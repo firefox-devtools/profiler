@@ -23,7 +23,10 @@ Parser.prototype = {
         break;
       case 'm':
         // marker
-        extraInfo.marker = info;
+        if (!("marker" in extraInfo)) {
+          extraInfo.marker = [];
+        }
+        extraInfo.marker.push(info);
         break;
       case 's':
         // sample
