@@ -86,6 +86,12 @@ HistogramRenderer.prototype = {
       rect.setAttribute("height", h);
       rect.setAttribute("fill", color);
       container.appendChild(rect);
+      rect.addEventListener("mouseover", function() {
+        rect.setAttribute("fill-opacity", "0.8");
+      }, false);
+      rect.addEventListener("mouseout", function() {
+        rect.removeAttribute("fill-opacity");
+      }, false);
       return rect;
     }
 
@@ -193,6 +199,7 @@ RangeSelector.prototype = {
         hilite.setAttribute("fill", "gray");
         hilite.setAttribute("fill-opacity", "0.5");
         hilite.setAttribute("class", hiliteClassName);
+        hilite.setAttribute("style", "pointer-events: none");
         graph.appendChild(hilite);
       }
     }, false);
