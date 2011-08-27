@@ -105,7 +105,6 @@ function parse() {
   var parser = new Parser();
   var data = parser.parse(document.getElementById("data").value);
   var treeData = parser.convertToCallTree(data);
-  document.getElementById("result").textContent = data.toSource();
   var tree = document.createElement("div");
   document.body.appendChild(tree);
   var treeRenderer = new TreeRenderer();
