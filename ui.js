@@ -85,6 +85,7 @@ HistogramRenderer.prototype = {
       rect.setAttribute("height", h);
       rect.setAttribute("fill", color);
       container.appendChild(rect);
+      return rect;
     }
 
     // iterate over the histogram items and create rects for each one
@@ -101,10 +102,13 @@ HistogramRenderer.prototype = {
     var widthSeenSoFar = 0;
     for (var i = 0; i < count; ++i) {
       var step = histogramData[i];
-      createRect(svgRoot, widthSeenSoFar, 0,
-                 step.width * widthFactor,
-                 step.value * heightFactor,
-                 "blue");
+      var rect = createRect(svgRoot, widthSeenSoFar, 0,
+                            step.width * widthFactor,
+                            step.value * heightFactor,
+                            "blue");
+      if ("marker" in step) {
+        rect.setAttribute("data-marker", step.marker);
+      }
       widthSeenSoFar += step.width * widthFactor;
     }
   }
