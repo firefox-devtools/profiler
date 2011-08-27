@@ -172,6 +172,29 @@ RangeSelector.prototype = {
           children[i].selected = false;
         }
       }
+
+      // highlight the range in the histogram
+      const hiliteClassName = "histogramHilite";
+      var prevHilite = document.querySelector("." + hiliteClassName);
+      if (prevHilite) {
+        prevHilite.parentNode.removeChild(prevHilite);
+      }
+      function rect(index) {
+        return graph.childNodes[children[index].getAttribute("data-index")];
+      }
+      if (end > begin) {
+        var hilite = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        hilite.setAttribute("x", rect(begin).getAttribute("x"));
+        hilite.setAttribute("y", 0);
+        hilite.setAttribute("width", parseFloat(rect(end).getAttribute("width")) +
+                                     parseFloat(rect(end).getAttribute("x")) -
+                                     parseFloat(rect(begin).getAttribute("x")));
+        hilite.setAttribute("height", graph.getAttribute("height"));
+        hilite.setAttribute("fill", "gray");
+        hilite.setAttribute("fill-opacity", "0.5");
+        hilite.setAttribute("class", hiliteClassName);
+        graph.appendChild(hilite);
+      }
     }, false);
   }
 };
