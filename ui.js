@@ -127,6 +127,51 @@ HistogramRenderer.prototype = {
     }
 
     var markers = gatherMarkersList(histogramData);
+    var rangeSelector = new RangeSelector();
+    rangeSelector.render(svgRoot, markers);
+  }
+};
+
+function RangeSelector() {}
+RangeSelector.prototype = {
+  render: function RangeSelector_render(graph, markers) {
+    var select = document.createElement("select");
+    select.setAttribute("multiple", "multiple");
+    select.setAttribute("size", markers.length);
+    graph.parentNode.appendChild(select);
+
+    for (var i = 0; i < markers.length; ++i) {
+      var marker = markers[i];
+      var option = document.createElement("option");
+      option.appendChild(document.createTextNode(marker.name));
+      option.setAttribute("data-index", marker.index);
+      select.appendChild(option);
+    }
+
+    select.addEventListener("change", function(e) {
+      // look for non-consecutive ranges, and make them consecutive
+      var range = [];
+      var children = select.childNodes;
+      for (var i = 0; i < children.length; ++i) {
+        range.push(children[i].selected);
+      }
+      var begin = -1, end = -1;
+      for (var i = 0; i < range.length; ++i) {
+        if (begin == -1 && range[i]) {
+          begin = i;
+        } else if (begin != -1 && range[i]) {
+          end = i;
+        }
+      }
+      for (var i = begin; i <= end; ++i) {
+        children[i].selected = true;
+      }
+      if (end > -1) {
+        for (var i = end + 1; i < children.length; ++i) {
+          children[i].selected = false;
+        }
+      }
+    }, false);
   }
 };
 
