@@ -39,7 +39,7 @@ HistogramRenderer.prototype = {
         var name = step.name;
         var value = parser.parseCallStack(name).length;
         if (name != prevName) {
-          // a new boundary has been discovered
+          // a new name boundary has been discovered
           var item = {
             name: name,
             width: 1,
@@ -47,6 +47,15 @@ HistogramRenderer.prototype = {
           };
           histogramData.push(item);
           prevName = name;
+        } else if ("marker" in step.extraInfo) {
+          // a new marker boundary has been discovered
+          var item = {
+            name: name,
+            width: 1,
+            value: value,
+            marker: step.extraInfo.marker
+          };
+          histogramData.push(item);
         } else {
           // the continuation of the previous data
           histogramData[histogramData.length - 1].width++;
