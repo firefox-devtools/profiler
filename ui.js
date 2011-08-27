@@ -47,6 +47,7 @@ HistogramRenderer.prototype = {
             marker: step.extraInfo.marker
           };
           histogramData.push(item);
+          prevName = name;
         } else if (name != prevName) {
           // a new name boundary has been discovered
           var item = {
