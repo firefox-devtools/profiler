@@ -111,6 +111,22 @@ HistogramRenderer.prototype = {
       }
       widthSeenSoFar += step.width * widthFactor;
     }
+
+    function gatherMarkersList(histogramData) {
+      var markers = [];
+      for (var i = 0; i < histogramData.length; ++i) {
+        var step = histogramData[i];
+        if ("marker" in step) {
+          markers.push({
+            index: i,
+            name: step.marker
+          });
+        }
+      }
+      return markers;
+    }
+
+    var markers = gatherMarkersList(histogramData);
   }
 };
 
