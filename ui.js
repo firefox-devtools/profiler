@@ -228,20 +228,26 @@ RangeSelector.prototype = {
         rect(begin).setAttribute("id", hilitedMarker);
         rect(begin).setAttribute("style", "fill: red;");
       } else if (end > begin) {
-        var hilite = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-        hilite.setAttribute("x", rect(begin).getAttribute("x"));
-        hilite.setAttribute("y", 0);
-        hilite.setAttribute("width", parseFloat(rect(end).getAttribute("width")) +
-                                     parseFloat(rect(end).getAttribute("x")) -
-                                     parseFloat(rect(begin).getAttribute("x")));
-        hilite.setAttribute("height", graph.getAttribute("height"));
-        hilite.setAttribute("fill", "gray");
-        hilite.setAttribute("fill-opacity", "0.5");
-        hilite.setAttribute("class", hiliteClassName);
-        hilite.setAttribute("style", "pointer-events: none");
-        graph.appendChild(hilite);
+        this.drawHiliteRectangle(graph,
+                                 rect(begin).getAttribute("x"),
+                                 parseFloat(rect(end).getAttribute("width")) +
+                                 parseFloat(rect(end).getAttribute("x")) -
+                                 parseFloat(rect(begin).getAttribute("x")),
+                                 graph.getAttribute("height"));
       }
     }, false);
+  },
+  drawHiliteRectangle: function RangeSelector_drawHiliteRectangle(graph, x, width, height) {
+    var hilite = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+    hilite.setAttribute("x", x);
+    hilite.setAttribute("y", 0);
+    hilite.setAttribute("width", width);
+    hilite.setAttribute("height", height);
+    hilite.setAttribute("fill", "gray");
+    hilite.setAttribute("fill-opacity", "0.5");
+    hilite.setAttribute("class", hiliteClassName);
+    hilite.setAttribute("style", "pointer-events: none");
+    graph.appendChild(hilite);
   }
 };
 
