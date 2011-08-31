@@ -51,6 +51,7 @@ Parser.prototype = {
     var lines = data.split("\n");
     var extraInfo = {};
     var samples = [];
+    var sample = null;
     for (var i = 0; i < lines.length; ++i) {
       var line = lines[i];
       if (line.length < 2 || line[1] != '-') {
@@ -73,10 +74,14 @@ Parser.prototype = {
       case 's':
         // sample
         var sampleName = info;
-        var sample = new Sample(sampleName, extraInfo);
+        sample = new Sample(sampleName, extraInfo);
         samples.push(sample);
         extraInfo = {}; // reset the extra info for future rounds
         break;
+      case 'c':
+        if (sample) { // ignore the case where we see a 'c' before an 's'
+          sample.name += "," + info;
+        }
       }
     }
     return samples;
@@ -93,6 +98,14 @@ Parser.prototype = {
       var callstack = this.parseCallStack(sample.name);
       if (!treeRoot) {
         treeRoot = new TreeNode(callstack[0], null);
+        treeRoot.totalSamples = samples.length;
+        var node = treeRoot;
+        for (var j = 1; j < callstack.length; ++j) {
+          var frame = callstack[j];
+          var child = new TreeNode(frame, node);
+          node.children.push(child);
+          node = child;
+        }
       } else {
         var newChild = treeRoot.followPath(callstack.slice(1));
         if (newChild.name == callstack[callstack.length - 1]) {

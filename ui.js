@@ -5,8 +5,10 @@ TreeRenderer.prototype = {
   render: function TreeRenderer_render(tree, container) {
     function convertToJSTreeData(tree) {
       var object = {};
+      var totalCount = tree.totalSamples;
       function childVisitor(node, curObj) {
-        curObj.title = node.counter + " " + node.name;
+        var percent = (100 * node.counter / totalCount).toFixed(2);
+        curObj.title = node.counter + " (" + percent + "%) " + node.name;
         if (node.children.length) {
           curObj.children = [];
           for (var i = 0; i < node.children.length; ++i) {
@@ -29,7 +31,8 @@ TreeRenderer.prototype = {
 
 function HistogramRenderer() {}
 HistogramRenderer.prototype = {
-  render: function HistogramRenderer_render(data, container) {
+  render: function HistogramRenderer_render(data, container,
+                                            markerContainer) {
     function convertToHistogramData(data) {
       var histogramData = [];
       var prevName = "";
@@ -78,6 +81,25 @@ HistogramRenderer.prototype = {
     svgRoot.setAttribute("height", height);
     container.appendChild(svgRoot);
 
+    // Define the marker gradient
+    var markerGradient = document.createElementNS(kSVGNS, "linearGradient");
+    markerGradient.setAttribute("id", "markerGradient");
+    markerGradient.setAttribute("x1", "0%");
+    markerGradient.setAttribute("y1", "0%");
+    markerGradient.setAttribute("x2", "0%");
+    markerGradient.setAttribute("y2", "100%");
+    var stop1 = document.createElementNS(kSVGNS, "stop");
+    stop1.setAttribute("offset", "0%");
+    stop1.setAttribute("style", "stop-color: blue; stop-opacity: 1;");
+    markerGradient.appendChild(stop1);
+    var stop2 = document.createElementNS(kSVGNS, "stop");
+    stop2.setAttribute("offset", "100%");
+    stop2.setAttribute("style", "stop-color: red; stop-opacity: 1;");
+    markerGradient.appendChild(stop2);
+    var defs = document.createElementNS(kSVGNS, "defs");
+    defs.appendChild(markerGradient);
+    svgRoot.appendChild(defs);
+
     function createRect(container, x, y, w, h, color) {
       var rect = document.createElementNS(kSVGNS, "rect");
       rect.setAttribute("x", x);
@@ -85,6 +107,7 @@ HistogramRenderer.prototype = {
       rect.setAttribute("width", w);
       rect.setAttribute("height", h);
       rect.setAttribute("fill", color);
+      rect.setAttribute("class", "rect");
       container.appendChild(rect);
       rect.addEventListener("mouseover", function() {
         rect.setAttribute("fill-opacity", "0.8");
@@ -114,7 +137,8 @@ HistogramRenderer.prototype = {
                             step.value * heightFactor,
                             "blue");
       if ("marker" in step) {
-        rect.setAttribute("data-marker", step.marker);
+        rect.setAttribute("title", step.marker);
+        rect.setAttribute("fill", "url(#markerGradient)");
       }
       widthSeenSoFar += step.width * widthFactor;
     }
@@ -134,18 +158,20 @@ HistogramRenderer.prototype = {
     }
 
     var markers = gatherMarkersList(histogramData);
-    var rangeSelector = new RangeSelector();
+    var rangeSelector = new RangeSelector(markerContainer);
     rangeSelector.render(svgRoot, markers);
   }
 };
 
-function RangeSelector() {}
+function RangeSelector(container) {
+  this.container = container;
+}
 RangeSelector.prototype = {
   render: function RangeSelector_render(graph, markers) {
     var select = document.createElement("select");
     select.setAttribute("multiple", "multiple");
     select.setAttribute("size", markers.length);
-    graph.parentNode.appendChild(select);
+    this.container.appendChild(select);
 
     for (var i = 0; i < markers.length; ++i) {
       var marker = markers[i];
@@ -185,10 +211,20 @@ RangeSelector.prototype = {
       if (prevHilite) {
         prevHilite.parentNode.removeChild(prevHilite);
       }
-      function rect(index) {
-        return graph.childNodes[children[index].getAttribute("data-index")];
+      const hilitedMarker = "markerHilite";
+      var prevMarkerHilite = document.querySelector("#" + hilitedMarker);
+      if (prevMarkerHilite) {
+        prevMarkerHilite.removeAttribute("id");
+        prevMarkerHilite.removeAttribute("style");
       }
-      if (end > begin) {
+      function rect(index) {
+        return graph.querySelectorAll(".rect")[children[index].getAttribute("data-index")];
+      }
+      if (begin > end) {
+        // Just highlight the respective marker in the histogram
+        rect(begin).setAttribute("id", hilitedMarker);
+        rect(begin).setAttribute("style", "fill: red;");
+      } else if (end > begin) {
         var hilite = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         hilite.setAttribute("x", rect(begin).getAttribute("x"));
         hilite.setAttribute("y", 0);
@@ -207,17 +243,21 @@ RangeSelector.prototype = {
 };
 
 function parse() {
+  document.getElementById("dataentry").className = "hidden";
+  document.getElementById("ui").className = "";
+
   var parser = new Parser();
   var data = parser.parse(document.getElementById("data").value);
   var treeData = parser.convertToCallTree(data);
-  var tree = document.createElement("div");
-  document.body.appendChild(tree);
+  var tree = document.getElementById("tree");
   var treeRenderer = new TreeRenderer();
   treeRenderer.render(treeData, tree);
-  var histogram = document.createElement("div");
-  histogram.style.width = "800px";
-  histogram.style.height = "400px";
-  document.body.appendChild(histogram);
+  var histogram = document.getElementById("histogram");
+  var width = histogram.clientWidth,
+      height = histogram.clientHeight;
+  histogram.style.width = width + "px";
+  histogram.style.height = height + "px";
   var histogramRenderer = new HistogramRenderer();
-  histogramRenderer.render(data, histogram);
+  histogramRenderer.render(data, histogram,
+                           document.getElementById("markers"));
 }

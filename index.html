@@ -19,10 +19,64 @@
     <script src="jstree/jstree.xml.js"></script>
     <script src="parser.js"></script>
     <script src="ui.js"></script>
+    <style type="text/css">
+      body {
+        margin: 0;
+      }
+      #ui {
+        display: block;
+        width: 1200px;
+        height: 1000px;
+        margin: 0 auto;
+      }
+      #ui.hidden {
+        display: none;
+      }
+      #dataentry {
+        display: block;
+        width: 1200px;
+        height: 1000px;
+        margin: 0 auto;
+      }
+      #dataentry.hidden {
+        display: none;
+      }
+      #tree {
+        width: 1200px;
+        height: 600px;
+      }
+      #bottombar {
+        width: 1200px;
+        height: 400px;
+      }
+      #histogram {
+        float: left;
+        height: 400px;
+        width: 1050px;
+      }
+      #markers {
+        float: right;
+        width: 150px;
+        height: 400px;
+      }
+      #markers > select {
+        width: 150px;
+        max-height: 400px;
+      }
+    </style>
   </head>
   <body>
-    <h1>Enter your profile data here:</h1>
-    <textarea rows=20 cols=80 id=data></textarea>
-    <p>Now, press this button: <button onclick="parse()">Parse</button></p>
+    <div id="ui" class="hidden">
+      <div id="tree"></div>
+      <div id="bottombar">
+        <div id="histogram"></div>
+        <div id="markers"></div>
+      </div>
+    </div>
+    <div id="dataentry">
+      <h1>Enter your profile data here:</h1>
+      <textarea rows=20 cols=80 id=data></textarea>
+      <p><button onclick="parse()">Parse</button></p>
+    </div>
   </body>
 </html>
