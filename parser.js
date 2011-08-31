@@ -51,6 +51,7 @@ Parser.prototype = {
     var lines = data.split("\n");
     var extraInfo = {};
     var samples = [];
+    var sample = null;
     for (var i = 0; i < lines.length; ++i) {
       var line = lines[i];
       if (line.length < 2 || line[1] != '-') {
@@ -73,10 +74,14 @@ Parser.prototype = {
       case 's':
         // sample
         var sampleName = info;
-        var sample = new Sample(sampleName, extraInfo);
+        sample = new Sample(sampleName, extraInfo);
         samples.push(sample);
         extraInfo = {}; // reset the extra info for future rounds
         break;
+      case 'c':
+        if (sample) { // ignore the case where we see a 'c' before an 's'
+          sample.name += "," + info;
+        }
       }
     }
     return samples;
