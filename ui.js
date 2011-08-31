@@ -1,5 +1,7 @@
 jQuery.jstree.THEMES_DIR = "jstree/themes/";
 
+const hiliteClassName = "histogramHilite";
+
 function TreeRenderer() {}
 TreeRenderer.prototype = {
   render: function TreeRenderer_render(tree, container) {
@@ -208,7 +210,6 @@ RangeSelector.prototype = {
       }
 
       // highlight the range in the histogram
-      const hiliteClassName = "histogramHilite";
       var prevHilite = document.querySelector("." + hiliteClassName);
       if (prevHilite) {
         prevHilite.parentNode.removeChild(prevHilite);
