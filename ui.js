@@ -5,8 +5,10 @@ TreeRenderer.prototype = {
   render: function TreeRenderer_render(tree, container) {
     function convertToJSTreeData(tree) {
       var object = {};
+      var totalCount = tree.totalSamples;
       function childVisitor(node, curObj) {
-        curObj.title = node.counter + " " + node.name;
+        var percent = (100 * node.counter / totalCount).toFixed(2);
+        curObj.title = node.counter + " (" + percent + "%) " + node.name;
         if (node.children.length) {
           curObj.children = [];
           for (var i = 0; i < node.children.length; ++i) {

@@ -98,6 +98,7 @@ Parser.prototype = {
       var callstack = this.parseCallStack(sample.name);
       if (!treeRoot) {
         treeRoot = new TreeNode(callstack[0], null);
+        treeRoot.totalSamples = samples.length;
         var node = treeRoot;
         for (var j = 1; j < callstack.length; ++j) {
           var frame = callstack[j];
