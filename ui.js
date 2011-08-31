@@ -196,8 +196,10 @@ RangeSelector.prototype = {
           end = i;
         }
       }
-      for (var i = begin; i <= end; ++i) {
-        children[i].selected = true;
+      if (begin > -1) {
+        for (var i = begin; i <= end; ++i) {
+          children[i].selected = true;
+        }
       }
       if (end > -1) {
         for (var i = end + 1; i < children.length; ++i) {
