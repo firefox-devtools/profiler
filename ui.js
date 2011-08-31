@@ -29,7 +29,8 @@ TreeRenderer.prototype = {
 
 function HistogramRenderer() {}
 HistogramRenderer.prototype = {
-  render: function HistogramRenderer_render(data, container) {
+  render: function HistogramRenderer_render(data, container,
+                                            markerContainer) {
     function convertToHistogramData(data) {
       var histogramData = [];
       var prevName = "";
@@ -134,18 +135,20 @@ HistogramRenderer.prototype = {
     }
 
     var markers = gatherMarkersList(histogramData);
-    var rangeSelector = new RangeSelector();
+    var rangeSelector = new RangeSelector(markerContainer);
     rangeSelector.render(svgRoot, markers);
   }
 };
 
-function RangeSelector() {}
+function RangeSelector(container) {
+  this.container = container;
+}
 RangeSelector.prototype = {
   render: function RangeSelector_render(graph, markers) {
     var select = document.createElement("select");
     select.setAttribute("multiple", "multiple");
     select.setAttribute("size", markers.length);
-    graph.parentNode.appendChild(select);
+    this.container.appendChild(select);
 
     for (var i = 0; i < markers.length; ++i) {
       var marker = markers[i];
@@ -207,17 +210,21 @@ RangeSelector.prototype = {
 };
 
 function parse() {
+  document.getElementById("dataentry").className = "hidden";
+  document.getElementById("ui").className = "";
+
   var parser = new Parser();
   var data = parser.parse(document.getElementById("data").value);
   var treeData = parser.convertToCallTree(data);
-  var tree = document.createElement("div");
-  document.body.appendChild(tree);
+  var tree = document.getElementById("tree");
   var treeRenderer = new TreeRenderer();
   treeRenderer.render(treeData, tree);
-  var histogram = document.createElement("div");
-  histogram.style.width = "800px";
-  histogram.style.height = "400px";
-  document.body.appendChild(histogram);
+  var histogram = document.getElementById("histogram");
+  var width = histogram.clientWidth,
+      height = histogram.clientHeight;
+  histogram.style.width = width + "px";
+  histogram.style.height = height + "px";
   var histogramRenderer = new HistogramRenderer();
-  histogramRenderer.render(data, histogram);
+  histogramRenderer.render(data, histogram,
+                           document.getElementById("markers"));
 }
