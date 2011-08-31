@@ -37,6 +37,7 @@ HistogramRenderer.prototype = {
       var histogramData = [];
       var prevName = "";
       var parser = new Parser();
+      var markerIndex = 0;
       for (var i = 0; i < data.length; ++i) {
         var step = data[i];
         var name = step.name;
@@ -47,7 +48,8 @@ HistogramRenderer.prototype = {
             name: name,
             width: 1,
             value: value,
-            marker: step.extraInfo.marker
+            marker: step.extraInfo.marker,
+            markerIndex: markerIndex++
           };
           histogramData.push(item);
           prevName = name;
@@ -137,6 +139,7 @@ HistogramRenderer.prototype = {
                             step.value * heightFactor,
                             "blue");
       if ("marker" in step) {
+        rect.setAttribute("data-markerindex", step.markerIndex);
         rect.setAttribute("title", step.marker);
         rect.setAttribute("fill", "url(#markerGradient)");
       }
@@ -211,10 +214,22 @@ RangeSelector.prototype = {
       if (prevHilite) {
         prevHilite.parentNode.removeChild(prevHilite);
       }
+      const hilitedMarker = "markerHilite";
+      var prevMarkerHilite = document.querySelector("." + hilitedMarker);
+      if (prevMarkerHilite) {
+        prevMarkerHilite.removeAttribute("class");
+        prevMarkerHilite.removeAttribute("style");
+      }
       function rect(index) {
         return graph.querySelectorAll(".rect")[children[index].getAttribute("data-index")];
       }
-      if (end > begin) {
+      if (begin > end) {
+        // Just highlight the respective marker in the histogram
+        document.querySelector("[data-markerindex='" + children[begin].getAttribute("data-index") + "']")
+                .setAttribute("class", hilitedMarker);
+        document.querySelector("[data-markerindex='" + children[begin].getAttribute("data-index") + "']")
+                .setAttribute("style", "fill: red;");
+      } else if (end > begin) {
         var hilite = document.createElementNS("http://www.w3.org/2000/svg", "rect");
         hilite.setAttribute("x", rect(begin).getAttribute("x"));
         hilite.setAttribute("y", 0);
