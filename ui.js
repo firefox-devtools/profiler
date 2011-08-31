@@ -88,6 +88,7 @@ HistogramRenderer.prototype = {
       rect.setAttribute("width", w);
       rect.setAttribute("height", h);
       rect.setAttribute("fill", color);
+      rect.setAttribute("class", "rect");
       container.appendChild(rect);
       rect.addEventListener("mouseover", function() {
         rect.setAttribute("fill-opacity", "0.8");
@@ -191,7 +192,7 @@ RangeSelector.prototype = {
         prevHilite.parentNode.removeChild(prevHilite);
       }
       function rect(index) {
-        return graph.childNodes[children[index].getAttribute("data-index")];
+        return graph.querySelectorAll(".rect")[children[index].getAttribute("data-index")];
       }
       if (end > begin) {
         var hilite = document.createElementNS("http://www.w3.org/2000/svg", "rect");
