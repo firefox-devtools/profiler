@@ -81,6 +81,25 @@ HistogramRenderer.prototype = {
     svgRoot.setAttribute("height", height);
     container.appendChild(svgRoot);
 
+    // Define the marker gradient
+    var markerGradient = document.createElementNS(kSVGNS, "linearGradient");
+    markerGradient.setAttribute("id", "markerGradient");
+    markerGradient.setAttribute("x1", "0%");
+    markerGradient.setAttribute("y1", "0%");
+    markerGradient.setAttribute("x2", "0%");
+    markerGradient.setAttribute("y2", "100%");
+    var stop1 = document.createElementNS(kSVGNS, "stop");
+    stop1.setAttribute("offset", "0%");
+    stop1.setAttribute("style", "stop-color: blue; stop-opacity: 1;");
+    markerGradient.appendChild(stop1);
+    var stop2 = document.createElementNS(kSVGNS, "stop");
+    stop2.setAttribute("offset", "100%");
+    stop2.setAttribute("style", "stop-color: red; stop-opacity: 1;");
+    markerGradient.appendChild(stop2);
+    var defs = document.createElementNS(kSVGNS, "defs");
+    defs.appendChild(markerGradient);
+    svgRoot.appendChild(defs);
+
     function createRect(container, x, y, w, h, color) {
       var rect = document.createElementNS(kSVGNS, "rect");
       rect.setAttribute("x", x);
@@ -118,7 +137,8 @@ HistogramRenderer.prototype = {
                             step.value * heightFactor,
                             "blue");
       if ("marker" in step) {
-        rect.setAttribute("data-marker", step.marker);
+        rect.setAttribute("title", step.marker);
+        rect.setAttribute("fill", "url(#markerGradient)");
       }
       widthSeenSoFar += step.width * widthFactor;
     }
