@@ -2,6 +2,12 @@ jQuery.jstree.THEMES_DIR = "jstree/themes/";
 
 const hiliteClassName = "histogramHilite";
 
+function removeAllChildren(element) {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+}
+
 function TreeRenderer() {}
 TreeRenderer.prototype = {
   render: function TreeRenderer_render(tree, container) {
@@ -24,6 +30,8 @@ TreeRenderer.prototype = {
       childVisitor(tree, object);
       return {data: [object]};
     }
+    removeAllChildren(container);
+    container.className = "";
     jQuery(container).jstree({
       json: convertToJSTreeData(tree),
       plugins: ["themes", "json", "ui"]
@@ -74,6 +82,19 @@ HistogramRenderer.prototype = {
     var width = container.clientWidth,
         height = container.clientHeight;
 
+    removeAllChildren(container);
+    removeAllChildren(markerContainer);
+
+    // Add the filtering UI
+    var iconBox = document.createElement("div");
+    iconBox.setAttribute("id", "iconbox");
+    var filterButton = document.createElement("img");
+    filterButton.setAttribute("src", "images/filter.png");
+    filterButton.setAttribute("id", "filter");
+    filterButton.setAttribute("class", "hidden");
+    iconBox.appendChild(filterButton);
+    container.appendChild(iconBox);
+
     // construct the SVG root element
     const kSVGNS = "http://www.w3.org/2000/svg";
     var svgRoot = document.createElementNS(kSVGNS, "svg");
@@ -81,6 +102,7 @@ HistogramRenderer.prototype = {
     svgRoot.setAttribute("baseProfile", "full");
     svgRoot.setAttribute("width", width);
     svgRoot.setAttribute("height", height);
+    svgRoot.setAttribute("data-samplecount", data.length);
     container.appendChild(svgRoot);
 
     // Define the marker gradient
@@ -171,6 +193,8 @@ function RangeSelector(container) {
 }
 RangeSelector.prototype = {
   render: function RangeSelector_render(graph, markers) {
+    removeAllChildren(markers);
+
     var select = document.createElement("select");
     select.setAttribute("multiple", "multiple");
     select.setAttribute("size", markers.length);
@@ -185,8 +209,22 @@ RangeSelector.prototype = {
       select.appendChild(option);
     }
 
+    // Prepare the filtering UI
     var self = this;
-    select.addEventListener("change", function(e) {
+    var filter = document.getElementById("filter");
+    try {
+      filter.removeEventListener("click", filter_onClick, false);
+    } catch (err) {
+    }
+    filter.addEventListener("click", function filter_onClick() {
+      self.filterCurrentRange(graph);
+    }, false);
+
+    try {
+      select.removeEventListener("click", select_onChange, false);
+    } catch (err) {
+    }
+    select.addEventListener("change", function select_onChange(e) {
       if (self.changeEventSuppressed) {
         return;
       }
@@ -312,15 +350,36 @@ RangeSelector.prototype = {
         updateHiliteRectangle(e.pageX, e.pageY);
       }
     }, false);
+  },
+  filterCurrentRange: function RangeSelector_filterCurrentRange(graph) {
+    // First, retrieve the current range of filtered samples
+    function sampleIndexFromPoint(x) {
+      var totalSamples = parseFloat(graph.getAttribute("data-samplecount"));
+      var width = parseFloat(graph.parentNode.clientWidth);
+      var factor = totalSamples / width;
+      return parseInt(parseFloat(x) * factor);
+    }
+
+    var hiliteRect = document.querySelector("." + hiliteClassName);
+    var start = sampleIndexFromPoint(hiliteRect.getAttribute("x"));
+    var end = sampleIndexFromPoint(parseFloat(hiliteRect.getAttribute("x")) +
+                                   parseFloat(hiliteRect.getAttribute("width")));
+    displaySample(gSamples.slice(start, end + 1));
   }
 };
 
+var gSamples = [];
 function parse() {
+  var parser = new Parser();
+  gSamples = parser.parse(document.getElementById("data").value);
+  displaySample(gSamples);
+}
+
+function displaySample(data) {
   document.getElementById("dataentry").className = "hidden";
   document.getElementById("ui").className = "";
 
   var parser = new Parser();
-  var data = parser.parse(document.getElementById("data").value);
   var treeData = parser.convertToCallTree(data);
   var tree = document.getElementById("tree");
   var treeRenderer = new TreeRenderer();
