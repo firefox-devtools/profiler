@@ -162,6 +162,7 @@ HistogramRenderer.prototype = {
     var markers = gatherMarkersList(histogramData);
     var rangeSelector = new RangeSelector(markerContainer);
     rangeSelector.render(svgRoot, markers);
+    rangeSelector.enableRangeSelectionOnHistogram(svgRoot);
   }
 };
 
@@ -183,6 +184,7 @@ RangeSelector.prototype = {
       select.appendChild(option);
     }
 
+    var self = this;
     select.addEventListener("change", function(e) {
       // look for non-consecutive ranges, and make them consecutive
       var range = [];
@@ -228,8 +230,9 @@ RangeSelector.prototype = {
         rect(begin).setAttribute("id", hilitedMarker);
         rect(begin).setAttribute("style", "fill: red;");
       } else if (end > begin) {
-        this.drawHiliteRectangle(graph,
+        self.drawHiliteRectangle(graph,
                                  rect(begin).getAttribute("x"),
+                                 0,
                                  parseFloat(rect(end).getAttribute("width")) +
                                  parseFloat(rect(end).getAttribute("x")) -
                                  parseFloat(rect(begin).getAttribute("x")),
@@ -237,7 +240,7 @@ RangeSelector.prototype = {
       }
     }, false);
   },
-  drawHiliteRectangle: function RangeSelector_drawHiliteRectangle(graph, x, width, height) {
+  drawHiliteRectangle: function RangeSelector_drawHiliteRectangle(graph, x, y, width, height) {
     var hilite = document.createElementNS("http://www.w3.org/2000/svg", "rect");
     hilite.setAttribute("x", x);
     hilite.setAttribute("y", 0);
@@ -248,6 +251,48 @@ RangeSelector.prototype = {
     hilite.setAttribute("class", hiliteClassName);
     hilite.setAttribute("style", "pointer-events: none");
     graph.appendChild(hilite);
+    return hilite;
+  },
+  enableRangeSelectionOnHistogram: function RangeSelector_enableRangeSelectionOnHistogram(graph) {
+    var isDrawingRectangle = false;
+    var origX, origY;
+    var hilite = null;
+    var self = this;
+    function updateHiliteRectangle(newX, newY) {
+      var startX = Math.min(newX, origX) - graph.parentNode.offsetLeft;
+      var startY = 0;
+      var width = Math.abs(newX - origX);
+      var height = graph.parentNode.clientHeight;
+      if (hilite) {
+        hilite.setAttribute("x", startX);
+        hilite.setAttribute("y", startY);
+        hilite.setAttribute("width", width);
+        hilite.setAttribute("height", height);
+      } else {
+        if (width) {
+          var prevHilite = document.querySelector("." + hiliteClassName);
+          if (prevHilite) {
+            prevHilite.parentNode.removeChild(prevHilite);
+          }
+          hilite = self.drawHiliteRectangle(graph, startX, startY, width, height);
+        }
+      }
+    }
+    graph.addEventListener("mousedown", function(e) {
+      isDrawingRectangle = true;
+      origX = e.pageX;
+      origY = e.pageY;
+    }, false);
+    graph.addEventListener("mouseup", function(e) {
+      updateHiliteRectangle(e.pageX, e.pageY);
+      isDrawingRectangle = false;
+      hilite = null;
+    }, false);
+    graph.addEventListener("mousemove", function(e) {
+      if (isDrawingRectangle) {
+        updateHiliteRectangle(e.pageX, e.pageY);
+      }
+    }, false);
   }
 };
 
