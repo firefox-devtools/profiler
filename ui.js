@@ -221,6 +221,7 @@ RangeSelector.prototype = {
       if (prevHilite) {
         prevHilite.parentNode.removeChild(prevHilite);
       }
+      document.getElementById("filter").className = "hidden";
       const hilitedMarker = "markerHilite";
       var prevMarkerHilite = document.querySelector("#" + hilitedMarker);
       if (prevMarkerHilite) {
@@ -256,6 +257,7 @@ RangeSelector.prototype = {
     hilite.setAttribute("class", hiliteClassName);
     hilite.setAttribute("style", "pointer-events: none");
     graph.appendChild(hilite);
+    document.getElementById("filter").className = "";
     return hilite;
   },
   clearCurrentRangeSelection: function RangeSelector_clearCurrentRangeSelection() {

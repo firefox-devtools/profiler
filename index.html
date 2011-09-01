@@ -29,17 +29,11 @@
         height: 1000px;
         margin: 0 auto;
       }
-      #ui.hidden {
-        display: none;
-      }
       #dataentry {
         display: block;
         width: 1200px;
         height: 1000px;
         margin: 0 auto;
-      }
-      #dataentry.hidden {
-        display: none;
       }
       #tree {
         width: 1200px;
@@ -53,6 +47,16 @@
         float: left;
         height: 400px;
         width: 1050px;
+        position: relative;
+      }
+      #iconbox {
+        position: absolute;
+        width: 36px;
+        left: -36px;
+        top: 0;
+      }
+      #filter {
+        cursor: pointer;
       }
       #markers {
         float: right;
@@ -63,13 +67,20 @@
         width: 150px;
         max-height: 400px;
       }
+      .hidden {
+        display: none !important;
+      }
     </style>
   </head>
   <body>
     <div id="ui" class="hidden">
       <div id="tree"></div>
       <div id="bottombar">
-        <div id="histogram"></div>
+        <div id="histogram">
+          <div id="iconbox">
+            <img src="images/filter.png" id="filter" class="hidden">
+          </div>
+        </div>
         <div id="markers"></div>
       </div>
     </div>
