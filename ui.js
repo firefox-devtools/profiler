@@ -175,6 +175,7 @@ RangeSelector.prototype = {
     select.setAttribute("multiple", "multiple");
     select.setAttribute("size", markers.length);
     this.container.appendChild(select);
+    this.selector = select;
 
     for (var i = 0; i < markers.length; ++i) {
       var marker = markers[i];
@@ -186,6 +187,10 @@ RangeSelector.prototype = {
 
     var self = this;
     select.addEventListener("change", function(e) {
+      if (self.changeEventSuppressed) {
+        return;
+      }
+
       // look for non-consecutive ranges, and make them consecutive
       var range = [];
       var children = select.childNodes;
@@ -253,6 +258,17 @@ RangeSelector.prototype = {
     graph.appendChild(hilite);
     return hilite;
   },
+  clearCurrentRangeSelection: function RangeSelector_clearCurrentRangeSelection() {
+    try {
+      this.changeEventSuppressed = true;
+      var children = this.selector.childNodes;
+      for (var i = 0; i < children.length; ++i) {
+        children[i].selected = false;
+      }
+    } finally {
+      this.changeEventSuppressed = false;
+    }
+  },
   enableRangeSelectionOnHistogram: function RangeSelector_enableRangeSelectionOnHistogram(graph) {
     var isDrawingRectangle = false;
     var origX, origY;
@@ -274,6 +290,7 @@ RangeSelector.prototype = {
           if (prevHilite) {
             prevHilite.parentNode.removeChild(prevHilite);
           }
+          self.clearCurrentRangeSelection();
           hilite = self.drawHiliteRectangle(graph, startX, startY, width, height);
         }
       }
