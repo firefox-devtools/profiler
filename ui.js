@@ -109,7 +109,6 @@ HistogramRenderer.prototype = {
     svgRoot.setAttribute("baseProfile", "full");
     svgRoot.setAttribute("width", width);
     svgRoot.setAttribute("height", height);
-    svgRoot.setAttribute("data-samplecount", data.length);
     container.appendChild(svgRoot);
 
     // Define the marker gradient
@@ -361,7 +360,7 @@ RangeSelector.prototype = {
   filterCurrentRange: function RangeSelector_filterCurrentRange(graph) {
     // First, retrieve the current range of filtered samples
     function sampleIndexFromPoint(x) {
-      var totalSamples = parseFloat(graph.getAttribute("data-samplecount"));
+      var totalSamples = parseFloat(gVisibleRange.end - gVisibleRange.start - 1);
       var width = parseFloat(graph.parentNode.clientWidth);
       var factor = totalSamples / width;
       return parseInt(parseFloat(x) * factor);
@@ -371,7 +370,7 @@ RangeSelector.prototype = {
     var start = sampleIndexFromPoint(hiliteRect.getAttribute("x"));
     var end = sampleIndexFromPoint(parseFloat(hiliteRect.getAttribute("x")) +
                                    parseFloat(hiliteRect.getAttribute("width")));
-    displaySample(gSamples.slice(start, end + 1));
+    displaySample(start, end + 1);
 
     var self = this;
     var showall = document.getElementById("showall");
@@ -385,21 +384,33 @@ RangeSelector.prototype = {
     showall.className = "";
   },
   resetFilter: function RangeSelector_resetFilter() {
-    displaySample(gSamples);
+    displaySample(0, gSamples.length);
     document.getElementById("showall").className = "hidden";
   }
 };
 
 var gSamples = [];
+var gVisibleRange = {
+  start: -1,
+  end: -1,
+  filter: function(start, end) {
+    this.start = start;
+    this.end = end;
+    return gSamples.slice(start, end);
+  }
+};
+
 function parse() {
   var parser = new Parser();
   gSamples = parser.parse(document.getElementById("data").value);
-  displaySample(gSamples);
+  displaySample(0, gSamples.length);
 }
 
-function displaySample(data) {
+function displaySample(start, end) {
   document.getElementById("dataentry").className = "hidden";
   document.getElementById("ui").className = "";
+
+  var data = gVisibleRange.filter(start, end);
 
   var parser = new Parser();
   var treeData = parser.convertToCallTree(data);
