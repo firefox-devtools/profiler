@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Cleaopara - UI for SPS</title>
+    <title>Cleopatra - UI for SPS</title>
     <script src="jstree/_lib/jquery.js"></script>
     <script src="jstree/_lib/jquery.hotkeys.js"></script>
     <script src="jstree/vakata.js"></script>
@@ -29,17 +29,11 @@
         height: 1000px;
         margin: 0 auto;
       }
-      #ui.hidden {
-        display: none;
-      }
       #dataentry {
         display: block;
         width: 1200px;
         height: 1000px;
         margin: 0 auto;
-      }
-      #dataentry.hidden {
-        display: none;
       }
       #tree {
         width: 1200px;
@@ -53,6 +47,16 @@
         float: left;
         height: 400px;
         width: 1050px;
+        position: relative;
+      }
+      #iconbox {
+        position: absolute;
+        width: 36px;
+        left: -36px;
+        top: 0;
+      }
+      #filter, #showall {
+        cursor: pointer;
       }
       #markers {
         float: right;
@@ -62,6 +66,9 @@
       #markers > select {
         width: 150px;
         max-height: 400px;
+      }
+      .hidden {
+        display: none !important;
       }
     </style>
   </head>
@@ -75,7 +82,7 @@
     </div>
     <div id="dataentry">
       <h1>Enter your profile data here:</h1>
-      <textarea rows=20 cols=80 id=data autofocus></textarea>
+      <textarea rows=20 cols=80 id=data autofocus spellcheck=false></textarea>
       <p><button onclick="parse()">Parse</button></p>
     </div>
   </body>
