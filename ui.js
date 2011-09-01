@@ -92,6 +92,7 @@ HistogramRenderer.prototype = {
     filterButton.setAttribute("src", "images/filter.png");
     filterButton.setAttribute("id", "filter");
     filterButton.setAttribute("class", "hidden");
+    filterButton.setAttribute("title", "Show only the samples from the selected range");
     iconBox.appendChild(filterButton);
     container.appendChild(iconBox);
 
