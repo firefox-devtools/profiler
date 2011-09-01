@@ -94,6 +94,12 @@ HistogramRenderer.prototype = {
     filterButton.setAttribute("class", "hidden");
     filterButton.setAttribute("title", "Show only the samples from the selected range");
     iconBox.appendChild(filterButton);
+    var showallButton = document.createElement("img");
+    showallButton.setAttribute("src", "images/showall.png");
+    showallButton.setAttribute("id", "showall");
+    showallButton.setAttribute("class", "hidden");
+    showallButton.setAttribute("title", "Show all of the samples");
+    iconBox.appendChild(showallButton);
     container.appendChild(iconBox);
 
     // construct the SVG root element
@@ -366,6 +372,21 @@ RangeSelector.prototype = {
     var end = sampleIndexFromPoint(parseFloat(hiliteRect.getAttribute("x")) +
                                    parseFloat(hiliteRect.getAttribute("width")));
     displaySample(gSamples.slice(start, end + 1));
+
+    var self = this;
+    var showall = document.getElementById("showall");
+    try {
+      showall.removeEventListener("click", showall_onClick, false);
+    } catch (err) {
+    }
+    showall.addEventListener("click", function showall_onClick() {
+      self.resetFilter();
+    }, false);
+    showall.className = "";
+  },
+  resetFilter: function RangeSelector_resetFilter() {
+    displaySample(gSamples);
+    document.getElementById("showall").className = "hidden";
   }
 };
 
