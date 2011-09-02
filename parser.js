@@ -62,7 +62,11 @@ Parser.prototype = {
       switch (line[0]) {
       case 'l':
         // leaf name
-        extraInfo.leafName = info;
+        if ("leafName" in extraInfo) {
+          extraInfo.leafName += ":" + info;
+        } else {
+          extraInfo.leafName = info;
+        }
         break;
       case 'm':
         // marker
