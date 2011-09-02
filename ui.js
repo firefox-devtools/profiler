@@ -1,4 +1,5 @@
 jQuery.jstree.THEMES_DIR = "jstree/themes/";
+jQuery.fx.off = true;
 
 const hiliteClassName = "histogramHilite";
 
