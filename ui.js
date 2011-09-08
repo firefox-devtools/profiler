@@ -46,6 +46,12 @@ HistogramRenderer.prototype = {
       var histogramData = [];
       var prevName = "";
       var parser = new Parser();
+      var maxHeight = 1;
+      for (var i = 0; i < data.length; ++i) {
+        var value = parser.parseCallStack(data[i].name).length;
+        if (maxHeight < value)
+          maxHeight = value;
+      }
       for (var i = 0; i < data.length; ++i) {
         var step = data[i];
         var name = step.name;
@@ -53,10 +59,16 @@ HistogramRenderer.prototype = {
         if ("marker" in step.extraInfo) {
           // a new marker boundary has been discovered
           var item = {
+            name: "marker",
+            width: 2,
+            value: maxHeight + 1,
+            marker: step.extraInfo.marker
+          };
+          histogramData.push(item);
+          var item = {
             name: name,
             width: 1,
-            value: value,
-            marker: step.extraInfo.marker
+            value: value
           };
           histogramData.push(item);
           prevName = name;
