@@ -1,4 +1,5 @@
 jQuery.jstree.THEMES_DIR = "jstree/themes/";
+jQuery.fx.off = true;
 
 const hiliteClassName = "histogramHilite";
 
@@ -30,8 +31,6 @@ TreeRenderer.prototype = {
       childVisitor(tree, object);
       return {data: [object]};
     }
-    removeAllChildren(container);
-    container.className = "";
     jQuery(container).jstree({
       json: convertToJSTreeData(tree),
       plugins: ["themes", "json", "ui"]
