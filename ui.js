@@ -9,6 +9,10 @@ function removeAllChildren(element) {
   }
 }
 
+function treeObjSort(a, b) {
+  return b.counter - a.counter;
+}
+
 function TreeRenderer() {}
 TreeRenderer.prototype = {
   render: function TreeRenderer_render(tree, container) {
@@ -18,19 +22,34 @@ TreeRenderer.prototype = {
       function childVisitor(node, curObj) {
         var percent = (100 * node.counter / totalCount).toFixed(2);
         curObj.title = node.counter + " (" + percent + "%) " + node.name;
+        dump("Add node: " + curObj.title + "\n");
+        curObj.counter = node.counter;
         if (node.children.length) {
           curObj.children = [];
+          var unknownCounter = node.counter;
           for (var i = 0; i < node.children.length; ++i) {
             var child = node.children[i];
             var newObj = {};
             childVisitor(child, newObj);
             curObj.children.push(newObj);
+            unknownCounter -= child.counter;
           }
+          if (unknownCounter != 0) {
+            var child = node.children[i];
+            var newObj = {};
+            var percent = (100 * unknownCounter / node.counter).toFixed(2);
+            newObj.counter = unknownCounter;
+            newObj.title = unknownCounter + " (" + percent + "%) ??? Unknown";
+            curObj.children.push(newObj);
+          }
+          curObj.children.sort(treeObjSort);
         }
       }
       childVisitor(tree, object);
       return {data: [object]};
     }
+    //removeAllChildren(container);
+    //container.className = "";
     jQuery(container).jstree({
       json: convertToJSTreeData(tree),
       plugins: ["themes", "json", "ui"]
@@ -45,6 +64,7 @@ HistogramRenderer.prototype = {
     function convertToHistogramData(data) {
       var histogramData = [];
       var prevName = "";
+      var prevRes = -1;
       var parser = new Parser();
       var maxHeight = 1;
       for (var i = 0; i < data.length; ++i) {
@@ -55,6 +75,7 @@ HistogramRenderer.prototype = {
       for (var i = 0; i < data.length; ++i) {
         var step = data[i];
         var name = step.name;
+        var res = step.extraInfo["responsiveness"];
         var value = parser.parseCallStack(name).length;
         if ("marker" in step.extraInfo) {
           // a new marker boundary has been discovered
@@ -68,23 +89,25 @@ HistogramRenderer.prototype = {
           var item = {
             name: name,
             width: 1,
-            value: value
+            value: value,
+            color: "rgb(" + Math.min(255, Math.round(255.0 * res / 1000.0)) +",0,0)",
           };
           histogramData.push(item);
-          prevName = name;
-        } else if (name != prevName) {
+        } else if (name != prevName || res != prevRes) {
           // a new name boundary has been discovered
           var item = {
             name: name,
             width: 1,
-            value: value
+            value: value,
+            color: "rgb(" + Math.min(255, Math.round(255.0 * res / 1000.0)) +",0,0)",
           };
           histogramData.push(item);
-          prevName = name;
         } else {
           // the continuation of the previous data
           histogramData[histogramData.length - 1].width++;
         }
+        prevName = name;
+        prevRes = res;
       }
       return histogramData;
     }
@@ -125,10 +148,10 @@ HistogramRenderer.prototype = {
     // Define the marker gradient
     var markerGradient = document.createElementNS(kSVGNS, "linearGradient");
     markerGradient.setAttribute("id", "markerGradient");
-    markerGradient.setAttribute("x1", "0%");
-    markerGradient.setAttribute("y1", "0%");
-    markerGradient.setAttribute("x2", "0%");
-    markerGradient.setAttribute("y2", "100%");
+    //markerGradient.setAttribute("x1", "0%");
+    //markerGradient.setAttribute("y1", "0%");
+    //markerGradient.setAttribute("x2", "0%");
+    //markerGradient.setAttribute("y2", "100%");
     var stop1 = document.createElementNS(kSVGNS, "stop");
     stop1.setAttribute("offset", "0%");
     stop1.setAttribute("style", "stop-color: blue; stop-opacity: 1;");
@@ -176,7 +199,7 @@ HistogramRenderer.prototype = {
       var rect = createRect(svgRoot, widthSeenSoFar, 0,
                             step.width * widthFactor,
                             step.value * heightFactor,
-                            "blue");
+                            step.color);
       if ("marker" in step) {
         rect.setAttribute("title", step.marker);
         rect.setAttribute("fill", "url(#markerGradient)");
@@ -417,7 +440,12 @@ function parse() {
   displaySample(0, gSamples.length);
 }
 
+var f = true;
 function displaySample(start, end) {
+  dump(start + ", " + end + "\n");
+  dump(start + ", " + end + "\n");
+  dump(start + ", " + end + "\n");
+  dump(start + ", " + end + "\n");
   document.getElementById("dataentry").className = "hidden";
   document.getElementById("ui").className = "";
 

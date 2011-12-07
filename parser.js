@@ -83,9 +83,18 @@ Parser.prototype = {
         extraInfo = {}; // reset the extra info for future rounds
         break;
       case 'c':
+        // continue sample
         if (sample) { // ignore the case where we see a 'c' before an 's'
           sample.name += "," + info;
         }
+        break;
+      case 'r':
+        // responsiveness
+        if (sample) {
+          sample.extraInfo["responsiveness"] = info;
+          dump("R " + info + "\n");
+        }
+        break;
       }
     }
     return samples;
