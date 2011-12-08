@@ -425,6 +425,39 @@ RangeSelector.prototype = {
   }
 };
 
+function maxResponsiveness(start, end) {
+  var data = gVisibleRange.filter(start, end);
+  var maxRes = 0.0;
+  for (var i = 0; i < data.length; ++i) {
+    if (maxRes < data[i].extraInfo["responsiveness"])
+      maxRes = data[i].extraInfo["responsiveness"];
+  }
+  return maxRes;
+}
+
+function avgResponsiveness(start, end) {
+  var data = gVisibleRange.filter(start, end);
+  var totalRes = 0.0;
+  for (var i = 0; i < data.length; ++i) {
+    totalRes += data[i].extraInfo["responsiveness"];
+  }
+  return totalRes / data.length;
+}
+
+function updateDescription() {
+  var infobar = document.getElementById("infobar");
+  var infoText = "";
+  
+  infoText += "Total Samples: " + gSamples.length + "<br>\n";
+  infoText += "<br>\n";
+  infoText += "Selection:<br>\n";
+  infoText += "--Range: [" + gVisibleRange.start + "," + gVisibleRange.end + "]<br>\n";
+  infoText += "--Avg. Responsiveness: " + avgResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
+  infoText += "--Max Responsiveness: " + maxResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
+
+  infobar.innerHTML = infoText;
+}
+
 var gSamples = [];
 var gVisibleRange = {
   start: -1,
@@ -461,4 +494,5 @@ function displaySample(start, end) {
   var histogramRenderer = new HistogramRenderer();
   histogramRenderer.render(data, histogram,
                            document.getElementById("markers"));
+  updateDescription();
 }
