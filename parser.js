@@ -92,7 +92,6 @@ Parser.prototype = {
         // responsiveness
         if (sample) {
           sample.extraInfo["responsiveness"] = info;
-          dump("R " + info + "\n");
         }
         break;
       }
