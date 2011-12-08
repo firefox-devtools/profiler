@@ -176,6 +176,7 @@ Parser.prototype = {
           for (var j = 0; j < remainingCallstack.length; ++j) {
             var frame = remainingCallstack[j];
             var child = new TreeNode(frame, node);
+            child.totalSamples = samples.length;
             node.children.push(child);
             node = child;
           }
