@@ -17,9 +17,10 @@ function TreeRenderer() {}
 TreeRenderer.prototype = {
   render: function TreeRenderer_render(tree, container) {
     function convertToJSTreeData(tree) {
+      var roots = [];
       var object = {};
-      var totalCount = tree.totalSamples;
       function childVisitor(node, curObj) {
+        var totalCount = node.totalSamples;
         var percent = (100 * node.counter / totalCount).toFixed(2);
         curObj.title = node.counter + " (" + percent + "%) " + node.name;
         //dump("Add node: " + curObj.title + "\n");
@@ -45,8 +46,19 @@ TreeRenderer.prototype = {
           curObj.children.sort(treeObjSort);
         }
       }
-      childVisitor(tree, object);
-      return {data: [object]};
+      // Need to handle multiple root for heavy tree
+      if (tree instanceof Array) {
+        for(var i = 0; i < tree.length; i++) {
+          object = {};
+          childVisitor(tree[i], object);
+          roots.push(object);
+        }
+      } else {
+        childVisitor(tree, object);
+        roots.push(object);
+      }
+      roots.sort(treeObjSort);
+      return {data: roots};
     }
     //removeAllChildren(container);
     //container.className = "";
@@ -454,6 +466,8 @@ function updateDescription() {
   infoText += "--Range: [" + gVisibleRange.start + "," + gVisibleRange.end + "]<br>\n";
   infoText += "--Avg. Responsiveness: " + avgResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
   infoText += "--Max Responsiveness: " + maxResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
+  infoText += "<br>\n";
+  infoText += "<input type='checkbox' id='heavy' " + (gIsHeavy?" checked='true' ":" ") + " onchange='toggleHeavy()'/>Heavy callstack<br />\n";
 
   infobar.innerHTML = infoText;
 }
@@ -475,6 +489,12 @@ function parse() {
   displaySample(0, gSamples.length);
 }
 
+var gIsHeavy = false;
+function toggleHeavy() {
+  gIsHeavy = !gIsHeavy;
+  displaySample(gVisibleRange.start, gVisibleRange.end); 
+}
+
 function displaySample(start, end) {
   document.getElementById("dataentry").className = "hidden";
   document.getElementById("ui").className = "";
@@ -482,7 +502,12 @@ function displaySample(start, end) {
   var data = gVisibleRange.filter(start, end);
 
   var parser = new Parser();
-  var treeData = parser.convertToCallTree(data);
+  var treeData;
+  if (gIsHeavy) {
+    treeData = parser.convertToHeavyCallTree(data);
+  } else {
+    treeData = parser.convertToCallTree(data);
+  }
   var tree = document.getElementById("tree");
   var treeRenderer = new TreeRenderer();
   treeRenderer.render(treeData, tree);

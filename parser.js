@@ -109,6 +109,32 @@ Parser.prototype = {
       var sample = samples[i];
       // NOTE: reserved
       var callstack = this.parseCallStack(sample.name).reverse();
+      var currBucket = roots;
+      var parentNode = null;
+      for (var j = 0; j < callstack.length; j++) {
+        var currParent = null;
+        var frame = callstack[j]; 
+        if (currBucket != null) {
+          for (var k = 0; k < currBucket.length; k++) {
+            var node = currBucket[k];
+            if (node.name == frame) {
+              parentNode = node;
+              node.counter++;
+              currParent = node; 
+              currBucket = currParent.children;
+              break;
+            }
+          }
+        }
+        // search
+        if (parentNode == null) {
+          var newNode = new TreeNode(frame, currParent); 
+          newNode.totalSamples = samples.length;
+          currBucket.push(newNode);
+          currParent = newNode;
+          currBucket = currParent.children;
+        }
+      }
     }
     return roots;
   },
