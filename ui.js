@@ -390,6 +390,10 @@ RangeSelector.prototype = {
       }
     }
     graph.addEventListener("mousedown", function(e) {
+      var prevHilite = document.querySelector("." + hiliteClassName);
+      if (prevHilite) {
+        prevHilite.parentNode.removeChild(prevHilite);
+      }
       isDrawingRectangle = true;
       origX = e.pageX;
       origY = e.pageY;
