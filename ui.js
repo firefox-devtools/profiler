@@ -22,7 +22,7 @@ TreeRenderer.prototype = {
       function childVisitor(node, curObj) {
         var percent = (100 * node.counter / totalCount).toFixed(2);
         curObj.title = node.counter + " (" + percent + "%) " + node.name;
-        dump("Add node: " + curObj.title + "\n");
+        //dump("Add node: " + curObj.title + "\n");
         curObj.counter = node.counter;
         if (node.children.length) {
           curObj.children = [];
@@ -50,9 +50,10 @@ TreeRenderer.prototype = {
     }
     //removeAllChildren(container);
     //container.className = "";
+    //jQuery(container).jstree('destroy');
     jQuery(container).jstree({
       json: convertToJSTreeData(tree),
-      plugins: ["themes", "json", "ui"]
+      plugins: ["themes", "json", "ui", "hotkeys"]
     });
   }
 };
@@ -72,7 +73,8 @@ HistogramRenderer.prototype = {
         if (maxHeight < value)
           maxHeight = value;
       }
-      for (var i = 0; i < data.length; ++i) {
+      var skipCount = Math.round(data.length / 2000);
+      for (var i = 0; i < data.length; i=i+1+skipCount) {
         var step = data[i];
         var name = step.name;
         var res = step.extraInfo["responsiveness"];
@@ -442,10 +444,6 @@ function parse() {
 
 var f = true;
 function displaySample(start, end) {
-  dump(start + ", " + end + "\n");
-  dump(start + ", " + end + "\n");
-  dump(start + ", " + end + "\n");
-  dump(start + ", " + end + "\n");
   document.getElementById("dataentry").className = "hidden";
   document.getElementById("ui").className = "";
 
