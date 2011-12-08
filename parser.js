@@ -91,7 +91,7 @@ Parser.prototype = {
       case 'r':
         // responsiveness
         if (sample) {
-          sample.extraInfo["responsiveness"] = info;
+          sample.extraInfo["responsiveness"] = parseFloat(info);
         }
         break;
       }
@@ -101,6 +101,16 @@ Parser.prototype = {
 
   parseCallStack: function Parser_parseCallStack(serialization) {
     return serialization.split(",");
+  },
+
+  convertToHeavyCallTree: function Parser_convertToHeavyCallTree(samples) {
+    var roots = [];
+    for (var i = 0; i < samples.length; ++i) {
+      var sample = samples[i];
+      // NOTE: reserved
+      var callstack = this.parseCallStack(sample.name).reverse();
+    }
+    return roots;
   },
 
   convertToCallTree: function Parser_convertToCallTree(samples) {
