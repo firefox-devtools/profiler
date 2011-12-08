@@ -73,7 +73,7 @@ HistogramRenderer.prototype = {
         if (maxHeight < value)
           maxHeight = value;
       }
-      var skipCount = Math.round(data.length / 2000);
+      var skipCount = Math.round(data.length / 2000.0);
       for (var i = 0; i < data.length; i=i+1+skipCount) {
         var step = data[i];
         var name = step.name;
@@ -399,7 +399,7 @@ RangeSelector.prototype = {
       var totalSamples = parseFloat(gVisibleRange.end - gVisibleRange.start - 1);
       var width = parseFloat(graph.parentNode.clientWidth);
       var factor = totalSamples / width;
-      return parseInt(parseFloat(x) * factor);
+      return gVisibleRange.start + parseInt(parseFloat(x) * factor);
     }
 
     var hiliteRect = document.querySelector("." + hiliteClassName);
@@ -442,7 +442,6 @@ function parse() {
   displaySample(0, gSamples.length);
 }
 
-var f = true;
 function displaySample(start, end) {
   document.getElementById("dataentry").className = "hidden";
   document.getElementById("ui").className = "";
