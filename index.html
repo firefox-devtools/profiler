@@ -25,9 +25,14 @@
       }
       #ui {
         display: block;
-        width: 1200px;
+        width: 1600px;
         height: 1000px;
         margin: 0 auto;
+      }
+      #mainarea {
+	float: left;
+	/* compensate for the icons that will appear on the left */
+	margin-left: 36px;
       }
       #dataentry {
         display: block;
@@ -38,6 +43,12 @@
       #tree {
         width: 1200px;
         height: 600px;
+      }
+      #infobar {
+        width: 300px;
+        height: 1000px;
+        float: left;
+        border-style: double;
       }
       #bottombar {
         width: 1200px;
@@ -74,11 +85,14 @@
   </head>
   <body>
     <div id="ui" class="hidden">
-      <div id="tree"></div>
-      <div id="bottombar">
-        <div id="histogram"></div>
-        <div id="markers"></div>
+      <div id="mainarea">
+        <div id="tree"></div>
+        <div id="bottombar">
+          <div id="histogram"></div>
+          <div id="markers"></div>
+        </div>
       </div>
+      <div id="infobar"></div>
     </div>
     <div id="dataentry">
       <h1>Enter your profile data here:</h1>
