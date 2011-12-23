@@ -31,7 +31,9 @@ TreeRenderer.prototype = {
           for (var i = 0; i < node.children.length; ++i) {
             var child = node.children[i];
             var newObj = {};
-            childVisitor(child, newObj);
+            var totalCount = child.totalSamples;
+            if (child.depth < 15)
+              childVisitor(child, newObj);
             curObj.children.push(newObj);
             unknownCounter -= child.counter;
           }
@@ -44,25 +46,25 @@ TreeRenderer.prototype = {
             curObj.children.push(newObj);
           }
           curObj.children.sort(treeObjSort);
+          curObj.children = curObj.children.splice(0, 20);
         }
       }
       // Need to handle multiple root for heavy tree
       if (tree instanceof Array) {
         for(var i = 0; i < tree.length; i++) {
           object = {};
+          var totalCount = tree[i].totalSamples;
           childVisitor(tree[i], object);
           roots.push(object);
         }
       } else {
+        var totalCount = tree.totalSamples;
         childVisitor(tree, object);
         roots.push(object);
       }
       roots.sort(treeObjSort);
       return {data: roots};
     }
-    //removeAllChildren(container);
-    //container.className = "";
-    //jQuery(container).jstree('destroy');
     jQuery(container).jstree({
       json: convertToJSTreeData(tree),
       plugins: ["themes", "json", "ui", "hotkeys"]
@@ -81,16 +83,16 @@ HistogramRenderer.prototype = {
       var parser = new Parser();
       var maxHeight = 1;
       for (var i = 0; i < data.length; ++i) {
-        var value = parser.parseCallStack(data[i].name).length;
+        var value = data[i].frames.length;
         if (maxHeight < value)
           maxHeight = value;
       }
       var skipCount = Math.round(data.length / 2000.0);
       for (var i = 0; i < data.length; i=i+1+skipCount) {
         var step = data[i];
-        var name = step.name;
+        var name = step.frames;
         var res = step.extraInfo["responsiveness"];
-        var value = parser.parseCallStack(name).length;
+        var value = step.frames.length;
         if ("marker" in step.extraInfo) {
           // a new marker boundary has been discovered
           var item = {
@@ -104,7 +106,7 @@ HistogramRenderer.prototype = {
             name: name,
             width: 1,
             value: value,
-            color: "rgb(" + Math.min(255, Math.round(255.0 * res / 1000.0)) +",0,0)",
+            color: "rgb(" + (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0)",
           };
           histogramData.push(item);
         } else if (name != prevName || res != prevRes) {
@@ -113,7 +115,7 @@ HistogramRenderer.prototype = {
             name: name,
             width: 1,
             value: value,
-            color: "rgb(" + Math.min(255, Math.round(255.0 * res / 1000.0)) +",0,0)",
+            color: "rgb(" + (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0)",
           };
           histogramData.push(item);
         } else {

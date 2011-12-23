@@ -1,5 +1,5 @@
 function Sample(name, extraInfo) {
-  this.name = name;
+  this.frames = [name];
   this.extraInfo = extraInfo;
 }
 
@@ -60,14 +60,14 @@ Parser.prototype = {
       }
       var info = line.substring(2);
       switch (line[0]) {
-      case 'l':
-        // leaf name
-        if ("leafName" in extraInfo) {
-          extraInfo.leafName += ":" + info;
-        } else {
-          extraInfo.leafName = info;
-        }
-        break;
+      //case 'l':
+      //  // leaf name
+      //  if ("leafName" in extraInfo) {
+      //    extraInfo.leafName += ":" + info;
+      //  } else {
+      //    extraInfo.leafName = info;
+      //  }
+      //  break;
       case 'm':
         // marker
         if (!("marker" in extraInfo)) {
@@ -83,9 +83,10 @@ Parser.prototype = {
         extraInfo = {}; // reset the extra info for future rounds
         break;
       case 'c':
+      case 'l':
         // continue sample
         if (sample) { // ignore the case where we see a 'c' before an 's'
-          sample.name += "," + info;
+          sample.frames.push(info);
         }
         break;
       case 'r':
@@ -99,16 +100,12 @@ Parser.prototype = {
     return samples;
   },
 
-  parseCallStack: function Parser_parseCallStack(serialization) {
-    return serialization.split(",");
-  },
-
   convertToHeavyCallTree: function Parser_convertToHeavyCallTree(samples) {
     var roots = [];
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
       // NOTE: reserved
-      var callstack = this.parseCallStack(sample.name).reverse();
+      var callstack = sample.frames.reverse();
       var currBucket = roots;
       var parentNode = null;
       for (var j = 0; j < callstack.length; j++) {
@@ -143,7 +140,7 @@ Parser.prototype = {
     var treeRoot = null;
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
-      var callstack = this.parseCallStack(sample.name);
+      var callstack = sample.frames;
       if (!treeRoot) {
         treeRoot = new TreeNode(callstack[0], null);
         treeRoot.totalSamples = samples.length;
@@ -151,6 +148,7 @@ Parser.prototype = {
         for (var j = 1; j < callstack.length; ++j) {
           var frame = callstack[j];
           var child = new TreeNode(frame, node);
+          node.totalSamples = samples.length;
           node.children.push(child);
           node = child;
         }
