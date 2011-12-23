@@ -5,6 +5,9 @@ function Tree(root, data) {
 
 Tree.prototype = {
   init: function Tree_init(data) {
+    while (this.root.hasChildNodes()) {
+      this.root.removeChild(this.root.firstChild);
+    }
     var treeRoot = document.createElement("div");
     treeRoot.className = "root";
     this.root.appendChild(treeRoot);
