@@ -4,3 +4,4 @@ div.root div.collapsed > div.collapsed {
 div.root div > div {
   margin-left: 1em;
 }
+.selected { color: blue; }
