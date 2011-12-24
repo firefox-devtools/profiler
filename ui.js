@@ -1,6 +1,3 @@
-jQuery.jstree.THEMES_DIR = "jstree/themes/";
-jQuery.fx.off = true;
-
 const hiliteClassName = "histogramHilite";
 
 function removeAllChildren(element) {
@@ -65,10 +62,7 @@ TreeRenderer.prototype = {
       roots.sort(treeObjSort);
       return {data: roots};
     }
-    jQuery(container).jstree({
-      json: convertToJSTreeData(tree),
-      plugins: ["themes", "json", "ui", "hotkeys"]
-    });
+    new Tree(container, convertToJSTreeData(tree));
   }
 };
 

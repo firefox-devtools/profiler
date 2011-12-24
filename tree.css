@@ -1,0 +1,6 @@
+div.root div.collapsed > div.collapsed {
+  display: none;
+}
+div.root div > div {
+  margin-left: 1em;
+}
