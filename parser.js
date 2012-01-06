@@ -148,7 +148,7 @@ Parser.prototype = {
         for (var j = 1; j < callstack.length; ++j) {
           var frame = callstack[j];
           var child = new TreeNode(frame, node);
-          node.totalSamples = samples.length;
+          child.totalSamples = samples.length;
           node.children.push(child);
           node = child;
         }
@@ -181,6 +181,8 @@ Parser.prototype = {
         }
       }
     }
+    if (treeRoot == null)
+      dump("no tree root\n");
     return treeRoot;
   }
 };
