@@ -12,6 +12,7 @@ Tree.prototype = {
     treeRoot.className = "root";
     this.root.appendChild(treeRoot);
     treeRoot.appendChild(this._createTree(treeRoot, data.data[0]));
+    this._tabIndex = 0;
   },
   _createTree: function Tree__createTree(root, data) {
     if (!("title" in data)) {
@@ -21,7 +22,10 @@ Tree.prototype = {
     div.className = "collapsed";
     div.onclick = this._onclick;
     div.onkeypress = this._onkeypress;
-    div.appendChild(document.createTextNode(data.title));
+    var span = document.createElement("span");
+    span.appendChild(document.createTextNode(data.title));
+    span.setAttribute("tabindex", this._tabIndex++);
+    div.appendChild(span);
     if ("children" in data) {
       for (var i = 0; i < data.children.length; ++i) {
         var innerTree = this._createTree(div, data.children[i]);
