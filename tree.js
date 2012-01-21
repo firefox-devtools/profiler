@@ -30,6 +30,8 @@ Tree.prototype = {
     text.node = div;
     div.node = div;
     div.treeText = text;
+    div.onClick = data.onClick;
+    div.data = data;
     div.treeText.className = "unselected";
     div.appendChild(text);
     div.treeChildren = [];
@@ -95,6 +97,9 @@ Tree.prototype = {
       div.id = "selected_treenode";
       div.treeText.className = "selected";
       div.tree.selected = div;
+      if (div.onClick != null) {
+        div.onClick(div.data);
+      }
       //div.scrollIntoView(true);
     }
   },

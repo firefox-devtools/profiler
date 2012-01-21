@@ -12,6 +12,16 @@ function treeObjSort(a, b) {
 
 function TreeRenderer() {}
 TreeRenderer.prototype = {
+  onClick: function TreeRender_onclick(data) {
+    var selected = [];
+    var curr = data;
+    while (curr != null) {
+      if (curr.name != null) {
+        selected.push(curr.name);
+      }
+      curr = curr.parent;
+    }
+  },
   render: function TreeRenderer_render(tree, container) {
     function convertToJSTreeData(tree) {
       var roots = [];
@@ -20,6 +30,8 @@ TreeRenderer.prototype = {
         var totalCount = node.totalSamples;
         var percent = (100 * node.counter / totalCount).toFixed(2);
         curObj.title = node.counter + " (" + percent + "%) " + node.name;
+        curObj.name = node.name;
+        curObj.onClick = TreeRenderer.prototype.onClick;
         //dump("Add node: " + curObj.title + "\n");
         curObj.counter = node.counter;
         if (node.children.length) {
@@ -30,6 +42,7 @@ TreeRenderer.prototype = {
             var newObj = {};
             var totalCount = child.totalSamples;
             childVisitor(child, newObj);
+            newObj.parent = curObj;
             curObj.children.push(newObj);
             unknownCounter -= child.counter;
           }
@@ -38,6 +51,7 @@ TreeRenderer.prototype = {
             var newObj = {};
             var percent = (100 * unknownCounter / node.counter).toFixed(2);
             newObj.counter = unknownCounter;
+            newObj.onClick = TreeRenderer.prototype.onClick;
             newObj.title = unknownCounter + " (" + percent + "%) ??? Unknown";
             curObj.children.push(newObj);
           }
