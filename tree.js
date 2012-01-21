@@ -55,11 +55,18 @@ Tree.prototype = {
     return div.treeParent;
   },
   _getFirstChild: function Tree__getFirstChild(div) {
-    if (Tree.prototype._isCollapsed(div)) {
+    if (Tree.prototype._isCollapsed(div))
       return null;
-    }
     var child = div.treeChildren[0];
     return child;
+  },
+  _getLastChild: function Tree__getLastChild(div) {
+    if (Tree.prototype._isCollapsed(div))
+      return div;
+    var lastChild = div.treeChildren[div.treeChildren.length-1];
+    if (lastChild == null)
+      return div;
+    return Tree.prototype._getLastChild(lastChild);
   },
   _getPrevSib: function Tree__getPevSib(div) {
     if (div.treeParent == null)
@@ -74,7 +81,7 @@ Tree.prototype = {
       return null;
     var nodeIndex = div.treeParent.treeChildren.indexOf(div);
     if (nodeIndex == div.treeParent.treeChildren.length - 1)
-      return null;
+      return Tree.prototype._getNextSib(div.treeParent);
     return div.treeParent.treeChildren[nodeIndex+1];
   },
   _select: function Tree__select(div) {
@@ -125,7 +132,7 @@ Tree.prototype = {
       var prevSib = Tree.prototype._getPrevSib(selected);
       var parent = Tree.prototype._getParent(selected); 
       if (prevSib != null) {
-        Tree.prototype._select(prevSib);
+        Tree.prototype._select(Tree.prototype._getLastChild(prevSib));
       } else if (parent != null) {
         Tree.prototype._select(parent);
       }
