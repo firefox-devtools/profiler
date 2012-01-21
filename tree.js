@@ -54,6 +54,13 @@ Tree.prototype = {
   _getParent: function Tree__getParent(div) {
     return div.treeParent;
   },
+  _getFirstChild: function Tree__getFirstChild(div) {
+    if (Tree.prototype._isCollapsed(div)) {
+      return null;
+    }
+    var child = div.treeChildren[0];
+    return child;
+  },
   _select: function Tree__select(div) {
     document.onkeypress = this._onkeypress;
     if (div.tree.selected != null) {
@@ -90,7 +97,10 @@ Tree.prototype = {
       if (!isCollapsed) {
         Tree.prototype._toggle(selected);
       } else {
-        // select parent
+        var parent = Tree.prototype._getParent(selected); 
+        if (parent != null) {
+          Tree.prototype._select(parent);
+        }
       }
     } else if (event.keyCode == 38) { // KEY_UP
       var parent = Tree.prototype._getParent(selected); 
@@ -103,6 +113,10 @@ Tree.prototype = {
         Tree.prototype._toggle(selected);
       }
     } else if (event.keyCode == 40) { // KEY_DOWN
+       var child = Tree.prototype._getFirstChild(selected); 
+       if (child != null) {
+         Tree.prototype._select(child);
+       }
     }
     event.stopPropagation();
   },
