@@ -21,6 +21,7 @@ TreeRenderer.prototype = {
       }
       curr = curr.parent;
     }
+    setHighlight(selected.reverse());
   },
   render: function TreeRenderer_render(tree, container) {
     function convertToJSTreeData(tree) {
@@ -81,7 +82,7 @@ TreeRenderer.prototype = {
 
 function HistogramRenderer() {}
 HistogramRenderer.prototype = {
-  render: function HistogramRenderer_render(data, container,
+  render: function HistogramRenderer_render(data, container, highlightSample,
                                             markerContainer) {
     function convertToHistogramData(data) {
       var histogramData = [];
@@ -100,6 +101,20 @@ HistogramRenderer.prototype = {
         var name = step.frames;
         var res = step.extraInfo["responsiveness"];
         var value = step.frames.length;
+        var color = (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0";
+        var isSelected = true;
+        if (step.frames.length >= highlightSample.length) {
+          for (var j = 0; j < highlightSample.length; j++) {
+            if (highlightSample[j] != step.frames[j]) {
+              isSelected = false;    
+            }
+          }
+        } else {
+          isSelected = false;
+        }
+        if (isSelected) {
+          color = "0,128,0";
+        }
         if ("marker" in step.extraInfo) {
           // a new marker boundary has been discovered
           var item = {
@@ -113,7 +128,7 @@ HistogramRenderer.prototype = {
             name: name,
             width: 1,
             value: value,
-            color: "rgb(" + (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0)",
+            color: "rgb(" + color + ")",
           };
           histogramData.push(item);
         } else if (name != prevName || res != prevRes) {
@@ -122,7 +137,7 @@ HistogramRenderer.prototype = {
             name: name,
             width: 1,
             value: value,
-            color: "rgb(" + (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0)",
+            color: "rgb(" + color + ")",
           };
           histogramData.push(item);
         } else {
@@ -486,6 +501,7 @@ function updateDescription() {
 }
 
 var gSamples = [];
+var gHighlighSample = [];
 var gVisibleRange = {
   start: -1,
   end: -1,
@@ -506,6 +522,18 @@ var gIsHeavy = false;
 function toggleHeavy() {
   gIsHeavy = !gIsHeavy;
   displaySample(gVisibleRange.start, gVisibleRange.end); 
+}
+
+function setHighlight(sample) {
+  //if (gHighlighSample.length == sample.length) return;
+  gHighlighSample = sample;
+
+  var data = gVisibleRange.filter(gVisibleRange.start, gVisibleRange.end);
+  var histogram = document.getElementById("histogram");
+  var histogramRenderer = new HistogramRenderer();
+  histogramRenderer.render(data, histogram, gHighlighSample,
+                           document.getElementById("markers"));
+  updateDescription();
 }
 
 function displaySample(start, end) {
@@ -530,7 +558,7 @@ function displaySample(start, end) {
   histogram.style.width = width + "px";
   histogram.style.height = height + "px";
   var histogramRenderer = new HistogramRenderer();
-  histogramRenderer.render(data, histogram,
+  histogramRenderer.render(data, histogram, gHighlighSample,
                            document.getElementById("markers"));
   updateDescription();
 }
