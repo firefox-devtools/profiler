@@ -29,8 +29,7 @@ TreeRenderer.prototype = {
             var child = node.children[i];
             var newObj = {};
             var totalCount = child.totalSamples;
-            if (child.depth < 15)
-              childVisitor(child, newObj);
+            childVisitor(child, newObj);
             curObj.children.push(newObj);
             unknownCounter -= child.counter;
           }
