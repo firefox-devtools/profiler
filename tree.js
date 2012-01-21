@@ -61,6 +61,22 @@ Tree.prototype = {
     var child = div.treeChildren[0];
     return child;
   },
+  _getPrevSib: function Tree__getPevSib(div) {
+    if (div.treeParent == null)
+      return null;
+    var nodeIndex = div.treeParent.treeChildren.indexOf(div);
+    if (nodeIndex == 0)
+      return null;
+    return div.treeParent.treeChildren[nodeIndex-1];
+  },
+  _getNextSib: function Tree__getNextSib(div) {
+    if (div.treeParent == null)
+      return null;
+    var nodeIndex = div.treeParent.treeChildren.indexOf(div);
+    if (nodeIndex == div.treeParent.treeChildren.length - 1)
+      return null;
+    return div.treeParent.treeChildren[nodeIndex+1];
+  },
   _select: function Tree__select(div) {
     document.onkeypress = this._onkeypress;
     if (div.tree.selected != null) {
@@ -72,6 +88,7 @@ Tree.prototype = {
       div.id = "selected_treenode";
       div.treeText.className = "selected";
       div.tree.selected = div;
+      //div.scrollIntoView(true);
     }
   },
   _selected: function Tree__selected() {
@@ -91,7 +108,9 @@ Tree.prototype = {
   },
   _onkeypress: function Tree__onkeypress(event) {
     var selected = Tree.prototype._selected();
-    if (selected == null) return;
+    event.stopPropagation();
+    event.preventDefault()
+    if (selected == null) return false;
     if (event.keyCode == 37) { // KEY_LEFT
       var isCollapsed = Tree.prototype._isCollapsed(selected);
       if (!isCollapsed) {
@@ -103,8 +122,11 @@ Tree.prototype = {
         }
       }
     } else if (event.keyCode == 38) { // KEY_UP
+      var prevSib = Tree.prototype._getPrevSib(selected);
       var parent = Tree.prototype._getParent(selected); 
-      if (parent != null) {
+      if (prevSib != null) {
+        Tree.prototype._select(prevSib);
+      } else if (parent != null) {
         Tree.prototype._select(parent);
       }
     } else if (event.keyCode == 39) { // KEY_RIGHT
@@ -113,12 +135,15 @@ Tree.prototype = {
         Tree.prototype._toggle(selected);
       }
     } else if (event.keyCode == 40) { // KEY_DOWN
-       var child = Tree.prototype._getFirstChild(selected); 
-       if (child != null) {
-         Tree.prototype._select(child);
-       }
+      var nextSib = Tree.prototype._getNextSib(selected);
+      var child = Tree.prototype._getFirstChild(selected); 
+      if (child != null) {
+        Tree.prototype._select(child);
+      } else if (nextSib) {
+        Tree.prototype._select(nextSib);
+      }
     }
-    event.stopPropagation();
+    return false;
   },
 };
 
