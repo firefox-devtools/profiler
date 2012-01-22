@@ -518,9 +518,9 @@ function uploadProfile(selected) {
   }
 
   if (dataToUpload.length > 1024*1024) {
-    dataSize = (dataToUpload/1024/1024) + " MB(s)";
+    dataSize = (dataToUpload.length/1024/1024) + " MB(s)";
   } else {
-    dataSize = (dataToUpload/1024) + " KB(s)";
+    dataSize = (dataToUpload.length/1024) + " KB(s)";
   }
 
   var formData = new FormData();
