@@ -542,7 +542,7 @@ function setHighlight(sample) {
 function selectSample(sample) {
   gHighlighSample = sample;
   
-  displaySample(gVisibleRange.start, gVisibleRange.end);
+  //displaySample(gVisibleRange.start, gVisibleRange.end);
 }
 
 function displaySample(start, end) {
