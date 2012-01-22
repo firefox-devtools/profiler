@@ -488,6 +488,10 @@ function avgResponsiveness(start, end) {
   return totalRes / data.length;
 }
 
+function copyProfile() {
+  window.prompt ("Copy to clipboard: Ctrl+C, Enter", document.getElementById("data").value);
+}
+
 function updateDescription() {
   var infobar = document.getElementById("infobar");
   var infoText = "";
@@ -500,6 +504,7 @@ function updateDescription() {
   infoText += "--Max Responsiveness: " + maxResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
   infoText += "<br>\n";
   infoText += "<input type='checkbox' id='heavy' " + (gIsHeavy?" checked='true' ":" ") + " onchange='toggleHeavy()'/>Heavy callstack<br />\n";
+  //infoText += "<input type='button' onclick='copyProfile()' value=\"Copy Profile to Clipboard\"></input><br />\n";
 
   infobar.innerHTML = infoText;
 }
