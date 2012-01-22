@@ -542,10 +542,10 @@ function updateDescription() {
   infoText += "--Max Responsiveness: " + maxResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
   infoText += "<br>\n";
   infoText += "<input type='checkbox' id='heavy' " + (gIsHeavy?" checked='true' ":" ") + " onchange='toggleHeavy()'/>Heavy callstack<br />\n";
-  infoText += "<a id='upload_status'>No upload in progress</a><br />\n";
 
   infoText += "<br>\n";
   infoText += "Share:<br>\n";
+  infoText += "<a id='upload_status'>No upload in progress</a><br />\n";
   infoText += "<input type='button' id='upload' value='Upload full profile'/>\n";
   infoText += "<input type='button' id='upload_select' value='Upload view'/><br />\n";
 
