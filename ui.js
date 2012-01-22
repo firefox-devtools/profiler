@@ -496,6 +496,24 @@ function copyProfile() {
   window.prompt ("Copy to clipboard: Ctrl+C, Enter", document.getElementById("data").value);
 }
 
+function uploadProfile() {
+  var oXHR = new XMLHttpRequest();
+  oXHR.open("POST", "http://profile-logs.appspot.com/store", true);
+  oXHR.onload = function (oEvent) {
+    if (oXHR.status == 200) {  
+      document.getElementById("upload_status").innerHTML = document.URL.split('?')[0] + "?report=" + oXHR.responseText;
+    } else {  
+      alert("Error " + oXHR.status + " occurred uploading your file.<br \/>");
+    }  
+  };
+
+  var formData = new FormData();
+  formData.append("file", document.getElementById("data").value);
+  document.getElementById("upload_status").innerHTML = "Uploading Profile (" + document.getElementById("data").value.length + " bytes)";
+  oXHR.send(formData);
+
+}
+
 function updateDescription() {
   var infobar = document.getElementById("infobar");
   var infoText = "";
@@ -508,9 +526,12 @@ function updateDescription() {
   infoText += "--Max Responsiveness: " + maxResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
   infoText += "<br>\n";
   infoText += "<input type='checkbox' id='heavy' " + (gIsHeavy?" checked='true' ":" ") + " onchange='toggleHeavy()'/>Heavy callstack<br />\n";
+  infoText += "<a id='upload_status'>No upload in progress</a><br />\n";
+  infoText += "<input type='button' id='upload' value='Upload profile'/><br />\n";
 
   infobar.innerHTML = infoText;
 
+  document.getElementById('upload').onclick = uploadProfile;
 }
 
 var gSamples = [];
