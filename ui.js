@@ -174,6 +174,14 @@ HistogramRenderer.prototype = {
     } else {
       showallButton.setAttribute("class", "");
     }
+    try {
+      showallButton.removeEventListener("click", showall_onClick, false);
+    } catch (err) {
+    }
+    showallButton.addEventListener("click", function showall_onClick() {
+      displaySample(0, gSamples.length);
+      document.getElementById("showall").className = "hidden";
+    }, false);
     showallButton.setAttribute("title", "Show all of the samples");
     iconBox.appendChild(showallButton);
     container.appendChild(iconBox);
