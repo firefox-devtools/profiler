@@ -516,8 +516,7 @@ function uploadProfile(selected) {
   } else {
     dataToUpload = document.getElementById("data").value;
   }
-  alert(dataToUpload.length);
-  return;
+
   if (dataToUpload.length > 1024*1024) {
     dataSize = (dataToUpload/1024/1024) + " MB(s)";
   } else {
