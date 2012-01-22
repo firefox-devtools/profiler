@@ -103,7 +103,7 @@ HistogramRenderer.prototype = {
         var value = step.frames.length;
         var color = (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0";
         var isSelected = true;
-        if (step.frames.length >= highlightSample.length) {
+        if (step.frames.length >= highlightSample.length && highlightSample.length > 2) {
           for (var j = 0; j < highlightSample.length; j++) {
             if (highlightSample[j] != step.frames[j]) {
               isSelected = false;    
