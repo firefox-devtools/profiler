@@ -1,6 +1,7 @@
-function Sample(name, extraInfo) {
+function Sample(name, extraInfo, line) {
   this.frames = [name];
   this.extraInfo = extraInfo;
+  this.lines = [];
 }
 
 function TreeNode(name, parent) {
@@ -96,6 +97,8 @@ Parser.prototype = {
         }
         break;
       }
+      if (sample != null)
+        sample.lines.push(line);
     }
     return samples;
   },

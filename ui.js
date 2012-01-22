@@ -477,6 +477,7 @@ function maxResponsiveness(start, end) {
   var data = gVisibleRange.filter(start, end);
   var maxRes = 0.0;
   for (var i = 0; i < data.length; ++i) {
+    if (data[i].extraInfo["responsiveness"] == null) continue;
     if (maxRes < data[i].extraInfo["responsiveness"])
       maxRes = data[i].extraInfo["responsiveness"];
   }
@@ -487,6 +488,7 @@ function avgResponsiveness(start, end) {
   var data = gVisibleRange.filter(start, end);
   var totalRes = 0.0;
   for (var i = 0; i < data.length; ++i) {
+    if (data[i].extraInfo["responsiveness"] == null) continue;
     totalRes += data[i].extraInfo["responsiveness"];
   }
   return totalRes / data.length;
@@ -496,20 +498,35 @@ function copyProfile() {
   window.prompt ("Copy to clipboard: Ctrl+C, Enter", document.getElementById("data").value);
 }
 
-function uploadProfile() {
+function uploadProfile(selected) {
   var oXHR = new XMLHttpRequest();
   oXHR.open("POST", "http://profile-logs.appspot.com/store", true);
   oXHR.onload = function (oEvent) {
     if (oXHR.status == 200) {  
       document.getElementById("upload_status").innerHTML = document.URL.split('?')[0] + "?report=" + oXHR.responseText;
     } else {  
-      alert("Error " + oXHR.status + " occurred uploading your file.<br \/>");
+      document.getElementById("upload_status").innerHTML = "Error " + oXHR.status + " occurred uploading your file.";
     }  
   };
 
+  var dataToUpload;
+  var dataSize;
+  if (selected === true) {
+    dataToUpload = gVisibleRange.getTextData();
+  } else {
+    dataToUpload = document.getElementById("data").value;
+  }
+  alert(dataToUpload.length);
+  return;
+  if (dataToUpload.length > 1024*1024) {
+    dataSize = (dataToUpload/1024/1024) + " MB(s)";
+  } else {
+    dataSize = (dataToUpload/1024) + " KB(s)";
+  }
+
   var formData = new FormData();
-  formData.append("file", document.getElementById("data").value);
-  document.getElementById("upload_status").innerHTML = "Uploading Profile (" + document.getElementById("data").value.length + " bytes)";
+  formData.append("file", dataToUpload);
+  document.getElementById("upload_status").innerHTML = "Uploading Profile (" + dataSize + ")";
   oXHR.send(formData);
 
 }
@@ -527,11 +544,18 @@ function updateDescription() {
   infoText += "<br>\n";
   infoText += "<input type='checkbox' id='heavy' " + (gIsHeavy?" checked='true' ":" ") + " onchange='toggleHeavy()'/>Heavy callstack<br />\n";
   infoText += "<a id='upload_status'>No upload in progress</a><br />\n";
-  infoText += "<input type='button' id='upload' value='Upload profile'/><br />\n";
+
+  infoText += "<br>\n";
+  infoText += "Share:<br>\n";
+  infoText += "<input type='button' id='upload' value='Upload full profile'/>\n";
+  infoText += "<input type='button' id='upload_select' value='Upload view'/><br />\n";
 
   infobar.innerHTML = infoText;
 
   document.getElementById('upload').onclick = uploadProfile;
+  document.getElementById('upload_select').onclick = function() {
+    uploadProfile(true);
+  };
 }
 
 var gSamples = [];
@@ -546,7 +570,15 @@ var gVisibleRange = {
   },
   isShowAll: function() {
     return (this.start == -1 && this.end == -1) || (this.start <= 0 && this.end >= gSamples.length);
-  }
+  },
+  getTextData: function() {
+    var data = [];
+    var samples = gSamples.slice(this.start, this.end);
+    for (var i = 0; i < samples.length; i++) {
+      data.push(samples[i].lines.join("\n"));
+    }
+    return data.join("\n");
+  } 
 };
 
 function parse() {
