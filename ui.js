@@ -169,7 +169,11 @@ HistogramRenderer.prototype = {
     var showallButton = document.createElement("img");
     showallButton.setAttribute("src", "images/showall.png");
     showallButton.setAttribute("id", "showall");
-    showallButton.setAttribute("class", "hidden");
+    if (gVisibleRange.isShowAll()) {
+      showallButton.setAttribute("class", "hidden");
+    } else {
+      showallButton.setAttribute("class", "");
+    }
     showallButton.setAttribute("title", "Show all of the samples");
     iconBox.appendChild(showallButton);
     container.appendChild(iconBox);
@@ -504,9 +508,9 @@ function updateDescription() {
   infoText += "--Max Responsiveness: " + maxResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
   infoText += "<br>\n";
   infoText += "<input type='checkbox' id='heavy' " + (gIsHeavy?" checked='true' ":" ") + " onchange='toggleHeavy()'/>Heavy callstack<br />\n";
-  //infoText += "<input type='button' onclick='copyProfile()' value=\"Copy Profile to Clipboard\"></input><br />\n";
 
   infobar.innerHTML = infoText;
+
 }
 
 var gSamples = [];
@@ -518,6 +522,9 @@ var gVisibleRange = {
     this.start = start;
     this.end = end;
     return gSamples.slice(start, end);
+  },
+  isShowAll: function() {
+    return (this.start == -1 && this.end == -1) || (this.start <= 0 && this.end >= gSamples.length);
   }
 };
 
