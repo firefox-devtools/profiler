@@ -202,7 +202,7 @@ HistogramRenderer.prototype = {
     defs.appendChild(markerGradient);
     svgRoot.appendChild(defs);
 
-    function createRect(container, x, y, w, h, color) {
+    function createRect(container, step, x, y, w, h, color) {
       var rect = document.createElementNS(kSVGNS, "rect");
       rect.setAttribute("x", x);
       rect.setAttribute("y", y);
@@ -211,6 +211,10 @@ HistogramRenderer.prototype = {
       rect.setAttribute("fill", color);
       rect.setAttribute("class", "rect");
       container.appendChild(rect);
+      rect.addEventListener("click", function() {
+        if (step.name == null) return;
+        selectSample(step.name);
+      }, false);
       rect.addEventListener("mouseover", function() {
         rect.setAttribute("fill-opacity", "0.8");
       }, false);
@@ -234,7 +238,7 @@ HistogramRenderer.prototype = {
     var widthSeenSoFar = 0;
     for (var i = 0; i < count; ++i) {
       var step = histogramData[i];
-      var rect = createRect(svgRoot, widthSeenSoFar, 0,
+      var rect = createRect(svgRoot, step, widthSeenSoFar, 0,
                             step.width * widthFactor,
                             step.value * heightFactor,
                             step.color);
@@ -525,7 +529,6 @@ function toggleHeavy() {
 }
 
 function setHighlight(sample) {
-  //if (gHighlighSample.length == sample.length) return;
   gHighlighSample = sample;
 
   var data = gVisibleRange.filter(gVisibleRange.start, gVisibleRange.end);
@@ -534,6 +537,12 @@ function setHighlight(sample) {
   histogramRenderer.render(data, histogram, gHighlighSample,
                            document.getElementById("markers"));
   updateDescription();
+}
+
+function selectSample(sample) {
+  gHighlighSample = sample;
+  
+  displaySample(gVisibleRange.start, gVisibleRange.end);
 }
 
 function displaySample(start, end) {
