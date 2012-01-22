@@ -103,6 +103,7 @@ if (getData.report != null) {
       
   if (request.status === 200) {  
     document.getElementById('data').value = request.responseText;
+    parse();
   } else {
     alert(request.status);
   }
