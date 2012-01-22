@@ -120,6 +120,9 @@ Tree.prototype = {
   },
   _onkeypress: function Tree__onkeypress(event) {
     var selected = Tree.prototype._selected();
+    if (event.keyCode < 37 || event.keyCode < 40) {
+      return;
+    }
     event.stopPropagation();
     event.preventDefault()
     if (selected == null) return false;
