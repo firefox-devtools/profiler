@@ -538,6 +538,26 @@ function uploadProfile(selected) {
 
 }
 
+function populate_skip_symbol() {
+  var skipSymbolCtrl = document.getElementById('skipsymbol')
+  //skipSymbolCtrl.options = gSkipSymbols;
+  for (var i = 0; i < gSkipSymbols.length; i++) {
+    var elOptNew = document.createElement('option');
+    elOptNew.text = gSkipSymbols[i];
+    elOptNew.value = gSkipSymbols[i];
+    elSel.add(elOptNew);
+  }
+    
+}
+
+function delete_skip_symbol() {
+  var skipSymbol = document.getElementById('skipsymbol').value
+}
+
+function add_skip_symbol() {
+  
+}
+
 function updateDescription() {
   var infobar = document.getElementById("infobar");
   var infoText = "";
@@ -557,16 +577,27 @@ function updateDescription() {
   infoText += "<input type='button' id='upload' value='Upload full profile'/>\n";
   infoText += "<input type='button' id='upload_select' value='Upload view'/><br />\n";
 
+  //infoText += "<br>\n";
+  //infoText += "Skip functions:<br>\n";
+  //infoText += "<select size=8 id='skipsymbol'></select><br />"
+  //infoText += "<input type='button' id='delete_skipsymbol' value='Delete'/><br />\n";
+  //infoText += "<input type='button' id='add_skipsymbol' value='Add'/><br />\n";
+  
   infobar.innerHTML = infoText;
 
   document.getElementById('upload').onclick = uploadProfile;
   document.getElementById('upload_select').onclick = function() {
     uploadProfile(true);
   };
+  //document.getElementById('delete_skipsymbol').onclick = delete_skip_symbol;
+  //document.getElementById('add_skipsymbol').onclick = add_skip_symbol;
+
+  //populate_skip_symbol();
 }
 
 var gSamples = [];
 var gHighlighSample = [];
+var gSkipSymbols = ["test2", "test1"];
 var gVisibleRange = {
   start: -1,
   end: -1,
