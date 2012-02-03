@@ -1,6 +1,15 @@
-function Sample(name, extraInfo) {
+Array.prototype.clone = function() { return this.slice(0); }
+
+function Sample(name, extraInfo, line) {
   this.frames = [name];
   this.extraInfo = extraInfo;
+  this.lines = [];
+  this.clone = function() {
+    var cpy = new Sample("", extraInfo, null);
+    cpy.frames = this.frames.clone();
+    cpy.lines = this.lines.clone();
+    return cpy;
+  }
 }
 
 function TreeNode(name, parent) {
@@ -96,59 +105,54 @@ Parser.prototype = {
         }
         break;
       }
+      if (sample != null)
+        sample.lines.push(line);
+    }
+    return samples;
+  },
+
+  filterByName: function Parse_filterByName(samples, filterName) {
+    samples = samples.clone(); 
+    filterName = filterName.toLowerCase();
+    calltrace_it: for (var i = 0; i < samples.length; ++i) {
+      var sample = samples[i];
+      var callstack = sample.frames;
+      for (var j = 0; j < callstack.length; ++j) { 
+        if (callstack[j].toLowerCase().indexOf(filterName) != -1) {
+          continue calltrace_it;
+        }
+      }
+      samples[i] = samples[i].clone();
+      samples[i].frames = ["Filtered out"];
     }
     return samples;
   },
 
   convertToHeavyCallTree: function Parser_convertToHeavyCallTree(samples) {
-    var roots = [];
-    for (var i = 0; i < samples.length; ++i) {
-      var sample = samples[i];
-      // NOTE: reserved
-      var callstack = sample.frames.reverse();
-      var currBucket = roots;
-      var parentNode = null;
-      for (var j = 0; j < callstack.length; j++) {
-        var currParent = null;
-        var frame = callstack[j]; 
-        if (currBucket != null) {
-          for (var k = 0; k < currBucket.length; k++) {
-            var node = currBucket[k];
-            if (node.name == frame) {
-              parentNode = node;
-              node.counter++;
-              currParent = node; 
-              currBucket = currParent.children;
-              break;
-            }
-          }
-        }
-        // search
-        if (parentNode == null) {
-          var newNode = new TreeNode(frame, currParent); 
-          newNode.totalSamples = samples.length;
-          currBucket.push(newNode);
-          currParent = newNode;
-          currBucket = currParent.children;
-        }
-      }
-    }
-    return roots;
+    return Parser.prototype.convertToCallTree(samples, true);
   },
 
-  convertToCallTree: function Parser_convertToCallTree(samples) {
+  convertToCallTree: function Parser_convertToCallTree(samples, isReverse) {
     var treeRoot = null;
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
-      var callstack = sample.frames;
+      var callstack = sample.frames.clone();
+      if (isReverse == true) callstack = callstack.reverse();
       if (!treeRoot) {
         treeRoot = new TreeNode(callstack[0], null);
         treeRoot.totalSamples = samples.length;
         var node = treeRoot;
         for (var j = 1; j < callstack.length; ++j) {
+          if (callstack[j] == "(root)") {
+            if (isReverse == true) {
+              callstack[j] = "(Program start)";
+            } else {
+              callstack[j] = "(Top frame)";
+            }
+          }
           var frame = callstack[j];
           var child = new TreeNode(frame, node);
-          node.totalSamples = samples.length;
+          child.totalSamples = samples.length;
           node.children.push(child);
           node = child;
         }
@@ -172,6 +176,13 @@ Parser.prototype = {
           }
           node = newChild;
           for (var j = 0; j < remainingCallstack.length; ++j) {
+            if (remainingCallstack[j] == "(root)") {
+              if (isReverse == true) {
+                remainingCallstack[j] = "(Program start)";
+              } else {
+                remainingCallstack[j] = "(Top frame)";
+              }
+            }
             var frame = remainingCallstack[j];
             var child = new TreeNode(frame, node);
             child.totalSamples = samples.length;
@@ -181,6 +192,8 @@ Parser.prototype = {
         }
       }
     }
+    if (treeRoot == null)
+      dump("no tree root\n");
     return treeRoot;
   }
 };

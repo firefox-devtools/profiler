@@ -1,6 +1,8 @@
-div.root div.collapsed > div.collapsed {
+div.root div.collapsed > div {
   display: none;
 }
 div.root div > div {
   margin-left: 1em;
+  white-space: nowrap;
 }
+.selected { color: blue; }

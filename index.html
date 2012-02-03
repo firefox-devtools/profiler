@@ -5,6 +5,7 @@
     <script src="parser.js"></script>
     <script src="tree.js"></script>
     <script src="ui.js"></script>
+    <script src="QueryData.compressed.js"></script>
     <link rel="stylesheet" type="text/css" href="tree.css">
     <style type="text/css">
       body {
@@ -91,5 +92,22 @@
       <textarea rows=20 cols=80 id=data autofocus spellcheck=false></textarea>
       <p><button onclick="parse()">Parse</button></p>
     </div>
+    <script>
+var getData = new QueryData();
+if (getData.report != null) {
+  document.getElementById('data').value = "Fetching profile";
+
+  var request = new XMLHttpRequest();  
+  request.open('GET', 'http://profile-logs.appspot.com/serve/' + getData.report, false);   
+  request.send(null);  
+      
+  if (request.status === 200) {  
+    document.getElementById('data').value = request.responseText;
+    parse();
+  } else {
+    alert("Failed to get profile. Error #" + request.status);
+  }
+}
+    </script>    
   </body>
 </html>

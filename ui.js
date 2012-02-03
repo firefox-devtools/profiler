@@ -12,6 +12,17 @@ function treeObjSort(a, b) {
 
 function TreeRenderer() {}
 TreeRenderer.prototype = {
+  onClick: function TreeRender_onclick(data) {
+    var selected = [];
+    var curr = data;
+    while (curr != null) {
+      if (curr.name != null) {
+        selected.push(curr.name);
+      }
+      curr = curr.parent;
+    }
+    setHighlight(selected.reverse());
+  },
   render: function TreeRenderer_render(tree, container) {
     function convertToJSTreeData(tree) {
       var roots = [];
@@ -20,6 +31,8 @@ TreeRenderer.prototype = {
         var totalCount = node.totalSamples;
         var percent = (100 * node.counter / totalCount).toFixed(2);
         curObj.title = node.counter + " (" + percent + "%) " + node.name;
+        curObj.name = node.name;
+        curObj.onClick = TreeRenderer.prototype.onClick;
         //dump("Add node: " + curObj.title + "\n");
         curObj.counter = node.counter;
         if (node.children.length) {
@@ -29,8 +42,8 @@ TreeRenderer.prototype = {
             var child = node.children[i];
             var newObj = {};
             var totalCount = child.totalSamples;
-            if (child.depth < 15)
-              childVisitor(child, newObj);
+            childVisitor(child, newObj);
+            newObj.parent = curObj;
             curObj.children.push(newObj);
             unknownCounter -= child.counter;
           }
@@ -39,6 +52,7 @@ TreeRenderer.prototype = {
             var newObj = {};
             var percent = (100 * unknownCounter / node.counter).toFixed(2);
             newObj.counter = unknownCounter;
+            newObj.onClick = TreeRenderer.prototype.onClick;
             newObj.title = unknownCounter + " (" + percent + "%) ??? Unknown";
             curObj.children.push(newObj);
           }
@@ -68,7 +82,7 @@ TreeRenderer.prototype = {
 
 function HistogramRenderer() {}
 HistogramRenderer.prototype = {
-  render: function HistogramRenderer_render(data, container,
+  render: function HistogramRenderer_render(data, container, highlightSample,
                                             markerContainer) {
     function convertToHistogramData(data) {
       var histogramData = [];
@@ -87,6 +101,22 @@ HistogramRenderer.prototype = {
         var name = step.frames;
         var res = step.extraInfo["responsiveness"];
         var value = step.frames.length;
+        var color = (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0";
+        var isSelected = true;
+        if (step.frames.length >= highlightSample.length && highlightSample.length > 1) {
+          var compareFrames = step.frames.clone();
+          if (gIsHeavy) compareFrames = compareFrames.reverse();
+          for (var j = 0; j < highlightSample.length; j++) {
+            if (highlightSample[j] != compareFrames[j] && compareFrames[j] != "(root)") {
+              isSelected = false;    
+            }
+          }
+        } else {
+          isSelected = false;
+        }
+        if (isSelected) {
+          color = "0,128,0";
+        }
         if ("marker" in step.extraInfo) {
           // a new marker boundary has been discovered
           var item = {
@@ -100,7 +130,7 @@ HistogramRenderer.prototype = {
             name: name,
             width: 1,
             value: value,
-            color: "rgb(" + (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0)",
+            color: "rgb(" + color + ")",
           };
           histogramData.push(item);
         } else if (name != prevName || res != prevRes) {
@@ -109,7 +139,7 @@ HistogramRenderer.prototype = {
             name: name,
             width: 1,
             value: value,
-            color: "rgb(" + (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0)",
+            color: "rgb(" + color + ")",
           };
           histogramData.push(item);
         } else {
@@ -141,7 +171,19 @@ HistogramRenderer.prototype = {
     var showallButton = document.createElement("img");
     showallButton.setAttribute("src", "images/showall.png");
     showallButton.setAttribute("id", "showall");
-    showallButton.setAttribute("class", "hidden");
+    if (gVisibleRange.isShowAll()) {
+      showallButton.setAttribute("class", "hidden");
+    } else {
+      showallButton.setAttribute("class", "");
+    }
+    try {
+      showallButton.removeEventListener("click", showall_onClick, false);
+    } catch (err) {
+    }
+    showallButton.addEventListener("click", function showall_onClick() {
+      displaySample(0, gSamples.length);
+      document.getElementById("showall").className = "hidden";
+    }, false);
     showallButton.setAttribute("title", "Show all of the samples");
     iconBox.appendChild(showallButton);
     container.appendChild(iconBox);
@@ -174,7 +216,7 @@ HistogramRenderer.prototype = {
     defs.appendChild(markerGradient);
     svgRoot.appendChild(defs);
 
-    function createRect(container, x, y, w, h, color) {
+    function createRect(container, step, x, y, w, h, color) {
       var rect = document.createElementNS(kSVGNS, "rect");
       rect.setAttribute("x", x);
       rect.setAttribute("y", y);
@@ -183,6 +225,10 @@ HistogramRenderer.prototype = {
       rect.setAttribute("fill", color);
       rect.setAttribute("class", "rect");
       container.appendChild(rect);
+      rect.addEventListener("click", function() {
+        if (step.name == null) return;
+        selectSample(step.name);
+      }, false);
       rect.addEventListener("mouseover", function() {
         rect.setAttribute("fill-opacity", "0.8");
       }, false);
@@ -206,7 +252,7 @@ HistogramRenderer.prototype = {
     var widthSeenSoFar = 0;
     for (var i = 0; i < count; ++i) {
       var step = histogramData[i];
-      var rect = createRect(svgRoot, widthSeenSoFar, 0,
+      var rect = createRect(svgRoot, step, widthSeenSoFar, 0,
                             step.width * widthFactor,
                             step.value * heightFactor,
                             step.color);
@@ -441,6 +487,7 @@ function maxResponsiveness(start, end) {
   var data = gVisibleRange.filter(start, end);
   var maxRes = 0.0;
   for (var i = 0; i < data.length; ++i) {
+    if (data[i].extraInfo["responsiveness"] == null) continue;
     if (maxRes < data[i].extraInfo["responsiveness"])
       maxRes = data[i].extraInfo["responsiveness"];
   }
@@ -451,9 +498,86 @@ function avgResponsiveness(start, end) {
   var data = gVisibleRange.filter(start, end);
   var totalRes = 0.0;
   for (var i = 0; i < data.length; ++i) {
+    if (data[i].extraInfo["responsiveness"] == null) continue;
     totalRes += data[i].extraInfo["responsiveness"];
   }
   return totalRes / data.length;
+}
+
+function copyProfile() {
+  window.prompt ("Copy to clipboard: Ctrl+C, Enter", document.getElementById("data").value);
+}
+
+function uploadProfile(selected) {
+  var oXHR = new XMLHttpRequest();
+  oXHR.open("POST", "http://profile-logs.appspot.com/store", true);
+  oXHR.onload = function (oEvent) {
+    if (oXHR.status == 200) {  
+      document.getElementById("upload_status").innerHTML = document.URL.split('?')[0] + "?report=" + oXHR.responseText;
+    } else {  
+      document.getElementById("upload_status").innerHTML = "Error " + oXHR.status + " occurred uploading your file.";
+    }  
+  };
+
+  var dataToUpload;
+  var dataSize;
+  if (selected === true) {
+    dataToUpload = gVisibleRange.getTextData();
+  } else {
+    dataToUpload = document.getElementById("data").value;
+  }
+
+  if (dataToUpload.length > 1024*1024) {
+    dataSize = (dataToUpload.length/1024/1024) + " MB(s)";
+  } else {
+    dataSize = (dataToUpload.length/1024) + " KB(s)";
+  }
+
+  var formData = new FormData();
+  formData.append("file", dataToUpload);
+  document.getElementById("upload_status").innerHTML = "Uploading Profile (" + dataSize + ")";
+  oXHR.send(formData);
+
+}
+
+function populate_skip_symbol() {
+  var skipSymbolCtrl = document.getElementById('skipsymbol')
+  //skipSymbolCtrl.options = gSkipSymbols;
+  for (var i = 0; i < gSkipSymbols.length; i++) {
+    var elOptNew = document.createElement('option');
+    elOptNew.text = gSkipSymbols[i];
+    elOptNew.value = gSkipSymbols[i];
+    elSel.add(elOptNew);
+  }
+    
+}
+
+function delete_skip_symbol() {
+  var skipSymbol = document.getElementById('skipsymbol').value
+}
+
+function add_skip_symbol() {
+  
+}
+
+var gFilterChangeCallback = null;
+function filterOnChange() {
+  if (gFilterChangeCallback != null) {
+    clearTimeout(gFilterChangeCallback);
+    gFilterChangeCallback = null;
+  }
+
+  gFilterChangeCallback = setTimeout(filterUpdate, 200); 
+}
+function filterUpdate() {
+  gFilterChangeCallback = null;
+
+  displaySample(gVisibleRange.start, gVisibleRange.end); 
+
+  filterNameInput = document.getElementById("filterName");
+  if (filterNameInput != null) {
+    filterNameInput.focus();
+  } 
 }
 
 function updateDescription() {
@@ -469,10 +593,43 @@ function updateDescription() {
   infoText += "<br>\n";
   infoText += "<input type='checkbox' id='heavy' " + (gIsHeavy?" checked='true' ":" ") + " onchange='toggleHeavy()'/>Heavy callstack<br />\n";
 
+  var filterNameInputOld = document.getElementById("filterName");
+  infoText += "<br>\n";
+  infoText += "Filter:\n";
+  infoText += "<input type='text' id='filterName' oninput='filterOnChange()'/><br>\n";
+
+  infoText += "<br>\n";
+  infoText += "Share:<br>\n";
+  infoText += "<a id='upload_status'>No upload in progress</a><br />\n";
+  infoText += "<input type='button' id='upload' value='Upload full profile'/>\n";
+  infoText += "<input type='button' id='upload_select' value='Upload view'/><br />\n";
+
+  //infoText += "<br>\n";
+  //infoText += "Skip functions:<br>\n";
+  //infoText += "<select size=8 id='skipsymbol'></select><br />"
+  //infoText += "<input type='button' id='delete_skipsymbol' value='Delete'/><br />\n";
+  //infoText += "<input type='button' id='add_skipsymbol' value='Add'/><br />\n";
+  
   infobar.innerHTML = infoText;
+
+  var filterNameInputNew = document.getElementById("filterName");
+  if (filterNameInputOld != null && filterNameInputNew != null) {
+    filterNameInputNew.parentNode.replaceChild(filterNameInputOld, filterNameInputNew);
+    //filterNameInputNew.value = filterNameInputOld.value;
+  }
+  document.getElementById('upload').onclick = uploadProfile;
+  document.getElementById('upload_select').onclick = function() {
+    uploadProfile(true);
+  };
+  //document.getElementById('delete_skipsymbol').onclick = delete_skip_symbol;
+  //document.getElementById('add_skipsymbol').onclick = add_skip_symbol;
+
+  //populate_skip_symbol();
 }
 
 var gSamples = [];
+var gHighlighSample = [];
+var gSkipSymbols = ["test2", "test1"];
 var gVisibleRange = {
   start: -1,
   end: -1,
@@ -480,7 +637,18 @@ var gVisibleRange = {
     this.start = start;
     this.end = end;
     return gSamples.slice(start, end);
-  }
+  },
+  isShowAll: function() {
+    return (this.start == -1 && this.end == -1) || (this.start <= 0 && this.end >= gSamples.length);
+  },
+  getTextData: function() {
+    var data = [];
+    var samples = gSamples.slice(this.start, this.end);
+    for (var i = 0; i < samples.length; i++) {
+      data.push(samples[i].lines.join("\n"));
+    }
+    return data.join("\n");
+  } 
 };
 
 function parse() {
@@ -495,6 +663,29 @@ function toggleHeavy() {
   displaySample(gVisibleRange.start, gVisibleRange.end); 
 }
 
+function setHighlight(sample) {
+  gHighlighSample = sample;
+
+  var parser = new Parser();
+  var data = gVisibleRange.filter(gVisibleRange.start, gVisibleRange.end);
+  var histogram = document.getElementById("histogram");
+  var histogramRenderer = new HistogramRenderer();
+  var filteredData = data;
+  var filterNameInput = document.getElementById("filterName");
+  if (filterNameInput != null && filterNameInput.value != "") {
+    filteredData = parser.filterByName(data, document.getElementById("filterName").value);
+  }
+  histogramRenderer.render(filteredData, histogram, gHighlighSample,
+                           document.getElementById("markers"));
+  updateDescription();
+}
+
+function selectSample(sample) {
+  gHighlighSample = sample;
+  
+  //displaySample(gVisibleRange.start, gVisibleRange.end);
+}
+
 function displaySample(start, end) {
   document.getElementById("dataentry").className = "hidden";
   document.getElementById("ui").className = "";
@@ -503,10 +694,15 @@ function displaySample(start, end) {
 
   var parser = new Parser();
   var treeData;
+  var filteredData = data;
+  var filterNameInput = document.getElementById("filterName");
+  if (filterNameInput != null && filterNameInput.value != "") {
+    filteredData = parser.filterByName(data, document.getElementById("filterName").value);
+  }
   if (gIsHeavy) {
-    treeData = parser.convertToHeavyCallTree(data);
+    treeData = parser.convertToHeavyCallTree(filteredData);
   } else {
-    treeData = parser.convertToCallTree(data);
+    treeData = parser.convertToCallTree(filteredData);
   }
   var tree = document.getElementById("tree");
   var treeRenderer = new TreeRenderer();
@@ -517,7 +713,7 @@ function displaySample(start, end) {
   histogram.style.width = width + "px";
   histogram.style.height = height + "px";
   var histogramRenderer = new HistogramRenderer();
-  histogramRenderer.render(data, histogram,
+  histogramRenderer.render(filteredData, histogram, gHighlighSample,
                            document.getElementById("markers"));
   updateDescription();
 }
