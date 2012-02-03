@@ -121,7 +121,10 @@ Tree.prototype = {
   _onkeypress: function Tree__onkeypress(event) {
     var selected = Tree.prototype._selected();
     if (event.keyCode < 37 || event.keyCode > 40) {
-      return;
+      if (event.keyCode != 0 ||
+          String.fromCharCode(event.charCode) != '*') {
+        return;
+      }
     }
     event.stopPropagation();
     event.preventDefault()
@@ -156,6 +159,13 @@ Tree.prototype = {
         Tree.prototype._select(child);
       } else if (nextSib) {
         Tree.prototype._select(nextSib);
+      }
+    } else if (String.fromCharCode(event.charCode) == '*') {
+      var isCollapsed = Tree.prototype._isCollapsed(selected);
+      var subtree = selected.querySelectorAll('div');
+      Tree.prototype._toggle(selected);
+      for (var i = 0; i < subtree.length; ++i) {
+        subtree[i].className = isCollapsed ? '' : 'collapsed';
       }
     }
     return false;
