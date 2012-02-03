@@ -106,46 +106,15 @@ Parser.prototype = {
   },
 
   convertToHeavyCallTree: function Parser_convertToHeavyCallTree(samples) {
-    var roots = [];
-    for (var i = 0; i < samples.length; ++i) {
-      var sample = samples[i];
-      // NOTE: reserved
-      var callstack = sample.clone().frames.reverse();
-      var currBucket = roots;
-      var parentNode = null;
-      for (var j = 0; j < callstack.length; j++) {
-        var currParent = null;
-        var frame = callstack[j]; 
-        if (currBucket != null) {
-          for (var k = 0; k < currBucket.length; k++) {
-            var node = currBucket[k];
-            if (node.name == frame) {
-              parentNode = node;
-              node.counter++;
-              currParent = node; 
-              currBucket = currParent.children;
-              break;
-            }
-          }
-        }
-        // search
-        if (parentNode == null) {
-          var newNode = new TreeNode(frame, currParent); 
-          newNode.totalSamples = samples.length;
-          currBucket.push(newNode);
-          currParent = newNode;
-          currBucket = currParent.children;
-        }
-      }
-    }
-    return roots;
+    return Parser.prototype.convertToCallTree(samples, true);
   },
 
-  convertToCallTree: function Parser_convertToCallTree(samples) {
+  convertToCallTree: function Parser_convertToCallTree(samples, isReverse) {
     var treeRoot = null;
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
       var callstack = sample.frames;
+      if (isReverse == true) callstack = callstack.clone().reverse();
       if (!treeRoot) {
         treeRoot = new TreeNode(callstack[0], null);
         treeRoot.totalSamples = samples.length;
