@@ -560,6 +560,26 @@ function add_skip_symbol() {
   
 }
 
+var gFilterChangeCallback = null;
+function filterOnChange() {
+  if (gFilterChangeCallback != null) {
+    clearTimeout(gFilterChangeCallback);
+    gFilterChangeCallback = null;
+  }
+
+  gFilterChangeCallback = setTimeout(filterUpdate, 200); 
+}
+function filterUpdate() {
+  gFilterChangeCallback = null;
+
+  displaySample(gVisibleRange.start, gVisibleRange.end); 
+
+  filterNameInput = document.getElementById("filterName");
+  if (filterNameInput != null) {
+    filterNameInput.focus();
+  } 
+}
+
 function updateDescription() {
   var infobar = document.getElementById("infobar");
   var infoText = "";
@@ -572,6 +592,11 @@ function updateDescription() {
   infoText += "--Max Responsiveness: " + maxResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
   infoText += "<br>\n";
   infoText += "<input type='checkbox' id='heavy' " + (gIsHeavy?" checked='true' ":" ") + " onchange='toggleHeavy()'/>Heavy callstack<br />\n";
+
+  var filterNameInputOld = document.getElementById("filterName");
+  infoText += "<br>\n";
+  infoText += "Filter:\n";
+  infoText += "<input type='text' id='filterName' oninput='filterOnChange()'/><br>\n";
 
   infoText += "<br>\n";
   infoText += "Share:<br>\n";
@@ -587,6 +612,11 @@ function updateDescription() {
   
   infobar.innerHTML = infoText;
 
+  var filterNameInputNew = document.getElementById("filterName");
+  if (filterNameInputOld != null && filterNameInputNew != null) {
+    filterNameInputNew.parentNode.replaceChild(filterNameInputOld, filterNameInputNew);
+    //filterNameInputNew.value = filterNameInputOld.value;
+  }
   document.getElementById('upload').onclick = uploadProfile;
   document.getElementById('upload_select').onclick = function() {
     uploadProfile(true);
@@ -636,10 +666,16 @@ function toggleHeavy() {
 function setHighlight(sample) {
   gHighlighSample = sample;
 
+  var parser = new Parser();
   var data = gVisibleRange.filter(gVisibleRange.start, gVisibleRange.end);
   var histogram = document.getElementById("histogram");
   var histogramRenderer = new HistogramRenderer();
-  histogramRenderer.render(data, histogram, gHighlighSample,
+  var filteredData = data;
+  var filterNameInput = document.getElementById("filterName");
+  if (filterNameInput != null && filterNameInput.value != "") {
+    filteredData = parser.filterByName(data, document.getElementById("filterName").value);
+  }
+  histogramRenderer.render(filteredData, histogram, gHighlighSample,
                            document.getElementById("markers"));
   updateDescription();
 }
@@ -658,10 +694,15 @@ function displaySample(start, end) {
 
   var parser = new Parser();
   var treeData;
+  var filteredData = data;
+  var filterNameInput = document.getElementById("filterName");
+  if (filterNameInput != null && filterNameInput.value != "") {
+    filteredData = parser.filterByName(data, document.getElementById("filterName").value);
+  }
   if (gIsHeavy) {
-    treeData = parser.convertToHeavyCallTree(data);
+    treeData = parser.convertToHeavyCallTree(filteredData);
   } else {
-    treeData = parser.convertToCallTree(data);
+    treeData = parser.convertToCallTree(filteredData);
   }
   var tree = document.getElementById("tree");
   var treeRenderer = new TreeRenderer();
@@ -672,7 +713,7 @@ function displaySample(start, end) {
   histogram.style.width = width + "px";
   histogram.style.height = height + "px";
   var histogramRenderer = new HistogramRenderer();
-  histogramRenderer.render(data, histogram, gHighlighSample,
+  histogramRenderer.render(filteredData, histogram, gHighlighSample,
                            document.getElementById("markers"));
   updateDescription();
 }

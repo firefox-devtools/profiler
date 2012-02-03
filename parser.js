@@ -4,6 +4,12 @@ function Sample(name, extraInfo, line) {
   this.frames = [name];
   this.extraInfo = extraInfo;
   this.lines = [];
+  this.clone = function() {
+    var cpy = new Sample("", extraInfo, null);
+    cpy.frames = this.frames.clone();
+    cpy.lines = this.lines.clone();
+    return cpy;
+  }
 }
 
 function TreeNode(name, parent) {
@@ -105,6 +111,23 @@ Parser.prototype = {
     return samples;
   },
 
+  filterByName: function Parse_filterByName(samples, filterName) {
+    samples = samples.clone(); 
+    filterName = filterName.toLowerCase();
+    calltrace_it: for (var i = 0; i < samples.length; ++i) {
+      var sample = samples[i];
+      var callstack = sample.frames;
+      for (var j = 0; j < callstack.length; ++j) { 
+        if (callstack[j].toLowerCase().indexOf(filterName) != -1) {
+          continue calltrace_it;
+        }
+      }
+      samples[i] = samples[i].clone();
+      samples[i].frames = ["Filtered out"];
+    }
+    return samples;
+  },
+
   convertToHeavyCallTree: function Parser_convertToHeavyCallTree(samples) {
     return Parser.prototype.convertToCallTree(samples, true);
   },
@@ -114,13 +137,6 @@ Parser.prototype = {
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
       var callstack = sample.frames.clone();
-      if (callstack[i] == "(root)") {
-        if (isReverse == true) {
-          callstack[i] = "(Program start)";
-        } else {
-          callstack[i] = "(Top frame)";
-        }
-      }
       if (isReverse == true) callstack = callstack.reverse();
       if (!treeRoot) {
         treeRoot = new TreeNode(callstack[0], null);
