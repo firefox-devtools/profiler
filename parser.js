@@ -1,3 +1,5 @@
+Array.prototype.clone = function() { return this.slice(0); }
+
 function Sample(name, extraInfo, line) {
   this.frames = [name];
   this.extraInfo = extraInfo;
@@ -108,7 +110,7 @@ Parser.prototype = {
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
       // NOTE: reserved
-      var callstack = sample.frames.reverse();
+      var callstack = sample.clone().frames.reverse();
       var currBucket = roots;
       var parentNode = null;
       for (var j = 0; j < callstack.length; j++) {
