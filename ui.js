@@ -104,8 +104,10 @@ HistogramRenderer.prototype = {
         var color = (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0";
         var isSelected = true;
         if (step.frames.length >= highlightSample.length && highlightSample.length > 1) {
+          var compareFrames = step.frames.clone();
+          if (gIsHeavy) compareFrames = compareFrames.reverse();
           for (var j = 0; j < highlightSample.length; j++) {
-            if (highlightSample[j] != step.frames[j]) {
+            if (highlightSample[j] != compareFrames[j] && compareFrames[j] != "(root)") {
               isSelected = false;    
             }
           }
