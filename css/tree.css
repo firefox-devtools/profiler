@@ -2,14 +2,57 @@
   outline: none; /* override the browser's focus styling */
 }
 
-#tree, div.root {
+#tree, div.root, #leftColumnBackground {
   background: -moz-linear-gradient(white, white 50%, #F0F5FF 50%, #F0F5FF);
   background-size: 100px 32px;
 }
 
-div.root,
 div.root div {
   min-width: -moz-min-content;
+}
+
+div.root {
+  padding-left: 150px;
+  min-height: 100%;
+  overflow: hidden;
+}
+
+#leftColumnBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 146px;
+  border-right: 1px solid #CCC;
+}
+
+.sampleCount,
+.samplePercentage,
+.selfSampleCount {
+  position: absolute;
+  text-align: right;
+}
+
+.sampleCount {
+  left: 2px;
+  width: 50px;
+}
+
+.samplePercentage {
+  left: 55px;
+  width: 40px;
+}
+
+.selfSampleCount {
+  left: 98px;
+  width: 45px;
+  padding-right: 2px;
+  border: solid #CCC;
+  border-width: 0 1px;
+}
+
+.libraryName {
+  margin-left: 10px;
+  color: #999;
 }
 
 div.root div.collapsed > div {
@@ -32,9 +75,21 @@ div.root div > div {
   background-color: -moz-dialog;
 }
 
+.selected > .sampleCount {
+  background-color: inherit;
+  margin-left: -2px;
+  padding-left: 2px;
+  padding-right: 98px;
+  margin-right: -98px;
+}
+
 #tree:focus .selected {
   color: highlighttext;
   background-color: highlight;
+}
+
+#tree:focus .selected > .libraryName {
+  color: #CCC;
 }
 
 .expandCollapseButton {

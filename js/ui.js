@@ -28,19 +28,27 @@ TreeRenderer.prototype = {
       var roots = [];
       var object = {};
       function childVisitor(node, curObj) {
-        var totalCount = node.totalSamples;
-        var percent = (100 * node.counter / totalCount).toFixed(2);
-        curObj.title = node.counter + " (" + percent + "%) " + node.name;
-        curObj.name = node.name;
-        curObj.onClick = TreeRenderer.prototype.onClick;
-        //dump("Add node: " + curObj.title + "\n");
         curObj.counter = node.counter;
+        var selfCounter = node.counter;
+        for (var i = 0; i < node.children.length; ++i) {
+          selfCounter -= node.children[i].counter;
+        }
+        curObj.selfCounter = selfCounter;
+        curObj.ratio = node.counter / node.totalSamples;
+        var functionAndLibrary = node.name.split(" (in ");
+        if (functionAndLibrary.length == 2) {
+          curObj.name = functionAndLibrary[0];
+          curObj.library = functionAndLibrary[1].substr(0, functionAndLibrary[1].length - 1);
+        } else {
+          curObj.name = node.name;
+          curObj.library = "";
+        }
+        curObj.onClick = TreeRenderer.prototype.onClick;
         if (node.children.length) {
           curObj.children = [];
           for (var i = 0; i < node.children.length; ++i) {
             var child = node.children[i];
             var newObj = {};
-            var totalCount = child.totalSamples;
             childVisitor(child, newObj);
             newObj.parent = curObj;
             curObj.children.push(newObj);
@@ -49,7 +57,6 @@ TreeRenderer.prototype = {
           curObj.children = curObj.children.splice(0, 20);
         }
       }
-      var totalCount = tree.totalSamples;
       childVisitor(tree, object);
       roots.push(object);
       roots.sort(treeObjSort);

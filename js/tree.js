@@ -7,31 +7,62 @@ function Tree(root, data) {
 
 Tree.prototype = {
   init: function Tree_init(data) {
-    while (this.root.hasChildNodes()) {
-      this.root.removeChild(this.root.firstChild);
+    while (this.root.querySelector("div.root")) {
+      this.root.removeChild(this.root.querySelector("div.root"));
     }
     var treeRoot = document.createElement("div");
     treeRoot.className = "root";
     this.root.appendChild(treeRoot);
-    var firstElem = this._createTree(treeRoot, data.data[0]);
+    var firstElem = this._createTree(treeRoot, data.data[0]); 
     treeRoot.appendChild(firstElem);
     this._select(firstElem);
     this._toggle(firstElem);
-    this.root.onkeypress = this._onkeypress;
-    this.root.onclick = this._onclick;
+    var self = this;
+    this.root.onkeypress = function (e) {
+      self._onkeypress(e);
+    };
+    this.root.onclick = function (e) {
+      self._onclick(e);
+    }
     this.root.focus();
+    this._setUpScrolling();
+  },
+  _setUpScrolling: function Tree__setUpScrolling() {
+    var waitingForPaint = false;
+    var accumulatedDeltaX = 0;
+    var accumulatedDeltaY = 0;
+    var root = this.root;
+    var rootDiv = this.root.querySelector("div.root");
+    this.root.addEventListener("MozMousePixelScroll", function (e) {
+      if (!waitingForPaint) {
+        window.mozRequestAnimationFrame(function () {
+          rootDiv.scrollLeft += accumulatedDeltaX;
+          root.scrollTop += accumulatedDeltaY;
+          accumulatedDeltaX = 0;
+          accumulatedDeltaY = 0;
+          waitingForPaint = false;
+        });
+        waitingForPaint = true;
+      }
+      if (e.axis == e.HORIZONTAL_AXIS) {
+        accumulatedDeltaX += e.detail;
+      } else {
+        accumulatedDeltaY += e.detail;
+      }
+      e.preventDefault();
+    }, false);
+  },
+  _scrollHeightChanged: function Tree__scrollHeightChanged() {
+    this.root.querySelector("#leftColumnBackground").style.height = this.root.querySelector("div.root").getBoundingClientRect().height + 'px';
   },
   _createTree: function Tree__createTree(root, data) {
-    if (!("title" in data)) {
-      return null;
-    }
     var div = document.createElement("div");
     div.className = "subtreeContainer collapsed";
     var hasChildren = ("children" in data) && (data.children.length > 0);
     if (!hasChildren)
       div.classList.add("leaf");
     var text = document.createElement("a");
-    text.innerHTML = this._HTMLForFunction(data.title);
+    text.innerHTML = this._HTMLForFunction(data);
     div.treeLine = text;
     div.data = data;
     div.treeLine.className = "unselected";
@@ -51,11 +82,15 @@ Tree.prototype = {
     }
     return div;
   },
-  _HTMLForFunction: function Tree__HTMLForFunction(title) {
+  _HTMLForFunction: function Tree__HTMLForFunction(node) {
     return '<input type="button" value="Expand / Collapse" class="expandCollapseButton" tabindex="-1"> ' +
-      '<span class="functionName">' + title + '</span>';
+      '<span class="sampleCount">' + node.counter + '</span> ' +
+      '<span class="samplePercentage">' + (100 * node.ratio).toFixed(1) + '%</span> ' +
+      '<span class="selfSampleCount">' + node.selfCounter + '</span> ' +
+      '<span class="functionName">' + node.name + '</span>' +
+      '<span class="libraryName">' + node.library + '</span>';
   },
-  _toggle: function Tree__toggle(div, /* optional */ newCollapsedValue) {
+  _toggle: function Tree__toggle(div, /* optional */ newCollapsedValue, /* optional */ suppressScrollHeightNotification) {
     if (newCollapsedValue === undefined) {
       div.classList.toggle("collapsed");
     } else {
@@ -64,33 +99,36 @@ Tree.prototype = {
       else
         div.classList.remove("collapsed");
     }
+    if (!suppressScrollHeightNotification)
+      this._scrollHeightChanged();
   },
   _toggleAll: function Tree__toggleAll(subtreeRoot, /* optional */ newCollapsedValue) {
     // Expands / collapses all child nodes, too.
     if (newCollapsedValue === undefined)
-      newCollapsedValue = !Tree.prototype._isCollapsed(subtreeRoot);
-    Tree.prototype._toggle(subtreeRoot, newCollapsedValue);
+      newCollapsedValue = !this._isCollapsed(subtreeRoot);
+    this._toggle(subtreeRoot, newCollapsedValue);
     var subtree = subtreeRoot.querySelectorAll('.subtreeContainer');
     for (var i = 0; i < subtree.length; ++i) {
-      Tree.prototype._toggle(subtree[i], newCollapsedValue);
+      this._toggle(subtree[i], newCollapsedValue, true);
     }
+    this._scrollHeightChanged();
   },
   _getParent: function Tree__getParent(div) {
     return div.treeParent;
   },
   _getFirstChild: function Tree__getFirstChild(div) {
-    if (Tree.prototype._isCollapsed(div))
+    if (this._isCollapsed(div))
       return null;
     var child = div.treeChildren[0];
     return child;
   },
   _getLastChild: function Tree__getLastChild(div) {
-    if (Tree.prototype._isCollapsed(div))
+    if (this._isCollapsed(div))
       return div;
     var lastChild = div.treeChildren[div.treeChildren.length-1];
     if (lastChild == null)
       return div;
-    return Tree.prototype._getLastChild(lastChild);
+    return this._getLastChild(lastChild);
   },
   _getPrevSib: function Tree__getPevSib(div) {
     if (div.treeParent == null)
@@ -105,7 +143,7 @@ Tree.prototype = {
       return null;
     var nodeIndex = div.treeParent.treeChildren.indexOf(div);
     if (nodeIndex == div.treeParent.treeChildren.length - 1)
-      return Tree.prototype._getNextSib(div.treeParent);
+      return this._getNextSib(div.treeParent);
     return div.treeParent.treeChildren[nodeIndex+1];
   },
   _scrollIntoView: function Tree__scrollIntoView(parentScrollbox, element, maxImportantWidth) {
@@ -149,7 +187,7 @@ Tree.prototype = {
       div.treeLine.className = "selected";
       div.tree.selected = div;
       var functionName = div.treeLine.querySelector(".functionName");
-      Tree.prototype._scrollIntoView(div.tree.root, functionName, 400);
+      this._scrollIntoView(div.tree.root, functionName, 400);
     }
   },
   _selected: function Tree__selected() {
@@ -170,22 +208,22 @@ Tree.prototype = {
   },
   _onclick: function Tree__onclick(event) {
     var target = event.target;
-    var node = Tree.prototype._getParentSubtreeContainer(target);
+    var node = this._getParentSubtreeContainer(target);
     if (!node)
       return;
     if (target.classList.contains("expandCollapseButton")) {
       if (event.altKey)
-        Tree.prototype._toggleAll(node);
+        this._toggleAll(node);
       else
-        Tree.prototype._toggle(node);
+        this._toggle(node);
     } else {
-      Tree.prototype._select(node);
+      this._select(node);
       if (event.detail == 2) // dblclick
-        Tree.prototype._toggle(node);
+        this._toggle(node);
     }
   },
   _onkeypress: function Tree__onkeypress(event) {
-    var selected = Tree.prototype._selected();
+    var selected = this._selected();
     if (event.keyCode < 37 || event.keyCode > 40) {
       if (event.keyCode != 0 ||
           String.fromCharCode(event.charCode) != '*') {
@@ -196,38 +234,38 @@ Tree.prototype = {
     event.preventDefault();
     if (selected == null) return false;
     if (event.keyCode == 37) { // KEY_LEFT
-      var isCollapsed = Tree.prototype._isCollapsed(selected);
+      var isCollapsed = this._isCollapsed(selected);
       if (!isCollapsed) {
-        Tree.prototype._toggle(selected);
+        this._toggle(selected);
       } else {
-        var parent = Tree.prototype._getParent(selected); 
+        var parent = this._getParent(selected); 
         if (parent != null) {
-          Tree.prototype._select(parent);
+          this._select(parent);
         }
       }
     } else if (event.keyCode == 38) { // KEY_UP
-      var prevSib = Tree.prototype._getPrevSib(selected);
-      var parent = Tree.prototype._getParent(selected); 
+      var prevSib = this._getPrevSib(selected);
+      var parent = this._getParent(selected); 
       if (prevSib != null) {
-        Tree.prototype._select(Tree.prototype._getLastChild(prevSib));
+        this._select(this._getLastChild(prevSib));
       } else if (parent != null) {
-        Tree.prototype._select(parent);
+        this._select(parent);
       }
     } else if (event.keyCode == 39) { // KEY_RIGHT
-      var isCollapsed = Tree.prototype._isCollapsed(selected);
+      var isCollapsed = this._isCollapsed(selected);
       if (isCollapsed) {
-        Tree.prototype._toggle(selected);
+        this._toggle(selected);
       }
     } else if (event.keyCode == 40) { // KEY_DOWN
-      var nextSib = Tree.prototype._getNextSib(selected);
-      var child = Tree.prototype._getFirstChild(selected); 
+      var nextSib = this._getNextSib(selected);
+      var child = this._getFirstChild(selected); 
       if (child != null) {
-        Tree.prototype._select(child);
+        this._select(child);
       } else if (nextSib) {
-        Tree.prototype._select(nextSib);
+        this._select(nextSib);
       }
     } else if (String.fromCharCode(event.charCode) == '*') {
-      Tree.prototype._toggleAll(selected);
+      this._toggleAll(selected);
     }
     return false;
   },
