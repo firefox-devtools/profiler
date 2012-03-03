@@ -146,16 +146,18 @@ Parser.prototype = {
   },
 
   convertToCallTree: function Parser_convertToCallTree(samples, isReverse) {
-    var treeRoot = new TreeNode(samples[0].frames[0], null);
+    var treeRoot = new TreeNode(isReverse ? "(total)" : samples[0].frames[0], null);
     treeRoot.counter = 0;
     treeRoot.totalSamples = samples.length;
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
-      var callstackWithoutRoot = sample.frames.slice(1);
+      var callstack = sample.frames.clone();
       if (isReverse)
-        callstackWithoutRoot.reverse();
-      var deepestExistingNode = treeRoot.followPath(callstackWithoutRoot);
-      var remainingCallstack = callstackWithoutRoot.slice(deepestExistingNode.getDepth());
+        callstack.reverse();
+      else
+        callstack.shift();
+      var deepestExistingNode = treeRoot.followPath(callstack);
+      var remainingCallstack = callstack.slice(deepestExistingNode.getDepth());
       deepestExistingNode.incrementCountersInParentChain();
       var node = deepestExistingNode;
       for (var j = 0; j < remainingCallstack.length; ++j) {
