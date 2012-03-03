@@ -5,4 +5,15 @@ div.root div > div {
   margin-left: 1em;
   white-space: nowrap;
 }
-.selected { color: blue; }
+
+.unselected,
+.selected {
+  display: block;
+  margin-left: -10000px;
+  padding-left: 10000px;
+}
+
+.selected {
+  color: highlighttext;
+  background-color: highlight;
+}
