@@ -228,9 +228,17 @@ Parser.prototype = {
       for (var j = 0; j < frames.length; j++) {
         var functionName = frames[j];
         var lineLevelInformationLocation = functionName.lastIndexOf(" + ");
-        if (lineLevelInformationLocation == -1)
-          continue;
-        frames[j] = functionName.substr(0, lineLevelInformationLocation);
+        if (lineLevelInformationLocation != -1) {
+          frames[j] = functionName.substr(0, lineLevelInformationLocation);
+        } else {
+          var libraryInformationLocation = functionName.lastIndexOf("(in ");
+          if (libraryInformationLocation != -1) {
+            var anotherBracketLocation = functionName.indexOf(") (", libraryInformationLocation + 4);
+            if (anotherBracketLocation != -1) {
+              frames[j] = functionName.substr(0, anotherBracketLocation + 1);
+            }
+          }
+        }
       }
     }
   },
