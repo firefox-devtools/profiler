@@ -1,5 +1,6 @@
 #tree, div.root {
-  background: -moz-repeating-linear-gradient(white, white 16px, #F0F5FF 16px, #F0F5FF 32px);
+  background: -moz-linear-gradient(white, white 50%, #F0F5FF 50%, #F0F5FF);
+  background-size: 100px 32px;
 }
 
 div.root,
