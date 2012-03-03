@@ -31,7 +31,7 @@ Tree.prototype = {
     if (!hasChildren)
       div.classList.add("leaf");
     var text = document.createElement("a");
-    text.innerHTML = this._HTMLForFunction(data.name);
+    text.innerHTML = this._HTMLForFunction(data.title);
     div.treeLine = text;
     div.data = data;
     div.treeLine.className = "unselected";

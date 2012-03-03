@@ -58,6 +58,11 @@ TreeNode.prototype.followPath = function TreeNode_followPath(path) {
 
   return matchingChild.followPath(path.slice(1));
 };
+TreeNode.prototype.incrementCountersInParentChain = function TreeNode_incrementCountersInParentChain() {
+  this.counter++;
+  if (this.parent)
+    this.parent.incrementCountersInParentChain();
+};
 
 function Parser() {}
 Parser.prototype = {
@@ -145,71 +150,25 @@ Parser.prototype = {
   },
 
   convertToCallTree: function Parser_convertToCallTree(samples, isReverse) {
-    var treeRoot = null;
-    if (isReverse) {
-      treeRoot = new TreeNode("(root)", null);
-      treeRoot.totalSamples = 0;
-    }
+    var treeRoot = new TreeNode("(root)", null);
+    treeRoot.totalSamples = samples.length;
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
-      var callstack = sample.frames.clone();
+      var callstackWithoutRoot = sample.frames.slice(1);
       if (isReverse)
-        callstack.reverse();
-      if (!treeRoot) {
-        // This can't happen in reverse mode.
-        // Create a tree root. callstack[0] is probably "(root)".
-        treeRoot = new TreeNode(callstack[0], null);
-        treeRoot.totalSamples = samples.length;
-        var node = treeRoot;
-        for (var j = 1; j < callstack.length; ++j) {
-          if (callstack[j] == "(root)") {
-            // XXXmstange How can this happen?
-            callstack[j] = "(Top frame)";
-          }
-          var frame = callstack[j];
-          var child = new TreeNode(frame, node);
-          child.totalSamples = samples.length;
-          node.children.push(child);
-          node = child;
-        }
-      } else {
-        var newChild = treeRoot.followPath(callstack.slice(1));
-        if (newChild.name == callstack[callstack.length - 1]) {
-          // we found the exact node, so let's just increment
-          // the counters through the parent chain.
-          var node = newChild;
-          while (node) {
-            node.counter++;
-            node = node.parent;
-          }
-        } else {
-          var depth = newChild.getDepth() + 1;
-          var remainingCallstack = callstack.slice(depth);
-          var node = newChild;
-          while (node) {
-            node.counter++;
-            node = node.parent;
-          }
-          node = newChild;
-          for (var j = 0; j < remainingCallstack.length; ++j) {
-            if (remainingCallstack[j] == "(root)") {
-              if (isReverse) {
-                remainingCallstack[j] = "(Program start)";
-              } else {
-                remainingCallstack[j] = "(Top frame)";
-              }
-            }
-            var frame = remainingCallstack[j];
-            var child = new TreeNode(frame, node);
-            child.totalSamples = samples.length;
-            node.children.push(child);
-            node = child;
-          }
-        }
+        callstackWithoutRoot.reverse();
+      var deepestExistingNode = treeRoot.followPath(callstackWithoutRoot);
+      var remainingCallstack = callstackWithoutRoot.slice(deepestExistingNode.getDepth());
+      deepestExistingNode.incrementCountersInParentChain();
+      var node = deepestExistingNode;
+      for (var j = 0; j < remainingCallstack.length; ++j) {
+        var frame = remainingCallstack[j];
+        var child = new TreeNode(frame, node);
+        child.totalSamples = samples.length;
+        node.children.push(child);
+        node = child;
       }
     }
-    if (treeRoot == null)
-      dump("no tree root\n");
     return treeRoot;
   },
   _clipText: function Tree__clipText(text, length) {
