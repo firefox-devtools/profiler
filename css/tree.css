@@ -18,6 +18,9 @@ div.root {
 }
 
 #leftColumnBackground {
+  background: -moz-linear-gradient(left, transparent, transparent 98px, #CCC 98px, #CCC 99px, transparent 99px),
+    -moz-linear-gradient(white, white 50%, #F0F5FF 50%, #F0F5FF);
+  background-size: auto, 100px 32px;
   position: absolute;
   top: 0;
   left: 0;
