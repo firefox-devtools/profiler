@@ -1,3 +1,7 @@
+#tree {
+  outline: none; /* override the browser's focus styling */
+}
+
 #tree, div.root {
   background: -moz-linear-gradient(white, white 50%, #F0F5FF 50%, #F0F5FF);
   background-size: 100px 32px;
@@ -24,6 +28,11 @@ div.root div > div {
 }
 
 .selected {
+  color: black;
+  background-color: -moz-dialog;
+}
+
+#tree:focus .selected {
   color: highlighttext;
   background-color: highlight;
 }
