@@ -7,6 +7,10 @@ function Tree(root, data) {
 
 Tree.prototype = {
   init: function Tree_init(data) {
+    if (this.root.cleanUp) {
+      this.root.cleanUp();
+      this.root.cleanUp = null;
+    }
     while (this.root.querySelector("div.root")) {
       this.root.removeChild(this.root.querySelector("div.root"));
     }
@@ -33,7 +37,7 @@ Tree.prototype = {
     var accumulatedDeltaY = 0;
     var root = this.root;
     var rootDiv = this.root.querySelector("div.root");
-    this.root.addEventListener("MozMousePixelScroll", function (e) {
+    function scrollListener(e) {
       if (!waitingForPaint) {
         window.mozRequestAnimationFrame(function () {
           rootDiv.scrollLeft += accumulatedDeltaX;
@@ -50,7 +54,11 @@ Tree.prototype = {
         accumulatedDeltaY += e.detail;
       }
       e.preventDefault();
-    }, false);
+    }
+    this.root.addEventListener("MozMousePixelScroll", scrollListener, false);
+    this.root.cleanUp = function () {
+      root.removeEventListener("MozMousePixelScroll", scrollListener, false);
+    };
   },
   _scrollHeightChanged: function Tree__scrollHeightChanged() {
     this.root.querySelector("#leftColumnBackground").style.height = this.root.querySelector("div.root").getBoundingClientRect().height + 'px';
