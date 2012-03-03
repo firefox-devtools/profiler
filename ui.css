@@ -1,0 +1,61 @@
+body {
+  margin: 0;
+  font-family: "Lucida Grande", sans-serif;
+  font-size: 11px;
+}
+#mainarea {
+  position: absolute;
+  top: 0;
+  right: 200px;
+  bottom: 0;
+  left: 0;
+}
+#dataentry {
+  display: block;
+  width: 1200px;
+  height: 1000px;
+  margin: 0 auto;
+}
+#tree {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 150px;
+  left: 0;
+  overflow: scroll;
+  -moz-user-select: none;
+  cursor: default;
+  line-height: 14px;
+  background: -moz-repeating-linear-gradient(white, white 14px, #F0F5FF 14px, #F0F5FF 28px);
+}
+#infobar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 200px;
+  overflow: auto;
+}
+#bottombar {
+  position: absolute;
+  height: 150px;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+  left: 0;
+}
+#histogram {
+  height: 130px;
+}
+#iconbox {
+  display: none;
+}
+#filter, #showall {
+  cursor: pointer;
+}
+#markers {
+  display: none;
+}
+.hidden {
+  display: none !important;
+}

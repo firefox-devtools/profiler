@@ -6,71 +6,8 @@
     <script src="tree.js"></script>
     <script src="ui.js"></script>
     <script src="QueryData.compressed.js"></script>
+    <link rel="stylesheet" type="text/css" href="ui.css">
     <link rel="stylesheet" type="text/css" href="tree.css">
-    <style type="text/css">
-      body {
-        margin: 0;
-      }
-      #ui {
-        display: block;
-        width: 1600px;
-        height: 1000px;
-        margin: 0 auto;
-      }
-      #mainarea {
-        float: left;
-        /* compensate for the icons that will appear on the left */
-        margin-left: 36px;
-      }
-      #dataentry {
-        display: block;
-        width: 1200px;
-        height: 1000px;
-        margin: 0 auto;
-      }
-      #tree {
-        width: 1200px;
-        height: 600px;
-        overflow: scroll;
-      }
-      #infobar {
-        width: 300px;
-        height: 1000px;
-        float: left;
-        border-style: double;
-      }
-      #bottombar {
-        width: 1200px;
-        height: 400px;
-      }
-      #histogram {
-        float: left;
-        height: 400px;
-        width: 1050px;
-        position: relative;
-      }
-      #iconbox {
-        position: absolute;
-        width: 36px;
-        left: -36px;
-        top: 0;
-      }
-      #filter, #showall {
-        cursor: pointer;
-      }
-      #markers {
-        float: right;
-        width: 150px;
-        height: 400px;
-      }
-      #markers > select {
-        width: 150px;
-        max-height: 400px;
-      }
-      .hidden {
-        display: none !important;
-      }
-    </style>
   </head>
   <body>
     <div id="ui" class="hidden">
