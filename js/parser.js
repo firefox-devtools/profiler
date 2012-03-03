@@ -17,12 +17,6 @@ function TreeNode(name, parent) {
   this.children = [];
   this.counter = 1;
   this.parent = parent;
-  this.depth = 0;
-  var node = this.parent;
-  while (node) {
-    this.depth++;
-    node = node.parent;
-  }
 }
 TreeNode.prototype.traverse = function TreeNode_traverse(callback) {
   if (this.children.length == 0) {
@@ -36,6 +30,11 @@ TreeNode.prototype.traverse = function TreeNode_traverse(callback) {
     }
   }
   return false;
+};
+TreeNode.prototype.getDepth = function TreeNode__getDepth() {
+  if (this.parent)
+    return this.parent.getDepth() + 1;
+  return 0;
 };
 TreeNode.prototype.followPath = function TreeNode_followPath(path) {
   var node = this;
@@ -167,7 +166,7 @@ Parser.prototype = {
             node = node.parent;
           }
         } else {
-          var depth = newChild.depth + 1;
+          var depth = newChild.getDepth() + 1;
           var remainingCallstack = callstack.slice(depth);
           var node = newChild;
           while (node) {
@@ -195,5 +194,23 @@ Parser.prototype = {
     if (treeRoot == null)
       dump("no tree root\n");
     return treeRoot;
-  }
+  },
+  mergeUnbranchedCallPaths: function Tree_mergeUnbranchedCallPaths(root) {
+    var node = root;
+    while (node.children.length == 1) {
+      node = node.children[0];
+      if (node.counter != root.counter) {
+        console.log("different counters: " + node.counter + " vs. " + root.counter )
+      }
+    }
+    if (node != root) {
+      // Merge path from root to node into root.
+      root.children = node.children;
+      root.name += " ... " + node.name;
+    }
+    for (var i = 0; i < root.children.length; i++) {
+      root.children[i] = this.mergeUnbranchedCallPaths(root.children[i]);
+    }
+    return root;
+  },
 };

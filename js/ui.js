@@ -591,7 +591,8 @@ function updateDescription() {
   infoText += "--Avg. Responsiveness: " + avgResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
   infoText += "--Max Responsiveness: " + maxResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
   infoText += "<br>\n";
-  infoText += "<label><input type='checkbox' id='heavy' " + (gIsHeavy?" checked='true' ":" ") + " onchange='toggleHeavy()'/>Heavy callstack</label><br />\n";
+  infoText += "<label><input type='checkbox' id='heavy' " + (gIsHeavy ?" checked='true' ":" ") + " onchange='toggleHeavy()'/>Heavy callstack</label><br />\n";
+  infoText += "<label><input type='checkbox' id='mergeUnbranched' " + (gMergeUnbranched ?" checked='true' ":" ") + " onchange='toggleMergeUnbranched()'/>Merge unbranched call paths</label><br />\n";
 
   var filterNameInputOld = document.getElementById("filterName");
   infoText += "<br>\n";
@@ -663,6 +664,12 @@ function toggleHeavy() {
   displaySample(gVisibleRange.start, gVisibleRange.end); 
 }
 
+var gMergeUnbranched = false;
+function toggleMergeUnbranched() {
+  gMergeUnbranched = !gMergeUnbranched;
+  displaySample(gVisibleRange.start, gVisibleRange.end); 
+}
+
 function setHighlightedSamples(samples) {
   gHighlightedSamples = samples;
 
@@ -703,6 +710,9 @@ function displaySample(start, end) {
     treeData = parser.convertToHeavyCallTree(filteredData);
   } else {
     treeData = parser.convertToCallTree(filteredData);
+  }
+  if (gMergeUnbranched) {
+    treeData = parser.mergeUnbranchedCallPaths(treeData);
   }
   var tree = document.getElementById("tree");
   var treeRenderer = new TreeRenderer();
