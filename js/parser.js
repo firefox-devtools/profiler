@@ -146,7 +146,8 @@ Parser.prototype = {
   },
 
   convertToCallTree: function Parser_convertToCallTree(samples, isReverse) {
-    var treeRoot = new TreeNode("(root)", null);
+    var treeRoot = new TreeNode(samples[0].frames[0], null);
+    treeRoot.counter = 0;
     treeRoot.totalSamples = samples.length;
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
