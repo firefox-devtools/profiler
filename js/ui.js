@@ -21,7 +21,7 @@ TreeRenderer.prototype = {
       }
       curr = curr.parent;
     }
-    setHighlight(selected.reverse());
+    setHighlightedSamples(selected.reverse());
   },
   render: function TreeRenderer_render(tree, container) {
     function convertToJSTreeData(tree) {
@@ -628,7 +628,7 @@ function updateDescription() {
 }
 
 var gSamples = [];
-var gHighlighSample = [];
+var gHighlightedSamples = [];
 var gSkipSymbols = ["test2", "test1"];
 var gVisibleRange = {
   start: -1,
@@ -663,8 +663,8 @@ function toggleHeavy() {
   displaySample(gVisibleRange.start, gVisibleRange.end); 
 }
 
-function setHighlight(sample) {
-  gHighlighSample = sample;
+function setHighlightedSamples(samples) {
+  gHighlightedSamples = samples;
 
   var parser = new Parser();
   var data = gVisibleRange.filter(gVisibleRange.start, gVisibleRange.end);
@@ -675,13 +675,13 @@ function setHighlight(sample) {
   if (filterNameInput != null && filterNameInput.value != "") {
     filteredData = parser.filterByName(data, document.getElementById("filterName").value);
   }
-  histogramRenderer.render(filteredData, histogram, gHighlighSample,
+  histogramRenderer.render(filteredData, histogram, gHighlightedSamples,
                            document.getElementById("markers"));
   updateDescription();
 }
 
 function selectSample(sample) {
-  gHighlighSample = sample;
+  gHighlightedSamples = sample;
   
   //displaySample(gVisibleRange.start, gVisibleRange.end);
 }
@@ -713,7 +713,7 @@ function displaySample(start, end) {
   histogram.style.width = width + "px";
   histogram.style.height = height + "px";
   var histogramRenderer = new HistogramRenderer();
-  histogramRenderer.render(filteredData, histogram, gHighlighSample,
+  histogramRenderer.render(filteredData, histogram, gHighlightedSamples,
                            document.getElementById("markers"));
   updateDescription();
 }
