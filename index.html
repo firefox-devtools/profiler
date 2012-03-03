@@ -27,8 +27,9 @@
     </div>
     <script>
       if (location.href.indexOf("usesample") != -1) {
+        var filename = (location.href.indexOf("pseudo") != -1) ? 'sample.profile' : 'sample.log';
         var oXHR = new XMLHttpRequest();
-        oXHR.open('GET', 'sample.log', true);
+        oXHR.open('GET', filename, true);
         oXHR.responseType = "text";
         oXHR.onreadystatechange = function (oEvent) {  
           if (oXHR.readyState === 4) {  
