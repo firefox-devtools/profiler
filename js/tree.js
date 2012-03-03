@@ -126,11 +126,11 @@ Tree.prototype = {
     if (leftCutoff > 0)
       parentScrollbox.scrollLeft -= leftCutoff;
     else if (rightCutoff > 0)
-      parentScrollbox.scrollLeft += rightCutoff;
+      parentScrollbox.scrollLeft += Math.min(rightCutoff, -leftCutoff);
     if (topCutoff > 0)
       parentScrollbox.scrollTop -= topCutoff;
     else if (bottomCutoff > 0)
-      parentScrollbox.scrollTop += bottomCutoff;
+      parentScrollbox.scrollTop += Math.min(bottomCutoff, -topCutoff);
   },
   _select: function Tree__select(div) {
     if (div.tree.selected != null) {
