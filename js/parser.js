@@ -36,21 +36,27 @@ TreeNode.prototype.getDepth = function TreeNode__getDepth() {
     return this.parent.getDepth() + 1;
   return 0;
 };
-TreeNode.prototype.followPath = function TreeNode_followPath(path) {
-  var node = this;
-nextIteration:
-  for (var i = 0; i < path.length; ++i) {
-    var segment = path[i];
-    for (var j = 0; j < node.children.length; ++j) {
-      var child = node.children[j];
-      if (child.name == segment) {
-        node = child;
-        continue nextIteration;
-      }
-    }
-    break;
+TreeNode.prototype.findChild = function TreeNode_findChild(name) {
+  for (var i = 0; i < this.children.length; i++) {
+    var child = this.children[i];
+    if (child.name == name)
+      return child;
   }
-  return node;
+  return null;
+}
+// path is an array of strings which is matched to our nodes' names.
+// Try to walk path in our own tree and return the last matching node. The
+// length of the match can be calculated by the caller by comparing the
+// returned node's depth with the depth of the path's start node.
+TreeNode.prototype.followPath = function TreeNode_followPath(path) {
+  if (path.length == 0)
+    return this;
+
+  var matchingChild = this.findChild(path[0]);
+  if (!matchingChild)
+    return this;
+
+  return matchingChild.followPath(path.slice(1));
 };
 
 function Parser() {}
@@ -140,21 +146,25 @@ Parser.prototype = {
 
   convertToCallTree: function Parser_convertToCallTree(samples, isReverse) {
     var treeRoot = null;
+    if (isReverse) {
+      treeRoot = new TreeNode("(root)", null);
+      treeRoot.totalSamples = 0;
+    }
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
       var callstack = sample.frames.clone();
-      if (isReverse) callstack = callstack.reverse();
+      if (isReverse)
+        callstack.reverse();
       if (!treeRoot) {
+        // This can't happen in reverse mode.
+        // Create a tree root. callstack[0] is probably "(root)".
         treeRoot = new TreeNode(callstack[0], null);
         treeRoot.totalSamples = samples.length;
         var node = treeRoot;
         for (var j = 1; j < callstack.length; ++j) {
           if (callstack[j] == "(root)") {
-            if (isReverse) {
-              callstack[j] = "(Program start)";
-            } else {
-              callstack[j] = "(Top frame)";
-            }
+            // XXXmstange How can this happen?
+            callstack[j] = "(Top frame)";
           }
           var frame = callstack[j];
           var child = new TreeNode(frame, node);
