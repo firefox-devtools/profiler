@@ -37,23 +37,12 @@ TreeRenderer.prototype = {
         curObj.counter = node.counter;
         if (node.children.length) {
           curObj.children = [];
-          var unknownCounter = node.counter;
           for (var i = 0; i < node.children.length; ++i) {
             var child = node.children[i];
             var newObj = {};
             var totalCount = child.totalSamples;
             childVisitor(child, newObj);
             newObj.parent = curObj;
-            curObj.children.push(newObj);
-            unknownCounter -= child.counter;
-          }
-          if (unknownCounter != 0) {
-            var child = node.children[i];
-            var newObj = {};
-            var percent = (100 * unknownCounter / node.counter).toFixed(2);
-            newObj.counter = unknownCounter;
-            newObj.onClick = TreeRenderer.prototype.onClick;
-            newObj.title = unknownCounter + " (" + percent + "%) ??? Unknown";
             curObj.children.push(newObj);
           }
           curObj.children.sort(treeObjSort);
