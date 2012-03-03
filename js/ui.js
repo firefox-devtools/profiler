@@ -665,7 +665,7 @@ function toggleHeavy() {
   displaySample(gVisibleRange.start, gVisibleRange.end); 
 }
 
-var gMergeUnbranched = true;
+var gMergeUnbranched = false;
 function toggleMergeUnbranched() {
   gMergeUnbranched = !gMergeUnbranched;
   displaySample(gVisibleRange.start, gVisibleRange.end); 
