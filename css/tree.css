@@ -1,3 +1,12 @@
+#tree, div.root {
+  background: -moz-repeating-linear-gradient(white, white 16px, #F0F5FF 16px, #F0F5FF 32px);
+}
+
+div.root,
+div.root div {
+  min-width: -moz-min-content;
+}
+
 div.root div.collapsed > div {
   display: none;
 }

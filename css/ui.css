@@ -26,7 +26,6 @@ body {
   -moz-user-select: none;
   cursor: default;
   line-height: 16px;
-  background: -moz-repeating-linear-gradient(white, white 16px, #F0F5FF 16px, #F0F5FF 32px);
 }
 #infobar {
   position: absolute;
