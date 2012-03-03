@@ -195,6 +195,11 @@ Parser.prototype = {
       dump("no tree root\n");
     return treeRoot;
   },
+  _clipText: function Tree__clipText(text, length) {
+    if (text.length <= length)
+      return text;
+    return text.substr(0, length) + "...";
+  },
   mergeUnbranchedCallPaths: function Tree_mergeUnbranchedCallPaths(root) {
     var node = root;
     while (node.children.length == 1) {
@@ -206,7 +211,7 @@ Parser.prototype = {
     if (node != root) {
       // Merge path from root to node into root.
       root.children = node.children;
-      root.name += " ... " + node.name;
+      root.name = this._clipText(root.name, 50) + " to " + this._clipText(node.name, 50);
     }
     for (var i = 0; i < root.children.length; i++) {
       root.children[i] = this.mergeUnbranchedCallPaths(root.children[i]);
