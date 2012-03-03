@@ -93,21 +93,22 @@
       <p><button onclick="parse()">Parse</button></p>
     </div>
     <script>
-var getData = new QueryData();
-if (getData.report != null) {
-  document.getElementById('data').value = "Fetching profile";
-
-  var request = new XMLHttpRequest();  
-  request.open('GET', 'http://profile-logs.appspot.com/serve/' + getData.report, false);   
-  request.send(null);  
-      
-  if (request.status === 200) {  
-    document.getElementById('data').value = request.responseText;
-    parse();
-  } else {
-    alert("Failed to get profile. Error #" + request.status);
-  }
-}
+      if (location.href.indexOf("usesample")) {
+        var oXHR = new XMLHttpRequest();
+        oXHR.open('GET', 'sample.log', true);
+        oXHR.responseType = "text";
+        oXHR.onreadystatechange = function (oEvent) {  
+          if (oXHR.readyState === 4) {  
+            if (oXHR.status === 200) {  
+              document.getElementById("data").value = oXHR.responseText;
+              parse();
+            } else {  
+              alert("Using the sample log needs XHR to work, so you can't run this from a file URL but need to start a webserver.");
+            }  
+          }  
+        };  
+        oXHR.send(null);
+      }
     </script>    
   </body>
 </html>
