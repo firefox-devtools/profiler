@@ -82,8 +82,8 @@ div.root div > div {
   background-color: inherit;
   margin-left: -2px;
   padding-left: 2px;
-  padding-right: 98px;
-  margin-right: -98px;
+  padding-right: 95px;
+  margin-right: -95px;
 }
 
 #tree:focus .selected {
