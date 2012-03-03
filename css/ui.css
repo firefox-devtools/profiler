@@ -18,7 +18,7 @@ body {
 }
 #tree {
   position: absolute;
-  top: 0;
+  top: 16px;
   right: 0;
   bottom: 150px;
   left: 0;
@@ -27,6 +27,46 @@ body {
   -moz-user-select: none;
   cursor: default;
   line-height: 16px;
+}
+#treeHeader {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+}
+#treeHeader > li {
+  position: absolute;
+  display: block;
+  -moz-appearance: treeheadercell;
+  margin: 0;
+  padding: 0;
+  top: 0;
+  height: 16px;
+  line-height: 15px;
+}
+#sampleCountHeader {
+  left: 0;
+  width: 99px;
+  text-align: right;
+}
+#selfSampleCountHeader {
+  left: 99px;
+  width: 48px;
+  text-align: right;
+}
+#sampleCountHeader > span,
+#selfSampleCountHeader > span {
+  padding-right: 12px;
+}
+#symbolNameHeader {
+  left: 147px;
+  right: 0;
+}
+#symbolNameHeader > span {
+  padding-left: 2px;
 }
 #infobar {
   position: absolute;
