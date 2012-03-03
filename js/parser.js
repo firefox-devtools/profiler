@@ -143,14 +143,14 @@ Parser.prototype = {
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
       var callstack = sample.frames.clone();
-      if (isReverse == true) callstack = callstack.reverse();
+      if (isReverse) callstack = callstack.reverse();
       if (!treeRoot) {
         treeRoot = new TreeNode(callstack[0], null);
         treeRoot.totalSamples = samples.length;
         var node = treeRoot;
         for (var j = 1; j < callstack.length; ++j) {
           if (callstack[j] == "(root)") {
-            if (isReverse == true) {
+            if (isReverse) {
               callstack[j] = "(Program start)";
             } else {
               callstack[j] = "(Top frame)";
@@ -183,7 +183,7 @@ Parser.prototype = {
           node = newChild;
           for (var j = 0; j < remainingCallstack.length; ++j) {
             if (remainingCallstack[j] == "(root)") {
-              if (isReverse == true) {
+              if (isReverse) {
                 remainingCallstack[j] = "(Program start)";
               } else {
                 remainingCallstack[j] = "(Top frame)";
