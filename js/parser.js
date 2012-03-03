@@ -145,10 +145,6 @@ Parser.prototype = {
     return samples;
   },
 
-  convertToHeavyCallTree: function Parser_convertToHeavyCallTree(samples) {
-    return Parser.prototype.convertToCallTree(samples, true);
-  },
-
   convertToCallTree: function Parser_convertToCallTree(samples, isReverse) {
     var treeRoot = new TreeNode("(root)", null);
     treeRoot.totalSamples = samples.length;

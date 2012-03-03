@@ -60,19 +60,9 @@ TreeRenderer.prototype = {
           curObj.children = curObj.children.splice(0, 20);
         }
       }
-      // Need to handle multiple root for heavy tree
-      if (tree instanceof Array) {
-        for(var i = 0; i < tree.length; i++) {
-          object = {};
-          var totalCount = tree[i].totalSamples;
-          childVisitor(tree[i], object);
-          roots.push(object);
-        }
-      } else {
-        var totalCount = tree.totalSamples;
-        childVisitor(tree, object);
-        roots.push(object);
-      }
+      var totalCount = tree.totalSamples;
+      childVisitor(tree, object);
+      roots.push(object);
       roots.sort(treeObjSort);
       return {data: roots};
     }
@@ -105,7 +95,8 @@ HistogramRenderer.prototype = {
         var isSelected = true;
         if (step.frames.length >= highlightSample.length && highlightSample.length > 1) {
           var compareFrames = step.frames.clone();
-          if (gIsHeavy) compareFrames = compareFrames.reverse();
+          if (gInvertCallstack)
+            compareFrames = compareFrames.reverse();
           for (var j = 0; j < highlightSample.length; j++) {
             if (highlightSample[j] != compareFrames[j] && compareFrames[j] != "(root)") {
               isSelected = false;    
@@ -591,7 +582,7 @@ function updateDescription() {
   infoText += "--Avg. Responsiveness: " + avgResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
   infoText += "--Max Responsiveness: " + maxResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
   infoText += "<br>\n";
-  infoText += "<label><input type='checkbox' id='heavy' " + (gIsHeavy ?" checked='true' ":" ") + " onchange='toggleHeavy()'/>Heavy callstack</label><br />\n";
+  infoText += "<label><input type='checkbox' id='invertCallstack' " + (gInvertCallstack ?" checked='true' ":" ") + " onchange='toggleInvertCallStack()'/>Invert callstack</label><br />\n";
   infoText += "<label><input type='checkbox' id='mergeUnbranched' " + (gMergeUnbranched ?" checked='true' ":" ") + " onchange='toggleMergeUnbranched()'/>Merge unbranched call paths</label><br />\n";
   infoText += "<label><input type='checkbox' id='mergeFunctions' " + (gMergeFunctions ?" checked='true' ":" ") + " onchange='toggleMergeFunctions()'/>Functions, not lines</label><br />\n";
 
@@ -659,9 +650,9 @@ function parse() {
   displaySample(0, gSamples.length);
 }
 
-var gIsHeavy = false;
-function toggleHeavy() {
-  gIsHeavy = !gIsHeavy;
+var gInvertCallstack = false;
+function toggleInvertCallStack() {
+  gInvertCallstack = !gInvertCallstack;
   displaySample(gVisibleRange.start, gVisibleRange.end); 
 }
 
@@ -716,11 +707,7 @@ function displaySample(start, end) {
   if (gMergeFunctions) {
     filteredData = parser.discardLineLevelInformation(filteredData);
   }
-  if (gIsHeavy) {
-    treeData = parser.convertToHeavyCallTree(filteredData);
-  } else {
-    treeData = parser.convertToCallTree(filteredData);
-  }
+  treeData = parser.convertToCallTree(filteredData, gInvertCallstack);
   if (gMergeUnbranched) {
     parser.mergeUnbranchedCallPaths(treeData);
   }
