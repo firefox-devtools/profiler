@@ -593,6 +593,7 @@ function updateDescription() {
   infoText += "<br>\n";
   infoText += "<label><input type='checkbox' id='heavy' " + (gIsHeavy ?" checked='true' ":" ") + " onchange='toggleHeavy()'/>Heavy callstack</label><br />\n";
   infoText += "<label><input type='checkbox' id='mergeUnbranched' " + (gMergeUnbranched ?" checked='true' ":" ") + " onchange='toggleMergeUnbranched()'/>Merge unbranched call paths</label><br />\n";
+  infoText += "<label><input type='checkbox' id='mergeFunctions' " + (gMergeFunctions ?" checked='true' ":" ") + " onchange='toggleMergeFunctions()'/>Functions, not lines</label><br />\n";
 
   var filterNameInputOld = document.getElementById("filterName");
   infoText += "<br>\n";
@@ -670,6 +671,12 @@ function toggleMergeUnbranched() {
   displaySample(gVisibleRange.start, gVisibleRange.end); 
 }
 
+var gMergeFunctions = true;
+function toggleMergeFunctions() {
+  gMergeFunctions = !gMergeFunctions;
+  displaySample(gVisibleRange.start, gVisibleRange.end); 
+}
+
 function setHighlightedSamples(samples) {
   gHighlightedSamples = samples;
 
@@ -706,13 +713,16 @@ function displaySample(start, end) {
   if (filterNameInput != null && filterNameInput.value != "") {
     filteredData = parser.filterByName(data, document.getElementById("filterName").value);
   }
+  if (gMergeFunctions) {
+    parser.discardLineLevelInformation(filteredData);
+  }
   if (gIsHeavy) {
     treeData = parser.convertToHeavyCallTree(filteredData);
   } else {
     treeData = parser.convertToCallTree(filteredData);
   }
   if (gMergeUnbranched) {
-    treeData = parser.mergeUnbranchedCallPaths(treeData);
+    parser.mergeUnbranchedCallPaths(treeData);
   }
   var tree = document.getElementById("tree");
   var treeRenderer = new TreeRenderer();

@@ -94,7 +94,7 @@ Parser.prototype = {
       case 'l':
         // continue sample
         if (sample) { // ignore the case where we see a 'c' before an 's'
-          sample.frames.push(info);
+          sample.frames.push(this._cleanFunctionName(info));
         }
         break;
       case 'r':
@@ -108,6 +108,13 @@ Parser.prototype = {
         sample.lines.push(line);
     }
     return samples;
+  },
+
+  _cleanFunctionName: function Parser__cleanFunctionName(functionName) {
+    var ignoredPrefix = "non-virtual thunk to ";
+    if (functionName.substr(0, ignoredPrefix.length) == ignoredPrefix)
+      return functionName.substr(ignoredPrefix.length);
+    return functionName;
   },
 
   filterByName: function Parse_filterByName(samples, filterName) {
@@ -202,11 +209,8 @@ Parser.prototype = {
   },
   mergeUnbranchedCallPaths: function Tree_mergeUnbranchedCallPaths(root) {
     var node = root;
-    while (node.children.length == 1) {
+    while (node.children.length == 1 && node.count == node.children[0].count) {
       node = node.children[0];
-      if (node.counter != root.counter) {
-        console.log("different counters: " + node.counter + " vs. " + root.counter )
-      }
     }
     if (node != root) {
       // Merge path from root to node into root.
@@ -214,8 +218,20 @@ Parser.prototype = {
       root.name = this._clipText(root.name, 50) + " to " + this._clipText(node.name, 50);
     }
     for (var i = 0; i < root.children.length; i++) {
-      root.children[i] = this.mergeUnbranchedCallPaths(root.children[i]);
+      this.mergeUnbranchedCallPaths(root.children[i]);
     }
-    return root;
+  },
+  discardLineLevelInformation: function Tree_discardLineLevelInformation(data) {
+    for (var i = 0; i < data.length; i++) {
+      var sample = data[i];
+      var frames = sample.frames;
+      for (var j = 0; j < frames.length; j++) {
+        var functionName = frames[j];
+        var lineLevelInformationLocation = functionName.lastIndexOf(" + ");
+        if (lineLevelInformationLocation == -1)
+          continue;
+        frames[j] = functionName.substr(0, lineLevelInformationLocation);
+      }
+    }
   },
 };
