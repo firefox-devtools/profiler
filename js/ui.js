@@ -714,7 +714,7 @@ function displaySample(start, end) {
     filteredData = parser.filterByName(data, document.getElementById("filterName").value);
   }
   if (gMergeFunctions) {
-    parser.discardLineLevelInformation(filteredData);
+    filteredData = parser.discardLineLevelInformation(filteredData);
   }
   if (gIsHeavy) {
     treeData = parser.convertToHeavyCallTree(filteredData);

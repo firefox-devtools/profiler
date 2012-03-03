@@ -191,9 +191,10 @@ Parser.prototype = {
     }
   },
   discardLineLevelInformation: function Tree_discardLineLevelInformation(data) {
+    var filteredData = [];
     for (var i = 0; i < data.length; i++) {
-      var sample = data[i];
-      var frames = sample.frames;
+      filteredData.push(data[i].clone());
+      var frames = filteredData[i].frames;
       for (var j = 0; j < frames.length; j++) {
         var functionName = frames[j];
         var lineLevelInformationLocation = functionName.lastIndexOf(" + ");
@@ -210,5 +211,6 @@ Parser.prototype = {
         }
       }
     }
+    return filteredData;
   },
 };
