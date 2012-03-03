@@ -40,3 +40,7 @@ div.root div > div {
 div.collapsed > * > .expandCollapseButton {
   -moz-appearance: treetwisty;
 }
+
+div.leaf > * > .expandCollapseButton {
+  visibility: hidden;
+}

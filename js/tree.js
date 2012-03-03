@@ -27,6 +27,9 @@ Tree.prototype = {
     }
     var div = document.createElement("div");
     div.className = "subtreeContainer collapsed";
+    var hasChildren = ("children" in data) && (data.children.length > 0);
+    if (!hasChildren)
+      div.classList.add("leaf");
     var text = document.createElement("a");
     text.innerHTML = this._HTMLForFunction(data.name);
     div.treeLine = text;
