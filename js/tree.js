@@ -17,20 +17,19 @@ Tree.prototype = {
     treeRoot.appendChild(firstElem);
     this._select(firstElem);
     this._toggle(firstElem);
+    this.root.onkeypress = this._onkeypress;
+    this.root.onclick = this._onclick;
+    this.root.focus();
   },
   _createTree: function Tree__createTree(root, data) {
     if (!("title" in data)) {
       return null;
     }
     var div = document.createElement("div");
-    div.className = "collapsed";
-    div.onclick = this._onclick;
+    div.className = "subtreeContainer collapsed";
     var text = document.createElement("a");
-    text.innerHTML = data.title;
-    text.node = div;
-    div.node = div;
+    text.innerHTML = this._HTMLForFunction(data.name);
     div.treeText = text;
-    div.onClick = data.onClick;
     div.data = data;
     div.treeText.className = "unselected";
     div.appendChild(text);
@@ -47,11 +46,30 @@ Tree.prototype = {
         }
       }
     }
-    document.onkeypress = this._onkeypress;
     return div;
   },
-  _toggle: function Tree__toggle(div) {
-    div.className = (div.className == "collapsed") ? "" : "collapsed";
+  _HTMLForFunction: function Tree__HTMLForFunction(title) {
+    return '<input type="button" value="Expand / Collapse" class="expandCollapseButton" tabindex="-1"> ' + title;
+  },
+  _toggle: function Tree__toggle(div, /* optional */ newCollapsedValue) {
+    if (newCollapsedValue === undefined) {
+      div.classList.toggle("collapsed");
+    } else {
+      if (newCollapsedValue)
+        div.classList.add("collapsed");
+      else
+        div.classList.remove("collapsed");
+    }
+  },
+  _toggleAll: function Tree__toggleAll(subtreeRoot, /* optional */ newCollapsedValue) {
+    // Expands / collapses all child nodes, too.
+    if (newCollapsedValue === undefined)
+      newCollapsedValue = !Tree.prototype._isCollapsed(subtreeRoot);
+    Tree.prototype._toggle(subtreeRoot, newCollapsedValue);
+    var subtree = subtreeRoot.querySelectorAll('.subtreeContainer');
+    for (var i = 0; i < subtree.length; ++i) {
+      Tree.prototype._toggle(subtree[i], newCollapsedValue);
+    }
   },
   _getParent: function Tree__getParent(div) {
     return div.treeParent;
@@ -87,7 +105,6 @@ Tree.prototype = {
     return div.treeParent.treeChildren[nodeIndex+1];
   },
   _select: function Tree__select(div) {
-    document.onkeypress = this._onkeypress;
     if (div.tree.selected != null) {
       div.tree.selected.id = "";
       div.tree.selected.treeText.className = "unselected";
@@ -107,16 +124,33 @@ Tree.prototype = {
     return document.getElementById("selected_treenode");
   },
   _isCollapsed: function Tree__isCollapsed(div) {
-    return (div.className == "collapsed");
+    return div.classList.contains("collapsed");
+  },
+  _getParentSubtreeContainer: function Tree__getParentSubtreeContainer(node) {
+    while (node) {
+      if (node.nodeType != node.ELEMENT_NODE)
+        break;
+      if (node.classList.contains("subtreeContainer"))
+        return node;
+      node = node.parentNode;
+    }
+    return null;
   },
   _onclick: function Tree__onclick(event) {
-    var target = event.target.node;
-    if (target.node != null) {
-      target = target.node;
+    var target = event.target;
+    var node = Tree.prototype._getParentSubtreeContainer(target);
+    if (!node)
+      return;
+    if (target.classList.contains("expandCollapseButton")) {
+      if (event.altKey)
+        Tree.prototype._toggleAll(node);
+      else
+        Tree.prototype._toggle(node);
+    } else {
+      Tree.prototype._select(node);
+      if (event.detail == 2) // dblclick
+        Tree.prototype._toggle(node);
     }
-    Tree.prototype._toggle(target);
-    Tree.prototype._select(target);
-    event.stopPropagation();
   },
   _onkeypress: function Tree__onkeypress(event) {
     var selected = Tree.prototype._selected();
@@ -127,7 +161,7 @@ Tree.prototype = {
       }
     }
     event.stopPropagation();
-    event.preventDefault()
+    event.preventDefault();
     if (selected == null) return false;
     if (event.keyCode == 37) { // KEY_LEFT
       var isCollapsed = Tree.prototype._isCollapsed(selected);
@@ -161,12 +195,7 @@ Tree.prototype = {
         Tree.prototype._select(nextSib);
       }
     } else if (String.fromCharCode(event.charCode) == '*') {
-      var isCollapsed = Tree.prototype._isCollapsed(selected);
-      var subtree = selected.querySelectorAll('div');
-      Tree.prototype._toggle(selected);
-      for (var i = 0; i < subtree.length; ++i) {
-        subtree[i].className = isCollapsed ? '' : 'collapsed';
-      }
+      Tree.prototype._toggleAll(selected);
     }
     return false;
   },

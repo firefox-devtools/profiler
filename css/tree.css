@@ -27,3 +27,16 @@ div.root div > div {
   color: highlighttext;
   background-color: highlight;
 }
+
+.expandCollapseButton {
+  -moz-appearance: treetwistyopen;
+  padding: 0;
+  overflow: hidden;
+  margin: -3px -4px -3px 0;
+  vertical-align: top;
+  color: transparent;
+}
+
+div.collapsed > * > .expandCollapseButton {
+  -moz-appearance: treetwisty;
+}
