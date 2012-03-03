@@ -29,9 +29,9 @@ Tree.prototype = {
     div.className = "subtreeContainer collapsed";
     var text = document.createElement("a");
     text.innerHTML = this._HTMLForFunction(data.name);
-    div.treeText = text;
+    div.treeLine = text;
     div.data = data;
-    div.treeText.className = "unselected";
+    div.treeLine.className = "unselected";
     div.appendChild(text);
     div.treeChildren = [];
     div.treeParent = null;
@@ -49,7 +49,8 @@ Tree.prototype = {
     return div;
   },
   _HTMLForFunction: function Tree__HTMLForFunction(title) {
-    return '<input type="button" value="Expand / Collapse" class="expandCollapseButton" tabindex="-1"> ' + title;
+    return '<input type="button" value="Expand / Collapse" class="expandCollapseButton" tabindex="-1"> ' +
+      '<span class="functionName">' + title + '</span>';
   },
   _toggle: function Tree__toggle(div, /* optional */ newCollapsedValue) {
     if (newCollapsedValue === undefined) {
@@ -104,20 +105,42 @@ Tree.prototype = {
       return Tree.prototype._getNextSib(div.treeParent);
     return div.treeParent.treeChildren[nodeIndex+1];
   },
+  _scrollIntoView: function Tree__scrollIntoView(parentScrollbox, element) {
+    // Make sure that element is inside the visible part of parentScrollbox by
+    // adjusting the scroll position of parentScrollbox. If element is wider or
+    // higher than the scroll port, the left and top edges are prioritized over
+    // the right and bottom edges.
+
+    // We can't use getBoundingClientRect() on the parentScrollbox because that
+    // would give us the outer size of the scrollbox, and not the actually
+    // visible part of the scroll viewport (which might be smaller due to
+    // scrollbars). So we use offsetLeft/Top and clientWidth/Height.
+    var r = element.getBoundingClientRect();
+    var leftCutoff = parentScrollbox.offsetLeft - r.left;
+    var rightCutoff = r.right - (parentScrollbox.offsetLeft + parentScrollbox.clientWidth);
+    var topCutoff = parentScrollbox.offsetTop - r.top;
+    var bottomCutoff = r.bottom - (parentScrollbox.offsetTop + parentScrollbox.clientHeight);
+    if (leftCutoff > 0)
+      parentScrollbox.scrollLeft -= leftCutoff;
+    else if (rightCutoff > 0)
+      parentScrollbox.scrollLeft += rightCutoff;
+    if (topCutoff > 0)
+      parentScrollbox.scrollTop -= topCutoff;
+    else if (bottomCutoff > 0)
+      parentScrollbox.scrollTop += bottomCutoff;
+  },
   _select: function Tree__select(div) {
     if (div.tree.selected != null) {
       div.tree.selected.id = "";
-      div.tree.selected.treeText.className = "unselected";
+      div.tree.selected.treeLine.className = "unselected";
       div.tree.selected = null;
     }
-    if (div != null) {
+    if (div) {
       div.id = "selected_treenode";
-      div.treeText.className = "selected";
+      div.treeLine.className = "selected";
       div.tree.selected = div;
-      if (div.onClick != null) {
-        div.onClick(div.data);
-      }
-      //div.scrollIntoView(true);
+      var functionName = div.treeLine.querySelector(".functionName");
+      Tree.prototype._scrollIntoView(div.tree.root, functionName);
     }
   },
   _selected: function Tree__selected() {
