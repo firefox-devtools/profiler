@@ -108,19 +108,25 @@ Tree.prototype = {
       return Tree.prototype._getNextSib(div.treeParent);
     return div.treeParent.treeChildren[nodeIndex+1];
   },
-  _scrollIntoView: function Tree__scrollIntoView(parentScrollbox, element) {
+  _scrollIntoView: function Tree__scrollIntoView(parentScrollbox, element, maxImportantWidth) {
     // Make sure that element is inside the visible part of parentScrollbox by
     // adjusting the scroll position of parentScrollbox. If element is wider or
     // higher than the scroll port, the left and top edges are prioritized over
     // the right and bottom edges.
+    // If maxImportantWidth is set, parts of the beyond this widths are
+    // considered as not important; they'll not be moved into view.
+
+    if (maxImportantWidth === undefined)
+      maxImportantWidth = Infinity;
 
     // We can't use getBoundingClientRect() on the parentScrollbox because that
     // would give us the outer size of the scrollbox, and not the actually
     // visible part of the scroll viewport (which might be smaller due to
     // scrollbars). So we use offsetLeft/Top and clientWidth/Height.
     var r = element.getBoundingClientRect();
+    var right = Math.min(r.right, r.left + maxImportantWidth);
     var leftCutoff = parentScrollbox.offsetLeft - r.left;
-    var rightCutoff = r.right - (parentScrollbox.offsetLeft + parentScrollbox.clientWidth);
+    var rightCutoff = right - (parentScrollbox.offsetLeft + parentScrollbox.clientWidth);
     var topCutoff = parentScrollbox.offsetTop - r.top;
     var bottomCutoff = r.bottom - (parentScrollbox.offsetTop + parentScrollbox.clientHeight);
     if (leftCutoff > 0)
@@ -143,7 +149,7 @@ Tree.prototype = {
       div.treeLine.className = "selected";
       div.tree.selected = div;
       var functionName = div.treeLine.querySelector(".functionName");
-      Tree.prototype._scrollIntoView(div.tree.root, functionName);
+      Tree.prototype._scrollIntoView(div.tree.root, functionName, 400);
     }
   },
   _selected: function Tree__selected() {
