@@ -244,7 +244,8 @@ HistogramRenderer.prototype = {
     var widthSeenSoFar = 0;
     for (var i = 0; i < count; ++i) {
       var step = histogramData[i];
-      var rect = createRect(svgRoot, step, widthSeenSoFar, 0,
+      var rect = createRect(svgRoot, step, widthSeenSoFar,
+                            (maxHeight - step.value) * heightFactor,
                             step.width * widthFactor,
                             step.value * heightFactor,
                             step.color);
