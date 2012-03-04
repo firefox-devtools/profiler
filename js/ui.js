@@ -12,16 +12,16 @@ function treeObjSort(a, b) {
 
 function TreeRenderer() {}
 TreeRenderer.prototype = {
-  onClick: function TreeRender_onclick(data) {
-    var selected = [];
-    var curr = data;
+  highlightFrame: function TreeRender_highlightFrame(frameData) {
+    var selectedCallstack = [];
+    var curr = frameData;
     while (curr != null) {
       if (curr.name != null) {
-        selected.push(curr.name);
+        selectedCallstack.push(curr.fullFrameNameAsInSample);
       }
       curr = curr.parent;
     }
-    setHighlightedSamples(selected.reverse());
+    setHighlightedCallstack(selectedCallstack.reverse());
   },
   render: function TreeRenderer_render(tree, container) {
     function convertToJSTreeData(tree) {
@@ -35,6 +35,7 @@ TreeRenderer.prototype = {
         }
         curObj.selfCounter = selfCounter;
         curObj.ratio = node.counter / node.totalSamples;
+        curObj.fullFrameNameAsInSample = node.name;
         var functionAndLibrary = node.name.split(" (in ");
         if (functionAndLibrary.length == 2) {
           curObj.name = functionAndLibrary[0];
@@ -62,15 +63,35 @@ TreeRenderer.prototype = {
       roots.sort(treeObjSort);
       return {data: roots};
     }
-    new Tree(container, convertToJSTreeData(tree));
+    var treeView = new Tree(container, convertToJSTreeData(tree));
+    var self = this;
+    treeView.addEventListener("select", function (frameData) {
+      self.highlightFrame(frameData);
+    });
   }
 };
 
 function HistogramRenderer() {}
 HistogramRenderer.prototype = {
-  render: function HistogramRenderer_render(data, container, highlightSample,
+  render: function HistogramRenderer_render(data, container, highlightedCallstack,
                                             markerContainer) {
     function convertToHistogramData(data) {
+      function isSampleSelected(step) {
+        var isSelected = true;
+        if (step.frames.length >= highlightedCallstack.length && highlightedCallstack.length > 1) {
+          var compareFrames = step.frames.clone();
+          if (gInvertCallstack)
+            compareFrames.reverse();
+          for (var j = 0; j < highlightedCallstack.length; j++) {
+            if (highlightedCallstack[j] != compareFrames[j] && compareFrames[j] != "(root)") {
+              isSelected = false;    
+            }
+          }
+        } else {
+          isSelected = false;
+        }
+        return isSelected;
+      }
       var histogramData = [];
       var prevName = "";
       var prevRes = -1;
@@ -88,20 +109,7 @@ HistogramRenderer.prototype = {
         var res = step.extraInfo["responsiveness"];
         var value = step.frames.length;
         var color = (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0";
-        var isSelected = true;
-        if (step.frames.length >= highlightSample.length && highlightSample.length > 1) {
-          var compareFrames = step.frames.clone();
-          if (gInvertCallstack)
-            compareFrames = compareFrames.reverse();
-          for (var j = 0; j < highlightSample.length; j++) {
-            if (highlightSample[j] != compareFrames[j] && compareFrames[j] != "(root)") {
-              isSelected = false;    
-            }
-          }
-        } else {
-          isSelected = false;
-        }
-        if (isSelected) {
+        if (isSampleSelected(step)) {
           color = "0,128,0";
         }
         if ("marker" in step.extraInfo) {
@@ -617,7 +625,7 @@ function updateDescription() {
 }
 
 var gSamples = [];
-var gHighlightedSamples = [];
+var gHighlightedCallstack = [];
 var gSkipSymbols = ["test2", "test1"];
 var gVisibleRange = {
   start: -1,
@@ -664,8 +672,8 @@ function toggleMergeFunctions() {
   displaySample(gVisibleRange.start, gVisibleRange.end); 
 }
 
-function setHighlightedSamples(samples) {
-  gHighlightedSamples = samples;
+function setHighlightedCallstack(samples) {
+  gHighlightedCallstack = samples;
 
   var parser = new Parser();
   var data = gVisibleRange.filter(gVisibleRange.start, gVisibleRange.end);
@@ -676,13 +684,16 @@ function setHighlightedSamples(samples) {
   if (filterNameInput != null && filterNameInput.value != "") {
     filteredData = parser.filterByName(data, document.getElementById("filterName").value);
   }
-  histogramRenderer.render(filteredData, histogram, gHighlightedSamples,
+  if (gMergeFunctions) {
+    filteredData = parser.discardLineLevelInformation(filteredData);
+  }
+  histogramRenderer.render(filteredData, histogram, gHighlightedCallstack,
                            document.getElementById("markers"));
   updateDescription();
 }
 
 function selectSample(sample) {
-  gHighlightedSamples = sample;
+  gHighlightedCallstack = sample;
   
   //displaySample(gVisibleRange.start, gVisibleRange.end);
 }
@@ -716,7 +727,7 @@ function displaySample(start, end) {
   histogram.style.width = width + "px";
   histogram.style.height = height + "px";
   var histogramRenderer = new HistogramRenderer();
-  histogramRenderer.render(filteredData, histogram, gHighlightedSamples,
+  histogramRenderer.render(filteredData, histogram, gHighlightedCallstack,
                            document.getElementById("markers"));
   updateDescription();
 }

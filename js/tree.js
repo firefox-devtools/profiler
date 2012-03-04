@@ -1,5 +1,6 @@
 function Tree(root, data) {
   this.root = root;
+  this._eventListeners = {};
   this.init(data);
   // root is autoselect
   // this.selected = null;
@@ -27,9 +28,31 @@ Tree.prototype = {
     };
     this.root.onclick = function (e) {
       self._onclick(e);
-    }
+    };
     this.root.focus();
     this._setUpScrolling();
+  },
+  addEventListener: function Tree_addEventListener(eventName, callbackFunction) {
+    if (!(eventName in this._eventListeners))
+      this._eventListeners[eventName] = [];
+    if (this._eventListeners[eventName].indexOf(callbackFunction) != -1)
+      return;
+    this._eventListeners[eventName].push(callbackFunction);
+  },
+  removeEventListener: function Tree_removeEventListener(eventName, callbackFunction) {
+    if (!(eventName in this._eventListeners))
+      return;
+    var index = this._eventListeners[eventName].indexOf(callbackFunction);
+    if (index == -1)
+      return;
+    this._eventListeners[eventName].splice(index, 1);
+  },
+  _fireEvent: function Tree__fireEvent(eventName, eventObject) {
+    if (!(eventName in this._eventListeners))
+      return;
+    this._eventListeners[eventName].forEach(function (callbackFunction) {
+      callbackFunction(eventObject);
+    });
   },
   _setUpScrolling: function Tree__setUpScrolling() {
     var waitingForPaint = false;
@@ -196,6 +219,7 @@ Tree.prototype = {
       div.tree.selected = div;
       var functionName = div.treeLine.querySelector(".functionName");
       this._scrollIntoView(div.tree.root, functionName, 400);
+      this._fireEvent("select", div.data);
     }
   },
   _selected: function Tree__selected() {
