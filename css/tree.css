@@ -13,7 +13,6 @@ div.root div {
 
 div.root {
   padding-left: 150px;
-  min-height: 100%;
   overflow: hidden;
 }
 
@@ -25,6 +24,7 @@ div.root {
   top: 0;
   left: 0;
   width: 146px;
+  min-height: 100%;
   border-right: 1px solid #CCC;
 }
 
