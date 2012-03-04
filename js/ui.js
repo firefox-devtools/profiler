@@ -77,20 +77,17 @@ HistogramRenderer.prototype = {
                                             markerContainer) {
     function convertToHistogramData(data) {
       function isSampleSelected(step) {
-        var isSelected = true;
-        if (step.frames.length >= highlightedCallstack.length && highlightedCallstack.length > 1) {
-          var compareFrames = step.frames.clone();
-          if (gInvertCallstack)
-            compareFrames.reverse();
-          for (var j = 0; j < highlightedCallstack.length; j++) {
-            if (highlightedCallstack[j] != compareFrames[j] && compareFrames[j] != "(root)") {
-              isSelected = false;    
-            }
-          }
-        } else {
-          isSelected = false;
+        if (step.frames.length < highlightedCallstack.length || highlightedCallstack.length <= 1)
+          return false;
+
+        var compareFrames = step.frames.clone();
+        if (gInvertCallstack)
+          compareFrames.reverse();
+        for (var j = 0; j < highlightedCallstack.length; j++) {
+          if (highlightedCallstack[j] != compareFrames[j] && compareFrames[j] != "(root)")
+            return false;
         }
-        return isSelected;
+        return true;
       }
       var histogramData = [];
       var prevName = "";
