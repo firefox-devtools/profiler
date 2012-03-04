@@ -2,16 +2,24 @@
   outline: none; /* override the browser's focus styling */
 }
 
-#tree, div.root, #leftColumnBackground {
+#tree ol,
+#tree li {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+#tree, ol.root, #leftColumnBackground {
   background: -moz-linear-gradient(white, white 50%, #F0F5FF 50%, #F0F5FF);
   background-size: 100px 32px;
 }
 
-div.root div {
+#tree ol.root ol,
+#tree ol.root li {
   min-width: -moz-min-content;
 }
 
-div.root {
+#tree ol.root {
   padding-left: 150px;
   overflow: hidden;
 }
@@ -58,17 +66,15 @@ div.root {
   color: #999;
 }
 
-div.root div.collapsed > div {
+#tree ol.root li.collapsed > ol {
   display: none;
 }
-div.root div > div {
+#tree ol.root li > ol {
   margin-left: 1em;
   white-space: nowrap;
 }
 
-.unselected,
-.selected {
-  display: block;
+.treeLine {
   margin-left: -10000px;
   padding-left: 10000px;
 }
@@ -104,10 +110,10 @@ div.root div > div {
   color: transparent;
 }
 
-div.collapsed > * > .expandCollapseButton {
+li.collapsed > * > .expandCollapseButton {
   -moz-appearance: treetwisty;
 }
 
-div.leaf > * > .expandCollapseButton {
+li.leaf > * > .expandCollapseButton {
   visibility: hidden;
 }

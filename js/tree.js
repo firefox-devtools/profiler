@@ -12,13 +12,13 @@ Tree.prototype = {
       this.root.cleanUp();
       this.root.cleanUp = null;
     }
-    while (this.root.querySelector("div.root")) {
-      this.root.removeChild(this.root.querySelector("div.root"));
+    while (this.root.querySelector("ol.root")) {
+      this.root.removeChild(this.root.querySelector("ol.root"));
     }
-    var treeRoot = document.createElement("div");
+    var treeRoot = document.createElement("ol");
     treeRoot.className = "root";
     this.root.appendChild(treeRoot);
-    var firstElem = this._createTree(treeRoot, data.data[0]); 
+    var firstElem = this._createTree(data.data[0]); 
     treeRoot.appendChild(firstElem);
     this._select(firstElem);
     this._toggle(firstElem);
@@ -59,11 +59,11 @@ Tree.prototype = {
     var accumulatedDeltaX = 0;
     var accumulatedDeltaY = 0;
     var root = this.root;
-    var rootDiv = this.root.querySelector("div.root");
+    var rootOl = this.root.querySelector("ol.root");
     function scrollListener(e) {
       if (!waitingForPaint) {
         window.mozRequestAnimationFrame(function () {
-          rootDiv.scrollLeft += accumulatedDeltaX;
+          rootOl.scrollLeft += accumulatedDeltaX;
           root.scrollTop += accumulatedDeltaY;
           accumulatedDeltaX = 0;
           accumulatedDeltaY = 0;
@@ -84,34 +84,36 @@ Tree.prototype = {
     };
   },
   _scrollHeightChanged: function Tree__scrollHeightChanged() {
-    this.root.querySelector("#leftColumnBackground").style.height = this.root.querySelector("div.root").getBoundingClientRect().height + 'px';
+    this.root.querySelector("#leftColumnBackground").style.height = this.root.querySelector("ol.root").getBoundingClientRect().height + 'px';
   },
-  _createTree: function Tree__createTree(root, data) {
-    var div = document.createElement("div");
-    div.className = "subtreeContainer collapsed";
+  _createTree: function Tree__createTree(data) {
+    var li = document.createElement("li");
+    li.className = "subtreeContainer collapsed";
     var hasChildren = ("children" in data) && (data.children.length > 0);
     if (!hasChildren)
-      div.classList.add("leaf");
-    var text = document.createElement("a");
-    text.innerHTML = this._HTMLForFunction(data);
-    div.treeLine = text;
-    div.data = data;
-    div.treeLine.className = "unselected";
-    div.appendChild(text);
-    div.treeChildren = [];
-    div.treeParent = null;
-    div.tree = this;
-    if ("children" in data) {
+      li.classList.add("leaf");
+    var treeLine = document.createElement("div");
+    treeLine.className = "treeLine";
+    treeLine.innerHTML = this._HTMLForFunction(data);
+    li.treeLine = treeLine;
+    li.data = data;
+    li.appendChild(treeLine);
+    li.treeChildren = [];
+    li.treeParent = null;
+    li.tree = this;
+    if (hasChildren) {
+      var ol = document.createElement("ol");
       for (var i = 0; i < data.children.length; ++i) {
-        var innerTree = this._createTree(div, data.children[i]);
+        var innerTree = this._createTree(data.children[i]);
         if (innerTree) {
-          innerTree.treeParent = div;   
-          div.appendChild(innerTree);
-          div.treeChildren.push(innerTree);
+          innerTree.treeParent = li;   
+          ol.appendChild(innerTree);
+          li.appendChild(ol);
+          li.treeChildren.push(innerTree);
         }
       }
     }
-    return div;
+    return li;
   },
   _HTMLForFunction: function Tree__HTMLForFunction(node) {
     return '<input type="button" value="Expand / Collapse" class="expandCollapseButton" tabindex="-1"> ' +
@@ -207,19 +209,21 @@ Tree.prototype = {
     else if (bottomCutoff > 0)
       parentScrollbox.scrollTop += Math.min(bottomCutoff, -topCutoff);
   },
-  _select: function Tree__select(div) {
-    if (div.tree.selected != null) {
-      div.tree.selected.id = "";
-      div.tree.selected.treeLine.className = "unselected";
-      div.tree.selected = null;
+  _select: function Tree__select(li) {
+    if (li.tree != this)
+      throw "supplied element isn't part of this tree";
+    if (this.selected != null) {
+      this.selected.id = "";
+      this.selected.treeLine.classList.remove("selected");
+      this.selected = null;
     }
-    if (div) {
-      div.id = "selected_treenode";
-      div.treeLine.className = "selected";
-      div.tree.selected = div;
-      var functionName = div.treeLine.querySelector(".functionName");
-      this._scrollIntoView(div.tree.root, functionName, 400);
-      this._fireEvent("select", div.data);
+    if (li) {
+      li.id = "selected_treenode";
+      li.treeLine.classList.add("selected");
+      li.tree.selected = li;
+      var functionName = li.treeLine.querySelector(".functionName");
+      this._scrollIntoView(li.tree.root, functionName, 400);
+      this._fireEvent("select", li.data);
     }
   },
   _selected: function Tree__selected() {
