@@ -31,7 +31,7 @@ ProfileTreeManager.prototype = {
   },
   render: function ProfileTreeManager_render(tree) {
     this.treeView.display(this.convertToJSTreeData(tree));
-  }
+  },
   convertToJSTreeData: function ProfileTreeManager__convertToJSTreeData(tree) {
     var roots = [];
     var object = {};
@@ -622,6 +622,7 @@ function updateDescription() {
   //populate_skip_symbol();
 }
 
+var gRawProfile = "";
 var gSamples = [];
 var gHighlightedCallstack = [];
 var gSkipSymbols = ["test2", "test1"];
@@ -646,8 +647,9 @@ var gVisibleRange = {
   } 
 };
 
-function parse() {
-  gSamples = Parser.parse(document.getElementById("data").value);
+function loadProfile(rawProfile) {
+  gRawProfile = rawProfile;
+  gSamples = Parser.parse(rawProfile);
   displaySample(0, gSamples.length);
 }
 
@@ -694,9 +696,12 @@ function selectSample(sample) {
   //displaySample(gVisibleRange.start, gVisibleRange.end);
 }
 
-function displaySample(start, end) {
+function enterMainUI() {
   document.getElementById("dataentry").className = "hidden";
   document.getElementById("ui").className = "";
+}
+
+function displaySample(start, end) {
 
   var data = gVisibleRange.filter(start, end);
 
