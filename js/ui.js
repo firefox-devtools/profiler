@@ -93,7 +93,6 @@ HistogramRenderer.prototype = {
       var histogramData = [];
       var prevName = "";
       var prevRes = -1;
-      var parser = new Parser();
       var maxHeight = 1;
       for (var i = 0; i < data.length; ++i) {
         var value = data[i].frames.length;
