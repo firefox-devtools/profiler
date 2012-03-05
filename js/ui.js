@@ -173,7 +173,8 @@ HistogramRenderer.prototype = {
     } catch (err) {
     }
     showallButton.addEventListener("click", function showall_onClick() {
-      displaySample(0, gSamples.length);
+      gVisibleRange.restrictTo(0, gSamples.length);
+      displaySample();
       document.getElementById("showall").className = "hidden";
     }, false);
     showallButton.setAttribute("title", "Show all of the samples");
@@ -457,7 +458,8 @@ RangeSelector.prototype = {
     var start = sampleIndexFromPoint(hiliteRect.getAttribute("x"));
     var end = sampleIndexFromPoint(parseFloat(hiliteRect.getAttribute("x")) +
                                    parseFloat(hiliteRect.getAttribute("width")));
-    displaySample(start, end + 1);
+    gVisibleRange.restrictTo(start, end + 1);
+    displaySample();
 
     var self = this;
     var showall = document.getElementById("showall");
@@ -471,13 +473,14 @@ RangeSelector.prototype = {
     showall.className = "";
   },
   resetFilter: function RangeSelector_resetFilter() {
-    displaySample(0, gSamples.length);
+    gVisibleRange.restrictTo(0, gSamples.length);
+    displaySample();
     document.getElementById("showall").className = "hidden";
   }
 };
 
-function maxResponsiveness(start, end) {
-  var data = gVisibleRange.filter(start, end);
+function maxResponsiveness() {
+  var data = gVisibleRange.getFilteredData();
   var maxRes = 0.0;
   for (var i = 0; i < data.length; ++i) {
     if (data[i].extraInfo["responsiveness"] == null) continue;
@@ -487,8 +490,8 @@ function maxResponsiveness(start, end) {
   return maxRes;
 }
 
-function avgResponsiveness(start, end) {
-  var data = gVisibleRange.filter(start, end);
+function avgResponsiveness() {
+  var data = gVisibleRange.getFilteredData();
   var totalRes = 0.0;
   for (var i = 0; i < data.length; ++i) {
     if (data[i].extraInfo["responsiveness"] == null) continue;
@@ -565,7 +568,7 @@ function filterOnChange() {
 function filterUpdate() {
   gFilterChangeCallback = null;
 
-  displaySample(gVisibleRange.start, gVisibleRange.end); 
+  displaySample(); 
 
   filterNameInput = document.getElementById("filterName");
   if (filterNameInput != null) {
@@ -630,10 +633,12 @@ var gSkipSymbols = ["test2", "test1"];
 var gVisibleRange = {
   start: -1,
   end: -1,
-  filter: function(start, end) {
+  restrictTo: function(start, end) {
     this.start = start;
     this.end = end;
-    return gSamples.slice(start, end);
+  },
+  getFilteredData: function () {
+    return gSamples.slice(this.start, this.end);
   },
   isShowAll: function() {
     return (this.start == -1 && this.end == -1) || (this.start <= 0 && this.end >= gSamples.length);
@@ -656,25 +661,25 @@ function loadProfile(rawProfile) {
 var gInvertCallstack = false;
 function toggleInvertCallStack() {
   gInvertCallstack = !gInvertCallstack;
-  displaySample(gVisibleRange.start, gVisibleRange.end); 
+  displaySample();
 }
 
 var gMergeUnbranched = false;
 function toggleMergeUnbranched() {
   gMergeUnbranched = !gMergeUnbranched;
-  displaySample(gVisibleRange.start, gVisibleRange.end); 
+  displaySample(); 
 }
 
 var gMergeFunctions = true;
 function toggleMergeFunctions() {
   gMergeFunctions = !gMergeFunctions;
-  displaySample(gVisibleRange.start, gVisibleRange.end); 
+  displaySample(); 
 }
 
 function setHighlightedCallstack(samples) {
   gHighlightedCallstack = samples;
 
-  var data = gVisibleRange.filter(gVisibleRange.start, gVisibleRange.end);
+  var data = gVisibleRange.getFilteredData();
   var histogram = document.getElementById("histogram");
   var histogramRenderer = new HistogramRenderer();
   var filteredData = data;
@@ -692,20 +697,18 @@ function setHighlightedCallstack(samples) {
 
 function selectSample(sample) {
   gHighlightedCallstack = sample;
-  
-  //displaySample(gVisibleRange.start, gVisibleRange.end);
 }
 
 function enterMainUI() {
   document.getElementById("dataentry").className = "hidden";
   document.getElementById("ui").className = "";
   gTreeManager = new ProfileTreeManager(document.getElementById("tree"));
-  displaySample(0, gSamples.length);
+  gVisibleRange.restrictTo(0, gSamples.length);
+  displaySample();
 }
 
-function displaySample(start, end) {
-
-  var data = gVisibleRange.filter(start, end);
+function displaySample() {
+  var data = gVisibleRange.getFilteredData();
 
   var treeData;
   var filteredData = data;
