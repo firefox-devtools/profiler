@@ -625,6 +625,7 @@ function updateDescription() {
 var gRawProfile = "";
 var gSamples = [];
 var gHighlightedCallstack = [];
+var gTreeManager = null;
 var gSkipSymbols = ["test2", "test1"];
 var gVisibleRange = {
   start: -1,
@@ -650,7 +651,6 @@ var gVisibleRange = {
 function loadProfile(rawProfile) {
   gRawProfile = rawProfile;
   gSamples = Parser.parse(rawProfile);
-  displaySample(0, gSamples.length);
 }
 
 var gInvertCallstack = false;
@@ -699,6 +699,8 @@ function selectSample(sample) {
 function enterMainUI() {
   document.getElementById("dataentry").className = "hidden";
   document.getElementById("ui").className = "";
+  gTreeManager = new ProfileTreeManager(document.getElementById("tree"));
+  displaySample(0, gSamples.length);
 }
 
 function displaySample(start, end) {
@@ -718,8 +720,7 @@ function displaySample(start, end) {
   if (gMergeUnbranched) {
     Parser.mergeUnbranchedCallPaths(treeData);
   }
-  var treeManager = new ProfileTreeManager(document.getElementById("tree"));
-  treeManager.render(treeData);
+  gTreeManager.render(treeData);
   var histogram = document.getElementById("histogram");
   var width = histogram.clientWidth,
       height = histogram.clientHeight;
