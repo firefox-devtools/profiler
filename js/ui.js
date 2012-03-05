@@ -44,7 +44,6 @@ TreeFeeder.prototype = {
           curObj.name = node.name;
           curObj.library = "";
         }
-        curObj.onClick = TreeFeeder.prototype.onClick;
         if (node.children.length) {
           curObj.children = [];
           for (var i = 0; i < node.children.length; ++i) {
