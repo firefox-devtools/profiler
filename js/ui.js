@@ -30,46 +30,46 @@ TreeFeeder.prototype = {
     setHighlightedCallstack(selectedCallstack.reverse());
   },
   render: function TreeFeeder_render(tree) {
-    function convertToJSTreeData(tree) {
-      var roots = [];
-      var object = {};
-      function childVisitor(node, curObj) {
-        curObj.counter = node.counter;
-        var selfCounter = node.counter;
-        for (var i = 0; i < node.children.length; ++i) {
-          selfCounter -= node.children[i].counter;
-        }
-        curObj.selfCounter = selfCounter;
-        curObj.ratio = node.counter / node.totalSamples;
-        curObj.fullFrameNameAsInSample = node.name;
-        var functionAndLibrary = node.name.split(" (in ");
-        if (functionAndLibrary.length == 2) {
-          curObj.name = functionAndLibrary[0];
-          curObj.library = functionAndLibrary[1].substr(0, functionAndLibrary[1].length - 1);
-        } else {
-          curObj.name = node.name;
-          curObj.library = "";
-        }
-        if (node.children.length) {
-          curObj.children = [];
-          for (var i = 0; i < node.children.length; ++i) {
-            var child = node.children[i];
-            var newObj = {};
-            childVisitor(child, newObj);
-            newObj.parent = curObj;
-            curObj.children.push(newObj);
-          }
-          curObj.children.sort(treeObjSort);
-          curObj.children = curObj.children.splice(0, 20);
-        }
-      }
-      childVisitor(tree, object);
-      roots.push(object);
-      roots.sort(treeObjSort);
-      return {data: roots};
-    }
-    this.treeView.display(convertToJSTreeData(tree));
+    this.treeView.display(this.convertToJSTreeData(tree));
   }
+  convertToJSTreeData: function TreeFeeder__convertToJSTreeData(tree) {
+    var roots = [];
+    var object = {};
+    function childVisitor(node, curObj) {
+      curObj.counter = node.counter;
+      var selfCounter = node.counter;
+      for (var i = 0; i < node.children.length; ++i) {
+        selfCounter -= node.children[i].counter;
+      }
+      curObj.selfCounter = selfCounter;
+      curObj.ratio = node.counter / node.totalSamples;
+      curObj.fullFrameNameAsInSample = node.name;
+      var functionAndLibrary = node.name.split(" (in ");
+      if (functionAndLibrary.length == 2) {
+        curObj.name = functionAndLibrary[0];
+        curObj.library = functionAndLibrary[1].substr(0, functionAndLibrary[1].length - 1);
+      } else {
+        curObj.name = node.name;
+        curObj.library = "";
+      }
+      if (node.children.length) {
+        curObj.children = [];
+        for (var i = 0; i < node.children.length; ++i) {
+          var child = node.children[i];
+          var newObj = {};
+          childVisitor(child, newObj);
+          newObj.parent = curObj;
+          curObj.children.push(newObj);
+        }
+        curObj.children.sort(treeObjSort);
+        curObj.children = curObj.children.splice(0, 20);
+      }
+    }
+    childVisitor(tree, object);
+    roots.push(object);
+    roots.sort(treeObjSort);
+    return {data: roots};
+  },
 };
 
 function HistogramRenderer() {}
