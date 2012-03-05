@@ -63,11 +63,12 @@ TreeRenderer.prototype = {
       roots.sort(treeObjSort);
       return {data: roots};
     }
-    var treeView = new Tree(container, convertToJSTreeData(tree));
+    var treeView = new TreeView(container);
     var self = this;
     treeView.addEventListener("select", function (frameData) {
       self.highlightFrame(frameData);
     });
+    treeView.display(convertToJSTreeData(tree));
   }
 };
 
