@@ -10,7 +10,13 @@ function treeObjSort(a, b) {
   return b.counter - a.counter;
 }
 
-function TreeFeeder() {}
+function TreeFeeder(container) {
+  this.treeView = new TreeView(container);
+  var self = this;
+  this.treeView.addEventListener("select", function (frameData) {
+    self.highlightFrame(frameData);
+  });
+}
 TreeFeeder.prototype = {
   highlightFrame: function TreeRender_highlightFrame(frameData) {
     var selectedCallstack = [];
@@ -23,7 +29,7 @@ TreeFeeder.prototype = {
     }
     setHighlightedCallstack(selectedCallstack.reverse());
   },
-  render: function TreeFeeder_render(tree, container) {
+  render: function TreeFeeder_render(tree) {
     function convertToJSTreeData(tree) {
       var roots = [];
       var object = {};
@@ -62,12 +68,7 @@ TreeFeeder.prototype = {
       roots.sort(treeObjSort);
       return {data: roots};
     }
-    var treeView = new TreeView(container);
-    var self = this;
-    treeView.addEventListener("select", function (frameData) {
-      self.highlightFrame(frameData);
-    });
-    treeView.display(convertToJSTreeData(tree));
+    this.treeView.display(convertToJSTreeData(tree));
   }
 };
 
@@ -715,9 +716,8 @@ function displaySample(start, end) {
   if (gMergeUnbranched) {
     parser.mergeUnbranchedCallPaths(treeData);
   }
-  var tree = document.getElementById("tree");
-  var treeFeeder = new TreeFeeder();
-  treeFeeder.render(treeData, tree);
+  var treeFeeder = new TreeFeeder(document.getElementById("tree"));
+  treeFeeder.render(treeData);
   var histogram = document.getElementById("histogram");
   var width = histogram.clientWidth,
       height = histogram.clientHeight;
