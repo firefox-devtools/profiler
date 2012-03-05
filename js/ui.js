@@ -173,7 +173,7 @@ HistogramRenderer.prototype = {
     } catch (err) {
     }
     showallButton.addEventListener("click", function showall_onClick() {
-      gVisibleRange.restrictTo(0, gSamples.length);
+      gVisibleRange.unrestrict();
       displaySample();
       document.getElementById("showall").className = "hidden";
     }, false);
@@ -448,7 +448,7 @@ RangeSelector.prototype = {
   filterCurrentRange: function RangeSelector_filterCurrentRange(graph) {
     // First, retrieve the current range of filtered samples
     function sampleIndexFromPoint(x) {
-      var totalSamples = parseFloat(gVisibleRange.end - gVisibleRange.start - 1);
+      var totalSamples = parseFloat(gVisibleRange.numSamples());
       var width = parseFloat(graph.parentNode.clientWidth);
       var factor = totalSamples / width;
       return gVisibleRange.start + parseInt(parseFloat(x) * factor);
@@ -473,7 +473,7 @@ RangeSelector.prototype = {
     showall.className = "";
   },
   resetFilter: function RangeSelector_resetFilter() {
-    gVisibleRange.restrictTo(0, gSamples.length);
+    gVisibleRange.unrestrict();
     displaySample();
     document.getElementById("showall").className = "hidden";
   }
@@ -637,15 +637,25 @@ var gVisibleRange = {
     this.start = start;
     this.end = end;
   },
+  unrestrict: function () {
+    this.restrictTo(-1, -1);
+  },
   getFilteredData: function () {
+    if (this.isShowAll())
+      return gSamples;
     return gSamples.slice(this.start, this.end);
   },
   isShowAll: function() {
     return (this.start == -1 && this.end == -1) || (this.start <= 0 && this.end >= gSamples.length);
   },
+  numSamples: function () {
+    if (this.isShowAll())
+      return gSamples.length - 1; // why - 1?
+    return this.end - this.start - 1;
+  },
   getTextData: function() {
     var data = [];
-    var samples = gSamples.slice(this.start, this.end);
+    var samples = this.getFilteredData();
     for (var i = 0; i < samples.length; i++) {
       data.push(samples[i].lines.join("\n"));
     }
@@ -703,7 +713,7 @@ function enterMainUI() {
   document.getElementById("dataentry").className = "hidden";
   document.getElementById("ui").className = "";
   gTreeManager = new ProfileTreeManager(document.getElementById("tree"));
-  gVisibleRange.restrictTo(0, gSamples.length);
+  gVisibleRange.unrestrict();
   displaySample();
 }
 
