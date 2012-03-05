@@ -647,8 +647,7 @@ var gVisibleRange = {
 };
 
 function parse() {
-  var parser = new Parser();
-  gSamples = parser.parse(document.getElementById("data").value);
+  gSamples = Parser.parse(document.getElementById("data").value);
   displaySample(0, gSamples.length);
 }
 
@@ -673,17 +672,16 @@ function toggleMergeFunctions() {
 function setHighlightedCallstack(samples) {
   gHighlightedCallstack = samples;
 
-  var parser = new Parser();
   var data = gVisibleRange.filter(gVisibleRange.start, gVisibleRange.end);
   var histogram = document.getElementById("histogram");
   var histogramRenderer = new HistogramRenderer();
   var filteredData = data;
   var filterNameInput = document.getElementById("filterName");
   if (filterNameInput != null && filterNameInput.value != "") {
-    filteredData = parser.filterByName(data, document.getElementById("filterName").value);
+    filteredData = Parser.filterByName(data, document.getElementById("filterName").value);
   }
   if (gMergeFunctions) {
-    filteredData = parser.discardLineLevelInformation(filteredData);
+    filteredData = Parser.discardLineLevelInformation(filteredData);
   }
   histogramRenderer.render(filteredData, histogram, gHighlightedCallstack,
                            document.getElementById("markers"));
@@ -702,19 +700,18 @@ function displaySample(start, end) {
 
   var data = gVisibleRange.filter(start, end);
 
-  var parser = new Parser();
   var treeData;
   var filteredData = data;
   var filterNameInput = document.getElementById("filterName");
   if (filterNameInput != null && filterNameInput.value != "") {
-    filteredData = parser.filterByName(data, document.getElementById("filterName").value);
+    filteredData = Parser.filterByName(data, document.getElementById("filterName").value);
   }
   if (gMergeFunctions) {
-    filteredData = parser.discardLineLevelInformation(filteredData);
+    filteredData = Parser.discardLineLevelInformation(filteredData);
   }
-  treeData = parser.convertToCallTree(filteredData, gInvertCallstack);
+  treeData = Parser.convertToCallTree(filteredData, gInvertCallstack);
   if (gMergeUnbranched) {
-    parser.mergeUnbranchedCallPaths(treeData);
+    Parser.mergeUnbranchedCallPaths(treeData);
   }
   var treeManager = new ProfileTreeManager(document.getElementById("tree"));
   treeManager.render(treeData);

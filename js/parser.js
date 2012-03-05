@@ -64,8 +64,7 @@ TreeNode.prototype.incrementCountersInParentChain = function TreeNode_incrementC
     this.parent.incrementCountersInParentChain();
 };
 
-function Parser() {}
-Parser.prototype = {
+var Parser = {
   parse: function Parser_parse(data) {
     var lines = data.split("\n");
     var extraInfo = {};
