@@ -202,9 +202,9 @@ TreeView.prototype = {
       return this._getNextSib(div.treeParent);
     return div.treeParent.treeChildren[nodeIndex+1];
   },
-  _scrollIntoView: function TreeView__scrollIntoView(parentScrollbox, element, maxImportantWidth) {
-    // Make sure that element is inside the visible part of parentScrollbox by
-    // adjusting the scroll position of parentScrollbox. If element is wider or
+  _scrollIntoView: function TreeView__scrollIntoView(element, maxImportantWidth) {
+    // Make sure that element is inside the visible part of our scrollbox by
+    // adjusting the scroll positions. If element is wider or
     // higher than the scroll port, the left and top edges are prioritized over
     // the right and bottom edges.
     // If maxImportantWidth is set, parts of the beyond this widths are
@@ -213,44 +213,41 @@ TreeView.prototype = {
     if (maxImportantWidth === undefined)
       maxImportantWidth = Infinity;
 
-    // We can't use getBoundingClientRect() on the parentScrollbox because that
-    // would give us the outer size of the scrollbox, and not the actually
-    // visible part of the scroll viewport (which might be smaller due to
-    // scrollbars). So we use offsetLeft/Top and clientWidth/Height.
+    var visibleRect = {
+      left: this._horizontalScrollbox.offsetLeft + 150, // TODO: un-hardcode 150
+      top: this._verticalScrollbox.offsetTop,
+      right: this._horizontalScrollbox.getBoundingClientRect().right,
+      bottom: this._verticalScrollbox.getBoundingClientRect().bottom
+    }
     var r = element.getBoundingClientRect();
     var right = Math.min(r.right, r.left + maxImportantWidth);
-    var leftCutoff = parentScrollbox.offsetLeft - r.left;
-    var rightCutoff = right - (parentScrollbox.offsetLeft + parentScrollbox.clientWidth);
-    var topCutoff = parentScrollbox.offsetTop - r.top;
-    var bottomCutoff = r.bottom - (parentScrollbox.offsetTop + parentScrollbox.clientHeight);
+    var leftCutoff = visibleRect.left - r.left;
+    var rightCutoff = right - visibleRect.right;
+    var topCutoff = visibleRect.top - r.top;
+    var bottomCutoff = r.bottom - visibleRect.bottom;
     if (leftCutoff > 0)
-      parentScrollbox.scrollLeft -= leftCutoff;
+      this._horizontalScrollbox.scrollLeft -= leftCutoff;
     else if (rightCutoff > 0)
-      parentScrollbox.scrollLeft += Math.min(rightCutoff, -leftCutoff);
+      this._horizontalScrollbox.scrollLeft += Math.min(rightCutoff, -leftCutoff);
     if (topCutoff > 0)
-      parentScrollbox.scrollTop -= topCutoff;
+      this._verticalScrollbox.scrollTop -= topCutoff;
     else if (bottomCutoff > 0)
-      parentScrollbox.scrollTop += Math.min(bottomCutoff, -topCutoff);
+      this._verticalScrollbox.scrollTop += Math.min(bottomCutoff, -topCutoff);
   },
   _select: function TreeView__select(li) {
     if (li.tree != this)
       throw "supplied element isn't part of this tree";
-    if (this.selected != null) {
-      this.selected.id = "";
-      this.selected.treeLine.classList.remove("selected");
-      this.selected = null;
+    if (this._selectedNode != null) {
+      this._selectedNode.treeLine.classList.remove("selected");
+      this._selectedNode = null;
     }
     if (li) {
-      li.id = "selected";
       li.treeLine.classList.add("selected");
-      li.tree.selected = li;
+      li.tree._selectedNode = li;
       var functionName = li.treeLine.querySelector(".functionName");
-      this._scrollIntoView(li.tree._verticalScrollbox, functionName, 400);
+      this._scrollIntoView(functionName, 400);
       this._fireEvent("select", li.data);
     }
-  },
-  _selected: function TreeView__selected() {
-    return this.selected;
   },
   _isCollapsed: function TreeView__isCollapsed(div) {
     return div.classList.contains("collapsed");
@@ -282,7 +279,7 @@ TreeView.prototype = {
     }
   },
   _onkeypress: function TreeView__onkeypress(event) {
-    var selected = this._selected();
+    var selected = this._selectedNode;
     if (event.keyCode < 37 || event.keyCode > 40) {
       if (event.keyCode != 0 ||
           String.fromCharCode(event.charCode) != '*') {

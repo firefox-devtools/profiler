@@ -70,6 +70,10 @@
   display: block;
   margin: 0;
   padding: 0;
+}
+
+.treeViewNodeList,
+.treeViewNode {
   min-width: -moz-min-content;
 }
 
