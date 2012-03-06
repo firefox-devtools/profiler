@@ -66,19 +66,20 @@
 
 .subtreeList,
 .subtreeContainer,
-#tree ol.root {
+.treeViewHorizontalScrollbox {
   display: block;
   margin: 0;
   padding: 0;
   min-width: -moz-min-content;
 }
 
-#tree ol.root {
+.treeViewHorizontalScrollbox {
   padding-left: 150px;
   overflow: hidden;
 }
 
-.treeViewVerticalScrollbox, ol.root {
+.treeViewVerticalScrollbox,
+.treeViewHorizontalScrollbox {
   background: -moz-linear-gradient(white, white 50%, #F0F5FF 50%, #F0F5FF);
   background-size: 100px 32px;
 }
@@ -125,12 +126,13 @@
   color: #999;
 }
 
-.subtreeContainer.collapsed > .subtreeList {
-  display: none;
-}
 .subtreeContainer > .subtreeList {
   margin-left: 1em;
   white-space: nowrap;
+}
+
+.subtreeContainer.collapsed > .subtreeList {
+  display: none;
 }
 
 .treeLine {
