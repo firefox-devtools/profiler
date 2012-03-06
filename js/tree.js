@@ -110,7 +110,7 @@ TreeView.prototype = {
   },
   _createTree: function TreeView__createTree(data) {
     var li = document.createElement("li");
-    li.className = "subtreeContainer collapsed";
+    li.className = "treeViewNode collapsed";
     var hasChildren = ("children" in data) && (data.children.length > 0);
     if (!hasChildren)
       li.classList.add("leaf");
@@ -125,7 +125,7 @@ TreeView.prototype = {
     li.tree = this;
     if (hasChildren) {
       var ol = document.createElement("ol");
-      ol.className = "subtreeList";
+      ol.className = "treeViewNodeList";
       for (var i = 0; i < data.children.length; ++i) {
         var innerTree = this._createTree(data.children[i]);
         if (innerTree) {
@@ -163,7 +163,7 @@ TreeView.prototype = {
     if (newCollapsedValue === undefined)
       newCollapsedValue = !this._isCollapsed(subtreeRoot);
     this._toggle(subtreeRoot, newCollapsedValue);
-    var subtree = subtreeRoot.querySelectorAll('.subtreeContainer');
+    var subtree = subtreeRoot.querySelectorAll('.treeViewNode');
     for (var i = 0; i < subtree.length; ++i) {
       this._toggle(subtree[i], newCollapsedValue, true);
     }
@@ -241,7 +241,7 @@ TreeView.prototype = {
       this.selected = null;
     }
     if (li) {
-      li.id = "selected_treenode";
+      li.id = "selected";
       li.treeLine.classList.add("selected");
       li.tree.selected = li;
       var functionName = li.treeLine.querySelector(".functionName");
@@ -250,16 +250,16 @@ TreeView.prototype = {
     }
   },
   _selected: function TreeView__selected() {
-    return document.getElementById("selected_treenode");
+    return this.selected;
   },
   _isCollapsed: function TreeView__isCollapsed(div) {
     return div.classList.contains("collapsed");
   },
-  _getParentSubtreeContainer: function TreeView__getParentSubtreeContainer(node) {
+  _getParenttreeViewNode: function TreeView__getParenttreeViewNode(node) {
     while (node) {
       if (node.nodeType != node.ELEMENT_NODE)
         break;
-      if (node.classList.contains("subtreeContainer"))
+      if (node.classList.contains("treeViewNode"))
         return node;
       node = node.parentNode;
     }
@@ -267,7 +267,7 @@ TreeView.prototype = {
   },
   _onclick: function TreeView__onclick(event) {
     var target = event.target;
-    var node = this._getParentSubtreeContainer(target);
+    var node = this._getParenttreeViewNode(target);
     if (!node)
       return;
     if (target.classList.contains("expandCollapseButton")) {
