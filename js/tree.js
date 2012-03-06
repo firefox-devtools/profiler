@@ -6,7 +6,7 @@ function TreeView() {
   this._container.setAttribute("tabindex", "0"); // make it focusable
 
   this._header = document.createElement("ul");
-  this._header.id = "treeHeader";
+  this._header.className = "treeHeader";
   this._container.appendChild(this._header);
 
   this._verticalScrollbox = document.createElement("div");
