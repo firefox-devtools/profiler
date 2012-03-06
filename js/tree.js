@@ -279,6 +279,9 @@ TreeView.prototype = {
     }
   },
   _onkeypress: function TreeView__onkeypress(event) {
+    if (event.ctrlKey || event.altKey || event.shiftKey || event.metaKey)
+      return;
+
     var selected = this._selectedNode;
     if (event.keyCode < 37 || event.keyCode > 40) {
       if (event.keyCode != 0 ||
