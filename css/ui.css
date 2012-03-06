@@ -22,11 +22,6 @@ body {
   right: 0;
   bottom: 150px;
   left: 0;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  -moz-user-select: none;
-  cursor: default;
-  line-height: 16px;
 }
 #treeHeader {
   position: absolute;

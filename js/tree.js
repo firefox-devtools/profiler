@@ -1,33 +1,35 @@
-function TreeView(container) {
-  this.container = container;
+function TreeView() {
   this._eventListeners = {};
+  this._container = document.createElement("div");
+  this._container.className = "treeViewContainer";
+  this._container.setAttribute("tabindex", "0"); // make it focusable
+  this._leftColumnBackground = document.createElement("div");
+  this._leftColumnBackground.className = "leftColumnBackground";
+  this._container.appendChild(this._leftColumnBackground);
+  this._rootOl = document.createElement("ol");
+  this._rootOl.className = "root";
+  this._container.appendChild(this._rootOl);
+  var self = this;
+  this._container.onkeypress = function (e) {
+    self._onkeypress(e);
+  };
+  this._container.onclick = function (e) {
+    self._onclick(e);
+  };
+  this._setUpScrolling();
 };
 
 TreeView.prototype = {
+  getContainer: function TreeView_getContainer() {
+    return this._container;
+  },
   display: function TreeView_display(data) {
-    if (this.container.cleanUp) {
-      this.container.cleanUp();
-      this.container.cleanUp = null;
-    }
-    while (this.container.querySelector("ol.root")) {
-      this.container.removeChild(this.container.querySelector("ol.root"));
-    }
-    var treeRoot = document.createElement("ol");
-    treeRoot.className = "root";
-    this.container.appendChild(treeRoot);
+    this._rootOl.innerHTML = "";
     var firstElem = this._createTree(data.data[0]); 
-    treeRoot.appendChild(firstElem);
+    this._rootOl.appendChild(firstElem);
     this._select(firstElem);
     this._toggle(firstElem);
-    var self = this;
-    this.container.onkeypress = function (e) {
-      self._onkeypress(e);
-    };
-    this.container.onclick = function (e) {
-      self._onclick(e);
-    };
-    this.container.focus();
-    this._setUpScrolling();
+    this._container.focus();
   },
   addEventListener: function TreeView_addEventListener(eventName, callbackFunction) {
     if (!(eventName in this._eventListeners))
@@ -55,13 +57,12 @@ TreeView.prototype = {
     var waitingForPaint = false;
     var accumulatedDeltaX = 0;
     var accumulatedDeltaY = 0;
-    var root = this.container;
-    var rootOl = this.container.querySelector("ol.root");
+    var self = this;
     function scrollListener(e) {
       if (!waitingForPaint) {
         window.mozRequestAnimationFrame(function () {
-          rootOl.scrollLeft += accumulatedDeltaX;
-          root.scrollTop += accumulatedDeltaY;
+          self._rootOl.scrollLeft += accumulatedDeltaX;
+          self._container.scrollTop += accumulatedDeltaY;
           accumulatedDeltaX = 0;
           accumulatedDeltaY = 0;
           waitingForPaint = false;
@@ -75,13 +76,13 @@ TreeView.prototype = {
       }
       e.preventDefault();
     }
-    this.container.addEventListener("MozMousePixelScroll", scrollListener, false);
-    this.container.cleanUp = function () {
-      root.removeEventListener("MozMousePixelScroll", scrollListener, false);
+    this._container.addEventListener("MozMousePixelScroll", scrollListener, false);
+    this._container.cleanUp = function () {
+      self._container.removeEventListener("MozMousePixelScroll", scrollListener, false);
     };
   },
   _scrollHeightChanged: function TreeView__scrollHeightChanged() {
-    this.container.querySelector("#leftColumnBackground").style.height = this.container.querySelector("ol.root").getBoundingClientRect().height + 'px';
+    this._leftColumnBackground.style.height = this._rootOl.getBoundingClientRect().height + 'px';
   },
   _createTree: function TreeView__createTree(data) {
     var li = document.createElement("li");
@@ -219,7 +220,7 @@ TreeView.prototype = {
       li.treeLine.classList.add("selected");
       li.tree.selected = li;
       var functionName = li.treeLine.querySelector(".functionName");
-      this._scrollIntoView(li.tree.container, functionName, 400);
+      this._scrollIntoView(li.tree._container, functionName, 400);
       this._fireEvent("select", li.data);
     }
   },

@@ -11,11 +11,12 @@ function treeObjSort(a, b) {
 }
 
 function ProfileTreeManager(container) {
-  this.treeView = new TreeView(container);
+  this.treeView = new TreeView();
   var self = this;
   this.treeView.addEventListener("select", function (frameData) {
     self.highlightFrame(frameData);
   });
+  container.appendChild(this.treeView.getContainer());
 }
 ProfileTreeManager.prototype = {
   highlightFrame: function TreeRender_highlightFrame(frameData) {
