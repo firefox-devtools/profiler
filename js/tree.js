@@ -1,14 +1,26 @@
 function TreeView() {
   this._eventListeners = {};
+
   this._container = document.createElement("div");
   this._container.className = "treeViewContainer";
   this._container.setAttribute("tabindex", "0"); // make it focusable
+
+  this._header = document.createElement("ul");
+  this._header.id = "treeHeader";
+  this._container.appendChild(this._header);
+
+  this._verticalScrollbox = document.createElement("div");
+  this._verticalScrollbox.className = "treeViewVerticalScrollbox";
+  this._container.appendChild(this._verticalScrollbox);
+
   this._leftColumnBackground = document.createElement("div");
   this._leftColumnBackground.className = "leftColumnBackground";
-  this._container.appendChild(this._leftColumnBackground);
+  this._verticalScrollbox.appendChild(this._leftColumnBackground);
+
   this._rootOl = document.createElement("ol");
   this._rootOl.className = "root";
-  this._container.appendChild(this._rootOl);
+  this._verticalScrollbox.appendChild(this._rootOl);
+
   var self = this;
   this._container.onkeypress = function (e) {
     self._onkeypress(e);
@@ -22,6 +34,19 @@ function TreeView() {
 TreeView.prototype = {
   getContainer: function TreeView_getContainer() {
     return this._container;
+  },
+  setColumns: function TreeView_setColumns(columns) {
+    this._header.innerHTML = "";
+    for (var columnID in columns) {
+      var columnName = columns[columnID];
+      var li = document.createElement("li");
+      li.className = "treeColumnHeader";
+      li.id = columnID + "Header";
+      var span = document.createElement("span");
+      span.textContent = columnName;
+      li.appendChild(span);
+      this._header.appendChild(li);
+    }
   },
   display: function TreeView_display(data) {
     this._rootOl.innerHTML = "";
@@ -62,7 +87,7 @@ TreeView.prototype = {
       if (!waitingForPaint) {
         window.mozRequestAnimationFrame(function () {
           self._rootOl.scrollLeft += accumulatedDeltaX;
-          self._container.scrollTop += accumulatedDeltaY;
+          self._verticalScrollbox.scrollTop += accumulatedDeltaY;
           accumulatedDeltaX = 0;
           accumulatedDeltaY = 0;
           waitingForPaint = false;
@@ -76,9 +101,9 @@ TreeView.prototype = {
       }
       e.preventDefault();
     }
-    this._container.addEventListener("MozMousePixelScroll", scrollListener, false);
-    this._container.cleanUp = function () {
-      self._container.removeEventListener("MozMousePixelScroll", scrollListener, false);
+    this._verticalScrollbox.addEventListener("MozMousePixelScroll", scrollListener, false);
+    this._verticalScrollbox.cleanUp = function () {
+      self._verticalScrollbox.removeEventListener("MozMousePixelScroll", scrollListener, false);
     };
   },
   _scrollHeightChanged: function TreeView__scrollHeightChanged() {
@@ -220,7 +245,7 @@ TreeView.prototype = {
       li.treeLine.classList.add("selected");
       li.tree.selected = li;
       var functionName = li.treeLine.querySelector(".functionName");
-      this._scrollIntoView(li.tree._container, functionName, 400);
+      this._scrollIntoView(li.tree._verticalScrollbox, functionName, 400);
       this._fireEvent("select", li.data);
     }
   },
