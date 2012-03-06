@@ -17,7 +17,7 @@
   padding: 0;
 }
 
-#treeHeader > li {
+.treeColumnHeader {
   position: absolute;
   display: block;
   -moz-appearance: treeheadercell;
@@ -28,29 +28,29 @@
   line-height: 15px;
 }
 
-#sampleCountHeader {
+.treeColumnHeader0 {
   left: 0;
   width: 99px;
   text-align: right;
 }
 
-#selfSampleCountHeader {
+.treeColumnHeader1 {
   left: 99px;
   width: 48px;
   text-align: right;
 }
 
-#sampleCountHeader > span,
-#selfSampleCountHeader > span {
+.treeColumnHeader0 > span,
+.treeColumnHeader1 > span {
   padding-right: 12px;
 }
 
-#symbolNameHeader {
+.treeColumnHeader2 {
   left: 147px;
   right: 0;
 }
 
-#symbolNameHeader > span {
+.treeColumnHeader2 > span {
   padding-left: 2px;
 }
 

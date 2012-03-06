@@ -37,13 +37,12 @@ TreeView.prototype = {
   },
   setColumns: function TreeView_setColumns(columns) {
     this._header.innerHTML = "";
-    for (var columnID in columns) {
-      var columnName = columns[columnID];
+    for (var i = 0; i < columns.length; i++) {
       var li = document.createElement("li");
-      li.className = "treeColumnHeader";
-      li.id = columnID + "Header";
+      li.className = "treeColumnHeader treeColumnHeader" + i;
+      li.id = columns[i].name + "Header";
       var span = document.createElement("span");
-      span.textContent = columnName;
+      span.textContent = columns[i].title;
       li.appendChild(span);
       this._header.appendChild(li);
     }
