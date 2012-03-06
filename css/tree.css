@@ -64,15 +64,12 @@
   overflow-x: hidden;
 }
 
-#tree ol,
-#tree li {
+.subtreeList,
+.subtreeContainer,
+#tree ol.root {
   display: block;
   margin: 0;
   padding: 0;
-}
-
-#tree ol.root ol,
-#tree ol.root li {
   min-width: -moz-min-content;
 }
 
@@ -128,10 +125,10 @@
   color: #999;
 }
 
-#tree ol.root li.collapsed > ol {
+.subtreeContainer.collapsed > .subtreeList {
   display: none;
 }
-#tree ol.root li > ol {
+.subtreeContainer > .subtreeList {
   margin-left: 1em;
   white-space: nowrap;
 }
@@ -172,10 +169,10 @@
   color: transparent;
 }
 
-li.collapsed > * > .expandCollapseButton {
+.subtreeContainer.collapsed > * > .expandCollapseButton {
   -moz-appearance: treetwisty;
 }
 
-li.leaf > * > .expandCollapseButton {
+.subtreeContainer.leaf > * > .expandCollapseButton {
   visibility: hidden;
 }

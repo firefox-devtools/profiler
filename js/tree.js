@@ -125,6 +125,7 @@ TreeView.prototype = {
     li.tree = this;
     if (hasChildren) {
       var ol = document.createElement("ol");
+      ol.className = "subtreeList";
       for (var i = 0; i < data.children.length; ++i) {
         var innerTree = this._createTree(data.children[i]);
         if (innerTree) {
