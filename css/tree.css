@@ -157,12 +157,12 @@
   margin-right: -95px;
 }
 
-.treeViewContainer:focus .selected {
+.treeViewContainer:focus .treeLine.selected {
   color: highlighttext;
   background-color: highlight;
 }
 
-.treeViewContainer:focus .selected > .libraryName {
+.treeViewContainer:focus .treeLine.selected > .libraryName {
   color: #CCC;
 }
 
