@@ -180,7 +180,7 @@ HistogramRenderer.prototype = {
     }
     showallButton.addEventListener("click", function showall_onClick() {
       gVisibleRange.unrestrict();
-      displaySample();
+      refreshUI();
       document.getElementById("showall").className = "hidden";
     }, false);
     showallButton.setAttribute("title", "Show all of the samples");
@@ -465,7 +465,7 @@ RangeSelector.prototype = {
     var end = sampleIndexFromPoint(parseFloat(hiliteRect.getAttribute("x")) +
                                    parseFloat(hiliteRect.getAttribute("width")));
     gVisibleRange.restrictTo(start, end + 1);
-    displaySample();
+    refreshUI();
 
     var self = this;
     var showall = document.getElementById("showall");
@@ -480,7 +480,7 @@ RangeSelector.prototype = {
   },
   resetFilter: function RangeSelector_resetFilter() {
     gVisibleRange.unrestrict();
-    displaySample();
+    refreshUI();
     document.getElementById("showall").className = "hidden";
   }
 };
@@ -574,7 +574,7 @@ function filterOnChange() {
 function filterUpdate() {
   gFilterChangeCallback = null;
 
-  displaySample(); 
+  refreshUI(); 
 
   filterNameInput = document.getElementById("filterName");
   if (filterNameInput != null) {
@@ -677,19 +677,19 @@ function loadProfile(rawProfile) {
 var gInvertCallstack = false;
 function toggleInvertCallStack() {
   gInvertCallstack = !gInvertCallstack;
-  displaySample();
+  refreshUI();
 }
 
 var gMergeUnbranched = false;
 function toggleMergeUnbranched() {
   gMergeUnbranched = !gMergeUnbranched;
-  displaySample(); 
+  refreshUI(); 
 }
 
 var gMergeFunctions = true;
 function toggleMergeFunctions() {
   gMergeFunctions = !gMergeFunctions;
-  displaySample(); 
+  refreshUI(); 
 }
 
 function setHighlightedCallstack(samples) {
@@ -720,11 +720,14 @@ function enterMainUI() {
   document.getElementById("ui").className = "";
   gTreeManager = new ProfileTreeManager(document.getElementById("tree"));
   gVisibleRange.unrestrict();
-  displaySample();
+  refreshUI();
 }
 
-function displaySample() {
+function refreshUI() {
+  var start = Date.now();
   var data = gVisibleRange.getFilteredData();
+  console.log("visible range filtering: " + (Date.now() - start) + "ms.");
+  start = Date.now();
 
   var treeData;
   var filteredData = data;
@@ -734,12 +737,18 @@ function displaySample() {
   }
   if (gMergeFunctions) {
     filteredData = Parser.discardLineLevelInformation(filteredData);
+    console.log("line information discarding: " + (Date.now() - start) + "ms.");
+    start = Date.now();
   }
   treeData = Parser.convertToCallTree(filteredData, gInvertCallstack);
+  console.log("conversion to calltree: " + (Date.now() - start) + "ms.");
+  start = Date.now();
   if (gMergeUnbranched) {
     Parser.mergeUnbranchedCallPaths(treeData);
   }
   gTreeManager.render(treeData);
+  console.log("tree rendering: " + (Date.now() - start) + "ms.");
+  start = Date.now();
   var histogram = document.getElementById("histogram");
   var width = histogram.clientWidth,
       height = histogram.clientHeight;
@@ -748,5 +757,7 @@ function displaySample() {
   var histogramRenderer = new HistogramRenderer();
   histogramRenderer.render(filteredData, histogram, gHighlightedCallstack,
                            document.getElementById("markers"));
+  console.log("histogram rendering: " + (Date.now() - start) + "ms.");
+  start = Date.now();
   updateDescription();
 }
