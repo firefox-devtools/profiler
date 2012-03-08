@@ -23,15 +23,28 @@ body {
   bottom: 150px;
   left: 0;
 }
-#infobar {
+#fileList {
   position: absolute;
   top: 0;
   left: 0;
+  bottom: 320px;
+  width: 199px;
+  overflow: auto;
+  padding: 0;
+  margin: 0;
+  background: #DBDFE7;
+  border-right: 1px solid #BBB;
+}
+#infobar {
+  position: absolute;
+  left: 0;
   bottom: 0;
   width: 193px;
+  height: 319px;
   overflow: auto;
   padding: 3px;
   background: #EEE;
+  border-top: 1px solid #BBB;
   border-right: 1px solid #BBB;
 }
 #bottombar {
@@ -58,4 +71,24 @@ body {
 }
 .hidden {
   display: none !important;
+}
+.fileListItem {
+  display: block;
+  margin: 0;
+  padding: 0;
+  height: 40px;
+  color: #FFF;
+  text-indent: 8px;
+  text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+  background: -moz-linear-gradient(#4B91D7 1px, #5FA9E4 1px, #5FA9E4 2px, #58A0DE 3px, #2B70C7 39px, #2763B4 39px);
+}
+.fileListItemTitle {
+  display: block;
+  padding-top: 6px;
+  font-size: 12px;
+}
+.fileListItemDescription {
+  display: block;
+  line-height: 15px;
+  font-size: 9px;
 }
