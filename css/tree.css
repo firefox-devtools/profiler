@@ -167,16 +167,43 @@
 }
 
 .expandCollapseButton {
-  -moz-appearance: treetwistyopen;
+  background: url(../images/treetwisty.svg) 0 0 no-repeat transparent;
+  margin: 0;
   padding: 0;
+  border: 0;
+  width: 16px;
+  height: 16px;
   overflow: hidden;
-  margin: -3px -4px -3px 0;
   vertical-align: top;
   color: transparent;
 }
 
-.treeViewNode.collapsed > * > .expandCollapseButton {
-  -moz-appearance: treetwisty;
+.expandCollapseButton:active:hover {
+  background-position: -16px 0;
+}
+
+.treeViewNode.collapsed > .treeLine > .expandCollapseButton {
+  background-position: 0 -16px;
+}
+
+.treeViewNode.collapsed > .treeLine > .expandCollapseButton:active:hover {
+  background-position: -16px -16px;
+}
+
+.treeLine.selected > .expandCollapseButton {
+  background-position: -32px 0;
+}
+
+.treeViewNode.collapsed > .treeLine.selected > .expandCollapseButton {
+  background-position: -32px -16px;
+}
+
+.treeLine.selected > .expandCollapseButton:active:hover {
+  background-position: -48px 0;
+}
+
+.treeViewNode.collapsed > .treeLine.selected > .expandCollapseButton:active:hover {
+  background-position: -48px -16px;
 }
 
 .treeViewNode.leaf > * > .expandCollapseButton {
