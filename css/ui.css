@@ -6,9 +6,9 @@ body {
 #mainarea {
   position: absolute;
   top: 0;
-  right: 200px;
+  left: 200px;
   bottom: 0;
-  left: 0;
+  right: 0;
 }
 #dataentry {
   display: block;
@@ -26,13 +26,13 @@ body {
 #infobar {
   position: absolute;
   top: 0;
-  right: 0;
+  left: 0;
   bottom: 0;
   width: 193px;
   overflow: auto;
   padding: 3px;
   background: #EEE;
-  border-left: 1px solid #BBB;
+  border-right: 1px solid #BBB;
 }
 #bottombar {
   position: absolute;
