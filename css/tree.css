@@ -192,19 +192,19 @@
   background-position: -16px -16px;
 }
 
-.treeLine.selected > .expandCollapseButton {
+.treeViewContainer:focus .treeLine.selected > .expandCollapseButton {
   background-position: -32px 0;
 }
 
-.treeViewNode.collapsed > .treeLine.selected > .expandCollapseButton {
+.treeViewContainer:focus .treeViewNode.collapsed > .treeLine.selected > .expandCollapseButton {
   background-position: -32px -16px;
 }
 
-.treeLine.selected > .expandCollapseButton:active:hover {
+.treeViewContainer:focus .treeLine.selected > .expandCollapseButton:active:hover {
   background-position: -48px 0;
 }
 
-.treeViewNode.collapsed > .treeLine.selected > .expandCollapseButton:active:hover {
+.treeViewContainer:focus .treeViewNode.collapsed > .treeLine.selected > .expandCollapseButton:active:hover {
   background-position: -48px -16px;
 }
 
