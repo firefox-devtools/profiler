@@ -45,9 +45,7 @@ TreeView.prototype = {
       var li = document.createElement("li");
       li.className = "treeColumnHeader treeColumnHeader" + i;
       li.id = columns[i].name + "Header";
-      var span = document.createElement("span");
-      span.textContent = columns[i].title;
-      li.appendChild(span);
+      li.textContent = columns[i].title;
       this._header.appendChild(li);
     }
   },
