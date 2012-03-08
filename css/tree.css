@@ -20,38 +20,40 @@
 .treeColumnHeader {
   position: absolute;
   display: block;
-  -moz-appearance: treeheadercell;
+  background: -moz-linear-gradient(#FFF 45%, #EEE 60%);
   margin: 0;
   padding: 0;
   top: 0;
-  height: 16px;
+  height: 15px;
   line-height: 15px;
+  border: 0 solid #CCC;
+  border-bottom-width: 1px;
+  text-indent: 5px;
+}
+
+.treeColumnHeader:not(:last-child) {
+  border-right-width: 1px;
 }
 
 .treeColumnHeader0 {
   left: 0;
-  width: 99px;
-  text-align: right;
+  width: 86px;
 }
 
 .treeColumnHeader1 {
   left: 99px;
-  width: 48px;
-  text-align: right;
+  width: 35px;
 }
 
-.treeColumnHeader0 > span,
-.treeColumnHeader1 > span {
+.treeColumnHeader0,
+.treeColumnHeader1 {
+  text-align: right;
   padding-right: 12px;
 }
 
 .treeColumnHeader2 {
   left: 147px;
   right: 0;
-}
-
-.treeColumnHeader2 > span {
-  padding-left: 2px;
 }
 
 .treeViewVerticalScrollbox {
