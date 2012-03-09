@@ -390,6 +390,8 @@ RangeSelector.prototype = {
       origY = e.pageY;
       if (this.setCapture)
         this.setCapture();
+      // Reset the highlight rectangle
+      updateHiliteRectangle(e.pageX, e.pageY);
       e.preventDefault();
     }, false);
     graph.addEventListener("mouseup", function(e) {
