@@ -390,6 +390,7 @@ RangeSelector.prototype = {
       origY = e.pageY;
       if (this.setCapture)
         this.setCapture();
+      updateHiliteRectangle(origX, origY);
       e.preventDefault();
     }, false);
     graph.addEventListener("mouseup", function(e) {
