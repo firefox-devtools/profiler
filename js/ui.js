@@ -509,6 +509,8 @@ BreadcrumbTrail.prototype = {
     if (prevSelected)
       prevSelected.classList.remove("selected");
     var li = this._breadcrumbs[index];
+    if (!li)
+      console.log("li at index " + index + " is null!");
     delete li.breadcrumbIsTransient;
     li.classList.add("selected");
     this._deleteBeyond(index);
@@ -517,11 +519,17 @@ BreadcrumbTrail.prototype = {
   },
   _deleteBeyond: function BreadcrumbTrail__deleteBeyond(index) {
     while (this._breadcrumbs.length > index + 1) {
-      delete this._breadcrumbs[index + 1].breadcrumbIsTransient;
-      this._containerElement.removeChild(this._breadcrumbs[index + 1]);
+      this._hide(this._breadcrumbs[index + 1]);
       this._breadcrumbs.splice(index + 1, 1);
     }
   },
+  _hide: function BreadcrumbTrail__hide(breadcrumb) {
+    delete breadcrumb.breadcrumbIsTransient;
+    breadcrumb.classList.add("deleted");
+    setTimeout(function () {
+      breadcrumb.parentNode.removeChild(breadcrumb);
+    }, 1000);
+  }
 };
 
 function maxResponsiveness() {
