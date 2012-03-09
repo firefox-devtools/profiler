@@ -424,7 +424,7 @@ RangeSelector.prototype = {
       var start = this._sampleIndexFromPoint(this._selectedRange.startX);
       var end = this._sampleIndexFromPoint(this._selectedRange.endX);
       self._transientRestrictionEnteringAffordance = gNestedRestrictions.add({
-        title: "Sample Selection",
+        title: "Sample Range",
         enterCallback: function () {
           self.filterRange(start, end);
         }
@@ -475,6 +475,8 @@ BreadcrumbTrail.prototype = {
    *                   breadcrumb.
    */
   add: function BreadcrumbTrail_add(breadcrumb) {
+    if (this._selectedBreadcrumbIndex != this._breadcrumbs.length - 1)
+      throw "Can only add new breadcrumbs if the current one is the last one."
     var li = document.createElement("li");
     li.className = "breadcrumbTrailItem";
     li.textContent = breadcrumb.title;
@@ -761,7 +763,7 @@ function enterMainUI() {
 
   gNestedRestrictions = new BreadcrumbTrail();
   gNestedRestrictions.add({
-    title: "Start",
+    title: "Complete Profile",
     enterCallback: function () {
       gVisibleRange.unrestrict();
       refreshUI();
