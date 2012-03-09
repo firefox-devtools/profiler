@@ -411,7 +411,7 @@ RangeSelector.prototype = {
     var hilite = null;
     var self = this;
     function updateHiliteRectangle(newX, newY) {
-      var startX = Math.min(newX, origX) - graph.parentNode.offsetLeft;
+      var startX = Math.min(newX, origX) - graph.parentNode.getBoundingClientRect().left;
       var startY = 0;
       var width = Math.abs(newX - origX);
       var height = graph.parentNode.clientHeight;
