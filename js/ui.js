@@ -266,6 +266,7 @@ function RangeSelector(container, graph) {
   this.container = container;
   this._graph = graph;
   this._selectedRange = { startX: 0, endX: 0 };
+  this._selectedSampleRange = { start: 0, end: 0 };
 }
 RangeSelector.prototype = {
   render: function RangeSelector_render(markers) {
@@ -419,10 +420,12 @@ RangeSelector.prototype = {
     hilite.classList.remove("selecting");
     if (isSomethingSelected) {
       hilite.classList.add("finished");
+      var start = this._sampleIndexFromPoint(this._selectedRange.startX);
+      var end = this._sampleIndexFromPoint(this._selectedRange.endX);
       self._transientRestrictionEnteringAffordance = gNestedRestrictions.add({
         title: "Sample Selection",
         enterCallback: function () {
-          self.filterCurrentRange();
+          self.filterRange(start, end);
         }
       });
     } else {
@@ -433,19 +436,13 @@ RangeSelector.prototype = {
     var hilite = document.querySelector("." + hiliteClassName);
     hilite.classList.add("collapsed");
   },
-  filterCurrentRange: function RangeSelector_filterCurrentRange() {
-    var graph = this._graph;
-    // First, retrieve the current range of filtered samples
-    function sampleIndexFromPoint(x) {
-      var totalSamples = parseFloat(gVisibleRange.numSamples());
-      var width = parseFloat(graph.parentNode.clientWidth);
-      var factor = totalSamples / width;
-      return gVisibleRange.start + parseInt(parseFloat(x) * factor);
-    }
-
-    var hiliteRect = document.querySelector("." + hiliteClassName);
-    var start = sampleIndexFromPoint(this._selectedRange.startX);
-    var end = sampleIndexFromPoint(this._selectedRange.endX);
+  _sampleIndexFromPoint: function RangeSelector__sampleIndexFromPoint(x) {
+    var totalSamples = parseFloat(gVisibleRange.numSamples());
+    var width = parseFloat(this._graph.parentNode.clientWidth);
+    var factor = totalSamples / width;
+    return gVisibleRange.start + parseInt(parseFloat(x) * factor);
+  },
+  filterRange: function RangeSelector_filterRange(start, end) {
     gVisibleRange.restrictTo(start, end + 1);
     this.collapseHistogramSelection();
     refreshUI();
