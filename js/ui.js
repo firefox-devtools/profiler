@@ -432,6 +432,8 @@ RangeSelector.prototype = {
       }
     }
     graph.addEventListener("mousedown", function(e) {
+      if (e.button != 0)
+        return;
       var prevHilite = document.querySelector("." + hiliteClassName);
       if (prevHilite) {
         prevHilite.parentNode.removeChild(prevHilite);
@@ -439,11 +441,16 @@ RangeSelector.prototype = {
       isDrawingRectangle = true;
       origX = e.pageX;
       origY = e.pageY;
+      if (this.setCapture)
+        this.setCapture();
+      e.preventDefault();
     }, false);
     graph.addEventListener("mouseup", function(e) {
-      updateHiliteRectangle(e.pageX, e.pageY);
-      isDrawingRectangle = false;
-      hilite = null;
+      if (isDrawingRectangle) {
+        updateHiliteRectangle(e.pageX, e.pageY);
+        isDrawingRectangle = false;
+        hilite = null;
+      }
     }, false);
     graph.addEventListener("mousemove", function(e) {
       if (isDrawingRectangle) {
