@@ -157,36 +157,6 @@ HistogramRenderer.prototype = {
     removeAllChildren(container);
     removeAllChildren(markerContainer);
 
-    // Add the filtering UI
-    var iconBox = document.createElement("div");
-    iconBox.setAttribute("id", "iconbox");
-    var filterButton = document.createElement("img");
-    filterButton.setAttribute("src", "images/filter.png");
-    filterButton.setAttribute("id", "filter");
-    filterButton.setAttribute("class", "hidden");
-    filterButton.setAttribute("title", "Show only the samples from the selected range");
-    iconBox.appendChild(filterButton);
-    var showallButton = document.createElement("img");
-    showallButton.setAttribute("src", "images/showall.png");
-    showallButton.setAttribute("id", "showall");
-    if (gVisibleRange.isShowAll()) {
-      showallButton.setAttribute("class", "hidden");
-    } else {
-      showallButton.setAttribute("class", "");
-    }
-    try {
-      showallButton.removeEventListener("click", showall_onClick, false);
-    } catch (err) {
-    }
-    showallButton.addEventListener("click", function showall_onClick() {
-      gVisibleRange.unrestrict();
-      refreshUI();
-      document.getElementById("showall").className = "hidden";
-    }, false);
-    showallButton.setAttribute("title", "Show all of the samples");
-    iconBox.appendChild(showallButton);
-    container.appendChild(iconBox);
-
     // construct the SVG root element
     const kSVGNS = "http://www.w3.org/2000/svg";
     var svgRoot = document.createElementNS(kSVGNS, "svg");
@@ -286,6 +256,7 @@ HistogramRenderer.prototype = {
 
 function RangeSelector(container) {
   this.container = container;
+  this._selectedRange = { startX: 0, endX: 0 };
 }
 RangeSelector.prototype = {
   render: function RangeSelector_render(graph, markers) {
@@ -307,14 +278,12 @@ RangeSelector.prototype = {
 
     // Prepare the filtering UI
     var self = this;
-    var filter = document.getElementById("filter");
-    try {
-      filter.removeEventListener("click", filter_onClick, false);
-    } catch (err) {
-    }
-    filter.addEventListener("click", function filter_onClick() {
+    function filter_onClick(e) {
       self.filterCurrentRange(graph);
-    }, false);
+      e.preventDefault();
+      return false;
+    }
+    document.querySelector(".restrictToHighlightButton").onclick = filter_onClick;
 
     try {
       select.removeEventListener("click", select_onChange, false);
@@ -355,7 +324,6 @@ RangeSelector.prototype = {
       if (prevHilite) {
         prevHilite.parentNode.removeChild(prevHilite);
       }
-      document.getElementById("filter").className = "hidden";
       const hilitedMarker = "markerHilite";
       var prevMarkerHilite = document.querySelector("#" + hilitedMarker);
       if (prevMarkerHilite) {
@@ -381,18 +349,11 @@ RangeSelector.prototype = {
     }, false);
   },
   drawHiliteRectangle: function RangeSelector_drawHiliteRectangle(graph, x, y, width, height) {
-    var hilite = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-    hilite.setAttribute("x", x);
-    hilite.setAttribute("y", 0);
-    hilite.setAttribute("width", width);
-    hilite.setAttribute("height", height);
-    hilite.setAttribute("fill", "gray");
-    hilite.setAttribute("fill-opacity", "0.5");
-    hilite.setAttribute("class", hiliteClassName);
-    hilite.setAttribute("style", "pointer-events: none");
-    graph.appendChild(hilite);
-    document.getElementById("filter").className = "";
-    return hilite;
+    var hilite = document.querySelector("." + hiliteClassName);
+    hilite.style.left = x + "px";
+    hilite.style.top = "0";
+    hilite.style.width = width + "px";
+    hilite.style.height = height + "px";
   },
   clearCurrentRangeSelection: function RangeSelector_clearCurrentRangeSelection() {
     try {
@@ -408,37 +369,21 @@ RangeSelector.prototype = {
   enableRangeSelectionOnHistogram: function RangeSelector_enableRangeSelectionOnHistogram(graph) {
     var isDrawingRectangle = false;
     var origX, origY;
-    var hilite = null;
     var self = this;
     function updateHiliteRectangle(newX, newY) {
       var startX = Math.min(newX, origX) - graph.parentNode.getBoundingClientRect().left;
       var startY = 0;
       var width = Math.abs(newX - origX);
       var height = graph.parentNode.clientHeight;
-      if (hilite) {
-        hilite.setAttribute("x", startX);
-        hilite.setAttribute("y", startY);
-        hilite.setAttribute("width", width);
-        hilite.setAttribute("height", height);
-      } else {
-        if (width) {
-          var prevHilite = document.querySelector("." + hiliteClassName);
-          if (prevHilite) {
-            prevHilite.parentNode.removeChild(prevHilite);
-          }
-          self.clearCurrentRangeSelection();
-          hilite = self.drawHiliteRectangle(graph, startX, startY, width, height);
-        }
-      }
+      self._selectedRange.startX = startX;
+      self._selectedRange.endX = startX + width;
+      self.drawHiliteRectangle(graph, startX, startY, width, height);
     }
     graph.addEventListener("mousedown", function(e) {
       if (e.button != 0)
         return;
-      var prevHilite = document.querySelector("." + hiliteClassName);
-      if (prevHilite) {
-        prevHilite.parentNode.removeChild(prevHilite);
-      }
       isDrawingRectangle = true;
+      self.beginHistogramSelection();
       origX = e.pageX;
       origY = e.pageY;
       if (this.setCapture)
@@ -449,7 +394,7 @@ RangeSelector.prototype = {
       if (isDrawingRectangle) {
         updateHiliteRectangle(e.pageX, e.pageY);
         isDrawingRectangle = false;
-        hilite = null;
+        self.finishHistogramSelection(e.pageX != origX);
       }
     }, false);
     graph.addEventListener("mousemove", function(e) {
@@ -457,6 +402,25 @@ RangeSelector.prototype = {
         updateHiliteRectangle(e.pageX, e.pageY);
       }
     }, false);
+  },
+  beginHistogramSelection: function RangeSelector_beginHistgramSelection() {
+    var hilite = document.querySelector("." + hiliteClassName);
+    hilite.classList.remove("finished");
+    hilite.classList.add("selecting");
+    hilite.classList.remove("collapsed");
+  },
+  finishHistogramSelection: function RangeSelector_finishHistgramSelection(isSomethingSelected) {
+    var hilite = document.querySelector("." + hiliteClassName);
+    hilite.classList.remove("selecting");
+    if (isSomethingSelected) {
+      hilite.classList.add("finished");
+    } else {
+      hilite.classList.add("collapsed");
+    }
+  },
+  collapseHistogramSelection: function RangeSelector_collapseHistogramSelection() {
+    var hilite = document.querySelector("." + hiliteClassName);
+    hilite.classList.add("collapsed");
   },
   filterCurrentRange: function RangeSelector_filterCurrentRange(graph) {
     // First, retrieve the current range of filtered samples
@@ -468,28 +432,12 @@ RangeSelector.prototype = {
     }
 
     var hiliteRect = document.querySelector("." + hiliteClassName);
-    var start = sampleIndexFromPoint(hiliteRect.getAttribute("x"));
-    var end = sampleIndexFromPoint(parseFloat(hiliteRect.getAttribute("x")) +
-                                   parseFloat(hiliteRect.getAttribute("width")));
+    var start = sampleIndexFromPoint(this._selectedRange.startX);
+    var end = sampleIndexFromPoint(this._selectedRange.endX);
     gVisibleRange.restrictTo(start, end + 1);
+    this.collapseHistogramSelection();
     refreshUI();
-
-    var self = this;
-    var showall = document.getElementById("showall");
-    try {
-      showall.removeEventListener("click", showall_onClick, false);
-    } catch (err) {
-    }
-    showall.addEventListener("click", function showall_onClick() {
-      self.resetFilter();
-    }, false);
-    showall.className = "";
   },
-  resetFilter: function RangeSelector_resetFilter() {
-    gVisibleRange.unrestrict();
-    refreshUI();
-    document.getElementById("showall").className = "hidden";
-  }
 };
 
 function maxResponsiveness() {

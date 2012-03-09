@@ -75,13 +75,62 @@ body {
   right: 0;
   top: 30px;
   left: 0;
-  overflow: hidden;
   border-bottom: 1px solid #CCC;
   background: -moz-linear-gradient(#EEE, #CCC);
 }
 #histogram {
   width: 100%;
   height: 100%;
+}
+.histogramHilite {
+  position: absolute;
+  pointer-events: none;
+}
+.histogramHilite:not(.collapsed) {
+  background: rgba(150, 150, 150, 0.5);
+}
+.histogramHilite:not(.finished) .histogramHiliteMenu {
+  visibility: hidden;
+  opacity: 0;
+}
+.histogramHiliteMenu {
+  pointer-events: auto;
+  display: block;
+  margin: 0;
+  padding: 4px 0;
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15), 0 4px 10px rgba(0, 0, 0, 0.5);
+  position: absolute;
+  top: 100%;
+  margin-top: -4px;
+  left: 100%;
+  margin-left: -50px;
+  -moz-transition: opacity 300ms ease-in-out 500ms;
+  opacity: 0;
+}
+#bottombar:hover .histogramHilite.finished > .histogramHiliteMenu {
+  -moz-transition: opacity 300ms ease-in-out 100ms;
+  opacity: 1;
+}
+.histogramHiliteMenuItem {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+.restrictToHighlightButton {
+  display: block;
+  cursor: default;
+  text-decoration: none;
+  color: black;
+  font-size: 13px;
+  line-height: 22px;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+.restrictToHighlightButton:hover {
+  color: white;
+  background: -moz-linear-gradient(#4B91D7 1px, #5FA9E4 1px, #5FA9E4 2px, #58A0DE 3px, #2B70C7 21px, #2763B4 21px);
 }
 #iconbox {
   display: none;
