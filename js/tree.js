@@ -240,8 +240,8 @@ TreeView.prototype = {
       maxImportantWidth = Infinity;
 
     var visibleRect = {
-      left: this._horizontalScrollbox.offsetLeft + 150, // TODO: un-hardcode 150
-      top: this._verticalScrollbox.offsetTop,
+      left: this._horizontalScrollbox.getBoundingClientRect().left + 150, // TODO: un-hardcode 150
+      top: this._verticalScrollbox.getBoundingClientRect().top,
       right: this._horizontalScrollbox.getBoundingClientRect().right,
       bottom: this._verticalScrollbox.getBoundingClientRect().bottom
     }
