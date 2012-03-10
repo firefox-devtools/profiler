@@ -25,7 +25,7 @@ function ProfileTreeManager(container) {
   container.appendChild(this.treeView.getContainer());
 }
 ProfileTreeManager.prototype = {
-  highlightFrame: function TreeRender_highlightFrame(frameData) {
+  highlightFrame: function Treedisplay_highlightFrame(frameData) {
     var selectedCallstack = [];
     var curr = frameData;
     while (curr != null) {
@@ -36,7 +36,7 @@ ProfileTreeManager.prototype = {
     }
     setHighlightedCallstack(selectedCallstack.reverse());
   },
-  render: function ProfileTreeManager_render(tree) {
+  display: function ProfileTreeManager_display(tree) {
     this.treeView.display(this.convertToJSTreeData(tree));
   },
   convertToJSTreeData: function ProfileTreeManager__convertToJSTreeData(tree) {
@@ -79,7 +79,7 @@ ProfileTreeManager.prototype = {
   },
 };
 
-function HistogramRenderer(container, markerContainer) {
+function HistogramView(container, markerContainer) {
   this._container = container;
   this._markerContainer = markerContainer;
   this._svgRoot = this._createSVGRoot(container.clientWidth, container.clientHeight);
@@ -87,8 +87,8 @@ function HistogramRenderer(container, markerContainer) {
   this._rangeSelector.enableRangeSelectionOnHistogram();
 
 }
-HistogramRenderer.prototype = {
-  _createSVGRoot: function HistogramRenderer__createSVGRoot(width, height) {
+HistogramView.prototype = {
+  _createSVGRoot: function HistogramView__createSVGRoot(width, height) {
     // construct the SVG root element
     var svgRoot = document.createElementNS(kSVGNS, "svg");
     svgRoot.setAttribute("version", "1.1");
@@ -98,7 +98,7 @@ HistogramRenderer.prototype = {
     this._container.appendChild(svgRoot);
     return svgRoot;
   },
-  render: function HistogramRenderer_render(data, highlightedCallstack) {
+  display: function HistogramView_display(data, highlightedCallstack) {
     var container = this._container;
     var markerContainer = this._markerContainer;
     var histogramData = this._convertToHistogramData(data, highlightedCallstack);
@@ -191,9 +191,9 @@ HistogramRenderer.prototype = {
     }
 
     var markers = gatherMarkersList(histogramData);
-    this._rangeSelector.render(markers);
+    this._rangeSelector.display(markers);
   },
-  _convertToHistogramData: function HistogramRenderer_convertToHistogramData(data, highlightedCallstack) {
+  _convertToHistogramData: function HistogramView_convertToHistogramData(data, highlightedCallstack) {
     function isSampleSelected(step) {
       if (step.frames.length < highlightedCallstack.length || highlightedCallstack.length <= 1)
         return false;
@@ -269,7 +269,7 @@ function RangeSelector(container, graph) {
   this._selectedSampleRange = { start: 0, end: 0 };
 }
 RangeSelector.prototype = {
-  render: function RangeSelector_render(markers) {
+  display: function RangeSelector_display(markers) {
     var graph = this._graph;
     removeAllChildren(markers);
 
@@ -684,7 +684,7 @@ var gSamples = [];
 var gHighlightedCallstack = [];
 var gTreeManager = null;
 var gNestedRestrictions = null;
-var gHistogramRenderer = null;
+var gHistogramView = null;
 var gSkipSymbols = ["test2", "test1"];
 var gVisibleRange = {
   start: -1,
@@ -754,7 +754,7 @@ function setHighlightedCallstack(samples) {
   if (gMergeFunctions) {
     filteredData = Parser.discardLineLevelInformation(filteredData);
   }
-  gHistogramRenderer.render(filteredData, gHighlightedCallstack);
+  gHistogramView.display(filteredData, gHighlightedCallstack);
   updateDescription();
 }
 
@@ -768,7 +768,7 @@ function enterMainUI() {
   gTreeManager = new ProfileTreeManager(document.getElementById("tree"));
 
   var histogram = document.getElementById("histogram");
-  gHistogramRenderer = new HistogramRenderer(histogram, document.getElementById("markers"));
+  gHistogramView = new HistogramView(histogram, document.getElementById("markers"));
 
   gNestedRestrictions = new BreadcrumbTrail();
   gNestedRestrictions.add({
@@ -805,11 +805,11 @@ function refreshUI() {
   if (gMergeUnbranched) {
     Parser.mergeUnbranchedCallPaths(treeData);
   }
-  gTreeManager.render(treeData);
-  console.log("tree rendering: " + (Date.now() - start) + "ms.");
+  gTreeManager.display(treeData);
+  console.log("tree displaying: " + (Date.now() - start) + "ms.");
   start = Date.now();
-  gHistogramRenderer.render(filteredData, gHighlightedCallstack);
-  console.log("histogram rendering: " + (Date.now() - start) + "ms.");
+  gHistogramView.display(filteredData, gHighlightedCallstack);
+  console.log("histogram displaying: " + (Date.now() - start) + "ms.");
   start = Date.now();
   updateDescription();
 }
