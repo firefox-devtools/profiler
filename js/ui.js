@@ -30,7 +30,9 @@ ProfileTreeManager.prototype = {
     var curr = frameData;
     while (curr != null) {
       if (curr.name != null) {
-        selectedCallstack.push(curr.fullFrameNameAsInSample);
+        var subCallstack = curr.fullFrameNamesAsInSample.clone();
+        subCallstack.reverse();
+        selectedCallstack = selectedCallstack.concat(subCallstack);
       }
       curr = curr.parent;
     }
@@ -53,7 +55,7 @@ ProfileTreeManager.prototype = {
       }
       curObj.selfCounter = selfCounter;
       curObj.ratio = node.counter / node.totalSamples;
-      curObj.fullFrameNameAsInSample = node.name;
+      curObj.fullFrameNamesAsInSample = node.mergedNames ? node.mergedNames : [node.name];
       var functionAndLibrary = node.name.split(" (in ");
       if (functionAndLibrary.length == 2) {
         curObj.name = functionAndLibrary[0];

@@ -175,13 +175,16 @@ var Parser = {
     return text.substr(0, length) + "...";
   },
   mergeUnbranchedCallPaths: function Tree_mergeUnbranchedCallPaths(root) {
+    var mergedNames = [root.name];
     var node = root;
     while (node.children.length == 1 && node.count == node.children[0].count) {
       node = node.children[0];
+      mergedNames.push(node.name);
     }
     if (node != root) {
       // Merge path from root to node into root.
       root.children = node.children;
+      root.mergedNames = mergedNames;
       root.name = this._clipText(root.name, 50) + " to " + this._clipText(node.name, 50);
     }
     for (var i = 0; i < root.children.length; i++) {
