@@ -56,14 +56,9 @@ ProfileTreeManager.prototype = {
       curObj.selfCounter = selfCounter;
       curObj.ratio = node.counter / node.totalSamples;
       curObj.fullFrameNamesAsInSample = node.mergedNames ? node.mergedNames : [node.name];
-      var functionAndLibrary = node.name.split(" (in ");
-      if (functionAndLibrary.length == 2) {
-        curObj.name = functionAndLibrary[0];
-        curObj.library = functionAndLibrary[1].substr(0, functionAndLibrary[1].length - 1);
-      } else {
-        curObj.name = node.name;
-        curObj.library = "";
-      }
+      var info = Parser.getFunctionInfo(node.name);
+      curObj.name = (info.functionName + " " + info.lineInformation).trim();
+      curObj.library = info.libraryName;
       if (node.children.length) {
         curObj.children = [];
         for (var i = 0; i < node.children.length; ++i) {

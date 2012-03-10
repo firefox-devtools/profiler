@@ -191,25 +191,26 @@ var Parser = {
       this.mergeUnbranchedCallPaths(root.children[i]);
     }
   },
+  getFunctionInfo: function Parser_getFunctionInfo(fullName) {
+    var match =
+      /^(.*) \(in ([^\)]*)\) (\+ [0-9]+)$/.exec(fullName) ||
+      /^(.*) \(in ([^\)]*)\) (\(.*:.*\))$/.exec(fullName) ||
+      /^(.*) \(in ([^\)]*)\)$/.exec(fullName) ||
+      /^(.*)$/.exec(fullName);
+    return {
+      functionName: match[1],
+      libraryName: match[2] || "",
+      lineInformation: match[3] || ""
+    };
+  },
   discardLineLevelInformation: function Tree_discardLineLevelInformation(data) {
     var filteredData = [];
     for (var i = 0; i < data.length; i++) {
       filteredData.push(data[i].clone());
       var frames = filteredData[i].frames;
       for (var j = 0; j < frames.length; j++) {
-        var functionName = frames[j];
-        var lineLevelInformationLocation = functionName.lastIndexOf(" + ");
-        if (lineLevelInformationLocation != -1) {
-          frames[j] = functionName.substr(0, lineLevelInformationLocation);
-        } else {
-          var libraryInformationLocation = functionName.lastIndexOf("(in ");
-          if (libraryInformationLocation != -1) {
-            var anotherBracketLocation = functionName.indexOf(") (", libraryInformationLocation + 4);
-            if (anotherBracketLocation != -1) {
-              frames[j] = functionName.substr(0, anotherBracketLocation + 1);
-            }
-          }
-        }
+        var info = this.getFunctionInfo(frames[j]);
+        frames[j] = info.functionName + " (in " + info.libraryName + ")";
       }
     }
     return filteredData;
