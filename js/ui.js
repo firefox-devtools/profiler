@@ -34,7 +34,10 @@ ProfileTreeManager.prototype = {
       }
       curr = curr.parent;
     }
-    setHighlightedCallstack(selectedCallstack.reverse());
+    selectedCallstack.reverse();
+    if (gInvertCallstack)
+      selectedCallstack.shift(); // remove (total)
+    setHighlightedCallstack(selectedCallstack);
   },
   display: function ProfileTreeManager_display(tree) {
     this.treeView.display(this.convertToJSTreeData(tree));
@@ -195,7 +198,8 @@ HistogramView.prototype = {
   },
   _convertToHistogramData: function HistogramView_convertToHistogramData(data, highlightedCallstack) {
     function isSampleSelected(step) {
-      if (step.frames.length < highlightedCallstack.length || highlightedCallstack.length <= 1)
+      if (step.frames.length < highlightedCallstack.length ||
+          highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
         return false;
 
       var compareFrames = step.frames.clone();
