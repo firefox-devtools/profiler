@@ -90,6 +90,7 @@ function HistogramView(markerContainer) {
   this._svgRoot.appendChild(this._rectContainer);
   this._rangeSelector = new RangeSelector(markerContainer, this._svgRoot);
   this._rangeSelector.enableRangeSelectionOnHistogram();
+  this._histogramData = [];
 
 }
 HistogramView.prototype = {
@@ -153,22 +154,22 @@ HistogramView.prototype = {
     return markers;
   },
   display: function HistogramView_display(data, highlightedCallstack) {
-    var histogramData = this._convertToHistogramData(data);
+    this._histogramData = this._convertToHistogramData(data);
 
     removeAllChildren(this._rectContainer);
 
-    var widthSum = histogramData.reduce(function (runningSum, step) {
+    var widthSum = this._histogramData.reduce(function (runningSum, step) {
       return runningSum + step.width;
     }, 0);
 
-    var maxHeight = histogramData.reduce(function (runningMaxHeight, step) {
+    var maxHeight = this._histogramData.reduce(function (runningMaxHeight, step) {
       return Math.max(step.value, runningMaxHeight);
     }, 0);
 
     // iterate over the histogram items and create rects for each one
     var nextX = 0;
-    for (var i = 0; i < histogramData.length; ++i) {
-      var step = histogramData[i];
+    for (var i = 0; i < this._histogramData.length; ++i) {
+      var step = this._histogramData[i];
       var rect = this._createRect(nextX,
                                   1 - step.value / maxHeight,
                                   step.width / widthSum,
@@ -177,15 +178,30 @@ HistogramView.prototype = {
       if ("marker" in step) {
         rect.setAttribute("title", step.marker);
         rect.classList.add("marker");
-      } else if (this._isSampleSelected(highlightedCallstack, step)) {
-        rect.classList.add("selected");
       }
+      step.rect = rect;
       this._rectContainer.appendChild(rect);
       nextX += step.width / widthSum;
     }
 
-    var markers = this._gatherMarkersList(histogramData);
+    var markers = this._gatherMarkersList(this._histogramData);
     this._rangeSelector.display(markers);
+    this._updateRectHighlighting(highlightedCallstack)
+  },
+  _updateRectHighlighting: function HistogramView__updateRectHighlighting(highlightedCallstack) {
+    for (var i = 0; i < this._histogramData.length; i++) {
+      var step = this._histogramData[i];
+      if ("marker" in step)
+        continue;
+      if (this._isSampleSelected(highlightedCallstack, step)) {
+        step.rect.classList.add("selected");
+      } else {
+        step.rect.classList.remove("selected");
+      }
+    }
+  },
+  highlightedCallstackChanged: function HistogramView_highlightedCallstackChanged(highlightedCallstack) {
+    this._updateRectHighlighting(highlightedCallstack);
   },
   _isSampleSelected: function HistogramView__isSampleSelected(highlightedCallstack, step) {
     if (step.frames.length < highlightedCallstack.length ||
@@ -736,7 +752,7 @@ function toggleMergeFunctions() {
 
 function setHighlightedCallstack(samples) {
   gHighlightedCallstack = samples;
-  gHistogramView.display(gCurrentlyShownSampleData, gHighlightedCallstack);
+  gHistogramView.highlightedCallstackChanged(gHighlightedCallstack);
   updateDescription();
 }
 
