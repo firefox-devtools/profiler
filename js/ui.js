@@ -83,8 +83,7 @@ ProfileTreeManager.prototype = {
 // completely red in the histogram.
 var kDelayUntilWorstResponsiveness = 1000;
 
-function HistogramView(container, markerContainer) {
-  this._container = container;
+function HistogramView(markerContainer) {
   this._svgRoot = this._createSVGRoot();
   this._rangeSelector = new RangeSelector(markerContainer, this._svgRoot);
   this._rangeSelector.enableRangeSelectionOnHistogram();
@@ -100,8 +99,10 @@ HistogramView.prototype = {
     svgRoot.setAttribute("height", "100%");
     svgRoot.setAttribute("preserveAspectRatio", "none");
     svgRoot.setAttribute("viewBox", "0 0 1 1");
-    this._container.appendChild(svgRoot);
     return svgRoot;
+  },
+  getContainer: function HistogramView_getContainer() {
+    return this._svgRoot;
   },
   _createMarkerGradient: function HistogramView__createMarkerGradient() {
     var markerGradient = document.createElementNS(kSVGNS, "linearGradient");
@@ -145,7 +146,6 @@ HistogramView.prototype = {
     return markers;
   },
   display: function HistogramView_display(data, highlightedCallstack) {
-    var container = this._container;
     var histogramData = this._convertToHistogramData(data);
 
     removeAllChildren(this._svgRoot);
@@ -740,8 +740,8 @@ function enterMainUI() {
   document.getElementById("ui").className = "";
   gTreeManager = new ProfileTreeManager(document.getElementById("tree"));
 
-  var histogram = document.getElementById("histogram");
-  gHistogramView = new HistogramView(histogram, document.getElementById("markers"));
+  gHistogramView = new HistogramView(document.getElementById("markers"));
+  document.getElementById("histogram").appendChild(gHistogramView.getContainer());
 
   gNestedRestrictions = new BreadcrumbTrail();
   gNestedRestrictions.add({
