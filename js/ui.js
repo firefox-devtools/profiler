@@ -196,21 +196,21 @@ HistogramView.prototype = {
     var markers = this._gatherMarkersList(histogramData);
     this._rangeSelector.display(markers);
   },
-  _convertToHistogramData: function HistogramView_convertToHistogramData(data, highlightedCallstack) {
-    function isSampleSelected(step) {
-      if (step.frames.length < highlightedCallstack.length ||
-          highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
-        return false;
+  _isSampleSelected: function HistogramView__isSampleSelected(highlightedCallstack, step) {
+    if (step.frames.length < highlightedCallstack.length ||
+        highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
+      return false;
 
-      var compareFrames = step.frames.clone();
-      if (gInvertCallstack)
-        compareFrames.reverse();
-      for (var j = 0; j < highlightedCallstack.length; j++) {
-        if (highlightedCallstack[j] != compareFrames[j] && compareFrames[j] != "(root)")
-          return false;
-      }
-      return true;
+    var compareFrames = step.frames.clone();
+    if (gInvertCallstack)
+      compareFrames.reverse();
+    for (var j = 0; j < highlightedCallstack.length; j++) {
+      if (highlightedCallstack[j] != compareFrames[j] && compareFrames[j] != "(root)")
+        return false;
     }
+    return true;
+  },
+  _convertToHistogramData: function HistogramView_convertToHistogramData(data, highlightedCallstack) {
     var histogramData = [];
     var prevName = "";
     var prevRes = -1;
@@ -227,7 +227,7 @@ HistogramView.prototype = {
       var res = step.extraInfo["responsiveness"];
       var value = step.frames.length;
       var color = (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0";
-      if (isSampleSelected(step)) {
+      if (this._isSampleSelected(highlightedCallstack, step)) {
         color = "0,128,0";
       }
       if ("marker" in step.extraInfo) {
