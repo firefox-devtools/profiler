@@ -85,7 +85,6 @@ var kDelayUntilWorstResponsiveness = 1000;
 
 function HistogramView(container, markerContainer) {
   this._container = container;
-  this._markerContainer = markerContainer;
   this._svgRoot = this._createSVGRoot();
   this._rangeSelector = new RangeSelector(markerContainer, this._svgRoot);
   this._rangeSelector.enableRangeSelectionOnHistogram();
@@ -158,11 +157,9 @@ HistogramView.prototype = {
   },
   display: function HistogramView_display(data, highlightedCallstack) {
     var container = this._container;
-    var markerContainer = this._markerContainer;
     var histogramData = this._convertToHistogramData(data, highlightedCallstack);
 
     removeAllChildren(this._svgRoot);
-    removeAllChildren(markerContainer);
 
     this._svgRoot.appendChild(this._createDefs());
 
@@ -271,6 +268,7 @@ function RangeSelector(container, graph) {
 RangeSelector.prototype = {
   display: function RangeSelector_display(markers) {
     var graph = this._graph;
+    removeAllChildren(this.container);
     removeAllChildren(markers);
 
     var select = document.createElement("select");
