@@ -127,8 +127,8 @@ HistogramView.prototype = {
     rect.setAttribute("y", y);
     rect.setAttribute("width", w);
     rect.setAttribute("height", h);
-    rect.setAttribute("fill", color);
-    rect.setAttribute("class", "rect");
+    rect.classList.add("rect");
+    rect.style.fill = color;
     return rect;
   },
   _gatherMarkersList: function HistogramView__gatherMarkersList(histogramData) {
@@ -171,7 +171,9 @@ HistogramView.prototype = {
                                   step.color);
       if ("marker" in step) {
         rect.setAttribute("title", step.marker);
-        rect.setAttribute("fill", "url(#markerGradient)");
+        rect.classList.add("marker");
+      } else if (this._isSampleSelected(highlightedCallstack, step)) {
+        rect.classList.add("selected");
       }
       this._svgRoot.appendChild(rect);
       nextX += step.width / widthSum;
@@ -195,9 +197,6 @@ HistogramView.prototype = {
     return true;
   },
   _getStepColor: function HistogramView__getStepColor(step, highlightedCallstack) {
-      if (this._isSampleSelected(highlightedCallstack, step))
-        return "rgb(0,128,0)";
-
       if ("responsiveness" in step.extraInfo) {
         var res = step.extraInfo.responsiveness;
         var redComponent = Math.round(255 * Math.min(1, res / kDelayUntilWorstResponsiveness));
@@ -219,17 +218,17 @@ HistogramView.prototype = {
     for (var i = 0; i < data.length; i++) {
       var step = data[i];
       var value = step.frames.length;
-      var name = step.frames;
+      var frames = step.frames;
       if ("marker" in step.extraInfo) {
         // A new marker boundary has been discovered.
         histogramData.push({
-          name: "marker",
+          frames: "marker",
           width: 2,
           value: maxHeight + 1,
           marker: step.extraInfo.marker
         });
         histogramData.push({
-          name: name,
+          frames: frames,
           width: 1,
           value: value,
           color: this._getStepColor(step, highlightedCallstack),
@@ -237,7 +236,7 @@ HistogramView.prototype = {
       } else {
         // A new name boundary has been discovered.
         histogramData.push({
-          name: name,
+          frames: frames,
           width: 1,
           value: value,
           color: this._getStepColor(step, highlightedCallstack),
