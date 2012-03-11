@@ -121,7 +121,7 @@ HistogramView.prototype = {
     defs.appendChild(this._createMarkerGradient());
     return defs;
   },
-  _createRect: function HistogramView__createRect(container, step, x, y, w, h, color) {
+  _createRect: function HistogramView__createRect(container, x, y, w, h, color) {
     var rect = document.createElementNS(kSVGNS, "rect");
     rect.setAttribute("x", x);
     rect.setAttribute("y", y);
@@ -165,7 +165,7 @@ HistogramView.prototype = {
     var widthSeenSoFar = 0;
     for (var i = 0; i < histogramData.length; ++i) {
       var step = histogramData[i];
-      var rect = this._createRect(this._svgRoot, step, widthSeenSoFar,
+      var rect = this._createRect(this._svgRoot, widthSeenSoFar,
                                   1 - step.value / maxHeight,
                                   step.width / widthSum,
                                   step.value / maxHeight,
