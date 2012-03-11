@@ -98,18 +98,7 @@ HistogramView.prototype = {
     this._container.appendChild(svgRoot);
     return svgRoot;
   },
-  display: function HistogramView_display(data, highlightedCallstack) {
-    var container = this._container;
-    var markerContainer = this._markerContainer;
-    var histogramData = this._convertToHistogramData(data, highlightedCallstack);
-    var count = histogramData.length;
-    var width = container.clientWidth,
-        height = container.clientHeight;
-
-    removeAllChildren(this._svgRoot);
-    removeAllChildren(markerContainer);
-
-    // Define the marker gradient
+  _createMarkerGradient: function HistogramView__createMarkerGradient() {
     var markerGradient = document.createElementNS(kSVGNS, "linearGradient");
     markerGradient.setAttribute("id", "markerGradient");
     //markerGradient.setAttribute("x1", "0%");
@@ -124,31 +113,59 @@ HistogramView.prototype = {
     stop2.setAttribute("offset", "100%");
     stop2.setAttribute("style", "stop-color: red; stop-opacity: 1;");
     markerGradient.appendChild(stop2);
+    return markerGradient;
+  },
+  _createDefs: function HistogramView__createDefs() {
     var defs = document.createElementNS(kSVGNS, "defs");
-    defs.appendChild(markerGradient);
-    this._svgRoot.appendChild(defs);
-
-    function createRect(container, step, x, y, w, h, color) {
-      var rect = document.createElementNS(kSVGNS, "rect");
-      rect.setAttribute("x", x);
-      rect.setAttribute("y", y);
-      rect.setAttribute("width", w);
-      rect.setAttribute("height", h);
-      rect.setAttribute("fill", color);
-      rect.setAttribute("class", "rect");
-      container.appendChild(rect);
-      rect.addEventListener("click", function() {
-        if (step.name == null) return;
-        selectSample(step.name);
-      }, false);
-      rect.addEventListener("mouseover", function() {
-        rect.setAttribute("fill-opacity", "0.8");
-      }, false);
-      rect.addEventListener("mouseout", function() {
-        rect.removeAttribute("fill-opacity");
-      }, false);
-      return rect;
+    defs.appendChild(this._createMarkerGradient());
+    return defs;
+  },
+  _createRect: function HistogramView__createRect(container, step, x, y, w, h, color) {
+    var rect = document.createElementNS(kSVGNS, "rect");
+    rect.setAttribute("x", x);
+    rect.setAttribute("y", y);
+    rect.setAttribute("width", w);
+    rect.setAttribute("height", h);
+    rect.setAttribute("fill", color);
+    rect.setAttribute("class", "rect");
+    container.appendChild(rect);
+    rect.addEventListener("click", function() {
+      if (step.name == null) return;
+      selectSample(step.name);
+    }, false);
+    rect.addEventListener("mouseover", function() {
+      rect.setAttribute("fill-opacity", "0.8");
+    }, false);
+    rect.addEventListener("mouseout", function() {
+      rect.removeAttribute("fill-opacity");
+    }, false);
+    return rect;
+  },
+  _gatherMarkersList: function HistogramView__gatherMarkersList(histogramData) {
+    var markers = [];
+    for (var i = 0; i < histogramData.length; ++i) {
+      var step = histogramData[i];
+      if ("marker" in step) {
+        markers.push({
+          index: i,
+          name: step.marker
+        });
+      }
     }
+    return markers;
+  },
+  display: function HistogramView_display(data, highlightedCallstack) {
+    var container = this._container;
+    var markerContainer = this._markerContainer;
+    var histogramData = this._convertToHistogramData(data, highlightedCallstack);
+    var count = histogramData.length;
+    var width = container.clientWidth,
+        height = container.clientHeight;
+
+    removeAllChildren(this._svgRoot);
+    removeAllChildren(markerContainer);
+
+    this._svgRoot.appendChild(this._createDefs());
 
     // iterate over the histogram items and create rects for each one
     var widthSum = 0, maxHeight = 0;
@@ -164,11 +181,11 @@ HistogramView.prototype = {
     var widthSeenSoFar = 0;
     for (var i = 0; i < count; ++i) {
       var step = histogramData[i];
-      var rect = createRect(this._svgRoot, step, widthSeenSoFar,
-                            (maxHeight - step.value) * heightFactor,
-                            step.width * widthFactor,
-                            step.value * heightFactor,
-                            step.color);
+      var rect = this._createRect(this._svgRoot, step, widthSeenSoFar,
+                                  (maxHeight - step.value) * heightFactor,
+                                  step.width * widthFactor,
+                                  step.value * heightFactor,
+                                  step.color);
       if ("marker" in step) {
         rect.setAttribute("title", step.marker);
         rect.setAttribute("fill", "url(#markerGradient)");
@@ -176,21 +193,7 @@ HistogramView.prototype = {
       widthSeenSoFar += step.width * widthFactor;
     }
 
-    function gatherMarkersList(histogramData) {
-      var markers = [];
-      for (var i = 0; i < histogramData.length; ++i) {
-        var step = histogramData[i];
-        if ("marker" in step) {
-          markers.push({
-            index: i,
-            name: step.marker
-          });
-        }
-      }
-      return markers;
-    }
-
-    var markers = gatherMarkersList(histogramData);
+    var markers = this._gatherMarkersList(histogramData);
     this._rangeSelector.display(markers);
   },
   _convertToHistogramData: function HistogramView_convertToHistogramData(data, highlightedCallstack) {
@@ -686,6 +689,7 @@ var gHighlightedCallstack = [];
 var gTreeManager = null;
 var gNestedRestrictions = null;
 var gHistogramView = null;
+var gCurrentlyShownSampleData = null;
 var gSkipSymbols = ["test2", "test1"];
 var gVisibleRange = {
   start: -1,
@@ -745,17 +749,7 @@ function toggleMergeFunctions() {
 
 function setHighlightedCallstack(samples) {
   gHighlightedCallstack = samples;
-
-  var data = gVisibleRange.getFilteredData();
-  var filteredData = data;
-  var filterNameInput = document.getElementById("filterName");
-  if (filterNameInput != null && filterNameInput.value != "") {
-    filteredData = Parser.filterByName(data, document.getElementById("filterName").value);
-  }
-  if (gMergeFunctions) {
-    filteredData = Parser.discardLineLevelInformation(filteredData);
-  }
-  gHistogramView.display(filteredData, gHighlightedCallstack);
+  gHistogramView.display(gCurrentlyShownSampleData, gHighlightedCallstack);
   updateDescription();
 }
 
@@ -800,6 +794,7 @@ function refreshUI() {
     console.log("line information discarding: " + (Date.now() - start) + "ms.");
     start = Date.now();
   }
+  gCurrentlyShownSampleData = filteredData;
   treeData = Parser.convertToCallTree(filteredData, gInvertCallstack);
   console.log("conversion to calltree: " + (Date.now() - start) + "ms.");
   start = Date.now();
