@@ -79,6 +79,10 @@ ProfileTreeManager.prototype = {
   },
 };
 
+// The responsiveness threshold (in ms) after which the sample shuold become
+// completely red in the histogram.
+var kDelayUntilWorstResponsiveness = 1000;
+
 function HistogramView(container, markerContainer) {
   this._container = container;
   this._markerContainer = markerContainer;
@@ -216,7 +220,7 @@ HistogramView.prototype = {
 
       var res = step.extraInfo["responsiveness"];
       if (res !== null) {
-        var redComponent = Math.round(Math.min(255, 255.0 * res / 1000.0));
+        var redComponent = Math.round(255 * Math.min(1, res / kDelayUntilWorstResponsiveness));
         return "rgb(" + redComponent + ",0,0)";
       }
 
