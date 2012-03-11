@@ -216,8 +216,7 @@ HistogramView.prototype = {
       if (maxHeight < value)
         maxHeight = value;
     }
-    var skipCount = Math.round(data.length / 2000.0);
-    for (var i = 0; i < data.length; i=i+1+skipCount) {
+    for (var i = 0; i < data.length; i++) {
       var step = data[i];
       var value = step.frames.length;
       var name = step.frames;
