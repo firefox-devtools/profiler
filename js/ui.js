@@ -107,10 +107,6 @@ HistogramView.prototype = {
   _createMarkerGradient: function HistogramView__createMarkerGradient() {
     var markerGradient = document.createElementNS(kSVGNS, "linearGradient");
     markerGradient.setAttribute("id", "markerGradient");
-    //markerGradient.setAttribute("x1", "0%");
-    //markerGradient.setAttribute("y1", "0%");
-    //markerGradient.setAttribute("x2", "0%");
-    //markerGradient.setAttribute("y2", "100%");
     var stop1 = document.createElementNS(kSVGNS, "stop");
     stop1.setAttribute("offset", "0%");
     stop1.setAttribute("style", "stop-color: blue; stop-opacity: 1;");
