@@ -238,32 +238,30 @@ HistogramView.prototype = {
       var value = step.frames.length;
       var name = step.frames;
       if ("marker" in step.extraInfo) {
-        // a new marker boundary has been discovered
-        var item = {
+        // A new marker boundary has been discovered.
+        histogramData.push({
           name: "marker",
           width: 2,
           value: maxHeight + 1,
           marker: step.extraInfo.marker
-        };
-        histogramData.push(item);
-        var item = {
+        });
+        histogramData.push({
           name: name,
           width: 1,
           value: value,
           color: this._getStepColor(step),
-        };
-        histogramData.push(item);
+        });
       } else if (name != prevName || res != prevRes) {
-        // a new name boundary has been discovered
-        var item = {
+        // A new name boundary has been discovered.
+        histogramData.push(
           name: name,
           width: 1,
           value: value,
           color: this._getStepColor(step),
-        };
-        histogramData.push(item);
+        });
       } else {
-        // the continuation of the previous data
+        // This is the continuation of the previous data.
+        // XXX ... not. (name != prevName doesn't check array equality)
         histogramData[histogramData.length - 1].width++;
       }
       prevName = name;
