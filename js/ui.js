@@ -214,12 +214,12 @@ HistogramView.prototype = {
     }
     return true;
   },
-  _getStepColor: function HistogramView__getStepColor(sample, highlightedCallstack) {
+  _getStepColor: function HistogramView__getStepColor(step, highlightedCallstack) {
       if (this._isSampleSelected(highlightedCallstack, step))
         return "rgb(0,128,0)";
 
-      var res = step.extraInfo["responsiveness"];
-      if (res !== null) {
+      if ("responsiveness" in step.extraInfo) {
+        var res = step.extraInfo.responsiveness;
         var redComponent = Math.round(255 * Math.min(1, res / kDelayUntilWorstResponsiveness));
         return "rgb(" + redComponent + ",0,0)";
       }
@@ -253,23 +253,17 @@ HistogramView.prototype = {
           name: name,
           width: 1,
           value: value,
-          color: this._getStepColor(step),
+          color: this._getStepColor(step, highlightedCallstack),
         });
-      } else if (name != prevName || res != prevRes) {
+      } else {
         // A new name boundary has been discovered.
-        histogramData.push(
+        histogramData.push({
           name: name,
           width: 1,
           value: value,
-          color: this._getStepColor(step),
+          color: this._getStepColor(step, highlightedCallstack),
         });
-      } else {
-        // This is the continuation of the previous data.
-        // XXX ... not. (name != prevName doesn't check array equality)
-        histogramData[histogramData.length - 1].width++;
       }
-      prevName = name;
-      prevRes = res;
     }
     return histogramData;
   },
