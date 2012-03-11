@@ -146,7 +146,7 @@ HistogramView.prototype = {
   },
   display: function HistogramView_display(data, highlightedCallstack) {
     var container = this._container;
-    var histogramData = this._convertToHistogramData(data, highlightedCallstack);
+    var histogramData = this._convertToHistogramData(data);
 
     removeAllChildren(this._svgRoot);
 
@@ -196,7 +196,7 @@ HistogramView.prototype = {
     }
     return true;
   },
-  _getStepColor: function HistogramView__getStepColor(step, highlightedCallstack) {
+  _getStepColor: function HistogramView__getStepColor(step) {
       if ("responsiveness" in step.extraInfo) {
         var res = step.extraInfo.responsiveness;
         var redComponent = Math.round(255 * Math.min(1, res / kDelayUntilWorstResponsiveness));
@@ -205,7 +205,7 @@ HistogramView.prototype = {
 
       return "rgb(0,0,0)";
   },
-  _convertToHistogramData: function HistogramView_convertToHistogramData(data, highlightedCallstack) {
+  _convertToHistogramData: function HistogramView_convertToHistogramData(data) {
     var histogramData = [];
     var prevName = "";
     var prevRes = -1;
@@ -231,7 +231,7 @@ HistogramView.prototype = {
           frames: frames,
           width: 1,
           value: value,
-          color: this._getStepColor(step, highlightedCallstack),
+          color: this._getStepColor(step),
         });
       } else {
         // A new name boundary has been discovered.
@@ -239,7 +239,7 @@ HistogramView.prototype = {
           frames: frames,
           width: 1,
           value: value,
-          color: this._getStepColor(step, highlightedCallstack),
+          color: this._getStepColor(step),
         });
       }
     }
