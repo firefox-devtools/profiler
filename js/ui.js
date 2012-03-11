@@ -85,6 +85,9 @@ var kDelayUntilWorstResponsiveness = 1000;
 
 function HistogramView(markerContainer) {
   this._svgRoot = this._createSVGRoot();
+  this._rectContainer = this._createRectContainer();
+  this._svgRoot.appendChild(this._createDefs());
+  this._svgRoot.appendChild(this._rectContainer);
   this._rangeSelector = new RangeSelector(markerContainer, this._svgRoot);
   this._rangeSelector.enableRangeSelectionOnHistogram();
 
@@ -122,6 +125,10 @@ HistogramView.prototype = {
     defs.appendChild(this._createMarkerGradient());
     return defs;
   },
+  _createRectContainer: function HistogramView__createRectContainer() {
+    var rectContainer = document.createElementNS(kSVGNS, "g");
+    return rectContainer;
+  },
   _createRect: function HistogramView__createRect(x, y, w, h, color) {
     var rect = document.createElementNS(kSVGNS, "rect");
     rect.setAttribute("x", x);
@@ -148,9 +155,7 @@ HistogramView.prototype = {
   display: function HistogramView_display(data, highlightedCallstack) {
     var histogramData = this._convertToHistogramData(data);
 
-    removeAllChildren(this._svgRoot);
-
-    this._svgRoot.appendChild(this._createDefs());
+    removeAllChildren(this._rectContainer);
 
     var widthSum = histogramData.reduce(function (runningSum, step) {
       return runningSum + step.width;
@@ -175,7 +180,7 @@ HistogramView.prototype = {
       } else if (this._isSampleSelected(highlightedCallstack, step)) {
         rect.classList.add("selected");
       }
-      this._svgRoot.appendChild(rect);
+      this._rectContainer.appendChild(rect);
       nextX += step.width / widthSum;
     }
 
