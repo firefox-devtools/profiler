@@ -83,8 +83,9 @@ ProfileTreeManager.prototype = {
 // completely red in the histogram.
 var kDelayUntilWorstResponsiveness = 1000;
 
-function HistogramView(container) {
+function HistogramView(container, markerContainer) {
   this._container = container;
+  this._markerContainer = markerContainer;
   this._svgRoot = this._createSVGRoot();
   this._rangeSelector = new RangeSelector(markerContainer, this._svgRoot);
   this._rangeSelector.enableRangeSelectionOnHistogram();
@@ -157,9 +158,11 @@ HistogramView.prototype = {
   },
   display: function HistogramView_display(data, highlightedCallstack) {
     var container = this._container;
+    var markerContainer = this._markerContainer;
     var histogramData = this._convertToHistogramData(data, highlightedCallstack);
 
     removeAllChildren(this._svgRoot);
+    removeAllChildren(markerContainer);
 
     this._svgRoot.appendChild(this._createDefs());
 
@@ -756,7 +759,7 @@ function enterMainUI() {
   gTreeManager = new ProfileTreeManager(document.getElementById("tree"));
 
   var histogram = document.getElementById("histogram");
-  gHistogramView = new HistogramView(histogram);
+  gHistogramView = new HistogramView(histogram, document.getElementById("markers"));
 
   gNestedRestrictions = new BreadcrumbTrail();
   gNestedRestrictions.add({
