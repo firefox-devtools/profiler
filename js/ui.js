@@ -210,6 +210,18 @@ HistogramView.prototype = {
     }
     return true;
   },
+  _getStepColor: function HistogramView__getStepColor(sample, highlightedCallstack) {
+      if (this._isSampleSelected(highlightedCallstack, step))
+        return "rgb(0,128,0)";
+
+      var res = step.extraInfo["responsiveness"];
+      if (res !== null) {
+        var redComponent = Math.round(Math.min(255, 255.0 * res / 1000.0));
+        return "rgb(" + redComponent + ",0,0)";
+      }
+
+      return "rgb(0,0,0)";
+  },
   _convertToHistogramData: function HistogramView_convertToHistogramData(data, highlightedCallstack) {
     var histogramData = [];
     var prevName = "";
@@ -223,13 +235,8 @@ HistogramView.prototype = {
     var skipCount = Math.round(data.length / 2000.0);
     for (var i = 0; i < data.length; i=i+1+skipCount) {
       var step = data[i];
-      var name = step.frames;
-      var res = step.extraInfo["responsiveness"];
       var value = step.frames.length;
-      var color = (res != null ? Math.min(255, Math.round(255.0 * res / 1000.0)):"0") +",0,0";
-      if (this._isSampleSelected(highlightedCallstack, step)) {
-        color = "0,128,0";
-      }
+      var name = step.frames;
       if ("marker" in step.extraInfo) {
         // a new marker boundary has been discovered
         var item = {
@@ -243,7 +250,7 @@ HistogramView.prototype = {
           name: name,
           width: 1,
           value: value,
-          color: "rgb(" + color + ")",
+          color: this._getStepColor(step),
         };
         histogramData.push(item);
       } else if (name != prevName || res != prevRes) {
@@ -252,7 +259,7 @@ HistogramView.prototype = {
           name: name,
           width: 1,
           value: value,
-          color: "rgb(" + color + ")",
+          color: this._getStepColor(step),
         };
         histogramData.push(item);
       } else {
