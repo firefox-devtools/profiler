@@ -161,10 +161,10 @@ HistogramView.prototype = {
     }, 0);
 
     // iterate over the histogram items and create rects for each one
-    var widthSeenSoFar = 0;
+    var nextX = 0;
     for (var i = 0; i < histogramData.length; ++i) {
       var step = histogramData[i];
-      var rect = this._createRect(widthSeenSoFar,
+      var rect = this._createRect(nextX,
                                   1 - step.value / maxHeight,
                                   step.width / widthSum,
                                   step.value / maxHeight,
@@ -174,7 +174,7 @@ HistogramView.prototype = {
         rect.setAttribute("fill", "url(#markerGradient)");
       }
       this._svgRoot.appendChild(rect);
-      widthSeenSoFar += step.width / widthSum;
+      nextX += step.width / widthSum;
     }
 
     var markers = this._gatherMarkersList(histogramData);
