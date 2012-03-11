@@ -150,7 +150,6 @@ TreeView.prototype = {
     li.appendChild(treeLine);
     li.treeChildren = [];
     li.treeParent = parentNode;
-    li.tree = this;
     if (hasChildren) {
       var ol = document.createElement("ol");
       ol.className = "treeViewNodeList";
@@ -261,15 +260,13 @@ TreeView.prototype = {
       this._verticalScrollbox.scrollTop += Math.min(bottomCutoff, -topCutoff);
   },
   _select: function TreeView__select(li) {
-    if (li.tree != this)
-      throw "supplied element isn't part of this tree";
     if (this._selectedNode != null) {
       this._selectedNode.treeLine.classList.remove("selected");
       this._selectedNode = null;
     }
     if (li) {
       li.treeLine.classList.add("selected");
-      li.tree._selectedNode = li;
+      this._selectedNode = li;
       var functionName = li.treeLine.querySelector(".functionName");
       this._scrollIntoView(functionName, 400);
       this._fireEvent("select", li.data);
