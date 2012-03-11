@@ -130,16 +130,6 @@ HistogramView.prototype = {
     rect.setAttribute("fill", color);
     rect.setAttribute("class", "rect");
     container.appendChild(rect);
-    rect.addEventListener("click", function() {
-      if (step.name == null) return;
-      selectSample(step.name);
-    }, false);
-    rect.addEventListener("mouseover", function() {
-      rect.setAttribute("fill-opacity", "0.8");
-    }, false);
-    rect.addEventListener("mouseout", function() {
-      rect.removeAttribute("fill-opacity");
-    }, false);
     return rect;
   },
   _gatherMarkersList: function HistogramView__gatherMarkersList(histogramData) {
@@ -745,10 +735,6 @@ function setHighlightedCallstack(samples) {
   gHighlightedCallstack = samples;
   gHistogramView.display(gCurrentlyShownSampleData, gHighlightedCallstack);
   updateDescription();
-}
-
-function selectSample(sample) {
-  gHighlightedCallstack = sample;
 }
 
 function enterMainUI() {
