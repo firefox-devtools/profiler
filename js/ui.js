@@ -86,19 +86,21 @@ var kDelayUntilWorstResponsiveness = 1000;
 function HistogramView(container, markerContainer) {
   this._container = container;
   this._markerContainer = markerContainer;
-  this._svgRoot = this._createSVGRoot(container.clientWidth, container.clientHeight);
+  this._svgRoot = this._createSVGRoot();
   this._rangeSelector = new RangeSelector(markerContainer, this._svgRoot);
   this._rangeSelector.enableRangeSelectionOnHistogram();
 
 }
 HistogramView.prototype = {
-  _createSVGRoot: function HistogramView__createSVGRoot(width, height) {
+  _createSVGRoot: function HistogramView__createSVGRoot() {
     // construct the SVG root element
     var svgRoot = document.createElementNS(kSVGNS, "svg");
     svgRoot.setAttribute("version", "1.1");
     svgRoot.setAttribute("baseProfile", "full");
-    svgRoot.setAttribute("width", width);
-    svgRoot.setAttribute("height", height);
+    svgRoot.setAttribute("width", "100%");
+    svgRoot.setAttribute("height", "100%");
+    svgRoot.setAttribute("preserveAspectRatio", "none");
+    svgRoot.setAttribute("viewBox", "0 0 1 1");
     this._container.appendChild(svgRoot);
     return svgRoot;
   },
@@ -162,9 +164,6 @@ HistogramView.prototype = {
     var container = this._container;
     var markerContainer = this._markerContainer;
     var histogramData = this._convertToHistogramData(data, highlightedCallstack);
-    var count = histogramData.length;
-    var width = container.clientWidth,
-        height = container.clientHeight;
 
     removeAllChildren(this._svgRoot);
     removeAllChildren(markerContainer);
@@ -180,21 +179,19 @@ HistogramView.prototype = {
     }, 0);
 
     // iterate over the histogram items and create rects for each one
-    var widthFactor = width / widthSum;
-    var heightFactor = height / maxHeight;
     var widthSeenSoFar = 0;
-    for (var i = 0; i < count; ++i) {
+    for (var i = 0; i < histogramData.length; ++i) {
       var step = histogramData[i];
       var rect = this._createRect(this._svgRoot, step, widthSeenSoFar,
-                                  (maxHeight - step.value) * heightFactor,
-                                  step.width * widthFactor,
-                                  step.value * heightFactor,
+                                  1 - step.value / maxHeight,
+                                  step.width / widthSum,
+                                  step.value / maxHeight,
                                   step.color);
       if ("marker" in step) {
         rect.setAttribute("title", step.marker);
         rect.setAttribute("fill", "url(#markerGradient)");
       }
-      widthSeenSoFar += step.width * widthFactor;
+      widthSeenSoFar += step.width / widthSum;
     }
 
     var markers = this._gatherMarkersList(histogramData);
