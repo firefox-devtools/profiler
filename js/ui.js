@@ -432,7 +432,7 @@ RangeSelector.prototype = {
       var start = this._sampleIndexFromPoint(this._selectedRange.startX);
       var end = this._sampleIndexFromPoint(this._selectedRange.endX);
       self._transientRestrictionEnteringAffordance = gNestedRestrictions.add({
-        title: "Sample Range",
+        title: "Sample Range [" + start + ", " + (end + 1) + "]",
         enterCallback: function () {
           self.filterRange(start, end);
         }
