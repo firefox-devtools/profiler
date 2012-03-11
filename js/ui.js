@@ -167,15 +167,15 @@ HistogramView.prototype = {
 
     this._svgRoot.appendChild(this._createDefs());
 
+    var widthSum = histogramData.reduce(function (runningSum, step) {
+      return runningSum + step.width;
+    }, 0);
+
+    var maxHeight = histogramData.reduce(function (runningMaxHeight, step) {
+      return Math.max(step.value, runningMaxHeight);
+    }, 0);
+
     // iterate over the histogram items and create rects for each one
-    var widthSum = 0, maxHeight = 0;
-    for (var i = 0; i < count; ++i) {
-      var step = histogramData[i];
-      widthSum += step.width;
-      if (step.value > maxHeight) {
-        maxHeight = step.value;
-      }
-    }
     var widthFactor = width / widthSum;
     var heightFactor = height / maxHeight;
     var widthSeenSoFar = 0;
