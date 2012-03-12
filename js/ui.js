@@ -247,18 +247,19 @@ HistogramView.prototype = {
       this._updateRectHighlighting(highlightedCallstack);
   },
   _isSampleSelected: function HistogramView__isSampleSelected(highlightedCallstack, step) {
-    for (var i = 0; i < step.frames; i++) {
+    next_iteration: for (var i = 0; i < step.frames.length; i++) {
       var frames = step.frames[i];
       if (frames.length < highlightedCallstack.length ||
         highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
-        continue;
+        continue next_iteration;
 
+      // TODO remove this clone, reverse the stack at build time.
       var compareFrames = frames.clone();
       if (gInvertCallstack)
         compareFrames.reverse();
       for (var j = 0; j < highlightedCallstack.length; j++) {
         if (highlightedCallstack[j] != compareFrames[j] && compareFrames[j] != "(root)")
-          continue;
+          continue next_iteration;
       }
       return true;
     }
