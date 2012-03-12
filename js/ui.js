@@ -177,10 +177,9 @@ HistogramView.prototype = {
     }, 0);
 
     // iterate over the histogram items and create rects for each one
-    var nextX = 0;
     for (var i = 0; i < this._histogramData.length; ++i) {
       var step = this._histogramData[i];
-      var rect = this._createRect(nextX,
+      var rect = this._createRect(step.x / widthSum,
                                   1 - step.value / maxHeight,
                                   step.width / widthSum,
                                   step.value / maxHeight,
@@ -191,7 +190,6 @@ HistogramView.prototype = {
       }
       step.rect = rect;
       this._rectContainer.appendChild(rect);
-      nextX += step.width / widthSum;
     }
 
     var markers = this._gatherMarkersList(this._histogramData);
@@ -238,14 +236,13 @@ HistogramView.prototype = {
   },
   _convertToHistogramData: function HistogramView_convertToHistogramData(data) {
     var histogramData = [];
-    var prevName = "";
-    var prevRes = -1;
     var maxHeight = 1;
     for (var i = 0; i < data.length; ++i) {
       var value = data[i].frames.length;
       if (maxHeight < value)
         maxHeight = value;
     }
+    var nextX = 0;
     for (var i = 0; i < data.length; i++) {
       var step = data[i];
       var value = step.frames.length;
@@ -254,24 +251,30 @@ HistogramView.prototype = {
         // A new marker boundary has been discovered.
         histogramData.push({
           frames: "marker",
+          x: nextX,
           width: 2,
           value: maxHeight + 1,
           marker: step.extraInfo.marker
         });
+        nextX += 2;
         histogramData.push({
           frames: frames,
+          x: nextX,
           width: 1,
           value: value,
           color: this._getStepColor(step),
         });
+        nextX += 1;
       } else {
         // A new name boundary has been discovered.
         histogramData.push({
           frames: frames,
+          x: nextX,
           width: 1,
           value: value,
           color: this._getStepColor(step),
         });
+        nextX += 1;
       }
     }
     return histogramData;
