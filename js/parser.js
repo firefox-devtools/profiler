@@ -68,6 +68,41 @@ var Parser = {
   parse: function Parser_parse(data) {
     var lines = data.split("\n");
     var extraInfo = {};
+    var symbols = [];
+    var symbolIndices = {};
+    var functions = [];
+    var functionIndices = {};
+
+    function indexForFunction(functionName, libraryName) {
+      if (functionName in functionIndices)
+        return functionIndices[functionName];
+      var newIndex = functions.length;
+      functions[newIndex] = {
+        functionName: functionName,
+        libraryName: libraryName
+      };
+      functionIndices[functionName] = newIndex;
+      return newIndex;
+    }
+
+    function parseSymbol(symbol) {
+      var info = Parser.getFunctionInfo(symbol);
+      return {
+        symbolName: symbol,
+        functionIndex: indexForFunction(info.functionName, info.libraryName),
+        lineInformation: info.lineInformation
+      };
+    }
+
+    function indexForSymbol(symbol) {
+      if (symbol in symbolIndices)
+        return symbolIndices[symbol];
+      var newIndex = symbols.length;
+      symbols[newIndex] = parseSymbol(symbol);
+      symbolIndices[symbol] = newIndex;
+      return newIndex;
+    }
+
     var samples = [];
     var sample = null;
     for (var i = 0; i < lines.length; ++i) {
@@ -104,7 +139,7 @@ var Parser = {
       case 'l':
         // continue sample
         if (sample) { // ignore the case where we see a 'c' before an 's'
-          sample.frames.push(this._cleanFunctionName(info));
+          sample.frames.push(indexForSymbol(info));
         }
         break;
       case 'r':
@@ -117,7 +152,7 @@ var Parser = {
       if (sample != null)
         sample.lines.push(line);
     }
-    return samples;
+    return { symbols: symbols, functions: functions, samples: samples};
   },
 
   _cleanFunctionName: function Parser__cleanFunctionName(functionName) {
@@ -127,24 +162,29 @@ var Parser = {
     return functionName;
   },
 
-  filterByName: function Parse_filterByName(samples, filterName) {
-    samples = samples.clone(); 
+  filterByName: function Parse_filterByName(profile, filterName) {
+    var samples = profile.samples.clone();
     filterName = filterName.toLowerCase();
     calltrace_it: for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
       var callstack = sample.frames;
       for (var j = 0; j < callstack.length; ++j) { 
-        if (callstack[j].toLowerCase().indexOf(filterName) != -1) {
+        if (profile.symbols[callstack[j]].toLowerCase().indexOf(filterName) != -1) {
           continue calltrace_it;
         }
       }
       samples[i] = samples[i].clone();
       samples[i].frames = ["Filtered out"];
     }
-    return samples;
+    return {
+      symbols: profile.symbols,
+      functions: profile.functions,
+      samples: samples
+    };
   },
 
-  convertToCallTree: function Parser_convertToCallTree(samples, isReverse) {
+  convertToCallTree: function Parser_convertToCallTree(profile, isReverse) {
+    var samples = profile.samples;
     var treeRoot = new TreeNode(isReverse ? "(total)" : samples[0].frames[0], null);
     treeRoot.counter = 0;
     treeRoot.totalSamples = samples.length;
@@ -185,7 +225,7 @@ var Parser = {
       // Merge path from root to node into root.
       root.children = node.children;
       root.mergedNames = mergedNames;
-      root.name = this._clipText(root.name, 50) + " to " + this._clipText(node.name, 50);
+      //root.name = this._clipText(root.name, 50) + " to " + this._clipText(node.name, 50);
     }
     for (var i = 0; i < root.children.length; i++) {
       this.mergeUnbranchedCallPaths(root.children[i]);
@@ -203,16 +243,23 @@ var Parser = {
       lineInformation: match[3] || ""
     };
   },
-  discardLineLevelInformation: function Tree_discardLineLevelInformation(data) {
+  discardLineLevelInformation: function Tree_discardLineLevelInformation(profile) {
+    var symbols = profile.symbols;
+    var data = profile.samples;
     var filteredData = [];
     for (var i = 0; i < data.length; i++) {
       filteredData.push(data[i].clone());
       var frames = filteredData[i].frames;
       for (var j = 0; j < frames.length; j++) {
-        var info = this.getFunctionInfo(frames[j]);
-        frames[j] = info.functionName + " (in " + info.libraryName + ")";
+        if (!(frames[j] in symbols))
+          continue;
+        frames[j] = symbols[frames[j]].functionIndex;
       }
     }
-    return filteredData;
+    return {
+      symbols: symbols,
+      functions: profile.functions,
+      samples: filteredData
+    };
   },
 };

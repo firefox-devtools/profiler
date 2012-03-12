@@ -41,10 +41,10 @@ ProfileTreeManager.prototype = {
       selectedCallstack.shift(); // remove (total)
     setHighlightedCallstack(selectedCallstack);
   },
-  display: function ProfileTreeManager_display(tree) {
-    this.treeView.display(this.convertToJSTreeData(tree));
+  display: function ProfileTreeManager_display(tree, symbols, functions, useFunctions) {
+    this.treeView.display(this.convertToJSTreeData(tree, symbols, functions, useFunctions));
   },
-  convertToJSTreeData: function ProfileTreeManager__convertToJSTreeData(tree) {
+  convertToJSTreeData: function ProfileTreeManager__convertToJSTreeData(tree, symbols, functions, useFunctions) {
     var roots = [];
     var object = {};
     function childVisitor(node, curObj) {
@@ -56,9 +56,19 @@ ProfileTreeManager.prototype = {
       curObj.selfCounter = selfCounter;
       curObj.ratio = node.counter / node.totalSamples;
       curObj.fullFrameNamesAsInSample = node.mergedNames ? node.mergedNames : [node.name];
-      var info = Parser.getFunctionInfo(node.name);
-      curObj.name = (info.functionName + " " + info.lineInformation).trim();
-      curObj.library = info.libraryName;
+      if (!(node.name in symbols)) {
+        curObj.name = node.name;
+        curObj.library = "";
+      } else {
+        var functionObj = useFunctions ? functions[node.name] : functions[symbols[node.name].functionIndex];
+        var info = {
+          functionName: functionObj.functionName,
+          libraryName: functionObj.libraryName,
+          lineInformation: useFunctions ? "" : symbols[node.name].lineInformation
+        };
+        curObj.name = (info.functionName + " " + info.lineInformation).trim();
+        curObj.library = info.libraryName;
+      }
       if (node.children.length) {
         curObj.children = [];
         for (var i = 0; i < node.children.length; ++i) {
@@ -153,8 +163,8 @@ HistogramView.prototype = {
     }
     return markers;
   },
-  display: function HistogramView_display(data, highlightedCallstack) {
-    this._histogramData = this._convertToHistogramData(data);
+  display: function HistogramView_display(profile, highlightedCallstack) {
+    this._histogramData = this._convertToHistogramData(profile.samples);
 
     removeAllChildren(this._rectContainer);
 
@@ -641,7 +651,7 @@ function updateDescription() {
   var infobar = document.getElementById("infobar");
   var infoText = "";
   
-  infoText += "Total Samples: " + gSamples.length + "<br>\n";
+  infoText += "Total Samples: " + gParsedProfile.samples.length + "<br>\n";
   infoText += "<br>\n";
   infoText += "Selection:<br>\n";
   infoText += "--Range: [" + gVisibleRange.start + "," + gVisibleRange.end + "]<br>\n";
@@ -687,7 +697,7 @@ function updateDescription() {
 }
 
 var gRawProfile = "";
-var gSamples = [];
+var gParsedProfile = {};
 var gHighlightedCallstack = [];
 var gTreeManager = null;
 var gNestedRestrictions = null;
@@ -706,15 +716,19 @@ var gVisibleRange = {
   },
   getFilteredData: function () {
     if (this.isShowAll())
-      return gSamples;
-    return gSamples.slice(this.start, this.end);
+      return gParsedProfile;
+    return {
+      symbols: gParsedProfile.symbols,
+      functions: gParsedProfile.functions,
+      samples: gParsedProfile.samples.slice(this.start, this.end)
+    };
   },
   isShowAll: function() {
-    return (this.start == -1 && this.end == -1) || (this.start <= 0 && this.end >= gSamples.length);
+    return (this.start == -1 && this.end == -1) || (this.start <= 0 && this.end >= gParsedProfile.samples.length);
   },
   numSamples: function () {
     if (this.isShowAll())
-      return gSamples.length - 1; // why - 1?
+      return gParsedProfile.samples.length - 1; // why - 1?
     return this.end - this.start - 1;
   },
   getTextData: function() {
@@ -730,7 +744,7 @@ var gVisibleRange = {
 function loadProfile(rawProfile) {
   gRawProfile = rawProfile;
   var startTime = Date.now();
-  gSamples = Parser.parse(rawProfile);
+  gParsedProfile = Parser.parse(rawProfile);
   console.log("parse time: " + (Date.now() - startTime) + "ms");
 }
 
@@ -785,27 +799,26 @@ function refreshUI() {
   start = Date.now();
 
   var treeData;
-  var filteredData = data;
   var filterNameInput = document.getElementById("filterName");
   if (filterNameInput != null && filterNameInput.value != "") {
-    filteredData = Parser.filterByName(data, document.getElementById("filterName").value);
+    data = Parser.filterByName(data, document.getElementById("filterName").value);
   }
   if (gMergeFunctions) {
-    filteredData = Parser.discardLineLevelInformation(filteredData);
+    data = Parser.discardLineLevelInformation(data);
     console.log("line information discarding: " + (Date.now() - start) + "ms.");
     start = Date.now();
   }
-  gCurrentlyShownSampleData = filteredData;
-  treeData = Parser.convertToCallTree(filteredData, gInvertCallstack);
+  gCurrentlyShownSampleData = data;
+  treeData = Parser.convertToCallTree(data, gInvertCallstack);
   console.log("conversion to calltree: " + (Date.now() - start) + "ms.");
   start = Date.now();
   if (gMergeUnbranched) {
     Parser.mergeUnbranchedCallPaths(treeData);
   }
-  gTreeManager.display(treeData);
+  gTreeManager.display(treeData, data.symbols, data.functions, gMergeFunctions);
   console.log("tree displaying: " + (Date.now() - start) + "ms.");
   start = Date.now();
-  gHistogramView.display(filteredData, gHighlightedCallstack);
+  gHistogramView.display(data, gHighlightedCallstack);
   console.log("histogram displaying: " + (Date.now() - start) + "ms.");
   start = Date.now();
   updateDescription();
