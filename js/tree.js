@@ -1,4 +1,4 @@
-var kMaxChunkDuration = 8; // ms
+var kMaxChunkDuration = 4; // ms
 
 function TreeView() {
   this._eventListeners = {};

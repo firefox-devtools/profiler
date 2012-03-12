@@ -176,9 +176,27 @@ HistogramView.prototype = {
       return Math.max(step.value, runningMaxHeight);
     }, 0);
 
+    this._nextStepIndex = 0;
+    this._finishedRendering = false;
+
+    if (this._animationFrame)
+      window.mozCancelAnimationFrame(this._animationFrame);
+
+    var self = this;
+    this._animationFrame = window.mozRequestAnimationFrame(function () {
+      self._doRenderingChunk(highlightedCallstack);
+    });
+  },
+  _doRenderingChunk: function HistogramView__doRenderingChunk(highlightedCallstack) {
+    var startTime = Date.now();
+    var endTime = startTime + kMaxChunkDuration;
+
+    var stepSize = 8;
+    var finished = false;
+
     // iterate over the histogram items and create rects for each one
-    for (var i = 0; i < this._histogramData.length; ++i) {
-      var step = this._histogramData[i];
+    while (Date.now() < endTime) {
+      var step = this._histogramData[this._nextStepIndex];
       var rect = this._createRect(step.x / this._widthSum,
                                   1 - step.value / this._maxHeight,
                                   step.width / this._widthSum,
@@ -190,11 +208,27 @@ HistogramView.prototype = {
       }
       step.rect = rect;
       this._rectContainer.appendChild(rect);
+      this._nextStepIndex += stepSize;
+      if (this._nextStepIndex >= this._histogramData.length) {
+        this._nextStepIndex = (this._nextStepIndex + 1) % stepSize;
+        if (this._nextStepIndex == 0) {
+          finished = true;
+          break;
+        }
+      }
     }
 
-    var markers = this._gatherMarkersList(this._histogramData);
-    this._rangeSelector.display(markers);
-    this._updateRectHighlighting(highlightedCallstack)
+    if (finished) {
+      var markers = this._gatherMarkersList(this._histogramData);
+      this._rangeSelector.display(markers);
+      this._updateRectHighlighting(highlightedCallstack)
+      this._finishedRendering = true;
+    } else {
+      var self = this;
+      this._animationFrame = window.mozRequestAnimationFrame(function () {
+        self._doRenderingChunk(highlightedCallstack);
+      });
+    }
   },
   _updateRectHighlighting: function HistogramView__updateRectHighlighting(highlightedCallstack) {
     for (var i = 0; i < this._histogramData.length; i++) {
@@ -209,7 +243,8 @@ HistogramView.prototype = {
     }
   },
   highlightedCallstackChanged: function HistogramView_highlightedCallstackChanged(highlightedCallstack) {
-    this._updateRectHighlighting(highlightedCallstack);
+    if (this._finishedRendering)
+      this._updateRectHighlighting(highlightedCallstack);
   },
   _isSampleSelected: function HistogramView__isSampleSelected(highlightedCallstack, step) {
     if (step.frames.length < highlightedCallstack.length ||
