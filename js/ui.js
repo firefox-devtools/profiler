@@ -703,6 +703,10 @@ function filterUpdate() {
 }
 
 function updateDescription() {
+  // Temporary until fileListItem are built correctly
+  var sampleCount = document.getElementById("fileListItemSamples");
+  sampleCount.innerHTML = gParsedProfile.samples.length;
+
   var infobar = document.getElementById("infobar");
   var infoText = "";
   
