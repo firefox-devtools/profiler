@@ -729,7 +729,9 @@ var gVisibleRange = {
 
 function loadProfile(rawProfile) {
   gRawProfile = rawProfile;
+  var startTime = Date.now();
   gSamples = Parser.parse(rawProfile);
+  console.log("parse time: " + (Date.now() - startTime) + "ms");
 }
 
 var gInvertCallstack = false;
