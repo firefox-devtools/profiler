@@ -10,6 +10,12 @@
     <link rel="stylesheet" type="text/css" href="css/tree.css">
   </head>
   <body>
+    <menu id="xulContextMenu" type="context">
+      <!-- Context menu for XUL library function, integrate with mozilla systems -->
+      <menuitem label="View Source"
+         onclick="xulContextMenu(event)">
+      </menuitem>
+    </menu>
     <div id="ui" class="hidden">
       <div id="mainarea">
         <div id="tree"></div>
@@ -51,6 +57,9 @@
         };  
         oXHR.send(null);
       }
-    </script>    
+      function xulContextMenu(event) {
+        alert(event.target.target);
+      }
+    </script>
   </body>
 </html>

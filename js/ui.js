@@ -247,18 +247,22 @@ HistogramView.prototype = {
       this._updateRectHighlighting(highlightedCallstack);
   },
   _isSampleSelected: function HistogramView__isSampleSelected(highlightedCallstack, step) {
-    if (step.frames.length < highlightedCallstack.length ||
+    for (var i = 0; i < step.frames; i++) {
+      var frames = step.frames[i];
+      if (frames.length < highlightedCallstack.length ||
         highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
-      return false;
+        continue;
 
-    var compareFrames = step.frames.clone();
-    if (gInvertCallstack)
-      compareFrames.reverse();
-    for (var j = 0; j < highlightedCallstack.length; j++) {
-      if (highlightedCallstack[j] != compareFrames[j] && compareFrames[j] != "(root)")
-        return false;
+      var compareFrames = frames.clone();
+      if (gInvertCallstack)
+        compareFrames.reverse();
+      for (var j = 0; j < highlightedCallstack.length; j++) {
+        if (highlightedCallstack[j] != compareFrames[j] && compareFrames[j] != "(root)")
+          continue;
+      }
+      return true;
     }
-    return true;
+    return false;
   },
   _getStepColor: function HistogramView__getStepColor(step) {
       if ("responsiveness" in step.extraInfo) {
@@ -278,10 +282,16 @@ HistogramView.prototype = {
         maxHeight = value;
     }
     var nextX = 0;
+    // The number of data items per histogramData rects.
+    // Except when seperated by a marker.
+    // This is used to cut down the number of rects, since
+    // there's no point in having more rects then pixels
+    var samplesPerStep = Math.ceil(data.length / 1000);
     for (var i = 0; i < data.length; i++) {
       var step = data[i];
       var value = step.frames.length;
       var frames = step.frames;
+      var currHistrogramData = histogramData[histogramData.length-1];
       if ("marker" in step.extraInfo) {
         // A new marker boundary has been discovered.
         histogramData.push({
@@ -293,17 +303,24 @@ HistogramView.prototype = {
         });
         nextX += 2;
         histogramData.push({
-          frames: frames,
+          frames: [frames],
           x: nextX,
           width: 1,
           value: value,
           color: this._getStepColor(step),
         });
         nextX += 1;
+      } else if (currHistrogramData != null &&
+        currHistrogramData.frames.length < samplesPerStep) {
+        currHistrogramData.frames.push(frames);
+        // When merging data items take the highest frame
+        if (value > currHistrogramData.value)
+          currHistrogramData.value = value;
+        // Merge the colors? For now we keep the first color set.
       } else {
         // A new name boundary has been discovered.
         histogramData.push({
-          frames: frames,
+          frames: [frames],
           x: nextX,
           width: 1,
           value: value,
