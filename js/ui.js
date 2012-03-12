@@ -168,21 +168,21 @@ HistogramView.prototype = {
 
     removeAllChildren(this._rectContainer);
 
-    var widthSum = this._histogramData.reduce(function (runningSum, step) {
+    this._widthSum = this._histogramData.reduce(function (runningSum, step) {
       return runningSum + step.width;
     }, 0);
 
-    var maxHeight = this._histogramData.reduce(function (runningMaxHeight, step) {
+    this._maxHeight = this._histogramData.reduce(function (runningMaxHeight, step) {
       return Math.max(step.value, runningMaxHeight);
     }, 0);
 
     // iterate over the histogram items and create rects for each one
     for (var i = 0; i < this._histogramData.length; ++i) {
       var step = this._histogramData[i];
-      var rect = this._createRect(step.x / widthSum,
-                                  1 - step.value / maxHeight,
-                                  step.width / widthSum,
-                                  step.value / maxHeight,
+      var rect = this._createRect(step.x / this._widthSum,
+                                  1 - step.value / this._maxHeight,
+                                  step.width / this._widthSum,
+                                  step.value / this._maxHeight,
                                   step.color);
       if ("marker" in step) {
         rect.setAttribute("title", step.marker);
