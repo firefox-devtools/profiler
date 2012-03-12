@@ -59,7 +59,7 @@ TreeView.prototype = {
     this._pendingActions.push({
       parentElement: this._horizontalScrollbox,
       parentNode: null,
-      data: data.data[0]
+      data: data[0].getData()
     });
     this._processPendingActions();
     this._select(this._horizontalScrollbox.firstChild);
@@ -154,7 +154,7 @@ TreeView.prototype = {
       var ol = document.createElement("ol");
       ol.className = "treeViewNodeList";
       for (var i = 0; i < data.children.length; ++i) {
-        this._pendingActions.push({parentElement: ol, parentNode: li, data: data.children[i] });
+        this._pendingActions.push({parentElement: ol, parentNode: li, data: data.children[i].getData() });
       }
       li.appendChild(ol);
     }

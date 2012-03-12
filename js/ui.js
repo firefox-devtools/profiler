@@ -44,10 +44,10 @@ ProfileTreeManager.prototype = {
   display: function ProfileTreeManager_display(tree, symbols, functions, useFunctions) {
     this.treeView.display(this.convertToJSTreeData(tree, symbols, functions, useFunctions));
   },
-  convertToJSTreeData: function ProfileTreeManager__convertToJSTreeData(tree, symbols, functions, useFunctions) {
-    var roots = [];
-    var object = {};
-    function childVisitor(node, curObj) {
+  convertToJSTreeData: function ProfileTreeManager__convertToJSTreeData(rootNode, symbols, functions, useFunctions) {
+    function createTreeViewNode(node, parent) {
+      var curObj = {};
+      curObj.parent = parent;
       curObj.counter = node.counter;
       var selfCounter = node.counter;
       for (var i = 0; i < node.children.length; ++i) {
@@ -70,22 +70,19 @@ ProfileTreeManager.prototype = {
         curObj.library = info.libraryName;
       }
       if (node.children.length) {
-        curObj.children = [];
-        for (var i = 0; i < node.children.length; ++i) {
-          var child = node.children[i];
-          var newObj = {};
-          childVisitor(child, newObj);
-          newObj.parent = curObj;
-          curObj.children.push(newObj);
-        }
-        curObj.children.sort(treeObjSort);
-        curObj.children = curObj.children.splice(0, 20);
+        curObj.children = getChildrenObjects(node.children, curObj);
       }
+      return curObj;
     }
-    childVisitor(tree, object);
-    roots.push(object);
-    roots.sort(treeObjSort);
-    return {data: roots};
+    function getChildrenObjects(children, parent) {
+      var sortedChildren = children.slice(0).sort(treeObjSort);
+      return sortedChildren.map(function (child) {
+        return {
+          getData: function () { return createTreeViewNode(child, parent); }
+        };
+      });
+    }
+    return getChildrenObjects([rootNode], null);
   },
 };
 
