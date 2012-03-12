@@ -628,6 +628,13 @@ function copyProfile() {
   window.prompt ("Copy to clipboard: Ctrl+C, Enter", document.getElementById("data").value);
 }
 
+function downloadProfile() {
+  var bb = new MozBlobBuilder();
+  bb.append(gRawProfile);
+  var blob = bb.getBlob("application/octet-stream");
+  location.href = window.URL.createObjectURL(blob);
+}
+
 function uploadProfile(selected) {
   var oXHR = new XMLHttpRequest();
   oXHR.open("POST", "http://profile-logs.appspot.com/store", true);
@@ -644,7 +651,7 @@ function uploadProfile(selected) {
   if (selected === true) {
     dataToUpload = gVisibleRange.getTextData();
   } else {
-    dataToUpload = document.getElementById("data").value;
+    dataToUpload = gRawProfile;
   }
 
   if (dataToUpload.length > 1024*1024) {
@@ -726,9 +733,10 @@ function updateDescription() {
 
   infoText += "<br>\n";
   infoText += "Share:<br>\n";
-  infoText += "<a id='upload_status'>No upload in progress</a><br />\n";
-  infoText += "<input type='button' id='upload' value='Upload full profile'/>\n";
-  infoText += "<input type='button' id='upload_select' value='Upload view'/><br />\n";
+  infoText += "<a id='upload_status'>No upload in progress</a><br>\n";
+  infoText += "<input type='button' id='upload' value='Upload full profile'>\n";
+  infoText += "<input type='button' id='upload_select' value='Upload view'><br>\n";
+  infoText += "<input type='button' id='download' value='Download full profile'><br>\n";
 
   //infoText += "<br>\n";
   //infoText += "Skip functions:<br>\n";
@@ -744,6 +752,7 @@ function updateDescription() {
     //filterNameInputNew.value = filterNameInputOld.value;
   }
   document.getElementById('upload').onclick = uploadProfile;
+  document.getElementById('download').onclick = downloadProfile;
   document.getElementById('upload_select').onclick = function() {
     uploadProfile(true);
   };
