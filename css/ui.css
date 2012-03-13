@@ -158,9 +158,3 @@ body {
   line-height: 15px;
   font-size: 9px;
 }
-.rect.selected {
-  fill: green !important;
-}
-.rect.marker {
-  fill: url(#markerGradient) !important;
-}
