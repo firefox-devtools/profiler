@@ -145,6 +145,8 @@ TreeView.prototype = {
     var treeLine = document.createElement("div");
     treeLine.className = "treeLine";
     treeLine.innerHTML = this._HTMLForFunction(data);
+    // When this item is toggled we will expand its children
+    li.pendingExpand = [];
     li.treeLine = treeLine;
     li.data = data;
     li.appendChild(treeLine);
@@ -154,7 +156,7 @@ TreeView.prototype = {
       var ol = document.createElement("ol");
       ol.className = "treeViewNodeList";
       for (var i = 0; i < data.children.length; ++i) {
-        this._pendingActions.push({parentElement: ol, parentNode: li, data: data.children[i].getData() });
+        li.pendingExpand.push({parentElement: ol, parentNode: li, data: data.children[i].getData() });
       }
       li.appendChild(ol);
     }
@@ -171,7 +173,13 @@ TreeView.prototype = {
       '<span class="functionName">' + node.name + '</span>' +
       '<span class="libraryName">' + node.library + '</span>';
   },
+  _resolveChild: function TreeView__resolveChild(div) {
+    while (div.pendingExpand != null && div.pendingExpand.length > 0) {
+      this._processOneAction(div.pendingExpand.shift());
+    }
+  },
   _toggle: function TreeView__toggle(div, /* optional */ newCollapsedValue, /* optional */ suppressScrollHeightNotification) {
+    this._resolveChild(div);
     if (newCollapsedValue === undefined) {
       div.classList.toggle("collapsed");
     } else {
