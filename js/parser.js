@@ -166,7 +166,8 @@ var Parser = {
     var samples = profile.samples.clone();
     calltrace_it: for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
-      if (sample.extraInfo["responsiveness"] < filterThreshold) {
+      if (!("responsiveness" in sample.extraInfo) ||
+          sample.extraInfo["responsiveness"] < filterThreshold) {
         samples[i] = samples[i].clone();
         samples[i].frames = ["Filtered out"];
       }
