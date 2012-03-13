@@ -100,11 +100,9 @@ function HistogramView(markerContainer) {
 HistogramView.prototype = {
   _createCanvas: function HistogramView__createSVGRoot() {
     var canvas = document.createElement("canvas");
-    canvas.width = 2000;
     canvas.height = 60;
     canvas.style.width = "100%";
     canvas.style.height = "100%";
-    canvas.getContext("2d").scale(canvas.width, canvas.height);
     return canvas;
   },
   getContainer: function HistogramView_getContainer() {
@@ -125,30 +123,23 @@ HistogramView.prototype = {
   },
   display: function HistogramView_display(profile, highlightedCallstack) {
     this._histogramData = this._convertToHistogramData(profile.samples);
+    var lastStep = this._histogramData[this._histogramData.length - 1];
+    this._widthSum = lastStep.x + lastStep.width;
+    this._canvas.width = this._widthSum;
     this._render(highlightedCallstack);
   },
   _render: function HistogramView__render(highlightedCallstack) {
-    this._widthSum = this._histogramData.reduce(function (runningSum, step) {
-      return runningSum + step.width;
-    }, 0);
-
-    this._maxHeight = this._histogramData.reduce(function (runningMaxHeight, step) {
-      return Math.max(step.value, runningMaxHeight);
-    }, 0);
-
     var ctx = this._canvas.getContext("2d");
-    ctx.clearRect(0, 0, 1, 1);
+    var height = this._canvas.height;
+    ctx.clearRect(0, 0, this._widthSum, height);
 
-    // iterate over the histogram items and create rects for each one
-    for (var i = 0; i < this._histogramData.length; i++) {
-      var step = this._histogramData[i];
-
-      ctx.fillStyle = this._isSampleSelected(highlightedCallstack, step) ? "green" : step.color;
-      ctx.fillRect(step.x / this._widthSum,
-                   1 - step.value / this._maxHeight,
-                   step.width / this._widthSum,
-                   step.value / this._maxHeight);
-    }
+    var self = this;
+    this._histogramData.forEach(function plotStep(step) {
+      var isSelected = self._isStepSelected(step, highlightedCallstack);
+      ctx.fillStyle = isSelected ? "green" : step.color;
+      var roundedHeight = Math.round(step.value * height);
+      ctx.fillRect(step.x, height - roundedHeight, step.width, roundedHeight);
+    });
 
     var markers = this._gatherMarkersList(this._histogramData);
     this._rangeSelector.display(markers);
@@ -157,8 +148,8 @@ HistogramView.prototype = {
   highlightedCallstackChanged: function HistogramView_highlightedCallstackChanged(highlightedCallstack) {
     this._render(highlightedCallstack);
   },
-  _isSampleSelected: function HistogramView__isSampleSelected(highlightedCallstack, step) {
-    function isCallstackSelected(frames) {
+  _isStepSelected: function HistogramView__isStepSelected(step, highlightedCallstack) {
+    return step.frames.some(function isCallstackSelected(frames) {
       if (frames.length < highlightedCallstack.length ||
           highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
         return false;
@@ -180,8 +171,7 @@ HistogramView.prototype = {
         }
       }
       return true;
-    }
-    return step.frames.some(isCallstackSelected);
+    });
   },
   _getStepColor: function HistogramView__getStepColor(step) {
       if ("responsiveness" in step.extraInfo) {
@@ -194,12 +184,13 @@ HistogramView.prototype = {
   },
   _convertToHistogramData: function HistogramView_convertToHistogramData(data) {
     var histogramData = [];
-    var maxHeight = 1;
+    var maxHeight = 0;
     for (var i = 0; i < data.length; ++i) {
       var value = data[i].frames.length;
       if (maxHeight < value)
         maxHeight = value;
     }
+    maxHeight += 1;
     var nextX = 0;
     // The number of data items per histogramData rects.
     // Except when seperated by a marker.
@@ -208,7 +199,7 @@ HistogramView.prototype = {
     var samplesPerStep = Math.floor(data.length / 2000);
     for (var i = 0; i < data.length; i++) {
       var step = data[i];
-      var value = step.frames.length;
+      var value = step.frames.length / maxHeight;
       var frames = step.frames;
       var currHistrogramData = histogramData[histogramData.length-1];
       if ("marker" in step.extraInfo) {
@@ -217,7 +208,7 @@ HistogramView.prototype = {
           frames: "marker",
           x: nextX,
           width: 2,
-          value: maxHeight + 1,
+          value: 1,
           marker: step.extraInfo.marker
         });
         nextX += 2;
