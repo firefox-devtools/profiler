@@ -173,7 +173,9 @@ var Parser = {
       var sample = samples[i];
       var callstack = sample.frames;
       for (var j = 0; j < callstack.length; ++j) { 
-        if (profile.symbols[callstack[j]].toLowerCase().indexOf(filterName) != -1) {
+        var symbol = profile.symbols[callstack[j]];
+        if (symbol != null &&
+            profile.symbols[callstack[j]].symbolName.toLowerCase().indexOf(filterName) != -1) {
           continue calltrace_it;
         }
       }
