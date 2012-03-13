@@ -292,7 +292,7 @@ HistogramView.prototype = {
     // Except when seperated by a marker.
     // This is used to cut down the number of rects, since
     // there's no point in having more rects then pixels
-    var samplesPerStep = Math.ceil(data.length / 1000);
+    var samplesPerStep = Math.floor(data.length / 2000);
     for (var i = 0; i < data.length; i++) {
       var step = data[i];
       var value = step.frames.length;
