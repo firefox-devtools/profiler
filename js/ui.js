@@ -136,58 +136,23 @@ HistogramView.prototype = {
       return Math.max(step.value, runningMaxHeight);
     }, 0);
 
-    this._nextStepIndex = 0;
-    this._finishedRendering = false;
-
-    if (this._animationFrame)
-      window.mozCancelAnimationFrame(this._animationFrame);
-
-    this._canvas.getContext("2d").clearRect(0, 0, 1, 1);
-
-    var self = this;
-    this._animationFrame = window.mozRequestAnimationFrame(function () {
-      self._doRenderingChunk(highlightedCallstack);
-    });
-  },
-  _doRenderingChunk: function HistogramView__doRenderingChunk(highlightedCallstack) {
-    var startTime = Date.now();
-    var endTime = startTime + kMaxChunkDuration;
-
-    var stepSize = 8;
-    var finished = false;
-
     var ctx = this._canvas.getContext("2d");
+    ctx.clearRect(0, 0, 1, 1);
 
     // iterate over the histogram items and create rects for each one
-    while (Date.now() < endTime) {
-      var step = this._histogramData[this._nextStepIndex];
+    for (var i = 0; i < this._histogramData.length; i++) {
+      var step = this._histogramData[i];
 
       ctx.fillStyle = this._isSampleSelected(highlightedCallstack, step) ? "green" : step.color;
       ctx.fillRect(step.x / this._widthSum,
                    1 - step.value / this._maxHeight,
                    step.width / this._widthSum,
                    step.value / this._maxHeight);
-
-      this._nextStepIndex += stepSize;
-      if (this._nextStepIndex >= this._histogramData.length) {
-        this._nextStepIndex = (this._nextStepIndex + 1) % stepSize;
-        if (this._nextStepIndex == 0) {
-          finished = true;
-          break;
-        }
-      }
     }
 
-    if (finished) {
-      var markers = this._gatherMarkersList(this._histogramData);
-      this._rangeSelector.display(markers);
-      this._finishedRendering = true;
-    } else {
-      var self = this;
-      this._animationFrame = window.mozRequestAnimationFrame(function () {
-        self._doRenderingChunk(highlightedCallstack);
-      });
-    }
+    var markers = this._gatherMarkersList(this._histogramData);
+    this._rangeSelector.display(markers);
+    this._finishedRendering = true;
   },
   highlightedCallstackChanged: function HistogramView_highlightedCallstackChanged(highlightedCallstack) {
     this._render(highlightedCallstack);
