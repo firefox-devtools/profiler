@@ -250,13 +250,21 @@ HistogramView.prototype = {
         highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
         continue next_iteration;
 
-      // TODO remove this clone, reverse the stack at build time.
-      var compareFrames = frames.clone();
-      if (gInvertCallstack)
-        compareFrames.reverse();
-      for (var j = 0; j < highlightedCallstack.length; j++) {
-        if (highlightedCallstack[j] != compareFrames[j] && compareFrames[j] != "(root)")
-          continue next_iteration;
+      var compareFrames = frames;
+      if (gInvertCallstack) {
+        for (var j = 0; j < highlightedCallstack.length; j++) {
+          var compareFrameIndex = highlightedCallstack.length - 1 - j;
+          if (highlightedCallstack[j] != compareFrames[compareFrameIndex] &&
+            compareFrames[compareFrameIndex] != "(root)")
+            continue next_iteration;
+        }
+      } else {
+        for (var j = 0; j < highlightedCallstack.length; j++) {
+          var compareFrameIndex = j;
+          if (highlightedCallstack[j] != compareFrames[compareFrameIndex] &&
+            compareFrames[compareFrameIndex] != "(root)")
+            continue next_iteration;
+        }
       }
       return true;
     }
@@ -725,6 +733,7 @@ function updateDescription() {
   infoText += "<label><input type='checkbox' id='invertCallstack' " + (gInvertCallstack ?" checked='true' ":" ") + " onchange='toggleInvertCallStack()'/>Invert callstack</label><br />\n";
   infoText += "<label><input type='checkbox' id='mergeUnbranched' " + (gMergeUnbranched ?" checked='true' ":" ") + " onchange='toggleMergeUnbranched()'/>Merge unbranched call paths</label><br />\n";
   infoText += "<label><input type='checkbox' id='mergeFunctions' " + (gMergeFunctions ?" checked='true' ":" ") + " onchange='toggleMergeFunctions()'/>Functions, not lines</label><br />\n";
+  infoText += "<label><input type='checkbox' id='showJank' " + (gJankOnly ?" checked='true' ":" ") + " onchange='toggleJank()'/>Show Jank only</label><br />\n";
 
   var filterNameInputOld = document.getElementById("filterName");
   infoText += "<br>\n";
@@ -817,7 +826,9 @@ function loadProfile(rawProfile) {
 var gInvertCallstack = false;
 function toggleInvertCallStack() {
   gInvertCallstack = !gInvertCallstack;
+  var startTime = Date.now();
   refreshUI();
+  console.log("invert time: " + (Date.now() - startTime) + "ms");
 }
 
 var gMergeUnbranched = false;
@@ -830,6 +841,16 @@ var gMergeFunctions = true;
 function toggleMergeFunctions() {
   gMergeFunctions = !gMergeFunctions;
   refreshUI(); 
+}
+
+var gJankOnly = false;
+var gJankThreshold = 50 /* ms */;
+function toggleJank(/* optional */ threshold) {
+  gJankOnly = !gJankOnly;
+  if (threshold != null ) {
+    gJankThreshold = threshold;
+  }
+  refreshUI();
 }
 
 function setHighlightedCallstack(samples) {
@@ -868,6 +889,9 @@ function refreshUI() {
   var filterNameInput = document.getElementById("filterName");
   if (filterNameInput != null && filterNameInput.value != "") {
     data = Parser.filterByName(data, document.getElementById("filterName").value);
+  }
+  if (gJankOnly) {
+    data = Parser.filterByJank(data, gJankThreshold);
   }
   if (gMergeFunctions) {
     data = Parser.discardLineLevelInformation(data);

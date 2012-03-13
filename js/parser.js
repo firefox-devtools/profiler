@@ -162,14 +162,32 @@ var Parser = {
     return functionName;
   },
 
-  filterByName: function Parse_filterByName(profile, filterName) {
+  filterByJank: function Parser_filterByJank(profile, filterThreshold) {
+    var samples = profile.samples.clone();
+    calltrace_it: for (var i = 0; i < samples.length; ++i) {
+      var sample = samples[i];
+      if (sample.extraInfo["responsiveness"] < filterThreshold) {
+        samples[i] = samples[i].clone();
+        samples[i].frames = ["Filtered out"];
+      }
+    }
+    return {
+      symbols: profile.symbols,
+      functions: profile.functions,
+      samples: samples
+    };
+  },
+
+  filterByName: function Parser_filterByName(profile, filterName) {
     var samples = profile.samples.clone();
     filterName = filterName.toLowerCase();
     calltrace_it: for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
       var callstack = sample.frames;
       for (var j = 0; j < callstack.length; ++j) { 
-        if (profile.symbols[callstack[j]].toLowerCase().indexOf(filterName) != -1) {
+        var symbol = profile.symbols[callstack[j]];
+        if (symbol != null &&
+            profile.symbols[callstack[j]].symbolName.toLowerCase().indexOf(filterName) != -1) {
           continue calltrace_it;
         }
       }
