@@ -191,23 +191,35 @@ TreeView.prototype = {
       var menuItem = menuItems[i];
       var menuItemNode = document.createElement("menuitem");
       var self = this;
-      menuItemNode.onclick = function() {
-        self._contextMenuClick(li.data);
-      }
+      menuItemNode.onclick = (function (menuItem) {
+        return function() {
+          self._contextMenuClick(li.data, menuItem);
+        };
+      })(menuItem);
       menuItemNode.label = menuItem;
       contextMenu.appendChild(menuItemNode);
     }
   },
-  _contextMenuClick: function TreeView__ContextMenuClick(node) {
-    //console.log(node);
+  _contextMenuClick: function TreeView__ContextMenuClick(node, menuItem) {
+    // TODO move me outside tree.js
+    if (menuItem == "View Source") {
+      // Remove anything after ( since MXR doesn't handle search with the arguments.
+      var symbol = node.name.split("(")[0];
+      window.open("http://mxr.mozilla.org/mozilla-central/search?string=" + symbol, "View Source");
+    } else if (menuItem == "Google Search") {
+      var symbol = node.name;
+      window.open("https://www.google.ca/search?q=" + symbol, "View Source");
+    }
   },
   _contextMenuForFunction: function TreeView__ContextMenuForFunction(node) {
+    // TODO move me outside tree.js
     var menu = [];
     if (node.library != null && node.library.toLowerCase() == "xul") {
       menu.push("View Source");
     }
     // Planned feature:
     // menu.push("Focus");
+    menu.push("Google Search");
     return menu;
   },
   _HTMLForFunction: function TreeView__HTMLForFunction(node) {
