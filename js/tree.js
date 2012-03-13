@@ -173,13 +173,13 @@ TreeView.prototype = {
       '<span class="functionName">' + node.name + '</span>' +
       '<span class="libraryName">' + node.library + '</span>';
   },
-  _resolveChild: function TreeView__resolveChild(div) {
+  _resolveChildren: function TreeView__resolveChildren(div) {
     while (div.pendingExpand != null && div.pendingExpand.length > 0) {
       this._processOneAction(div.pendingExpand.shift());
     }
   },
   _toggle: function TreeView__toggle(div, /* optional */ newCollapsedValue, /* optional */ suppressScrollHeightNotification) {
-    this._resolveChild(div);
+    this._resolveChildren(div);
     if (newCollapsedValue === undefined) {
       div.classList.toggle("collapsed");
     } else {
