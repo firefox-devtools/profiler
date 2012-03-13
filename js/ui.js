@@ -164,9 +164,9 @@ HistogramView.prototype = {
 
       ctx.fillStyle = this._isSampleSelected(highlightedCallstack, step) ? "green" : step.color;
       ctx.fillRect(step.x / this._widthSum,
-                                  1 - step.value / this._maxHeight,
-                                  step.width / this._widthSum,
-                                  step.value / this._maxHeight);
+                   1 - step.value / this._maxHeight,
+                   step.width / this._widthSum,
+                   step.value / this._maxHeight);
 
       this._nextStepIndex += stepSize;
       if (this._nextStepIndex >= this._histogramData.length) {
