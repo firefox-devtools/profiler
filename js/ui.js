@@ -250,9 +250,10 @@ HistogramView.prototype = {
         highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
         continue next_iteration;
 
+      var compareFrames = frames;
       if (gInvertCallstack) {
         for (var j = 0; j < highlightedCallstack.length; j++) {
-          var compareFrameIndex = hlightedCallstack.length - j;
+          var compareFrameIndex = highlightedCallstack.length - 1 - j;
           if (highlightedCallstack[j] != compareFrames[compareFrameIndex] &&
             compareFrames[compareFrameIndex] != "(root)")
             continue next_iteration;
