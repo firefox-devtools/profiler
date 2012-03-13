@@ -163,7 +163,19 @@ var Parser = {
   },
 
   filterByJank: function Parser_filterByJank(profile, filterThreshold) {
-    return profile; 
+    var samples = profile.samples.clone();
+    calltrace_it: for (var i = 0; i < samples.length; ++i) {
+      var sample = samples[i];
+      if (sample.extraInfo["responsiveness"] < filterThreshold) {
+        samples[i] = samples[i].clone();
+        samples[i].frames = ["Filtered out"];
+      }
+    }
+    return {
+      symbols: profile.symbols,
+      functions: profile.functions,
+      samples: samples
+    };
   },
 
   filterByName: function Parser_filterByName(profile, filterName) {
