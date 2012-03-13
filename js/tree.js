@@ -136,6 +136,41 @@ TreeView.prototype = {
   _scrollHeightChanged: function TreeView__scrollHeightChanged() {
     this._leftColumnBackground.style.height = this._horizontalScrollbox.getBoundingClientRect().height + 'px';
   },
+  _createTree: function TreeView__createTree(parentElement, parentNode, data) {
+    var li = document.createElement("li");
+    li.className = "treeViewNode collapsed";
+    var hasChildren = ("children" in data) && (data.children.length > 0);
+    if (!hasChildren)
+      li.classList.add("leaf");
+    var treeLine = document.createElement("div");
+    treeLine.className = "treeLine";
+    treeLine.innerHTML = this._HTMLForFunction(data);
+    // When this item is toggled we will expand its children
+    li.pendingExpand = [];
+    li.treeLine = treeLine;
+    li.data = data;
+    li.appendChild(treeLine);
+    li.treeChildren = [];
+    li.contextMenuItems = this._contextMenuForFunction(data);
+    li.treeParent = parentNode;
+    li.setAttribute("contextmenu", "xulContextMenu");
+    var self = this;
+    li.addEventListener("contextmenu", function(event) {
+        self._contextMenu(event);
+    }, true);
+    if (hasChildren) {
+      var ol = document.createElement("ol");
+      ol.className = "treeViewNodeList";
+      for (var i = 0; i < data.children.length; ++i) {
+        li.pendingExpand.push({parentElement: ol, parentNode: li, data: data.children[i].getData() });
+      }
+      li.appendChild(ol);
+    }
+    if (parentNode) {
+      parentNode.treeChildren.push(li);
+    }
+    parentElement.appendChild(li);
+  },
   _contextMenu: function TreeView__contextMenu(event) {
     var target = event.target;
     while (target != null && target.contextMenu == null) {
@@ -155,43 +190,25 @@ TreeView.prototype = {
     for (var i = 0; i < menuItems.length; i++) {
       var menuItem = menuItems[i];
       var menuItemNode = document.createElement("menuitem");
+      var self = this;
       menuItemNode.onclick = function() {
+        self._contextMenuClick(li.data);
       }
       menuItemNode.label = menuItem;
       contextMenu.appendChild(menuItemNode);
     }
   },
-  _createTree: function TreeView__createTree(parentElement, parentNode, data) {
-    var li = document.createElement("li");
-    li.className = "treeViewNode collapsed";
-    var hasChildren = ("children" in data) && (data.children.length > 0);
-    if (!hasChildren)
-      li.classList.add("leaf");
-    var treeLine = document.createElement("div");
-    treeLine.className = "treeLine";
-    treeLine.innerHTML = this._HTMLForFunction(data);
-    // When this item is toggled we will expand its children
-    li.pendingExpand = [];
-    li.treeLine = treeLine;
-    li.data = data;
-    li.appendChild(treeLine);
-    li.treeChildren = [];
-    //li.contextMenuItems = [];
-    li.treeParent = parentNode;
-    li.setAttribute("contextmenu", "xulContextMenu");
-    li.addEventListener("contextmenu", TreeView.prototype._contextMenu, true);
-    if (hasChildren) {
-      var ol = document.createElement("ol");
-      ol.className = "treeViewNodeList";
-      for (var i = 0; i < data.children.length; ++i) {
-        li.pendingExpand.push({parentElement: ol, parentNode: li, data: data.children[i].getData() });
-      }
-      li.appendChild(ol);
+  _contextMenuClick: function TreeView__ContextMenuClick(node) {
+    //console.log(node);
+  },
+  _contextMenuForFunction: function TreeView__ContextMenuForFunction(node) {
+    var menu = [];
+    if (node.library != null && node.library.toLowerCase() == "xul") {
+      menu.push("View Source");
     }
-    if (parentNode) {
-      parentNode.treeChildren.push(li);
-    }
-    parentElement.appendChild(li);
+    // Planned feature:
+    // menu.push("Focus");
+    return menu;
   },
   _HTMLForFunction: function TreeView__HTMLForFunction(node) {
     return '<input type="button" value="Expand / Collapse" class="expandCollapseButton" tabindex="-1"> ' +
