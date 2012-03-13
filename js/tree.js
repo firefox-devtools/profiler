@@ -209,6 +209,9 @@ TreeView.prototype = {
     } else if (menuItem == "Google Search") {
       var symbol = node.name;
       window.open("https://www.google.ca/search?q=" + symbol, "View Source");
+    } else if (menuItem == "Focus") {
+      var symbol = node.name;
+      focusOnSymbol(symbol);
     }
   },
   _contextMenuForFunction: function TreeView__ContextMenuForFunction(node) {
@@ -217,8 +220,7 @@ TreeView.prototype = {
     if (node.library != null && node.library.toLowerCase() == "xul") {
       menu.push("View Source");
     }
-    // Planned feature:
-    // menu.push("Focus");
+    menu.push("Focus");
     menu.push("Google Search");
     return menu;
   },
