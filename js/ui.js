@@ -124,12 +124,10 @@ HistogramView.prototype = {
     return markers;
   },
   display: function HistogramView_display(profile, highlightedCallstack) {
-    if (!profile)
-      return;
-
-    this._cachedProfile = profile;
     this._histogramData = this._convertToHistogramData(profile.samples);
-
+    this._render(highlightedCallstack);
+  },
+  _render: function HistogramView__render(highlightedCallstack) {
     this._widthSum = this._histogramData.reduce(function (runningSum, step) {
       return runningSum + step.width;
     }, 0);
@@ -192,7 +190,7 @@ HistogramView.prototype = {
     }
   },
   highlightedCallstackChanged: function HistogramView_highlightedCallstackChanged(highlightedCallstack) {
-    this.display(this._cachedProfile, highlightedCallstack);
+    this._render(highlightedCallstack);
   },
   _isSampleSelected: function HistogramView__isSampleSelected(highlightedCallstack, step) {
     function isCallstackSelected(frames) {
