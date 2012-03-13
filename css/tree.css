@@ -1,0 +1,213 @@
+.treeViewContainer {
+  -moz-user-select: none;
+  cursor: default;
+  line-height: 16px;
+  height: 100%;
+  outline: none; /* override the browser's focus styling */
+  position: relative;
+}
+
+.treeHeader {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+}
+
+.treeColumnHeader {
+  position: absolute;
+  display: block;
+  background: -moz-linear-gradient(#FFF 45%, #EEE 60%);
+  margin: 0;
+  padding: 0;
+  top: 0;
+  height: 15px;
+  line-height: 15px;
+  border: 0 solid #CCC;
+  border-bottom-width: 1px;
+  text-indent: 5px;
+}
+
+.treeColumnHeader:not(:last-child) {
+  border-right-width: 1px;
+}
+
+.treeColumnHeader0 {
+  left: 0;
+  width: 86px;
+}
+
+.treeColumnHeader1 {
+  left: 99px;
+  width: 35px;
+}
+
+.treeColumnHeader0,
+.treeColumnHeader1 {
+  text-align: right;
+  padding-right: 12px;
+}
+
+.treeColumnHeader2 {
+  left: 147px;
+  right: 0;
+}
+
+.treeViewVerticalScrollbox {
+  position: absolute;
+  top: 16px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.treeViewNodeList,
+.treeViewNode,
+.treeViewHorizontalScrollbox {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+.treeViewNodeList,
+.treeViewNode {
+  min-width: -moz-min-content;
+}
+
+.treeViewHorizontalScrollbox {
+  padding-left: 150px;
+  overflow: hidden;
+}
+
+.treeViewVerticalScrollbox,
+.treeViewHorizontalScrollbox {
+  background: -moz-linear-gradient(white, white 50%, #F0F5FF 50%, #F0F5FF);
+  background-size: 100px 32px;
+}
+
+.leftColumnBackground {
+  background: -moz-linear-gradient(left, transparent, transparent 98px, #CCC 98px, #CCC 99px, transparent 99px),
+    -moz-linear-gradient(white, white 50%, #F0F5FF 50%, #F0F5FF);
+  background-size: auto, 100px 32px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 146px;
+  min-height: 100%;
+  border-right: 1px solid #CCC;
+}
+
+.sampleCount,
+.samplePercentage,
+.selfSampleCount {
+  position: absolute;
+  text-align: right;
+}
+
+.sampleCount {
+  left: 2px;
+  width: 50px;
+}
+
+.samplePercentage {
+  left: 55px;
+  width: 40px;
+}
+
+.selfSampleCount {
+  left: 98px;
+  width: 45px;
+  padding-right: 2px;
+  border: solid #CCC;
+  border-width: 0 1px;
+}
+
+.libraryName {
+  margin-left: 10px;
+  color: #999;
+}
+
+.treeViewNodeList {
+  margin-left: 1em;
+  white-space: nowrap;
+}
+
+.treeViewNode.collapsed > .treeViewNodeList {
+  display: none;
+}
+
+.treeLine {
+  margin-left: -10000px;
+  padding-left: 10000px;
+}
+
+.treeLine.selected {
+  color: black;
+  background-color: -moz-dialog;
+}
+
+.treeLine.selected > .sampleCount {
+  background-color: inherit;
+  margin-left: -2px;
+  padding-left: 2px;
+  padding-right: 95px;
+  margin-right: -95px;
+}
+
+.treeViewContainer:focus .treeLine.selected {
+  color: highlighttext;
+  background-color: highlight;
+}
+
+.treeViewContainer:focus .treeLine.selected > .libraryName {
+  color: #CCC;
+}
+
+.expandCollapseButton {
+  background: url(../images/treetwisty.svg) 0 0 no-repeat transparent;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: 16px;
+  height: 16px;
+  overflow: hidden;
+  vertical-align: top;
+  color: transparent;
+}
+
+.expandCollapseButton:active:hover {
+  background-position: -16px 0;
+}
+
+.treeViewNode.collapsed > .treeLine > .expandCollapseButton {
+  background-position: 0 -16px;
+}
+
+.treeViewNode.collapsed > .treeLine > .expandCollapseButton:active:hover {
+  background-position: -16px -16px;
+}
+
+.treeViewContainer:focus .treeLine.selected > .expandCollapseButton {
+  background-position: -32px 0;
+}
+
+.treeViewContainer:focus .treeViewNode.collapsed > .treeLine.selected > .expandCollapseButton {
+  background-position: -32px -16px;
+}
+
+.treeViewContainer:focus .treeLine.selected > .expandCollapseButton:active:hover {
+  background-position: -48px 0;
+}
+
+.treeViewContainer:focus .treeViewNode.collapsed > .treeLine.selected > .expandCollapseButton:active:hover {
+  background-position: -48px -16px;
+}
+
+.treeViewNode.leaf > * > .expandCollapseButton {
+  visibility: hidden;
+}

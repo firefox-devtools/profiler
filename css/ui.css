@@ -1,0 +1,166 @@
+body {
+  margin: 0;
+  font-family: "Lucida Grande", sans-serif;
+  font-size: 11px;
+}
+#mainarea {
+  position: absolute;
+  top: 0;
+  left: 200px;
+  bottom: 0;
+  right: 0;
+}
+#dataentry {
+  display: block;
+  width: 1200px;
+  height: 1000px;
+  margin: 0 auto;
+}
+.breadcrumbTrail {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 29px;
+  left: 0;
+  background: -moz-linear-gradient(#FFF 50%, #F3F3F3 55%);
+  border-bottom: 1px solid #CCC;
+  margin: 0;
+  padding: 0;
+}
+.breadcrumbTrailItem {
+  background: -moz-linear-gradient(#FFF 50%, #F3F3F3 55%);
+  display: block;
+  margin: 0;
+  padding: 0;
+  float: left;
+  line-height: 29px;
+  padding: 0 10px;
+  font-size: 12px;
+  -moz-user-select: none;
+  cursor: default;
+  border-right: 1px solid #CCC;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative;
+  z-index: 1;
+}
+@-moz-keyframes slide-out {
+  from {
+    margin-left: -150px;
+    opacity: 0;
+  }
+  to {
+    margin-left: 0;
+    opacity: 1;
+  }
+}
+.breadcrumbTrailItem:not(:first-child) {
+  -moz-animation: slide-out;
+  -moz-animation-duration: 400ms;
+  -moz-animation-timing-function: ease-out;
+}
+.breadcrumbTrailItem.selected {
+  background: -moz-linear-gradient(#E5E5E5 50%, #DADADA 55%);
+  z-index: 2;
+}
+.breadcrumbTrailItem:not(.selected):active:hover {
+  background: -moz-linear-gradient(#F2F2F2 50%, #E6E6E6 55%);
+}
+.breadcrumbTrailItem.deleted {
+  z-index: 0;
+  -moz-transition: 400ms ease-out;
+  -moz-transition-property: opacity, margin-left;
+  opacity: 0;
+  margin-left: -150px;
+}
+#tree {
+  position: absolute;
+  top: 90px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+#fileList {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 320px;
+  width: 199px;
+  overflow: auto;
+  padding: 0;
+  margin: 0;
+  background: #DBDFE7;
+  border-right: 1px solid #BBB;
+}
+#infobar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 193px;
+  height: 319px;
+  overflow: auto;
+  padding: 3px;
+  background: #EEE;
+  border-top: 1px solid #BBB;
+  border-right: 1px solid #BBB;
+}
+#bottombar {
+  position: absolute;
+  height: 60px;
+  right: 0;
+  top: 30px;
+  left: 0;
+  border-bottom: 1px solid #CCC;
+  background: -moz-linear-gradient(#EEE, #CCC);
+}
+#histogram {
+  width: 100%;
+  height: 100%;
+}
+.histogramHilite {
+  position: absolute;
+  pointer-events: none;
+}
+.histogramHilite:not(.collapsed) {
+  background: rgba(150, 150, 150, 0.5);
+}
+#iconbox {
+  display: none;
+}
+#filter, #showall {
+  cursor: pointer;
+}
+#markers {
+  display: none;
+}
+.hidden {
+  display: none !important;
+}
+.fileListItem {
+  display: block;
+  margin: 0;
+  padding: 0;
+  height: 40px;
+  color: #FFF;
+  text-indent: 8px;
+  text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+  background: -moz-linear-gradient(#4B91D7 1px, #5FA9E4 1px, #5FA9E4 2px, #58A0DE 3px, #2B70C7 39px, #2763B4 39px);
+}
+.fileListItemTitle {
+  display: block;
+  padding-top: 6px;
+  font-size: 12px;
+}
+.fileListItemDescription {
+  display: block;
+  line-height: 15px;
+  font-size: 9px;
+}
+.rect.selected {
+  fill: green !important;
+}
+.rect.marker {
+  fill: url(#markerGradient) !important;
+}

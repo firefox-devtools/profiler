@@ -2,112 +2,64 @@
 <html>
   <head>
     <title>Cleopatra - UI for SPS</title>
-    <script src="parser.js"></script>
-    <script src="tree.js"></script>
-    <script src="ui.js"></script>
-    <script src="QueryData.compressed.js"></script>
-    <link rel="stylesheet" type="text/css" href="tree.css">
-    <style type="text/css">
-      body {
-        margin: 0;
-      }
-      #ui {
-        display: block;
-        width: 1600px;
-        height: 1000px;
-        margin: 0 auto;
-      }
-      #mainarea {
-        float: left;
-        /* compensate for the icons that will appear on the left */
-        margin-left: 36px;
-      }
-      #dataentry {
-        display: block;
-        width: 1200px;
-        height: 1000px;
-        margin: 0 auto;
-      }
-      #tree {
-        width: 1200px;
-        height: 600px;
-        overflow: scroll;
-      }
-      #infobar {
-        width: 300px;
-        height: 1000px;
-        float: left;
-        border-style: double;
-      }
-      #bottombar {
-        width: 1200px;
-        height: 400px;
-      }
-      #histogram {
-        float: left;
-        height: 400px;
-        width: 1050px;
-        position: relative;
-      }
-      #iconbox {
-        position: absolute;
-        width: 36px;
-        left: -36px;
-        top: 0;
-      }
-      #filter, #showall {
-        cursor: pointer;
-      }
-      #markers {
-        float: right;
-        width: 150px;
-        height: 400px;
-      }
-      #markers > select {
-        width: 150px;
-        max-height: 400px;
-      }
-      .hidden {
-        display: none !important;
-      }
-    </style>
+    <script src="js/parser.js"></script>
+    <script src="js/tree.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/QueryData.compressed.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/ui.css">
+    <link rel="stylesheet" type="text/css" href="css/tree.css">
   </head>
   <body>
+    <menu id="xulContextMenu" type="context">
+      <!-- Context menu for XUL library function, integrate with mozilla systems -->
+      <menuitem label="View Source"
+         onclick="xulContextMenu(event)">
+      </menuitem>
+    </menu>
     <div id="ui" class="hidden">
       <div id="mainarea">
         <div id="tree"></div>
         <div id="bottombar">
           <div id="histogram"></div>
           <div id="markers"></div>
-        </div>
-        <div id="footer">
-          Best viewed in Netscape Navigator 4.76
-          <img src="images/netscape.gif"/>
+          <div class="histogramHilite collapsed">
+          </div>
         </div>
       </div>
+      <ul id="fileList">
+        <li class="fileListItem">
+          <span class="fileListItemTitle">Current Profile</span>
+          <span class="fileListItemDescription"><a id="fileListItemSamples">...</a> Samples, 2012-03-08 22:12</span>
+        </li>
+      </ul>
       <div id="infobar"></div>
     </div>
     <div id="dataentry">
       <h1>Enter your profile data here:</h1>
       <textarea rows=20 cols=80 id=data autofocus spellcheck=false></textarea>
-      <p><button onclick="parse()">Parse</button></p>
+      <p><button onclick="loadProfile(document.getElementById('data').value); enterMainUI();">Parse</button></p>
     </div>
     <script>
-var getData = new QueryData();
-if (getData.report != null) {
-  document.getElementById('data').value = "Fetching profile";
-
-  var request = new XMLHttpRequest();  
-  request.open('GET', 'http://profile-logs.appspot.com/serve/' + getData.report, false);   
-  request.send(null);  
-      
-  if (request.status === 200) {  
-    document.getElementById('data').value = request.responseText;
-    parse();
-  } else {
-    alert("Failed to get profile. Error #" + request.status);
-  }
-}
-    </script>    
+      if (location.href.indexOf("usesample") != -1) {
+        var filename = (location.href.indexOf("pseudo") != -1) ? 'sample.profile' : 'sample.log';
+        var oXHR = new XMLHttpRequest();
+        oXHR.open('GET', filename, true);
+        oXHR.responseType = "text";
+        oXHR.onreadystatechange = function (oEvent) {  
+          if (oXHR.readyState === 4) {  
+            if (oXHR.status === 200) {  
+              loadProfile(oXHR.responseText);
+              enterMainUI();
+            } else {  
+              alert("Using the sample log needs XHR to work, so you can't run this from a file URL but need to start a webserver.");
+            }  
+          }  
+        };  
+        oXHR.send(null);
+      }
+      function xulContextMenu(event) {
+        alert(event.target.target);
+      }
+    </script>
   </body>
 </html>
