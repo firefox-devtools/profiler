@@ -250,13 +250,20 @@ HistogramView.prototype = {
         highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
         continue next_iteration;
 
-      // TODO remove this clone, reverse the stack at build time.
-      var compareFrames = frames.clone();
-      if (gInvertCallstack)
-        compareFrames.reverse();
-      for (var j = 0; j < highlightedCallstack.length; j++) {
-        if (highlightedCallstack[j] != compareFrames[j] && compareFrames[j] != "(root)")
-          continue next_iteration;
+      if (gInvertCallstack) {
+        for (var j = 0; j < highlightedCallstack.length; j++) {
+          var compareFrameIndex = hlightedCallstack.length - j;
+          if (highlightedCallstack[j] != compareFrames[compareFrameIndex] &&
+            compareFrames[compareFrameIndex] != "(root)")
+            continue next_iteration;
+        }
+      } else {
+        for (var j = 0; j < highlightedCallstack.length; j++) {
+          var compareFrameIndex = j;
+          if (highlightedCallstack[j] != compareFrames[compareFrameIndex] &&
+            compareFrames[compareFrameIndex] != "(root)")
+            continue next_iteration;
+        }
       }
       return true;
     }
@@ -818,7 +825,9 @@ function loadProfile(rawProfile) {
 var gInvertCallstack = false;
 function toggleInvertCallStack() {
   gInvertCallstack = !gInvertCallstack;
+  var startTime = Date.now();
   refreshUI();
+  console.log("invert time: " + (Date.now() - startTime) + "ms");
 }
 
 var gMergeUnbranched = false;
