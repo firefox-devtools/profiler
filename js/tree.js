@@ -191,16 +191,16 @@ TreeView.prototype = {
     if (!suppressScrollHeightNotification)
       this._scrollHeightChanged();
   },
-  _toggleAll: function TreeView__toggleAll(subtreeRoot, /* optional */ newCollapsedValue) {
+  _toggleAll: function TreeView__toggleAll(subtreeRoot, /* optional */ newCollapsedValue, /* optional */ suppressScrollHeightNotification) {
     // Expands / collapses all child nodes, too.
     if (newCollapsedValue === undefined)
       newCollapsedValue = !this._isCollapsed(subtreeRoot);
     this._toggle(subtreeRoot, newCollapsedValue);
-    var subtree = subtreeRoot.querySelectorAll('.treeViewNode');
-    for (var i = 0; i < subtree.length; ++i) {
-      this._toggle(subtree[i], newCollapsedValue, true);
+    for (var i = 0; i < subtreeRoot.treeChildren.length; ++i) {
+      this._toggleAll(subtreeRoot.treeChildren[i], newCollapsedValue, true);
     }
-    this._scrollHeightChanged();
+    if (!suppressScrollHeightNotification)
+      this._scrollHeightChanged();
   },
   _getParent: function TreeView__getParent(div) {
     return div.treeParent;
