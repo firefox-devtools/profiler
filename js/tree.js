@@ -136,6 +136,31 @@ TreeView.prototype = {
   _scrollHeightChanged: function TreeView__scrollHeightChanged() {
     this._leftColumnBackground.style.height = this._horizontalScrollbox.getBoundingClientRect().height + 'px';
   },
+  _contextMenu: function TreeView__contextMenu(event) {
+    var target = event.target;
+    while (target != null && target.contextMenu == null) {
+      target = target.parentNode;
+    }
+    var li = target;
+    var contextMenu = target.contextMenu;
+    var menuItems = ["No options"];
+    if (li != null && li.contextMenuItems != null)
+      menuItems = li.contextMenuItems;
+
+    // Mark on the context menu which tree node is clicked on.
+    contextMenu.target = li;
+    while (contextMenu.hasChildNodes()) {
+      contextMenu.removeChild(contextMenu.firstChild);
+    }
+    for (var i = 0; i < menuItems.length; i++) {
+      var menuItem = menuItems[i];
+      var menuItemNode = document.createElement("menuitem");
+      menuItemNode.onclick = function() {
+      }
+      menuItemNode.label = menuItem;
+      contextMenu.appendChild(menuItemNode);
+    }
+  },
   _createTree: function TreeView__createTree(parentElement, parentNode, data) {
     var li = document.createElement("li");
     li.className = "treeViewNode collapsed";
@@ -151,7 +176,10 @@ TreeView.prototype = {
     li.data = data;
     li.appendChild(treeLine);
     li.treeChildren = [];
+    //li.contextMenuItems = [];
     li.treeParent = parentNode;
+    li.setAttribute("contextmenu", "xulContextMenu");
+    li.addEventListener("contextmenu", TreeView.prototype._contextMenu, true);
     if (hasChildren) {
       var ol = document.createElement("ol");
       ol.className = "treeViewNodeList";
