@@ -162,7 +162,11 @@ var Parser = {
     return functionName;
   },
 
-  filterByName: function Parse_filterByName(profile, filterName) {
+  filterByJank: function Parser_filterByJank(profile, filterThreshold) {
+    return profile; 
+  },
+
+  filterByName: function Parser_filterByName(profile, filterName) {
     var samples = profile.samples.clone();
     filterName = filterName.toLowerCase();
     calltrace_it: for (var i = 0; i < samples.length; ++i) {

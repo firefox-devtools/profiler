@@ -725,6 +725,7 @@ function updateDescription() {
   infoText += "<label><input type='checkbox' id='invertCallstack' " + (gInvertCallstack ?" checked='true' ":" ") + " onchange='toggleInvertCallStack()'/>Invert callstack</label><br />\n";
   infoText += "<label><input type='checkbox' id='mergeUnbranched' " + (gMergeUnbranched ?" checked='true' ":" ") + " onchange='toggleMergeUnbranched()'/>Merge unbranched call paths</label><br />\n";
   infoText += "<label><input type='checkbox' id='mergeFunctions' " + (gMergeFunctions ?" checked='true' ":" ") + " onchange='toggleMergeFunctions()'/>Functions, not lines</label><br />\n";
+  infoText += "<label><input type='checkbox' id='showJank' " + (gJankOnly ?" checked='true' ":" ") + " onchange='toggleJankOnly()'/>Show Jank only</label><br />\n";
 
   var filterNameInputOld = document.getElementById("filterName");
   infoText += "<br>\n";
@@ -832,6 +833,16 @@ function toggleMergeFunctions() {
   refreshUI(); 
 }
 
+var gJankOnly = false;
+var gJankThreshold = 50 /* ms */;
+function toggleJank(/* optional */ threshold) {
+  gJankOnly = !gJankOnly;
+  if (threshold != null ) {
+    gJankThreshold = threshold;
+  }
+  refreshUI();
+}
+
 function setHighlightedCallstack(samples) {
   gHighlightedCallstack = samples;
   gHistogramView.highlightedCallstackChanged(gHighlightedCallstack);
@@ -868,6 +879,9 @@ function refreshUI() {
   var filterNameInput = document.getElementById("filterName");
   if (filterNameInput != null && filterNameInput.value != "") {
     data = Parser.filterByName(data, document.getElementById("filterName").value);
+  }
+  if (gJankOnly) {
+    data = Parser.filterByJank(data, gJankThreshold);
   }
   if (gMergeFunctions) {
     data = Parser.discardLineLevelInformation(data);
