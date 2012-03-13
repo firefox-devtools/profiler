@@ -767,6 +767,18 @@ var gVisibleRange = {
   } 
 };
 
+function loadProfileFile(fileList) {
+  if (fileList.length == 0)
+    return;
+  var file = fileList[0];
+  var reader = new FileReader();
+  reader.onloadend = function () {
+    loadProfile(reader.result);
+    enterMainUI();
+  };
+  reader.readAsText(file);
+}
+
 function loadProfile(rawProfile) {
   gRawProfile = rawProfile;
   var startTime = Date.now();

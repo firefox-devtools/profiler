@@ -35,7 +35,9 @@
       <div id="infobar"></div>
     </div>
     <div id="dataentry">
-      <h1>Enter your profile data here:</h1>
+      <h1>Upload your profile here:</h1>
+      <input type="file" id="datafile" onchange="loadProfileFile(this.files);">
+      <h1>Or, alternatively, enter your profile data here:</h1>
       <textarea rows=20 cols=80 id=data autofocus spellcheck=false></textarea>
       <p><button onclick="loadProfile(document.getElementById('data').value); enterMainUI();">Parse</button></p>
     </div>
