@@ -195,31 +195,30 @@ HistogramView.prototype = {
     this.display(this._cachedProfile, highlightedCallstack);
   },
   _isSampleSelected: function HistogramView__isSampleSelected(highlightedCallstack, step) {
-    next_iteration: for (var i = 0; i < step.frames.length; i++) {
-      var frames = step.frames[i];
+    function isCallstackSelected(frames) {
       if (frames.length < highlightedCallstack.length ||
-        highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
-        continue next_iteration;
+          highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
+        return false;
 
       var compareFrames = frames;
       if (gInvertCallstack) {
         for (var j = 0; j < highlightedCallstack.length; j++) {
           var compareFrameIndex = highlightedCallstack.length - 1 - j;
           if (highlightedCallstack[j] != compareFrames[compareFrameIndex] &&
-            compareFrames[compareFrameIndex] != "(root)")
-            continue next_iteration;
+              compareFrames[compareFrameIndex] != "(root)")
+            return false;
         }
       } else {
         for (var j = 0; j < highlightedCallstack.length; j++) {
           var compareFrameIndex = j;
           if (highlightedCallstack[j] != compareFrames[compareFrameIndex] &&
-            compareFrames[compareFrameIndex] != "(root)")
-            continue next_iteration;
+              compareFrames[compareFrameIndex] != "(root)")
+            return false;
         }
       }
       return true;
     }
-    return false;
+    return step.frames.some(isCallstackSelected);
   },
   _getStepColor: function HistogramView__getStepColor(step) {
       if ("responsiveness" in step.extraInfo) {
