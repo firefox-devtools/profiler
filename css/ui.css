@@ -26,6 +26,7 @@ body {
   border-bottom: 1px solid #CCC;
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 .breadcrumbTrailItem {
   background: -moz-linear-gradient(#FFF 50%, #F3F3F3 55%);
@@ -44,11 +45,10 @@ body {
   text-overflow: ellipsis;
   white-space: nowrap;
   position: relative;
-  z-index: 1;
 }
 @-moz-keyframes slide-out {
   from {
-    margin-left: -250px;
+    margin-left: -270px;
     opacity: 0;
   }
   to {
@@ -63,17 +63,15 @@ body {
 }
 .breadcrumbTrailItem.selected {
   background: -moz-linear-gradient(#E5E5E5 50%, #DADADA 55%);
-  z-index: 2;
 }
 .breadcrumbTrailItem:not(.selected):active:hover {
   background: -moz-linear-gradient(#F2F2F2 50%, #E6E6E6 55%);
 }
 .breadcrumbTrailItem.deleted {
-  z-index: 0;
   -moz-transition: 400ms ease-out;
   -moz-transition-property: opacity, margin-left;
   opacity: 0;
-  margin-left: -150px;
+  margin-left: -270px;
 }
 #tree {
   position: absolute;

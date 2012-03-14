@@ -508,6 +508,7 @@ BreadcrumbTrail.prototype = {
     li.breadcrumbIndex = index;
     li.breadcrumbEnterCallback = breadcrumb.enterCallback;
     li.breadcrumbIsTransient = true;
+    li.style.zIndex = 1000 - index;
     this._containerElement.appendChild(li);
     this._breadcrumbs.push(li);
     if (index == 0)
@@ -553,7 +554,7 @@ BreadcrumbTrail.prototype = {
     setTimeout(function () {
       breadcrumb.parentNode.removeChild(breadcrumb);
     }, 1000);
-  }
+  },
 };
 
 function maxResponsiveness() {
