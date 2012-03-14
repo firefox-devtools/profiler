@@ -208,6 +208,7 @@ TreeView.prototype = {
       menu.push("View Source");
     }
     menu.push("Focus Frame");
+    menu.push("Focus Callstack");
     menu.push("Google Search");
     return menu;
   },
