@@ -189,7 +189,7 @@ var Parser = {
         samples[i].frames.reverse();
       }
       while (samples[i].frames.length > 0) {
-        if (profile.symbols[samples[i].frames[0]] != null) {
+        if (samples[i].frames[0] in profile.symbols) {
           var currSymbol = profile.functions[profile.symbols[samples[i].frames[0]].functionIndex].functionName;
           currSymbol = currSymbol.toLowerCase();
           if (symbol == currSymbol) {
