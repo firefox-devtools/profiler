@@ -32,7 +32,6 @@ function TreeView() {
   this._container.onclick = function (e) {
     self._onclick(e);
   };
-  this._verticalScrollbox.setAttribute("contextmenu", "xulContextMenu");
   this._verticalScrollbox.addEventListener("contextmenu", function(event) {
     self._contextMenu(event);
   }, true);
@@ -170,8 +169,7 @@ TreeView.prototype = {
     parentElement.appendChild(li);
   },
   _contextMenu: function TreeView__contextMenu(event) {
-    var contextMenu = this._verticalScrollbox.contextMenu;
-    contextMenu.innerHTML = "";
+    this._verticalScrollbox.setAttribute("contextmenu", "");
 
     var target = event.target;
     if (target.classList.contains("expandCollapseButton"))
@@ -182,6 +180,9 @@ TreeView.prototype = {
       return;
 
     this._select(li);
+
+    var contextMenu = document.getElementById("xulContextMenu");
+    contextMenu.innerHTML = "";
 
     var menuItems = this._contextMenuForFunction(li.data);
     for (var i = 0; i < menuItems.length; i++) {
@@ -196,6 +197,7 @@ TreeView.prototype = {
       menuItemNode.label = menuItem;
       contextMenu.appendChild(menuItemNode);
     }
+    this._verticalScrollbox.setAttribute("contextmenu", contextMenu.id);
   },
   _contextMenuClick: function TreeView__ContextMenuClick(node, menuItem) {
     // TODO move me outside tree.js
