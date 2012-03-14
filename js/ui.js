@@ -121,16 +121,22 @@ HistogramView.prototype = {
     }
     return markers;
   },
+  _calculateWidthMultiplier: function () {
+    var minWidth = 2000;
+    return Math.ceil(minWidth / this._widthSum);
+  },
   display: function HistogramView_display(profile, highlightedCallstack) {
     this._histogramData = this._convertToHistogramData(profile.samples);
     var lastStep = this._histogramData[this._histogramData.length - 1];
     this._widthSum = lastStep.x + lastStep.width;
-    this._canvas.width = this._widthSum;
+    this._widthMultiplier = this._calculateWidthMultiplier();
+    this._canvas.width = this._widthMultiplier * this._widthSum;
     this._render(highlightedCallstack);
   },
   _render: function HistogramView__render(highlightedCallstack) {
     var ctx = this._canvas.getContext("2d");
     var height = this._canvas.height;
+    ctx.setTransform(this._widthMultiplier, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, this._widthSum, height);
 
     var self = this;
