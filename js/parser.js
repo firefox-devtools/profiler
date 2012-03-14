@@ -186,12 +186,13 @@ var Parser = {
       if (!origSample)
         return null;
       var sample = origSample.clone();
-      while (sample.frames.length > 0) {
-        if (symbolOrFunctionIndex == sample.frames[0])
+      for (var i = 0; i < sample.frames.length; i++) {
+        if (symbolOrFunctionIndex == sample.frames[i]) {
+          sample.frames = sample.frames.slice(i);
           return sample;
-        sample.frames.shift();
+        }
       }
-      return null;
+      return null; // no frame matched; filter out complete sample
     });
     return {
       symbols: profile.symbols,
