@@ -186,7 +186,7 @@ var Parser = {
       samples[i] = samples[i].clone();
       samples[i].frames = samples[i].frames.clone();
       if (invertCallstack) {
-        samples[i].frames = samples[i].frames.reverse();
+        samples[i].frames.reverse();
       }
       while (samples[i].frames.length > 0) {
         if (profile.symbols[samples[i].frames[0]] != null) {
