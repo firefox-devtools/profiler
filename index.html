@@ -11,10 +11,7 @@
   </head>
   <body>
     <menu id="xulContextMenu" type="context">
-      <!-- Context menu for XUL library function, integrate with mozilla systems -->
-      <menuitem label="View Source"
-         onclick="xulContextMenu(event)">
-      </menuitem>
+      <!-- Items are added/removed each time the menu is shown -->
     </menu>
     <div id="ui" class="hidden">
       <div id="mainarea">
@@ -60,7 +57,8 @@
         oXHR.send(null);
       }
       function xulContextMenu(event) {
-        alert(event.target.target);
+        console.log(event.target);
+        alert(event.target);
       }
     </script>
   </body>

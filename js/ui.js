@@ -769,6 +769,12 @@ function toggleJank(/* optional */ threshold) {
   refreshUI();
 }
 
+var gFocusSymbol = null;
+function focusOnSymbol(focusSymbol) {
+  gFocusSymbol = focusSymbol;
+  refreshUI();
+}
+
 function setHighlightedCallstack(samples) {
   gHighlightedCallstack = samples;
   gHistogramView.highlightedCallstackChanged(gHighlightedCallstack);
@@ -813,6 +819,10 @@ function refreshUI() {
     data = Parser.discardLineLevelInformation(data);
     console.log("line information discarding: " + (Date.now() - start) + "ms.");
     start = Date.now();
+  }
+  // We need to focus after we filter because focus will trim the symbols
+  if (gFocusSymbol != null) {
+    data = Parser.filterBySymbol(data, gFocusSymbol, gInvertCallstack);
   }
   gCurrentlyShownSampleData = data;
   treeData = Parser.convertToCallTree(data, gInvertCallstack);
