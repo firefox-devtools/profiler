@@ -179,7 +179,7 @@ var Parser = {
     };
   },
 
-  filterBySymbol: function Parser_filterBySymbol(profile, symbol, invertCallstack) {
+  filterBySymbol: function Parser_filterBySymbol(profile, symbol, invertCallstack, useFunctions) {
     console.log("filtering profile by symbol " + symbol);
     symbol = symbol.toLowerCase();
     var samples = profile.samples.map(function filterSample(origSample) {
@@ -189,7 +189,8 @@ var Parser = {
       }
       while (sample.frames.length > 0) {
         if (sample.frames[0] in profile.symbols) {
-          var currSymbol = profile.functions[profile.symbols[sample.frames[0]].functionIndex].functionName;
+          var currSymbol = useFunctions ? profile.functions[sample.frames[0]].functionName :
+                                          profile.symbols[sample.frames[0]].symbolName;
           currSymbol = currSymbol.toLowerCase();
           if (symbol == currSymbol) {
             if (invertCallstack) {

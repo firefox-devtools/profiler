@@ -847,7 +847,9 @@ function refreshUI() {
   }
   // We need to focus after we filter because focus will trim the symbols
   if (gFocusSymbol != null) {
-    data = Parser.filterBySymbol(data, gFocusSymbol, gInvertCallstack);
+    data = Parser.filterBySymbol(data, gFocusSymbol, gInvertCallstack, gMergeFunctions);
+    console.log("symbol filtering: " + (Date.now() - start) + "ms.");
+    start = Date.now();
   }
   gCurrentlyShownSampleData = data;
   treeData = Parser.convertToCallTree(data, gInvertCallstack);
