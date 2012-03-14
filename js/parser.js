@@ -180,11 +180,9 @@ var Parser = {
   },
 
   filterBySymbol: function Parser_filterBySymbol(profile, symbol, invertCallstack) {
-    var samples = profile.samples.clone();
     symbol = symbol.toLowerCase();
-    calltrace_it: for (var i = 0; i < samples.length; ++i) {
-      samples[i] = samples[i].clone();
-      var sample = samples[i];
+    var samples = profile.samples.map(function filterSample(origSample) {
+      sample = origSample.clone();
       sample.frames = sample.frames.clone();
       if (invertCallstack) {
         sample.frames.reverse();
@@ -200,13 +198,14 @@ var Parser = {
             } else {
               sample.frames = ["(root)"].concat(sample.frames);
             }
-            continue calltrace_it; // Stop trimming this callstack
+            return sample;
           }
         }
         sample.frames.shift();
       }
       sample.frames = ["(root)"];
-    }
+      return sample;
+    });
     return {
       symbols: profile.symbols,
       functions: profile.functions,
