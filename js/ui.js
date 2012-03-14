@@ -499,8 +499,12 @@ BreadcrumbTrail.prototype = {
    *                   breadcrumb.
    */
   add: function BreadcrumbTrail_add(breadcrumb) {
-    if (this._selectedBreadcrumbIndex != this._breadcrumbs.length - 1)
-      throw "Can only add new breadcrumbs if the current one is the last one."
+    for (var i = this._breadcrumbs.length - 1; i > this._selectedBreadcrumbIndex; i--) {
+      var rearLi = this._breadcrumbs[i];
+      if (!rearLi.breadcrumbIsTransient)
+        throw "Can only add new breadcrumbs if after the current one there are only transient ones."
+      rearLi.breadcrumbDiscarder.discard();
+    }
     var li = document.createElement("li");
     li.className = "breadcrumbTrailItem";
     li.textContent = breadcrumb.title;
@@ -514,14 +518,16 @@ BreadcrumbTrail.prototype = {
     if (index == 0)
       this._enter(index);
     var self = this;
-    return {
+    li.breadcrumbDiscarder = {
       discard: function () {
         if (li.breadcrumbIsTransient) {
           self._deleteBeyond(index - 1);
           delete li.breadcrumbIsTransient;
+          delete li.breadcrumbDiscarder;
         }
       }
     };
+    return li.breadcrumbDiscarder;
   },
   addAndEnter: function BreadcrumbTrail_addAndEnter(breadcrumb) {
     var removalHandle = this.add(breadcrumb);
