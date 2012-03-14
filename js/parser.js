@@ -188,12 +188,8 @@ var Parser = {
       }
       while (sample.frames.length > 0) {
         if (symbolOrFunctionIndex == sample.frames[0]) {
-          if (invertCallstack) {
-            sample.frames.pop(); // remove root from the bottom
+          if (invertCallstack)
             sample.frames.reverse();
-          } else {
-            sample.frames = ["(root)"].concat(sample.frames);
-          }
           return sample;
         }
         sample.frames.shift();
@@ -241,10 +237,9 @@ var Parser = {
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
       var callstack = sample.frames.clone();
+      callstack.shift();
       if (isReverse)
         callstack.reverse();
-      else
-        callstack.shift();
       var deepestExistingNode = treeRoot.followPath(callstack);
       var remainingCallstack = callstack.slice(deepestExistingNode.getDepth());
       deepestExistingNode.incrementCountersInParentChain();
