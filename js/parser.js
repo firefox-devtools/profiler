@@ -190,7 +190,7 @@ var Parser = {
         if (symbolOrFunctionIndex == sample.frames[0]) {
           if (invertCallstack) {
             sample.frames.pop(); // remove root from the bottom
-            sample.frames = sample.frames.reverse();
+            sample.frames.reverse();
           } else {
             sample.frames = ["(root)"].concat(sample.frames);
           }
