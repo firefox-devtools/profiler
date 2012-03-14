@@ -180,6 +180,7 @@ var Parser = {
   },
 
   filterBySymbol: function Parser_filterBySymbol(profile, symbol, invertCallstack) {
+    console.log("filtering profile by symbol " + symbol);
     symbol = symbol.toLowerCase();
     var samples = profile.samples.map(function filterSample(origSample) {
       var sample = origSample.clone();
@@ -214,6 +215,7 @@ var Parser = {
   },
 
   filterByName: function Parser_filterByName(profile, filterName) {
+    console.log("filtering profile by name " + filterName);
     var samples = profile.samples.clone();
     filterName = filterName.toLowerCase();
     calltrace_it: for (var i = 0; i < samples.length; ++i) {
