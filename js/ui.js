@@ -810,9 +810,9 @@ function toggleJank(/* optional */ threshold) {
   refreshUI();
 }
 
-var gFocusSampleFilter = null;
+var gSampleFilters = [];
 function focusOnSymbol(focusSymbol) {
-  gFocusSampleFilter = new FocusSampleFilter(focusSymbol);
+  gSampleFilters = [new FocusSampleFilter(focusSymbol)];
   refreshUI();
 }
 
@@ -857,10 +857,8 @@ function refreshUI() {
   if (filterNameInput != null && filterNameInput.value != "") {
     data = Parser.filterByName(data, document.getElementById("filterName").value);
   }
-  if (gFocusSampleFilter) {
-    data = gFocusSampleFilter.filter(data);
-    console.log("symbol filtering: " + (Date.now() - start) + "ms.");
-    start = Date.now();
+  for (var i = 0; i < gSampleFilters.length; i++) {
+    data = gSampleFilters[i].filter(data);
   }
   if (gJankOnly) {
     data = Parser.filterByJank(data, gJankThreshold);
