@@ -198,8 +198,9 @@ var Parser = {
         }
         sample.frames.shift();
       }
-      sample.frames = ["(root)"];
-      return sample;
+      return null;
+    }).filter(function noNullSamples(sample) {
+      return sample != null;
     });
     return {
       symbols: profile.symbols,
