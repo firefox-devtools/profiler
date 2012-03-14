@@ -479,14 +479,23 @@ FocusedFrameSampleFilter.prototype = {
   },
 };
 
-function FocusedCallstackSampleFilter(focusedCallstack) {
-  this._focusedCallstack = focusedCallstack;
+function FocusedCallstackPrefixSampleFilter(focusedCallstack) {
+  this._focusedCallstackPrefix = focusedCallstack;
 }
-FocusedCallstackSampleFilter.prototype = {
-  filter: function FocusedCallstackSampleFilter_filter(profile) {
-    return Parser.filterByCallstack(profile, this._focusedCallstack);
+FocusedCallstackPrefixSampleFilter.prototype = {
+  filter: function FocusedCallstackPrefixSampleFilter_filter(profile) {
+    return Parser.filterByCallstackPrefix(profile, this._focusedCallstackPrefix);
   }
+};
+
+function FocusedCallstackPostfixSampleFilter(focusedCallstack) {
+  this._focusedCallstackPostfix = focusedCallstack;
 }
+FocusedCallstackPostfixSampleFilter.prototype = {
+  filter: function FocusedCallstackPostfixSampleFilter_filter(profile) {
+    return Parser.filterByCallstackPostfix(profile, this._focusedCallstackPostfix);
+  }
+};
 
 function BreadcrumbTrail() {
   this._breadcrumbs = [];
@@ -842,7 +851,10 @@ function focusOnSymbol(focusSymbol, name) {
 }
 
 function focusOnCallstack(focusedCallstack, name) {
-  var newFilterChain = gSampleFilters.concat([new FocusedCallstackSampleFilter(focusedCallstack)]);
+  var filter = gInvertCallstack ?
+    new FocusedCallstackPostfixSampleFilter(focusedCallstack) :
+    new FocusedCallstackPrefixSampleFilter(focusedCallstack);
+  var newFilterChain = gSampleFilters.concat([filter]);
   gNestedRestrictions.addAndEnter({
     title: name,
     enterCallback: function () {

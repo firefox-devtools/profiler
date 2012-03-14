@@ -201,7 +201,7 @@ var Parser = {
     };
   },
 
-  filterByCallstack: function Parser_filterByCallstack(profile, callstack) {
+  filterByCallstackPrefix: function Parser_filterByCallstackPrefix(profile, callstack) {
     var samples = profile.samples.map(function filterSample(origSample, i) {
       if (!origSample)
         return null;
@@ -213,6 +213,27 @@ var Parser = {
           return null;
       }
       sample.frames = sample.frames.slice(callstack.length - 1);
+      return sample;
+    });
+    return {
+      symbols: profile.symbols,
+      functions: profile.functions,
+      samples: samples
+    };
+  },
+
+  filterByCallstackPostfix: function Parser_filterByCallstackPostfix(profile, callstack) {
+    var samples = profile.samples.map(function filterSample(origSample, i) {
+      if (!origSample)
+        return null;
+      if (origSample.frames.length < callstack.length)
+        return null;
+      var sample = origSample.clone();
+      for (var i = 0; i < callstack.length; i++) {
+        if (sample.frames[sample.frames.length - i - 1] != callstack[i])
+          return null;
+      }
+      sample.frames = sample.frames.slice(0, sample.frames.length - callstack.length + 1);
       return sample;
     });
     return {
