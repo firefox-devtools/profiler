@@ -224,7 +224,7 @@ var Parser = {
       for (var j = 0; j < callstack.length; ++j) { 
         var symbol = profile.symbols[callstack[j]];
         if (symbol != null &&
-            profile.functions[callstack[j]].symbolName.toLowerCase().indexOf(filterName) != -1) {
+            symbol.symbolName.toLowerCase().indexOf(filterName) != -1) {
           continue calltrace_it;
         }
       }
