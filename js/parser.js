@@ -168,8 +168,7 @@ var Parser = {
       var sample = samples[i];
       if (!("responsiveness" in sample.extraInfo) ||
           sample.extraInfo["responsiveness"] < filterThreshold) {
-        samples[i] = samples[i].clone();
-        samples[i].frames = ["Filtered out"];
+        samples[i] = null;
       }
     }
     return {
@@ -182,6 +181,8 @@ var Parser = {
   filterBySymbol: function Parser_filterBySymbol(profile, symbolOrFunctionIndex, invertCallstack) {
     console.log("filtering profile by symbol " + symbolOrFunctionIndex);
     var samples = profile.samples.map(function filterSample(origSample) {
+      if (!origSample)
+        return null;
       var sample = origSample.clone();
       if (invertCallstack) {
         sample.frames.reverse();
@@ -195,8 +196,6 @@ var Parser = {
         sample.frames.shift();
       }
       return null;
-    }).filter(function noNullSamples(sample) {
-      return sample != null;
     });
     return {
       symbols: profile.symbols,
@@ -219,8 +218,7 @@ var Parser = {
           continue calltrace_it;
         }
       }
-      samples[i] = samples[i].clone();
-      samples[i].frames = ["Filtered out"];
+      samples[i] = null;
     }
     return {
       symbols: profile.symbols,
@@ -230,7 +228,9 @@ var Parser = {
   },
 
   convertToCallTree: function Parser_convertToCallTree(profile, isReverse) {
-    var samples = profile.samples;
+    var samples = profile.samples.filter(function noNullSamples(sample) {
+      return sample != null;
+    });
     var treeRoot = new TreeNode(isReverse ? "(total)" : samples[0].frames[0], null);
     treeRoot.counter = 0;
     treeRoot.totalSamples = samples.length;
@@ -293,6 +293,10 @@ var Parser = {
     var data = profile.samples;
     var filteredData = [];
     for (var i = 0; i < data.length; i++) {
+      if (!data[i]) {
+        filteredData.push(null);
+        continue;
+      }
       filteredData.push(data[i].clone());
       var frames = filteredData[i].frames;
       for (var j = 0; j < frames.length; j++) {

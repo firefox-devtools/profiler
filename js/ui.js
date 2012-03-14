@@ -211,6 +211,8 @@ HistogramView.prototype = {
     var histogramData = [];
     var maxHeight = 0;
     for (var i = 0; i < data.length; ++i) {
+      if (!data[i])
+        continue;
       var value = data[i].frames.length;
       if (maxHeight < value)
         maxHeight = value;
@@ -224,6 +226,11 @@ HistogramView.prototype = {
     var samplesPerStep = Math.floor(data.length / 2000);
     for (var i = 0; i < data.length; i++) {
       var step = data[i];
+      if (!step) {
+        // Add a gap for the sample that was filtered out.
+        nextX += 1;
+        continue;
+      }
       var value = step.frames.length / maxHeight;
       var frames = step.frames;
       var currHistrogramData = histogramData[histogramData.length-1];
