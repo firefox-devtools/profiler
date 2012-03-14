@@ -56,7 +56,7 @@ ProfileTreeManager.prototype = {
       var symbol = node.name;
       window.open("https://www.google.ca/search?q=" + symbol, "View Source");
     } else if (menuItem == "Focus") {
-      var symbol = node.name;
+      var symbol = node.fullFrameNamesAsInSample[0]; // TODO: we only function one symbol when callpath merging is on, fix that
       focusOnSymbol(symbol);
     }
   },
@@ -847,7 +847,7 @@ function refreshUI() {
   }
   // We need to focus after we filter because focus will trim the symbols
   if (gFocusSymbol != null) {
-    data = Parser.filterBySymbol(data, gFocusSymbol, gInvertCallstack, gMergeFunctions);
+    data = Parser.filterBySymbol(data, gFocusSymbol, gInvertCallstack);
     console.log("symbol filtering: " + (Date.now() - start) + "ms.");
     start = Date.now();
   }

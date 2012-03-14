@@ -179,28 +179,22 @@ var Parser = {
     };
   },
 
-  filterBySymbol: function Parser_filterBySymbol(profile, symbol, invertCallstack, useFunctions) {
-    console.log("filtering profile by symbol " + symbol);
-    symbol = symbol.toLowerCase();
+  filterBySymbol: function Parser_filterBySymbol(profile, symbolOrFunctionIndex, invertCallstack) {
+    console.log("filtering profile by symbol " + symbolOrFunctionIndex);
     var samples = profile.samples.map(function filterSample(origSample) {
       var sample = origSample.clone();
       if (invertCallstack) {
         sample.frames.reverse();
       }
       while (sample.frames.length > 0) {
-        if (sample.frames[0] in profile.symbols) {
-          var currSymbol = useFunctions ? profile.functions[sample.frames[0]].functionName :
-                                          profile.symbols[sample.frames[0]].symbolName;
-          currSymbol = currSymbol.toLowerCase();
-          if (symbol == currSymbol) {
-            if (invertCallstack) {
-              sample.frames.pop(); // remove root from the bottom
-              sample.frames = sample.frames.reverse();
-            } else {
-              sample.frames = ["(root)"].concat(sample.frames);
-            }
-            return sample;
+        if (symbolOrFunctionIndex == sample.frames[0]) {
+          if (invertCallstack) {
+            sample.frames.pop(); // remove root from the bottom
+            sample.frames = sample.frames.reverse();
+          } else {
+            sample.frames = ["(root)"].concat(sample.frames);
           }
+          return sample;
         }
         sample.frames.shift();
       }
