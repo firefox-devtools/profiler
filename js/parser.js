@@ -166,10 +166,11 @@ var Parser = {
     var samples = profile.samples.clone();
     calltrace_it: for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
+      if (!sample)
+        continue;
       if (!("responsiveness" in sample.extraInfo) ||
           sample.extraInfo["responsiveness"] < filterThreshold) {
-        samples[i] = samples[i].clone();
-        samples[i].frames = ["Filtered out"];
+        samples[i] = null;
       }
     }
     return {
@@ -179,33 +180,20 @@ var Parser = {
     };
   },
 
-  filterBySymbol: function Parser_filterBySymbol(profile, symbol, invertCallstack) {
-    var samples = profile.samples.clone();
-    symbol = symbol.toLowerCase();
-    calltrace_it: for (var i = 0; i < samples.length; ++i) {
-      samples[i] = samples[i].clone();
-      samples[i].frames = samples[i].frames.clone();
-      if (invertCallstack) {
-        samples[i].frames = samples[i].frames.reverse();
-      }
-      while (samples[i].frames.length > 0) {
-        if (profile.symbols[samples[i].frames[0]] != null) {
-          var currSymbol = profile.functions[profile.symbols[samples[i].frames[0]].functionIndex].functionName;
-          currSymbol = currSymbol.toLowerCase();
-          if (symbol == currSymbol) {
-            if (invertCallstack) {
-              samples[i].frames.pop(); // remove root from the bottom
-              samples[i].frames = samples[i].frames.reverse();
-            } else {
-              samples[i].frames = ["(root)"].concat(samples[i].frames);
-            }
-            continue calltrace_it; // Stop trimming this callstack
-          }
+  filterBySymbol: function Parser_filterBySymbol(profile, symbolOrFunctionIndex) {
+    console.log("filtering profile by symbol " + symbolOrFunctionIndex);
+    var samples = profile.samples.map(function filterSample(origSample) {
+      if (!origSample)
+        return null;
+      var sample = origSample.clone();
+      for (var i = 0; i < sample.frames.length; i++) {
+        if (symbolOrFunctionIndex == sample.frames[i]) {
+          sample.frames = sample.frames.slice(i);
+          return sample;
         }
-        samples[i].frames.shift();
       }
-      samples[i].frames = ["(root)"];
-    }
+      return null; // no frame matched; filter out complete sample
+    });
     return {
       symbols: profile.symbols,
       functions: profile.functions,
@@ -213,21 +201,32 @@ var Parser = {
     };
   },
 
-  filterByName: function Parser_filterByName(profile, filterName) {
+  filterByName: function Parser_filterByName(profile, filterName, useFunctions) {
+    function getSymbolOrFunctionName(index, profile, useFunctions) {
+      if (useFunctions) {
+        if (!(index in profile.functions))
+          return "";
+        return profile.functions[index].functionName;
+      }
+      if (!(index in profile.symbols))
+        return "";
+      return profile.symbols[index].symbolName;
+    }
+    console.log("filtering profile by name " + filterName);
     var samples = profile.samples.clone();
     filterName = filterName.toLowerCase();
     calltrace_it: for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
+      if (!sample)
+        continue;
       var callstack = sample.frames;
       for (var j = 0; j < callstack.length; ++j) { 
-        var symbol = profile.symbols[callstack[j]];
-        if (symbol != null &&
-            profile.functions[callstack[j]].symbolName.toLowerCase().indexOf(filterName) != -1) {
+        var symbolOrFunctionName = getSymbolOrFunctionName(callstack[j], profile, useFunctions);
+        if (symbolOrFunctionName.toLowerCase().indexOf(filterName) != -1) {
           continue calltrace_it;
         }
       }
-      samples[i] = samples[i].clone();
-      samples[i].frames = ["Filtered out"];
+      samples[i] = null;
     }
     return {
       symbols: profile.symbols,
@@ -237,17 +236,18 @@ var Parser = {
   },
 
   convertToCallTree: function Parser_convertToCallTree(profile, isReverse) {
-    var samples = profile.samples;
+    var samples = profile.samples.filter(function noNullSamples(sample) {
+      return sample != null;
+    });
     var treeRoot = new TreeNode(isReverse ? "(total)" : samples[0].frames[0], null);
     treeRoot.counter = 0;
     treeRoot.totalSamples = samples.length;
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
       var callstack = sample.frames.clone();
+      callstack.shift();
       if (isReverse)
         callstack.reverse();
-      else
-        callstack.shift();
       var deepestExistingNode = treeRoot.followPath(callstack);
       var remainingCallstack = callstack.slice(deepestExistingNode.getDepth());
       deepestExistingNode.incrementCountersInParentChain();
@@ -301,6 +301,10 @@ var Parser = {
     var data = profile.samples;
     var filteredData = [];
     for (var i = 0; i < data.length; i++) {
+      if (!data[i]) {
+        filteredData.push(null);
+        continue;
+      }
       filteredData.push(data[i].clone());
       var frames = filteredData[i].frames;
       for (var j = 0; j < frames.length; j++) {

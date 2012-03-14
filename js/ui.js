@@ -22,6 +22,9 @@ function ProfileTreeManager(container) {
   this.treeView.addEventListener("select", function (frameData) {
     self.highlightFrame(frameData);
   });
+  this.treeView.addEventListener("contextMenuClick", function (e) {
+    self._onContextMenuClick(e);
+  });
   container.appendChild(this.treeView.getContainer());
 }
 ProfileTreeManager.prototype = {
@@ -40,6 +43,22 @@ ProfileTreeManager.prototype = {
     if (gInvertCallstack)
       selectedCallstack.shift(); // remove (total)
     setHighlightedCallstack(selectedCallstack);
+  },
+  _onContextMenuClick: function ProfileTreeManager__onContextMenuClick(e) {
+    var node = e.node;
+    var menuItem = e.menuItem;
+
+    if (menuItem == "View Source") {
+      // Remove anything after ( since MXR doesn't handle search with the arguments.
+      var symbol = node.name.split("(")[0];
+      window.open("http://mxr.mozilla.org/mozilla-central/search?string=" + symbol, "View Source");
+    } else if (menuItem == "Google Search") {
+      var symbol = node.name;
+      window.open("https://www.google.ca/search?q=" + symbol, "View Source");
+    } else if (menuItem == "Focus") {
+      var symbol = node.fullFrameNamesAsInSample[0]; // TODO: we only function one symbol when callpath merging is on, fix that
+      focusOnSymbol(symbol, node.name);
+    }
   },
   display: function ProfileTreeManager_display(tree, symbols, functions, useFunctions) {
     this.treeView.display(this.convertToJSTreeData(tree, symbols, functions, useFunctions));
@@ -121,16 +140,22 @@ HistogramView.prototype = {
     }
     return markers;
   },
+  _calculateWidthMultiplier: function () {
+    var minWidth = 2000;
+    return Math.ceil(minWidth / this._widthSum);
+  },
   display: function HistogramView_display(profile, highlightedCallstack) {
     this._histogramData = this._convertToHistogramData(profile.samples);
     var lastStep = this._histogramData[this._histogramData.length - 1];
     this._widthSum = lastStep.x + lastStep.width;
-    this._canvas.width = this._widthSum;
+    this._widthMultiplier = this._calculateWidthMultiplier();
+    this._canvas.width = this._widthMultiplier * this._widthSum;
     this._render(highlightedCallstack);
   },
   _render: function HistogramView__render(highlightedCallstack) {
     var ctx = this._canvas.getContext("2d");
     var height = this._canvas.height;
+    ctx.setTransform(this._widthMultiplier, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, this._widthSum, height);
 
     var self = this;
@@ -186,6 +211,8 @@ HistogramView.prototype = {
     var histogramData = [];
     var maxHeight = 0;
     for (var i = 0; i < data.length; ++i) {
+      if (!data[i])
+        continue;
       var value = data[i].frames.length;
       if (maxHeight < value)
         maxHeight = value;
@@ -199,6 +226,11 @@ HistogramView.prototype = {
     var samplesPerStep = Math.floor(data.length / 2000);
     for (var i = 0; i < data.length; i++) {
       var step = data[i];
+      if (!step) {
+        // Add a gap for the sample that was filtered out.
+        nextX += 1;
+        continue;
+      }
       var value = step.frames.length / maxHeight;
       var frames = step.frames;
       var currHistrogramData = histogramData[histogramData.length-1];
@@ -430,6 +462,15 @@ RangeSelector.prototype = {
     gVisibleRange.restrictTo(start, end + 1);
     this.collapseHistogramSelection();
     refreshUI();
+  },
+};
+
+function FocusSampleFilter(focusedSymbol) {
+  this._focusedSymbol = focusedSymbol;
+}
+FocusSampleFilter.prototype = {
+  filter: function FocusSampleFilter_filter(profile) {
+    return Parser.filterBySymbol(profile, this._focusedSymbol);
   },
 };
 
@@ -769,10 +810,16 @@ function toggleJank(/* optional */ threshold) {
   refreshUI();
 }
 
-var gFocusSymbol = null;
-function focusOnSymbol(focusSymbol) {
-  gFocusSymbol = focusSymbol;
-  refreshUI();
+var gSampleFilters = [];
+function focusOnSymbol(focusSymbol, name) {
+  var newFilters = gSampleFilters.concat([new FocusSampleFilter(focusSymbol)]);
+  gNestedRestrictions.addAndEnter({
+    title: name,
+    enterCallback: function () {
+      gSampleFilters = newFilters;
+      refreshUI();
+    }
+  });
 }
 
 function setHighlightedCallstack(samples) {
@@ -794,6 +841,7 @@ function enterMainUI() {
     title: "Complete Profile",
     enterCallback: function () {
       gVisibleRange.unrestrict();
+      gSampleFilters = [];
       refreshUI();
     }
   })
@@ -807,25 +855,24 @@ function refreshUI() {
   console.log("visible range filtering: " + (Date.now() - start) + "ms.");
   start = Date.now();
 
-  var treeData;
-  var filterNameInput = document.getElementById("filterName");
-  if (filterNameInput != null && filterNameInput.value != "") {
-    data = Parser.filterByName(data, document.getElementById("filterName").value);
-  }
-  if (gJankOnly) {
-    data = Parser.filterByJank(data, gJankThreshold);
-  }
   if (gMergeFunctions) {
     data = Parser.discardLineLevelInformation(data);
     console.log("line information discarding: " + (Date.now() - start) + "ms.");
     start = Date.now();
   }
-  // We need to focus after we filter because focus will trim the symbols
-  if (gFocusSymbol != null) {
-    data = Parser.filterBySymbol(data, gFocusSymbol, gInvertCallstack);
+  var filterNameInput = document.getElementById("filterName");
+  if (filterNameInput != null && filterNameInput.value != "") {
+    data = Parser.filterByName(data, document.getElementById("filterName").value);
   }
+  for (var i = 0; i < gSampleFilters.length; i++) {
+    data = gSampleFilters[i].filter(data);
+  }
+  if (gJankOnly) {
+    data = Parser.filterByJank(data, gJankThreshold);
+  }
+  // We need to focus after we filter because focus will trim the symbols
   gCurrentlyShownSampleData = data;
-  treeData = Parser.convertToCallTree(data, gInvertCallstack);
+  var treeData = Parser.convertToCallTree(data, gInvertCallstack);
   console.log("conversion to calltree: " + (Date.now() - start) + "ms.");
   start = Date.now();
   if (gMergeUnbranched) {

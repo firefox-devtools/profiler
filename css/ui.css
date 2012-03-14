@@ -39,7 +39,7 @@ body {
   -moz-user-select: none;
   cursor: default;
   border-right: 1px solid #CCC;
-  max-width: 150px;
+  max-width: 250px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -48,7 +48,7 @@ body {
 }
 @-moz-keyframes slide-out {
   from {
-    margin-left: -150px;
+    margin-left: -250px;
     opacity: 0;
   }
   to {
