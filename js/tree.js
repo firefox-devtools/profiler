@@ -32,6 +32,10 @@ function TreeView() {
   this._container.onclick = function (e) {
     self._onclick(e);
   };
+  this._verticalScrollbox.setAttribute("contextmenu", "xulContextMenu");
+  this._verticalScrollbox.addEventListener("contextmenu", function(event) {
+    self._contextMenu(event);
+  }, true);
   this._setUpScrolling();
 };
 
@@ -151,13 +155,7 @@ TreeView.prototype = {
     li.data = data;
     li.appendChild(treeLine);
     li.treeChildren = [];
-    li.contextMenuItems = this._contextMenuForFunction(data);
     li.treeParent = parentNode;
-    li.setAttribute("contextmenu", "xulContextMenu");
-    var self = this;
-    li.addEventListener("contextmenu", function(event) {
-        self._contextMenu(event);
-    }, true);
     if (hasChildren) {
       var ol = document.createElement("ol");
       ol.className = "treeViewNodeList";
@@ -172,21 +170,20 @@ TreeView.prototype = {
     parentElement.appendChild(li);
   },
   _contextMenu: function TreeView__contextMenu(event) {
-    var target = event.target;
-    while (target != null && target.contextMenu == null) {
-      target = target.parentNode;
-    }
-    var li = target;
-    var contextMenu = target.contextMenu;
-    var menuItems = ["No options"];
-    if (li != null && li.contextMenuItems != null)
-      menuItems = li.contextMenuItems;
+    var contextMenu = this._verticalScrollbox.contextMenu;
+    contextMenu.innerHTML = "";
 
-    // Mark on the context menu which tree node is clicked on.
-    contextMenu.target = li;
-    while (contextMenu.hasChildNodes()) {
-      contextMenu.removeChild(contextMenu.firstChild);
-    }
+    var target = event.target;
+    if (target.classList.contains("expandCollapseButton"))
+      return;
+
+    var li = this._getParentTreeViewNode(target);
+    if (!li)
+      return;
+
+    this._select(li);
+
+    var menuItems = this._contextMenuForFunction(li.data);
     for (var i = 0; i < menuItems.length; i++) {
       var menuItem = menuItems[i];
       var menuItemNode = document.createElement("menuitem");
@@ -214,7 +211,7 @@ TreeView.prototype = {
       focusOnSymbol(symbol);
     }
   },
-  _contextMenuForFunction: function TreeView__ContextMenuForFunction(node) {
+  _contextMenuForFunction: function TreeView__contextMenuForFunction(node) {
     // TODO move me outside tree.js
     var menu = [];
     if (node.library != null && node.library.toLowerCase() == "xul") {
@@ -342,7 +339,7 @@ TreeView.prototype = {
   _isCollapsed: function TreeView__isCollapsed(div) {
     return div.classList.contains("collapsed");
   },
-  _getParenttreeViewNode: function TreeView__getParenttreeViewNode(node) {
+  _getParentTreeViewNode: function TreeView__getParentTreeViewNode(node) {
     while (node) {
       if (node.nodeType != node.ELEMENT_NODE)
         break;
@@ -354,7 +351,7 @@ TreeView.prototype = {
   },
   _onclick: function TreeView__onclick(event) {
     var target = event.target;
-    var node = this._getParenttreeViewNode(target);
+    var node = this._getParentTreeViewNode(target);
     if (!node)
       return;
     if (target.classList.contains("expandCollapseButton")) {
