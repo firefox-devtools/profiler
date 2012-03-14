@@ -839,27 +839,26 @@ function refreshUI() {
   console.log("visible range filtering: " + (Date.now() - start) + "ms.");
   start = Date.now();
 
-  var treeData;
-  var filterNameInput = document.getElementById("filterName");
-  if (filterNameInput != null && filterNameInput.value != "") {
-    data = Parser.filterByName(data, document.getElementById("filterName").value);
-  }
-  if (gJankOnly) {
-    data = Parser.filterByJank(data, gJankThreshold);
-  }
   if (gMergeFunctions) {
     data = Parser.discardLineLevelInformation(data);
     console.log("line information discarding: " + (Date.now() - start) + "ms.");
     start = Date.now();
   }
-  // We need to focus after we filter because focus will trim the symbols
-  if (gFocusSymbol != null) {
+  var filterNameInput = document.getElementById("filterName");
+  if (filterNameInput != null && filterNameInput.value != "") {
+    data = Parser.filterByName(data, document.getElementById("filterName").value);
+  }
+  if (gFocusSymbol) {
     data = Parser.filterBySymbol(data, gFocusSymbol, gInvertCallstack);
     console.log("symbol filtering: " + (Date.now() - start) + "ms.");
     start = Date.now();
   }
+  if (gJankOnly) {
+    data = Parser.filterByJank(data, gJankThreshold);
+  }
+  // We need to focus after we filter because focus will trim the symbols
   gCurrentlyShownSampleData = data;
-  treeData = Parser.convertToCallTree(data, gInvertCallstack);
+  var treeData = Parser.convertToCallTree(data, gInvertCallstack);
   console.log("conversion to calltree: " + (Date.now() - start) + "ms.");
   start = Date.now();
   if (gMergeUnbranched) {

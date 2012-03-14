@@ -166,6 +166,8 @@ var Parser = {
     var samples = profile.samples.clone();
     calltrace_it: for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
+      if (!sample)
+        continue;
       if (!("responsiveness" in sample.extraInfo) ||
           sample.extraInfo["responsiveness"] < filterThreshold) {
         samples[i] = null;
@@ -204,17 +206,28 @@ var Parser = {
     };
   },
 
-  filterByName: function Parser_filterByName(profile, filterName) {
+  filterByName: function Parser_filterByName(profile, filterName, useFunctions) {
+    function getSymbolOrFunctionName(index, profile, useFunctions) {
+      if (useFunctions) {
+        if (!(index in profile.functions))
+          return "";
+        return profile.functions[index].functionName;
+      }
+      if (!(index in profile.symbols))
+        return "";
+      return profile.symbols[index].symbolName;
+    }
     console.log("filtering profile by name " + filterName);
     var samples = profile.samples.clone();
     filterName = filterName.toLowerCase();
     calltrace_it: for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
+      if (!sample)
+        continue;
       var callstack = sample.frames;
       for (var j = 0; j < callstack.length; ++j) { 
-        var symbol = profile.symbols[callstack[j]];
-        if (symbol != null &&
-            symbol.symbolName.toLowerCase().indexOf(filterName) != -1) {
+        var symbolOrFunctionName = getSymbolOrFunctionName(callstack[j], profile, useFunctions);
+        if (symbolOrFunctionName.toLowerCase().indexOf(filterName) != -1) {
           continue calltrace_it;
         }
       }
