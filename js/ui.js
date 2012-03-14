@@ -872,6 +872,7 @@ function refreshUI() {
     data = Parser.filterByName(data, document.getElementById("filterName").value);
   }
   for (var i = 0; i < gSampleFilters.length; i++) {
+    // TODO: Make gVisibleRange filtering also part of the gSampleFilter chain.
     data = gSampleFilters[i].filter(data);
   }
   if (gJankOnly) {
