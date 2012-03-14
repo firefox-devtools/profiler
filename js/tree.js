@@ -185,7 +185,7 @@ TreeView.prototype = {
     contextMenu.innerHTML = "";
 
     var self = this;
-    this._contextMenuForFunction(li.data).forEach(function (menuitem) {
+    this._contextMenuForFunction(li.data).forEach(function (menuItem) {
       var menuItemNode = document.createElement("menuitem");
       menuItemNode.onclick = (function (menuItem) {
         return function() {
@@ -199,18 +199,7 @@ TreeView.prototype = {
     this._verticalScrollbox.setAttribute("contextmenu", contextMenu.id);
   },
   _contextMenuClick: function TreeView__ContextMenuClick(node, menuItem) {
-    // TODO move me outside tree.js
-    if (menuItem == "View Source") {
-      // Remove anything after ( since MXR doesn't handle search with the arguments.
-      var symbol = node.name.split("(")[0];
-      window.open("http://mxr.mozilla.org/mozilla-central/search?string=" + symbol, "View Source");
-    } else if (menuItem == "Google Search") {
-      var symbol = node.name;
-      window.open("https://www.google.ca/search?q=" + symbol, "View Source");
-    } else if (menuItem == "Focus") {
-      var symbol = node.name;
-      focusOnSymbol(symbol);
-    }
+    this._fireEvent("contextMenuClick", { node: node, menuItem: menuItem });
   },
   _contextMenuForFunction: function TreeView__contextMenuForFunction(node) {
     // TODO move me outside tree.js

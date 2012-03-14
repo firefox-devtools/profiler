@@ -22,6 +22,9 @@ function ProfileTreeManager(container) {
   this.treeView.addEventListener("select", function (frameData) {
     self.highlightFrame(frameData);
   });
+  this.treeView.addEventListener("contextMenuClick", function (e) {
+    self._onContextMenuClick(e);
+  });
   container.appendChild(this.treeView.getContainer());
 }
 ProfileTreeManager.prototype = {
@@ -40,6 +43,22 @@ ProfileTreeManager.prototype = {
     if (gInvertCallstack)
       selectedCallstack.shift(); // remove (total)
     setHighlightedCallstack(selectedCallstack);
+  },
+  _onContextMenuClick: function ProfileTreeManager__onContextMenuClick(e) {
+    var node = e.node;
+    var menuItem = e.menuItem;
+
+    if (menuItem == "View Source") {
+      // Remove anything after ( since MXR doesn't handle search with the arguments.
+      var symbol = node.name.split("(")[0];
+      window.open("http://mxr.mozilla.org/mozilla-central/search?string=" + symbol, "View Source");
+    } else if (menuItem == "Google Search") {
+      var symbol = node.name;
+      window.open("https://www.google.ca/search?q=" + symbol, "View Source");
+    } else if (menuItem == "Focus") {
+      var symbol = node.name;
+      focusOnSymbol(symbol);
+    }
   },
   display: function ProfileTreeManager_display(tree, symbols, functions, useFunctions) {
     this.treeView.display(this.convertToJSTreeData(tree, symbols, functions, useFunctions));
