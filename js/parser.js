@@ -182,7 +182,7 @@ var Parser = {
   filterBySymbol: function Parser_filterBySymbol(profile, symbol, invertCallstack) {
     symbol = symbol.toLowerCase();
     var samples = profile.samples.map(function filterSample(origSample) {
-      sample = origSample.clone();
+      var sample = origSample.clone();
       sample.frames = sample.frames.clone();
       if (invertCallstack) {
         sample.frames.reverse();
