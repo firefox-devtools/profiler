@@ -207,7 +207,7 @@ TreeView.prototype = {
     if (node.library != null && node.library.toLowerCase() == "xul") {
       menu.push("View Source");
     }
-    menu.push("Focus");
+    menu.push("Focus Frame");
     menu.push("Google Search");
     return menu;
   },

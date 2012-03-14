@@ -55,7 +55,7 @@ ProfileTreeManager.prototype = {
     } else if (menuItem == "Google Search") {
       var symbol = node.name;
       window.open("https://www.google.ca/search?q=" + symbol, "View Source");
-    } else if (menuItem == "Focus") {
+    } else if (menuItem == "Focus Frame") {
       var symbol = node.fullFrameNamesAsInSample[0]; // TODO: we only function one symbol when callpath merging is on, fix that
       focusOnSymbol(symbol, node.name);
     }
