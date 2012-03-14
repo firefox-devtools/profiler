@@ -180,7 +180,7 @@ var Parser = {
     };
   },
 
-  filterBySymbol: function Parser_filterBySymbol(profile, symbolOrFunctionIndex, invertCallstack) {
+  filterBySymbol: function Parser_filterBySymbol(profile, symbolOrFunctionIndex) {
     console.log("filtering profile by symbol " + symbolOrFunctionIndex);
     var samples = profile.samples.map(function filterSample(origSample) {
       if (!origSample)

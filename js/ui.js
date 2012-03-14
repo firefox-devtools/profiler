@@ -465,6 +465,15 @@ RangeSelector.prototype = {
   },
 };
 
+function FocusSampleFilter(focusedSymbol) {
+  this._focusedSymbol = focusedSymbol;
+}
+FocusSampleFilter.prototype = {
+  filter: function FocusSampleFilter_filter(profile) {
+    return Parser.filterBySymbol(profile, this._focusedSymbol);
+  },
+};
+
 function BreadcrumbTrail() {
   this._breadcrumbs = [];
   this._selectedBreadcrumbIndex = -1;
@@ -801,9 +810,9 @@ function toggleJank(/* optional */ threshold) {
   refreshUI();
 }
 
-var gFocusSymbol = null;
+var gFocusSampleFilter = null;
 function focusOnSymbol(focusSymbol) {
-  gFocusSymbol = focusSymbol;
+  gFocusSampleFilter = new FocusSampleFilter(focusSymbol);
   refreshUI();
 }
 
@@ -848,8 +857,8 @@ function refreshUI() {
   if (filterNameInput != null && filterNameInput.value != "") {
     data = Parser.filterByName(data, document.getElementById("filterName").value);
   }
-  if (gFocusSymbol) {
-    data = Parser.filterBySymbol(data, gFocusSymbol, gInvertCallstack);
+  if (gFocusSampleFilter) {
+    data = gFocusSampleFilter.filter(data);
     console.log("symbol filtering: " + (Date.now() - start) + "ms.");
     start = Date.now();
   }
