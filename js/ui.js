@@ -564,7 +564,7 @@ BreadcrumbTrail.prototype = {
 };
 
 function maxResponsiveness() {
-  var data = gVisibleRange.getFilteredData();
+  var data = gCurrentlyShownSampleData;
   var maxRes = 0.0;
   for (var i = 0; i < data.length; ++i) {
     if (data[i].extraInfo["responsiveness"] == null) continue;
@@ -575,7 +575,7 @@ function maxResponsiveness() {
 }
 
 function avgResponsiveness() {
-  var data = gVisibleRange.getFilteredData();
+  var data = gCurrentlyShownSampleData;
   var totalRes = 0.0;
   for (var i = 0; i < data.length; ++i) {
     if (data[i].extraInfo["responsiveness"] == null) continue;
