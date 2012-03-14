@@ -183,28 +183,29 @@ var Parser = {
     var samples = profile.samples.clone();
     symbol = symbol.toLowerCase();
     calltrace_it: for (var i = 0; i < samples.length; ++i) {
-      samples[i] = samples[i].clone();
-      samples[i].frames = samples[i].frames.clone();
+      var sample = samples[i];
+      sample = sample.clone();
+      sample.frames = sample.frames.clone();
       if (invertCallstack) {
-        samples[i].frames.reverse();
+        sample.frames.reverse();
       }
-      while (samples[i].frames.length > 0) {
-        if (samples[i].frames[0] in profile.symbols) {
-          var currSymbol = profile.functions[profile.symbols[samples[i].frames[0]].functionIndex].functionName;
+      while (sample.frames.length > 0) {
+        if (sample.frames[0] in profile.symbols) {
+          var currSymbol = profile.functions[profile.symbols[sample.frames[0]].functionIndex].functionName;
           currSymbol = currSymbol.toLowerCase();
           if (symbol == currSymbol) {
             if (invertCallstack) {
-              samples[i].frames.pop(); // remove root from the bottom
-              samples[i].frames = samples[i].frames.reverse();
+              sample.frames.pop(); // remove root from the bottom
+              sample.frames = sample.frames.reverse();
             } else {
-              samples[i].frames = ["(root)"].concat(samples[i].frames);
+              sample.frames = ["(root)"].concat(sample.frames);
             }
             continue calltrace_it; // Stop trimming this callstack
           }
         }
-        samples[i].frames.shift();
+        sample.frames.shift();
       }
-      samples[i].frames = ["(root)"];
+      sample.frames = ["(root)"];
     }
     return {
       symbols: profile.symbols,
