@@ -179,6 +179,40 @@ var Parser = {
     };
   },
 
+  filterBySymbol: function Parser_filterBySymbol(profile, symbol, invertCallstack) {
+    var samples = profile.samples.clone();
+    symbol = symbol.toLowerCase();
+    calltrace_it: for (var i = 0; i < samples.length; ++i) {
+      samples[i] = samples[i].clone();
+      samples[i].frames = samples[i].frames.clone();
+      if (invertCallstack) {
+        samples[i].frames = samples[i].frames.reverse();
+      }
+      while (samples[i].frames.length > 0) {
+        if (profile.symbols[samples[i].frames[0]] != null) {
+          var currSymbol = profile.functions[profile.symbols[samples[i].frames[0]].functionIndex].functionName;
+          currSymbol = currSymbol.toLowerCase();
+          if (symbol == currSymbol) {
+            if (invertCallstack) {
+              samples[i].frames.pop(); // remove root from the bottom
+              samples[i].frames = samples[i].frames.reverse();
+            } else {
+              samples[i].frames = ["(root)"].concat(samples[i].frames);
+            }
+            continue calltrace_it; // Stop trimming this callstack
+          }
+        }
+        samples[i].frames.shift();
+      }
+      samples[i].frames = ["(root)"];
+    }
+    return {
+      symbols: profile.symbols,
+      functions: profile.functions,
+      samples: samples
+    };
+  },
+
   filterByName: function Parser_filterByName(profile, filterName) {
     var samples = profile.samples.clone();
     filterName = filterName.toLowerCase();
@@ -188,7 +222,7 @@ var Parser = {
       for (var j = 0; j < callstack.length; ++j) { 
         var symbol = profile.symbols[callstack[j]];
         if (symbol != null &&
-            profile.symbols[callstack[j]].symbolName.toLowerCase().indexOf(filterName) != -1) {
+            profile.functions[callstack[j]].symbolName.toLowerCase().indexOf(filterName) != -1) {
           continue calltrace_it;
         }
       }

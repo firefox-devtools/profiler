@@ -151,7 +151,13 @@ TreeView.prototype = {
     li.data = data;
     li.appendChild(treeLine);
     li.treeChildren = [];
+    li.contextMenuItems = this._contextMenuForFunction(data);
     li.treeParent = parentNode;
+    li.setAttribute("contextmenu", "xulContextMenu");
+    var self = this;
+    li.addEventListener("contextmenu", function(event) {
+        self._contextMenu(event);
+    }, true);
     if (hasChildren) {
       var ol = document.createElement("ol");
       ol.className = "treeViewNodeList";
@@ -164,6 +170,59 @@ TreeView.prototype = {
       parentNode.treeChildren.push(li);
     }
     parentElement.appendChild(li);
+  },
+  _contextMenu: function TreeView__contextMenu(event) {
+    var target = event.target;
+    while (target != null && target.contextMenu == null) {
+      target = target.parentNode;
+    }
+    var li = target;
+    var contextMenu = target.contextMenu;
+    var menuItems = ["No options"];
+    if (li != null && li.contextMenuItems != null)
+      menuItems = li.contextMenuItems;
+
+    // Mark on the context menu which tree node is clicked on.
+    contextMenu.target = li;
+    while (contextMenu.hasChildNodes()) {
+      contextMenu.removeChild(contextMenu.firstChild);
+    }
+    for (var i = 0; i < menuItems.length; i++) {
+      var menuItem = menuItems[i];
+      var menuItemNode = document.createElement("menuitem");
+      var self = this;
+      menuItemNode.onclick = (function (menuItem) {
+        return function() {
+          self._contextMenuClick(li.data, menuItem);
+        };
+      })(menuItem);
+      menuItemNode.label = menuItem;
+      contextMenu.appendChild(menuItemNode);
+    }
+  },
+  _contextMenuClick: function TreeView__ContextMenuClick(node, menuItem) {
+    // TODO move me outside tree.js
+    if (menuItem == "View Source") {
+      // Remove anything after ( since MXR doesn't handle search with the arguments.
+      var symbol = node.name.split("(")[0];
+      window.open("http://mxr.mozilla.org/mozilla-central/search?string=" + symbol, "View Source");
+    } else if (menuItem == "Google Search") {
+      var symbol = node.name;
+      window.open("https://www.google.ca/search?q=" + symbol, "View Source");
+    } else if (menuItem == "Focus") {
+      var symbol = node.name;
+      focusOnSymbol(symbol);
+    }
+  },
+  _contextMenuForFunction: function TreeView__ContextMenuForFunction(node) {
+    // TODO move me outside tree.js
+    var menu = [];
+    if (node.library != null && node.library.toLowerCase() == "xul") {
+      menu.push("View Source");
+    }
+    menu.push("Focus");
+    menu.push("Google Search");
+    return menu;
   },
   _HTMLForFunction: function TreeView__HTMLForFunction(node) {
     return '<input type="button" value="Expand / Collapse" class="expandCollapseButton" tabindex="-1"> ' +
