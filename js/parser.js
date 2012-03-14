@@ -186,15 +186,9 @@ var Parser = {
       if (!origSample)
         return null;
       var sample = origSample.clone();
-      if (invertCallstack) {
-        sample.frames.reverse();
-      }
       while (sample.frames.length > 0) {
-        if (symbolOrFunctionIndex == sample.frames[0]) {
-          if (invertCallstack)
-            sample.frames.reverse();
+        if (symbolOrFunctionIndex == sample.frames[0])
           return sample;
-        }
         sample.frames.shift();
       }
       return null;
