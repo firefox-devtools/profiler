@@ -57,7 +57,7 @@ ProfileTreeManager.prototype = {
       window.open("https://www.google.ca/search?q=" + symbol, "View Source");
     } else if (menuItem == "Focus") {
       var symbol = node.fullFrameNamesAsInSample[0]; // TODO: we only function one symbol when callpath merging is on, fix that
-      focusOnSymbol(symbol);
+      focusOnSymbol(symbol, node.name);
     }
   },
   display: function ProfileTreeManager_display(tree, symbols, functions, useFunctions) {
@@ -811,10 +811,10 @@ function toggleJank(/* optional */ threshold) {
 }
 
 var gSampleFilters = [];
-function focusOnSymbol(focusSymbol) {
+function focusOnSymbol(focusSymbol, name) {
   var newFilters = gSampleFilters.concat([new FocusSampleFilter(focusSymbol)]);
   gNestedRestrictions.addAndEnter({
-    title: "Focus Frame " + focusSymbol,
+    title: name,
     enterCallback: function () {
       gSampleFilters = newFilters;
       refreshUI();
