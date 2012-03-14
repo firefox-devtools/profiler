@@ -812,8 +812,14 @@ function toggleJank(/* optional */ threshold) {
 
 var gSampleFilters = [];
 function focusOnSymbol(focusSymbol) {
-  gSampleFilters = [new FocusSampleFilter(focusSymbol)];
-  refreshUI();
+  var newFilters = gSampleFilters.concat([new FocusSampleFilter(focusSymbol)]);
+  gNestedRestrictions.addAndEnter({
+    title: "Focus Frame " + focusSymbol,
+    enterCallback: function () {
+      gSampleFilters = newFilters;
+      refreshUI();
+    }
+  });
 }
 
 function setHighlightedCallstack(samples) {
@@ -835,6 +841,7 @@ function enterMainUI() {
     title: "Complete Profile",
     enterCallback: function () {
       gVisibleRange.unrestrict();
+      gSampleFilters = [];
       refreshUI();
     }
   })
