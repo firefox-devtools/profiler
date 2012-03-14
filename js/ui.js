@@ -438,10 +438,13 @@ RangeSelector.prototype = {
       hilite.classList.add("finished");
       var start = this._sampleIndexFromPoint(this._selectedRange.startX);
       var end = this._sampleIndexFromPoint(this._selectedRange.endX);
+      var newFilterChain = gSampleFilters.concat([new RangeSampleFilter(start, end)]);
       self._transientRestrictionEnteringAffordance = gNestedRestrictions.add({
         title: "Sample Range [" + start + ", " + (end + 1) + "]",
         enterCallback: function () {
-          self.filterRange(start, end);
+          gSampleFilters = newFilterChain;
+          self.collapseHistogramSelection();
+          refreshUI();
         }
       });
     } else {
@@ -453,15 +456,11 @@ RangeSelector.prototype = {
     hilite.classList.add("collapsed");
   },
   _sampleIndexFromPoint: function RangeSelector__sampleIndexFromPoint(x) {
-    var totalSamples = parseFloat(gVisibleRange.numSamples());
+    // XXX this is completely wrong, fix please
+    var totalSamples = parseFloat(gCurrentlyShownSampleData.samples.length);
     var width = parseFloat(this._graph.parentNode.clientWidth);
     var factor = totalSamples / width;
-    return gVisibleRange.start + parseInt(parseFloat(x) * factor);
-  },
-  filterRange: function RangeSelector_filterRange(start, end) {
-    gVisibleRange.restrictTo(start, end + 1);
-    this.collapseHistogramSelection();
-    refreshUI();
+    return parseInt(parseFloat(x) * factor);
   },
 };
 
@@ -499,8 +498,12 @@ BreadcrumbTrail.prototype = {
    *                   breadcrumb.
    */
   add: function BreadcrumbTrail_add(breadcrumb) {
-    if (this._selectedBreadcrumbIndex != this._breadcrumbs.length - 1)
-      throw "Can only add new breadcrumbs if the current one is the last one."
+    for (var i = this._breadcrumbs.length - 1; i > this._selectedBreadcrumbIndex; i--) {
+      var rearLi = this._breadcrumbs[i];
+      if (!rearLi.breadcrumbIsTransient)
+        throw "Can only add new breadcrumbs if after the current one there are only transient ones."
+      rearLi.breadcrumbDiscarder.discard();
+    }
     var li = document.createElement("li");
     li.className = "breadcrumbTrailItem";
     li.textContent = breadcrumb.title;
@@ -508,19 +511,22 @@ BreadcrumbTrail.prototype = {
     li.breadcrumbIndex = index;
     li.breadcrumbEnterCallback = breadcrumb.enterCallback;
     li.breadcrumbIsTransient = true;
+    li.style.zIndex = 1000 - index;
     this._containerElement.appendChild(li);
     this._breadcrumbs.push(li);
     if (index == 0)
       this._enter(index);
     var self = this;
-    return {
+    li.breadcrumbDiscarder = {
       discard: function () {
         if (li.breadcrumbIsTransient) {
           self._deleteBeyond(index - 1);
           delete li.breadcrumbIsTransient;
+          delete li.breadcrumbDiscarder;
         }
       }
     };
+    return li.breadcrumbDiscarder;
   },
   addAndEnter: function BreadcrumbTrail_addAndEnter(breadcrumb) {
     var removalHandle = this.add(breadcrumb);
@@ -553,28 +559,40 @@ BreadcrumbTrail.prototype = {
     setTimeout(function () {
       breadcrumb.parentNode.removeChild(breadcrumb);
     }, 1000);
-  }
+  },
 };
 
 function maxResponsiveness() {
-  var data = gVisibleRange.getFilteredData();
+  var data = gCurrentlyShownSampleData.samples;
   var maxRes = 0.0;
   for (var i = 0; i < data.length; ++i) {
-    if (data[i].extraInfo["responsiveness"] == null) continue;
+    if (!data[i] || !data[i].extraInfo["responsiveness"])
+      continue;
     if (maxRes < data[i].extraInfo["responsiveness"])
       maxRes = data[i].extraInfo["responsiveness"];
   }
   return maxRes;
 }
 
+function numberOfCurrentlyShownSamples() {
+  var data = gCurrentlyShownSampleData.samples;
+  var num = 0;
+  for (var i = 0; i < data.length; ++i) {
+    if (data[i])
+      num++;
+  }
+  return num;
+}
+
 function avgResponsiveness() {
-  var data = gVisibleRange.getFilteredData();
+  var data = gCurrentlyShownSampleData.samples;
   var totalRes = 0.0;
   for (var i = 0; i < data.length; ++i) {
-    if (data[i].extraInfo["responsiveness"] == null) continue;
+    if (!data[i] || !data[i].extraInfo["responsiveness"])
+      continue;
     totalRes += data[i].extraInfo["responsiveness"];
   }
-  return totalRes / data.length;
+  return totalRes / numberOfCurrentlyShownSamples();
 }
 
 function copyProfile() {
@@ -602,7 +620,7 @@ function uploadProfile(selected) {
   var dataToUpload;
   var dataSize;
   if (selected === true) {
-    dataToUpload = gVisibleRange.getTextData();
+    dataToUpload = getTextData();
   } else {
     dataToUpload = gRawProfile;
   }
@@ -671,9 +689,8 @@ function updateDescription() {
   infoText += "Total Samples: " + gParsedProfile.samples.length + "<br>\n";
   infoText += "<br>\n";
   infoText += "Selection:<br>\n";
-  infoText += "--Range: [" + gVisibleRange.start + "," + gVisibleRange.end + "]<br>\n";
-  infoText += "--Avg. Responsiveness: " + avgResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
-  infoText += "--Max Responsiveness: " + maxResponsiveness(gVisibleRange.start, gVisibleRange.end).toFixed(2) + " ms<br>\n";
+  infoText += "--Avg. Responsiveness: " + avgResponsiveness().toFixed(2) + "ms<br>\n";
+  infoText += "--Max Responsiveness: " + maxResponsiveness().toFixed(2) + "ms<br>\n";
   infoText += "<br>\n";
   infoText += "<label><input type='checkbox' id='invertCallstack' " + (gInvertCallstack ?" checked='true' ":" ") + " onchange='toggleInvertCallStack()'/>Invert callstack</label><br />\n";
   infoText += "<label><input type='checkbox' id='mergeUnbranched' " + (gMergeUnbranched ?" checked='true' ":" ") + " onchange='toggleMergeUnbranched()'/>Merge unbranched call paths</label><br />\n";
@@ -724,42 +741,29 @@ var gNestedRestrictions = null;
 var gHistogramView = null;
 var gCurrentlyShownSampleData = null;
 var gSkipSymbols = ["test2", "test1"];
-var gVisibleRange = {
-  start: -1,
-  end: -1,
-  restrictTo: function(start, end) {
-    this.start = start;
-    this.end = end;
-  },
-  unrestrict: function () {
-    this.restrictTo(-1, -1);
-  },
-  getFilteredData: function () {
-    if (this.isShowAll())
-      return gParsedProfile;
+
+function RangeSampleFilter(start, end) {
+  this._start = start;
+  this._end = end;
+}
+RangeSampleFilter.prototype = {
+  filter: function RangeSampleFilter_filter(profile) {
     return {
-      symbols: gParsedProfile.symbols,
-      functions: gParsedProfile.functions,
-      samples: gParsedProfile.samples.slice(this.start, this.end)
+      symbols: profile.symbols,
+      functions: profile.functions,
+      samples: profile.samples.slice(this._start, this._end)
     };
-  },
-  isShowAll: function() {
-    return (this.start == -1 && this.end == -1) || (this.start <= 0 && this.end >= gParsedProfile.samples.length);
-  },
-  numSamples: function () {
-    if (this.isShowAll())
-      return gParsedProfile.samples.length - 1; // why - 1?
-    return this.end - this.start - 1;
-  },
-  getTextData: function() {
-    var data = [];
-    var samples = this.getFilteredData();
-    for (var i = 0; i < samples.length; i++) {
-      data.push(samples[i].lines.join("\n"));
-    }
-    return data.join("\n");
-  } 
-};
+  }
+}
+
+function getTextData() {
+  var data = [];
+  var samples = gCurrentlyShownSampleData.samples;
+  for (var i = 0; i < samples.length; i++) {
+    data.push(samples[i].lines.join("\n"));
+  }
+  return data.join("\n");
+}
 
 function loadProfileFile(fileList) {
   if (fileList.length == 0)
@@ -812,11 +816,11 @@ function toggleJank(/* optional */ threshold) {
 
 var gSampleFilters = [];
 function focusOnSymbol(focusSymbol, name) {
-  var newFilters = gSampleFilters.concat([new FocusSampleFilter(focusSymbol)]);
+  var newFilterChain = gSampleFilters.concat([new FocusSampleFilter(focusSymbol)]);
   gNestedRestrictions.addAndEnter({
     title: name,
     enterCallback: function () {
-      gSampleFilters = newFilters;
+      gSampleFilters = newFilterChain;
       refreshUI();
     }
   });
@@ -840,7 +844,6 @@ function enterMainUI() {
   gNestedRestrictions.add({
     title: "Complete Profile",
     enterCallback: function () {
-      gVisibleRange.unrestrict();
       gSampleFilters = [];
       refreshUI();
     }
@@ -851,7 +854,7 @@ function enterMainUI() {
 
 function refreshUI() {
   var start = Date.now();
-  var data = gVisibleRange.getFilteredData();
+  var data = gParsedProfile;
   console.log("visible range filtering: " + (Date.now() - start) + "ms.");
   start = Date.now();
 
