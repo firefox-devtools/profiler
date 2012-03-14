@@ -183,8 +183,8 @@ var Parser = {
     var samples = profile.samples.clone();
     symbol = symbol.toLowerCase();
     calltrace_it: for (var i = 0; i < samples.length; ++i) {
+      samples[i] = samples[i].clone();
       var sample = samples[i];
-      sample = sample.clone();
       sample.frames = sample.frames.clone();
       if (invertCallstack) {
         sample.frames.reverse();
