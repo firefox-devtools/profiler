@@ -184,11 +184,9 @@ TreeView.prototype = {
     var contextMenu = document.getElementById("xulContextMenu");
     contextMenu.innerHTML = "";
 
-    var menuItems = this._contextMenuForFunction(li.data);
-    for (var i = 0; i < menuItems.length; i++) {
-      var menuItem = menuItems[i];
+    var self = this;
+    this._contextMenuForFunction(li.data).forEach(function (menuitem) {
       var menuItemNode = document.createElement("menuitem");
-      var self = this;
       menuItemNode.onclick = (function (menuItem) {
         return function() {
           self._contextMenuClick(li.data, menuItem);
@@ -196,7 +194,8 @@ TreeView.prototype = {
       })(menuItem);
       menuItemNode.label = menuItem;
       contextMenu.appendChild(menuItemNode);
-    }
+    });
+
     this._verticalScrollbox.setAttribute("contextmenu", contextMenu.id);
   },
   _contextMenuClick: function TreeView__ContextMenuClick(node, menuItem) {
