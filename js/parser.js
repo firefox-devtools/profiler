@@ -184,7 +184,6 @@ var Parser = {
     symbol = symbol.toLowerCase();
     var samples = profile.samples.map(function filterSample(origSample) {
       var sample = origSample.clone();
-      sample.frames = sample.frames.clone();
       if (invertCallstack) {
         sample.frames.reverse();
       }
