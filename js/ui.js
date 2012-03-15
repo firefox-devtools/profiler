@@ -29,20 +29,23 @@ function ProfileTreeManager(container) {
 }
 ProfileTreeManager.prototype = {
   highlightFrame: function Treedisplay_highlightFrame(frameData) {
-    var selectedCallstack = [];
-    var curr = frameData;
+    setHighlightedCallstack(this._getCallstackUpTo(frameData));
+  },
+  _getCallstackUpTo: function ProfileTreeManager__getCallstackUpTo(frame) {
+    var callstack = [];
+    var curr = frame;
     while (curr != null) {
       if (curr.name != null) {
         var subCallstack = curr.fullFrameNamesAsInSample.clone();
         subCallstack.reverse();
-        selectedCallstack = selectedCallstack.concat(subCallstack);
+        callstack = callstack.concat(subCallstack);
       }
       curr = curr.parent;
     }
-    selectedCallstack.reverse();
+    callstack.reverse();
     if (gInvertCallstack)
-      selectedCallstack.shift(); // remove (total)
-    setHighlightedCallstack(selectedCallstack);
+      callstack.shift(); // remove (total)
+    return callstack;
   },
   _onContextMenuClick: function ProfileTreeManager__onContextMenuClick(e) {
     var node = e.node;
@@ -55,9 +58,12 @@ ProfileTreeManager.prototype = {
     } else if (menuItem == "Google Search") {
       var symbol = node.name;
       window.open("https://www.google.ca/search?q=" + symbol, "View Source");
-    } else if (menuItem == "Focus") {
+    } else if (menuItem == "Focus Frame") {
       var symbol = node.fullFrameNamesAsInSample[0]; // TODO: we only function one symbol when callpath merging is on, fix that
       focusOnSymbol(symbol, node.name);
+    } else if (menuItem == "Focus Callstack") {
+      var focusedCallstack = this._getCallstackUpTo(node);
+      focusOnCallstack(focusedCallstack, node.name);
     }
   },
   display: function ProfileTreeManager_display(tree, symbols, functions, useFunctions) {
@@ -464,13 +470,31 @@ RangeSelector.prototype = {
   },
 };
 
-function FocusSampleFilter(focusedSymbol) {
+function FocusedFrameSampleFilter(focusedSymbol) {
   this._focusedSymbol = focusedSymbol;
 }
-FocusSampleFilter.prototype = {
-  filter: function FocusSampleFilter_filter(profile) {
+FocusedFrameSampleFilter.prototype = {
+  filter: function FocusedFrameSampleFilter_filter(profile) {
     return Parser.filterBySymbol(profile, this._focusedSymbol);
   },
+};
+
+function FocusedCallstackPrefixSampleFilter(focusedCallstack) {
+  this._focusedCallstackPrefix = focusedCallstack;
+}
+FocusedCallstackPrefixSampleFilter.prototype = {
+  filter: function FocusedCallstackPrefixSampleFilter_filter(profile) {
+    return Parser.filterByCallstackPrefix(profile, this._focusedCallstackPrefix);
+  }
+};
+
+function FocusedCallstackPostfixSampleFilter(focusedCallstack) {
+  this._focusedCallstackPostfix = focusedCallstack;
+}
+FocusedCallstackPostfixSampleFilter.prototype = {
+  filter: function FocusedCallstackPostfixSampleFilter_filter(profile) {
+    return Parser.filterByCallstackPostfix(profile, this._focusedCallstackPostfix);
+  }
 };
 
 function BreadcrumbTrail() {
@@ -816,7 +840,7 @@ function toggleJank(/* optional */ threshold) {
 
 var gSampleFilters = [];
 function focusOnSymbol(focusSymbol, name) {
-  var newFilterChain = gSampleFilters.concat([new FocusSampleFilter(focusSymbol)]);
+  var newFilterChain = gSampleFilters.concat([new FocusedFrameSampleFilter(focusSymbol)]);
   gNestedRestrictions.addAndEnter({
     title: name,
     enterCallback: function () {
@@ -824,6 +848,20 @@ function focusOnSymbol(focusSymbol, name) {
       refreshUI();
     }
   });
+}
+
+function focusOnCallstack(focusedCallstack, name) {
+  var filter = gInvertCallstack ?
+    new FocusedCallstackPostfixSampleFilter(focusedCallstack) :
+    new FocusedCallstackPrefixSampleFilter(focusedCallstack);
+  var newFilterChain = gSampleFilters.concat([filter]);
+  gNestedRestrictions.addAndEnter({
+    title: name,
+    enterCallback: function () {
+      gSampleFilters = newFilterChain;
+      refreshUI();
+    }
+  })
 }
 
 function setHighlightedCallstack(samples) {
