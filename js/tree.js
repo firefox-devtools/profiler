@@ -172,7 +172,8 @@ TreeView.prototype = {
     this._verticalScrollbox.setAttribute("contextmenu", "");
 
     var target = event.target;
-    if (target.classList.contains("expandCollapseButton"))
+    if (target.classList.contains("expandCollapseButton") ||
+        target.classList.contains("focusCallstackButton"))
       return;
 
     var li = this._getParentTreeViewNode(target);
@@ -218,7 +219,8 @@ TreeView.prototype = {
       '<span class="samplePercentage">' + (100 * node.ratio).toFixed(1) + '%</span> ' +
       '<span class="selfSampleCount">' + node.selfCounter + '</span> ' +
       '<span class="functionName">' + node.name + '</span>' +
-      '<span class="libraryName">' + node.library + '</span>';
+      '<span class="libraryName">' + node.library + '</span>' +
+      '<input type="button" value="Focus Callstack" class="focusCallstackButton" tabindex="-1">';
   },
   _resolveChildren: function TreeView__resolveChildren(div) {
     while (div.pendingExpand != null && div.pendingExpand.length > 0) {
@@ -350,6 +352,8 @@ TreeView.prototype = {
         this._toggleAll(node);
       else
         this._toggle(node);
+    } else if (target.classList.contains("focusCallstackButton")) {
+      this._fireEvent("focusCallstackButtonClicked", node.data);
     } else {
       this._select(node);
       if (event.detail == 2) // dblclick

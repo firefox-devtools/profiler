@@ -25,6 +25,10 @@ function ProfileTreeManager(container) {
   this.treeView.addEventListener("contextMenuClick", function (e) {
     self._onContextMenuClick(e);
   });
+  this.treeView.addEventListener("focusCallstackButtonClicked", function (frameData) {
+    var focusedCallstack = self._getCallstackUpTo(frameData);
+    focusOnCallstack(focusedCallstack, frameData.name);
+  });
   container.appendChild(this.treeView.getContainer());
 }
 ProfileTreeManager.prototype = {
