@@ -184,6 +184,8 @@ HistogramView.prototype = {
     this._render(highlightedCallstack);
   },
   _isStepSelected: function HistogramView__isStepSelected(step, highlightedCallstack) {
+    if ("marker" in step)
+      return false;
     return step.frames.some(function isCallstackSelected(frames) {
       if (frames.length < highlightedCallstack.length ||
           highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
@@ -251,7 +253,8 @@ HistogramView.prototype = {
           x: nextX,
           width: 2,
           value: 1,
-          marker: step.extraInfo.marker
+          marker: step.extraInfo.marker,
+          color: "fuchsia"
         });
         nextX += 2;
         histogramData.push({
