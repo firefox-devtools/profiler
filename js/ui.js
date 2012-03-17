@@ -717,24 +717,24 @@ function updateDescription() {
   var infobar = document.getElementById("infobar");
   var infoText = "";
   
-  infoText += "Total Samples: " + gParsedProfile.samples.length + "<br>\n";
-  infoText += "<br>\n";
-  infoText += "Selection:<br>\n";
-  infoText += "--Avg. Responsiveness: " + avgResponsiveness().toFixed(2) + "ms<br>\n";
-  infoText += "--Max Responsiveness: " + maxResponsiveness().toFixed(2) + "ms<br>\n";
-  infoText += "<br>\n";
-  infoText += "<label><input type='checkbox' id='invertCallstack' " + (gInvertCallstack ?" checked='true' ":" ") + " onchange='toggleInvertCallStack()'/>Invert callstack</label><br />\n";
-  infoText += "<label><input type='checkbox' id='mergeUnbranched' " + (gMergeUnbranched ?" checked='true' ":" ") + " onchange='toggleMergeUnbranched()'/>Merge unbranched call paths</label><br />\n";
-  infoText += "<label><input type='checkbox' id='mergeFunctions' " + (gMergeFunctions ?" checked='true' ":" ") + " onchange='toggleMergeFunctions()'/>Functions, not lines</label><br />\n";
-  infoText += "<label><input type='checkbox' id='showJank' " + (gJankOnly ?" checked='true' ":" ") + " onchange='toggleJank()'/>Show Jank only</label><br />\n";
+  infoText += "<h2>Selection Info</h2>\n<ul>\n";
+  infoText += "  <li>Avg. Responsiveness:<br>" + avgResponsiveness().toFixed(2) + "ms</li>\n";
+  infoText += "  <li>Max Responsiveness:<br>" + maxResponsiveness().toFixed(2) + "ms</li>\n";
+  infoText += "</ul>\n";
+  infoText += "<h2>Pre Filtering</h2>\n";
+  infoText += "<label><input type='checkbox' id='mergeFunctions' " + (gMergeFunctions ?" checked='true' ":" ") + " onchange='toggleMergeFunctions()'/>Functions, not lines</label><br>\n";
 
   var filterNameInputOld = document.getElementById("filterName");
-  infoText += "<br>\n";
   infoText += "Filter:\n";
   infoText += "<input type='text' id='filterName' oninput='filterOnChange()'/><br>\n";
 
-  infoText += "<br>\n";
-  infoText += "Share:<br>\n";
+  infoText += "<h2>Post Filtering</h2>\n";
+  infoText += "<label><input type='checkbox' id='showJank' " + (gJankOnly ?" checked='true' ":" ") + " onchange='toggleJank()'/>Show Jank only</label><br>\n";
+  infoText += "<h2>View Options</h2>\n";
+  infoText += "<label><input type='checkbox' id='mergeUnbranched' " + (gMergeUnbranched ?" checked='true' ":" ") + " onchange='toggleMergeUnbranched()'/>Merge unbranched call paths</label><br>\n";
+  infoText += "<label><input type='checkbox' id='invertCallstack' " + (gInvertCallstack ?" checked='true' ":" ") + " onchange='toggleInvertCallStack()'/>Invert callstack</label><br>\n";
+
+  infoText += "<h2>Share</h2>\n";
   infoText += "<a id='upload_status'>No upload in progress</a><br>\n";
   infoText += "<input type='button' id='upload' value='Upload full profile'>\n";
   infoText += "<input type='button' id='upload_select' value='Upload view'><br>\n";

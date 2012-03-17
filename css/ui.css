@@ -84,7 +84,7 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  bottom: 320px;
+  bottom: 360px;
   width: 199px;
   overflow: auto;
   padding: 0;
@@ -97,12 +97,27 @@ body {
   left: 0;
   bottom: 0;
   width: 193px;
-  height: 319px;
+  height: 359px;
   overflow: auto;
   padding: 3px;
   background: #EEE;
   border-top: 1px solid #BBB;
   border-right: 1px solid #BBB;
+}
+#infobar h2 {
+  font-size: 1em;
+  padding: 1px 3px;
+  margin: 3px -3px;
+  background: rgba(255, 255, 255, 0.6);
+  border: solid #CCC;
+  border-width: 1px 0;
+}
+#infobar h2:first-child {
+  margin-top: -4px;
+}
+#infobar ul {
+  margin: 2px 0;
+  padding-left: 18px;
 }
 #bottombar {
   position: absolute;
