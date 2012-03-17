@@ -918,7 +918,6 @@ function refreshUI() {
   if (gJankOnly) {
     data = Parser.filterByJank(data, gJankThreshold);
   }
-  // We need to focus after we filter because focus will trim the symbols
   gCurrentlyShownSampleData = data;
   var treeData = Parser.convertToCallTree(data, gInvertCallstack);
   console.log("conversion to calltree: " + (Date.now() - start) + "ms.");
