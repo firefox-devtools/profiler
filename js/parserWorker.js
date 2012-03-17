@@ -27,6 +27,13 @@ function parseRawProfile(requestID, rawProfile) {
     return makeSample(sample.frames.clone(), sample.extraInfo, sample.lines.clone());
   }
 
+  function cleanFunctionName(functionName) {
+    var ignoredPrefix = "non-virtual thunk to ";
+    if (functionName.substr(0, ignoredPrefix.length) == ignoredPrefix)
+      return functionName.substr(ignoredPrefix.length);
+    return functionName;
+  }
+
   function getFunctionInfo(fullName) {
     var match =
       /^(.*) \(in ([^\)]*)\) (\+ [0-9]+)$/.exec(fullName) ||
@@ -34,7 +41,7 @@ function parseRawProfile(requestID, rawProfile) {
       /^(.*) \(in ([^\)]*)\)$/.exec(fullName) ||
       /^(.*)$/.exec(fullName);
     return {
-      functionName: match[1],
+      functionName: cleanFunctionName(match[1]),
       libraryName: match[2] || "",
       lineInformation: match[3] || ""
     };

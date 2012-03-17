@@ -83,13 +83,6 @@ var Parser = {
     });
   },
 
-  _cleanFunctionName: function Parser__cleanFunctionName(functionName) {
-    var ignoredPrefix = "non-virtual thunk to ";
-    if (functionName.substr(0, ignoredPrefix.length) == ignoredPrefix)
-      return functionName.substr(ignoredPrefix.length);
-    return functionName;
-  },
-
   filterByJank: function Parser_filterByJank(profile, filterThreshold) {
     var samples = profile.samples.clone();
     calltrace_it: for (var i = 0; i < samples.length; ++i) {
