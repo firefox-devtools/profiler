@@ -18,19 +18,6 @@ function TreeNode(name, parent) {
   this.counter = 1;
   this.parent = parent;
 }
-TreeNode.prototype.traverse = function TreeNode_traverse(callback) {
-  if (this.children.length == 0) {
-    return false;
-  }
-  for (var i = 0; i < this.children.length; ++i) {
-    var child = this.children[i];
-    var result = callback(child);
-    if (result !== false) {
-      return result;
-    }
-  }
-  return false;
-};
 TreeNode.prototype.getDepth = function TreeNode__getDepth() {
   if (this.parent)
     return this.parent.getDepth() + 1;
