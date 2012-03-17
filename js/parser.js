@@ -1,36 +1,23 @@
 Array.prototype.clone = function() { return this.slice(0); }
 
-function Sample(name, extraInfo, line) {
-  this.frames = [name];
-  this.extraInfo = extraInfo;
-  this.lines = [];
-  this.clone = function() {
-    var cpy = new Sample("", extraInfo, null);
-    cpy.frames = this.frames.clone();
-    cpy.lines = this.lines.clone();
-    return cpy;
-  }
+function makeSample(frames, extraInfo, lines) {
+  return {
+    frames: frames,
+    extraInfo: extraInfo,
+    lines: lines
+  };
 }
 
-function TreeNode(name, parent) {
+function cloneSample(sample) {
+  return makeSample(sample.frames.clone(), sample.extraInfo, sample.lines.clone());
+}
+
+function TreeNode(name, parent, startCount) {
   this.name = name;
   this.children = [];
-  this.counter = 1;
+  this.counter = startCount;
   this.parent = parent;
 }
-TreeNode.prototype.traverse = function TreeNode_traverse(callback) {
-  if (this.children.length == 0) {
-    return false;
-  }
-  for (var i = 0; i < this.children.length; ++i) {
-    var child = this.children[i];
-    var result = callback(child);
-    if (result !== false) {
-      return result;
-    }
-  }
-  return false;
-};
 TreeNode.prototype.getDepth = function TreeNode__getDepth() {
   if (this.parent)
     return this.parent.getDepth() + 1;
@@ -64,102 +51,23 @@ TreeNode.prototype.incrementCountersInParentChain = function TreeNode_incrementC
     this.parent.incrementCountersInParentChain();
 };
 
+var gParserWorker = new Worker("js/parserWorker.js");
+gParserWorker.nextRequestID = 0;
+
 var Parser = {
-  parse: function Parser_parse(data) {
-    var lines = data.split("\n");
-    var extraInfo = {};
-    var symbols = [];
-    var symbolIndices = {};
-    var functions = [];
-    var functionIndices = {};
-
-    function indexForFunction(functionName, libraryName) {
-      if (functionName in functionIndices)
-        return functionIndices[functionName];
-      var newIndex = functions.length;
-      functions[newIndex] = {
-        functionName: functionName,
-        libraryName: libraryName
-      };
-      functionIndices[functionName] = newIndex;
-      return newIndex;
-    }
-
-    function parseSymbol(symbol) {
-      var info = Parser.getFunctionInfo(symbol);
-      return {
-        symbolName: symbol,
-        functionIndex: indexForFunction(info.functionName, info.libraryName),
-        lineInformation: info.lineInformation
-      };
-    }
-
-    function indexForSymbol(symbol) {
-      if (symbol in symbolIndices)
-        return symbolIndices[symbol];
-      var newIndex = symbols.length;
-      symbols[newIndex] = parseSymbol(symbol);
-      symbolIndices[symbol] = newIndex;
-      return newIndex;
-    }
-
-    var samples = [];
-    var sample = null;
-    for (var i = 0; i < lines.length; ++i) {
-      var line = lines[i];
-      if (line.length < 2 || line[1] != '-') {
-        // invalid line, ignore it
-        continue;
+  parse: function Parser_parse(data, finishCallback) {
+    var requestID = gParserWorker.nextRequestID++;
+    gParserWorker.addEventListener("message", function onMessageFromWorker(msg) {
+      if (msg.data.requestID == requestID) {
+        gParserWorker.removeEventListener("message", onMessageFromWorker);
+        finishCallback(msg.data.parsedProfile);
       }
-      var info = line.substring(2);
-      switch (line[0]) {
-      //case 'l':
-      //  // leaf name
-      //  if ("leafName" in extraInfo) {
-      //    extraInfo.leafName += ":" + info;
-      //  } else {
-      //    extraInfo.leafName = info;
-      //  }
-      //  break;
-      case 'm':
-        // marker
-        if (!("marker" in extraInfo)) {
-          extraInfo.marker = [];
-        }
-        extraInfo.marker.push(info);
-        break;
-      case 's':
-        // sample
-        var sampleName = info;
-        sample = new Sample(sampleName, extraInfo);
-        samples.push(sample);
-        extraInfo = {}; // reset the extra info for future rounds
-        break;
-      case 'c':
-      case 'l':
-        // continue sample
-        if (sample) { // ignore the case where we see a 'c' before an 's'
-          sample.frames.push(indexForSymbol(info));
-        }
-        break;
-      case 'r':
-        // responsiveness
-        if (sample) {
-          sample.extraInfo["responsiveness"] = parseFloat(info);
-        }
-        break;
-      }
-      if (sample != null)
-        sample.lines.push(line);
-    }
-    return { symbols: symbols, functions: functions, samples: samples};
-  },
-
-  _cleanFunctionName: function Parser__cleanFunctionName(functionName) {
-    var ignoredPrefix = "non-virtual thunk to ";
-    if (functionName.substr(0, ignoredPrefix.length) == ignoredPrefix)
-      return functionName.substr(ignoredPrefix.length);
-    return functionName;
+    });
+    gParserWorker.postMessage({
+      requestID: requestID,
+      task: "parseRawProfile",
+      rawProfile: data
+    });
   },
 
   filterByJank: function Parser_filterByJank(profile, filterThreshold) {
@@ -185,7 +93,7 @@ var Parser = {
     var samples = profile.samples.map(function filterSample(origSample) {
       if (!origSample)
         return null;
-      var sample = origSample.clone();
+      var sample = cloneSample(origSample);
       for (var i = 0; i < sample.frames.length; i++) {
         if (symbolOrFunctionIndex == sample.frames[i]) {
           sample.frames = sample.frames.slice(i);
@@ -207,7 +115,7 @@ var Parser = {
         return null;
       if (origSample.frames.length < callstack.length)
         return null;
-      var sample = origSample.clone();
+      var sample = cloneSample(origSample);
       for (var i = 0; i < callstack.length; i++) {
         if (sample.frames[i] != callstack[i])
           return null;
@@ -228,7 +136,7 @@ var Parser = {
         return null;
       if (origSample.frames.length < callstack.length)
         return null;
-      var sample = origSample.clone();
+      var sample = cloneSample(origSample);
       for (var i = 0; i < callstack.length; i++) {
         if (sample.frames[sample.frames.length - i - 1] != callstack[i])
           return null;
@@ -282,10 +190,8 @@ var Parser = {
       return sample != null;
     });
     if (samples.length == 0)
-      return new TreeNode("(empty)", null);
-    var treeRoot = new TreeNode(isReverse ? "(total)" : samples[0].frames[0], null);
-    treeRoot.counter = 0;
-    treeRoot.totalSamples = samples.length;
+      return new TreeNode("(empty)", null, 0);
+    var treeRoot = new TreeNode(isReverse ? "(total)" : samples[0].frames[0], null, 0);
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
       var callstack = sample.frames.clone();
@@ -298,8 +204,7 @@ var Parser = {
       var node = deepestExistingNode;
       for (var j = 0; j < remainingCallstack.length; ++j) {
         var frame = remainingCallstack[j];
-        var child = new TreeNode(frame, node);
-        child.totalSamples = samples.length;
+        var child = new TreeNode(frame, node, 1);
         node.children.push(child);
         node = child;
       }
@@ -328,18 +233,6 @@ var Parser = {
       this.mergeUnbranchedCallPaths(root.children[i]);
     }
   },
-  getFunctionInfo: function Parser_getFunctionInfo(fullName) {
-    var match =
-      /^(.*) \(in ([^\)]*)\) (\+ [0-9]+)$/.exec(fullName) ||
-      /^(.*) \(in ([^\)]*)\) (\(.*:.*\))$/.exec(fullName) ||
-      /^(.*) \(in ([^\)]*)\)$/.exec(fullName) ||
-      /^(.*)$/.exec(fullName);
-    return {
-      functionName: match[1],
-      libraryName: match[2] || "",
-      lineInformation: match[3] || ""
-    };
-  },
   discardLineLevelInformation: function Tree_discardLineLevelInformation(profile) {
     var symbols = profile.symbols;
     var data = profile.samples;
@@ -349,7 +242,7 @@ var Parser = {
         filteredData.push(null);
         continue;
       }
-      filteredData.push(data[i].clone());
+      filteredData.push(cloneSample(data[i]));
       var frames = filteredData[i].frames;
       for (var j = 0; j < frames.length; j++) {
         if (!(frames[j] in symbols))

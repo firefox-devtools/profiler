@@ -36,7 +36,7 @@
       <input type="file" id="datafile" onchange="loadProfileFile(this.files);">
       <h1>Or, alternatively, enter your profile data here:</h1>
       <textarea rows=20 cols=80 id=data autofocus spellcheck=false></textarea>
-      <p><button onclick="loadProfile(document.getElementById('data').value); enterMainUI();">Parse</button></p>
+      <p><button onclick="loadProfile(document.getElementById('data').value, enterMainUI);">Parse</button></p>
     </div>
     <script>
       if (location.href.indexOf("usesample") != -1) {
@@ -47,8 +47,7 @@
         oXHR.onreadystatechange = function (oEvent) {  
           if (oXHR.readyState === 4) {  
             if (oXHR.status === 200) {  
-              loadProfile(oXHR.responseText);
-              enterMainUI();
+              loadProfile(oXHR.responseText, enterMainUI);
             } else {  
               alert("Using the sample log needs XHR to work, so you can't run this from a file URL but need to start a webserver.");
             }  

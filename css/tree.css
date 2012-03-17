@@ -168,8 +168,9 @@
   color: #CCC;
 }
 
-.expandCollapseButton {
-  background: url(../images/treetwisty.svg) 0 0 no-repeat transparent;
+.expandCollapseButton,
+.focusCallstackButton {
+  background: none 0 0 no-repeat transparent;
   margin: 0;
   padding: 0;
   border: 0;
@@ -180,7 +181,18 @@
   color: transparent;
 }
 
-.expandCollapseButton:active:hover {
+.expandCollapseButton {
+  background-image: url(../images/treetwisty.svg);
+}
+
+.focusCallstackButton {
+  background-image: url(../images/circlearrow.svg);
+  margin-left: 5px;
+  visibility: hidden;
+}
+
+.expandCollapseButton:active:hover,
+.focusCallstackButton:active:hover {
   background-position: -16px 0;
 }
 
@@ -192,7 +204,8 @@
   background-position: -16px -16px;
 }
 
-.treeViewContainer:focus .treeLine.selected > .expandCollapseButton {
+.treeViewContainer:focus .treeLine.selected > .expandCollapseButton,
+.treeViewContainer:focus .treeLine.selected > .focusCallstackButton {
   background-position: -32px 0;
 }
 
@@ -200,7 +213,8 @@
   background-position: -32px -16px;
 }
 
-.treeViewContainer:focus .treeLine.selected > .expandCollapseButton:active:hover {
+.treeViewContainer:focus .treeLine.selected > .expandCollapseButton:active:hover,
+.treeViewContainer:focus .treeLine.selected > .focusCallstackButton:active:hover {
   background-position: -48px 0;
 }
 
@@ -210,4 +224,8 @@
 
 .treeViewNode.leaf > * > .expandCollapseButton {
   visibility: hidden;
+}
+
+.treeLine:hover > .focusCallstackButton {
+  visibility: visible;
 }

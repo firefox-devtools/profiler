@@ -25,6 +25,10 @@ function ProfileTreeManager(container) {
   this.treeView.addEventListener("contextMenuClick", function (e) {
     self._onContextMenuClick(e);
   });
+  this.treeView.addEventListener("focusCallstackButtonClicked", function (frameData) {
+    var focusedCallstack = self._getCallstackUpTo(frameData);
+    focusOnCallstack(focusedCallstack, frameData.name);
+  });
   container.appendChild(this.treeView.getContainer());
 }
 ProfileTreeManager.prototype = {
@@ -70,6 +74,7 @@ ProfileTreeManager.prototype = {
     this.treeView.display(this.convertToJSTreeData(tree, symbols, functions, useFunctions));
   },
   convertToJSTreeData: function ProfileTreeManager__convertToJSTreeData(rootNode, symbols, functions, useFunctions) {
+    var totalSamples = rootNode.counter;
     function createTreeViewNode(node, parent) {
       var curObj = {};
       curObj.parent = parent;
@@ -79,7 +84,7 @@ ProfileTreeManager.prototype = {
         selfCounter -= node.children[i].counter;
       }
       curObj.selfCounter = selfCounter;
-      curObj.ratio = node.counter / node.totalSamples;
+      curObj.ratio = node.counter / totalSamples;
       curObj.fullFrameNamesAsInSample = node.mergedNames ? node.mergedNames : [node.name];
       if (!(node.name in symbols)) {
         curObj.name = node.name;
@@ -180,6 +185,8 @@ HistogramView.prototype = {
     this._render(highlightedCallstack);
   },
   _isStepSelected: function HistogramView__isStepSelected(step, highlightedCallstack) {
+    if ("marker" in step)
+      return false;
     return step.frames.some(function isCallstackSelected(frames) {
       if (frames.length < highlightedCallstack.length ||
           highlightedCallstack.length <= (gInvertCallstack ? 0 : 1))
@@ -247,7 +254,8 @@ HistogramView.prototype = {
           x: nextX,
           width: 2,
           value: 1,
-          marker: step.extraInfo.marker
+          marker: step.extraInfo.marker,
+          color: "fuchsia"
         });
         nextX += 2;
         histogramData.push({
@@ -710,24 +718,24 @@ function updateDescription() {
   var infobar = document.getElementById("infobar");
   var infoText = "";
   
-  infoText += "Total Samples: " + gParsedProfile.samples.length + "<br>\n";
-  infoText += "<br>\n";
-  infoText += "Selection:<br>\n";
-  infoText += "--Avg. Responsiveness: " + avgResponsiveness().toFixed(2) + "ms<br>\n";
-  infoText += "--Max Responsiveness: " + maxResponsiveness().toFixed(2) + "ms<br>\n";
-  infoText += "<br>\n";
-  infoText += "<label><input type='checkbox' id='invertCallstack' " + (gInvertCallstack ?" checked='true' ":" ") + " onchange='toggleInvertCallStack()'/>Invert callstack</label><br />\n";
-  infoText += "<label><input type='checkbox' id='mergeUnbranched' " + (gMergeUnbranched ?" checked='true' ":" ") + " onchange='toggleMergeUnbranched()'/>Merge unbranched call paths</label><br />\n";
-  infoText += "<label><input type='checkbox' id='mergeFunctions' " + (gMergeFunctions ?" checked='true' ":" ") + " onchange='toggleMergeFunctions()'/>Functions, not lines</label><br />\n";
-  infoText += "<label><input type='checkbox' id='showJank' " + (gJankOnly ?" checked='true' ":" ") + " onchange='toggleJank()'/>Show Jank only</label><br />\n";
+  infoText += "<h2>Selection Info</h2>\n<ul>\n";
+  infoText += "  <li>Avg. Responsiveness:<br>" + avgResponsiveness().toFixed(2) + "ms</li>\n";
+  infoText += "  <li>Max Responsiveness:<br>" + maxResponsiveness().toFixed(2) + "ms</li>\n";
+  infoText += "</ul>\n";
+  infoText += "<h2>Pre Filtering</h2>\n";
+  infoText += "<label><input type='checkbox' id='mergeFunctions' " + (gMergeFunctions ?" checked='true' ":" ") + " onchange='toggleMergeFunctions()'/>Functions, not lines</label><br>\n";
 
   var filterNameInputOld = document.getElementById("filterName");
-  infoText += "<br>\n";
   infoText += "Filter:\n";
   infoText += "<input type='text' id='filterName' oninput='filterOnChange()'/><br>\n";
 
-  infoText += "<br>\n";
-  infoText += "Share:<br>\n";
+  infoText += "<h2>Post Filtering</h2>\n";
+  infoText += "<label><input type='checkbox' id='showJank' " + (gJankOnly ?" checked='true' ":" ") + " onchange='toggleJank()'/>Show Jank only</label><br>\n";
+  infoText += "<h2>View Options</h2>\n";
+  infoText += "<label><input type='checkbox' id='mergeUnbranched' " + (gMergeUnbranched ?" checked='true' ":" ") + " onchange='toggleMergeUnbranched()'/>Merge unbranched call paths</label><br>\n";
+  infoText += "<label><input type='checkbox' id='invertCallstack' " + (gInvertCallstack ?" checked='true' ":" ") + " onchange='toggleInvertCallStack()'/>Invert callstack</label><br>\n";
+
+  infoText += "<h2>Share</h2>\n";
   infoText += "<a id='upload_status'>No upload in progress</a><br>\n";
   infoText += "<input type='button' id='upload' value='Upload full profile'>\n";
   infoText += "<input type='button' id='upload_select' value='Upload view'><br>\n";
@@ -795,17 +803,19 @@ function loadProfileFile(fileList) {
   var file = fileList[0];
   var reader = new FileReader();
   reader.onloadend = function () {
-    loadProfile(reader.result);
-    enterMainUI();
+    loadProfile(reader.result, enterMainUI);
   };
-  reader.readAsText(file);
+  reader.readAsText(file, "utf-8");
 }
 
-function loadProfile(rawProfile) {
+function loadProfile(rawProfile, finishCallback) {
   gRawProfile = rawProfile;
   var startTime = Date.now();
-  gParsedProfile = Parser.parse(rawProfile);
-  console.log("parse time: " + (Date.now() - startTime) + "ms");
+  gParsedProfile = Parser.parse(rawProfile, function (parsedProfile) {
+    console.log("parse time: " + (Date.now() - startTime) + "ms");
+    gParsedProfile = parsedProfile;
+    finishCallback();
+  });
 }
 
 var gInvertCallstack = false;
@@ -911,7 +921,6 @@ function refreshUI() {
   if (gJankOnly) {
     data = Parser.filterByJank(data, gJankThreshold);
   }
-  // We need to focus after we filter because focus will trim the symbols
   gCurrentlyShownSampleData = data;
   var treeData = Parser.convertToCallTree(data, gInvertCallstack);
   console.log("conversion to calltree: " + (Date.now() - start) + "ms.");
