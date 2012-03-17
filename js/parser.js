@@ -12,10 +12,10 @@ function cloneSample(sample) {
   return makeSample(sample.frames.clone(), sample.extraInfo, sample.lines.clone());
 }
 
-function TreeNode(name, parent) {
+function TreeNode(name, parent, startCount) {
   this.name = name;
   this.children = [];
-  this.counter = 1;
+  this.counter = startCount;
   this.parent = parent;
 }
 TreeNode.prototype.getDepth = function TreeNode__getDepth() {
@@ -190,9 +190,8 @@ var Parser = {
       return sample != null;
     });
     if (samples.length == 0)
-      return new TreeNode("(empty)", null);
-    var treeRoot = new TreeNode(isReverse ? "(total)" : samples[0].frames[0], null);
-    treeRoot.counter = 0;
+      return new TreeNode("(empty)", null, 0);
+    var treeRoot = new TreeNode(isReverse ? "(total)" : samples[0].frames[0], null, 0);
     treeRoot.totalSamples = samples.length;
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
@@ -206,7 +205,7 @@ var Parser = {
       var node = deepestExistingNode;
       for (var j = 0; j < remainingCallstack.length; ++j) {
         var frame = remainingCallstack[j];
-        var child = new TreeNode(frame, node);
+        var child = new TreeNode(frame, node, 1);
         child.totalSamples = samples.length;
         node.children.push(child);
         node = child;
