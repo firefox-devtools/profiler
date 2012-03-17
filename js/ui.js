@@ -804,7 +804,7 @@ function loadProfileFile(fileList) {
   reader.onloadend = function () {
     loadProfile(reader.result, enterMainUI);
   };
-  reader.readAsText(file);
+  reader.readAsText(file, "utf-8");
 }
 
 function loadProfile(rawProfile, finishCallback) {
