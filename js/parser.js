@@ -1,15 +1,15 @@
 Array.prototype.clone = function() { return this.slice(0); }
 
-function Sample(name, extraInfo, line) {
-  this.frames = [name];
-  this.extraInfo = extraInfo;
-  this.lines = [];
-  this.clone = function() {
-    var cpy = new Sample("", extraInfo, null);
-    cpy.frames = this.frames.clone();
-    cpy.lines = this.lines.clone();
-    return cpy;
-  }
+function makeSample(frames, extraInfo, lines) {
+  return {
+    frames: frames,
+    extraInfo: extraInfo,
+    lines: lines
+  };
+}
+
+function cloneSample(sample) {
+  return makeSample(sample.frames.clone(), sample.extraInfo, sample.lines.clone());
 }
 
 function TreeNode(name, parent) {
@@ -65,7 +65,7 @@ TreeNode.prototype.incrementCountersInParentChain = function TreeNode_incrementC
 };
 
 var Parser = {
-  parse: function Parser_parse(data) {
+  parse: function Parser_parse(data, finishCallback) {
     var lines = data.split("\n");
     var extraInfo = {};
     var symbols = [];
@@ -131,7 +131,7 @@ var Parser = {
       case 's':
         // sample
         var sampleName = info;
-        sample = new Sample(sampleName, extraInfo);
+        sample = makeSample([sampleName], extraInfo, []);
         samples.push(sample);
         extraInfo = {}; // reset the extra info for future rounds
         break;
@@ -152,7 +152,9 @@ var Parser = {
       if (sample != null)
         sample.lines.push(line);
     }
-    return { symbols: symbols, functions: functions, samples: samples};
+    setTimeout(function() {
+      finishCallback({ symbols: symbols, functions: functions, samples: samples});
+    }, 0);
   },
 
   _cleanFunctionName: function Parser__cleanFunctionName(functionName) {
@@ -185,7 +187,7 @@ var Parser = {
     var samples = profile.samples.map(function filterSample(origSample) {
       if (!origSample)
         return null;
-      var sample = origSample.clone();
+      var sample = cloneSample(origSample);
       for (var i = 0; i < sample.frames.length; i++) {
         if (symbolOrFunctionIndex == sample.frames[i]) {
           sample.frames = sample.frames.slice(i);
@@ -207,7 +209,7 @@ var Parser = {
         return null;
       if (origSample.frames.length < callstack.length)
         return null;
-      var sample = origSample.clone();
+      var sample = cloneSample(origSample);
       for (var i = 0; i < callstack.length; i++) {
         if (sample.frames[i] != callstack[i])
           return null;
@@ -228,7 +230,7 @@ var Parser = {
         return null;
       if (origSample.frames.length < callstack.length)
         return null;
-      var sample = origSample.clone();
+      var sample = cloneSample(origSample);
       for (var i = 0; i < callstack.length; i++) {
         if (sample.frames[sample.frames.length - i - 1] != callstack[i])
           return null;
@@ -349,7 +351,7 @@ var Parser = {
         filteredData.push(null);
         continue;
       }
-      filteredData.push(data[i].clone());
+      filteredData.push(cloneSample(data[i]));
       var frames = filteredData[i].frames;
       for (var j = 0; j < frames.length; j++) {
         if (!(frames[j] in symbols))

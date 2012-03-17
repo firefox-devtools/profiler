@@ -802,17 +802,19 @@ function loadProfileFile(fileList) {
   var file = fileList[0];
   var reader = new FileReader();
   reader.onloadend = function () {
-    loadProfile(reader.result);
-    enterMainUI();
+    loadProfile(reader.result, enterMainUI);
   };
   reader.readAsText(file);
 }
 
-function loadProfile(rawProfile) {
+function loadProfile(rawProfile, finishCallback) {
   gRawProfile = rawProfile;
   var startTime = Date.now();
-  gParsedProfile = Parser.parse(rawProfile);
-  console.log("parse time: " + (Date.now() - startTime) + "ms");
+  gParsedProfile = Parser.parse(rawProfile, function (parsedProfile) {
+    console.log("parse time: " + (Date.now() - startTime) + "ms");
+    gParsedProfile = parsedProfile;
+    finishCallback();
+  });
 }
 
 var gInvertCallstack = false;
