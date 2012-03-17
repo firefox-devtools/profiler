@@ -710,6 +710,26 @@ function filterUpdate() {
   } 
 }
 
+// Maps document id to a tooltip description
+var tooltip = {
+  "mergeFunctions" : "Ignore line information and merge samples based on function names.",
+  "showJank" : "Show only samples with >50ms responsiveness.",
+  //"mergeUnvranch" : "???",
+  "filterName" : "Show only samples with a frame containing the filter as a substring.",
+  "invertCallstack" : "Invert the callstack (Heavy view) to find the most expensive leaf functions.",
+  "upload" : "Upload the full profile to public cloud storage to share with others.",
+  "upload_select" : "Upload only the selected view.",
+  "download" : "Initiate a download of the full profile.",
+}
+
+function addTooltips() {
+  for (var elemId in tooltip) {
+    var elem = document.getElementById(elemId); 
+    if (elem == null) continue;
+    elem.title = tooltip[elemId];
+  }
+}
+
 function updateDescription() {
   // Temporary until fileListItem are built correctly
   var sampleCount = document.getElementById("fileListItemSamples");
@@ -748,6 +768,7 @@ function updateDescription() {
   //infoText += "<input type='button' id='add_skipsymbol' value='Add'/><br />\n";
   
   infobar.innerHTML = infoText;
+  addTooltips();
 
   var filterNameInputNew = document.getElementById("filterName");
   if (filterNameInputOld != null && filterNameInputNew != null) {
@@ -841,6 +862,8 @@ function toggleMergeFunctions() {
 var gJankOnly = false;
 var gJankThreshold = 50 /* ms */;
 function toggleJank(/* optional */ threshold) {
+  // Currently we have no way to change the threshold in the UI
+  // once we add this we will need to change the tooltip.
   gJankOnly = !gJankOnly;
   if (threshold != null ) {
     gJankThreshold = threshold;
