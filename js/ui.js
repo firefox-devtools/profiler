@@ -74,6 +74,7 @@ ProfileTreeManager.prototype = {
     this.treeView.display(this.convertToJSTreeData(tree, symbols, functions, useFunctions));
   },
   convertToJSTreeData: function ProfileTreeManager__convertToJSTreeData(rootNode, symbols, functions, useFunctions) {
+    var totalSamples = rootNode.counter;
     function createTreeViewNode(node, parent) {
       var curObj = {};
       curObj.parent = parent;
@@ -83,7 +84,7 @@ ProfileTreeManager.prototype = {
         selfCounter -= node.children[i].counter;
       }
       curObj.selfCounter = selfCounter;
-      curObj.ratio = node.counter / node.totalSamples;
+      curObj.ratio = node.counter / totalSamples;
       curObj.fullFrameNamesAsInSample = node.mergedNames ? node.mergedNames : [node.name];
       if (!(node.name in symbols)) {
         curObj.name = node.name;

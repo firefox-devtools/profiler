@@ -192,7 +192,6 @@ var Parser = {
     if (samples.length == 0)
       return new TreeNode("(empty)", null, 0);
     var treeRoot = new TreeNode(isReverse ? "(total)" : samples[0].frames[0], null, 0);
-    treeRoot.totalSamples = samples.length;
     for (var i = 0; i < samples.length; ++i) {
       var sample = samples[i];
       var callstack = sample.frames.clone();
@@ -206,7 +205,6 @@ var Parser = {
       for (var j = 0; j < remainingCallstack.length; ++j) {
         var frame = remainingCallstack[j];
         var child = new TreeNode(frame, node, 1);
-        child.totalSamples = samples.length;
         node.children.push(child);
         node = child;
       }
