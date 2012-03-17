@@ -244,7 +244,7 @@ TreeView.prototype = {
     // Expands / collapses all child nodes, too.
     if (newCollapsedValue === undefined)
       newCollapsedValue = !this._isCollapsed(subtreeRoot);
-    this._toggle(subtreeRoot, newCollapsedValue);
+    this._toggle(subtreeRoot, newCollapsedValue, true);
     for (var i = 0; i < subtreeRoot.treeChildren.length; ++i) {
       this._toggleAll(subtreeRoot.treeChildren[i], newCollapsedValue, true);
     }
