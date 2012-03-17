@@ -64,97 +64,23 @@ TreeNode.prototype.incrementCountersInParentChain = function TreeNode_incrementC
     this.parent.incrementCountersInParentChain();
 };
 
+var gParserWorker = new Worker("js/parserWorker.js");
+gParserWorker.nextRequestID = 0;
+
 var Parser = {
   parse: function Parser_parse(data, finishCallback) {
-    var lines = data.split("\n");
-    var extraInfo = {};
-    var symbols = [];
-    var symbolIndices = {};
-    var functions = [];
-    var functionIndices = {};
-
-    function indexForFunction(functionName, libraryName) {
-      if (functionName in functionIndices)
-        return functionIndices[functionName];
-      var newIndex = functions.length;
-      functions[newIndex] = {
-        functionName: functionName,
-        libraryName: libraryName
-      };
-      functionIndices[functionName] = newIndex;
-      return newIndex;
-    }
-
-    function parseSymbol(symbol) {
-      var info = Parser.getFunctionInfo(symbol);
-      return {
-        symbolName: symbol,
-        functionIndex: indexForFunction(info.functionName, info.libraryName),
-        lineInformation: info.lineInformation
-      };
-    }
-
-    function indexForSymbol(symbol) {
-      if (symbol in symbolIndices)
-        return symbolIndices[symbol];
-      var newIndex = symbols.length;
-      symbols[newIndex] = parseSymbol(symbol);
-      symbolIndices[symbol] = newIndex;
-      return newIndex;
-    }
-
-    var samples = [];
-    var sample = null;
-    for (var i = 0; i < lines.length; ++i) {
-      var line = lines[i];
-      if (line.length < 2 || line[1] != '-') {
-        // invalid line, ignore it
-        continue;
+    var requestID = gParserWorker.nextRequestID++;
+    gParserWorker.addEventListener("message", function onMessageFromWorker(msg) {
+      if (msg.data.requestID == requestID) {
+        gParserWorker.removeEventListener("message", onMessageFromWorker);
+        finishCallback(msg.data.parsedProfile);
       }
-      var info = line.substring(2);
-      switch (line[0]) {
-      //case 'l':
-      //  // leaf name
-      //  if ("leafName" in extraInfo) {
-      //    extraInfo.leafName += ":" + info;
-      //  } else {
-      //    extraInfo.leafName = info;
-      //  }
-      //  break;
-      case 'm':
-        // marker
-        if (!("marker" in extraInfo)) {
-          extraInfo.marker = [];
-        }
-        extraInfo.marker.push(info);
-        break;
-      case 's':
-        // sample
-        var sampleName = info;
-        sample = makeSample([sampleName], extraInfo, []);
-        samples.push(sample);
-        extraInfo = {}; // reset the extra info for future rounds
-        break;
-      case 'c':
-      case 'l':
-        // continue sample
-        if (sample) { // ignore the case where we see a 'c' before an 's'
-          sample.frames.push(indexForSymbol(info));
-        }
-        break;
-      case 'r':
-        // responsiveness
-        if (sample) {
-          sample.extraInfo["responsiveness"] = parseFloat(info);
-        }
-        break;
-      }
-      if (sample != null)
-        sample.lines.push(line);
-    }
-    setTimeout(function() {
-      finishCallback({ symbols: symbols, functions: functions, samples: samples});
-    }, 0);
+    });
+    gParserWorker.postMessage({
+      requestID: requestID,
+      task: "parseRawProfile",
+      rawProfile: data
+    });
   },
 
   _cleanFunctionName: function Parser__cleanFunctionName(functionName) {
@@ -329,18 +255,6 @@ var Parser = {
     for (var i = 0; i < root.children.length; i++) {
       this.mergeUnbranchedCallPaths(root.children[i]);
     }
-  },
-  getFunctionInfo: function Parser_getFunctionInfo(fullName) {
-    var match =
-      /^(.*) \(in ([^\)]*)\) (\+ [0-9]+)$/.exec(fullName) ||
-      /^(.*) \(in ([^\)]*)\) (\(.*:.*\))$/.exec(fullName) ||
-      /^(.*) \(in ([^\)]*)\)$/.exec(fullName) ||
-      /^(.*)$/.exec(fullName);
-    return {
-      functionName: match[1],
-      libraryName: match[2] || "",
-      lineInformation: match[3] || ""
-    };
   },
   discardLineLevelInformation: function Tree_discardLineLevelInformation(profile) {
     var symbols = profile.symbols;
