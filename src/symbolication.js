@@ -35,78 +35,6 @@ function bisectRight(a, x, lo = 0, hi = a.length) {
   return lo;
 }
 
-function fixupFrameTable(frameTable, oldFuncToNewFuncMap) {
-  const { data, schema } = frameTable;
-  return {
-    schema,
-    data: data.mapFields(schema.func, {
-      func: oldFunc => {
-        const newFunc = oldFuncToNewFuncMap.get(oldFunc);
-        return newFunc === undefined ? oldFunc : newFunc;
-      }
-    })
-  };
-}
-
-/**
- * XXX fix this comment
- * Using the provided symbol table, replace addresses in the thread's
- * funcTable with their corresponding symbols.
- * @param  array  [addrs, syms] The symbol table.
- * @param  array  addresses     The addresses to replace, as an array of
- *                              [funcTableIndex, integerAddressRelativeToLibrary]
- *                              elements.
- * @param  object thread        The thread whose funcTable needs to be augmented.
- * @return object               The updated thread as a new object.
- */
-function mergeFunctions(addrs, addressesToSymbolicate, thread, oldFuncToNewFuncMap = new Map(), addrToFuncIndexMap = new Map()) {
-  let funcTable = {
-    schema: thread.funcTable.schema,
-    data: new DataTable(thread.funcTable.schema, thread.funcTable.data)
-  };
-  addressesToSymbolicate.sort(([i1, address1], [i2, address2]) => {
-    if (address1 !== address2) {
-      return address1 - address2;
-    }
-    return i1 - i2;
-  });
-  let lastFuncIndex = -1;
-  let nextFuncAddress = 0;
-  let nextFuncAddressIndex = 0;
-  for (let [funcIndex, addr] of addressesToSymbolicate) {
-    if (addr < nextFuncAddress) {
-      oldFuncToNewFuncMap.set(funcIndex, lastFuncIndex);
-      continue;
-    }
-    let funcAddressIndex = bisectRight(addrs, addr, nextFuncAddressIndex) - 1;
-    if (funcAddressIndex >= 0) {
-      const funcAddr = addrs[funcAddressIndex];
-      nextFuncAddressIndex = funcAddressIndex + 1;
-      nextFuncAddress = (nextFuncAddressIndex < addrs.length) ? addrs[nextFuncAddressIndex] : Infinity;
-      lastFuncIndex = funcIndex;
-      addrToFuncIndexMap.set(funcAddr, funcIndex);
-    }
-  }
-  const frameTable = fixupFrameTable(thread.frameTable, oldFuncToNewFuncMap);
-  const { funcStackTable, samples } = createFuncStackTableAndFixupSamples(thread.stackTable, frameTable, funcTable, thread.samples);
-  return Object.assign({}, thread, { funcTable, frameTable, funcStackTable, samples });
-}
-
-function setFuncNames(thread, funcAddrs, funcNames, addrToFuncIndexMap) {
-  let funcTable = {
-    schema: thread.funcTable.schema,
-    data: new DataTable(thread.funcTable.schema, thread.funcTable.data)
-  };
-  let stringTable = thread.stringTable;
-  funcAddrs.forEach((addr, addrIndex) => {
-    let funcIndex = addrToFuncIndexMap.get(addr);
-    let symbolName = funcNames[addrIndex];
-    let symbolIndex = stringTable.indexForString(symbolName);
-    funcTable.data.setValue(funcIndex, funcTable.schema.name, symbolIndex);
-  });
-  return Object.assign({}, thread, { funcTable, stringTable });
-}
-
 /**
  * Find the addresses in this thread's funcTable that we need symbols for.
  * @param  object thread The thread, in "preprocessed profile" format.
@@ -148,6 +76,79 @@ return timeCode('gatherAddressesInThread', () => {
   return foundAddresses;
 });}
 
+function fixupFrameTable(frameTable, oldFuncToNewFuncMap) {
+  const { data, schema } = frameTable;
+  return {
+    schema,
+    data: data.mapFields(schema.func, {
+      func: oldFunc => {
+        const newFunc = oldFuncToNewFuncMap.get(oldFunc);
+        return newFunc === undefined ? oldFunc : newFunc;
+      }
+    })
+  };
+}
+
+/**
+ * XXX fix this comment
+ * Using the provided symbol table, replace addresses in the thread's
+ * funcTable with their corresponding symbols.
+ * @param  array  [addrs, syms] The symbol table.
+ * @param  array  addresses     The addresses to replace, as an array of
+ *                              [funcTableIndex, integerAddressRelativeToLibrary]
+ *                              elements.
+ * @param  object thread        The thread whose funcTable needs to be augmented.
+ * @return object               The updated thread as a new object.
+ */
+function mergeFunctions(addrs, addressesToSymbolicate, thread, oldFuncToNewFuncMap = new Map()) {
+  let addrToFuncIndexMap = new Map();
+  addressesToSymbolicate.sort(([i1, address1], [i2, address2]) => {
+    if (address1 !== address2) {
+      return address1 - address2;
+    }
+    return i1 - i2;
+  });
+  let lastFuncIndex = -1;
+  let nextFuncAddress = 0;
+  let nextFuncAddressIndex = 0;
+  for (let [funcIndex, addr] of addressesToSymbolicate) {
+    if (addr < nextFuncAddress) {
+      oldFuncToNewFuncMap.set(funcIndex, lastFuncIndex);
+      continue;
+    }
+    let funcAddressIndex = bisectRight(addrs, addr, nextFuncAddressIndex) - 1;
+    if (funcAddressIndex >= 0) {
+      const funcAddr = addrs[funcAddressIndex];
+      nextFuncAddressIndex = funcAddressIndex + 1;
+      nextFuncAddress = (nextFuncAddressIndex < addrs.length) ? addrs[nextFuncAddressIndex] : Infinity;
+      lastFuncIndex = funcIndex;
+      addrToFuncIndexMap.set(funcAddr, funcIndex);
+    }
+  }
+  return addrToFuncIndexMap;
+}
+
+function setFuncNames(thread, funcAddrs, funcNames, addrToFuncIndexMap) {
+  let funcTable = {
+    schema: thread.funcTable.schema,
+    data: new DataTable(thread.funcTable.schema, thread.funcTable.data)
+  };
+  let stringTable = thread.stringTable;
+  funcAddrs.forEach((addr, addrIndex) => {
+    let funcIndex = addrToFuncIndexMap.get(addr);
+    let symbolName = funcNames[addrIndex];
+    let symbolIndex = stringTable.indexForString(symbolName);
+    funcTable.data.setValue(funcIndex, funcTable.schema.name, symbolIndex);
+  });
+  return Object.assign({}, thread, { funcTable, stringTable });
+}
+
+function correctThreadFrameTableAndFuncStackTableAndSamplesAfterFunctionsWereMerged(thread, oldFuncToNewFuncMap) {
+  const frameTable = fixupFrameTable(thread.frameTable, oldFuncToNewFuncMap);
+  const { funcStackTable, samples } = createFuncStackTableAndFixupSamples(thread.stackTable, frameTable, thread.funcTable, thread.samples);
+  return Object.assign({}, thread, { frameTable, funcStackTable, samples });
+}
+
 /**
  * Symbolicate the given thread. Calls cbo.onUpdateThread after each bit of
  * symbolication, and resolves the returned promise once completely done.
@@ -161,16 +162,31 @@ function symbolicateThread(thread, symbolStore, cbo) {
   let foundAddresses = gatherAddressesInThread(thread);
   let updatedThread = thread;
   let oldFuncToNewFuncMap = new Map();
+
+  let scheduledThreadUpdate = false;
+  function scheduleThreadUpdate() {
+    if (!scheduledThreadUpdate) {
+      setTimeout(callOnUpdateThread, 0);
+      scheduledThreadUpdate = true;
+    }
+  }
+
+  function callOnUpdateThread() {
+    updatedThread = correctThreadFrameTableAndFuncStackTableAndSamplesAfterFunctionsWereMerged(updatedThread, oldFuncToNewFuncMap)
+    cbo.onUpdateThread(updatedThread, oldFuncToNewFuncMap);
+    oldFuncToNewFuncMap = new Map();
+    scheduledThreadUpdate = false;
+  }
+
   return Promise.all(Array.from(foundAddresses).map(function ([lib, addresses]) {
     return symbolStore.getFuncAddressTableForLib(lib).then(addrs => {
-      let addrToFuncIndexMap = new Map();
+      let addrToFuncIndexMap = mergeFunctions(addrs, addresses, updatedThread, oldFuncToNewFuncMap);
+      scheduleThreadUpdate();
       // TODO: call onUpdateThread from a runnable, and only call createFuncStackTableAndFixupSamples in there
-      updatedThread = mergeFunctions(addrs, addresses, updatedThread, oldFuncToNewFuncMap, addrToFuncIndexMap);
-      cbo.onUpdateThread(updatedThread, oldFuncToNewFuncMap);
       let funcAddrs = Array.from(addrToFuncIndexMap.keys()).sort((a, b) => a - b);
       return symbolStore.getSymbolsForAddressesInLib(funcAddrs, lib).then(funcNames => {
         updatedThread = setFuncNames(updatedThread, funcAddrs, funcNames, addrToFuncIndexMap);
-        cbo.onUpdateThread(updatedThread, oldFuncToNewFuncMap);
+        scheduleThreadUpdate();
       });
     }).catch(error => {
       // console.log(`Couldn't get symbols for library ${lib.pdbName} ${lib.breakpadId}`);
