@@ -4,7 +4,6 @@ import { DataTable } from './data-table';
 import { UniqueStringArray } from './unique-string-array';
 
 function adjustTimeStamps(samplesOrMarkers, delta) {
-  console.log("samplesOrMarkers:", samplesOrMarkers);
   let { data, schema } = samplesOrMarkers;
   return {
     data: data.mapFields(schema.time, {
@@ -56,14 +55,20 @@ return timeCode('createFuncStackTableAndFixupSamples', () => {
   funcStackTable.data.declareAdder('addFuncStack', ['prefix', 'func']);
   for (let stackIndex = 0; stackIndex < stackTable.data.length; stackIndex++) {
     const prefixStack = stackTable.data.getValue(stackIndex, stackTable.schema.prefix);
-    const prefixFuncStack = (prefixStack === -1) ? -1 :
+    const prefixFuncStack = (prefixStack === null) ? null :
        stackIndexToFuncStackIndex.get(prefixStack);
     const frameIndex = stackTable.data.getValue(stackIndex, stackTable.schema.frame);
+    if (frameIndex === null) {
+      console.log("have null frameIndex", stackIndex, stackTable);
+    }
     const funcIndex = frameTable.data.getValue(frameIndex, frameTable.schema.func);
     const prefixFuncStackAndFuncIndex = prefixFuncStack * funcCount + funcIndex;
     let funcStackIndex = prefixFuncStackAndFuncToFuncStackMap.get(prefixFuncStackAndFuncIndex);
     if (funcStackIndex === undefined) {
       funcStackIndex = funcStackTable.data.length;
+      if (funcIndex === null) {
+        console.log("adding funcStack with null funcIndex", funcStackIndex, frameIndex, frameTable);
+      }
       funcStackTable.data.addFuncStack(prefixFuncStack, funcIndex);
       prefixFuncStackAndFuncToFuncStackMap.set(prefixFuncStackAndFuncIndex, funcStackIndex);
     }

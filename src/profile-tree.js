@@ -32,9 +32,12 @@ export function getCallTree(thread) {
   return timeCode('getCallTree', () => {
     let root = new TreeNode('(root)');
     let nodes = new Map();
-    nodes.set(-1, root);
+    nodes.set(null, root);
     const { data, schema } = thread.funcStackTable;
     data.twoFieldsForEach(schema.prefix, schema.func, (prefix, funcIndex, funcStackIndex) => {
+      if (funcIndex === null) {
+        console.log('funcIndex is null', funcStackIndex, data);
+      }
       let parentNode = nodes.get(prefix);
       let funcNameStringIndex = thread.funcTable.data.getValue(funcIndex, thread.funcTable.schema.name);
       let funcName = thread.stringTable.getString(funcNameStringIndex);

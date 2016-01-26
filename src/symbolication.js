@@ -160,10 +160,11 @@ return timeCode('gatherAddressesInThread', () => {
 function symbolicateThread(thread, symbolStore, cbo) {
   let foundAddresses = gatherAddressesInThread(thread);
   let updatedThread = thread;
+  let oldFuncToNewFuncMap = new Map();
   return Promise.all(Array.from(foundAddresses).map(function ([lib, addresses]) {
     return symbolStore.getFuncAddressTableForLib(lib).then(addrs => {
-      let oldFuncToNewFuncMap = new Map();
       let addrToFuncIndexMap = new Map();
+      // TODO: call onUpdateThread from a runnable, and only call createFuncStackTableAndFixupSamples in there
       updatedThread = mergeFunctions(addrs, addresses, updatedThread, oldFuncToNewFuncMap, addrToFuncIndexMap);
       cbo.onUpdateThread(updatedThread, oldFuncToNewFuncMap);
       let funcAddrs = Array.from(addrToFuncIndexMap.keys()).sort((a, b) => a - b);

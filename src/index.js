@@ -36,6 +36,7 @@ function reducer(state, action) {
 }
 
 function renderProfile(profile) {
+  // TODO: don't reconstruct tree if funcStackTable and samples haven't changed
   const tree = getCallTree(profile.threads[0]);
   let depthLimit = 20;
   function renderNode(node, depth) {
