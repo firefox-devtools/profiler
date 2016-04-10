@@ -40,25 +40,19 @@ function bisectRight(a, x, lo = 0, hi = a.length) {
 }
 
 /**
- * Find the addresses in this thread's funcTable that we need symbols for.
+ * Find the functions in this thread's funcTable that we need symbols for.
  * @param  object thread The thread, in "preprocessed profile" format.
- * @return Map           A map containing the addresses. Each entry's key is a
+ * @return Map           A map containing the funcIndices. Each entry's key is a
  *                       lib object from the thread's libs array, and the value
- *                       is an array of two-element arrays, where the first
- *                       field is an index into the function table, and the
- *                       second field is the (integer, relative-to-library)
- *                       address at that index.
+ *                       is an array of funcIndex.
  *                       Example:
- *                       map.get(lib): [[0, 1234], [1, 1237], [2, 1240]]
+ *                       map.get(lib): [0, 1, 2, 8, 34]
  */
 function gatherAddressesInThread(thread) {
   let { libs, funcTable, stringTable, resourceTable } = thread;
   let foundAddresses = new Map();
-  for (let i = 0; i < funcTable.length; i++) {
-    const resourceIndex = funcTable.resource[i];
-    const nameIndex = funcTable.name[i];
-    const address = funcTable.address[i];
-    const funcIndex = i;
+  for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+    const resourceIndex = funcTable.resource[funcIndex];
     if (resourceIndex === -1) {
       continue;
     }
@@ -67,7 +61,7 @@ function gatherAddressesInThread(thread) {
       continue;
     }
 
-    const name = stringTable.getString(nameIndex);
+    const name = stringTable.getString(funcTable.name[funcIndex]);
     if (!name.startsWith('0x')) {
       // Somebody already symbolicated this function for us.
       continue;
@@ -75,10 +69,12 @@ function gatherAddressesInThread(thread) {
 
     const libIndex = resourceTable.lib[resourceIndex];
     const lib = libs[libIndex];
-    if (!foundAddresses.has(lib)) {
-      foundAddresses.set(lib, []);
+    let libFuncs = foundAddresses.get(lib);
+    if (libFuncs === undefined) {
+      libFuncs = [];
+      foundAddresses.set(lib, libFuncs);
     }
-    foundAddresses.get(lib).push([funcIndex, address]);
+    libFuncs.push(funcIndex);
   };
   return foundAddresses;
 }
@@ -100,12 +96,14 @@ function fixupFrameTable(frameTable, oldFuncToNewFuncMap) {
  * @param  array  addresses     The addresses to replace, as an array of
  *                              [funcTableIndex, integerAddressRelativeToLibrary]
  *                              elements.
- * @param  object thread        The thread whose funcTable needs to be augmented.
- * @return object               The updated thread as a new object.
+ * @param  object funcTable     The funcTable that the funcIndices in addressToSymbolicate refer to.
+ * @return object               A map that maps an address to a funcIndex.
  */
-function mergeFunctions(addrs, addressesToSymbolicate, thread, oldFuncToNewFuncMap = new Map()) {
+function mergeFunctions(addrs, addressesToSymbolicate, funcTable, oldFuncToNewFuncMap = new Map()) {
   let addrToFuncIndexMap = new Map();
-  addressesToSymbolicate.sort(([i1, address1], [i2, address2]) => {
+  addressesToSymbolicate.sort((i1, i2) => {
+    const address1 = funcTable.address[i1];
+    const address2 = funcTable.address[i2];
     if (address1 !== address2) {
       return address1 - address2;
     }
@@ -114,7 +112,8 @@ function mergeFunctions(addrs, addressesToSymbolicate, thread, oldFuncToNewFuncM
   let lastFuncIndex = -1;
   let nextFuncAddress = 0;
   let nextFuncAddressIndex = 0;
-  for (let [funcIndex, addr] of addressesToSymbolicate) {
+  for (let funcIndex of addressesToSymbolicate) {
+    const addr = funcTable.address[funcIndex];
     if (addr < nextFuncAddress) {
       oldFuncToNewFuncMap.set(funcIndex, lastFuncIndex);
       continue;
@@ -191,11 +190,9 @@ function symbolicateThread(thread, symbolStore, cbo) {
   }
 
   return Promise.all(Array.from(foundAddresses).map(function ([lib, addresses]) {
-    // addresses is an array of two-element arrays, where the first element is
-    // an index the into the function table, and the second field is the
-    // (integer, relative-to-library) address at that index.
+    // addresses is an object containing two arrays as { funcIndex, address }
     return symbolStore.getFuncAddressTableForLib(lib).then(addrs => {
-      let addrToFuncIndexMap = mergeFunctions(addrs, addresses, updatedThread, oldFuncToNewFuncMap);
+      let addrToFuncIndexMap = mergeFunctions(addrs, addresses, updatedThread.funcTable, oldFuncToNewFuncMap);
       scheduleThreadUpdate();
       let funcAddrs = Array.from(addrToFuncIndexMap.keys()).sort((a, b) => a - b);
       return symbolStore.getSymbolsForAddressesInLib(funcAddrs, lib).then(funcNames => {
