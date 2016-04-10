@@ -33,21 +33,23 @@ export function getCallTree(thread) {
     let root = new TreeNode('(root)');
     let nodes = new Map();
     nodes.set(null, root);
-    const { data, schema } = thread.funcStackTable;
-    data.twoFieldsForEach(schema.prefix, schema.func, (prefix, funcIndex, funcStackIndex) => {
+    for (let funcStackIndex = 0; funcStackIndex < thread.funcStackTable.length; funcStackIndex++) {
+      const prefix = thread.funcStackTable.prefix[funcStackIndex];
+      const funcIndex = thread.funcStackTable.func[funcStackIndex];
       if (funcIndex === null) {
         console.log('funcIndex is null', funcStackIndex, data);
       }
       let parentNode = nodes.get(prefix);
-      let funcNameStringIndex = thread.funcTable.data.getValue(funcIndex, thread.funcTable.schema.name);
+      let funcNameStringIndex = thread.funcTable.name[funcIndex];
       let funcName = thread.stringTable.getString(funcNameStringIndex);
       let node = new TreeNode(funcName, parentNode);
       parentNode.addChild(node);
       nodes.set(funcStackIndex, node);
-    });
-    thread.samples.data.oneFieldForEach(thread.samples.schema.funcStack, funcStack => {
+    }
+    for (let sampleIndex = 0; sampleIndex < thread.samples.length; sampleIndex++) {
+      const funcStack = thread.samples.funcStack[sampleIndex];
       nodes.get(funcStack).incrementSampleCountBy(1);
-    });
+    }
     root.postProcess();
     return root;
   });

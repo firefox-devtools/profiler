@@ -3,13 +3,9 @@ import { DataTable } from './data-table';
 import { UniqueStringArray } from './unique-string-array';
 
 function adjustTimeStamps(samplesOrMarkers, delta) {
-  let { data, schema } = samplesOrMarkers;
-  return {
-    data: data.mapFields(schema.time, {
-      time: time => time === -1 ? -1 : time + delta
-    }),
-    schema
-  };
+  return Object.assign({}, samplesOrMarkers, {
+    time: samplesOrMarkers.time.map(time => time === -1 ? -1 : time + delta)
+  });
 }
 
 export const resourceTypes = {
@@ -28,141 +24,130 @@ export const resourceTypes = {
  */
 export function createFuncStackTableAndFixupSamples(stackTable, frameTable, funcTable, samples) {
   let stackIndexToFuncStackIndex = new Map();
-  const funcCount = funcTable.data.length;
+  const funcCount = funcTable.length;
   let prefixFuncStackAndFuncToFuncStackMap = new Map(); // prefixFuncStack * funcCount + func => funcStack
-  let funcStackTable = {
-    schema: {
-      prefix: 0,
-      func: 1
-    }
-  };
-  funcStackTable.data = new DataTable(funcStackTable.schema);
-  funcStackTable.data.declareAdder('addFuncStack', ['prefix', 'func']);
-  for (let stackIndex = 0; stackIndex < stackTable.data.length; stackIndex++) {
-    const prefixStack = stackTable.data.getValue(stackIndex, stackTable.schema.prefix);
+  let funcStackTable = { prefix: [], func: [], length: 0 };
+  function addFuncStack(prefix, func) {
+    const index = funcStackTable.length++;
+    funcStackTable.prefix[index] = prefix;
+    funcStackTable.func[index] = func;
+  }
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefixStack = stackTable.prefix[stackIndex];
     const prefixFuncStack = (prefixStack === null) ? null :
        stackIndexToFuncStackIndex.get(prefixStack);
-    const frameIndex = stackTable.data.getValue(stackIndex, stackTable.schema.frame);
+    const frameIndex = stackTable.frame[stackIndex];
     if (frameIndex === null) {
       console.log("have null frameIndex", stackIndex, stackTable);
     }
-    const funcIndex = frameTable.data.getValue(frameIndex, frameTable.schema.func);
+    const funcIndex = frameTable.func[frameIndex];
     const prefixFuncStackAndFuncIndex = prefixFuncStack * funcCount + funcIndex;
     let funcStackIndex = prefixFuncStackAndFuncToFuncStackMap.get(prefixFuncStackAndFuncIndex);
     if (funcStackIndex === undefined) {
-      funcStackIndex = funcStackTable.data.length;
+      funcStackIndex = funcStackTable.length;
       if (funcIndex === null) {
         console.log("adding funcStack with null funcIndex", funcStackIndex, frameIndex, frameTable);
       }
-      funcStackTable.data.addFuncStack(prefixFuncStack, funcIndex);
+      addFuncStack(prefixFuncStack, funcIndex);
       prefixFuncStackAndFuncToFuncStackMap.set(prefixFuncStackAndFuncIndex, funcStackIndex);
     }
     stackIndexToFuncStackIndex.set(stackIndex, funcStackIndex);
   }
 
-  const newSamplesSchema = ('funcStack' in samples.schema)
-    ? samples.schema
-    : Object.assign({ funcStack: Object.keys(samples.schema).length }, samples.schema);
-
-  const newSamplesData = samples.data.mapFieldsWithNewSchema(newSamplesSchema, samples.schema.stack, {
-    funcStack: stack => stackIndexToFuncStackIndex.get(stack)
+  const newSamples = Object.assign({}, samples, {
+    funcStack: samples.stack.map(stack => stackIndexToFuncStackIndex.get(stack))
   });
 
   return {
     funcStackTable,
-    samples: {
-      schema: newSamplesSchema,
-      data: newSamplesData
-    }
+    samples: newSamples
   };
+}
+
+function toStructOfArrays(rawTable) {
+  const result = { length: rawTable.data.length };
+  for (let fieldName in rawTable.schema) {
+    const fieldIndex = rawTable.schema[fieldName];
+    result[fieldName] = rawTable.data.map(entry => (fieldIndex in entry) ? entry[fieldIndex] : null);
+  }
+  return result;
 }
 
 function fixUpThread(thread, rootMeta, libs) {
   let funcTable = {
-    schema: {
-      name: 0,
-      resource: 1,
-      address: 2
-    }
+    length: 0,
+    name: [],
+    resource: [],
+    address: []
   };
-  funcTable.data = new DataTable(funcTable.schema);
-  funcTable.data.declareAdder('addFunc', ['name', 'resource', 'address']);
+  function addFunc(name, resource, address) {
+    const index = funcTable.length++;
+    funcTable.name[index] = name;
+    funcTable.resource[index] = resource;
+    funcTable.address[index] = address;
+  }
   let resourceTable = {
-    schema: {
-      type: 0,
-      name: 1,
-      lib: 2,
-      icon: 3,
-      addonId: 4
-    }
+    length: 0,
+    type: [],
+    name: [],
+    lib: [],
+    icon: [],
+    addonId: []
   };
-  resourceTable.data = new DataTable(resourceTable.schema);
-  resourceTable.data.declareAdder('addLibResource', ['type', 'name', 'lib']);
+  function addLibResource(name, lib) {
+    const index = resourceTable.length++;
+    resourceTable.type[index] = resourceTypes.library;
+    resourceTable.name[index] = name;
+    resourceTable.lib[index] = lib;
+  }
+
   let stringTable = new UniqueStringArray(thread.stringTable);
+  const frameTable = toStructOfArrays(thread.frameTable);
+  const stackTable = toStructOfArrays(thread.stackTable);
+  const samples = toStructOfArrays(thread.samples);
+  const markers = toStructOfArrays(thread.markers);
 
-  // Converting the frameTable to a DataTable drops the optimizations JSON here,
-  // because DataTable can only store float fields. Find a solution for that.
-  const frameTableData = new DataTable(thread.frameTable.schema, thread.frameTable.data);
-  const frameTable = { schema: thread.frameTable.schema, data: frameTableData };
-
-  const stackTableData = new DataTable(thread.stackTable.schema, thread.stackTable.data);
-  const stackTable = { schema: thread.stackTable.schema, data: stackTableData };
-
-  const samplesData = new DataTable(thread.samples.schema, thread.samples.data);
-  const samples = { schema: thread.samples.schema, data: samplesData };
-
-  const markersData = new DataTable(thread.markers.schema, thread.markers.data);
-  const markers = { schema: thread.markers.schema, data: markersData };
-
-  let newFrameTableSchema = Object.assign({}, thread.frameTable.schema);
-  newFrameTableSchema.func = thread.frameTable.schema.location;
-  // newFrameTableSchema.address = Object.keys(thread.frameTable.schema).length;
-  delete newFrameTableSchema.location;
+  let newFrameTable = Object.assign({}, frameTable);
+  // newFrameTable.address = [];
+  delete newFrameTable.location;
 
   let libToResourceIndex = new Map();
   let stringTableIndexToNewFuncIndex = new Map();
 
-  const newFrameTableData = frameTable.data.mapFieldsWithNewSchema(newFrameTableSchema, thread.frameTable.schema.location, {
-    func: locationIndex => {
-      let funcIndex = stringTableIndexToNewFuncIndex.get(locationIndex);
-      if (funcIndex !== undefined) {
-        return funcIndex;
-      }
-
-      let resourceIndex = -1;
-      let addressRelativeToLib = -1;
-      const locationString = stringTable.getString(locationIndex);
-      if (locationString.startsWith('0x')) {
-        const address = parseInt(locationString.substr(2), 16);
-        const lib = getContainingLibrary(libs, address);
-        if (lib) {
-          addressRelativeToLib = address - lib.start;
-          if (libToResourceIndex.has(lib)) {
-            resourceIndex = libToResourceIndex.get(lib);
-          } else {
-            resourceIndex = resourceTable.data.length;
-            libToResourceIndex.set(lib, resourceIndex);
-            const nameStringIndex = stringTable.indexForString(lib.pdbName);
-            resourceTable.data.addLibResource(resourceTypes.library, nameStringIndex, libs.indexOf(lib));
-          }
-        }
-      }
-      funcIndex = funcTable.data.length;
-      funcTable.data.addFunc(locationIndex, resourceIndex, addressRelativeToLib);
-      stringTableIndexToNewFuncIndex.set(locationIndex, funcIndex);
+  newFrameTable.func = frameTable.location.map(locationIndex => {
+    let funcIndex = stringTableIndexToNewFuncIndex.get(locationIndex);
+    if (funcIndex !== undefined) {
       return funcIndex;
     }
+
+    let resourceIndex = -1;
+    let addressRelativeToLib = -1;
+    const locationString = stringTable.getString(locationIndex);
+    if (locationString.startsWith('0x')) {
+      const address = parseInt(locationString.substr(2), 16);
+      const lib = getContainingLibrary(libs, address);
+      if (lib) {
+        addressRelativeToLib = address - lib.start;
+        if (libToResourceIndex.has(lib)) {
+          resourceIndex = libToResourceIndex.get(lib);
+        } else {
+          resourceIndex = resourceTable.length;
+          libToResourceIndex.set(lib, resourceIndex);
+          const nameStringIndex = stringTable.indexForString(lib.pdbName);
+          addLibResource(nameStringIndex, libs.indexOf(lib));
+        }
+      }
+    }
+    funcIndex = funcTable.length;
+    addFunc(locationIndex, resourceIndex, addressRelativeToLib);
+    stringTableIndexToNewFuncIndex.set(locationIndex, funcIndex);
+    return funcIndex;
   });
 /*
     if (locationString.startsWith('0x')) {
-      frame.address = funcTable.data.getValue(funcIndex, funcTable.schema.address);
+      frame.address = funcTable.address[funcIndex];
     }
 */
-  const newFrameTable = {
-    data: newFrameTableData,
-    schema: newFrameTableSchema
-  };
-
   const { samples: newSamples, funcStackTable } =
     createFuncStackTableAndFixupSamples(stackTable, newFrameTable, funcTable, samples);
 

@@ -53,48 +53,48 @@ describe('merge-profiles', function () {
     });
     it('should shift the content process by 1 second', function () {
       assert.equal(profile.threads[2].name, 'Content');
-      assert.equal(profile.threads[0].samples.data.getValue(0, profile.threads[0].samples.schema.time), 0);
-      assert.equal(profile.threads[0].samples.data.getValue(1, profile.threads[0].samples.schema.time), 1);
-      assert.equal(profile.threads[2].samples.data.getValue(0, profile.threads[2].samples.schema.time), 1000);
-      assert.equal(profile.threads[2].samples.data.getValue(1, profile.threads[2].samples.schema.time), 1001);
-      assert.equal(profile.threads[0].markers.data.getValue(0, profile.threads[0].markers.schema.time), 0);
-      assert.equal(profile.threads[0].markers.data.getValue(1, profile.threads[0].markers.schema.time), 2);
-      assert.equal(profile.threads[2].markers.data.getValue(0, profile.threads[2].markers.schema.time), 1000);
-      assert.equal(profile.threads[2].markers.data.getValue(1, profile.threads[2].markers.schema.time), 1002);
+      assert.equal(profile.threads[0].samples.time[0], 0);
+      assert.equal(profile.threads[0].samples.time[1], 1);
+      assert.equal(profile.threads[2].samples.time[0], 1000);
+      assert.equal(profile.threads[2].samples.time[1], 1001);
+      assert.equal(profile.threads[0].markers.time[0], 0);
+      assert.equal(profile.threads[0].markers.time[1], 2);
+      assert.equal(profile.threads[2].markers.time[0], 1000);
+      assert.equal(profile.threads[2].markers.time[1], 1002);
       // TODO: also shift the samples inside marker callstacks
     });
     it('should create one function per frame', function () {
       const thread = profile.threads[0];
-      assert.equal(thread.frameTable.data.length, 4);
-      assert.notProperty(thread.frameTable.schema, 'location');
-      assert.property(thread.frameTable.schema, 'func');
-      assert.property(thread.funcTable.schema, 'resource');
-      assert.equal(thread.funcTable.data.length, 4);
-      assert.equal(thread.frameTable.data.getValue(0, thread.frameTable.schema.func), 0);
-      assert.equal(thread.frameTable.data.getValue(1, thread.frameTable.schema.func), 1);
-      assert.equal(thread.frameTable.data.getValue(2, thread.frameTable.schema.func), 2);
-      assert.equal(thread.frameTable.data.getValue(3, thread.frameTable.schema.func), 3);
-      assert.equal(thread.funcTable.data.getValue(0, thread.funcTable.schema.name), 0);
-      assert.equal(thread.funcTable.data.getValue(1, thread.funcTable.schema.name), 1);
-      assert.equal(thread.funcTable.data.getValue(2, thread.funcTable.schema.name), 2);
-      assert.equal(thread.funcTable.data.getValue(3, thread.funcTable.schema.name), 3);
+      assert.equal(thread.frameTable.length, 4);
+      assert.notProperty(thread.frameTable, 'location');
+      assert.property(thread.frameTable, 'func');
+      assert.property(thread.funcTable, 'resource');
+      assert.equal(thread.funcTable.length, 4);
+      assert.equal(thread.frameTable.func[0], 0);
+      assert.equal(thread.frameTable.func[1], 1);
+      assert.equal(thread.frameTable.func[2], 2);
+      assert.equal(thread.frameTable.func[3], 3);
+      assert.equal(thread.funcTable.name[0], 0);
+      assert.equal(thread.funcTable.name[1], 1);
+      assert.equal(thread.funcTable.name[2], 2);
+      assert.equal(thread.funcTable.name[3], 3);
     });
     it('should create one funcStack per stack', function () {
       const thread = profile.threads[0];
-      assert.equal(thread.stackTable.data.length, 4);
-      assert.equal(thread.funcStackTable.data.length, 4);
-      assert.property(thread.funcStackTable.schema, 'prefix');
-      assert.property(thread.funcStackTable.schema, 'func');
-      assert.equal(thread.funcStackTable.data.getValue(0, thread.funcStackTable.schema.func), 0);
-      assert.equal(thread.funcStackTable.data.getValue(1, thread.funcStackTable.schema.func), 1);
-      assert.equal(thread.funcStackTable.data.getValue(2, thread.funcStackTable.schema.func), 2);
-      assert.equal(thread.funcStackTable.data.getValue(3, thread.funcStackTable.schema.func), 3);
+      assert.equal(thread.stackTable.length, 4);
+      assert.equal(thread.funcStackTable.length, 4);
+      assert.property(thread.funcStackTable, 'prefix');
+      assert.property(thread.funcStackTable, 'func');
+      assert.equal(thread.funcStackTable.func[0], 0);
+      assert.equal(thread.funcStackTable.func[1], 1);
+      assert.equal(thread.funcStackTable.func[2], 2);
+      assert.equal(thread.funcStackTable.func[3], 3);
     });
     it('should create one resource per used library', function () {
       const thread = profile.threads[0];
-      assert.equal(thread.resourceTable.data.length, 1);
-      assert.equal(thread.resourceTable.data.getValue(0, thread.resourceTable.schema.type), resourceTypes.library);
-      const nameStringIndex = thread.resourceTable.data.getValue(0, thread.resourceTable.schema.name);
+      assert.equal(thread.resourceTable.length, 1);
+      assert.equal(thread.resourceTable.type[0], resourceTypes.library);
+      const nameStringIndex = thread.resourceTable.name[0];
       assert.equal(thread.stringTable.getString(nameStringIndex), "firefox");
     });
     // TODO: add a JS frame to the example profile and check that we get a resource for the JS file
@@ -161,8 +161,8 @@ describe('symbolication', function () {
 
     it('should assign correct symbols to frames', function () {
       function functionNameForFrameInThread(thread, frameIndex) {
-        const funcIndex = thread.frameTable.data.getValue(frameIndex, thread.frameTable.schema.func);
-        const funcNameStringIndex = thread.funcTable.data.getValue(funcIndex, thread.funcTable.schema.name);
+        const funcIndex = thread.frameTable.func[frameIndex];
+        const funcNameStringIndex = thread.funcTable.name[funcIndex];
         return thread.stringTable.getString(funcNameStringIndex);
       }
       assert.equal(functionNameForFrameInThread(unsymbolicatedProfile.threads[0], 1), '0x100000f84');

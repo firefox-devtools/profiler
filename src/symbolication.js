@@ -55,42 +55,42 @@ function bisectRight(a, x, lo = 0, hi = a.length) {
 function gatherAddressesInThread(thread) {
   let { libs, funcTable, stringTable, resourceTable } = thread;
   let foundAddresses = new Map();
-  funcTable.data.threeFieldsForEach(funcTable.schema.resource, funcTable.schema.name, funcTable.schema.address, (resourceIndex, nameIndex, address, funcIndex) => {
+  for (let i = 0; i < funcTable.length; i++) {
+    const resourceIndex = funcTable.resource[i];
+    const nameIndex = funcTable.name[i];
+    const address = funcTable.address[i];
+    const funcIndex = i;
     if (resourceIndex === -1) {
-      return;
+      continue;
     }
-    const resource = resourceTable.data.getObject(resourceIndex);
-    if (resource.type !== resourceTypes.library) {
-      return;
+    const resourceType = resourceTable.type[resourceIndex];
+    if (resourceType !== resourceTypes.library) {
+      continue;
     }
 
     const name = stringTable.getString(nameIndex);
     if (!name.startsWith('0x')) {
       // Somebody already symbolicated this function for us.
-      return;
+      continue;
     }
 
-    const libIndex = resource.lib;
+    const libIndex = resourceTable.lib[resourceIndex];
     const lib = libs[libIndex];
     if (!foundAddresses.has(lib)) {
       foundAddresses.set(lib, []);
     }
     foundAddresses.get(lib).push([funcIndex, address]);
-  });
+  };
   return foundAddresses;
 }
 
 function fixupFrameTable(frameTable, oldFuncToNewFuncMap) {
-  const { data, schema } = frameTable;
-  return {
-    schema,
-    data: data.mapFields(schema.func, {
-      func: oldFunc => {
-        const newFunc = oldFuncToNewFuncMap.get(oldFunc);
-        return newFunc === undefined ? oldFunc : newFunc;
-      }
+  return Object.assign({}, frameTable, {
+    func: frameTable.func.map(oldFunc => {
+      const newFunc = oldFuncToNewFuncMap.get(oldFunc);
+      return newFunc === undefined ? oldFunc : newFunc;
     })
-  };
+  });
 }
 
 /**
@@ -133,16 +133,14 @@ function mergeFunctions(addrs, addressesToSymbolicate, thread, oldFuncToNewFuncM
 }
 
 function setFuncNames(thread, funcAddrs, funcNames, addrToFuncIndexMap) {
-  let funcTable = {
-    schema: thread.funcTable.schema,
-    data: new DataTable(thread.funcTable.schema, thread.funcTable.data)
-  };
+  let funcTable = Object.assign({}, thread.funcTable);
+  funcTable.name = funcTable.name.slice();
   let stringTable = thread.stringTable;
   funcAddrs.forEach((addr, addrIndex) => {
     let funcIndex = addrToFuncIndexMap.get(addr);
     let symbolName = funcNames[addrIndex];
     let symbolIndex = stringTable.indexForString(symbolName);
-    funcTable.data.setValue(funcIndex, funcTable.schema.name, symbolIndex);
+    funcTable.name[funcIndex] = symbolIndex;
   });
   return Object.assign({}, thread, { funcTable, stringTable });
 }
