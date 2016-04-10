@@ -53,13 +53,11 @@ export function createFuncStackTableAndFixupSamples(stackTable, frameTable, func
     stackIndexToFuncStackIndex.set(stackIndex, funcStackIndex);
   }
 
-  const newSamples = Object.assign({}, samples, {
-    funcStack: samples.stack.map(stack => stackIndexToFuncStackIndex.get(stack))
-  });
-
   return {
     funcStackTable,
-    samples: newSamples
+    samples: Object.assign({}, samples, {
+      funcStack: samples.stack.map(stack => stackIndexToFuncStackIndex.get(stack))
+    })
   };
 }
 
@@ -106,14 +104,10 @@ function fixUpThread(thread, rootMeta, libs) {
   const samples = toStructOfArrays(thread.samples);
   const markers = toStructOfArrays(thread.markers);
 
-  let newFrameTable = Object.assign({}, frameTable);
-  // newFrameTable.address = [];
-  delete newFrameTable.location;
-
   let libToResourceIndex = new Map();
   let stringTableIndexToNewFuncIndex = new Map();
 
-  newFrameTable.func = frameTable.location.map(locationIndex => {
+  frameTable.func = frameTable.location.map(locationIndex => {
     let funcIndex = stringTableIndexToNewFuncIndex.get(locationIndex);
     if (funcIndex !== undefined) {
       return funcIndex;
@@ -142,19 +136,12 @@ function fixUpThread(thread, rootMeta, libs) {
     stringTableIndexToNewFuncIndex.set(locationIndex, funcIndex);
     return funcIndex;
   });
-/*
-    if (locationString.startsWith('0x')) {
-      frame.address = funcTable.address[funcIndex];
-    }
-*/
-  const { samples: newSamples, funcStackTable } =
-    createFuncStackTableAndFixupSamples(stackTable, newFrameTable, funcTable, samples);
+  frameTable.address = frameTable.func.map(funcIndex => funcTable.address[funcIndex]);
+  delete frameTable.location;
 
   return Object.assign({}, thread, {
-    samples: newSamples,
-    frameTable: newFrameTable,
-    libs, funcTable, resourceTable, stackTable, funcStackTable, stringTable, markers
-  });
+    libs, frameTable, funcTable, resourceTable, stackTable, stringTable, markers
+  }, createFuncStackTableAndFixupSamples(stackTable, frameTable, funcTable, samples));
 }
 
 function preprocessSharedLibraries(libs) {

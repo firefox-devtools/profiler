@@ -74,10 +74,18 @@ describe('merge-profiles', function () {
       assert.equal(thread.frameTable.func[1], 1);
       assert.equal(thread.frameTable.func[2], 2);
       assert.equal(thread.frameTable.func[3], 3);
+      assert.equal(thread.frameTable.address[0], -1);
+      assert.equal(thread.frameTable.address[1], 3972);
+      assert.equal(thread.frameTable.address[2], 6725);
+      assert.equal(thread.frameTable.address[3], -1);
       assert.equal(thread.funcTable.name[0], 0);
       assert.equal(thread.funcTable.name[1], 1);
       assert.equal(thread.funcTable.name[2], 2);
       assert.equal(thread.funcTable.name[3], 3);
+      assert.equal(thread.funcTable.address[0], -1);
+      assert.equal(thread.funcTable.address[1], 3972);
+      assert.equal(thread.funcTable.address[2], 6725);
+      assert.equal(thread.funcTable.address[3], -1);
     });
     it('should create one funcStack per stack', function () {
       const thread = profile.threads[0];
