@@ -1,8 +1,13 @@
 import { resourceTypes, createFuncStackTableAndFixupSamples } from './merge-profiles';
-import { timeCode } from './time-code';
 import { DataTable } from './data-table';
 import { UniqueStringArray } from './unique-string-array';
 
+/**
+ * Return the library object that contains address.
+ * @param  array of {start,end,...} libs    The array of librarys
+ * @param                           address The address to find
+ * @return {start,end,...} lib object       The lib object that contains address, rv.start <= address < rv.end, or null if no such lib object exists.
+ */
 export function getContainingLibrary(libs, address) {
   if (isNaN(address)) {
     return null;
@@ -41,14 +46,13 @@ function bisectRight(a, x, lo = 0, hi = a.length) {
  * @return Map           A map containing the addresses. Each entry's key is a
  *                       lib object from the thread's libs array, and the value
  *                       is an array of two-element arrays, where the first
- *                       field is an index to the function table, and the
+ *                       field is an index into the function table, and the
  *                       second field is the (integer, relative-to-library)
  *                       address at that index.
  *                       Example:
  *                       map.get(lib): [[0, 1234], [1, 1237], [2, 1240]]
  */
 function gatherAddressesInThread(thread) {
-return timeCode('gatherAddressesInThread', () => {
   let { libs, funcTable, stringTable, resourceTable } = thread;
   let foundAddresses = new Map();
   funcTable.data.threeFieldsForEach(funcTable.schema.resource, funcTable.schema.name, funcTable.schema.address, (resourceIndex, nameIndex, address, funcIndex) => {
@@ -74,7 +78,7 @@ return timeCode('gatherAddressesInThread', () => {
     foundAddresses.get(lib).push([funcIndex, address]);
   });
   return foundAddresses;
-});}
+}
 
 function fixupFrameTable(frameTable, oldFuncToNewFuncMap) {
   const { data, schema } = frameTable;
@@ -143,6 +147,17 @@ function setFuncNames(thread, funcAddrs, funcNames, addrToFuncIndexMap) {
   return Object.assign({}, thread, { funcTable, stringTable });
 }
 
+/**
+ * Correctly collapse a function into another function and return a consistent
+ * profile that no longer refers to the collapsed-away function.
+ * "Functions" in a profile are created before the library's function table is
+ * known, by creating one function per frame address. Once the function table
+ * is known, different addresses that are inside the same function need to be
+ * merged into that same function. For that purpose, 
+ * @param  {[type]} thread              [description]
+ * @param  {[type]} oldFuncToNewFuncMap [description]
+ * @return {[type]}                     [description]
+ */
 function correctThreadFrameTableAndFuncStackTableAndSamplesAfterFunctionsWereMerged(thread, oldFuncToNewFuncMap) {
   const frameTable = fixupFrameTable(thread.frameTable, oldFuncToNewFuncMap);
   const { funcStackTable, samples } = createFuncStackTableAndFixupSamples(thread.stackTable, frameTable, thread.funcTable, thread.samples);
@@ -179,17 +194,19 @@ function symbolicateThread(thread, symbolStore, cbo) {
   }
 
   return Promise.all(Array.from(foundAddresses).map(function ([lib, addresses]) {
+    // addresses is an array of two-element arrays, where the first element is
+    // an index the into the function table, and the second field is the
+    // (integer, relative-to-library) address at that index.
     return symbolStore.getFuncAddressTableForLib(lib).then(addrs => {
       let addrToFuncIndexMap = mergeFunctions(addrs, addresses, updatedThread, oldFuncToNewFuncMap);
       scheduleThreadUpdate();
-      // TODO: call onUpdateThread from a runnable, and only call createFuncStackTableAndFixupSamples in there
       let funcAddrs = Array.from(addrToFuncIndexMap.keys()).sort((a, b) => a - b);
       return symbolStore.getSymbolsForAddressesInLib(funcAddrs, lib).then(funcNames => {
         updatedThread = setFuncNames(updatedThread, funcAddrs, funcNames, addrToFuncIndexMap);
         scheduleThreadUpdate();
       });
     }).catch(error => {
-      // console.log(`Couldn't get symbols for library ${lib.pdbName} ${lib.breakpadId}`);
+      console.log(`Couldn't get symbols for library ${lib.pdbName} ${lib.breakpadId}`);
       // console.error(error);
       // Don't throw, so that the resulting promise will be resolved, thereby
       // indicating that we're done symbolicating with lib.

@@ -1,5 +1,4 @@
 import { getContainingLibrary } from './symbolication';
-import { timeCode } from './time-code';
 import { DataTable } from './data-table';
 import { UniqueStringArray } from './unique-string-array';
 
@@ -11,19 +10,6 @@ function adjustTimeStamps(samplesOrMarkers, delta) {
     }),
     schema
   };
-}
-
-function turnSubprofileIntoThreads(subprofile, rootMeta) {
-  let libs = preprocessSharedLibraries(subprofile.libs);
-  let adjustTimestampsBy = rootMeta.startTime - subprofile.meta.startTime;
-  return subprofile.threads.map(thread => {
-    let newThread = fixUpThread(thread, rootMeta, libs);
-    const { samples, markers } = newThread;
-    return Object.assign(newThread, {
-      samples: adjustTimeStamps(samples, adjustTimestampsBy),
-      markers: adjustTimeStamps(markers, adjustTimestampsBy),
-    });
-  });
 }
 
 export const resourceTypes = {
@@ -41,7 +27,6 @@ export const resourceTypes = {
  * @return {[type]} [description]
  */
 export function createFuncStackTableAndFixupSamples(stackTable, frameTable, funcTable, samples) {
-return timeCode('createFuncStackTableAndFixupSamples', () => {
   let stackIndexToFuncStackIndex = new Map();
   const funcCount = funcTable.data.length;
   let prefixFuncStackAndFuncToFuncStackMap = new Map(); // prefixFuncStack * funcCount + func => funcStack
@@ -90,7 +75,6 @@ return timeCode('createFuncStackTableAndFixupSamples', () => {
       data: newSamplesData
     }
   };
-});
 }
 
 function fixUpThread(thread, rootMeta, libs) {
@@ -183,18 +167,10 @@ function fixUpThread(thread, rootMeta, libs) {
     createFuncStackTableAndFixupSamples(stackTable, newFrameTable, funcTable, samples);
 
   return Object.assign({}, thread, {
-    libs, funcTable, resourceTable, stackTable, funcStackTable, samples: newSamples,
+    samples: newSamples,
     frameTable: newFrameTable,
-    stringTable, markers
+    libs, funcTable, resourceTable, stackTable, funcStackTable, stringTable, markers
   });
-}
-
-// Returns an array of threads, fit for inclusion in the root profile.
-function preprocessThread(thread, rootMeta, libs) {
-  if (typeof thread === 'string') {
-    return turnSubprofileIntoThreads(JSON.parse(thread), rootMeta);
-  }
-  return [fixUpThread(thread, rootMeta, libs)];
 }
 
 function preprocessSharedLibraries(libs) {
@@ -212,14 +188,29 @@ function preprocessSharedLibraries(libs) {
   }).sort((a, b) => a.start - b.start);
 }
 
+function turnSubprofileIntoThreads(subprofile, rootMeta) {
+  let libs = preprocessSharedLibraries(subprofile.libs);
+  let adjustTimestampsBy = subprofile.meta.startTime - rootMeta.startTime;
+  return subprofile.threads.map(thread => {
+    let newThread = fixUpThread(thread, rootMeta, libs);
+    newThread.samples = adjustTimeStamps(newThread.samples, adjustTimestampsBy);
+    newThread.markers = adjustTimeStamps(newThread.markers, adjustTimestampsBy);
+    return newThread;
+  });
+}
+
 export function preprocessProfile(profile) {
   // profile.meta.startTime is process start time, as a timestamp in ms
   let libs = preprocessSharedLibraries(profile.libs);
-  let meta = profile.meta;
-  return {
-    meta,
-    threads: profile.threads.reduce((newThreads, thread) => {
-      return newThreads.concat(preprocessThread(thread, meta, libs));
-    }, [])
-  };
+  let threads = [];
+  for (let threadOrSubprocess of profile.threads) {
+    if (typeof threadOrSubprocess === 'string') {
+      let subprocessProfile = JSON.parse(threadOrSubprocess);
+      let threadsFromSubprocess = turnSubprofileIntoThreads(subprocessProfile, profile.meta);
+      threads = threads.concat(threadsFromSubprocess);
+    } else {
+      threads.push(fixUpThread(threadOrSubprocess, profile.meta, libs));
+    }
+  }
+  return { meta: profile.meta, threads };
 }
