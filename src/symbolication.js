@@ -1,5 +1,4 @@
 import { resourceTypes, createFuncStackTableAndFixupSamples } from './merge-profiles';
-import { DataTable } from './data-table';
 import { UniqueStringArray } from './unique-string-array';
 
 /**

@@ -1,5 +1,4 @@
 import { getContainingLibrary } from './symbolication';
-import { DataTable } from './data-table';
 import { UniqueStringArray } from './unique-string-array';
 
 function adjustTimeStamps(samplesOrMarkers, delta) {
