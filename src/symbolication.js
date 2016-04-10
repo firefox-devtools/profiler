@@ -1,3 +1,4 @@
+import bisection from 'bisection';
 import { resourceTypes, createFuncStackTableAndFixupSamples } from './merge-profiles';
 import { UniqueStringArray } from './unique-string-array';
 
@@ -24,19 +25,6 @@ export function getContainingLibrary(libs, address) {
       return libs[mid];
   }
   return null;
-}
-
-// See python bisect.bisect_right
-function bisectRight(a, x, lo = 0, hi = a.length) {
-  while (lo < hi) {
-    let mid = ((lo + hi) / 2)|0;
-    if (x < a[mid]) {
-      hi = mid;
-    } else {
-      lo = mid + 1;
-    }
-  }
-  return lo;
 }
 
 /**
@@ -133,7 +121,7 @@ function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsTo
     // Now funcAddress >= nextFuncAddress.
     // Find the index in funcAddressTable of the function that funcAddress is
     // inside of.
-    let funcAddressIndex = bisectRight(funcAddressTable, funcAddress, nextFuncAddressIndex) - 1;
+    let funcAddressIndex = bisection.right(funcAddressTable, funcAddress, nextFuncAddressIndex) - 1;
     if (funcAddressIndex >= 0) {
       const realFuncAddress = funcAddressTable[funcAddressIndex];
       nextFuncAddressIndex = funcAddressIndex + 1;
