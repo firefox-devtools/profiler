@@ -25,7 +25,7 @@ export function createFuncStackTableAndFixupSamples(stackTable, frameTable, func
   let stackIndexToFuncStackIndex = new Map();
   const funcCount = funcTable.length;
   let prefixFuncStackAndFuncToFuncStackMap = new Map(); // prefixFuncStack * funcCount + func => funcStack
-  let funcStackTable = { prefix: [], func: [], length: 0 };
+  let funcStackTable = { length: 0, prefix: [], func: [] };
   function addFuncStack(prefix, func) {
     const index = funcStackTable.length++;
     funcStackTable.prefix[index] = prefix;
