@@ -36,17 +36,11 @@ export function createFuncStackTableAndFixupSamples(stackTable, frameTable, func
     const prefixFuncStack = (prefixStack === null) ? null :
        stackIndexToFuncStackIndex.get(prefixStack);
     const frameIndex = stackTable.frame[stackIndex];
-    if (frameIndex === null) {
-      console.log("have null frameIndex", stackIndex, stackTable);
-    }
     const funcIndex = frameTable.func[frameIndex];
     const prefixFuncStackAndFuncIndex = prefixFuncStack * funcCount + funcIndex;
     let funcStackIndex = prefixFuncStackAndFuncToFuncStackMap.get(prefixFuncStackAndFuncIndex);
     if (funcStackIndex === undefined) {
       funcStackIndex = funcStackTable.length;
-      if (funcIndex === null) {
-        console.log("adding funcStack with null funcIndex", funcStackIndex, frameIndex, frameTable);
-      }
       addFuncStack(prefixFuncStack, funcIndex);
       prefixFuncStackAndFuncToFuncStackMap.set(prefixFuncStackAndFuncIndex, funcStackIndex);
     }
