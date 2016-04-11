@@ -1,10 +1,13 @@
 import 'babel-polyfill';
+import React, { Component, PropTypes } from 'react';
+import { render } from 'react-dom';
+import { Provider, connect } from 'react-redux';
+import { createStore } from 'redux';
+
 import { preprocessProfile } from './preprocess-profile';
 import { symbolicateProfile } from './symbolication';
 import { SymbolStore } from './symbol-store';
 import { getCallTree } from './profile-tree';
-
-let _state = {};
 
 function reducer(state, action) {
   switch (action.type) {
@@ -30,15 +33,23 @@ function reducer(state, action) {
       newWaitingForLibs.delete(action.requestedLib);
       return Object.assign({}, state, { waitingForLibs: newWaitingForLibs });
     }
-    default:
-      throw new Error("Unhandled action type");
+    default: {
+      console.log(`Unhandled action type ${action.type}`);
+      return state;
+    }
   }
 }
 
-function renderProfile(profile) {
+window.onerror = function (e) {
+  console.log(e);
+}
+
+window.geckoProfilerPromise = new Promise(function (resolve, reject) {
+  window.connectToGeckoProfiler = resolve;
+});
+
+let TreeView = ({ tree, depthLimit }) => {
   // TODO: don't reconstruct tree if funcStackTable and samples haven't changed
-  const tree = getCallTree(profile.threads[0]);
-  let depthLimit = 20;
   function renderNode(node, depth) {
     if (depth > depthLimit) {
       return '';
@@ -46,79 +57,90 @@ function renderProfile(profile) {
     return '  '.repeat(depth) + node._totalSampleCount + ' ' + node._name + '\n' +
       node._children.map(child => renderNode(child, depth + 1)).join('');
   }
-  document.body.textContent = renderNode(tree, 0);
-}
+  return (
+    <div> { renderNode(tree, 0) } </div>
+  );
+};
+TreeView = connect()(TreeView)
 
-let renderTimeout = 0;
-function render() {
-  renderProfile(_state.profile);
-  // document.body.textContent = `${_state.status}, ${_state.symbolicationStatus}`;
-  renderTimeout = 0;
-}
-
-function dispatch(action) {
-  _state = reducer(_state, action);
-  // console.log(_state);
-  if (_state.status === 'DONE' && !renderTimeout) {
-    renderTimeout = setTimeout(render, 0);
+class App extends Component {
+  constructor(props) {
+    super(props);
   }
-}
 
-dispatch({
-  type: 'WAITING_FOR_PROFILE_FROM_ADDON'
-});
+  componentDidMount() {
+    const { dispatch } = this.props;
 
-window.onerror = function (e) {
-  console.log(e);
-}
-
-window.connectToGeckoProfiler = (geckoProfiler) => {
-setTimeout(()=>{
-  console.log("connected!");
-  geckoProfiler.getProfile().then(profile => {
-    console.log("got profile!");
-    let p = preprocessProfile(profile);
     dispatch({
-      type: 'RECEIVE_PROFILE_FROM_ADDON',
-      profile: p
+      type: 'WAITING_FOR_PROFILE_FROM_ADDON'
     });
-    // return;
-    let symbolStore = new SymbolStore("cleopatra-async-storage", {
-      requestSymbolTable: (pdbName, breakpadId) => {
-        let requestedLib = { pdbName, breakpadId };
+
+    window.geckoProfilerPromise.then((geckoProfiler) => {
+      console.log("connected!");
+      geckoProfiler.getProfile().then(profile => {
+        console.log("got profile!");
+        let p = preprocessProfile(profile);
         dispatch({
-          type: 'REQUESTING_SYMBOL_TABLE',
-          requestedLib
+          type: 'RECEIVE_PROFILE_FROM_ADDON',
+          profile: p
         });
-        return geckoProfiler.getSymbolTable(pdbName, breakpadId).then(symbolTable => {
-          dispatch({
-            type: 'RECEIVED_SYMBOL_TABLE_REPLY',
-            requestedLib
-          });
-          return symbolTable;
-        }, error => {
-          dispatch({
-            type: 'RECEIVED_SYMBOL_TABLE_REPLY',
-            requestedLib
-          });
-          throw error;
+        // return;
+        let symbolStore = new SymbolStore("cleopatra-async-storage", {
+          requestSymbolTable: (pdbName, breakpadId) => {
+            let requestedLib = { pdbName, breakpadId };
+            dispatch({
+              type: 'REQUESTING_SYMBOL_TABLE',
+              requestedLib
+            });
+            return geckoProfiler.getSymbolTable(pdbName, breakpadId).then(symbolTable => {
+              dispatch({
+                type: 'RECEIVED_SYMBOL_TABLE_REPLY',
+                requestedLib
+              });
+              return symbolTable;
+            }, error => {
+              dispatch({
+                type: 'RECEIVED_SYMBOL_TABLE_REPLY',
+                requestedLib
+              });
+              throw error;
+            });
+          }
         });
-      }
-    });
-    dispatch({
-      type: 'START_SYMBOLICATING'
-    });
-    symbolicateProfile(p, symbolStore, {
-      onUpdateProfile: profile => {
         dispatch({
-          type: 'PROFILE_SYMBOLICATION_STEP',
-          profile
+          type: 'START_SYMBOLICATING'
         });
-      }
-    }).then(() => dispatch({ type: 'DONE_SYMBOLICATING' }));
-  });
-}, 0);
-}
-window.addEventListener("load", e => {
-  
-});
+        symbolicateProfile(p, symbolStore, {
+          onUpdateProfile: profile => {
+            dispatch({
+              type: 'PROFILE_SYMBOLICATION_STEP',
+              profile
+            });
+          }
+        }).then(() => dispatch({ type: 'DONE_SYMBOLICATING' }));
+      });
+    });
+  }
+
+  render() {
+    const { profile, status } = this.props;
+    if (status !== 'DONE') {
+      return (<div></div>);
+    }
+    return (
+      <div>
+        <TreeView tree={getCallTree(profile.threads[0])} depthLimit={20} />
+      </div>
+    );
+  }
+};
+App = connect(state => state)(App);
+
+let store = createStore(reducer, {});
+
+render(
+  <Provider store={store}>
+    <App />
+  </Provider>,
+  document.querySelector('body')
+);
