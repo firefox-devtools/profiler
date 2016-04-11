@@ -1,6 +1,7 @@
 import { assert } from 'chai';
 import { getContainingLibrary, symbolicateProfile } from '../src/symbolication';
-import { preprocessProfile, resourceTypes } from '../src/merge-profiles';
+import { preprocessProfile } from '../src/merge-profiles';
+import { resourceTypes } from '../src/profile-data';
 import exampleProfile from './example-profile';
 import { UniqueStringArray } from '../src/unique-string-array';
 import { FakeSymbolStore } from './fake-symbol-store';

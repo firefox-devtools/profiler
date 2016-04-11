@@ -1,5 +1,5 @@
 import bisection from 'bisection';
-import { resourceTypes, createFuncStackTableAndFixupSamples } from './merge-profiles';
+import { resourceTypes, createFuncStackTableAndFixupSamples } from './profile-data';
 import { UniqueStringArray } from './unique-string-array';
 
 /**
