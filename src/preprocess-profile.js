@@ -100,7 +100,7 @@ function preprocessSharedLibraries(libs) {
   }).sort((a, b) => a.start - b.start);
 }
 
-function adjustTimeStamps(samplesOrMarkers, delta) {
+function adjustTimestamps(samplesOrMarkers, delta) {
   return Object.assign({}, samplesOrMarkers, {
     time: samplesOrMarkers.time.map(time => time === -1 ? -1 : time + delta)
   });
@@ -117,8 +117,8 @@ export function preprocessProfile(profile) {
       const adjustTimestampsBy = subprocessProfile.meta.startTime - profile.meta.startTime;
       for (let thread of subprocessProfile.threads) {
         const newThread = preprocessThread(thread, profile.meta, subprocessLibs);
-        newThread.samples = adjustTimeStamps(newThread.samples, adjustTimestampsBy);
-        newThread.markers = adjustTimeStamps(newThread.markers, adjustTimestampsBy);
+        newThread.samples = adjustTimestamps(newThread.samples, adjustTimestampsBy);
+        newThread.markers = adjustTimestamps(newThread.markers, adjustTimestampsBy);
         threads.push(newThread);
       }
     } else {
