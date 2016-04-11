@@ -1,12 +1,6 @@
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from './unique-string-array';
 
-function adjustTimeStamps(samplesOrMarkers, delta) {
-  return Object.assign({}, samplesOrMarkers, {
-    time: samplesOrMarkers.time.map(time => time === -1 ? -1 : time + delta)
-  });
-}
-
 export const resourceTypes = {
   unknown: 0,
   library: 1,
@@ -151,6 +145,12 @@ function preprocessSharedLibraries(libs) {
     }
     return Object.assign({}, lib, { pdbName, breakpadId });
   }).sort((a, b) => a.start - b.start);
+}
+
+function adjustTimeStamps(samplesOrMarkers, delta) {
+  return Object.assign({}, samplesOrMarkers, {
+    time: samplesOrMarkers.time.map(time => time === -1 ? -1 : time + delta)
+  });
 }
 
 export function preprocessProfile(profile) {
