@@ -2,6 +2,12 @@ import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from './unique-string-array';
 import { resourceTypes, createFuncStackTableAndFixupSamples } from './profile-data';
 
+/**
+ * Turn a data table from the form { schema, data } (as used in the raw profile
+ * JSON) into a struct of arrays. This isn't very nice to read, but it
+ * drastically reduces the number of JS objects the JS engine has to deal with,
+ * resulting in fewer GC pauses.
+ */
 function toStructOfArrays(rawTable) {
   const result = { length: rawTable.data.length };
   for (let fieldName in rawTable.schema) {
@@ -11,8 +17,14 @@ function toStructOfArrays(rawTable) {
   return result;
 }
 
-function preprocessThread(thread, rootMeta, libs) {
-  let funcTable = {
+/**
+ * Convert the given thread into preprocessed form.
+ * @param  {[type]} thread   [description]
+ * @param  {[type]} libs     [description]
+ * @return {[type]}          [description]
+ */
+function preprocessThread(thread, libs) {
+  const funcTable = {
     length: 0,
     name: [],
     resource: [],
@@ -24,7 +36,7 @@ function preprocessThread(thread, rootMeta, libs) {
     funcTable.resource[index] = resource;
     funcTable.address[index] = address;
   }
-  let resourceTable = {
+  const resourceTable = {
     length: 0,
     type: [],
     name: [],
@@ -39,14 +51,14 @@ function preprocessThread(thread, rootMeta, libs) {
     resourceTable.lib[index] = lib;
   }
 
-  let stringTable = new UniqueStringArray(thread.stringTable);
+  const stringTable = new UniqueStringArray(thread.stringTable);
   const frameTable = toStructOfArrays(thread.frameTable);
   const stackTable = toStructOfArrays(thread.stackTable);
   const samples = toStructOfArrays(thread.samples);
   const markers = toStructOfArrays(thread.markers);
 
-  let libToResourceIndex = new Map();
-  let stringTableIndexToNewFuncIndex = new Map();
+  const libToResourceIndex = new Map();
+  const stringTableIndexToNewFuncIndex = new Map();
 
   frameTable.func = frameTable.location.map(locationIndex => {
     let funcIndex = stringTableIndexToNewFuncIndex.get(locationIndex);
@@ -85,6 +97,9 @@ function preprocessThread(thread, rootMeta, libs) {
   }, createFuncStackTableAndFixupSamples(stackTable, frameTable, funcTable, samples));
 }
 
+/**
+ * Ensure every lib has pdbName and breakpadId fields, and sort them by start address.
+ */
 function preprocessSharedLibraries(libs) {
   return JSON.parse(libs).map(lib => {
     let pdbName, breakpadId;
@@ -100,12 +115,20 @@ function preprocessSharedLibraries(libs) {
   }).sort((a, b) => a.start - b.start);
 }
 
+/**
+ * Adjust the "time" field by the given delta.
+ */
 function adjustTimestamps(samplesOrMarkers, delta) {
   return Object.assign({}, samplesOrMarkers, {
-    time: samplesOrMarkers.time.map(time => time === -1 ? -1 : time + delta)
+    time: samplesOrMarkers.time.map(time => time === undefined ? undefined : time + delta)
   });
 }
 
+/**
+ * Convert a profile from "raw" format into the preprocessed format.
+ * For a description of the preprocessed format, look at the tests for this
+ * function. (Sorry!)
+ */
 export function preprocessProfile(profile) {
   // profile.meta.startTime is process start time, as a timestamp in ms
   const libs = preprocessSharedLibraries(profile.libs);
@@ -116,13 +139,13 @@ export function preprocessProfile(profile) {
       const subprocessLibs = preprocessSharedLibraries(subprocessProfile.libs);
       const adjustTimestampsBy = subprocessProfile.meta.startTime - profile.meta.startTime;
       for (let thread of subprocessProfile.threads) {
-        const newThread = preprocessThread(thread, profile.meta, subprocessLibs);
+        const newThread = preprocessThread(thread, subprocessLibs);
         newThread.samples = adjustTimestamps(newThread.samples, adjustTimestampsBy);
         newThread.markers = adjustTimestamps(newThread.markers, adjustTimestampsBy);
         threads.push(newThread);
       }
     } else {
-      threads.push(preprocessThread(threadOrSubprocess, profile.meta, libs));
+      threads.push(preprocessThread(threadOrSubprocess, libs));
     }
   }
   return { meta: profile.meta, threads };
