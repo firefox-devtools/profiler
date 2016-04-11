@@ -1,5 +1,5 @@
 import 'babel-polyfill';
-import { preprocessProfile } from './merge-profiles';
+import { preprocessProfile } from './preprocess-profile';
 import { symbolicateProfile } from './symbolication';
 import { SymbolStore } from './symbol-store';
 import { getCallTree } from './profile-tree';
