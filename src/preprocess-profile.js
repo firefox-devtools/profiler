@@ -6,7 +6,7 @@ import { resourceTypes, createFuncStackTableAndFixupSamples } from './profile-da
  * Turn a data table from the form { schema, data } (as used in the raw profile
  * JSON) into a struct of arrays. This isn't very nice to read, but it
  * drastically reduces the number of JS objects the JS engine has to deal with,
- * resulting in fewer GC pauses.
+ * resulting in fewer GC pauses and hopefully better performance.
  */
 function toStructOfArrays(rawTable) {
   const result = { length: rawTable.data.length };
@@ -19,9 +19,6 @@ function toStructOfArrays(rawTable) {
 
 /**
  * Convert the given thread into preprocessed form.
- * @param  {[type]} thread   [description]
- * @param  {[type]} libs     [description]
- * @return {[type]}          [description]
  */
 function preprocessThread(thread, libs) {
   const funcTable = {
