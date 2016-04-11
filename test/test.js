@@ -29,7 +29,7 @@ describe('unique-string-array', function () {
   });
 });
 
-describe('merge-profiles', function () {
+describe('preprocess-profile', function () {
   describe('preprocessProfile', function () {
     const profile = preprocessProfile(exampleProfile);
     it('should have three threads', function () {
@@ -58,6 +58,28 @@ describe('merge-profiles', function () {
       for (let lib of libs) {
         assert.isAbove(lib.start, lastStartAddress);
         lastStartAddress = lib.start;
+      }
+    });
+    it("should have reasonable pdbName fields on each library", function () {
+      assert.equal(profile.threads[0].libs[0].pdbName, 'firefox');
+      assert.equal(profile.threads[0].libs[1].pdbName, 'examplebinary');
+      assert.equal(profile.threads[0].libs[2].pdbName, 'examplebinary2.pdb');
+      assert.equal(profile.threads[1].libs[0].pdbName, 'firefox');
+      assert.equal(profile.threads[1].libs[1].pdbName, 'examplebinary');
+      assert.equal(profile.threads[1].libs[2].pdbName, 'examplebinary2.pdb');
+
+      // Thread 2 is the content process main thread
+      assert.equal(profile.threads[2].libs[0].pdbName, 'firefox-webcontent');
+      assert.equal(profile.threads[2].libs[1].pdbName, 'examplebinary');
+      assert.equal(profile.threads[2].libs[2].pdbName, 'examplebinary2.pdb');
+    });
+    it("should have reasonable breakpadId fields on each library", function () {
+      for (let thread of profile.threads) {
+        for (let lib of thread.libs) {
+          assert.property(lib, 'breakpadId');
+          assert.equal(lib.breakpadId.length, 33);
+          assert.equal(lib.breakpadId, lib.breakpadId.toUpperCase());
+        }
       }
     });
     it('should shift the content process by 1 second', function () {

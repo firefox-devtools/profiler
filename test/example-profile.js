@@ -21,6 +21,7 @@ const extraBinaries = [ // intentionally wrong sort order, preprocessProfile wil
   {
     pdbName: 'examplebinary2.pdb',
     pdbSignature: '{10000000-0000-0000-0000-0000000000a2}',
+    pdbAge: 7,
     name: 'C:\\examplebinary2',
     start: 0x200000000 + 20,
     end: 0x200000000 + 40
