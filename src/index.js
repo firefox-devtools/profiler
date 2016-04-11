@@ -33,10 +33,8 @@ function reducer(state, action) {
       newWaitingForLibs.delete(action.requestedLib);
       return Object.assign({}, state, { waitingForLibs: newWaitingForLibs });
     }
-    default: {
-      console.log(`Unhandled action type ${action.type}`);
+    default:
       return state;
-    }
   }
 }
 
@@ -142,5 +140,5 @@ render(
   <Provider store={store}>
     <App />
   </Provider>,
-  document.querySelector('body')
+  document.getElementById('root')
 );
