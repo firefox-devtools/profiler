@@ -119,7 +119,7 @@ const contentProcessMeta = Object.assign({}, parentProcessMeta, {
 
 const contentProcessProfile = {
   meta: contentProcessMeta,
-  libs: JSON.stringify([contentProcessBinary].concat(extraBinaries)), // libs are stringified in the profile
+  libs: JSON.stringify([contentProcessBinary].concat(extraBinaries)), // libs are stringified in the raw profile
   threads: [
     Object.assign({ name: 'Content' }, thread)
   ]

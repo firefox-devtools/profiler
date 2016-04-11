@@ -105,7 +105,7 @@ function preprocessSharedLibraries(libs) {
       breakpadId = lib.breakpadId;
     } else {
       pdbName = lib.pdbName;
-      let pdbSig = lib.pdbSignature.replace(/[{}-]/g, "").toUpperCase();
+      const pdbSig = lib.pdbSignature.replace(/[{}-]/g, "").toUpperCase();
       breakpadId = pdbSig + lib.pdbAge;
     }
     return Object.assign({}, lib, { pdbName, breakpadId });
@@ -127,7 +127,6 @@ function adjustTimestamps(samplesOrMarkers, delta) {
  * function. (Sorry!)
  */
 export function preprocessProfile(profile) {
-  // profile.meta.startTime is process start time, as a timestamp in ms
   const libs = preprocessSharedLibraries(profile.libs);
   const threads = [];
   for (let threadOrSubprocess of profile.threads) {
