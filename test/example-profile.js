@@ -17,7 +17,7 @@ const contentProcessBinary = {
   end: 0x100000000 + 10000
 };
 
-const extraBinaries = [ // wrong sort order, preprocessProfile will sort them
+const extraBinaries = [ // intentionally wrong sort order, preprocessProfile will sort them
   {
     pdbName: 'examplebinary2.pdb',
     pdbSignature: '{10000000-0000-0000-0000-0000000000a2}',
