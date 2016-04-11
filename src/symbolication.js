@@ -37,7 +37,7 @@ export function getContainingLibrary(libs, address) {
  *                       Example:
  *                       map.get(lib): [0, 1, 2, 8, 34]
  */
-function gatherAddressesInThread(thread) {
+function gatherFuncsInThread(thread) {
   const { libs, funcTable, stringTable, resourceTable } = thread;
   const foundAddresses = new Map();
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
@@ -208,8 +208,8 @@ function symbolicateThread(thread, symbolStore, cbo) {
     scheduledThreadUpdate = false;
   }
 
-  let foundAddresses = gatherAddressesInThread(thread);
-  return Promise.all(Array.from(foundAddresses).map(function ([lib, funcsToSymbolicate]) {
+  let foundFuncs = gatherFuncsInThread(thread);
+  return Promise.all(Array.from(foundFuncs).map(function ([lib, funcsToSymbolicate]) {
     // lib is a lib object from thread.libs.
     // funcsToSymbolicate is an array of funcIndex.
     return symbolStore.getFuncAddressTableForLib(lib).then(funcAddressTable => {

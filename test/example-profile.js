@@ -17,19 +17,19 @@ const contentProcessBinary = {
   end: 0x100000000 + 10000
 };
 
-const extraBinaries = [
-  {
-    breakpadId: '1000000000000000000000000000000A1',
-    name: '/tmp/examplebinary',
-    start: 0x200000000,
-    end: 0x200000000 + 20
-  },
+const extraBinaries = [ // wrong sort order, preprocessProfile will sort them
   {
     pdbName: 'examplebinary2.pdb',
     pdbSignature: '{10000000-0000-0000-0000-0000000000a2}',
     name: 'C:\\examplebinary2',
     start: 0x200000000 + 20,
     end: 0x200000000 + 40
+  },
+  {
+    breakpadId: '1000000000000000000000000000000A1',
+    name: '/tmp/examplebinary',
+    start: 0x200000000,
+    end: 0x200000000 + 20
   },
 ];
 

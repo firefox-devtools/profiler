@@ -19,7 +19,7 @@ export const resourceTypes = {
 /**
  * Takes the stack table and the frame table, creates a func stack table and
  * fixes up the funcStack field in the samples data.
- * @return {[type]} [description]
+ * @return object  The funcStackTable and the new samples object.
  */
 export function createFuncStackTableAndFixupSamples(stackTable, frameTable, funcTable, samples) {
   let stackIndexToFuncStackIndex = new Map();
@@ -64,7 +64,7 @@ function toStructOfArrays(rawTable) {
   return result;
 }
 
-function fixUpThread(thread, rootMeta, libs) {
+function preprocessThread(thread, rootMeta, libs) {
   let funcTable = {
     length: 0,
     name: [],
@@ -149,32 +149,27 @@ function preprocessSharedLibraries(libs) {
       let pdbSig = lib.pdbSignature.replace(/[{}-]/g, "").toUpperCase();
       breakpadId = pdbSig + lib.pdbAge;
     }
-    return Object.assign({}, lib, {pdbName, breakpadId});
+    return Object.assign({}, lib, { pdbName, breakpadId });
   }).sort((a, b) => a.start - b.start);
-}
-
-function turnSubprofileIntoThreads(subprofile, rootMeta) {
-  let libs = preprocessSharedLibraries(subprofile.libs);
-  let adjustTimestampsBy = subprofile.meta.startTime - rootMeta.startTime;
-  return subprofile.threads.map(thread => {
-    let newThread = fixUpThread(thread, rootMeta, libs);
-    newThread.samples = adjustTimeStamps(newThread.samples, adjustTimestampsBy);
-    newThread.markers = adjustTimeStamps(newThread.markers, adjustTimestampsBy);
-    return newThread;
-  });
 }
 
 export function preprocessProfile(profile) {
   // profile.meta.startTime is process start time, as a timestamp in ms
-  let libs = preprocessSharedLibraries(profile.libs);
-  let threads = [];
+  const libs = preprocessSharedLibraries(profile.libs);
+  const threads = [];
   for (let threadOrSubprocess of profile.threads) {
     if (typeof threadOrSubprocess === 'string') {
-      let subprocessProfile = JSON.parse(threadOrSubprocess);
-      let threadsFromSubprocess = turnSubprofileIntoThreads(subprocessProfile, profile.meta);
-      threads = threads.concat(threadsFromSubprocess);
+      const subprocessProfile = JSON.parse(threadOrSubprocess);
+      const subprocessLibs = preprocessSharedLibraries(subprocessProfile.libs);
+      const adjustTimestampsBy = subprocessProfile.meta.startTime - profile.meta.startTime;
+      for (let thread of subprocessProfile.threads) {
+        const newThread = preprocessThread(thread, profile.meta, subprocessLibs);
+        newThread.samples = adjustTimeStamps(newThread.samples, adjustTimestampsBy);
+        newThread.markers = adjustTimeStamps(newThread.markers, adjustTimestampsBy);
+        threads.push(newThread);
+      }
     } else {
-      threads.push(fixUpThread(threadOrSubprocess, profile.meta, libs));
+      threads.push(preprocessThread(threadOrSubprocess, profile.meta, libs));
     }
   }
   return { meta: profile.meta, threads };

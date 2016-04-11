@@ -51,6 +51,14 @@ describe('merge-profiles', function () {
         assert.property(thread, 'resourceTable');
       }
     });
+    it("should sort libs by start address", function () {
+      const libs = profile.threads[0].libs;
+      let lastStartAddress = -Infinity;
+      for (let lib of libs) {
+        assert.isAbove(lib.start, lastStartAddress);
+        lastStartAddress = lib.start;
+      }
+    });
     it('should shift the content process by 1 second', function () {
       assert.equal(profile.threads[2].name, 'Content');
       assert.equal(profile.threads[0].samples.time[0], 0);
