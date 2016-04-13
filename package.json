@@ -10,15 +10,15 @@
     "build": "npm-run-all --parallel build:*",
     "build:bundle": "browserify src/index.js -t babelify -o www/bundle.js",
     "build:db-worker": "browserify src/symbol-store-db-worker.js -t babelify -o www/symbol-store-db-worker.js",
+    "build:prpr-worker": "browserify src/profile-preprocessor-worker.js -t babelify -o www/profile-preprocessor-worker.js",
     "watch": "npm-run-all --parallel watch:*",
     "watch:bundle": "watchify src/index.js -t babelify -o www/bundle.js",
     "watch:db-worker": "watchify src/symbol-store-db-worker.js -t babelify -o www/symbol-store-db-worker.js",
+    "watch:prpr-worker": "watchify src/profile-preprocessor-worker.js -t babelify -o www/profile-preprocessor-worker.js",
     "build-ugly": "npm-run-all --parallel build-ugly:*",
     "build-ugly:bundle": "browserify src/index.js -t babelify -o 'uglifyjs -cm > www/bundle.js'",
     "build-ugly:db-worker": "browserify src/symbol-store-db-worker.js -t babelify -o 'uglifyjs -cm > www/symbol-store-db-worker.js'",
-    "watch-ugly": "npm-run-all --parallel watch-ugly:*",
-    "watch-ugly:bundle": "watchify src/index.js -t babelify -o 'uglifyjs -cm > www/bundle.js'",
-    "watch-ugly:db-worker": "watchify src/symbol-store-db-worker.js -t babelify -o 'uglifyjs -cm > www/symbol-store-db-worker.js'"
+    "build-ugly:prpr-worker": "browserify src/profile-preprocessor-worker.js -t babelify -o 'uglifyjs -cm > www/profile-preprocessor-worker.js'"
   },
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MIT",
