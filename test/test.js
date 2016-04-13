@@ -2,7 +2,7 @@ import 'babel-polyfill';
 import { assert } from 'chai';
 import { getContainingLibrary, symbolicateProfile } from '../src/symbolication';
 import { preprocessProfile } from '../src/preprocess-profile';
-import { resourceTypes } from '../src/profile-data';
+import { resourceTypes, createFuncStackTableAndFixupSamples } from '../src/profile-data';
 import exampleProfile from './example-profile';
 import { UniqueStringArray } from '../src/unique-string-array';
 import { FakeSymbolStore } from './fake-symbol-store';
@@ -49,7 +49,6 @@ describe('preprocess-profile', function () {
         assert.property(thread, 'markers');
         assert.property(thread, 'stringTable');
         assert.property(thread, 'funcTable');
-        assert.property(thread, 'funcStackTable');
         assert.property(thread, 'resourceTable');
       }
     });
@@ -119,17 +118,6 @@ describe('preprocess-profile', function () {
       assert.equal(thread.funcTable.address[2], 6725);
       assert.equal(thread.funcTable.address[3], -1);
     });
-    it('should create one funcStack per stack', function () {
-      const thread = profile.threads[0];
-      assert.equal(thread.stackTable.length, 4);
-      assert.equal(thread.funcStackTable.length, 4);
-      assert.property(thread.funcStackTable, 'prefix');
-      assert.property(thread.funcStackTable, 'func');
-      assert.equal(thread.funcStackTable.func[0], 0);
-      assert.equal(thread.funcStackTable.func[1], 1);
-      assert.equal(thread.funcStackTable.func[2], 2);
-      assert.equal(thread.funcStackTable.func[3], 3);
-    });
     it('should create one resource per used library', function () {
       const thread = profile.threads[0];
       assert.equal(thread.resourceTable.length, 1);
@@ -138,6 +126,25 @@ describe('preprocess-profile', function () {
       assert.equal(thread.stringTable.getString(nameStringIndex), "firefox");
     });
     // TODO: add a JS frame to the example profile and check that we get a resource for the JS file
+  });
+});
+
+describe('profile-data', function () {
+  describe('createFuncStackTableAndFixupSamples', function () {
+    const profile = preprocessProfile(exampleProfile);
+    const thread = profile.threads[0];
+    const { funcStackTable } =
+      createFuncStackTableAndFixupSamples(thread.stackTable, thread.frameTable, thread.funcTable, thread.samples);
+    it('should create one funcStack per stack', function () {
+      assert.equal(thread.stackTable.length, 4);
+      assert.equal(funcStackTable.length, 4);
+      assert.property(funcStackTable, 'prefix');
+      assert.property(funcStackTable, 'func');
+      assert.equal(funcStackTable.func[0], 0);
+      assert.equal(funcStackTable.func[1], 1);
+      assert.equal(funcStackTable.func[2], 2);
+      assert.equal(funcStackTable.func[3], 3);
+    });
   });
 });
 

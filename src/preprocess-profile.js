@@ -1,6 +1,6 @@
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from './unique-string-array';
-import { resourceTypes, createFuncStackTableAndFixupSamples } from './profile-data';
+import { resourceTypes } from './profile-data';
 import { provideHostSide } from './promise-worker';
 
 /**
@@ -91,8 +91,8 @@ function preprocessThread(thread, libs) {
   delete frameTable.location;
 
   return Object.assign({}, thread, {
-    libs, frameTable, funcTable, resourceTable, stackTable, markers, stringTable,
-  }, createFuncStackTableAndFixupSamples(stackTable, frameTable, funcTable, samples));
+    libs, frameTable, funcTable, resourceTable, stackTable, markers, stringTable, samples
+  });
 }
 
 /**
@@ -117,6 +117,10 @@ function preprocessSharedLibraries(libs) {
  * Adjust the "time" field by the given delta.
  */
 function adjustTimestamps(samplesOrMarkers, delta) {
+  if (!samplesOrMarkers.time) {
+    console.log(`don't have samplesOrMarkers.time!`);
+    console.log(samplesOrMarkers);
+  }
   return Object.assign({}, samplesOrMarkers, {
     time: samplesOrMarkers.time.map(time => time === undefined ? undefined : time + delta)
   });

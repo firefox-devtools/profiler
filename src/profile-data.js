@@ -44,8 +44,6 @@ export function createFuncStackTableAndFixupSamples(stackTable, frameTable, func
 
   return {
     funcStackTable,
-    samples: Object.assign({}, samples, {
-      funcStack: samples.stack.map(stack => stackIndexToFuncStackIndex.get(stack))
-    })
+    sampleFuncStacks: samples.stack.map(stack => stackIndexToFuncStackIndex.get(stack))
   };
 }

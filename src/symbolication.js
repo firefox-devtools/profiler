@@ -1,5 +1,5 @@
 import bisection from 'bisection';
-import { resourceTypes, createFuncStackTableAndFixupSamples } from './profile-data';
+import { resourceTypes } from './profile-data';
 import { UniqueStringArray } from './unique-string-array';
 
 /**
@@ -177,8 +177,7 @@ function applyFunctionMerging(thread, oldFuncToNewFuncMap) {
       return newFunc === undefined ? oldFunc : newFunc;
     })
   });
-  return Object.assign({}, thread, { frameTable },
-    createFuncStackTableAndFixupSamples(thread.stackTable, frameTable, thread.funcTable, thread.samples));
+  return Object.assign({}, thread, { frameTable });
 }
 
 /**
