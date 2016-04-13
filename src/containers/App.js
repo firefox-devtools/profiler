@@ -20,9 +20,10 @@ class App extends Component {
 
     window.geckoProfilerPromise.then((geckoProfiler) => {
       console.log("connected!");
-      geckoProfiler.getProfile().then(profile => {
+      let profilePromise = geckoProfiler.getProfile();
+      profilePromise.then(profile => {
         console.log("got profile!");
-        let p = preprocessProfile(profile);
+        const p = preprocessProfile(profile);
         dispatch({
           type: 'RECEIVE_PROFILE_FROM_ADDON',
           profile: p

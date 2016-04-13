@@ -20,7 +20,6 @@ export class SymbolStoreDB {
         db.onerror = reject;
         let tableStore = db.createObjectStore('symbol-tables', { autoIncrement: true });
         tableStore.createIndex('libKey',  ['pdbName', 'breakpadId'], { unique: true });
-        db.createObjectStore('symbols', { keyPath: ['libKey', 'address'] });
       };
       openreq.onsuccess = () => {
         this._db = openreq.result;
@@ -51,27 +50,20 @@ export class SymbolStoreDB {
     });
   }
 
-  importLibrary(pdbName, breakpadId, [addrs, syms]) {
+  importLibrary(pdbName, breakpadId, [addrs, index, buffer]) {
     if (!this._db) {
-      return this._setupDBPromise.then(() => this.importLibrary(pdbName, breakpadId, [addrs, syms]));
+      return this._setupDBPromise.then(() => this.importLibrary(pdbName, breakpadId, [addrs, index, buffer]));
     }
 
     return new Promise((resolve, reject) => {
-      let transaction = this._db.transaction(['symbol-tables', 'symbols'], 'readwrite');
+      let transaction = this._db.transaction('symbol-tables', 'readwrite');
       let libKey = null;
       transaction.onerror = reject;
-      transaction.oncomplete = () => resolve(libKey);
       let tableStore = transaction.objectStore('symbol-tables');
-      let putReq = tableStore.put({ pdbName, breakpadId, addrs });
+      let putReq = tableStore.put({ pdbName, breakpadId, addrs, index, buffer });
       putReq.onsuccess = () => {
-        libKey = putReq.result;
-        let symStore = transaction.objectStore('symbols');
-        for (let i = 0; i < addrs.length; i++) {
-          let address = addrs[i];
-          let symbol = syms[i];
-          symStore.put({ libKey, address, symbol });
-        }
-      }
+        resolve(putReq.result);
+      };
     });
   }
 
@@ -103,31 +95,29 @@ export class SymbolStoreDB {
    * @param  {integer} libKey                       The primary key for the library, as returned by getLibKey
    * @return {array of strings}                     The symbols, one for each address in requestedAddresses.
    */
-  getSymbolsForAddressesInLib(requestedAddresses, libKey) {
+  getSymbolsForAddressesInLib(requestedAddressesIndices, libKey) {
     if (!this._db) {
-      return this._setupDBPromise.then(() => this.getSymbolsForAddressesInLib(requestedAddresses, libKey));
+      return this._setupDBPromise.then(() => this.getSymbolsForAddressesInLib(requestedAddressesIndices, libKey));
     }
 
     return new Promise((resolve, reject) => {
-      let transaction = this._db.transaction('symbols', 'readonly');
-      let store = transaction.objectStore('symbols');
-      let req = store.openCursor(IDBKeyRange.lowerBound([libKey, requestedAddresses[0]]));
-      let resultArray = [];
-      let i = 0;
+      let transaction = this._db.transaction('symbol-tables', 'readonly');
+      let store = transaction.objectStore('symbol-tables');
+      let req = store.get(libKey);
       req.onerror = reject;
       req.onsuccess = () => {
-        let cursor = req.result;
-        if (!cursor) {
-          reject(new Error("unexpected null cursor"));
+        if (!req.result) {
+          reject(new Error("unexpected null result"));
           return;
         }
-        resultArray.push(cursor.value.symbol);
-        i++;
-        if (i === requestedAddresses.length) {
-          resolve(resultArray);
-          return;
-        }
-        cursor.continue([libKey, requestedAddresses[i]]);
+        const { addrs, index, buffer } = req.result;
+        const decoder = new TextDecoder();
+        resolve(requestedAddressesIndices.map(addrIndex => {
+          const startOffset = index[addrIndex];
+          const endOffset = index[addrIndex + 1];
+          const subarray = buffer.subarray(startOffset, endOffset);
+          return decoder.decode(subarray);
+        }));
       };
     });
   }

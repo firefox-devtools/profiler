@@ -1,3 +1,4 @@
+import 'babel-polyfill';
 import { assert } from 'chai';
 import { getContainingLibrary, symbolicateProfile } from '../src/symbolication';
 import { preprocessProfile } from '../src/preprocess-profile';

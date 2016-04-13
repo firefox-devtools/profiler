@@ -89,10 +89,11 @@ function gatherFuncsInThread(thread) {
  * @param  array  funcsToSymbolicate  An array containing funcIndex elements for the funcs in this library.
  * @param  object funcTable           The funcTable that the funcIndices in addressToSymbolicate refer to.
  * @param  Map    oldFuncToNewFuncMap An out parameter that specifies how funcs should be merged.
- * @return object                     A map that maps a func address to a funcIndex, one entry for each func that needs to be symbolicated.
+ * @return object                     A map that maps a func address index to a funcIndex, one entry for each func that needs to be symbolicated.
  */
 function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, funcTable, oldFuncToNewFuncMap = new Map()) {
-  let addrToFuncIndexMap = new Map();
+  let funcAddrIndices = [];
+  let funcIndices = [];
 
   // Sort funcsToSymbolicate by address.
   funcsToSymbolicate.sort((i1, i2) => {
@@ -127,10 +128,11 @@ function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsTo
       nextFuncAddressIndex = funcAddressIndex + 1;
       nextFuncAddress = (nextFuncAddressIndex < funcAddressTable.length) ? funcAddressTable[nextFuncAddressIndex] : Infinity;
       lastFuncIndex = funcIndex;
-      addrToFuncIndexMap.set(realFuncAddress, funcIndex);
+      funcAddrIndices.push(funcAddressIndex);
+      funcIndices.push(funcIndex);
     }
   }
-  return addrToFuncIndexMap;
+  return { funcAddrIndices, funcIndices };
 }
 
 /**
@@ -143,14 +145,13 @@ function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsTo
  * @param addrToFuncIndexMap A Map that maps a func address to the funcIndex.
  * @return                   The new thread object.
  */
-function setFuncNames(thread, funcAddrs, funcNames, addrToFuncIndexMap) {
-  let funcTable = Object.assign({}, thread.funcTable);
+function setFuncNames(thread, funcIndices, funcNames) {
+  const funcTable = Object.assign({}, thread.funcTable);
   funcTable.name = funcTable.name.slice();
-  let stringTable = thread.stringTable;
-  funcAddrs.forEach((addr, addrIndex) => {
-    let funcIndex = addrToFuncIndexMap.get(addr);
-    let symbolName = funcNames[addrIndex];
-    let symbolIndex = stringTable.indexForString(symbolName);
+  const stringTable = thread.stringTable;
+  funcIndices.forEach((funcIndex, i) => {
+    const symbolName = funcNames[i];
+    const symbolIndex = stringTable.indexForString(symbolName);
     funcTable.name[funcIndex] = symbolIndex;
   });
   return Object.assign({}, thread, { funcTable, stringTable });
@@ -217,19 +218,19 @@ function symbolicateThread(thread, symbolStore, cbo) {
       // that are actually the same function.
       // We don't have any symbols yet. We'll request those after we've merged
       // the functions.
-      let addrToFuncIndexMap = findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, updatedThread.funcTable, oldFuncToNewFuncMap);
+      const  {funcAddrIndices, funcIndices} = findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, updatedThread.funcTable, oldFuncToNewFuncMap);
       scheduleThreadUpdate();
 
       // Now list the func addresses that we want symbols for, and request them.
-      let funcAddrs = Array.from(addrToFuncIndexMap.keys()).sort((a, b) => a - b);
-      return symbolStore.getSymbolsForAddressesInLib(funcAddrs, lib).then(funcNames => {
+      return symbolStore.getSymbolsForAddressesInLib(funcAddrIndices, lib).then(funcNames => {
         // We have the symbol names now. Add them to our string table and point
         // to them from the funcTable.
-        updatedThread = setFuncNames(updatedThread, funcAddrs, funcNames, addrToFuncIndexMap);
+        updatedThread = setFuncNames(updatedThread, funcIndices, funcNames);
         scheduleThreadUpdate();
       });
     }).catch(error => {
       console.log(`Couldn't get symbols for library ${lib.pdbName} ${lib.breakpadId}`);
+      console.error(error);
       // console.error(error);
       // Don't throw, so that the resulting promise will be resolved, thereby
       // indicating that we're done symbolicating with lib.

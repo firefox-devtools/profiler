@@ -1,6 +1,7 @@
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from './unique-string-array';
 import { resourceTypes, createFuncStackTableAndFixupSamples } from './profile-data';
+import { provideHostSide } from './promise-worker';
 
 /**
  * Turn a data table from the form { schema, data } (as used in the raw profile
@@ -90,7 +91,7 @@ function preprocessThread(thread, libs) {
   delete frameTable.location;
 
   return Object.assign({}, thread, {
-    libs, frameTable, funcTable, resourceTable, stackTable, stringTable, markers
+    libs, frameTable, funcTable, resourceTable, stackTable, markers, stringTable,
   }, createFuncStackTableAndFixupSamples(stackTable, frameTable, funcTable, samples));
 }
 
@@ -146,3 +147,11 @@ export function preprocessProfile(profile) {
   }
   return { meta: profile.meta, threads };
 }
+
+export class ProfilePreprocessor {
+  preprocessProfile(profile) {
+    return Promise.resolve(preprocessProfile(profile));
+  }
+};
+
+export const ProfilePreprocessorThreaded = provideHostSide('profile-preprocessor-worker.js', ['preprocessProfile']);
