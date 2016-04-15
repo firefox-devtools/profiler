@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { preprocessProfile } from '../preprocess-profile';
 import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
-import { getCallTree } from '../profile-tree';
+import * as Actions from '../actions';
 import TreeView from '../components/TreeView';
 
 class App extends Component {
@@ -14,54 +14,36 @@ class App extends Component {
   componentDidMount() {
     const { dispatch } = this.props;
 
-    dispatch({
-      type: 'WAITING_FOR_PROFILE_FROM_ADDON'
-    });
+    dispatch(Actions.waitingForProfileFromAddon());
 
     window.geckoProfilerPromise.then((geckoProfiler) => {
-      console.log("connected!");
-      let profilePromise = geckoProfiler.getProfile();
-      profilePromise.then(profile => {
-        console.log("got profile!");
-        const p = preprocessProfile(profile);
-        dispatch({
-          type: 'RECEIVE_PROFILE_FROM_ADDON',
-          profile: p
-        });
-        // return;
-        let symbolStore = new SymbolStore("cleopatra-async-storage", {
+      geckoProfiler.getProfile().then(profile => {
+        profile = preprocessProfile(profile);
+        dispatch(Actions.receiveProfileFromAddon(profile));
+
+        const symbolStore = new SymbolStore("cleopatra-async-storage", {
           requestSymbolTable: (pdbName, breakpadId) => {
             let requestedLib = { pdbName, breakpadId };
-            dispatch({
-              type: 'REQUESTING_SYMBOL_TABLE',
-              requestedLib
-            });
+            dispatch(Actions.requestingSymbolTable(requestedLib));
             return geckoProfiler.getSymbolTable(pdbName, breakpadId).then(symbolTable => {
-              dispatch({
-                type: 'RECEIVED_SYMBOL_TABLE_REPLY',
-                requestedLib
-              });
+              dispatch(Actions.receivedSymbolTableReply(requestedLib));
               return symbolTable;
             }, error => {
-              dispatch({
-                type: 'RECEIVED_SYMBOL_TABLE_REPLY',
-                requestedLib
-              });
+              dispatch(Actions.receivedSymbolTableReply(requestedLib));
               throw error;
             });
           }
         });
-        dispatch({
-          type: 'START_SYMBOLICATING'
-        });
-        symbolicateProfile(p, symbolStore, {
-          onUpdateProfile: profile => {
-            dispatch({
-              type: 'PROFILE_SYMBOLICATION_STEP',
-              profile
-            });
+
+        dispatch(Actions.startSymbolicating());
+        symbolicateProfile(profile, symbolStore, {
+          onMergeFunctions: (threadIndex, oldFuncToNewFuncMap) => {
+            dispatch(Actions.mergeFunctions(threadIndex, oldFuncToNewFuncMap));
+          },
+          onGotFuncNames: (threadIndex, funcIndices, funcNames) => {
+            dispatch(Actions.assignFunctionNames(threadIndex, funcIndices, funcNames));
           }
-        }).then(() => dispatch({ type: 'DONE_SYMBOLICATING' }));
+        }).then(() => dispatch(Actions.doneSymbolicating()));
       });
     });
   }
@@ -73,7 +55,7 @@ class App extends Component {
     }
     return (
       <div>
-        <TreeView tree={getCallTree(profile.threads[0])} depthLimit={20} />
+        <TreeView thread={profile.threads[0]} depthLimit={20} />
       </div>
     );
   }

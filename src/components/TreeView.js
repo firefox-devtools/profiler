@@ -1,7 +1,9 @@
 import React, { Component, PropTypes } from 'react';
+import { getCallTree } from '../profile-tree';
 import { connect } from 'react-redux';
 
-let TreeView = ({ tree, depthLimit }) => {
+let TreeView = ({ thread, depthLimit }) => {
+  const tree = getCallTree(thread);
   // TODO: don't reconstruct tree if funcStackTable and samples haven't changed
   function renderNode(node, depth) {
     if (depth > depthLimit) {

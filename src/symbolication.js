@@ -91,7 +91,8 @@ function gatherFuncsInThread(thread) {
  * @param  Map    oldFuncToNewFuncMap An out parameter that specifies how funcs should be merged.
  * @return object                     A map that maps a func address index to a funcIndex, one entry for each func that needs to be symbolicated.
  */
-function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, funcTable, oldFuncToNewFuncMap = new Map()) {
+function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, funcTable) {
+  const oldFuncToNewFuncMap = new Map();
   let funcAddrIndices = [];
   let funcIndices = [];
 
@@ -132,7 +133,7 @@ function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsTo
       funcIndices.push(funcIndex);
     }
   }
-  return { funcAddrIndices, funcIndices };
+  return { funcAddrIndices, funcIndices, oldFuncToNewFuncMap };
 }
 
 /**
@@ -145,7 +146,7 @@ function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsTo
  * @param addrToFuncIndexMap A Map that maps a func address to the funcIndex.
  * @return                   The new thread object.
  */
-function setFuncNames(thread, funcIndices, funcNames) {
+export function setFuncNames(thread, funcIndices, funcNames) {
   const funcTable = Object.assign({}, thread.funcTable);
   funcTable.name = funcTable.name.slice();
   const stringTable = thread.stringTable;
@@ -170,7 +171,7 @@ function setFuncNames(thread, funcIndices, funcNames) {
  * @param  object oldFuncToNewFuncMap A map that defines which function should be collapsed into which other function.
  * @return object                     The new thread object.
  */
-function applyFunctionMerging(thread, oldFuncToNewFuncMap) {
+export function applyFunctionMerging(thread, oldFuncToNewFuncMap) {
   const frameTable = Object.assign({}, thread.frameTable, {
     func: thread.frameTable.func.map(oldFunc => {
       const newFunc = oldFuncToNewFuncMap.get(oldFunc);
@@ -189,9 +190,8 @@ function applyFunctionMerging(thread, oldFuncToNewFuncMap) {
  *                             a new updated thread every time we've done a bit of symbolication.
  * @return Promise             A promise that resolves (with nothing) once symbolication of the thread has completed.
  */
-function symbolicateThread(thread, symbolStore, cbo) {
+function symbolicateThread(thread, threadIndex, symbolStore, cbo) {
   let updatedThread = thread;
-  let oldFuncToNewFuncMap = new Map();
 
   let scheduledThreadUpdate = false;
   function scheduleThreadUpdate() {
@@ -217,20 +217,17 @@ function symbolicateThread(thread, symbolStore, cbo) {
       // that are actually the same function.
       // We don't have any symbols yet. We'll request those after we've merged
       // the functions.
-      const  {funcAddrIndices, funcIndices} = findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, updatedThread.funcTable, oldFuncToNewFuncMap);
-      scheduleThreadUpdate();
+      const  { funcAddrIndices, funcIndices, oldFuncToNewFuncMap } =
+        findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, updatedThread.funcTable);
+      cbo.onMergeFunctions(threadIndex, oldFuncToNewFuncMap);
 
       // Now list the func addresses that we want symbols for, and request them.
       return symbolStore.getSymbolsForAddressesInLib(funcAddrIndices, lib).then(funcNames => {
-        // We have the symbol names now. Add them to our string table and point
-        // to them from the funcTable.
-        updatedThread = setFuncNames(updatedThread, funcIndices, funcNames);
-        scheduleThreadUpdate();
+        cbo.onGotFuncNames(threadIndex, funcIndices, funcNames);
       });
     }).catch(error => {
       console.log(`Couldn't get symbols for library ${lib.pdbName} ${lib.breakpadId}`);
       console.error(error);
-      // console.error(error);
       // Don't throw, so that the resulting promise will be resolved, thereby
       // indicating that we're done symbolicating with lib.
     });
@@ -248,13 +245,6 @@ function symbolicateThread(thread, symbolStore, cbo) {
 export function symbolicateProfile(profile, symbolStore, cbo) {
   let updatedProfile = profile;
   return Promise.all(profile.threads.map((thread, threadIndex) => {
-    return symbolicateThread(thread, symbolStore, {
-      onUpdateThread: (updatedThread, oldFuncToNewFuncMap) => {
-        let threads = updatedProfile.threads.slice();
-        threads[threadIndex] = updatedThread;
-        updatedProfile = Object.assign({}, updatedProfile, { threads });
-        cbo.onUpdateProfile(updatedProfile);
-      }
-    });
+    return symbolicateThread(thread, threadIndex, symbolStore, cbo);
   }));
 }

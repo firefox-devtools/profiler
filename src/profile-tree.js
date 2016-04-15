@@ -1,4 +1,5 @@
 import { timeCode } from './time-code';
+import { createFuncStackTableAndFixupSamples } from './profile-data.js';
 
 class TreeNode {
   constructor(name, parent) {

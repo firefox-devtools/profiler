@@ -1,4 +1,4 @@
-import { SymbolStoreDBThreaded } from './symbol-store-db';
+import { SymbolStoreDB } from './symbol-store-db';
 
 export class SymbolStore {
   /**
@@ -11,7 +11,7 @@ export class SymbolStore {
    */
   constructor(dbNamePrefix, symbolProvider) {
     this._symbolProvider = symbolProvider;
-    this._db = new SymbolStoreDBThreaded(`${dbNamePrefix}-symbol-tables`);
+    this._db = new SymbolStoreDB(`${dbNamePrefix}-symbol-tables`);
 
     /**
      * A set of strings identifying libraries that we have requested

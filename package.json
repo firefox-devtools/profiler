@@ -6,32 +6,30 @@
   "scripts": {
     "test": "mocha --compilers js:babel-core/register",
     "start": "npm run build && npm run server",
-    "server": "live-server www --port=4242",
+    "server": "node server.js",
     "build": "npm-run-all --parallel build:*",
-    "build:bundle": "browserify src/index.js -t babelify -o www/bundle.js",
-    "build:db-worker": "browserify src/symbol-store-db-worker.js -t babelify -o www/symbol-store-db-worker.js",
-    "build:prpr-worker": "browserify src/profile-preprocessor-worker.js -t babelify -o www/profile-preprocessor-worker.js",
+    "build:bundle": "browserify index.js -t babelify -o dist/bundle.js",
     "watch": "npm-run-all --parallel watch:*",
-    "watch:bundle": "watchify src/index.js -t babelify -o www/bundle.js",
-    "watch:db-worker": "watchify src/symbol-store-db-worker.js -t babelify -o www/symbol-store-db-worker.js",
-    "watch:prpr-worker": "watchify src/profile-preprocessor-worker.js -t babelify -o www/profile-preprocessor-worker.js",
+    "watch:bundle": "watchify index.js -t babelify -o dist/bundle.js",
     "build-ugly": "npm-run-all --parallel build-ugly:*",
-    "build-ugly:bundle": "browserify src/index.js -t babelify -o 'uglifyjs -cm > www/bundle.js'",
-    "build-ugly:db-worker": "browserify src/symbol-store-db-worker.js -t babelify -o 'uglifyjs -cm > www/symbol-store-db-worker.js'",
-    "build-ugly:prpr-worker": "browserify src/profile-preprocessor-worker.js -t babelify -o 'uglifyjs -cm > www/profile-preprocessor-worker.js'"
+    "build-ugly:bundle": "browserify index.js -t babelify -o 'uglifyjs -cm > dist/bundle.js'",
+    "webpack": "webpack"
   },
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.2.0",
     "babel-core": "^6.2.1",
+    "babel-loader": "^6.2.4",
     "babel-polyfill": "^6.2.0",
     "babel-preset-es2015": "^6.1.18",
     "babel-preset-react": "^6.5.0",
+    "babel-preset-react-hmre": "^1.1.1",
     "babelify": "^7.2.0",
     "bisection": "0.0.3",
     "browserify": "^12.0.1",
     "chai": "^3.5.0",
+    "express": "^4.13.4",
     "live-server": "^0.8.2",
     "mocha": "^2.3.4",
     "npm-run-all": "^1.7.0",
@@ -42,12 +40,22 @@
     "redux": "^3.4.0",
     "uglify": "^0.1.5",
     "uglify-js": "^2.6.1",
-    "watchify": "^3.6.1"
+    "watchify": "^3.6.1",
+    "webpack": "^1.12.15",
+    "webpack-dev-middleware": "^1.6.1",
+    "webpack-hot-middleware": "^2.10.0"
   },
   "babel": {
     "presets": [
       "es2015",
       "react"
-    ]
+    ],
+    "env": {
+      "development": {
+        "presets": [
+          "react-hmre"
+        ]
+      }
+    }
   }
 }
