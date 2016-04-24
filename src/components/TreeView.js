@@ -23,7 +23,7 @@ const TreeViewRow = ({ node, nodeId, depth, fixedColumns, mainColumn, index, can
     if (event.target.classList.contains('treeRowToggleButton')) {
       onToggle(nodeId, !isExpanded, event.altKey === true);
     } else {
-      onClick(nodeId);
+      onClick(nodeId, event);
     }
   }
   return (
@@ -130,8 +130,11 @@ class TreeView extends Component {
     this.props.onSelectionChange(nodeId);
   }
 
-  _onRowClicked(nodeId) {
+  _onRowClicked(nodeId, event) {
     this._select(nodeId);
+    if (event.detail === 2) { // double click
+      this._toggle(nodeId);
+    }
   }
 
   _onKeyDown(event) {
