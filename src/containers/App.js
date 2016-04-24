@@ -13,8 +13,15 @@ import ReactUpdates from 'react/lib/ReactUpdates';
  * Cribbed from:
  * github.com/facebook/react/blob/master/src/addons/ReactRAFBatchingStrategy.js
  * github.com/petehunt/react-raf-batching/blob/master/ReactRAFBatching.js
+ * and adjusted so that tick() is only called if something actually changed.
  */
 
+let requestedAnimationFrame = false;
+
+function tick() {
+  requestedAnimationFrame = false;
+  ReactUpdates.flushBatchedUpdates();
+}
 
 var ReactRAFBatchingStrategy = {
   isBatchingUpdates: true,
@@ -25,19 +32,23 @@ var ReactRAFBatchingStrategy = {
    */
   batchedUpdates: function(callback, a, b, c, d, e, f) {
     callback(a, b, c, d, e, f);
+  },
+
+  onEnqueueUpdate: function() {
+    if (!requestedAnimationFrame) {
+      requestedAnimationFrame = true;
+      requestAnimationFrame(tick);
+    }
   }
 };
 
 ReactUpdates.injection.injectBatchingStrategy(ReactRAFBatchingStrategy);
-
-function tick() {
-  ReactUpdates.flushBatchedUpdates();
-  requestAnimationFrame(tick);
-}
-
-if (window && typeof window.requestAnimationFrame == 'function') {
-  window.requestAnimationFrame(tick);
-}
+const originalEnqueueUpdate = ReactUpdates.enqueueUpdate;
+ReactUpdates.enqueueUpdate = (a, b, c, d, e, f) => {
+  const result = originalEnqueueUpdate.call(ReactUpdates, a, b, c, d, e, f);
+  ReactRAFBatchingStrategy.onEnqueueUpdate();
+  return result;
+};
 
 class App extends Component {
   constructor(props) {
