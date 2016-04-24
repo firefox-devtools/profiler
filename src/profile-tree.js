@@ -1,5 +1,5 @@
 import { timeCode } from './time-code';
-import { createFuncStackTableAndFixupSamples } from './profile-data';
+import { getFuncStackInfo } from './profile-data';
 
 class ProfileTree {
   constructor(funcStackTable, funcTable, stringTable, rootTotalTime) {
@@ -61,7 +61,7 @@ class ProfileTree {
 export function getCallTree(thread, interval) {
   return timeCode('getCallTree', () => {
     const { funcStackTable, sampleFuncStacks } =
-      createFuncStackTableAndFixupSamples(thread.stackTable, thread.frameTable, thread.funcTable, thread.samples);
+      getFuncStackInfo(thread.stackTable, thread.frameTable, thread.funcTable, thread.samples);
 
     const funcStackSelfTime = new Float32Array(funcStackTable.length);
     const funcStackTotalTime = new Float32Array(funcStackTable.length);

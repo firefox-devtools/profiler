@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
-import { getCallTree } from '../profile-tree';
 import { connect } from 'react-redux';
-import { createFuncStackTableAndFixupSamples } from '../profile-data';
+import shallowCompare from 'react-addons-shallow-compare';
+import { getCallTree } from '../profile-tree';
 import { timeCode } from '../time-code';
 
 class Histogram extends Component {
@@ -9,6 +9,10 @@ class Histogram extends Component {
   constructor(props) {
     super(props);
     this._resizeListener = e => this.forceUpdate();
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
   }
 
   componentDidMount() {
@@ -23,7 +27,7 @@ class Histogram extends Component {
   }
 
   drawCanvas(c) {
-    const { thread, interval, rangeStart, rangeEnd } = this.props;
+    const { thread, interval, rangeStart, rangeEnd, funcStackInfo } = this.props;
 
     const devicePixelRatio = c.ownerDocument ? c.ownerDocument.defaultView.devicePixelRatio : 1;
     const r = c.getBoundingClientRect();
@@ -31,8 +35,7 @@ class Histogram extends Component {
     c.height = Math.round(r.height * devicePixelRatio);
     const ctx = c.getContext('2d');
     let maxDepth = 0;
-    const { funcStackTable, sampleFuncStacks } =
-      createFuncStackTableAndFixupSamples(thread.stackTable, thread.frameTable, thread.funcTable, thread.samples);
+    const { funcStackTable, sampleFuncStacks } = funcStackInfo;
     for (let i = 0; i < funcStackTable.depth.length; i++) {
       if (funcStackTable.depth[i] > maxDepth) {
         maxDepth = funcStackTable.depth[i];

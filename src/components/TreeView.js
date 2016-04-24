@@ -101,13 +101,22 @@ class TreeView extends Component {
     return !this._expandedNodeIds.has(nodeId);
   }
 
+  _expandAllDescendants(nodeId) {
+    this.props.tree.getChildren(nodeId).forEach(childId => {
+      this._expandedNodeIds.add(childId);
+      this._expandAllDescendants(childId);
+    });
+  }
+
   _toggle(nodeId, newExpanded = this._isCollapsed(nodeId), toggleAll = false) {
     if (newExpanded) {
       this._expandedNodeIds.add(nodeId);
+      if (toggleAll) {
+        this._expandAllDescendants(nodeId);
+      }
     } else {
       this._expandedNodeIds.delete(nodeId);
     }
-    this._selectedNodeId = nodeId;
     this.forceUpdate();
   }
 

@@ -18,8 +18,8 @@ export const resourceTypes = {
  * fixes up the funcStack field in the samples data.
  * @return object  The funcStackTable and the new samples object.
  */
-export function createFuncStackTableAndFixupSamples(stackTable, frameTable, funcTable, samples) {
-return timeCode('createFuncStackTableAndFixupSamples', () => {
+export function getFuncStackInfo(stackTable, frameTable, funcTable, samples) {
+return timeCode('getFuncStackInfo', () => {
   let stackIndexToFuncStackIndex = new Map();
   const funcCount = funcTable.length;
   let prefixFuncStackAndFuncToFuncStackMap = new Map(); // prefixFuncStack * funcCount + func => funcStack
