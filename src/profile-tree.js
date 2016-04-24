@@ -31,7 +31,7 @@ class ProfileTree {
   }
 
   hasChildren(funcStackIndex) {
-    return getChildren(funcStackIndex).length !== 0;
+    return this.getChildren(funcStackIndex).length !== 0;
   }
 
   /**

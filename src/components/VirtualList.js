@@ -1,8 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 
-const VirtualListRow = ({renderItem, item, index}) => {
-  return renderItem(item, index);
-}
+const VirtualListRow = ({renderItem, item, index}) => renderItem(item, index);
 
 class VirtualList extends Component {
 
@@ -41,11 +39,6 @@ class VirtualList extends Component {
 
     const range = this.computeVisibleRange();
     const { visibleRangeStart, visibleRangeEnd } = range;
-    const renderedRows = items.map((item, i) => {
-      if (i < visibleRangeStart || i >= visibleRangeEnd)
-        return;
-      return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item}/>
-    });
     return (
       <div className={className} ref='container'>
         <div className={`${className}Inner`} ref='inner'
@@ -56,7 +49,13 @@ class VirtualList extends Component {
           <div className={`${className}TopSpacer`}
                key={-1}
                style={{height: Math.max(0, visibleRangeStart) * itemHeight + 'px'}} />
-          {renderedRows}
+          {
+            items.map((item, i) => {
+              if (i < visibleRangeStart || i >= visibleRangeEnd)
+                return;
+              return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item}/>
+            })
+          }
         </div>
       </div>
     );

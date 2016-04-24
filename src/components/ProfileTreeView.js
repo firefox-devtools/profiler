@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import TreeView from './TreeView';
 import { getCallTree } from '../profile-tree';
 
-ProfileTreeView = ({ thread, depthLimit, interval }) => {
+const ProfileTreeView = ({ thread, depthLimit, interval }) => {
   return (
     <TreeView tree={getCallTree(thread, interval)}
               depthLimit={depthLimit}

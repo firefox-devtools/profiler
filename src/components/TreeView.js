@@ -1,22 +1,20 @@
 import React, { Component, PropTypes } from 'react';
 import VirtualList from './VirtualList';
 
-const TreeViewHeader = ({ fixedColumns, mainColumn }) => {
-  return (
-    <div className='treeViewHeader'>
-      {
-        fixedColumns.map(col =>
-          <span className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
-                key={col.propName}>
-            { col.title }
-          </span>)
-      }
-      <span className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}>
-        { mainColumn.title }
-      </span>
-    </div>
-  );
-}
+const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
+  <div className='treeViewHeader'>
+    {
+      fixedColumns.map(col =>
+        <span className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
+              key={col.propName}>
+          { col.title }
+        </span>)
+    }
+    <span className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}>
+      { mainColumn.title }
+    </span>
+  </div>
+);
 
 const TreeViewRow = ({ node, depth, fixedColumns, mainColumn, index, canBeExpanded, isExpanded }) => {
   const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
@@ -70,13 +68,13 @@ class TreeView extends Component {
       return [thisNodeRow];
     }
     const children = this.props.tree.getChildren(nodeId);
-    const addChildRows = (arr, child) => arr.concat(this.visibleRowsFromNode(child, depth + 1));
+    const addChildRows = (arr, child) => arr.concat(this.getVisibleRowsFromNode(child, depth + 1));
     return children.reduce(addChildRows, [thisNodeRow]);
   }
 
   getAllVisibleRows() {
     const roots = this.props.tree.getRoots();
-    const addRootRows = (arr, root) => arr.concat(visibleRowsFromNode(root, 0));
+    const addRootRows = (arr, root) => arr.concat(this.getVisibleRowsFromNode(root, 0));
     return roots.reduce(addRootRows, []);
   }
 
