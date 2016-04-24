@@ -1,0 +1,33 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  font: message-box;
+}
+
+.treeView {
+  width: 800px;
+  height: 400px;
+  overflow: auto;
+
+}
+
+.treeRow {
+  white-space: nowrap;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: flex-start;
+}
+
+.treeRowCol0 {
+  position: sticky;
+  left: 0px;
+}
+
+.treeRowCol {
+  overflow: hidden;
+}
+
+.histogram {
+  width: 800px;
+  height: 50px;
+}

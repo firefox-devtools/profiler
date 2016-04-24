@@ -20,15 +20,20 @@ export function createFuncStackTableAndFixupSamples(stackTable, frameTable, func
   let stackIndexToFuncStackIndex = new Map();
   const funcCount = funcTable.length;
   let prefixFuncStackAndFuncToFuncStackMap = new Map(); // prefixFuncStack * funcCount + func => funcStack
-  let funcStackTable = { length: 0, prefix: [], func: [] };
+  let funcStackTable = { length: 0, prefix: [], func: [], depth: [] };
   function addFuncStack(prefix, func) {
     const index = funcStackTable.length++;
     funcStackTable.prefix[index] = prefix;
     funcStackTable.func[index] = func;
+    if (prefix === -1) {
+      funcStackTable.depth[index] = 0;
+    } else {
+      funcStackTable.depth[index] = funcStackTable.depth[prefix] + 1;
+    }
   }
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefixStack = stackTable.prefix[stackIndex];
-    const prefixFuncStack = (prefixStack === null) ? null :
+    const prefixFuncStack = (prefixStack === null) ? -1 :
        stackIndexToFuncStackIndex.get(prefixStack);
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
@@ -41,9 +46,41 @@ export function createFuncStackTableAndFixupSamples(stackTable, frameTable, func
     }
     stackIndexToFuncStackIndex.set(stackIndex, funcStackIndex);
   }
+  funcStackTable.prefix = new Int32Array(funcStackTable.prefix);
+  funcStackTable.func = new Int32Array(funcStackTable.func);
 
   return {
     funcStackTable,
     sampleFuncStacks: samples.stack.map(stack => stackIndexToFuncStackIndex.get(stack))
   };
+}
+
+function getTimeRangeForThread(thread, interval) {
+  return { start: thread.samples.time[0], end: thread.samples.time[thread.samples.length - 1] + interval};
+}
+
+export function getTimeRangeIncludingAllThreads(profile) {
+  const completeRange = { start: Infinity, end: -Infinity };
+  profile.threads.forEach(thread => {
+    const threadRange = getTimeRangeForThread(thread, profile.meta.interval);
+    completeRange.start = Math.min(completeRange.start, threadRange.start);
+    completeRange.end = Math.max(completeRange.end, threadRange.end);
+  });
+  return completeRange;
+}
+
+export function defaultThreadOrder(threads) {
+  // Put the compositor thread last.
+  let threadOrder = threads.map((thread, i) => i);
+  threadOrder.sort((a, b) => {
+    const nameA = threads[a].name;
+    const nameB = threads[b].name;
+    console.log(nameA, nameB);
+    if (nameA === 'Compositor' && nameB !== 'Compositor')
+      return 1;
+    if (nameB === 'Compositor' && nameA !== 'Compositor')
+      return -1;
+    return a - b;
+  });
+  return threadOrder;
 }

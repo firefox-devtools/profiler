@@ -13,6 +13,9 @@ app.use(webpackHotMiddleware(compiler))
 app.get("/", function(req, res) {
   res.sendFile(__dirname + '/index.html')
 })
+app.get("/static/style.css", function(req, res) {
+  res.sendFile(__dirname + '/static/style.css')
+})
 
 app.get("/symbol-store-db-worker.js", function(req, res) {
   res.sendFile(__dirname + '/www/symbol-store-db-worker.js')

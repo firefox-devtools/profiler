@@ -1,59 +1,76 @@
 import { timeCode } from './time-code';
-import { createFuncStackTableAndFixupSamples } from './profile-data.js';
+import { createFuncStackTableAndFixupSamples } from './profile-data';
 
-class TreeNode {
-  constructor(name, parent) {
-    this._name = name;
-    this._parent = parent;
-    this._children = [];
-    this._leafSampleCount = 0;
-    this._totalSampleCount = 0;
+class ProfileTree {
+  constructor(funcStackTable, funcTable, stringTable, rootTotalTime) {
+    this._funcStackTable = funcStackTable;
+    this._funcTable = funcTable;
+    this._stringTable = stringTable;
+    this._rootTotalTime = rootTotalTime;
+    this._nodes = new Map();
+    this._children = new Map();
   }
 
-  addChild(node) {
-    this._children.push(node);
+  getRoots() {
+    return this.getChildren(-1);
   }
 
-  incrementSampleCountBy(increment) {
-    this._leafSampleCount += increment;
+  /**
+   * Return an array of funcStackIndex for the children of the node with index funcStackIndex.
+   * @param  {[type]} funcStackIndex [description]
+   * @return {[type]}                [description]
+   */
+  getChildren(funcStackIndex) {
+    let children = this._children.get(funcStackIndex);
+    if (children === undefined) {
+      children = this._funcStackTable.prefix.reduce((arr, prefix, childFuncStackIndex) => prefix === funcStackIndex ? arr.concat(childFuncStackIndex) : arr, []);
+      children.sort((a, b) => this._funcStackTable.totalTime[b] - this._funcStackTable.totalTime[a]);
+      this._children.set(funcStackIndex, children);
+    }
+    return children;
   }
 
-  postProcess() {
-    this._children = this._children.filter(child => {
-      child.postProcess();
-      return child._totalSampleCount !== 0
-    });
-    this._children.sort((a, b) => b._totalSampleCount - a._totalSampleCount);
-    this._totalSampleCount = this._leafSampleCount +
-      this._children.reduce((acc, child) => acc + child._totalSampleCount, 0);
+  /**
+   * Return an object with information about the node with index funcStackIndex.
+   * @param  {[type]} funcStackIndex [description]
+   * @return {[type]}                [description]
+   */
+  getNode(funcStackIndex) {
+    let node = this._nodes.get(funcStackIndex);
+    if (node === undefined) {
+      node = {
+        leafTime: this._funcStackTable.leafTime[funcStackIndex],
+        totalTime: this._funcStackTable.totalTime[funcStackIndex],
+        name: this._stringTable.getString(this._funcTable.name[this._funcStackTable.func[funcStackIndex]]),
+      };
+      this._nodes.set(funcStackIndex, node);
+    }
+    return node;
   }
-}
+};
 
 export function getCallTree(thread) {
   return timeCode('getCallTree', () => {
-    let root = new TreeNode('(root)');
-    let nodes = new Map();
-    nodes.set(null, root);
     const { funcStackTable, sampleFuncStacks } =
       createFuncStackTableAndFixupSamples(thread.stackTable, thread.frameTable, thread.funcTable, thread.samples);
-    for (let funcStackIndex = 0; funcStackIndex < funcStackTable.length; funcStackIndex++) {
-      const prefix = funcStackTable.prefix[funcStackIndex];
-      const funcIndex = funcStackTable.func[funcStackIndex];
-      if (funcIndex === null) {
-        console.log('funcIndex is null', funcStackIndex, data);
+
+    const funcStackLeafTime = new Float32Array(funcStackTable.length);
+    const funcStackTotalTime = new Float32Array(funcStackTable.length);
+    const interval = 1;
+    for (let sampleIndex = 0; sampleIndex < sampleFuncStacks.length; sampleIndex++) {
+      funcStackLeafTime[sampleFuncStacks[sampleIndex]] += interval;
+    }
+    let rootTotalTime = 0;
+    for (let funcStackIndex = funcStackTotalTime.length - 1; funcStackIndex >= 0; funcStackIndex--) {
+      funcStackTotalTime[funcStackIndex] += funcStackLeafTime[funcStackIndex];
+      const prefixFuncStack = funcStackTable.prefix[funcStackIndex];
+      if (prefixFuncStack === -1) {
+        rootTotalTime += funcStackTotalTime[funcStackIndex];
+      } else {
+        funcStackTotalTime[prefixFuncStack] += funcStackTotalTime[funcStackIndex];
       }
-      let parentNode = nodes.get(prefix);
-      let funcNameStringIndex = thread.funcTable.name[funcIndex];
-      let funcName = thread.stringTable.getString(funcNameStringIndex);
-      let node = new TreeNode(funcName, parentNode);
-      parentNode.addChild(node);
-      nodes.set(funcStackIndex, node);
     }
-    for (let sampleIndex = 0; sampleIndex < thread.samples.length; sampleIndex++) {
-      const funcStack = sampleFuncStacks[sampleIndex];
-      nodes.get(funcStack).incrementSampleCountBy(1);
-    }
-    root.postProcess();
-    return root;
+    const newFuncStackTable = Object.assign({}, funcStackTable, { leafTime: funcStackLeafTime, totalTime: funcStackTotalTime });
+    return new ProfileTree(newFuncStackTable, thread.funcTable, thread.stringTable, rootTotalTime);
   });
 }

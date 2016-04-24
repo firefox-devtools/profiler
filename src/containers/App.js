@@ -1,10 +1,43 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { preprocessProfile } from '../preprocess-profile';
+import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
 import * as Actions from '../actions';
-import TreeView from '../components/TreeView';
+import ProfileViewer from '../components/ProfileViewer';
+import ReactUpdates from 'react/lib/ReactUpdates';
+
+/*eslint-env browser*/
+/**
+ * Cribbed from:
+ * github.com/facebook/react/blob/master/src/addons/ReactRAFBatchingStrategy.js
+ * github.com/petehunt/react-raf-batching/blob/master/ReactRAFBatching.js
+ */
+
+
+var ReactRAFBatchingStrategy = {
+  isBatchingUpdates: true,
+
+  /**
+   * Call the provided function in a context within which calls to `setState`
+   * and friends are batched such that components aren't updated unnecessarily.
+   */
+  batchedUpdates: function(callback, a, b, c, d, e, f) {
+    callback(a, b, c, d, e, f);
+  }
+};
+
+ReactUpdates.injection.injectBatchingStrategy(ReactRAFBatchingStrategy);
+
+function tick() {
+  ReactUpdates.flushBatchedUpdates();
+  requestAnimationFrame(tick);
+}
+
+if (window && typeof window.requestAnimationFrame == 'function') {
+  window.requestAnimationFrame(tick);
+}
 
 class App extends Component {
   constructor(props) {
@@ -49,14 +82,13 @@ class App extends Component {
   }
 
   render() {
-    const { profile, status } = this.props;
-    if (status !== 'DONE') {
+    const { view, profileView } = this.props;
+    if (view !== 'PROFILE') {
       return (<div></div>);
     }
+    const { profile, viewOptions } = profileView;
     return (
-      <div>
-        <TreeView thread={profile.threads[0]} depthLimit={20} />
-      </div>
+      <ProfileViewer profile={profile} viewOptions={viewOptions}/>
     );
   }
 };

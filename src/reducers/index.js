@@ -1,12 +1,8 @@
 import { applyFunctionMerging, setFuncNames } from '../symbolication';
+import { defaultThreadOrder } from '../profile-data';
 
-export default function reducer(state, action) {
-  console.log('processing an action');
+function profileViewReducer(state, action) {
   switch (action.type) {
-    case 'WAITING_FOR_PROFILE_FROM_ADDON':
-      return { status: 'WAITING_FOR_PROFILE' };
-    case 'RECEIVE_PROFILE_FROM_ADDON':
-      return { status: 'DONE', profile: action.profile };
     case 'PROFILE_SYMBOLICATION_STEP':
       return Object.assign({}, state, { profile: action.profile });
     case 'START_SYMBOLICATING':
@@ -40,6 +36,36 @@ export default function reducer(state, action) {
       return Object.assign({}, state, { profile });
     }
     default:
+      return state;
+  }
+}
+
+export default function reducer(state, action) {
+  console.log('processing an action');
+  switch (action.type) {
+    case 'WAITING_FOR_PROFILE_FROM_ADDON':
+      return { status: 'WAITING_FOR_PROFILE' };
+    case 'RECEIVE_PROFILE_FROM_ADDON':
+      return {
+        status: 'DONE',
+        view: 'PROFILE',
+        profileView: {
+          viewOptions: {
+            threadOrder: defaultThreadOrder(action.profile.threads),
+            selectedFuncStack: null,
+            symbolicationStatus: null,
+          },
+          profile: action.profile
+        },
+      };
+    default:
+      if ('profileView' in state) {
+        const profileView = profileViewReducer(state.profileView, action);
+        if (profileView !== state.profileView) {
+          return Object.assign({}, state, { profileView });
+        }
+        return state;
+      }
       return state;
   }
 }
