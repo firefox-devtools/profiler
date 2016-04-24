@@ -88,7 +88,7 @@ class App extends Component {
     }
     const { profile, viewOptions } = profileView;
     return (
-      <ProfileViewer profile={profile} viewOptions={viewOptions}/>
+      <ProfileViewer profile={profile} viewOptions={viewOptions} className='profileViewer'/>
     );
   }
 };

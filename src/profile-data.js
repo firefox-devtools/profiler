@@ -1,3 +1,5 @@
+import { timeCode } from './time-code';
+
 /**
  * Various helpers for dealing with the profile as a data structure.
  */
@@ -17,6 +19,7 @@ export const resourceTypes = {
  * @return object  The funcStackTable and the new samples object.
  */
 export function createFuncStackTableAndFixupSamples(stackTable, frameTable, funcTable, samples) {
+return timeCode('createFuncStackTableAndFixupSamples', () => {
   let stackIndexToFuncStackIndex = new Map();
   const funcCount = funcTable.length;
   let prefixFuncStackAndFuncToFuncStackMap = new Map(); // prefixFuncStack * funcCount + func => funcStack
@@ -48,11 +51,13 @@ export function createFuncStackTableAndFixupSamples(stackTable, frameTable, func
   }
   funcStackTable.prefix = new Int32Array(funcStackTable.prefix);
   funcStackTable.func = new Int32Array(funcStackTable.func);
+  funcStackTable.depth = new Uint32Array(funcStackTable.depth);
 
   return {
     funcStackTable,
     sampleFuncStacks: samples.stack.map(stack => stackIndexToFuncStackIndex.get(stack))
   };
+});
 }
 
 function getTimeRangeForThread(thread, interval) {

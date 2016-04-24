@@ -1,78 +1,98 @@
 import React, { Component, PropTypes } from 'react';
-import { getCallTree } from '../profile-tree';
-import { connect } from 'react-redux';
-import TreeRow from './TreeRow';
+import VirtualList from './VirtualList';
 
-class VirtualList extends Component {
-  computeVisibleRange() {
-    if (!this.refs.container) {
-      return {firstVisible: 0, lastVisible: 100};
-    }
-    const outerRect = this.refs.container.getBoundingClientRect();
-    const innerRect = this.refs.inner.getBoundingClientRect();
-    const overscan = 20;
-    const chunkSize = 16;
-    let firstVisible = Math.floor((outerRect.top - innerRect.top) / this.props.itemHeight) - overscan;
-    firstVisible = Math.floor(firstVisible / chunkSize) * chunkSize;
-    let lastVisible = Math.ceil((outerRect.bottom - innerRect.top) / this.props.itemHeight) + overscan;
-    lastVisible = Math.ceil(lastVisible / chunkSize) * chunkSize;
-    return {firstVisible, lastVisible};
-  }
-  componentDidMount() {
-    this.refs.container.addEventListener('scroll', e => this.forceUpdate());
-    this.forceUpdate(); // for initial size
-  }
-  render() {
-    const range = this.computeVisibleRange();
-    const { firstVisible, lastVisible } = range;
-    const renderedRows = this.props.items.map((item, i) => {
-      if (i < firstVisible || i > lastVisible)
-        return;
-      return <div className={this.props.className+'Row'}
-                   key={i}
-                   style={{height: this.props.itemHeight + 'px'}}>
-                {this.props.renderItem(item)}
-            </div>
-    });
-    return (<div className={this.props.className} ref='container'>
-      <div className={this.props.className + 'Inner'} ref='inner'
-            style={{
-              height: `${this.props.items.length * this.props.itemHeight}px`,
-              width: '3000px'
-            }}>
-        <div className={this.props.className + 'TopSpacer'} key={-1} style={{height: Math.max(0, firstVisible) * this.props.itemHeight + 'px'}}/>
-        {renderedRows}
-      </div>
-    </div>);
-  }
+const TreeViewHeader = ({ fixedColumns, mainColumn }) => {
+  return (
+    <div className='treeViewHeader'>
+      {
+        fixedColumns.map(col =>
+          <span className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
+                key={col.propName}>
+            { col.title }
+          </span>)
+      }
+      <span className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}>
+        { mainColumn.title }
+      </span>
+    </div>
+  );
 }
 
+const TreeViewRow = ({ node, depth, fixedColumns, mainColumn, index, canBeExpanded, isExpanded }) => {
+  const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
+  return (
+    <div className={`treeViewRow ${evenOddClassName}`} style={{height: '16px'}}>
+      {
+        fixedColumns.map(col =>
+          <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
+                key={col.propName}>
+            { node[col.propName] }
+          </span>)
+      }
+      <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}
+            style={{ marginLeft: `${depth * 10}px` }}>
+        { node[mainColumn.propName] }
+      </span>
+    </div>
+  );
+};
+
 class TreeView extends Component {
+
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
+    this.state = {
+      expandedNodeIds: new Set(),
+    };
   }
-  renderRow({ node, depth }) {
-    return <TreeRow node={this._tree.getNode(node)} depth={depth}/>;
-  }
-  render() {
-    const { thread, depthLimit } = this.props;
-    this._tree = getCallTree(thread);
-    const tree = this._tree;
-    function visibleRowsFromNode(node, depth) {
-      const visible = (depth <= depthLimit);
-      if (!visible) {
-        return [];
-      }
-      return tree.getChildren(node).reduce((arr, child) => arr.concat(visibleRowsFromNode(child, depth + 1)),
-              [{ node, depth }]);
-    }
-    const visibleRows = tree.getRoots().reduce((arr, root) => arr.concat(visibleRowsFromNode(root, 0)), []);
+
+  renderRow({ nodeId, depth }, index) {
+    const node = this.props.tree.getNode(nodeId);
+    const canBeExpanded = this.props.tree.hasChildren(nodeId);
+    const isExpanded = this.state.expandedNodeIds.has(nodeId);
     return (
-      <VirtualList className='treeView' items={visibleRows}
-          renderItem={this.renderRow}
-          itemHeight={15}/>
+      <TreeViewRow node={node}
+                   fixedColumns={this.props.fixedColumns}
+                   mainColumn={this.props.mainColumn}
+                   depth={depth}
+                   nodeId={nodeId}
+                   index={index}
+                   canBeExpanded={canBeExpanded}
+                   isExpanded={isExpanded} />
     );
   }
+
+  getVisibleRowsFromNode(nodeId, depth) {
+    const isExpanded = this.state.expandedNodeIds.has(nodeId);
+    const thisNodeRow = { nodeId, depth };
+    if (!isExpanded) {
+      return [thisNodeRow];
+    }
+    const children = this.props.tree.getChildren(nodeId);
+    const addChildRows = (arr, child) => arr.concat(this.visibleRowsFromNode(child, depth + 1));
+    return children.reduce(addChildRows, [thisNodeRow]);
+  }
+
+  getAllVisibleRows() {
+    const roots = this.props.tree.getRoots();
+    const addRootRows = (arr, root) => arr.concat(visibleRowsFromNode(root, 0));
+    return roots.reduce(addRootRows, []);
+  }
+
+  render() {
+    return (
+      <div className='treeView'>
+        <TreeViewHeader fixedColumns={this.props.fixedColumns}
+                         mainColumn={this.props.mainColumn}/>
+        <VirtualList className='treeViewBody'
+                     items={this.getAllVisibleRows()}
+                     renderItem={this.renderRow}
+                     itemHeight={16}/>
+      </div>
+    );
+  }
+
 };
-export default connect()(TreeView);
+
+export default TreeView;

@@ -2,32 +2,112 @@ html, body {
   margin: 0;
   padding: 0;
   font: message-box;
+  height: 100%;
+}
+
+body, #root, .profileViewer {
+  display: flex;
+  flex-flow: column nowrap;
+  flex: 1;
 }
 
 .treeView {
-  width: 800px;
-  height: 400px;
-  overflow: auto;
-
+  display: flex;
+  flex-flow: column nowrap;
+  flex: 1;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  cursor: default;
+  border-top: 1px solid #D6D6D6;
 }
 
-.treeRow {
+.treeViewHeader {
+  padding: 1px 0;
+  border-bottom: 1px solid #D6D6D6;
+  position: relative;
+  height: 16px;
+  background: white;
+}
+
+.treeViewHeaderMainColumn {
+  flex: 1;
+}
+
+.treeViewBody {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.treeViewBodyInner {
+  position: absolute;
+}
+
+.treeViewRow {
   white-space: nowrap;
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
 }
 
-.treeRowCol0 {
-  position: sticky;
-  left: 0px;
+.treeViewHeaderColumn {
+  position: absolute;
+  box-sizing: border-box;
+  padding: 1px 5px;
+  top: 0;
+  bottom: 0;
+}
+.treeViewHeaderColumn.treeViewFixedColumn::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 0;
+  bottom: 3px;
+  width: 1px;
+  background: #E5E5E5;
 }
 
-.treeRowCol {
+.treeViewRowColumn.treeViewFixedColumn {
+  position: sticky;
+  box-sizing: border-box;
+  border-right: 1px solid #D6D6D6;
+}
+.treeViewFixedColumn.totalTime {
+  left: 0px;
+  width: 70px;
+  border-right: none;
+}
+.treeViewFixedColumn.totalTimePercent {
+  left: 70px;
+  width: 50px;
+}
+.treeViewFixedColumn.selfTime {
+  left: 120px;
+  width: 70px;
+}
+.treeViewHeaderColumn.totalTime {
+  width: 120px;
+}
+.treeViewRowColumn.totalTime,
+.treeViewRowColumn.totalTimePercent,
+.treeViewRowColumn.selfTime {
+  text-align: right;
+  padding-right: 5px;
+}
+
+.treeViewRowColumn.treeViewMainColumn {
+  flex: 1;
   overflow: hidden;
 }
 
+.treeViewRow.even, .treeViewRow.even > .treeViewFixedColumn {
+  background-color: #FFFFFF;
+}
+.treeViewRow.odd, .treeViewRow.odd > .treeViewFixedColumn {
+  background-color: #F5F5F5;
+}
+
 .histogram {
-  width: 800px;
-  height: 50px;
+  height: 40px;
 }

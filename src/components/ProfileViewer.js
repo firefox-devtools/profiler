@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { getTimeRangeIncludingAllThreads } from '../profile-data';
-import TreeView from '../components/TreeView';
+import ProfileTreeView from '../components/ProfileTreeView';
 import Histogram from '../components/Histogram';
 
 class ProfileViewer extends Component {
@@ -15,8 +15,19 @@ class ProfileViewer extends Component {
     const treeThread = profile.threads[viewOptions.threadOrder[Math.max(0, profile.threads.length - 2)]];
     return (
       <div className={className}>
-        {viewOptions.threadOrder.map(threadIndex => <Histogram key={threadIndex} interval={profile.meta.interval} thread={profile.threads[threadIndex]} className='histogram' rangeStart={timeRange.start} rangeEnd={timeRange.end}/>)}
-        <TreeView thread={treeThread} depthLimit={40} />
+        {
+          viewOptions.threadOrder.map(threadIndex =>
+            <Histogram key={threadIndex}
+                       interval={profile.meta.interval}
+                       thread={profile.threads[threadIndex]}
+                       className='histogram'
+                       rangeStart={timeRange.start}
+                       rangeEnd={timeRange.end}/>
+          )
+        }
+        <ProfileTreeView thread={treeThread}
+                         interval={profile.meta.interval}
+                         depthLimit={40} />
       </div>
     );
   }

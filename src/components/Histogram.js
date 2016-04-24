@@ -6,51 +6,66 @@ import { timeCode } from '../time-code';
 
 class Histogram extends Component {
 
-  componentDidMount() {
-    if (this.refs.canvas && this.refs.canvas.ownerDocument) {
-      const win = this.refs.canvas.ownerDocument.defaultView;
-      win.addEventListener('resize', e => this.forceUpdate());
-      this.forceUpdate(); // for initial size
-    }
+  constructor(props) {
+    super(props);
+    this._resizeListener = e => this.forceUpdate();
   }
+
+  componentDidMount() {
+    const win = this.refs.canvas.ownerDocument.defaultView;
+    win.addEventListener('resize', this._resizeListener);
+    this.forceUpdate(); // for initial size
+  }
+
+  componentWillUnmount() {
+    const win = this.refs.canvas.ownerDocument.defaultView;
+    win.removeEventListener('resize', this._resizeListener);
+  }
+
+  drawCanvas(c) {
+    const { thread, interval, rangeStart, rangeEnd } = this.props;
+
+    const devicePixelRatio = c.ownerDocument ? c.ownerDocument.defaultView.devicePixelRatio : 1;
+    const r = c.getBoundingClientRect();
+    c.width = Math.round(r.width * devicePixelRatio);
+    c.height = Math.round(r.height * devicePixelRatio);
+    const ctx = c.getContext('2d');
+    let maxDepth = 0;
+    const { funcStackTable, sampleFuncStacks } =
+      createFuncStackTableAndFixupSamples(thread.stackTable, thread.frameTable, thread.funcTable, thread.samples);
+    for (let i = 0; i < funcStackTable.depth.length; i++) {
+      if (funcStackTable.depth[i] > maxDepth) {
+        maxDepth = funcStackTable.depth[i];
+      }
+    }
+    const range = [rangeStart, rangeEnd];
+    const rangeLength = range[1] - range[0];
+    const xPixelsPerMs = c.width / rangeLength;
+    const yPixelsPerDepth = c.height / maxDepth;
+    const intervalMs = interval * 1.5;
+    for (let i = 0; i < sampleFuncStacks.length; i++) {
+      const sampleTime = thread.samples.time[i];
+      if (sampleTime + intervalMs < range[0] || sampleTime > range[1])
+        continue;
+      const funcStack = sampleFuncStacks[i];
+      const sampleHeight = funcStackTable.depth[funcStack] * yPixelsPerDepth;
+      const startY = c.height - sampleHeight;
+      const responsiveness = thread.samples.responsiveness[i];
+      const jankSeverity = Math.min(1, responsiveness / 100);
+      ctx.fillStyle = `rgb(${Math.round(255 * jankSeverity)}, 0, 0)`;
+      ctx.fillRect((sampleTime - range[0]) * xPixelsPerMs, startY, intervalMs * xPixelsPerMs, sampleHeight);
+    }
+
+  }
+
   render() {
     if (this.refs.canvas) {
       timeCode('histogram render', () => {
-        const c = this.refs.canvas;
-        const devicePixelRatio = c.ownerDocument ? c.ownerDocument.defaultView.devicePixelRatio : 1;
-        const r = c.getBoundingClientRect();
-        c.width = Math.round(r.width * devicePixelRatio);
-        c.height = Math.round(r.height * devicePixelRatio);
-        const ctx = c.getContext('2d');
-        let maxDepth = 0;
-        const thread = this.props.thread;
-        const { funcStackTable, sampleFuncStacks } =
-          createFuncStackTableAndFixupSamples(thread.stackTable, thread.frameTable, thread.funcTable, thread.samples);
-        for (let i = 0; i < funcStackTable.depth.length; i++) {
-          if (funcStackTable.depth[i] > maxDepth) {
-            maxDepth = funcStackTable.depth[i];
-          }
-        }
-        const range = [this.props.rangeStart, this.props.rangeEnd];
-        const rangeLength = range[1] - range[0];
-        const xPixelsPerMs = c.width / rangeLength;
-        const yPixelsPerDepth = c.height / maxDepth;
-        const intervalMs = this.props.interval * 1.5;
-        for (let i = 0; i < sampleFuncStacks.length; i++) {
-          const sampleTime = thread.samples.time[i];
-          if (sampleTime + intervalMs < range[0] || sampleTime > range[1])
-            continue;
-          const funcStack = sampleFuncStacks[i];
-          const sampleHeight = funcStackTable.depth[funcStack] * yPixelsPerDepth;
-          const startY = c.height - sampleHeight;
-          const responsiveness = thread.samples.responsiveness[i];
-          const jankSeverity = Math.min(1, responsiveness / 100);
-          ctx.fillStyle = `rgb(${Math.round(255 * jankSeverity)}, 0, 0)`;
-          ctx.fillRect((sampleTime - range[0]) * xPixelsPerMs, startY, intervalMs * xPixelsPerMs, sampleHeight);
-        }
+        this.drawCanvas(this.refs.canvas);
       });
     }
     return <canvas className={this.props.className} ref='canvas'/>;
   }
+
 }
 export default Histogram;
