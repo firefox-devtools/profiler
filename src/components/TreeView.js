@@ -35,8 +35,8 @@ const TreeViewRow = ({ node, nodeId, depth, fixedColumns, mainColumn, index, can
             { node[col.propName] }
           </span>)
       }
-      <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`}
-            style={{ marginLeft: `${depth * 10}px` }}/>
+      <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
+      <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
       <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
         { node[mainColumn.propName] }
       </span>
@@ -52,10 +52,8 @@ class TreeView extends Component {
     this._toggle = this._toggle.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onRowClicked = this._onRowClicked.bind(this);
-    this.state = {
-      expandedNodeIds: new Set(),
-      selectedNodeId: -1
-    };
+    this._expandedNodeIds = new Set();
+    this._selectedNodeId = -1;
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -64,10 +62,9 @@ class TreeView extends Component {
 
   _renderRow({ nodeId, depth }, index) {
     const { tree } = this.props;
-    const { selectedNodeId, expandedNodeIds } = this.state;
     const node = tree.getNode(nodeId);
     const canBeExpanded = tree.hasChildren(nodeId);
-    const isExpanded = expandedNodeIds.has(nodeId);
+    const isExpanded = this._expandedNodeIds.has(nodeId);
     return (
       <TreeViewRow node={node}
                    fixedColumns={this.props.fixedColumns}
@@ -78,13 +75,13 @@ class TreeView extends Component {
                    canBeExpanded={canBeExpanded}
                    isExpanded={isExpanded}
                    onToggle={this._toggle}
-                   selected={nodeId === selectedNodeId}
+                   selected={nodeId === this._selectedNodeId}
                    onClick={this._onRowClicked}/>
     );
   }
 
   _getVisibleRowsFromNode(nodeId, depth) {
-    const isExpanded = this.state.expandedNodeIds.has(nodeId);
+    const isExpanded = this._expandedNodeIds.has(nodeId);
     const thisNodeRow = { nodeId, depth };
     if (!isExpanded) {
       return [thisNodeRow];
@@ -101,19 +98,17 @@ class TreeView extends Component {
   }
 
   _isCollapsed(nodeId) {
-    return !this.state.expandedNodeIds.has(nodeId);
+    return !this._expandedNodeIds.has(nodeId);
   }
 
   _toggle(nodeId, newExpanded = this._isCollapsed(nodeId), toggleAll = false) {
     if (newExpanded) {
-      const newExpandedNodeIds = new Set(this.state.expandedNodeIds);
-      newExpandedNodeIds.add(nodeId);
-      this.setState({expandedNodeIds: newExpandedNodeIds});
+      this._expandedNodeIds.add(nodeId);
     } else {
-      const newExpandedNodeIds = new Set(this.state.expandedNodeIds);
-      newExpandedNodeIds.delete(nodeId);
-      this.setState({expandedNodeIds: newExpandedNodeIds});
+      this._expandedNodeIds.delete(nodeId);
     }
+    this._selectedNodeId = nodeId;
+    this.forceUpdate();
   }
 
   _toggleAll(nodeId, newExpanded = this._isCollapsed(nodeId)) {
@@ -121,7 +116,8 @@ class TreeView extends Component {
   }
 
   _select(nodeId) {
-    this.setState({ selectedNodeId: nodeId });
+    this._selectedNodeId = nodeId;
+    this.forceUpdate();
     this.props.onSelectionChange(nodeId);
   }
 
@@ -130,7 +126,6 @@ class TreeView extends Component {
   }
 
   _onKeyDown(event) {
-    console.log('keydown', event);
 
     if (event.ctrlKey || event.altKey || event.metaKey)
       return;
@@ -144,7 +139,7 @@ class TreeView extends Component {
     event.stopPropagation();
     event.preventDefault();
 
-    const selected = this.state.selectedNodeId;
+    const selected = this._selectedNodeId;
     const visibleRows = this._getAllVisibleRows();
     const selectedRowIndex = visibleRows.findIndex(({nodeId}) => nodeId === selected);
 
