@@ -19,9 +19,9 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
 
 const TreeViewRow = ({ node, nodeId, depth, fixedColumns, mainColumn, index, canBeExpanded, isExpanded, onToggle, selected, onClick }) => {
   const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
-  const clickHandler = e => {
-    if (e.target.classList.contains('treeRowToggleButton')) {
-      onToggle(nodeId, !isExpanded, e.altKey === true);
+  const clickHandler = event => {
+    if (event.target.classList.contains('treeRowToggleButton')) {
+      onToggle(nodeId, !isExpanded, event.altKey === true);
     } else {
       onClick(nodeId);
     }
