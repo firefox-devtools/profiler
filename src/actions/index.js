@@ -55,3 +55,10 @@ export function assignFunctionNames(threadIndex, funcIndices, funcNames) {
     threadIndex, funcIndices, funcNames
   };
 }
+
+export function changeSelectedFuncStack(selectedFuncStack) {
+  return {
+    type: 'CHANGE_SELECTED_FUNC_STACK',
+    selectedFuncStack
+  };
+}

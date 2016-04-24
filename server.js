@@ -16,6 +16,9 @@ app.get("/", function(req, res) {
 app.get("/static/style.css", function(req, res) {
   res.sendFile(__dirname + '/static/style.css')
 })
+app.get("/static/treetwisty.svg", function(req, res) {
+  res.sendFile(__dirname + '/static/treetwisty.svg')
+})
 
 app.get("/symbol-store-db-worker.js", function(req, res) {
   res.sendFile(__dirname + '/www/symbol-store-db-worker.js')

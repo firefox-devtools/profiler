@@ -35,12 +35,12 @@ class VirtualList extends Component {
   }
 
   render() {
-    const { itemHeight, className, renderItem, items } = this.props;
+    const { itemHeight, className, renderItem, items, focusable, onKeyDown } = this.props;
 
     const range = this.computeVisibleRange();
     const { visibleRangeStart, visibleRangeEnd } = range;
     return (
-      <div className={className} ref='container'>
+      <div className={className} ref='container' tabIndex={ focusable ? 0 : -1 } onKeyDown={onKeyDown}>
         <div className={`${className}Inner`} ref='inner'
               style={{
                 height: `${items.length * itemHeight}px`,

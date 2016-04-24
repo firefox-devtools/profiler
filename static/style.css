@@ -38,6 +38,8 @@ body, #root, .profileViewer {
   flex: 1;
   overflow: auto;
   position: relative;
+  outline: 0;
+  will-change: scroll-position;
 }
 
 .treeViewBodyInner {
@@ -106,6 +108,69 @@ body, #root, .profileViewer {
 }
 .treeViewRow.odd, .treeViewRow.odd > .treeViewFixedColumn {
   background-color: #F5F5F5;
+}
+.treeViewRow.selected,
+.treeViewRow.selected > .treeViewFixedColumn {
+  background-color: -moz-dialog;
+  color: black;
+}
+.treeViewBody:focus > * > .treeViewRow.selected,
+.treeViewBody:focus > * > .treeViewRow.selected > .treeViewFixedColumn {
+  background-color: highlight;
+  color: highlighttext;
+}
+
+
+.treeRowToggleButton,
+.focusCallstackButton {
+  background: none 0 0 no-repeat transparent;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: 16px;
+  height: 16px;
+  overflow: hidden;
+  vertical-align: top;
+  color: transparent;
+}
+
+.treeRowToggleButton {
+  background-image: url(./treetwisty.svg);
+}
+
+.treeRowToggleButton:active:hover,
+.focusCallstackButton:active:hover {
+  background-position: -16px 0;
+}
+
+.treeRowToggleButton.collapsed {
+  background-position: 0 -16px;
+}
+
+.treeRowToggleButton.collapsed:active:hover {
+  background-position: -16px -16px;
+}
+
+.treeViewBody:focus > * > .treeViewRow.selected > .treeRowToggleButton,
+.treeViewBody:focus > * > .treeViewRow.selected > .focusCallstackButton {
+  background-position: -32px 0;
+}
+
+.treeViewBody:focus > * > .treeViewRow.selected > .treeRowToggleButton.collapsed {
+  background-position: -32px -16px;
+}
+
+.treeViewBody:focus > * > .treeViewRow.selected > .treeRowToggleButton:active:hover,
+.treeViewBody:focus > * > .treeViewRow.selected > .focusCallstackButton:active:hover {
+  background-position: -48px 0;
+}
+
+.treeViewBody:focus > * > .treeViewRow.selected > .treeRowToggleButton.collapsed:active:hover {
+  background-position: -48px -16px;
+}
+
+.treeRowToggleButton.leaf {
+  visibility: hidden;
 }
 
 .histogram {

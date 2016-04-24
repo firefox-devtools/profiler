@@ -26,8 +26,7 @@ class ProfileViewer extends Component {
           )
         }
         <ProfileTreeView thread={treeThread}
-                         interval={profile.meta.interval}
-                         depthLimit={40} />
+                         interval={profile.meta.interval} />
       </div>
     );
   }

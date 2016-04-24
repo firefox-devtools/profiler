@@ -35,6 +35,10 @@ function profileViewReducer(state, action) {
       const profile = Object.assign({}, state.profile, { threads });
       return Object.assign({}, state, { profile });
     }
+    case 'CHANGE_SELECTED_FUNC_STACK':
+      const { selectedFuncStack } = action;
+      const viewOptions = Object.assign({}, state.viewOptions, { selectedFuncStack });
+      return Object.assign({}, state, { viewOptions });
     default:
       return state;
   }

@@ -34,6 +34,10 @@ class ProfileTree {
     return this.getChildren(funcStackIndex).length !== 0;
   }
 
+  getParent(funcStackIndex) {
+    return this._funcStackTable.prefix[funcStackIndex];
+  }
+
   /**
    * Return an object with information about the node with index funcStackIndex.
    * @param  {[type]} funcStackIndex [description]
