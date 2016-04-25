@@ -147,12 +147,8 @@ return timeCode('filterThreadToJSOnly', () => {
     return newStackIndex;
   }
 
-  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    convertStack(stackIndex);
-  }
-
   const newSamples = Object.assign({}, thread.samples, {
-    stack: thread.samples.stack.map(oldStack => oldStackToNewStack.get(oldStack))
+    stack: thread.samples.stack.map(oldStack => convertStack(oldStack))
   });
 
   return Object.assign({}, thread, {
