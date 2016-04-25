@@ -17,31 +17,46 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
   </div>
 );
 
-const TreeViewRow = ({ node, nodeId, depth, fixedColumns, mainColumn, index, canBeExpanded, isExpanded, onToggle, selected, onClick }) => {
-  const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
-  const clickHandler = event => {
+class TreeViewRow extends Component {
+
+  constructor(props) {
+    super(props);
+    this._onClick = this._onClick.bind(this);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
+
+  _onClick(event) {
+    const { nodeId, isExpanded, onToggle, onClick } = this.props;
     if (event.target.classList.contains('treeRowToggleButton')) {
       onToggle(nodeId, !isExpanded, event.altKey === true);
     } else {
       onClick(nodeId, event);
     }
   }
-  return (
-    <div className={`treeViewRow ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onClick={clickHandler}>
-      {
-        fixedColumns.map(col =>
-          <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
-                key={col.propName}>
-            { node[col.propName] }
-          </span>)
-      }
-      <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
-      <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
-      <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
-        { node[mainColumn.propName] }
-      </span>
-    </div>
-  );
+
+  render() {
+    const { node, nodeId, depth, fixedColumns, mainColumn, index, canBeExpanded, isExpanded, onToggle, selected, onClick } = this.props;
+    const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
+    return (
+      <div className={`treeViewRow ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
+        {
+          fixedColumns.map(col =>
+            <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
+                  key={col.propName}>
+              { node[col.propName] }
+            </span>)
+        }
+        <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
+        <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
+        <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
+          { node[mainColumn.propName] }
+        </span>
+      </div>
+    );
+  }
 };
 
 class TreeView extends Component {
