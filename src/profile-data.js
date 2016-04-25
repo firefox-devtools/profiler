@@ -123,28 +123,34 @@ return timeCode('filterThreadToJSOnly', () => {
   };
 
   const oldStackToNewStack = new Map();
+  const funcCount = funcTable.length;
+  let prefixStackAndFuncToStack = new Map(); // prefixNewStack * funcCount + func => newStackIndex
 
   function convertStack(stackIndex) {
     if (stackIndex === null) {
       return null;
     }
-    const newStack = oldStackToNewStack.get(stackIndex);
-    if (newStack !== undefined) {
-      return newStack;
+    let newStack = oldStackToNewStack.get(stackIndex);
+    if (newStack === undefined) {
+      const prefixNewStack = convertStack(stackTable.prefix[stackIndex]);
+      const frameIndex = stackTable.frame[stackIndex];
+      const funcIndex = frameTable.func[frameIndex];
+      const prefixStackAndFuncIndex = (prefixNewStack === null ? -1 : prefixNewStack) * funcCount + funcIndex;
+      newStack = prefixStackAndFuncToStack.get(prefixStackAndFuncIndex);
+      if (newStack === undefined) {
+        if (!funcTable.isJS[funcIndex]) {
+          newStack = prefixNewStack;
+        } else {
+          const newFrameIndex = addFrameAndFunc(funcIndex);
+          newStack = newStackTable.length++;
+          newStackTable.prefix[newStack] = prefixNewStack;
+          newStackTable.frame[newStack] = newFrameIndex;
+        }
+        oldStackToNewStack.set(stackIndex, newStack);
+        prefixStackAndFuncToStack.set(prefixStackAndFuncIndex, newStack);
+      }
     }
-    const prefixNewStack = convertStack(stackTable.prefix[stackIndex]);
-    const frameIndex = stackTable.frame[stackIndex];
-    const funcIndex = frameTable.func[frameIndex];
-    if (!funcTable.isJS[funcIndex]) {
-      oldStackToNewStack.set(stackIndex, prefixNewStack);
-      return prefixNewStack;
-    }
-    const newFrameIndex = addFrameAndFunc(funcIndex);
-    const newStackIndex = newStackTable.length++;
-    newStackTable.prefix[newStackIndex] = prefixNewStack;
-    newStackTable.frame[newStackIndex] = newFrameIndex;
-    oldStackToNewStack.set(stackIndex, newStackIndex);
-    return newStackIndex;
+    return newStack;
   }
 
   const newSamples = Object.assign({}, thread.samples, {
