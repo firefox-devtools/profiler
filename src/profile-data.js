@@ -135,12 +135,12 @@ return timeCode('filterThreadToJSOnly', () => {
       const prefixNewStack = convertStack(stackTable.prefix[stackIndex]);
       const frameIndex = stackTable.frame[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
-      const prefixStackAndFuncIndex = (prefixNewStack === null ? -1 : prefixNewStack) * funcCount + funcIndex;
-      newStack = prefixStackAndFuncToStack.get(prefixStackAndFuncIndex);
-      if (newStack === undefined) {
-        if (!funcTable.isJS[funcIndex]) {
-          newStack = prefixNewStack;
-        } else {
+      if (!funcTable.isJS[funcIndex]) {
+        newStack = prefixNewStack;
+      } else {
+        const prefixStackAndFuncIndex = (prefixNewStack === null ? -1 : prefixNewStack) * funcCount + funcIndex;
+        newStack = prefixStackAndFuncToStack.get(prefixStackAndFuncIndex);
+        if (newStack === undefined) {
           const newFrameIndex = addFrameAndFunc(funcIndex);
           newStack = newStackTable.length++;
           newStackTable.prefix[newStack] = prefixNewStack;
