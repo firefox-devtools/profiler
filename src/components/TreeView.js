@@ -60,7 +60,7 @@ class TreeView extends Component {
     return shallowCompare(this, nextProps, nextState);
   }
 
-  _renderRow({ nodeId, depth }, index) {
+  _renderRow(nodeId, index) {
     const { tree } = this.props;
     const node = tree.getNode(nodeId);
     const canBeExpanded = tree.hasChildren(nodeId);
@@ -69,7 +69,7 @@ class TreeView extends Component {
       <TreeViewRow node={node}
                    fixedColumns={this.props.fixedColumns}
                    mainColumn={this.props.mainColumn}
-                   depth={depth}
+                   depth={tree.getDepth(nodeId)}
                    nodeId={nodeId}
                    index={index}
                    canBeExpanded={canBeExpanded}
@@ -80,21 +80,24 @@ class TreeView extends Component {
     );
   }
 
-  _getVisibleRowsFromNode(nodeId, depth) {
-    const isExpanded = this._expandedNodeIds.has(nodeId);
-    const thisNodeRow = { nodeId, depth };
-    if (!isExpanded) {
-      return [thisNodeRow];
+  _addVisibleRowsFromNode(arr, nodeId, depth) {
+    arr.push(nodeId);
+    if (!this._expandedNodeIds.has(nodeId)) {
+      return;
     }
     const children = this.props.tree.getChildren(nodeId);
-    const addChildRows = (arr, child) => arr.concat(this._getVisibleRowsFromNode(child, depth + 1));
-    return children.reduce(addChildRows, [thisNodeRow]);
+    for (let i = 0; i < children.length; i++) {
+      this._addVisibleRowsFromNode(arr, children[i], depth + 1);
+    }
   }
 
   _getAllVisibleRows() {
     const roots = this.props.tree.getRoots();
-    const addRootRows = (arr, root) => arr.concat(this._getVisibleRowsFromNode(root, 0));
-    return roots.reduce(addRootRows, []);
+    const allRows = [];
+    for (let i = 0; i < roots.length; i++) {
+      this._addVisibleRowsFromNode(allRows, roots[i], 0);
+    }
+    return allRows;
   }
 
   _isCollapsed(nodeId) {
@@ -153,10 +156,10 @@ class TreeView extends Component {
 
     const selected = this._selectedNodeId;
     const visibleRows = this._getAllVisibleRows();
-    const selectedRowIndex = visibleRows.findIndex(({nodeId}) => nodeId === selected);
+    const selectedRowIndex = visibleRows.findIndex((nodeId) => nodeId === selected);
 
     if (selectedRowIndex === -1) {
-      this._select(visibleRows[0].nodeId);
+      this._select(visibleRows[0]);
       return;
     }
 
@@ -172,7 +175,7 @@ class TreeView extends Component {
       }
     } else if (event.keyCode == 38) { // KEY_UP
       if (selectedRowIndex > 0) {
-        this._select(visibleRows[selectedRowIndex - 1].nodeId);
+        this._select(visibleRows[selectedRowIndex - 1]);
       }
     } else if (event.keyCode == 39) { // KEY_RIGHT
       var isCollapsed = this._isCollapsed(selected);
@@ -186,7 +189,7 @@ class TreeView extends Component {
       }
     } else if (event.keyCode == 40) { // KEY_DOWN
       if (selectedRowIndex < visibleRows.length - 1) {
-        this._select(visibleRows[selectedRowIndex + 1].nodeId);
+        this._select(visibleRows[selectedRowIndex + 1]);
       }
     } else if (String.fromCharCode(event.charCode) == '*') {
       this._toggleAll(selected);

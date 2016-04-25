@@ -27,7 +27,7 @@ class Histogram extends Component {
   }
 
   drawCanvas(c) {
-    const { thread, interval, rangeStart, rangeEnd, funcStackInfo } = this.props;
+    const { thread, interval, rangeStart, rangeEnd, funcStackInfo, selectedFuncStack } = this.props;
 
     const devicePixelRatio = c.ownerDocument ? c.ownerDocument.defaultView.devicePixelRatio : 1;
     const r = c.getBoundingClientRect();
@@ -46,16 +46,29 @@ class Histogram extends Component {
     const xPixelsPerMs = c.width / rangeLength;
     const yPixelsPerDepth = c.height / maxDepth;
     const intervalMs = interval * 1.5;
+    let selectedFuncStackDepth = 0;
+    if (selectedFuncStack !== -1 && selectedFuncStack !== null) {
+      selectedFuncStackDepth = funcStackTable.depth[selectedFuncStack];
+    }
+    function hasSelectedFuncStackPrefix(funcStack) {
+      let depth = funcStackTable.depth[funcStack];
+      while (depth > selectedFuncStackDepth) {
+        funcStack = funcStackTable.prefix[funcStack];
+        depth--;
+      }
+      return funcStack === selectedFuncStack;
+    }
     for (let i = 0; i < sampleFuncStacks.length; i++) {
       const sampleTime = thread.samples.time[i];
       if (sampleTime + intervalMs < range[0] || sampleTime > range[1])
         continue;
       const funcStack = sampleFuncStacks[i];
+      const isHighlighted = hasSelectedFuncStackPrefix(funcStack);
       const sampleHeight = funcStackTable.depth[funcStack] * yPixelsPerDepth;
       const startY = c.height - sampleHeight;
       const responsiveness = thread.samples.responsiveness[i];
       const jankSeverity = Math.min(1, responsiveness / 100);
-      ctx.fillStyle = `rgb(${Math.round(255 * jankSeverity)}, 0, 0)`;
+      ctx.fillStyle = `rgb(${Math.round(255 * jankSeverity)}, ${isHighlighted ? 255 : 0}, 0)`;
       ctx.fillRect((sampleTime - range[0]) * xPixelsPerMs, startY, intervalMs * xPixelsPerMs, sampleHeight);
     }
 

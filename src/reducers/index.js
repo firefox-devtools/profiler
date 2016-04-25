@@ -45,7 +45,6 @@ function profileViewReducer(state, action) {
 }
 
 export default function reducer(state, action) {
-  console.log('processing an action');
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_ADDON':
       return { status: 'WAITING_FOR_PROFILE' };

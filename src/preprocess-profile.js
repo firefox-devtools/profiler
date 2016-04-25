@@ -18,6 +18,16 @@ function toStructOfArrays(rawTable) {
   return result;
 }
 
+// JS File information sometimes comes with multiple URIs which are chained
+// with " -> ". We only want the last URI in this list.
+function getRealScriptURI(url) {
+  if (url) {
+    var urls = url.split(" -> ");
+    return urls[urls.length - 1];
+  }
+  return url;
+}
+
 /**
  * Convert the given thread into preprocessed form.
  */
@@ -26,13 +36,15 @@ function preprocessThread(thread, libs) {
     length: 0,
     name: [],
     resource: [],
-    address: []
+    address: [],
+    isJS: []
   };
-  function addFunc(name, resource, address) {
+  function addFunc(name, resource, address, isJS) {
     const index = funcTable.length++;
     funcTable.name[index] = name;
     funcTable.resource[index] = resource;
     funcTable.address[index] = address;
+    funcTable.isJS[index] = isJS;
   }
   const resourceTable = {
     length: 0,
@@ -48,6 +60,11 @@ function preprocessThread(thread, libs) {
     resourceTable.name[index] = name;
     resourceTable.lib[index] = lib;
   }
+  function addURLResource(url) {
+    const index = resourceTable.length++;
+    resourceTable.type[index] = resourceTypes.url;
+    resourceTable.name[index] = name;
+  }
 
   const stringTable = new UniqueStringArray(thread.stringTable);
   const frameTable = toStructOfArrays(thread.frameTable);
@@ -56,6 +73,7 @@ function preprocessThread(thread, libs) {
   const markers = toStructOfArrays(thread.markers);
 
   const libToResourceIndex = new Map();
+  const urlToResourceIndex = new Map();
   const stringTableIndexToNewFuncIndex = new Map();
 
   frameTable.func = frameTable.location.map(locationIndex => {
@@ -66,6 +84,7 @@ function preprocessThread(thread, libs) {
 
     let resourceIndex = -1;
     let addressRelativeToLib = -1;
+    let isJS = false;
     const locationString = stringTable.getString(locationIndex);
     if (locationString.startsWith('0x')) {
       const address = parseInt(locationString.substr(2), 16);
@@ -81,9 +100,25 @@ function preprocessThread(thread, libs) {
           addLibResource(nameStringIndex, libs.indexOf(lib));
         }
       }
+    } else {
+      const jsMatch =
+        /^(.*) \((.*):([0-9]+)\)$/.exec(locationString) ||
+        /^()(.*):([0-9]+)$/.exec(locationString);
+      if (jsMatch) {
+        isJS = true;
+        const scriptURI = getRealScriptURI(jsMatch[2]);
+        if (urlToResourceIndex.has(scriptURI)) {
+          resourceIndex = urlToResourceIndex.get(scriptURI);
+        } else {
+          resourceIndex = resourceTable.length;
+          urlToResourceIndex.set(scriptURI, resourceIndex);
+          const urlStringIndex = stringTable.indexForString(scriptURI);
+          addURLResource(urlStringIndex);
+        }
+      }
     }
     funcIndex = funcTable.length;
-    addFunc(locationIndex, resourceIndex, addressRelativeToLib);
+    addFunc(locationIndex, resourceIndex, addressRelativeToLib, isJS);
     stringTableIndexToNewFuncIndex.set(locationIndex, funcIndex);
     return funcIndex;
   });

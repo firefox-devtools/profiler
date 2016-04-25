@@ -51,7 +51,7 @@ return timeCode('getFuncStackInfo', () => {
   }
   funcStackTable.prefix = new Int32Array(funcStackTable.prefix);
   funcStackTable.func = new Int32Array(funcStackTable.func);
-  funcStackTable.depth = new Uint32Array(funcStackTable.depth);
+  funcStackTable.depth = funcStackTable.depth;
 
   return {
     funcStackTable,
@@ -88,4 +88,78 @@ export function defaultThreadOrder(threads) {
     return a - b;
   });
   return threadOrder;
+}
+
+export function filterThreadToJSOnly(thread) {
+return timeCode('filterThreadToJSOnly', () => {
+  const { stackTable, funcTable, frameTable } = thread;
+
+  // frameTable will be equal to funcTable
+  const newFrameTable = {
+    length: 0,
+    func: [],
+    address: [],
+  };
+  const newFuncTable = {
+    length: 0,
+    name: [],
+    resource: [],
+    address: [],
+    isJS: [],
+  };
+  function addFrameAndFunc(oldFuncIndex) {
+    const newFuncIndex = newFuncTable.length++;
+    newFuncTable.name[newFuncIndex] = funcTable.name[oldFuncIndex];
+    newFuncTable.resource[newFuncIndex] = funcTable.resource[oldFuncIndex];
+    newFuncTable.isJS[newFuncIndex] = true;
+    const newFrameIndex = newFrameTable.length++;
+    newFrameTable.func[newFrameIndex] = newFuncIndex;
+    return newFrameIndex;
+  }
+  const newStackTable = {
+    length: 0,
+    frame: [],
+    prefix: [],
+  };
+
+  const oldStackToNewStack = new Map();
+
+  function convertStack(stackIndex) {
+    if (stackIndex === null) {
+      return null;
+    }
+    const newStack = oldStackToNewStack.get(stackIndex);
+    if (newStack !== undefined) {
+      return newStack;
+    }
+    const prefixNewStack = convertStack(stackTable.prefix[stackIndex]);
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    if (!funcTable.isJS[funcIndex]) {
+      oldStackToNewStack.set(stackIndex, prefixNewStack);
+      return prefixNewStack;
+    }
+    const newFrameIndex = addFrameAndFunc(funcIndex);
+    const newStackIndex = newStackTable.length++;
+    newStackTable.prefix[newStackIndex] = prefixNewStack;
+    newStackTable.frame[newStackIndex] = newFrameIndex;
+    oldStackToNewStack.set(stackIndex, newStackIndex);
+    return newStackIndex;
+  }
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    convertStack(stackIndex);
+  }
+
+  const newSamples = Object.assign({}, thread.samples, {
+    stack: thread.samples.stack.map(oldStack => oldStackToNewStack.get(oldStack))
+  });
+
+  return Object.assign({}, thread, {
+    samples: newSamples,
+    stackTable: newStackTable,
+    funcTable: newFuncTable,
+    frameTable: newFrameTable,
+  });
+});
 }

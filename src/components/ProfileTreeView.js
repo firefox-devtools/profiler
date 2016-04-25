@@ -16,9 +16,9 @@ class ProfileTreeView extends Component{
   }
 
   render() {
-    const { thread, interval, dispatch } = this.props;
+    const { thread, interval, funcStackInfo, dispatch } = this.props;
     return (
-      <TreeView tree={getCallTree(thread, interval)}
+      <TreeView tree={getCallTree(thread, interval, funcStackInfo)}
                 fixedColumns={[
                   { propName: 'totalTime', title: 'Running Time' },
                   { propName: 'totalTimePercent', title: '' },

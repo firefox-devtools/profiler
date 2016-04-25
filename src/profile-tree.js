@@ -38,6 +38,10 @@ class ProfileTree {
     return this._funcStackTable.prefix[funcStackIndex];
   }
 
+  getDepth(funcStackIndex) {
+    return this._funcStackTable.depth[funcStackIndex];
+  }
+
   /**
    * Return an object with information about the node with index funcStackIndex.
    * @param  {[type]} funcStackIndex [description]
@@ -58,10 +62,9 @@ class ProfileTree {
   }
 };
 
-export function getCallTree(thread, interval) {
+export function getCallTree(thread, interval, funcStackInfo) {
   return timeCode('getCallTree', () => {
-    const { funcStackTable, sampleFuncStacks } =
-      getFuncStackInfo(thread.stackTable, thread.frameTable, thread.funcTable, thread.samples);
+    const { funcStackTable, sampleFuncStacks } = funcStackInfo;
 
     const funcStackSelfTime = new Float32Array(funcStackTable.length);
     const funcStackTotalTime = new Float32Array(funcStackTable.length);
