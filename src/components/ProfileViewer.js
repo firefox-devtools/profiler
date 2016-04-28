@@ -16,9 +16,13 @@ class ProfileViewer extends Component {
   render() {
     const { profile, viewOptions, className } = this.props;
     const timeRange = getTimeRangeIncludingAllThreads(profile);
-    const treeThreadIndex = viewOptions.threadOrder[Math.max(0, profile.threads.length - 2)];
+    const showContentProcess = true;
+    const treeThreadIndex = showContentProcess ? viewOptions.threadOrder[Math.max(0, profile.threads.length - 2)] : viewOptions.threadOrder[0];
     const threads = profile.threads.slice(0);
-    threads[treeThreadIndex] = this._memoizedFilterThreadToJSOnly(threads[treeThreadIndex]);
+    const jsOnly = true;
+    if (jsOnly) {
+      threads[treeThreadIndex] = this._memoizedFilterThreadToJSOnly(threads[treeThreadIndex]);
+    }
     const funcStackInfos = threads.map((thread, threadIndex) => {
       if (!this._memoizedGetFuncStackInfo[threadIndex]) {
         this._memoizedGetFuncStackInfo[threadIndex] = memoizeSync(getFuncStackInfo, { max: 1 });

@@ -34,6 +34,31 @@ class VirtualList extends Component {
     return { visibleRangeStart, visibleRangeEnd };
   }
 
+  scrollItemIntoView(itemIndex, offsetX) {
+    if (!this.refs.container) {
+      return;
+    }
+    const itemTop = itemIndex * this.props.itemHeight;
+    const itemBottom = itemTop + this.props.itemHeight;
+    const { container } = this.refs;
+
+    if (container.scrollTop > itemTop) {
+      container.scrollTop = itemTop;
+    } else if (container.scrollTop + container.clientHeight < itemBottom) {
+      container.scrollTop = Math.min(itemTop, itemBottom - container.clientHeight);
+    }
+
+    const interestingWidth = 450;
+    const itemLeft = offsetX;
+    const itemRight = itemLeft + interestingWidth;
+
+    if (container.scrollLeft > itemLeft) {
+      container.scrollLeft = itemLeft;
+    } else if (container.scrollLeft + container.clientWidth < itemRight) {
+      container.scrollLeft = Math.min(itemLeft, itemRight - container.clientWidth);
+    }
+  }
+
   render() {
     const { itemHeight, className, renderItem, items, focusable, onKeyDown } = this.props;
 

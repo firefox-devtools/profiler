@@ -144,6 +144,8 @@ class TreeView extends Component {
 
   _select(nodeId) {
     this._selectedNodeId = nodeId;
+    const visibleRows = this._getAllVisibleRows();
+    this.refs.list.scrollItemIntoView(visibleRows.findIndex((ni) => ni === nodeId), this.props.tree.getDepth(nodeId) * 10);
     this.forceUpdate();
     this.props.onSelectionChange(nodeId);
   }
@@ -223,7 +225,8 @@ class TreeView extends Component {
                      renderItem={this._renderRow}
                      itemHeight={16}
                      focusable={true}
-                     onKeyDown={this._onKeyDown}/>
+                     onKeyDown={this._onKeyDown}
+                     ref='list'/>
       </div>
     );
   }
