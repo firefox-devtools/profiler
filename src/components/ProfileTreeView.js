@@ -15,10 +15,22 @@ class ProfileTreeView extends Component{
     dispatch(Actions.changeSelectedFuncStack(newSelectedNodeId));
   }
 
+  componentWillMount() {
+    const { thread, interval, funcStackInfo } = this.props;
+    this._tree = getCallTree(thread, interval, funcStackInfo);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.funcStackInfo !== this.props.funcStackInfo) {
+      const { thread, interval, funcStackInfo } = this.props;
+      this._tree = getCallTree(thread, interval, funcStackInfo);
+    }
+  }
+
   render() {
     const { thread, interval, funcStackInfo, selectedFuncStack } = this.props;
     return (
-      <TreeView tree={getCallTree(thread, interval, funcStackInfo)}
+      <TreeView tree={this._tree}
                 fixedColumns={[
                   { propName: 'totalTime', title: 'Running Time' },
                   { propName: 'totalTimePercent', title: '' },
