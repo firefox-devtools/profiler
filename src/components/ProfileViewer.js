@@ -26,6 +26,22 @@ class ProfileViewer extends Component {
     return jsOnlyThread;
   }
 
+  _getFuncStackInfo(threadIndex, thread) {
+    const { stackTable, frameTable, funcTable, samples } = thread;
+    const key = { stackTable, frameTable, funcTable, samples };
+    if (this._cachedFuncStackInfos[threadIndex]) {
+      const { cacheKey, funcStackInfo } = this._cachedFuncStackInfos[threadIndex];
+      if (shallowequal(cacheKey, key)) {
+        return funcStackInfo;
+      }
+    }
+    const funcStackInfo = getFuncStackInfo(stackTable, frameTable, funcTable, samples);
+    this._cachedFuncStackInfos[threadIndex] = {
+      cacheKey: key, funcStackInfo
+    };
+    return funcStackInfo;
+  }
+
   render() {
     const { profile, viewOptions, className } = this.props;
     const timeRange = getTimeRangeIncludingAllThreads(profile);
@@ -37,21 +53,7 @@ class ProfileViewer extends Component {
       threads[treeThreadIndex] = this._filterToJSOnly(threads[treeThreadIndex]);
     }
 
-    const funcStackInfos = threads.map((thread, threadIndex) => {
-      const { stackTable, frameTable, funcTable, samples } = thread;
-      const key = { stackTable, frameTable, funcTable, samples };
-      if (this._cachedFuncStackInfos[threadIndex]) {
-        const { cacheKey, funcStackInfo } = this._cachedFuncStackInfos[threadIndex];
-        if (shallowequal(cacheKey, key)) {
-          return funcStackInfo;
-        }
-      }
-      const funcStackInfo = getFuncStackInfo(stackTable, frameTable, funcTable, samples);
-      this._cachedFuncStackInfos[threadIndex] = {
-        cacheKey: key, funcStackInfo
-      };
-      return funcStackInfo;
-    });
+    const funcStackInfos = threads.map((thread, threadIndex) => this._getFuncStackInfo(threadIndex, thread));
 
     return (
       <div className={className}>

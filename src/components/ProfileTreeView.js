@@ -22,7 +22,7 @@ class ProfileTreeView extends Component{
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.funcStackInfo !== this.props.funcStackInfo) {
-      const { thread, interval, funcStackInfo } = this.props;
+      const { thread, interval, funcStackInfo } = nextProps;
       this._tree = getCallTree(thread, interval, funcStackInfo);
     }
   }
