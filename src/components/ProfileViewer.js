@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import memoizeSync from 'memoizesync';
+import shallowequal from 'shallowequal';
 import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import { getFuncStackInfo, filterThreadToJSOnly } from '../profile-data';
 import ProfileTreeView from '../components/ProfileTreeView';
@@ -10,7 +11,21 @@ class ProfileViewer extends Component {
   constructor(props) {
     super(props);
     this._memoizedGetFuncStackInfo = [];
-    this._memoizedFilterThreadToJSOnly = memoizeSync(filterThreadToJSOnly, { max: 1 });
+    this._cachedFuncStackInfos = [];
+    this._cachedJSOnly = null;
+  }
+
+  _filterToJSOnly(thread) {
+    const key = { thread }
+    if (this._cachedJSOnly) {
+      const { cacheKey, jsOnlyThread } = this._cachedJSOnly;
+      if (shallowequal(cacheKey, key)) {
+        return jsOnlyThread;
+      }
+    }
+    const jsOnlyThread = filterThreadToJSOnly(thread);
+    this._cachedJSOnly = { cacheKey: key, jsOnlyThread };
+    return jsOnlyThread;
   }
 
   render() {
@@ -19,16 +34,27 @@ class ProfileViewer extends Component {
     const showContentProcess = true;
     const treeThreadIndex = showContentProcess ? viewOptions.threadOrder[Math.max(0, profile.threads.length - 2)] : viewOptions.threadOrder[0];
     const threads = profile.threads.slice(0);
-    const jsOnly = true;
+    const jsOnly = false;
     if (jsOnly) {
-      threads[treeThreadIndex] = this._memoizedFilterThreadToJSOnly(threads[treeThreadIndex]);
+      threads[treeThreadIndex] = this._filterToJSOnly(threads[treeThreadIndex]);
     }
+
     const funcStackInfos = threads.map((thread, threadIndex) => {
-      if (!this._memoizedGetFuncStackInfo[threadIndex]) {
-        this._memoizedGetFuncStackInfo[threadIndex] = memoizeSync(getFuncStackInfo, { max: 1 });
+      const { stackTable, frameTable, funcTable, samples } = thread;
+      const key = { stackTable, frameTable, funcTable, samples };
+      if (this._cachedFuncStackInfos[threadIndex]) {
+        const { cacheKey, funcStackInfo } = this._cachedFuncStackInfos[threadIndex];
+        if (shallowequal(cacheKey, key)) {
+          return funcStackInfo;
+        }
       }
-      return this._memoizedGetFuncStackInfo[threadIndex](thread.stackTable, thread.frameTable, thread.funcTable, thread.samples)
+      const funcStackInfo = getFuncStackInfo(stackTable, frameTable, funcTable, samples);
+      this._cachedFuncStackInfos[threadIndex] = {
+        cacheKey: key, funcStackInfo
+      };
+      return funcStackInfo;
     });
+
     return (
       <div className={className}>
         {
@@ -45,7 +71,8 @@ class ProfileViewer extends Component {
         }
         <ProfileTreeView thread={threads[treeThreadIndex]}
                          interval={profile.meta.interval}
-                         funcStackInfo={funcStackInfos[treeThreadIndex]}/>
+                         funcStackInfo={funcStackInfos[treeThreadIndex]}
+                         selectedFuncStack={viewOptions.selectedFuncStack}/>
       </div>
     );
   }

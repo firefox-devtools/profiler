@@ -92,7 +92,7 @@ export function defaultThreadOrder(threads) {
 
 export function filterThreadToJSOnly(thread) {
 return timeCode('filterThreadToJSOnly', () => {
-  const { stackTable, funcTable, frameTable } = thread;
+  const { stackTable, funcTable, frameTable, samples } = thread;
 
   // frameTable will be equal to funcTable
   const newFrameTable = {
@@ -153,8 +153,8 @@ return timeCode('filterThreadToJSOnly', () => {
     return newStack;
   }
 
-  const newSamples = Object.assign({}, thread.samples, {
-    stack: thread.samples.stack.map(oldStack => convertStack(oldStack))
+  const newSamples = Object.assign({}, samples, {
+    stack: samples.stack.map(oldStack => convertStack(oldStack))
   });
 
   return Object.assign({}, thread, {

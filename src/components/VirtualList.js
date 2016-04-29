@@ -48,7 +48,7 @@ class VirtualList extends Component {
       container.scrollTop = Math.min(itemTop, itemBottom - container.clientHeight);
     }
 
-    const interestingWidth = 450;
+    const interestingWidth = 400;
     const itemLeft = offsetX;
     const itemRight = itemLeft + interestingWidth;
 

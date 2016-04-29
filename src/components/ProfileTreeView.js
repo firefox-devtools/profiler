@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import memoizeSync from 'memoizesync';
 import TreeView from './TreeView';
 import { getCallTree } from '../profile-tree';
 import * as Actions from '../actions';
@@ -16,7 +17,7 @@ class ProfileTreeView extends Component{
   }
 
   render() {
-    const { thread, interval, funcStackInfo, dispatch } = this.props;
+    const { thread, interval, funcStackInfo, selectedFuncStack } = this.props;
     return (
       <TreeView tree={getCallTree(thread, interval, funcStackInfo)}
                 fixedColumns={[
@@ -25,7 +26,8 @@ class ProfileTreeView extends Component{
                   { propName: 'selfTime', title: 'Self' },
                 ]}
                 mainColumn={{propName:'name', title: ''}}
-                onSelectionChange={this._onSelectionChange} />
+                onSelectionChange={this._onSelectionChange}
+                selectedNodeId={selectedFuncStack} />
     );
 
   }

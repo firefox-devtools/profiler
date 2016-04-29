@@ -2,8 +2,9 @@ import { timeCode } from './time-code';
 import { getFuncStackInfo } from './profile-data';
 
 class ProfileTree {
-  constructor(funcStackTable, funcTable, stringTable, rootTotalTime) {
+  constructor(funcStackTable, funcStackTimes, funcTable, stringTable, rootTotalTime) {
     this._funcStackTable = funcStackTable;
+    this._funcStackTimes = funcStackTimes;
     this._funcTable = funcTable;
     this._stringTable = stringTable;
     this._rootTotalTime = rootTotalTime;
@@ -24,7 +25,7 @@ class ProfileTree {
     let children = this._children.get(funcStackIndex);
     if (children === undefined) {
       children = this._funcStackTable.prefix.reduce((arr, prefix, childFuncStackIndex) => prefix === funcStackIndex ? arr.concat(childFuncStackIndex) : arr, []);
-      children.sort((a, b) => this._funcStackTable.totalTime[b] - this._funcStackTable.totalTime[a]);
+      children.sort((a, b) => this._funcStackTimes.totalTime[b] - this._funcStackTimes.totalTime[a]);
       this._children.set(funcStackIndex, children);
     }
     return children;
@@ -42,6 +43,10 @@ class ProfileTree {
     return this._funcStackTable.depth[funcStackIndex];
   }
 
+  hasSameNodeIds(tree) {
+    return this._funcStackTable === tree._funcStackTable;
+  }
+
   /**
    * Return an object with information about the node with index funcStackIndex.
    * @param  {[type]} funcStackIndex [description]
@@ -51,9 +56,9 @@ class ProfileTree {
     let node = this._nodes.get(funcStackIndex);
     if (node === undefined) {
       node = {
-        totalTime: `${this._funcStackTable.totalTime[funcStackIndex].toFixed(1)}ms`,
-        totalTimePercent: `${(100 * this._funcStackTable.totalTime[funcStackIndex] / this._rootTotalTime).toFixed(1)}%`,
-        selfTime: `${this._funcStackTable.selfTime[funcStackIndex].toFixed(1)}ms`,
+        totalTime: `${this._funcStackTimes.totalTime[funcStackIndex].toFixed(1)}ms`,
+        totalTimePercent: `${(100 * this._funcStackTimes.totalTime[funcStackIndex] / this._rootTotalTime).toFixed(1)}%`,
+        selfTime: `${this._funcStackTimes.selfTime[funcStackIndex].toFixed(1)}ms`,
         name: this._stringTable.getString(this._funcTable.name[this._funcStackTable.func[funcStackIndex]]),
       };
       this._nodes.set(funcStackIndex, node);
@@ -81,7 +86,7 @@ export function getCallTree(thread, interval, funcStackInfo) {
         funcStackTotalTime[prefixFuncStack] += funcStackTotalTime[funcStackIndex];
       }
     }
-    const newFuncStackTable = Object.assign({}, funcStackTable, { selfTime: funcStackSelfTime, totalTime: funcStackTotalTime });
-    return new ProfileTree(newFuncStackTable, thread.funcTable, thread.stringTable, rootTotalTime);
+    const funcStackTimes = { selfTime: funcStackSelfTime, totalTime: funcStackTotalTime };
+    return new ProfileTree(funcStackTable, funcStackTimes, thread.funcTable, thread.stringTable, rootTotalTime);
   });
 }

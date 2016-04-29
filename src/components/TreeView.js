@@ -75,6 +75,20 @@ class TreeView extends Component {
     return shallowCompare(this, nextProps, nextState);
   }
 
+  componentWillReceiveProps(nextProps) {
+    if (!nextProps.tree.hasSameNodeIds(this.props.tree)) {
+      console.log("!hasSameNodeIds!");
+      console.log(nextProps.tree._funcStackTable === this.props.tree._funcStackTable);
+      this._expandedNodeIds = new Set();
+      this._selectedNodeId = nextProps.selectedNodeId;
+      let prefix = nextProps.tree.getParent(this._selectedNodeId);
+      // while (prefix !== -1) {
+      //   this._expandedNodeIds.add(prefix);
+      //   prefix = nextProps.tree.getParent(prefix);
+      // }
+    }
+  }
+
   _renderRow(nodeId, index) {
     const { tree } = this.props;
     const node = tree.getNode(nodeId);
