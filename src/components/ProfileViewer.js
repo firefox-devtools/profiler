@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import memoizeSync from 'memoizesync';
 import shallowequal from 'shallowequal';
 import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import { getFuncStackInfo, filterThreadToJSOnly } from '../profile-data';
@@ -10,7 +9,6 @@ import Histogram from '../components/Histogram';
 class ProfileViewer extends Component {
   constructor(props) {
     super(props);
-    this._memoizedGetFuncStackInfo = [];
     this._cachedFuncStackInfos = [];
     this._cachedJSOnly = null;
   }

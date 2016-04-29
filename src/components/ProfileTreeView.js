@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import memoizeSync from 'memoizesync';
 import TreeView from './TreeView';
 import { getCallTree } from '../profile-tree';
 import * as Actions from '../actions';
