@@ -1,8 +1,8 @@
 import 'babel-polyfill';
 import { assert } from 'chai';
-import { getContainingLibrary, symbolicateProfile } from '../src/symbolication';
+import { getContainingLibrary, symbolicateProfile, applyFunctionMerging, setFuncNames } from '../src/symbolication';
 import { preprocessProfile } from '../src/preprocess-profile';
-import { resourceTypes, createFuncStackTableAndFixupSamples } from '../src/profile-data';
+import { resourceTypes, getFuncStackInfo } from '../src/profile-data';
 import exampleProfile from './example-profile';
 import { UniqueStringArray } from '../src/unique-string-array';
 import { FakeSymbolStore } from './fake-symbol-store';
@@ -134,7 +134,7 @@ describe('profile-data', function () {
     const profile = preprocessProfile(exampleProfile);
     const thread = profile.threads[0];
     const { funcStackTable } =
-      createFuncStackTableAndFixupSamples(thread.stackTable, thread.frameTable, thread.funcTable, thread.samples);
+      getFuncStackInfo(thread.stackTable, thread.frameTable, thread.funcTable, thread.samples);
     it('should create one funcStack per stack', function () {
       assert.equal(thread.stackTable.length, 4);
       assert.equal(funcStackTable.length, 4);
@@ -198,9 +198,13 @@ describe('symbolication', function () {
         0x2000: 'last symbol'
       };
       const symbolProvider = new FakeSymbolStore({ 'firefox': symbolTable, 'firefox-webcontent': symbolTable });
+      symbolicatedProfile = Object.assign({}, unsymbolicatedProfile, { threads: unsymbolicatedProfile.threads.slice() });
       const symbolicationPromise = symbolicateProfile(unsymbolicatedProfile, symbolProvider, {
-        onUpdateProfile: function (updatedProfile) {
-          symbolicatedProfile = updatedProfile;
+        onMergeFunctions: (threadIndex, oldFuncToNewFuncMap) => {
+          symbolicatedProfile.threads[threadIndex] = applyFunctionMerging(symbolicatedProfile.threads[threadIndex], oldFuncToNewFuncMap);
+        },
+        onGotFuncNames: (threadIndex, funcIndices, funcNames) => {
+          symbolicatedProfile.threads[threadIndex] = setFuncNames(symbolicatedProfile.threads[threadIndex], funcIndices, funcNames)
         }
       });
       return symbolicationPromise;

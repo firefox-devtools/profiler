@@ -1,4 +1,7 @@
 export function timeCode(label, codeAsACallback) {
+  if (typeof performance === 'undefined') {
+    return codeAsACallback();
+  }
   const start = performance.now();
   const result = codeAsACallback();
   const elapsed = Math.round(performance.now() - start);

@@ -48,7 +48,7 @@ class ProfileViewer extends Component {
     const showContentProcess = true;
     const treeThreadIndex = showContentProcess ? viewOptions.threadOrder[Math.max(0, profile.threads.length - 2)] : viewOptions.threadOrder[0];
     const threads = profile.threads.slice(0);
-    const jsOnly = false;
+    const jsOnly = true;
     if (jsOnly) {
       threads[treeThreadIndex] = this._filterToJSOnly(threads[treeThreadIndex]);
     }
