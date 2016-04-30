@@ -35,10 +35,16 @@ function profileViewReducer(state, action) {
       const profile = Object.assign({}, state.profile, { threads });
       return Object.assign({}, state, { profile });
     }
-    case 'CHANGE_SELECTED_FUNC_STACK':
+    case 'CHANGE_SELECTED_FUNC_STACK': {
       const { selectedFuncStack } = action;
       const viewOptions = Object.assign({}, state.viewOptions, { selectedFuncStack });
       return Object.assign({}, state, { viewOptions });
+    }
+    case 'CHANGE_SELECTED_THREAD': {
+      const { threadIndex } = action;
+      const viewOptions = Object.assign({}, state.viewOptions, { selectedThread: threadIndex });
+      return Object.assign({}, state, { viewOptions });
+    }
     default:
       return state;
   }
@@ -49,12 +55,14 @@ export default function reducer(state, action) {
     case 'WAITING_FOR_PROFILE_FROM_ADDON':
       return { status: 'WAITING_FOR_PROFILE' };
     case 'RECEIVE_PROFILE_FROM_ADDON':
+      const threadOrder = defaultThreadOrder(action.profile.threads);
       return {
         status: 'DONE',
         view: 'PROFILE',
         profileView: {
           viewOptions: {
-            threadOrder: defaultThreadOrder(action.profile.threads),
+            threadOrder: threadOrder,
+            selectedThread: threadOrder[0],
             selectedFuncStack: null,
             symbolicationStatus: null,
           },

@@ -77,15 +77,22 @@ class TreeView extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (!nextProps.tree.hasSameNodeIds(this.props.tree)) {
-      console.log("!hasSameNodeIds!");
-      console.log(nextProps.tree._funcStackTable === this.props.tree._funcStackTable);
       this._expandedNodeIds = new Set();
       this._selectedNodeId = nextProps.selectedNodeId;
       let prefix = nextProps.tree.getParent(this._selectedNodeId);
-      // while (prefix !== -1) {
-      //   this._expandedNodeIds.add(prefix);
-      //   prefix = nextProps.tree.getParent(prefix);
-      // }
+      if (typeof prefix === 'undefined') {
+        this._selectedNodeId = 0;
+        return;
+      }
+      if (this.refs.list) {
+        const visibleRows = this._getAllVisibleRows(nextProps);
+        this.refs.list.scrollItemIntoView(visibleRows.findIndex((ni) => ni === this._selectedNodeId),
+                                          nextProps.tree.getDepth(this._selectedNodeId) * 10);
+      }
+      while ( 0 && prefix !== -1) {
+        this._expandedNodeIds.add(prefix);
+        prefix = nextProps.tree.getParent(prefix);
+      }
     }
   }
 
@@ -109,22 +116,22 @@ class TreeView extends Component {
     );
   }
 
-  _addVisibleRowsFromNode(arr, nodeId, depth) {
+  _addVisibleRowsFromNode(props, arr, nodeId, depth) {
     arr.push(nodeId);
     if (!this._expandedNodeIds.has(nodeId)) {
       return;
     }
     const children = this.props.tree.getChildren(nodeId);
     for (let i = 0; i < children.length; i++) {
-      this._addVisibleRowsFromNode(arr, children[i], depth + 1);
+      this._addVisibleRowsFromNode(props, arr, children[i], depth + 1);
     }
   }
 
-  _getAllVisibleRows() {
-    const roots = this.props.tree.getRoots();
+  _getAllVisibleRows(props) {
+    const roots = props.tree.getRoots();
     const allRows = [];
     for (let i = 0; i < roots.length; i++) {
-      this._addVisibleRowsFromNode(allRows, roots[i], 0);
+      this._addVisibleRowsFromNode(props, allRows, roots[i], 0);
     }
     return allRows;
   }
@@ -158,7 +165,7 @@ class TreeView extends Component {
 
   _select(nodeId) {
     this._selectedNodeId = nodeId;
-    const visibleRows = this._getAllVisibleRows();
+    const visibleRows = this._getAllVisibleRows(this.props);
     this.refs.list.scrollItemIntoView(visibleRows.findIndex((ni) => ni === nodeId), this.props.tree.getDepth(nodeId) * 10);
     this.forceUpdate();
     this.props.onSelectionChange(nodeId);
@@ -186,7 +193,7 @@ class TreeView extends Component {
     event.preventDefault();
 
     const selected = this._selectedNodeId;
-    const visibleRows = this._getAllVisibleRows();
+    const visibleRows = this._getAllVisibleRows(this.props);
     const selectedRowIndex = visibleRows.findIndex((nodeId) => nodeId === selected);
 
     if (selectedRowIndex === -1) {
@@ -229,7 +236,7 @@ class TreeView extends Component {
 
   render() {
     const { fixedColumns, mainColumn } = this.props;
-    this._visibleRows = this._getAllVisibleRows();
+    this._visibleRows = this._getAllVisibleRows(this.props);
     return (
       <div className='treeView'>
         <TreeViewHeader fixedColumns={this.props.fixedColumns}

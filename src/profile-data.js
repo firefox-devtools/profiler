@@ -80,11 +80,10 @@ export function defaultThreadOrder(threads) {
   threadOrder.sort((a, b) => {
     const nameA = threads[a].name;
     const nameB = threads[b].name;
-    if (nameA === 'Compositor' && nameB !== 'Compositor')
-      return 1;
-    if (nameB === 'Compositor' && nameA !== 'Compositor')
-      return -1;
-    return a - b;
+    if (nameA === nameB) {
+      return a - b;
+    }
+    return (nameA === 'Compositor') ? 1 : -1;
   });
   return threadOrder;
 }

@@ -173,6 +173,37 @@ body, #root, .profileViewer {
   visibility: hidden;
 }
 
+.profileViewerHeader {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.profileThreadHeaderBar {
+  margin: 0;
+  padding: 0;
+  height: 40px;
+  display: flex;
+  flex-flow: row nowrap;
+  background: white;
+  border-top: 1px solid #D6D6D6;
+}
+
+.profileThreadHeaderBar > h1 {
+  width: 100px;
+  font-weight: normal;
+  font: message-box;
+  line-height: 40px;
+  border-right: 1px solid #D6D6D6;
+  margin: 0;
+  margin-left: 15px;
+  cursor: default;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
 .histogram {
   height: 40px;
+  flex: 1;
 }

@@ -60,14 +60,19 @@ window.geckoProfilerPromise = new Promise(function (resolve, reject) {
 let store = createStore(rootReducer, {});
 
 render(
-  <AppContainer component={Root} props={{store}} />,
+  <AppContainer>
+    <Root store={store} />
+  </AppContainer>,
   document.getElementById('root')
 );
 
 if (module.hot) {
   module.hot.accept('./src/containers/Root', () => {
+    const NewRoot = require('./src/containers/Root').default;
     render(
-      <AppContainer component={require('./src/containers/Root').default} props={{store}} />,
+      <AppContainer>
+        <NewRoot store={store} />
+      </AppContainer>,
       document.getElementById('root')
     );
   });

@@ -62,3 +62,10 @@ export function changeSelectedFuncStack(selectedFuncStack) {
     selectedFuncStack
   };
 }
+
+export function changeSelectedThread(threadIndex) {
+  return {
+    type: 'CHANGE_SELECTED_THREAD',
+    threadIndex
+  };
+}

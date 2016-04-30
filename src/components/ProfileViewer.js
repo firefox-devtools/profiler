@@ -4,13 +4,15 @@ import shallowequal from 'shallowequal';
 import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import { getFuncStackInfo, filterThreadToJSOnly } from '../profile-data';
 import ProfileTreeView from '../components/ProfileTreeView';
-import Histogram from '../components/Histogram';
+import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
+import * as Actions from '../actions';
 
 class ProfileViewer extends Component {
   constructor(props) {
     super(props);
     this._cachedFuncStackInfos = [];
     this._cachedJSOnly = null;
+    this._onProfileTitleClick = this._onProfileTitleClick.bind(this);
   }
 
   _filterToJSOnly(thread) {
@@ -42,13 +44,16 @@ class ProfileViewer extends Component {
     return funcStackInfo;
   }
 
+  _onProfileTitleClick(threadIndex, event) {
+    this.props.dispatch(Actions.changeSelectedThread(threadIndex));
+  }
+
   render() {
     const { profile, viewOptions, className } = this.props;
     const timeRange = getTimeRangeIncludingAllThreads(profile);
-    const showContentProcess = true;
-    const treeThreadIndex = showContentProcess ? viewOptions.threadOrder[Math.max(0, profile.threads.length - 2)] : viewOptions.threadOrder[0];
+    const treeThreadIndex = viewOptions.selectedThread;
     const threads = profile.threads.slice(0);
-    const jsOnly = true;
+    const jsOnly = false;
     if (jsOnly) {
       threads[treeThreadIndex] = this._filterToJSOnly(threads[treeThreadIndex]);
     }
@@ -57,18 +62,21 @@ class ProfileViewer extends Component {
 
     return (
       <div className={className}>
+        <ol className={`${className}Header`}>
         {
           viewOptions.threadOrder.map(threadIndex =>
-            <Histogram key={threadIndex}
-                       interval={profile.meta.interval}
-                       thread={threads[threadIndex]}
-                       className='histogram'
-                       rangeStart={timeRange.start}
-                       rangeEnd={timeRange.end}
-                       funcStackInfo={funcStackInfos[threadIndex]}
-                       selectedFuncStack={threadIndex === treeThreadIndex ? viewOptions.selectedFuncStack : -1 }/>
+            <ProfileThreadHeaderBar key={threadIndex}
+                                    index={threadIndex}
+                                    interval={profile.meta.interval}
+                                    thread={threads[threadIndex]}
+                                    rangeStart={timeRange.start}
+                                    rangeEnd={timeRange.end}
+                                    funcStackInfo={funcStackInfos[threadIndex]}
+                                    selectedFuncStack={threadIndex === treeThreadIndex ? viewOptions.selectedFuncStack : -1 }
+                                    onClick={this._onProfileTitleClick}/>
           )
         }
+        </ol>
         <ProfileTreeView thread={threads[treeThreadIndex]}
                          interval={profile.meta.interval}
                          funcStackInfo={funcStackInfos[treeThreadIndex]}
@@ -77,4 +85,4 @@ class ProfileViewer extends Component {
     );
   }
 };
-export default ProfileViewer;
+export default connect()(ProfileViewer);
