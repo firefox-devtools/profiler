@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import shallowequal from 'shallowequal';
 import { getTimeRangeIncludingAllThreads } from '../profile-data';
-import { getFuncStackInfo, filterThreadToJSOnly } from '../profile-data';
+import { getFuncStackInfo, filterThreadToJSOnly, getFuncStackFromFuncArray, getStackAsFuncArray } from '../profile-data';
 import ProfileTreeView from '../components/ProfileTreeView';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
 import * as Actions from '../actions';
@@ -59,6 +59,7 @@ class ProfileViewer extends Component {
     }
 
     const funcStackInfos = threads.map((thread, threadIndex) => this._getFuncStackInfo(threadIndex, thread));
+    const selectedFuncStacks = viewOptions.selectedFuncStacks.map((sf, threadIndex) => getFuncStackFromFuncArray(sf, funcStackInfos[threadIndex].funcStackTable));
 
     return (
       <div className={className}>
@@ -72,15 +73,16 @@ class ProfileViewer extends Component {
                                     rangeStart={timeRange.start}
                                     rangeEnd={timeRange.end}
                                     funcStackInfo={funcStackInfos[threadIndex]}
-                                    selectedFuncStack={threadIndex === treeThreadIndex ? viewOptions.selectedFuncStack : -1 }
+                                    selectedFuncStack={threadIndex === treeThreadIndex ? selectedFuncStacks[treeThreadIndex] : -1 }
                                     onClick={this._onProfileTitleClick}/>
           )
         }
         </ol>
         <ProfileTreeView thread={threads[treeThreadIndex]}
+                         threadIndex={treeThreadIndex}
                          interval={profile.meta.interval}
                          funcStackInfo={funcStackInfos[treeThreadIndex]}
-                         selectedFuncStack={viewOptions.selectedFuncStack}/>
+                         selectedFuncStack={selectedFuncStacks[treeThreadIndex]}/>
       </div>
     );
   }

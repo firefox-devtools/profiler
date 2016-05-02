@@ -84,14 +84,14 @@ class TreeView extends Component {
         this._selectedNodeId = 0;
         return;
       }
-      if (this.refs.list) {
+      while (prefix !== -1) {
+        this._expandedNodeIds.add(prefix);
+        prefix = nextProps.tree.getParent(prefix);
+      }
+      if (0 && this.refs.list) { // This is needed when switching between threads, not when updating func stacks.
         const visibleRows = this._getAllVisibleRows(nextProps);
         this.refs.list.scrollItemIntoView(visibleRows.findIndex((ni) => ni === this._selectedNodeId),
                                           nextProps.tree.getDepth(this._selectedNodeId) * 10);
-      }
-      while ( 0 && prefix !== -1) {
-        this._expandedNodeIds.add(prefix);
-        prefix = nextProps.tree.getParent(prefix);
       }
     }
   }

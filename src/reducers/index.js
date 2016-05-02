@@ -25,8 +25,18 @@ function profileViewReducer(state, action) {
       const { threadIndex, oldFuncToNewFuncMap } = action;
       const threads = state.profile.threads.slice();
       threads[threadIndex] = applyFunctionMerging(threads[threadIndex], oldFuncToNewFuncMap);
+      const selectedFuncStacks = state.viewOptions.selectedFuncStacks.map((selectedFuncStack, ti) => {
+        if (ti !== threadIndex) {
+          return selectedFuncStack;
+        }
+        return selectedFuncStack.map(oldFunc => {
+          const newFunc = oldFuncToNewFuncMap.get(oldFunc);
+          return newFunc === undefined ? oldFunc : newFunc;
+        });
+      });
+      const viewOptions = Object.assign({}, state.viewOptions, { selectedFuncStacks });
       const profile = Object.assign({}, state.profile, { threads });
-      return Object.assign({}, state, { profile });
+      return Object.assign({}, state, { profile, viewOptions });
     }
     case 'ASSIGN_FUNCTION_NAMES': {
       const { threadIndex, funcIndices, funcNames } = action;
@@ -36,8 +46,9 @@ function profileViewReducer(state, action) {
       return Object.assign({}, state, { profile });
     }
     case 'CHANGE_SELECTED_FUNC_STACK': {
-      const { selectedFuncStack } = action;
-      const viewOptions = Object.assign({}, state.viewOptions, { selectedFuncStack });
+      const { selectedFuncStack, threadIndex } = action;
+      const selectedFuncStacks = state.viewOptions.selectedFuncStacks.map((sf, ti) => ti === threadIndex ? selectedFuncStack : sf);
+      const viewOptions = Object.assign({}, state.viewOptions, { selectedFuncStacks });
       return Object.assign({}, state, { viewOptions });
     }
     case 'CHANGE_SELECTED_THREAD': {
@@ -63,7 +74,7 @@ export default function reducer(state, action) {
           viewOptions: {
             threadOrder: threadOrder,
             selectedThread: threadOrder[0],
-            selectedFuncStack: null,
+            selectedFuncStacks: action.profile.threads.map(thread => []),
             symbolicationStatus: null,
           },
           profile: action.profile

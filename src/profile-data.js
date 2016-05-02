@@ -163,3 +163,37 @@ return timeCode('filterThreadToJSOnly', () => {
   });
 });
 }
+
+export function getFuncStackFromFuncArray(funcArray, funcStackTable) {
+  let fs = -1;
+  for (let i = 0; i < funcArray.length; i++) {
+    const func = funcArray[i];
+    let nextFS = -1;
+    for (let funcStackIndex = fs + 1; funcStackIndex < funcStackTable.length; funcStackIndex++) {
+      if (funcStackTable.prefix[funcStackIndex] === fs &&
+          funcStackTable.func[funcStackIndex] === func) {
+        nextFS = funcStackIndex;
+        break;
+      }
+    }
+    if (nextFS === -1) {
+      return null;
+    }
+    fs = nextFS;
+  }
+  return fs;
+}
+
+export function getStackAsFuncArray(funcStackIndex, funcStackTable) {
+  if (funcStackIndex === null) {
+    return [];
+  }
+  const funcArray = [];
+  let fs = funcStackIndex;
+  while (fs !== -1) {
+    funcArray.push(funcStackTable.func[fs]);
+    fs = funcStackTable.prefix[fs];
+  }
+  funcArray.reverse();
+  return funcArray;
+}

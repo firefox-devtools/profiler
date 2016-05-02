@@ -56,10 +56,10 @@ export function assignFunctionNames(threadIndex, funcIndices, funcNames) {
   };
 }
 
-export function changeSelectedFuncStack(selectedFuncStack) {
+export function changeSelectedFuncStack(threadIndex, selectedFuncStack) {
   return {
     type: 'CHANGE_SELECTED_FUNC_STACK',
-    selectedFuncStack
+    selectedFuncStack, threadIndex
   };
 }
 

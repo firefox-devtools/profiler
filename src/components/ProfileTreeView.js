@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TreeView from './TreeView';
+import { getStackAsFuncArray } from '../profile-data';
 import { getCallTree } from '../profile-tree';
 import * as Actions from '../actions';
 
@@ -12,11 +13,11 @@ class ProfileTreeView extends Component{
 
   _onSelectionChange(newSelectedNodeId) {
     const { dispatch } = this.props;
-    dispatch(Actions.changeSelectedFuncStack(newSelectedNodeId));
+    dispatch(Actions.changeSelectedFuncStack(this.props.threadIndex, getStackAsFuncArray(newSelectedNodeId, this.props.funcStackInfo.funcStackTable)));
   }
 
   componentWillMount() {
-    const { thread, interval, funcStackInfo } = this.props;
+    const { thread, interval, funcStackInfo, selectedFuncStack } = this.props;
     this._tree = getCallTree(thread, interval, funcStackInfo);
   }
 
@@ -28,7 +29,6 @@ class ProfileTreeView extends Component{
   }
 
   render() {
-    const { thread, interval, funcStackInfo, selectedFuncStack } = this.props;
     return (
       <TreeView tree={this._tree}
                 fixedColumns={[
@@ -38,7 +38,7 @@ class ProfileTreeView extends Component{
                 ]}
                 mainColumn={{propName:'name', title: ''}}
                 onSelectionChange={this._onSelectionChange}
-                selectedNodeId={selectedFuncStack} />
+                selectedNodeId={this.props.selectedFuncStack} />
     );
 
   }
