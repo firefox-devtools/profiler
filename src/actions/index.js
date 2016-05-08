@@ -31,13 +31,6 @@ export function startSymbolicating() {
   };
 }
 
-export function profileSymbolicationStep(profile) {
-  return {
-    type: 'PROFILE_SYMBOLICATION_STEP',
-    profile
-  };
-}
-
 export function doneSymbolicating() {
   return { type: 'DONE_SYMBOLICATING' };
 }

@@ -3,8 +3,6 @@ import { defaultThreadOrder } from '../profile-data';
 
 function profileViewReducer(state, action) {
   switch (action.type) {
-    case 'PROFILE_SYMBOLICATION_STEP':
-      return Object.assign({}, state, { profile: action.profile });
     case 'START_SYMBOLICATING':
       return Object.assign({}, state, { symbolicationStatus: 'SYMBOLICATING' });
     case 'DONE_SYMBOLICATING':
