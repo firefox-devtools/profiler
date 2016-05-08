@@ -19,29 +19,29 @@ function profileViewReducer(state, action) {
       newWaitingForLibs.delete(action.requestedLib);
       return Object.assign({}, state, { waitingForLibs: newWaitingForLibs });
     }
-    case 'MERGE_FUNCTIONS': {
-      const { threadIndex, oldFuncToNewFuncMap } = action;
-      const threads = state.profile.threads.slice();
-      threads[threadIndex] = applyFunctionMerging(threads[threadIndex], oldFuncToNewFuncMap);
-      const selectedFuncStacks = state.viewOptions.selectedFuncStacks.map((selectedFuncStack, ti) => {
-        if (ti !== threadIndex) {
+    case 'COALESCED_FUNCTIONS_UPDATE': {
+      const { functionsUpdatePerThread } = action;
+      const threads = state.profile.threads.map((thread, threadIndex) => {
+        if (!functionsUpdatePerThread[threadIndex])
+          return thread;
+        const { oldFuncToNewFuncMap, funcIndices, funcNames } = functionsUpdatePerThread[threadIndex];
+        thread = applyFunctionMerging(thread, oldFuncToNewFuncMap);
+        thread = setFuncNames(thread, funcIndices, funcNames);
+        return thread;
+      });
+      const profile = Object.assign({}, state.profile, { threads });
+      const selectedFuncStacks = state.viewOptions.selectedFuncStacks.map((selectedFuncStack, threadIndex) => {
+        if (!functionsUpdatePerThread[threadIndex]) {
           return selectedFuncStack;
         }
+        const { oldFuncToNewFuncMap } = functionsUpdatePerThread[threadIndex];
         return selectedFuncStack.map(oldFunc => {
           const newFunc = oldFuncToNewFuncMap.get(oldFunc);
           return newFunc === undefined ? oldFunc : newFunc;
         });
       });
       const viewOptions = Object.assign({}, state.viewOptions, { selectedFuncStacks });
-      const profile = Object.assign({}, state.profile, { threads });
       return Object.assign({}, state, { profile, viewOptions });
-    }
-    case 'ASSIGN_FUNCTION_NAMES': {
-      const { threadIndex, funcIndices, funcNames } = action;
-      const threads = state.profile.threads.slice();
-      threads[threadIndex] = setFuncNames(threads[threadIndex], funcIndices, funcNames);
-      const profile = Object.assign({}, state.profile, { threads });
-      return Object.assign({}, state, { profile });
     }
     case 'CHANGE_SELECTED_FUNC_STACK': {
       const { selectedFuncStack, threadIndex } = action;
@@ -59,7 +59,7 @@ function profileViewReducer(state, action) {
   }
 }
 
-export default function reducer(state, action) {
+export default function reducer(state = {}, action) {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_ADDON':
       return { status: 'WAITING_FOR_PROFILE' };

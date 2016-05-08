@@ -3,7 +3,8 @@ import 'babel-polyfill';
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
+import thunk from 'redux-thunk';
 import { AppContainer } from 'react-hot-loader';
 
 import rootReducer from './src/reducers';
@@ -57,7 +58,7 @@ window.geckoProfilerPromise = new Promise(function (resolve, reject) {
   window.connectToGeckoProfiler = resolve;
 });
 
-let store = createStore(rootReducer, {});
+let store = createStore(rootReducer, applyMiddleware(thunk));
 
 render(
   <AppContainer>

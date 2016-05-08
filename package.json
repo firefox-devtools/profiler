@@ -43,6 +43,7 @@
     "react-router-redux": "^4.0.2",
     "react-virtualized": "^6.2.0",
     "redux": "^3.4.0",
+    "redux-thunk": "^2.0.1",
     "shallowequal": "^0.2.2",
     "uglify": "^0.1.5",
     "uglify-js": "^2.6.1",

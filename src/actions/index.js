@@ -35,18 +35,72 @@ export function doneSymbolicating() {
   return { type: 'DONE_SYMBOLICATING' };
 }
 
-export function mergeFunctions(threadIndex, oldFuncToNewFuncMap) {
+export function coalescedFunctionsUpdate(functionsUpdatePerThread) {
   return {
-    type: 'MERGE_FUNCTIONS',
-    threadIndex, oldFuncToNewFuncMap
+    type: 'COALESCED_FUNCTIONS_UPDATE',
+    functionsUpdatePerThread
   };
 }
 
+class ColascedFunctionsUpdateDispatcher {
+  constructor() {
+    this._requestedAnimationFrame = false;
+    this._updates = {};
+  }
+
+  _scheduleUpdate(dispatch) {
+    if (!this._requestedAnimationFrame) {
+      window.requestAnimationFrame(e => this._dispatchUpdate(dispatch));
+    }
+  }
+
+  _dispatchUpdate(dispatch) {
+    const updates = this._updates;
+    this._updates = {};
+    this._requestedAnimationFrame = false;
+    dispatch(coalescedFunctionsUpdate(updates));
+  }
+
+  mergeFunctions(dispatch, threadIndex, oldFuncToNewFuncMap) {
+    this._scheduleUpdate(dispatch);
+    if (!this._updates[threadIndex]) {
+      this._updates[threadIndex] = {
+        oldFuncToNewFuncMap,
+        funcIndices: [],
+        funcNames: [],
+      };
+    } else {
+      const oldMap = this._updates[threadIndex].oldFuncToNewFuncMap;
+      this._updates[threadIndex].oldFuncToNewFuncMap = new Map(function*() { yield* oldMap; yield* oldFuncToNewFuncMap}());
+    }
+  }
+
+  assignFunctionNames(dispatch, threadIndex, funcIndices, funcNames) {
+    this._scheduleUpdate(dispatch);
+    if (!this._updates[threadIndex]) {
+      this._updates[threadIndex] = {
+        funcIndices, funcNames,
+        oldFuncToNewFuncMap: new Map(),
+      };
+    } else {
+      this._updates[threadIndex].funcIndices = this._updates[threadIndex].funcIndices.concat(funcIndices);
+      this._updates[threadIndex].funcNames = this._updates[threadIndex].funcNames.concat(funcNames);
+    }
+  }
+}
+
+const gCoalescedFunctionsUpdateDispatcher = new ColascedFunctionsUpdateDispatcher();
+
+export function mergeFunctions(threadIndex, oldFuncToNewFuncMap) {
+  return dispatch => {
+    gCoalescedFunctionsUpdateDispatcher.mergeFunctions(dispatch, threadIndex, oldFuncToNewFuncMap);
+  }
+}
+
 export function assignFunctionNames(threadIndex, funcIndices, funcNames) {
-  return {
-    type: 'ASSIGN_FUNCTION_NAMES',
-    threadIndex, funcIndices, funcNames
-  };
+  return dispatch => {
+    gCoalescedFunctionsUpdateDispatcher.assignFunctionNames(dispatch, threadIndex, funcIndices, funcNames);
+  }
 }
 
 export function changeSelectedFuncStack(threadIndex, selectedFuncStack) {
