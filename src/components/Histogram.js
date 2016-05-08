@@ -9,6 +9,21 @@ class Histogram extends Component {
   constructor(props) {
     super(props);
     this._resizeListener = e => this.forceUpdate();
+    this._requestedAnimationFrame = false;
+  }
+
+  _scheduleDraw() {
+    if (!this._requestedAnimationFrame) {
+      this._requestedAnimationFrame = true;
+      window.requestAnimationFrame(e => {
+        this._requestedAnimationFrame = false;
+        if (this.refs.canvas) {
+          timeCode('histogram render', () => {
+            this.drawCanvas(this.refs.canvas);
+          });
+        }
+      });
+    }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -75,11 +90,7 @@ class Histogram extends Component {
   }
 
   render() {
-    if (this.refs.canvas) {
-      timeCode('histogram render', () => {
-        this.drawCanvas(this.refs.canvas);
-      });
-    }
+    this._scheduleDraw();
     return <canvas className={this.props.className} ref='canvas'/>;
   }
 
