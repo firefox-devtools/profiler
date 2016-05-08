@@ -59,7 +59,15 @@ class ProfileViewer extends Component {
     }
 
     const funcStackInfos = threads.map((thread, threadIndex) => this._getFuncStackInfo(threadIndex, thread));
-    const selectedFuncStacks = viewOptions.selectedFuncStacks.map((sf, threadIndex) => getFuncStackFromFuncArray(sf, funcStackInfos[threadIndex].funcStackTable));
+    const selectedFuncStacks = viewOptions.threads.map((thread, threadIndex) => {
+      return getFuncStackFromFuncArray(thread.selectedFuncStack, funcStackInfos[threadIndex].funcStackTable);
+    });
+    if (!viewOptions.threads[treeThreadIndex].expandedFuncStacks) {
+      console.log(viewOptions);
+    }
+    const expandedFuncStacks = viewOptions.threads[treeThreadIndex].expandedFuncStacks.map(funcArray => {
+      return getFuncStackFromFuncArray(funcArray, funcStackInfos[treeThreadIndex].funcStackTable);
+    });
 
     return (
       <div className={className}>
@@ -82,7 +90,8 @@ class ProfileViewer extends Component {
                          threadIndex={treeThreadIndex}
                          interval={profile.meta.interval}
                          funcStackInfo={funcStackInfos[treeThreadIndex]}
-                         selectedFuncStack={selectedFuncStacks[treeThreadIndex]}/>
+                         selectedFuncStack={selectedFuncStacks[treeThreadIndex]}
+                         expandedFuncStacks={expandedFuncStacks}/>
       </div>
     );
   }

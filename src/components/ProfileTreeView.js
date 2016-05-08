@@ -9,11 +9,28 @@ class ProfileTreeView extends Component{
   constructor(props) {
     super(props);
     this._onSelectionChange = this._onSelectionChange.bind(this);
+    this._onExpandedNodesChange = this._onExpandedNodesChange.bind(this);
+    this._fixedColumns = [
+      { propName: 'totalTime', title: 'Running Time' },
+      { propName: 'totalTimePercent', title: '' },
+      { propName: 'selfTime', title: 'Self' },
+    ];
+    this._mainColumn = { propName:'name', title: '' };
   }
 
   _onSelectionChange(newSelectedNodeId) {
     const { dispatch } = this.props;
-    dispatch(Actions.changeSelectedFuncStack(this.props.threadIndex, getStackAsFuncArray(newSelectedNodeId, this.props.funcStackInfo.funcStackTable)));
+    dispatch(Actions.changeSelectedFuncStack(this.props.threadIndex,
+      getStackAsFuncArray(newSelectedNodeId, this.props.funcStackInfo.funcStackTable)));
+  }
+
+  _onExpandedNodesChange(newExpandedNodeIds) {
+    const { dispatch } = this.props;
+    const newExpandedFuncStacks =
+      newExpandedNodeIds.map(nodeId => getStackAsFuncArray(nodeId, this.props.funcStackInfo.funcStackTable));
+    console.log('newExpandedFuncStacks:', newExpandedFuncStacks);
+    dispatch(Actions.changeExpandedFuncStacks(this.props.threadIndex,
+      newExpandedFuncStacks));
   }
 
   componentWillMount() {
@@ -31,14 +48,12 @@ class ProfileTreeView extends Component{
   render() {
     return (
       <TreeView tree={this._tree}
-                fixedColumns={[
-                  { propName: 'totalTime', title: 'Running Time' },
-                  { propName: 'totalTimePercent', title: '' },
-                  { propName: 'selfTime', title: 'Self' },
-                ]}
-                mainColumn={{propName:'name', title: ''}}
+                fixedColumns={this._fixedColumns}
+                mainColumn={this._mainColumn}
                 onSelectionChange={this._onSelectionChange}
-                selectedNodeId={this.props.selectedFuncStack} />
+                onExpandedNodesChange={this._onExpandedNodesChange}
+                selectedNodeId={this.props.selectedFuncStack}
+                expandedNodeIds={this.props.expandedFuncStacks} />
     );
 
   }

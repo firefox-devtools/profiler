@@ -111,9 +111,15 @@ export function changeSelectedFuncStack(threadIndex, selectedFuncStack) {
   };
 }
 
-export function changeSelectedThread(threadIndex) {
+export function changeSelectedThread(selectedThread) {
   return {
     type: 'CHANGE_SELECTED_THREAD',
-    threadIndex
+    selectedThread
+  };
+}
+export function changeExpandedFuncStacks(threadIndex, expandedFuncStacks) {
+  return {
+    type: 'CHANGE_EXPANDED_FUNC_STACKS',
+    threadIndex, expandedFuncStacks
   };
 }

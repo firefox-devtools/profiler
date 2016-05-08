@@ -67,8 +67,6 @@ class TreeView extends Component {
     this._toggle = this._toggle.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onRowClicked = this._onRowClicked.bind(this);
-    this._expandedNodeIds = new Set();
-    this._selectedNodeId = -1;
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -77,21 +75,18 @@ class TreeView extends Component {
 
   componentWillReceiveProps(nextProps) {
     if (!nextProps.tree.hasSameNodeIds(this.props.tree)) {
-      this._expandedNodeIds = new Set();
-      this._selectedNodeId = nextProps.selectedNodeId;
-      let prefix = nextProps.tree.getParent(this._selectedNodeId);
+      let prefix = nextProps.tree.getParent(nextProps.selectedNodeId);
       if (typeof prefix === 'undefined') {
-        this._selectedNodeId = 0;
         return;
       }
-      while (prefix !== -1) {
-        this._expandedNodeIds.add(prefix);
+      while (0 && prefix !== -1) {
+        // this._expandedNodeIds.add(prefix);
         prefix = nextProps.tree.getParent(prefix);
       }
       if (0 && this.refs.list) { // This is needed when switching between threads, not when updating func stacks.
         const visibleRows = this._getAllVisibleRows(nextProps);
-        this.refs.list.scrollItemIntoView(visibleRows.findIndex((ni) => ni === this._selectedNodeId),
-                                          nextProps.tree.getDepth(this._selectedNodeId) * 10);
+        this.refs.list.scrollItemIntoView(visibleRows.findIndex((ni) => ni === nextProps.selectedNodeId),
+                                          nextProps.tree.getDepth(nextProps.selectedNodeId) * 10);
       }
     }
   }
@@ -100,7 +95,7 @@ class TreeView extends Component {
     const { tree } = this.props;
     const node = tree.getNode(nodeId);
     const canBeExpanded = tree.hasChildren(nodeId);
-    const isExpanded = this._expandedNodeIds.has(nodeId);
+    const isExpanded = this.props.expandedNodeIds.includes(nodeId);
     return (
       <TreeViewRow node={node}
                    fixedColumns={this.props.fixedColumns}
@@ -111,14 +106,14 @@ class TreeView extends Component {
                    canBeExpanded={canBeExpanded}
                    isExpanded={isExpanded}
                    onToggle={this._toggle}
-                   selected={nodeId === this._selectedNodeId}
+                   selected={nodeId === this.props.selectedNodeId}
                    onClick={this._onRowClicked}/>
     );
   }
 
   _addVisibleRowsFromNode(props, arr, nodeId, depth) {
     arr.push(nodeId);
-    if (!this._expandedNodeIds.has(nodeId)) {
+    if (!this.props.expandedNodeIds.includes(nodeId)) {
       return;
     }
     const children = this.props.tree.getChildren(nodeId);
@@ -137,26 +132,27 @@ class TreeView extends Component {
   }
 
   _isCollapsed(nodeId) {
-    return !this._expandedNodeIds.has(nodeId);
+    return !this.props.expandedNodeIds.includes(nodeId);
   }
 
-  _expandAllDescendants(nodeId) {
+  _addAllDescendants(newSet, nodeId) {
     this.props.tree.getChildren(nodeId).forEach(childId => {
-      this._expandedNodeIds.add(childId);
-      this._expandAllDescendants(childId);
+      newSet.add(childId);
+      this._addAllDescendants(newSet, childId);
     });
   }
 
   _toggle(nodeId, newExpanded = this._isCollapsed(nodeId), toggleAll = false) {
+    const newSet = new Set(this.props.expandedNodeIds);
     if (newExpanded) {
-      this._expandedNodeIds.add(nodeId);
+      newSet.add(nodeId);
       if (toggleAll) {
-        this._expandAllDescendants(nodeId);
+        this._addAllDescendants(newSet, nodeId);
       }
     } else {
-      this._expandedNodeIds.delete(nodeId);
+      newSet.delete(nodeId);
     }
-    this.forceUpdate();
+    this.props.onExpandedNodesChange(Array.from(newSet.values()));
   }
 
   _toggleAll(nodeId, newExpanded = this._isCollapsed(nodeId)) {
@@ -164,10 +160,8 @@ class TreeView extends Component {
   }
 
   _select(nodeId) {
-    this._selectedNodeId = nodeId;
     const visibleRows = this._getAllVisibleRows(this.props);
     this.refs.list.scrollItemIntoView(visibleRows.findIndex((ni) => ni === nodeId), this.props.tree.getDepth(nodeId) * 10);
-    this.forceUpdate();
     this.props.onSelectionChange(nodeId);
   }
 
@@ -179,7 +173,6 @@ class TreeView extends Component {
   }
 
   _onKeyDown(event) {
-
     if (event.ctrlKey || event.altKey || event.metaKey)
       return;
 
@@ -192,7 +185,7 @@ class TreeView extends Component {
     event.stopPropagation();
     event.preventDefault();
 
-    const selected = this._selectedNodeId;
+    const selected = this.props.selectedNodeId;
     const visibleRows = this._getAllVisibleRows(this.props);
     const selectedRowIndex = visibleRows.findIndex((nodeId) => nodeId === selected);
 

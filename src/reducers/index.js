@@ -30,28 +30,51 @@ function profileViewReducer(state, action) {
         return thread;
       });
       const profile = Object.assign({}, state.profile, { threads });
-      const selectedFuncStacks = state.viewOptions.selectedFuncStacks.map((selectedFuncStack, threadIndex) => {
+      const vothreads = state.viewOptions.threads.map((thread, threadIndex) => {
         if (!functionsUpdatePerThread[threadIndex]) {
-          return selectedFuncStack;
+          return thread;
         }
         const { oldFuncToNewFuncMap } = functionsUpdatePerThread[threadIndex];
-        return selectedFuncStack.map(oldFunc => {
+        const selectedFuncStack = thread.selectedFuncStack.map(oldFunc => {
           const newFunc = oldFuncToNewFuncMap.get(oldFunc);
           return newFunc === undefined ? oldFunc : newFunc;
         });
+        const expandedFuncStacks = thread.expandedFuncStacks.map(oldFuncArray => {
+          return oldFuncArray.map(oldFunc => {
+            const newFunc = oldFuncToNewFuncMap.get(oldFunc);
+            return newFunc === undefined ? oldFunc : newFunc;
+          });
+        });
+        return Object.assign({}, thread, { selectedFuncStack, expandedFuncStacks });
       });
-      const viewOptions = Object.assign({}, state.viewOptions, { selectedFuncStacks });
+      const viewOptions = Object.assign({}, state.viewOptions, { threads: vothreads });
       return Object.assign({}, state, { profile, viewOptions });
     }
     case 'CHANGE_SELECTED_FUNC_STACK': {
       const { selectedFuncStack, threadIndex } = action;
-      const selectedFuncStacks = state.viewOptions.selectedFuncStacks.map((sf, ti) => ti === threadIndex ? selectedFuncStack : sf);
-      const viewOptions = Object.assign({}, state.viewOptions, { selectedFuncStacks });
+      const threads = state.viewOptions.threads.map((thread, ti) => {
+        if (ti !== threadIndex) {
+          return thread;
+        }
+        return Object.assign({}, thread, { selectedFuncStack });
+      });
+      const viewOptions = Object.assign({}, state.viewOptions, { threads });
       return Object.assign({}, state, { viewOptions });
     }
     case 'CHANGE_SELECTED_THREAD': {
-      const { threadIndex } = action;
-      const viewOptions = Object.assign({}, state.viewOptions, { selectedThread: threadIndex });
+      const { selectedThread } = action;
+      const viewOptions = Object.assign({}, state.viewOptions, { selectedThread });
+      return Object.assign({}, state, { viewOptions });
+    }
+    case 'CHANGE_EXPANDED_FUNC_STACKS': {
+      const { threadIndex, expandedFuncStacks } = action;
+      const threads = state.viewOptions.threads.map((thread, ti) => {
+        if (ti !== threadIndex) {
+          return thread;
+        }
+        return Object.assign({}, thread, { expandedFuncStacks });
+      });
+      const viewOptions = Object.assign({}, state.viewOptions, { threads });
       return Object.assign({}, state, { viewOptions });
     }
     default:
@@ -72,7 +95,10 @@ export default function reducer(state = {}, action) {
           viewOptions: {
             threadOrder: threadOrder,
             selectedThread: threadOrder[0],
-            selectedFuncStacks: action.profile.threads.map(thread => []),
+            threads: action.profile.threads.map(thread => ({
+              selectedFuncStack: [],
+              expandedFuncStacks: [],
+            })),
             symbolicationStatus: null,
           },
           profile: action.profile
