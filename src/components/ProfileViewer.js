@@ -5,6 +5,7 @@ import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import { getFuncStackInfo, filterThreadToJSOnly, getFuncStackFromFuncArray, getStackAsFuncArray } from '../profile-data';
 import ProfileTreeView from '../components/ProfileTreeView';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
+import ProfileViewSidebar from '../components/ProfileViewSidebar';
 import * as Actions from '../actions';
 
 class ProfileViewer extends Component {
@@ -51,22 +52,18 @@ class ProfileViewer extends Component {
   render() {
     const { profile, viewOptions, className } = this.props;
     const timeRange = getTimeRangeIncludingAllThreads(profile);
-    const treeThreadIndex = viewOptions.selectedThread;
+    const { selectedThread, jsOnly } = viewOptions;
     const threads = profile.threads.slice(0);
-    const jsOnly = false;
     if (jsOnly) {
-      threads[treeThreadIndex] = this._filterToJSOnly(threads[treeThreadIndex]);
+      threads[selectedThread] = this._filterToJSOnly(threads[selectedThread]);
     }
 
     const funcStackInfos = threads.map((thread, threadIndex) => this._getFuncStackInfo(threadIndex, thread));
     const selectedFuncStacks = viewOptions.threads.map((thread, threadIndex) => {
       return getFuncStackFromFuncArray(thread.selectedFuncStack, funcStackInfos[threadIndex].funcStackTable);
     });
-    if (!viewOptions.threads[treeThreadIndex].expandedFuncStacks) {
-      console.log(viewOptions);
-    }
-    const expandedFuncStacks = viewOptions.threads[treeThreadIndex].expandedFuncStacks.map(funcArray => {
-      return getFuncStackFromFuncArray(funcArray, funcStackInfos[treeThreadIndex].funcStackTable);
+    const expandedFuncStacks = viewOptions.threads[selectedThread].expandedFuncStacks.map(funcArray => {
+      return getFuncStackFromFuncArray(funcArray, funcStackInfos[selectedThread].funcStackTable);
     });
 
     return (
@@ -81,17 +78,21 @@ class ProfileViewer extends Component {
                                     rangeStart={timeRange.start}
                                     rangeEnd={timeRange.end}
                                     funcStackInfo={funcStackInfos[threadIndex]}
-                                    selectedFuncStack={threadIndex === treeThreadIndex ? selectedFuncStacks[treeThreadIndex] : -1 }
+                                    selectedFuncStack={threadIndex === selectedThread ? selectedFuncStacks[selectedThread] : -1 }
+                                    isSelected={threadIndex === selectedThread}
                                     onClick={this._onProfileTitleClick}/>
           )
         }
         </ol>
-        <ProfileTreeView thread={threads[treeThreadIndex]}
-                         threadIndex={treeThreadIndex}
-                         interval={profile.meta.interval}
-                         funcStackInfo={funcStackInfos[treeThreadIndex]}
-                         selectedFuncStack={selectedFuncStacks[treeThreadIndex]}
-                         expandedFuncStacks={expandedFuncStacks}/>
+        <div className='treeAndSidebarWrapper'>
+          <ProfileViewSidebar />
+          <ProfileTreeView thread={threads[selectedThread]}
+                           threadIndex={selectedThread}
+                           interval={profile.meta.interval}
+                           funcStackInfo={funcStackInfos[selectedThread]}
+                           selectedFuncStack={selectedFuncStacks[selectedThread]}
+                           expandedFuncStacks={expandedFuncStacks}/>
+         </div>
       </div>
     );
   }

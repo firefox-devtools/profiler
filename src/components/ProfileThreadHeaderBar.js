@@ -13,9 +13,9 @@ class ProfileThreadHeaderBar extends Component {
   }
 
   render() {
-    const { thread, index, interval, rangeStart, rangeEnd, funcStackInfo, selectedFuncStack, onClick } = this.props;
+    const { thread, index, interval, rangeStart, rangeEnd, funcStackInfo, selectedFuncStack, isSelected, onClick } = this.props;
     return (
-      <li className='profileThreadHeaderBar'>
+      <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')}>
         <h1 onClick={(event) => onClick(index, event)}>{thread.name}</h1>
         <Histogram interval={interval}
                    thread={thread}

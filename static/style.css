@@ -189,6 +189,11 @@ body, #root, .profileViewer {
   border-top: 1px solid #D6D6D6;
 }
 
+.profileThreadHeaderBar.selected {
+  background-color: highlight;
+  color: highlighttext;
+}
+
 .profileThreadHeaderBar > h1 {
   width: 100px;
   font-weight: normal;
@@ -206,4 +211,39 @@ body, #root, .profileViewer {
 .histogram {
   height: 40px;
   flex: 1;
+  background: white;
+}
+
+.treeAndSidebarWrapper {
+  flex: 1;
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.sidebar {
+  width: 200px;
+  box-sizing: border-box;
+  padding: 5px;
+  border-top: 1px solid #D6D6D6;
+  border-right: 1px solid #D6D6D6;
+  background: #EEE;
+}
+
+.sidebar ul {
+  display: block;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 5px;
+}
+
+.sidebar ul > li {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar label {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
 }

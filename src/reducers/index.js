@@ -120,6 +120,15 @@ function waitingForLibs(state = new Set(), action) {
   }
 }
 
+function jsOnly(state = false, action) {
+  switch (action.type) {
+    case 'CHANGE_JS_ONLY':
+      return action.jsOnly;
+    default:
+      return state;
+  }
+}
+
 function profile(state = {}, action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
@@ -141,7 +150,7 @@ function profile(state = {}, action) {
   }
 }
 
-const viewOptions = combineReducers({ threadOrder, selectedThread, threads: viewOptionsThreads, symbolicationStatus, waitingForLibs });
+const viewOptions = combineReducers({ threadOrder, selectedThread, threads: viewOptionsThreads, symbolicationStatus, waitingForLibs, jsOnly });
 const profileView = combineReducers({ viewOptions, profile });
 
 export default combineReducers({ status, view, profileView });

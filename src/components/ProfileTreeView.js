@@ -28,7 +28,6 @@ class ProfileTreeView extends Component{
     const { dispatch } = this.props;
     const newExpandedFuncStacks =
       newExpandedNodeIds.map(nodeId => getStackAsFuncArray(nodeId, this.props.funcStackInfo.funcStackTable));
-    console.log('newExpandedFuncStacks:', newExpandedFuncStacks);
     dispatch(Actions.changeExpandedFuncStacks(this.props.threadIndex,
       newExpandedFuncStacks));
   }

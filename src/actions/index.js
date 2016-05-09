@@ -117,9 +117,18 @@ export function changeSelectedThread(selectedThread) {
     selectedThread
   };
 }
+
 export function changeExpandedFuncStacks(threadIndex, expandedFuncStacks) {
   return {
     type: 'CHANGE_EXPANDED_FUNC_STACKS',
     threadIndex, expandedFuncStacks
+  };
+}
+
+export function changeJSOnly(jsOnly) {
+  console.log(`changeJSOnly(${jsOnly})`)
+  return {
+    type: 'CHANGE_JS_ONLY',
+    jsOnly
   };
 }
