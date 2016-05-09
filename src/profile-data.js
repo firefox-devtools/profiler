@@ -200,7 +200,7 @@ export function getStackAsFuncArray(funcStackIndex, funcStackTable) {
 
 export function invertCallstack(thread) {
 return timeCode('invertCallstack', () => {
-  const { stackTable, funcTable, frameTable, samples } = thread;
+  const { stackTable, frameTable, samples } = thread;
 
   const newStackTable = {
     length: 0,
