@@ -126,9 +126,15 @@ export function changeExpandedFuncStacks(threadIndex, expandedFuncStacks) {
 }
 
 export function changeJSOnly(jsOnly) {
-  console.log(`changeJSOnly(${jsOnly})`)
   return {
     type: 'CHANGE_JS_ONLY',
     jsOnly
+  };
+}
+
+export function changeInvertCallstack(invertCallstack) {
+  return {
+    type: 'CHANGE_INVERT_CALLSTACK',
+    invertCallstack
   };
 }

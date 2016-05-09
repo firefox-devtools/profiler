@@ -129,6 +129,15 @@ function jsOnly(state = false, action) {
   }
 }
 
+function invertCallstack(state = false, action) {
+  switch (action.type) {
+    case 'CHANGE_INVERT_CALLSTACK':
+      return action.invertCallstack;
+    default:
+      return state;
+  }
+}
+
 function profile(state = {}, action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
@@ -150,7 +159,11 @@ function profile(state = {}, action) {
   }
 }
 
-const viewOptions = combineReducers({ threadOrder, selectedThread, threads: viewOptionsThreads, symbolicationStatus, waitingForLibs, jsOnly });
+const viewOptions = combineReducers({
+  threads: viewOptionsThreads,
+  threadOrder, selectedThread, symbolicationStatus, waitingForLibs, jsOnly, invertCallstack
+});
+
 const profileView = combineReducers({ viewOptions, profile });
 
 export default combineReducers({ status, view, profileView });

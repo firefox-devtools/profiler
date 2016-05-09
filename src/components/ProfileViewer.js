@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import shallowequal from 'shallowequal';
 import { getTimeRangeIncludingAllThreads } from '../profile-data';
-import { getFuncStackInfo, filterThreadToJSOnly, getFuncStackFromFuncArray, getStackAsFuncArray } from '../profile-data';
+import { getFuncStackInfo, filterThreadToJSOnly, getFuncStackFromFuncArray, getStackAsFuncArray, invertCallstack } from '../profile-data';
 import ProfileTreeView from '../components/ProfileTreeView';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
 import ProfileViewSidebar from '../components/ProfileViewSidebar';
@@ -29,6 +29,19 @@ class ProfileViewer extends Component {
     return jsOnlyThread;
   }
 
+  _invertCallStack(thread) {
+    const key = { thread }
+    if (this._cachedInvertedCallstack) {
+      const { cacheKey, invertedCallstackThread } = this._cachedInvertedCallstack;
+      if (shallowequal(cacheKey, key)) {
+        return invertedCallstackThread;
+      }
+    }
+    const invertedCallstackThread = invertCallstack(thread);
+    this._cachedInvertedCallstack = { cacheKey: key, invertedCallstackThread };
+    return invertedCallstackThread;
+  }
+
   _getFuncStackInfo(threadIndex, thread) {
     const { stackTable, frameTable, funcTable, samples } = thread;
     const key = { stackTable, frameTable, funcTable, samples };
@@ -52,10 +65,13 @@ class ProfileViewer extends Component {
   render() {
     const { profile, viewOptions, className } = this.props;
     const timeRange = getTimeRangeIncludingAllThreads(profile);
-    const { selectedThread, jsOnly } = viewOptions;
+    const { selectedThread, jsOnly, invertCallstack } = viewOptions;
     const threads = profile.threads.slice(0);
     if (jsOnly) {
       threads[selectedThread] = this._filterToJSOnly(threads[selectedThread]);
+    }
+    if (invertCallstack) {
+      threads[selectedThread] = this._invertCallStack(threads[selectedThread]);
     }
 
     const funcStackInfos = threads.map((thread, threadIndex) => this._getFuncStackInfo(threadIndex, thread));

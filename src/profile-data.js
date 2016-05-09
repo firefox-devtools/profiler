@@ -197,3 +197,54 @@ export function getStackAsFuncArray(funcStackIndex, funcStackTable) {
   funcArray.reverse();
   return funcArray;
 }
+
+export function invertCallstack(thread) {
+return timeCode('invertCallstack', () => {
+  const { stackTable, funcTable, frameTable, samples } = thread;
+
+  const newStackTable = {
+    length: 0,
+    frame: [],
+    prefix: [],
+  };
+  const frameCount = frameTable.length;
+  let prefixAndFrameToStack = new Map(); // prefix * frameCount + frame => stackIndex
+  function stackFor(prefix, frame) {
+    const prefixAndFrameIndex = (prefix === null ? -1 : prefix) * frameCount + frame;
+    let stackIndex = prefixAndFrameToStack.get(prefixAndFrameIndex);
+    if (stackIndex === undefined) {
+      stackIndex = newStackTable.length++;
+      newStackTable.prefix[stackIndex] = prefix;
+      newStackTable.frame[stackIndex] = frame;
+      prefixAndFrameToStack.set(prefixAndFrameIndex, stackIndex);
+    }
+    return stackIndex;
+  }
+
+  const oldStackToNewStack = new Map();
+
+  function convertStack(stackIndex) {
+    if (stackIndex === null) {
+      return null;
+    }
+    let newStack = oldStackToNewStack.get(stackIndex);
+    if (newStack === undefined) {
+      newStack = null;
+      for (let currentStack = stackIndex; currentStack !== null; currentStack = stackTable.prefix[currentStack]) {
+        newStack = stackFor(newStack, stackTable.frame[currentStack]);
+      }
+      oldStackToNewStack.set(stackIndex, newStack);
+    }
+    return newStack;
+  }
+
+  const newSamples = Object.assign({}, samples, {
+    stack: samples.stack.map(oldStack => convertStack(oldStack))
+  });
+
+  return Object.assign({}, thread, {
+    samples: newSamples,
+    stackTable: newStackTable,
+  });
+});
+}
