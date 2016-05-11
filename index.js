@@ -1,4 +1,3 @@
-import 'react-hot-loader/patch';
 import 'babel-polyfill';
 import React from 'react';
 import { render } from 'react-dom';
@@ -9,7 +8,6 @@ import { AppContainer } from 'react-hot-loader';
 
 import rootReducer from './src/reducers';
 import Root from './src/containers/Root';
-import ReactUpdates from 'react/lib/ReactUpdates';
 
 window.geckoProfilerPromise = new Promise(function (resolve, reject) {
   window.connectToGeckoProfiler = resolve;
