@@ -2,12 +2,14 @@ import { timeCode } from './time-code';
 import { getFuncStackInfo } from './profile-data';
 
 class ProfileTree {
-  constructor(funcStackTable, funcStackTimes, funcTable, stringTable, rootTotalTime) {
+  constructor(funcStackTable, funcStackTimes, funcStackChildCount, funcTable, stringTable, rootTotalTime, rootCount) {
     this._funcStackTable = funcStackTable;
     this._funcStackTimes = funcStackTimes;
+    this._funcStackChildCount = funcStackChildCount;
     this._funcTable = funcTable;
     this._stringTable = stringTable;
     this._rootTotalTime = rootTotalTime;
+    this._rootCount = rootCount;
     this._nodes = new Map();
     this._children = new Map();
   }
@@ -24,7 +26,15 @@ class ProfileTree {
   getChildren(funcStackIndex) {
     let children = this._children.get(funcStackIndex);
     if (children === undefined) {
-      children = this._funcStackTable.prefix.reduce((arr, prefix, childFuncStackIndex) => prefix === funcStackIndex ? arr.concat(childFuncStackIndex) : arr, []);
+      const childCount = funcStackIndex === -1 ? this._rootCount : this._funcStackChildCount[funcStackIndex];
+      children = [];
+      for (let childFuncStackIndex = funcStackIndex + 1;
+           childFuncStackIndex < this._funcStackTable.length && children.length < childCount;
+           childFuncStackIndex++) {
+        if (this._funcStackTable.prefix[childFuncStackIndex] === funcStackIndex) {
+          children.push(childFuncStackIndex)
+        }
+      }
       children.sort((a, b) => this._funcStackTimes.totalTime[b] - this._funcStackTimes.totalTime[a]);
       this._children.set(funcStackIndex, children);
     }
@@ -73,20 +83,24 @@ export function getCallTree(thread, interval, funcStackInfo) {
 
     const funcStackSelfTime = new Float32Array(funcStackTable.length);
     const funcStackTotalTime = new Float32Array(funcStackTable.length);
+    const numChildren = new Uint32Array(funcStackTable.length);
     for (let sampleIndex = 0; sampleIndex < sampleFuncStacks.length; sampleIndex++) {
       funcStackSelfTime[sampleFuncStacks[sampleIndex]] += interval;
     }
     let rootTotalTime = 0;
+    let numRoots = 0;
     for (let funcStackIndex = funcStackTotalTime.length - 1; funcStackIndex >= 0; funcStackIndex--) {
       funcStackTotalTime[funcStackIndex] += funcStackSelfTime[funcStackIndex];
       const prefixFuncStack = funcStackTable.prefix[funcStackIndex];
       if (prefixFuncStack === -1) {
         rootTotalTime += funcStackTotalTime[funcStackIndex];
+        numRoots++;
       } else {
         funcStackTotalTime[prefixFuncStack] += funcStackTotalTime[funcStackIndex];
+        numChildren[prefixFuncStack]++;
       }
     }
     const funcStackTimes = { selfTime: funcStackSelfTime, totalTime: funcStackTotalTime };
-    return new ProfileTree(funcStackTable, funcStackTimes, thread.funcTable, thread.stringTable, rootTotalTime);
+    return new ProfileTree(funcStackTable, funcStackTimes, numChildren, thread.funcTable, thread.stringTable, rootTotalTime, numRoots);
   });
 }
