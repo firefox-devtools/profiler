@@ -2,20 +2,18 @@ var path = require('path')
 var webpack = require('webpack')
 
 module.exports = {
-  devtool: 'cheap-module-eval-source-map',
   entry: [
-    'webpack-dev-server/client?http://localhost:4242',
-    'webpack/hot/only-dev-server',
-    'react-hot-loader/patch',
     './index'
   ],
   output: {
-    path: path.join(__dirname, 'dist'),
+    path: path.join(__dirname, 'static'),
     filename: 'bundle.js',
     publicPath: '/static/'
   },
   plugins: [
-    new webpack.HotModuleReplacementPlugin()
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`
+    })
   ],
   resolve: {
     alias: {
@@ -40,4 +38,13 @@ module.exports = {
       include: __dirname
     }]
   }
+}
+
+if (process.env.NODE_ENV === 'development') {
+  module.exports.devtool = 'cheap-module-eval-source-map';
+  module.exports.entry = [
+    'webpack-dev-server/client?http://localhost:4242',
+    'webpack/hot/only-dev-server',
+    'react-hot-loader/patch'].concat(module.exports.entry);
+  module.exports.plugins = [new webpack.HotModuleReplacementPlugin()].concat(module.exports.plugins);
 }

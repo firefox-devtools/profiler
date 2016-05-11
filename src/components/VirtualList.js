@@ -1,6 +1,16 @@
 import React, { Component, PropTypes } from 'react';
+import shallowCompare from 'react-addons-shallow-compare';
 
-const VirtualListRow = ({renderItem, item, index}) => renderItem(item, index);
+class VirtualListRow extends Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
+
+  render() {
+    const { renderItem, item, index } = this.props;
+    return renderItem(item, index);
+  }
+};
 
 class VirtualList extends Component {
 
@@ -78,7 +88,7 @@ class VirtualList extends Component {
             items.map((item, i) => {
               if (i < visibleRangeStart || i >= visibleRangeEnd)
                 return;
-              return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item}/>
+              return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item} items={items}/>
             })
           }
         </div>

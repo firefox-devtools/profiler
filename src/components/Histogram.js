@@ -83,7 +83,7 @@ class Histogram extends Component {
       const startY = c.height - sampleHeight;
       const responsiveness = thread.samples.responsiveness[i];
       const jankSeverity = Math.min(1, responsiveness / 100);
-      ctx.fillStyle = `rgb(${Math.round(255 * jankSeverity)}, ${isHighlighted ? 255 : 0}, 0)`;
+      ctx.fillStyle = isHighlighted ? '#38445f' : '#7990c8';
       ctx.fillRect((sampleTime - range[0]) * xPixelsPerMs, startY, intervalMs * xPixelsPerMs, sampleHeight);
     }
 
