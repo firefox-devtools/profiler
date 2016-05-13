@@ -1,6 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import shallowequal from 'shallowequal';
 import * as Actions from '../actions';
 
 const ProfileViewSidebar = ({ jsOnly, onChangeJSOnly, invertCallstack, onChangeInvertCallstack }) => (
@@ -26,6 +25,12 @@ const ProfileViewSidebar = ({ jsOnly, onChangeJSOnly, invertCallstack, onChangeI
   </div>
 );
 
+ProfileViewSidebar.propTypes = {
+  jsOnly: PropTypes.bool.isRequired,
+  onChangeJSOnly: PropTypes.func.isRequired,
+  invertCallstack: PropTypes.bool.isRequired,
+  onChangeInvertCallstack: PropTypes.func.isRequired,
+};
 
 export default connect(state => ({
   jsOnly: state.profileView.viewOptions.jsOnly,
