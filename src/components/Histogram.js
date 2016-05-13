@@ -95,13 +95,18 @@ class Histogram extends Component {
 }
 
 Histogram.propTypes = {
-  thread: PropTypes.object,
-  interval: PropTypes.number,
-  rangeStart: PropTypes.number,
-  rangeEnd: PropTypes.number,
-  funcStackInfo: PropTypes.object,
-  selectedFuncStack: PropTypes.number,
-  className: PropTypes.string,
+  'thread': PropTypes.shape({
+    samples: PropTypes.object.isRequired,
+  }).isRequired,
+  'interval': PropTypes.number.isRequired,
+  'rangeStart': PropTypes.number.isRequired,
+  'rangeEnd': PropTypes.number.isRequired,
+  'funcStackInfo': PropTypes.shape({
+    'funcStackTable': PropTypes.object.isRequired,
+    'sampleFuncStacks': PropTypes.object.isRequired,
+  }).isRequired,
+  'selectedFuncStack': PropTypes.number.isRequired,
+  'className': PropTypes.string,
 };
 
 export default Histogram;
