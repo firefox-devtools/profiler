@@ -161,7 +161,7 @@ function profile(state = {}, action) {
 
 const viewOptions = combineReducers({
   threads: viewOptionsThreads,
-  threadOrder, selectedThread, symbolicationStatus, waitingForLibs, jsOnly, invertCallstack
+  threadOrder, selectedThread, symbolicationStatus, waitingForLibs, jsOnly, invertCallstack,
 });
 
 const profileView = combineReducers({ viewOptions, profile });

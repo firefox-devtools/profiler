@@ -42,7 +42,7 @@
 
 export function getStore(dbName) {
   let DBVERSION = 1;
-  let STORENAME = "keyvaluestore"
+  let STORENAME = 'keyvaluestore';
   let db = null;
 
   function withStore(type, onsuccess, onerror) {
@@ -71,7 +71,7 @@ export function getStore(dbName) {
   function getItem(key) {
     return new Promise((resolve, reject) => {
       let req;
-      withStore("readonly", (store) => {
+      withStore('readonly', (store) => {
         store.transaction.oncomplete = function onComplete() {
           let value = req.result;
           if (value === undefined) {
@@ -81,7 +81,7 @@ export function getStore(dbName) {
         };
         req = store.get(key);
         req.onerror = function getItemOnError() {
-          reject("Error in asyncStorage.getItem(): ", req.error.name);
+          reject('Error in asyncStorage.getItem(): ', req.error.name);
         };
       }, reject);
     });
@@ -89,11 +89,11 @@ export function getStore(dbName) {
 
   function setItem(key, value) {
     return new Promise((resolve, reject) => {
-      withStore("readwrite", (store) => {
+      withStore('readwrite', (store) => {
         store.transaction.oncomplete = resolve;
         let req = store.put(value, key);
         req.onerror = function setItemOnError() {
-          reject("Error in asyncStorage.setItem(): ", req.error.name);
+          reject('Error in asyncStorage.setItem(): ', req.error.name);
         };
       }, reject);
     });
@@ -101,11 +101,11 @@ export function getStore(dbName) {
 
   function removeItem(key) {
     return new Promise((resolve, reject) => {
-      withStore("readwrite", (store) => {
+      withStore('readwrite', (store) => {
         store.transaction.oncomplete = resolve;
         let req = store.delete(key);
         req.onerror = function removeItemOnError() {
-          reject("Error in asyncStorage.removeItem(): ", req.error.name);
+          reject('Error in asyncStorage.removeItem(): ', req.error.name);
         };
       }, reject);
     });
@@ -113,11 +113,11 @@ export function getStore(dbName) {
 
   function clear() {
     return new Promise((resolve, reject) => {
-      withStore("readwrite", (store) => {
+      withStore('readwrite', (store) => {
         store.transaction.oncomplete = resolve;
         let req = store.clear();
         req.onerror = function clearOnError() {
-          reject("Error in asyncStorage.clear(): ", req.error.name);
+          reject('Error in asyncStorage.clear(): ', req.error.name);
         };
       }, reject);
     });
@@ -126,13 +126,13 @@ export function getStore(dbName) {
   function length() {
     return new Promise((resolve, reject) => {
       let req;
-      withStore("readonly", (store) => {
+      withStore('readonly', (store) => {
         store.transaction.oncomplete = function onComplete() {
           resolve(req.result);
-        }
+        };
         req = store.count();
         req.onerror = function lengthOnError() {
-          reject("Error in asyncStorage.length(): ", req.error.name);
+          reject('Error in asyncStorage.length(): ', req.error.name);
         };
       }, reject);
     });
@@ -146,7 +146,7 @@ export function getStore(dbName) {
       }
 
       let req;
-      withStore("readonly", (store) => {
+      withStore('readonly', (store) => {
         store.transaction.oncomplete = function onComplete() {
           let cursor = req.result;
           resolve(cursor ? cursor.key : null);
@@ -170,7 +170,7 @@ export function getStore(dbName) {
           cursor.advance(n);
         };
         req.onerror = function keyOnError() {
-          reject("Error in asyncStorage.key(): ", req.error.name);
+          reject('Error in asyncStorage.key(): ', req.error.name);
         };
       }, reject);
     });
@@ -182,6 +182,6 @@ export function getStore(dbName) {
     removeItem: removeItem,
     clear: clear,
     length: length,
-    key: key
+    key: key,
   };
 }

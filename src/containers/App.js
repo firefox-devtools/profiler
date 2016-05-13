@@ -22,7 +22,7 @@ class App extends Component {
         profile = preprocessProfile(profile);
         dispatch(Actions.receiveProfileFromAddon(profile));
 
-        const symbolStore = new SymbolStore("cleopatra-async-storage", {
+        const symbolStore = new SymbolStore('cleopatra-async-storage', {
           requestSymbolTable: (pdbName, breakpadId) => {
             let requestedLib = { pdbName, breakpadId };
             dispatch(Actions.requestingSymbolTable(requestedLib));
@@ -33,7 +33,7 @@ class App extends Component {
               dispatch(Actions.receivedSymbolTableReply(requestedLib));
               throw error;
             });
-          }
+          },
         });
 
         dispatch(Actions.startSymbolicating());
@@ -43,7 +43,7 @@ class App extends Component {
           },
           onGotFuncNames: (threadIndex, funcIndices, funcNames) => {
             dispatch(Actions.assignFunctionNames(threadIndex, funcIndices, funcNames));
-          }
+          },
         }).then(() => dispatch(Actions.doneSymbolicating()));
       });
     });
@@ -59,5 +59,5 @@ class App extends Component {
       <ProfileViewer profile={profile} viewOptions={viewOptions} className='profileViewer'/>
     );
   }
-};
+}
 export default connect(state => state)(App);

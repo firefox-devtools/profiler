@@ -10,7 +10,7 @@ class VirtualListRow extends Component {
     const { renderItem, item, index } = this.props;
     return renderItem(item, index);
   }
-};
+}
 
 class VirtualList extends Component {
 
@@ -79,7 +79,7 @@ class VirtualList extends Component {
         <div className={`${className}Inner`} ref='inner'
               style={{
                 height: `${items.length * itemHeight}px`,
-                width: '3000px'
+                width: '3000px',
               }}>
           <div className={`${className}TopSpacer`}
                key={-1}
@@ -88,7 +88,7 @@ class VirtualList extends Component {
             items.map((item, i) => {
               if (i < visibleRangeStart || i >= visibleRangeEnd)
                 return;
-              return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item} items={items}/>
+              return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item} items={items}/>;
             })
           }
         </div>

@@ -10,7 +10,7 @@ function runBatch() {
 }
 
 export function enqueueForBatching(fun) {
-  console.log(`pushing a new fun for batching`);
+  console.log('pushing a new fun for batching');
   enqueuedFunctions.push(fun);
   if (!scheduledBatch) {
     setTimeout(runBatch, 0);

@@ -15,7 +15,7 @@ export function provideHostSide(workerFilename, methods) {
       } else if (type === 'error') {
         reject(data.error);
       }
-    }
+    };
 
     for (let method of methods) {
       this[method] = (function () {
@@ -29,7 +29,7 @@ export function provideHostSide(workerFilename, methods) {
     }
 
     worker.postMessage({ type: 'constructor', constructorArguments });
-  }
+  };
 }
 
 export function provideWorkerSide(workerGlobal, theClass) {
@@ -45,5 +45,5 @@ export function provideWorkerSide(workerGlobal, theClass) {
         workerGlobal.postMessage({ msgID, type: 'error', error: error.toString() });
       });
     }
-  }
+  };
 }

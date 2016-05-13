@@ -1,33 +1,33 @@
 export function waitingForProfileFromAddon() {
   return {
-    type: 'WAITING_FOR_PROFILE_FROM_ADDON'
+    type: 'WAITING_FOR_PROFILE_FROM_ADDON',
   };
 }
 
 export function receiveProfileFromAddon(profile) {
   return {
     type: 'RECEIVE_PROFILE_FROM_ADDON',
-    profile: profile
+    profile: profile,
   };
 }
 
 export function requestingSymbolTable(requestedLib) {
   return {
     type: 'REQUESTING_SYMBOL_TABLE',
-    requestedLib
+    requestedLib,
   };
 }
 
 export function receivedSymbolTableReply(requestedLib) {
   return {
     type: 'RECEIVED_SYMBOL_TABLE_REPLY',
-    requestedLib
+    requestedLib,
   };
 }
 
 export function startSymbolicating() {
   return {
-    type: 'START_SYMBOLICATING'
+    type: 'START_SYMBOLICATING',
   };
 }
 
@@ -38,7 +38,7 @@ export function doneSymbolicating() {
 export function coalescedFunctionsUpdate(functionsUpdatePerThread) {
   return {
     type: 'COALESCED_FUNCTIONS_UPDATE',
-    functionsUpdatePerThread
+    functionsUpdatePerThread,
   };
 }
 
@@ -72,7 +72,7 @@ class ColascedFunctionsUpdateDispatcher {
       };
     } else {
       const oldMap = this._updates[threadIndex].oldFuncToNewFuncMap;
-      this._updates[threadIndex].oldFuncToNewFuncMap = new Map(function*() { yield* oldMap; yield* oldFuncToNewFuncMap}());
+      this._updates[threadIndex].oldFuncToNewFuncMap = new Map(function*() { yield* oldMap; yield* oldFuncToNewFuncMap;}());
     }
   }
 
@@ -95,46 +95,46 @@ const gCoalescedFunctionsUpdateDispatcher = new ColascedFunctionsUpdateDispatche
 export function mergeFunctions(threadIndex, oldFuncToNewFuncMap) {
   return dispatch => {
     gCoalescedFunctionsUpdateDispatcher.mergeFunctions(dispatch, threadIndex, oldFuncToNewFuncMap);
-  }
+  };
 }
 
 export function assignFunctionNames(threadIndex, funcIndices, funcNames) {
   return dispatch => {
     gCoalescedFunctionsUpdateDispatcher.assignFunctionNames(dispatch, threadIndex, funcIndices, funcNames);
-  }
+  };
 }
 
 export function changeSelectedFuncStack(threadIndex, selectedFuncStack) {
   return {
     type: 'CHANGE_SELECTED_FUNC_STACK',
-    selectedFuncStack, threadIndex
+    selectedFuncStack, threadIndex,
   };
 }
 
 export function changeSelectedThread(selectedThread) {
   return {
     type: 'CHANGE_SELECTED_THREAD',
-    selectedThread
+    selectedThread,
   };
 }
 
 export function changeExpandedFuncStacks(threadIndex, expandedFuncStacks) {
   return {
     type: 'CHANGE_EXPANDED_FUNC_STACKS',
-    threadIndex, expandedFuncStacks
+    threadIndex, expandedFuncStacks,
   };
 }
 
 export function changeJSOnly(jsOnly) {
   return {
     type: 'CHANGE_JS_ONLY',
-    jsOnly
+    jsOnly,
   };
 }
 
 export function changeInvertCallstack(invertCallstack) {
   return {
     type: 'CHANGE_INVERT_CALLSTACK',
-    invertCallstack
+    invertCallstack,
   };
 }

@@ -17,7 +17,7 @@ class ProfileViewer extends Component {
   }
 
   _filterToJSOnly(thread) {
-    const key = { thread }
+    const key = { thread };
     if (this._cachedJSOnly) {
       const { cacheKey, jsOnlyThread } = this._cachedJSOnly;
       if (shallowequal(cacheKey, key)) {
@@ -30,7 +30,7 @@ class ProfileViewer extends Component {
   }
 
   _invertCallStack(thread) {
-    const key = { thread }
+    const key = { thread };
     if (this._cachedInvertedCallstack) {
       const { cacheKey, invertedCallstackThread } = this._cachedInvertedCallstack;
       if (shallowequal(cacheKey, key)) {
@@ -53,7 +53,7 @@ class ProfileViewer extends Component {
     }
     const funcStackInfo = getFuncStackInfo(stackTable, frameTable, funcTable, samples);
     this._cachedFuncStackInfos[threadIndex] = {
-      cacheKey: key, funcStackInfo
+      cacheKey: key, funcStackInfo,
     };
     return funcStackInfo;
   }
@@ -112,5 +112,5 @@ class ProfileViewer extends Component {
       </div>
     );
   }
-};
+}
 export default connect()(ProfileViewer);

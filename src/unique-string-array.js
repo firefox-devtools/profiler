@@ -20,4 +20,4 @@ export class UniqueStringArray {
     }
     return index;
   }
-};
+}

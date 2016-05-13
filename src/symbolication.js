@@ -64,7 +64,7 @@ function gatherFuncsInThread(thread) {
       foundAddresses.set(lib, libFuncs);
     }
     libFuncs.push(funcIndex);
-  };
+  }
   return foundAddresses;
 }
 
@@ -176,7 +176,7 @@ export function applyFunctionMerging(thread, oldFuncToNewFuncMap) {
     func: thread.frameTable.func.map(oldFunc => {
       const newFunc = oldFuncToNewFuncMap.get(oldFunc);
       return newFunc === undefined ? oldFunc : newFunc;
-    })
+    }),
   });
   return Object.assign({}, thread, { frameTable });
 }
@@ -202,7 +202,7 @@ function symbolicateThread(thread, threadIndex, symbolStore, cbo) {
   }
 
   function callOnUpdateThread() {
-    updatedThread = applyFunctionMerging(updatedThread, oldFuncToNewFuncMap)
+    updatedThread = applyFunctionMerging(updatedThread, oldFuncToNewFuncMap);
     cbo.onUpdateThread(updatedThread, oldFuncToNewFuncMap);
     oldFuncToNewFuncMap = new Map();
     scheduledThreadUpdate = false;

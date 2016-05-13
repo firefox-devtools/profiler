@@ -22,7 +22,7 @@ function toStructOfArrays(rawTable) {
 // with " -> ". We only want the last URI in this list.
 function getRealScriptURI(url) {
   if (url) {
-    var urls = url.split(" -> ");
+    var urls = url.split(' -> ');
     return urls[urls.length - 1];
   }
   return url;
@@ -37,7 +37,7 @@ function preprocessThread(thread, libs) {
     name: [],
     resource: [],
     address: [],
-    isJS: []
+    isJS: [],
   };
   function addFunc(name, resource, address, isJS) {
     const index = funcTable.length++;
@@ -52,7 +52,7 @@ function preprocessThread(thread, libs) {
     name: [],
     lib: [],
     icon: [],
-    addonId: []
+    addonId: [],
   };
   function addLibResource(name, lib) {
     const index = resourceTable.length++;
@@ -126,7 +126,7 @@ function preprocessThread(thread, libs) {
   delete frameTable.location;
 
   return Object.assign({}, thread, {
-    libs, frameTable, funcTable, resourceTable, stackTable, markers, stringTable, samples
+    libs, frameTable, funcTable, resourceTable, stackTable, markers, stringTable, samples,
   });
 }
 
@@ -137,11 +137,11 @@ function preprocessSharedLibraries(libs) {
   return JSON.parse(libs).map(lib => {
     let pdbName, breakpadId;
     if ('breakpadId' in lib) {
-      pdbName = lib.name.substr(lib.name.lastIndexOf("/") + 1);
+      pdbName = lib.name.substr(lib.name.lastIndexOf('/') + 1);
       breakpadId = lib.breakpadId;
     } else {
       pdbName = lib.pdbName;
-      const pdbSig = lib.pdbSignature.replace(/[{}-]/g, "").toUpperCase();
+      const pdbSig = lib.pdbSignature.replace(/[{}-]/g, '').toUpperCase();
       breakpadId = pdbSig + lib.pdbAge;
     }
     return Object.assign({}, lib, { pdbName, breakpadId });
@@ -153,11 +153,11 @@ function preprocessSharedLibraries(libs) {
  */
 function adjustTimestamps(samplesOrMarkers, delta) {
   if (!samplesOrMarkers.time) {
-    console.log(`don't have samplesOrMarkers.time!`);
+    console.log('don\'t have samplesOrMarkers.time!');
     console.log(samplesOrMarkers);
   }
   return Object.assign({}, samplesOrMarkers, {
-    time: samplesOrMarkers.time.map(time => time === undefined ? undefined : time + delta)
+    time: samplesOrMarkers.time.map(time => time === undefined ? undefined : time + delta),
   });
 }
 
@@ -191,6 +191,6 @@ export class ProfilePreprocessor {
   preprocessProfile(profile) {
     return Promise.resolve(preprocessProfile(profile));
   }
-};
+}
 
 export const ProfilePreprocessorThreaded = provideHostSide('profile-preprocessor-worker.js', ['preprocessProfile']);

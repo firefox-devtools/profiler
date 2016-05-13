@@ -57,7 +57,7 @@ class TreeViewRow extends Component {
       </div>
     );
   }
-};
+}
 
 class TreeView extends Component {
 
@@ -245,6 +245,6 @@ class TreeView extends Component {
     );
   }
 
-};
+}
 
 export default TreeView;

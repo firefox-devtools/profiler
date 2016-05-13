@@ -32,7 +32,7 @@ class ProfileTree {
            childFuncStackIndex < this._funcStackTable.length && children.length < childCount;
            childFuncStackIndex++) {
         if (this._funcStackTable.prefix[childFuncStackIndex] === funcStackIndex) {
-          children.push(childFuncStackIndex)
+          children.push(childFuncStackIndex);
         }
       }
       children.sort((a, b) => this._funcStackTimes.totalTime[b] - this._funcStackTimes.totalTime[a]);
@@ -75,7 +75,7 @@ class ProfileTree {
     }
     return node;
   }
-};
+}
 
 export function getCallTree(thread, interval, funcStackInfo) {
   return timeCode('getCallTree', () => {

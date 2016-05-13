@@ -44,7 +44,7 @@ export class SymbolStoreDB {
         if (cursor) {
           resolve(cursor.primaryKey);
         } else {
-          reject(new Error("Nothing in the async cache for this library."));
+          reject(new Error('Nothing in the async cache for this library.'));
         }
       };
     });
@@ -107,7 +107,7 @@ export class SymbolStoreDB {
       req.onerror = reject;
       req.onsuccess = () => {
         if (!req.result) {
-          reject(new Error("unexpected null result"));
+          reject(new Error('unexpected null result'));
           return;
         }
         const { addrs, index, buffer } = req.result;
@@ -121,11 +121,11 @@ export class SymbolStoreDB {
       };
     });
   }
-};
+}
 
 export const SymbolStoreDBThreaded = provideHostSide('symbol-store-db-worker.js', [
   'getLibKey',
   'importLibrary',
   'getFuncAddressTableForLib',
-  'getSymbolsForAddressesInLib'
+  'getSymbolsForAddressesInLib',
 ]);
