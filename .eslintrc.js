@@ -18,7 +18,8 @@ module.exports = {
     "rules": {
         "indent": [
             "error",
-            2
+            2,
+            { "SwitchCase": 1 }
         ],
         "linebreak-style": [
             "error",
@@ -31,6 +32,9 @@ module.exports = {
         "semi": [
             "error",
             "always"
+        ],
+        "no-extra-semi": [
+            "error"
         ],
         "comma-dangle": [
             "error",
