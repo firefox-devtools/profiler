@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha --compilers js:babel-core/register",
-    "start": "npm run build && npm run server",
+    "start": "npm run server",
+    "start-prod": "npm run build-prod && npm run plain-server",
     "server": "NODE_ENV=development node server.js",
     "plain-server": "live-server --port=4242",
     "build": "NODE_ENV=development webpack",
