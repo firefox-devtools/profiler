@@ -10,7 +10,7 @@
     "server": "NODE_ENV=development node server.js",
     "plain-server": "live-server --port=4242",
     "build": "NODE_ENV=development webpack",
-    "build-prod": "NODE_ENV=production webpack -p",
+    "build-prod": "NODE_ENV=production webpack -p --progress",
     "eslint": "eslint index.js src",
     "eslint-fix": "eslint --fix index.js src"
   },
