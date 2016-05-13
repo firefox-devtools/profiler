@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import shallowequal from 'shallowequal';
 import { getTimeRangeIncludingAllThreads } from '../profile-data';
-import { getFuncStackInfo, filterThreadToJSOnly, getFuncStackFromFuncArray, invertCallstack } from '../profile-data';
+import { getFuncStackInfo, filterThreadToJSOnly, getFuncStackFromFuncArray, getStackAsFuncArray, invertCallstack } from '../profile-data';
 import ProfileTreeView from '../components/ProfileTreeView';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
 import ProfileViewSidebar from '../components/ProfileViewSidebar';
@@ -14,6 +14,8 @@ class ProfileViewer extends Component {
     this._cachedFuncStackInfos = [];
     this._cachedJSOnly = null;
     this._onProfileTitleClick = this._onProfileTitleClick.bind(this);
+    this._onSelectedFuncStackChange = this._onSelectedFuncStackChange.bind(this);
+    this._onExpandedFuncStacksChange = this._onExpandedFuncStacksChange.bind(this);
   }
 
   _filterToJSOnly(thread) {
@@ -62,6 +64,30 @@ class ProfileViewer extends Component {
     this.props.dispatch(Actions.changeSelectedThread(threadIndex));
   }
 
+  _onSelectedFuncStackChange(newSelectedFuncStack) {
+    const { dispatch, viewOptions, profile } = this.props;
+    const { selectedThread } = viewOptions;
+    const thread = profile.threads[selectedThread];
+    const funcStackInfo = this._getFuncStackInfo(selectedThread, thread);
+    dispatch(Actions.changeSelectedFuncStack(selectedThread,
+      getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable)));
+  }
+
+  _onExpandedFuncStacksChange(newExpandedFuncStacks) {
+    const { dispatch, viewOptions, profile } = this.props;
+    const { selectedThread } = viewOptions;
+    const thread = profile.threads[selectedThread];
+    const funcStackInfo = this._getFuncStackInfo(selectedThread, thread);
+    dispatch(Actions.changeExpandedFuncStacks(selectedThread,
+      newExpandedFuncStacks.map(funcStackIndex => getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable))));
+  }
+
+  componentDidMount() {
+    console.log(this.refs.treeView);
+    this.refs.treeView.focus();
+    this.refs.treeView.procureInterestingInitialSelection();
+  }
+
   render() {
     const { profile, viewOptions, className } = this.props;
     const timeRange = getTimeRangeIncludingAllThreads(profile);
@@ -107,7 +133,10 @@ class ProfileViewer extends Component {
                            interval={profile.meta.interval}
                            funcStackInfo={funcStackInfos[selectedThread]}
                            selectedFuncStack={selectedFuncStacks[selectedThread]}
-                           expandedFuncStacks={expandedFuncStacks}/>
+                           expandedFuncStacks={expandedFuncStacks}
+                           onSelectedFuncStackChange={this._onSelectedFuncStackChange}
+                           onExpandedFuncStacksChange={this._onExpandedFuncStacksChange}
+                           ref='treeView'/>
          </div>
       </div>
     );

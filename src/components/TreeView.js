@@ -258,6 +258,10 @@ class TreeView extends Component {
     }
   }
 
+  focus() {
+    this.refs.list.focus();
+  }
+
   render() {
     const { fixedColumns, mainColumn } = this.props;
     this._visibleRows = this._getAllVisibleRows(this.props);

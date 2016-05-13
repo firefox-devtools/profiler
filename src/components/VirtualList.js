@@ -75,6 +75,10 @@ class VirtualList extends Component {
     }
   }
 
+  focus() {
+    this.refs.container.focus();
+  }
+
   render() {
     const { itemHeight, className, renderItem, items, focusable, onKeyDown } = this.props;
 

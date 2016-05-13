@@ -40,7 +40,7 @@ ProfileThreadHeaderBar.propTypes = {
   rangeEnd: PropTypes.number.isRequired,
   funcStackInfo: PropTypes.shape({
     funcStackTable: PropTypes.object.isRequired,
-    sampleFuncStacks: PropTypes.object.isRequired,
+    sampleFuncStacks: PropTypes.array.isRequired,
   }).isRequired,
   selectedFuncStack: PropTypes.number.isRequired,
   isSelected: PropTypes.bool.isRequired,
