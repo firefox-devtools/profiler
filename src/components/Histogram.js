@@ -1,21 +1,19 @@
 import React, { Component, PropTypes } from 'react';
-import { connect } from 'react-redux';
 import shallowCompare from 'react-addons-shallow-compare';
-import { getCallTree } from '../profile-tree';
 import { timeCode } from '../time-code';
 
 class Histogram extends Component {
 
   constructor(props) {
     super(props);
-    this._resizeListener = e => this.forceUpdate();
+    this._resizeListener = () => this.forceUpdate();
     this._requestedAnimationFrame = false;
   }
 
   _scheduleDraw() {
     if (!this._requestedAnimationFrame) {
       this._requestedAnimationFrame = true;
-      window.requestAnimationFrame(e => {
+      window.requestAnimationFrame(() => {
         this._requestedAnimationFrame = false;
         if (this.refs.canvas) {
           timeCode('histogram render', () => {
@@ -81,8 +79,8 @@ class Histogram extends Component {
       const isHighlighted = hasSelectedFuncStackPrefix(funcStack);
       const sampleHeight = funcStackTable.depth[funcStack] * yPixelsPerDepth;
       const startY = c.height - sampleHeight;
-      const responsiveness = thread.samples.responsiveness[i];
-      const jankSeverity = Math.min(1, responsiveness / 100);
+      // const responsiveness = thread.samples.responsiveness[i];
+      // const jankSeverity = Math.min(1, responsiveness / 100);
       ctx.fillStyle = isHighlighted ? '#38445f' : '#7990c8';
       ctx.fillRect((sampleTime - range[0]) * xPixelsPerMs, startY, intervalMs * xPixelsPerMs, sampleHeight);
     }
@@ -95,4 +93,15 @@ class Histogram extends Component {
   }
 
 }
+
+Histogram.propTypes = {
+  thread: PropTypes.object,
+  interval: PropTypes.number,
+  rangeStart: PropTypes.number,
+  rangeEnd: PropTypes.number,
+  funcStackInfo: PropTypes.object,
+  selectedFuncStack: PropTypes.number,
+  className: PropTypes.string,
+};
+
 export default Histogram;
