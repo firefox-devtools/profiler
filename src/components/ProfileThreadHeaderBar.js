@@ -29,4 +29,22 @@ class ProfileThreadHeaderBar extends Component {
   }
 
 }
+
+ProfileThreadHeaderBar.propTypes = {
+  thread: PropTypes.shape({
+    samples: PropTypes.object.isRequired,
+  }).isRequired,
+  index: PropTypes.number.isRequired,
+  interval: PropTypes.number.isRequired,
+  rangeStart: PropTypes.number.isRequired,
+  rangeEnd: PropTypes.number.isRequired,
+  funcStackInfo: PropTypes.shape({
+    funcStackTable: PropTypes.object.isRequired,
+    sampleFuncStacks: PropTypes.object.isRequired,
+  }).isRequired,
+  selectedFuncStack: PropTypes.number.isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  onClick: PropTypes.func.isRequired,
+};
+
 export default ProfileThreadHeaderBar;
