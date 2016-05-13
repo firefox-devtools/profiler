@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import shallowequal from 'shallowequal';
 import { getTimeRangeIncludingAllThreads } from '../profile-data';
-import { getFuncStackInfo, filterThreadToJSOnly, getFuncStackFromFuncArray, getStackAsFuncArray, invertCallstack } from '../profile-data';
+import { getFuncStackInfo, filterThreadToJSOnly, getFuncStackFromFuncArray, invertCallstack } from '../profile-data';
 import ProfileTreeView from '../components/ProfileTreeView';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
 import ProfileViewSidebar from '../components/ProfileViewSidebar';
@@ -58,7 +58,7 @@ class ProfileViewer extends Component {
     return funcStackInfo;
   }
 
-  _onProfileTitleClick(threadIndex, event) {
+  _onProfileTitleClick(threadIndex) {
     this.props.dispatch(Actions.changeSelectedThread(threadIndex));
   }
 
@@ -113,4 +113,12 @@ class ProfileViewer extends Component {
     );
   }
 }
+
+ProfileViewer.propTypes = {
+  profile: PropTypes.object.isRequired,
+  viewOptions: PropTypes.object.isRequired,
+  className: PropTypes.string,
+  dispatch: PropTypes.func.isRequired,
+};
+
 export default connect()(ProfileViewer);
