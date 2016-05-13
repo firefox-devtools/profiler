@@ -105,7 +105,7 @@ Histogram.propTypes = {
     funcStackTable: PropTypes.object.isRequired,
     sampleFuncStacks: PropTypes.array.isRequired,
   }).isRequired,
-  selectedFuncStack: PropTypes.number.isRequired,
+  selectedFuncStack: PropTypes.number,
   className: PropTypes.string,
 };
 

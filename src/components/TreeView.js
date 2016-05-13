@@ -17,6 +17,17 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
   </div>
 );
 
+TreeViewHeader.propTypes = {
+  fixedColumns: PropTypes.arrayOf(PropTypes.shape({
+    propName: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  })).isRequired,
+  mainColumn: PropTypes.shape({
+    propName: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  }).isRequired,
+};
+
 class TreeViewRow extends Component {
 
   constructor(props) {
@@ -38,7 +49,7 @@ class TreeViewRow extends Component {
   }
 
   render() {
-    const { node, nodeId, depth, fixedColumns, mainColumn, index, canBeExpanded, isExpanded, onToggle, selected, onClick } = this.props;
+    const { node, depth, fixedColumns, mainColumn, index, canBeExpanded, isExpanded, selected } = this.props;
     const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
     return (
       <div className={`treeViewRow ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
@@ -58,6 +69,26 @@ class TreeViewRow extends Component {
     );
   }
 }
+
+TreeViewRow.propTypes = {
+  node: PropTypes.object.isRequired,
+  nodeId: PropTypes.number.isRequired,
+  depth: PropTypes.number.isRequired,
+  fixedColumns: PropTypes.arrayOf(PropTypes.shape({
+    propName: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  })).isRequired,
+  mainColumn: PropTypes.shape({
+    propName: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  }).isRequired,
+  index: PropTypes.number.isRequired,
+  canBeExpanded: PropTypes.bool.isRequired,
+  isExpanded: PropTypes.bool.isRequired,
+  onToggle: PropTypes.func.isRequired,
+  selected: PropTypes.bool.isRequired,
+  onClick: PropTypes.func.isRequired,
+};
 
 class TreeView extends Component {
 
@@ -92,21 +123,21 @@ class TreeView extends Component {
   }
 
   _renderRow(nodeId, index) {
-    const { tree } = this.props;
+    const { tree, expandedNodeIds, fixedColumns, mainColumn, selectedNodeId } = this.props;
     const node = tree.getNode(nodeId);
     const canBeExpanded = tree.hasChildren(nodeId);
-    const isExpanded = this.props.expandedNodeIds.includes(nodeId);
+    const isExpanded = expandedNodeIds.includes(nodeId);
     return (
       <TreeViewRow node={node}
-                   fixedColumns={this.props.fixedColumns}
-                   mainColumn={this.props.mainColumn}
+                   fixedColumns={fixedColumns}
+                   mainColumn={mainColumn}
                    depth={tree.getDepth(nodeId)}
                    nodeId={nodeId}
                    index={index}
                    canBeExpanded={canBeExpanded}
                    isExpanded={isExpanded}
                    onToggle={this._toggle}
-                   selected={nodeId === this.props.selectedNodeId}
+                   selected={nodeId === selectedNodeId}
                    onClick={this._onRowClicked}/>
     );
   }
@@ -195,11 +226,11 @@ class TreeView extends Component {
     }
 
     if (event.keyCode == 37) { // KEY_LEFT
-      var isCollapsed = this._isCollapsed(selected);
+      const isCollapsed = this._isCollapsed(selected);
       if (!isCollapsed) {
         this._toggle(selected);
       } else {
-        var parent = this.props.tree.getParent(selected); 
+        const parent = this.props.tree.getParent(selected); 
         if (parent != -1) {
           this._select(parent);
         }
@@ -209,7 +240,7 @@ class TreeView extends Component {
         this._select(visibleRows[selectedRowIndex - 1]);
       }
     } else if (event.keyCode == 39) { // KEY_RIGHT
-      var isCollapsed = this._isCollapsed(selected);
+      const isCollapsed = this._isCollapsed(selected);
       if (isCollapsed) {
         this._toggle(selected);
       } else {
@@ -232,8 +263,8 @@ class TreeView extends Component {
     this._visibleRows = this._getAllVisibleRows(this.props);
     return (
       <div className='treeView'>
-        <TreeViewHeader fixedColumns={this.props.fixedColumns}
-                         mainColumn={this.props.mainColumn}/>
+        <TreeViewHeader fixedColumns={fixedColumns}
+                         mainColumn={mainColumn}/>
         <VirtualList className='treeViewBody'
                      items={this._visibleRows}
                      renderItem={this._renderRow}
@@ -246,5 +277,21 @@ class TreeView extends Component {
   }
 
 }
+
+TreeView.propTypes = {
+  fixedColumns: PropTypes.arrayOf(PropTypes.shape({
+    propName: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  })).isRequired,
+  mainColumn: PropTypes.shape({
+    propName: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  }).isRequired,
+  tree: PropTypes.object.isRequired,
+  expandedNodeIds: PropTypes.arrayOf(PropTypes.number).isRequired,
+  selectedNodeId: PropTypes.number,
+  onExpandedNodesChange: PropTypes.func.isRequired,
+  onSelectionChange: PropTypes.func.isRequired,
+};
 
 export default TreeView;

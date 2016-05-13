@@ -68,7 +68,7 @@ ProfileTreeView.propTypes = {
     funcStackTable: PropTypes.object.isRequired,
     sampleFuncStacks: PropTypes.array.isRequired,
   }).isRequired,
-  selectedFuncStack: PropTypes.number.isRequired,
+  selectedFuncStack: PropTypes.number,
   expandedFuncStacks: PropTypes.array.isRequired,
   dispatch: PropTypes.func.isRequired,
 };
