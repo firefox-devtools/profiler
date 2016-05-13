@@ -50,7 +50,7 @@ class ColascedFunctionsUpdateDispatcher {
 
   _scheduleUpdate(dispatch) {
     if (!this._requestedAnimationFrame) {
-      window.requestAnimationFrame(e => this._dispatchUpdate(dispatch));
+      window.requestAnimationFrame(() => this._dispatchUpdate(dispatch));
       this._requestedAnimationFrame = true;
     }
   }
