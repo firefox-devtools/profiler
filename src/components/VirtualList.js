@@ -12,11 +12,17 @@ class VirtualListRow extends Component {
   }
 }
 
+VirtualListRow.propTypes = {
+  renderItem: PropTypes.func.isRequired,
+  item: PropTypes.any.isRequired,
+  index: PropTypes.number.isRequired,
+};
+
 class VirtualList extends Component {
 
   constructor(props) {
     super(props);
-    this._scrollListener = e => this.forceUpdate();
+    this._scrollListener = () => this.forceUpdate();
   }
 
   componentDidMount() {
@@ -97,5 +103,14 @@ class VirtualList extends Component {
   }
 
 }
+
+VirtualList.propTypes = {
+  itemHeight: PropTypes.number.isRequired,
+  className: PropTypes.string,
+  renderItem: PropTypes.func.isRequired,
+  items: PropTypes.array.isRequired,
+  focusable: PropTypes.bool.isRequired,
+  onKeyDown: PropTypes.func.isRequired,
+};
 
 export default VirtualList;

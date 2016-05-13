@@ -1,5 +1,4 @@
 import { timeCode } from './time-code';
-import { getFuncStackInfo } from './profile-data';
 
 class ProfileTree {
   constructor(funcStackTable, funcStackTimes, funcStackChildCount, funcTable, stringTable, rootTotalTime, rootCount) {

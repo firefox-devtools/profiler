@@ -63,7 +63,7 @@ function preprocessThread(thread, libs) {
   function addURLResource(url) {
     const index = resourceTable.length++;
     resourceTable.type[index] = resourceTypes.url;
-    resourceTable.name[index] = name;
+    resourceTable.name[index] = url;
   }
 
   const stringTable = new UniqueStringArray(thread.stringTable);
@@ -152,10 +152,6 @@ function preprocessSharedLibraries(libs) {
  * Adjust the "time" field by the given delta.
  */
 function adjustTimestamps(samplesOrMarkers, delta) {
-  if (!samplesOrMarkers.time) {
-    console.log('don\'t have samplesOrMarkers.time!');
-    console.log(samplesOrMarkers);
-  }
   return Object.assign({}, samplesOrMarkers, {
     time: samplesOrMarkers.time.map(time => time === undefined ? undefined : time + delta),
   });

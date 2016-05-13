@@ -33,7 +33,7 @@ export class SymbolStore {
     if (this._failedRequests.has(libid)) {
       return Promise.reject(new Error('We\'ve tried to request a symbol table for this library before and failed, so we\'re not trying again.'));
     }
-    return this._db.getLibKey(pdbName, breakpadId).catch(error => {
+    return this._db.getLibKey(pdbName, breakpadId).catch(() => {
       if (this._importingLibs.has(libid)) {
         // We've already requested a symbol table for this library and are
         // waiting for the result, so just return the promise for the existing

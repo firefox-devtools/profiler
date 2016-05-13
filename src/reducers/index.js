@@ -45,7 +45,7 @@ function selectedThread(state = 0, action) {
 function viewOptionsThreads(state = [], action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
-      return action.profile.threads.map(thread => ({
+      return action.profile.threads.map(() => ({
         selectedFuncStack: [],
         expandedFuncStacks: [],
       }));

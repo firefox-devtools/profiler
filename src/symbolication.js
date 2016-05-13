@@ -1,6 +1,5 @@
 import bisection from 'bisection';
 import { resourceTypes } from './profile-data';
-import { UniqueStringArray } from './unique-string-array';
 
 /**
  * Return the library object that contains address.
@@ -125,7 +124,8 @@ function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsTo
     // inside of.
     let funcAddressIndex = bisection.right(funcAddressTable, funcAddress, nextFuncAddressIndex) - 1;
     if (funcAddressIndex >= 0) {
-      const realFuncAddress = funcAddressTable[funcAddressIndex];
+      // TODO: Take realFuncAddress and put it into the func table.
+      // const realFuncAddress = funcAddressTable[funcAddressIndex];
       nextFuncAddressIndex = funcAddressIndex + 1;
       nextFuncAddress = (nextFuncAddressIndex < funcAddressTable.length) ? funcAddressTable[nextFuncAddressIndex] : Infinity;
       lastFuncIndex = funcIndex;
@@ -191,23 +191,6 @@ export function applyFunctionMerging(thread, oldFuncToNewFuncMap) {
  * @return Promise             A promise that resolves (with nothing) once symbolication of the thread has completed.
  */
 function symbolicateThread(thread, threadIndex, symbolStore, cbo) {
-  let updatedThread = thread;
-
-  let scheduledThreadUpdate = false;
-  function scheduleThreadUpdate() {
-    if (!scheduledThreadUpdate) {
-      setTimeout(callOnUpdateThread, 0);
-      scheduledThreadUpdate = true;
-    }
-  }
-
-  function callOnUpdateThread() {
-    updatedThread = applyFunctionMerging(updatedThread, oldFuncToNewFuncMap);
-    cbo.onUpdateThread(updatedThread, oldFuncToNewFuncMap);
-    oldFuncToNewFuncMap = new Map();
-    scheduledThreadUpdate = false;
-  }
-
   let foundFuncs = gatherFuncsInThread(thread);
   return Promise.all(Array.from(foundFuncs).map(function ([lib, funcsToSymbolicate]) {
     // lib is a lib object from thread.libs.
@@ -218,16 +201,15 @@ function symbolicateThread(thread, threadIndex, symbolStore, cbo) {
       // We don't have any symbols yet. We'll request those after we've merged
       // the functions.
       const  { funcAddrIndices, funcIndices, oldFuncToNewFuncMap } =
-        findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, updatedThread.funcTable);
+        findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, thread.funcTable);
       cbo.onMergeFunctions(threadIndex, oldFuncToNewFuncMap);
 
       // Now list the func addresses that we want symbols for, and request them.
       return symbolStore.getSymbolsForAddressesInLib(funcAddrIndices, lib).then(funcNames => {
         cbo.onGotFuncNames(threadIndex, funcIndices, funcNames);
       });
-    }).catch(error => {
-      console.log(`Couldn't get symbols for library ${lib.pdbName} ${lib.breakpadId}`);
-      console.error(error);
+    }).catch(() => {
+      // We could not find symbols for this library.
       // Don't throw, so that the resulting promise will be resolved, thereby
       // indicating that we're done symbolicating with lib.
     });
@@ -243,7 +225,6 @@ function symbolicateThread(thread, threadIndex, symbolStore, cbo) {
  * @return Promise            A promise that resolves (with nothing) once symbolication has completed.
  */
 export function symbolicateProfile(profile, symbolStore, cbo) {
-  let updatedProfile = profile;
   return Promise.all(profile.threads.map((thread, threadIndex) => {
     return symbolicateThread(thread, threadIndex, symbolStore, cbo);
   }));

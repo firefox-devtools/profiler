@@ -1,7 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { preprocessProfile } from '../preprocess-profile';
-import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
 import * as Actions from '../actions';
@@ -60,4 +59,14 @@ class App extends Component {
     );
   }
 }
+
+App.propTypes = {
+  view: PropTypes.string.isRequired,
+  profileView: PropTypes.shape({
+    profile: PropTypes.object.isRequired,
+    viewOptions: PropTypes.object.isRequired,
+  }).isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
+
 export default connect(state => state)(App);

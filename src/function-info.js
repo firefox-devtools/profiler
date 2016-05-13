@@ -12,13 +12,13 @@ function cleanFunctionName(functionName) {
 }
 
 function addonWithID(addonID) {
-  return firstMatch(meta.addons, function addonHasID(addon) {
+  return meta.addons.find(function addonHasID(addon) {
     return addon.id.toLowerCase() == addonID.toLowerCase();
   });
 }
 
 function findAddonForChromeURIHost(host) {
-  return firstMatch(meta.addons, function addonUsesChromeURIHost(addon) {
+  return meta.addons.find(function addonUsesChromeURIHost(addon) {
     return addon.chromeURIHosts && addon.chromeURIHosts.indexOf(host) != -1;
   });
 }
@@ -41,7 +41,7 @@ function getAddonForScriptURI(url, host) {
   if (!meta || !meta.addons)
     return null;
 
-  if (url.startsWith('resource:') && endsWith(host, '-at-jetpack')) {
+  if (url.startsWith('resource:') && host.endsWith('-at-jetpack')) {
     // Assume this is a jetpack url
     var jetpackID = host.substring(0, host.length - 11) + '@jetpack';
     return addonWithID(jetpackID);

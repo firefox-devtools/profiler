@@ -57,7 +57,6 @@ export class SymbolStoreDB {
 
     return new Promise((resolve, reject) => {
       let transaction = this._db.transaction('symbol-tables', 'readwrite');
-      let libKey = null;
       transaction.onerror = reject;
       let tableStore = transaction.objectStore('symbol-tables');
       let putReq = tableStore.put({ pdbName, breakpadId, addrs, index, buffer });
@@ -110,7 +109,7 @@ export class SymbolStoreDB {
           reject(new Error('unexpected null result'));
           return;
         }
-        const { addrs, index, buffer } = req.result;
+        const { index, buffer } = req.result;
         const decoder = new TextDecoder();
         resolve(requestedAddressesIndices.map(addrIndex => {
           const startOffset = index[addrIndex];
