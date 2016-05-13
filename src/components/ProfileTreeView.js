@@ -33,7 +33,7 @@ class ProfileTreeView extends Component{
   }
 
   componentWillMount() {
-    const { thread, interval, funcStackInfo, selectedFuncStack } = this.props;
+    const { thread, interval, funcStackInfo } = this.props;
     this._tree = getCallTree(thread, interval, funcStackInfo);
   }
 
@@ -57,4 +57,20 @@ class ProfileTreeView extends Component{
 
   }
 }
+
+ProfileTreeView.propTypes = {
+  thread: PropTypes.shape({
+    samples: PropTypes.object.isRequired,
+  }).isRequired,
+  threadIndex: PropTypes.number.isRequired,
+  interval: PropTypes.number.isRequired,
+  funcStackInfo: PropTypes.shape({
+    funcStackTable: PropTypes.object.isRequired,
+    sampleFuncStacks: PropTypes.array.isRequired,
+  }).isRequired,
+  selectedFuncStack: PropTypes.number.isRequired,
+  expandedFuncStacks: PropTypes.array.isRequired,
+  dispatch: PropTypes.func.isRequired,
+};
+
 export default connect()(ProfileTreeView);
