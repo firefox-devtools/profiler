@@ -33,8 +33,10 @@ function threadOrder(state = [], action) {
 
 function selectedThread(state = 0, action) {
   switch (action.type) {
-    case 'RECEIVE_PROFILE_FROM_ADDON':
-      return defaultThreadOrder(action.profile.threads)[0];
+    case 'RECEIVE_PROFILE_FROM_ADDON': {
+      const contentThreadId = action.profile.threads.findIndex(thread => thread.name === 'Content');
+      return contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(action.profile.threads)[0];
+    }
     case 'CHANGE_SELECTED_THREAD':
       return action.selectedThread;
     default:

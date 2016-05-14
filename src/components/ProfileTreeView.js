@@ -30,7 +30,21 @@ class ProfileTreeView extends Component{
   }
 
   procureInterestingInitialSelection() {
-
+    // Expand the heaviest callstack up to a certain depth and select the frame
+    // at that depth.
+    const newExpandedFuncStacks = this.props.expandedFuncStacks.slice();
+    const maxInterestingDepth = 12; // scientifically determined
+    let currentFuncStack = this._tree.getRoots()[0];
+    newExpandedFuncStacks.push(currentFuncStack);
+    for (let i = 0; i < maxInterestingDepth; i++) {
+      const children = this._tree.getChildren(currentFuncStack);
+      if (children.length === 0)
+        break;
+      currentFuncStack = children[0];
+      newExpandedFuncStacks.push(currentFuncStack);
+    }
+    this.props.onExpandedFuncStacksChange(newExpandedFuncStacks);
+    this.props.onSelectedFuncStackChange(currentFuncStack);
   }
 
   render() {

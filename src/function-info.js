@@ -13,13 +13,13 @@ function cleanFunctionName(functionName) {
 
 function addonWithID(addonID) {
   return meta.addons.find(function addonHasID(addon) {
-    return addon.id.toLowerCase() == addonID.toLowerCase();
+    return addon.id.toLowerCase() === addonID.toLowerCase();
   });
 }
 
 function findAddonForChromeURIHost(host) {
   return meta.addons.find(function addonUsesChromeURIHost(addon) {
-    return addon.chromeURIHosts && addon.chromeURIHosts.indexOf(host) != -1;
+    return addon.chromeURIHosts && addon.chromeURIHosts.indexOf(host) !== -1;
   });
 }
 
@@ -47,14 +47,14 @@ function getAddonForScriptURI(url, host) {
     return addonWithID(jetpackID);
   }
 
-  if (url.startsWith('file:///') && url.indexOf('/extensions/') != -1) {
+  if (url.startsWith('file:///') && url.indexOf('/extensions/') !== -1) {
     var unpackedAddonNameMatch = /\/extensions\/(.*?)\//.exec(url);
     if (unpackedAddonNameMatch)
       return addonWithID(decodeURIComponent(unpackedAddonNameMatch[1]));
     return null;
   }
 
-  if (url.startsWith('jar:file:///') && url.indexOf('/extensions/') != -1) {
+  if (url.startsWith('jar:file:///') && url.indexOf('/extensions/') !== -1) {
     var packedAddonNameMatch = /\/extensions\/(.*?).xpi/.exec(url);
     if (packedAddonNameMatch)
       return addonWithID(decodeURIComponent(packedAddonNameMatch[1]));
@@ -194,7 +194,7 @@ export function getFunctionInfo(fullName) {
       functionName: cleanFunctionName(fullName),
       libraryName: '',
       lineInformation: '',
-      isRoot: fullName == '(root)',
+      isRoot: fullName === '(root)',
       isJSFrame: false,
     };
   }

@@ -208,8 +208,8 @@ class TreeView extends Component {
       return;
 
     if (event.keyCode < 37 || event.keyCode > 40) {
-      if (event.keyCode != 0 ||
-          String.fromCharCode(event.charCode) != '*') {
+      if (event.keyCode !== 0 ||
+          String.fromCharCode(event.charCode) !== '*') {
         return;
       }
     }
@@ -225,21 +225,21 @@ class TreeView extends Component {
       return;
     }
 
-    if (event.keyCode == 37) { // KEY_LEFT
+    if (event.keyCode === 37) { // KEY_LEFT
       const isCollapsed = this._isCollapsed(selected);
       if (!isCollapsed) {
         this._toggle(selected);
       } else {
         const parent = this.props.tree.getParent(selected); 
-        if (parent != -1) {
+        if (parent !== -1) {
           this._select(parent);
         }
       }
-    } else if (event.keyCode == 38) { // KEY_UP
+    } else if (event.keyCode === 38) { // KEY_UP
       if (selectedRowIndex > 0) {
         this._select(visibleRows[selectedRowIndex - 1]);
       }
-    } else if (event.keyCode == 39) { // KEY_RIGHT
+    } else if (event.keyCode === 39) { // KEY_RIGHT
       const isCollapsed = this._isCollapsed(selected);
       if (isCollapsed) {
         this._toggle(selected);
@@ -249,11 +249,11 @@ class TreeView extends Component {
           this._select(this.props.tree.getChildren(selected)[0]);
         }
       }
-    } else if (event.keyCode == 40) { // KEY_DOWN
+    } else if (event.keyCode === 40) { // KEY_DOWN
       if (selectedRowIndex < visibleRows.length - 1) {
         this._select(visibleRows[selectedRowIndex + 1]);
       }
-    } else if (String.fromCharCode(event.charCode) == '*') {
+    } else if (String.fromCharCode(event.charCode) === '*') {
       this._toggleAll(selected);
     }
   }
