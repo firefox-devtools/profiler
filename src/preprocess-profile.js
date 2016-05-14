@@ -19,7 +19,7 @@ import { provideHostSide } from './promise-worker';
  */
 function toStructOfArrays(rawTable) {
   const result = { length: rawTable.data.length };
-  for (let fieldName in rawTable.schema) {
+  for (const fieldName in rawTable.schema) {
     const fieldIndex = rawTable.schema[fieldName];
     result[fieldName] = rawTable.data.map(entry => (fieldIndex in entry) ? entry[fieldIndex] : null);
   }
@@ -30,7 +30,7 @@ function toStructOfArrays(rawTable) {
 // with " -> ". We only want the last URI in this list.
 function getRealScriptURI(url) {
   if (url) {
-    var urls = url.split(' -> ');
+    const urls = url.split(' -> ');
     return urls[urls.length - 1];
   }
   return url;
@@ -183,12 +183,12 @@ function adjustTimestamps(samplesOrMarkers, delta) {
 export function preprocessProfile(profile) {
   const libs = preprocessSharedLibraries(profile.libs);
   const threads = [];
-  for (let threadOrSubprocess of profile.threads) {
+  for (const threadOrSubprocess of profile.threads) {
     if (typeof threadOrSubprocess === 'string') {
       const subprocessProfile = JSON.parse(threadOrSubprocess);
       const subprocessLibs = preprocessSharedLibraries(subprocessProfile.libs);
       const adjustTimestampsBy = subprocessProfile.meta.startTime - profile.meta.startTime;
-      for (let thread of subprocessProfile.threads) {
+      for (const thread of subprocessProfile.threads) {
         const newThread = preprocessThread(thread, subprocessLibs);
         newThread.samples = adjustTimestamps(newThread.samples, adjustTimestampsBy);
         newThread.markers = adjustTimestamps(newThread.markers, adjustTimestampsBy);

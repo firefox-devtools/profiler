@@ -17,15 +17,18 @@ export function provideHostSide(workerFilename, methods) {
       }
     };
 
-    for (let method of methods) {
-      this[method] = (function () {
-        const paramArray = Array.from(arguments);
+    function makeMethod(method) {
+      return function (...paramArray) {
         const msgID = nextMessageID++;
         worker.postMessage({ msgID, type: 'method', method, paramArray });
         return new Promise((resolve, reject) => {
           callbacks.set(msgID, { resolve, reject });
         });
-      }).bind(this);
+      };
+    }
+
+    for (const method of methods) {
+      this[method] = makeMethod(method);
     }
 
     worker.postMessage({ type: 'constructor', constructorArguments });

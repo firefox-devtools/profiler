@@ -3,9 +3,9 @@ import { resourceTypes } from './profile-data';
 
 /**
  * Return the library object that contains address.
- * @param  array of {start,end,...} libs    The array of librarys
- * @param                           address The address to find
- * @return {start,end,...} lib object       The lib object that contains address, rv.start <= address < rv.end, or null if no such lib object exists.
+ * @param {Array<Object>} libs The array of libraries, each with a start and end property.
+ * @param {Number} address The address to find
+ * @return {Object} lib object       The lib object that contains address, rv.start <= address < rv.end, or null if no such lib object exists.
  */
 export function getContainingLibrary(libs, address) {
   if (isNaN(address)) {
@@ -15,26 +15,27 @@ export function getContainingLibrary(libs, address) {
   let left = 0;
   let right = libs.length - 1;
   while (left <= right) {
-    let mid = ((left + right) / 2)|0;
-    if (address >= libs[mid].end)
+    const mid = ((left + right) / 2)|0;
+    if (address >= libs[mid].end) {
       left = mid + 1;
-    else if (address < libs[mid].start)
+    } else if (address < libs[mid].start) {
       right = mid - 1;
-    else
+    } else {
       return libs[mid];
+    }
   }
   return null;
 }
 
 /**
  * Find the functions in this thread's funcTable that we need symbols for.
- * @param  object thread The thread, in "preprocessed profile" format.
- * @return Map           A map containing the funcIndices of the functions that
- *                       need to be symbolicated. Each entry's key is a lib
- *                       object from the thread's libs array, and the value is
- *                       an array of funcIndex.
- *                       Example:
- *                       map.get(lib): [0, 1, 2, 8, 34]
+ * @param  {Object} thread The thread, in "preprocessed profile" format.
+ * @return {Map}           A map containing the funcIndices of the functions that
+ *                         need to be symbolicated. Each entry's key is a lib
+ *                         object from the thread's libs array, and the value is
+ *                         an array of funcIndex.
+ *                         Example:
+ *                         map.get(lib): [0, 1, 2, 8, 34]
  */
 function gatherFuncsInThread(thread) {
   const { libs, funcTable, stringTable, resourceTable } = thread;
@@ -84,16 +85,16 @@ function gatherFuncsInThread(thread) {
  * return value - the return value is a map whose keys are the true func
  * addresses that we need symbols for. The value of each map entry is the
  * funcIndex for the func that has become the "one true func" for this function.
- * @param  array  funcAddressTable    An array containing the address of every function of a library, in ascending order.
- * @param  array  funcsToSymbolicate  An array containing funcIndex elements for the funcs in this library.
- * @param  object funcTable           The funcTable that the funcIndices in addressToSymbolicate refer to.
- * @param  Map    oldFuncToNewFuncMap An out parameter that specifies how funcs should be merged.
- * @return object                     A map that maps a func address index to a funcIndex, one entry for each func that needs to be symbolicated.
+ * @param  {Array}  funcAddressTable    An array containing the address of every function of a library, in ascending order.
+ * @param  {Array}  funcsToSymbolicate  An array containing funcIndex elements for the funcs in this library.
+ * @param  {Object} funcTable           The funcTable that the funcIndices in addressToSymbolicate refer to.
+ * @param  {Map}    oldFuncToNewFuncMap An out parameter that specifies how funcs should be merged.
+ * @return {Object}                     A map that maps a func address index to a funcIndex, one entry for each func that needs to be symbolicated.
  */
 function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, funcTable) {
   const oldFuncToNewFuncMap = new Map();
-  let funcAddrIndices = [];
-  let funcIndices = [];
+  const funcAddrIndices = [];
+  const funcIndices = [];
 
   // Sort funcsToSymbolicate by address.
   funcsToSymbolicate.sort((i1, i2) => {
@@ -109,7 +110,7 @@ function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsTo
   let lastFuncIndex = -1;
   let nextFuncAddress = 0;
   let nextFuncAddressIndex = 0;
-  for (let funcIndex of funcsToSymbolicate) {
+  for (const funcIndex of funcsToSymbolicate) {
     const funcAddress = funcTable.address[funcIndex];
     if (funcAddress < nextFuncAddress) {
       // The address of the func at funcIndex is still inside the
@@ -122,7 +123,7 @@ function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsTo
     // Now funcAddress >= nextFuncAddress.
     // Find the index in funcAddressTable of the function that funcAddress is
     // inside of.
-    let funcAddressIndex = bisection.right(funcAddressTable, funcAddress, nextFuncAddressIndex) - 1;
+    const funcAddressIndex = bisection.right(funcAddressTable, funcAddress, nextFuncAddressIndex) - 1;
     if (funcAddressIndex >= 0) {
       // TODO: Take realFuncAddress and put it into the func table.
       // const realFuncAddress = funcAddressTable[funcAddressIndex];
@@ -140,11 +141,11 @@ function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsTo
  * Modify the symbolicated funcs to point to the new func name strings.
  * This function adds the func names to the thread's string table and
  * adjusts the funcTable to point to those strings.
- * @param thread             The thread whose funcTable needs adjusting.
- * @param funcAddrs          An array of addresses of the functions that we got symbols for.
- * @param funcNames          An array of strings containing the corresponding symbols.
- * @param addrToFuncIndexMap A Map that maps a func address to the funcIndex.
- * @return                   The new thread object.
+ * @param {Object} thread             The thread whose funcTable needs adjusting.
+ * @param {Object} funcIndices        An array of indices of the functions that we got symbols for.
+ * @param {Object} funcNames          An array of strings containing the corresponding symbols.
+ * @param {Map}    addrToFuncIndexMap A Map that maps a func address to the funcIndex.
+ * @return {Object}                   The new thread object.
  */
 export function setFuncNames(thread, funcIndices, funcNames) {
   const funcTable = Object.assign({}, thread.funcTable);
@@ -167,9 +168,9 @@ export function setFuncNames(thread, funcIndices, funcNames) {
  * known, by creating one function per frame address. Once the function table
  * is known, different addresses that are inside the same function need to be
  * merged into that same function.
- * @param  object thread              The thread that needs to be augmented. Treated as immutable.
- * @param  object oldFuncToNewFuncMap A map that defines which function should be collapsed into which other function.
- * @return object                     The new thread object.
+ * @param  {Object} thread              The thread that needs to be augmented. Treated as immutable.
+ * @param  {Map}    oldFuncToNewFuncMap A map that defines which function should be collapsed into which other function.
+ * @return {Object}                     The new thread object.
  */
 export function applyFunctionMerging(thread, oldFuncToNewFuncMap) {
   const frameTable = Object.assign({}, thread.frameTable, {
@@ -182,17 +183,17 @@ export function applyFunctionMerging(thread, oldFuncToNewFuncMap) {
 }
 
 /**
- * Symbolicate the given thread. Calls cbo.onUpdateThread after each bit of
+ * Symbolicate the given thread. Calls cbo.onMergeFunctions and cb.onGotFuncNames after each bit of
  * symbolication, and resolves the returned promise once completely done.
- * @param  object  thread      The thread to symbolicate, in the "preprocessed profile" format.
- * @param  object  symbolStore A SymbolStore object that can be used for getting the required symbol tables.
- * @param  object  cbo         An object containing a callback function 'onUpdateThread' which is called with
- *                             a new updated thread every time we've done a bit of symbolication.
- * @return Promise             A promise that resolves (with nothing) once symbolication of the thread has completed.
+ * @param  {Object}  thread      The thread to symbolicate, in the "preprocessed profile" format.
+ * @param  {Number}  threadIndex The index of the thread. This is needed because it gets supplied in the callbacks.
+ * @param  {Object}  symbolStore A SymbolStore object that can be used for getting the required symbol tables.
+ * @param  {Object}  cbo         An object containing callback functions 'onMergeFunctions'  and 'onGotFuncNames'.
+ * @return {Promise}             A promise that resolves (with nothing) once symbolication of the thread has completed.
  */
 function symbolicateThread(thread, threadIndex, symbolStore, cbo) {
-  let foundFuncs = gatherFuncsInThread(thread);
-  return Promise.all(Array.from(foundFuncs).map(function ([lib, funcsToSymbolicate]) {
+  const foundFuncMap = gatherFuncsInThread(thread);
+  return Promise.all(Array.from(foundFuncMap).map(function ([lib, funcsToSymbolicate]) {
     // lib is a lib object from thread.libs.
     // funcsToSymbolicate is an array of funcIndex.
     return symbolStore.getFuncAddressTableForLib(lib).then(funcAddressTable => {
@@ -200,7 +201,7 @@ function symbolicateThread(thread, threadIndex, symbolStore, cbo) {
       // that are actually the same function.
       // We don't have any symbols yet. We'll request those after we've merged
       // the functions.
-      const  { funcAddrIndices, funcIndices, oldFuncToNewFuncMap } =
+      const { funcAddrIndices, funcIndices, oldFuncToNewFuncMap } =
         findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, thread.funcTable);
       cbo.onMergeFunctions(threadIndex, oldFuncToNewFuncMap);
 
@@ -218,11 +219,10 @@ function symbolicateThread(thread, threadIndex, symbolStore, cbo) {
 
 /**
  * Symbolicate a profile.
- * @param  object profile     The profile to symbolicate, in preprocessed format.
- * @param  object symbolStore A SymbolStore object with a getFuncAddressTableForLib and getSymbolsForAddressesInLib methods.
- * @param  object cbo         An object containing a callback function 'onUpdateProfile',  which is called
- *                            with a new updated profile whenever we've done a bit of symbolication.
- * @return Promise            A promise that resolves (with nothing) once symbolication has completed.
+ * @param  {Object} profile     The profile to symbolicate, in preprocessed format.
+ * @param  {Object} symbolStore A SymbolStore object with a getFuncAddressTableForLib and getSymbolsForAddressesInLib methods.
+ * @param  {Object} cbo         An object containing callback functions 'onMergeFunctions'  and 'onGotFuncNames'.
+ * @return {Promise}            A promise that resolves (with nothing) once symbolication has completed.
  */
 export function symbolicateProfile(profile, symbolStore, cbo) {
   return Promise.all(profile.threads.map((thread, threadIndex) => {

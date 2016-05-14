@@ -7,7 +7,7 @@ import { provideHostSide } from './promise-worker';
  */
 export class SymbolStoreDB {
   /**
-   * @param string dbName   The name of the indexedDB database that's used
+   * @param {string} dbName The name of the indexedDB database that's used
    *                        to store the symbol tables.
    */
   constructor(dbName) {
@@ -17,13 +17,13 @@ export class SymbolStoreDB {
 
   _setupDB(dbName) {
     return new Promise((resolve, reject) => {
-      let openreq = indexedDB.open(dbName, 1);
+      const openreq = indexedDB.open(dbName, 1);
       openreq.onerror = reject;
       openreq.onupgradeneeded = () => {
-        let db = openreq.result;
+        const db = openreq.result;
         db.onerror = reject;
-        let tableStore = db.createObjectStore('symbol-tables', { autoIncrement: true });
-        tableStore.createIndex('libKey',  ['pdbName', 'breakpadId'], { unique: true });
+        const tableStore = db.createObjectStore('symbol-tables', { autoIncrement: true });
+        tableStore.createIndex('libKey', ['pdbName', 'breakpadId'], { unique: true });
       };
       openreq.onsuccess = () => {
         this._db = openreq.result;
@@ -38,13 +38,13 @@ export class SymbolStoreDB {
     }
 
     return new Promise((resolve, reject) => {
-      let transaction = this._db.transaction('symbol-tables', 'readonly');
-      let store = transaction.objectStore('symbol-tables');
-      let index = store.index('libKey');
-      let req = index.openKeyCursor(IDBKeyRange.only([pdbName, breakpadId]));
+      const transaction = this._db.transaction('symbol-tables', 'readonly');
+      const store = transaction.objectStore('symbol-tables');
+      const index = store.index('libKey');
+      const req = index.openKeyCursor(IDBKeyRange.only([pdbName, breakpadId]));
       req.onerror = reject;
       req.onsuccess = () => {
-        let cursor = req.result;
+        const cursor = req.result;
         if (cursor) {
           resolve(cursor.primaryKey);
         } else {
@@ -60,10 +60,10 @@ export class SymbolStoreDB {
     }
 
     return new Promise((resolve, reject) => {
-      let transaction = this._db.transaction('symbol-tables', 'readwrite');
+      const transaction = this._db.transaction('symbol-tables', 'readwrite');
       transaction.onerror = reject;
-      let tableStore = transaction.objectStore('symbol-tables');
-      let putReq = tableStore.put({ pdbName, breakpadId, addrs, index, buffer });
+      const tableStore = transaction.objectStore('symbol-tables');
+      const putReq = tableStore.put({ pdbName, breakpadId, addrs, index, buffer });
       putReq.onsuccess = () => {
         resolve(putReq.result);
       };
@@ -76,9 +76,9 @@ export class SymbolStoreDB {
     }
 
     return new Promise((resolve, reject) => {
-      let transaction = this._db.transaction('symbol-tables', 'readonly');
-      let store = transaction.objectStore('symbol-tables');
-      let req = store.get(libKey);
+      const transaction = this._db.transaction('symbol-tables', 'readonly');
+      const store = transaction.objectStore('symbol-tables');
+      const req = store.get(libKey);
       req.onerror = reject;
       req.onsuccess = () => {
         if (req.result) {
@@ -94,9 +94,9 @@ export class SymbolStoreDB {
   /**
    * Returns a promise of an array with symbol names, matching the order of
    * the requested addresses.
-   * @param  {array of integers} requestedAddresses The addresses to look up symbols for, *sorted from lowest to highest*.
-   * @param  {integer} libKey                       The primary key for the library, as returned by getLibKey
-   * @return {array of strings}                     The symbols, one for each address in requestedAddresses.
+   * @param  {Array<Number>} requestedAddressesIndices The indices of each symbol that should be looked up.
+   * @param  {Number} libKey The primary key for the library, as returned by getLibKey
+   * @return {Array<String>} The symbols, one for each address in requestedAddresses.
    */
   getSymbolsForAddressesInLib(requestedAddressesIndices, libKey) {
     if (!this._db) {
@@ -104,9 +104,9 @@ export class SymbolStoreDB {
     }
 
     return new Promise((resolve, reject) => {
-      let transaction = this._db.transaction('symbol-tables', 'readonly');
-      let store = transaction.objectStore('symbol-tables');
-      let req = store.get(libKey);
+      const transaction = this._db.transaction('symbol-tables', 'readonly');
+      const store = transaction.objectStore('symbol-tables');
+      const req = store.get(libKey);
       req.onerror = reject;
       req.onsuccess = () => {
         if (!req.result) {

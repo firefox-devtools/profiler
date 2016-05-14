@@ -147,12 +147,12 @@ function profile(state = {}, action) {
     case 'COALESCED_FUNCTIONS_UPDATE': {
       const { functionsUpdatePerThread } = action;
       const threads = state.threads.map((thread, threadIndex) => {
-        if (!functionsUpdatePerThread[threadIndex])
+        if (!functionsUpdatePerThread[threadIndex]) {
           return thread;
+        }
         const { oldFuncToNewFuncMap, funcIndices, funcNames } = functionsUpdatePerThread[threadIndex];
-        thread = applyFunctionMerging(thread, oldFuncToNewFuncMap);
-        thread = setFuncNames(thread, funcIndices, funcNames);
-        return thread;
+        return setFuncNames(applyFunctionMerging(thread, oldFuncToNewFuncMap),
+                            funcIndices, funcNames);
       });
       return Object.assign({}, state, { threads });
     }

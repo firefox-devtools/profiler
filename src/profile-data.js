@@ -16,14 +16,18 @@ export const resourceTypes = {
 /**
  * Takes the stack table and the frame table, creates a func stack table and
  * fixes up the funcStack field in the samples data.
- * @return object  The funcStackTable and the new samples object.
+ * @param {object} stackTable The thread's stackTable.
+ * @param {object} frameTable The thread's frameTable.
+ * @param {object} funcTable The thread's funcTable.
+ * @param {object} samples The thread's samples.
+ * @return {object} The funcStackTable and the new samples object.
  */
 export function getFuncStackInfo(stackTable, frameTable, funcTable, samples) {
   return timeCode('getFuncStackInfo', () => {
-    let stackIndexToFuncStackIndex = new Map();
+    const stackIndexToFuncStackIndex = new Map();
     const funcCount = funcTable.length;
-    let prefixFuncStackAndFuncToFuncStackMap = new Map(); // prefixFuncStack * funcCount + func => funcStack
-    let funcStackTable = { length: 0, prefix: [], func: [], depth: [] };
+    const prefixFuncStackAndFuncToFuncStackMap = new Map(); // prefixFuncStack * funcCount + func => funcStack
+    const funcStackTable = { length: 0, prefix: [], func: [], depth: [] };
     function addFuncStack(prefix, func) {
       const index = funcStackTable.length++;
       funcStackTable.prefix[index] = prefix;
@@ -76,7 +80,7 @@ export function getTimeRangeIncludingAllThreads(profile) {
 
 export function defaultThreadOrder(threads) {
   // Put the compositor thread last.
-  let threadOrder = threads.map((thread, i) => i);
+  const threadOrder = threads.map((thread, i) => i);
   threadOrder.sort((a, b) => {
     const nameA = threads[a].name;
     const nameB = threads[b].name;
@@ -122,7 +126,7 @@ export function filterThreadToJSOnly(thread) {
 
     const oldStackToNewStack = new Map();
     const funcCount = funcTable.length;
-    let prefixStackAndFuncToStack = new Map(); // prefixNewStack * funcCount + func => newStackIndex
+    const prefixStackAndFuncToStack = new Map(); // prefixNewStack * funcCount + func => newStackIndex
 
     function convertStack(stackIndex) {
       if (stackIndex === null) {
@@ -208,7 +212,7 @@ export function invertCallstack(thread) {
       prefix: [],
     };
     const frameCount = frameTable.length;
-    let prefixAndFrameToStack = new Map(); // prefix * frameCount + frame => stackIndex
+    const prefixAndFrameToStack = new Map(); // prefix * frameCount + frame => stackIndex
     function stackFor(prefix, frame) {
       const prefixAndFrameIndex = (prefix === null ? -1 : prefix) * frameCount + frame;
       let stackIndex = prefixAndFrameToStack.get(prefixAndFrameIndex);

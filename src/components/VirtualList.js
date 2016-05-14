@@ -96,8 +96,9 @@ class VirtualList extends Component {
                style={{height: Math.max(0, visibleRangeStart) * itemHeight + 'px'}} />
           {
             items.map((item, i) => {
-              if (i < visibleRangeStart || i >= visibleRangeEnd)
-                return;
+              if (i < visibleRangeStart || i >= visibleRangeEnd) {
+                return null;
+              }
               return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item} items={items}/>;
             })
           }

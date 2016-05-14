@@ -204,8 +204,9 @@ class TreeView extends Component {
   }
 
   _onKeyDown(event) {
-    if (event.ctrlKey || event.altKey || event.metaKey)
+    if (event.ctrlKey || event.altKey || event.metaKey) {
       return;
+    }
 
     if (event.keyCode < 37 || event.keyCode > 40) {
       if (event.keyCode !== 0 ||

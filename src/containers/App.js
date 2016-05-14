@@ -17,13 +17,13 @@ class App extends Component {
     dispatch(Actions.waitingForProfileFromAddon());
 
     window.geckoProfilerPromise.then((geckoProfiler) => {
-      geckoProfiler.getProfile().then(profile => {
-        profile = preprocessProfile(profile);
+      geckoProfiler.getProfile().then(rawProfile => {
+        const profile = preprocessProfile(rawProfile);
         dispatch(Actions.receiveProfileFromAddon(profile));
 
         const symbolStore = new SymbolStore('cleopatra-async-storage', {
           requestSymbolTable: (pdbName, breakpadId) => {
-            let requestedLib = { pdbName, breakpadId };
+            const requestedLib = { pdbName, breakpadId };
             dispatch(Actions.requestingSymbolTable(requestedLib));
             return geckoProfiler.getSymbolTable(pdbName, breakpadId).then(symbolTable => {
               dispatch(Actions.receivedSymbolTableReply(requestedLib));

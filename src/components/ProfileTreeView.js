@@ -10,7 +10,7 @@ class ProfileTreeView extends Component{
       { propName: 'totalTimePercent', title: '' },
       { propName: 'selfTime', title: 'Self' },
     ];
-    this._mainColumn = { propName:'name', title: '' };
+    this._mainColumn = { propName: 'name', title: '' };
   }
 
   componentWillMount() {
@@ -38,8 +38,9 @@ class ProfileTreeView extends Component{
     newExpandedFuncStacks.push(currentFuncStack);
     for (let i = 0; i < maxInterestingDepth; i++) {
       const children = this._tree.getChildren(currentFuncStack);
-      if (children.length === 0)
+      if (children.length === 0) {
         break;
+      }
       currentFuncStack = children[0];
       newExpandedFuncStacks.push(currentFuncStack);
     }

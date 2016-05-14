@@ -63,18 +63,19 @@ class Histogram extends Component {
     if (selectedFuncStack !== -1 && selectedFuncStack !== null) {
       selectedFuncStackDepth = funcStackTable.depth[selectedFuncStack];
     }
-    function hasSelectedFuncStackPrefix(funcStack) {
-      let depth = funcStackTable.depth[funcStack];
-      while (depth > selectedFuncStackDepth) {
+    function hasSelectedFuncStackPrefix(funcStackPrefix) {
+      let funcStack = funcStackPrefix;
+      for (let depth = funcStackTable.depth[funcStack];
+           depth > selectedFuncStackDepth; depth--) {
         funcStack = funcStackTable.prefix[funcStack];
-        depth--;
       }
       return funcStack === selectedFuncStack;
     }
     for (let i = 0; i < sampleFuncStacks.length; i++) {
       const sampleTime = thread.samples.time[i];
-      if (sampleTime + intervalMs < range[0] || sampleTime > range[1])
+      if (sampleTime + intervalMs < range[0] || sampleTime > range[1]) {
         continue;
+      }
       const funcStack = sampleFuncStacks[i];
       const isHighlighted = hasSelectedFuncStackPrefix(funcStack);
       const sampleHeight = funcStackTable.depth[funcStack] * yPixelsPerDepth;

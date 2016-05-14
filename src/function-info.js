@@ -1,13 +1,14 @@
 // Imported from cleopatra, needs to be double-checked.
 
-let resources = {};
-let meta = { addons: [] };
+const resources = {};
+const meta = { addons: [] };
 
 // If the function name starts with "non-virtual thunk to ", remove that part.
 function cleanFunctionName(functionName) {
-  var ignoredPrefix = 'non-virtual thunk to ';
-  if (functionName.startsWith(ignoredPrefix))
+  const ignoredPrefix = 'non-virtual thunk to ';
+  if (functionName.startsWith(ignoredPrefix)) {
     return functionName.substr(ignoredPrefix.length);
+  }
   return functionName;
 }
 
@@ -38,33 +39,37 @@ function resourceNameFromLibrary(library) {
 }
 
 function getAddonForScriptURI(url, host) {
-  if (!meta || !meta.addons)
+  if (!meta || !meta.addons) {
     return null;
+  }
 
   if (url.startsWith('resource:') && host.endsWith('-at-jetpack')) {
     // Assume this is a jetpack url
-    var jetpackID = host.substring(0, host.length - 11) + '@jetpack';
+    const jetpackID = host.substring(0, host.length - 11) + '@jetpack';
     return addonWithID(jetpackID);
   }
 
   if (url.startsWith('file:///') && url.indexOf('/extensions/') !== -1) {
-    var unpackedAddonNameMatch = /\/extensions\/(.*?)\//.exec(url);
-    if (unpackedAddonNameMatch)
+    const unpackedAddonNameMatch = /\/extensions\/(.*?)\//.exec(url);
+    if (unpackedAddonNameMatch) {
       return addonWithID(decodeURIComponent(unpackedAddonNameMatch[1]));
+    }
     return null;
   }
 
   if (url.startsWith('jar:file:///') && url.indexOf('/extensions/') !== -1) {
-    var packedAddonNameMatch = /\/extensions\/(.*?).xpi/.exec(url);
-    if (packedAddonNameMatch)
+    const packedAddonNameMatch = /\/extensions\/(.*?).xpi/.exec(url);
+    if (packedAddonNameMatch) {
       return addonWithID(decodeURIComponent(packedAddonNameMatch[1]));
+    }
     return null;
   }
 
   if (url.startsWith('chrome://')) {
-    var chromeURIMatch = /chrome\:\/\/(.*?)\//.exec(url);
-    if (chromeURIMatch)
+    const chromeURIMatch = /chrome:\/\/(.*?)\//.exec(url);
+    if (chromeURIMatch) {
       return findAddonForChromeURIHost(chromeURIMatch[1]);
+    }
     return null;
   }
 
@@ -72,21 +77,20 @@ function getAddonForScriptURI(url, host) {
 }
 
 function resourceNameFromURI(url) {
-  if (!url)
+  if (!url) {
     return ensureResource('unknown', {type: 'unknown', name: '<unknown>'});
+  }
 
-  var match = /^(.*):\/\/(.*?)\//.exec(url);
+  const match = /^(.*):\/\/(.*?)\//.exec(url);
 
   if (!match) {
     // Can this happen? If so, we should change the regular expression above.
     return ensureResource('url_' + url, {type: 'url', name: url});
   }
 
-  var urlRoot = match[0];
-  var protocol = match[1];
-  var host = match[2];
+  const [urlRoot, protocol, host] = match;
 
-  var addon = getAddonForScriptURI(url, host);
+  const addon = getAddonForScriptURI(url, host);
   if (addon) {
     return ensureResource('addon_' + addon.id, {
       type: 'addon',
@@ -115,7 +119,7 @@ function resourceNameFromURI(url) {
 // foo/ -> foo/
 // foo -> foo
 function getFilename(url) {
-  var lastSlashPos = url.lastIndexOf('/', url.length - 2);
+  const lastSlashPos = url.lastIndexOf('/', url.length - 2);
   return url.substr(lastSlashPos + 1);
 }
 
@@ -123,7 +127,7 @@ function getFilename(url) {
 // with " -> ". We only want the last URI in this list.
 function getRealScriptURI(url) {
   if (url) {
-    var urls = url.split(' -> ');
+    const urls = url.split(' -> ');
     return urls[urls.length - 1];
   }
   return url;
@@ -145,13 +149,14 @@ function getRealScriptURI(url) {
 export function getFunctionInfo(fullName) {
 
   function getCPPFunctionInfo(fullName) {
-    var match =
+    const match =
       /^(.*) \(in ([^\)]*)\) (\+ [0-9]+)$/.exec(fullName) ||
       /^(.*) \(in ([^\)]*)\) (\(.*:.*\))$/.exec(fullName) ||
       /^(.*) \(in ([^\)]*)\)$/.exec(fullName);
 
-    if (!match)
+    if (!match) {
       return null;
+    }
 
     return {
       functionName: cleanFunctionName(match[1]),
@@ -163,18 +168,19 @@ export function getFunctionInfo(fullName) {
   }
 
   function getJSFunctionInfo(fullName) {
-    var jsMatch =
+    const jsMatch =
       /^(.*) \((.*):([0-9]+)\)$/.exec(fullName) ||
       /^()(.*):([0-9]+)$/.exec(fullName);
 
-    if (!jsMatch)
+    if (!jsMatch) {
       return null;
+    }
 
-    var functionName = jsMatch[1] || '<Anonymous>';
-    var scriptURI = getRealScriptURI(jsMatch[2]);
-    var lineNumber = jsMatch[3];
-    var scriptFile = getFilename(scriptURI);
-    var resourceName = resourceNameFromURI(scriptURI);
+    const functionName = jsMatch[1] || '<Anonymous>';
+    const scriptURI = getRealScriptURI(jsMatch[2]);
+    const lineNumber = jsMatch[3];
+    const scriptFile = getFilename(scriptURI);
+    const resourceName = resourceNameFromURI(scriptURI);
 
     return {
       functionName: functionName + '() @ ' + scriptFile + ':' + lineNumber,

@@ -30,7 +30,7 @@ export class SymbolStore {
 
   _ensureLibraryIsInDB(lib) {
     const { pdbName, breakpadId } = lib;
-    let libid = `${pdbName}/${breakpadId}`;
+    const libid = `${pdbName}/${breakpadId}`;
     if (this._failedRequests.has(libid)) {
       return Promise.reject(new Error('We\'ve tried to request a symbol table for this library before and failed, so we\'re not trying again.'));
     }
@@ -43,8 +43,8 @@ export class SymbolStore {
       }
 
       // Request the symbol table from the symbol provider.
-      let symbolTablePromise = this._symbolProvider.requestSymbolTable(lib.pdbName, lib.breakpadId);
-      let importPromise = symbolTablePromise.then(symbolTable => {
+      const symbolTablePromise = this._symbolProvider.requestSymbolTable(lib.pdbName, lib.breakpadId);
+      const importPromise = symbolTablePromise.then(symbolTable => {
         this._importingLibs.delete(libid);
         return this._db.importLibrary(pdbName, breakpadId, symbolTable);
       }, error => {
