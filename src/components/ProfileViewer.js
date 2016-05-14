@@ -65,8 +65,14 @@ class ProfileViewer extends Component {
 
   _onSelectedFuncStackChange(newSelectedFuncStack) {
     const { dispatch, viewOptions, profile } = this.props;
-    const { selectedThread } = viewOptions;
-    const thread = profile.threads[selectedThread];
+    const { selectedThread, jsOnly, invertCallstack } = viewOptions;
+    let thread = profile.threads[selectedThread];
+    if (jsOnly) {
+      thread = this._filterToJSOnly(thread);
+    }
+    if (invertCallstack) {
+      thread = this._invertCallStack(thread);
+    }
     const funcStackInfo = this._getFuncStackInfo(selectedThread, thread);
     dispatch(Actions.changeSelectedFuncStack(selectedThread,
       getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable)));
@@ -74,8 +80,14 @@ class ProfileViewer extends Component {
 
   _onExpandedFuncStacksChange(newExpandedFuncStacks) {
     const { dispatch, viewOptions, profile } = this.props;
-    const { selectedThread } = viewOptions;
-    const thread = profile.threads[selectedThread];
+    const { selectedThread, jsOnly, invertCallstack } = viewOptions;
+    let thread = profile.threads[selectedThread];
+    if (jsOnly) {
+      thread = this._filterToJSOnly(thread);
+    }
+    if (invertCallstack) {
+      thread = this._invertCallStack(thread);
+    }
     const funcStackInfo = this._getFuncStackInfo(selectedThread, thread);
     dispatch(Actions.changeExpandedFuncStacks(selectedThread,
       newExpandedFuncStacks.map(funcStackIndex => getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable))));

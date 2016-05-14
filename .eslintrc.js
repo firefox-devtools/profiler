@@ -77,7 +77,8 @@ module.exports = {
         "generator-star-spacing": "error",
         "no-duplicate-imports": "error",
         "no-var": "error",
-        "prefer-const": "error"
+        "prefer-const": "error",
+        "array-bracket-spacing": "error"
     },
     "settings": {
         "react": {

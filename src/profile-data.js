@@ -2,6 +2,7 @@ import { timeCode } from './time-code';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
+ * @module profile-data
  */
 
 export const resourceTypes = {
@@ -16,11 +17,11 @@ export const resourceTypes = {
 /**
  * Takes the stack table and the frame table, creates a func stack table and
  * fixes up the funcStack field in the samples data.
- * @param {object} stackTable The thread's stackTable.
- * @param {object} frameTable The thread's frameTable.
- * @param {object} funcTable The thread's funcTable.
- * @param {object} samples The thread's samples.
- * @return {object} The funcStackTable and the new samples object.
+ * @param  {Object} stackTable The thread's stackTable.
+ * @param  {Object} frameTable The thread's frameTable.
+ * @param  {Object} funcTable  The thread's funcTable.
+ * @param  {Object} samples    The thread's samples.
+ * @return {Object} The        funcStackTable and the new samples object.
  */
 export function getFuncStackInfo(stackTable, frameTable, funcTable, samples) {
   return timeCode('getFuncStackInfo', () => {
