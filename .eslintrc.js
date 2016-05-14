@@ -46,6 +46,9 @@ module.exports = {
         ],
         "eqeqeq": [
             "error"
+        ],
+        "valid-jsdoc": [
+            "error"
         ]
     },
     "settings": {

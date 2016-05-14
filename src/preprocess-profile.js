@@ -4,10 +4,18 @@ import { resourceTypes } from './profile-data';
 import { provideHostSide } from './promise-worker';
 
 /**
- * Turn a data table from the form { schema, data } (as used in the raw profile
+ * Module for converting a profile into the 'preprocessed' format.
+ * @module preprocess-profile
+ */
+
+/**
+ * Turn a data table from the form `{ schema, data }` (as used in the raw profile
  * JSON) into a struct of arrays. This isn't very nice to read, but it
  * drastically reduces the number of JS objects the JS engine has to deal with,
  * resulting in fewer GC pauses and hopefully better performance.
+ *
+ * @param {object} rawTable A data table of the form `{ schema, data }`.
+ * @return {object} A data table of the form `{ length: number, field1: array, field2: array }`
  */
 function toStructOfArrays(rawTable) {
   const result = { length: rawTable.data.length };
@@ -30,6 +38,9 @@ function getRealScriptURI(url) {
 
 /**
  * Convert the given thread into preprocessed form.
+ * @param {object} thread The thread object, in the 'raw' format.
+ * @param {array} libs A libs array, in preprocessed format (as returned by preprocessSharedLibraries).
+ * @return {object} A new thread object in the 'preprocessed' format.
  */
 function preprocessThread(thread, libs) {
   const funcTable = {
@@ -132,6 +143,8 @@ function preprocessThread(thread, libs) {
 
 /**
  * Ensure every lib has pdbName and breakpadId fields, and sort them by start address.
+ * @param {string} libs The sharedLibrary JSON string as found in a profile in the 'raw' format.
+ * @return {array} An array of lib objects, sorted by startAddress.
  */
 function preprocessSharedLibraries(libs) {
   return JSON.parse(libs).map(lib => {
@@ -150,6 +163,9 @@ function preprocessSharedLibraries(libs) {
 
 /**
  * Adjust the "time" field by the given delta.
+ * @param {object} samplesOrMarkers The table of samples/markers.
+ * @param {number} delta The time delta, in milliseconds, by which to adjust.
+ * @return {object} A samples/markers table with adjusted time values.
  */
 function adjustTimestamps(samplesOrMarkers, delta) {
   return Object.assign({}, samplesOrMarkers, {
@@ -161,6 +177,8 @@ function adjustTimestamps(samplesOrMarkers, delta) {
  * Convert a profile from "raw" format into the preprocessed format.
  * For a description of the preprocessed format, look at the tests for this
  * function. (Sorry!)
+ * @param {object} profile A profile object, in the 'raw' format.
+ * @return {object} A new profile object, in the 'preprocessed' format.
  */
 export function preprocessProfile(profile) {
   const libs = preprocessSharedLibraries(profile.libs);

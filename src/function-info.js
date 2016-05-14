@@ -131,8 +131,8 @@ function getRealScriptURI(url) {
 
 /**
  * Get an object with information about the function.
- * @param  string fullName The function name
- * @return object          An object of the form:
+ * @param  {string} fullName The function name
+ * @return {object}          An object of the form:
  *                           {
  *                             functionName: string,
  *                             libraryName: string,
@@ -140,7 +140,7 @@ function getRealScriptURI(url) {
  *                             isRoot: bool,
  *                             isJSFrame: bool
  *                           }
- *                         libraryName is a string index into the resources array at the top of this file.
+ *                           libraryName is a string index into the resources array at the top of this file.
  */
 export function getFunctionInfo(fullName) {
 

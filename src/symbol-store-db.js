@@ -1,8 +1,12 @@
 import { provideHostSide } from './promise-worker';
 
+/**
+ * A wrapper around an IndexedDB table that stores symbol tables.
+ * @class SymbolStoreDB
+ * @classdesc Where does this description show up?
+ */
 export class SymbolStoreDB {
   /**
-   * SymbolStore constructor.
    * @param string dbName   The name of the indexedDB database that's used
    *                        to store the symbol tables.
    */

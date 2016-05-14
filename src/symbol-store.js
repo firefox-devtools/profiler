@@ -1,29 +1,30 @@
 import { SymbolStoreDB } from './symbol-store-db';
 
+/**
+ * Lets you get symbol tables and only requests them from the symbol provider once.
+ * @class SymbolStore
+ * @classdesc A broker that lets you request stuff as often as you want.
+ */
 export class SymbolStore {
   /**
    * SymbolStore constructor.
-   * @param string dbNamePrefix   A prefix for the indexedDB database which the SymbolStore
-   *                              uses internally (using asyncStorage) to store symbol tables.
-   * @param object symbolProvider An object with a method 'requestSymbolTable(pdbName, breakpadId)'
-   *                              which will be called whenever we need a symbol table. This method
-   *                              needs to return a promise of [addr, syms] (the symbol table).
+   * @param {string} dbNamePrefix   A prefix for the indexedDB database which the SymbolStore
+   *                                uses internally (using asyncStorage) to store symbol tables.
+   * @param {object} symbolProvider An object with a method 'requestSymbolTable(pdbName, breakpadId)'
+   *                                which will be called whenever we need a symbol table. This method
+   *                                needs to return a promise of [addr, syms] (the symbol table).
    */
   constructor(dbNamePrefix, symbolProvider) {
     this._symbolProvider = symbolProvider;
     this._db = new SymbolStoreDB(`${dbNamePrefix}-symbol-tables`);
 
-    /**
-     * A set of strings identifying libraries that we have requested
-     * symbols for but gotten an error back.
-     */
+    // A set of strings identifying libraries that we have requested
+    // symbols for but gotten an error back.
     this._failedRequests = new Set();
 
-    /**
-     * A map with one entry for each library that we have requested (but not yet
-     * received) symbols for. The keys are strings (libid), and the values are
-     * promises.
-     */
+    // A map with one entry for each library that we have requested (but not yet
+    // received) symbols for. The keys are strings (libid), and the values are
+    // promises.
     this._importingLibs = new Map();
   }
 
@@ -59,13 +60,24 @@ export class SymbolStore {
     });
   }
 
+  /**
+   * Get the array of symbol addresses for the given library.
+   * @param  {object} lib A library object with the properties `pdbName` and `breakpadId`.
+   * @return {Promise<Array<Number>>} A promise of the array of addresses.
+   */
   getFuncAddressTableForLib(lib) {
     return this._ensureLibraryIsInDB(lib).then(
       libKey => this._db.getFuncAddressTableForLib(libKey));
   }
 
-  getSymbolsForAddressesInLib(requestedAddresses, lib) {
+  /**
+   * Get an array of symbol strings for the given symbol indices.
+   * @param  {Array<Number>} requestedAddressesIndices An array where each element is the index of the symbol whose string should be looked up.
+   * @param  {Object} lib A library object with the properties `pdbName` and `breakpadId`.
+   * @return {Promise<Array<String>>} An promise array of strings, in the order as requested.
+   */
+  getSymbolsForAddressesInLib(requestedAddressesIndices, lib) {
     return this._ensureLibraryIsInDB(lib).then(
-      libKey => this._db.getSymbolsForAddressesInLib(requestedAddresses, libKey));
+      libKey => this._db.getSymbolsForAddressesInLib(requestedAddressesIndices, libKey));
   }
 }
