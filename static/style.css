@@ -208,7 +208,7 @@ body, #root, .profileViewer {
   user-select: none;
 }
 
-.histogram {
+.threadStackGraph {
   height: 40px;
   flex: 1;
 }

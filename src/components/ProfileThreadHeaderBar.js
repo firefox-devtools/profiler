@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
-import Histogram from './Histogram';
+import ThreadStackGraph from './ThreadStackGraph';
 
 class ProfileThreadHeaderBar extends Component {
 
@@ -17,9 +17,9 @@ class ProfileThreadHeaderBar extends Component {
     return (
       <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')} style={style}>
         <h1 onMouseDown={(event) => onMouseDown(index, event)} className='grippy'>{thread.name}</h1>
-        <Histogram interval={interval}
+        <ThreadStackGraph interval={interval}
                    thread={thread}
-                   className='histogram'
+                   className='threadStackGraph'
                    rangeStart={rangeStart}
                    rangeEnd={rangeEnd}
                    funcStackInfo={funcStackInfo}

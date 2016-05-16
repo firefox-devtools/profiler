@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import { timeCode } from '../time-code';
 
-class Histogram extends Component {
+class ThreadStackGraph extends Component {
 
   constructor(props) {
     super(props);
@@ -16,7 +16,7 @@ class Histogram extends Component {
       window.requestAnimationFrame(() => {
         this._requestedAnimationFrame = false;
         if (this.refs.canvas) {
-          timeCode('histogram render', () => {
+          timeCode('ThreadStackGraph render', () => {
             this.drawCanvas(this.refs.canvas);
           });
         }
@@ -95,7 +95,7 @@ class Histogram extends Component {
 
 }
 
-Histogram.propTypes = {
+ThreadStackGraph.propTypes = {
   thread: PropTypes.shape({
     samples: PropTypes.object.isRequired,
   }).isRequired,
@@ -110,4 +110,4 @@ Histogram.propTypes = {
   className: PropTypes.string,
 };
 
-export default Histogram;
+export default ThreadStackGraph;
