@@ -13,10 +13,10 @@ class ProfileThreadHeaderBar extends Component {
   }
 
   render() {
-    const { thread, index, interval, rangeStart, rangeEnd, funcStackInfo, selectedFuncStack, isSelected, onClick } = this.props;
+    const { thread, index, interval, rangeStart, rangeEnd, funcStackInfo, selectedFuncStack, isSelected, onClick, style } = this.props;
     return (
-      <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')}>
-        <h1 onClick={(event) => onClick(index, event)}>{thread.name}</h1>
+      <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')} style={style}>
+        <h1 onClick={(event) => onClick(index, event)} className='grippy'>{thread.name}</h1>
         <Histogram interval={interval}
                    thread={thread}
                    className='histogram'
@@ -45,6 +45,7 @@ ProfileThreadHeaderBar.propTypes = {
   selectedFuncStack: PropTypes.number.isRequired,
   isSelected: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
+  style: PropTypes.style,
 };
 
 export default ProfileThreadHeaderBar;

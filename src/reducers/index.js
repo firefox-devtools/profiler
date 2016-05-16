@@ -26,6 +26,8 @@ function threadOrder(state = [], action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
       return defaultThreadOrder(action.profile.threads);
+    case 'CHANGE_THREAD_ORDER':
+      return action.threadOrder;
     default:
       return state;
   }

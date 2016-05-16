@@ -119,6 +119,13 @@ export function changeSelectedThread(selectedThread) {
   };
 }
 
+export function changeThreadOrder(threadOrder) {
+  return {
+    type: 'CHANGE_THREAD_ORDER',
+    threadOrder,
+  };
+}
+
 export function changeExpandedFuncStacks(threadIndex, expandedFuncStacks) {
   return {
     type: 'CHANGE_EXPANDED_FUNC_STACKS',

@@ -5,6 +5,7 @@ import { getFuncStackInfo, getTimeRangeIncludingAllThreads, filterThreadToJSOnly
 import ProfileTreeView from '../components/ProfileTreeView';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
 import ProfileViewSidebar from '../components/ProfileViewSidebar';
+import Reorderable from '../components/Reorderable';
 import * as Actions from '../actions';
 
 class ProfileViewer extends Component {
@@ -15,6 +16,11 @@ class ProfileViewer extends Component {
     this._onProfileTitleClick = this._onProfileTitleClick.bind(this);
     this._onSelectedFuncStackChange = this._onSelectedFuncStackChange.bind(this);
     this._onExpandedFuncStacksChange = this._onExpandedFuncStacksChange.bind(this);
+    this._onChangeThreadOrder = this._onChangeThreadOrder.bind(this);
+  }
+
+  _onChangeThreadOrder(newThreadOrder) {
+    this.props.dispatch(Actions.changeThreadOrder(newThreadOrder));
   }
 
   _filterToJSOnly(thread) {
@@ -121,13 +127,13 @@ class ProfileViewer extends Component {
 
     return (
       <div className={className}>
-        <ol className={`${className}Header`}>
+        <Reorderable tagName='ol' className={`${className}Header`} order={viewOptions.threadOrder} orient='vertical' onChangeOrder={this._onChangeThreadOrder}>
         {
-          viewOptions.threadOrder.map(threadIndex =>
+          threads.map((thread, threadIndex) =>
             <ProfileThreadHeaderBar key={threadIndex}
                                     index={threadIndex}
                                     interval={profile.meta.interval}
-                                    thread={threads[threadIndex]}
+                                    thread={thread}
                                     rangeStart={timeRange.start}
                                     rangeEnd={timeRange.end}
                                     funcStackInfo={funcStackInfos[threadIndex]}
@@ -136,7 +142,7 @@ class ProfileViewer extends Component {
                                     onClick={this._onProfileTitleClick}/>
           )
         }
-        </ol>
+        </Reorderable>
         <div className='treeAndSidebarWrapper'>
           <ProfileViewSidebar />
           <ProfileTreeView thread={threads[selectedThread]}
