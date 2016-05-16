@@ -13,7 +13,7 @@ class ProfileViewer extends Component {
     super(props);
     this._cachedFuncStackInfos = [];
     this._cachedJSOnly = null;
-    this._onProfileTitleClick = this._onProfileTitleClick.bind(this);
+    this._onProfileTitleMouseDown = this._onProfileTitleMouseDown.bind(this);
     this._onSelectedFuncStackChange = this._onSelectedFuncStackChange.bind(this);
     this._onExpandedFuncStacksChange = this._onExpandedFuncStacksChange.bind(this);
     this._onChangeThreadOrder = this._onChangeThreadOrder.bind(this);
@@ -65,8 +65,11 @@ class ProfileViewer extends Component {
     return funcStackInfo;
   }
 
-  _onProfileTitleClick(threadIndex) {
+  _onProfileTitleMouseDown(threadIndex, event) {
     this.props.dispatch(Actions.changeSelectedThread(threadIndex));
+
+    // Don't allow clicks on the threads list to steal focus from the tree view.
+    event.preventDefault();
   }
 
   _onSelectedFuncStackChange(newSelectedFuncStack) {
@@ -139,7 +142,7 @@ class ProfileViewer extends Component {
                                     funcStackInfo={funcStackInfos[threadIndex]}
                                     selectedFuncStack={threadIndex === selectedThread ? selectedFuncStacks[selectedThread] : -1 }
                                     isSelected={threadIndex === selectedThread}
-                                    onClick={this._onProfileTitleClick}/>
+                                    onMouseDown={this._onProfileTitleMouseDown}/>
           )
         }
         </Reorderable>
