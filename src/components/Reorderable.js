@@ -174,6 +174,7 @@ class Reorderable extends Component {
               if (phase === 'MANIPULATING') {
                 delete style.transition;
                 style.transform = `${xy.translateXY}(${this.state.manipulationDelta}px)`;
+                style.opacity = '0.8';
               } else {
                 style.transform = `${xy.translateXY}(${this.state.finalOffset}px)`;
               }

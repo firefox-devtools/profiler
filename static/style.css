@@ -185,13 +185,13 @@ body, #root, .profileViewer {
   height: 40px;
   display: flex;
   flex-flow: row nowrap;
-  background: white;
   border-top: 1px solid #D6D6D6;
+  box-shadow: 0 1px #D6D6D6;
+  background-color: white;
 }
 
 .profileThreadHeaderBar.selected {
-  background-color: highlight;
-  color: highlighttext;
+  background-color: hsl(220, 50%, 93%);
 }
 
 .profileThreadHeaderBar > h1 {
@@ -211,7 +211,6 @@ body, #root, .profileViewer {
 .histogram {
   height: 40px;
   flex: 1;
-  background: white;
 }
 
 .treeAndSidebarWrapper {
