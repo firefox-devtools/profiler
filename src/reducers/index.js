@@ -55,6 +55,8 @@ function viewOptionsThreads(state = [], action) {
       }));
     case 'COALESCED_FUNCTIONS_UPDATE': {
       const { functionsUpdatePerThread } = action;
+      // For each thread, apply oldFuncToNewFuncMap to that thread's
+      // selectedFuncStack and expandedFuncStacks.
       return state.map((thread, threadIndex) => {
         if (!functionsUpdatePerThread[threadIndex]) {
           return thread;
@@ -75,21 +77,19 @@ function viewOptionsThreads(state = [], action) {
     }
     case 'CHANGE_SELECTED_FUNC_STACK': {
       const { selectedFuncStack, threadIndex } = action;
-      return state.map((thread, ti) => {
-        if (ti !== threadIndex) {
-          return thread;
-        }
-        return Object.assign({}, thread, { selectedFuncStack });
-      });
+      return [
+        ...state.slice(0, threadIndex),
+        Object.assign({}, state[threadIndex], { selectedFuncStack }),
+        ...state.slice(threadIndex + 1),
+      ];
     }
     case 'CHANGE_EXPANDED_FUNC_STACKS': {
       const { threadIndex, expandedFuncStacks } = action;
-      return state.map((thread, ti) => {
-        if (ti !== threadIndex) {
-          return thread;
-        }
-        return Object.assign({}, thread, { expandedFuncStacks });
-      });
+      return [
+        ...state.slice(0, threadIndex),
+        Object.assign({}, state[threadIndex], { expandedFuncStacks }),
+        ...state.slice(threadIndex + 1),
+      ];
     }
     default:
       return state;
