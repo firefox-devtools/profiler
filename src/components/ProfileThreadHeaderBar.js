@@ -45,7 +45,7 @@ ProfileThreadHeaderBar.propTypes = {
   selectedFuncStack: PropTypes.number.isRequired,
   isSelected: PropTypes.bool.isRequired,
   onMouseDown: PropTypes.func.isRequired,
-  style: PropTypes.style,
+  style: PropTypes.object,
 };
 
 export default ProfileThreadHeaderBar;
