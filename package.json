@@ -63,11 +63,10 @@
   },
   "babel": {
     "presets": [
+      "es2015",
       "react"
     ],
     "plugins": [
-      "transform-es2015-modules-commonjs",
-      "transform-es2015-block-scoping",
       "react-hot-loader/babel"
     ]
   }

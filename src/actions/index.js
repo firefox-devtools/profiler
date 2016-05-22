@@ -71,9 +71,9 @@ class ColascedFunctionsUpdateDispatcher {
         funcNames: [],
       };
     } else {
-      const oldMap = this._updates[threadIndex].oldFuncToNewFuncMap;
-      this._updates[threadIndex].oldFuncToNewFuncMap =
-        new Map(function *() { yield* oldMap; yield* oldFuncToNewFuncMap;}());
+      for (const oldFunc of oldFuncToNewFuncMap.keys()) {
+        this._updates[threadIndex].oldFuncToNewFuncMap.set(oldFunc, oldFuncToNewFuncMap.get(oldFunc));
+      }
     }
   }
 
