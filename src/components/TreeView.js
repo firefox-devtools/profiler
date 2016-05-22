@@ -98,6 +98,8 @@ class TreeView extends Component {
     this._toggle = this._toggle.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onRowClicked = this._onRowClicked.bind(this);
+    this._specialItems = [];
+    this._visibleRows = [];
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -107,18 +109,24 @@ class TreeView extends Component {
   componentWillReceiveProps(nextProps) {
     if (!nextProps.tree.hasSameNodeIds(this.props.tree)) {
       let prefix = nextProps.tree.getParent(nextProps.selectedNodeId);
-      if (typeof prefix === 'undefined') {
-        return;
+      if (typeof prefix !== 'undefined') {
+        while (0 && prefix !== -1) {
+          // this._expandedNodeIds.add(prefix);
+          prefix = nextProps.tree.getParent(prefix);
+        }
+        if (0 && this.refs.list) { // This is needed when switching between threads, not when updating func stacks.
+          const visibleRows = this._getAllVisibleRows(nextProps);
+          this.refs.list.scrollItemIntoView(visibleRows.findIndex((ni) => ni === nextProps.selectedNodeId),
+                                            nextProps.tree.getDepth(nextProps.selectedNodeId) * 10);
+        }
       }
-      while (0 && prefix !== -1) {
-        // this._expandedNodeIds.add(prefix);
-        prefix = nextProps.tree.getParent(prefix);
-      }
-      if (0 && this.refs.list) { // This is needed when switching between threads, not when updating func stacks.
-        const visibleRows = this._getAllVisibleRows(nextProps);
-        this.refs.list.scrollItemIntoView(visibleRows.findIndex((ni) => ni === nextProps.selectedNodeId),
-                                          nextProps.tree.getDepth(nextProps.selectedNodeId) * 10);
-      }
+    }
+    if (nextProps.selectedNodeId !== this.props.selectedNodeId) {
+      this._specialItems = [nextProps.selectedNodeId];
+    }
+    if (nextProps.tree !== this.props.tree ||
+        nextProps.expandedNodeIds !== this.props.expandedNodeIds) {
+      this._visibleRows = this._getAllVisibleRows(nextProps);
     }
   }
 
@@ -144,10 +152,10 @@ class TreeView extends Component {
 
   _addVisibleRowsFromNode(props, arr, nodeId, depth) {
     arr.push(nodeId);
-    if (!this.props.expandedNodeIds.includes(nodeId)) {
+    if (!props.expandedNodeIds.includes(nodeId)) {
       return;
     }
-    const children = this.props.tree.getChildren(nodeId);
+    const children = props.tree.getChildren(nodeId);
     for (let i = 0; i < children.length; i++) {
       this._addVisibleRowsFromNode(props, arr, children[i], depth + 1);
     }
@@ -265,7 +273,6 @@ class TreeView extends Component {
 
   render() {
     const { fixedColumns, mainColumn } = this.props;
-    this._visibleRows = this._getAllVisibleRows(this.props);
     return (
       <div className='treeView'>
         <TreeViewHeader fixedColumns={fixedColumns}
@@ -276,6 +283,7 @@ class TreeView extends Component {
                      itemHeight={16}
                      focusable={true}
                      onKeyDown={this._onKeyDown}
+                     specialItems={this._specialItems}
                      ref='list'/>
       </div>
     );

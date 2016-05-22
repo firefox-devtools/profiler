@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import shallowequal from 'shallowequal';
+import memoize from 'memoize-immutable';
 import { getFuncStackInfo, getTimeRangeIncludingAllThreads, filterThreadToJSOnly, getFuncStackFromFuncArray, getStackAsFuncArray, invertCallstack } from '../profile-data';
 import ProfileTreeView from '../components/ProfileTreeView';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
@@ -17,10 +18,17 @@ class ProfileViewer extends Component {
     this._onSelectedFuncStackChange = this._onSelectedFuncStackChange.bind(this);
     this._onExpandedFuncStacksChange = this._onExpandedFuncStacksChange.bind(this);
     this._onChangeThreadOrder = this._onChangeThreadOrder.bind(this);
+    this._getExpandedFuncStacks = memoize(this._getExpandedFuncStacks);
   }
 
   _onChangeThreadOrder(newThreadOrder) {
     this.props.dispatch(Actions.changeThreadOrder(newThreadOrder));
+  }
+
+  _getExpandedFuncStacks(expandedFuncStacks, funcStackTable) {
+    return expandedFuncStacks.map(funcArray => {
+      return getFuncStackFromFuncArray(funcArray, funcStackTable);
+    });
   }
 
   _filterToJSOnly(thread) {
@@ -124,9 +132,7 @@ class ProfileViewer extends Component {
     const selectedFuncStacks = viewOptions.threads.map((thread, threadIndex) => {
       return getFuncStackFromFuncArray(thread.selectedFuncStack, funcStackInfos[threadIndex].funcStackTable);
     });
-    const expandedFuncStacks = viewOptions.threads[selectedThread].expandedFuncStacks.map(funcArray => {
-      return getFuncStackFromFuncArray(funcArray, funcStackInfos[selectedThread].funcStackTable);
-    });
+    const expandedFuncStacks = this._getExpandedFuncStacks(viewOptions.threads[selectedThread].expandedFuncStacks, funcStackInfos[selectedThread].funcStackTable);
 
     return (
       <div className={className}>

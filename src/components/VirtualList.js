@@ -16,6 +16,7 @@ VirtualListRow.propTypes = {
   renderItem: PropTypes.func.isRequired,
   item: PropTypes.any.isRequired,
   index: PropTypes.number.isRequired,
+  isSpecial: PropTypes.bool,
 };
 
 class VirtualList extends Component {
@@ -80,7 +81,7 @@ class VirtualList extends Component {
   }
 
   render() {
-    const { itemHeight, className, renderItem, items, focusable, onKeyDown } = this.props;
+    const { itemHeight, className, renderItem, items, focusable, specialItems, onKeyDown } = this.props;
 
     const range = this.computeVisibleRange();
     const { visibleRangeStart, visibleRangeEnd } = range;
@@ -99,7 +100,7 @@ class VirtualList extends Component {
               if (i < visibleRangeStart || i >= visibleRangeEnd) {
                 return null;
               }
-              return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item} items={items}/>;
+              return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item} items={items} isSpecial={specialItems.includes(item)}/>;
             })
           }
         </div>
@@ -115,6 +116,7 @@ VirtualList.propTypes = {
   renderItem: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
   focusable: PropTypes.bool.isRequired,
+  specialItems: PropTypes.array.isRequired,
   onKeyDown: PropTypes.func.isRequired,
 };
 

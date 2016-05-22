@@ -37,6 +37,7 @@
     "eslint-plugin-react": "^5.1.1",
     "express": "^4.13.4",
     "live-server": "^1.0.0",
+    "memoize-immutable": "^2.1.0",
     "memoizesync": "^0.5.0",
     "mocha": "^2.3.4",
     "npm-run-all": "^2.1.1",
