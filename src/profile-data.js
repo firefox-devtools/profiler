@@ -97,28 +97,6 @@ export function filterThreadToJSOnly(thread) {
   return timeCode('filterThreadToJSOnly', () => {
     const { stackTable, funcTable, frameTable, samples } = thread;
 
-    // frameTable will be equal to funcTable
-    const newFrameTable = {
-      length: 0,
-      func: [],
-      address: [],
-    };
-    const newFuncTable = {
-      length: 0,
-      name: [],
-      resource: [],
-      address: [],
-      isJS: [],
-    };
-    function addFrameAndFunc(oldFuncIndex) {
-      const newFuncIndex = newFuncTable.length++;
-      newFuncTable.name[newFuncIndex] = funcTable.name[oldFuncIndex];
-      newFuncTable.resource[newFuncIndex] = funcTable.resource[oldFuncIndex];
-      newFuncTable.isJS[newFuncIndex] = true;
-      const newFrameIndex = newFrameTable.length++;
-      newFrameTable.func[newFrameIndex] = newFuncIndex;
-      return newFrameIndex;
-    }
     const newStackTable = {
       length: 0,
       frame: [],
@@ -126,8 +104,8 @@ export function filterThreadToJSOnly(thread) {
     };
 
     const oldStackToNewStack = new Map();
-    const funcCount = funcTable.length;
-    const prefixStackAndFuncToStack = new Map(); // prefixNewStack * funcCount + func => newStackIndex
+    const frameCount = frameTable.length;
+    const prefixStackAndFrameToStack = new Map(); // prefixNewStack * frameCount + frame => newStackIndex
 
     function convertStack(stackIndex) {
       if (stackIndex === null) {
@@ -141,16 +119,15 @@ export function filterThreadToJSOnly(thread) {
         if (!funcTable.isJS[funcIndex]) {
           newStack = prefixNewStack;
         } else {
-          const prefixStackAndFuncIndex = (prefixNewStack === null ? -1 : prefixNewStack) * funcCount + funcIndex;
-          newStack = prefixStackAndFuncToStack.get(prefixStackAndFuncIndex);
+          const prefixStackAndFrameIndex = (prefixNewStack === null ? -1 : prefixNewStack) * frameCount + frameIndex;
+          newStack = prefixStackAndFrameToStack.get(prefixStackAndFrameIndex);
           if (newStack === undefined) {
-            const newFrameIndex = addFrameAndFunc(funcIndex);
             newStack = newStackTable.length++;
             newStackTable.prefix[newStack] = prefixNewStack;
-            newStackTable.frame[newStack] = newFrameIndex;
+            newStackTable.frame[newStack] = frameIndex;
           }
           oldStackToNewStack.set(stackIndex, newStack);
-          prefixStackAndFuncToStack.set(prefixStackAndFuncIndex, newStack);
+          prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
         }
       }
       return newStack;
@@ -163,8 +140,6 @@ export function filterThreadToJSOnly(thread) {
     return Object.assign({}, thread, {
       samples: newSamples,
       stackTable: newStackTable,
-      funcTable: newFuncTable,
-      frameTable: newFrameTable,
     });
   });
 }
