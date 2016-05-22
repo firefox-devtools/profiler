@@ -42,7 +42,7 @@ class VirtualList extends Component {
     const { itemHeight } = this.props;
     const outerRect = this.refs.container.getBoundingClientRect();
     const innerRect = this.refs.inner.getBoundingClientRect();
-    const overscan = 32;
+    const overscan = 5;
     const chunkSize = 16;
     let visibleRangeStart = Math.floor((outerRect.top - innerRect.top) / itemHeight) - overscan;
     visibleRangeStart = Math.floor(visibleRangeStart / chunkSize) * chunkSize;
