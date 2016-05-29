@@ -51,6 +51,7 @@
     "react-virtualized": "^7.0.5",
     "redux": "^3.4.0",
     "redux-thunk": "^2.0.1",
+    "reselect": "^2.5.1",
     "shallowequal": "^0.2.2",
     "uglify": "^0.1.5",
     "uglify-js": "^2.6.1",

@@ -1,6 +1,9 @@
 import React, { Component, PropTypes } from 'react';
+import { connect } from 'react-redux';
 import TreeView from './TreeView';
-import { getCallTree } from '../profile-tree';
+import { getStackAsFuncArray } from '../profile-data';
+import { getProfile, selectedThreadSelectors, getSelectedThreadIndex } from '../selectors/';
+import * as Actions from '../actions';
 
 class ProfileTreeView extends Component{
   constructor(props) {
@@ -13,18 +16,6 @@ class ProfileTreeView extends Component{
     this._mainColumn = { propName: 'name', title: '' };
   }
 
-  componentWillMount() {
-    const { thread, interval, funcStackInfo } = this.props;
-    this._tree = getCallTree(thread, interval, funcStackInfo);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.funcStackInfo !== this.props.funcStackInfo) {
-      const { thread, interval, funcStackInfo } = nextProps;
-      this._tree = getCallTree(thread, interval, funcStackInfo);
-    }
-  }
-
   focus() {
     this.refs.treeView.focus();
   }
@@ -34,10 +25,10 @@ class ProfileTreeView extends Component{
     // at that depth.
     const newExpandedFuncStacks = this.props.expandedFuncStacks.slice();
     const maxInterestingDepth = 17; // scientifically determined
-    let currentFuncStack = this._tree.getRoots()[0];
+    let currentFuncStack = this.props.tree.getRoots()[0];
     newExpandedFuncStacks.push(currentFuncStack);
     for (let i = 0; i < maxInterestingDepth; i++) {
-      const children = this._tree.getChildren(currentFuncStack);
+      const children = this.props.tree.getChildren(currentFuncStack);
       if (children.length === 0) {
         break;
       }
@@ -50,7 +41,7 @@ class ProfileTreeView extends Component{
 
   render() {
     return (
-      <TreeView tree={this._tree}
+      <TreeView tree={this.props.tree}
                 fixedColumns={this._fixedColumns}
                 mainColumn={this._mainColumn}
                 onSelectionChange={this.props.onSelectedFuncStackChange}
@@ -69,6 +60,7 @@ ProfileTreeView.propTypes = {
   }).isRequired,
   threadIndex: PropTypes.number.isRequired,
   interval: PropTypes.number.isRequired,
+  tree: PropTypes.object.isRequired,
   funcStackInfo: PropTypes.shape({
     funcStackTable: PropTypes.object.isRequired,
     sampleFuncStacks: PropTypes.array.isRequired,
@@ -79,4 +71,27 @@ ProfileTreeView.propTypes = {
   onExpandedFuncStacksChange: PropTypes.func.isRequired,
 };
 
-export default ProfileTreeView;
+export default connect(state => {
+  return {
+    thread: selectedThreadSelectors.getFilteredThread(state),
+    threadIndex: getSelectedThreadIndex(state),
+    interval: getProfile(state).meta.interval,
+    tree: selectedThreadSelectors.getCallTree(state),
+    funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state),
+    selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state),
+    expandedFuncStacks: selectedThreadSelectors.getExpandedFuncStacks(state),
+  };
+}, null, (stateProps, dispatchProps, ownProps) => {
+  const { funcStackInfo, threadIndex } = stateProps;
+  const { dispatch } = dispatchProps;
+  return Object.assign({}, stateProps, ownProps, {
+    onSelectedFuncStackChange: newSelectedFuncStack => {
+      dispatch(Actions.changeSelectedFuncStack(threadIndex,
+        getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable)));
+    },
+    onExpandedFuncStacksChange: newExpandedFuncStacks => {
+      dispatch(Actions.changeExpandedFuncStacks(threadIndex,
+        newExpandedFuncStacks.map(funcStackIndex => getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable))));
+    },
+  });
+}, { withRef: true })(ProfileTreeView);

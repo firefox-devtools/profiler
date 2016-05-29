@@ -49,13 +49,12 @@ class App extends Component {
   }
 
   render() {
-    const { view, profileView } = this.props;
+    const { view } = this.props;
     if (view !== 'PROFILE') {
       return (<div></div>);
     }
-    const { profile, viewOptions } = profileView;
     return (
-      <ProfileViewer profile={profile} viewOptions={viewOptions} className='profileViewer'/>
+      <ProfileViewer/>
     );
   }
 }
