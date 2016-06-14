@@ -149,11 +149,11 @@ function getSampleIndexRangeForSelection(samples, selection) {
   if (firstSample === -1) {
     firstSample = samples.length;
   }
-  let afterLastSample = firstSample + samples.time.slice(firstSample).findIndex(t => t >= selection.selectionEnd);
+  let afterLastSample = samples.time.slice(firstSample).findIndex(t => t >= selection.selectionEnd);
   if (afterLastSample === -1) {
-    afterLastSample = samples.length;
+    return [firstSample, samples.length];
   }
-  return [firstSample, afterLastSample];
+  return [firstSample, firstSample + afterLastSample];
 }
 
 export function filterThreadToSelectedRange(thread, selection) {
