@@ -62,8 +62,21 @@ export const selectorsForThread = threadIndex => {
         return shouldInvertCallstack ? ProfileData.invertCallstack(thread) : thread;
       }
     );
+    const getRangeSelectionFilteredThread = createSelector(
+      getFilteredThread,
+      getProfileViewOptions,
+      (thread, viewOptions) => {
+        return viewOptions.selection.hasSelection ? ProfileData.filterThreadToSelectedRange(thread, viewOptions.selection) : thread;
+      }
+    );
     const getFuncStackInfo = createSelector(
       getFilteredThread,
+      ({stackTable, frameTable, funcTable, samples}) => {
+        return ProfileData.getFuncStackInfo(stackTable, frameTable, funcTable, samples);
+      }
+    );
+    const getRangeSelectionFuncStackInfo = createSelector(
+      getRangeSelectionFilteredThread,
       ({stackTable, frameTable, funcTable, samples}) => {
         return ProfileData.getFuncStackInfo(stackTable, frameTable, funcTable, samples);
       }
@@ -91,15 +104,16 @@ export const selectorsForThread = threadIndex => {
       }
     );
     const getCallTree = createSelector(
-      getFilteredThread,
+      getRangeSelectionFilteredThread,
       getProfileInterval,
-      getFuncStackInfo,
+      getRangeSelectionFuncStackInfo,
       ProfileTree.getCallTree
     );
     selectorsForThreads[threadIndex] = {
       getThread,
       getViewOptions,
       getFilteredThread,
+      getRangeSelectionFilteredThread,
       getFuncStackInfo,
       getSelectedFuncStack,
       getExpandedFuncStacks,

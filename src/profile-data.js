@@ -144,6 +144,34 @@ export function filterThreadToJSOnly(thread) {
   });
 }
 
+function getSampleIndexRangeForSelection(samples, selection) {
+  let firstSample = samples.time.findIndex(t => t >= selection.selectionStart);
+  if (firstSample === -1) {
+    firstSample = samples.length;
+  }
+  let afterLastSample = firstSample + samples.time.slice(firstSample).findIndex(t => t >= selection.selectionEnd);
+  if (afterLastSample === -1) {
+    afterLastSample = samples.length;
+  }
+  return [firstSample, afterLastSample];
+}
+
+export function filterThreadToSelectedRange(thread, selection) {
+  const { samples } = thread;
+  const [begin, end] = getSampleIndexRangeForSelection(samples, selection);
+  const newSamples = {
+    length: end - begin,
+    time: samples.time.slice(begin, end),
+    stack: samples.stack.slice(begin, end),
+    responsiveness: samples.responsiveness.slice(begin, end),
+    rss: samples.rss.slice(begin, end),
+    uss: samples.uss.slice(begin, end),
+    frameNumber: samples.frameNumber.slice(begin, end),
+    power: samples.power.slice(begin, end),
+  };
+  return Object.assign({}, thread, { samples: newSamples });
+}
+
 export function getFuncStackFromFuncArray(funcArray, funcStackTable) {
   let fs = -1;
   for (let i = 0; i < funcArray.length; i++) {
