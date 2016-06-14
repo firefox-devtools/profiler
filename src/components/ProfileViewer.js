@@ -5,7 +5,7 @@ import ProfileTreeView from '../components/ProfileTreeView';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
 import ProfileViewSidebar from '../components/ProfileViewSidebar';
 import Reorderable from '../components/Reorderable';
-import TimeLine from '../components/TimeLine';
+import TimelineWithRangeSelection from '../components/TimelineWithRangeSelection';
 import * as Actions from '../actions';
 import { getProfile, getProfileViewOptions, getThreadOrder } from '../selectors/';
 
@@ -16,14 +16,28 @@ class ProfileViewer extends Component {
   }
 
   render() {
-    const { profile, className, threadOrder, onChangeThreadOrder } = this.props;
+    const {
+      profile, className, threadOrder, onChangeThreadOrder,
+      viewOptions, onSelectionChange,
+    } = this.props;
     const timeRange = getTimeRangeIncludingAllThreads(profile);
     const threads = profile.threads;
+    const { hasSelection, selectionStart, selectionEnd } = viewOptions.selection;
     return (
       <div className={className}>
-        <div className={`${className}Header`}>
-          <TimeLine className={`${className}HeaderTimeLine`} zeroAt={timeRange.start} rangeStart={timeRange.start} rangeEnd={timeRange.end} />
-          <Reorderable tagName='ol' className={`${className}HeaderThreadList`} order={threadOrder} orient='vertical' onChangeOrder={onChangeThreadOrder}>
+        <TimelineWithRangeSelection className={`${className}Header`}
+                                    zeroAt={timeRange.start}
+                                    rangeStart={timeRange.start}
+                                    rangeEnd={timeRange.end}
+                                    hasSelection={hasSelection}
+                                    selectionStart={selectionStart}
+                                    selectionEnd={selectionEnd}
+                                    onSelectionChange={onSelectionChange}>
+          <Reorderable tagName='ol'
+                       className={`${className}HeaderThreadList`}
+                       order={threadOrder}
+                       orient='vertical'
+                       onChangeOrder={onChangeThreadOrder}>
           {
             threads.map((thread, threadIndex) =>
               <ProfileThreadHeaderBar key={threadIndex}
@@ -34,7 +48,7 @@ class ProfileViewer extends Component {
             )
           }
           </Reorderable>
-        </div>
+        </TimelineWithRangeSelection>
         <div className='treeAndSidebarWrapper'>
           <ProfileViewSidebar />
           <ProfileTreeView ref='treeView'/>
@@ -49,6 +63,8 @@ ProfileViewer.propTypes = {
   className: PropTypes.string.isRequired,
   threadOrder: PropTypes.array.isRequired,
   onChangeThreadOrder: PropTypes.func.isRequired,
+  viewOptions: PropTypes.object.isRequired,
+  onSelectionChange: PropTypes.func.isRequired,
 };
 
 export default connect(state => ({
@@ -59,5 +75,8 @@ export default connect(state => ({
 }), dispatch => ({
   onChangeThreadOrder: newThreadOrder => {
     dispatch(Actions.changeThreadOrder(newThreadOrder));
+  },
+  onSelectionChange: newSelection => {
+    dispatch(Actions.updateProfileSelection(newSelection));
   },
 }))(ProfileViewer);

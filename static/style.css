@@ -173,16 +173,28 @@ body, #root, .profileViewer {
   visibility: hidden;
 }
 
-.timeLineContainer {
-  box-shadow: inset 1px 0 #D6D6D6;
+.profileViewerHeader {
+  position: relative;
+  margin-left: 115px;
+}
+
+.profileViewerHeaderTimeLine {
+  box-shadow: -1px 0 #D6D6D6;
   height: 20px;
+  overflow: hidden;
+}
+
+.timeLineContainer {
   overflow: hidden;
   list-style: none;
   margin: 0;
-  margin-left: 115px;
   padding: 0;
   display: block;
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   -moz-user-select: none;
   user-select: none;
   line-height: 20px;
@@ -196,9 +208,11 @@ body, #root, .profileViewer {
   position: absolute;
   top: 0;
   bottom: 0;
-  border-left: 1px solid #D6D6D6;
+  width: 1px;
+  margin-left: -1px;
   white-space: nowrap;
   text-align: right;
+  background: linear-gradient(transparent, #D6D6D6 19px, #D6D6D6 20px, #D6D6D666 0);
 }
 
 .timeLineNotchText {
@@ -209,7 +223,7 @@ body, #root, .profileViewer {
 
 .profileViewerHeaderThreadList {
   list-style: none;
-  margin: 0;
+  margin: 0 0 0 -115px;
   padding: 0;
 }
 
@@ -235,7 +249,7 @@ body, #root, .profileViewer {
   line-height: 40px;
   border-right: 1px solid #D6D6D6;
   margin: 0;
-  margin-left: 15px;
+  margin-left: 14px;
   cursor: default;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -244,7 +258,68 @@ body, #root, .profileViewer {
 
 .threadStackGraph {
   height: 40px;
+  width: calc(100% - 115px);
+  position: relative;
+}
+
+.overlay {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-flow: row nowrap;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  margin-left: -5px;
+  padding-left: 5px;
+  overflow: hidden;
+}
+
+.dimmerBefore,
+.dimmerAfter {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.dimmerAfter {
   flex: 1;
+}
+
+.rangeSelectionGrippy {
+  height: 20px;
+  pointer-events: auto;
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.grippyRangeStart,
+.grippyRangeEnd {
+  width: 0px;
+  padding: 3px;
+  background: #AAA;
+  border: 1px solid white;
+  margin: 0 -4px;
+  cursor: ew-resize;
+  border-radius: 5px;
+  position: relative;
+  z-index: 3;
+}
+
+.grippyRangeStart:hover,
+.grippyRangeStart.dragging,
+.grippyRangeEnd:hover,
+.grippyRangeEnd.dragging {
+  background: #888;
+}
+
+.grippyMoveRange {
+  flex: 1;
+  cursor: grab;
+}
+
+.grippyMoveRange.dragging {
+  cursor: grabbing;
 }
 
 .treeAndSidebarWrapper {

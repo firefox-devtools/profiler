@@ -2,11 +2,6 @@ import React, { Component, PropTypes } from 'react';
 
 class TimeLine extends Component {
 
-  componentDidMount() {
-    // Re-render now that we can find out the width of the container.
-    this.forceUpdate();
-  }
-
   _findNiceNumberGreaterOrEqualTo(uglyNumber) {
     // Write uglyNumber as a * 10^b, with 1 <= a < 10.
     // Return the lowest of 2 * 10^b, 5 * 10^b, 10 * 10^b that is greater or equal to uglyNumber.
@@ -21,14 +16,13 @@ class TimeLine extends Component {
   }
 
   _getNotches() {
-    if (!this.refs.container) {
+    if (this.props.width === 0) {
       return { notches: [], decimalPlaces: 0 };
     }
 
-    const width = this.refs.container.getBoundingClientRect().width;
-    const { zeroAt, rangeStart, rangeEnd } = this.props;
+    const { zeroAt, rangeStart, rangeEnd, width } = this.props;
     const pixelsPerMilliSecond = width / (rangeEnd - rangeStart);
-    const minimumNotchWidth = 50; // pixels
+    const minimumNotchWidth = 55; // pixels
     const { number: notchTime, exponent } = this._findNiceNumberGreaterOrEqualTo(minimumNotchWidth / pixelsPerMilliSecond);
     const firstNotchIndex = Math.ceil((rangeStart - zeroAt) / notchTime);
     const lastNotchIndex = Math.floor((rangeEnd - zeroAt) / notchTime);
@@ -43,7 +37,7 @@ class TimeLine extends Component {
     const { className } = this.props;
     const { notches, decimalPlaces } = this._getNotches();
     return (<div className={className}>
-      <ol className='timeLineContainer' ref='container'>
+      <ol className='timeLineContainer'>
         {
           notches.map(({ time, pos }, i) => (
             <li className='timeLineNotch' key={i} style={{left: `${pos}px`}}>
@@ -62,6 +56,7 @@ TimeLine.propTypes = {
   zeroAt: PropTypes.number.isRequired,
   rangeStart: PropTypes.number.isRequired,
   rangeEnd: PropTypes.number.isRequired,
+  width: PropTypes.number.isRequired,
 };
 
 export default TimeLine;

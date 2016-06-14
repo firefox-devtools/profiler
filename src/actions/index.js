@@ -146,3 +146,10 @@ export function changeInvertCallstack(invertCallstack) {
     invertCallstack,
   };
 }
+
+export function updateProfileSelection(selection) {
+  return {
+    type: 'UPDATE_PROFILE_SELECTION',
+    selection,
+  };
+}

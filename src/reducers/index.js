@@ -142,6 +142,15 @@ function invertCallstack(state = false, action) {
   }
 }
 
+function selection(state = { hasSelection: false }, action) {
+  switch (action.type) {
+    case 'UPDATE_PROFILE_SELECTION':
+      return action.selection;
+    default:
+      return state;
+  }
+}
+
 function profile(state = {}, action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
@@ -166,6 +175,7 @@ function profile(state = {}, action) {
 const viewOptions = combineReducers({
   threads: viewOptionsThreads,
   threadOrder, selectedThread, symbolicationStatus, waitingForLibs, jsOnly, invertCallstack,
+  selection,
 });
 
 const profileView = combineReducers({ viewOptions, profile });
