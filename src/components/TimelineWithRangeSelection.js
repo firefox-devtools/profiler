@@ -106,7 +106,7 @@ TimelineWithRangeSelectionImpl.propTypes = {
   selectionEnd: PropTypes.number,
   width: PropTypes.number.isRequired,
   onSelectionChange: PropTypes.func,
-  children: PropTypes.children,
+  children: PropTypes.any,
 };
 
 const TimelineWithRangeSelection = withSize(TimelineWithRangeSelectionImpl);
