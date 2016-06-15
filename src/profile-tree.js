@@ -30,7 +30,8 @@ class ProfileTree {
       for (let childFuncStackIndex = funcStackIndex + 1;
            childFuncStackIndex < this._funcStackTable.length && children.length < childCount;
            childFuncStackIndex++) {
-        if (this._funcStackTable.prefix[childFuncStackIndex] === funcStackIndex) {
+        if (this._funcStackTable.prefix[childFuncStackIndex] === funcStackIndex &&
+            this._funcStackTimes.totalTime[childFuncStackIndex] !== 0) {
           children.push(childFuncStackIndex);
         }
       }
@@ -90,6 +91,9 @@ export function getCallTree(thread, interval, funcStackInfo) {
     let numRoots = 0;
     for (let funcStackIndex = funcStackTotalTime.length - 1; funcStackIndex >= 0; funcStackIndex--) {
       funcStackTotalTime[funcStackIndex] += funcStackSelfTime[funcStackIndex];
+      if (funcStackTotalTime[funcStackIndex] === 0) {
+        continue;
+      }
       const prefixFuncStack = funcStackTable.prefix[funcStackIndex];
       if (prefixFuncStack === -1) {
         rootTotalTime += funcStackTotalTime[funcStackIndex];
