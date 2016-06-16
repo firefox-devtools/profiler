@@ -79,5 +79,5 @@ export default class Draggable extends Component {
 Draggable.propTypes = {
   value: PropTypes.any,
   onMove: PropTypes.func.isRequired,
-  children: PropTypes.any,
+  children: PropTypes.node,
 };

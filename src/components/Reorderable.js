@@ -198,7 +198,7 @@ Reorderable.propTypes = {
   className: PropTypes.string,
   order: PropTypes.arrayOf(PropTypes.number).isRequired,
   onChangeOrder: PropTypes.func.isRequired,
-  children: PropTypes.arrayOf(PropTypes.element),
+  children: PropTypes.node,
 };
 
 export default Reorderable;
