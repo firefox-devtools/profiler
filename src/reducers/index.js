@@ -77,9 +77,13 @@ function viewOptionsThreads(state = [], action) {
     }
     case 'CHANGE_SELECTED_FUNC_STACK': {
       const { selectedFuncStack, threadIndex } = action;
+      const expandedFuncStacks = state[threadIndex].expandedFuncStacks.slice();
+      for (let i = 1; i <= selectedFuncStack.length; i++) {
+        expandedFuncStacks.push(selectedFuncStack.slice(0, i));
+      }
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], { selectedFuncStack }),
+        Object.assign({}, state[threadIndex], { selectedFuncStack, expandedFuncStacks }),
         ...state.slice(threadIndex + 1),
       ];
     }

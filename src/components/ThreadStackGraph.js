@@ -9,6 +9,7 @@ class ThreadStackGraph extends Component {
     super(props);
     this._resizeListener = () => this.forceUpdate();
     this._requestedAnimationFrame = false;
+    this._onMouseUp = this._onMouseUp.bind(this);
   }
 
   _scheduleDraw() {
@@ -90,9 +91,20 @@ class ThreadStackGraph extends Component {
 
   }
 
+  _onMouseUp(e) {
+    if (this.props.onClick) {
+      const { rangeStart, rangeEnd } = this.props;
+      const r = this.refs.canvas.getBoundingClientRect();
+
+      const x = e.pageX - r.left;
+      const time = rangeStart + x / r.width * (rangeEnd - rangeStart);
+      this.props.onClick(time);
+    }
+  }
+
   render() {
     this._scheduleDraw();
-    return <canvas className={this.props.className} ref='canvas'/>;
+    return <canvas className={this.props.className} ref='canvas' onMouseUp={this._onMouseUp}/>;
   }
 
 }
@@ -110,6 +122,7 @@ ThreadStackGraph.propTypes = {
   }).isRequired,
   selectedFuncStack: PropTypes.number,
   className: PropTypes.string,
+  onClick: PropTypes.func,
 };
 
 export default ThreadStackGraph;

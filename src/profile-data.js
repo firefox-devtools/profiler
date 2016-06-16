@@ -260,3 +260,18 @@ export function invertCallstack(thread) {
     });
   });
 }
+
+export function getSampleIndexClosestToTime(thread, time) {
+  const { samples } = thread;
+  for (let i = 0; i < samples.length; i++) {
+    if (samples.time[i] >= time) {
+      if (i == 0) {
+        return 0;
+      }
+      const distanceToThis = samples.time[i] - time;
+      const distanceToLast = time - samples.time[i - 1];
+      return distanceToThis < distanceToLast ? i : i - 1;
+    }
+  }
+  return samples.length - 1;
+}
