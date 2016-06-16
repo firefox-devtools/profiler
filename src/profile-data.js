@@ -149,11 +149,11 @@ export function filterThreadToJSOnly(thread) {
 }
 
 function getSampleIndexRangeForSelection(samples, selection) {
-  let firstSample = samples.time.findIndex(t => t >= selection.selectionStart);
+  const firstSample = samples.time.findIndex(t => t >= selection.selectionStart);
   if (firstSample === -1) {
-    firstSample = samples.length;
+    return [samples.length, samples.length];
   }
-  let afterLastSample = samples.time.slice(firstSample).findIndex(t => t >= selection.selectionEnd);
+  const afterLastSample = samples.time.slice(firstSample).findIndex(t => t >= selection.selectionEnd);
   if (afterLastSample === -1) {
     return [firstSample, samples.length];
   }
