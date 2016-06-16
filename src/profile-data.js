@@ -149,6 +149,7 @@ export function filterThreadToJSOnly(thread) {
 }
 
 function getSampleIndexRangeForSelection(samples, selection) {
+  // TODO: This should really use bisect. samples.time is sorted.
   const firstSample = samples.time.findIndex(t => t >= selection.selectionStart);
   if (firstSample === -1) {
     return [samples.length, samples.length];
@@ -261,11 +262,11 @@ export function invertCallstack(thread) {
   });
 }
 
-export function getSampleIndexClosestToTime(thread, time) {
-  const { samples } = thread;
+export function getSampleIndexClosestToTime(samples, time) {
+  // TODO: This should really use bisect. samples.time is sorted.
   for (let i = 0; i < samples.length; i++) {
     if (samples.time[i] >= time) {
-      if (i == 0) {
+      if (i === 0) {
         return 0;
       }
       const distanceToThis = samples.time[i] - time;

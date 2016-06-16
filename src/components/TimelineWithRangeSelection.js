@@ -8,6 +8,7 @@ class TimelineWithRangeSelectionImpl extends Component {
   constructor(props) {
     super(props);
     this._onMouseDown = this._onMouseDown.bind(this);
+    this.handlers = null;
     this._container = null;
     this._containerCreated = c => { this._container = c; };
   }
@@ -23,12 +24,15 @@ class TimelineWithRangeSelectionImpl extends Component {
       return;
     }
 
+    // Don't steal focus.
+    e.preventDefault();
+
     const { rangeStart, rangeEnd } = this.props;
     const mouseDownTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
 
     let isRangeSelecting = false;
 
-    this._mouseMoveHandler = e => {
+    const mouseMoveHandler = e => {
       isRangeSelecting = true;
       const mouseMoveTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
       const selectionStart = Math.max(rangeStart, Math.min(mouseDownTime, mouseMoveTime));
@@ -39,9 +43,9 @@ class TimelineWithRangeSelectionImpl extends Component {
       });
     };
 
-    this._mouseUpHandler = e => {
+    const mouseUpHandler = e => {
       if (isRangeSelecting) {
-        this._mouseMoveHandler(e);
+        mouseMoveHandler(e);
         e.stopPropagation();
         this._uninstallMoveAndUpHandlers();
         return;
@@ -60,17 +64,21 @@ class TimelineWithRangeSelectionImpl extends Component {
       this._uninstallMoveAndUpHandlers();
     };
 
-    this._installMoveAndUpHandlers();
+    this._installMoveAndUpHandlers(mouseMoveHandler, mouseUpHandler);
   }
 
-  _installMoveAndUpHandlers() {
-    window.addEventListener('mousemove', this._mouseMoveHandler, true);
-    window.addEventListener('mouseup', this._mouseUpHandler, true);
+  _installMoveAndUpHandlers(mouseMoveHandler, mouseUpHandler) {
+    this._handlers = { mouseMoveHandler, mouseUpHandler };
+    window.addEventListener('mousemove', mouseMoveHandler, true);
+    window.addEventListener('mouseup', mouseUpHandler, true);
   }
 
   _uninstallMoveAndUpHandlers() {
-    window.removeEventListener('mousemove', this._mouseMoveHandler, true);
-    window.removeEventListener('mouseup', this._mouseUpHandler, true);
+    if (this._handlers) {
+      const { mouseMoveHandler, mouseUpHandler } = this._handlers;
+      window.removeEventListener('mousemove', mouseMoveHandler, true);
+      window.removeEventListener('mouseup', mouseUpHandler, true);
+    }
   }
 
   render() {

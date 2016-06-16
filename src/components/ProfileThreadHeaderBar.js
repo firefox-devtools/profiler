@@ -1,9 +1,69 @@
-import React from 'react';
+import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import ThreadStackGraph from './ThreadStackGraph';
 import { selectorsForThread, getSelectedThreadIndex } from '../selectors/';
 import { getSampleIndexClosestToTime, getStackAsFuncArray } from '../profile-data';
-import * as Actions from '../actions';
+import * as actions from '../actions';
+
+class ProfileThreadHeaderBar extends Component {
+
+  constructor(props) {
+    super(props);
+    this._onLabelMouseDown = this._onLabelMouseDown.bind(this);
+    this._onGraphClick = this._onGraphClick.bind(this);
+  }
+
+  _onLabelMouseDown(e) {
+    const { changeSelectedThread, threadIndex } = this.props;
+    changeSelectedThread(threadIndex);
+
+    // Don't allow clicks on the threads list to steal focus from the tree view.
+    e.preventDefault();
+  }
+
+  _onGraphClick(time) {
+    const { thread, threadIndex, funcStackInfo, changeSelectedThread, changeSelectedFuncStack } = this.props;
+    const sampleIndex = getSampleIndexClosestToTime(thread.samples, time);
+    const newSelectedStack = thread.samples.stack[sampleIndex];
+    const newSelectedFuncStack = funcStackInfo.stackIndexToFuncStackIndex.get(newSelectedStack);
+    changeSelectedThread(threadIndex);
+    changeSelectedFuncStack(threadIndex,
+      getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable));
+    // TODO: Scroll the selected row into view.
+  }
+
+  render() {
+    const { thread, interval, rangeStart, rangeEnd, funcStackInfo, selectedFuncStack, isSelected, style } = this.props;
+    return (
+      <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')} style={style}>
+        <h1 onMouseDown={this._onLabelMouseDown} className='grippy'>{thread.name}</h1>
+        <ThreadStackGraph interval={interval}
+                   thread={thread}
+                   className='threadStackGraph'
+                   rangeStart={rangeStart}
+                   rangeEnd={rangeEnd}
+                   funcStackInfo={funcStackInfo}
+                   selectedFuncStack={selectedFuncStack}
+                   onClick={this._onGraphClick}/>
+      </li>
+    );    
+  }
+
+}
+
+ProfileThreadHeaderBar.propTypes = {
+  threadIndex: PropTypes.number.isRequired,
+  thread: PropTypes.object.isRequired,
+  funcStackInfo: PropTypes.object.isRequired,
+  changeSelectedThread: PropTypes.func.isRequired,
+  changeSelectedFuncStack: PropTypes.func.isRequired,
+  interval: PropTypes.number.isRequired,
+  rangeStart: PropTypes.number.isRequired,
+  rangeEnd: PropTypes.number.isRequired,
+  selectedFuncStack: PropTypes.arrayOf(PropTypes.number).isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  style: PropTypes.object,
+};
 
 export default connect((state, props) => {
   const threadIndex = props.index;
@@ -16,36 +76,4 @@ export default connect((state, props) => {
     isSelected: threadIndex === selectedThread,
     threadIndex,
   };
-}, null, (stateProps, dispatchProps, ownProps) => {
-  const { threadIndex, thread, funcStackInfo } = stateProps;
-  const { dispatch } = dispatchProps;
-  return Object.assign({}, stateProps, ownProps, {
-    onMouseDown: event => {
-      dispatch(Actions.changeSelectedThread(threadIndex));
-
-      // Don't allow clicks on the threads list to steal focus from the tree view.
-      event.preventDefault();
-    },
-    onGraphClick: time => {
-      const sampleIndex = getSampleIndexClosestToTime(thread, time);
-      const newSelectedStack = thread.samples.stack[sampleIndex];
-      const newSelectedFuncStack = funcStackInfo.stackIndexToFuncStackIndex.get(newSelectedStack);
-      dispatch(Actions.changeSelectedThread(threadIndex));
-      dispatch(Actions.changeSelectedFuncStack(threadIndex,
-        getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable)));
-      // TODO: scroll selected row into view
-    },
-  });
-})(({ thread, interval, rangeStart, rangeEnd, funcStackInfo, selectedFuncStack, isSelected, onMouseDown, style, onGraphClick }) => (
-  <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')} style={style}>
-    <h1 onMouseDown={onMouseDown} className='grippy'>{thread.name}</h1>
-    <ThreadStackGraph interval={interval}
-               thread={thread}
-               className='threadStackGraph'
-               rangeStart={rangeStart}
-               rangeEnd={rangeEnd}
-               funcStackInfo={funcStackInfo}
-               selectedFuncStack={selectedFuncStack}
-               onClick={onGraphClick}/>
-  </li>
-));
+}, actions)(ProfileThreadHeaderBar);

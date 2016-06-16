@@ -14,6 +14,7 @@ export default class Draggable extends Component {
     super(props);
     this.state = { dragging: false };
     this._onMouseDown = this._onMouseDown.bind(this);
+    this._handlers = null;
     this._container = null;
     this._containerCreated = c => { this._container = c; };
   }
@@ -31,29 +32,33 @@ export default class Draggable extends Component {
     const mouseDownY = e.pageY;
     const startValue = this.props.value;
 
-    this._mouseMoveHandler = e => {
+    const mouseMoveHandler = e => {
       this.props.onMove(startValue, e.pageX - mouseDownX, e.pageY - mouseDownY);
       e.stopPropagation();
       e.preventDefault();
     };
 
-    this._mouseUpHandler = e => {
-      this._mouseMoveHandler(e);
+    const mouseUpHandler = e => {
+      mouseMoveHandler(e);
       this._uninstallMoveAndUpHandlers();
       this.setState({ dragging: false });
     };
 
-    this._installMoveAndUpHandlers();
+    this._installMoveAndUpHandlers(mouseMoveHandler, mouseUpHandler);
   }
 
-  _installMoveAndUpHandlers() {
-    window.addEventListener('mousemove', this._mouseMoveHandler, true);
-    window.addEventListener('mouseup', this._mouseUpHandler, true);
+  _installMoveAndUpHandlers(mouseMoveHandler, mouseUpHandler) {
+    this._handlers = { mouseMoveHandler, mouseUpHandler };
+    window.addEventListener('mousemove', mouseMoveHandler, true);
+    window.addEventListener('mouseup', mouseUpHandler, true);
   }
 
   _uninstallMoveAndUpHandlers() {
-    window.removeEventListener('mousemove', this._mouseMoveHandler, true);
-    window.removeEventListener('mouseup', this._mouseUpHandler, true);
+    if (this._handlers) {
+      const { mouseMoveHandler, mouseUpHandler } = this._handlers;
+      window.removeEventListener('mousemove', mouseMoveHandler, true);
+      window.removeEventListener('mouseup', mouseUpHandler, true);
+    }
   }
 
   componentWillUnmount() {
