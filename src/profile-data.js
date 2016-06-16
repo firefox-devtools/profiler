@@ -16,14 +16,14 @@ export const resourceTypes = {
 
 /**
  * Takes the stack table and the frame table, creates a func stack table and
- * fixes up the funcStack field in the samples data.
+ * returns a map from each stack to its corresponding func stack which can be
+ * used to provide funcStack information for the samples data.
  * @param  {Object} stackTable The thread's stackTable.
  * @param  {Object} frameTable The thread's frameTable.
  * @param  {Object} funcTable  The thread's funcTable.
- * @param  {Object} samples    The thread's samples.
- * @return {Object} The        funcStackTable and the new samples object.
+ * @return {Object}            The funcStackTable and the stackIndexToFuncStackIndex map.
  */
-export function getFuncStackInfo(stackTable, frameTable, funcTable, samples) {
+export function getFuncStackInfo(stackTable, frameTable, funcTable) {
   return timeCode('getFuncStackInfo', () => {
     const stackIndexToFuncStackIndex = new Map();
     const funcCount = funcTable.length;
@@ -60,9 +60,13 @@ export function getFuncStackInfo(stackTable, frameTable, funcTable, samples) {
 
     return {
       funcStackTable,
-      sampleFuncStacks: samples.stack.map(stack => stackIndexToFuncStackIndex.get(stack)),
+      stackIndexToFuncStackIndex,
     };
   });
+}
+
+export function getSampleFuncStacks(samples, stackIndexToFuncStackIndex) {
+  return samples.stack.map(stack => stackIndexToFuncStackIndex.get(stack));
 }
 
 function getTimeRangeForThread(thread, interval) {

@@ -71,14 +71,8 @@ export const selectorsForThread = threadIndex => {
     );
     const getFuncStackInfo = createSelector(
       getFilteredThread,
-      ({stackTable, frameTable, funcTable, samples}) => {
-        return ProfileData.getFuncStackInfo(stackTable, frameTable, funcTable, samples);
-      }
-    );
-    const getRangeSelectionFuncStackInfo = createSelector(
-      getRangeSelectionFilteredThread,
-      ({stackTable, frameTable, funcTable, samples}) => {
-        return ProfileData.getFuncStackInfo(stackTable, frameTable, funcTable, samples);
+      ({stackTable, frameTable, funcTable}) => {
+        return ProfileData.getFuncStackInfo(stackTable, frameTable, funcTable);
       }
     );
     const getSelectedFuncStackAsFuncArray = createSelector(
@@ -106,7 +100,7 @@ export const selectorsForThread = threadIndex => {
     const getCallTree = createSelector(
       getRangeSelectionFilteredThread,
       getProfileInterval,
-      getRangeSelectionFuncStackInfo,
+      getFuncStackInfo,
       ProfileTree.getCallTree
     );
     selectorsForThreads[threadIndex] = {

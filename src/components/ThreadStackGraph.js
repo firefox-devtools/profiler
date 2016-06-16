@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import { timeCode } from '../time-code';
+import { getSampleFuncStacks } from '../profile-data';
 
 class ThreadStackGraph extends Component {
 
@@ -48,7 +49,8 @@ class ThreadStackGraph extends Component {
     c.height = Math.round(r.height * devicePixelRatio);
     const ctx = c.getContext('2d');
     let maxDepth = 0;
-    const { funcStackTable, sampleFuncStacks } = funcStackInfo;
+    const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
+    const sampleFuncStacks = getSampleFuncStacks(thread.samples, stackIndexToFuncStackIndex);
     for (let i = 0; i < funcStackTable.depth.length; i++) {
       if (funcStackTable.depth[i] > maxDepth) {
         maxDepth = funcStackTable.depth[i];
@@ -104,7 +106,7 @@ ThreadStackGraph.propTypes = {
   rangeEnd: PropTypes.number.isRequired,
   funcStackInfo: PropTypes.shape({
     funcStackTable: PropTypes.object.isRequired,
-    sampleFuncStacks: PropTypes.array.isRequired,
+    stackIndexToFuncStackIndex: PropTypes.any.isRequired,
   }).isRequired,
   selectedFuncStack: PropTypes.number,
   className: PropTypes.string,
