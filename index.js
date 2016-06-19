@@ -7,6 +7,8 @@ import { AppContainer } from 'react-hot-loader';
 import rootReducer from './src/reducers';
 import Root from './src/containers/Root';
 
+require('./static/style.css');
+
 window.geckoProfilerPromise = new Promise(function (resolve) {
   window.connectToGeckoProfiler = resolve;
 });

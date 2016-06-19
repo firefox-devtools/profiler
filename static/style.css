@@ -135,7 +135,7 @@ body, #root, .profileViewer {
 }
 
 .treeRowToggleButton {
-  background-image: url(./treetwisty.svg);
+  background-image: url(/static/treetwisty.svg);
 }
 
 .treeRowToggleButton:active:hover,
