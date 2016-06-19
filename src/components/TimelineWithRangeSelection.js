@@ -51,13 +51,14 @@ class TimelineWithRangeSelectionImpl extends Component {
         return;
       }
 
-      if (e.detail >= 2) {
+      const mouseUpTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
+      const { selectionStart, selectionEnd } = this.props;
+      if (mouseUpTime < selectionStart ||
+          mouseUpTime >= selectionEnd) {
+        // Unset selection.
         this.props.onSelectionChange({
           hasSelection: false,
         });
-        e.stopPropagation();
-        this._uninstallMoveAndUpHandlers();
-        return;
       }
 
       // Do not stopPropagation(), so that graph gets mouseup event.

@@ -78,7 +78,7 @@ function viewOptionsThreads(state = [], action) {
     case 'CHANGE_SELECTED_FUNC_STACK': {
       const { selectedFuncStack, threadIndex } = action;
       const expandedFuncStacks = state[threadIndex].expandedFuncStacks.slice();
-      for (let i = 1; i <= selectedFuncStack.length; i++) {
+      for (let i = 1; i < selectedFuncStack.length; i++) {
         expandedFuncStacks.push(selectedFuncStack.slice(0, i));
       }
       return [
@@ -146,10 +146,22 @@ function invertCallstack(state = false, action) {
   }
 }
 
-function selection(state = { hasSelection: false }, action) {
+function selection(state = { hasSelection: false }, action) { // TODO: Rename to timeRangeSelection
   switch (action.type) {
     case 'UPDATE_PROFILE_SELECTION':
       return action.selection;
+    default:
+      return state;
+  }
+}
+
+function scrollToSelectionGeneration(state = 0, action) {
+  switch (action.type) {
+    case 'CHANGE_INVERT_CALLSTACK':
+    case 'CHANGE_JS_ONLY':
+    case 'CHANGE_SELECTED_FUNC_STACK':
+    case 'CHANGE_SELECTED_THREAD':
+      return state + 1;
     default:
       return state;
   }
@@ -179,7 +191,7 @@ function profile(state = {}, action) {
 const viewOptions = combineReducers({
   threads: viewOptionsThreads,
   threadOrder, selectedThread, symbolicationStatus, waitingForLibs, jsOnly, invertCallstack,
-  selection,
+  selection, scrollToSelectionGeneration,
 });
 
 const profileView = combineReducers({ viewOptions, profile });

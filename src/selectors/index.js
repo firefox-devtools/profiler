@@ -24,6 +24,11 @@ export const getJSOnly = createSelector(
   viewOptions => viewOptions.jsOnly
 );
 
+export const getScrollToSelectionGeneration = createSelector(
+  getProfileViewOptions,
+  viewOptions => viewOptions.scrollToSelectionGeneration
+);
+
 export const getInvertCallstack = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.invertCallstack

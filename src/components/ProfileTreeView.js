@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TreeView from './TreeView';
 import { getStackAsFuncArray } from '../profile-data';
-import { getProfile, selectedThreadSelectors, getSelectedThreadIndex } from '../selectors/';
+import { getProfile, selectedThreadSelectors, getSelectedThreadIndex, getScrollToSelectionGeneration } from '../selectors/';
 import * as Actions from '../actions';
 
 class ProfileTreeView extends Component{
@@ -18,6 +18,14 @@ class ProfileTreeView extends Component{
 
   focus() {
     this.refs.treeView.focus();
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.props.scrollToSelectionGeneration > prevProps.scrollToSelectionGeneration) {
+      if (this.refs.treeView) {
+        this.refs.treeView.scrollSelectionIntoView();
+      }
+    }
   }
 
   procureInterestingInitialSelection() {
@@ -59,6 +67,7 @@ ProfileTreeView.propTypes = {
     samples: PropTypes.object.isRequired,
   }).isRequired,
   threadIndex: PropTypes.number.isRequired,
+  scrollToSelectionGeneration: PropTypes.number.isRequired,
   interval: PropTypes.number.isRequired,
   tree: PropTypes.object.isRequired,
   funcStackInfo: PropTypes.shape({
@@ -75,6 +84,7 @@ export default connect(state => {
   return {
     thread: selectedThreadSelectors.getFilteredThread(state),
     threadIndex: getSelectedThreadIndex(state),
+    scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     interval: getProfile(state).meta.interval,
     tree: selectedThreadSelectors.getCallTree(state),
     funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state),

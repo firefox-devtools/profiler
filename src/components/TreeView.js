@@ -102,25 +102,21 @@ class TreeView extends Component {
     this._visibleRows = [];
   }
 
+  scrollSelectionIntoView() {
+    if (this.refs.list) {
+      const { selectedNodeId, tree } = this.props;
+      const rowIndex = this._visibleRows.indexOf(selectedNodeId);
+      const depth = tree.getDepth(selectedNodeId);
+      this.refs.list.scrollItemIntoView(rowIndex, depth * 10);
+    }
+
+  }
+
   shouldComponentUpdate(nextProps, nextState) {
     return shallowCompare(this, nextProps, nextState);
   }
 
   componentWillReceiveProps(nextProps) {
-    if (!nextProps.tree.hasSameNodeIds(this.props.tree)) {
-      let prefix = nextProps.tree.getParent(nextProps.selectedNodeId);
-      if (typeof prefix !== 'undefined') {
-        while (0 && prefix !== -1) {
-          // this._expandedNodeIds.add(prefix);
-          prefix = nextProps.tree.getParent(prefix);
-        }
-        if (0 && this.refs.list) { // This is needed when switching between threads, not when updating func stacks.
-          const visibleRows = this._getAllVisibleRows(nextProps);
-          this.refs.list.scrollItemIntoView(visibleRows.findIndex((ni) => ni === nextProps.selectedNodeId),
-                                            nextProps.tree.getDepth(nextProps.selectedNodeId) * 10);
-        }
-      }
-    }
     if (nextProps.selectedNodeId !== this.props.selectedNodeId) {
       this._specialItems = [nextProps.selectedNodeId];
     }
@@ -199,8 +195,6 @@ class TreeView extends Component {
   }
 
   _select(nodeId) {
-    const visibleRows = this._getAllVisibleRows(this.props);
-    this.refs.list.scrollItemIntoView(visibleRows.findIndex((ni) => ni === nodeId), this.props.tree.getDepth(nodeId) * 10);
     this.props.onSelectionChange(nodeId);
   }
 
