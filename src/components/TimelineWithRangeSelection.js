@@ -40,12 +40,20 @@ class TimelineWithRangeSelectionImpl extends Component {
       this.props.onSelectionChange({
         hasSelection: true,
         selectionStart, selectionEnd,
+        isModifying: true,
       });
     };
 
     const mouseUpHandler = e => {
       if (isRangeSelecting) {
-        mouseMoveHandler(e);
+        const mouseMoveTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
+        const selectionStart = Math.max(rangeStart, Math.min(mouseDownTime, mouseMoveTime));
+        const selectionEnd = Math.min(rangeEnd, Math.max(mouseDownTime, mouseMoveTime));
+        this.props.onSelectionChange({
+          hasSelection: true,
+          selectionStart, selectionEnd,
+          isModifying: false,
+        });
         e.stopPropagation();
         this._uninstallMoveAndUpHandlers();
         return;
@@ -58,6 +66,7 @@ class TimelineWithRangeSelectionImpl extends Component {
         // Unset selection.
         this.props.onSelectionChange({
           hasSelection: false,
+          isModifying: false,
         });
       }
 
@@ -83,7 +92,7 @@ class TimelineWithRangeSelectionImpl extends Component {
   }
 
   render() {
-    const { className, zeroAt, rangeStart, rangeEnd, children, hasSelection, selectionStart, selectionEnd, width, onSelectionChange } = this.props;
+    const { className, zeroAt, rangeStart, rangeEnd, children, hasSelection, isModifying, selectionStart, selectionEnd, width, onSelectionChange } = this.props;
     return (
       <div className={className} ref={this._containerCreated} onMouseDown={this._onMouseDown}>
         <TimeLine className={`${className}TimeLine`}
@@ -96,6 +105,7 @@ class TimelineWithRangeSelectionImpl extends Component {
                                                 rangeEnd={rangeEnd}
                                                 selectionStart={selectionStart}
                                                 selectionEnd={selectionEnd}
+                                                isModifying={isModifying}
                                                 width={width}
                                                 onSelectionChange={onSelectionChange}/>
                        : null }
@@ -111,6 +121,7 @@ TimelineWithRangeSelectionImpl.propTypes = {
   rangeStart: PropTypes.number.isRequired,
   rangeEnd: PropTypes.number.isRequired,
   hasSelection: PropTypes.bool.isRequired,
+  isModifying: PropTypes.bool.isRequired,
   selectionStart: PropTypes.number,
   selectionEnd: PropTypes.number,
   width: PropTypes.number.isRequired,

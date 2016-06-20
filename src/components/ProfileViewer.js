@@ -22,7 +22,8 @@ class ProfileViewer extends Component {
     } = this.props;
     const timeRange = getTimeRangeIncludingAllThreads(profile);
     const threads = profile.threads;
-    const { hasSelection, selectionStart, selectionEnd } = viewOptions.selection;
+    const { hasSelection, isModifying, selectionStart, selectionEnd } = viewOptions.selection;
+    console.log(`isModifying: ${isModifying}`);
     return (
       <div className={className}>
         <TimelineWithRangeSelection className={`${className}Header`}
@@ -30,6 +31,7 @@ class ProfileViewer extends Component {
                                     rangeStart={timeRange.start}
                                     rangeEnd={timeRange.end}
                                     hasSelection={hasSelection}
+                                    isModifying={isModifying}
                                     selectionStart={selectionStart}
                                     selectionEnd={selectionEnd}
                                     onSelectionChange={onSelectionChange}>

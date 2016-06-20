@@ -146,7 +146,7 @@ function invertCallstack(state = false, action) {
   }
 }
 
-function selection(state = { hasSelection: false }, action) { // TODO: Rename to timeRangeSelection
+function selection(state = { hasSelection: false, isModifying: false }, action) { // TODO: Rename to timeRangeSelection
   switch (action.type) {
     case 'UPDATE_PROFILE_SELECTION':
       return action.selection;

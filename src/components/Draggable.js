@@ -33,13 +33,15 @@ export default class Draggable extends Component {
     const startValue = this.props.value;
 
     const mouseMoveHandler = e => {
-      this.props.onMove(startValue, e.pageX - mouseDownX, e.pageY - mouseDownY);
+      this.props.onMove(startValue, e.pageX - mouseDownX, e.pageY - mouseDownY, true);
       e.stopPropagation();
       e.preventDefault();
     };
 
     const mouseUpHandler = e => {
-      mouseMoveHandler(e);
+      this.props.onMove(startValue, e.pageX - mouseDownX, e.pageY - mouseDownY, false);
+      e.stopPropagation();
+      e.preventDefault();
       this._uninstallMoveAndUpHandlers();
       this.setState({ dragging: false });
     };

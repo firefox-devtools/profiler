@@ -322,6 +322,52 @@ body, #root, .profileViewer {
   cursor: grabbing;
 }
 
+.rangeSelectionWrapper {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.rangeSelectionInner {
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+
+.rangeSelectionZoomButton {
+  width: 30px;
+  height: 30px;
+  pointer-events: auto;
+  box-sizing: border-box;
+  border-radius: 100%;
+  margin: -15px;
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: url(/static/zoom-icon.svg) center center no-repeat rgba(255, 255, 255, 0.6);
+  transition: opacity 200ms ease-in-out;
+  will-change: opacity;
+  opacity: 0.5;
+}
+
+.rangeSelectionZoomButton.hidden {
+  opacity: 0.0 !important;
+  pointer-events: none;
+}
+
+.profileViewerHeader:hover .rangeSelectionZoomButton {
+  opacity: 1.0;
+}
+
+.rangeSelectionZoomButton:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.rangeSelectionZoomButton:active:hover {
+  background-color: rgba(160, 160, 160, 0.6);
+}
+
 .treeAndSidebarWrapper {
   flex: 1;
   display: flex;
