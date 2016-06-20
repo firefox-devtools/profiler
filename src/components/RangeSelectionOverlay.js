@@ -31,10 +31,16 @@ export default class RangeSelectionOverlay extends Component {
     }));
 
     this._zoomButtonOnMouseDown = this._zoomButtonOnMouseDown.bind(this);
+    this._zoomButtonOnClick = this._zoomButtonOnClick.bind(this);
   }
 
   _zoomButtonOnMouseDown(e) {
     e.stopPropagation();
+  }
+
+  _zoomButtonOnClick(e) {
+    e.stopPropagation();
+    
   }
 
   render() {
@@ -53,7 +59,8 @@ export default class RangeSelectionOverlay extends Component {
           </div>
           <div className='rangeSelectionInner'>
             <button className={classNames('rangeSelectionZoomButton', { hidden: isModifying })}
-                    onMouseDown={this._zoomButtonOnMouseDown}/>
+                    onMouseDown={this._zoomButtonOnMouseDown}
+                    onClick={this._zoomButtonOnClick}/>
           </div>
         </div>
         <div className='dimmerAfter'></div>

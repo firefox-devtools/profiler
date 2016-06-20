@@ -24,7 +24,9 @@ class TimelineWithRangeSelectionImpl extends Component {
       return;
     }
 
-    // Don't steal focus.
+    // Don't steal focus. The -moz-user-focus: ignore declaration achieves
+    // this more reliably in Gecko, so this preventDefault is mostly for other
+    // browsers.
     e.preventDefault();
 
     const { rangeStart, rangeEnd } = this.props;
