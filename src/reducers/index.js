@@ -185,6 +185,15 @@ function rootRange(state = { start: 0, end: 1 }, action) {
   }
 }
 
+function zeroAt(state = 0, action) {
+  switch (action.type) {
+    case 'RECEIVE_PROFILE_FROM_ADDON':
+      return getTimeRangeIncludingAllThreads(action.profile).start;
+    default:
+      return state;
+  }
+}
+
 function profile(state = {}, action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
@@ -209,7 +218,7 @@ function profile(state = {}, action) {
 const viewOptions = combineReducers({
   threads: viewOptionsThreads,
   threadOrder, selectedThread, symbolicationStatus, waitingForLibs, jsOnly, invertCallstack,
-  selection, scrollToSelectionGeneration, rangeFilters, rootRange,
+  selection, scrollToSelectionGeneration, rangeFilters, rootRange, zeroAt,
 });
 
 const profileView = combineReducers({ viewOptions, profile });

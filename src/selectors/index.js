@@ -49,6 +49,11 @@ export const getSelectedThreadIndex = createSelector(
   viewOptions => viewOptions.selectedThread
 );
 
+export const getZeroAt = createSelector(
+  getProfileViewOptions,
+  viewOptions => viewOptions.zeroAt
+);
+
 export const getThreadOrder = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.threadOrder

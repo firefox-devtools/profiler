@@ -6,7 +6,7 @@ import ProfileViewSidebar from '../components/ProfileViewSidebar';
 import Reorderable from '../components/Reorderable';
 import TimelineWithRangeSelection from '../components/TimelineWithRangeSelection';
 import * as actions from '../actions';
-import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange } from '../selectors/';
+import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../selectors/';
 
 class ProfileViewer extends Component {
   componentDidMount() {
@@ -18,14 +18,14 @@ class ProfileViewer extends Component {
     const {
       profile, className, threadOrder, changeThreadOrder,
       viewOptions, updateProfileSelection, addRangeFilterAndUnsetSelection,
-      timeRange,
+      timeRange, zeroAt,
     } = this.props;
     const threads = profile.threads;
     const { hasSelection, isModifying, selectionStart, selectionEnd } = viewOptions.selection;
     return (
       <div className={className}>
         <TimelineWithRangeSelection className={`${className}Header`}
-                                    zeroAt={timeRange.start}
+                                    zeroAt={zeroAt}
                                     rangeStart={timeRange.start}
                                     rangeEnd={timeRange.end}
                                     hasSelection={hasSelection}
@@ -68,6 +68,7 @@ ProfileViewer.propTypes = {
   updateProfileSelection: PropTypes.func.isRequired,
   addRangeFilterAndUnsetSelection: PropTypes.func.isRequired,
   timeRange: PropTypes.object.isRequired,
+  zeroAt: PropTypes.number.isRequired,
 };
 
 export default connect(state => ({
@@ -76,4 +77,5 @@ export default connect(state => ({
   className: 'profileViewer',
   threadOrder: getThreadOrder(state),
   timeRange: getDisplayRange(state),
+  zeroAt: getZeroAt(state),
 }), actions)(ProfileViewer);

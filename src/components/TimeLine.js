@@ -28,7 +28,7 @@ class TimeLine extends Component {
     const lastNotchIndex = Math.floor((rangeEnd - zeroAt) / notchTime);
     const notches = [];
     for (let i = firstNotchIndex; i <= lastNotchIndex; i++) {
-      notches.push({ time: i * notchTime / 1000, pos: (i * notchTime + (rangeStart - zeroAt)) * pixelsPerMilliSecond});
+      notches.push({ time: i * notchTime / 1000, pos: (i * notchTime - (rangeStart - zeroAt)) * pixelsPerMilliSecond});
     }
     return { notches, decimalPlaces: Math.max(0, -(exponent - 3)) };
   }
