@@ -52,6 +52,7 @@
     "react-router-redux": "^4.0.2",
     "react-virtualized": "^7.0.5",
     "redux": "^3.4.0",
+    "redux-logger": "^2.6.1",
     "redux-thunk": "^2.0.1",
     "reselect": "^2.5.1",
     "shallowequal": "^0.2.2",

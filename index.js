@@ -2,6 +2,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
+import createLogger from 'redux-logger';
 import { AppContainer } from 'react-hot-loader';
 
 import rootReducer from './src/reducers';
@@ -13,7 +14,9 @@ window.geckoProfilerPromise = new Promise(function (resolve) {
   window.connectToGeckoProfiler = resolve;
 });
 
-let store = createStore(rootReducer, applyMiddleware(thunk));
+const store = createStore(rootReducer,
+  process.env.NODE_ENV === 'development' ? applyMiddleware(thunk, createLogger())
+                                         : applyMiddleware(thunk));
 
 render(
   <AppContainer>
