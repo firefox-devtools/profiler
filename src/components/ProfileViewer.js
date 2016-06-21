@@ -1,13 +1,12 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import ProfileTreeView from '../components/ProfileTreeView';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
 import ProfileViewSidebar from '../components/ProfileViewSidebar';
 import Reorderable from '../components/Reorderable';
 import TimelineWithRangeSelection from '../components/TimelineWithRangeSelection';
-import * as Actions from '../actions';
-import { getProfile, getProfileViewOptions, getThreadOrder } from '../selectors/';
+import * as actions from '../actions';
+import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange } from '../selectors/';
 
 class ProfileViewer extends Component {
   componentDidMount() {
@@ -17,10 +16,10 @@ class ProfileViewer extends Component {
 
   render() {
     const {
-      profile, className, threadOrder, onChangeThreadOrder,
-      viewOptions, onSelectionChange,
+      profile, className, threadOrder, changeThreadOrder,
+      viewOptions, updateProfileSelection, addRangeFilterAndUnsetSelection,
+      timeRange,
     } = this.props;
-    const timeRange = getTimeRangeIncludingAllThreads(profile);
     const threads = profile.threads;
     const { hasSelection, isModifying, selectionStart, selectionEnd } = viewOptions.selection;
     return (
@@ -33,12 +32,13 @@ class ProfileViewer extends Component {
                                     isModifying={isModifying}
                                     selectionStart={selectionStart}
                                     selectionEnd={selectionEnd}
-                                    onSelectionChange={onSelectionChange}>
+                                    onSelectionChange={updateProfileSelection}
+                                    onZoomButtonClick={addRangeFilterAndUnsetSelection}>
           <Reorderable tagName='ol'
                        className={`${className}HeaderThreadList`}
                        order={threadOrder}
                        orient='vertical'
-                       onChangeOrder={onChangeThreadOrder}>
+                       onChangeOrder={changeThreadOrder}>
           {
             threads.map((thread, threadIndex) =>
               <ProfileThreadHeaderBar key={threadIndex}
@@ -63,9 +63,11 @@ ProfileViewer.propTypes = {
   profile: PropTypes.object.isRequired,
   className: PropTypes.string.isRequired,
   threadOrder: PropTypes.array.isRequired,
-  onChangeThreadOrder: PropTypes.func.isRequired,
+  changeThreadOrder: PropTypes.func.isRequired,
   viewOptions: PropTypes.object.isRequired,
-  onSelectionChange: PropTypes.func.isRequired,
+  updateProfileSelection: PropTypes.func.isRequired,
+  addRangeFilterAndUnsetSelection: PropTypes.func.isRequired,
+  timeRange: PropTypes.object.isRequired,
 };
 
 export default connect(state => ({
@@ -73,11 +75,5 @@ export default connect(state => ({
   viewOptions: getProfileViewOptions(state),
   className: 'profileViewer',
   threadOrder: getThreadOrder(state),
-}), dispatch => ({
-  onChangeThreadOrder: newThreadOrder => {
-    dispatch(Actions.changeThreadOrder(newThreadOrder));
-  },
-  onSelectionChange: newSelection => {
-    dispatch(Actions.updateProfileSelection(newSelection));
-  },
-}))(ProfileViewer);
+  timeRange: getDisplayRange(state),
+}), actions)(ProfileViewer);

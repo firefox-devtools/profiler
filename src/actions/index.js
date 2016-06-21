@@ -153,3 +153,17 @@ export function updateProfileSelection(selection) {
     selection,
   };
 }
+
+export function addRangeFilter(start, end) {
+  return {
+    type: 'ADD_RANGE_FILTER',
+    start, end,
+  };
+}
+
+export function addRangeFilterAndUnsetSelection(start, end) {
+  return dispatch => {
+    dispatch(addRangeFilter(start, end));
+    dispatch(updateProfileSelection({ hasSelection: false, isModifying: false }));
+  };
+}

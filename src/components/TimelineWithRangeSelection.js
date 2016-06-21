@@ -94,7 +94,12 @@ class TimelineWithRangeSelectionImpl extends Component {
   }
 
   render() {
-    const { className, zeroAt, rangeStart, rangeEnd, children, hasSelection, isModifying, selectionStart, selectionEnd, width, onSelectionChange } = this.props;
+    const {
+      className, zeroAt, rangeStart, rangeEnd, children,
+      hasSelection, isModifying, selectionStart, selectionEnd,
+      width, onSelectionChange, onZoomButtonClick,
+    } = this.props;
+
     return (
       <div className={className} ref={this._containerCreated} onMouseDown={this._onMouseDown}>
         <TimeLine className={`${className}TimeLine`}
@@ -109,7 +114,8 @@ class TimelineWithRangeSelectionImpl extends Component {
                                                 selectionEnd={selectionEnd}
                                                 isModifying={isModifying}
                                                 width={width}
-                                                onSelectionChange={onSelectionChange}/>
+                                                onSelectionChange={onSelectionChange}
+                                                onZoomButtonClick={onZoomButtonClick}/>
                        : null }
       </div>
     );
@@ -128,6 +134,7 @@ TimelineWithRangeSelectionImpl.propTypes = {
   selectionEnd: PropTypes.number,
   width: PropTypes.number.isRequired,
   onSelectionChange: PropTypes.func,
+  onZoomButtonClick: PropTypes.func,
   children: PropTypes.node,
 };
 

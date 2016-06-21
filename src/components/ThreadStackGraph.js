@@ -61,7 +61,7 @@ class ThreadStackGraph extends Component {
     const rangeLength = range[1] - range[0];
     const xPixelsPerMs = c.width / rangeLength;
     const yPixelsPerDepth = c.height / maxDepth;
-    const intervalMs = interval * 1.5;
+    const intervalMs = interval * 1.2;
     let selectedFuncStackDepth = 0;
     if (selectedFuncStack !== -1 && selectedFuncStack !== null) {
       selectedFuncStackDepth = funcStackTable.depth[selectedFuncStack];

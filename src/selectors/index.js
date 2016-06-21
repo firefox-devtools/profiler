@@ -34,6 +34,16 @@ export const getInvertCallstack = createSelector(
   viewOptions => viewOptions.invertCallstack
 );
 
+export const getDisplayRange = createSelector(
+  getProfileViewOptions,
+  viewOptions => {
+    if (viewOptions.rangeFilters.length > 0) {
+      return viewOptions.rangeFilters[viewOptions.rangeFilters.length - 1];
+    }
+    return viewOptions.rootRange;
+  }
+);
+
 export const getSelectedThreadIndex = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.selectedThread
@@ -53,8 +63,16 @@ export const selectorsForThread = threadIndex => {
       getProfileViewOptions,
       viewOptions => viewOptions.threads[threadIndex]
     );
-    const getJSOnlyFilteredThread = createSelector(
+    const getRangeFilteredThread = createSelector(
       getThread,
+      getDisplayRange,
+      (thread, range) => {
+        const { start, end } = range;
+        return ProfileData.filterThreadToRange(thread, start, end);
+      }
+    );
+    const getJSOnlyFilteredThread = createSelector(
+      getRangeFilteredThread,
       getJSOnly,
       (thread, jsOnly) => {
         return jsOnly ? ProfileData.filterThreadToJSOnly(thread) : thread;
@@ -71,7 +89,11 @@ export const selectorsForThread = threadIndex => {
       getFilteredThread,
       getProfileViewOptions,
       (thread, viewOptions) => {
-        return viewOptions.selection.hasSelection ? ProfileData.filterThreadToSelectedRange(thread, viewOptions.selection) : thread;
+        if (!viewOptions.selection.hasSelection) {
+          return thread;
+        }
+        const { selectionStart, selectionEnd } = viewOptions.selection;
+        return ProfileData.filterThreadToRange(thread, selectionStart, selectionEnd);
       }
     );
     const getFuncStackInfo = createSelector(

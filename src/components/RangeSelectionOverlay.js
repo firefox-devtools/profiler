@@ -40,7 +40,8 @@ export default class RangeSelectionOverlay extends Component {
 
   _zoomButtonOnClick(e) {
     e.stopPropagation();
-    
+    const { selectionStart, selectionEnd } = this.props;
+    this.props.onZoomButtonClick(selectionStart, selectionEnd);
   }
 
   render() {
@@ -77,4 +78,5 @@ RangeSelectionOverlay.propTypes = {
   isModifying: PropTypes.bool.isRequired,
   width: PropTypes.number.isRequired,
   onSelectionChange: PropTypes.func,
+  onZoomButtonClick: PropTypes.func,
 };

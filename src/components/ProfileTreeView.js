@@ -20,7 +20,7 @@ class ProfileTreeView extends Component{
     this.refs.treeView.focus();
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (this.props.scrollToSelectionGeneration > prevProps.scrollToSelectionGeneration) {
       if (this.refs.treeView) {
         this.refs.treeView.scrollSelectionIntoView();

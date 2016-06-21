@@ -148,22 +148,22 @@ export function filterThreadToJSOnly(thread) {
   });
 }
 
-function getSampleIndexRangeForSelection(samples, selection) {
+function getSampleIndexRangeForSelection(samples, rangeStart, rangeEnd) {
   // TODO: This should really use bisect. samples.time is sorted.
-  const firstSample = samples.time.findIndex(t => t >= selection.selectionStart);
+  const firstSample = samples.time.findIndex(t => t >= rangeStart);
   if (firstSample === -1) {
     return [samples.length, samples.length];
   }
-  const afterLastSample = samples.time.slice(firstSample).findIndex(t => t >= selection.selectionEnd);
+  const afterLastSample = samples.time.slice(firstSample).findIndex(t => t >= rangeEnd);
   if (afterLastSample === -1) {
     return [firstSample, samples.length];
   }
   return [firstSample, firstSample + afterLastSample];
 }
 
-export function filterThreadToSelectedRange(thread, selection) {
+export function filterThreadToRange(thread, rangeStart, rangeEnd) {
   const { samples } = thread;
-  const [begin, end] = getSampleIndexRangeForSelection(samples, selection);
+  const [begin, end] = getSampleIndexRangeForSelection(samples, rangeStart, rangeEnd);
   const newSamples = {
     length: end - begin,
     time: samples.time.slice(begin, end),

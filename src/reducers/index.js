@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 import { applyFunctionMerging, setFuncNames } from '../symbolication';
-import { defaultThreadOrder } from '../profile-data';
+import { defaultThreadOrder, getTimeRangeIncludingAllThreads } from '../profile-data';
 
 function status(state = 'INITIALIZING', action) {
   switch (action.type) {
@@ -167,6 +167,24 @@ function scrollToSelectionGeneration(state = 0, action) {
   }
 }
 
+function rangeFilters(state = [], action) {
+  switch (action.type) {
+    case 'ADD_RANGE_FILTER':
+      return [...state, { start: action.start, end: action.end }];
+    default:
+      return state;
+  }
+}
+
+function rootRange(state = { start: 0, end: 1 }, action) {
+  switch (action.type) {
+    case 'RECEIVE_PROFILE_FROM_ADDON':
+      return getTimeRangeIncludingAllThreads(action.profile);
+    default:
+      return state;
+  }
+}
+
 function profile(state = {}, action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
@@ -191,7 +209,7 @@ function profile(state = {}, action) {
 const viewOptions = combineReducers({
   threads: viewOptionsThreads,
   threadOrder, selectedThread, symbolicationStatus, waitingForLibs, jsOnly, invertCallstack,
-  selection, scrollToSelectionGeneration,
+  selection, scrollToSelectionGeneration, rangeFilters, rootRange,
 });
 
 const profileView = combineReducers({ viewOptions, profile });
