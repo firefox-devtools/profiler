@@ -19,8 +19,8 @@
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MIT",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/mstange/cleopatra.git"
+    "type": "git",
+    "url": "https://github.com/mstange/cleopatra.git"
   },
   "devDependencies": {
     "array-move": "^1.0.0",
@@ -53,7 +53,8 @@
     "react-dom": "^15.0.1",
     "react-hot-loader": "^3.0.0-beta.0",
     "react-redux": "^4.4.2",
-    "react-router-redux": "^4.0.2",
+    "react-router": "^2.4.1",
+    "react-router-redux": "^4.0.5",
     "react-virtualized": "^7.0.5",
     "redux": "^3.4.0",
     "redux-logger": "^2.6.1",

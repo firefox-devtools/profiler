@@ -223,4 +223,4 @@ const viewOptions = combineReducers({
 
 const profileView = combineReducers({ viewOptions, profile });
 
-export default combineReducers({ status, view, profileView });
+export default { status, view, profileView };

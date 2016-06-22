@@ -1,11 +1,13 @@
 import React from 'react';
 import { render } from 'react-dom';
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, combineReducers } from 'redux';
 import thunk from 'redux-thunk';
 import createLogger from 'redux-logger';
 import { AppContainer } from 'react-hot-loader';
+import { Router, Route, browserHistory } from 'react-router'
+import { syncHistoryWithStore, routerReducer, routerMiddleware } from 'react-router-redux'
 
-import rootReducer from './src/reducers';
+import reducers from './src/reducers';
 import Root from './src/containers/Root';
 
 require('./static/style.css');
@@ -14,13 +16,15 @@ window.geckoProfilerPromise = new Promise(function (resolve) {
   window.connectToGeckoProfiler = resolve;
 });
 
-const store = createStore(rootReducer,
-  process.env.NODE_ENV === 'development' ? applyMiddleware(thunk, createLogger())
-                                         : applyMiddleware(thunk));
+const store = createStore(combineReducers(Object.assign({}, reducers, { routing: routerReducer })),
+  process.env.NODE_ENV === 'development' ? applyMiddleware(routerMiddleware(browserHistory), thunk, createLogger())
+                                         : applyMiddleware(routerMiddleware(browserHistory), thunk));
+
+const history = syncHistoryWithStore(browserHistory, store)
 
 render(
   <AppContainer>
-    <Root store={store} />
+    <Root store={store} history={history} />
   </AppContainer>,
   document.getElementById('root')
 );
@@ -30,13 +34,13 @@ if (module.hot) {
     const NewRoot = require('./src/containers/Root').default;
     render(
       <AppContainer>
-        <NewRoot store={store} />
+        <NewRoot store={store} history={history} />
       </AppContainer>,
       document.getElementById('root')
     );
   });
   module.hot.accept('./src/reducers', () => {
-    const newRootReducer = require('./src/reducers').default;
-    store.replaceReducer(newRootReducer);
+    const newReducers = require('./src/reducers').default;
+    store.replaceReducer(combineReducers(Object.assign({}, newReducers, { routing: routerReducer })));
   });
 }
