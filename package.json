@@ -18,6 +18,10 @@
   },
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MIT",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/mstange/cleopatra.git"
+  },
   "devDependencies": {
     "array-move": "^1.0.0",
     "babel-cli": "^6.2.0",
