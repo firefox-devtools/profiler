@@ -4,8 +4,8 @@ import { createStore, applyMiddleware, combineReducers } from 'redux';
 import thunk from 'redux-thunk';
 import createLogger from 'redux-logger';
 import { AppContainer } from 'react-hot-loader';
-import { Router, Route, browserHistory } from 'react-router'
-import { syncHistoryWithStore, routerReducer, routerMiddleware } from 'react-router-redux'
+import { browserHistory } from 'react-router';
+import { syncHistoryWithStore, routerReducer, routerMiddleware } from 'react-router-redux';
 
 import reducers from './src/reducers';
 import Root from './src/containers/Root';
@@ -20,7 +20,7 @@ const store = createStore(combineReducers(Object.assign({}, reducers, { routing:
   process.env.NODE_ENV === 'development' ? applyMiddleware(routerMiddleware(browserHistory), thunk, createLogger())
                                          : applyMiddleware(routerMiddleware(browserHistory), thunk));
 
-const history = syncHistoryWithStore(browserHistory, store)
+const history = syncHistoryWithStore(browserHistory, store);
 
 render(
   <AppContainer>
