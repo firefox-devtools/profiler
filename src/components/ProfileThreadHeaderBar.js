@@ -68,11 +68,11 @@ ProfileThreadHeaderBar.propTypes = {
 export default connect((state, props) => {
   const threadIndex = props.index;
   const selectors = selectorsForThread(threadIndex);
-  const selectedThread = getSelectedThreadIndex(state);
+  const selectedThread = getSelectedThreadIndex(state, props);
   return {
-    thread: selectors.getFilteredThread(state),
-    funcStackInfo: selectors.getFuncStackInfo(state),
-    selectedFuncStack: threadIndex === selectedThread ? selectors.getSelectedFuncStack(state) : -1,
+    thread: selectors.getFilteredThread(state, props),
+    funcStackInfo: selectors.getFuncStackInfo(state, props),
+    selectedFuncStack: threadIndex === selectedThread ? selectors.getSelectedFuncStack(state, props) : -1,
     isSelected: threadIndex === selectedThread,
     threadIndex,
   };

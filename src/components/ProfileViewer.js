@@ -18,7 +18,7 @@ class ProfileViewer extends Component {
     const {
       profile, className, threadOrder, changeThreadOrder,
       viewOptions, updateProfileSelection, addRangeFilterAndUnsetSelection,
-      timeRange, zeroAt,
+      timeRange, zeroAt, params, location,
     } = this.props;
     const threads = profile.threads;
     const { hasSelection, isModifying, selectionStart, selectionEnd } = viewOptions.selection;
@@ -45,14 +45,16 @@ class ProfileViewer extends Component {
                                       index={threadIndex}
                                       interval={profile.meta.interval}
                                       rangeStart={timeRange.start}
-                                      rangeEnd={timeRange.end}/>
+                                      rangeEnd={timeRange.end}
+                                      params={params}
+                                      location={location}/>
             )
           }
           </Reorderable>
         </TimelineWithRangeSelection>
         <div className='treeAndSidebarWrapper'>
-          <ProfileViewSidebar />
-          <ProfileTreeView ref='treeView'/>
+          <ProfileViewSidebar params={params} location={location} />
+          <ProfileTreeView ref='treeView' params={params} location={location}/>
          </div>
       </div>
     );
@@ -69,13 +71,15 @@ ProfileViewer.propTypes = {
   addRangeFilterAndUnsetSelection: PropTypes.func.isRequired,
   timeRange: PropTypes.object.isRequired,
   zeroAt: PropTypes.number.isRequired,
+  params: PropTypes.any.isRequired,
+  location: PropTypes.any.isRequired,
 };
 
-export default connect(state => ({
-  profile: getProfile(state),
-  viewOptions: getProfileViewOptions(state),
+export default connect((state, props) => ({
+  profile: getProfile(state, props),
+  viewOptions: getProfileViewOptions(state, props),
   className: 'profileViewer',
-  threadOrder: getThreadOrder(state),
-  timeRange: getDisplayRange(state),
-  zeroAt: getZeroAt(state),
+  threadOrder: getThreadOrder(state, props),
+  timeRange: getDisplayRange(state, props),
+  zeroAt: getZeroAt(state, props),
 }), actions)(ProfileViewer);

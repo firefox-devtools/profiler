@@ -1,20 +1,16 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import * as Actions from '../actions';
+import * as actions from '../actions';
 
 export default connect(state => ({
-  jsOnly: state.profileView.viewOptions.jsOnly,
   invertCallstack: state.profileView.viewOptions.invertCallstack,
-}), dispatch => ({
-  onChangeJSOnly: jsOnly => dispatch(Actions.changeJSOnly(jsOnly)),
-  onChangeInvertCallstack: invertCallstack => dispatch(Actions.changeInvertCallstack(invertCallstack)),
-}))(({ jsOnly, onChangeJSOnly, invertCallstack, onChangeInvertCallstack }) => (
+}), actions)(({ location: { query: { jsOnly } }, changeJSOnly, invertCallstack, changeInvertCallstack }) => (
   <div className='sidebar'>
     <ul>
       <li>
         <label>
           <input type='checkbox'
-                 onChange={e => onChangeJSOnly(e.target.checked)}
+                 onChange={e => changeJSOnly(e.target.checked)}
                  checked={jsOnly}/>
           { ' JavaScript only' }
         </label>
@@ -22,7 +18,7 @@ export default connect(state => ({
       <li>
         <label>
           <input type='checkbox'
-                 onChange={e => onChangeInvertCallstack(e.target.checked)}
+                 onChange={e => changeInvertCallstack(e.target.checked)}
                  checked={invertCallstack}/>
           { ' Invert call stack' }
         </label>

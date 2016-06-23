@@ -80,16 +80,17 @@ ProfileTreeView.propTypes = {
   onExpandedFuncStacksChange: PropTypes.func.isRequired,
 };
 
-export default connect(state => {
+export default connect((state, props) => {
+  console.log('props:', props ? props : null);
   return {
-    thread: selectedThreadSelectors.getFilteredThread(state),
-    threadIndex: getSelectedThreadIndex(state),
-    scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-    interval: getProfile(state).meta.interval,
-    tree: selectedThreadSelectors.getCallTree(state),
-    funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state),
-    selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state),
-    expandedFuncStacks: selectedThreadSelectors.getExpandedFuncStacks(state),
+    thread: selectedThreadSelectors.getFilteredThread(state, props),
+    threadIndex: getSelectedThreadIndex(state, props),
+    scrollToSelectionGeneration: getScrollToSelectionGeneration(state, props),
+    interval: getProfile(state, props).meta.interval,
+    tree: selectedThreadSelectors.getCallTree(state, props),
+    funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state, props),
+    selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state, props),
+    expandedFuncStacks: selectedThreadSelectors.getExpandedFuncStacks(state, props),
   };
 }, null, (stateProps, dispatchProps, ownProps) => {
   const { funcStackInfo, threadIndex } = stateProps;

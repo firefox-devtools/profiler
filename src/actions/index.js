@@ -1,3 +1,5 @@
+import { push } from 'react-router-redux';
+
 export function waitingForProfileFromAddon() {
   return {
     type: 'WAITING_FOR_PROFILE_FROM_ADDON',
@@ -134,9 +136,8 @@ export function changeExpandedFuncStacks(threadIndex, expandedFuncStacks) {
 }
 
 export function changeJSOnly(jsOnly) {
-  return {
-    type: 'CHANGE_JS_ONLY',
-    jsOnly,
+  return dispatch => {
+    dispatch(push({ query: jsOnly ? { jsOnly: '1' } : {} }));
   };
 }
 

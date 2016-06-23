@@ -3,26 +3,10 @@ import * as ProfileData from '../profile-data';
 import * as ProfileTree from '../profile-tree';
 
 export const getProfileView = state => state.profileView;
-
-export const getProfile = createSelector(
-  getProfileView,
-  profileView => profileView.profile
-);
-
-export const getProfileInterval = createSelector(
-  getProfile,
-  profile => profile.meta.interval
-);
-
-export const getProfileViewOptions = createSelector(
-  getProfileView,
-  profileView => profileView.viewOptions
-);
-
-export const getJSOnly = createSelector(
-  getProfileViewOptions,
-  viewOptions => viewOptions.jsOnly
-);
+export const getProfile = state => getProfileView(state).profile;
+export const getProfileInterval = state => getProfile(state).meta.interval;
+export const getProfileViewOptions = state => getProfileView(state).viewOptions;
+export const getJSOnly = (state, props) => props.location.query.jsOnly === '1';
 
 export const getScrollToSelectionGeneration = createSelector(
   getProfileViewOptions,
@@ -63,11 +47,8 @@ const selectorsForThreads = {};
 
 export const selectorsForThread = threadIndex => {
   if (!(threadIndex in selectorsForThreads)) {
-    const getThread = createSelector(getProfile, profile => profile.threads[threadIndex]);
-    const getViewOptions = createSelector(
-      getProfileViewOptions,
-      viewOptions => viewOptions.threads[threadIndex]
-    );
+    const getThread = state => getProfile(state).threads[threadIndex];
+    const getViewOptions = state => getProfileViewOptions(state).threads[threadIndex];
     const getRangeFilteredThread = createSelector(
       getThread,
       getDisplayRange,
@@ -151,17 +132,9 @@ export const selectorsForThread = threadIndex => {
 
 export const selectedThreadSelectors = (() => {
   const anyThreadSelectors = selectorsForThread(0);
-  const stateToState = state => state;
   const result = {};
   for (const key in anyThreadSelectors) {
-    const selectedThreadSelectorForKey = createSelector(
-      getSelectedThreadIndex,
-      stateToState,
-      (selectedThreadIndex, state) => {
-        return selectorsForThread(selectedThreadIndex)[key](state);
-      }
-    );
-    result[key] = selectedThreadSelectorForKey;
+    result[key] = (state, props) => selectorsForThread(getSelectedThreadIndex(state, props))[key](state, props);
   }
   return result;
 })();

@@ -128,15 +128,6 @@ function waitingForLibs(state = new Set(), action) {
   }
 }
 
-function jsOnly(state = false, action) {
-  switch (action.type) {
-    case 'CHANGE_JS_ONLY':
-      return action.jsOnly;
-    default:
-      return state;
-  }
-}
-
 function invertCallstack(state = false, action) {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
@@ -217,7 +208,7 @@ function profile(state = {}, action) {
 
 const viewOptions = combineReducers({
   threads: viewOptionsThreads,
-  threadOrder, selectedThread, symbolicationStatus, waitingForLibs, jsOnly, invertCallstack,
+  threadOrder, selectedThread, symbolicationStatus, waitingForLibs, invertCallstack,
   selection, scrollToSelectionGeneration, rangeFilters, rootRange, zeroAt,
 });
 

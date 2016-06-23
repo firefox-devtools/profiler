@@ -49,12 +49,12 @@ class App extends Component {
   }
 
   render() {
-    const { view } = this.props;
+    const { view, params, location } = this.props;
     if (view !== 'PROFILE') {
       return (<div></div>);
     }
     return (
-      <ProfileViewer/>
+      <ProfileViewer params={params} location={location}/>
     );
   }
 }
@@ -66,6 +66,8 @@ App.propTypes = {
     viewOptions: PropTypes.object.isRequired,
   }).isRequired,
   dispatch: PropTypes.func.isRequired,
+  params: PropTypes.any.isRequired,
+  location: PropTypes.any.isRequired,
 };
 
 export default connect(state => state)(App);
