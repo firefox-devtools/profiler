@@ -128,15 +128,6 @@ function waitingForLibs(state = new Set(), action) {
   }
 }
 
-function invertCallstack(state = false, action) {
-  switch (action.type) {
-    case 'CHANGE_INVERT_CALLSTACK':
-      return action.invertCallstack;
-    default:
-      return state;
-  }
-}
-
 function selection(state = { hasSelection: false, isModifying: false }, action) { // TODO: Rename to timeRangeSelection
   switch (action.type) {
     case 'UPDATE_PROFILE_SELECTION':
@@ -153,15 +144,6 @@ function scrollToSelectionGeneration(state = 0, action) {
     case 'CHANGE_SELECTED_FUNC_STACK':
     case 'CHANGE_SELECTED_THREAD':
       return state + 1;
-    default:
-      return state;
-  }
-}
-
-function rangeFilters(state = [], action) {
-  switch (action.type) {
-    case 'ADD_RANGE_FILTER':
-      return [...state, { start: action.start, end: action.end }];
     default:
       return state;
   }
@@ -208,8 +190,8 @@ function profile(state = {}, action) {
 
 const viewOptions = combineReducers({
   threads: viewOptionsThreads,
-  threadOrder, selectedThread, symbolicationStatus, waitingForLibs, invertCallstack,
-  selection, scrollToSelectionGeneration, rangeFilters, rootRange, zeroAt,
+  threadOrder, selectedThread, symbolicationStatus, waitingForLibs,
+  selection, scrollToSelectionGeneration, rootRange, zeroAt,
 });
 
 const profileView = combineReducers({ viewOptions, profile });
