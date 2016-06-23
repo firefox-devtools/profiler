@@ -170,7 +170,7 @@ function queryRootReducer(state = {}, action) {
     case 'CHANGE_INVERT_CALLSTACK':
       return changeBoolQueryParam(state, 'invertCallstack', action.invertCallstack);
     case 'ADD_RANGE_FILTER':
-      return changeStringQueryParam(state, 'rangeFilters', stringifyRangeFilters([...parseRangeFilters(state.rangeFilters), { start: action.start, end: action.end }]))
+      return changeStringQueryParam(state, 'rangeFilters', stringifyRangeFilters([...parseRangeFilters(state.rangeFilters), { start: action.start, end: action.end }]));
     default:
       return state;
   }

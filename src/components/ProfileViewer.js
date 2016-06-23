@@ -22,7 +22,7 @@ class ProfileViewer extends Component {
   render() {
     const {
       profile, className, threadOrder, changeThreadOrder,
-      viewOptions, updateProfileSelection, addRangeFilterAndUnsetSelection,
+      viewOptions, updateProfileSelection,
       timeRange, zeroAt, params, location,
     } = this.props;
     const threads = profile.threads;

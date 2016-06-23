@@ -16,7 +16,7 @@ export const getRangeFiltersStringParam = (state, props) => {
     return query.rangeFilters;
   }
   return '';
-}
+};
 
 export const getRangeFilters = createSelector(
   getRangeFiltersStringParam,
