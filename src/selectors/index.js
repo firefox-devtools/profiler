@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect';
 import * as ProfileData from '../profile-data';
 import * as ProfileTree from '../profile-tree';
+import { parseRangeFilters } from '../range-filters';
 
 export const getProfileView = state => state.profileView;
 export const getProfile = state => getProfileView(state).profile;
@@ -9,6 +10,19 @@ export const getProfileViewOptions = state => getProfileView(state).viewOptions;
 export const getJSOnly = (state, props) => ('jsOnly' in props.location.query);
 export const getInvertCallstack = (state, props) => ('invertCallstack' in props.location.query);
 
+export const getRangeFiltersStringParam = (state, props) => {
+  const { query } = props.location;
+  if ('rangeFilters' in query) {
+    return query.rangeFilters;
+  }
+  return '';
+}
+
+export const getRangeFilters = createSelector(
+  getRangeFiltersStringParam,
+  parseRangeFilters
+);
+
 export const getScrollToSelectionGeneration = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.scrollToSelectionGeneration
@@ -16,9 +30,10 @@ export const getScrollToSelectionGeneration = createSelector(
 
 export const getDisplayRange = createSelector(
   getProfileViewOptions,
-  viewOptions => {
-    if (viewOptions.rangeFilters.length > 0) {
-      return viewOptions.rangeFilters[viewOptions.rangeFilters.length - 1];
+  getRangeFilters,
+  (viewOptions, rangeFilters) => {
+    if (rangeFilters.length > 0) {
+      return rangeFilters[rangeFilters.length - 1];
     }
     return viewOptions.rootRange;
   }

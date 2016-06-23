@@ -12,6 +12,11 @@ class ProfileViewer extends Component {
   componentDidMount() {
     this.refs.treeView.getWrappedInstance().focus();
     this.refs.treeView.getWrappedInstance().procureInterestingInitialSelection();
+    this._onZoomButtonClick = this._onZoomButtonClick.bind(this);
+  }
+
+  _onZoomButtonClick(start, end) {
+    this.props.addRangeFilterAndUnsetSelection(start, end, this.props.location);
   }
 
   render() {
@@ -33,7 +38,7 @@ class ProfileViewer extends Component {
                                     selectionStart={selectionStart}
                                     selectionEnd={selectionEnd}
                                     onSelectionChange={updateProfileSelection}
-                                    onZoomButtonClick={addRangeFilterAndUnsetSelection}>
+                                    onZoomButtonClick={this._onZoomButtonClick}>
           <Reorderable tagName='ol'
                        className={`${className}HeaderThreadList`}
                        order={threadOrder}

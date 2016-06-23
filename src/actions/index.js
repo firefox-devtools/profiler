@@ -1,4 +1,5 @@
 import { push } from 'react-router-redux';
+import { parseRangeFilters, stringifyRangeFilters } from '../range-filters';
 
 export function waitingForProfileFromAddon() {
   return {
@@ -148,12 +149,28 @@ function changeBoolQueryParam(query, paramName, newValue) {
   return newQuery;
 }
 
+function changeStringQueryParam(query, paramName, newValue) {
+  const shouldRemoveFromQuery = (newValue === '' || newValue === null || newValue === undefined);
+  if (shouldRemoveFromQuery && !(paramName in query)) {
+    return query;
+  }
+  const newQuery = Object.assign({}, query);
+  if (shouldRemoveFromQuery) {
+    delete newQuery[paramName];
+  } else {
+    newQuery[paramName] = newValue;
+  }
+  return newQuery;
+}
+
 function queryRootReducer(state = {}, action) {
   switch (action.type) {
     case 'CHANGE_JS_ONLY':
       return changeBoolQueryParam(state, 'jsOnly', action.jsOnly);
     case 'CHANGE_INVERT_CALLSTACK':
       return changeBoolQueryParam(state, 'invertCallstack', action.invertCallstack);
+    case 'ADD_RANGE_FILTER':
+      return changeStringQueryParam(state, 'rangeFilters', stringifyRangeFilters([...parseRangeFilters(state.rangeFilters), { start: action.start, end: action.end }]))
     default:
       return state;
   }
@@ -184,16 +201,16 @@ export function updateProfileSelection(selection) {
   };
 }
 
-export function addRangeFilter(start, end) {
-  return {
+export function addRangeFilter(start, end, location) {
+  return pushQueryAction({
     type: 'ADD_RANGE_FILTER',
     start, end,
-  };
+  }, location);
 }
 
-export function addRangeFilterAndUnsetSelection(start, end) {
+export function addRangeFilterAndUnsetSelection(start, end, location) {
   return dispatch => {
-    dispatch(addRangeFilter(start, end));
+    dispatch(addRangeFilter(start, end, location));
     dispatch(updateProfileSelection({ hasSelection: false, isModifying: false }));
   };
 }
