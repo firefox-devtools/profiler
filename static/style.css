@@ -175,14 +175,25 @@ body, #root, .profileViewer {
 
 .profileViewerHeader {
   position: relative;
-  margin-left: 115px;
+  margin-left: 114px;
+  border-left: 1px solid #D6D6D6;
   -moz-user-focus: ignore;
 }
 
 .profileViewerHeaderTimeLine {
-  box-shadow: -1px 0 #D6D6D6;
   height: 20px;
   overflow: hidden;
+}
+
+.profileViewerHeaderTimeLine::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: -115px;
+  right: 0;
+  height: 1px;
+  background: #D6D6D6;
+  z-index: 3;
 }
 
 .timeLineContainer {
