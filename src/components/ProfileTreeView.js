@@ -81,7 +81,6 @@ ProfileTreeView.propTypes = {
 };
 
 export default connect((state, props) => {
-  console.log('props:', props ? props : null);
   return {
     thread: selectedThreadSelectors.getFilteredThread(state, props),
     threadIndex: getSelectedThreadIndex(state, props),

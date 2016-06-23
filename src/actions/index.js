@@ -135,17 +135,46 @@ export function changeExpandedFuncStacks(threadIndex, expandedFuncStacks) {
   };
 }
 
-export function changeJSOnly(jsOnly) {
-  return dispatch => {
-    dispatch(push({ query: jsOnly ? { jsOnly: '1' } : {} }));
-  };
+function changeBoolQueryParam(query, paramName, newValue) {
+  if ((paramName in query) === newValue) {
+    return query;
+  }
+  const newQuery = Object.assign({}, query);
+  if (newValue) {
+    newQuery[paramName] = null;
+  } else {
+    delete newQuery[paramName];
+  }
+  return newQuery;
 }
 
-export function changeInvertCallstack(invertCallstack) {
-  return {
+function queryRootReducer(state = {}, action) {
+  switch (action.type) {
+    case 'CHANGE_JS_ONLY':
+      return changeBoolQueryParam(state, 'jsOnly', action.jsOnly);
+    case 'CHANGE_INVERT_CALLSTACK':
+      return changeBoolQueryParam(state, 'invertCallstack', action.invertCallstack);
+    default:
+      return state;
+  }
+}
+
+function pushQueryAction(action, { query }) {
+  return push({ query: queryRootReducer(query, action) });
+}
+
+export function changeJSOnly(jsOnly, location) {
+  return pushQueryAction({
+    type: 'CHANGE_JS_ONLY',
+    jsOnly,
+  }, location);
+}
+
+export function changeInvertCallstack(invertCallstack, location) {
+  return pushQueryAction({
     type: 'CHANGE_INVERT_CALLSTACK',
     invertCallstack,
-  };
+  }, location);
 }
 
 export function updateProfileSelection(selection) {
