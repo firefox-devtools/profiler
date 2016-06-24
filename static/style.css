@@ -423,7 +423,7 @@ body, #root, .profileViewer {
 .sidebar {
   width: 200px;
   box-sizing: border-box;
-  padding: 5px;
+  padding: 10px;
   border-top: 1px solid #D6D6D6;
   border-right: 1px solid #D6D6D6;
   background: #EEE;
@@ -433,7 +433,7 @@ body, #root, .profileViewer {
   display: block;
   list-style: none;
   margin: 0;
-  padding: 0 0 0 5px;
+  padding: 0;
 }
 
 .sidebar ul > li {
