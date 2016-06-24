@@ -276,3 +276,29 @@ export function getSampleIndexClosestToTime(samples, time) {
   }
   return samples.length - 1;
 }
+
+export function getJankInstances(samples, thresholdInMs) {
+  let lastResponsiveness = 0;
+  let lastTimestamp = 0;
+  const jankInstances = [];
+  for (let i = 0; i < samples.length; i++) {
+    const currentResponsiveness = samples.responsiveness[i];
+    if (currentResponsiveness < lastResponsiveness) {
+      if (lastResponsiveness >= thresholdInMs) {
+        jankInstances.push({
+          start: lastTimestamp - lastResponsiveness,
+          dur: lastResponsiveness,
+        });
+      }
+    }
+    lastResponsiveness = currentResponsiveness;
+    lastTimestamp = samples.time[i];
+  }
+  if (lastResponsiveness >= thresholdInMs) {
+    jankInstances.push({
+      start: lastTimestamp - lastResponsiveness,
+      dur: lastResponsiveness,
+    });
+  }
+  return jankInstances;
+}

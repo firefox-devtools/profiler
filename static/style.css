@@ -233,10 +233,44 @@ body, #root, .profileViewer {
   padding-right: 5px;
 }
 
+.profileViewerHeaderJankTimelines {
+  padding: 8px 0;
+}
+
+.profileViewerHeaderJankTimeline {
+  list-style: none;
+  display: block;
+  margin: 0;
+  height: 7px;
+  position: relative;
+  overflow: hidden;
+}
+
+.profileViewerHeaderJankTimelineItem {
+  margin: 0;
+  position: absolute;
+  top: 0;
+  height: 6px;
+  background: red;
+  box-sizing: border-box;
+  border-right: 2px solid #C00;
+}
+
+.profileViewerHeaderJankTimelineItem:hover {
+  background: #F66;
+  border-color: #F00;
+}
+
+.profileViewerHeaderJankTimelineItem:active:hover {
+  background: #D00;
+  border-color: #A00;
+}
+
 .profileViewerHeaderThreadList {
   list-style: none;
   margin: 0 0 0 -115px;
   padding: 0;
+  box-shadow: inset 0 1px #D6D6D6;
 }
 
 .profileThreadHeaderBar {
