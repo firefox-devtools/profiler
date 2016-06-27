@@ -18,7 +18,8 @@ class ProfileViewer extends Component {
   }
 
   _onZoomButtonClick(start, end) {
-    this.props.addRangeFilterAndUnsetSelection(start, end, this.props.location);
+    const { addRangeFilterAndUnsetSelection, zeroAt, location } = this.props;
+    addRangeFilterAndUnsetSelection(start - zeroAt, end - zeroAt, location);
   }
 
   _onJankInstanceSelect(threadIndex, start, end) {

@@ -29,13 +29,17 @@ export const getScrollToSelectionGeneration = createSelector(
 );
 
 export const getDisplayRange = createSelector(
-  getProfileViewOptions,
+  state => getProfileViewOptions(state).rootRange,
+  state => getProfileViewOptions(state).zeroAt,
   getRangeFilters,
-  (viewOptions, rangeFilters) => {
+  (rootRange, zeroAt, rangeFilters) => {
     if (rangeFilters.length > 0) {
-      return rangeFilters[rangeFilters.length - 1];
+      let { start, end } = rangeFilters[rangeFilters.length - 1];
+      start += zeroAt;
+      end += zeroAt;
+      return { start, end };
     }
-    return viewOptions.rootRange;
+    return rootRange;
   }
 );
 

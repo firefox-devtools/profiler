@@ -25,7 +25,7 @@ export const resourceTypes = {
  */
 export function getFuncStackInfo(stackTable, frameTable, funcTable) {
   return timeCode('getFuncStackInfo', () => {
-    const stackIndexToFuncStackIndex = new Map();
+    const stackIndexToFuncStackIndex = new Uint32Array(stackTable.length);
     const funcCount = funcTable.length;
     const prefixFuncStackAndFuncToFuncStackMap = new Map(); // prefixFuncStack * funcCount + func => funcStack
     const funcStackTable = { length: 0, prefix: [], func: [], depth: [] };
@@ -41,8 +41,9 @@ export function getFuncStackInfo(stackTable, frameTable, funcTable) {
     }
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefixStack = stackTable.prefix[stackIndex];
+      // assert(prefixStack === null || prefixStack < stackIndex);
       const prefixFuncStack = (prefixStack === null) ? -1 :
-         stackIndexToFuncStackIndex.get(prefixStack);
+         stackIndexToFuncStackIndex[prefixStack];
       const frameIndex = stackTable.frame[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
       const prefixFuncStackAndFuncIndex = prefixFuncStack * funcCount + funcIndex;
@@ -52,7 +53,7 @@ export function getFuncStackInfo(stackTable, frameTable, funcTable) {
         addFuncStack(prefixFuncStack, funcIndex);
         prefixFuncStackAndFuncToFuncStackMap.set(prefixFuncStackAndFuncIndex, funcStackIndex);
       }
-      stackIndexToFuncStackIndex.set(stackIndex, funcStackIndex);
+      stackIndexToFuncStackIndex[stackIndex] = funcStackIndex;
     }
     funcStackTable.prefix = new Int32Array(funcStackTable.prefix);
     funcStackTable.func = new Int32Array(funcStackTable.func);
@@ -66,7 +67,7 @@ export function getFuncStackInfo(stackTable, frameTable, funcTable) {
 }
 
 export function getSampleFuncStacks(samples, stackIndexToFuncStackIndex) {
-  return samples.stack.map(stack => stackIndexToFuncStackIndex.get(stack));
+  return samples.stack.map(stack => stackIndexToFuncStackIndex[stack]);
 }
 
 function getTimeRangeForThread(thread, interval) {
@@ -199,6 +200,10 @@ export function getFuncStackFromFuncArray(funcArray, funcStackTable) {
 
 export function getStackAsFuncArray(funcStackIndex, funcStackTable) {
   if (funcStackIndex === null) {
+    return [];
+  }
+  if (funcStackIndex * 1 !== funcStackIndex) {
+    console.log('bad funcStackIndex in getStackAsFuncArray:', funcStackIndex);
     return [];
   }
   const funcArray = [];

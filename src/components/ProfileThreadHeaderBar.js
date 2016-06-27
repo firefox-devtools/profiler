@@ -25,11 +25,10 @@ class ProfileThreadHeaderBar extends Component {
     const { thread, threadIndex, funcStackInfo, changeSelectedThread, changeSelectedFuncStack } = this.props;
     const sampleIndex = getSampleIndexClosestToTime(thread.samples, time);
     const newSelectedStack = thread.samples.stack[sampleIndex];
-    const newSelectedFuncStack = funcStackInfo.stackIndexToFuncStackIndex.get(newSelectedStack);
+    const newSelectedFuncStack = newSelectedStack === null ? -1 : funcStackInfo.stackIndexToFuncStackIndex[newSelectedStack];
     changeSelectedThread(threadIndex);
     changeSelectedFuncStack(threadIndex,
       getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable));
-    // TODO: Scroll the selected row into view.
   }
 
   render() {
