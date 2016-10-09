@@ -26,7 +26,7 @@ class ProfileFilterNavigator extends Component {
 
   render() {
     const { rangeFilters, popRangeFiltersAndUnsetSelection, location } = this.props;
-    const rangeItems = rangeFilters.map(range => `Range: ${(range.start / 1000).toFixed(2)}s-${(range.end / 1000).toFixed(2)}s`);
+    const rangeItems = rangeFilters.map(range => `Range: ${(range.start / 1000).toFixed(2)}s–${(range.end / 1000).toFixed(2)}s`);
     const items = ['Complete Profile', ...rangeItems];
     const selectedItem = items.length - 1;
     return (
