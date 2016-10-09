@@ -16,8 +16,7 @@ class ProfileViewer extends Component {
     this.refs.treeView.getWrappedInstance().focus();
     this.refs.treeView.getWrappedInstance().procureInterestingInitialSelection();
     this._onZoomButtonClick = this._onZoomButtonClick.bind(this);
-    this._onJankInstanceSelect = this._onJankInstanceSelect.bind(this);
-    this._onTracingMarkerSelect = this._onTracingMarkerSelect.bind(this);
+    this._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(this);
   }
 
   _onZoomButtonClick(start, end) {
@@ -25,7 +24,7 @@ class ProfileViewer extends Component {
     addRangeFilterAndUnsetSelection(start - zeroAt, end - zeroAt, location);
   }
 
-  _onJankInstanceSelect(threadIndex, start, end) {
+  _onIntervalMarkerSelect(threadIndex, start, end) {
     const { timeRange, updateProfileSelection, changeSelectedThread } = this.props;
     updateProfileSelection({
       hasSelection: true,
@@ -34,10 +33,6 @@ class ProfileViewer extends Component {
       selectionEnd: Math.min(timeRange.end, end),
     });
     changeSelectedThread(threadIndex);
-  }
-
-  _onTracingMarkerSelect(threadIndex, start, end) {
-    // do nothing
   }
 
   render() {
@@ -66,29 +61,22 @@ class ProfileViewer extends Component {
               threadOrder.map(threadIndex => {
                 const threadName = threads[threadIndex].name;
                 return (
+                  [((threadName === 'GeckoMain' || threadName === 'Content') ?
+                    <ProfileThreadJankTimeline className={`${className}HeaderIntervalMarkerTimeline`}
+                                               rangeStart={timeRange.start}
+                                               rangeEnd={timeRange.end}
+                                               threadIndex={threadIndex}
+                                               key={`jank${threadIndex}`}
+                                               onSelect={this._onIntervalMarkerSelect}
+                                               location={location} /> : null),
                   <ProfileThreadTracingMarkerTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineGfx ${className}HeaderIntervalMarkerTimelineThread${threadName}`}
                                                       rangeStart={timeRange.start}
                                                       rangeEnd={timeRange.end}
                                                       threadIndex={threadIndex}
-                                                      key={threadIndex}
-                                                      onTracingMarkerSelect={this._onTracingMarkerSelect}
-                                                      location={location} />
+                                                      key={`gfx${threadIndex}`}
+                                                      onSelect={this._onIntervalMarkerSelect}
+                                                      location={location} />]
                 );
-              })
-            }
-          </div>
-          <div className={`${className}HeaderIntervalMarkerTimelineContainer ${className}HeaderIntervalMarkerTimelineContainerJank`}>
-            {
-              threadOrder.map(threadIndex => {
-                const threadName = threads[threadIndex].name;
-                return (threadName === 'GeckoMain' || threadName === 'Content') ?
-                  <ProfileThreadJankTimeline className={`${className}HeaderIntervalMarkerTimeline`}
-                                             rangeStart={timeRange.start}
-                                             rangeEnd={timeRange.end}
-                                             threadIndex={threadIndex}
-                                             key={threadIndex}
-                                             onSelect={this._onJankInstanceSelect}
-                                             location={location} /> : null
               })
             }
           </div>

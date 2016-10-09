@@ -20,6 +20,9 @@ export const withSize = Wrapped => class WithSizeWrapper extends Component {
   }
 
   _observeSize(wrappedComponent) {
+    if (!wrappedComponent) {
+      return;
+    }
     const container = findDOMNode(wrappedComponent);
     this._resizeListener = () => this._updateWidth(container);
     window.addEventListener('resize', this._resizeListener);

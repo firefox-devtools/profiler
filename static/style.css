@@ -333,7 +333,7 @@ body, #root, .profileViewer {
   list-style: none;
   display: block;
   margin: 0;
-  height: 7px;
+  height: 6px;
   position: relative;
   overflow: hidden;
 }
@@ -341,6 +341,7 @@ body, #root, .profileViewer {
 .profileViewerHeaderIntervalMarkerTimelineThreadGeckoMain,
 .profileViewerHeaderIntervalMarkerTimelineThreadContent {
   height: 18px;
+  border-bottom: 1px solid #D6D6D6;
 }
 
 .profileViewerHeaderIntervalMarkerTimelineItem {
@@ -351,6 +352,35 @@ body, #root, .profileViewer {
   height: 6px;
   background: black;
   box-sizing: border-box;
+}
+
+/* Make the four corner pixels white so that it looks a little like rounded corners */
+.profileViewerHeaderIntervalMarkerTimelineItem::before,
+.profileViewerHeaderIntervalMarkerTimelineItem::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0.5px;
+  border: solid white;
+  border-width: 0.5px 0;
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItem::before {
+  left: 0;
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItem::after {
+  right: 0;
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItem:hover,
+.profileViewerHeaderIntervalMarkerTimelineItem:active {
+  background-image: linear-gradient(hsla(0,0%,100%,0.3),hsla(0,0%,100%,0.3));
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItem:active:hover {
+  background-image: linear-gradient(hsla(0,0%,0%,0.3),hsla(0,0%,0%,0.3));
 }
 
 .profileViewerHeaderIntervalMarkerTimelineItemTypeStyles,
@@ -413,18 +443,12 @@ body, #root, .profileViewer {
 }
 
 .profileViewerHeaderIntervalMarkerTimelineItemTypeJank {
-  background: rgba(0,0,0,0.5);
-  border-right: 2px solid rgba(0,0,0,0.9);
+  background: hsl(0,90%,70%);
+  box-shadow: inset 1px 0 hsl(0,90%,50%), inset -1px 0 hsl(0,90%,50%);
 }
-
-.profileViewerHeaderIntervalMarkerTimelineItemTypeJank:hover {
-  background: rgba(0,0,0,0.4);
-  border-color: rgba(0,0,0,0.4);
-}
-
-.profileViewerHeaderIntervalMarkerTimelineItemTypeJank:active:hover {
-  background: rgba(0,0,0,0.6);
-  border-color: rgba(0,0,0,1);
+.profileViewerHeaderIntervalMarkerTimelineItemTypeJank::before,
+.profileViewerHeaderIntervalMarkerTimelineItemTypeJank::after {
+  content: none;
 }
 
 .profileViewerHeaderThreadList {

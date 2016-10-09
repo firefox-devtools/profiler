@@ -17,11 +17,7 @@ class IntervalMarkerTimeline extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    const doUpdate = shallowCompare(this, nextProps, nextState);
-    if (doUpdate) {
-      console.log('IntervalMarkerTimeline is updating. Old:', this.props, 'New:', nextProps);
-    }
-    return doUpdate;
+    return shallowCompare(this, nextProps, nextState);
   }
 
   render() {
@@ -57,7 +53,7 @@ IntervalMarkerTimeline.propTypes = {
     title: PropTypes.string.isRequired,
     name: PropTypes.string,
   })).isRequired,
-  width: PropTypes.number.isRequired,
+  width: PropTypes.number.isRequired, // provided by withSize
   threadIndex: PropTypes.number.isRequired,
   threadName: PropTypes.string.isRequired,
   onSelect: PropTypes.func.isRequired,
