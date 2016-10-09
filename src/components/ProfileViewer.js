@@ -6,6 +6,7 @@ import ProfileViewSidebar from '../components/ProfileViewSidebar';
 import Reorderable from '../components/Reorderable';
 import TimelineWithRangeSelection from '../components/TimelineWithRangeSelection';
 import ProfileThreadJankTimeline from '../containers/ProfileThreadJankTimeline';
+import ProfileThreadTracingMarkerTimeline from '../containers/ProfileThreadTracingMarkerTimeline';
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
 import * as actions from '../actions';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../selectors/';
@@ -16,6 +17,7 @@ class ProfileViewer extends Component {
     this.refs.treeView.getWrappedInstance().procureInterestingInitialSelection();
     this._onZoomButtonClick = this._onZoomButtonClick.bind(this);
     this._onJankInstanceSelect = this._onJankInstanceSelect.bind(this);
+    this._onTracingMarkerSelect = this._onTracingMarkerSelect.bind(this);
   }
 
   _onZoomButtonClick(start, end) {
@@ -32,6 +34,10 @@ class ProfileViewer extends Component {
       selectionEnd: Math.min(timeRange.end, end),
     });
     changeSelectedThread(threadIndex);
+  }
+
+  _onTracingMarkerSelect(threadIndex, start, end) {
+    // do nothing
   }
 
   render() {
@@ -55,18 +61,35 @@ class ProfileViewer extends Component {
                                     selectionEnd={selectionEnd}
                                     onSelectionChange={updateProfileSelection}
                                     onZoomButtonClick={this._onZoomButtonClick}>
-          <div className={`${className}HeaderJankTimelines`}>
+          <div className={`${className}HeaderIntervalMarkerTimelineContainer ${className}HeaderIntervalMarkerTimelineContainerGfx`}>
             {
-              threads.map((thread, threadIndex) =>
-                (thread.name === 'GeckoMain' || thread.name === 'Content') ?
-                  <ProfileThreadJankTimeline className={`${className}HeaderJankTimeline`}
+              threadOrder.map(threadIndex => {
+                const threadName = threads[threadIndex].name;
+                return (
+                  <ProfileThreadTracingMarkerTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineGfx ${className}HeaderIntervalMarkerTimelineThread${threadName}`}
+                                                      rangeStart={timeRange.start}
+                                                      rangeEnd={timeRange.end}
+                                                      threadIndex={threadIndex}
+                                                      key={threadIndex}
+                                                      onTracingMarkerSelect={this._onTracingMarkerSelect}
+                                                      location={location} />
+                );
+              })
+            }
+          </div>
+          <div className={`${className}HeaderIntervalMarkerTimelineContainer ${className}HeaderIntervalMarkerTimelineContainerJank`}>
+            {
+              threadOrder.map(threadIndex => {
+                const threadName = threads[threadIndex].name;
+                return (threadName === 'GeckoMain' || threadName === 'Content') ?
+                  <ProfileThreadJankTimeline className={`${className}HeaderIntervalMarkerTimeline`}
                                              rangeStart={timeRange.start}
                                              rangeEnd={timeRange.end}
                                              threadIndex={threadIndex}
                                              key={threadIndex}
-                                             onJankInstanceSelect={this._onJankInstanceSelect}
+                                             onSelect={this._onJankInstanceSelect}
                                              location={location} /> : null
-              )
+              })
             }
           </div>
           <Reorderable tagName='ol'

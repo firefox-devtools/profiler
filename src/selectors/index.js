@@ -76,9 +76,23 @@ export const selectorsForThread = threadIndex => {
       getRangeFilteredThread,
       thread => thread.samples
     );
+    const getRangeFilteredThreadMarkers = createSelector(
+      getRangeFilteredThread,
+      thread => thread.markers
+    );
+    const getThreadName = createSelector(
+      getThread,
+      thread => thread.name
+    );
     const getJankInstances = createSelector(
       getRangeFilteredThreadSamples,
-      samples => ProfileData.getJankInstances(samples, 50)
+      getThreadName,
+      (samples, threadName) => ProfileData.getJankInstances(samples, threadName, 50)
+    );
+    const getTracingMarkers = createSelector(
+      getThread,
+      getRangeFilteredThreadMarkers,
+      (thread, markers) => ProfileData.getTracingMarkers(thread, markers)
     );
     const getJSOnlyFilteredThread = createSelector(
       getRangeFilteredThread,
@@ -144,6 +158,7 @@ export const selectorsForThread = threadIndex => {
       getViewOptions,
       getFilteredThread,
       getJankInstances,
+      getTracingMarkers,
       getRangeSelectionFilteredThread,
       getFuncStackInfo,
       getSelectedFuncStack,

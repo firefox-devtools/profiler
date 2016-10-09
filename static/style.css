@@ -325,11 +325,11 @@ body, #root, .profileViewer {
   padding-right: 5px;
 }
 
-.profileViewerHeaderJankTimelines {
+.profileViewerHeaderIntervalMarkerTimelineContainerJank {
   padding: 8px 0;
 }
 
-.profileViewerHeaderJankTimeline {
+.profileViewerHeaderIntervalMarkerTimeline {
   list-style: none;
   display: block;
   margin: 0;
@@ -338,24 +338,93 @@ body, #root, .profileViewer {
   overflow: hidden;
 }
 
-.profileViewerHeaderJankTimelineItem {
+.profileViewerHeaderIntervalMarkerTimelineThreadGeckoMain,
+.profileViewerHeaderIntervalMarkerTimelineThreadContent {
+  height: 18px;
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItem {
   margin: 0;
   position: absolute;
+  z-index: 2;
   top: 0;
   height: 6px;
-  background: red;
+  background: black;
   box-sizing: border-box;
-  border-right: 2px solid #C00;
 }
 
-.profileViewerHeaderJankTimelineItem:hover {
-  background: #F66;
-  border-color: #F00;
+.profileViewerHeaderIntervalMarkerTimelineItemTypeStyles,
+.profileViewerHeaderIntervalMarkerTimelineItemTypeReflow,
+.profileViewerHeaderIntervalMarkerTimelineItemTypeDisplayList {
+  top: 6px;
 }
 
-.profileViewerHeaderJankTimelineItem:active:hover {
-  background: #D00;
-  border-color: #A00;
+.profileViewerHeaderIntervalMarkerTimelineItemTypeRasterize {
+  top: 12px;
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeRD {
+  background: hsla(0,0%,0%,0.05);
+  height: 100%;
+  z-index: 0;
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeScripts {
+  background: rgb(250,100,40);
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeStyles {
+  background: rgb(40,40,100);
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeReflow {
+  background: rgb(40,40,100);
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeDisplayList {
+  background: rgb(150, 40, 100);
+}
+.profileViewerHeaderIntervalMarkerTimelineItemTypeRasterize {
+  background: rgb(100, 250, 40);
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeComposite {
+  background: rgb(100,40,250);
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeVsync {
+  background: rgb(255, 128, 0);
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeLayerTransaction {
+  background: rgb(250, 0, 33);
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeLayerContentGPU {
+  background: rgba(0,200,0,0.5);
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeLayerCompositorGPU {
+  background: rgba(0,200,0,0.5);
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeLayerOther {
+  background: rgb(200,0,0);
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeJank {
+  background: rgba(0,0,0,0.5);
+  border-right: 2px solid rgba(0,0,0,0.9);
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeJank:hover {
+  background: rgba(0,0,0,0.4);
+  border-color: rgba(0,0,0,0.4);
+}
+
+.profileViewerHeaderIntervalMarkerTimelineItemTypeJank:active:hover {
+  background: rgba(0,0,0,0.6);
+  border-color: rgba(0,0,0,1);
 }
 
 .profileViewerHeaderThreadList {

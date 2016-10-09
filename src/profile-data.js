@@ -282,7 +282,7 @@ export function getSampleIndexClosestToTime(samples, time) {
   return samples.length - 1;
 }
 
-export function getJankInstances(samples, thresholdInMs) {
+export function getJankInstances(samples, threadName, thresholdInMs) {
   let lastResponsiveness = 0;
   let lastTimestamp = 0;
   const jankInstances = [];
@@ -293,6 +293,8 @@ export function getJankInstances(samples, thresholdInMs) {
         jankInstances.push({
           start: lastTimestamp - lastResponsiveness,
           dur: lastResponsiveness,
+          title: `${lastResponsiveness.toFixed(2)}ms event processing delay on thread ${threadName}`,
+          name: 'Jank',
         });
       }
     }
@@ -303,7 +305,40 @@ export function getJankInstances(samples, thresholdInMs) {
     jankInstances.push({
       start: lastTimestamp - lastResponsiveness,
       dur: lastResponsiveness,
+      title: `${lastResponsiveness.toFixed(2)}ms event processing delay on thread ${threadName}`,
+      name: 'Jank',
     });
   }
   return jankInstances;
+}
+
+export function getTracingMarkers(thread, markers) {
+  const tracingMarkers = [];
+  const { stringTable } = thread;
+  const openMarkers = [];
+  for (let i = 0; i < markers.length; i++) {
+    const data = markers.data[i];
+    if (!data || data.type !== 'tracing') {
+      // console.log('non-tracing marker:', name);
+      continue;
+    }
+
+    const time = markers.time[i];
+    const name = stringTable.getString(markers.name[i]);
+    if (data.interval === 'start') {
+      openMarkers.push({
+        start: time,
+        name,
+      });
+    } else if (data.interval === 'end') {
+      var marker = openMarkers.pop();
+      if (marker === undefined) {
+        continue;
+      }
+      marker.dur = time - marker.start;
+      marker.title = `${marker.name} for ${marker.dur.toFixed(2)}ms`;
+      tracingMarkers.push(marker);
+    }
+  }
+  return tracingMarkers;
 }

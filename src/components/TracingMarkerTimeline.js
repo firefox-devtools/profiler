@@ -2,17 +2,17 @@ import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import { withSize } from '../with-size';
 
-class JankTimeline extends Component {
+class TracingMarkerTimeline extends Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     return shallowCompare(this, nextProps, nextState);
   }
 
   render() {
-    const { className, rangeStart, rangeEnd, width, jankInstances, threadIndex, threadName, onJankInstanceSelect } = this.props;
+    const { className, rangeStart, rangeEnd, width, tracingMarkers, threadIndex, threadName, onTracingMarkerSelect } = this.props;
     return (<ol className={className}>
       {
-        jankInstances.map(({ start, dur }, i) => {
+        tracingMarkers.map(({ start, dur }, i) => {
           const pos = (start - rangeStart) / (rangeEnd - rangeStart) * width;
           const itemWidth = dur / (rangeEnd - rangeStart) * width;
           return <li className={`${className}Item`}
@@ -20,7 +20,7 @@ class JankTimeline extends Component {
                      title={`${dur.toFixed(2)}ms event processing delay on thread ${threadName}`}
                      style={{left: `${pos}px`, width: `${itemWidth}px`}}
                      onMouseDown={(e) => e.stopPropagation()}
-                     onClick={() => onJankInstanceSelect(threadIndex, start, start + dur)}/>;
+                     onClick={() => onTracingMarkerSelect(threadIndex, start, start + dur)}/>;
         })
       }
     </ol>);
@@ -28,18 +28,18 @@ class JankTimeline extends Component {
 
 }
 
-JankTimeline.propTypes = {
+TracingMarkerTimeline.propTypes = {
   className: PropTypes.string.isRequired,
   rangeStart: PropTypes.number.isRequired,
   rangeEnd: PropTypes.number.isRequired,
-  jankInstances: PropTypes.arrayOf(PropTypes.shape({
+  tracingMarkers: PropTypes.arrayOf(PropTypes.shape({
     start: PropTypes.number.isRequired,
     dur: PropTypes.number.isRequired,
   })).isRequired,
   width: PropTypes.number.isRequired,
   threadIndex: PropTypes.number.isRequired,
   threadName: PropTypes.string.isRequired,
-  onJankInstanceSelect: PropTypes.func.isRequired,
+  onTracingMarkerSelect: PropTypes.func.isRequired,
 };
 
-export default withSize(JankTimeline);
+export default withSize(TracingMarkerTimeline);

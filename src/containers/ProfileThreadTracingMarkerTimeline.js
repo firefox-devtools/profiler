@@ -5,9 +5,8 @@ import { selectorsForThread } from '../selectors/';
 export default connect((state, props) => {
   const { threadIndex } = props;
   const selectors = selectorsForThread(threadIndex);
-  const threadName = selectors.getThread(state, props).name;
   return {
-    intervalMarkers: selectors.getJankInstances(state, props),
-    threadName,
+    intervalMarkers: selectors.getTracingMarkers(state, props),
+    threadName: selectors.getThread(state, props).name,
   };
 })(IntervalMarkerTimeline);
