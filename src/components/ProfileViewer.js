@@ -6,6 +6,7 @@ import ProfileViewSidebar from '../components/ProfileViewSidebar';
 import Reorderable from '../components/Reorderable';
 import TimelineWithRangeSelection from '../components/TimelineWithRangeSelection';
 import ProfileThreadJankTimeline from '../containers/ProfileThreadJankTimeline';
+import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
 import * as actions from '../actions';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../selectors/';
 
@@ -43,6 +44,7 @@ class ProfileViewer extends Component {
     const { hasSelection, isModifying, selectionStart, selectionEnd } = viewOptions.selection;
     return (
       <div className={className}>
+        <ProfileFilterNavigator location={location}/>
         <TimelineWithRangeSelection className={`${className}Header`}
                                     zeroAt={zeroAt}
                                     rangeStart={timeRange.start}

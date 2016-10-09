@@ -151,7 +151,8 @@ function changeBoolQueryParam(query, paramName, newValue) {
 
 function changeStringQueryParam(query, paramName, newValue) {
   const shouldRemoveFromQuery = (newValue === '' || newValue === null || newValue === undefined);
-  if (shouldRemoveFromQuery && !(paramName in query)) {
+  if ((shouldRemoveFromQuery && !(paramName in query)) ||
+      (!shouldRemoveFromQuery && query[paramName] === newValue)) {
     return query;
   }
   const newQuery = Object.assign({}, query);
@@ -163,18 +164,69 @@ function changeStringQueryParam(query, paramName, newValue) {
   return newQuery;
 }
 
-function queryRootReducer(state = {}, action) {
+function applyBoolQueryParamReducer(query, paramName, reducer, action) {
+  const currentValue = (paramName in query);
+  return changeBoolQueryParam(query, paramName, reducer(currentValue, action));
+}
+
+function applyStringQueryParamReducer(query, paramName, reducer, action) {
+  const currentValue = (paramName in query) ? query[paramName] : '';
+  return changeStringQueryParam(query, paramName, reducer(currentValue, action));
+}
+
+function createQueryReducer(boolParamReducers, stringParamReducers) {
+  return (state = {}, action) => {
+    let s = state;
+    for (const paramName in boolParamReducers) {
+      s = applyBoolQueryParamReducer(s, paramName, boolParamReducers[paramName], action);
+    }
+    for (const paramName in stringParamReducers) {
+      s = applyStringQueryParamReducer(s, paramName, stringParamReducers[paramName], action);
+    }
+    return s;
+  }
+}
+
+function jsOnlyReducer(state = false, action) {
   switch (action.type) {
     case 'CHANGE_JS_ONLY':
-      return changeBoolQueryParam(state, 'jsOnly', action.jsOnly);
-    case 'CHANGE_INVERT_CALLSTACK':
-      return changeBoolQueryParam(state, 'invertCallstack', action.invertCallstack);
-    case 'ADD_RANGE_FILTER':
-      return changeStringQueryParam(state, 'rangeFilters', stringifyRangeFilters([...parseRangeFilters(state.rangeFilters), { start: action.start, end: action.end }]));
+      return action.jsOnly;
     default:
       return state;
   }
 }
+
+function invertCallstackReducer(state = false, action) {
+  switch (action.type) {
+    case 'CHANGE_INVERT_CALLSTACK':
+      return action.invertCallstack;
+    default:
+      return state;
+  }
+}
+
+function rangeFiltersReducer(state = '', action) {
+  switch (action.type) {
+    case 'ADD_RANGE_FILTER': {
+      const rangeFilters = parseRangeFilters(state);
+      rangeFilters.push({ start: action.start, end: action.end });
+      return stringifyRangeFilters(rangeFilters);
+    }
+    case 'POP_RANGE_FILTERS': {
+      const rangeFilters = parseRangeFilters(state);
+      return stringifyRangeFilters(rangeFilters.slice(0, action.firstRemovedFilterIndex));
+    }
+    default:
+      return state;
+  }
+}
+
+export const queryRootReducer = createQueryReducer({
+  jsOnly: jsOnlyReducer,
+  invertCallstack: invertCallstackReducer,
+}, {
+  rangeFilters: rangeFiltersReducer,
+});
 
 function pushQueryAction(action, { query }) {
   return push({ query: queryRootReducer(query, action) });
@@ -214,3 +266,19 @@ export function addRangeFilterAndUnsetSelection(start, end, location) {
     dispatch(updateProfileSelection({ hasSelection: false, isModifying: false }));
   };
 }
+
+export function popRangeFilters(firstRemovedFilterIndex, location) {
+  return pushQueryAction({
+    type: 'POP_RANGE_FILTERS',
+    firstRemovedFilterIndex,
+  }, location);
+}
+
+export function popRangeFiltersAndUnsetSelection(firstRemovedFilterIndex, location) {
+  return dispatch => {
+    dispatch(popRangeFilters(firstRemovedFilterIndex, location));
+    dispatch(updateProfileSelection({ hasSelection: false, isModifying: false }));
+  };
+}
+
+export { push } from 'react-router-redux';
