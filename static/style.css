@@ -494,7 +494,8 @@ body, #root, .profileViewer {
   pointer-events: none;
 }
 
-.profileViewerHeader:hover .rangeSelectionZoomButton {
+.profileViewerHeader:hover .rangeSelectionZoomButton,
+.rangeSelectionZoomButton:active {
   opacity: 1.0;
 }
 
