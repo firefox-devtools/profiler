@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import * as actions from '../actions';
-import { getJSOnly, getInvertCallstack, getRangeFilters } from '../selectors';
+import { getRangeFilters } from '../selectors';
 
 // const MyLink = ({ to, children, push }) => {
 //   // Ideally this should be an <a href>, but need a way to convert 'to' (which
@@ -14,14 +14,6 @@ class ProfileFilterNavigator extends Component {
     super(props);
     this._onJSOnlyClick = this._onJSOnlyClick.bind(this);
     this._onInvertCallstackClick = this._onInvertCallstackClick.bind(this);
-  }
-
-  _onJSOnlyClick(e) {
-    this.props.changeJSOnly(e.target.checked, this.props.location);
-  }
-
-  _onInvertCallstackClick(e) {
-    this.props.changeInvertCallstack(e.target.checked, this.props.location);
   }
 
   render() {
@@ -74,6 +66,9 @@ class ProfileFilterNavigator extends Component {
 }
 
 ProfileFilterNavigator.propTypes = {
+  rangeFilters: PropTypes.array.isRequired,
+  popRangeFiltersAndUnsetSelection: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
 };
 
 export default connect((state, props) => ({

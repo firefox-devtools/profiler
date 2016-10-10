@@ -9,7 +9,7 @@ class IntervalMarkerTimeline extends Component {
   }
 
   _onSelect(e) {
-    this.props.onSelect(this.props.threadIndex, +e.target.getAttribute("data-start"), +e.target.getAttribute("data-end"));
+    this.props.onSelect(this.props.threadIndex, +e.target.getAttribute('data-start'), +e.target.getAttribute('data-end'));
   }
 
   _onMouseDown(e) {
@@ -21,7 +21,7 @@ class IntervalMarkerTimeline extends Component {
   }
 
   render() {
-    const { className, rangeStart, rangeEnd, width, intervalMarkers, threadIndex, threadName, onSelect } = this.props;
+    const { className, rangeStart, rangeEnd, width, intervalMarkers } = this.props;
     const itemClassName = className.split(' ')[0] + 'Item';
     return (<ol className={className}>
       {

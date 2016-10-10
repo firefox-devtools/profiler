@@ -331,7 +331,7 @@ export function getTracingMarkers(thread, markers) {
         name,
       });
     } else if (data.interval === 'end') {
-      var marker = openMarkers.pop();
+      const marker = openMarkers.pop();
       if (marker === undefined) {
         continue;
       }

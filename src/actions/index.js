@@ -184,7 +184,7 @@ function createQueryReducer(boolParamReducers, stringParamReducers) {
       s = applyStringQueryParamReducer(s, paramName, stringParamReducers[paramName], action);
     }
     return s;
-  }
+  };
 }
 
 function jsOnlyReducer(state = false, action) {
