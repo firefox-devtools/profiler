@@ -10,12 +10,6 @@ import { getRangeFilters } from '../selectors';
 // };
 
 class ProfileFilterNavigator extends Component {
-  constructor(props) {
-    super(props);
-    this._onJSOnlyClick = this._onJSOnlyClick.bind(this);
-    this._onInvertCallstackClick = this._onInvertCallstackClick.bind(this);
-  }
-
   render() {
     const { rangeFilters, popRangeFiltersAndUnsetSelection, location } = this.props;
     const rangeItems = rangeFilters.map(range => `Range: ${(range.start / 1000).toFixed(2)}s–${(range.end / 1000).toFixed(2)}s`);
