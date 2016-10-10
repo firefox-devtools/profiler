@@ -9,7 +9,7 @@ Cleopatra is a webpage to visualize performance profiles. It was written to be u
 Running
 =======
 
-This is the cleopatra-react branch, which doesn't support many features at the moment. One of them is opening profiles. The only way to show profiles at the moment is to use a new version of the gecko profiler addon, which I haven't published yet.
+This is the cleopatra-react branch, which doesn't support many features at the moment. One of them is opening profiles. The only way to show profiles at the moment is to use [my `for-cleopatra-react` branch of the gecko profiler addon](https://github.com/mstange/Gecko-Profiler-Addon/tree/for-cleopatra-react).
 
     $ # First, make sure you have somewhat recent versions of node and npm.
     $ # Then, clone this repository and check out this branch:
@@ -28,4 +28,4 @@ Alternatively, you can run the development version. The development version is s
 
 To run the development version, run `npm run start` instead of `npm run start-prod`.
 
-Once the local webserver is running, you can run Firefox with the new (and currently non-public) version of the gecko profiler addon. Press Ctrl+Shift+6 to capture and view the profile. The addon will capture the current profile, open a new tab, load `http://localhost:4242/`, and transfer the profile to it.
+Once the local webserver is running, you can run Firefox with the [new version of the gecko profiler addon](https://github.com/mstange/Gecko-Profiler-Addon/tree/for-cleopatra-react). Press Ctrl+Shift+6 to capture and view the profile. The addon will capture the current profile, open a new tab, load `http://localhost:4242/`, and transfer the profile to it.
