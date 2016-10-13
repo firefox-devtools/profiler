@@ -5,6 +5,7 @@ import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
 import * as Actions from '../actions';
 import ProfileViewer from '../components/ProfileViewer';
+import Initializing from '../components/Initializing';
 
 class App extends Component {
   constructor(props) {
@@ -50,12 +51,21 @@ class App extends Component {
 
   render() {
     const { view, params, location } = this.props;
-    if (view !== 'PROFILE') {
-      return (<div></div>);
+
+    switch (view) {
+      case 'INITIALIZING':
+        return (
+          <Initializing />
+        );
+      case 'PROFILE':
+        return (
+          <ProfileViewer params={params} location={location}/>
+        );
+      default:
+        return (
+          <div>View not found.</div>
+        );
     }
-    return (
-      <ProfileViewer params={params} location={location}/>
-    );
   }
 }
 
