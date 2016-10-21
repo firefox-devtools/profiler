@@ -29,3 +29,8 @@ Alternatively, you can run the development version. The development version is s
 To run the development version, run `npm run start` instead of `npm run start-prod`.
 
 Once the local webserver is running, you can run Firefox with the [new version of the gecko profiler addon](https://github.com/mstange/Gecko-Profiler-Addon/tree/for-cleopatra-react). Press Ctrl+Shift+6 to capture and view the profile. The addon will capture the current profile, open a new tab, load `http://localhost:4242/`, and transfer the profile to it.
+
+Development Docs
+=======
+
+The documentation for the project is just getting started, but it is located at [in the docs folder](./docs).

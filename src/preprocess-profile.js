@@ -37,7 +37,8 @@ function getRealScriptURI(url) {
 }
 
 /**
- * Convert the given thread into preprocessed form.
+ * Convert the given thread into preprocessed form. See docs/profile-data.md for more
+ * information.
  * @param {object} thread The thread object, in the 'raw' format.
  * @param {array} libs A libs array, in preprocessed format (as returned by preprocessSharedLibraries).
  * @return {object} A new thread object in the 'preprocessed' format.
@@ -175,8 +176,8 @@ function adjustTimestamps(samplesOrMarkers, delta) {
 
 /**
  * Convert a profile from "raw" format into the preprocessed format.
- * For a description of the preprocessed format, look at the tests for this
- * function. (Sorry!)
+ * For a description of the preprocessed format, look at docs/profile-data.md or
+ * alternately the tests for this function.
  * @param {object} profile A profile object, in the 'raw' format.
  * @return {object} A new profile object, in the 'preprocessed' format.
  */
