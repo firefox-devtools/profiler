@@ -28,6 +28,25 @@ export function getContainingLibrary(libs, address) {
 }
 
 /**
+ * [getContainingLibrary description]
+ * @param  {[type]} libs    [description]
+ * @param  {[type]} address [description]
+ * @return {[type]}         [description]
+ */
+export function getClosestLibrary(libs, address) {
+  if (isNaN(address)) {
+    return null;
+  }
+
+  const startAddresses = libs.map(lib => lib.start);
+  const libIndex = bisection.right(startAddresses, address, 0) - 1;
+  if (libIndex < 0) {
+    return null;
+  }
+  return libs[libIndex];
+}
+
+/**
  * Find the functions in this thread's funcTable that we need symbols for.
  * @param  {Object} thread The thread, in "preprocessed profile" format.
  * @return {Map}           A map containing the funcIndices of the functions that
@@ -217,15 +236,85 @@ function symbolicateThread(thread, threadIndex, symbolStore, cbo) {
   }));
 }
 
+function symbolicateTaskTracer(tasktracer, symbolStore, cbo) {
+  const { addressTable, addressIndicesByLib } = tasktracer;
+  return Promise.all(Array.from(addressIndicesByLib).map(([lib, addressIndices]) => {
+    return symbolStore.getFuncAddressTableForLib(lib).then(funcAddressTable => {
+      addressIndices.sort((a, b) => addressTable.address[a] - addressTable.address[b]);
+      const funcAddrIndices = [];
+      const addressIndicesToSymbolicate = [];
+      for (const addressIndex of addressIndices) {
+        const address = addressTable.address[addressIndex];
+        const funcAddressIndex = bisection.right(funcAddressTable, address, 0) - 1;
+        if (funcAddressIndex >= 0) {
+          funcAddrIndices.push(funcAddressIndex);
+          addressIndicesToSymbolicate.push(addressIndex);
+        }
+      }
+      return symbolStore.getSymbolsForAddressesInLib(funcAddrIndices, lib).then(symbolNames => {
+        cbo.onGotTaskTracerNames(addressIndicesToSymbolicate, symbolNames);
+      });
+    });
+  }));
+}
+
+function classNameFromSymbolName(symbolName) {
+  let className = symbolName;
+
+  const vtablePrefix = 'vtable for ';
+  if (className.startsWith(vtablePrefix)) {
+    className = className.substring(vtablePrefix.length);
+  }
+
+  const sourceEventMarkerPos = className.indexOf('SourceEventType)::CreateSourceEvent');
+  if (sourceEventMarkerPos !== -1) {
+    return className.substring(sourceEventMarkerPos + 'SourceEventType)::Create'.length);
+  }
+
+  const runnableFunctionMarker = 'mozilla::detail::RunnableFunction<';
+  if (className.startsWith(runnableFunctionMarker)) {
+    const parenPos = className.indexOf('(', runnableFunctionMarker.length + 1);
+    const functionName = className.substring(runnableFunctionMarker.length, parenPos);
+    return `RunnableFunction(${functionName})`;
+  }
+
+  const runnableMethodMarker = 'mozilla::detail::RunnableMethodImpl<';
+  if (className.startsWith(runnableMethodMarker)) {
+    const parenPos = className.indexOf('(', runnableMethodMarker.length);
+    const endPos = className.indexOf('::*)', parenPos + 1);
+    className = className.substring(parenPos + 1, endPos);
+    return `RunnableMethod(${className})`;
+  }
+
+  return className;
+}
+
+export function setTaskTracerNames(tasktracer, addressIndices, symbolNames) {
+  const { stringTable, addressTable } = tasktracer;
+  const className = addressTable.className.slice();
+  for (let i = 0; i < addressIndices.length; i++) {
+    const addressIndex = addressIndices[i];
+    const classNameString = classNameFromSymbolName(symbolNames[i]);
+    className[addressIndex] = stringTable.indexForString(classNameString);
+  }
+  return Object.assign({}, tasktracer, {
+    addressTable: Object.assign({}, tasktracer.addressTable, { className }),
+  });
+}
+
 /**
  * Symbolicate a profile.
  * @param  {Object} profile     The profile to symbolicate, in preprocessed format.
  * @param  {Object} symbolStore A SymbolStore object with a getFuncAddressTableForLib and getSymbolsForAddressesInLib methods.
- * @param  {Object} cbo         An object containing callback functions 'onMergeFunctions'  and 'onGotFuncNames'.
+ * @param  {Object} cbo         An object containing callback functions 'onMergeFunctions', 'onGotFuncNames' and 'onGotTaskTracerNames'.
  * @return {Promise}            A promise that resolves (with nothing) once symbolication has completed.
  */
 export function symbolicateProfile(profile, symbolStore, cbo) {
-  return Promise.all(profile.threads.map((thread, threadIndex) => {
+  const symbolicationPromises = profile.threads.map((thread, threadIndex) => {
     return symbolicateThread(thread, threadIndex, symbolStore, cbo);
-  }));
+  });
+  if ('tasktracer' in profile) {
+    symbolicationPromises.push(symbolicateTaskTracer(profile.tasktracer, symbolStore, cbo));
+  }
+  return Promise.all(symbolicationPromises).then(() => undefined);
 }

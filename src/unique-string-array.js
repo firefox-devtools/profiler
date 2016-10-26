@@ -1,5 +1,5 @@
 export class UniqueStringArray {
-  constructor(originalArray) {
+  constructor(originalArray = []) {
     this._array = originalArray.slice(0);
     this._stringToIndex = new Map(originalArray.map((s, i) => [s, i]));
   }

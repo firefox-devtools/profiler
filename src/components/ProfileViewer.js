@@ -13,8 +13,10 @@ import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, get
 
 class ProfileViewer extends Component {
   componentDidMount() {
-    this.refs.treeView.getWrappedInstance().focus();
-    this.refs.treeView.getWrappedInstance().procureInterestingInitialSelection();
+    if (this.refs.treeView) {
+      this.refs.treeView.getWrappedInstance().focus();
+      this.refs.treeView.getWrappedInstance().procureInterestingInitialSelection();
+    }
     this._onZoomButtonClick = this._onZoomButtonClick.bind(this);
     this._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(this);
   }
@@ -101,7 +103,7 @@ class ProfileViewer extends Component {
         <div className='treeAndSidebarWrapper'>
           <ProfileViewSidebar params={params} location={location} />
           <ProfileTreeView ref='treeView' params={params} location={location}/>
-         </div>
+        </div>
       </div>
     );
   }

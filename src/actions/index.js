@@ -108,6 +108,13 @@ export function assignFunctionNames(threadIndex, funcIndices, funcNames) {
   };
 }
 
+export function assignTaskTracerNames(addressIndices, symbolNames) {
+  return {
+    type: 'ASSIGN_TASK_TRACER_NAMES',
+    addressIndices, symbolNames,
+  };
+}
+
 export function changeSelectedFuncStack(threadIndex, selectedFuncStack) {
   return {
     type: 'CHANGE_SELECTED_FUNC_STACK',

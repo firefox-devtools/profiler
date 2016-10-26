@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import { applyFunctionMerging, setFuncNames } from '../symbolication';
+import { applyFunctionMerging, setFuncNames, setTaskTracerNames } from '../symbolication';
 import { defaultThreadOrder, getTimeRangeIncludingAllThreads } from '../profile-data';
 
 function status(state = 'INITIALIZING', action) {
@@ -182,6 +182,11 @@ function profile(state = {}, action) {
                             funcIndices, funcNames);
       });
       return Object.assign({}, state, { threads });
+    }
+    case 'ASSIGN_TASK_TRACER_NAMES': {
+      const { addressIndices, symbolNames } = action;
+      const tasktracer = setTaskTracerNames(state.tasktracer, addressIndices, symbolNames);
+      return Object.assign({}, state, { tasktracer });
     }
     default:
       return state;

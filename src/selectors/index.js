@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect';
 import * as ProfileData from '../profile-data';
 import * as ProfileTree from '../profile-tree';
+import * as TaskTracer from '../task-tracer';
 import { parseRangeFilters } from '../range-filters';
 
 export const getProfileView = state => state.profileView;
@@ -9,6 +10,7 @@ export const getProfileInterval = state => getProfile(state).meta.interval;
 export const getProfileViewOptions = state => getProfileView(state).viewOptions;
 export const getJSOnly = (state, props) => ('jsOnly' in props.location.query);
 export const getInvertCallstack = (state, props) => ('invertCallstack' in props.location.query);
+export const getProfileTaskTracerData = state => getProfile(state).tasktracer;
 
 export const getRangeFiltersStringParam = (state, props) => {
   const { query } = props.location;
@@ -56,6 +58,12 @@ export const getZeroAt = createSelector(
 export const getThreadOrder = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.threadOrder
+);
+
+export const getTasksByThread = createSelector(
+  state => getProfileTaskTracerData(state).taskTable,
+  state => getProfileTaskTracerData(state).threadTable,
+  TaskTracer.getTasksByThread
 );
 
 const selectorsForThreads = {};

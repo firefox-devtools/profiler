@@ -44,6 +44,9 @@ class App extends Component {
           onGotFuncNames: (threadIndex, funcIndices, funcNames) => {
             dispatch(Actions.assignFunctionNames(threadIndex, funcIndices, funcNames));
           },
+          onGotTaskTracerNames: (addressIndices, symbolNames) => {
+            dispatch(Actions.assignTaskTracerNames(addressIndices, symbolNames));
+          },
         }).then(() => dispatch(Actions.doneSymbolicating()));
       });
     });
