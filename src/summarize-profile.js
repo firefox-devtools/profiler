@@ -1,3 +1,6 @@
+import { selectorsForThread, getProfile } from './selectors/';
+import { createHistory } from 'history';
+
 /**
  * Map symbol name its id, e.g. symbolToIds["js::RunScript"] === 45
  */
@@ -107,22 +110,51 @@ function calculateSymbolIdToCategory(profile) {
 }
 
 /**
+ * Return a function that categorizes a function name. The categories
+ * are cached between calls.
+ */
+function functionNameCategorizer() {
+  const cache = {};
+  return function functionNameToCategory(name) {
+    const existingCategory = cache[name];
+    if (typeof existingCategory === 'string') {
+      return existingCategory;
+    }
+
+    for (const [matches, pattern, category] of categories) {
+      if (matches(name, pattern)) {
+        cache[name] = category;
+        return category;
+      }
+    }
+
+    cache[name] = false;
+    return false;
+  };
+}
+
+/**
  * Given a profile, return a function that categorizes a sample.
  */
-function sampleCategorizer(profile) {
-  const symbolIdToCategory = calculateSymbolIdToCategory(profile);
+function sampleCategorizer(thread) {
+  const categorize = functionNameCategorizer();
 
-  return function categorizeSample(sample) {
-    let category = 'uncategorized';
-
-    // TODO - Optimize this loop, we go through every frame, but only return one value.
-    sample.frames.forEach(frameId => {
-      let frameCategory = symbolIdToCategory[frameId];
-      if (frameCategory && frameCategory !== 'wait') {
-        category = frameCategory;
+  return function categorizeSampleStack(nextStackIndex) {
+    const stacks = [];
+    do {
+      const stackIndex = nextStackIndex;
+      const frameIndex = thread.stackTable.frame[stackIndex];
+      nextStackIndex = thread.stackTable.prefix[stackIndex];
+      const funcIndex = thread.frameTable.func[frameIndex];
+      const name = thread.stringTable._array[thread.funcTable.name[funcIndex]];
+      stacks.push(name);
+      const category = categorize(name);
+      if (category) {
+        return category;
       }
-    });
-    return category;
+    } while (typeof nextStackIndex === 'number');
+
+    return 'uncategorized';
   };
 }
 
@@ -134,7 +166,6 @@ function sampleCategorizer(profile) {
 function summarizeSampleCategories(summary, fullCategoryName) {
   const categories = fullCategoryName.split('.');
 
-  // TODO - This is counting subcategories twice.
   while (categories.length > 0) {
     const category = categories.join('.');
     summary[category] = (summary[category] || 0) + 1;
@@ -176,20 +207,17 @@ function attachThreadInformation(threads) {
 }
 
 /**
- * Take a profile and return a summary that categorizes each sample, then calculates
+ * Take a profile and return a summary that categorizes each sample, then calculate
  * a summary of the percentage of time each sample was present.
  */
 function summarizeProfile (profile) {
-  const categorizeSample = sampleCategorizer(profile);
-  const threads = Object.values(profile.profileJSON.threads);
-
-  const summaries = threads.map(thread => (
-      thread.samples
-        .map(categorizeSample)
+  const summaries = profile.threads.map((thread, i) => (
+      thread.samples.stack
+        .map(sampleCategorizer(thread))
         .reduce(summarizeSampleCategories, {})
     ))
     .map(calculateSummaryPercentages)
-    .map(attachThreadInformation(threads));
+    .map(attachThreadInformation(profile.threads));
 
   summaries.forEach(({thread, histogram}) => {
     console.log(thread);
@@ -199,7 +227,7 @@ function summarizeProfile (profile) {
   console.log(summaries);
 }
 
-fetch('./example-profile-cleopatra.json')
+fetch('./profiles/state-dump.json')
   .then(r => r.json())
-  .then(summarizeProfile)
+  .then(state => summarizeProfile(getProfile(state)))
   .catch(console.error.bind(console));
