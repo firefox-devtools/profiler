@@ -206,19 +206,8 @@ function attachThreadInformation(threads) {
   };
 }
 
-/**
- * Take a profile and return a summary that categorizes each sample, then calculate
- * a summary of the percentage of time each sample was present.
- */
-function summarizeProfile (profile) {
-  const summaries = profile.threads.map((thread, i) => (
-      thread.samples.stack
-        .map(sampleCategorizer(thread))
-        .reduce(summarizeSampleCategories, {})
-    ))
-    .map(calculateSummaryPercentages)
-    .map(attachThreadInformation(profile.threads));
 
+function consoleLogSummaries (summaries) {
   summaries.forEach(({thread, histogram}) => {
     console.log(thread);
     console.table(histogram);
@@ -227,7 +216,26 @@ function summarizeProfile (profile) {
   console.log(summaries);
 }
 
+/**
+ * Take a profile and return a summary that categorizes each sample, then calculate
+ * a summary of the percentage of time each sample was present.
+ */
+export function summarizeProfile (profile, symbolicationStatus) {
+  if (symbolicationStatus !== 'DONE') {
+    return;
+  }
+  return profile.threads.map(thread => (
+      thread.samples.stack
+        .map(sampleCategorizer(thread))
+        .reduce(summarizeSampleCategories, {})
+    ))
+    .map(calculateSummaryPercentages)
+    .map(attachThreadInformation(profile.threads));
+}
+
+/*
 fetch('./profiles/state-dump.json')
   .then(r => r.json())
   .then(state => summarizeProfile(getProfile(state)))
   .catch(console.error.bind(console));
+*/

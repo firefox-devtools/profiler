@@ -3,6 +3,7 @@ import * as ProfileData from '../profile-data';
 import * as ProfileTree from '../profile-tree';
 import * as TaskTracer from '../task-tracer';
 import { parseRangeFilters } from '../range-filters';
+import { summarizeProfile } from '../summarize-profile';
 
 export const getProfileView = state => state.profileView;
 export const getProfile = state => getProfileView(state).profile;
@@ -11,6 +12,10 @@ export const getProfileViewOptions = state => getProfileView(state).viewOptions;
 export const getJSOnly = (state, props) => ('jsOnly' in props.location.query);
 export const getInvertCallstack = (state, props) => ('invertCallstack' in props.location.query);
 export const getProfileTaskTracerData = state => getProfile(state).tasktracer;
+
+export const getIsSymbolicationStatus = state => {
+  return getProfileViewOptions(state).symbolicationStatus;
+};
 
 export const getRangeFiltersStringParam = (state, props) => {
   const { query } = props.location;
@@ -46,7 +51,7 @@ export const getDisplayRange = createSelector(
 );
 
 export const getSelectedThreadIndex = createSelector(
-  getProfileViewOptions,
+  getProfile,
   viewOptions => viewOptions.selectedThread
 );
 
@@ -65,6 +70,10 @@ export const getTasksByThread = createSelector(
   state => getProfileTaskTracerData(state).threadTable,
   TaskTracer.getTasksByThread
 );
+
+export const getThreadSummaries = state => {
+  return summarizeProfile(getProfile(state), getIsSymbolicationStatus(state));
+};
 
 const selectorsForThreads = {};
 
