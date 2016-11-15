@@ -6,6 +6,7 @@
   "scripts": {
     "test": "mocha --compilers js:babel-core/register",
     "start": "NODE_ENV=development node server.js",
+    "start-no-hot": "NODE_ENV=development-no-hot node server.js",
     "start-prod": "npm run build-prod && npm run serve-static",
     "start-prod-readable": "npm run build-prod-readable && npm run serve-static",
     "serve-static": "http-server . -p 4242",
