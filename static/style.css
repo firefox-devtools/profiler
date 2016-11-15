@@ -750,3 +750,88 @@ body, #root, .profileViewer {
 .initializing-text li {
   margin: 1em 0;
 }
+
+/* Summarize Profile */
+
+.summarize-profile {
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+.summarize-profile * {
+  box-sizing: border-box;
+}
+
+.summarize-profile-table {
+  display: flex;
+  flex-direction: column;
+  padding: 2em;
+}
+
+.summarize-profile-numeric {
+  text-align: right;
+  width: 25%;
+}
+
+.summarize-profile-text {
+  flex: 1;
+  flex-shrink: 1;
+}
+
+.summarize-profile-row,
+.summarize-profile-header {
+  display: flex;
+}
+
+.summarize-profile-row:hover {
+  background-color: #e6edff;
+}
+
+.summarize-profile-row > div {
+  padding: 0.2em 0;
+}
+
+.summarize-profile-header {
+  text-align: left;
+  font-weight: normal;
+  border-bottom: 1px solid #888;
+  margin-bottom: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+.summarize-profile-numeric {
+  text-align: right;
+  width: 25%;
+}
+
+.summarize-profile-row .summarize-profile-numeric {
+  font-family: monospace;
+  color: #444;
+}
+
+.summarize-profile-thread {
+  padding: 3em 0 1em;
+  font-size: 1.5em;
+  color: #000;
+}
+
+@media (min-width: 1001px) {
+  .summarize-profile-table {
+    width: 30%;
+    margin: 0 1.66%;
+  }
+}
+
+@media (max-width: 1000px) {
+  .summarize-profile {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .summarize-profile-table {
+    max-width: 40em;
+    width: 100%;
+  }
+}

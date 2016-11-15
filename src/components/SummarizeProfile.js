@@ -14,7 +14,7 @@ class SummarizeProfile extends Component {
       <div className='summarize-profile'>
         {
           !summaries ? 'Symbolicating profile.'
-          : summaries.map(({thread, histogram}) => (
+          : summaries.map(({thread, summary}) => (
             <div className='summarize-profile-table' key={thread}>
               <div className='summarize-profile-thread' colSpan='3'>{thread} Thread</div>
               <div className='summarize-profile-header'>
@@ -22,7 +22,7 @@ class SummarizeProfile extends Component {
                 <div className='summarize-profile-numeric'>Samples</div>
                 <div className='summarize-profile-numeric'>% Time</div>
               </div>
-              {histogram.map(({category, samples, percentage}) => (
+              {summary.map(({category, samples, percentage}) => (
                 <div className='summarize-profile-row' key={category}>
                   <div className='summarize-profile-text'>{category}</div>
                   <div className='summarize-profile-numeric'>{samples}</div>

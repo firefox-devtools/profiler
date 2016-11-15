@@ -80,6 +80,11 @@ const categories = [
   [match.substring, 'IC::update(', 'script.icupdate'],
   [match.prefix, 'js::jit::CodeGenerator::link(', 'script.link'],
 
+  [match.exact, 'base::WaitableEvent::Wait()', 'idle'],
+  // TODO - The mach msg trap is dependent on being called from RunCurrentEventLoopInMode
+  // Probably add a fourth entry to this tuple for child checks.
+  [match.exact, 'mach_msg_trap', 'idle'],
+
   // Can't do this until we come up with a way of labeling ion/baseline.
   // [match.prefix, 'Interpret(', 'script.interpreter',
 ];
@@ -93,8 +98,8 @@ function calculateSymbolIdToCategory(profile) {
   const symbolToIds = calculateSymbolToIds(profile);
   const symbolIdToCategory = {};
 
-  for (let symbol in symbolToIds) {
-    let symbolIds = symbolToIds[symbol];
+  for (const symbol in symbolToIds) {
+    const symbolIds = symbolToIds[symbol];
 
     // Go through each category and attempt to assign it to this symbol.
     categories.forEach(([matches, pattern, category]) => {
@@ -133,6 +138,7 @@ function functionNameCategorizer() {
   };
 }
 
+let uncategorized = {};
 /**
  * Given a profile, return a function that categorizes a sample.
  */
@@ -154,6 +160,8 @@ function sampleCategorizer(thread) {
       }
     } while (typeof nextStackIndex === 'number');
 
+    const stack = stacks.join('\n');
+    uncategorized[stack] = (uncategorized[stack] || 0) + 1;
     return 'uncategorized';
   };
 }
@@ -178,7 +186,7 @@ function summarizeSampleCategories(summary, fullCategoryName) {
 /**
  * Finalize the summary calculation by attaching percentages and sorting the result.
  */
-function calculateSummaryPercentages(summary, i) {
+function calculateSummaryPercentages(summary) {
   const rows = Object.entries(summary);
 
   const sampleCount = rows.reduce((sum, [name, count]) => {
@@ -200,20 +208,32 @@ function calculateSummaryPercentages(summary, i) {
  * name.
  */
 function attachThreadInformation(threads) {
-  return function(histogram, i) {
+  return function(summary, i) {
     const thread = threads[i];
-    return { thread: thread.name, histogram };
+    return { thread: thread.name, summary };
   };
 }
 
-
 function consoleLogSummaries (summaries) {
-  summaries.forEach(({thread, histogram}) => {
+  summaries.forEach(({thread, summary}) => {
     console.log(thread);
-    console.table(histogram);
+    console.table(summary);
   });
 
   console.log(summaries);
+}
+
+function flushUncategorizedLog (maxLogLength = 50) {
+  const entries = Object.entries(uncategorized);
+
+  console.log('Top ${maxLogLength} uncategorized stacks');
+  console.log(
+    entries
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, Math.min(maxLogLength, entries.length))
+  );
+
+  uncategorized = {};
 }
 
 /**
@@ -224,15 +244,31 @@ export function summarizeProfile (profile, symbolicationStatus) {
   if (symbolicationStatus !== 'DONE') {
     return;
   }
-  return profile.threads.map(thread => (
+  const summaries = profile.threads.map(thread => (
       thread.samples.stack
         .map(sampleCategorizer(thread))
         .reduce(summarizeSampleCategories, {})
     ))
     .map(calculateSummaryPercentages)
-    .map(attachThreadInformation(profile.threads));
+    .map(attachThreadInformation(profile.threads))
+    // Sort the threads based on how many categories they have.
+    .sort((a, b) => countKeys(b.summary) - countKeys(a.summary));
+
+  // Uncategorized samples are collected as a side-effect from above.
+  flushUncategorizedLog();
+
+  return summaries;
 }
 
+function countKeys (object) {
+  let i = 0;
+  for (const key in object) {
+    if (object.hasOwnProperty(key)) {
+      i++;
+    }
+  }
+  return i;
+}
 /*
 fetch('./profiles/state-dump.json')
   .then(r => r.json())
