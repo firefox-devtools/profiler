@@ -1,5 +1,13 @@
 import { push } from 'react-router-redux';
 import { parseRangeFilters, stringifyRangeFilters } from '../range-filters';
+import { getProfile } from '../selectors/';
+
+export function profileSummaryProcessed(summary) {
+  return {
+    type: 'PROFILE_SUMMARY_PROCESSED',
+    summary,
+  };
+}
 
 export function waitingForProfileFromAddon() {
   return {
@@ -35,7 +43,18 @@ export function startSymbolicating() {
 }
 
 export function doneSymbolicating() {
-  return { type: 'DONE_SYMBOLICATING' };
+  return function(dispatch, getState) {
+    dispatch({ type: 'DONE_SYMBOLICATING' });
+    dispatch({
+      toWorker: true,
+      type: 'PROFILE_PROCESSED',
+      profile: getProfile(getState()),
+    });
+    dispatch({
+      toWorker: true,
+      type: 'SUMMARIZE_PROFILE',
+    });
+  };
 }
 
 export function coalescedFunctionsUpdate(functionsUpdatePerThread) {

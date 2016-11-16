@@ -193,6 +193,15 @@ function profile(state = {}, action) {
   }
 }
 
+function summary (state = null, action) {
+  switch (action.type) {
+    case 'PROFILE_SUMMARY_PROCESSED':
+      return action.summary;
+    default:
+      return state;
+  }
+}
+
 const viewOptions = combineReducers({
   threads: viewOptionsThreads,
   threadOrder, selectedThread, symbolicationStatus, waitingForLibs,
@@ -201,4 +210,4 @@ const viewOptions = combineReducers({
 
 const profileView = combineReducers({ viewOptions, profile });
 
-export default { status, view, profileView };
+export default { status, view, profileView, summary };

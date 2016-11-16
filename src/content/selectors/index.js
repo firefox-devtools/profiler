@@ -3,7 +3,6 @@ import * as ProfileData from '../profile-data';
 import * as ProfileTree from '../profile-tree';
 import * as TaskTracer from '../task-tracer';
 import { parseRangeFilters } from '../range-filters';
-import { summarizeProfile } from '../summarize-profile';
 
 export const getProfileView = state => state.profileView;
 export const getProfile = state => getProfileView(state).profile;
@@ -51,7 +50,7 @@ export const getDisplayRange = createSelector(
 );
 
 export const getSelectedThreadIndex = createSelector(
-  getProfile,
+  getProfileViewOptions,
   viewOptions => viewOptions.selectedThread
 );
 
@@ -71,8 +70,8 @@ export const getTasksByThread = createSelector(
   TaskTracer.getTasksByThread
 );
 
-export const getThreadSummaries = state => {
-  return summarizeProfile(getProfile(state), getIsSymbolicationStatus(state));
+export const getProfileSummaries = state => {
+  return state.summary;
 };
 
 const selectorsForThreads = {};

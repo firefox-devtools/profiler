@@ -5,6 +5,7 @@ import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
 import * as Actions from '../actions';
 import ProfileViewer from '../components/ProfileViewer';
+import SummarizeProfile from '../components/SummarizeProfile';
 import Initializing from '../components/Initializing';
 
 class App extends Component {
@@ -55,14 +56,24 @@ class App extends Component {
   render() {
     const { view, params, location } = this.props;
 
-    switch (view) {
-      case 'INITIALIZING':
-        return (
-          <Initializing />
-        );
+    // Temporarily hook into the search params here:
+    const paramView = new URL(window.location).searchParams.get('view');
+
+    // Always show initializing
+    if (view === 'INITIALIZING') {
+      return (
+        <Initializing />
+      );
+    }
+
+    switch (paramView || view) {
       case 'PROFILE':
         return (
           <ProfileViewer params={params} location={location}/>
+        );
+      case 'SUMMARIZE_PROFILE':
+        return (
+          <SummarizeProfile />
         );
       default:
         return (

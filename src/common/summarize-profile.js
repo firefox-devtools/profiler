@@ -1,25 +1,3 @@
-import { selectorsForThread, getProfile } from './selectors/';
-import { createHistory } from 'history';
-
-/**
- * Map symbol name its id, e.g. symbolToIds["js::RunScript"] === 45
- */
-function calculateSymbolToIds(profile) {
-  const symbolsText = profile.symbolicationTable;
-  const symbolToIds = {};
-
-  for (let id in symbolsText) {
-    if (symbolsText.hasOwnProperty(id)) {
-      id = Number(id);
-      const name = symbolsText[id];
-      const ids = symbolToIds[name] || [];
-      ids.push(id);
-      symbolToIds[name] = ids;
-    }
-  }
-  return symbolToIds;
-}
-
 /**
  * A list of strategies for matching sample names to patterns.
  */
@@ -28,7 +6,7 @@ const match = {
   prefix: (symbol, pattern) => symbol.indexOf(pattern) === 0,
   substring: (symbol, pattern) => symbol.indexOf(pattern) > -1,
   stem: (symbol, pattern) => {
-    return symbol === pattern || symbol.indexOf(pattern + '(') === 0;
+    return symbol === pattern || (symbol && symbol.indexOf(pattern + '(') === 0);
   },
 };
 
@@ -90,33 +68,9 @@ const categories = [
 ];
 
 /**
- * Return an object that maps symbol ids to its category
- * e.g. symbolIdToCategory[45] === "script"
- */
-function calculateSymbolIdToCategory(profile) {
-  // Assign categories to all symbols
-  const symbolToIds = calculateSymbolToIds(profile);
-  const symbolIdToCategory = {};
-
-  for (const symbol in symbolToIds) {
-    const symbolIds = symbolToIds[symbol];
-
-    // Go through each category and attempt to assign it to this symbol.
-    categories.forEach(([matches, pattern, category]) => {
-      if (matches(symbol, pattern)) {
-        symbolIds.forEach(id => {
-          symbolIdToCategory[id] = category;
-        });
-      }
-    });
-  }
-
-  return symbolIdToCategory;
-}
-
-/**
  * Return a function that categorizes a function name. The categories
  * are cached between calls.
+ * @returns {function} Function categorizer.
  */
 function functionNameCategorizer() {
   const cache = {};
@@ -141,12 +95,15 @@ function functionNameCategorizer() {
 let uncategorized = {};
 /**
  * Given a profile, return a function that categorizes a sample.
+ * @param {object} thread Thread from a profile.
+ * @return {function} Sample stack categorizer.
  */
 function sampleCategorizer(thread) {
   const categorize = functionNameCategorizer();
 
-  return function categorizeSampleStack(nextStackIndex) {
+  return function categorizeSampleStack(initialStackIndex) {
     const stacks = [];
+    let nextStackIndex = initialStackIndex;
     do {
       const stackIndex = nextStackIndex;
       const frameIndex = thread.stackTable.frame[stackIndex];
@@ -170,6 +127,9 @@ function sampleCategorizer(thread) {
  * Count the number of samples in a given category. This will also count subcategories
  * in the case of categories labeled like "script.link", so "script" and "script.link"
  * will each be counted as having a sample.
+ * @param {object} summary - Accumulates the counts.
+ * @param {string} fullCategoryName - The name of the category.
+ * @returns {object} summary
  */
 function summarizeSampleCategories(summary, fullCategoryName) {
   const categories = fullCategoryName.split('.');
@@ -185,6 +145,8 @@ function summarizeSampleCategories(summary, fullCategoryName) {
 
 /**
  * Finalize the summary calculation by attaching percentages and sorting the result.
+ * @param {object} summary - The object that summarizes the times of the samples.
+ * @return {array} The summary with percentages.
  */
 function calculateSummaryPercentages(summary) {
   const rows = Object.entries(summary);
@@ -206,6 +168,8 @@ function calculateSummaryPercentages(summary) {
 /**
  * Also include any relevant meta-information here. Right now this is only the thread
  * name.
+ * @param {object} threads - The threads from a profile.
+ * @return {function} Function that attaches the summary and thread information.
  */
 function attachThreadInformation(threads) {
   return function(summary, i) {
@@ -214,24 +178,19 @@ function attachThreadInformation(threads) {
   };
 }
 
-function consoleLogSummaries (summaries) {
-  summaries.forEach(({thread, summary}) => {
-    console.log(thread);
-    console.table(summary);
-  });
-
-  console.log(summaries);
-}
-
 function flushUncategorizedLog (maxLogLength = 50) {
   const entries = Object.entries(uncategorized);
 
-  console.log('Top ${maxLogLength} uncategorized stacks');
-  console.log(
-    entries
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, Math.min(maxLogLength, entries.length))
-  );
+  if (process.env.NODE_ENV.indexOf('development') === 0) {
+    /* eslint-disable no-console */
+    console.log(`Top ${maxLogLength} uncategorized stacks`);
+    console.log(
+      entries
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, Math.min(maxLogLength, entries.length))
+    );
+    /* eslint-enable no-console */
+  }
 
   uncategorized = {};
 }
@@ -239,11 +198,10 @@ function flushUncategorizedLog (maxLogLength = 50) {
 /**
  * Take a profile and return a summary that categorizes each sample, then calculate
  * a summary of the percentage of time each sample was present.
+ * @param {object} profile - The profile to summarize.
+ * @returns {object} The summaries of each thread.
  */
-export function summarizeProfile (profile, symbolicationStatus) {
-  if (symbolicationStatus !== 'DONE') {
-    return;
-  }
+export function summarizeProfile (profile) {
   const summaries = profile.threads.map(thread => (
       thread.samples.stack
         .map(sampleCategorizer(thread))
@@ -255,6 +213,7 @@ export function summarizeProfile (profile, symbolicationStatus) {
     .sort((a, b) => countKeys(b.summary) - countKeys(a.summary));
 
   // Uncategorized samples are collected as a side-effect from above.
+  // They are only logged in development environments.
   flushUncategorizedLog();
 
   return summaries;
@@ -269,9 +228,3 @@ function countKeys (object) {
   }
   return i;
 }
-/*
-fetch('./profiles/state-dump.json')
-  .then(r => r.json())
-  .then(state => summarizeProfile(getProfile(state)))
-  .catch(console.error.bind(console));
-*/
