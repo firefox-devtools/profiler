@@ -21,20 +21,17 @@ module.exports = {
       'redux-devtools': path.join(__dirname, '..', '..', 'src'),
       'react': path.join(__dirname, 'node_modules', 'react'),
     },
-    extensions: ['', '.js'],
-  },
-  resolveLoader: {
-    'fallback': path.join(__dirname, 'node_modules'),
+    extensions: ['.js'],
   },
   module: {
-    loaders: [{
+    rules: [{
       test: /\.js$/,
-      loaders: ['babel'],
+      loaders: ['babel-loader'],
       exclude: /node_modules/,
       include: __dirname,
     }, {
       test: /\.css?$/,
-      loaders: ['style', 'raw'],
+      loaders: ['style-loader', 'css-loader?minimize'],
       include: __dirname,
     }],
   },
