@@ -600,6 +600,44 @@ body, #root, .profileViewer {
   background-color: rgba(160, 160, 160, 0.6);
 }
 
+.tabBarContainer {
+  display: flex;
+  flex-flow: row nowrap;
+  background: #EEE;
+  border-top: 1px solid #D6D6D6;
+  position: relative;
+}
+
+.tabBarTabWrapper {
+  margin: 0;
+  padding: 0 0.5px;
+  list-style: none;
+  display: flex;
+  flex-flow: row nowrap;
+  margin: 0 -1px;
+}
+
+.tabBarTab {
+  width: 8em;
+  text-align: center;
+  cursor: default;
+  -moz-user-select: none;
+  text-align: center;
+  padding: 4px;
+  border: solid #D6D6D6;
+  border-width: 0 1px;
+  margin: 0 -0.5px;
+  background-clip: padding-box;
+}
+
+.tabBarTab.selected {
+  background: white;
+}
+
+.tabBarTabWrapper:not(.beingReordered) > .tabBarTab:not(.selected):hover {
+  background-color: #DDD;
+}
+
 .treeAndSidebarWrapper {
   flex: 1;
   display: flex;

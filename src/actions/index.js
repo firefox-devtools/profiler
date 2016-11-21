@@ -136,6 +136,13 @@ export function changeThreadOrder(threadOrder) {
   };
 }
 
+export function changeTabOrder(tabOrder) {
+  return {
+    type: 'CHANGE_TAB_ORDER',
+    tabOrder,
+  };
+}
+
 export function changeExpandedFuncStacks(threadIndex, expandedFuncStacks) {
   return {
     type: 'CHANGE_EXPANDED_FUNC_STACKS',

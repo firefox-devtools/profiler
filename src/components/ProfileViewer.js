@@ -5,6 +5,7 @@ import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
 import ProfileViewSidebar from '../components/ProfileViewSidebar';
 import Reorderable from '../components/Reorderable';
 import TimelineWithRangeSelection from '../components/TimelineWithRangeSelection';
+import TabBar from '../components/TabBar';
 import ProfileThreadJankTimeline from '../containers/ProfileThreadJankTimeline';
 import ProfileThreadTracingMarkerTimeline from '../containers/ProfileThreadTracingMarkerTimeline';
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
@@ -16,6 +17,22 @@ class ProfileViewer extends Component {
     super(props);
     this._onZoomButtonClick = this._onZoomButtonClick.bind(this);
     this._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(this);
+    this._onSelectTab = this._onSelectTab.bind(this);
+
+    this._tabs = [
+      {
+        name: 'summary',
+        title: 'Summary',
+      },
+      {
+        name: 'calltree',
+        title: 'Call Tree',
+      },
+      {
+        name: 'markers',
+        title: 'Markers',
+      },
+    ];
   }
 
   componentDidMount() {
@@ -41,14 +58,20 @@ class ProfileViewer extends Component {
     changeSelectedThread(threadIndex);
   }
 
+  _onSelectTab(selectedTab) {
+  }
+
   render() {
     const {
       profile, className, threadOrder, changeThreadOrder,
       viewOptions, updateProfileSelection,
       timeRange, zeroAt, params, location,
+      changeTabOrder,
     } = this.props;
     const threads = profile.threads;
-    const { hasSelection, isModifying, selectionStart, selectionEnd } = viewOptions.selection;
+    const { selection, tabOrder } = viewOptions;
+    const { hasSelection, isModifying, selectionStart, selectionEnd } = selection;
+    const selectedTab = 'calltree';
     return (
       <div className={className}>
         <ProfileFilterNavigator location={location}/>
@@ -104,6 +127,11 @@ class ProfileViewer extends Component {
           }
           </Reorderable>
         </TimelineWithRangeSelection>
+        <TabBar tabs={this._tabs}
+                selectedTabName={selectedTab}
+                tabOrder={tabOrder}
+                onSelectTab={this._onSelectTab}
+                onChangeTabOrder={changeTabOrder} />
         <div className='treeAndSidebarWrapper'>
           <ProfileViewSidebar params={params} location={location} />
           <ProfileTreeView ref='treeView' params={params} location={location}/>
@@ -126,6 +154,7 @@ ProfileViewer.propTypes = {
   params: PropTypes.any.isRequired,
   location: PropTypes.any.isRequired,
   changeSelectedThread: PropTypes.func.isRequired,
+  changeTabOrder: PropTypes.func.isRequired,
 };
 
 export default connect((state, props) => ({

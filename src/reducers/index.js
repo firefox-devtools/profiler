@@ -167,6 +167,15 @@ function zeroAt(state = 0, action) {
   }
 }
 
+function tabOrder(state = [0, 1, 2], action) {
+  switch (action.type) {
+    case 'CHANGE_TAB_ORDER':
+      return action.tabOrder;
+    default:
+      return state;
+  }
+}
+
 function profile(state = {}, action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
@@ -197,6 +206,7 @@ const viewOptions = combineReducers({
   threads: viewOptionsThreads,
   threadOrder, selectedThread, symbolicationStatus, waitingForLibs,
   selection, scrollToSelectionGeneration, rootRange, zeroAt,
+  tabOrder,
 });
 
 const profileView = combineReducers({ viewOptions, profile });
