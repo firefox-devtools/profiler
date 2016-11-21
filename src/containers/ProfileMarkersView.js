@@ -1,7 +1,9 @@
 import React from 'react';
 
-export default () => (
-  <div className='profileSummaryView'>
+const ProfileMarkersView = () => (
+  <div className='profileMarkersView'>
     <p>The profile markers component does not exist yet.</p>
   </div>
 );
+
+export default ProfileMarkersView;

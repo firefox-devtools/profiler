@@ -1,8 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import ProfileTreeView from '../components/ProfileTreeView';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
-import ProfileViewSidebar from '../components/ProfileViewSidebar';
 import Reorderable from '../components/Reorderable';
 import TimelineWithRangeSelection from '../components/TimelineWithRangeSelection';
 import TabBar from '../components/TabBar';
@@ -129,13 +127,11 @@ class ProfileViewer extends Component {
                 tabOrder={tabOrder}
                 onSelectTab={this._onSelectTab}
                 onChangeTabOrder={changeTabOrder} />
-        {
-          {
-            summary: <ProfileSummaryView params={params} location={location} />,
-            calltree: <ProfileCallTreeView params={params} location={location} />,
-            markers: <ProfileMarkersView params={params} location={location} />,
-          }[selectedTab]
-        }
+        {{
+          summary: <ProfileSummaryView params={params} location={location} />,
+          calltree: <ProfileCallTreeView params={params} location={location} />,
+          markers: <ProfileMarkersView params={params} location={location} />,
+        }[selectedTab]}
         
       </div>
     );
