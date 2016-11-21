@@ -196,7 +196,7 @@ class Reorderable extends Component {
 }
 
 Reorderable.propTypes = {
-  orient: PropTypes.string.isRequired,
+  orient: PropTypes.string.isRequired, /* "horizontal" or "vertical" */
   tagName: PropTypes.string.isRequired,
   className: PropTypes.string,
   order: PropTypes.arrayOf(PropTypes.number).isRequired,
