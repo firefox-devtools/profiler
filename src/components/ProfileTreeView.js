@@ -44,7 +44,7 @@ class ProfileTreeView extends Component {
   _onExpandedFuncStacksChange(newExpandedFuncStacks) {
     const { funcStackInfo, threadIndex, changeExpandedFuncStacks } = this.props;
     changeExpandedFuncStacks(threadIndex,
-      newExpandedFuncStacks.map(funcStackIndex => getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable)))
+      newExpandedFuncStacks.map(funcStackIndex => getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable)));
   }
 
   procureInterestingInitialSelection() {
@@ -97,8 +97,8 @@ ProfileTreeView.propTypes = {
   }).isRequired,
   selectedFuncStack: PropTypes.number,
   expandedFuncStacks: PropTypes.array.isRequired,
-  onSelectedFuncStackChange: PropTypes.func.isRequired,
-  onExpandedFuncStacksChange: PropTypes.func.isRequired,
+  changeSelectedFuncStack: PropTypes.func.isRequired,
+  changeExpandedFuncStacks: PropTypes.func.isRequired,
 };
 
 export default connect((state, props) => {
