@@ -55,7 +55,7 @@
     "react-dom": "^15.0.1",
     "react-hot-loader": "^3.0.0-beta.0",
     "react-redux": "^4.4.2",
-    "react-router": "^2.4.1",
+    "react-router": "^3.0.0",
     "react-router-redux": "^4.0.5",
     "react-virtualized": "^8.0.12",
     "redux": "^3.4.0",
