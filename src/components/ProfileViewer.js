@@ -6,6 +6,7 @@ import ProfileViewSidebar from '../components/ProfileViewSidebar';
 import Reorderable from '../components/Reorderable';
 import TimelineWithRangeSelection from '../components/TimelineWithRangeSelection';
 import TabBar from '../components/TabBar';
+import ProfileCallTreeView from '../containers/ProfileCallTreeView';
 import ProfileThreadJankTimeline from '../containers/ProfileThreadJankTimeline';
 import ProfileThreadTracingMarkerTimeline from '../containers/ProfileThreadTracingMarkerTimeline';
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
@@ -33,13 +34,6 @@ class ProfileViewer extends Component {
         title: 'Markers',
       },
     ];
-  }
-
-  componentDidMount() {
-    if (this.refs.treeView) {
-      this.refs.treeView.getWrappedInstance().focus();
-      this.refs.treeView.getWrappedInstance().procureInterestingInitialSelection();
-    }
   }
 
   _onZoomButtonClick(start, end) {
@@ -133,10 +127,7 @@ class ProfileViewer extends Component {
                 tabOrder={tabOrder}
                 onSelectTab={this._onSelectTab}
                 onChangeTabOrder={changeTabOrder} />
-        <div className='treeAndSidebarWrapper'>
-          <ProfileViewSidebar params={params} location={location} />
-          <ProfileTreeView ref='treeView' params={params} location={location}/>
-        </div>
+        <ProfileCallTreeView params={params} location={location} />
       </div>
     );
   }

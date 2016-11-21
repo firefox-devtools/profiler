@@ -5,7 +5,7 @@ import { getStackAsFuncArray } from '../profile-data';
 import { getProfile, selectedThreadSelectors, getSelectedThreadIndex, getScrollToSelectionGeneration } from '../selectors/';
 import * as Actions from '../actions';
 
-class ProfileTreeView extends Component{
+class ProfileTreeView extends Component {
   constructor(props) {
     super(props);
     this._fixedColumns = [
@@ -16,8 +16,9 @@ class ProfileTreeView extends Component{
     this._mainColumn = { propName: 'name', title: '' };
   }
 
-  focus() {
-    this.refs.treeView.focus();
+  componentDidMount() {
+    this.focus();
+    this.procureInterestingInitialSelection();
   }
 
   componentDidUpdate(prevProps) {
@@ -26,6 +27,10 @@ class ProfileTreeView extends Component{
         this.refs.treeView.scrollSelectionIntoView();
       }
     }
+  }
+
+  focus() {
+    this.refs.treeView.focus();
   }
 
   procureInterestingInitialSelection() {
