@@ -4,7 +4,7 @@ export function parseRangeFilters(stringValue = '') {
     return [];
   }
   return stringValue.split('~').map(s => {
-    const m = s.match(/range\-(\-?[0-9.]+)_(\-?[0-9.]+)/);
+    const m = s.match(/range-(\?[0-9.]+)_(-?[0-9.]+)/);
     if (!m) {
       return { start: 0, end: 1000 };
     }

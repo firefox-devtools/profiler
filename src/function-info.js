@@ -150,9 +150,9 @@ export function getFunctionInfo(fullName) {
 
   function getCPPFunctionInfo(fullName) {
     const match =
-      /^(.*) \(in ([^\)]*)\) (\+ [0-9]+)$/.exec(fullName) ||
-      /^(.*) \(in ([^\)]*)\) (\(.*:.*\))$/.exec(fullName) ||
-      /^(.*) \(in ([^\)]*)\)$/.exec(fullName);
+      /^(.*) \(in ([^)]*)\) (\+ [0-9]+)$/.exec(fullName) ||
+      /^(.*) \(in ([^)]*)\) (\(.*:.*\))$/.exec(fullName) ||
+      /^(.*) \(in ([^)]*)\)$/.exec(fullName);
 
     if (!match) {
       return null;

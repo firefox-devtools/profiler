@@ -93,13 +93,13 @@ class ProfileViewer extends Component {
                                                key={`jank${threadIndex}`}
                                                onSelect={this._onIntervalMarkerSelect}
                                                location={location} /> : null),
-                  <ProfileThreadTracingMarkerTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineGfx ${className}HeaderIntervalMarkerTimelineThread${threadName}`}
-                                                      rangeStart={timeRange.start}
-                                                      rangeEnd={timeRange.end}
-                                                      threadIndex={threadIndex}
-                                                      key={`gfx${threadIndex}`}
-                                                      onSelect={this._onIntervalMarkerSelect}
-                                                      location={location} />]
+                    <ProfileThreadTracingMarkerTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineGfx ${className}HeaderIntervalMarkerTimelineThread${threadName}`}
+                                                        rangeStart={timeRange.start}
+                                                        rangeEnd={timeRange.end}
+                                                        threadIndex={threadIndex}
+                                                        key={`gfx${threadIndex}`}
+                                                        onSelect={this._onIntervalMarkerSelect}
+                                                        location={location} />]
                 );
               })
             }
