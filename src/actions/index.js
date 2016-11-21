@@ -136,6 +136,10 @@ export function changeThreadOrder(threadOrder) {
   };
 }
 
+export function changeSelectedTab(selectedTab, location) {
+  return dispatch => dispatch(push({ pathname: `/profile/${selectedTab}/`, query: location.query }));
+}
+
 export function changeTabOrder(tabOrder) {
   return {
     type: 'CHANGE_TAB_ORDER',

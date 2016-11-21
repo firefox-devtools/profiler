@@ -59,6 +59,7 @@ class ProfileViewer extends Component {
   }
 
   _onSelectTab(selectedTab) {
+    this.props.changeSelectedTab(selectedTab, this.props.location);
   }
 
   render() {
@@ -71,7 +72,7 @@ class ProfileViewer extends Component {
     const threads = profile.threads;
     const { selection, tabOrder } = viewOptions;
     const { hasSelection, isModifying, selectionStart, selectionEnd } = selection;
-    const selectedTab = 'calltree';
+    const { selectedTab } = params;
     return (
       <div className={className}>
         <ProfileFilterNavigator location={location}/>
@@ -154,6 +155,7 @@ ProfileViewer.propTypes = {
   params: PropTypes.any.isRequired,
   location: PropTypes.any.isRequired,
   changeSelectedThread: PropTypes.func.isRequired,
+  changeSelectedTab: PropTypes.func.isRequired,
   changeTabOrder: PropTypes.func.isRequired,
 };
 

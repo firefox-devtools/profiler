@@ -1,11 +1,9 @@
-import React, { Component, PropTypes } from 'react';
+import { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { preprocessProfile } from '../preprocess-profile';
 import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
 import * as Actions from '../actions';
-import ProfileViewer from '../components/ProfileViewer';
-import Initializing from '../components/Initializing';
 
 class App extends Component {
   constructor(props) {
@@ -53,34 +51,13 @@ class App extends Component {
   }
 
   render() {
-    const { view, params, location } = this.props;
-
-    switch (view) {
-      case 'INITIALIZING':
-        return (
-          <Initializing />
-        );
-      case 'PROFILE':
-        return (
-          <ProfileViewer params={params} location={location}/>
-        );
-      default:
-        return (
-          <div>View not found.</div>
-        );
-    }
+    return this.props.children;
   }
 }
 
 App.propTypes = {
-  view: PropTypes.string.isRequired,
-  profileView: PropTypes.shape({
-    profile: PropTypes.object.isRequired,
-    viewOptions: PropTypes.object.isRequired,
-  }).isRequired,
   dispatch: PropTypes.func.isRequired,
-  params: PropTypes.any.isRequired,
-  location: PropTypes.any.isRequired,
+  children: PropTypes.any.isRequired,
 };
 
 export default connect(state => state)(App);

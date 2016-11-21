@@ -1,7 +1,26 @@
 import React, { Component, PropTypes } from 'react';
-import { Provider } from 'react-redux';
-import { Router, Route } from 'react-router';
+import { connect, Provider } from 'react-redux';
+import { Router, Route, Redirect, IndexRedirect } from 'react-router';
 import App from './App';
+import ProfileViewer from '../components/ProfileViewer';
+import Initializing from '../components/Initializing';
+
+const ProfileViewerOnceReady = connect(({ view }) => ({ view }))(({ view, params, location }) => {
+  switch (view) {
+    case 'INITIALIZING':
+      return (
+        <Initializing />
+      );
+    case 'PROFILE':
+      return (
+        <ProfileViewer params={params} location={location}/>
+      );
+    default:
+      return (
+        <div>View not found.</div>
+      );
+  }
+});
 
 export default class Root extends Component {
   render() {
@@ -9,7 +28,11 @@ export default class Root extends Component {
     return (
       <Provider store={store}>
         <Router history={history}>
-          <Route path='/' component={App} />
+          <Route path='/' component={App}>
+            <IndexRedirect to='/profile/calltree/' />
+            <Route path='profile/:selectedTab' component={ProfileViewerOnceReady} />
+            <Redirect from='profile' to='/profile/calltree/' component={ProfileViewerOnceReady} />
+          </Route>
         </Router>
       </Provider>
     );
