@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import TreeView from './TreeView';
 import { getStackAsFuncArray } from '../profile-data';
 import { getProfile, selectedThreadSelectors, getSelectedThreadIndex, getScrollToSelectionGeneration } from '../selectors/';
-import * as Actions from '../actions';
+import * as actions from '../actions';
 
 class ProfileTreeView extends Component {
   constructor(props) {
@@ -96,17 +96,17 @@ export default connect((state, props) => {
     selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state, props),
     expandedFuncStacks: selectedThreadSelectors.getExpandedFuncStacks(state, props),
   };
-}, null, (stateProps, dispatchProps, ownProps) => {
+}, actions, (stateProps, dispatchProps, ownProps) => {
   const { funcStackInfo, threadIndex } = stateProps;
-  const { dispatch } = dispatchProps;
+  const { changeSelectedFuncStack, changeExpandedFuncStacks } = dispatchProps;
   return Object.assign({}, stateProps, ownProps, {
     onSelectedFuncStackChange: newSelectedFuncStack => {
-      dispatch(Actions.changeSelectedFuncStack(threadIndex,
-        getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable)));
+      changeSelectedFuncStack(threadIndex,
+        getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable));
     },
     onExpandedFuncStacksChange: newExpandedFuncStacks => {
-      dispatch(Actions.changeExpandedFuncStacks(threadIndex,
-        newExpandedFuncStacks.map(funcStackIndex => getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable))));
+      changeExpandedFuncStacks(threadIndex,
+        newExpandedFuncStacks.map(funcStackIndex => getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable)));
     },
   });
 }, { withRef: true })(ProfileTreeView);
