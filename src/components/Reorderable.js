@@ -161,8 +161,9 @@ class Reorderable extends Component {
     }
 
     const { phase, manipulatingIndex, destinationIndex, adjustPrecedingBy, adjustSucceedingBy } = this.state;
+    const adjustedClassName = (phase === 'MANIPULATING') ? className + ' beingReordered' : className;
     return (
-      <TagName className={className} ref='container'>
+      <TagName className={adjustedClassName} ref='container'>
         {
           orderedChildren.map((child, childIndex) => {
             const style = {
