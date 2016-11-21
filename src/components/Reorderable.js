@@ -132,11 +132,13 @@ class Reorderable extends Component {
       window.removeEventListener('mousemove', mouseMoveListener, true);
       window.removeEventListener('mouseup', mouseUpListener, true);
       setTimeout(() => {
-        const newOrder = arrayMove(this.props.order, elementIndex, destinationIndex);
         this.setState({
           phase: 'RESTING',
         });
-        this.props.onChangeOrder(newOrder);
+        if (elementIndex !== destinationIndex) {
+          const newOrder = arrayMove(this.props.order, elementIndex, destinationIndex);
+          this.props.onChangeOrder(newOrder);
+        }
       }, 200);
     };
     window.addEventListener('mousemove', mouseMoveListener, true);
