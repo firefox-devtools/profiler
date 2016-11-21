@@ -193,10 +193,12 @@ function profile(state = {}, action) {
   }
 }
 
-function summary (state = null, action) {
+function summaryView (state = {summary: null, expanded: null}, action) {
   switch (action.type) {
     case 'PROFILE_SUMMARY_PROCESSED':
-      return action.summary;
+      return Object.assign({}, state, { summary: action.summary, expanded: new Set() });
+    case 'PROFILE_SUMMARY_EXPANDED_CHANGED':
+      return Object.assign({}, state, { expanded: action.expanded });
     default:
       return state;
   }
@@ -210,4 +212,4 @@ const viewOptions = combineReducers({
 
 const profileView = combineReducers({ viewOptions, profile });
 
-export default { status, view, profileView, summary };
+export default { status, view, profileView, summaryView };

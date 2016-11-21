@@ -67,6 +67,18 @@ const categories = [
   // [match.prefix, 'Interpret(', 'script.interpreter',
 ];
 
+export function summarizeProfile (profile) {
+  const categories = categorizeThreadSamples(profile);
+  const rollingSummaries = calculateRollingSummaries(profile, categories);
+  const summaries = summarizeCategories(profile, categories);
+
+  return profile.threads.map((thread, i) => ({
+    thread: thread.name,
+    rollingSummary: rollingSummaries[i],
+    summary: summaries[i],
+  }));
+}
+
 /**
  * Return a function that categorizes a function name. The categories
  * are cached between calls.
@@ -92,13 +104,13 @@ function functionNameCategorizer() {
   };
 }
 
-let uncategorized = {};
 /**
  * Given a profile, return a function that categorizes a sample.
  * @param {object} thread Thread from a profile.
+ * @param {object} uncategorized Any uncategorized samples are collected here.
  * @return {function} Sample stack categorizer.
  */
-function sampleCategorizer(thread) {
+function sampleCategorizer(thread, uncategorized = {}) {
   const categorize = functionNameCategorizer();
 
   return function categorizeSampleStack(initialStackIndex) {
@@ -165,58 +177,98 @@ function calculateSummaryPercentages(summary) {
     .sort((a, b) => b.samples - a.samples);
 }
 
-/**
- * Also include any relevant meta-information here. Right now this is only the thread
- * name.
- * @param {object} threads - The threads from a profile.
- * @return {function} Function that attaches the summary and thread information.
- */
-function attachThreadInformation(threads) {
-  return function(summary, i) {
-    const thread = threads[i];
-    return { thread: thread.name, summary };
-  };
+
+function logUncategorizedSamples (uncategorized, maxLogLength = 10) {
+  const entries = Object.entries(uncategorized);
+  /* eslint-disable no-console */
+  console.log(`Top ${maxLogLength} uncategorized stacks`);
+  const log = typeof console.table === 'function' ? console.table : console.log;
+  log(
+    entries
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, Math.min(maxLogLength, entries.length))
+  );
+  /* eslint-enable no-console */
 }
 
-function flushUncategorizedLog (maxLogLength = 50) {
-  const entries = Object.entries(uncategorized);
+/**
+ * Take a profile and return a summary that categorizes each sample, then calculate
+ * a summary of the percentage of time each sample was present.
+ * @param {array} profile - The current profile.
+ * @returns {array} Stacks mapped to categories.
+ */
+export function categorizeThreadSamples (profile) {
+  const uncategorized = {};
+  const summaries = profile.threads.map(thread => (
+    thread.samples.stack
+      .map(sampleCategorizer(thread, uncategorized))
+  ));
 
-  if (process.env.NODE_ENV.indexOf('development') === 0) {
-    /* eslint-disable no-console */
-    console.log(`Top ${maxLogLength} uncategorized stacks`);
-    console.log(
-      entries
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, Math.min(maxLogLength, entries.length))
-    );
-    /* eslint-enable no-console */
+  if (process.env.NODE_ENV && process.env.NODE_ENV.indexOf('development') === 0) {
+    logUncategorizedSamples(uncategorized);
   }
 
-  uncategorized = {};
+  return summaries;
 }
 
 /**
  * Take a profile and return a summary that categorizes each sample, then calculate
  * a summary of the percentage of time each sample was present.
  * @param {object} profile - The profile to summarize.
+ * @param {object} threadCategories - Each thread's categories for the samples.
  * @returns {object} The summaries of each thread.
  */
-export function summarizeProfile (profile) {
-  const summaries = profile.threads.map(thread => (
-      thread.samples.stack
-        .map(sampleCategorizer(thread))
-        .reduce(summarizeSampleCategories, {})
+export function summarizeCategories (profile, threadCategories) {
+  return threadCategories.map(categories => (
+      categories.reduce(summarizeSampleCategories, {})
     ))
-    .map(calculateSummaryPercentages)
-    .map(attachThreadInformation(profile.threads))
+    .map(calculateSummaryPercentages);
     // Sort the threads based on how many categories they have.
-    .sort((a, b) => countKeys(b.summary) - countKeys(a.summary));
+    // .sort((a, b) => countKeys(b.summary) - countKeys(a.summary));
+}
 
-  // Uncategorized samples are collected as a side-effect from above.
-  // They are only logged in development environments.
-  flushUncategorizedLog();
+export function calculateRollingSummaries (profile, threadCategories, segments = 40, rolling = 4) {
+  const [minTime, maxTime] = profile.threads.map(thread => {
+    return [thread.samples.time[0], thread.samples.time[thread.samples.time.length - 1]];
+  })
+  .reduce((a, b) => ([
+    Math.min(a[0], b[0]),
+    Math.max(a[1], b[1]),
+  ]));
+  const totalTime = maxTime - minTime;
+  const segmentLength = totalTime / segments;
+  const segmentHalfLength = segmentLength / 2;
+  const rollingLength = segmentLength * rolling;
+  const rollingHalfLength = segmentLength * rolling / 2;
 
-  return summaries;
+  return profile.threads.map((thread, threadIndex) => {
+    const categories = threadCategories[threadIndex];
+
+    return times(segments, (segmentIndex) => {
+      let samplesInRange = 0;
+      const samples = {};
+
+      const rollingMinTime = minTime + (segmentIndex * segmentLength) + segmentHalfLength - rollingHalfLength;
+      const rollingMaxTime = rollingMinTime + rollingLength;
+
+      for (let sampleIndex = 0; sampleIndex < thread.samples.time.length; sampleIndex++) {
+        const time = thread.samples.time[sampleIndex];
+        const category = categories[sampleIndex];
+        if (time > rollingMinTime) {
+          if (time > rollingMaxTime) {
+            break;
+          }
+          samples[category] = (samples[category] || 0) + 1;
+          samplesInRange++;
+        }
+      }
+
+      return {
+        samples,
+        percentage: mapObj(samples, count => count / samplesInRange),
+      };
+    });
+  });
 }
 
 function countKeys (object) {
@@ -227,4 +279,24 @@ function countKeys (object) {
     }
   }
   return i;
+}
+
+function times (n, fn) {
+  const results = Array(n);
+  for (let i = 0; i < n; i++) {
+    results[i] = fn(i);
+  }
+  return results;
+}
+
+function mapObj (object, fn) {
+  let i = 0;
+  const mappedObj = {};
+  for (const key in object) {
+    if (object.hasOwnProperty(key)) {
+      i++;
+      mappedObj[key] = fn(object[key], key, i);
+    }
+  }
+  return mappedObj;
 }

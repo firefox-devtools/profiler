@@ -5,7 +5,7 @@ import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
 import * as Actions from '../actions';
 import ProfileViewer from '../components/ProfileViewer';
-import SummarizeProfile from '../components/SummarizeProfile';
+import SummarizeProfile from '../containers/SummarizeProfile';
 import Initializing from '../components/Initializing';
 
 class App extends Component {

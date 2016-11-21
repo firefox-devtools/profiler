@@ -8,6 +8,7 @@ export const getProfileView = state => state.profileView;
 export const getProfile = state => getProfileView(state).profile;
 export const getProfileInterval = state => getProfile(state).meta.interval;
 export const getProfileViewOptions = state => getProfileView(state).viewOptions;
+export const getThreadNames = state => getProfile(state).threads.map(t => t.name);
 export const getJSOnly = (state, props) => ('jsOnly' in props.location.query);
 export const getInvertCallstack = (state, props) => ('invertCallstack' in props.location.query);
 export const getProfileTaskTracerData = state => getProfile(state).tasktracer;
@@ -71,7 +72,11 @@ export const getTasksByThread = createSelector(
 );
 
 export const getProfileSummaries = state => {
-  return state.summary;
+  return state.summaryView.summary;
+};
+
+export const getProfileExpandedSummaries = state => {
+  return state.summaryView.expanded;
 };
 
 const selectorsForThreads = {};

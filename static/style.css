@@ -755,9 +755,8 @@ body, #root, .profileViewer {
 
 .summarize-profile {
   width: 100%;
+  max-width: 80em;
   margin: 0 auto;
-  display: flex;
-  flex-wrap: wrap;
   box-sizing: border-box;
 }
 .summarize-profile * {
@@ -768,6 +767,21 @@ body, #root, .profileViewer {
   display: flex;
   flex-direction: column;
   padding: 2em;
+  /*width: 100%;*/
+  margin: 0 1.66%;
+  font-size: 1.2em;
+}
+
+.summarize-line-graph {
+  min-width: 50%;
+  flex: 1;
+  margin-inline-end: 1em;
+}
+
+.summarize-profile-details {
+  width: 40em;
+  display:flex;
+  align-items: center;
 }
 
 .summarize-profile-numeric {
@@ -786,11 +800,11 @@ body, #root, .profileViewer {
 }
 
 .summarize-profile-row:hover {
-  background-color: #e6edff;
+  background-color: #fcfcfc;
 }
 
 .summarize-profile-row > div {
-  padding: 0.2em 0;
+  padding: 0.1em 0;
 }
 
 .summarize-profile-header {
@@ -812,26 +826,72 @@ body, #root, .profileViewer {
 }
 
 .summarize-profile-thread {
-  padding: 3em 0 1em;
+  margin-bottom: 1em;
   font-size: 1.5em;
   color: #000;
 }
 
-@media (min-width: 1001px) {
-  .summarize-profile-table {
-    width: 30%;
-    margin: 0 1.66%;
-  }
+.summarize-line-graph svg {
+  background-color:#f6f6f6;
 }
 
-@media (max-width: 1000px) {
-  .summarize-profile {
-    flex-direction: column;
-    align-items: center;
-  }
+.summarize-profile-filler::after {
+  content: "\00a0";
+}
 
-  .summarize-profile-table {
-    max-width: 40em;
-    width: 100%;
-  }
+.summarize-profile-filler {
+  width: 75%;
+  display: inline-block;
+  background-color: #eee;
+}
+
+.summarize-line-graph-filler.filler {
+  background-color: #eee;
+}
+
+.summarize-profile-collapse {
+  background: none;
+  border: none;
+  color: #03f;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+}
+
+.summarize-profile-collapse:hover {
+  text-decoration: underline;
+}
+
+.summarize-profile-collapse::before {
+  content: "";
+  width: 0;
+  height: 0;
+  position: relative;
+  display: inline-block;
+  margin: 0 0.4em;
+  border-left: 0.5em solid transparent;
+  border-right: 0.5em solid transparent;
+  border-top: 0.5em solid #03f;
+  transition: transform 500ms;
+}
+
+.summarize-profile-collapse.expanded::before {
+  transform: rotate(180deg);
+}
+
+.summarize-profile-button-row {
+  text-align: right;
+}
+
+.filler {
+  animation-name: filler;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes filler {
+  0% { opacity: 1; animation-timing-function: ease-out; }
+  50% { opacity: 0.5; animation-timing-function: ease-in-out; }
+  100% { opacity: 1; animation-timing-function: ease-in; }
 }

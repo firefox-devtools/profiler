@@ -1,11 +1,33 @@
 import { push } from 'react-router-redux';
 import { parseRangeFilters, stringifyRangeFilters } from '../range-filters';
-import { getProfile } from '../selectors/';
+import { getProfile, getProfileExpandedSummaries } from '../selectors/';
 
 export function profileSummaryProcessed(summary) {
   return {
     type: 'PROFILE_SUMMARY_PROCESSED',
     summary,
+  };
+}
+
+export function collapseProfileSummaryThread(threadName) {
+  return function(dispatch, getState) {
+    const expanded = new Set(getProfileExpandedSummaries(getState()));
+    expanded.delete(threadName);
+    dispatch({
+      type: 'PROFILE_SUMMARY_EXPANDED_CHANGED',
+      expanded,
+    });
+  };
+}
+
+export function expandProfileSummaryThread(threadName) {
+  return function(dispatch, getState) {
+    const expanded = new Set(getProfileExpandedSummaries(getState()));
+    expanded.add(threadName);
+    dispatch({
+      type: 'PROFILE_SUMMARY_EXPANDED_CHANGED',
+      expanded,
+    });
   };
 }
 
