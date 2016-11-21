@@ -12,13 +12,17 @@ import * as actions from '../actions';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../selectors/';
 
 class ProfileViewer extends Component {
+  constructor(props) {
+    super(props);
+    this._onZoomButtonClick = this._onZoomButtonClick.bind(this);
+    this._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(this);
+  }
+
   componentDidMount() {
     if (this.refs.treeView) {
       this.refs.treeView.getWrappedInstance().focus();
       this.refs.treeView.getWrappedInstance().procureInterestingInitialSelection();
     }
-    this._onZoomButtonClick = this._onZoomButtonClick.bind(this);
-    this._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(this);
   }
 
   _onZoomButtonClick(start, end) {
