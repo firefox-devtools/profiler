@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import bisection from 'bisection';
 import clamp from 'clamp';
 import arrayMove from 'array-move';
+import { getContentRect, getMarginRect } from '../css-geometry-tools';
 
 class Reorderable extends Component {
 
@@ -63,8 +64,8 @@ class Reorderable extends Component {
   _startDraggingElement(container, element, event) {
     const xy = this._getXY();
     const mouseDownPos = event[xy.pageXY];
-    const elementRect = element.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
+    const elementRect = getMarginRect(element);
+    const containerRect = getContentRect(container);
     const spaceBefore = elementRect[xy.lefttop] - containerRect[xy.lefttop];
     const spaceAfter = containerRect[xy.rightbottom] - elementRect[xy.rightbottom];
 
@@ -81,7 +82,7 @@ class Reorderable extends Component {
         isBefore = false;
         return 0;
       }
-      const childRect = child.getBoundingClientRect();
+      const childRect = getMarginRect(child);
       return isBefore ? childRect[xy.lefttop] - elementRect[xy.lefttop]
                       : childRect[xy.rightbottom] - elementRect[xy.rightbottom];
     });
@@ -100,11 +101,11 @@ class Reorderable extends Component {
 
     const nextEdgeAfterElement = (elementIndex === children.length - 1)
       ? containerRect[xy.rightbottom]
-      : children[elementIndex + 1].getBoundingClientRect()[xy.lefttop];
+      : getMarginRect(children[elementIndex + 1])[xy.lefttop];
 
     const nextEdgeBeforeElement = (elementIndex === 0)
       ? containerRect[xy.lefttop]
-      : children[elementIndex - 1].getBoundingClientRect()[xy.rightbottom];
+      : getMarginRect(children[elementIndex - 1])[xy.rightbottom];
 
     this.setState({
       phase: 'MANIPULATING',
