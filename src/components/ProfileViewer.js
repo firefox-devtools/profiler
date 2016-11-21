@@ -6,7 +6,9 @@ import ProfileViewSidebar from '../components/ProfileViewSidebar';
 import Reorderable from '../components/Reorderable';
 import TimelineWithRangeSelection from '../components/TimelineWithRangeSelection';
 import TabBar from '../components/TabBar';
+import ProfileSummaryView from '../containers/ProfileSummaryView';
 import ProfileCallTreeView from '../containers/ProfileCallTreeView';
+import ProfileMarkersView from '../containers/ProfileMarkersView';
 import ProfileThreadJankTimeline from '../containers/ProfileThreadJankTimeline';
 import ProfileThreadTracingMarkerTimeline from '../containers/ProfileThreadTracingMarkerTimeline';
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
@@ -127,7 +129,14 @@ class ProfileViewer extends Component {
                 tabOrder={tabOrder}
                 onSelectTab={this._onSelectTab}
                 onChangeTabOrder={changeTabOrder} />
-        <ProfileCallTreeView params={params} location={location} />
+        {
+          {
+            summary: <ProfileSummaryView params={params} location={location} />,
+            calltree: <ProfileCallTreeView params={params} location={location} />,
+            markers: <ProfileMarkersView params={params} location={location} />,
+          }[selectedTab]
+        }
+        
       </div>
     );
   }
