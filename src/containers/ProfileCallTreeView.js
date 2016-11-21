@@ -4,8 +4,8 @@ import ProfileViewSidebar from '../components/ProfileViewSidebar';
 
 const ProfileCallTreeView = ({ params, location }) => (
   <div className='treeAndSidebarWrapper'>
-    <ProfileViewSidebar params={params} location={location} />
     <ProfileTreeView params={params} location={location}/>
+    <ProfileViewSidebar params={params} location={location} />
   </div>
 );
 

@@ -59,6 +59,7 @@ body, #root, .profileViewer {
   padding: 1px 5px;
   top: 0;
   bottom: 0;
+  line-height: 15px;
 }
 .treeViewHeaderColumn.treeViewFixedColumn::after {
   content: '';
@@ -638,6 +639,14 @@ body, #root, .profileViewer {
   background-color: #DDD;
 }
 
+.profileSummaryView,
+.profileMarkersView {
+  border-top: 1px solid #D6D6D6;
+  padding: 10px;
+  flex: 1;
+  overflow-y: auto;
+}
+
 .treeAndSidebarWrapper {
   flex: 1;
   display: flex;
@@ -728,7 +737,7 @@ body, #root, .profileViewer {
   box-sizing: border-box;
   padding: 10px;
   border-top: 1px solid #D6D6D6;
-  border-right: 1px solid #D6D6D6;
+  border-left: 1px solid #D6D6D6;
   background: #EEE;
 }
 
