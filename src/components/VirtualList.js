@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
+import { findDOMNode } from 'react-dom';
 
 class VirtualListRow extends Component {
   shouldComponentUpdate(nextProps, nextState) {
@@ -17,6 +18,48 @@ VirtualListRow.propTypes = {
   item: PropTypes.any.isRequired,
   index: PropTypes.number.isRequired,
   isSpecial: PropTypes.bool,
+};
+
+class VirtualListInner extends Component {
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
+
+  render() {
+    const { itemHeight, className, renderItem, items, specialItems, visibleRangeStart, visibleRangeEnd } = this.props;
+
+    return (
+      <div className={className}
+            style={{
+              height: `${items.length * itemHeight}px`,
+              width: '3000px',
+            }}>
+        <div className={`${className}TopSpacer`}
+             key={-1}
+             style={{height: Math.max(0, visibleRangeStart) * itemHeight + 'px'}} />
+        {
+          items.map((item, i) => {
+            if (i < visibleRangeStart || i >= visibleRangeEnd) {
+              return null;
+            }
+            return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item} items={items} isSpecial={specialItems.includes(item)}/>;
+          })
+        }
+      </div>
+    );
+  }
+}
+
+VirtualListInner.propTypes = {
+  itemHeight: PropTypes.number.isRequired,
+  className: PropTypes.string,
+  renderItem: PropTypes.func.isRequired,
+  items: PropTypes.array.isRequired,
+  focusable: PropTypes.bool.isRequired,
+  specialItems: PropTypes.array.isRequired,
+  visibleRangeStart: PropTypes.number.isRequired,
+  visibleRangeEnd: PropTypes.number.isRequired,
 };
 
 class VirtualList extends Component {
@@ -39,15 +82,15 @@ class VirtualList extends Component {
     if (!this.refs.container) {
       return { visibleRangeStart: 0, visibleRangeEnd: 100 };
     }
-    const { itemHeight } = this.props;
+    const { itemHeight, items } = this.props;
     const outerRect = this.refs.container.getBoundingClientRect();
-    const innerRect = this.refs.inner.getBoundingClientRect();
+    const innerRect = findDOMNode(this.refs.inner).getBoundingClientRect();
     const overscan = 25;
     const chunkSize = 16;
     let visibleRangeStart = Math.floor((outerRect.top - innerRect.top) / itemHeight) - overscan;
-    visibleRangeStart = Math.floor(visibleRangeStart / chunkSize) * chunkSize;
+    visibleRangeStart = Math.max(0, Math.floor(visibleRangeStart / chunkSize) * chunkSize);
     let visibleRangeEnd = Math.ceil((outerRect.bottom - innerRect.top) / itemHeight) + overscan;
-    visibleRangeEnd = Math.ceil(visibleRangeEnd / chunkSize) * chunkSize;
+    visibleRangeEnd = Math.min(items.length, Math.ceil(visibleRangeEnd / chunkSize) * chunkSize);
     return { visibleRangeStart, visibleRangeEnd };
   }
 
@@ -82,28 +125,17 @@ class VirtualList extends Component {
 
   render() {
     const { itemHeight, className, renderItem, items, focusable, specialItems, onKeyDown } = this.props;
-
-    const range = this.computeVisibleRange();
-    const { visibleRangeStart, visibleRangeEnd } = range;
+    const { visibleRangeStart, visibleRangeEnd } = this.computeVisibleRange();
     return (
       <div className={className} ref='container' tabIndex={ focusable ? 0 : -1 } onKeyDown={onKeyDown}>
-        <div className={`${className}Inner`} ref='inner'
-              style={{
-                height: `${items.length * itemHeight}px`,
-                width: '3000px',
-              }}>
-          <div className={`${className}TopSpacer`}
-               key={-1}
-               style={{height: Math.max(0, visibleRangeStart) * itemHeight + 'px'}} />
-          {
-            items.map((item, i) => {
-              if (i < visibleRangeStart || i >= visibleRangeEnd) {
-                return null;
-              }
-              return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item} items={items} isSpecial={specialItems.includes(item)}/>;
-            })
-          }
-        </div>
+        <VirtualListInner className={`${className}Inner`}
+                          visibleRangeStart={visibleRangeStart}
+                          visibleRangeEnd={visibleRangeEnd}
+                          itemHeight={itemHeight}
+                          renderItem={renderItem}
+                          items={items}
+                          specialItems={specialItems}
+                          ref='inner' />
       </div>
     );
   }
