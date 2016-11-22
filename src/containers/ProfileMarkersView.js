@@ -48,7 +48,7 @@ class MarkerTree {
     let node = this._nodes.get(markerIndex);
     if (node === undefined) {
       node = {
-        timestamp: `${((this._thread.markers.time[markerIndex] - this._zeroAt) / 1000).toFixed(2)}s`,
+        timestamp: `${((this._thread.markers.time[markerIndex] - this._zeroAt) / 1000).toFixed(3)}s`,
         category: 'unknown',
         name: this._thread.stringTable.getString(this._thread.markers.name[markerIndex]),
       };
