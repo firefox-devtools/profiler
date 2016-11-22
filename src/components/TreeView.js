@@ -98,8 +98,8 @@ class TreeView extends Component {
     this._toggle = this._toggle.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onRowClicked = this._onRowClicked.bind(this);
-    this._specialItems = [];
-    this._visibleRows = [];
+    this._specialItems = [props.selectedNodeId];
+    this._visibleRows = this._getAllVisibleRows(props);
   }
 
   scrollSelectionIntoView() {
