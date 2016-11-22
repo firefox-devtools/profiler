@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TreeView from '../components/TreeView';
-import { getZeroAt, selectedThreadSelectors, getSelectedThreadIndex } from '../selectors/';
+import { getZeroAt, selectedThreadSelectors, getSelectedThreadIndex, getSelectedMarker } from '../selectors/';
 import * as actions from '../actions';
 
 class MarkerTree {
@@ -63,11 +63,12 @@ class ProfileMarkersView extends Component {
     super(props);
     this._fixedColumns = [
       { propName: 'timestamp', title: 'Time Stamp' },
-      { propName: 'category', title: '' },
+      { propName: 'category', title: 'Category' },
     ];
     this._mainColumn = { propName: 'name', title: '' };
     this._expandedNodeIds = [];
     this._onExpandedNodeIdsChange = () => {};
+    this._onSelectionChange = this._onSelectionChange.bind(this);
   }
 
   componentDidMount() {
@@ -78,16 +79,22 @@ class ProfileMarkersView extends Component {
     this.refs.treeView.focus();
   }
 
+  _onSelectionChange(selectedMarker) {
+    const { threadIndex, changeSelectedMarker } = this.props;
+    changeSelectedMarker(threadIndex, selectedMarker);
+  }
+
   render() {
-    const tree = new MarkerTree(this.props.thread, this.props.zeroAt);
+    const { thread, zeroAt, selectedMarker } = this.props;
+    const tree = new MarkerTree(thread, zeroAt);
     return (
       <div className='profileMarkersView'>
         <TreeView tree={tree}
                   fixedColumns={this._fixedColumns}
                   mainColumn={this._mainColumn}
-                  onSelectionChange={this._onExpandedNodeIdsChange}
+                  onSelectionChange={this._onSelectionChange}
                   onExpandedNodesChange={this._onExpandedNodeIdsChange}
-                  selectedNodeId={0}
+                  selectedNodeId={selectedMarker}
                   expandedNodeIds={this._expandedNodeIds}
                   ref='treeView'/>
       </div>
@@ -97,11 +104,14 @@ class ProfileMarkersView extends Component {
 
 ProfileMarkersView.propTypes = {
   thread: PropTypes.object.isRequired,
+  threadIndex: PropTypes.number.isRequired,
+  selectedMarker: PropTypes.number.isRequired,
   zeroAt: PropTypes.number.isRequired,
 };
 
 export default connect((state, props) => ({
   threadIndex: getSelectedThreadIndex(state, props),
   thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state, props),
+  selectedMarker: selectedThreadSelectors.getViewOptions(state, props).selectedMarker,
   zeroAt: getZeroAt(state, props),
 }), actions)(ProfileMarkersView);

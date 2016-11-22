@@ -52,6 +52,7 @@ function viewOptionsThreads(state = [], action) {
       return action.profile.threads.map(() => ({
         selectedFuncStack: [],
         expandedFuncStacks: [],
+        selectedMarker: -1,
       }));
     case 'COALESCED_FUNCTIONS_UPDATE': {
       const { functionsUpdatePerThread } = action;
@@ -72,7 +73,11 @@ function viewOptionsThreads(state = [], action) {
             return newFunc === undefined ? oldFunc : newFunc;
           });
         });
-        return { selectedFuncStack, expandedFuncStacks };
+        return {
+          selectedFuncStack,
+          expandedFuncStacks,
+          selectedMarker: thread.selectedMarker,
+        };
       });
     }
     case 'CHANGE_SELECTED_FUNC_STACK': {
@@ -92,6 +97,14 @@ function viewOptionsThreads(state = [], action) {
       return [
         ...state.slice(0, threadIndex),
         Object.assign({}, state[threadIndex], { expandedFuncStacks }),
+        ...state.slice(threadIndex + 1),
+      ];
+    }
+    case 'CHANGE_SELECTED_MARKER': {
+      const { threadIndex, selectedMarker } = action;
+      return [
+        ...state.slice(0, threadIndex),
+        Object.assign({}, state[threadIndex], { selectedMarker }),
         ...state.slice(threadIndex + 1),
       ];
     }

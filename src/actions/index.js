@@ -154,6 +154,13 @@ export function changeExpandedFuncStacks(threadIndex, expandedFuncStacks) {
   };
 }
 
+export function changeSelectedMarker(threadIndex, selectedMarker) {
+  return {
+    type: 'CHANGE_SELECTED_MARKER',
+    selectedMarker, threadIndex,
+  };
+}
+
 function changeBoolQueryParam(query, paramName, newValue) {
   if ((paramName in query) === newValue) {
     return query;
