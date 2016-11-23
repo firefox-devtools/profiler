@@ -24,7 +24,9 @@ class MarkerTree {
   }
 
   hasChildren(markerIndex) {
-    return markerIndex === -1;
+    const { markers } = this._thread;
+    return markers.data[markerIndex] !== null &&
+           ('stack' in markers.data[markerIndex]);
   }
 
   getParent() {
@@ -47,10 +49,21 @@ class MarkerTree {
   getNode(markerIndex) {
     let node = this._nodes.get(markerIndex);
     if (node === undefined) {
+      const { markers, stringTable } = this._thread;
+      let category = 'unknown';
+      let name = stringTable.getString(markers.name[markerIndex]);
+      if (markers.data[markerIndex]) {
+        if ('category' in markers.data[markerIndex]) {
+          category = markers.data[markerIndex].category;
+        }
+        if (markers.data[markerIndex].type === 'tracing') {
+          name = `[${markers.data[markerIndex].interval}] ${name}`;
+        }
+      }
       node = {
-        timestamp: `${((this._thread.markers.time[markerIndex] - this._zeroAt) / 1000).toFixed(3)}s`,
-        category: 'unknown',
-        name: this._thread.stringTable.getString(this._thread.markers.name[markerIndex]),
+        timestamp: `${((markers.time[markerIndex] - this._zeroAt) / 1000).toFixed(3)}s`,
+        name,
+        category,
       };
       this._nodes.set(markerIndex, node);
     }
