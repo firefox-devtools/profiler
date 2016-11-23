@@ -675,6 +675,7 @@ body, #root, .profileViewer {
 }
 
 .taskTracerViewWrapper {
+  border-top: 1px solid #D6D6D6;
   flex: 1;
   overflow: auto;
   position: relative;
@@ -722,6 +723,7 @@ body, #root, .profileViewer {
   list-style: none;
   display: block;
   margin: 0;
+  padding: 0;
   height: 4px;
   position: relative;
   overflow: hidden;

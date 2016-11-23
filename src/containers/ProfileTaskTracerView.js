@@ -90,20 +90,22 @@ class ProfileTaskTracerView extends Component {
     const { tasktracer, tasksByThread, rangeStart, rangeEnd } = this.props;
     const { threadTable, stringTable } = tasktracer;
     return (
-      <ol className='taskTracerView'>
-        {
-          Array.from(tasksByThread).map(([threadIndex, tasks]) => {
-            return (
-              <ThreadTaskTracerView key={threadIndex}
-                                    name={stringTable.getString(threadTable.name[threadIndex])}
-                                    tasks={tasks}
-                                    tasktracer={tasktracer}
-                                    rangeStart={rangeStart}
-                                    rangeEnd={rangeEnd} />
-            );
-          })
-        }
-      </ol>
+      <div className='taskTracerViewWrapper'>
+        <ol className='taskTracerView'>
+          {
+            Array.from(tasksByThread).map(([threadIndex, tasks]) => {
+              return (
+                <ThreadTaskTracerView key={threadIndex}
+                                      name={stringTable.getString(threadTable.name[threadIndex])}
+                                      tasks={tasks}
+                                      tasktracer={tasktracer}
+                                      rangeStart={rangeStart}
+                                      rangeEnd={rangeEnd} />
+              );
+            })
+          }
+        </ol>
+      </div>
     );
   }
 }

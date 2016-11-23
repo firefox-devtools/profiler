@@ -7,6 +7,7 @@ import TabBar from '../components/TabBar';
 import ProfileSummaryView from '../containers/ProfileSummaryView';
 import ProfileCallTreeView from '../containers/ProfileCallTreeView';
 import ProfileMarkersView from '../containers/ProfileMarkersView';
+import ProfileTaskTracerView from '../containers/ProfileTaskTracerView';
 import ProfileThreadJankTimeline from '../containers/ProfileThreadJankTimeline';
 import ProfileThreadTracingMarkerTimeline from '../containers/ProfileThreadTracingMarkerTimeline';
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
@@ -32,6 +33,10 @@ class ProfileViewer extends Component {
       {
         name: 'markers',
         title: 'Markers',
+      },
+      {
+        name: 'tasktracer',
+        title: 'Task Tracer',
       },
     ];
   }
@@ -131,6 +136,7 @@ class ProfileViewer extends Component {
           summary: <ProfileSummaryView params={params} location={location} />,
           calltree: <ProfileCallTreeView params={params} location={location} />,
           markers: <ProfileMarkersView params={params} location={location} />,
+          tasktracer: <ProfileTaskTracerView params={params} location={location} rangeStart={timeRange.start} rangeEnd={timeRange.end} />,
         }[selectedTab]}
         
       </div>
