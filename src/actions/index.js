@@ -137,7 +137,11 @@ export function changeThreadOrder(threadOrder) {
 }
 
 export function changeSelectedTab(selectedTab, location) {
-  return dispatch => dispatch(push({ pathname: `/profile/${selectedTab}/`, query: location.query }));
+  const newPathname = `/profile/${selectedTab}/`;
+  if (location.pathname === newPathname) {
+    return () => {};
+  }
+  return dispatch => dispatch(push({ pathname: newPathname, query: location.query }));
 }
 
 export function changeTabOrder(tabOrder) {
