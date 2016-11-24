@@ -89,7 +89,7 @@ class VirtualList extends Component {
   }
 
   computeVisibleRange() {
-    const { itemHeight, items } = this.props;
+    const { itemHeight } = this.props;
     if (!this.refs.container) {
       return { visibleRangeStart: 0, visibleRangeEnd: 100 };
     }

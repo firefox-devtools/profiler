@@ -4,9 +4,9 @@ import * as actions from '../actions';
 import { getTasksByThread, getProfileTaskTracerData } from '../selectors';
 import { withSize } from '../with-size';
 
-class ThreadTaskTracerTracks extends Component {
+class ThreadTaskTracerTracksImpl extends Component {
   render() {
-    const { name, tasks, tasktracer, rangeStart, rangeEnd, width } = this.props;
+    const { tasks, tasktracer, rangeStart, rangeEnd, width } = this.props;
     const { taskTable, stringTable, addressTable } = tasktracer;
     const tracks = [];
     for (const taskIndex of tasks) {
@@ -68,8 +68,7 @@ class ThreadTaskTracerTracks extends Component {
   }
 }
 
-ThreadTaskTracerTracks.propTypes = {
-  name: PropTypes.string.isRequired,
+ThreadTaskTracerTracksImpl.propTypes = {
   tasks: PropTypes.arrayOf(PropTypes.number).isRequired,
   tasktracer: PropTypes.object.isRequired,
   rangeStart: PropTypes.number.isRequired,
@@ -77,7 +76,7 @@ ThreadTaskTracerTracks.propTypes = {
   width: PropTypes.number.isRequired,
 };
 
-ThreadTaskTracerTracks = withSize(ThreadTaskTracerTracks);
+const ThreadTaskTracerTracks = withSize(ThreadTaskTracerTracksImpl);
 
 class ThreadTaskTracerView extends Component {
   render() {
@@ -88,7 +87,7 @@ class ThreadTaskTracerView extends Component {
     return (
       <li className='taskTracerThreadView'>
         <h1 className='taskTracerThreadViewThreadName' title={name}>{name}</h1>
-        <ThreadTaskTracerTracks name={name} tasks={tasks} tasktracer={tasktracer} rangeStart={rangeStart} rangeEnd={rangeEnd} />
+        <ThreadTaskTracerTracks tasks={tasks} tasktracer={tasktracer} rangeStart={rangeStart} rangeEnd={rangeEnd} />
       </li>
     );
   }
@@ -100,7 +99,6 @@ ThreadTaskTracerView.propTypes = {
   tasktracer: PropTypes.object.isRequired,
   rangeStart: PropTypes.number.isRequired,
   rangeEnd: PropTypes.number.isRequired,
-  width: PropTypes.number.isRequired,
 };
 
 class ProfileTaskTracerView extends Component {
