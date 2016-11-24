@@ -4,7 +4,7 @@ import * as actions from '../actions';
 import { getTasksByThread, getProfileTaskTracerData } from '../selectors';
 import { withSize } from '../with-size';
 
-class ThreadTaskTracerViewImpl extends Component {
+class ThreadTaskTracerTracks extends Component {
   render() {
     const { name, tasks, tasktracer, rangeStart, rangeEnd, width } = this.props;
     const { taskTable, stringTable, addressTable } = tasktracer;
@@ -29,52 +29,46 @@ class ThreadTaskTracerViewImpl extends Component {
       track.tasks.push(taskIndex);
       track.fullUpTo = taskTable.endTime[taskIndex] || rangeEnd;
     }
-    if (tracks.length === 0) {
-      return <li className='taskTracerThreadView taskTracerThreadViewEmpty' />;
-    }
     return (
-      <li className='taskTracerThreadView'>
-        <h1 className='taskTracerThreadViewThreadName'>{name}</h1>
-        <div className='taskTracerThreadViewTracks'>
-        {
-          tracks.map(track => {
-            return (
-              <ol className='taskTracerThreadViewTrack'>
-                {
-                  track.tasks.map((taskIndex, i) => {
-                    const dispatchTime = taskTable.dispatchTime[taskIndex];
-                    const beginTime = taskTable.beginTime[taskIndex] || rangeEnd;
-                    const endTime = taskTable.endTime[taskIndex] || rangeEnd;
-                    const pos = (beginTime - rangeStart) / (rangeEnd - rangeStart) * width;
+      <div className='taskTracerThreadViewTracks'>
+      {
+        tracks.map(track => {
+          return (
+            <ol className='taskTracerThreadViewTrack'>
+              {
+                track.tasks.map((taskIndex, i) => {
+                  const dispatchTime = taskTable.dispatchTime[taskIndex];
+                  const beginTime = taskTable.beginTime[taskIndex] || rangeEnd;
+                  const endTime = taskTable.endTime[taskIndex] || rangeEnd;
+                  const pos = (beginTime - rangeStart) / (rangeEnd - rangeStart) * width;
 
-                    const execWidth = (endTime - beginTime) / (rangeEnd - rangeStart) * width;
-                    const beginDelayWidth = (beginTime - dispatchTime) / (rangeEnd - rangeStart) * width;
+                  const execWidth = (endTime - beginTime) / (rangeEnd - rangeStart) * width;
+                  const beginDelayWidth = (beginTime - dispatchTime) / (rangeEnd - rangeStart) * width;
 
-                    const addressIndex = taskTable.address[taskIndex];
-                    const classNameStringIndex = addressTable.className[addressIndex];
-                    const title = classNameStringIndex !== undefined ? stringTable.getString(addressTable.className[addressIndex]) : 'undefined';
-                    return (
-                      <li key={i}
-                          className='taskTracerThreadViewTrackTask'
-                          title={title}
-                          style={{left: `${pos}px`, width: `${execWidth}px`}}>
-                        <span className='taskTracerThreadViewTrackTaskBeginDelay'
-                              style={{left: `-${beginDelayWidth}px`, width: `${beginDelayWidth}px`}}/>
-                      </li>
-                    );
-                  })
-                }
-              </ol>
-            );
-          })
-        }
-        </div>
-      </li>
+                  const addressIndex = taskTable.address[taskIndex];
+                  const classNameStringIndex = addressTable.className[addressIndex];
+                  const title = classNameStringIndex !== undefined ? stringTable.getString(addressTable.className[addressIndex]) : 'undefined';
+                  return (
+                    <li key={i}
+                        className='taskTracerThreadViewTrackTask'
+                        title={title}
+                        style={{left: `${pos}px`, width: `${execWidth}px`}}>
+                      <span className='taskTracerThreadViewTrackTaskBeginDelay'
+                            style={{left: `-${beginDelayWidth}px`, width: `${beginDelayWidth}px`}}/>
+                    </li>
+                  );
+                })
+              }
+            </ol>
+          );
+        })
+      }
+      </div>
     );
   }
 }
 
-ThreadTaskTracerViewImpl.propTypes = {
+ThreadTaskTracerTracks.propTypes = {
   name: PropTypes.string.isRequired,
   tasks: PropTypes.arrayOf(PropTypes.number).isRequired,
   tasktracer: PropTypes.object.isRequired,
@@ -83,7 +77,31 @@ ThreadTaskTracerViewImpl.propTypes = {
   width: PropTypes.number.isRequired,
 };
 
-const ThreadTaskTracerView = withSize(ThreadTaskTracerViewImpl);
+ThreadTaskTracerTracks = withSize(ThreadTaskTracerTracks);
+
+class ThreadTaskTracerView extends Component {
+  render() {
+    const { name, tasks, tasktracer, rangeStart, rangeEnd } = this.props;
+    if (tasks.length === 0) {
+      return <li className='taskTracerThreadView taskTracerThreadViewEmpty' />;
+    }
+    return (
+      <li className='taskTracerThreadView'>
+        <h1 className='taskTracerThreadViewThreadName' title={name}>{name}</h1>
+        <ThreadTaskTracerTracks name={name} tasks={tasks} tasktracer={tasktracer} rangeStart={rangeStart} rangeEnd={rangeEnd} />
+      </li>
+    );
+  }
+}
+
+ThreadTaskTracerView.propTypes = {
+  name: PropTypes.string.isRequired,
+  tasks: PropTypes.arrayOf(PropTypes.number).isRequired,
+  tasktracer: PropTypes.object.isRequired,
+  rangeStart: PropTypes.number.isRequired,
+  rangeEnd: PropTypes.number.isRequired,
+  width: PropTypes.number.isRequired,
+};
 
 class ProfileTaskTracerView extends Component {
   render() {
