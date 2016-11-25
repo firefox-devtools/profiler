@@ -690,6 +690,10 @@ body, #root, .profileViewer {
   padding: 10px;
 }
 
+.profileSummaryP {
+  margin: 0;
+}
+
 .taskTracerView {
   position: absolute;
   top: 0;
