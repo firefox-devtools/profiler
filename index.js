@@ -1,4 +1,5 @@
 import React from 'react';
+import Perf from 'react-addons-perf';
 import { render } from 'react-dom';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import thunk from 'redux-thunk';
@@ -28,6 +29,8 @@ render(
   </AppContainer>,
   document.getElementById('root')
 );
+
+window.Perf = Perf;
 
 if (module.hot) {
   module.hot.accept('./src/containers/Root', () => {
