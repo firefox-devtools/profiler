@@ -674,11 +674,20 @@ body, #root, .profileViewer {
   flex-flow: row nowrap;
 }
 
-.taskTracerViewWrapper {
+.taskTracerViewWrapper,
+.logViewWrapper {
   border-top: 1px solid #D6D6D6;
   flex: 1;
   overflow: auto;
   position: relative;
+}
+
+.logViewPre {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 10px;
 }
 
 .taskTracerView {

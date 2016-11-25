@@ -180,7 +180,7 @@ function zeroAt(state = 0, action) {
   }
 }
 
-function tabOrder(state = [0, 1, 2, 3], action) {
+function tabOrder(state = [0, 1, 2, 3, 4], action) {
   switch (action.type) {
     case 'CHANGE_TAB_ORDER':
       return action.tabOrder;
