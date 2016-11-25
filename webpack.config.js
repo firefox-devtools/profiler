@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: [
@@ -7,12 +8,28 @@ module.exports = {
   ],
   output: {
     path: path.join(__dirname, 'static'),
-    filename: 'bundle.js',
-    publicPath: '/static/',
+    filename: '[hash].bundle.js',
+    chunkFilename: '[id].[hash].bundle.js',
+    publicPath: '/',
   },
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
+    }),
+    new webpack.LoaderOptionsPlugin({
+      options: {
+        worker: {
+          output: {
+            filename: "[hash].worker.js",
+            chunkFilename: "[id].[hash].worker.js"
+          }
+        }
+      }
+    }),
+    new HtmlWebpackPlugin({
+      title: 'Cleopatra',
+      favicon: 'static/favicon.png',
+      template: 'index.html',
     }),
   ],
   resolve: {

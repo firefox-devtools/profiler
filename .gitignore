@@ -1,5 +1,5 @@
 npm-debug.log*
 node_modules/
 .DS_Store
-www/bundle.js
-static/bundle.js
+static/*.js
+static/*.html

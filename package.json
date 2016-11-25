@@ -9,10 +9,11 @@
     "start-no-hot": "NODE_ENV=development-no-hot node server.js",
     "start-prod": "npm run build-prod && npm run serve-static",
     "start-prod-readable": "npm run build-prod-readable && npm run serve-static",
-    "serve-static": "ws -s index.html -p 4242",
-    "build": "NODE_ENV=development webpack --progress",
-    "build-prod-readable": "NODE_ENV=production webpack --progress",
-    "build-prod": "NODE_ENV=production webpack -p --progress",
+    "serve-static": "ws -d static/ -s index.html -p 4242",
+    "build": "npm run build:clean && NODE_ENV=development webpack --progress",
+    "build-prod-readable": "npm run build:clean && NODE_ENV=production webpack --progress",
+    "build-prod": "npm run build:clean && NODE_ENV=production webpack -p --progress",
+    "build:clean": "rimraf static/*.js static/*.html",
     "eslint": "eslint index.js src",
     "eslint-fix": "eslint --fix index.js src",
     "documentation": "documentation"
@@ -45,6 +46,7 @@
     "eslint-config-google": "^0.6.0",
     "eslint-plugin-react": "^6.4.0",
     "express": "^4.13.4",
+    "html-webpack-plugin": "^2.24.1",
     "http-server": "^0.9.0",
     "local-web-server": "^1.2.6",
     "memoize-immutable": "^2.1.0",
@@ -65,13 +67,15 @@
     "redux-logger": "^2.6.1",
     "redux-thunk": "^2.0.1",
     "reselect": "^2.5.1",
+    "rimraf": "^2.5.4",
     "shallowequal": "^0.2.2",
     "style-loader": "^0.13.1",
     "watchify": "^3.6.1",
     "webpack": "^2.1.0-beta.27",
     "webpack-dev-middleware": "^1.8.4",
     "webpack-dev-server": "^1.16.2",
-    "webpack-hot-middleware": "^2.13.2"
+    "webpack-hot-middleware": "^2.13.2",
+    "worker-loader": "^0.7.1"
   },
   "babel": {
     "presets": [
