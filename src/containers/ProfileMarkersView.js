@@ -57,7 +57,14 @@ class MarkerTree {
           category = markers.data[markerIndex].category;
         }
         if (markers.data[markerIndex].type === 'tracing') {
-          name = `[${markers.data[markerIndex].interval}] ${name}`;
+          if (category === 'log') {
+            // name is actually the whole message that was sent to fprintf_stderr. Would you consider that.
+            if (name.length > 100) {
+              name = name.substring(0, 100) + '...';
+            }
+          } else {
+            name = `[${markers.data[markerIndex].interval}] ${name}`;
+          }
         }
       }
       node = {
