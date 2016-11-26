@@ -13,6 +13,10 @@ import Root from './src/containers/Root';
 
 require('./static/style.css');
 
+if (process.env.NODE_ENV === 'production') {
+  require('offline-plugin/runtime').install();
+}
+
 window.geckoProfilerPromise = new Promise(function (resolve) {
   window.connectToGeckoProfiler = resolve;
 });

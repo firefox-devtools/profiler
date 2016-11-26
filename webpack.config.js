@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const OfflinePlugin = require('offline-plugin');
 
 module.exports = {
   entry: [
@@ -30,6 +31,15 @@ module.exports = {
       title: 'Cleopatra',
       favicon: 'static/favicon.png',
       template: 'index.html',
+    }),
+    new OfflinePlugin({
+      externals: ['treetwisty.svg', 'zoom-icon.svg'],
+      relativePaths: false,
+      AppCache: false,
+      ServiceWorker: {
+        scope: '/',
+        navigateFallbackURL: '/',
+      },
     }),
   ],
   resolve: {
