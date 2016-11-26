@@ -32,6 +32,15 @@ module.exports = {
       favicon: 'static/favicon.png',
       template: 'index.html',
     }),
+    new OfflinePlugin({
+      externals: ['treetwisty.svg', 'zoom-icon.svg'],
+      relativePaths: false,
+      AppCache: false,
+      ServiceWorker: {
+        scope: '/',
+        navigateFallbackURL: '/',
+      },
+    }),
   ],
   resolve: {
     alias: {
