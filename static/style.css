@@ -838,19 +838,22 @@ body, #root, .profileViewer {
 
 .symbolicationStatusOverlay {
   position: fixed;
-  top: 0;
+  top: -8px;
+  padding-top: 8px;
   left: 30%;
   right: 30%;
-  background: rgba(0,0,0,0.2);
-  text-shadow: 0 1px hsla(0,0%,100%,0.4);
+  background: rgba(0,0,0,0.07);
   text-align: center;
-  padding: 0 10px;
+  padding-left: 10px;
+  padding-right: 10px;
   white-space: nowrap;
   text-overflow: ellipsis;
-  height: 24px;
-  line-height: 24px;
+  height: 20px;
+  line-height: 20px;
   border-radius: 0 0 5px 5px;
-  transition: ease-in-out 200ms transform, ease-in-out 200ms opacity;
+  transition: transform .2s ease-in-out, opacity .2s ease-in-out;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.1);
+  will-change: opacity, transform;
 }
 
 .symbolicationStatusOverlay.hidden {

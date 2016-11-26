@@ -38,9 +38,7 @@ class SymbolicationStatusOverlay extends Component {
       );
     }
     return (
-      <div className='symbolicationStatusOverlay hidden'>
-        {'Done.'}
-      </div>
+      <div className='symbolicationStatusOverlay hidden'></div>
     );
   }
 }
