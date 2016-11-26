@@ -833,3 +833,25 @@ body, #root, .profileViewer {
 .initializing-text li {
   margin: 1em 0;
 }
+
+.symbolicationStatusOverlay {
+  position: fixed;
+  top: 0;
+  left: 30%;
+  right: 30%;
+  background: rgba(0,0,0,0.2);
+  text-shadow: 0 1px hsla(0,0%,100%,0.4);
+  text-align: center;
+  padding: 0 10px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 0 0 5px 5px;
+  transition: ease-in-out 200ms transform, ease-in-out 200ms opacity;
+}
+
+.symbolicationStatusOverlay.hidden {
+  opacity: 0;
+  transform: translateY(-30px);
+}

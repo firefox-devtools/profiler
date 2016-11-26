@@ -12,6 +12,7 @@ import ProfileLogView from '../containers/ProfileLogView';
 import ProfileThreadJankTimeline from '../containers/ProfileThreadJankTimeline';
 import ProfileThreadTracingMarkerTimeline from '../containers/ProfileThreadTracingMarkerTimeline';
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
+import SymbolicationStatusOverlay from '../containers/SymbolicationStatusOverlay';
 import * as actions from '../actions';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../selectors/';
 
@@ -145,6 +146,8 @@ class ProfileViewer extends Component {
           log: <ProfileLogView params={params} location={location} />,
         }[selectedTab]}
         
+        <SymbolicationStatusOverlay />
+
       </div>
     );
   }
