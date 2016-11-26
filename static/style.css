@@ -622,6 +622,7 @@ body, #root, .profileViewer {
   display: flex;
   flex-flow: row nowrap;
   margin: 0 -1px;
+  max-width: 100%;
 }
 
 .tabBarTab {
@@ -634,6 +635,7 @@ body, #root, .profileViewer {
   border: solid #D6D6D6;
   border-width: 0 1px;
   margin: 0 -0.5px;
+  white-space: nowrap;
   background-clip: padding-box;
 }
 
