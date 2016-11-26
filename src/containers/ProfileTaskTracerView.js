@@ -32,9 +32,9 @@ class ThreadTaskTracerTracksImpl extends Component {
     return (
       <div className='taskTracerThreadViewTracks'>
       {
-        tracks.map(track => {
+        tracks.map((track, trackIndex) => {
           return (
-            <ol className='taskTracerThreadViewTrack'>
+            <ol className='taskTracerThreadViewTrack' key={trackIndex}>
               {
                 track.tasks.map((taskIndex, i) => {
                   const dispatchTime = taskTable.dispatchTime[taskIndex];
