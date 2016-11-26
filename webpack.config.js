@@ -29,7 +29,6 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       title: 'Cleopatra',
-      favicon: 'static/favicon.png',
       template: 'index.html',
     }),
   ],
