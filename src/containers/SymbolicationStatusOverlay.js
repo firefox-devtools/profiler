@@ -21,11 +21,19 @@ class SymbolicationStatusOverlay extends Component {
     const { viewOptions } = this.props;
     const { symbolicationStatus, waitingForLibs } = viewOptions;
     if (symbolicationStatus === 'SYMBOLICATING') {
-      const libNames = Array.from(waitingForLibs.values()).map(lib => lib.pdbName);
+      if (waitingForLibs.size > 0) {
+        const libNames = Array.from(waitingForLibs.values()).map(lib => lib.pdbName);
+        return (
+          <div className='symbolicationStatusOverlay'>
+            <span className='symbolicationStatusOverlayThrobber'></span>
+            {`Waiting for symbol tables for ${englishListJoin(libNames)}...`}
+          </div>
+        );
+      }
       return (
         <div className='symbolicationStatusOverlay'>
           <span className='symbolicationStatusOverlayThrobber'></span>
-          {`Symbolicating libraries ${englishListJoin(libNames)}...`}
+          {`Symbolicating call stacks...`}
         </div>
       );
     }
