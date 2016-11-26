@@ -10,7 +10,7 @@ export function gzipString(str) {
     const encoder = new window.TextEncoder();
     const dataAsArrayBuffer = encoder.encode(str);
     zeeWorker.postMessage({
-      data: dataAsArrayBuffer
+      data: dataAsArrayBuffer,
     }, [dataAsArrayBuffer.buffer]);
   });
 }
