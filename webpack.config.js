@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const OfflinePlugin = require('offline-plugin');
 
 module.exports = {
   entry: [
@@ -54,7 +55,18 @@ module.exports = {
   },
 };
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'production') {
+  module.exports.plugins.push(
+    new OfflinePlugin({
+      externals: ['treetwisty.svg', 'zoom-icon.svg'],
+      relativePaths: false,
+      AppCache: false,
+      ServiceWorker: {
+        scope: '/',
+        navigateFallbackURL: '/',
+      },
+    }));
+} else if (process.env.NODE_ENV === 'development') {
   module.exports.devtool = 'cheap-module-eval-source-map';
   module.exports.entry = [
     'webpack-dev-server/client?http://localhost:4242',
