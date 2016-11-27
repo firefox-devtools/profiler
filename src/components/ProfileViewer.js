@@ -12,6 +12,7 @@ import ProfileLogView from '../containers/ProfileLogView';
 import ProfileThreadJankTimeline from '../containers/ProfileThreadJankTimeline';
 import ProfileThreadTracingMarkerTimeline from '../containers/ProfileThreadTracingMarkerTimeline';
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
+import ProfileSharing from '../containers/ProfileSharing';
 import SymbolicationStatusOverlay from '../containers/SymbolicationStatusOverlay';
 import * as actions from '../actions';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../selectors/';
@@ -80,7 +81,10 @@ class ProfileViewer extends Component {
     const { selectedTab } = params;
     return (
       <div className={className}>
-        <ProfileFilterNavigator location={location}/>
+        <div className={`${className}TopBar`}>
+          <ProfileFilterNavigator location={location}/>
+          <ProfileSharing />
+        </div>
         <TimelineWithRangeSelection className={`${className}Header`}
                                     zeroAt={zeroAt}
                                     rangeStart={timeRange.start}
