@@ -5,6 +5,12 @@
   position: relative;
 }
 
+/**
+ * This wrapper uses overflow: hidden to clip the actual button.
+ * This clip is needed for the vertical slide animation that the
+ * profile sharing composite button does.
+ * The clip is on .buttonWithPanelButtonWrapper and not on
+ * .buttonWithPanel because the latter would clip the panel. */
 .buttonWithPanelButtonWrapper {
   display: flex;
   flex-flow: column nowrap;
@@ -24,6 +30,7 @@
   background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1));
 }
 
+.buttonWithPanel.open > * > .buttonWithPanelButton,
 .buttonWithPanelButton:hover:active {
   background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2));
 }
