@@ -3,6 +3,10 @@ import { connect } from 'react-redux';
 import * as actions from '../actions';
 import { getProfileViewOptions } from '../selectors/';
 
+function englishSgPlLibrary(count) {
+  return count === 1 ? 'library' : 'libraries';
+}
+
 function englishListJoin(list) {
   switch (list.length) {
     case 0:
@@ -26,14 +30,14 @@ class SymbolicationStatusOverlay extends Component {
         return (
           <div className='symbolicationStatusOverlay'>
             <span className='symbolicationStatusOverlayThrobber'></span>
-            {`Waiting for symbol tables for ${englishListJoin(libNames)}...`}
+            {`Waiting for symbol tables for ${englishSgPlLibrary(libNames.length)} ${englishListJoin(libNames)}...`}
           </div>
         );
       }
       return (
         <div className='symbolicationStatusOverlay'>
           <span className='symbolicationStatusOverlayThrobber'></span>
-          {`Symbolicating call stacks...`}
+          {'Symbolicating call stacks...'}
         </div>
       );
     }

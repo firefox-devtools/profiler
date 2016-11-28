@@ -1,0 +1,29 @@
+.buttonWithPanel {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+  position: relative;
+}
+
+.buttonWithPanelButtonWrapper {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+  height: 100%;
+  overflow: hidden;
+}
+
+.buttonWithPanelButton {
+  border: 0;
+  margin: 0;
+  padding: 0 10px;
+  height: 100%;
+}
+
+.buttonWithPanelButton:hover {
+  background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1));
+}
+
+.buttonWithPanelButton:hover:active {
+  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2));
+}

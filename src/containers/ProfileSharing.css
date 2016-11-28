@@ -1,0 +1,100 @@
+.profileSharing {
+  height: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.profileSharingCompositeButtonContainer {
+  display: flex;
+  flex-flow: column nowrap;
+  margin-bottom: ;
+}
+
+.profileSharingShareButton,
+.profileSharingUploadingButton,
+.profileSharingPermalinkButton,
+.profileSharingUploadErrorButton {
+  height: 24px;
+  margin-bottom: -24px;
+}
+
+.profileSharingUploadingButton {
+  overflow: hidden;
+}
+
+.profileSharingUploadingButtonInner {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+  height: 100%;
+  overflow: hidden;
+}
+
+.profileSharingUploadingButtonLabel {
+  padding: 0 10px;
+  line-height: 24px;
+  text-align: center;
+  color: hsla(0,0%,100%,0.7);
+  position: relative;
+  -moz-user-select: none;
+  cursor: default;
+}
+
+.profileSharingUploadingButtonProgress {
+  height: 24px;
+  margin-bottom: -24px;
+  width: calc(100% + (0.173648178 * 24px)); /* 0.173648178 == sin(10deg) */
+  background: blue;
+  border: 0;
+  transform: skewX(10deg);
+  transform-origin: bottom left;
+}
+
+.profileSharingUploadingButtonProgress::-moz-progress-bar {
+  background: hsla(0,0%,0%,0.4);
+} 
+
+.profileSharingShareButtonButton {
+  background-color: hsl(137,81%,44%);
+  color: white;
+}
+
+.profileSharingCompositeButtonContainer:not(.currentButtonIsShareButton) > .profileSharingShareButton,
+.profileSharingCompositeButtonContainer:not(.currentButtonIsUploadingButton) > .profileSharingUploadingButton,
+.profileSharingCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .profileSharingPermalinkButton,
+.profileSharingCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .profileSharingUploadErrorButton {
+  pointer-events: none;
+}
+
+.profileSharingShareButtonButton,
+.profileSharingUploadingButtonInner,
+.profileSharingPermalinkButtonButton,
+.profileSharingUploadErrorButtonButton {
+  transition: transform 200ms ease-in-out;
+}
+
+.profileSharingCompositeButtonContainer:not(.currentButtonIsShareButton) > .profileSharingShareButton > .buttonWithPanelButtonWrapper > .profileSharingShareButtonButton,
+.profileSharingCompositeButtonContainer.currentButtonIsPermalinkButton > .profileSharingUploadingButton > .profileSharingUploadingButtonInner,
+.profileSharingCompositeButtonContainer.currentButtonIsUploadErrorButton > .profileSharingUploadingButton > .profileSharingUploadingButtonInner {
+  transform: translateY(-24px);
+}
+
+.profileSharingCompositeButtonContainer.currentButtonIsShareButton > .profileSharingUploadingButton > .profileSharingUploadingButtonInner,
+.profileSharingCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .profileSharingPermalinkButton > .buttonWithPanelButtonWrapper > .profileSharingPermalinkButtonButton,
+.profileSharingCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .profileSharingUploadErrorButton > .buttonWithPanelButtonWrapper > .profileSharingUploadErrorButtonButton {
+  transform: translateY(24px);
+}
+
+.profileSharingPrivacyPanel {
+  --width: 280px;
+}
+
+.profileSharingProfileDownloadPanel {
+  --width: 280px;
+  --offset-from-right: 25px;
+}
+
+.profileSharingPermalinkTextField {
+  width: 14em;
+  margin: 5px -5px;
+}

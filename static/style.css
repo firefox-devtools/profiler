@@ -190,37 +190,6 @@ body, #root, .profileViewer {
   border-bottom: 1px solid #D6D6D6;
 }
 
-.profileSharing {
-  height: 100%;
-  display: flex;
-  flex-flow: row nowrap;
-  -moz-user-select: none;
-  cursor: default;
-}
-
-.profileSharingShareButton,
-.profileSharingDownloadButton {
-  padding: 0 10px;
-  line-height: 24px;
-  text-align: center;
-}
-
-.profileSharingShareButton:hover,
-.profileSharingDownloadButton:hover {
-  background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1));
-}
-
-.profileSharingShareButton:hover:active,
-.profileSharingDownloadButton:hover:active {
-  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2));
-}
-
-.profileSharingShareButton {
-  width: 10em;
-  background-color: rgb(0,190,0);
-  color: white;
-}
-
 .profileFilterNavigator {
   height: 100%;
   margin: 0;
@@ -887,6 +856,7 @@ body, #root, .profileViewer {
   padding-left: 10px;
   padding-right: 10px;
   white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
   height: 20px;
   line-height: 20px;
