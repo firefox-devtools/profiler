@@ -1,11 +1,14 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { getProfile } from '../selectors/';
+import { getProfile, getProfileViewOptions } from '../selectors/';
 import { gzipString } from '../gz';
 import { uploadBinaryProfileData } from '../cleopatra-profile-store';
 import ArrowPanel from '../components/ArrowPanel';
 import ButtonWithPanel from '../components/ButtonWithPanel';
+import { shortenCleopatraUrl } from '../shorten-cleopatra-url';
+import { serializeProfile } from '../preprocess-profile';
+import prettyBytes from 'pretty-bytes';
 
 require('./ProfileSharing.css');
 
@@ -40,7 +43,7 @@ UploadingStatus.propTypes = {
   progress: PropTypes.number.isRequired,
 };
 
-class ProfileSharingCompositeButtonImpl extends Component {
+class ProfileSharingCompositeButton extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -48,10 +51,31 @@ class ProfileSharingCompositeButtonImpl extends Component {
       uploadProgress: 0,
       key: '',
       error: '',
+      fullURL: '',
+      shortURL: '',
     };
     this._attemptToShare = this._attemptToShare.bind(this);
+    this._onPermalinkPanelOpen = this._onPermalinkPanelOpen.bind(this);
+    this._onPermalinkPanelClose = this._onPermalinkPanelClose.bind(this);
     this._permalinkButtonCreated = elem => { this._permalinkButton = elem; };
     this._uploadErrorButtonCreated = elem => { this._uploadErrorButton = elem; };
+    this._permalinkTextFieldCreated = elem => { this._permalinkTextField = elem; };
+  }
+
+  _onPermalinkPanelOpen() {
+    shortenCleopatraUrl(this.state.fullURL).then(shortURL => {
+      this.setState({ shortURL });
+      if (this._permalinkTextField) {
+        this._permalinkTextField.focus();
+        this._permalinkTextField.select();
+      }
+    });
+  }
+
+  _onPermalinkPanelClose() {
+    if (this._permalinkTextField) {
+      this._permalinkTextField.blur();
+    }
   }
 
   _attemptToShare() {
@@ -65,9 +89,9 @@ class ProfileSharingCompositeButtonImpl extends Component {
       if (!profile) {
         throw new Error('profile is null');
       }
-      const jsonString = JSON.stringify(profile);
+      const jsonString = serializeProfile(profile);
       if (!jsonString) {
-        throw new Error('profile stringification failed');
+        throw new Error('profile serialization failed');
       }
 
       this.setState({ state: 'uploading' });
@@ -80,6 +104,8 @@ class ProfileSharingCompositeButtonImpl extends Component {
       this.setState({
         state: 'public',
         key,
+        fullURL: `https://new.cleopatra.io/public/${key}/`,
+        shortURL: `https://new.cleopatra.io/public/${key}/`,
       });
       if (this._permalinkButton) {
         this._permalinkButton.openPanel();
@@ -96,7 +122,7 @@ class ProfileSharingCompositeButtonImpl extends Component {
   }
 
   render() {
-    const { state, uploadProgress, /* key, */ error } = this.state;
+    const { state, uploadProgress, error, shortURL } = this.state;
     return (
       <div className={
         classNames('profileSharingCompositeButtonContainer', {
@@ -107,66 +133,146 @@ class ProfileSharingCompositeButtonImpl extends Component {
         })}>
         <ButtonWithPanel className='profileSharingShareButton'
                          label='Share...'
-                         panel={<ArrowPanel className='profileSharingPrivacyPanel'
-                                            title={'Upload Profile – Privacy Notice'}
-                                            okButtonText='Share'
-                                            cancelButtonText='Cancel'
-                                            onOkButtonClick={this._attemptToShare}>
-                                  <PrivacyNotice/>
-                                </ArrowPanel>}/>
+                         panel={
+          <ArrowPanel className='profileSharingPrivacyPanel'
+                      title={'Upload Profile – Privacy Notice'}
+                      okButtonText='Share'
+                      cancelButtonText='Cancel'
+                      onOkButtonClick={this._attemptToShare}>
+            <PrivacyNotice/>
+          </ArrowPanel>
+        }/>
         <UploadingStatus progress={uploadProgress}/>
         <ButtonWithPanel className='profileSharingPermalinkButton'
                          ref={this._permalinkButtonCreated}
                          label='Permalink'
-                         panel={<ArrowPanel className='profileSharingPermalinkPanel'>
-                                  <input type='text'
-                                         className='profileSharingPermalinkTextField'
-                                         value={'https://clptr.io/2gzRwzO' /* `https://new.cleopatra.io/public/${key}/` */}/>
-                                </ArrowPanel>}/>
+                         panel={
+          <ArrowPanel className='profileSharingPermalinkPanel'
+                      onOpen={this._onPermalinkPanelOpen}
+                      onClose={this._onPermalinkPanelClose}>
+            <input type='text'
+                   className='profileSharingPermalinkTextField'
+                   value={shortURL}
+                   ref={this._permalinkTextFieldCreated}/>
+          </ArrowPanel>
+        }/>
         <ButtonWithPanel className='profileSharingUploadErrorButton'
                          ref={this._uploadErrorButtonCreated}
                          label='Upload Error'
-                         panel={<ArrowPanel className='profileSharingUploadErrorPanel'
-                                            title={'Upload Error'}
-                                            okButtonText='Try Again'
-                                            cancelButtonText='Cancel'
-                                            onOkButtonClick={this._attemptToShare}>
-                                  <p>An error occurred during upload:</p>
-                                  <pre>{`${error}`}</pre>
-                                </ArrowPanel>}/>
+                         panel={
+          <ArrowPanel className='profileSharingUploadErrorPanel'
+                      title={'Upload Error'}
+                      okButtonText='Try Again'
+                      cancelButtonText='Cancel'
+                      onOkButtonClick={this._attemptToShare}>
+            <p>An error occurred during upload:</p>
+            <pre>{`${error}`}</pre>
+          </ArrowPanel>
+        }/>
       </div>
     );
   }
 }
 
-ProfileSharingCompositeButtonImpl.propTypes = {
+ProfileSharingCompositeButton.propTypes = {
   profile: PropTypes.object,
 };
 
-const ProfileSharingCompositeButton = connect(state => ({
-  profile: getProfile(state),
-}))(ProfileSharingCompositeButtonImpl);
+function filenameDateString(d) {
+  const pad = x => x < 10 ? `0${x}` : `${x}`;
+  return `${pad(d.getFullYear())}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}.${pad(d.getMinutes())}`;
+}
 
-const DownloadLinks = () => (
-  <section>
-    <p>Uncompressed: <a href='blob:aesouchaoseurh' download='Firefox profile 2016-11-28 16:22.sps.json'>Firefox profile 2016-11-28 16:22.sps.json</a></p>
-    <p>Compressed: <a href='blob:aesouchaoseurh' download='Firefox profile 2016-11-28 16:22.sps.json.gz'>Firefox profile 2016-11-28 16:22.sps.json.gz</a></p>
-  </section>
-);
+class ProfileDownloadButton extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      uncompressedBlobUrl: '',
+      compressedBlobUrl: '',
+      uncompressedSize: 0,
+      compressedSize: 0,
+      filename: '',
+    };
+    this._onPanelOpen = this._onPanelOpen.bind(this);
+  }
 
-const ProfileDownloadButton = () => (
-  <ButtonWithPanel className='profileSharingProfileDownloadButton'
-                   label='Download...'
-                   panel={<ArrowPanel className='profileSharingProfileDownloadPanel' title={'Download Profile'}>
-                            <DownloadLinks/>
-                          </ArrowPanel>}/>
-);
+  _onPanelOpen() {
+    const { profile, viewOptions } = this.props;
+    const profileDate = new Date(profile.meta.startTime + viewOptions.rootRange.start);
+    const serializedProfile = serializeProfile(profile);
+    const blob = new Blob([serializedProfile], { type: 'application/octet-binary' });
+    const blobURL = URL.createObjectURL(blob);
+    this.setState({
+      filename: `${profile.meta.product} ${filenameDateString(profileDate)} profile.sps.json`,
+      uncompressedBlobUrl: blobURL,
+      uncompressedSize: blob.size,
+    });
+    gzipString(serializedProfile).then(data => {
+      const blob = new Blob([data], { type: 'application/octet-binary' });
+      const blobURL = URL.createObjectURL(blob);
+      this.setState({
+        compressedBlobUrl: blobURL,
+        compressedSize: blob.size,
+      });
+    });
+  }
 
-const ProfileSharing = () => (
+  render() {
+    const {
+      filename, uncompressedBlobUrl, compressedBlobUrl,
+      uncompressedSize, compressedSize,
+    } = this.state;
+    return (
+      <ButtonWithPanel className='profileSharingProfileDownloadButton'
+                       label='Download...'
+                       panel={
+        <ArrowPanel className='profileSharingProfileDownloadPanel'
+                    title={'Download Profile'}
+                    onOpen={this._onPanelOpen}>
+          <section>
+            { uncompressedBlobUrl
+                ? <p>
+                    <a className='profileSharingDownloadLink'
+                       href={uncompressedBlobUrl}
+                       download={filename}>
+                      {`${filename} (${prettyBytes(uncompressedSize)})`}
+                    </a>
+                  </p>
+                : null }
+            { compressedBlobUrl
+                ? <p>
+                    <a className='profileSharingDownloadLink'
+                       href={compressedBlobUrl}
+                       download={`${filename}.gz`}>
+                      {`${filename}.gz (${prettyBytes(compressedSize)})`}
+                    </a>
+                  </p>
+                : null }
+          </section>
+        </ArrowPanel>
+      }/>
+    );
+  }
+}
+
+ProfileDownloadButton.propTypes = {
+  profile: PropTypes.object,
+  viewOptions: PropTypes.object,
+};
+
+const ProfileSharing = ({ profile, viewOptions }) => (
   <div className='profileSharing'>
-    <ProfileSharingCompositeButton />
-    <ProfileDownloadButton />
+    <ProfileSharingCompositeButton profile={profile}/>
+    <ProfileDownloadButton profile={profile} viewOptions={viewOptions}/>
   </div>
 );
 
-export default ProfileSharing;
+ProfileSharing.propTypes = {
+  profile: PropTypes.object,
+  viewOptions: PropTypes.object,
+};
+
+export default connect(state => ({
+  profile: getProfile(state),
+  viewOptions: getProfileViewOptions(state),
+}))(ProfileSharing);

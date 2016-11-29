@@ -90,8 +90,12 @@
 }
 
 .profileSharingProfileDownloadPanel {
-  --width: 280px;
   --offset-from-right: 25px;
+  --width: 30em;
+}
+
+.profileSharingDownloadLink {
+  white-space: nowrap;
 }
 
 .profileSharingPermalinkTextField {
