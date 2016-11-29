@@ -1,4 +1,7 @@
 .profileSharing {
+  --internal-share-button-background-color: var(--share-button-background-color, hsl(137,81%,44%));
+  --internal-uploading-button-background-color: var(--uploading-button-background-color, #38445f);
+  --internal-uploading-progress-fill-color: var(--uploading-progress-fill-color, #7990c8);
   height: 100%;
   display: flex;
   flex-flow: row nowrap;
@@ -44,18 +47,18 @@
   height: 24px;
   margin-bottom: -24px;
   width: calc(100% + (0.173648178 * 24px)); /* 0.173648178 == sin(10deg) */
-  background: blue;
+  background: var(--internal-uploading-button-background-color);
   border: 0;
   transform: skewX(10deg);
   transform-origin: bottom left;
 }
 
 .profileSharingUploadingButtonProgress::-moz-progress-bar {
-  background: hsla(0,0%,0%,0.4);
+  background: var(--internal-uploading-progress-fill-color);
 } 
 
 .profileSharingShareButtonButton {
-  background-color: hsl(137,81%,44%);
+  background-color: var(--internal-share-button-background-color);
   color: white;
 }
 

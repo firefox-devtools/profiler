@@ -224,10 +224,10 @@ class ProfileDownloadButton extends Component {
     } = this.state;
     return (
       <ButtonWithPanel className='profileSharingProfileDownloadButton'
-                       label='Download...'
+                       label='Save as file...'
                        panel={
         <ArrowPanel className='profileSharingProfileDownloadPanel'
-                    title={'Download Profile'}
+                    title={'Save Profile to a Local File'}
                     onOpen={this._onPanelOpen}>
           <section>
             { uncompressedBlobUrl
