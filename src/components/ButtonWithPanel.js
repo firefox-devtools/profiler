@@ -9,16 +9,16 @@ class ButtonWithPanel extends Component {
     this.state = { open: false };
     this._onPanelOpen = () => {
       this.setState({ open: true });
-      if (this.props.panel.onOpen) {
-        this.props.panel.onOpen();
+      if (this.props.panel.props.onOpen) {
+        this.props.panel.props.onOpen();
       }
-    }
+    };
     this._onPanelClose = () => {
       this.setState({ open: false });
-      if (this.props.panel.onClose) {
-        this.props.panel.onClose();
+      if (this.props.panel.props.onClose) {
+        this.props.panel.props.onClose();
       }
-    }
+    };
     this._onButtonClick = this._onButtonClick.bind(this);
     this._panelCreated = panel => { this._panel = panel; };
   }
@@ -47,7 +47,7 @@ class ButtonWithPanel extends Component {
         {React.cloneElement(panel, {
           ref: this._panelCreated,
           onOpen: this._onPanelOpen,
-          onClose: this._onPanelClose
+          onClose: this._onPanelClose,
         })}
       </div>
     );
