@@ -378,7 +378,6 @@ export function serializeProfile(profile) {
     newTasktracer.stringArray = stringTable.serializeToArray();
     newProfile.tasktracer = newTasktracer;
   }
-  console.log('newProfile:', newProfile);
   return JSON.stringify(newProfile);
 }
 
@@ -396,7 +395,6 @@ export function unserializeProfile(jsonString) {
     delete tasktracer.stringArray;
     tasktracer.stringTable = new UniqueStringArray(stringArray);
   }
-  console.log('profile:', profile);
   return profile;
 }
 
