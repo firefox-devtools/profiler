@@ -61,7 +61,7 @@ module.exports = {
 if (process.env.NODE_ENV === 'production') {
   module.exports.plugins.push(
     new OfflinePlugin({
-      externals: ['treetwisty.svg', 'zoom-icon.svg'],
+      externals: ['favicon.png', 'treetwisty.svg', 'zoom-icon.svg', 'gecko-profiler-screenshot-2016-11-29.png'],
       relativePaths: false,
       AppCache: false,
       ServiceWorker: {

@@ -1,9 +1,10 @@
 import React, { Component, PropTypes } from 'react';
 import { connect, Provider } from 'react-redux';
-import { Router, Route, Redirect, IndexRedirect } from 'react-router';
+import { Router, Route, Redirect, IndexRoute } from 'react-router';
 import App from './App';
 import ProfileViewer from '../components/ProfileViewer';
 import Initializing from '../components/Initializing';
+import Home from '../containers/Home';
 
 const ProfileViewerOnceReady = connect(({ view }) => ({ view }))(({ view, params, location }) => {
   switch (view) {
@@ -29,7 +30,7 @@ export default class Root extends Component {
       <Provider store={store}>
         <Router history={history}>
           <Route path='/' component={App}>
-            <IndexRedirect to='/profile/calltree/' />
+            <IndexRoute component={Home} />
             <Route path='profile/:selectedTab' component={ProfileViewerOnceReady} />
             <Redirect from='profile' to='/profile/calltree/' component={ProfileViewerOnceReady} />
           </Route>
