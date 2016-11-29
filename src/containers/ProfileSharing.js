@@ -2,11 +2,12 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import { getProfile, getProfileViewOptions } from '../selectors/';
+import * as actions from '../actions';
 import { gzipString } from '../gz';
 import { uploadBinaryProfileData } from '../cleopatra-profile-store';
 import ArrowPanel from '../components/ArrowPanel';
 import ButtonWithPanel from '../components/ButtonWithPanel';
-import { shortenCleopatraUrl } from '../shorten-cleopatra-url';
+import shortenCleopatraURL from '../shorten-cleopatra-url';
 import { serializeProfile } from '../preprocess-profile';
 import prettyBytes from 'pretty-bytes';
 
@@ -46,13 +47,15 @@ UploadingStatus.propTypes = {
 class ProfileSharingCompositeButton extends Component {
   constructor(props) {
     super(props);
+    console.log('initializing ProfileSharingCompositeButton with', props);
+    const { dataSource, params: { hash } } = props;
     this.state = {
-      state: 'local',  // local -> uploading (<-> error) -> public
+      state: dataSource === 'public' ? 'public' : 'local',  // local -> uploading (<-> error) -> public
       uploadProgress: 0,
-      key: '',
+      hash,
       error: '',
-      fullURL: '',
-      shortURL: '',
+      fullURL: window.location.href,
+      shortURL: window.location.href,
     };
     this._attemptToShare = this._attemptToShare.bind(this);
     this._onPermalinkPanelOpen = this._onPermalinkPanelOpen.bind(this);
@@ -62,8 +65,18 @@ class ProfileSharingCompositeButton extends Component {
     this._permalinkTextFieldCreated = elem => { this._permalinkTextField = elem; };
   }
 
+  componentWillReceiveProps({ params: { dataSource, hash } }) {
+    if (dataSource === 'public' &&
+        this.state.state !== 'public') {
+      this.setState({ state: 'public', hash });
+    }
+    if (window.location.href !== this.state.fullURL) {
+      this.setState({ fullURL: window.location.href });
+    }
+  }
+
   _onPermalinkPanelOpen() {
-    shortenCleopatraUrl(this.state.fullURL).then(shortURL => {
+    shortenCleopatraURL(this.state.fullURL).then(shortURL => {
       this.setState({ shortURL });
       if (this._permalinkTextField) {
         this._permalinkTextField.focus();
@@ -100,12 +113,14 @@ class ProfileSharingCompositeButton extends Component {
       return uploadBinaryProfileData(gzipData, uploadProgress => {
         this.setState({ uploadProgress });
       });
-    }).then(key => {
+    }).then(hash => {
+      const { location, params, onProfilePublished } = this.props;
+      onProfilePublished(hash, location, params);
       this.setState({
         state: 'public',
-        key,
-        fullURL: `https://new.cleopatra.io/public/${key}/`,
-        shortURL: `https://new.cleopatra.io/public/${key}/`,
+        hash,
+        fullURL: window.location.href,
+        shortURL: window.location.href,
       });
       if (this._permalinkButton) {
         this._permalinkButton.openPanel();
@@ -176,6 +191,10 @@ class ProfileSharingCompositeButton extends Component {
 
 ProfileSharingCompositeButton.propTypes = {
   profile: PropTypes.object,
+  location: PropTypes.object.isRequired,
+  params: PropTypes.object.isRequired,
+  dataSource: PropTypes.string.isRequired,
+  onProfilePublished: PropTypes.func.isRequired,
 };
 
 function filenameDateString(d) {
@@ -260,9 +279,9 @@ ProfileDownloadButton.propTypes = {
   viewOptions: PropTypes.object,
 };
 
-const ProfileSharing = ({ profile, viewOptions }) => (
+const ProfileSharing = ({ profile, viewOptions, dataSource, location, params, profilePublished }) => (
   <div className='profileSharing'>
-    <ProfileSharingCompositeButton profile={profile}/>
+    <ProfileSharingCompositeButton profile={profile} dataSource={dataSource} location={location} params={params} onProfilePublished={profilePublished}/>
     <ProfileDownloadButton profile={profile} viewOptions={viewOptions}/>
   </div>
 );
@@ -270,9 +289,13 @@ const ProfileSharing = ({ profile, viewOptions }) => (
 ProfileSharing.propTypes = {
   profile: PropTypes.object,
   viewOptions: PropTypes.object,
+  location: PropTypes.object.isRequired,
+  params: PropTypes.object.isRequired,
+  dataSource: PropTypes.string.isRequired,
+  profilePublished: PropTypes.func.isRequired,
 };
 
 export default connect(state => ({
   profile: getProfile(state),
   viewOptions: getProfileViewOptions(state),
-}))(ProfileSharing);
+}), actions)(ProfileSharing);

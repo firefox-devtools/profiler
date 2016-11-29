@@ -75,6 +75,7 @@
     "rimraf": "^2.5.4",
     "shallowequal": "^0.2.2",
     "style-loader": "^0.13.1",
+    "url": "^0.11.0",
     "watchify": "^3.6.1",
     "webpack": "^2.1.0-beta.27",
     "webpack-dev-middleware": "^1.8.4",

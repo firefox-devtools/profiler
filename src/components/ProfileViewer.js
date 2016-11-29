@@ -65,7 +65,8 @@ class ProfileViewer extends Component {
   }
 
   _onSelectTab(selectedTab) {
-    this.props.changeSelectedTab(selectedTab, this.props.location);
+    const { changeSelectedTab, dataSource, location, params } = this.props;
+    changeSelectedTab(selectedTab, dataSource, location, params);
   }
 
   render() {
@@ -73,7 +74,7 @@ class ProfileViewer extends Component {
       profile, className, threadOrder, changeThreadOrder,
       viewOptions, updateProfileSelection,
       timeRange, zeroAt, params, location,
-      changeTabOrder,
+      changeTabOrder, dataSource,
     } = this.props;
     const threads = profile.threads;
     const { selection, tabOrder } = viewOptions;
@@ -83,7 +84,7 @@ class ProfileViewer extends Component {
       <div className={className}>
         <div className={`${className}TopBar`}>
           <ProfileFilterNavigator location={location}/>
-          <ProfileSharing />
+          <ProfileSharing dataSource={dataSource} location={location} params={params}/>
         </div>
         <TimelineWithRangeSelection className={`${className}Header`}
                                     zeroAt={zeroAt}
@@ -167,6 +168,7 @@ ProfileViewer.propTypes = {
   addRangeFilterAndUnsetSelection: PropTypes.func.isRequired,
   timeRange: PropTypes.object.isRequired,
   zeroAt: PropTypes.number.isRequired,
+  dataSource: PropTypes.string.isRequired,
   params: PropTypes.any.isRequired,
   location: PropTypes.any.isRequired,
   changeSelectedThread: PropTypes.func.isRequired,

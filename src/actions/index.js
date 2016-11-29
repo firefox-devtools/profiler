@@ -1,5 +1,8 @@
-import { push } from 'react-router-redux';
+import { push, replace } from 'react-router-redux';
 import { parseRangeFilters, stringifyRangeFilters } from '../range-filters';
+import { preprocessProfile, unserializeProfile } from '../preprocess-profile';
+import { symbolicateProfile } from '../symbolication';
+import { SymbolStore } from '../symbol-store';
 
 export function waitingForProfileFromAddon() {
   return {
@@ -115,6 +118,84 @@ export function assignTaskTracerNames(addressIndices, symbolNames) {
   };
 }
 
+export function retrieveProfileFromAddon() {
+  return dispatch => {
+    if (!window.geckoProfilerPromise) {
+      // XXX handle this.
+      return;
+    }
+
+    dispatch(waitingForProfileFromAddon());
+
+    window.geckoProfilerPromise.then(geckoProfiler => {
+      geckoProfiler.getProfile().then(rawProfile => {
+        const profile = preprocessProfile(rawProfile);
+        dispatch(receiveProfileFromAddon(profile));
+
+        const symbolStore = new SymbolStore('cleopatra-async-storage', {
+          requestSymbolTable: (pdbName, breakpadId) => {
+            const requestedLib = { pdbName, breakpadId };
+            dispatch(requestingSymbolTable(requestedLib));
+            return geckoProfiler.getSymbolTable(pdbName, breakpadId).then(symbolTable => {
+              dispatch(receivedSymbolTableReply(requestedLib));
+              return symbolTable;
+            }, error => {
+              dispatch(receivedSymbolTableReply(requestedLib));
+              throw error;
+            });
+          },
+        });
+
+        dispatch(startSymbolicating());
+        symbolicateProfile(profile, symbolStore, {
+          onMergeFunctions: (threadIndex, oldFuncToNewFuncMap) => {
+            dispatch(mergeFunctions(threadIndex, oldFuncToNewFuncMap));
+          },
+          onGotFuncNames: (threadIndex, funcIndices, funcNames) => {
+            dispatch(assignFunctionNames(threadIndex, funcIndices, funcNames));
+          },
+          onGotTaskTracerNames: (addressIndices, symbolNames) => {
+            dispatch(assignTaskTracerNames(addressIndices, symbolNames));
+          },
+        }).then(() => dispatch(doneSymbolicating()));
+      });
+    });
+  };
+}
+
+export function waitingForProfileFromWeb() {
+  return {
+    type: 'WAITING_FOR_PROFILE_FROM_WEB',
+  };
+}
+
+export function receiveProfileFromWeb(profile) {
+  return {
+    type: 'RECEIVE_PROFILE_FROM_WEB',
+    profile,
+  };
+}
+
+export function errorReceivingProfileFromWeb(error) {
+  return {
+    type: 'ERROR_RECEIVING_PROFILE_FROM_WEB',
+    error,
+  };
+}
+
+export function retrieveProfileFromWeb(hash) {
+  return dispatch => {
+    dispatch(waitingForProfileFromWeb());
+
+    fetch(`https://profile-store.commondatastorage.googleapis.com/${hash}`).then(response => response.text()).then(text => {
+      const profile = unserializeProfile(text);
+      dispatch(receiveProfileFromWeb(profile));
+    }).catch(error => {
+      dispatch(errorReceivingProfileFromWeb(error));
+    });
+  };
+}
+
 export function changeSelectedFuncStack(threadIndex, selectedFuncStack) {
   return {
     type: 'CHANGE_SELECTED_FUNC_STACK',
@@ -136,12 +217,29 @@ export function changeThreadOrder(threadOrder) {
   };
 }
 
-export function changeSelectedTab(selectedTab, location) {
-  const newPathname = `/profile/${selectedTab}/`;
+function basePathExcludingTrailingSlash(dataSource, params) {
+  if (params.hash) {
+    return `/${dataSource}/${params.hash}`;
+  }
+  return `/${dataSource}`;
+}
+
+export function changeSelectedTab(selectedTab, dataSource, location, params) {
+  const newPathname = `${basePathExcludingTrailingSlash(dataSource, params)}/${selectedTab}/`;
   if (location.pathname === newPathname) {
     return () => {};
   }
   return dispatch => dispatch(push({ pathname: newPathname, query: location.query }));
+}
+
+export function profilePublished(hash, location, params) {
+  const { selectedTab } = params;
+  const newParams = Object.assign({}, params, { dataSource: 'public', hash });
+  const newPathname = `${basePathExcludingTrailingSlash(newParams)}/${selectedTab}/`;
+  if (location.pathname === newPathname) {
+    return () => {};
+  }
+  return dispatch => dispatch(replace({ pathname: newPathname, query: location.query }));
 }
 
 export function changeTabOrder(tabOrder) {
@@ -257,8 +355,8 @@ export const queryRootReducer = createQueryReducer({
   rangeFilters: rangeFiltersReducer,
 });
 
-function pushQueryAction(action, { query }) {
-  return push({ query: queryRootReducer(query, action) });
+function pushQueryAction(action, { pathname, query }) {
+  return push({ pathname, query: queryRootReducer(query, action) });
 }
 
 export function changeJSOnly(jsOnly, location) {
