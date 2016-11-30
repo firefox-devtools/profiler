@@ -13,7 +13,7 @@
     "build": "npm run build:clean && NODE_ENV=development webpack --progress",
     "build-prod-readable": "npm run build:clean && NODE_ENV=production webpack --progress",
     "build-prod": "npm run build:clean && NODE_ENV=production webpack -p --progress",
-    "build:clean": "rimraf dist && mkdirp dist",
+    "build:clean": "rimraf dist && mkdirp dist && cp res/.htaccess dist/",
     "eslint": "eslint index.js src",
     "eslint-fix": "eslint --fix index.js src",
     "documentation": "documentation"
