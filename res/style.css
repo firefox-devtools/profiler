@@ -142,7 +142,7 @@ body, #root, .profileViewer {
 }
 
 .treeRowToggleButton {
-  background-image: url(/treetwisty.svg);
+  background-image: url(./treetwisty.svg);
 }
 
 .treeRowToggleButton:active:hover,
@@ -244,7 +244,7 @@ body, #root, .profileViewer {
 }
 
 .profileFilterNavigatorItem:not(.profileFilterNavigatorLeafItem):not(.profileFilterNavigatorBeforeSelectedItem):not(.profileFilterNavigatorSelectedItem)::after {
-  background-image: url(/scope-bar-separator.svg);
+  background-image: url(./scope-bar-separator.svg);
   background-repeat: no-repeat;
   background-position: -18px -12px;
   background-size: 24px 24px;
@@ -592,7 +592,7 @@ body, #root, .profileViewer {
   margin: -15px;
   position: relative;
   border: 1px solid rgba(0, 0, 0, 0.2);
-  background: url(/zoom-icon.svg) center center no-repeat rgba(255, 255, 255, 0.6);
+  background: url(./zoom-icon.svg) center center no-repeat rgba(255, 255, 255, 0.6);
   transition: opacity 200ms ease-in-out;
   will-change: opacity;
   opacity: 0.5;

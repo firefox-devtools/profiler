@@ -8,7 +8,7 @@ module.exports = {
     './index',
   ],
   output: {
-    path: path.join(__dirname, 'static'),
+    path: path.join(__dirname, 'dist'),
     filename: '[hash].bundle.js',
     chunkFilename: '[id].[hash].bundle.js',
     publicPath: '/',
@@ -29,7 +29,8 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       title: 'Cleopatra',
-      template: 'index.html',
+      template: 'res/index.html',
+      favicon: 'res/favicon.png',
     }),
   ],
   resolve: {
@@ -53,6 +54,15 @@ module.exports = {
       test: /\.css?$/,
       loaders: ['style-loader', 'css-loader?minimize'],
       include: __dirname,
+    }, {
+      test: /\.jpg$/,
+      loader: 'file-loader',
+    }, {
+      test: /\.png$/,
+      loader: 'file-loader',
+    }, {
+      test: /\.svg$/,
+      loader: 'file-loader',
     }],
   },
 };
@@ -60,7 +70,6 @@ module.exports = {
 if (process.env.NODE_ENV === 'production') {
   module.exports.plugins.push(
     new OfflinePlugin({
-      externals: ['favicon.png', 'treetwisty.svg', 'zoom-icon.svg', 'gecko-profiler-screenshot-2016-11-29.png'],
       relativePaths: false,
       AppCache: false,
       ServiceWorker: {

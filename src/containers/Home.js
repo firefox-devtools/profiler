@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
+import AddonScreenshot from '../../res/gecko-profiler-screenshot-2016-11-29.png';
 
 require('./Home.css');
 
@@ -18,7 +19,7 @@ const Home = ({ className, profilerUrl }) => {
           <li><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>5</kbd>: Stop / Restart profiling</li>
           <li><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>6</kbd>: Capture the profile and open up this interface.</li>
         </ul>
-        <p><img src='/gecko-profiler-screenshot-2016-11-29.png' style={{ width: '393px', height: '216px' }}/></p>
+        <p><img src={AddonScreenshot} style={{ width: '393px', height: '216px' }}/></p>
       </section>
     </div>
   );

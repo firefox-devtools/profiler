@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import classNames from 'classnames';
 import { getProfile, getProfileViewOptions } from '../selectors/';
 import * as actions from '../actions';
-import { gzipString } from '../gz';
+import { compress } from '../gz';
 import { uploadBinaryProfileData } from '../cleopatra-profile-store';
 import ArrowPanel from '../components/ArrowPanel';
 import ButtonWithPanel from '../components/ButtonWithPanel';
@@ -109,7 +109,7 @@ class ProfileSharingCompositeButton extends Component {
 
       this.setState({ state: 'uploading' });
       resolve(jsonString);
-    })).then(gzipString).then(gzipData => {
+    })).then(compress).then(gzipData => {
       return uploadBinaryProfileData(gzipData, uploadProgress => {
         this.setState({ uploadProgress });
       });
@@ -226,7 +226,7 @@ class ProfileDownloadButton extends Component {
       uncompressedBlobUrl: blobURL,
       uncompressedSize: blob.size,
     });
-    gzipString(serializedProfile).then(data => {
+    compress(serializedProfile).then(data => {
       const blob = new Blob([data], { type: 'application/octet-binary' });
       const blobURL = URL.createObjectURL(blob);
       this.setState({

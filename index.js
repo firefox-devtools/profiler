@@ -11,7 +11,7 @@ import { syncHistoryWithStore, routerReducer, routerMiddleware } from 'react-rou
 import reducers from './src/reducers';
 import Root from './src/containers/Root';
 
-require('./static/style.css');
+require('./res/style.css');
 
 if (process.env.NODE_ENV === 'production') {
   require('offline-plugin/runtime').install();
