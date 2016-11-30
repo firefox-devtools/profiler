@@ -65,7 +65,7 @@ class ProfileSharingCompositeButton extends Component {
     this._permalinkTextFieldCreated = elem => { this._permalinkTextField = elem; };
   }
 
-  componentWillReceiveProps({ params: { dataSource, hash } }) {
+  componentWillReceiveProps({ dataSource, params: { hash } }) {
     if (dataSource === 'public' &&
         this.state.state !== 'public') {
       this.setState({ state: 'public', hash });

@@ -234,8 +234,8 @@ export function changeSelectedTab(selectedTab, dataSource, location, params) {
 
 export function profilePublished(hash, location, params) {
   const { selectedTab } = params;
-  const newParams = Object.assign({}, params, { dataSource: 'public', hash });
-  const newPathname = `${basePathExcludingTrailingSlash(newParams)}/${selectedTab}/`;
+  const newParams = Object.assign({}, params, { hash });
+  const newPathname = `${basePathExcludingTrailingSlash('public', newParams)}/${selectedTab}/`;
   if (location.pathname === newPathname) {
     return () => {};
   }
