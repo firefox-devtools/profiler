@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { getProfileSummaries, getThreadNames, getProfileExpandedSummaries } from '../selectors/';
-import SummarizeLineGraph from '../components/SummarizeLineGraph';
+import SummarizeLineGraph from '../components/summarize-profile/SummarizeLineGraph';
 import * as actions from '../actions';
 
 const EXPAND_LENGTH = 5;

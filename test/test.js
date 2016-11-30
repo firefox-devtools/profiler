@@ -1,10 +1,10 @@
 import 'babel-polyfill';
 import { assert } from 'chai';
-import { getContainingLibrary, symbolicateProfile, applyFunctionMerging, setFuncNames } from '../src/symbolication';
-import { preprocessProfile } from '../src/preprocess-profile';
-import { resourceTypes, getFuncStackInfo } from '../src/profile-data';
+import { getContainingLibrary, symbolicateProfile, applyFunctionMerging, setFuncNames } from '../src/content/symbolication';
+import { preprocessProfile } from '../src/content/preprocess-profile';
+import { resourceTypes, getFuncStackInfo } from '../src/content/profile-data';
 import exampleProfile from './example-profile';
-import { UniqueStringArray } from '../src/unique-string-array';
+import { UniqueStringArray } from '../src/content/unique-string-array';
 import { FakeSymbolStore } from './fake-symbol-store';
 
 describe('unique-string-array', function () {
@@ -40,7 +40,7 @@ describe('preprocess-profile', function () {
       assert.notProperty(profile, 'libs');
     });
     it('should have threads that are objects of the right shape', function () {
-      for (let thread of profile.threads) {
+      for (const thread of profile.threads) {
         assert.equal(typeof thread, 'object');
         assert.property(thread, 'libs');
         assert.property(thread, 'samples');
@@ -52,15 +52,15 @@ describe('preprocess-profile', function () {
         assert.property(thread, 'resourceTable');
       }
     });
-    it("should sort libs by start address", function () {
+    it('should sort libs by start address', function () {
       const libs = profile.threads[0].libs;
       let lastStartAddress = -Infinity;
-      for (let lib of libs) {
+      for (const lib of libs) {
         assert.isAbove(lib.start, lastStartAddress);
         lastStartAddress = lib.start;
       }
     });
-    it("should have reasonable pdbName fields on each library", function () {
+    it('should have reasonable pdbName fields on each library', function () {
       assert.equal(profile.threads[0].libs[0].pdbName, 'firefox');
       assert.equal(profile.threads[0].libs[1].pdbName, 'examplebinary');
       assert.equal(profile.threads[0].libs[2].pdbName, 'examplebinary2.pdb');
@@ -73,9 +73,9 @@ describe('preprocess-profile', function () {
       assert.equal(profile.threads[2].libs[1].pdbName, 'examplebinary');
       assert.equal(profile.threads[2].libs[2].pdbName, 'examplebinary2.pdb');
     });
-    it("should have reasonable breakpadId fields on each library", function () {
-      for (let thread of profile.threads) {
-        for (let lib of thread.libs) {
+    it('should have reasonable breakpadId fields on each library', function () {
+      for (const thread of profile.threads) {
+        for (const lib of thread.libs) {
           assert.property(lib, 'breakpadId');
           assert.equal(lib.breakpadId.length, 33);
           assert.equal(lib.breakpadId, lib.breakpadId.toUpperCase());
@@ -123,7 +123,7 @@ describe('preprocess-profile', function () {
       assert.equal(thread.resourceTable.length, 1);
       assert.equal(thread.resourceTable.type[0], resourceTypes.library);
       const nameStringIndex = thread.resourceTable.name[0];
-      assert.equal(thread.stringTable.getString(nameStringIndex), "firefox");
+      assert.equal(thread.stringTable.getString(nameStringIndex), 'firefox');
     });
     // TODO: add a JS frame to the example profile and check that we get a resource for the JS file
   });
@@ -150,7 +150,7 @@ describe('profile-data', function () {
 
 describe('symbolication', function () {
   describe('getContainingLibrary', function () {
-    let libs = [
+    const libs = [
       { start: 0, end: 20, name: 'first' },
       { start: 20, end: 40, name: 'second' },
       { start: 40, end: 50, name: 'third' },
@@ -182,7 +182,7 @@ describe('symbolication', function () {
       assert.equal(getContainingLibrary(libs, 50), null);
       assert.equal(getContainingLibrary(libs, 55), null);
       assert.equal(getContainingLibrary(libs, 59), null);
-    })
+    });
   });
 
   describe('symbolicateProfile', function (done) {
@@ -195,7 +195,7 @@ describe('symbolication', function () {
         0: 'first symbol',
         0xf00: 'second symbol',
         0x1a00: 'third symbol',
-        0x2000: 'last symbol'
+        0x2000: 'last symbol',
       };
       const symbolProvider = new FakeSymbolStore({ 'firefox': symbolTable, 'firefox-webcontent': symbolTable });
       symbolicatedProfile = Object.assign({}, unsymbolicatedProfile, { threads: unsymbolicatedProfile.threads.slice() });
@@ -204,8 +204,8 @@ describe('symbolication', function () {
           symbolicatedProfile.threads[threadIndex] = applyFunctionMerging(symbolicatedProfile.threads[threadIndex], oldFuncToNewFuncMap);
         },
         onGotFuncNames: (threadIndex, funcIndices, funcNames) => {
-          symbolicatedProfile.threads[threadIndex] = setFuncNames(symbolicatedProfile.threads[threadIndex], funcIndices, funcNames)
-        }
+          symbolicatedProfile.threads[threadIndex] = setFuncNames(symbolicatedProfile.threads[threadIndex], funcIndices, funcNames);
+        },
       });
       return symbolicationPromise;
     });
