@@ -47,7 +47,6 @@ UploadingStatus.propTypes = {
 class ProfileSharingCompositeButton extends Component {
   constructor(props) {
     super(props);
-    console.log('initializing ProfileSharingCompositeButton with', props);
     const { dataSource, params: { hash } } = props;
     this.state = {
       state: dataSource === 'public' ? 'public' : 'local',  // local -> uploading (<-> error) -> public
