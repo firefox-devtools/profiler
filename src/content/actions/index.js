@@ -4,6 +4,28 @@ import { preprocessProfile, unserializeProfile } from '../preprocess-profile';
 import { defaultThreadOrder, getTimeRangeIncludingAllThreads } from '../profile-data';
 import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
+import { getProfile } from '../selectors/';
+
+export function profileSummaryProcessed(summary) {
+  return {
+    type: 'PROFILE_SUMMARY_PROCESSED',
+    summary,
+  };
+}
+
+export function expandProfileSummaryThread(threadName) {
+  return {
+    type: 'PROFILE_SUMMARY_EXPAND',
+    threadName,
+  };
+}
+
+export function collapseProfileSummaryThread(threadName) {
+  return {
+    type: 'PROFILE_SUMMARY_COLLAPSE',
+    threadName,
+  };
+}
 
 export function waitingForProfileFromAddon() {
   return {
@@ -39,7 +61,19 @@ export function startSymbolicating() {
 }
 
 export function doneSymbolicating() {
-  return { type: 'DONE_SYMBOLICATING' };
+  return function(dispatch, getState) {
+    dispatch({ type: 'DONE_SYMBOLICATING' });
+    // TODO - Do not use selectors here.
+    dispatch({
+      toWorker: true,
+      type: 'PROFILE_PROCESSED',
+      profile: getProfile(getState()),
+    });
+    dispatch({
+      toWorker: true,
+      type: 'SUMMARIZE_PROFILE',
+    });
+  };
 }
 
 export function coalescedFunctionsUpdate(functionsUpdatePerThread) {
