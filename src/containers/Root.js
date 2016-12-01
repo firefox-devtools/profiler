@@ -7,7 +7,7 @@ import Home from '../containers/Home';
 
 class GettingProfileFromAddonImpl extends Component {
   componentDidMount() {
-    this.props.retrieveProfileFromAddon();
+    this.props.retrieveProfileFromAddon(this.props.location);
   }
 
   render() {
@@ -22,6 +22,7 @@ class GettingProfileFromAddonImpl extends Component {
 
 GettingProfileFromAddonImpl.propTypes = {
   retrieveProfileFromAddon: PropTypes.func.isRequired,
+  location: PropTypes.object.isRequired,
 };
 
 const GettingProfileFromAddon = connect(() => ({}), actions)(GettingProfileFromAddonImpl);

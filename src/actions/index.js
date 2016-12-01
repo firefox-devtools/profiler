@@ -119,7 +119,7 @@ export function assignTaskTracerNames(addressIndices, symbolNames) {
   };
 }
 
-export function retrieveProfileFromAddon() {
+export function retrieveProfileFromAddon(location) {
   return dispatch => {
     dispatch(waitingForProfileFromAddon());
 
