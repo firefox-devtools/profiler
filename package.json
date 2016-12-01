@@ -4,7 +4,7 @@
   "description": "Cleopatra, the gecko profiler UI",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register",
+    "test": "mocha --compilers js:babel-core/register test/**/*.js src/**/test/*.js",
     "start": "NODE_ENV=development node server.js",
     "start-no-hot": "NODE_ENV=development-no-hot node server.js",
     "start-prod": "npm run build-prod && npm run serve-static",

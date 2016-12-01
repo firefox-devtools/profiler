@@ -17,7 +17,7 @@
   right: calc(0px - var(--internal-offset-from-right));
   min-width: var(--internal-width);
   filter: drop-shadow(0 0 0.5px rgba(0,0,0,0.4)) drop-shadow(0 4px 5px rgba(0,0,0,0.4));
-  filter: url(../../res/shadowfilter.svg#menushadow);
+  filter: url(../../../res/shadowfilter.svg#menushadow);
   color: black;
   text-align: left;
   line-height: 1.3;

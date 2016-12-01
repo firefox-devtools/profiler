@@ -842,3 +842,15 @@ body, #root, .profileViewer {
   opacity: 0;
   transform: translateY(-30px);
 }
+
+.filler {
+  animation-name: filler;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes filler {
+  0% { opacity: 1; animation-timing-function: ease-out; }
+  50% { opacity: 0.5; animation-timing-function: ease-in-out; }
+  100% { opacity: 1; animation-timing-function: ease-in; }
+}

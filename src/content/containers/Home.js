@@ -1,6 +1,6 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import AddonScreenshot from '../../res/gecko-profiler-screenshot-2016-11-29.png';
+import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2016-11-29.png';
 
 require('./Home.css');
 
