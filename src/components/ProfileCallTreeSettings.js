@@ -24,18 +24,20 @@ class ProfileCallTreeSettings extends Component {
     const { jsOnly, invertCallstack } = this.props;
     return (
       <div className='profileCallTreeSettings'>
-        <ul>
-          <li>
-            <label>
+        <ul className='profileCallTreeSettingsList'>
+          <li className='profileCallTreeSettingsListItem'>
+            <label className='profileCallTreeSettingsLabel'>
               <input type='checkbox'
+                     className='profileCallTreeSettingsCheckbox'
                      onChange={this._onJSOnlyClick}
                      checked={jsOnly}/>
               { ' JavaScript only' }
             </label>
           </li>
-          <li>
-            <label>
+          <li className='profileCallTreeSettingsListItem'>
+            <label className='profileCallTreeSettingsLabel'>
               <input type='checkbox'
+                     className='profileCallTreeSettingsCheckbox'
                      onChange={this._onInvertCallstackClick}
                      checked={invertCallstack}/>
               { ' Invert call stack' }

@@ -7,20 +7,20 @@
   background: #F9F9F9;
 }
 
-.profileCallTreeSettings ul {
+.profileCallTreeSettingsList {
   display: block;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.profileCallTreeSettings ul > li {
+.profileCallTreeSettingsListItem {
   display: inline-block;
   margin: 0 5px;
   padding: 0;
 }
 
-.profileCallTreeSettings label {
+.profileCallTreeSettingsLabel {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
