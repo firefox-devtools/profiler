@@ -3,6 +3,8 @@ import { connect } from 'react-redux';
 import * as actions from '../actions';
 import { getJSOnly, getInvertCallstack } from '../selectors';
 
+import './ProfileCallTreeSidebar.css';
+
 class ProfileCallTreeSidebar extends Component {
   constructor(props) {
     super(props);
