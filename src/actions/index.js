@@ -1,7 +1,7 @@
 import { push, replace } from 'react-router-redux';
 import { parseRangeFilters, stringifyRangeFilters } from '../range-filters';
 import { preprocessProfile, unserializeProfile } from '../preprocess-profile';
-import { getTimeRangeIncludingAllThreads } from '../profile-data';
+import { defaultThreadOrder, getTimeRangeIncludingAllThreads } from '../profile-data';
 import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
 
@@ -128,6 +128,17 @@ export function retrieveProfileFromAddon() {
       // XXX update state to show that we're connected to the profiler addon
       geckoProfiler.getProfile().then(rawProfile => {
         const profile = preprocessProfile(rawProfile);
+
+        if (!('thread' in location.query)) {
+          let contentThreadId = profile.threads.findIndex(thread => thread.name === 'Content');
+          contentThreadId = contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(profile.threads)[0];
+          dispatch(replaceQueryAction({
+            type: 'CHANGE_SELECTED_THREAD',
+            selectedThread: contentThreadId,
+          }, location));
+        }
+
+
         dispatch(receiveProfileFromAddon(profile));
 
         const symbolStore = new SymbolStore('cleopatra-async-storage', {
@@ -190,14 +201,29 @@ export function retrieveProfileFromWeb(hash, location) {
       if (profile === undefined) {
         throw new Error('Unable to parse the profile.');
       }
-      dispatch(receiveProfileFromWeb(profile));
+
+      let queryActions = [];
+      if (!('thread' in location.query)) {
+        let contentThreadId = profile.threads.findIndex(thread => thread.name === 'Content');
+        contentThreadId = contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(profile.threads)[0];
+        queryActions.push({
+          type: 'CHANGE_SELECTED_THREAD',
+          selectedThread: contentThreadId,
+        });
+      }
 
       if (window.legacyRangeFilters) {
         const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
-        dispatch(addRangeFilters(window.legacyRangeFilters.map(
-          ({ start, end }) => ({ start: start - zeroAt, end: end - zeroAt })
-        ), location));
+        queryActions = queryActions.concat(window.legacyRangeFilters.map(
+          ({ start, end }) => ({
+            type: 'ADD_RANGE_FILTER',
+            filter: { start: start - zeroAt, end: end - zeroAt },
+          })
+        ));
       }
+
+      dispatch(replaceQueryActions(queryActions, location));
+      dispatch(receiveProfileFromWeb(profile));
 
     }).catch(error => {
       dispatch(errorReceivingProfileFromWeb(error));
@@ -212,11 +238,11 @@ export function changeSelectedFuncStack(threadIndex, selectedFuncStack) {
   };
 }
 
-export function changeSelectedThread(selectedThread) {
-  return {
+export function changeSelectedThread(selectedThread, location) {
+  return pushQueryAction({
     type: 'CHANGE_SELECTED_THREAD',
     selectedThread,
-  };
+  }, location);
 }
 
 export function changeThreadOrder(threadOrder) {
@@ -357,11 +383,6 @@ function rangeFiltersReducer(state = '', action) {
       rangeFilters.push({ start, end });
       return stringifyRangeFilters(rangeFilters);
     }
-    case 'ADD_RANGE_FILTERS': {
-      const rangeFilters = parseRangeFilters(state);
-      const { filters } = action;
-      return stringifyRangeFilters(rangeFilters.concat(filters));
-    }
     case 'POP_RANGE_FILTERS': {
       const rangeFilters = parseRangeFilters(state);
       return stringifyRangeFilters(rangeFilters.slice(0, action.firstRemovedFilterIndex));
@@ -380,16 +401,38 @@ function callTreeSearchReducer(state = '', action) {
   }
 }
 
+function selectedThreadReducer(state = '', action) {
+  switch (action.type) {
+    case 'CHANGE_SELECTED_THREAD':
+      return `${action.selectedThread}`;
+    default:
+      return state;
+  }
+}
+
 export const queryRootReducer = createQueryReducer({
   jsOnly: jsOnlyReducer,
   invertCallstack: invertCallstackReducer,
 }, {
   rangeFilters: rangeFiltersReducer,
   search: callTreeSearchReducer,
+  thread: selectedThreadReducer,
 });
 
 function pushQueryAction(action, { pathname, query }) {
   return push({ pathname, query: queryRootReducer(query, action) });
+}
+
+function pushQueryActions(actions, { pathname, query }) {
+  return push({ pathname, query: actions.reduce(queryRootReducer, query) });
+}
+
+function replaceQueryAction(action, { pathname, query }) {
+  return replace({ pathname, query: queryRootReducer(query, action) });
+}
+
+function replaceQueryActions(actions, { pathname, query }) {
+  return replace({ pathname, query: actions.reduce(queryRootReducer, query) });
 }
 
 export function changeJSOnly(jsOnly, location) {
@@ -417,13 +460,6 @@ export function addRangeFilter(start, end, location) {
   return pushQueryAction({
     type: 'ADD_RANGE_FILTER',
     start, end,
-  }, location);
-}
-
-export function addRangeFilters(filters, location) {
-  return pushQueryAction({
-    type: 'ADD_RANGE_FILTERS',
-    filters,
   }, location);
 }
 

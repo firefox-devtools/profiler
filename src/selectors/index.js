@@ -9,6 +9,7 @@ export const getProfile = state => getProfileView(state).profile;
 export const getProfileInterval = state => getProfile(state).meta.interval;
 export const getProfileViewOptions = state => getProfileView(state).viewOptions;
 export const getJSOnly = (state, props) => ('jsOnly' in props.location.query);
+export const getSelectedThreadIndex = (state, props) => +(props.location.query.thread || 0);
 export const getSearchString = (state, props) => (props.location.query.search || '');
 export const getInvertCallstack = (state, props) => ('invertCallstack' in props.location.query);
 export const getProfileTaskTracerData = state => getProfile(state).tasktracer;
@@ -44,11 +45,6 @@ export const getDisplayRange = createSelector(
     }
     return rootRange;
   }
-);
-
-export const getSelectedThreadIndex = createSelector(
-  getProfileViewOptions,
-  viewOptions => viewOptions.selectedThread
 );
 
 export const getZeroAt = createSelector(

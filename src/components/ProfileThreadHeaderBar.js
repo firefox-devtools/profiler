@@ -14,19 +14,19 @@ class ProfileThreadHeaderBar extends Component {
   }
 
   _onLabelMouseDown(e) {
-    const { changeSelectedThread, threadIndex } = this.props;
-    changeSelectedThread(threadIndex);
+    const { changeSelectedThread, threadIndex, location } = this.props;
+    changeSelectedThread(threadIndex, location);
 
     // Don't allow clicks on the threads list to steal focus from the tree view.
     e.preventDefault();
   }
 
   _onGraphClick(time) {
-    const { thread, threadIndex, funcStackInfo, changeSelectedThread, changeSelectedFuncStack } = this.props;
+    const { thread, threadIndex, funcStackInfo, changeSelectedThread, changeSelectedFuncStack, location } = this.props;
     const sampleIndex = getSampleIndexClosestToTime(thread.samples, time);
     const newSelectedStack = thread.samples.stack[sampleIndex];
     const newSelectedFuncStack = newSelectedStack === null ? -1 : funcStackInfo.stackIndexToFuncStackIndex[newSelectedStack];
-    changeSelectedThread(threadIndex);
+    changeSelectedThread(threadIndex, location);
     changeSelectedFuncStack(threadIndex,
       getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable));
   }
@@ -62,6 +62,7 @@ ProfileThreadHeaderBar.propTypes = {
   selectedFuncStack: PropTypes.arrayOf(PropTypes.number).isRequired,
   isSelected: PropTypes.bool.isRequired,
   style: PropTypes.object,
+  location: PropTypes.object.isRequired,
 };
 
 export default connect((state, props) => {
