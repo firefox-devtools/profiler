@@ -36,14 +36,27 @@ function getRealScriptURI(url) {
   return url;
 }
 
-/**
- * Convert the given thread into preprocessed form. See docs/profile-data.md for more
- * information.
- * @param {object} thread The thread object, in the 'raw' format.
- * @param {array} libs A libs array, in preprocessed format (as returned by preprocessSharedLibraries).
- * @return {object} A new thread object in the 'preprocessed' format.
- */
-function preprocessThread(thread, libs) {
+function preprocessThreadStageOne(thread) {
+  const stringTable = new UniqueStringArray(thread.stringTable);
+  const frameTable = toStructOfArrays(thread.frameTable);
+  const stackTable = toStructOfArrays(thread.stackTable);
+  const samples = toStructOfArrays(thread.samples);
+  const markers = toStructOfArrays(thread.markers);
+  return Object.assign({}, thread, {
+    frameTable, stackTable, markers, stringTable, samples,
+  });
+}
+
+
+function cleanFunctionName(functionName) {
+  const ignoredPrefix = 'non-virtual thunk to ';
+  if (functionName.startsWith && functionName.startsWith(ignoredPrefix)) {
+    return functionName.substr(ignoredPrefix.length);
+  }
+  return functionName;
+}
+
+function preprocessThreadStageTwo(thread, libs) {
   const funcTable = {
     length: 0,
     name: [],
@@ -78,18 +91,16 @@ function preprocessThread(thread, libs) {
     resourceTable.name[index] = url;
   }
 
-  const stringTable = new UniqueStringArray(thread.stringTable);
-  const frameTable = toStructOfArrays(thread.frameTable);
-  const stackTable = toStructOfArrays(thread.stackTable);
-  const samples = toStructOfArrays(thread.samples);
-  const markers = toStructOfArrays(thread.markers);
+  const { stringTable, frameTable, stackTable, samples, markers } = thread;
 
   const libToResourceIndex = new Map();
+  const libNameToResourceIndex = new Map();
   const urlToResourceIndex = new Map();
   const stringTableIndexToNewFuncIndex = new Map();
 
   frameTable.func = frameTable.location.map(locationIndex => {
-    let funcIndex = stringTableIndexToNewFuncIndex.get(locationIndex);
+    let funcNameIndex = locationIndex;
+    let funcIndex = stringTableIndexToNewFuncIndex.get(funcNameIndex);
     if (funcIndex !== undefined) {
       return funcIndex;
     }
@@ -97,7 +108,7 @@ function preprocessThread(thread, libs) {
     let resourceIndex = -1;
     let addressRelativeToLib = -1;
     let isJS = false;
-    const locationString = stringTable.getString(locationIndex);
+    const locationString = stringTable.getString(funcNameIndex);
     if (locationString.startsWith('0x')) {
       const address = parseInt(locationString.substr(2), 16);
       const lib = getContainingLibrary(libs, address);
@@ -113,25 +124,45 @@ function preprocessThread(thread, libs) {
         }
       }
     } else {
-      const jsMatch =
-        /^(.*) \((.*):([0-9]+)\)$/.exec(locationString) ||
-        /^()(.*):([0-9]+)$/.exec(locationString);
-      if (jsMatch) {
-        isJS = true;
-        const scriptURI = getRealScriptURI(jsMatch[2]);
-        if (urlToResourceIndex.has(scriptURI)) {
-          resourceIndex = urlToResourceIndex.get(scriptURI);
+      const cppMatch = 
+        /^(.*) \(in ([^)]*)\) (\+ [0-9]+)$/.exec(locationString) ||
+        /^(.*) \(in ([^)]*)\) (\(.*:.*\))$/.exec(locationString) ||
+        /^(.*) \(in ([^)]*)\)$/.exec(locationString);
+      if (cppMatch) {
+        funcNameIndex = stringTable.indexForString(cleanFunctionName(cppMatch[1]));
+        const libraryNameStringIndex = stringTable.indexForString(cppMatch[2]);
+        funcIndex = stringTableIndexToNewFuncIndex.get(funcNameIndex);
+        if (funcIndex !== undefined) {
+          return funcIndex;
+        }
+        if (libNameToResourceIndex.has(libraryNameStringIndex)) {
+          resourceIndex = libNameToResourceIndex.get(libraryNameStringIndex);
         } else {
           resourceIndex = resourceTable.length;
-          urlToResourceIndex.set(scriptURI, resourceIndex);
-          const urlStringIndex = stringTable.indexForString(scriptURI);
-          addURLResource(urlStringIndex);
+          libNameToResourceIndex.set(libraryNameStringIndex, resourceIndex);
+          addLibResource(libraryNameStringIndex, -1);
+        }
+      } else {
+        const jsMatch =
+          /^(.*) \((.*):([0-9]+)\)$/.exec(locationString) ||
+          /^()(.*):([0-9]+)$/.exec(locationString);
+        if (jsMatch) {
+          isJS = true;
+          const scriptURI = getRealScriptURI(jsMatch[2]);
+          if (urlToResourceIndex.has(scriptURI)) {
+            resourceIndex = urlToResourceIndex.get(scriptURI);
+          } else {
+            resourceIndex = resourceTable.length;
+            urlToResourceIndex.set(scriptURI, resourceIndex);
+            const urlStringIndex = stringTable.indexForString(scriptURI);
+            addURLResource(urlStringIndex);
+          }
         }
       }
     }
     funcIndex = funcTable.length;
-    addFunc(locationIndex, resourceIndex, addressRelativeToLib, isJS);
-    stringTableIndexToNewFuncIndex.set(locationIndex, funcIndex);
+    addFunc(funcNameIndex, resourceIndex, addressRelativeToLib, isJS);
+    stringTableIndexToNewFuncIndex.set(funcNameIndex, funcIndex);
     return funcIndex;
   });
   frameTable.address = frameTable.func.map(funcIndex => funcTable.address[funcIndex]);
@@ -140,6 +171,17 @@ function preprocessThread(thread, libs) {
   return Object.assign({}, thread, {
     libs, frameTable, funcTable, resourceTable, stackTable, markers, stringTable, samples,
   });
+}
+
+/**
+ * Convert the given thread into preprocessed form. See docs/profile-data.md for more
+ * information.
+ * @param {object} thread The thread object, in the 'raw' format.
+ * @param {array} libs A libs array, in preprocessed format (as returned by preprocessSharedLibraries).
+ * @return {object} A new thread object in the 'preprocessed' format.
+ */
+function preprocessThread(thread, libs) {
+  return preprocessThreadStageTwo(preprocessThreadStageOne(thread), libs);
 }
 
 /**
@@ -381,9 +423,17 @@ export function serializeProfile(profile) {
   return JSON.stringify(newProfile);
 }
 
-export function unserializeProfile(jsonString) {
+function attemptToUnserializePreprocessedProfileFormat(profile) {
+  try {
+    if (!('threads' in profile) || profile.threads.length < 1 ||
+        ('stringArray' in profile.threads[0])) {
+      return undefined;
+    }
+  } catch (e) {
+    return undefined;
+  }
+
   // stringArray -> stringTable
-  const profile = JSON.parse(jsonString);
   profile.threads.forEach(thread => {
     const stringArray = thread.stringArray;
     delete thread.stringArray;
@@ -396,6 +446,147 @@ export function unserializeProfile(jsonString) {
     tasktracer.stringTable = new UniqueStringArray(stringArray);
   }
   return profile;
+}
+
+function preprocessThreadFromProfileJSONWithSymbolicationTable(thread, symbolicationTable) {
+  const stringTable = new UniqueStringArray();
+  const frameTable = {
+    length: 0,
+    category: [],
+    location: [],
+    implementation: [],
+    line: [],
+    optimizations: [],
+  };
+  const stackTable = {
+    length: 0,
+    frame: [],
+    prefix: [],
+  };
+  const samples = {
+    length: 0,
+    frameNumber: [],
+    power: [],
+    responsiveness: [],
+    rss: [],
+    stack: [],
+    time: [],
+    uss: [],
+  };
+  const markers = {
+    length: 0,
+    data: [],
+    name: [],
+    time: [],
+  };
+
+  // Do markers first. Markers are easy.
+  for (let i = 0; i < thread.markers.length; i++) {
+    const marker = thread.markers[i];
+    const markerIndex = markers.length++;
+    markers.data[markerIndex] = ('data' in marker) ? marker.data : null;
+    markers.name[markerIndex] = stringTable.indexForString(marker.name);
+    markers.time[markerIndex] = ('time' in marker) ? marker.time : null;
+  }
+
+  const frameMap = new Map();
+  const stackMap = new Map();
+
+  for (let i = 0; i < thread.samples.length; i++) {
+    const sample = thread.samples[i];
+    // sample has the shape: {
+    //   frames: [symbolicationTableIndices for the stack frames]
+    //   extraInfo: {
+    //     responsiveness,
+    //     time,
+    //   }
+    // }
+    //
+    // We map every stack frame to a frame.
+    // Then we walk the stack, creating "stacks" (= (prefix stack, frame) pairs)
+    // as needed, and arrive at the sample's stackIndex.
+    const frames = sample.frames;
+    let prefix = null;
+    for (let i = 0; i < frames.length; i++) {
+      const frameSymbolicationTableIndex = frames[i];
+      let frameIndex = frameMap.get(frameSymbolicationTableIndex);
+      if (frameIndex === undefined) {
+        frameIndex = frameTable.length++;
+        frameTable.location[frameIndex] = stringTable.indexForString(symbolicationTable[frameSymbolicationTableIndex]);
+        frameTable.category[frameIndex] = null;
+        frameTable.implementation[frameIndex] = null;
+        frameTable.line[frameIndex] = null;
+        frameTable.optimizations[frameIndex] = null;
+        frameMap.set(frameSymbolicationTableIndex, frameIndex);
+      }
+      let stackIndex = stackMap.get(`${prefix}:${frameIndex}`);
+      if (stackIndex === undefined) {
+        stackIndex = stackTable.length++;
+        stackTable.prefix[stackIndex] = prefix;
+        stackTable.frame[stackIndex] = frameIndex;
+        stackMap.set(`${prefix}:${frameIndex}`, stackIndex);
+      }
+      prefix = stackIndex;
+    }
+    const sampleIndex = samples.length++;
+    samples.stack[sampleIndex] = prefix;
+    samples.time[sampleIndex] = ('time' in sample.extraInfo) ? sample.extraInfo.time : null;
+    samples.responsiveness[sampleIndex] = ('responsiveness' in sample.extraInfo) ? sample.extraInfo.responsiveness : null;
+    samples.frameNumber[sampleIndex] = ('frameNumber' in sample.extraInfo) ? sample.extraInfo.frameNumber : null;
+    samples.power[sampleIndex] = ('power' in sample.extraInfo) ? sample.extraInfo.power : null;
+    samples.rss[sampleIndex] = ('rss' in sample.extraInfo) ? sample.extraInfo.rss : null;
+    samples.uss[sampleIndex] = ('uss' in sample.extraInfo) ? sample.extraInfo.uss : null;
+  }
+
+  return {
+    name: thread.name,
+    frameTable, stackTable, markers, stringTable, samples,
+  };
+}
+
+function attemptToUnserializeRawProfileFormat(profile) {
+  try {
+    if (!('libs' in profile) || typeof profile.libs !== 'string' ||
+        !('threads' in profile) || profile.threads.length < 1 ||
+        !('frameTable' in profile.threads[0]) ||
+        !('schema' in profile.threads[0].frameTable)) {
+      return undefined;
+    }
+  } catch (e) {
+    return undefined;
+  }
+  return preprocessProfile(profile);
+}
+
+function attemptToUnserializeProfileJSONWithSymbolicationTableProfileFormat(profile) {
+  try {
+    if (!('format' in profile) || profile.format !== 'profileJSONWithSymbolicationTable,1') {
+      return undefined;
+    }
+  } catch (e) {
+    return undefined;
+  }
+
+  const { meta, profileJSON, symbolicationTable } = profile;
+
+  const threads = [];
+  const tasktracer = emptyTaskTracerData();
+
+  for (const threadIndex in profileJSON.threads) {
+    const thread = profileJSON.threads[threadIndex];
+    threads.push(preprocessThreadStageTwo(preprocessThreadFromProfileJSONWithSymbolicationTable(thread, symbolicationTable), []));
+  }
+  const result = {
+    meta, threads, tasktracer,
+  };
+  return result;
+}
+
+export function unserializeProfile(jsonString) {
+  const profile = JSON.parse(jsonString);
+  return attemptToUnserializePreprocessedProfileFormat(profile) ||
+         attemptToUnserializeRawProfileFormat(profile) ||
+         attemptToUnserializeProfileJSONWithSymbolicationTableProfileFormat(profile);
 }
 
 export class ProfilePreprocessor {
