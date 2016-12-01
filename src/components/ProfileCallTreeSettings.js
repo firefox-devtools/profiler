@@ -23,7 +23,7 @@ class ProfileCallTreeSettings extends Component {
   }
 
   _onSearchFieldIdleAfterChange(value) {
-    this.props.changeCallTreeSearchString(value);
+    this.props.changeCallTreeSearchString(value, this.props.location);
   }
 
   render() {

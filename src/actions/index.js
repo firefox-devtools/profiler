@@ -227,10 +227,10 @@ export function changeThreadOrder(threadOrder) {
 }
 
 export function changeCallTreeSearchString(searchString) {
-  return {
+  return pushQueryAction({
     type: 'CHANGE_CALL_TREE_SEARCH_STRING',
     searchString,
-  };
+  }, location);
 }
 
 
@@ -371,11 +371,21 @@ function rangeFiltersReducer(state = '', action) {
   }
 }
 
+function callTreeSearchReducer(state = '', action) {
+  switch (action.type) {
+    case 'CHANGE_CALL_TREE_SEARCH_STRING':
+      return action.searchString;
+    default:
+      return state;
+  }
+}
+
 export const queryRootReducer = createQueryReducer({
   jsOnly: jsOnlyReducer,
   invertCallstack: invertCallstackReducer,
 }, {
   rangeFilters: rangeFiltersReducer,
+  search: callTreeSearchReducer,
 });
 
 function pushQueryAction(action, { pathname, query }) {
