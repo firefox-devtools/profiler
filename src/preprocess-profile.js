@@ -426,7 +426,7 @@ export function serializeProfile(profile) {
 function attemptToUnserializePreprocessedProfileFormat(profile) {
   try {
     if (!('threads' in profile) || profile.threads.length < 1 ||
-        ('stringArray' in profile.threads[0])) {
+        !('stringArray' in profile.threads[0])) {
       return undefined;
     }
   } catch (e) {
