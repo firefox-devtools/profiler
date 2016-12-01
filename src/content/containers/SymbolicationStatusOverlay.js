@@ -15,7 +15,7 @@ function englishListJoin(list) {
       return list[0];
     default: {
       const allButLast = list.slice(0, list.length - 1);
-      return allButLast.join(', ') + ' and ' + list[list.lenth - 1];
+      return allButLast.join(', ') + ' and ' + list[list.length - 1];
     }
   }
 }

@@ -682,7 +682,7 @@ body, #root, .profileViewer {
 .treeAndSidebarWrapper {
   flex: 1;
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: column nowrap;
 }
 
 .taskTracerViewWrapper,
@@ -777,34 +777,6 @@ body, #root, .profileViewer {
   height: 1px;
   background-color: inherit;
   opacity: 0.4;
-}
-
-.sidebar {
-  width: 200px;
-  box-sizing: border-box;
-  padding: 10px;
-  border-top: 1px solid #D6D6D6;
-  border-left: 1px solid #D6D6D6;
-  background: #EEE;
-}
-
-.sidebar ul {
-  display: block;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.sidebar ul > li {
-  display: block;
-  margin: 0;
-  padding: 0;
-}
-
-.sidebar label {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
 }
 
 .initializing {

@@ -37,20 +37,6 @@ function threadOrder(state = [], action) {
   }
 }
 
-function selectedThread(state = 0, action) {
-  switch (action.type) {
-    case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_WEB': {
-      const contentThreadId = action.profile.threads.findIndex(thread => thread.name === 'Content');
-      return contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(action.profile.threads)[0];
-    }
-    case 'CHANGE_SELECTED_THREAD':
-      return action.selectedThread;
-    default:
-      return state;
-  }
-}
-
 function viewOptionsThreads(state = [], action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
@@ -246,7 +232,7 @@ function summaryView (state = {summary: null, expanded: null}, action) {
 
 const viewOptions = combineReducers({
   threads: viewOptionsThreads,
-  threadOrder, selectedThread, symbolicationStatus, waitingForLibs,
+  threadOrder, symbolicationStatus, waitingForLibs,
   selection, scrollToSelectionGeneration, rootRange, zeroAt,
   tabOrder,
 });

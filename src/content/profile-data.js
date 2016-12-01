@@ -149,6 +149,54 @@ export function filterThreadToJSOnly(thread) {
   });
 }
 
+export function filterThreadToSearchString(thread, searchString) {
+  return timeCode('filterThreadToSearchString', () => {
+    if (searchString === '') {
+      return thread;
+    }
+    const lowercaseSearchString = searchString.toLowerCase();
+    const { samples, funcTable, frameTable, stackTable, stringTable } = thread;
+
+    const funcMatchesFilterCache = new Map();
+    function funcMatchesFilter(func) {
+      let result = funcMatchesFilterCache.get(func);
+      if (result === undefined) {
+        const nameIndex = funcTable.name[func];
+        const nameString = stringTable.getString(nameIndex);
+        result = nameString.toLowerCase().includes(lowercaseSearchString);
+        funcMatchesFilterCache.set(func, result);
+      }
+      return result;
+    }
+
+    const stackMatchesFilterCache = new Map();
+    function stackMatchesFilter(stackIndex) {
+      if (stackIndex === null) {
+        return false;
+      }
+      let result = stackMatchesFilterCache.get(stackIndex);
+      if (result === undefined) {
+        const prefix = stackTable.prefix[stackIndex];
+        if (stackMatchesFilter(prefix)) {
+          result = true;
+        } else {
+          const frame = stackTable.frame[stackIndex];
+          const func = frameTable.func[frame];
+          result = funcMatchesFilter(func);
+        }
+        stackMatchesFilterCache.set(stackIndex, result);
+      }
+      return result;
+    }
+
+    return Object.assign({}, thread, {
+      samples: Object.assign({}, samples, {
+        stack: samples.stack.map(s => stackMatchesFilter(s) ? s : null),
+      }),
+    });
+  });
+}
+
 function getSampleIndexRangeForSelection(samples, rangeStart, rangeEnd) {
   // TODO: This should really use bisect. samples.time is sorted.
   const firstSample = samples.time.findIndex(t => t >= rangeStart);

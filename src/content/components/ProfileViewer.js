@@ -54,14 +54,14 @@ class ProfileViewer extends Component {
   }
 
   _onIntervalMarkerSelect(threadIndex, start, end) {
-    const { timeRange, updateProfileSelection, changeSelectedThread } = this.props;
+    const { timeRange, updateProfileSelection, changeSelectedThread, location } = this.props;
     updateProfileSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart: Math.max(timeRange.start, start),
       selectionEnd: Math.min(timeRange.end, end),
     });
-    changeSelectedThread(threadIndex);
+    changeSelectedThread(threadIndex, location);
   }
 
   _onSelectTab(selectedTab) {
@@ -90,6 +90,7 @@ class ProfileViewer extends Component {
                                     zeroAt={zeroAt}
                                     rangeStart={timeRange.start}
                                     rangeEnd={timeRange.end}
+                                    minSelectionStartWidth={profile.meta.interval}
                                     hasSelection={hasSelection}
                                     isModifying={isModifying}
                                     selectionStart={selectionStart}

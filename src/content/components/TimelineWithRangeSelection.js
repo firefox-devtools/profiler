@@ -29,21 +29,23 @@ class TimelineWithRangeSelectionImpl extends Component {
     // browsers.
     e.preventDefault();
 
-    const { rangeStart, rangeEnd } = this.props;
+    const { rangeStart, rangeEnd, minSelectionStartWidth } = this.props;
     const mouseDownTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
 
     let isRangeSelecting = false;
 
     const mouseMoveHandler = e => {
-      isRangeSelecting = true;
       const mouseMoveTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
       const selectionStart = Math.max(rangeStart, Math.min(mouseDownTime, mouseMoveTime));
       const selectionEnd = Math.min(rangeEnd, Math.max(mouseDownTime, mouseMoveTime));
-      this.props.onSelectionChange({
-        hasSelection: true,
-        selectionStart, selectionEnd,
-        isModifying: true,
-      });
+      if (isRangeSelecting || selectionEnd - selectionStart >= minSelectionStartWidth) {
+        isRangeSelecting = true;
+        this.props.onSelectionChange({
+          hasSelection: true,
+          selectionStart, selectionEnd,
+          isModifying: true,
+        });
+      }
     };
 
     const mouseUpHandler = e => {
@@ -128,6 +130,7 @@ TimelineWithRangeSelectionImpl.propTypes = {
   zeroAt: PropTypes.number.isRequired,
   rangeStart: PropTypes.number.isRequired,
   rangeEnd: PropTypes.number.isRequired,
+  minSelectionStartWidth: PropTypes.number.isRequired,
   hasSelection: PropTypes.bool.isRequired,
   isModifying: PropTypes.bool.isRequired,
   selectionStart: PropTypes.number,

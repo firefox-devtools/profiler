@@ -12,6 +12,7 @@ import Root from './src/content/containers/Root';
 import threadDispatcher from './src/common/thread-middleware';
 import messages from './src/content/messages';
 import handleMessages from './src/common/message-handler';
+import { redirectLegacyUrls } from './src/content/cleopatra-legacy-urls';
 
 require('./res/style.css');
 
@@ -41,6 +42,8 @@ const store = createStore(
   ].filter(fn => fn)));
 
 handleMessages(worker, store, messages);
+redirectLegacyUrls();
+
 
 const history = syncHistoryWithStore(browserHistory, store);
 

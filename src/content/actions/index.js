@@ -1,6 +1,7 @@
 import { push, replace } from 'react-router-redux';
 import { parseRangeFilters, stringifyRangeFilters } from '../range-filters';
 import { preprocessProfile, unserializeProfile } from '../preprocess-profile';
+import { defaultThreadOrder, getTimeRangeIncludingAllThreads } from '../profile-data';
 import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
 import { getProfile } from '../selectors/';
@@ -62,7 +63,7 @@ export function startSymbolicating() {
 export function doneSymbolicating() {
   return function(dispatch, getState) {
     dispatch({ type: 'DONE_SYMBOLICATING' });
-    // TODO - Do not use selectors here. 
+    // TODO - Do not use selectors here.
     dispatch({
       toWorker: true,
       type: 'PROFILE_PROCESSED',
@@ -152,19 +153,26 @@ export function assignTaskTracerNames(addressIndices, symbolNames) {
   };
 }
 
-export function retrieveProfileFromAddon() {
+export function retrieveProfileFromAddon(location) {
   return dispatch => {
-    if (!window.geckoProfilerPromise) {
-      // XXX handle this.
-      console.warn('The geckoProfilerPromise was not found.');
-      return;
-    }
-
     dispatch(waitingForProfileFromAddon());
 
+    // XXX use Promise.race with a 5 second timeout promise to show an error message
     window.geckoProfilerPromise.then(geckoProfiler => {
+      // XXX update state to show that we're connected to the profiler addon
       geckoProfiler.getProfile().then(rawProfile => {
         const profile = preprocessProfile(rawProfile);
+
+        if (!('thread' in location.query)) {
+          let contentThreadId = profile.threads.findIndex(thread => thread.name === 'Content');
+          contentThreadId = contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(profile.threads)[0];
+          dispatch(replaceQueryAction({
+            type: 'CHANGE_SELECTED_THREAD',
+            selectedThread: contentThreadId,
+          }, location));
+        }
+
+
         dispatch(receiveProfileFromAddon(profile));
 
         const symbolStore = new SymbolStore('cleopatra-async-storage', {
@@ -218,13 +226,39 @@ export function errorReceivingProfileFromWeb(error) {
   };
 }
 
-export function retrieveProfileFromWeb(hash) {
+export function retrieveProfileFromWeb(hash, location) {
   return dispatch => {
     dispatch(waitingForProfileFromWeb());
 
     fetch(`https://profile-store.commondatastorage.googleapis.com/${hash}`).then(response => response.text()).then(text => {
       const profile = unserializeProfile(text);
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+
+      let queryActions = [];
+      if (!('thread' in location.query)) {
+        let contentThreadId = profile.threads.findIndex(thread => thread.name === 'Content');
+        contentThreadId = contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(profile.threads)[0];
+        queryActions.push({
+          type: 'CHANGE_SELECTED_THREAD',
+          selectedThread: contentThreadId,
+        });
+      }
+
+      if (window.legacyRangeFilters) {
+        const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
+        queryActions = queryActions.concat(window.legacyRangeFilters.map(
+          ({ start, end }) => ({
+            type: 'ADD_RANGE_FILTER',
+            filter: { start: start - zeroAt, end: end - zeroAt },
+          })
+        ));
+      }
+
+      dispatch(replaceQueryActions(queryActions, location));
       dispatch(receiveProfileFromWeb(profile));
+
     }).catch(error => {
       dispatch(errorReceivingProfileFromWeb(error));
     });
@@ -238,11 +272,11 @@ export function changeSelectedFuncStack(threadIndex, selectedFuncStack) {
   };
 }
 
-export function changeSelectedThread(selectedThread) {
-  return {
+export function changeSelectedThread(selectedThread, location) {
+  return pushQueryAction({
     type: 'CHANGE_SELECTED_THREAD',
     selectedThread,
-  };
+  }, location);
 }
 
 export function changeThreadOrder(threadOrder) {
@@ -251,6 +285,14 @@ export function changeThreadOrder(threadOrder) {
     threadOrder,
   };
 }
+
+export function changeCallTreeSearchString(searchString, location) {
+  return pushQueryAction({
+    type: 'CHANGE_CALL_TREE_SEARCH_STRING',
+    searchString,
+  }, location);
+}
+
 
 function basePathExcludingTrailingSlash(dataSource, params) {
   if (params.hash) {
@@ -371,7 +413,8 @@ function rangeFiltersReducer(state = '', action) {
   switch (action.type) {
     case 'ADD_RANGE_FILTER': {
       const rangeFilters = parseRangeFilters(state);
-      rangeFilters.push({ start: action.start, end: action.end });
+      const { start, end } = action;
+      rangeFilters.push({ start, end });
       return stringifyRangeFilters(rangeFilters);
     }
     case 'POP_RANGE_FILTERS': {
@@ -383,15 +426,43 @@ function rangeFiltersReducer(state = '', action) {
   }
 }
 
+function callTreeSearchReducer(state = '', action) {
+  switch (action.type) {
+    case 'CHANGE_CALL_TREE_SEARCH_STRING':
+      return action.searchString;
+    default:
+      return state;
+  }
+}
+
+function selectedThreadReducer(state = '', action) {
+  switch (action.type) {
+    case 'CHANGE_SELECTED_THREAD':
+      return `${action.selectedThread}`;
+    default:
+      return state;
+  }
+}
+
 export const queryRootReducer = createQueryReducer({
   jsOnly: jsOnlyReducer,
   invertCallstack: invertCallstackReducer,
 }, {
   rangeFilters: rangeFiltersReducer,
+  search: callTreeSearchReducer,
+  thread: selectedThreadReducer,
 });
 
 function pushQueryAction(action, { pathname, query }) {
   return push({ pathname, query: queryRootReducer(query, action) });
+}
+
+function replaceQueryAction(action, { pathname, query }) {
+  return replace({ pathname, query: queryRootReducer(query, action) });
+}
+
+function replaceQueryActions(actions, { pathname, query }) {
+  return replace({ pathname, query: actions.reduce(queryRootReducer, query) });
 }
 
 export function changeJSOnly(jsOnly, location) {
