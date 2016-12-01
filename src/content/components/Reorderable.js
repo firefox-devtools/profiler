@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import bisection from 'bisection';
 import clamp from 'clamp';
 import arrayMove from 'array-move';
+import { getContentRect, getMarginRect } from '../css-geometry-tools';
 
 class Reorderable extends Component {
 
@@ -63,8 +64,8 @@ class Reorderable extends Component {
   _startDraggingElement(container, element, event) {
     const xy = this._getXY();
     const mouseDownPos = event[xy.pageXY];
-    const elementRect = element.getBoundingClientRect();
-    const containerRect = container.getBoundingClientRect();
+    const elementRect = getMarginRect(element);
+    const containerRect = getContentRect(container);
     const spaceBefore = elementRect[xy.lefttop] - containerRect[xy.lefttop];
     const spaceAfter = containerRect[xy.rightbottom] - elementRect[xy.rightbottom];
 
@@ -81,7 +82,7 @@ class Reorderable extends Component {
         isBefore = false;
         return 0;
       }
-      const childRect = child.getBoundingClientRect();
+      const childRect = getMarginRect(child);
       return isBefore ? childRect[xy.lefttop] - elementRect[xy.lefttop]
                       : childRect[xy.rightbottom] - elementRect[xy.rightbottom];
     });
@@ -100,11 +101,11 @@ class Reorderable extends Component {
 
     const nextEdgeAfterElement = (elementIndex === children.length - 1)
       ? containerRect[xy.rightbottom]
-      : children[elementIndex + 1].getBoundingClientRect()[xy.lefttop];
+      : getMarginRect(children[elementIndex + 1])[xy.lefttop];
 
     const nextEdgeBeforeElement = (elementIndex === 0)
       ? containerRect[xy.lefttop]
-      : children[elementIndex - 1].getBoundingClientRect()[xy.rightbottom];
+      : getMarginRect(children[elementIndex - 1])[xy.rightbottom];
 
     this.setState({
       phase: 'MANIPULATING',
@@ -132,11 +133,13 @@ class Reorderable extends Component {
       window.removeEventListener('mousemove', mouseMoveListener, true);
       window.removeEventListener('mouseup', mouseUpListener, true);
       setTimeout(() => {
-        const newOrder = arrayMove(this.props.order, elementIndex, destinationIndex);
         this.setState({
           phase: 'RESTING',
         });
-        this.props.onChangeOrder(newOrder);
+        if (elementIndex !== destinationIndex) {
+          const newOrder = arrayMove(this.props.order, elementIndex, destinationIndex);
+          this.props.onChangeOrder(newOrder);
+        }
       }, 200);
     };
     window.addEventListener('mousemove', mouseMoveListener, true);
@@ -159,8 +162,9 @@ class Reorderable extends Component {
     }
 
     const { phase, manipulatingIndex, destinationIndex, adjustPrecedingBy, adjustSucceedingBy } = this.state;
+    const adjustedClassName = (phase === 'MANIPULATING') ? className + ' beingReordered' : className;
     return (
-      <TagName className={className} ref='container'>
+      <TagName className={adjustedClassName} ref='container'>
         {
           orderedChildren.map((child, childIndex) => {
             const style = {
@@ -174,7 +178,6 @@ class Reorderable extends Component {
               if (phase === 'MANIPULATING') {
                 delete style.transition;
                 style.transform = `${xy.translateXY}(${this.state.manipulationDelta}px)`;
-                style.opacity = '0.8';
               } else {
                 style.transform = `${xy.translateXY}(${this.state.finalOffset}px)`;
               }
@@ -193,7 +196,7 @@ class Reorderable extends Component {
 }
 
 Reorderable.propTypes = {
-  orient: PropTypes.string.isRequired,
+  orient: PropTypes.string.isRequired, /* "horizontal" or "vertical" */
   tagName: PropTypes.string.isRequired,
   className: PropTypes.string,
   order: PropTypes.arrayOf(PropTypes.number).isRequired,

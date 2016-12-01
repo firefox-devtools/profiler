@@ -360,6 +360,44 @@ export function preprocessProfile(profile) {
   return result;
 }
 
+export function serializeProfile(profile) {
+  // stringTable -> stringArray
+  const newProfile = Object.assign({}, profile, {
+    threads: profile.threads.map(thread => {
+      const stringTable = thread.stringTable;
+      const newThread = Object.assign({}, thread);
+      delete newThread.stringTable;
+      newThread.stringArray = stringTable.serializeToArray();
+      return newThread;
+    }),
+  });
+  if ('tasktracer' in newProfile) {
+    const newTasktracer = Object.assign({}, newProfile.tasktracer);
+    const stringTable = newTasktracer.stringTable;
+    delete newTasktracer.stringTable;
+    newTasktracer.stringArray = stringTable.serializeToArray();
+    newProfile.tasktracer = newTasktracer;
+  }
+  return JSON.stringify(newProfile);
+}
+
+export function unserializeProfile(jsonString) {
+  // stringArray -> stringTable
+  const profile = JSON.parse(jsonString);
+  profile.threads.forEach(thread => {
+    const stringArray = thread.stringArray;
+    delete thread.stringArray;
+    thread.stringTable = new UniqueStringArray(stringArray);
+  });
+  if ('tasktracer' in profile) {
+    const tasktracer = profile.tasktracer;
+    const stringArray = tasktracer.stringArray;
+    delete tasktracer.stringArray;
+    tasktracer.stringTable = new UniqueStringArray(stringArray);
+  }
+  return profile;
+}
+
 export class ProfilePreprocessor {
   preprocessProfile(profile) {
     return Promise.resolve(preprocessProfile(profile));

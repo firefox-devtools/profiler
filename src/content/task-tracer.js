@@ -1,6 +1,5 @@
 
 export function getTasksByThread(taskTable, threadTable) {
-  console.log('taskTable:', taskTable);
   const threadIndexToTaskIndicesMap = new Map();
   for (let threadIndex = 0; threadIndex < threadTable.length; threadIndex++) {
     const taskIndices = [];

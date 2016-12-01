@@ -1,24 +1,51 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import ProfileTreeView from '../components/ProfileTreeView';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
-import ProfileViewSidebar from '../components/ProfileViewSidebar';
 import Reorderable from '../components/Reorderable';
 import TimelineWithRangeSelection from '../components/TimelineWithRangeSelection';
+import TabBar from '../components/TabBar';
+import ProfileSummaryView from '../containers/ProfileSummaryView';
+import ProfileCallTreeView from '../containers/ProfileCallTreeView';
+import ProfileMarkersView from '../containers/ProfileMarkersView';
+import ProfileTaskTracerView from '../containers/ProfileTaskTracerView';
+import ProfileLogView from '../containers/ProfileLogView';
 import ProfileThreadJankTimeline from '../containers/ProfileThreadJankTimeline';
 import ProfileThreadTracingMarkerTimeline from '../containers/ProfileThreadTracingMarkerTimeline';
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
+import ProfileSharing from '../containers/ProfileSharing';
+import SymbolicationStatusOverlay from '../containers/SymbolicationStatusOverlay';
 import * as actions from '../actions';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../selectors/';
 
 class ProfileViewer extends Component {
-  componentDidMount() {
-    if (this.refs.treeView) {
-      this.refs.treeView.getWrappedInstance().focus();
-      this.refs.treeView.getWrappedInstance().procureInterestingInitialSelection();
-    }
+  constructor(props) {
+    super(props);
     this._onZoomButtonClick = this._onZoomButtonClick.bind(this);
     this._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(this);
+    this._onSelectTab = this._onSelectTab.bind(this);
+
+    this._tabs = [
+      {
+        name: 'summary',
+        title: 'Summary',
+      },
+      {
+        name: 'calltree',
+        title: 'Call Tree',
+      },
+      {
+        name: 'markers',
+        title: 'Markers',
+      },
+      {
+        name: 'tasktracer',
+        title: 'Task Tracer',
+      },
+      {
+        name: 'log',
+        title: 'Log',
+      },
+    ];
   }
 
   _onZoomButtonClick(start, end) {
@@ -37,17 +64,28 @@ class ProfileViewer extends Component {
     changeSelectedThread(threadIndex);
   }
 
+  _onSelectTab(selectedTab) {
+    const { changeSelectedTab, dataSource, location, params } = this.props;
+    changeSelectedTab(selectedTab, dataSource, location, params);
+  }
+
   render() {
     const {
       profile, className, threadOrder, changeThreadOrder,
       viewOptions, updateProfileSelection,
       timeRange, zeroAt, params, location,
+      changeTabOrder, dataSource,
     } = this.props;
     const threads = profile.threads;
-    const { hasSelection, isModifying, selectionStart, selectionEnd } = viewOptions.selection;
+    const { selection, tabOrder } = viewOptions;
+    const { hasSelection, isModifying, selectionStart, selectionEnd } = selection;
+    const { selectedTab } = params;
     return (
       <div className={className}>
-        <ProfileFilterNavigator location={location}/>
+        <div className={`${className}TopBar`}>
+          <ProfileFilterNavigator location={location}/>
+          <ProfileSharing dataSource={dataSource} location={location} params={params}/>
+        </div>
         <TimelineWithRangeSelection className={`${className}Header`}
                                     zeroAt={zeroAt}
                                     rangeStart={timeRange.start}
@@ -71,13 +109,13 @@ class ProfileViewer extends Component {
                                                key={`jank${threadIndex}`}
                                                onSelect={this._onIntervalMarkerSelect}
                                                location={location} /> : null),
-                  <ProfileThreadTracingMarkerTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineGfx ${className}HeaderIntervalMarkerTimelineThread${threadName}`}
-                                                      rangeStart={timeRange.start}
-                                                      rangeEnd={timeRange.end}
-                                                      threadIndex={threadIndex}
-                                                      key={`gfx${threadIndex}`}
-                                                      onSelect={this._onIntervalMarkerSelect}
-                                                      location={location} />]
+                    <ProfileThreadTracingMarkerTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineGfx ${className}HeaderIntervalMarkerTimelineThread${threadName}`}
+                                                        rangeStart={timeRange.start}
+                                                        rangeEnd={timeRange.end}
+                                                        threadIndex={threadIndex}
+                                                        key={`gfx${threadIndex}`}
+                                                        onSelect={this._onIntervalMarkerSelect}
+                                                        location={location} />]
                 );
               })
             }
@@ -100,10 +138,21 @@ class ProfileViewer extends Component {
           }
           </Reorderable>
         </TimelineWithRangeSelection>
-        <div className='treeAndSidebarWrapper'>
-          <ProfileViewSidebar params={params} location={location} />
-          <ProfileTreeView ref='treeView' params={params} location={location}/>
-        </div>
+        <TabBar tabs={this._tabs}
+                selectedTabName={selectedTab}
+                tabOrder={tabOrder}
+                onSelectTab={this._onSelectTab}
+                onChangeTabOrder={changeTabOrder} />
+        {{
+          summary: <ProfileSummaryView params={params} location={location} />,
+          calltree: <ProfileCallTreeView params={params} location={location} />,
+          markers: <ProfileMarkersView params={params} location={location} />,
+          tasktracer: <ProfileTaskTracerView params={params} location={location} rangeStart={timeRange.start} rangeEnd={timeRange.end} />,
+          log: <ProfileLogView params={params} location={location} />,
+        }[selectedTab]}
+        
+        <SymbolicationStatusOverlay />
+
       </div>
     );
   }
@@ -119,9 +168,12 @@ ProfileViewer.propTypes = {
   addRangeFilterAndUnsetSelection: PropTypes.func.isRequired,
   timeRange: PropTypes.object.isRequired,
   zeroAt: PropTypes.number.isRequired,
+  dataSource: PropTypes.string.isRequired,
   params: PropTypes.any.isRequired,
   location: PropTypes.any.isRequired,
   changeSelectedThread: PropTypes.func.isRequired,
+  changeSelectedTab: PropTypes.func.isRequired,
+  changeTabOrder: PropTypes.func.isRequired,
 };
 
 export default connect((state, props) => ({

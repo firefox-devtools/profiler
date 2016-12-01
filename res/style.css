@@ -59,6 +59,8 @@ body, #root, .profileViewer {
   padding: 1px 5px;
   top: 0;
   bottom: 0;
+  line-height: 15px;
+  white-space: nowrap;
 }
 .treeViewHeaderColumn.treeViewFixedColumn::after {
   content: '';
@@ -93,9 +95,14 @@ body, #root, .profileViewer {
 }
 .treeViewRowColumn.totalTime,
 .treeViewRowColumn.totalTimePercent,
-.treeViewRowColumn.selfTime {
+.treeViewRowColumn.selfTime,
+.treeViewRowColumn.timestamp {
   text-align: right;
   padding-right: 5px;
+}
+.treeViewRowColumn.category {
+  text-align: left;
+  padding-left: 5px;
 }
 
 .treeViewRowColumn.treeViewMainColumn {
@@ -135,7 +142,7 @@ body, #root, .profileViewer {
 }
 
 .treeRowToggleButton {
-  background-image: url(/static/treetwisty.svg);
+  background-image: url(./treetwisty.svg);
 }
 
 .treeRowToggleButton:active:hover,
@@ -173,7 +180,7 @@ body, #root, .profileViewer {
   visibility: hidden;
 }
 
-.profileFilterNavigator {
+.profileViewerTopBar {
   height: 24px;
   margin: 0;
   padding: 0;
@@ -181,6 +188,15 @@ body, #root, .profileViewer {
   flex-flow: row nowrap;
   background: #EEE;
   border-bottom: 1px solid #D6D6D6;
+}
+
+.profileFilterNavigator {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-flow: row nowrap;
   -moz-user-select: none;
   cursor: default;
   --selected-color: #7990c8;
@@ -228,7 +244,7 @@ body, #root, .profileViewer {
 }
 
 .profileFilterNavigatorItem:not(.profileFilterNavigatorLeafItem):not(.profileFilterNavigatorBeforeSelectedItem):not(.profileFilterNavigatorSelectedItem)::after {
-  background-image: url(/static/scope-bar-separator.svg);
+  background-image: url(./scope-bar-separator.svg);
   background-repeat: no-repeat;
   background-position: -18px -12px;
   background-size: 24px 24px;
@@ -576,7 +592,7 @@ body, #root, .profileViewer {
   margin: -15px;
   position: relative;
   border: 1px solid rgba(0, 0, 0, 0.2);
-  background: url(/static/zoom-icon.svg) center center no-repeat rgba(255, 255, 255, 0.6);
+  background: url(./zoom-icon.svg) center center no-repeat rgba(255, 255, 255, 0.6);
   transition: opacity 200ms ease-in-out;
   will-change: opacity;
   opacity: 0.5;
@@ -600,16 +616,93 @@ body, #root, .profileViewer {
   background-color: rgba(160, 160, 160, 0.6);
 }
 
+.tabBarContainer {
+  display: flex;
+  flex-flow: row nowrap;
+  background: #EEE;
+  border-top: 1px solid #D6D6D6;
+  position: relative;
+}
+
+.tabBarTabWrapper {
+  margin: 0;
+  padding: 0 0.5px;
+  list-style: none;
+  display: flex;
+  flex-flow: row nowrap;
+  margin: 0 -1px;
+  max-width: 100%;
+}
+
+.tabBarTab {
+  width: 8em;
+  text-align: center;
+  cursor: default;
+  -moz-user-select: none;
+  text-align: center;
+  padding: 4px;
+  border: solid #D6D6D6;
+  border-width: 0 1px;
+  margin: 0 -0.5px;
+  white-space: nowrap;
+  background-clip: padding-box;
+}
+
+.tabBarTab.selected {
+  background: white;
+}
+
+.tabBarTabWrapper:not(.beingReordered) > .tabBarTab:not(.selected):hover {
+  background-color: #DDD;
+}
+
+.profileSummaryView {
+  border-top: 1px solid #D6D6D6;
+  padding: 10px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.profileMarkersView {
+  flex: 1;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.treeViewFixedColumn.timestamp {
+  left: 0px;
+  width: 80px;
+  border-right: none;
+}
+.treeViewFixedColumn.category {
+  left: 80px;
+  width: 70px;
+}
+
 .treeAndSidebarWrapper {
   flex: 1;
   display: flex;
   flex-flow: row nowrap;
 }
 
-.taskTracerViewWrapper {
+.taskTracerViewWrapper,
+.logViewWrapper {
+  border-top: 1px solid #D6D6D6;
   flex: 1;
   overflow: auto;
   position: relative;
+}
+
+.logViewPre {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 10px;
+}
+
+.profileSummaryP {
+  margin: 0;
 }
 
 .taskTracerView {
@@ -654,6 +747,7 @@ body, #root, .profileViewer {
   list-style: none;
   display: block;
   margin: 0;
+  padding: 0;
   height: 4px;
   position: relative;
   overflow: hidden;
@@ -690,7 +784,7 @@ body, #root, .profileViewer {
   box-sizing: border-box;
   padding: 10px;
   border-top: 1px solid #D6D6D6;
-  border-right: 1px solid #D6D6D6;
+  border-left: 1px solid #D6D6D6;
   background: #EEE;
 }
 
@@ -749,6 +843,32 @@ body, #root, .profileViewer {
 
 .initializing-text li {
   margin: 1em 0;
+}
+
+.symbolicationStatusOverlay {
+  position: fixed;
+  top: -8px;
+  padding-top: 8px;
+  left: 30%;
+  right: 30%;
+  background: rgba(0,0,0,0.07);
+  text-align: center;
+  padding-left: 10px;
+  padding-right: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  height: 20px;
+  line-height: 20px;
+  border-radius: 0 0 5px 5px;
+  transition: transform .2s ease-in-out, opacity .2s ease-in-out;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.1);
+  will-change: opacity, transform;
+}
+
+.symbolicationStatusOverlay.hidden {
+  opacity: 0;
+  transform: translateY(-30px);
 }
 
 /* Summarize Profile */

@@ -1,4 +1,5 @@
 import React from 'react';
+import Perf from 'react-addons-perf';
 import { render } from 'react-dom';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import thunk from 'redux-thunk';
@@ -12,9 +13,13 @@ import threadDispatcher from './src/common/thread-middleware';
 import messages from './src/content/messages';
 import handleMessages from './src/common/message-handler';
 
-require('./static/style.css');
+require('./res/style.css');
 
-import CleopatraWorker from 'worker!./src/worker';
+if (process.env.NODE_ENV === 'production') {
+  require('offline-plugin/runtime').install();
+}
+
+import CleopatraWorker from 'worker-loader!./src/worker';
 const worker = new CleopatraWorker();
 
 window.geckoProfilerPromise = new Promise(function (resolve) {
@@ -45,6 +50,8 @@ render(
   </AppContainer>,
   document.getElementById('root')
 );
+
+window.Perf = Perf;
 
 if (module.hot) {
   module.hot.accept('./src/content/containers/Root', () => {

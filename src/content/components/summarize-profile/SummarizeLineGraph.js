@@ -4,7 +4,7 @@ const HEIGHT = 30;
 const STROKE = 3;
 const HALF_STROKE = STROKE / 2;
 
-export default class SummarizeLineGraph extends Component {
+class SummarizeLineGraph extends Component {
   componentDidMount() {
     const resize = () => this.updateWidth();
     window.addEventListener('resize', resize);
@@ -116,8 +116,10 @@ export default class SummarizeLineGraph extends Component {
 SummarizeLineGraph.propTypes = {
   rollingSummary: PropTypes.array,
   category: PropTypes.string,
-  isBlank: PropTypes.boolean,
+  isBlank: PropTypes.bool,
 };
+
+export default SummarizeLineGraph;
 
 function round (n) {
   return Math.round(n * 1000) / 1000;

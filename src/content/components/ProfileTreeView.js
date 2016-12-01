@@ -3,9 +3,9 @@ import { connect } from 'react-redux';
 import TreeView from './TreeView';
 import { getStackAsFuncArray } from '../profile-data';
 import { getProfile, selectedThreadSelectors, getSelectedThreadIndex, getScrollToSelectionGeneration } from '../selectors/';
-import * as Actions from '../actions';
+import * as actions from '../actions';
 
-class ProfileTreeView extends Component{
+class ProfileTreeView extends Component {
   constructor(props) {
     super(props);
     this._fixedColumns = [
@@ -14,10 +14,13 @@ class ProfileTreeView extends Component{
       { propName: 'selfTime', title: 'Self' },
     ];
     this._mainColumn = { propName: 'name', title: '' };
+    this._onSelectedFuncStackChange = this._onSelectedFuncStackChange.bind(this);
+    this._onExpandedFuncStacksChange = this._onExpandedFuncStacksChange.bind(this);
   }
 
-  focus() {
-    this.refs.treeView.focus();
+  componentDidMount() {
+    this.focus();
+    this.procureInterestingInitialSelection();
   }
 
   componentDidUpdate(prevProps) {
@@ -28,34 +31,52 @@ class ProfileTreeView extends Component{
     }
   }
 
+  focus() {
+    this.refs.treeView.focus();
+  }
+
+  _onSelectedFuncStackChange(newSelectedFuncStack) {
+    const { funcStackInfo, threadIndex, changeSelectedFuncStack } = this.props;
+    changeSelectedFuncStack(threadIndex,
+      getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable));
+  }
+
+  _onExpandedFuncStacksChange(newExpandedFuncStacks) {
+    const { funcStackInfo, threadIndex, changeExpandedFuncStacks } = this.props;
+    changeExpandedFuncStacks(threadIndex,
+      newExpandedFuncStacks.map(funcStackIndex => getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable)));
+  }
+
   procureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame
     // at that depth.
-    const newExpandedFuncStacks = this.props.expandedFuncStacks.slice();
+    const { tree, expandedFuncStacks } = this.props;
+    const newExpandedFuncStacks = expandedFuncStacks.slice();
     const maxInterestingDepth = 17; // scientifically determined
-    let currentFuncStack = this.props.tree.getRoots()[0];
+    let currentFuncStack = tree.getRoots()[0];
     newExpandedFuncStacks.push(currentFuncStack);
     for (let i = 0; i < maxInterestingDepth; i++) {
-      const children = this.props.tree.getChildren(currentFuncStack);
+      const children = tree.getChildren(currentFuncStack);
       if (children.length === 0) {
         break;
       }
       currentFuncStack = children[0];
       newExpandedFuncStacks.push(currentFuncStack);
     }
-    this.props.onExpandedFuncStacksChange(newExpandedFuncStacks);
-    this.props.onSelectedFuncStackChange(currentFuncStack);
+    this._onExpandedFuncStacksChange(newExpandedFuncStacks);
+    this._onSelectedFuncStackChange(currentFuncStack);
   }
 
   render() {
+    const { tree, selectedFuncStack, expandedFuncStacks } = this.props;
     return (
-      <TreeView tree={this.props.tree}
+      <TreeView tree={tree}
                 fixedColumns={this._fixedColumns}
                 mainColumn={this._mainColumn}
-                onSelectionChange={this.props.onSelectedFuncStackChange}
-                onExpandedNodesChange={this.props.onExpandedFuncStacksChange}
-                selectedNodeId={this.props.selectedFuncStack}
-                expandedNodeIds={this.props.expandedFuncStacks}
+                onSelectionChange={this._onSelectedFuncStackChange}
+                onExpandedNodesChange={this._onExpandedFuncStacksChange}
+                selectedNodeId={selectedFuncStack}
+                expandedNodeIds={expandedFuncStacks}
                 ref='treeView'/>
     );
 
@@ -76,8 +97,8 @@ ProfileTreeView.propTypes = {
   }).isRequired,
   selectedFuncStack: PropTypes.number,
   expandedFuncStacks: PropTypes.array.isRequired,
-  onSelectedFuncStackChange: PropTypes.func.isRequired,
-  onExpandedFuncStacksChange: PropTypes.func.isRequired,
+  changeSelectedFuncStack: PropTypes.func.isRequired,
+  changeExpandedFuncStacks: PropTypes.func.isRequired,
 };
 
 export default connect((state, props) => {
@@ -91,17 +112,4 @@ export default connect((state, props) => {
     selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state, props),
     expandedFuncStacks: selectedThreadSelectors.getExpandedFuncStacks(state, props),
   };
-}, null, (stateProps, dispatchProps, ownProps) => {
-  const { funcStackInfo, threadIndex } = stateProps;
-  const { dispatch } = dispatchProps;
-  return Object.assign({}, stateProps, ownProps, {
-    onSelectedFuncStackChange: newSelectedFuncStack => {
-      dispatch(Actions.changeSelectedFuncStack(threadIndex,
-        getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable)));
-    },
-    onExpandedFuncStacksChange: newExpandedFuncStacks => {
-      dispatch(Actions.changeExpandedFuncStacks(threadIndex,
-        newExpandedFuncStacks.map(funcStackIndex => getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable))));
-    },
-  });
-}, { withRef: true })(ProfileTreeView);
+}, actions, null, { withRef: true })(ProfileTreeView);

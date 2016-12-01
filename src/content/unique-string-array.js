@@ -20,4 +20,8 @@ export class UniqueStringArray {
     }
     return index;
   }
+
+  serializeToArray() {
+    return this._array.slice(0);
+  }
 }

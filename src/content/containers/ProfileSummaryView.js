@@ -9,7 +9,7 @@ import * as actions from '../actions';
 
 const EXPAND_LENGTH = 5;
 
-class SummarizeProfile extends Component {
+class ProfileSummaryView extends Component {
   render() {
     const {
       summaries, expanded, threadNames,
@@ -56,7 +56,7 @@ class SummarizeProfile extends Component {
         {threadNames.map(thread => (
           <div key={thread}>
             <div className='summarize-profile-table'>
-              <SummarizeProfileHeader thread={thread} />
+              <SummarizeProfileHeader threadName={thread} />
               {fill(3, i => (
                 <div className='summarize-profile-row' key={i}>
                   <SummarizeLineGraph />
@@ -75,12 +75,12 @@ class SummarizeProfile extends Component {
   }
 }
 
-SummarizeProfile.propTypes = {
+ProfileSummaryView.propTypes = {
   summaries: PropTypes.array,
   expanded: PropTypes.object,
   threadNames: PropTypes.array,
-  collapseProfileSummaryThread: PropTypes.function,
-  expandProfileSummaryThread: PropTypes.function,
+  collapseProfileSummaryThread: PropTypes.func,
+  expandProfileSummaryThread: PropTypes.func,
 };
 
 function fill (size, fn) {
@@ -98,4 +98,4 @@ export default connect((state, props) => {
     summaries: getProfileSummaries(state, props),
     threadNames: getThreadNames(state, props),
   };
-}, actions)(SummarizeProfile);
+}, actions)(ProfileSummaryView);

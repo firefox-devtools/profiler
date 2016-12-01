@@ -80,7 +80,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
       markers: [
         SchemaData({
           name // index into stringTable - Marker name
-          time // TODO e.g. 37070.186708
+          time // milliseconds since since profile.meta.startTime, e.g. 37070.186708
           data // arbitrary JSON about the marker. e.g.
                // {
                //   "type": "tracing",
@@ -98,8 +98,11 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
       samples: [
         SchemaData({
           stack,           // index into stackTable - The current stack of the sample.
-          time,            // TODO - unit? The time of the sample: 37067.409299
-          responsiveness,  // TODO Length of the time for the sample? e.g. 1.437998
+          time,            // milliseconds since since profile.meta.startTime
+                           // e.g 37067.409299
+          responsiveness,  // milliseconds since the last event was processed in this
+                           // thread's event loop at the time that the sample was taken
+                           // e.g. 1.437998
           rss,             // TODO
           uss,             // TODO
           frameNumber,     // TODO
@@ -115,7 +118,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
       // The thread ID - TODO: how is this useful?
       tid: 7442229,
 
-      // The name of this thread. - TODO: what are the possible values here?
+      // The name of the thread (see Sampler::RegisterCurrentThread)
       name, // String e.g. "GeckoMain", "Compositor", etc.
 
       //--------------------------------------------------------
@@ -220,13 +223,13 @@ Miscellaneous data:
  * libs
  * tid
 
-The only information not directly taken from nsIProfiler is the funcTable which has the following properties. (TODO - describe what this represents is the the symbolication data?)
+Different frames can be created from the same function, and thus do not represent the unique set of functions. This function table is generated during Cleopatra's pre-processing step. Frames can provide additional information about the various ways the function was executed, while it's also useful to have a list of only the functions, so both types of information are retained.
 
 ```js
 funcTable: {
   address: [ 65438929, 65632509, -1, ... ],
   isJS: [ false, false, true, ... ],
-  name: [ 0, 1, 2, ... ], // TODO, what does this represent?
+  name: [ 0, 1, 2, ... ], // Index into the string table, has the function name.
   resource: [ 0, 1, -1, ... ], // TODO, what does this represent?
   length: 6258,
 }

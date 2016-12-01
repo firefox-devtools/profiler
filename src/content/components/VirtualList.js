@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
+import { findDOMNode } from 'react-dom';
 
 class VirtualListRow extends Component {
   shouldComponentUpdate(nextProps, nextState) {
@@ -19,34 +20,86 @@ VirtualListRow.propTypes = {
   isSpecial: PropTypes.bool,
 };
 
+class VirtualListInner extends Component {
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
+
+  render() {
+    const { itemHeight, className, renderItem, items, specialItems, visibleRangeStart, visibleRangeEnd } = this.props;
+
+    return (
+      <div className={className}
+            style={{
+              height: `${items.length * itemHeight}px`,
+              width: '3000px',
+            }}>
+        <div className={`${className}TopSpacer`}
+             key={-1}
+             style={{height: Math.max(0, visibleRangeStart) * itemHeight + 'px'}} />
+        {
+          items.map((item, i) => {
+            if (i < visibleRangeStart || i >= visibleRangeEnd) {
+              return null;
+            }
+            return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item} items={items} isSpecial={specialItems.includes(item)}/>;
+          })
+        }
+      </div>
+    );
+  }
+}
+
+VirtualListInner.propTypes = {
+  itemHeight: PropTypes.number.isRequired,
+  className: PropTypes.string,
+  renderItem: PropTypes.func.isRequired,
+  items: PropTypes.array.isRequired,
+  focusable: PropTypes.bool.isRequired,
+  specialItems: PropTypes.array.isRequired,
+  visibleRangeStart: PropTypes.number.isRequired,
+  visibleRangeEnd: PropTypes.number.isRequired,
+};
+
 class VirtualList extends Component {
 
   constructor(props) {
     super(props);
-    this._scrollListener = () => this.forceUpdate();
+    this._onScroll = this._onScroll.bind(this);
+    this._visibleRange = this.computeVisibleRange();
   }
 
   componentDidMount() {
-    this.refs.container.addEventListener('scroll', this._scrollListener);
-    this.forceUpdate(); // for initial size
+    this.refs.container.addEventListener('scroll', this._onScroll);
+    this._onScroll(); // for initial size
   }
 
   componentWillUnmount() {
-    this.refs.container.removeEventListener('scroll', this._scrollListener);
+    this.refs.container.removeEventListener('scroll', this._onScroll);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
+
+  _onScroll() {
+    this._visibleRange = this.computeVisibleRange();
+    this.forceUpdate();
   }
 
   computeVisibleRange() {
+    const { itemHeight } = this.props;
     if (!this.refs.container) {
       return { visibleRangeStart: 0, visibleRangeEnd: 100 };
     }
-    const { itemHeight } = this.props;
     const outerRect = this.refs.container.getBoundingClientRect();
-    const innerRect = this.refs.inner.getBoundingClientRect();
+    const innerRectY = findDOMNode(this.refs.inner).getBoundingClientRect().top;
     const overscan = 25;
     const chunkSize = 16;
-    let visibleRangeStart = Math.floor((outerRect.top - innerRect.top) / itemHeight) - overscan;
+    let visibleRangeStart = Math.floor((outerRect.top - innerRectY) / itemHeight) - overscan;
     visibleRangeStart = Math.floor(visibleRangeStart / chunkSize) * chunkSize;
-    let visibleRangeEnd = Math.ceil((outerRect.bottom - innerRect.top) / itemHeight) + overscan;
+    let visibleRangeEnd = Math.ceil((outerRect.bottom - innerRectY) / itemHeight) + overscan;
     visibleRangeEnd = Math.ceil(visibleRangeEnd / chunkSize) * chunkSize;
     return { visibleRangeStart, visibleRangeEnd };
   }
@@ -82,28 +135,17 @@ class VirtualList extends Component {
 
   render() {
     const { itemHeight, className, renderItem, items, focusable, specialItems, onKeyDown } = this.props;
-
-    const range = this.computeVisibleRange();
-    const { visibleRangeStart, visibleRangeEnd } = range;
+    const { visibleRangeStart, visibleRangeEnd } = this._visibleRange;
     return (
       <div className={className} ref='container' tabIndex={ focusable ? 0 : -1 } onKeyDown={onKeyDown}>
-        <div className={`${className}Inner`} ref='inner'
-              style={{
-                height: `${items.length * itemHeight}px`,
-                width: '3000px',
-              }}>
-          <div className={`${className}TopSpacer`}
-               key={-1}
-               style={{height: Math.max(0, visibleRangeStart) * itemHeight + 'px'}} />
-          {
-            items.map((item, i) => {
-              if (i < visibleRangeStart || i >= visibleRangeEnd) {
-                return null;
-              }
-              return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item} items={items} isSpecial={specialItems.includes(item)}/>;
-            })
-          }
-        </div>
+        <VirtualListInner className={`${className}Inner`}
+                          visibleRangeStart={Math.max(0, visibleRangeStart)}
+                          visibleRangeEnd={Math.min(items.length, visibleRangeEnd)}
+                          itemHeight={itemHeight}
+                          renderItem={renderItem}
+                          items={items}
+                          specialItems={specialItems}
+                          ref='inner' />
       </div>
     );
   }

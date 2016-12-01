@@ -1,22 +1,24 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 import SummarizeLineGraph from './SummarizeLineGraph';
 
-export function SummarizeProfileThread(props) {
-  const {summaryTable, rollingSummary, isExpanded, index, expandLength} = props;
-  if (index > expandLength && !isExpanded) {
-    return null;
-  }
-  const {category, samples, percentage} = summaryTable;
-  return (
-    <div className='summarize-profile-row'>
-      <SummarizeLineGraph rollingSummary={rollingSummary} category={category} />
-      <div className='summarize-profile-details'>
-        <div className='summarize-profile-text'>{category}</div>
-        <div className='summarize-profile-numeric'>{samples}</div>
-        <div className='summarize-profile-numeric'>{displayPercentage(percentage)}</div>
+class SummarizeProfileThread extends Component {
+  render() {
+    const {summaryTable, rollingSummary, isExpanded, index, expandLength} = this.props;
+    if (index > expandLength && !isExpanded) {
+      return null;
+    }
+    const {category, samples, percentage} = summaryTable;
+    return (
+      <div className='summarize-profile-row'>
+        <SummarizeLineGraph rollingSummary={rollingSummary} category={category} />
+        <div className='summarize-profile-details'>
+          <div className='summarize-profile-text'>{category}</div>
+          <div className='summarize-profile-numeric'>{samples}</div>
+          <div className='summarize-profile-numeric'>{displayPercentage(percentage)}</div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 }
 
 SummarizeProfileThread.propTypes = {
@@ -27,6 +29,7 @@ SummarizeProfileThread.propTypes = {
   expandLength: PropTypes.number,
 };
 
+export default SummarizeProfileThread;
 /**
  * Format a percentage for display, e.g. 0.1344844543 => "13.45%".
  * @param {number} n - The number.

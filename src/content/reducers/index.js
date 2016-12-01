@@ -5,8 +5,10 @@ import { defaultThreadOrder, getTimeRangeIncludingAllThreads } from '../profile-
 function status(state = 'INITIALIZING', action) {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_ADDON':
+    case 'WAITING_FOR_PROFILE_FROM_WEB':
       return 'WAITING_FOR_PROFILE';
     case 'RECEIVE_PROFILE_FROM_ADDON':
+    case 'RECEIVE_PROFILE_FROM_WEB':
       return 'DONE';
     default:
       return state;
@@ -16,6 +18,7 @@ function status(state = 'INITIALIZING', action) {
 function view(state = 'INITIALIZING', action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
+    case 'RECEIVE_PROFILE_FROM_WEB':
       return 'PROFILE';
     default:
       return state;
@@ -25,6 +28,7 @@ function view(state = 'INITIALIZING', action) {
 function threadOrder(state = [], action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
+    case 'RECEIVE_PROFILE_FROM_WEB':
       return defaultThreadOrder(action.profile.threads);
     case 'CHANGE_THREAD_ORDER':
       return action.threadOrder;
@@ -35,7 +39,8 @@ function threadOrder(state = [], action) {
 
 function selectedThread(state = 0, action) {
   switch (action.type) {
-    case 'RECEIVE_PROFILE_FROM_ADDON': {
+    case 'RECEIVE_PROFILE_FROM_ADDON':
+    case 'RECEIVE_PROFILE_FROM_WEB': {
       const contentThreadId = action.profile.threads.findIndex(thread => thread.name === 'Content');
       return contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(action.profile.threads)[0];
     }
@@ -49,9 +54,11 @@ function selectedThread(state = 0, action) {
 function viewOptionsThreads(state = [], action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
+    case 'RECEIVE_PROFILE_FROM_WEB':
       return action.profile.threads.map(() => ({
         selectedFuncStack: [],
         expandedFuncStacks: [],
+        selectedMarker: -1,
       }));
     case 'COALESCED_FUNCTIONS_UPDATE': {
       const { functionsUpdatePerThread } = action;
@@ -72,7 +79,11 @@ function viewOptionsThreads(state = [], action) {
             return newFunc === undefined ? oldFunc : newFunc;
           });
         });
-        return { selectedFuncStack, expandedFuncStacks };
+        return {
+          selectedFuncStack,
+          expandedFuncStacks,
+          selectedMarker: thread.selectedMarker,
+        };
       });
     }
     case 'CHANGE_SELECTED_FUNC_STACK': {
@@ -92,6 +103,14 @@ function viewOptionsThreads(state = [], action) {
       return [
         ...state.slice(0, threadIndex),
         Object.assign({}, state[threadIndex], { expandedFuncStacks }),
+        ...state.slice(threadIndex + 1),
+      ];
+    }
+    case 'CHANGE_SELECTED_MARKER': {
+      const { threadIndex, selectedMarker } = action;
+      return [
+        ...state.slice(0, threadIndex),
+        Object.assign({}, state[threadIndex], { selectedMarker }),
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -152,6 +171,7 @@ function scrollToSelectionGeneration(state = 0, action) {
 function rootRange(state = { start: 0, end: 1 }, action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
+    case 'RECEIVE_PROFILE_FROM_WEB':
       return getTimeRangeIncludingAllThreads(action.profile);
     default:
       return state;
@@ -161,7 +181,17 @@ function rootRange(state = { start: 0, end: 1 }, action) {
 function zeroAt(state = 0, action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
+    case 'RECEIVE_PROFILE_FROM_WEB':
       return getTimeRangeIncludingAllThreads(action.profile).start;
+    default:
+      return state;
+  }
+}
+
+function tabOrder(state = [0, 1, 2, 3, 4], action) {
+  switch (action.type) {
+    case 'CHANGE_TAB_ORDER':
+      return action.tabOrder;
     default:
       return state;
   }
@@ -170,6 +200,7 @@ function zeroAt(state = 0, action) {
 function profile(state = {}, action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
+    case 'RECEIVE_PROFILE_FROM_WEB':
       return action.profile;
     case 'COALESCED_FUNCTIONS_UPDATE': {
       const { functionsUpdatePerThread } = action;
@@ -217,6 +248,7 @@ const viewOptions = combineReducers({
   threads: viewOptionsThreads,
   threadOrder, selectedThread, symbolicationStatus, waitingForLibs,
   selection, scrollToSelectionGeneration, rootRange, zeroAt,
+  tabOrder,
 });
 
 const profileView = combineReducers({ viewOptions, profile });
