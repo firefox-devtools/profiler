@@ -682,7 +682,7 @@ body, #root, .profileViewer {
 .treeAndSidebarWrapper {
   flex: 1;
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: column nowrap;
 }
 
 .taskTracerViewWrapper,

@@ -1,10 +1,10 @@
 .sidebar {
-  width: 200px;
+  height: 25px;
   box-sizing: border-box;
-  padding: 10px;
+  padding: 0;
+  line-height: 25px;
   border-top: 1px solid #D6D6D6;
-  border-left: 1px solid #D6D6D6;
-  background: #EEE;
+  background: #F9F9F9;
 }
 
 .sidebar ul {
@@ -15,8 +15,8 @@
 }
 
 .sidebar ul > li {
-  display: block;
-  margin: 0;
+  display: inline-block;
+  margin: 0 5px;
   padding: 0;
 }
 
