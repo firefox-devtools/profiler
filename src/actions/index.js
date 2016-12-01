@@ -226,7 +226,7 @@ export function changeThreadOrder(threadOrder) {
   };
 }
 
-export function changeCallTreeSearchString(searchString) {
+export function changeCallTreeSearchString(searchString, location) {
   return pushQueryAction({
     type: 'CHANGE_CALL_TREE_SEARCH_STRING',
     searchString,
