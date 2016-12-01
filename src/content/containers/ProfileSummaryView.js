@@ -1,11 +1,13 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { getProfileSummaries, getThreadNames, getProfileExpandedSummaries } from '../selectors/';
-import SummarizeLineGraph from '../components/summarize-profile/SummarizeLineGraph';
-import SummarizeProfileHeader from '../components/summarize-profile/SummarizeProfileHeader';
-import SummarizeProfileExpand from '../components/summarize-profile/SummarizeProfileExpand';
-import SummarizeProfileThread from '../components/summarize-profile/SummarizeProfileThread';
+import SummarizeLineGraph from '../components/SummarizeLineGraph';
+import SummarizeProfileHeader from '../components/SummarizeProfileHeader';
+import SummarizeProfileExpand from '../components/SummarizeProfileExpand';
+import SummarizeProfileThread from '../components/SummarizeProfileThread';
 import * as actions from '../actions';
+
+require('./ProfileSummaryView.css');
 
 const EXPAND_LENGTH = 5;
 

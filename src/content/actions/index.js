@@ -62,6 +62,7 @@ export function startSymbolicating() {
 export function doneSymbolicating() {
   return function(dispatch, getState) {
     dispatch({ type: 'DONE_SYMBOLICATING' });
+    // TODO - Do not use selectors here. 
     dispatch({
       toWorker: true,
       type: 'PROFILE_PROCESSED',
