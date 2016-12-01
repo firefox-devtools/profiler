@@ -1,10 +1,10 @@
 import React, { PropTypes } from 'react';
 import ProfileTreeView from '../components/ProfileTreeView';
-import ProfileCallTreeSidebar from '../components/ProfileCallTreeSidebar';
+import ProfileCallTreeSettings from '../components/ProfileCallTreeSettings';
 
 const ProfileCallTreeView = ({ params, location }) => (
   <div className='treeAndSidebarWrapper'>
-    <ProfileCallTreeSidebar params={params} location={location} />
+    <ProfileCallTreeSettings params={params} location={location} />
     <ProfileTreeView params={params} location={location}/>
   </div>
 );

@@ -1,4 +1,4 @@
-.sidebar {
+.profileCallTreeSettings {
   height: 25px;
   box-sizing: border-box;
   padding: 0;
@@ -7,20 +7,20 @@
   background: #F9F9F9;
 }
 
-.sidebar ul {
+.profileCallTreeSettings ul {
   display: block;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.sidebar ul > li {
+.profileCallTreeSettings ul > li {
   display: inline-block;
   margin: 0 5px;
   padding: 0;
 }
 
-.sidebar label {
+.profileCallTreeSettings label {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;

@@ -3,9 +3,9 @@ import { connect } from 'react-redux';
 import * as actions from '../actions';
 import { getJSOnly, getInvertCallstack } from '../selectors';
 
-import './ProfileCallTreeSidebar.css';
+import './ProfileCallTreeSettings.css';
 
-class ProfileCallTreeSidebar extends Component {
+class ProfileCallTreeSettings extends Component {
   constructor(props) {
     super(props);
     this._onJSOnlyClick = this._onJSOnlyClick.bind(this);
@@ -23,7 +23,7 @@ class ProfileCallTreeSidebar extends Component {
   render() {
     const { jsOnly, invertCallstack } = this.props;
     return (
-      <div className='sidebar'>
+      <div className='profileCallTreeSettings'>
         <ul>
           <li>
             <label>
@@ -47,7 +47,7 @@ class ProfileCallTreeSidebar extends Component {
   }
 }
 
-ProfileCallTreeSidebar.propTypes = {
+ProfileCallTreeSettings.propTypes = {
   jsOnly: PropTypes.bool.isRequired,
   changeJSOnly: PropTypes.func.isRequired,
   invertCallstack: PropTypes.bool.isRequired,
@@ -58,4 +58,4 @@ ProfileCallTreeSidebar.propTypes = {
 export default connect((state, props) => ({
   invertCallstack: getInvertCallstack(state, props),
   jsOnly: getJSOnly(state, props),
-}), actions)(ProfileCallTreeSidebar);
+}), actions)(ProfileCallTreeSettings);
