@@ -2,6 +2,9 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { getProfileSummaries, getThreadNames, getProfileExpandedSummaries } from '../selectors/';
 import SummarizeLineGraph from '../components/summarize-profile/SummarizeLineGraph';
+import SummarizeProfileHeader from '../components/summarize-profile/SummarizeProfileHeader';
+import SummarizeProfileExpand from '../components/summarize-profile/SummarizeProfileExpand';
+import SummarizeProfileThread from '../components/summarize-profile/SummarizeProfileThread';
 import * as actions from '../actions';
 
 const EXPAND_LENGTH = 5;
@@ -23,10 +26,24 @@ class SummarizeProfile extends Component {
             return (
               <div key={thread}>
                 <div className='summarize-profile-table'>
-                  {renderHeader(thread)}
-                  {renderThreadSummary(summary, rollingSummary, isExpanded)}
-                  {renderExpandButton(summary, thread, isExpanded, expand, collapse)}
-                </div>
+                  <SummarizeProfileHeader threadName={thread} />
+                  {summary.map((summaryTable, index) => (
+                    <SummarizeProfileThread
+                      summaryTable={summaryTable}
+                      rollingSummary={rollingSummary}
+                      isExpanded={isExpanded}
+                      index={index}
+                      key={summaryTable.category}
+                      expandLength={EXPAND_LENGTH} />
+                  ))}
+                  <SummarizeProfileExpand
+                    summary={summary}
+                    thread={thread}
+                    isExpanded={isExpanded}
+                    expand={expand}
+                    collapse={collapse}
+                    expandLength={EXPAND_LENGTH} />
+                  </div>
               </div>
             );
           })}
@@ -39,7 +56,7 @@ class SummarizeProfile extends Component {
         {threadNames.map(thread => (
           <div key={thread}>
             <div className='summarize-profile-table'>
-              {renderHeader(thread)}
+              <SummarizeProfileHeader thread={thread} />
               {fill(3, i => (
                 <div className='summarize-profile-row' key={i}>
                   <SummarizeLineGraph />
@@ -58,65 +75,12 @@ class SummarizeProfile extends Component {
   }
 }
 
-function renderExpandButton (summary, thread, isExpanded, expand, collapse) {
-  // Only show the expand/collapse button when it is warranted.
-  if (summary.length > EXPAND_LENGTH) {
-    return (
-      <div className='summarize-profile-row'>
-        <SummarizeLineGraph isBlank={true} />
-        <div className='summarize-profile-details'>
-          {
-            isExpanded
-              ? <a className='summarize-profile-collapse expanded' onClick={() => collapse(thread) }>Collapse</a>
-              : <a className='summarize-profile-collapse' onClick={() => expand(thread) }>Expand remaining categories...</a>
-          }
-        </div>
-      </div>
-    );
-  }
-  return null;
-}
-
-function renderThreadSummary(summary, rollingSummary, isExpanded) {
-  return summary.map(({category, samples, percentage}, i) => {
-    if (i > EXPAND_LENGTH && !isExpanded) {
-      return null;
-    }
-    return (
-      <div className='summarize-profile-row' key={category}>
-        <SummarizeLineGraph rollingSummary={rollingSummary} category={category} />
-        <div className='summarize-profile-details'>
-          <div className='summarize-profile-text'>{category}</div>
-          <div className='summarize-profile-numeric'>{samples}</div>
-          <div className='summarize-profile-numeric'>{displayPercentage(percentage)}</div>
-        </div>
-      </div>
-    );
-  });
-}
-
-function renderHeader (name) {
-  return (
-    <div>
-      <div className='summarize-profile-thread' colSpan='3'>{name} Thread</div>
-      <div className='summarize-profile-header'>
-        <div className='summarize-line-graph'>
-          Rolling Summary
-        </div>
-        <div className='summarize-profile-details'>
-          <div className='summarize-profile-text'>Category</div>
-          <div className='summarize-profile-numeric'>Samples</div>
-          <div className='summarize-profile-numeric'>% Time</div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 SummarizeProfile.propTypes = {
   summaries: PropTypes.array,
   expanded: PropTypes.object,
   threadNames: PropTypes.array,
+  collapseProfileSummaryThread: PropTypes.function,
+  expandProfileSummaryThread: PropTypes.function,
 };
 
 function fill (size, fn) {
@@ -127,17 +91,6 @@ function fill (size, fn) {
   return array;
 }
 
-/**
- * Format a percentage for display, e.g. 0.1344844543 => "13.45%".
- * @param {number} n - The number.
- * @returns {string} The formatted string.
- */
-function displayPercentage (n) {
-  const percentage = Math.round(n * 1000);
-  const integer = Math.floor(percentage / 10);
-  const decimal = Math.floor(percentage - integer * 10);
-  return `${integer}.${decimal}`;
-}
 
 export default connect((state, props) => {
   return {

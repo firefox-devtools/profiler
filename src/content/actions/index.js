@@ -1,6 +1,6 @@
 import { push } from 'react-router-redux';
 import { parseRangeFilters, stringifyRangeFilters } from '../range-filters';
-import { getProfile, getProfileExpandedSummaries } from '../selectors/';
+import { getProfile } from '../selectors/';
 
 export function profileSummaryProcessed(summary) {
   return {
@@ -9,25 +9,17 @@ export function profileSummaryProcessed(summary) {
   };
 }
 
-export function collapseProfileSummaryThread(threadName) {
-  return function(dispatch, getState) {
-    const expanded = new Set(getProfileExpandedSummaries(getState()));
-    expanded.delete(threadName);
-    dispatch({
-      type: 'PROFILE_SUMMARY_EXPANDED_CHANGED',
-      expanded,
-    });
+export function expandProfileSummaryThread(threadName) {
+  return {
+    type: 'PROFILE_SUMMARY_EXPAND',
+    threadName,
   };
 }
 
-export function expandProfileSummaryThread(threadName) {
-  return function(dispatch, getState) {
-    const expanded = new Set(getProfileExpandedSummaries(getState()));
-    expanded.add(threadName);
-    dispatch({
-      type: 'PROFILE_SUMMARY_EXPANDED_CHANGED',
-      expanded,
-    });
+export function collapseProfileSummaryThread(threadName) {
+  return {
+    type: 'PROFILE_SUMMARY_COLLAPSE',
+    threadName,
   };
 }
 

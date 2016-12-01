@@ -1,7 +1,9 @@
-export function SummarizeProfileHeader ({theadName}) {
+import React, { PropTypes } from 'react';
+
+export function SummarizeProfileHeader ({threadName}) {
   return (
     <div>
-      <div className='summarize-profile-thread' colSpan='3'>{theadName} Thread</div>
+      <div className='summarize-profile-thread' colSpan='3'>{threadName} Thread</div>
       <div className='summarize-profile-header'>
         <div className='summarize-line-graph'>
           Rolling Summary
@@ -15,3 +17,7 @@ export function SummarizeProfileHeader ({theadName}) {
     </div>
   );
 }
+
+SummarizeProfileHeader.propTypes = {
+  threadName: PropTypes.string,
+};

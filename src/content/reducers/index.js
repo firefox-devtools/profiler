@@ -195,10 +195,19 @@ function profile(state = {}, action) {
 
 function summaryView (state = {summary: null, expanded: null}, action) {
   switch (action.type) {
-    case 'PROFILE_SUMMARY_PROCESSED':
+    case 'PROFILE_SUMMARY_PROCESSED': {
       return Object.assign({}, state, { summary: action.summary, expanded: new Set() });
-    case 'PROFILE_SUMMARY_EXPANDED_CHANGED':
-      return Object.assign({}, state, { expanded: action.expanded });
+    }
+    case 'PROFILE_SUMMARY_EXPAND': {
+      const expanded = new Set(state.expanded);
+      expanded.add(action.threadName);
+      return Object.assign({}, state, { expanded });
+    }
+    case 'PROFILE_SUMMARY_COLLAPSE': {
+      const expanded = new Set(state.expanded);
+      expanded.delete(action.threadName);
+      return Object.assign({}, state, { expanded });
+    }
     default:
       return state;
   }

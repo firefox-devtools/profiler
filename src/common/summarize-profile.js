@@ -271,6 +271,7 @@ export function calculateRollingSummaries (profile, threadCategories, segments =
   });
 }
 
+/* eslint-disable no-unused-vars */
 function countKeys (object) {
   let i = 0;
   for (const key in object) {
@@ -280,6 +281,7 @@ function countKeys (object) {
   }
   return i;
 }
+/* eslint-enable no-unused-vars */
 
 function times (n, fn) {
   const results = Array(n);

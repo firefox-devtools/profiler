@@ -1,5 +1,9 @@
-export function SummarizeProfileThread({summaryTable, rollingSummary, isExpanded, index}) {
-  if (index > EXPAND_LENGTH && !isExpanded) {
+import React, { PropTypes } from 'react';
+import SummarizeLineGraph from './SummarizeLineGraph';
+
+export function SummarizeProfileThread(props) {
+  const {summaryTable, rollingSummary, isExpanded, index, expandLength} = props;
+  if (index > expandLength && !isExpanded) {
     return null;
   }
   const {category, samples, percentage} = summaryTable;
@@ -13,4 +17,24 @@ export function SummarizeProfileThread({summaryTable, rollingSummary, isExpanded
       </div>
     </div>
   );
+}
+
+SummarizeProfileThread.propTypes = {
+  summaryTable: PropTypes.object,
+  rollingSummary: PropTypes.array,
+  isExpanded: PropTypes.boolean,
+  index: PropTypes.number,
+  expandLength: PropTypes.number,
+};
+
+/**
+ * Format a percentage for display, e.g. 0.1344844543 => "13.45%".
+ * @param {number} n - The number.
+ * @returns {string} The formatted string.
+ */
+function displayPercentage (n) {
+  const percentage = Math.round(n * 1000);
+  const integer = Math.floor(percentage / 10);
+  const decimal = Math.floor(percentage - integer * 10);
+  return `${integer}.${decimal}`;
 }

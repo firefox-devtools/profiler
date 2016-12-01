@@ -1,8 +1,10 @@
+import React, { PropTypes } from 'react';
 import SummarizeLineGraph from './SummarizeLineGraph';
 
-export function SummarizeProfileExpand ({summary, thread, isExpanded, expand, collapse}) {
+export function SummarizeProfileExpand (props) {
+  const {summary, thread, isExpanded, expand, collapse, expandLength} = props;
   // Only show the expand/collapse button when it is warranted.
-  if (summary.length > EXPAND_LENGTH) {
+  if (summary.length > expandLength) {
     return (
       <div className='summarize-profile-row'>
         <SummarizeLineGraph isBlank={true} />
@@ -18,3 +20,12 @@ export function SummarizeProfileExpand ({summary, thread, isExpanded, expand, co
   }
   return null;
 }
+
+SummarizeProfileExpand.propTypes = {
+  summary: PropTypes.array,
+  thread: PropTypes.string,
+  isExpanded: PropTypes.boolean,
+  expand: PropTypes.func,
+  collapse: PropTypes.func,
+  expandLength: PropTypes.number,
+};
