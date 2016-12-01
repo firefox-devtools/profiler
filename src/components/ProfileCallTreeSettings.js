@@ -65,6 +65,7 @@ ProfileCallTreeSettings.propTypes = {
   changeJSOnly: PropTypes.func.isRequired,
   invertCallstack: PropTypes.bool.isRequired,
   changeInvertCallstack: PropTypes.func.isRequired,
+  changeCallTreeSearchString: PropTypes.func.isRequired,
   location: PropTypes.any.isRequired,
 };
 
