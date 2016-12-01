@@ -121,14 +121,11 @@ export function assignTaskTracerNames(addressIndices, symbolNames) {
 
 export function retrieveProfileFromAddon() {
   return dispatch => {
-    if (!window.geckoProfilerPromise) {
-      // XXX handle this.
-      return;
-    }
-
     dispatch(waitingForProfileFromAddon());
 
+    // XXX use Promise.race with a 5 second timeout promise to show an error message
     window.geckoProfilerPromise.then(geckoProfiler => {
+      // XXX update state to show that we're connected to the profiler addon
       geckoProfiler.getProfile().then(rawProfile => {
         const profile = preprocessProfile(rawProfile);
         dispatch(receiveProfileFromAddon(profile));
