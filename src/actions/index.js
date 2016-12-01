@@ -226,6 +226,14 @@ export function changeThreadOrder(threadOrder) {
   };
 }
 
+export function changeCallTreeSearchString(searchString) {
+  return {
+    type: 'CHANGE_CALL_TREE_SEARCH_STRING',
+    searchString,
+  };
+}
+
+
 function basePathExcludingTrailingSlash(dataSource, params) {
   if (params.hash) {
     return `/${dataSource}/${params.hash}`;

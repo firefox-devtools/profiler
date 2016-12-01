@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import * as actions from '../actions';
 import { getJSOnly, getInvertCallstack } from '../selectors';
+import IdleSearchField from '../components/IdleSearchField';
 
 import './ProfileCallTreeSettings.css';
 
@@ -10,6 +11,7 @@ class ProfileCallTreeSettings extends Component {
     super(props);
     this._onJSOnlyClick = this._onJSOnlyClick.bind(this);
     this._onInvertCallstackClick = this._onInvertCallstackClick.bind(this);
+    this._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(this);
   }
 
   _onJSOnlyClick(e) {
@@ -18,6 +20,10 @@ class ProfileCallTreeSettings extends Component {
 
   _onInvertCallstackClick(e) {
     this.props.changeInvertCallstack(e.target.checked, this.props.location);
+  }
+
+  _onSearchFieldIdleAfterChange(value) {
+    this.props.changeCallTreeSearchString(value);
   }
 
   render() {
@@ -44,6 +50,11 @@ class ProfileCallTreeSettings extends Component {
             </label>
           </li>
         </ul>
+        <div className='profileCallTreeSettingsSearchbar'>
+          <IdleSearchField className='profileCallTreeSettingsSearchField'
+                           idlePeriod={150}
+                           onIdleAfterChange={this._onSearchFieldIdleAfterChange}/>
+        </div>
       </div>
     );
   }

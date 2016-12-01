@@ -1,14 +1,16 @@
 .profileCallTreeSettings {
   height: 25px;
-  box-sizing: border-box;
   padding: 0;
   line-height: 25px;
   border-top: 1px solid #D6D6D6;
   background: #F9F9F9;
+  display: flex;
+  flex-flow: row nowrap;
 }
 
 .profileCallTreeSettingsList {
   display: block;
+  flex: 1;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -24,4 +26,12 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
+}
+
+.profileCallTreeSettingsSearchbar {
+  padding: 0 10px;
+}
+
+.profileCallTreeSettingsSearchField {
+  width: 250px;
 }
