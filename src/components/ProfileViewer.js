@@ -90,6 +90,7 @@ class ProfileViewer extends Component {
                                     zeroAt={zeroAt}
                                     rangeStart={timeRange.start}
                                     rangeEnd={timeRange.end}
+                                    minSelectionStartWidth={profile.meta.interval}
                                     hasSelection={hasSelection}
                                     isModifying={isModifying}
                                     selectionStart={selectionStart}
