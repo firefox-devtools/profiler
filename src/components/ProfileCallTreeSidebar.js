@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import * as actions from '../actions';
 import { getJSOnly, getInvertCallstack } from '../selectors';
 
-class ProfileViewSidebar extends Component {
+class ProfileCallTreeSidebar extends Component {
   constructor(props) {
     super(props);
     this._onJSOnlyClick = this._onJSOnlyClick.bind(this);
@@ -45,7 +45,7 @@ class ProfileViewSidebar extends Component {
   }
 }
 
-ProfileViewSidebar.propTypes = {
+ProfileCallTreeSidebar.propTypes = {
   jsOnly: PropTypes.bool.isRequired,
   changeJSOnly: PropTypes.func.isRequired,
   invertCallstack: PropTypes.bool.isRequired,
@@ -56,4 +56,4 @@ ProfileViewSidebar.propTypes = {
 export default connect((state, props) => ({
   invertCallstack: getInvertCallstack(state, props),
   jsOnly: getJSOnly(state, props),
-}), actions)(ProfileViewSidebar);
+}), actions)(ProfileCallTreeSidebar);
