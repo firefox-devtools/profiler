@@ -30,9 +30,9 @@ const GettingProfileFromLocal = () => (<div>Not implemented yet.</div>);
 
 class GettingProfileFromWebImpl extends Component {
   componentDidMount() {
-    const { params, retrieveProfileFromWeb } = this.props;
+    const { location, params, retrieveProfileFromWeb } = this.props;
     if (params.hash) {
-      retrieveProfileFromWeb(params.hash);
+      retrieveProfileFromWeb(params.hash, location);
     }
   }
 

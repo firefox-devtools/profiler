@@ -10,6 +10,7 @@ import { syncHistoryWithStore, routerReducer, routerMiddleware } from 'react-rou
 
 import reducers from './src/reducers';
 import Root from './src/containers/Root';
+import { redirectLegacyUrls } from './src/cleopatra-legacy-urls';
 
 require('./res/style.css');
 
@@ -20,6 +21,8 @@ if (process.env.NODE_ENV === 'production') {
 window.geckoProfilerPromise = new Promise(function (resolve) {
   window.connectToGeckoProfiler = resolve;
 });
+
+redirectLegacyUrls();
 
 const store = createStore(combineReducers(Object.assign({}, reducers, { routing: routerReducer })),
   process.env.NODE_ENV === 'development' ? applyMiddleware(routerMiddleware(browserHistory), thunk, createLogger())

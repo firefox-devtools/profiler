@@ -1,6 +1,7 @@
 import { push, replace } from 'react-router-redux';
 import { parseRangeFilters, stringifyRangeFilters } from '../range-filters';
 import { preprocessProfile, unserializeProfile } from '../preprocess-profile';
+import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
 
@@ -183,13 +184,21 @@ export function errorReceivingProfileFromWeb(error) {
   };
 }
 
-export function retrieveProfileFromWeb(hash) {
+export function retrieveProfileFromWeb(hash, location) {
   return dispatch => {
     dispatch(waitingForProfileFromWeb());
 
     fetch(`https://profile-store.commondatastorage.googleapis.com/${hash}`).then(response => response.text()).then(text => {
       const profile = unserializeProfile(text);
       dispatch(receiveProfileFromWeb(profile));
+
+      if (window.legacyRangeFilters) {
+        const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
+        dispatch(addRangeFilters(window.legacyRangeFilters.map(
+          ({ start, end }) => ({ start: start - zeroAt, end: end - zeroAt })
+        ), location));
+      }
+
     }).catch(error => {
       dispatch(errorReceivingProfileFromWeb(error));
     });
@@ -336,8 +345,14 @@ function rangeFiltersReducer(state = '', action) {
   switch (action.type) {
     case 'ADD_RANGE_FILTER': {
       const rangeFilters = parseRangeFilters(state);
-      rangeFilters.push({ start: action.start, end: action.end });
+      const { start, end } = action;
+      rangeFilters.push({ start, end });
       return stringifyRangeFilters(rangeFilters);
+    }
+    case 'ADD_RANGE_FILTERS': {
+      const rangeFilters = parseRangeFilters(state);
+      const { filters } = action;
+      return stringifyRangeFilters(rangeFilters.concat(filters));
     }
     case 'POP_RANGE_FILTERS': {
       const rangeFilters = parseRangeFilters(state);
@@ -384,6 +399,13 @@ export function addRangeFilter(start, end, location) {
   return pushQueryAction({
     type: 'ADD_RANGE_FILTER',
     start, end,
+  }, location);
+}
+
+export function addRangeFilters(filters, location) {
+  return pushQueryAction({
+    type: 'ADD_RANGE_FILTERS',
+    filters,
   }, location);
 }
 
