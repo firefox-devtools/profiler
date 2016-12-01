@@ -167,6 +167,7 @@ class ProfileSharingCompositeButton extends Component {
             <input type='text'
                    className='profileSharingPermalinkTextField'
                    value={shortURL}
+                   readOnly='readOnly'
                    ref={this._permalinkTextFieldCreated}/>
           </ArrowPanel>
         }/>
