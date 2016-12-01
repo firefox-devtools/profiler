@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import * as actions from '../actions';
-import { getJSOnly, getInvertCallstack } from '../selectors';
+import { getJSOnly, getInvertCallstack, getSearchString } from '../selectors';
 import IdleSearchField from '../components/IdleSearchField';
 
 import './ProfileCallTreeSettings.css';
@@ -27,7 +27,7 @@ class ProfileCallTreeSettings extends Component {
   }
 
   render() {
-    const { jsOnly, invertCallstack } = this.props;
+    const { jsOnly, invertCallstack, searchString } = this.props;
     return (
       <div className='profileCallTreeSettings'>
         <ul className='profileCallTreeSettingsList'>
@@ -53,6 +53,7 @@ class ProfileCallTreeSettings extends Component {
         <div className='profileCallTreeSettingsSearchbar'>
           <IdleSearchField className='profileCallTreeSettingsSearchField'
                            idlePeriod={200}
+                           defaultValue={searchString}
                            onIdleAfterChange={this._onSearchFieldIdleAfterChange}/>
         </div>
       </div>
@@ -67,9 +68,11 @@ ProfileCallTreeSettings.propTypes = {
   changeInvertCallstack: PropTypes.func.isRequired,
   changeCallTreeSearchString: PropTypes.func.isRequired,
   location: PropTypes.any.isRequired,
+  searchString: PropTypes.string.isRequired,
 };
 
 export default connect((state, props) => ({
   invertCallstack: getInvertCallstack(state, props),
   jsOnly: getJSOnly(state, props),
+  searchString: getSearchString(state, props),
 }), actions)(ProfileCallTreeSettings);
