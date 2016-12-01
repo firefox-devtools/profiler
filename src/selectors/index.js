@@ -9,6 +9,7 @@ export const getProfile = state => getProfileView(state).profile;
 export const getProfileInterval = state => getProfile(state).meta.interval;
 export const getProfileViewOptions = state => getProfileView(state).viewOptions;
 export const getJSOnly = (state, props) => ('jsOnly' in props.location.query);
+export const getSearchString = (state, props) => (props.location.query.search || '');
 export const getInvertCallstack = (state, props) => ('invertCallstack' in props.location.query);
 export const getProfileTaskTracerData = state => getProfile(state).tasktracer;
 
@@ -109,8 +110,15 @@ export const selectorsForThread = threadIndex => {
         return jsOnly ? ProfileData.filterThreadToJSOnly(thread) : thread;
       }
     );
-    const getFilteredThread = createSelector(
+    const getJSOnlyAndSearchFilteredThread = createSelector(
       getJSOnlyFilteredThread,
+      getSearchString,
+      (thread, searchString) => {
+        return ProfileData.filterThreadToSearchString(thread, searchString);
+      }
+    );
+    const getFilteredThread = createSelector(
+      getJSOnlyAndSearchFilteredThread,
       getInvertCallstack,
       (thread, shouldInvertCallstack) => {
         return shouldInvertCallstack ? ProfileData.invertCallstack(thread) : thread;
