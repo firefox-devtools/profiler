@@ -187,6 +187,9 @@ export function retrieveProfileFromWeb(hash, location) {
 
     fetch(`https://profile-store.commondatastorage.googleapis.com/${hash}`).then(response => response.text()).then(text => {
       const profile = unserializeProfile(text);
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
       dispatch(receiveProfileFromWeb(profile));
 
       if (window.legacyRangeFilters) {
