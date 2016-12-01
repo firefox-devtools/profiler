@@ -52,7 +52,7 @@ class ProfileCallTreeSettings extends Component {
         </ul>
         <div className='profileCallTreeSettingsSearchbar'>
           <IdleSearchField className='profileCallTreeSettingsSearchField'
-                           idlePeriod={150}
+                           idlePeriod={200}
                            onIdleAfterChange={this._onSearchFieldIdleAfterChange}/>
         </div>
       </div>
