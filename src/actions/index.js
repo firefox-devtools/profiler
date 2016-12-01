@@ -423,10 +423,6 @@ function pushQueryAction(action, { pathname, query }) {
   return push({ pathname, query: queryRootReducer(query, action) });
 }
 
-function pushQueryActions(actions, { pathname, query }) {
-  return push({ pathname, query: actions.reduce(queryRootReducer, query) });
-}
-
 function replaceQueryAction(action, { pathname, query }) {
   return replace({ pathname, query: queryRootReducer(query, action) });
 }
