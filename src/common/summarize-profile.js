@@ -1,3 +1,5 @@
+import { timeCode } from './time-code';
+
 /**
  * A list of strategies for matching sample names to patterns.
  */
@@ -68,15 +70,17 @@ const categories = [
 ];
 
 export function summarizeProfile(profile) {
-  const categories = categorizeThreadSamples(profile);
-  const rollingSummaries = calculateRollingSummaries(profile, categories);
-  const summaries = summarizeCategories(profile, categories);
+  return timeCode('summarizeProfile', () => {
+    const categories = categorizeThreadSamples(profile);
+    const rollingSummaries = calculateRollingSummaries(profile, categories);
+    const summaries = summarizeCategories(profile, categories);
 
-  return profile.threads.map((thread, i) => ({
-    thread: thread.name,
-    rollingSummary: rollingSummaries[i],
-    summary: summaries[i],
-  }));
+    return profile.threads.map((thread, i) => ({
+      thread: thread.name,
+      rollingSummary: rollingSummaries[i],
+      summary: summaries[i],
+    }));
+  });
 }
 
 /**
@@ -198,17 +202,19 @@ function logUncategorizedSamples(uncategorized, maxLogLength = 10) {
  * @returns {array} Stacks mapped to categories.
  */
 export function categorizeThreadSamples(profile) {
-  const uncategorized = {};
-  const summaries = profile.threads.map(thread => (
-    thread.samples.stack
-      .map(sampleCategorizer(thread, uncategorized))
-  ));
+  return timeCode('categorizeThreadSamples', () => {
+    const uncategorized = {};
+    const summaries = profile.threads.map(thread => (
+      thread.samples.stack
+        .map(sampleCategorizer(thread, uncategorized))
+    ));
 
-  if (process.env.NODE_ENV === 'development') {
-    logUncategorizedSamples(uncategorized);
-  }
+    if (process.env.NODE_ENV === 'development') {
+      logUncategorizedSamples(uncategorized);
+    }
 
-  return summaries;
+    return summaries;
+  });
 }
 
 /**

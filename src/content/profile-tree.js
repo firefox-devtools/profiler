@@ -1,4 +1,4 @@
-import { timeCode } from './time-code';
+import { timeCode } from '../common/time-code';
 import { getSampleFuncStacks } from './profile-data';
 
 class ProfileTree {

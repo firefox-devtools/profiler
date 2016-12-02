@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
-import { timeCode } from '../time-code';
+import { timeCode } from '../../common/time-code';
 import { getSampleFuncStacks } from '../profile-data';
 
 class ThreadStackGraph extends Component {

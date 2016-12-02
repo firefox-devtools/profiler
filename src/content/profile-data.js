@@ -1,4 +1,4 @@
-import { timeCode } from './time-code';
+import { timeCode } from '../common/time-code';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
