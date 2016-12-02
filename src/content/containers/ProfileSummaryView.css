@@ -1,11 +1,21 @@
 .summarize-profile {
-  width: 100%;
-  max-width: 80em;
-  margin: 0 auto;
-  box-sizing: border-box;
+  flex: 1;
+  border-top: 1px solid #D6D6D6;
+  overflow: auto;
+  position: relative;
 }
+
 .summarize-profile * {
   box-sizing: border-box;
+}
+
+.summarize-profile-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-width: 80em;
+  margin: 0 auto;
 }
 
 .summarize-profile-table {
