@@ -224,7 +224,7 @@ export function summarizeCategories (profile, threadCategories) {
     ))
     .map(calculateSummaryPercentages);
     // Sort the threads based on how many categories they have.
-    // .sort((a, b) => countKeys(b.summary) - countKeys(a.summary));
+    // .sort((a, b) => Object.keys(b.summary).length - Object.keys(a.summary).length);
 }
 
 export function calculateRollingSummaries (profile, threadCategories, segments = 40, rolling = 4) {
@@ -270,18 +270,6 @@ export function calculateRollingSummaries (profile, threadCategories, segments =
     });
   });
 }
-
-/* eslint-disable no-unused-vars */
-function countKeys (object) {
-  let i = 0;
-  for (const key in object) {
-    if (object.hasOwnProperty(key)) {
-      i++;
-    }
-  }
-  return i;
-}
-/* eslint-enable no-unused-vars */
 
 function times (n, fn) {
   const results = Array(n);
