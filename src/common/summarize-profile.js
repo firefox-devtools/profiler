@@ -111,10 +111,9 @@ function functionNameCategorizer() {
 /**
  * Given a profile, return a function that categorizes a sample.
  * @param {object} thread Thread from a profile.
- * @param {object} uncategorized Any uncategorized samples are collected here.
  * @return {function} Sample stack categorizer.
  */
-function sampleCategorizer(thread, uncategorized = {}) {
+function sampleCategorizer(thread) {
   const categorizeFuncName = functionNameCategorizer();
   const stackCategoryCache = new Map();
 
@@ -236,9 +235,8 @@ function countUncategorizedStacks(profile, summaries) {
  */
 export function categorizeThreadSamples(profile) {
   return timeCode('categorizeThreadSamples', () => {
-    const uncategorized = {};
     const summaries = profile.threads.map(thread => {
-      const categorizer = sampleCategorizer(thread, uncategorized);
+      const categorizer = sampleCategorizer(thread);
       return thread.samples.stack.map(categorizer);
     });
 
