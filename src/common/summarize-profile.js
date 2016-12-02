@@ -244,7 +244,7 @@ export function calculateRollingSummaries(profile, threadCategories, segmentCoun
   return profile.threads.map((thread, threadIndex) => {
     const categories = threadCategories[threadIndex];
 
-    return times(segmentCount, (segmentIndex) => {
+    return times(segmentCount, segmentIndex => {
       let samplesInRange = 0;
       const samples = {};
 

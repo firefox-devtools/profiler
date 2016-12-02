@@ -221,7 +221,7 @@ class TreeView extends Component {
 
     const selected = this.props.selectedNodeId;
     const visibleRows = this._getAllVisibleRows(this.props);
-    const selectedRowIndex = visibleRows.findIndex((nodeId) => nodeId === selected);
+    const selectedRowIndex = visibleRows.findIndex(nodeId => nodeId === selected);
 
     if (selectedRowIndex === -1) {
       this._select(visibleRows[0]);

@@ -84,6 +84,7 @@ module.exports = {
             "named": "never",
             "asyncArrow": "always",
         }],
+        "arrow-parens": ["error", "as-needed"],
     },
     "settings": {
         "react": {

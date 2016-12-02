@@ -71,7 +71,7 @@ export function getStore(dbName) {
   function getItem(key) {
     return new Promise((resolve, reject) => {
       let req;
-      withStore('readonly', (store) => {
+      withStore('readonly', store => {
         store.transaction.oncomplete = function onComplete() {
           let value = req.result;
           if (value === undefined) {
@@ -89,7 +89,7 @@ export function getStore(dbName) {
 
   function setItem(key, value) {
     return new Promise((resolve, reject) => {
-      withStore('readwrite', (store) => {
+      withStore('readwrite', store => {
         store.transaction.oncomplete = resolve;
         const req = store.put(value, key);
         req.onerror = function setItemOnError() {
@@ -101,7 +101,7 @@ export function getStore(dbName) {
 
   function removeItem(key) {
     return new Promise((resolve, reject) => {
-      withStore('readwrite', (store) => {
+      withStore('readwrite', store => {
         store.transaction.oncomplete = resolve;
         const req = store.delete(key);
         req.onerror = function removeItemOnError() {
@@ -113,7 +113,7 @@ export function getStore(dbName) {
 
   function clear() {
     return new Promise((resolve, reject) => {
-      withStore('readwrite', (store) => {
+      withStore('readwrite', store => {
         store.transaction.oncomplete = resolve;
         const req = store.clear();
         req.onerror = function clearOnError() {
@@ -126,7 +126,7 @@ export function getStore(dbName) {
   function length() {
     return new Promise((resolve, reject) => {
       let req;
-      withStore('readonly', (store) => {
+      withStore('readonly', store => {
         store.transaction.oncomplete = function onComplete() {
           resolve(req.result);
         };
@@ -146,7 +146,7 @@ export function getStore(dbName) {
       }
 
       let req;
-      withStore('readonly', (store) => {
+      withStore('readonly', store => {
         store.transaction.oncomplete = function onComplete() {
           const cursor = req.result;
           resolve(cursor ? cursor.key : null);

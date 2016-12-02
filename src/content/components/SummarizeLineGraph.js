@@ -84,7 +84,7 @@ class SummarizeLineGraph extends Component {
 
   render() {
     return (
-      <div className='summarize-line-graph' ref={(el) => { this.el = el; }}>
+      <div className='summarize-line-graph' ref={el => { this.el = el; }}>
         {
           this.state && this.props && this.props.rollingSummary
             ? <svg
