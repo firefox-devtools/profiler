@@ -24,7 +24,7 @@ class SummarizeProfileThread extends Component {
 SummarizeProfileThread.propTypes = {
   summaryTable: PropTypes.object,
   rollingSummary: PropTypes.array,
-  isExpanded: PropTypes.boolean,
+  isExpanded: PropTypes.bool,
   index: PropTypes.number,
   expandLength: PropTypes.number,
 };
