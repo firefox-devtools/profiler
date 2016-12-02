@@ -213,16 +213,15 @@ export function waitingForProfileFromWeb() {
 }
 
 export function receiveProfileFromWeb(profile) {
-  return function (dispatch, getState) {
+  return dispatch => {
     dispatch({
       type: 'RECEIVE_PROFILE_FROM_WEB',
       profile,
     });
-    // TODO - Do not use selectors here.
     dispatch({
       toWorker: true,
       type: 'PROFILE_PROCESSED',
-      profile: getProfile(getState()),
+      profile: profile,
     });
     dispatch({
       toWorker: true,
