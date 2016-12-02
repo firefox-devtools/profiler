@@ -15,10 +15,6 @@ export const getSearchString = (state, props) => (props.location.query.search ||
 export const getInvertCallstack = (state, props) => ('invertCallstack' in props.location.query);
 export const getProfileTaskTracerData = state => getProfile(state).tasktracer;
 
-export const getIsSymbolicationStatus = state => {
-  return getProfileViewOptions(state).symbolicationStatus;
-};
-
 export const getRangeFiltersStringParam = (state, props) => {
   const { query } = props.location;
   if ('rangeFilters' in query) {
