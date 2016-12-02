@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TreeView from './TreeView';
 import { getStackAsFuncArray } from '../profile-data';
-import { getProfile, selectedThreadSelectors, getSelectedThreadIndex, getScrollToSelectionGeneration } from '../selectors/';
+import { getProfile, selectedThreadSelectors, getSelectedThreadIndex, getScrollToSelectionGeneration, getSearchString } from '../selectors/';
 import * as actions from '../actions';
 
 class ProfileTreeView extends Component {
@@ -50,7 +50,7 @@ class ProfileTreeView extends Component {
   procureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame
     // at that depth.
-    const { tree, expandedFuncStacks } = this.props;
+    const { tree, expandedFuncStacks, searchString } = this.props;
     const newExpandedFuncStacks = expandedFuncStacks.slice();
     const maxInterestingDepth = 17; // scientifically determined
     let currentFuncStack = tree.getRoots()[0];
@@ -68,7 +68,7 @@ class ProfileTreeView extends Component {
   }
 
   render() {
-    const { tree, selectedFuncStack, expandedFuncStacks } = this.props;
+    const { tree, selectedFuncStack, expandedFuncStacks, searchString } = this.props;
     return (
       <TreeView tree={tree}
                 fixedColumns={this._fixedColumns}
@@ -77,6 +77,7 @@ class ProfileTreeView extends Component {
                 onExpandedNodesChange={this._onExpandedFuncStacksChange}
                 selectedNodeId={selectedFuncStack}
                 expandedNodeIds={expandedFuncStacks}
+                highlightString={searchString.toLowerCase()}
                 ref='treeView'/>
     );
 
@@ -99,6 +100,7 @@ ProfileTreeView.propTypes = {
   expandedFuncStacks: PropTypes.array.isRequired,
   changeSelectedFuncStack: PropTypes.func.isRequired,
   changeExpandedFuncStacks: PropTypes.func.isRequired,
+  searchString: PropTypes.string,
 };
 
 export default connect((state, props) => {
@@ -111,5 +113,6 @@ export default connect((state, props) => {
     funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state, props),
     selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state, props),
     expandedFuncStacks: selectedThreadSelectors.getExpandedFuncStacks(state, props),
+    searchString: getSearchString(state, props),
   };
 }, actions, null, { withRef: true })(ProfileTreeView);

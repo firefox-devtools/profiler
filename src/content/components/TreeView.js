@@ -28,6 +28,24 @@ TreeViewHeader.propTypes = {
   }).isRequired,
 };
 
+function reactStringWithHighlightedSubstrings(string, substring, className) {
+  if (!substring) {
+    return string;
+  }
+  const lowercaseString = string.toLowerCase();
+  const result = [];
+  let startAt = 0;
+  let nextOccurrence = -1;
+  while ((nextOccurrence = lowercaseString.indexOf(substring, startAt)) !== -1) {
+    const afterNextOccurrence = nextOccurrence + substring.length;
+    result.push(string.substring(startAt, nextOccurrence));
+    result.push(<span key={nextOccurrence} className={className}>{string.substring(nextOccurrence, afterNextOccurrence)}</span>);
+    startAt = afterNextOccurrence;
+  }
+  result.push(string.substring(startAt));
+  return result;
+}
+
 class TreeViewRow extends Component {
 
   constructor(props) {
@@ -49,7 +67,7 @@ class TreeViewRow extends Component {
   }
 
   render() {
-    const { node, depth, fixedColumns, mainColumn, index, canBeExpanded, isExpanded, selected } = this.props;
+    const { node, depth, fixedColumns, mainColumn, index, canBeExpanded, isExpanded, selected, highlightString } = this.props;
     const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
     return (
       <div className={`treeViewRow ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
@@ -63,7 +81,7 @@ class TreeViewRow extends Component {
         <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
-          { node[mainColumn.propName] }
+          {reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting')}
         </span>
       </div>
     );
@@ -88,6 +106,7 @@ TreeViewRow.propTypes = {
   onToggle: PropTypes.func.isRequired,
   selected: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
+  highlightString: PropTypes.string,
 };
 
 class TreeView extends Component {
@@ -127,7 +146,7 @@ class TreeView extends Component {
   }
 
   _renderRow(nodeId, index) {
-    const { tree, expandedNodeIds, fixedColumns, mainColumn, selectedNodeId } = this.props;
+    const { tree, expandedNodeIds, fixedColumns, mainColumn, selectedNodeId, highlightString } = this.props;
     const node = tree.getNode(nodeId);
     const canBeExpanded = tree.hasChildren(nodeId);
     const isExpanded = expandedNodeIds.includes(nodeId);
@@ -142,7 +161,8 @@ class TreeView extends Component {
                    isExpanded={isExpanded}
                    onToggle={this._toggle}
                    selected={nodeId === selectedNodeId}
-                   onClick={this._onRowClicked}/>
+                   onClick={this._onRowClicked}
+                   highlightString={highlightString}/>
     );
   }
 
@@ -299,6 +319,7 @@ TreeView.propTypes = {
   selectedNodeId: PropTypes.number,
   onExpandedNodesChange: PropTypes.func.isRequired,
   onSelectionChange: PropTypes.func.isRequired,
+  highlightString: PropTypes.string,
 };
 
 export default TreeView;

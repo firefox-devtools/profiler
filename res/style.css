@@ -74,6 +74,7 @@ body, #root, .profileViewer {
 
 .treeViewRowColumn.treeViewFixedColumn {
   position: sticky;
+  z-index: 2;
   box-sizing: border-box;
   border-right: 1px solid #D6D6D6;
 }
@@ -107,7 +108,6 @@ body, #root, .profileViewer {
 
 .treeViewRowColumn.treeViewMainColumn {
   flex: 1;
-  overflow: hidden;
 }
 
 .treeViewRow.even, .treeViewRow.even > .treeViewFixedColumn {
@@ -125,6 +125,16 @@ body, #root, .profileViewer {
 .treeViewBody:focus > * > .treeViewRow.selected > .treeViewFixedColumn {
   background-color: highlight;
   color: highlighttext;
+}
+
+.treeViewHighlighting {
+  padding: 1px;
+  margin: -1px;
+  color: #000;
+  background: #cbe8fe;
+  border-radius: 2px;
+  box-shadow: 0 0 0 0.5px rgba(0,0,0,0.05), 0 1px 1px rgba(0,0,0,.3);
+  position: relative;
 }
 
 
