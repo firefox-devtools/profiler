@@ -49,7 +49,7 @@ export class SymbolStore {
         return this._db.importLibrary(pdbName, breakpadId, symbolTable);
       }, error => {
         this._importingLibs.delete(libid);
-        console.error(`Failed to symbolicate library ${pdbName}.`);
+        console.error(`Failed to symbolicate library ${pdbName}: ${error}`);
         throw error;
       });
       this._importingLibs.set(libid, importPromise);
