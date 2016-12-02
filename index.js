@@ -37,7 +37,7 @@ const store = createStore(
     routerMiddleware(browserHistory),
     thunk,
     threadDispatcher(worker, 'toWorker'),
-    process.env.NODE_ENV === 'development' === 0
+    process.env.NODE_ENV === 'development'
       ? createLogger({titleFormatter: action => `content action ${action.type}`})
       : null,
   ].filter(fn => fn)));
