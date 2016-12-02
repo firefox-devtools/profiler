@@ -3,10 +3,10 @@
  */
 const match = {
   exact: (symbol, pattern) => symbol === pattern,
-  prefix: (symbol, pattern) => symbol.indexOf(pattern) === 0,
+  prefix: (symbol, pattern) => symbol.startsWith(pattern),
   substring: (symbol, pattern) => symbol.indexOf(pattern) > -1,
   stem: (symbol, pattern) => {
-    return symbol === pattern || (symbol && symbol.indexOf(pattern + '(') === 0);
+    return symbol === pattern || (symbol && symbol.startsWith(pattern + '('));
   },
 };
 
@@ -204,7 +204,7 @@ export function categorizeThreadSamples (profile) {
       .map(sampleCategorizer(thread, uncategorized))
   ));
 
-  if (process.env.NODE_ENV && process.env.NODE_ENV.indexOf('development') === 0) {
+  if (process.env.NODE_ENV && process.env.NODE_ENV.startsWith('development')) {
     logUncategorizedSamples(uncategorized);
   }
 
