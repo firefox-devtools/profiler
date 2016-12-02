@@ -8,7 +8,7 @@ module.exports = {
     './index',
   ],
   output: {
-    path: path.join(__dirname, 'public_html'),
+    path: path.join(__dirname, 'dist'),
     filename: '[hash].bundle.js',
     chunkFilename: '[id].[hash].bundle.js',
     publicPath: '/',
