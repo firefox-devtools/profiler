@@ -89,7 +89,7 @@ ProfileSummaryView.propTypes = {
   expandProfileSummaryThread: PropTypes.func,
 };
 
-function fill (size, fn) {
+function fill(size, fn) {
   const array = Array(size);
   for (let i = 0; i < size; i++) {
     array[i] = fn(i);

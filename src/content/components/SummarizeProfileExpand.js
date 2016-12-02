@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import SummarizeLineGraph from './SummarizeLineGraph';
 
 class SummarizeProfileExpand extends Component {
-  render () {
+  render() {
     const {summary, thread, isExpanded, expand, collapse, expandLength} = this.props;
     // Only show the expand/collapse button when it is warranted.
     if (summary.length > expandLength) {

@@ -210,7 +210,7 @@ function profile(state = {}, action) {
   }
 }
 
-function summaryView (state = {summary: null, expanded: null}, action) {
+function summaryView(state = {summary: null, expanded: null}, action) {
   switch (action.type) {
     case 'PROFILE_SUMMARY_PROCESSED': {
       return Object.assign({}, state, { summary: action.summary, expanded: new Set() });

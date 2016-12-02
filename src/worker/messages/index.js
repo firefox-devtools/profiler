@@ -7,10 +7,10 @@ import {processProfileSummary, profileProcessed} from '../actions';
 const messages = {};
 export default messages;
 
-messages.PROFILE_PROCESSED = function(message, call) {
+messages.PROFILE_PROCESSED = function (message, call) {
   call(profileProcessed, message.profile);
 };
 
-messages.SUMMARIZE_PROFILE = function(message, call) {
+messages.SUMMARIZE_PROFILE = function (message, call) {
   call(processProfileSummary);
 };

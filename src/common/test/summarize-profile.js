@@ -113,7 +113,7 @@ describe('summarize-profile', function () {
   });
 });
 
-function forEachObj (object, fn) {
+function forEachObj(object, fn) {
   let i = 0;
   for (const key in object) {
     if (object.hasOwnProperty(key)) {

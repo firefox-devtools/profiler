@@ -12,7 +12,7 @@ const PERCENT_TIME_TITLE = 'The percentage of time represents the percentage of 
   'recording.';
 
 class SummarizeProfileHeader extends Component {
-  render () {
+  render() {
     const {threadName} = this.props;
     return (
       <div>

@@ -61,7 +61,7 @@ export function startSymbolicating() {
 }
 
 export function doneSymbolicating() {
-  return function(dispatch, getState) {
+  return function (dispatch, getState) {
     dispatch({ type: 'DONE_SYMBOLICATING' });
     // TODO - Do not use selectors here.
     dispatch({

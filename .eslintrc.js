@@ -78,7 +78,12 @@ module.exports = {
         "no-duplicate-imports": "error",
         "no-var": "error",
         "prefer-const": "error",
-        "array-bracket-spacing": "error"
+        "array-bracket-spacing": "error",
+        "space-before-function-paren": ["error", {
+            "anonymous": "always",
+            "named": "never",
+            "asyncArrow": "always",
+        }],
     },
     "settings": {
         "react": {

@@ -5,7 +5,7 @@ import ZeeWorker from 'file-loader!./zee-worker.js';
 const zeeWorker = new Worker(ZeeWorker);
 const zeeCallbacks = [];
 
-zeeWorker.onmessage = function(msg) {
+zeeWorker.onmessage = function (msg) {
   zeeCallbacks[msg.data.callbackID][msg.data.type](msg.data.data);
   zeeCallbacks[msg.data.callbackID] = null;
 };

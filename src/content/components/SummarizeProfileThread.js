@@ -35,7 +35,7 @@ export default SummarizeProfileThread;
  * @param {number} n - The number.
  * @returns {string} The formatted string.
  */
-function displayPercentage (n) {
+function displayPercentage(n) {
   const percentage = Math.round(n * 1000);
   const integer = Math.floor(percentage / 10);
   const decimal = Math.floor(percentage - integer * 10);

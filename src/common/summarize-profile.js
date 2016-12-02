@@ -67,7 +67,7 @@ const categories = [
   // [match.prefix, 'Interpret(', 'script.interpreter',
 ];
 
-export function summarizeProfile (profile) {
+export function summarizeProfile(profile) {
   const categories = categorizeThreadSamples(profile);
   const rollingSummaries = calculateRollingSummaries(profile, categories);
   const summaries = summarizeCategories(profile, categories);
@@ -178,7 +178,7 @@ function calculateSummaryPercentages(summary) {
 }
 
 
-function logUncategorizedSamples (uncategorized, maxLogLength = 10) {
+function logUncategorizedSamples(uncategorized, maxLogLength = 10) {
   const entries = Object.entries(uncategorized);
   /* eslint-disable no-console */
   console.log(`Top ${maxLogLength} uncategorized stacks`);
@@ -197,7 +197,7 @@ function logUncategorizedSamples (uncategorized, maxLogLength = 10) {
  * @param {array} profile - The current profile.
  * @returns {array} Stacks mapped to categories.
  */
-export function categorizeThreadSamples (profile) {
+export function categorizeThreadSamples(profile) {
   const uncategorized = {};
   const summaries = profile.threads.map(thread => (
     thread.samples.stack
@@ -218,7 +218,7 @@ export function categorizeThreadSamples (profile) {
  * @param {object} threadCategories - Each thread's categories for the samples.
  * @returns {object} The summaries of each thread.
  */
-export function summarizeCategories (profile, threadCategories) {
+export function summarizeCategories(profile, threadCategories) {
   return threadCategories.map(categories => (
       categories.reduce(summarizeSampleCategories, {})
     ))
@@ -227,7 +227,7 @@ export function summarizeCategories (profile, threadCategories) {
     // .sort((a, b) => Object.keys(b.summary).length - Object.keys(a.summary).length);
 }
 
-export function calculateRollingSummaries (profile, threadCategories, segmentCount = 40, rolling = 4) {
+export function calculateRollingSummaries(profile, threadCategories, segmentCount = 40, rolling = 4) {
   const [minTime, maxTime] = profile.threads.map(thread => {
     return [thread.samples.time[0], thread.samples.time[thread.samples.time.length - 1]];
   })
@@ -271,7 +271,7 @@ export function calculateRollingSummaries (profile, threadCategories, segmentCou
   });
 }
 
-function times (n, fn) {
+function times(n, fn) {
   const results = Array(n);
   for (let i = 0; i < n; i++) {
     results[i] = fn(i);
@@ -279,7 +279,7 @@ function times (n, fn) {
   return results;
 }
 
-function mapObj (object, fn) {
+function mapObj(object, fn) {
   let i = 0;
   const mappedObj = {};
   for (const key in object) {

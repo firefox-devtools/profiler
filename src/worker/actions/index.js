@@ -1,7 +1,7 @@
 import { summarizeProfile } from '../../common/summarize-profile';
 
-export function processProfileSummary () {
-  return function(dispatch, getState) {
+export function processProfileSummary() {
+  return function (dispatch, getState) {
     dispatch({
       toContent: true,
       type: 'PROFILE_SUMMARY_PROCESSED',

@@ -121,14 +121,14 @@ SummarizeLineGraph.propTypes = {
 
 export default SummarizeLineGraph;
 
-function round (n) {
+function round(n) {
   return Math.round(n * 1000) / 1000;
 }
 
-function moveTo (x, y) {
+function moveTo(x, y) {
   return `M${x},${y}`;
 }
 
-function lineTo (x, y) {
+function lineTo(x, y) {
   return `L${x},${y}`;
 }
