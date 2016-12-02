@@ -213,9 +213,21 @@ export function waitingForProfileFromWeb() {
 }
 
 export function receiveProfileFromWeb(profile) {
-  return {
-    type: 'RECEIVE_PROFILE_FROM_WEB',
-    profile,
+  return function (dispatch, getState) {
+    dispatch({
+      type: 'RECEIVE_PROFILE_FROM_WEB',
+      profile,
+    });
+    // TODO - Do not use selectors here.
+    dispatch({
+      toWorker: true,
+      type: 'PROFILE_PROCESSED',
+      profile: getProfile(getState()),
+    });
+    dispatch({
+      toWorker: true,
+      type: 'SUMMARIZE_PROFILE',
+    });
   };
 }
 
