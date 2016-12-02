@@ -116,22 +116,30 @@ function functionNameCategorizer() {
  */
 function sampleCategorizer(thread, uncategorized = {}) {
   const categorizeFuncName = functionNameCategorizer();
+  const stackCategoryCache = new Map();
 
-  return function categorizeSampleStack(initialStackIndex) {
-    let nextStackIndex = initialStackIndex;
-    while (nextStackIndex !== null) {
-      const stackIndex = nextStackIndex;
-      const frameIndex = thread.stackTable.frame[stackIndex];
-      nextStackIndex = thread.stackTable.prefix[stackIndex];
-      const funcIndex = thread.frameTable.func[frameIndex];
-      const name = thread.stringTable._array[thread.funcTable.name[funcIndex]];
-      const category = categorizeFuncName(name);
-      if (category) {
-        return category;
-      }
+  return function categorizeSampleStack(stackIndex) {
+    if (stackIndex === null) {
+      return 'uncategorized';
     }
 
-    return 'uncategorized';
+    let category = stackCategoryCache.get(stackIndex);
+    if (category !== undefined) {
+      return category;
+    }
+
+    const frameIndex = thread.stackTable.frame[stackIndex];
+    const funcIndex = thread.frameTable.func[frameIndex];
+    const name = thread.stringTable._array[thread.funcTable.name[funcIndex]];
+    category = categorizeFuncName(name);
+    if (category !== false) {
+      stackCategoryCache.set(stackIndex, category);
+      return category;
+    }
+
+    category = categorizeSampleStack(thread.stackTable.prefix[stackIndex]);
+    stackCategoryCache.set(stackIndex, category);
+    return category;
   };
 }
 
