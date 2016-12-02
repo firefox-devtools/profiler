@@ -78,13 +78,6 @@ if (process.env.NODE_ENV === 'production') {
       },
     }));
 } else if (process.env.NODE_ENV === 'development') {
-  module.exports.devtool = 'cheap-module-eval-source-map';
-  module.exports.entry = [
-    'webpack-dev-server/client?http://localhost:4242',
-    'webpack/hot/only-dev-server',
-    'react-hot-loader/patch'].concat(module.exports.entry);
-  module.exports.plugins = [new webpack.HotModuleReplacementPlugin()].concat(module.exports.plugins);
-} else if (process.env.NODE_ENV === 'development-no-hot') {
   module.exports.devtool = 'source-map';
   module.exports.entry = ['webpack-dev-server/client?http://localhost:4242'].concat(module.exports.entry);
 }

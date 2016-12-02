@@ -204,7 +204,7 @@ export function categorizeThreadSamples(profile) {
       .map(sampleCategorizer(thread, uncategorized))
   ));
 
-  if (process.env.NODE_ENV && process.env.NODE_ENV.startsWith('development')) {
+  if (process.env.NODE_ENV === 'development') {
     logUncategorizedSamples(uncategorized);
   }
 

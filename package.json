@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha --compilers js:babel-core/register test/**/*.js src/**/test/*.js",
     "start": "NODE_ENV=development node server.js",
-    "start-no-hot": "NODE_ENV=development-no-hot node server.js",
+    "start-no-hot": "npm run start",
     "start-prod": "npm run build-prod && npm run serve-static",
     "start-prod-readable": "npm run build-prod-readable && npm run serve-static",
     "serve-static": "ws -d dist/ -s index.html -p 4242",
@@ -56,20 +56,17 @@
     "memoizesync": "^0.5.0",
     "mkdirp": "^0.5.1",
     "mocha": "^3.1.1",
-    "npm-run-all": "^3.1.0",
     "offline-plugin": "^4.5.2",
     "pretty-bytes": "^4.0.2",
     "query-string": "^4.2.3",
     "raw-loader": "^0.5.1",
     "react": "^15.4.1",
     "react-addons-perf": "^15.4.1",
-    "react-addons-shallow-compare": "^15.0.1",
+    "react-addons-shallow-compare": "^15.4.1",
     "react-dom": "^15.4.1",
-    "react-hot-loader": "^3.0.0-beta.6",
     "react-redux": "^4.4.2",
     "react-router": "^3.0.0",
     "react-router-redux": "^4.0.5",
-    "react-virtualized": "^8.0.12",
     "redux": "^3.4.0",
     "redux-logger": "^2.6.1",
     "redux-thunk": "^2.0.1",
@@ -81,7 +78,7 @@
     "watchify": "^3.6.1",
     "webpack": "^2.1.0-beta.27",
     "webpack-dev-middleware": "^1.8.4",
-    "webpack-dev-server": "^1.16.2",
+    "webpack-dev-server": "^2.1.0-beta.12",
     "webpack-hot-middleware": "^2.13.2",
     "worker-loader": "^0.7.1"
   },
@@ -89,9 +86,6 @@
     "presets": [
       "react",
       "es2015"
-    ],
-    "plugins": [
-      "react-hot-loader/babel"
     ]
   }
 }

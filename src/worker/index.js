@@ -15,7 +15,7 @@ const store = createStore(
   applyMiddleware(
     thunk,
     threadDispatcher(self, 'toContent'),
-    process.env.NODE_ENV.indexOf('development') === 0
+    process.env.NODE_ENV === 'development'
       ? createLogger({ titleFormatter: action => `worker action ${action.type}` })
       : null
   ));
