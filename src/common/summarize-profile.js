@@ -227,7 +227,7 @@ export function summarizeCategories (profile, threadCategories) {
     // .sort((a, b) => Object.keys(b.summary).length - Object.keys(a.summary).length);
 }
 
-export function calculateRollingSummaries (profile, threadCategories, segments = 40, rolling = 4) {
+export function calculateRollingSummaries (profile, threadCategories, segmentCount = 40, rolling = 4) {
   const [minTime, maxTime] = profile.threads.map(thread => {
     return [thread.samples.time[0], thread.samples.time[thread.samples.time.length - 1]];
   })
@@ -236,7 +236,7 @@ export function calculateRollingSummaries (profile, threadCategories, segments =
     Math.max(a[1], b[1]),
   ]));
   const totalTime = maxTime - minTime;
-  const segmentLength = totalTime / segments;
+  const segmentLength = totalTime / segmentCount;
   const segmentHalfLength = segmentLength / 2;
   const rollingLength = segmentLength * rolling;
   const rollingHalfLength = segmentLength * rolling / 2;
@@ -244,7 +244,7 @@ export function calculateRollingSummaries (profile, threadCategories, segments =
   return profile.threads.map((thread, threadIndex) => {
     const categories = threadCategories[threadIndex];
 
-    return times(segments, (segmentIndex) => {
+    return times(segmentCount, (segmentIndex) => {
       let samplesInRange = 0;
       const samples = {};
 
