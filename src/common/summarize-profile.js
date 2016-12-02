@@ -115,26 +115,22 @@ function functionNameCategorizer() {
  * @return {function} Sample stack categorizer.
  */
 function sampleCategorizer(thread, uncategorized = {}) {
-  const categorize = functionNameCategorizer();
+  const categorizeFuncName = functionNameCategorizer();
 
   return function categorizeSampleStack(initialStackIndex) {
-    const stacks = [];
     let nextStackIndex = initialStackIndex;
-    do {
+    while (nextStackIndex !== null) {
       const stackIndex = nextStackIndex;
       const frameIndex = thread.stackTable.frame[stackIndex];
       nextStackIndex = thread.stackTable.prefix[stackIndex];
       const funcIndex = thread.frameTable.func[frameIndex];
       const name = thread.stringTable._array[thread.funcTable.name[funcIndex]];
-      stacks.push(name);
-      const category = categorize(name);
+      const category = categorizeFuncName(name);
       if (category) {
         return category;
       }
-    } while (typeof nextStackIndex === 'number');
+    }
 
-    const stack = stacks.join('\n');
-    uncategorized[stack] = (uncategorized[stack] || 0) + 1;
     return 'uncategorized';
   };
 }
@@ -195,6 +191,35 @@ function logUncategorizedSamples(uncategorized, maxLogLength = 10) {
   /* eslint-enable no-console */
 }
 
+function stackToString(stackIndex, thread) {
+  const { stackTable, frameTable, funcTable, stringTable } = thread;
+  const stack = [];
+  let nextStackIndex = stackIndex;
+  while (nextStackIndex !== null) {
+    const frameIndex = stackTable.frame[nextStackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    const name = stringTable._array[funcTable.name[funcIndex]];
+    stack.push(name);
+    nextStackIndex = stackTable.prefix[nextStackIndex];
+  }
+  return stack.join('\n');
+}
+
+function countUncategorizedStacks(profile, summaries) {
+  const uncategorized = {};
+  profile.threads.forEach((thread, i) => {
+    const threadSummary = summaries[i];
+    const { samples } = thread;
+    for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+      if (threadSummary[sampleIndex] === 'uncategorized') {
+        const stringCallStack = stackToString(samples.stack[sampleIndex], thread);
+        uncategorized[stringCallStack] = (uncategorized[stringCallStack] || 0) + 1;
+      }
+    }
+  });
+  return uncategorized;
+}
+
 /**
  * Take a profile and return a summary that categorizes each sample, then calculate
  * a summary of the percentage of time each sample was present.
@@ -210,6 +235,7 @@ export function categorizeThreadSamples(profile) {
     });
 
     if (process.env.NODE_ENV === 'development') {
+      const uncategorized = countUncategorizedStacks(profile, summaries);
       logUncategorizedSamples(uncategorized);
     }
 
