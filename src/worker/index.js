@@ -12,12 +12,12 @@ const store = createStore(
   // Initial State:
   {},
   // Enhancers:
-  applyMiddleware(
+  applyMiddleware(...[
     thunk,
     threadDispatcher(self, 'toContent'),
     process.env.NODE_ENV === 'development'
       ? createLogger({ titleFormatter: action => `worker action ${action.type}` })
       : null
-  ));
+  ].filter(fn => fn)));
 
 handleMessages(self, store, messages);
