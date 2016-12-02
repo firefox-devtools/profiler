@@ -89,21 +89,21 @@ export function summarizeProfile(profile) {
  * @returns {function} Function categorizer.
  */
 function functionNameCategorizer() {
-  const cache = {};
+  const cache = new Map();
   return function functionNameToCategory(name) {
-    const existingCategory = cache[name];
-    if (typeof existingCategory === 'string') {
+    const existingCategory = cache.get(name);
+    if (existingCategory !== undefined) {
       return existingCategory;
     }
 
     for (const [matches, pattern, category] of categories) {
       if (matches(name, pattern)) {
-        cache[name] = category;
+        cache.set(name, category);
         return category;
       }
     }
 
-    cache[name] = false;
+    cache.set(name, false);
     return false;
   };
 }
@@ -204,10 +204,10 @@ function logUncategorizedSamples(uncategorized, maxLogLength = 10) {
 export function categorizeThreadSamples(profile) {
   return timeCode('categorizeThreadSamples', () => {
     const uncategorized = {};
-    const summaries = profile.threads.map(thread => (
-      thread.samples.stack
-        .map(sampleCategorizer(thread, uncategorized))
-    ));
+    const summaries = profile.threads.map(thread => {
+      const categorizer = sampleCategorizer(thread, uncategorized);
+      return thread.samples.stack.map(categorizer);
+    });
 
     if (process.env.NODE_ENV === 'development') {
       logUncategorizedSamples(uncategorized);
