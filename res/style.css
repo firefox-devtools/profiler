@@ -106,8 +106,9 @@ body, #root, .profileViewer {
   padding-left: 5px;
 }
 
-.treeViewRowColumn.treeViewMainColumn {
-  flex: 1;
+.treeViewAppendageColumn {
+  margin-left: 10px;
+  color: #999;
 }
 
 .treeViewRow.even, .treeViewRow.even > .treeViewFixedColumn {

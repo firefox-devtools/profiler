@@ -67,7 +67,7 @@ class TreeViewRow extends Component {
   }
 
   render() {
-    const { node, depth, fixedColumns, mainColumn, index, canBeExpanded, isExpanded, selected, highlightString } = this.props;
+    const { node, depth, fixedColumns, mainColumn, appendageColumn, index, canBeExpanded, isExpanded, selected, highlightString } = this.props;
     const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
     return (
       <div className={`treeViewRow ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
@@ -82,6 +82,9 @@ class TreeViewRow extends Component {
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
           {reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting')}
+        </span>
+        <span className={`treeViewRowColumn treeViewAppendageColumn ${appendageColumn.propName}`}>
+          {node[appendageColumn.propName]}
         </span>
       </div>
     );
@@ -100,6 +103,10 @@ TreeViewRow.propTypes = {
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
   }).isRequired,
+  appendageColumn: PropTypes.shape({
+    propName: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  }),
   index: PropTypes.number.isRequired,
   canBeExpanded: PropTypes.bool.isRequired,
   isExpanded: PropTypes.bool.isRequired,
@@ -146,7 +153,7 @@ class TreeView extends Component {
   }
 
   _renderRow(nodeId, index) {
-    const { tree, expandedNodeIds, fixedColumns, mainColumn, selectedNodeId, highlightString } = this.props;
+    const { tree, expandedNodeIds, fixedColumns, mainColumn, appendageColumn, selectedNodeId, highlightString } = this.props;
     const node = tree.getNode(nodeId);
     const canBeExpanded = tree.hasChildren(nodeId);
     const isExpanded = expandedNodeIds.includes(nodeId);
@@ -154,6 +161,7 @@ class TreeView extends Component {
       <TreeViewRow node={node}
                    fixedColumns={fixedColumns}
                    mainColumn={mainColumn}
+                   appendageColumn={appendageColumn}
                    depth={tree.getDepth(nodeId)}
                    nodeId={nodeId}
                    index={index}
@@ -320,6 +328,10 @@ TreeView.propTypes = {
   onExpandedNodesChange: PropTypes.func.isRequired,
   onSelectionChange: PropTypes.func.isRequired,
   highlightString: PropTypes.string,
+  appendageColumn: PropTypes.shape({
+    propName: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  }),
 };
 
 export default TreeView;

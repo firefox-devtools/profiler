@@ -14,6 +14,7 @@ class ProfileTreeView extends Component {
       { propName: 'selfTime', title: 'Self' },
     ];
     this._mainColumn = { propName: 'name', title: '' };
+    this._appendageColumn = { propName: 'lib', title: '' };
     this._onSelectedFuncStackChange = this._onSelectedFuncStackChange.bind(this);
     this._onExpandedFuncStacksChange = this._onExpandedFuncStacksChange.bind(this);
   }
@@ -73,6 +74,7 @@ class ProfileTreeView extends Component {
       <TreeView tree={tree}
                 fixedColumns={this._fixedColumns}
                 mainColumn={this._mainColumn}
+                appendageColumn={this._appendageColumn}
                 onSelectionChange={this._onSelectedFuncStackChange}
                 onExpandedNodesChange={this._onExpandedFuncStacksChange}
                 selectedNodeId={selectedFuncStack}

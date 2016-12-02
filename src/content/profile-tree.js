@@ -2,11 +2,12 @@ import { timeCode } from '../common/time-code';
 import { getSampleFuncStacks } from './profile-data';
 
 class ProfileTree {
-  constructor(funcStackTable, funcStackTimes, funcStackChildCount, funcTable, stringTable, rootTotalTime, rootCount) {
+  constructor(funcStackTable, funcStackTimes, funcStackChildCount, funcTable, resourceTable, stringTable, rootTotalTime, rootCount) {
     this._funcStackTable = funcStackTable;
     this._funcStackTimes = funcStackTimes;
     this._funcStackChildCount = funcStackChildCount;
     this._funcTable = funcTable;
+    this._resourceTable = resourceTable;
     this._stringTable = stringTable;
     this._rootTotalTime = rootTotalTime;
     this._rootCount = rootCount;
@@ -66,11 +67,16 @@ class ProfileTree {
   getNode(funcStackIndex) {
     let node = this._nodes.get(funcStackIndex);
     if (node === undefined) {
+      const funcIndex = this._funcStackTable.func[funcStackIndex];
+      const funcName = this._stringTable.getString(this._funcTable.name[funcIndex]);
+      const libNameIndex = this._resourceTable.name[this._funcTable.resource[funcIndex]];
+      const libName = libNameIndex !== undefined ? this._stringTable.getString(libNameIndex) : '';
       node = {
         totalTime: `${this._funcStackTimes.totalTime[funcStackIndex].toFixed(1)}ms`,
         totalTimePercent: `${(100 * this._funcStackTimes.totalTime[funcStackIndex] / this._rootTotalTime).toFixed(1)}%`,
         selfTime: `${this._funcStackTimes.selfTime[funcStackIndex].toFixed(1)}ms`,
-        name: this._stringTable.getString(this._funcTable.name[this._funcStackTable.func[funcStackIndex]]),
+        name: funcName,
+        lib: libName,
       };
       this._nodes.set(funcStackIndex, node);
     }
@@ -106,6 +112,6 @@ export function getCallTree(thread, interval, funcStackInfo) {
       }
     }
     const funcStackTimes = { selfTime: funcStackSelfTime, totalTime: funcStackTotalTime };
-    return new ProfileTree(funcStackTable, funcStackTimes, numChildren, thread.funcTable, thread.stringTable, rootTotalTime, numRoots);
+    return new ProfileTree(funcStackTable, funcStackTimes, numChildren, thread.funcTable, thread.resourceTable, thread.stringTable, rootTotalTime, numRoots);
   });
 }
