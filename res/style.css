@@ -57,6 +57,11 @@ body, #root, .profileViewer {
   min-width: min-content;
 }
 
+.treeViewBodyInner {
+  background: white;
+  overflow: hidden;
+}
+
 .treeViewRow {
   white-space: nowrap;
   display: flex;
