@@ -33,7 +33,7 @@ class VirtualListInnerChunk extends Component {
     return (
       <div className={className}>
         {
-          range(visibleRangeStart, visibleRangeEnd).map(i => {
+          range(visibleRangeStart, Math.max(visibleRangeStart, visibleRangeEnd)).map(i => {
             const item = items[i];
             return (
               <VirtualListRow key={i}
@@ -72,7 +72,9 @@ class VirtualListInner extends Component {
     const { itemHeight, className, renderItem, items, specialItems, visibleRangeStart, visibleRangeEnd, columnIndex } = this.props;
 
     const chunkSize = 16;
-    const chunks = range(Math.floor(visibleRangeStart / chunkSize), Math.ceil(visibleRangeEnd / chunkSize)).map(c => c * chunkSize);
+    const startChunkIndex = Math.floor(visibleRangeStart / chunkSize);
+    const endChunkIndex = Math.ceil(visibleRangeEnd / chunkSize);
+    const chunks = range(startChunkIndex, Math.max(startChunkIndex, endChunkIndex)).map(c => c * chunkSize);
 
     return (
       <div className={className}
