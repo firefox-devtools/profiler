@@ -67,7 +67,6 @@ VirtualListInner.propTypes = {
   className: PropTypes.string,
   renderItem: PropTypes.func.isRequired,
   items: PropTypes.array.isRequired,
-  focusable: PropTypes.bool.isRequired,
   specialItems: PropTypes.array.isRequired,
   visibleRangeStart: PropTypes.number.isRequired,
   visibleRangeEnd: PropTypes.number.isRequired,
