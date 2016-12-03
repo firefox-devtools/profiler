@@ -42,8 +42,19 @@ body, #root, .profileViewer {
   will-change: scroll-position;
 }
 
-.treeViewBodyInner {
+.treeViewBodyInnerWrapper {
   position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.treeViewBodyInner0 {
+  left: 0;
+  position: sticky;
+  z-index: 2;
+  min-width: min-content;
 }
 
 .treeViewRow {
@@ -73,8 +84,6 @@ body, #root, .profileViewer {
 }
 
 .treeViewRowColumn.treeViewFixedColumn {
-  position: sticky;
-  z-index: 2;
   box-sizing: border-box;
   border-right: 1px solid #D6D6D6;
 }
@@ -122,8 +131,8 @@ body, #root, .profileViewer {
   background-color: -moz-dialog;
   color: black;
 }
-.treeViewBody:focus > * > .treeViewRow.selected,
-.treeViewBody:focus > * > .treeViewRow.selected > .treeViewFixedColumn {
+.treeViewBody:focus > * > * > .treeViewRow.selected,
+.treeViewBody:focus > * > * > .treeViewRow.selected > .treeViewFixedColumn {
   background-color: highlight;
   color: highlighttext;
 }

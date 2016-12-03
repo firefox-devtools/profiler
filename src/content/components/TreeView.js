@@ -46,7 +46,53 @@ function reactStringWithHighlightedSubstrings(string, substring, className) {
   return result;
 }
 
-class TreeViewRow extends Component {
+class TreeViewRowFixedColumns extends Component {
+
+  constructor(props) {
+    super(props);
+    this._onClick = this._onClick.bind(this);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
+
+  _onClick(event) {
+    const { nodeId, onClick } = this.props;
+    onClick(nodeId, event);
+  }
+
+  render() {
+    const { node, columns, index, selected, highlightString } = this.props;
+    const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
+    return (
+      <div className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
+        {
+          columns.map(col =>
+            <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
+                  key={col.propName}>
+              { reactStringWithHighlightedSubstrings(node[col.propName], highlightString, 'treeViewHighlighting') }
+            </span>)
+        }
+      </div>
+    );
+  }
+}
+
+TreeViewRowFixedColumns.propTypes = {
+  node: PropTypes.object.isRequired,
+  nodeId: PropTypes.number.isRequired,
+  columns: PropTypes.arrayOf(PropTypes.shape({
+    propName: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  })).isRequired,
+  index: PropTypes.number.isRequired,
+  selected: PropTypes.bool.isRequired,
+  onClick: PropTypes.func.isRequired,
+  highlightString: PropTypes.string,
+};
+
+class TreeViewRowScrolledColumns extends Component {
 
   constructor(props) {
     super(props);
@@ -67,17 +113,10 @@ class TreeViewRow extends Component {
   }
 
   render() {
-    const { node, depth, fixedColumns, mainColumn, appendageColumn, index, canBeExpanded, isExpanded, selected, highlightString } = this.props;
+    const { node, depth, mainColumn, appendageColumn, index, canBeExpanded, isExpanded, selected, highlightString } = this.props;
     const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
     return (
-      <div className={`treeViewRow ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
-        {
-          fixedColumns.map(col =>
-            <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
-                  key={col.propName}>
-              { node[col.propName] }
-            </span>)
-        }
+      <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
         <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
@@ -93,14 +132,10 @@ class TreeViewRow extends Component {
   }
 }
 
-TreeViewRow.propTypes = {
+TreeViewRowScrolledColumns.propTypes = {
   node: PropTypes.object.isRequired,
   nodeId: PropTypes.number.isRequired,
   depth: PropTypes.number.isRequired,
-  fixedColumns: PropTypes.arrayOf(PropTypes.shape({
-    propName: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-  })).isRequired,
   mainColumn: PropTypes.shape({
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
@@ -154,25 +189,35 @@ class TreeView extends Component {
     }
   }
 
-  _renderRow(nodeId, index) {
+  _renderRow(nodeId, index, columnIndex) {
     const { tree, expandedNodeIds, fixedColumns, mainColumn, appendageColumn, selectedNodeId, highlightString } = this.props;
     const node = tree.getNode(nodeId);
-    const canBeExpanded = tree.hasChildren(nodeId);
-    const isExpanded = expandedNodeIds.includes(nodeId);
-    return (
-      <TreeViewRow node={node}
-                   fixedColumns={fixedColumns}
-                   mainColumn={mainColumn}
-                   appendageColumn={appendageColumn}
-                   depth={tree.getDepth(nodeId)}
-                   nodeId={nodeId}
-                   index={index}
-                   canBeExpanded={canBeExpanded}
-                   isExpanded={isExpanded}
-                   onToggle={this._toggle}
-                   selected={nodeId === selectedNodeId}
-                   onClick={this._onRowClicked}
-                   highlightString={highlightString}/>
+    if (columnIndex === 0) {
+      return (
+        <TreeViewRowFixedColumns node={node}
+                                 columns={fixedColumns}
+                                 nodeId={nodeId}
+                                 index={index}
+                                 selected={nodeId === selectedNodeId}
+                                 onClick={this._onRowClicked}
+                                 highlightString={highlightString}/>
+       );
+      }
+      const canBeExpanded = tree.hasChildren(nodeId);
+      const isExpanded = expandedNodeIds.includes(nodeId);
+      return (
+        <TreeViewRowScrolledColumns node={node}
+                                    mainColumn={mainColumn}
+                                    appendageColumn={appendageColumn}
+                                    depth={tree.getDepth(nodeId)}
+                                    nodeId={nodeId}
+                                    index={index}
+                                    canBeExpanded={canBeExpanded}
+                                    isExpanded={isExpanded}
+                                    onToggle={this._toggle}
+                                    selected={nodeId === selectedNodeId}
+                                    onClick={this._onRowClicked}
+                                    highlightString={highlightString}/>
     );
   }
 
@@ -305,6 +350,7 @@ class TreeView extends Component {
                      items={this._visibleRows}
                      renderItem={this._renderRow}
                      itemHeight={16}
+                     columnCount={2}
                      focusable={true}
                      onKeyDown={this._onKeyDown}
                      specialItems={this._specialItems}

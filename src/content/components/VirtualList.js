@@ -47,7 +47,7 @@ class VirtualListInner extends Component {
            ref={this._containerCreated}
             style={{
               height: `${items.length * itemHeight}px`,
-              width: '3000px',
+              width: columnIndex === 1 ? '3000px' : undefined,
             }}>
         <div className={`${className}TopSpacer`}
              key={-1}
@@ -164,20 +164,22 @@ class VirtualList extends Component {
     const { visibleRangeStart, visibleRangeEnd } = this._visibleRange;
     return (
       <div className={className} ref={this._containerCreated} tabIndex={ focusable ? 0 : -1 } onKeyDown={onKeyDown}>
-        {
-          range(columnCount).map(columnIndex => (
-            <VirtualListInner className={classNames(`${className}Inner`, `${className}Inner${columnIndex}`)}
-                              visibleRangeStart={Math.max(0, visibleRangeStart)}
-                              visibleRangeEnd={Math.min(items.length, visibleRangeEnd)}
-                              itemHeight={itemHeight}
-                              renderItem={renderItem}
-                              items={items}
-                              specialItems={specialItems}
-                              columnIndex={columnIndex}
-                              key={columnIndex}
-                              ref={columnIndex === 0 ? this._innerCreated : undefined} />
-          ))
-        }
+        <div className={`${className}InnerWrapper`}>
+          {
+            range(columnCount).map(columnIndex => (
+              <VirtualListInner className={classNames(`${className}Inner`, `${className}Inner${columnIndex}`)}
+                                visibleRangeStart={Math.max(0, visibleRangeStart)}
+                                visibleRangeEnd={Math.min(items.length, visibleRangeEnd)}
+                                itemHeight={itemHeight}
+                                renderItem={renderItem}
+                                items={items}
+                                specialItems={specialItems}
+                                columnIndex={columnIndex}
+                                key={columnIndex}
+                                ref={columnIndex === 0 ? this._innerCreated : undefined} />
+            ))
+          }
+        </div>
       </div>
     );
   }
