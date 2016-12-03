@@ -22,6 +22,35 @@ VirtualListRow.propTypes = {
   isSpecial: PropTypes.bool,
 };
 
+class VirtualListInnerChunk extends Component {
+  shouldComponentUpdate(nextProps, nextState) {
+    return shallowCompare(this, nextProps, nextState);
+  }
+
+  render() {
+    const { className, renderItem, items, specialItems, visibleRangeStart, visibleRangeEnd, columnIndex } = this.props;
+
+    return (
+      <div className={className}>
+        {
+          range(visibleRangeStart, visibleRangeEnd).map(i => {
+            const item = items[i];
+            return (
+              <VirtualListRow key={i}
+                              index={i}
+                              columnIndex={columnIndex}
+                              renderItem={renderItem}
+                              item={item}
+                              items={items}
+                              isSpecial={specialItems.includes(item)}/>
+            );
+          })
+        }
+      </div>
+    );
+  }
+}
+
 class VirtualListInner extends Component {
   constructor(props) {
     super(props);
@@ -42,6 +71,9 @@ class VirtualListInner extends Component {
   render() {
     const { itemHeight, className, renderItem, items, specialItems, visibleRangeStart, visibleRangeEnd, columnIndex } = this.props;
 
+    const chunkSize = 16;
+    const chunks = range(Math.floor(visibleRangeStart / chunkSize), Math.ceil(visibleRangeEnd / chunkSize)).map(c => c * chunkSize);
+
     return (
       <div className={className}
            ref={this._containerCreated}
@@ -53,18 +85,16 @@ class VirtualListInner extends Component {
              key={-1}
              style={{height: Math.max(0, visibleRangeStart) * itemHeight + 'px'}} />
         {
-          items.map((item, i) => {
-            if (i < visibleRangeStart || i >= visibleRangeEnd) {
-              return null;
-            }
+          chunks.map(chunkStart => {
             return (
-              <VirtualListRow key={i}
-                              index={i}
-                              columnIndex={columnIndex}
-                              renderItem={renderItem}
-                              item={item}
-                              items={items}
-                              isSpecial={specialItems.includes(item)}/>
+              <VirtualListInnerChunk className={`${className}InnerChunk`}
+                                      key={chunkStart}
+                                      visibleRangeStart={Math.max(chunkStart, visibleRangeStart)}
+                                      visibleRangeEnd={Math.min(chunkStart + chunkSize, visibleRangeEnd)}
+                                      columnIndex={columnIndex}
+                                      renderItem={renderItem}
+                                      items={items}
+                                      specialItems={specialItems}/>
             );
           })
         }

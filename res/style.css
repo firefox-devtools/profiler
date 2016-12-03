@@ -136,8 +136,8 @@ body, #root, .profileViewer {
   background-color: -moz-dialog;
   color: black;
 }
-.treeViewBody:focus > * > * > .treeViewRow.selected,
-.treeViewBody:focus > * > * > .treeViewRow.selected > .treeViewFixedColumn {
+.treeViewBody:focus > * > * > * > .treeViewRow.selected,
+.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeViewFixedColumn {
   background-color: highlight;
   color: highlighttext;
 }
