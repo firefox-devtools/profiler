@@ -1,6 +1,5 @@
 import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
-import { findDOMNode } from 'react-dom';
 
 class VirtualListRow extends Component {
   shouldComponentUpdate(nextProps, nextState) {
@@ -21,9 +20,20 @@ VirtualListRow.propTypes = {
 };
 
 class VirtualListInner extends Component {
+  constructor(props) {
+    super(props);
+    this._containerCreated = e => { this._container = e; };
+  }
 
   shouldComponentUpdate(nextProps, nextState) {
     return shallowCompare(this, nextProps, nextState);
+  }
+
+  getBoundingClientRect() {
+    if (this._container) {
+      return this._container.getBoundingClientRect();
+    }
+    return new window.DOMRect();
   }
 
   render() {
@@ -31,6 +41,7 @@ class VirtualListInner extends Component {
 
     return (
       <div className={className}
+           ref={this._containerCreated}
             style={{
               height: `${items.length * itemHeight}px`,
               width: '3000px',
@@ -94,7 +105,7 @@ class VirtualList extends Component {
       return { visibleRangeStart: 0, visibleRangeEnd: 100 };
     }
     const outerRect = this.refs.container.getBoundingClientRect();
-    const innerRectY = findDOMNode(this.refs.inner).getBoundingClientRect().top;
+    const innerRectY = this.refs.inner.getBoundingClientRect().top;
     const overscan = disableOverscan ? 0 : 25;
     const chunkSize = 16;
     let visibleRangeStart = Math.floor((outerRect.top - innerRectY) / itemHeight) - overscan;
