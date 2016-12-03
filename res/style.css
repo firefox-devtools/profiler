@@ -120,6 +120,10 @@ body, #root, .profileViewer {
   padding-left: 5px;
 }
 
+.treeRowIndentSpacer {
+  flex-shrink: 0;
+}
+
 .treeViewAppendageColumn {
   margin-left: 10px;
   color: #999;
@@ -156,11 +160,11 @@ body, #root, .profileViewer {
 .treeRowToggleButton,
 .focusCallstackButton {
   background: none 0 0 no-repeat transparent;
+  flex-shrink: 0;
   margin: 0;
   padding: 0;
   border: 0;
   width: 16px;
-  min-width: 16px;
   height: 16px;
   overflow: hidden;
   vertical-align: top;
@@ -553,6 +557,7 @@ body, #root, .profileViewer {
 .dimmerBefore,
 .dimmerAfter {
   background: rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
 }
 
 .dimmerAfter {

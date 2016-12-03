@@ -117,7 +117,7 @@ class TreeViewRowScrolledColumns extends Component {
     const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
     return (
       <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
-        <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px`, minWidth: `${depth * 10}px` }}/>
+        <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
           {reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting')}
