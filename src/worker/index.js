@@ -17,7 +17,7 @@ const store = createStore(
     threadDispatcher(self, 'toContent'),
     process.env.NODE_ENV === 'development'
       ? createLogger({ titleFormatter: action => `worker action ${action.type}` })
-      : null
+      : null,
   ].filter(fn => fn)));
 
 handleMessages(self, store, messages);
