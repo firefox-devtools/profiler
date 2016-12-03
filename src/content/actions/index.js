@@ -262,7 +262,8 @@ export function retrieveProfileFromWeb(hash, location) {
         queryActions = queryActions.concat(window.legacyRangeFilters.map(
           ({ start, end }) => ({
             type: 'ADD_RANGE_FILTER',
-            filter: { start: start - zeroAt, end: end - zeroAt },
+            start: start - zeroAt,
+            end: end - zeroAt,
           })
         ));
       }
