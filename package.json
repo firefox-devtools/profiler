@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "array-move": "^1.0.0",
+    "array-range": "^1.0.1",
     "babel-cli": "^6.2.0",
     "babel-core": "^6.2.1",
     "babel-loader": "^6.2.4",

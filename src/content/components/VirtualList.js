@@ -1,5 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
+import classNames from 'classnames';
+import range from 'array-range';
 
 class VirtualListRow extends Component {
   shouldComponentUpdate(nextProps, nextState) {
@@ -7,8 +9,8 @@ class VirtualListRow extends Component {
   }
 
   render() {
-    const { renderItem, item, index } = this.props;
-    return renderItem(item, index);
+    const { renderItem, item, index, columnIndex } = this.props;
+    return renderItem(item, index, columnIndex);
   }
 }
 
@@ -16,6 +18,7 @@ VirtualListRow.propTypes = {
   renderItem: PropTypes.func.isRequired,
   item: PropTypes.any.isRequired,
   index: PropTypes.number.isRequired,
+  columnIndex: PropTypes.number.isRequired,
   isSpecial: PropTypes.bool,
 };
 
@@ -37,7 +40,7 @@ class VirtualListInner extends Component {
   }
 
   render() {
-    const { itemHeight, className, renderItem, items, specialItems, visibleRangeStart, visibleRangeEnd } = this.props;
+    const { itemHeight, className, renderItem, items, specialItems, visibleRangeStart, visibleRangeEnd, columnIndex } = this.props;
 
     return (
       <div className={className}
@@ -54,7 +57,15 @@ class VirtualListInner extends Component {
             if (i < visibleRangeStart || i >= visibleRangeEnd) {
               return null;
             }
-            return <VirtualListRow key={i} index={i} renderItem={renderItem} item={item} items={items} isSpecial={specialItems.includes(item)}/>;
+            return (
+              <VirtualListRow key={i}
+                              index={i}
+                              columnIndex={columnIndex}
+                              renderItem={renderItem}
+                              item={item}
+                              items={items}
+                              isSpecial={specialItems.includes(item)}/>
+            );
           })
         }
       </div>
@@ -78,15 +89,17 @@ class VirtualList extends Component {
     super(props);
     this._onScroll = this._onScroll.bind(this);
     this._visibleRange = this.computeVisibleRange();
+    this._containerCreated = elem => { this._container = elem; };
+    this._innerCreated = elem => { this._inner = elem; };
   }
 
   componentDidMount() {
-    this.refs.container.addEventListener('scroll', this._onScroll);
+    this._container.addEventListener('scroll', this._onScroll);
     this._onScroll(); // for initial size
   }
 
   componentWillUnmount() {
-    this.refs.container.removeEventListener('scroll', this._onScroll);
+    this._container.removeEventListener('scroll', this._onScroll);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -100,11 +113,11 @@ class VirtualList extends Component {
 
   computeVisibleRange() {
     const { itemHeight, disableOverscan } = this.props;
-    if (!this.refs.container) {
+    if (!this._container) {
       return { visibleRangeStart: 0, visibleRangeEnd: 100 };
     }
-    const outerRect = this.refs.container.getBoundingClientRect();
-    const innerRectY = this.refs.inner.getBoundingClientRect().top;
+    const outerRect = this._container.getBoundingClientRect();
+    const innerRectY = this._inner.getBoundingClientRect().top;
     const overscan = disableOverscan ? 0 : 25;
     const chunkSize = 16;
     let visibleRangeStart = Math.floor((outerRect.top - innerRectY) / itemHeight) - overscan;
@@ -117,12 +130,12 @@ class VirtualList extends Component {
   }
 
   scrollItemIntoView(itemIndex, offsetX) {
-    if (!this.refs.container) {
+    if (!this._container) {
       return;
     }
     const itemTop = itemIndex * this.props.itemHeight;
     const itemBottom = itemTop + this.props.itemHeight;
-    const { container } = this.refs;
+    const container = this._container;
 
     if (container.scrollTop > itemTop) {
       container.scrollTop = itemTop;
@@ -142,22 +155,29 @@ class VirtualList extends Component {
   }
 
   focus() {
-    this.refs.container.focus();
+    this._container.focus();
   }
 
   render() {
     const { itemHeight, className, renderItem, items, focusable, specialItems, onKeyDown } = this.props;
+    const columnCount = this.props.columnCount || 1;
     const { visibleRangeStart, visibleRangeEnd } = this._visibleRange;
     return (
-      <div className={className} ref='container' tabIndex={ focusable ? 0 : -1 } onKeyDown={onKeyDown}>
-        <VirtualListInner className={`${className}Inner`}
-                          visibleRangeStart={Math.max(0, visibleRangeStart)}
-                          visibleRangeEnd={Math.min(items.length, visibleRangeEnd)}
-                          itemHeight={itemHeight}
-                          renderItem={renderItem}
-                          items={items}
-                          specialItems={specialItems}
-                          ref='inner' />
+      <div className={className} ref={this._containerCreated} tabIndex={ focusable ? 0 : -1 } onKeyDown={onKeyDown}>
+        {
+          range(columnCount).map(columnIndex => (
+            <VirtualListInner className={classNames(`${className}Inner`, `${className}Inner${columnIndex}`)}
+                              visibleRangeStart={Math.max(0, visibleRangeStart)}
+                              visibleRangeEnd={Math.min(items.length, visibleRangeEnd)}
+                              itemHeight={itemHeight}
+                              renderItem={renderItem}
+                              items={items}
+                              specialItems={specialItems}
+                              columnIndex={columnIndex}
+                              key={columnIndex}
+                              ref={columnIndex === 0 ? this._innerCreated : undefined} />
+          ))
+        }
       </div>
     );
   }
