@@ -83,9 +83,11 @@ class TreeViewRow extends Component {
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
           {reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting')}
         </span>
-        <span className={`treeViewRowColumn treeViewAppendageColumn ${appendageColumn.propName}`}>
-          {node[appendageColumn.propName]}
-        </span>
+        { appendageColumn ? (
+          <span className={`treeViewRowColumn treeViewAppendageColumn ${appendageColumn.propName}`}>
+            {node[appendageColumn.propName]}
+          </span>
+          ) : null}
       </div>
     );
   }
