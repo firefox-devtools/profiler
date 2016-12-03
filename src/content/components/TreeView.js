@@ -296,7 +296,7 @@ class TreeView extends Component {
   }
 
   render() {
-    const { fixedColumns, mainColumn } = this.props;
+    const { fixedColumns, mainColumn, disableOverscan } = this.props;
     return (
       <div className='treeView'>
         <TreeViewHeader fixedColumns={fixedColumns}
@@ -308,6 +308,7 @@ class TreeView extends Component {
                      focusable={true}
                      onKeyDown={this._onKeyDown}
                      specialItems={this._specialItems}
+                     disableOverscan={disableOverscan}
                      ref='list'/>
       </div>
     );
@@ -334,6 +335,7 @@ TreeView.propTypes = {
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
   }),
+  disableOverscan: PropTypes.bool,
 };
 
 export default TreeView;

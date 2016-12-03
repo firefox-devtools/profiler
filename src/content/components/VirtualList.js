@@ -89,18 +89,20 @@ class VirtualList extends Component {
   }
 
   computeVisibleRange() {
-    const { itemHeight } = this.props;
+    const { itemHeight, disableOverscan } = this.props;
     if (!this.refs.container) {
       return { visibleRangeStart: 0, visibleRangeEnd: 100 };
     }
     const outerRect = this.refs.container.getBoundingClientRect();
     const innerRectY = findDOMNode(this.refs.inner).getBoundingClientRect().top;
-    const overscan = 25;
+    const overscan = disableOverscan ? 0 : 25;
     const chunkSize = 16;
     let visibleRangeStart = Math.floor((outerRect.top - innerRectY) / itemHeight) - overscan;
-    visibleRangeStart = Math.floor(visibleRangeStart / chunkSize) * chunkSize;
     let visibleRangeEnd = Math.ceil((outerRect.bottom - innerRectY) / itemHeight) + overscan;
-    visibleRangeEnd = Math.ceil(visibleRangeEnd / chunkSize) * chunkSize;
+    if (!disableOverscan) {
+      visibleRangeStart = Math.floor(visibleRangeStart / chunkSize) * chunkSize;
+      visibleRangeEnd = Math.ceil(visibleRangeEnd / chunkSize) * chunkSize;
+    }
     return { visibleRangeStart, visibleRangeEnd };
   }
 
@@ -160,6 +162,7 @@ VirtualList.propTypes = {
   focusable: PropTypes.bool.isRequired,
   specialItems: PropTypes.array.isRequired,
   onKeyDown: PropTypes.func.isRequired,
+  disableOverscan: PropTypes.bool,
 };
 
 export default VirtualList;

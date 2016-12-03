@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TreeView from './TreeView';
 import { getStackAsFuncArray } from '../profile-data';
-import { getProfile, selectedThreadSelectors, getSelectedThreadIndex, getScrollToSelectionGeneration, getSearchString } from '../selectors/';
+import { getProfile, selectedThreadSelectors, getSelectedThreadIndex, getScrollToSelectionGeneration, getSearchString, getProfileViewOptions } from '../selectors/';
 import * as actions from '../actions';
 
 class ProfileTreeView extends Component {
@@ -69,7 +69,7 @@ class ProfileTreeView extends Component {
   }
 
   render() {
-    const { tree, selectedFuncStack, expandedFuncStacks, searchString } = this.props;
+    const { tree, selectedFuncStack, expandedFuncStacks, searchString, disableOverscan } = this.props;
     return (
       <TreeView tree={tree}
                 fixedColumns={this._fixedColumns}
@@ -80,6 +80,7 @@ class ProfileTreeView extends Component {
                 selectedNodeId={selectedFuncStack}
                 expandedNodeIds={expandedFuncStacks}
                 highlightString={searchString.toLowerCase()}
+                disableOverscan={disableOverscan}
                 ref='treeView'/>
     );
 
@@ -103,6 +104,7 @@ ProfileTreeView.propTypes = {
   changeSelectedFuncStack: PropTypes.func.isRequired,
   changeExpandedFuncStacks: PropTypes.func.isRequired,
   searchString: PropTypes.string,
+  disableOverscan: PropTypes.bool,
 };
 
 export default connect((state, props) => {
@@ -116,5 +118,6 @@ export default connect((state, props) => {
     selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state, props),
     expandedFuncStacks: selectedThreadSelectors.getExpandedFuncStacks(state, props),
     searchString: getSearchString(state, props),
+    disableOverscan: getProfileViewOptions(state, props).selection.isModifying,
   };
 }, actions, null, { withRef: true })(ProfileTreeView);
