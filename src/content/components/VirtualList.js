@@ -118,7 +118,7 @@ class VirtualList extends Component {
   constructor(props) {
     super(props);
     this._onScroll = this._onScroll.bind(this);
-    this._visibleRange = this.computeVisibleRange();
+    this._geometry = undefined;
     this._containerCreated = elem => { this._container = elem; };
     this._innerCreated = elem => { this._inner = elem; };
   }
@@ -137,17 +137,25 @@ class VirtualList extends Component {
   }
 
   _onScroll() {
-    this._visibleRange = this.computeVisibleRange();
+    this._geometry = this._queryGeometry();
     this.forceUpdate();
+  }
+
+  _queryGeometry() {
+    if (!this._container) {
+      return undefined;
+    }
+    const outerRect = this._container.getBoundingClientRect();
+    const innerRectY = this._inner.getBoundingClientRect().top;
+    return { outerRect, innerRectY };
   }
 
   computeVisibleRange() {
     const { itemHeight, disableOverscan } = this.props;
-    if (!this._container) {
+    if (!this._geometry) {
       return { visibleRangeStart: 0, visibleRangeEnd: 100 };
     }
-    const outerRect = this._container.getBoundingClientRect();
-    const innerRectY = this._inner.getBoundingClientRect().top;
+    const { outerRect, innerRectY } = this._geometry;
     const overscan = disableOverscan ? 0 : 25;
     const chunkSize = 16;
     let visibleRangeStart = Math.floor((outerRect.top - innerRectY) / itemHeight) - overscan;
@@ -191,7 +199,7 @@ class VirtualList extends Component {
   render() {
     const { itemHeight, className, renderItem, items, focusable, specialItems, onKeyDown } = this.props;
     const columnCount = this.props.columnCount || 1;
-    const { visibleRangeStart, visibleRangeEnd } = this._visibleRange;
+    const { visibleRangeStart, visibleRangeEnd } = this.computeVisibleRange();
     return (
       <div className={className} ref={this._containerCreated} tabIndex={ focusable ? 0 : -1 } onKeyDown={onKeyDown}>
         <div className={`${className}InnerWrapper`}>
