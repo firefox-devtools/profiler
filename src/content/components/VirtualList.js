@@ -51,6 +51,16 @@ class VirtualListInnerChunk extends Component {
   }
 }
 
+VirtualListInnerChunk.propTypes = {
+  className: PropTypes.string,
+  renderItem: PropTypes.func.isRequired,
+  items: PropTypes.array.isRequired,
+  specialItems: PropTypes.array.isRequired,
+  visibleRangeStart: PropTypes.number.isRequired,
+  visibleRangeEnd: PropTypes.number.isRequired,
+  columnIndex: PropTypes.number.isRequired,
+};
+
 class VirtualListInner extends Component {
   constructor(props) {
     super(props);
@@ -113,6 +123,7 @@ VirtualListInner.propTypes = {
   specialItems: PropTypes.array.isRequired,
   visibleRangeStart: PropTypes.number.isRequired,
   visibleRangeEnd: PropTypes.number.isRequired,
+  columnIndex: PropTypes.number.isRequired,
 };
 
 class VirtualList extends Component {
@@ -235,6 +246,7 @@ VirtualList.propTypes = {
   specialItems: PropTypes.array.isRequired,
   onKeyDown: PropTypes.func.isRequired,
   disableOverscan: PropTypes.bool,
+  columnCount: PropTypes.number,
 };
 
 export default VirtualList;
