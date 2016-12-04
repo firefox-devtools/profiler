@@ -100,13 +100,13 @@ class VirtualListInner extends Component {
           chunks.map(chunkStart => {
             return (
               <VirtualListInnerChunk className={`${className}InnerChunk`}
-                                      key={chunkStart}
-                                      visibleRangeStart={Math.max(chunkStart, visibleRangeStart)}
-                                      visibleRangeEnd={Math.min(chunkStart + chunkSize, visibleRangeEnd)}
-                                      columnIndex={columnIndex}
-                                      renderItem={renderItem}
-                                      items={items}
-                                      specialItems={specialItems}/>
+                                     key={chunkStart}
+                                     visibleRangeStart={Math.max(chunkStart, visibleRangeStart)}
+                                     visibleRangeEnd={Math.min(chunkStart + chunkSize, visibleRangeEnd)}
+                                     columnIndex={columnIndex}
+                                     renderItem={renderItem}
+                                     items={items}
+                                     specialItems={specialItems}/>
             );
           })
         }
