@@ -201,23 +201,23 @@ class TreeView extends Component {
                                  selected={nodeId === selectedNodeId}
                                  onClick={this._onRowClicked}
                                  highlightString={highlightString}/>
-       );
-      }
-      const canBeExpanded = tree.hasChildren(nodeId);
-      const isExpanded = expandedNodeIds.includes(nodeId);
-      return (
-        <TreeViewRowScrolledColumns node={node}
-                                    mainColumn={mainColumn}
-                                    appendageColumn={appendageColumn}
-                                    depth={tree.getDepth(nodeId)}
-                                    nodeId={nodeId}
-                                    index={index}
-                                    canBeExpanded={canBeExpanded}
-                                    isExpanded={isExpanded}
-                                    onToggle={this._toggle}
-                                    selected={nodeId === selectedNodeId}
-                                    onClick={this._onRowClicked}
-                                    highlightString={highlightString}/>
+      );
+    }
+    const canBeExpanded = tree.hasChildren(nodeId);
+    const isExpanded = expandedNodeIds.includes(nodeId);
+    return (
+      <TreeViewRowScrolledColumns node={node}
+                                  mainColumn={mainColumn}
+                                  appendageColumn={appendageColumn}
+                                  depth={tree.getDepth(nodeId)}
+                                  nodeId={nodeId}
+                                  index={index}
+                                  canBeExpanded={canBeExpanded}
+                                  isExpanded={isExpanded}
+                                  onToggle={this._toggle}
+                                  selected={nodeId === selectedNodeId}
+                                  onClick={this._onRowClicked}
+                                  highlightString={highlightString}/>
     );
   }
 
