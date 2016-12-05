@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import classNames from 'classnames';
+import clamp from 'clamp';
 import Draggable from './Draggable';
 
 export default class RangeSelectionOverlay extends Component {
@@ -11,7 +12,7 @@ export default class RangeSelectionOverlay extends Component {
       const delta = dx / width * (rangeEnd - rangeStart);
       const selectionDeltas = fun(delta);
       const selectionStart = Math.max(rangeStart, originalValue.selectionStart + selectionDeltas.startDelta);
-      const selectionEnd = Math.max(selectionStart, Math.min(rangeEnd, originalValue.selectionEnd + selectionDeltas.endDelta));
+      const selectionEnd = clamp(originalValue.selectionEnd + selectionDeltas.endDelta, selectionStart, rangeEnd);
       this.props.onSelectionChange({
         hasSelection: true, isModifying, selectionStart, selectionEnd,
       });

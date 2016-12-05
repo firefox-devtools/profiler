@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import TimeLine from './TimeLine';
 import RangeSelectionOverlay from './RangeSelectionOverlay';
+import clamp from 'clamp';
 import { withSize } from '../with-size';
 
 class TimelineWithRangeSelectionImpl extends Component {
@@ -36,8 +37,8 @@ class TimelineWithRangeSelectionImpl extends Component {
 
     const mouseMoveHandler = e => {
       const mouseMoveTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
-      const selectionStart = Math.max(rangeStart, Math.min(mouseDownTime, mouseMoveTime));
-      const selectionEnd = Math.min(rangeEnd, Math.max(mouseDownTime, mouseMoveTime));
+      const selectionStart = clamp(Math.min(mouseDownTime, mouseMoveTime), rangeStart, rangeEnd);
+      const selectionEnd = clamp(Math.max(mouseDownTime, mouseMoveTime), rangeStart, rangeEnd);
       if (isRangeSelecting || selectionEnd - selectionStart >= minSelectionStartWidth) {
         isRangeSelecting = true;
         this.props.onSelectionChange({
@@ -51,8 +52,8 @@ class TimelineWithRangeSelectionImpl extends Component {
     const mouseUpHandler = e => {
       if (isRangeSelecting) {
         const mouseMoveTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
-        const selectionStart = Math.max(rangeStart, Math.min(mouseDownTime, mouseMoveTime));
-        const selectionEnd = Math.min(rangeEnd, Math.max(mouseDownTime, mouseMoveTime));
+        const selectionStart = clamp(Math.min(mouseDownTime, mouseMoveTime), rangeStart, rangeEnd);
+        const selectionEnd = clamp(Math.max(mouseDownTime, mouseMoveTime), rangeStart, rangeEnd);
         this.props.onSelectionChange({
           hasSelection: true,
           selectionStart, selectionEnd,
