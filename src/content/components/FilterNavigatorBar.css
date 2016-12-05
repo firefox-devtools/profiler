@@ -1,0 +1,90 @@
+.filterNavigatorBar {
+  --internal-selected-color: var(--selected-color, #7990c8);
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-flow: row nowrap;
+  -moz-user-select: none;
+  cursor: default;
+}
+
+.filterNavigatorBarItem {
+  display: block;
+  position: relative;
+  height: 24px;
+  line-height: 24px;
+  border: solid transparent;
+  border-width: 0 8px 0 6px;
+  border-right-color: transparent !important;
+  padding: 0 6px 0 8px;
+  background-clip: padding-box;
+}
+
+.filterNavigatorBarLeafItem {
+  padding-right: 8px;
+}
+
+.filterNavigatorBarItem::before,
+.filterNavigatorBarItem::after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border: 12px solid transparent;
+  border-right-width: 2px;
+  pointer-events: none;
+}
+
+.filterNavigatorBarItem::before {
+  left: -14px;
+  border-left-color: transparent !important;
+}
+
+.filterNavigatorBarItem::after {
+  right: -14px;
+  border-top-color: transparent !important;
+  border-right-color: transparent !important;
+  border-bottom-color: transparent !important;
+}
+
+.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):not(.filterNavigatorBarBeforeSelectedItem):not(.filterNavigatorBarSelectedItem)::after {
+  background-image: url(../../../res/scope-bar-separator.svg);
+  background-repeat: no-repeat;
+  background-position: -18px -12px;
+  background-size: 24px 24px;
+}
+
+.filterNavigatorBarSelectedItem {
+  background-color: var(--internal-selected-color);
+  color: white;
+}
+
+.filterNavigatorBarSelectedItem:not(.filterNavigatorBarRootItem)::before,
+.filterNavigatorBarSelectedItem.filterNavigatorBarRootItem,
+.filterNavigatorBarSelectedItem:not(.filterNavigatorBarLeafItem)::after {
+  border-color: var(--internal-selected-color);
+}
+
+.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):not(.filterNavigatorBarRootItem):hover::before,
+.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem).filterNavigatorBarRootItem:hover,
+.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):not(.filterNavigatorBarLeafItem):hover::after {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):active:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):not(.filterNavigatorBarRootItem):active:hover::before,
+.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem).filterNavigatorBarRootItem:active:hover,
+.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):not(.filterNavigatorBarLeafItem):active:hover::after {
+  border-color: rgba(0, 0, 0, 0.2);
+}
