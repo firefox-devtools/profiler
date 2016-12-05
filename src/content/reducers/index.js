@@ -39,6 +39,21 @@ function threadOrder(state = [], action) {
   }
 }
 
+function removePrefixFromFuncArray(prefixFuncs, funcArray) {
+  if (prefixFuncs.length > funcArray.length ||
+      prefixFuncs.some((prefixFunc, i) => prefixFunc !== funcArray[i])) {
+    return [];
+  }
+  return funcArray.slice(prefixFuncs.length - 1);
+}
+
+function funcStackAfterCallTreeFilter(funcArray, filter) {
+  if (filter.type === 'prefix' && !filter.matchJSOnly) {
+    return removePrefixFromFuncArray(filter.prefixFuncs, funcArray);
+  }
+  return funcArray;
+}
+
 function viewOptionsThreads(state = [], action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
@@ -99,6 +114,16 @@ function viewOptionsThreads(state = [], action) {
       return [
         ...state.slice(0, threadIndex),
         Object.assign({}, state[threadIndex], { selectedMarker }),
+        ...state.slice(threadIndex + 1),
+      ];
+    }
+    case 'ADD_CALL_TREE_FILTER': {
+      const { threadIndex, filter } = action;
+      const expandedFuncStacks = state[threadIndex].expandedFuncStacks.map(fs => funcStackAfterCallTreeFilter(fs, filter));
+      const selectedFuncStack = funcStackAfterCallTreeFilter(state[threadIndex].selectedFuncStack, filter);
+      return [
+        ...state.slice(0, threadIndex),
+        Object.assign({}, state[threadIndex], { selectedFuncStack, expandedFuncStacks }),
         ...state.slice(threadIndex + 1),
       ];
     }
