@@ -3,6 +3,7 @@ import * as ProfileData from '../profile-data';
 import * as ProfileTree from '../profile-tree';
 import * as TaskTracer from '../task-tracer';
 import { parseRangeFilters } from '../range-filters';
+import { parseCallTreeFilters } from '../call-tree-filters';
 
 export const getProfileView = state => state.profileView;
 export const getProfile = state => getProfileView(state).profile;
@@ -26,6 +27,19 @@ export const getRangeFiltersStringParam = (state, props) => {
 export const getRangeFilters = createSelector(
   getRangeFiltersStringParam,
   parseRangeFilters
+);
+
+export const getCallTreeFiltersStringParam = (state, props) => {
+  const { query } = props.location;
+  if ('callTreeFilters' in query) {
+    return query.callTreeFilters;
+  }
+  return '';
+};
+
+export const getCallTreeFilters = createSelector(
+  getCallTreeFiltersStringParam,
+  parseCallTreeFilters
 );
 
 export const getScrollToSelectionGeneration = createSelector(
@@ -108,8 +122,25 @@ export const selectorsForThread = threadIndex => {
       getRangeFilteredThreadMarkers,
       (thread, markers) => ProfileData.getTracingMarkers(thread, markers)
     );
-    const getJSOnlyFilteredThread = createSelector(
+    const getRangeAndCallTreeFilteredThread = createSelector(
       getRangeFilteredThread,
+      getCallTreeFilters,
+      (thread, callTreeFilters) => {
+        const result = callTreeFilters.reduce((t, filter) => {
+          switch (filter.type) {
+            case 'prefix':
+              return ProfileData.filterThreadToPrefixStack(t, filter.prefixFuncs, filter.matchJSOnly);
+            case 'postfix':
+              return ProfileData.filterThreadToPostfixStack(t, filter.postfixFuncs, filter.matchJSOnly);
+            default:
+              throw new Error('unhandled call tree filter');
+          }
+        }, thread);
+        return result;
+      }
+    );
+    const getJSOnlyFilteredThread = createSelector(
+      getRangeAndCallTreeFilteredThread,
       getJSOnly,
       (thread, jsOnly) => {
         return jsOnly ? ProfileData.filterThreadToJSOnly(thread) : thread;

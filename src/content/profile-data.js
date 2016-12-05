@@ -197,6 +197,118 @@ export function filterThreadToSearchString(thread, searchString) {
   });
 }
 
+/**
+ * Filter thread to only contain stacks which start with |prefixFuncs|, and
+ * only samples witth those stacks. The new stacks' roots will be frames whose
+ * func is the last element of the prefix func array.
+ * @param  {object} thread      The thread.
+ * @param  {array} prefixFuncs  The prefix stack, as an array of funcs.
+ * @param  {bool} matchJSOnly   Ignore non-JS frames during matching.
+ * @return {object}             The filtered thread.
+ */
+export function filterThreadToPrefixStack(thread, prefixFuncs, matchJSOnly) {
+  return timeCode('filterThreadToPrefixStack', () => {
+    const { stackTable, frameTable, funcTable, samples } = thread;
+    const prefixDepth = prefixFuncs.length;
+    const stackMatches = new Int32Array(stackTable.length);
+    const oldStackToNewStack = new Map();
+    oldStackToNewStack.set(null, null);
+    const newStackTable = {
+      length: 0,
+      prefix: [],
+      frame: [],
+    };
+    for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+      const prefix = stackTable.prefix[stackIndex];
+      const prefixMatchesUpTo = prefix !== null ? stackMatches[prefix] : 0;
+      let stackMatchesUpTo = -1;
+      if (prefixMatchesUpTo !== -1) {
+        const frame = stackTable.frame[stackIndex];
+        if (prefixMatchesUpTo === prefixDepth) {
+          stackMatchesUpTo = prefixDepth;
+        } else {
+          const func = frameTable.func[frame];
+          if (func === prefixFuncs[prefixMatchesUpTo]) {
+            stackMatchesUpTo = prefixMatchesUpTo + 1;
+          } else if (matchJSOnly && !funcTable.isJS[func]) {
+            stackMatchesUpTo = prefixMatchesUpTo;
+          }
+        }
+        if (stackMatchesUpTo === prefixDepth) {
+          const newStackIndex = newStackTable.length++;
+          const newStackPrefix = oldStackToNewStack.get(prefix);
+          newStackTable.prefix[newStackIndex] = newStackPrefix !== undefined ? newStackPrefix : null;
+          newStackTable.frame[newStackIndex] = frame;
+          oldStackToNewStack.set(stackIndex, newStackIndex);
+        }
+      }
+      stackMatches[stackIndex] = stackMatchesUpTo;
+    }
+    const newSamples = Object.assign({}, samples, {
+      stack: samples.stack.map(oldStack => {
+        if (stackMatches[oldStack] !== prefixDepth) {
+          return null;
+        }
+        return oldStackToNewStack.get(oldStack);
+      }),
+    });
+    return Object.assign({}, thread, {
+      stackTable: newStackTable,
+      samples: newSamples,
+    });
+  });
+}
+
+/**
+ * Filter thread to only contain stacks which end with |postfixFuncs|, and
+ * only samples witth those stacks. The new stacks' leaf frames will be
+ * frames whose func is the last element of the postfix func array.
+ * @param  {object} thread      The thread.
+ * @param  {array} postfixFuncs The postfix stack, as an array of funcs,
+ *                              starting from the leaf func.
+ * @param  {bool} matchJSOnly   Ignore non-JS frames during matching.
+ * @return {object}             The filtered thread.
+ */
+export function filterThreadToPostfixStack(thread, postfixFuncs, matchJSOnly) {
+  return timeCode('filterThreadToPostfixStack', () => {
+    const postfixDepth = postfixFuncs.length;
+    const { stackTable, frameTable, funcTable, samples } = thread;
+
+    function convertStack(leaf) {
+      let matchesUpToDepth = 0; // counted from the leaf
+      for (let stack = leaf; stack !== null; stack = stackTable.prefix[stack]) {
+        const frame = stackTable.frame[stack];
+        const func = frameTable.func[frame];
+        if (func === postfixFuncs[matchesUpToDepth]) {
+          matchesUpToDepth++;
+          if (matchesUpToDepth === postfixDepth) {
+            return stack;
+          }
+        } else if (!matchJSOnly || funcTable.isJS[func]) {
+          return null;
+        }
+      }
+      return null;
+    }
+
+    const oldStackToNewStack = new Map();
+    oldStackToNewStack.set(null, null);
+    const newSamples = Object.assign({}, samples, {
+      stack: samples.stack.map(stackIndex => {
+        let newStackIndex = oldStackToNewStack.get(stackIndex);
+        if (newStackIndex === undefined) {
+          newStackIndex = convertStack(stackIndex);
+          oldStackToNewStack.set(stackIndex, newStackIndex);
+        }
+        return newStackIndex;
+      }),
+    });
+    return Object.assign({}, thread, {
+      samples: newSamples,
+    });
+  });
+}
+
 function getSampleIndexRangeForSelection(samples, rangeStart, rangeEnd) {
   // TODO: This should really use bisect. samples.time is sorted.
   const firstSample = samples.time.findIndex(t => t >= rangeStart);

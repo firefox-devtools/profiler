@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
+import classNames from 'classnames';
 import VirtualList from './VirtualList';
 
 const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
@@ -104,16 +105,25 @@ class TreeViewRowScrolledColumns extends Component {
   }
 
   _onClick(event) {
-    const { nodeId, isExpanded, onToggle, onClick } = this.props;
+    const {
+      nodeId, isExpanded, onToggle, onClick, onAppendageButtonClick,
+    } = this.props;
     if (event.target.classList.contains('treeRowToggleButton')) {
       onToggle(nodeId, !isExpanded, event.altKey === true);
+    } else if (event.target.classList.contains('treeViewRowAppendageButton')) {
+      if (onAppendageButtonClick) {
+        onAppendageButtonClick(nodeId, event.target.getAttribute('data-appendage-button-name'));
+      }
     } else {
       onClick(nodeId, event);
     }
   }
 
   render() {
-    const { node, depth, mainColumn, appendageColumn, index, canBeExpanded, isExpanded, selected, highlightString } = this.props;
+    const {
+      node, depth, mainColumn, appendageColumn, index, canBeExpanded,
+      isExpanded, selected, highlightString, appendageButtons,
+    } = this.props;
     const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
     return (
       <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
@@ -127,6 +137,13 @@ class TreeViewRowScrolledColumns extends Component {
             {node[appendageColumn.propName]}
           </span>
           ) : null}
+        { appendageButtons ? appendageButtons.map(buttonName => (
+            <input className={classNames('treeViewRowAppendageButton', buttonName)}
+                   type='button'
+                   key={buttonName}
+                   data-appendage-button-name={buttonName}
+                   value=''/>
+          )) : null }
       </div>
     );
   }
@@ -144,12 +161,14 @@ TreeViewRowScrolledColumns.propTypes = {
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
   }),
+  appendageButtons: PropTypes.arrayOf(PropTypes.string),
   index: PropTypes.number.isRequired,
   canBeExpanded: PropTypes.bool.isRequired,
   isExpanded: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
   selected: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
+  onAppendageButtonClick: PropTypes.func,
   highlightString: PropTypes.string,
 };
 
@@ -190,7 +209,11 @@ class TreeView extends Component {
   }
 
   _renderRow(nodeId, index, columnIndex) {
-    const { tree, expandedNodeIds, fixedColumns, mainColumn, appendageColumn, selectedNodeId, highlightString } = this.props;
+    const {
+      tree, expandedNodeIds, fixedColumns, mainColumn, appendageColumn,
+      selectedNodeId, highlightString, appendageButtons,
+      onAppendageButtonClick,
+    } = this.props;
     const node = tree.getNode(nodeId);
     if (columnIndex === 0) {
       return (
@@ -209,6 +232,7 @@ class TreeView extends Component {
       <TreeViewRowScrolledColumns node={node}
                                   mainColumn={mainColumn}
                                   appendageColumn={appendageColumn}
+                                  appendageButtons={appendageButtons}
                                   depth={tree.getDepth(nodeId)}
                                   nodeId={nodeId}
                                   index={index}
@@ -217,6 +241,7 @@ class TreeView extends Component {
                                   onToggle={this._toggle}
                                   selected={nodeId === selectedNodeId}
                                   onClick={this._onRowClicked}
+                                  onAppendageButtonClick={onAppendageButtonClick}
                                   highlightString={highlightString}/>
     );
   }
@@ -381,6 +406,8 @@ TreeView.propTypes = {
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
   }),
+  appendageButtons: PropTypes.arrayOf(PropTypes.string),
+  onAppendageButtonClick: PropTypes.func,
   disableOverscan: PropTypes.bool,
 };
 

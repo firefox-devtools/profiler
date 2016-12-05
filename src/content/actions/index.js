@@ -1,5 +1,6 @@
 import { push, replace } from 'react-router-redux';
 import { parseRangeFilters, stringifyRangeFilters } from '../range-filters';
+import { parseCallTreeFilters, stringifyCallTreeFilters } from '../call-tree-filters';
 import { preprocessProfile, unserializeProfile } from '../preprocess-profile';
 import { defaultThreadOrder, getTimeRangeIncludingAllThreads } from '../profile-data';
 import { symbolicateProfile } from '../symbolication';
@@ -438,6 +439,23 @@ function rangeFiltersReducer(state = '', action) {
   }
 }
 
+function callTreeFiltersReducer(state = '', action) {
+  switch (action.type) {
+    case 'ADD_CALL_TREE_FILTER': {
+      const callTreeFilters = parseCallTreeFilters(state);
+      const { filter } = action;
+      callTreeFilters.push(filter);
+      return stringifyCallTreeFilters(callTreeFilters);
+    }
+    case 'POP_CALL_TREE_FILTERS': {
+      const callTreeFilters = parseCallTreeFilters(state);
+      return stringifyCallTreeFilters(callTreeFilters.slice(0, action.firstRemovedFilterIndex));
+    }
+    default:
+      return state;
+  }
+}
+
 function callTreeSearchReducer(state = '', action) {
   switch (action.type) {
     case 'CHANGE_CALL_TREE_SEARCH_STRING':
@@ -461,6 +479,7 @@ export const queryRootReducer = createQueryReducer({
   invertCallstack: invertCallstackReducer,
 }, {
   rangeFilters: rangeFiltersReducer,
+  callTreeFilters: callTreeFiltersReducer,
   search: callTreeSearchReducer,
   thread: selectedThreadReducer,
 });
@@ -524,6 +543,22 @@ export function popRangeFiltersAndUnsetSelection(firstRemovedFilterIndex, locati
     dispatch(popRangeFilters(firstRemovedFilterIndex, location));
     dispatch(updateProfileSelection({ hasSelection: false, isModifying: false }));
   };
+}
+
+export function addCallTreeFilter(threadIndex, filter, location) {
+  return pushQueryAction({
+    type: 'ADD_CALL_TREE_FILTER',
+    filter,
+    // TODO: needs a thread field, because funcs really are per-thread
+  }, location);
+}
+
+export function popCallTreeFilters(threadIndex, firstRemovedFilterIndex, location) {
+  return pushQueryAction({
+    type: 'POP_CALL_TREE_FILTERS',
+    firstRemovedFilterIndex,
+    // TODO: also needs a thread field
+  }, location);
 }
 
 export { push } from 'react-router-redux';

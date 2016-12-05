@@ -175,6 +175,12 @@ body, #root, .profileViewer {
   background-image: url(./treetwisty.svg);
 }
 
+.focusCallstackButton {
+  background-image: url(./circlearrow.svg);
+  margin-left: 5px;
+  visibility: hidden;
+}
+
 .treeRowToggleButton:active:hover,
 .focusCallstackButton:active:hover {
   background-position: -16px 0;
@@ -188,26 +194,30 @@ body, #root, .profileViewer {
   background-position: -16px -16px;
 }
 
-.treeViewBody:focus > * > .treeViewRow.selected > .treeRowToggleButton,
-.treeViewBody:focus > * > .treeViewRow.selected > .focusCallstackButton {
+.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeRowToggleButton,
+.treeViewBody:focus > * > * > * > .treeViewRow.selected > .focusCallstackButton {
   background-position: -32px 0;
 }
 
-.treeViewBody:focus > * > .treeViewRow.selected > .treeRowToggleButton.collapsed {
+.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeRowToggleButton.collapsed {
   background-position: -32px -16px;
 }
 
-.treeViewBody:focus > * > .treeViewRow.selected > .treeRowToggleButton:active:hover,
-.treeViewBody:focus > * > .treeViewRow.selected > .focusCallstackButton:active:hover {
+.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeRowToggleButton:active:hover,
+.treeViewBody:focus > * > * > * > .treeViewRow.selected > .focusCallstackButton:active:hover {
   background-position: -48px 0;
 }
 
-.treeViewBody:focus > * > .treeViewRow.selected > .treeRowToggleButton.collapsed:active:hover {
+.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeRowToggleButton.collapsed:active:hover {
   background-position: -48px -16px;
 }
 
 .treeRowToggleButton.leaf {
   visibility: hidden;
+}
+
+.treeViewRow:hover > .focusCallstackButton {
+  visibility: visible;
 }
 
 .profileViewerTopBar {
