@@ -54,6 +54,7 @@ class ProfileCallTreeSettings extends Component {
           <label className='profileCallTreeSettingsSearchbarLabel'>
             {'Filter stacks: '}
             <IdleSearchField className='profileCallTreeSettingsSearchField'
+                             title='Only display stacks which contain a function whose name matches this substring'
                              idlePeriod={200}
                              defaultValue={searchString}
                              onIdleAfterChange={this._onSearchFieldIdleAfterChange}/>

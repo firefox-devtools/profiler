@@ -52,12 +52,13 @@ class IdleSearchField extends Component {
   }
 
   render() {
-    const { className, defaultValue } = this.props;
+    const { className, title, defaultValue } = this.props;
     return (
       <span className={classNames('idleSearchField', className)}>
         <input type='search'
                className='idleSearchFieldInput'
                required='required'
+               title={title}
                defaultValue={defaultValue}
                ref={this._searchFieldCreated}
                onInput={this._onSearchFieldInput}
@@ -76,6 +77,7 @@ IdleSearchField.propTypes = {
   idlePeriod: PropTypes.number.isRequired,
   defaultValue: PropTypes.string,
   className: PropTypes.string,
+  title: PropTypes.string,
 };
 
 export default IdleSearchField;
