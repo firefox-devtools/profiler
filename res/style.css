@@ -232,6 +232,7 @@ body, #root, .profileViewer {
 
 .profileFilterNavigator {
   height: 24px;
+  flex: 1;
 }
 
 .profileViewerHeader {

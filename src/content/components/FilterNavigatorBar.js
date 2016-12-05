@@ -10,7 +10,7 @@ class FilterNavigatorBar extends Component {
   }
 
   _onLiClick(e) {
-    const index = e.target.getAttribute('data-index')|0;
+    const index = e.target.closest('.filterNavigatorBarItem').dataset.index|0;
     this.props.onPop(index);
   }
 
@@ -30,7 +30,7 @@ class FilterNavigatorBar extends Component {
                     'filterNavigatorBarLeafItem': i === items.length - 1,
                   })}
                 onClick={this._onLiClick}>
-              {item}
+              <span className='filterNavigatorBarItemContent'>{item}</span>
             </li>
           ))
         }

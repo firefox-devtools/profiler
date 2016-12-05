@@ -3,15 +3,18 @@
   height: 24px;
   margin: 0;
   padding: 0;
-  flex: 1;
+  flex-shrink: 0;
   display: flex;
   flex-flow: row nowrap;
   -moz-user-select: none;
   cursor: default;
+  overflow: hidden;
 }
 
 .filterNavigatorBarItem {
-  display: block;
+  display: flex;
+  flex-flow: row nowrap;
+  min-width: 0;
   position: relative;
   height: 24px;
   line-height: 24px;
@@ -22,8 +25,20 @@
   background-clip: padding-box;
 }
 
+.filterNavigatorBarRootItem {
+  margin-left: -8px;
+  flex-shrink: 0;
+}
+
+.filterNavigatorBarItemContent {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .filterNavigatorBarLeafItem {
   padding-right: 8px;
+  margin-right: -8px;
 }
 
 .filterNavigatorBarItem::before,
