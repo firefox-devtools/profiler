@@ -8,6 +8,7 @@ class IdleSearchField extends Component {
     super(props);
     this._onSearchFieldInput = this._onSearchFieldInput.bind(this);
     this._onSearchFieldClick = this._onSearchFieldClick.bind(this);
+    this._onClearButtonClick = this._onClearButtonClick.bind(this);
     this._onTimeout = this._onTimeout.bind(this);
     this._searchFieldCreated = elem => { this._searchField = elem; };
     this._timeout = 0;
@@ -17,6 +18,14 @@ class IdleSearchField extends Component {
   _onSearchFieldClick() {
     if (this._searchField) {
       this._searchField.select();
+    }
+  }
+
+  _onClearButtonClick() {
+    if (this._searchField) {
+      this._searchField.value = '';
+      this._notifyIfChanged('');
+      this._searchField.focus();
     }
   }
 
@@ -31,22 +40,33 @@ class IdleSearchField extends Component {
   _onTimeout() {
     if (this._searchField) {
       const value = this._searchField.value;
-      if (value !== this._previouslyNotifiedValue) {
-        this._previouslyNotifiedValue = value;
-        this.props.onIdleAfterChange(value);
-      }
+      this._notifyIfChanged(value);
+    }
+  }
+
+  _notifyIfChanged(value) {
+    if (value !== this._previouslyNotifiedValue) {
+      this._previouslyNotifiedValue = value;
+      this.props.onIdleAfterChange(value);
     }
   }
 
   render() {
     const { className, defaultValue } = this.props;
     return (
-      <input type='search'
-             className={classNames('idleSearchField', className)}
-             defaultValue={defaultValue}
-             ref={this._searchFieldCreated}
-             onInput={this._onSearchFieldInput}
-             onClick={this._onSearchFieldClick}/>
+      <span className={classNames('idleSearchField', className)}>
+        <input type='search'
+               className='idleSearchFieldInput'
+               required='required'
+               defaultValue={defaultValue}
+               ref={this._searchFieldCreated}
+               onInput={this._onSearchFieldInput}
+               onClick={this._onSearchFieldClick}/>
+        <input type='button'
+               className='idleSearchFieldButton'
+               value='Clear'
+               onClick={this._onClearButtonClick}/>
+      </span>
     );
   }
 }

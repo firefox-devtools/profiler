@@ -1,4 +1,11 @@
 .idleSearchField {
+  display: inline-flex;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+.idleSearchFieldInput {
+  flex: 1;
   height: 19px;
   position: relative;
   -moz-appearance: none;
@@ -11,7 +18,26 @@
 }
 
 @media(-moz-mac-yosemite-theme) {
-  .idleSearchField:focus {
+  .idleSearchFieldInput:focus {
     box-shadow: 0 0 0 3px -moz-mac-focusring, inset 0 0 0.5px rgba(0,0,0,0.15), 0 0 0.5px rgba(0,0,0,0.1);
   }
+}
+
+.idleSearchFieldButton {
+  width: 11px;
+  height: 11px;
+  overflow: hidden;
+  background: url(../../../res/searchfield-cancel.svg) top left no-repeat;
+  background-size: contain;
+  border: 0;
+  padding: 0;
+  vertical-align: middle;
+  color: transparent;
+  position: relative;
+  margin-left: -16px;
+  -moz-user-focus: ignore;
+}
+
+.idleSearchFieldInput:invalid + .idleSearchFieldButton {
+  visibility: hidden;
 }
