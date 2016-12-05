@@ -287,7 +287,7 @@ function selectedThread(state = 0, action) {
       return action.selectedThread;
     case 'RECEIVE_PROFILE_FROM_ADDON': {
       const contentThreadId = action.profile.threads.findIndex(thread => thread.name === 'Content');
-      return contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(profile.threads)[0];
+      return contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(action.profile.threads)[0];
     }
     default:
       return state;
