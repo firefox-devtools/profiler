@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { getProfile, getProfileViewOptions, getDataSource, getHash } from '../selectors/';
+import { getProfile, getProfileViewOptions, getDataSource, getHash, getURLPredictor } from '../selectors/';
 import * as actions from '../actions';
 import { compress } from '../gz';
 import { uploadBinaryProfileData } from '../cleopatra-profile-store';
@@ -10,6 +10,8 @@ import ButtonWithPanel from '../components/ButtonWithPanel';
 import shortenCleopatraURL from '../shorten-cleopatra-url';
 import { serializeProfile } from '../preprocess-profile';
 import prettyBytes from 'pretty-bytes';
+import sha1 from '../sha1';
+import url from 'url';
 
 require('./ProfileSharing.css');
 
@@ -75,13 +77,17 @@ class ProfileSharingCompositeButton extends Component {
   }
 
   _onPermalinkPanelOpen() {
-    shortenCleopatraURL(this.state.fullURL).then(shortURL => {
+    this._shortenURLAndFocusTextFieldOnCompletion();
+  }
+
+  _shortenURLAndFocusTextFieldOnCompletion() {
+    return shortenCleopatraURL(this.state.fullURL).then(shortURL => {
       this.setState({ shortURL });
       if (this._permalinkTextField) {
         this._permalinkTextField.focus();
         this._permalinkTextField.select();
       }
-    });
+    }).catch(() => {});
   }
 
   _onPermalinkPanelClose() {
@@ -96,8 +102,9 @@ class ProfileSharingCompositeButton extends Component {
       return;
     }
 
+    const { profile, predictURL } = this.props;
+
     (new Promise(resolve => {
-      const { profile } = this.props;
       if (!profile) {
         throw new Error('profile is null');
       }
@@ -106,24 +113,36 @@ class ProfileSharingCompositeButton extends Component {
         throw new Error('profile serialization failed');
       }
 
-      this.setState({ state: 'uploading' });
+      this.setState({ state: 'uploading', uploadProgress: 0 });
       resolve(jsonString);
-    })).then(compress).then(gzipData => {
-      return uploadBinaryProfileData(gzipData, uploadProgress => {
-        this.setState({ uploadProgress });
-      });
-    }).then(hash => {
-      const { onProfilePublished } = this.props;
-      onProfilePublished(hash);
+    })).then(s => (new TextEncoder()).encode(s)).then(typedArray => {
+      return Promise.all([compress(typedArray.slice(0)), sha1(typedArray)]);
+    }).then(([gzipData, hash]) => {
+      const predictedURL = url.resolve(window.location.href, predictURL(actions.profilePublished(hash)));
       this.setState({
-        state: 'public',
         hash,
-        fullURL: window.location.href,
-        shortURL: window.location.href,
+        fullURL: predictedURL,
+        shortURL: predictedURL,
       });
-      if (this._permalinkButton) {
-        this._permalinkButton.openPanel();
-      }
+      const uploadPromise = uploadBinaryProfileData(gzipData, uploadProgress => {
+        this.setState({ uploadProgress });
+      }).then(hash => {
+        const { onProfilePublished } = this.props;
+        onProfilePublished(hash);
+        const newShortURL = (this.state.fullURL === window.location.href) ? this.state.shortURL : window.location.href;
+        this.setState({
+          state: 'public',
+          hash,
+          fullURL: window.location.href,
+          shortURL: newShortURL,
+        });
+      });
+      const shortenCleopatraURLPromise = this._shortenURLAndFocusTextFieldOnCompletion();
+      Promise.race([uploadPromise, shortenCleopatraURLPromise]).then(() => {
+        if (this._permalinkButton) {
+          this._permalinkButton.openPanel();
+        }
+      });
     }).catch(error => {
       this.setState({
         state: 'error',
@@ -194,6 +213,7 @@ ProfileSharingCompositeButton.propTypes = {
   dataSource: PropTypes.string.isRequired,
   hash: PropTypes.string,
   onProfilePublished: PropTypes.func.isRequired,
+  predictURL: PropTypes.func.isRequired,
 };
 
 function filenameDateString(d) {
@@ -278,9 +298,13 @@ ProfileDownloadButton.propTypes = {
   viewOptions: PropTypes.object,
 };
 
-const ProfileSharing = ({ profile, viewOptions, dataSource, hash, profilePublished }) => (
+const ProfileSharing = ({ profile, viewOptions, dataSource, hash, profilePublished, predictURL }) => (
   <div className='profileSharing'>
-    <ProfileSharingCompositeButton profile={profile} dataSource={dataSource} hash={hash} onProfilePublished={profilePublished}/>
+    <ProfileSharingCompositeButton profile={profile}
+                                   dataSource={dataSource}
+                                   hash={hash}
+                                   onProfilePublished={profilePublished}
+                                   predictURL={predictURL}/>
     <ProfileDownloadButton profile={profile} viewOptions={viewOptions}/>
   </div>
 );
@@ -291,6 +315,7 @@ ProfileSharing.propTypes = {
   dataSource: PropTypes.string.isRequired,
   hash: PropTypes.string,
   profilePublished: PropTypes.func.isRequired,
+  predictURL: PropTypes.func.isRequired,
 };
 
 export default connect(state => ({
@@ -298,4 +323,5 @@ export default connect(state => ({
   viewOptions: getProfileViewOptions(state),
   dataSource: getDataSource(state),
   hash: getHash(state),
+  predictURL: getURLPredictor(state),
 }), actions)(ProfileSharing);

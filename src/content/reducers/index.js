@@ -367,7 +367,7 @@ function invertCallstack(state = false, action) {
   }
 }
 
-const urlState = (regularUrlStateReducer => (state, action) => {
+export const urlState = (regularUrlStateReducer => (state, action) => {
   switch (action.type) {
     case '@@urlenhancer/updateURLState':
       return action.urlState;

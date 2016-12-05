@@ -2,6 +2,8 @@ import { createSelector } from 'reselect';
 import * as ProfileData from '../profile-data';
 import * as ProfileTree from '../profile-tree';
 import * as TaskTracer from '../task-tracer';
+import * as reducers from '../reducers';
+import { urlFromState } from '../url-handling';
 
 export const getView = state => state.view;
 export const getProfileView = state => state.profileView;
@@ -21,6 +23,15 @@ export const getInvertCallstack = state => getURLState(state).invertCallstack;
 export const getSearchString = state => getURLState(state).callTreeSearchString;
 export const getSelectedTab = state => getURLState(state).selectedTab;
 export const getSelectedThreadIndex = state => getURLState(state).selectedThread;
+
+export const getURLPredictor = createSelector(
+  getURLState,
+  urlState => actionOrActionList => {
+    const actionList = ('type' in actionOrActionList) ? [actionOrActionList] : actionOrActionList;
+    const newURLState = actionList.reduce(reducers.urlState, urlState);
+    return urlFromState(newURLState);
+  }
+);
 
 export const getScrollToSelectionGeneration = createSelector(
   getProfileViewOptions,
