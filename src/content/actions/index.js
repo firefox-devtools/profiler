@@ -1,8 +1,5 @@
-import { push, replace } from 'react-router-redux';
-import { parseRangeFilters, stringifyRangeFilters } from '../range-filters';
-import { parseCallTreeFilters, stringifyCallTreeFilters } from '../call-tree-filters';
 import { preprocessProfile, unserializeProfile } from '../preprocess-profile';
-import { defaultThreadOrder, getTimeRangeIncludingAllThreads } from '../profile-data';
+import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
 import { getProfile } from '../selectors/';
@@ -154,7 +151,7 @@ export function assignTaskTracerNames(addressIndices, symbolNames) {
   };
 }
 
-export function retrieveProfileFromAddon(location) {
+export function retrieveProfileFromAddon() {
   return dispatch => {
     dispatch(waitingForProfileFromAddon());
 
@@ -163,16 +160,6 @@ export function retrieveProfileFromAddon(location) {
       // XXX update state to show that we're connected to the profiler addon
       geckoProfiler.getProfile().then(rawProfile => {
         const profile = preprocessProfile(rawProfile);
-
-        if (!('thread' in location.query)) {
-          let contentThreadId = profile.threads.findIndex(thread => thread.name === 'Content');
-          contentThreadId = contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(profile.threads)[0];
-          dispatch(replaceQueryAction({
-            type: 'CHANGE_SELECTED_THREAD',
-            selectedThread: contentThreadId,
-          }, location));
-        }
-
 
         dispatch(receiveProfileFromAddon(profile));
 
@@ -238,7 +225,7 @@ export function errorReceivingProfileFromWeb(error) {
   };
 }
 
-export function retrieveProfileFromWeb(hash, location) {
+export function retrieveProfileFromWeb(hash) {
   return dispatch => {
     dispatch(waitingForProfileFromWeb());
 
@@ -248,28 +235,17 @@ export function retrieveProfileFromWeb(hash, location) {
         throw new Error('Unable to parse the profile.');
       }
 
-      let queryActions = [];
-      if (!('thread' in location.query)) {
-        let contentThreadId = profile.threads.findIndex(thread => thread.name === 'Content');
-        contentThreadId = contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(profile.threads)[0];
-        queryActions.push({
-          type: 'CHANGE_SELECTED_THREAD',
-          selectedThread: contentThreadId,
-        });
-      }
-
       if (window.legacyRangeFilters) {
         const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
-        queryActions = queryActions.concat(window.legacyRangeFilters.map(
-          ({ start, end }) => ({
+        window.legacyRangeFilters.forEach(
+          ({ start, end }) => dispatch({
             type: 'ADD_RANGE_FILTER',
             start: start - zeroAt,
             end: end - zeroAt,
           })
-        ));
+        );
       }
 
-      dispatch(replaceQueryActions(queryActions, location));
       dispatch(receiveProfileFromWeb(profile));
 
     }).catch(error => {
@@ -285,11 +261,11 @@ export function changeSelectedFuncStack(threadIndex, selectedFuncStack) {
   };
 }
 
-export function changeSelectedThread(selectedThread, location) {
-  return pushQueryAction({
+export function changeSelectedThread(selectedThread) {
+  return {
     type: 'CHANGE_SELECTED_THREAD',
     selectedThread,
-  }, location);
+  };
 }
 
 export function changeThreadOrder(threadOrder) {
@@ -299,37 +275,25 @@ export function changeThreadOrder(threadOrder) {
   };
 }
 
-export function changeCallTreeSearchString(searchString, location) {
-  return pushQueryAction({
+export function changeCallTreeSearchString(searchString) {
+  return {
     type: 'CHANGE_CALL_TREE_SEARCH_STRING',
     searchString,
-  }, location);
+  };
 }
 
-
-function basePathExcludingTrailingSlash(dataSource, params) {
-  if (params.hash) {
-    return `/${dataSource}/${params.hash}`;
-  }
-  return `/${dataSource}`;
+export function changeSelectedTab(selectedTab) {
+  return {
+    type: 'CHANGE_SELECTED_TAB',
+    selectedTab,
+  };
 }
 
-export function changeSelectedTab(selectedTab, dataSource, location, params) {
-  const newPathname = `${basePathExcludingTrailingSlash(dataSource, params)}/${selectedTab}/`;
-  if (location.pathname === newPathname) {
-    return () => {};
-  }
-  return dispatch => dispatch(push({ pathname: newPathname, query: location.query }));
-}
-
-export function profilePublished(hash, location, params) {
-  const { selectedTab } = params;
-  const newParams = Object.assign({}, params, { hash });
-  const newPathname = `${basePathExcludingTrailingSlash('public', newParams)}/${selectedTab}/`;
-  if (location.pathname === newPathname) {
-    return () => {};
-  }
-  return dispatch => dispatch(replace({ pathname: newPathname, query: location.query }));
+export function profilePublished(hash) {
+  return {
+    type: 'PROFILE_PUBLISHED',
+    hash,
+  };
 }
 
 export function changeTabOrder(tabOrder) {
@@ -353,161 +317,18 @@ export function changeSelectedMarker(threadIndex, selectedMarker) {
   };
 }
 
-function changeBoolQueryParam(query, paramName, newValue) {
-  if ((paramName in query) === newValue) {
-    return query;
-  }
-  const newQuery = Object.assign({}, query);
-  if (newValue) {
-    newQuery[paramName] = null;
-  } else {
-    delete newQuery[paramName];
-  }
-  return newQuery;
-}
-
-function changeStringQueryParam(query, paramName, newValue) {
-  const shouldRemoveFromQuery = (newValue === '' || newValue === null || newValue === undefined);
-  if ((shouldRemoveFromQuery && !(paramName in query)) ||
-      (!shouldRemoveFromQuery && query[paramName] === newValue)) {
-    return query;
-  }
-  const newQuery = Object.assign({}, query);
-  if (shouldRemoveFromQuery) {
-    delete newQuery[paramName];
-  } else {
-    newQuery[paramName] = newValue;
-  }
-  return newQuery;
-}
-
-function applyBoolQueryParamReducer(query, paramName, reducer, action) {
-  const currentValue = (paramName in query);
-  return changeBoolQueryParam(query, paramName, reducer(currentValue, action));
-}
-
-function applyStringQueryParamReducer(query, paramName, reducer, action) {
-  const currentValue = (paramName in query) ? query[paramName] : '';
-  return changeStringQueryParam(query, paramName, reducer(currentValue, action));
-}
-
-function createQueryReducer(boolParamReducers, stringParamReducers) {
-  return (state = {}, action) => {
-    let s = state;
-    for (const paramName in boolParamReducers) {
-      s = applyBoolQueryParamReducer(s, paramName, boolParamReducers[paramName], action);
-    }
-    for (const paramName in stringParamReducers) {
-      s = applyStringQueryParamReducer(s, paramName, stringParamReducers[paramName], action);
-    }
-    return s;
+export function changeJSOnly(jsOnly) {
+  return {
+    type: 'CHANGE_JS_ONLY',
+    jsOnly,
   };
 }
 
-function jsOnlyReducer(state = false, action) {
-  switch (action.type) {
-    case 'CHANGE_JS_ONLY':
-      return action.jsOnly;
-    default:
-      return state;
-  }
-}
-
-function invertCallstackReducer(state = false, action) {
-  switch (action.type) {
-    case 'CHANGE_INVERT_CALLSTACK':
-      return action.invertCallstack;
-    default:
-      return state;
-  }
-}
-
-function rangeFiltersReducer(state = '', action) {
-  switch (action.type) {
-    case 'ADD_RANGE_FILTER': {
-      const rangeFilters = parseRangeFilters(state);
-      const { start, end } = action;
-      rangeFilters.push({ start, end });
-      return stringifyRangeFilters(rangeFilters);
-    }
-    case 'POP_RANGE_FILTERS': {
-      const rangeFilters = parseRangeFilters(state);
-      return stringifyRangeFilters(rangeFilters.slice(0, action.firstRemovedFilterIndex));
-    }
-    default:
-      return state;
-  }
-}
-
-function callTreeFiltersReducer(state = '', action) {
-  switch (action.type) {
-    case 'ADD_CALL_TREE_FILTER': {
-      const callTreeFilters = parseCallTreeFilters(state);
-      const { filter } = action;
-      callTreeFilters.push(filter);
-      return stringifyCallTreeFilters(callTreeFilters);
-    }
-    case 'POP_CALL_TREE_FILTERS': {
-      const callTreeFilters = parseCallTreeFilters(state);
-      return stringifyCallTreeFilters(callTreeFilters.slice(0, action.firstRemovedFilterIndex));
-    }
-    default:
-      return state;
-  }
-}
-
-function callTreeSearchReducer(state = '', action) {
-  switch (action.type) {
-    case 'CHANGE_CALL_TREE_SEARCH_STRING':
-      return action.searchString;
-    default:
-      return state;
-  }
-}
-
-function selectedThreadReducer(state = '', action) {
-  switch (action.type) {
-    case 'CHANGE_SELECTED_THREAD':
-      return `${action.selectedThread}`;
-    default:
-      return state;
-  }
-}
-
-export const queryRootReducer = createQueryReducer({
-  jsOnly: jsOnlyReducer,
-  invertCallstack: invertCallstackReducer,
-}, {
-  rangeFilters: rangeFiltersReducer,
-  callTreeFilters: callTreeFiltersReducer,
-  search: callTreeSearchReducer,
-  thread: selectedThreadReducer,
-});
-
-function pushQueryAction(action, { pathname, query }) {
-  return push({ pathname, query: queryRootReducer(query, action) });
-}
-
-function replaceQueryAction(action, { pathname, query }) {
-  return replace({ pathname, query: queryRootReducer(query, action) });
-}
-
-function replaceQueryActions(actions, { pathname, query }) {
-  return replace({ pathname, query: actions.reduce(queryRootReducer, query) });
-}
-
-export function changeJSOnly(jsOnly, location) {
-  return pushQueryAction({
-    type: 'CHANGE_JS_ONLY',
-    jsOnly,
-  }, location);
-}
-
-export function changeInvertCallstack(invertCallstack, location) {
-  return pushQueryAction({
+export function changeInvertCallstack(invertCallstack) {
+  return {
     type: 'CHANGE_INVERT_CALLSTACK',
     invertCallstack,
-  }, location);
+  };
 }
 
 export function updateProfileSelection(selection) {
@@ -517,48 +338,46 @@ export function updateProfileSelection(selection) {
   };
 }
 
-export function addRangeFilter(start, end, location) {
-  return pushQueryAction({
+export function addRangeFilter(start, end) {
+  return {
     type: 'ADD_RANGE_FILTER',
     start, end,
-  }, location);
+  };
 }
 
-export function addRangeFilterAndUnsetSelection(start, end, location) {
+export function addRangeFilterAndUnsetSelection(start, end) {
   return dispatch => {
-    dispatch(addRangeFilter(start, end, location));
+    dispatch(addRangeFilter(start, end));
     dispatch(updateProfileSelection({ hasSelection: false, isModifying: false }));
   };
 }
 
-export function popRangeFilters(firstRemovedFilterIndex, location) {
-  return pushQueryAction({
+export function popRangeFilters(firstRemovedFilterIndex) {
+  return {
     type: 'POP_RANGE_FILTERS',
     firstRemovedFilterIndex,
-  }, location);
+  };
 }
 
-export function popRangeFiltersAndUnsetSelection(firstRemovedFilterIndex, location) {
+export function popRangeFiltersAndUnsetSelection(firstRemovedFilterIndex) {
   return dispatch => {
-    dispatch(popRangeFilters(firstRemovedFilterIndex, location));
+    dispatch(popRangeFilters(firstRemovedFilterIndex));
     dispatch(updateProfileSelection({ hasSelection: false, isModifying: false }));
   };
 }
 
-export function addCallTreeFilter(threadIndex, filter, location) {
-  return pushQueryAction({
+export function addCallTreeFilter(threadIndex, filter) {
+  return {
     type: 'ADD_CALL_TREE_FILTER',
+    threadIndex,
     filter,
-    // TODO: needs a thread field, because funcs really are per-thread
-  }, location);
+  };
 }
 
-export function popCallTreeFilters(threadIndex, firstRemovedFilterIndex, location) {
-  return pushQueryAction({
+export function popCallTreeFilters(threadIndex, firstRemovedFilterIndex) {
+  return {
     type: 'POP_CALL_TREE_FILTERS',
+    threadIndex,
     firstRemovedFilterIndex,
-    // TODO: also needs a thread field
-  }, location);
+  };
 }
-
-export { push } from 'react-router-redux';

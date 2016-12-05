@@ -17,6 +17,8 @@ function status(state = 'INITIALIZING', action) {
 
 function view(state = 'INITIALIZING', action) {
   switch (action.type) {
+    case 'FILE_NOT_FOUND':
+      return 'FILE_NOT_FOUND';
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_WEB':
       return 'PROFILE';
@@ -239,4 +241,126 @@ const viewOptions = combineReducers({
 
 const profileView = combineReducers({ viewOptions, profile });
 
-export default { status, view, profileView, summaryView };
+function dataSource(state = 'none', action) {
+  switch (action.type) {
+    case 'PROFILE_PUBLISHED':
+      return 'public';
+    default:
+      return state;
+  }
+}
+
+function hash(state = '', action) {
+  switch (action.type) {
+    case 'PROFILE_PUBLISHED':
+      return action.hash;
+    default:
+      return state;
+  }
+}
+
+function selectedTab(state = 'calltree', action) {
+  switch (action.type) {
+    case 'CHANGE_SELECTED_TAB':
+      return action.selectedTab;
+    default:
+      return state;
+  }
+}
+
+function rangeFilters(state = [], action) {
+  switch (action.type) {
+    case 'ADD_RANGE_FILTER': {
+      const { start, end } = action;
+      return [...state, { start, end }];
+    }
+    case 'POP_RANGE_FILTERS':
+      return state.slice(0, action.firstRemovedFilterIndex);
+    default:
+      return state;
+  }
+}
+
+function selectedThread(state = 0, action) {
+  switch (action.type) {
+    case 'CHANGE_SELECTED_THREAD':
+      return action.selectedThread;
+    case 'RECEIVE_PROFILE_FROM_ADDON': {
+      const contentThreadId = action.profile.threads.findIndex(thread => thread.name === 'Content');
+      return contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(profile.threads)[0];
+    }
+    default:
+      return state;
+  }
+}
+
+function callTreeSearchString(state = '', action) {
+  switch (action.type) {
+    case 'CHANGE_CALL_TREE_SEARCH_STRING':
+      return action.searchString;
+    default:
+      return state;
+  }
+}
+
+function callTreeFilters(state = {}, action) {
+  switch (action.type) {
+    case 'ADD_CALL_TREE_FILTER': {
+      const { threadIndex, filter } = action;
+      const oldFilters = state[threadIndex] || [];
+      return Object.assign({}, state, {
+        [threadIndex]: [...oldFilters, filter],
+      });
+    }
+    case 'POP_CALL_TREE_FILTERS': {
+      const { threadIndex, firstRemovedFilterIndex } = action;
+      const oldFilters = state[threadIndex] || [];
+      return Object.assign({}, state, {
+        [threadIndex]: oldFilters.slice(0, firstRemovedFilterIndex),
+      });
+    }
+    default:
+      return state;
+  }
+}
+
+function jsOnly(state = false, action) {
+  switch (action.type) {
+    case 'CHANGE_JS_ONLY':
+      return action.jsOnly;
+    default:
+      return state;
+  }
+}
+
+function invertCallstack(state = false, action) {
+  switch (action.type) {
+    case 'CHANGE_INVERT_CALLSTACK':
+      return action.invertCallstack;
+    default:
+      return state;
+  }
+}
+
+const urlState = (regularUrlStateReducer => (state, action) => {
+  switch (action.type) {
+    case '@@urlenhancer/updateURLState':
+      return action.urlState;
+    default:
+      return regularUrlStateReducer(state, action);
+  }
+})(combineReducers({
+  dataSource, hash, selectedTab, rangeFilters, selectedThread,
+  callTreeSearchString, callTreeFilters, jsOnly, invertCallstack,
+}));
+
+function isUrlSetupDone(state = false, action) {
+  switch (action.type) {
+    case '@@urlenhancer/urlSetupDone':
+      return true;
+    default:
+      return state;
+  }
+}
+
+export default { status, view, profileView, summaryView, urlState, isUrlSetupDone };

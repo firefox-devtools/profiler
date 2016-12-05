@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { getProfile, getProfileViewOptions } from '../selectors/';
+import { getProfile, getProfileViewOptions, getDataSource, getHash } from '../selectors/';
 import * as actions from '../actions';
 import { compress } from '../gz';
 import { uploadBinaryProfileData } from '../cleopatra-profile-store';
@@ -47,7 +47,7 @@ UploadingStatus.propTypes = {
 class ProfileSharingCompositeButton extends Component {
   constructor(props) {
     super(props);
-    const { dataSource, params: { hash } } = props;
+    const { dataSource, hash } = props;
     this.state = {
       state: dataSource === 'public' ? 'public' : 'local',  // local -> uploading (<-> error) -> public
       uploadProgress: 0,
@@ -64,7 +64,7 @@ class ProfileSharingCompositeButton extends Component {
     this._permalinkTextFieldCreated = elem => { this._permalinkTextField = elem; };
   }
 
-  componentWillReceiveProps({ dataSource, params: { hash } }) {
+  componentWillReceiveProps({ dataSource, hash }) {
     if (dataSource === 'public' &&
         this.state.state !== 'public') {
       this.setState({ state: 'public', hash });
@@ -113,8 +113,8 @@ class ProfileSharingCompositeButton extends Component {
         this.setState({ uploadProgress });
       });
     }).then(hash => {
-      const { location, params, onProfilePublished } = this.props;
-      onProfilePublished(hash, location, params);
+      const { onProfilePublished } = this.props;
+      onProfilePublished(hash);
       this.setState({
         state: 'public',
         hash,
@@ -191,9 +191,8 @@ class ProfileSharingCompositeButton extends Component {
 
 ProfileSharingCompositeButton.propTypes = {
   profile: PropTypes.object,
-  location: PropTypes.object.isRequired,
-  params: PropTypes.object.isRequired,
   dataSource: PropTypes.string.isRequired,
+  hash: PropTypes.string,
   onProfilePublished: PropTypes.func.isRequired,
 };
 
@@ -279,9 +278,9 @@ ProfileDownloadButton.propTypes = {
   viewOptions: PropTypes.object,
 };
 
-const ProfileSharing = ({ profile, viewOptions, dataSource, location, params, profilePublished }) => (
+const ProfileSharing = ({ profile, viewOptions, dataSource, hash, profilePublished }) => (
   <div className='profileSharing'>
-    <ProfileSharingCompositeButton profile={profile} dataSource={dataSource} location={location} params={params} onProfilePublished={profilePublished}/>
+    <ProfileSharingCompositeButton profile={profile} dataSource={dataSource} hash={hash} onProfilePublished={profilePublished}/>
     <ProfileDownloadButton profile={profile} viewOptions={viewOptions}/>
   </div>
 );
@@ -289,13 +288,14 @@ const ProfileSharing = ({ profile, viewOptions, dataSource, location, params, pr
 ProfileSharing.propTypes = {
   profile: PropTypes.object,
   viewOptions: PropTypes.object,
-  location: PropTypes.object.isRequired,
-  params: PropTypes.object.isRequired,
   dataSource: PropTypes.string.isRequired,
+  hash: PropTypes.string,
   profilePublished: PropTypes.func.isRequired,
 };
 
 export default connect(state => ({
   profile: getProfile(state),
   viewOptions: getProfileViewOptions(state),
+  dataSource: getDataSource(state),
+  hash: getHash(state),
 }), actions)(ProfileSharing);

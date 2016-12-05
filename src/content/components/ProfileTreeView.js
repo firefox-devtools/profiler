@@ -54,19 +54,19 @@ class ProfileTreeView extends Component {
   }
 
   _onAppendageButtonClick(funcStackIndex) {
-    const { funcStackInfo, threadIndex, addCallTreeFilter, jsOnly, invertCallstack, location } = this.props;
+    const { funcStackInfo, threadIndex, addCallTreeFilter, jsOnly, invertCallstack } = this.props;
     if (invertCallstack) {
       addCallTreeFilter(threadIndex, {
         type: 'postfix',
         postfixFuncs: getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable),
         matchJSOnly: jsOnly,
-      }, location);
+      });
     } else {
       addCallTreeFilter(threadIndex, {
         type: 'prefix',
         prefixFuncs: getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable),
         matchJSOnly: jsOnly,
-      }, location);
+      });
     }
   }
 
@@ -132,7 +132,6 @@ ProfileTreeView.propTypes = {
   addCallTreeFilter: PropTypes.func.isRequired,
   jsOnly: PropTypes.bool.isRequired,
   invertCallstack: PropTypes.bool.isRequired,
-  location: PropTypes.object.isRequired,
 };
 
 export default connect((state, props) => ({

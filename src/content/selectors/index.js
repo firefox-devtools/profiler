@@ -2,45 +2,25 @@ import { createSelector } from 'reselect';
 import * as ProfileData from '../profile-data';
 import * as ProfileTree from '../profile-tree';
 import * as TaskTracer from '../task-tracer';
-import { parseRangeFilters } from '../range-filters';
-import { parseCallTreeFilters } from '../call-tree-filters';
 
+export const getView = state => state.view;
 export const getProfileView = state => state.profileView;
 export const getProfile = state => getProfileView(state).profile;
 export const getProfileInterval = state => getProfile(state).meta.interval;
 export const getProfileViewOptions = state => getProfileView(state).viewOptions;
 export const getThreadNames = state => getProfile(state).threads.map(t => t.name);
-export const getJSOnly = (state, props) => ('jsOnly' in props.location.query);
-export const getSelectedThreadIndex = (state, props) => +(props.location.query.thread || 0);
-export const getSearchString = (state, props) => (props.location.query.search || '');
-export const getInvertCallstack = (state, props) => ('invertCallstack' in props.location.query);
 export const getProfileTaskTracerData = state => getProfile(state).tasktracer;
 
-export const getRangeFiltersStringParam = (state, props) => {
-  const { query } = props.location;
-  if ('rangeFilters' in query) {
-    return query.rangeFilters;
-  }
-  return '';
-};
+const getURLState = state => state.urlState;
 
-export const getRangeFilters = createSelector(
-  getRangeFiltersStringParam,
-  parseRangeFilters
-);
-
-export const getCallTreeFiltersStringParam = (state, props) => {
-  const { query } = props.location;
-  if ('callTreeFilters' in query) {
-    return query.callTreeFilters;
-  }
-  return '';
-};
-
-export const getCallTreeFilters = createSelector(
-  getCallTreeFiltersStringParam,
-  parseCallTreeFilters
-);
+export const getDataSource = state => getURLState(state).dataSource;
+export const getHash = state => getURLState(state).hash;
+export const getRangeFilters = state => getURLState(state).rangeFilters;
+export const getJSOnly = state => getURLState(state).jsOnly;
+export const getInvertCallstack = state => getURLState(state).invertCallstack;
+export const getSearchString = state => getURLState(state).callTreeSearchString;
+export const getSelectedTab = state => getURLState(state).selectedTab;
+export const getSelectedThreadIndex = state => getURLState(state).selectedThread;
 
 export const getScrollToSelectionGeneration = createSelector(
   getProfileViewOptions,
@@ -92,6 +72,7 @@ export const selectorsForThread = threadIndex => {
   if (!(threadIndex in selectorsForThreads)) {
     const getThread = state => getProfile(state).threads[threadIndex];
     const getViewOptions = state => getProfileViewOptions(state).threads[threadIndex];
+    const getCallTreeFilters = state => getURLState(state).callTreeFilters[threadIndex] || [];
     const getRangeFilteredThread = createSelector(
       getThread,
       getDisplayRange,
@@ -208,6 +189,7 @@ export const selectorsForThread = threadIndex => {
     selectorsForThreads[threadIndex] = {
       getThread,
       getViewOptions,
+      getCallTreeFilters,
       getFilteredThread,
       getJankInstances,
       getTracingMarkers,

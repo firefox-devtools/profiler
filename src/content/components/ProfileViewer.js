@@ -15,7 +15,7 @@ import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
 import ProfileSharing from '../containers/ProfileSharing';
 import SymbolicationStatusOverlay from '../containers/SymbolicationStatusOverlay';
 import * as actions from '../actions';
-import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../selectors/';
+import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt, getSelectedTab } from '../selectors/';
 
 class ProfileViewer extends Component {
   constructor(props) {
@@ -49,42 +49,41 @@ class ProfileViewer extends Component {
   }
 
   _onZoomButtonClick(start, end) {
-    const { addRangeFilterAndUnsetSelection, zeroAt, location } = this.props;
-    addRangeFilterAndUnsetSelection(start - zeroAt, end - zeroAt, location);
+    const { addRangeFilterAndUnsetSelection, zeroAt } = this.props;
+    addRangeFilterAndUnsetSelection(start - zeroAt, end - zeroAt);
   }
 
   _onIntervalMarkerSelect(threadIndex, start, end) {
-    const { timeRange, updateProfileSelection, changeSelectedThread, location } = this.props;
+    const { timeRange, updateProfileSelection, changeSelectedThread } = this.props;
     updateProfileSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart: Math.max(timeRange.start, start),
       selectionEnd: Math.min(timeRange.end, end),
     });
-    changeSelectedThread(threadIndex, location);
+    changeSelectedThread(threadIndex);
   }
 
   _onSelectTab(selectedTab) {
-    const { changeSelectedTab, dataSource, location, params } = this.props;
-    changeSelectedTab(selectedTab, dataSource, location, params);
+    const { changeSelectedTab } = this.props;
+    changeSelectedTab(selectedTab);
   }
 
   render() {
     const {
       profile, className, threadOrder, changeThreadOrder,
       viewOptions, updateProfileSelection,
-      timeRange, zeroAt, params, location,
-      changeTabOrder, dataSource,
+      timeRange, zeroAt,
+      changeTabOrder, selectedTab,
     } = this.props;
     const threads = profile.threads;
     const { selection, tabOrder } = viewOptions;
     const { hasSelection, isModifying, selectionStart, selectionEnd } = selection;
-    const { selectedTab } = params;
     return (
       <div className={className}>
         <div className={`${className}TopBar`}>
-          <ProfileFilterNavigator location={location}/>
-          <ProfileSharing dataSource={dataSource} location={location} params={params}/>
+          <ProfileFilterNavigator />
+          <ProfileSharing />
         </div>
         <TimelineWithRangeSelection className={`${className}Header`}
                                     zeroAt={zeroAt}
@@ -108,15 +107,13 @@ class ProfileViewer extends Component {
                                                rangeEnd={timeRange.end}
                                                threadIndex={threadIndex}
                                                key={`jank${threadIndex}`}
-                                               onSelect={this._onIntervalMarkerSelect}
-                                               location={location} /> : null),
+                                               onSelect={this._onIntervalMarkerSelect} /> : null),
                     <ProfileThreadTracingMarkerTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineGfx ${className}HeaderIntervalMarkerTimelineThread${threadName}`}
                                                         rangeStart={timeRange.start}
                                                         rangeEnd={timeRange.end}
                                                         threadIndex={threadIndex}
                                                         key={`gfx${threadIndex}`}
-                                                        onSelect={this._onIntervalMarkerSelect}
-                                                        location={location} />]
+                                                        onSelect={this._onIntervalMarkerSelect} />]
                 );
               })
             }
@@ -132,9 +129,7 @@ class ProfileViewer extends Component {
                                       index={threadIndex}
                                       interval={profile.meta.interval}
                                       rangeStart={timeRange.start}
-                                      rangeEnd={timeRange.end}
-                                      params={params}
-                                      location={location}/>
+                                      rangeEnd={timeRange.end}/>
             )
           }
           </Reorderable>
@@ -145,11 +140,11 @@ class ProfileViewer extends Component {
                 onSelectTab={this._onSelectTab}
                 onChangeTabOrder={changeTabOrder} />
         {{
-          summary: <ProfileSummaryView params={params} location={location} />,
-          calltree: <ProfileCallTreeView params={params} location={location} />,
-          markers: <ProfileMarkersView params={params} location={location} />,
-          tasktracer: <ProfileTaskTracerView params={params} location={location} rangeStart={timeRange.start} rangeEnd={timeRange.end} />,
-          log: <ProfileLogView params={params} location={location} />,
+          summary: <ProfileSummaryView />,
+          calltree: <ProfileCallTreeView />,
+          markers: <ProfileMarkersView />,
+          tasktracer: <ProfileTaskTracerView rangeStart={timeRange.start} rangeEnd={timeRange.end} />,
+          log: <ProfileLogView />,
         }[selectedTab]}
         
         <SymbolicationStatusOverlay />
@@ -169,9 +164,7 @@ ProfileViewer.propTypes = {
   addRangeFilterAndUnsetSelection: PropTypes.func.isRequired,
   timeRange: PropTypes.object.isRequired,
   zeroAt: PropTypes.number.isRequired,
-  dataSource: PropTypes.string.isRequired,
-  params: PropTypes.any.isRequired,
-  location: PropTypes.any.isRequired,
+  selectedTab: PropTypes.string.isRequired,
   changeSelectedThread: PropTypes.func.isRequired,
   changeSelectedTab: PropTypes.func.isRequired,
   changeTabOrder: PropTypes.func.isRequired,
@@ -180,6 +173,7 @@ ProfileViewer.propTypes = {
 export default connect((state, props) => ({
   profile: getProfile(state, props),
   viewOptions: getProfileViewOptions(state, props),
+  selectedTab: getSelectedTab(state),
   className: 'profileViewer',
   threadOrder: getThreadOrder(state, props),
   timeRange: getDisplayRange(state, props),

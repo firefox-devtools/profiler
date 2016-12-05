@@ -4,8 +4,6 @@ import { render } from 'react-dom';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import thunk from 'redux-thunk';
 import createLogger from 'redux-logger';
-import { browserHistory } from 'react-router';
-import { syncHistoryWithStore, routerReducer, routerMiddleware } from 'react-router-redux';
 import reducers from './src/content/reducers';
 import Root from './src/content/containers/Root';
 import threadDispatcher from './src/common/thread-middleware';
@@ -30,11 +28,9 @@ const worker = new CleopatraWorker();
 
 const store = createStore(
   combineReducers(Object.assign({}, reducers, {
-    routing: routerReducer,
     worker,
   })),
   applyMiddleware(...[
-    routerMiddleware(browserHistory),
     thunk,
     threadDispatcher(worker, 'toWorker'),
     process.env.NODE_ENV === 'development'
@@ -44,10 +40,8 @@ const store = createStore(
 
 handleMessages(worker, store, messages);
 
-const history = syncHistoryWithStore(browserHistory, store);
-
 render(
-  <Root store={store} history={history} />,
+  <Root store={store} />,
   document.getElementById('root')
 );
 

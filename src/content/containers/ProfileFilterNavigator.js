@@ -14,9 +14,6 @@ export default connect((state, props) => {
     items,
     selectedItem: items.length - 1,
   };
-}, actions, (stateProps, dispatchProps, ownProps) => ({
-  className: stateProps.className,
-  items: stateProps.items,
-  selectedItem: stateProps.selectedItem,
-  onPop: i => dispatchProps.popRangeFiltersAndUnsetSelection(i, ownProps.location),
-}))(FilterNavigatorBar);
+}, {
+  onPop: actions.popRangeFiltersAndUnsetSelection,
+})(FilterNavigatorBar);

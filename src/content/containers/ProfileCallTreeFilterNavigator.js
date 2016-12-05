@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import * as actions from '../actions';
-import { getSelectedThreadIndex, selectedThreadSelectors, getCallTreeFilters } from '../selectors';
+import { getSelectedThreadIndex, selectedThreadSelectors } from '../selectors';
 import FilterNavigatorBar from '../components/FilterNavigatorBar';
 
 import './ProfileCallTreeFilterNavigator.css';
@@ -23,7 +23,7 @@ function filterString(filter, { funcTable, stringTable }) {
 
 export default connect((state, props) => {
   const thread = selectedThreadSelectors.getFilteredThread(state, props);
-  const callTreeFilters = getCallTreeFilters(state, props);
+  const callTreeFilters = selectedThreadSelectors.getCallTreeFilters(state, props);
   const items = ['Complete Thread', ...callTreeFilters.map(f => filterString(f, thread))];
   return {
     className: 'profileCallTreeFilterNavigator',
@@ -31,9 +31,9 @@ export default connect((state, props) => {
     selectedItem: items.length - 1,
     threadIndex: getSelectedThreadIndex(state, props),
   };
-}, actions, (stateProps, dispatchProps, ownProps) => ({
+}, actions, (stateProps, dispatchProps) => ({
   className: stateProps.className,
   items: stateProps.items,
   selectedItem: stateProps.selectedItem,
-  onPop: i => dispatchProps.popCallTreeFilters(stateProps.threadIndex, i, ownProps.location),
+  onPop: i => dispatchProps.popCallTreeFilters(stateProps.threadIndex, i),
 }))(FilterNavigatorBar);

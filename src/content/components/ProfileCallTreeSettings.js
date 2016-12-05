@@ -15,15 +15,15 @@ class ProfileCallTreeSettings extends Component {
   }
 
   _onJSOnlyClick(e) {
-    this.props.changeJSOnly(e.target.checked, this.props.location);
+    this.props.changeJSOnly(e.target.checked);
   }
 
   _onInvertCallstackClick(e) {
-    this.props.changeInvertCallstack(e.target.checked, this.props.location);
+    this.props.changeInvertCallstack(e.target.checked);
   }
 
   _onSearchFieldIdleAfterChange(value) {
-    this.props.changeCallTreeSearchString(value, this.props.location);
+    this.props.changeCallTreeSearchString(value);
   }
 
   render() {
@@ -70,7 +70,6 @@ ProfileCallTreeSettings.propTypes = {
   invertCallstack: PropTypes.bool.isRequired,
   changeInvertCallstack: PropTypes.func.isRequired,
   changeCallTreeSearchString: PropTypes.func.isRequired,
-  location: PropTypes.any.isRequired,
   searchString: PropTypes.string.isRequired,
 };
 
