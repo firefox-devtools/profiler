@@ -98,10 +98,10 @@ function fill(size, fn) {
 }
 
 
-export default connect((state, props) => {
+export default connect(state => {
   return {
-    expanded: getProfileExpandedSummaries(state, props),
-    summaries: getProfileSummaries(state, props),
-    threadNames: getThreadNames(state, props),
+    expanded: getProfileExpandedSummaries(state),
+    summaries: getProfileSummaries(state),
+    threadNames: getThreadNames(state),
   };
 }, actions)(ProfileSummaryView);

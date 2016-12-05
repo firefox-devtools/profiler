@@ -207,7 +207,7 @@ export const selectedThreadSelectors = (() => {
   const anyThreadSelectors = selectorsForThread(0);
   const result = {};
   for (const key in anyThreadSelectors) {
-    result[key] = (state, props) => selectorsForThread(getSelectedThreadIndex(state, props))[key](state, props);
+    result[key] = state => selectorsForThread(getSelectedThreadIndex(state))[key](state);
   }
   return result;
 })();

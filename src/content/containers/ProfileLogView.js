@@ -28,6 +28,6 @@ ProfileLogView.propTypes = {
   thread: PropTypes.object.isRequired,
 };
 
-export default connect((state, props) => ({
-  thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state, props),
+export default connect(state => ({
+  thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state),
 }), actions)(ProfileLogView);

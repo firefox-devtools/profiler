@@ -170,12 +170,12 @@ ProfileViewer.propTypes = {
   changeTabOrder: PropTypes.func.isRequired,
 };
 
-export default connect((state, props) => ({
-  profile: getProfile(state, props),
-  viewOptions: getProfileViewOptions(state, props),
+export default connect(state => ({
+  profile: getProfile(state),
+  viewOptions: getProfileViewOptions(state),
   selectedTab: getSelectedTab(state),
   className: 'profileViewer',
-  threadOrder: getThreadOrder(state, props),
-  timeRange: getDisplayRange(state, props),
-  zeroAt: getZeroAt(state, props),
+  threadOrder: getThreadOrder(state),
+  timeRange: getDisplayRange(state),
+  zeroAt: getZeroAt(state),
 }), actions)(ProfileViewer);

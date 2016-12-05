@@ -73,8 +73,8 @@ ProfileCallTreeSettings.propTypes = {
   searchString: PropTypes.string.isRequired,
 };
 
-export default connect((state, props) => ({
-  invertCallstack: getInvertCallstack(state, props),
-  jsOnly: getJSOnly(state, props),
-  searchString: getSearchString(state, props),
+export default connect(state => ({
+  invertCallstack: getInvertCallstack(state),
+  jsOnly: getJSOnly(state),
+  searchString: getSearchString(state),
 }), actions)(ProfileCallTreeSettings);

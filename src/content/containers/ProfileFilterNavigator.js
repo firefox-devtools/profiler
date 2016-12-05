@@ -7,8 +7,8 @@ function rangeString(range) {
   return `Range: ${(range.start / 1000).toFixed(2)}s–${(range.end / 1000).toFixed(2)}s`;
 }
 
-export default connect((state, props) => {
-  const items = ['Complete Profile', ...getRangeFilters(state, props).map(rangeString)];
+export default connect(state => {
+  const items = ['Complete Profile', ...getRangeFilters(state).map(rangeString)];
   return {
     className: 'profileFilterNavigator',
     items,

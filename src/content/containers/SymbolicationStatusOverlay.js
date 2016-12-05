@@ -51,6 +51,6 @@ SymbolicationStatusOverlay.propTypes = {
   viewOptions: PropTypes.object.isRequired,
 };
 
-export default connect((state, props) => ({
-  viewOptions: getProfileViewOptions(state, props),
+export default connect(state => ({
+  viewOptions: getProfileViewOptions(state),
 }), actions)(SymbolicationStatusOverlay);

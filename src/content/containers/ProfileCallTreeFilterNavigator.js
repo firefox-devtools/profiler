@@ -21,15 +21,15 @@ function filterString(filter, { funcTable, stringTable }) {
   }
 }
 
-export default connect((state, props) => {
-  const thread = selectedThreadSelectors.getFilteredThread(state, props);
-  const callTreeFilters = selectedThreadSelectors.getCallTreeFilters(state, props);
+export default connect(state => {
+  const thread = selectedThreadSelectors.getFilteredThread(state);
+  const callTreeFilters = selectedThreadSelectors.getCallTreeFilters(state);
   const items = ['Complete Thread', ...callTreeFilters.map(f => filterString(f, thread))];
   return {
     className: 'profileCallTreeFilterNavigator',
     items,
     selectedItem: items.length - 1,
-    threadIndex: getSelectedThreadIndex(state, props),
+    threadIndex: getSelectedThreadIndex(state),
   };
 }, actions, (stateProps, dispatchProps) => ({
   className: stateProps.className,

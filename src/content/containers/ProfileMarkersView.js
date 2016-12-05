@@ -130,9 +130,9 @@ ProfileMarkersView.propTypes = {
   changeSelectedMarker: PropTypes.func.isRequired,
 };
 
-export default connect((state, props) => ({
-  threadIndex: getSelectedThreadIndex(state, props),
-  thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state, props),
-  selectedMarker: selectedThreadSelectors.getViewOptions(state, props).selectedMarker,
-  zeroAt: getZeroAt(state, props),
+export default connect(state => ({
+  threadIndex: getSelectedThreadIndex(state),
+  thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state),
+  selectedMarker: selectedThreadSelectors.getViewOptions(state).selectedMarker,
+  zeroAt: getZeroAt(state),
 }), actions)(ProfileMarkersView);

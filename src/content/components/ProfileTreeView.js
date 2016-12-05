@@ -134,17 +134,17 @@ ProfileTreeView.propTypes = {
   invertCallstack: PropTypes.bool.isRequired,
 };
 
-export default connect((state, props) => ({
-  thread: selectedThreadSelectors.getFilteredThread(state, props),
-  threadIndex: getSelectedThreadIndex(state, props),
-  scrollToSelectionGeneration: getScrollToSelectionGeneration(state, props),
-  interval: getProfile(state, props).meta.interval,
-  tree: selectedThreadSelectors.getCallTree(state, props),
-  funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state, props),
-  selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state, props),
-  expandedFuncStacks: selectedThreadSelectors.getExpandedFuncStacks(state, props),
-  searchString: getSearchString(state, props),
-  disableOverscan: getProfileViewOptions(state, props).selection.isModifying,
-  invertCallstack: getInvertCallstack(state, props),
-  jsOnly: getJSOnly(state, props),
+export default connect(state => ({
+  thread: selectedThreadSelectors.getFilteredThread(state),
+  threadIndex: getSelectedThreadIndex(state),
+  scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
+  interval: getProfile(state).meta.interval,
+  tree: selectedThreadSelectors.getCallTree(state),
+  funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state),
+  selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state),
+  expandedFuncStacks: selectedThreadSelectors.getExpandedFuncStacks(state),
+  searchString: getSearchString(state),
+  disableOverscan: getProfileViewOptions(state).selection.isModifying,
+  invertCallstack: getInvertCallstack(state),
+  jsOnly: getJSOnly(state),
 }), actions, null, { withRef: true })(ProfileTreeView);
