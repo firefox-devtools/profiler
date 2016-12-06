@@ -72,7 +72,10 @@ class ProfileSharingCompositeButton extends Component {
       this.setState({ state: 'public', hash });
     }
     if (window.location.href !== this.state.fullURL) {
-      this.setState({ fullURL: window.location.href });
+      this.setState({
+        fullURL: window.location.href,
+        shortURL: window.location.href,
+      });
     }
   }
 
