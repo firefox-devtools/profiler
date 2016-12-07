@@ -74,8 +74,15 @@ if (process.env.NODE_ENV === 'production') {
       AppCache: false,
       ServiceWorker: {
         scope: '/',
-        navigateFallbackURL: '/',
       },
+      cacheMaps: [
+        {
+          requestTypes: null,
+          match: function (url, request) {
+            return url.origin === location.origin ? url.origin + '/' : null;
+          },
+        },
+      ],
     }));
 } else if (process.env.NODE_ENV === 'development') {
   module.exports.devtool = 'source-map';
