@@ -9,13 +9,21 @@ Cleopatra is a webpage to visualize performance profiles. It was written to be u
 Running
 =======
 
-This is the cleopatra-react branch, which doesn't support many features at the moment. One of them is opening profiles. The only way to show profiles at the moment is to use [my `for-cleopatra-react` branch of the gecko profiler addon](https://github.com/mstange/Gecko-Profiler-Addon/tree/for-cleopatra-react).
+This project is live on [https://new.cleopatra.io/](https://new.cleopatra.io/). In order to obtain profiles from Firefox, you need to install an add-on, which you can do by clicking the link on that website.
+
+If you want to hack on cleopatra and run your own version locally, you need to point the add-on at your local instance:
+
+ 1. Go to `about:addons`.
+ 2. Find the Gecko Profiler add-on.
+ 3. Click Preferences.
+ 4. Change the value of the “Reporter URL” textbox to `http://localhost:4242/from-addon/`.
+
+Then clone this repository and start your local cleopatra instance like this:
 
     $ # First, make sure you have somewhat recent versions of node and npm.
     $ # Then, clone this repository and check out this branch:
     $ git clone https://github.com/mstange/cleopatra.git
     $ cd cleopatra
-    $ git checkout cleopatra-react
     $ # Now, install the necessary node modules:
     $ npm install
     $ # Run webpack to process + bundle the JS, and start a local webserver at
@@ -24,11 +32,9 @@ This is the cleopatra-react branch, which doesn't support many features at the m
 
 This builds and runs the production version.
 
-Alternatively, you can run the development version. The development version is slower because it has lots of runtime checks and logging, but it has hot reloading so the development experience is a lot nicer.
+Alternatively, you can run the development version. The development has lots of runtime checks and logging and is not minified. However, that means that it runs a lot slower.
 
 To run the development version, run `npm run start` instead of `npm run start-prod`.
-
-Once the local webserver is running, you can run Firefox with the [new version of the gecko profiler addon](https://github.com/mstange/Gecko-Profiler-Addon/tree/for-cleopatra-react). Press Ctrl+Shift+6 to capture and view the profile. The addon will capture the current profile, open a new tab, load `http://localhost:4242/`, and transfer the profile to it.
 
 Development Docs
 =======
