@@ -97,24 +97,34 @@ class ProfileViewer extends Component {
                                     selectionEnd={selectionEnd}
                                     onSelectionChange={updateProfileSelection}
                                     onZoomButtonClick={this._onZoomButtonClick}>
+          <div className={`${className}HeaderIntervalMarkerTimelineContainer ${className}HeaderIntervalMarkerTimelineContainerJank`}>
+            {
+              threadOrder.map(threadIndex => {
+                const threadName = threads[threadIndex].name;
+                return (
+                  ((threadName === 'GeckoMain') ?
+                    <ProfileThreadJankTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineJank`}
+                                               rangeStart={timeRange.start}
+                                               rangeEnd={timeRange.end}
+                                               threadIndex={threadIndex}
+                                               key={threadIndex}
+                                               onSelect={this._onIntervalMarkerSelect} /> : null)
+                );
+              })
+            }
+          </div>
           <div className={`${className}HeaderIntervalMarkerTimelineContainer ${className}HeaderIntervalMarkerTimelineContainerGfx`}>
             {
               threadOrder.map(threadIndex => {
                 const threadName = threads[threadIndex].name;
                 return (
-                  [((threadName === 'GeckoMain' || threadName === 'Content') ?
-                    <ProfileThreadJankTimeline className={`${className}HeaderIntervalMarkerTimeline`}
-                                               rangeStart={timeRange.start}
-                                               rangeEnd={timeRange.end}
-                                               threadIndex={threadIndex}
-                                               key={`jank${threadIndex}`}
-                                               onSelect={this._onIntervalMarkerSelect} /> : null),
+                  ((threadName === 'GeckoMain' || threadName === 'Compositor') ?
                     <ProfileThreadTracingMarkerTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineGfx ${className}HeaderIntervalMarkerTimelineThread${threadName}`}
                                                         rangeStart={timeRange.start}
                                                         rangeEnd={timeRange.end}
                                                         threadIndex={threadIndex}
-                                                        key={`gfx${threadIndex}`}
-                                                        onSelect={this._onIntervalMarkerSelect} />]
+                                                        key={threadIndex}
+                                                        onSelect={this._onIntervalMarkerSelect} /> : null)
                 );
               })
             }
