@@ -73,18 +73,19 @@ export function stateFromCurrentLocation() {
       // again. This is not pretty.
       window.legacyRangeFilters =
         filters.filter(f => f.type === 'RangeSampleFilter').map(({ start, end }) => ({ start, end }));
+
+      return {
+        dataSource: 'public',
+        hash: ('report' in legacyQuery) ? legacyQuery.report : '',
+        selectedTab: 'calltree',
+        rangeFilters: [],
+        selectedThread: 0,
+        callTreeSearchString: '',
+        callTreeFilters: {},
+        jsOnly: false,
+        invertCallstack: false,
+      };
     }
-    return {
-      dataSource: 'public',
-      hash: ('report' in legacyQuery) ? legacyQuery.report : '',
-      selectedTab: 'calltree',
-      rangeFilters: [],
-      selectedThread: 0,
-      callTreeSearchString: '',
-      callTreeFilters: {},
-      jsOnly: false,
-      invertCallstack: false,
-    };
   }
 
   const dirs = pathname.split('/').filter(d => d);
