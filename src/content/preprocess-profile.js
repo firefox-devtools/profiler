@@ -42,7 +42,9 @@ function preprocessThreadStageOne(thread) {
   const stackTable = toStructOfArrays(thread.stackTable);
   const samples = toStructOfArrays(thread.samples);
   const markers = toStructOfArrays(thread.markers);
-  return Object.assign({}, thread, {
+  return Object.assign({
+    processType: 'default',
+  }, thread, {
     frameTable, stackTable, markers, stringTable, samples,
   });
 }
@@ -370,7 +372,7 @@ function adjustTimestamps(samplesOrMarkers, delta) {
  */
 export function preprocessProfile(profile) {
   const libs = preprocessSharedLibraries(profile.libs);
-  const threads = [];
+  let threads = [];
   const tasktracer = emptyTaskTracerData();
 
   if (('tasktracer' in profile) && ('threads' in profile.tasktracer)) {
@@ -382,12 +384,21 @@ export function preprocessProfile(profile) {
       const subprocessProfile = JSON.parse(threadOrSubprocess);
       const subprocessLibs = preprocessSharedLibraries(subprocessProfile.libs);
       const adjustTimestampsBy = subprocessProfile.meta.startTime - profile.meta.startTime;
-      for (const thread of subprocessProfile.threads) {
+      threads = threads.concat(subprocessProfile.threads.map((thread, threadIndex) => {
         const newThread = preprocessThread(thread, subprocessLibs);
         newThread.samples = adjustTimestamps(newThread.samples, adjustTimestampsBy);
         newThread.markers = adjustTimestamps(newThread.markers, adjustTimestampsBy);
-        threads.push(newThread);
-      }
+        if (newThread.name === 'Content') {
+          // Workaround for bug 1322471.
+          if (threadIndex === 0) {
+            newThread.name = 'GeckoMain';
+          } else {
+            newThread.name = 'Unknown';
+          }
+          newThread.processType = newThread.processType || 'tab';
+        }
+        return newThread;
+      }));
       if (('tasktracer' in subprocessProfile) && ('threads' in subprocessProfile.tasktracer)) {
         addPreprocessedTaskTracerData(subprocessProfile.tasktracer, tasktracer, subprocessLibs, profile.meta.startTime);
       }
