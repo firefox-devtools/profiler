@@ -15,7 +15,12 @@ import CleopatraWorker from 'worker-loader!./src/worker';
 import './res/style.css';
 
 if (process.env.NODE_ENV === 'production') {
-  require('offline-plugin/runtime').install();
+  const runtime = require('offline-plugin/runtime');
+  runtime.install({
+    onUpdateReady: () => {
+      runtime.applyUpdate();
+    },
+  });
 }
 
 redirectLegacyUrls();

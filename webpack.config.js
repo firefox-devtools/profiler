@@ -74,6 +74,7 @@ if (process.env.NODE_ENV === 'production') {
       AppCache: false,
       ServiceWorker: {
         scope: '/',
+        events: true,
       },
       cacheMaps: [
         {
