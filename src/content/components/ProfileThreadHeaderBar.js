@@ -33,9 +33,10 @@ class ProfileThreadHeaderBar extends Component {
 
   render() {
     const { thread, interval, rangeStart, rangeEnd, funcStackInfo, selectedFuncStack, isSelected, style } = this.props;
+    const title = thread.processType ? `${thread.name} [${thread.processType}]` : thread.name;
     return (
       <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')} style={style}>
-        <h1 onMouseDown={this._onLabelMouseDown} className='grippy' title={thread.name}>{thread.name}</h1>
+        <h1 onMouseDown={this._onLabelMouseDown} className='grippy' title={title}>{title}</h1>
         <ThreadStackGraph interval={interval}
                    thread={thread}
                    className='threadStackGraph'
