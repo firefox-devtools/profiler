@@ -549,8 +549,15 @@ function preprocessThreadFromProfileJSONWithSymbolicationTable(thread, symbolica
     samples.uss[sampleIndex] = ('uss' in sample.extraInfo) ? sample.extraInfo.uss : null;
   }
 
+  let threadName = thread.name;
+  let processType = thread.processType || (threadName === 'Content' ? 'tab' : (threadName === 'Plugin' ? 'plugin' : 'default'));
+
+  if (threadName === 'Content') {
+    threadName = 'GeckoMain';
+  }
+
   return {
-    name: thread.name,
+    name: threadName, processType,
     frameTable, stackTable, markers, stringTable, samples,
   };
 }
