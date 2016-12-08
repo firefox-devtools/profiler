@@ -8,7 +8,11 @@ class TimelineWithRangeSelectionImpl extends Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      hoverLocation: 0,
+    };
     this._onMouseDown = this._onMouseDown.bind(this);
+    this._onMouseMove = this._onMouseMove.bind(this);
     this.handlers = null;
     this._container = null;
     this._containerCreated = c => { this._container = c; };
@@ -96,6 +100,18 @@ class TimelineWithRangeSelectionImpl extends Component {
     }
   }
 
+  _onMouseMove(e) {
+    if (!this._container) {
+      return;
+    }
+    const {
+      rangeStart, rangeEnd,
+    } = this.props;
+
+    const r = this._container.getBoundingClientRect();
+    this.setState({ hoverLocation: e.pageX - r.left });
+  }
+
   render() {
     const {
       className, zeroAt, rangeStart, rangeEnd, children,
@@ -103,13 +119,20 @@ class TimelineWithRangeSelectionImpl extends Component {
       width, onSelectionChange, onZoomButtonClick,
     } = this.props;
 
+    const {
+      hoverLocation
+    } = this.state;
+
     return (
-      <div className={className} ref={this._containerCreated} onMouseDown={this._onMouseDown}>
+      <div className={className}
+           ref={this._containerCreated}
+           onMouseDown={this._onMouseDown}
+           onMouseMove={this._onMouseMove}>
         <TimeLine className={`${className}TimeLine`}
                   zeroAt={zeroAt}
                   rangeStart={rangeStart}
                   rangeEnd={rangeEnd}
-                  width={width} />
+                  width={width}/>
         { children }
         { hasSelection ? <RangeSelectionOverlay rangeStart={rangeStart}
                                                 rangeEnd={rangeEnd}
@@ -120,6 +143,11 @@ class TimelineWithRangeSelectionImpl extends Component {
                                                 onSelectionChange={onSelectionChange}
                                                 onZoomButtonClick={onZoomButtonClick}/>
                        : null }
+        <div className='timelineWithRangeSelectionHoverIndicator'
+             style={{
+                visibility: isModifying ? 'hidden' : undefined,
+                left: `${hoverLocation}px`,
+             }}/>
       </div>
     );
   }
