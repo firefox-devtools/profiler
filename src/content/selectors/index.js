@@ -100,14 +100,10 @@ export const selectorsForThread = threadIndex => {
       getRangeFilteredThread,
       thread => thread.markers
     );
-    const getThreadName = createSelector(
-      getThread,
-      thread => thread.name
-    );
     const getJankInstances = createSelector(
       getRangeFilteredThreadSamples,
-      getThreadName,
-      (samples, threadName) => ProfileData.getJankInstances(samples, threadName, 50)
+      state => getThread(state).processType,
+      (samples, processType) => ProfileData.getJankInstances(samples, processType, 50)
     );
     const getTracingMarkers = createSelector(
       getThread,

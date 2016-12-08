@@ -42,9 +42,7 @@ function preprocessThreadStageOne(thread) {
   const stackTable = toStructOfArrays(thread.stackTable);
   const samples = toStructOfArrays(thread.samples);
   const markers = toStructOfArrays(thread.markers);
-  return Object.assign({
-    processType: 'default',
-  }, thread, {
+  return Object.assign({}, thread, {
     frameTable, stackTable, markers, stringTable, samples,
   });
 }
@@ -403,7 +401,9 @@ export function preprocessProfile(profile) {
         addPreprocessedTaskTracerData(subprocessProfile.tasktracer, tasktracer, subprocessLibs, profile.meta.startTime);
       }
     } else {
-      threads.push(preprocessThread(threadOrSubprocess, libs));
+      const newThread = preprocessThread(threadOrSubprocess, libs);
+      newThread.processType = newThread.processType || 'default';
+      threads.push(newThread);
     }
   }
   const result = {

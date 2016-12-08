@@ -442,7 +442,7 @@ export function getSampleIndexClosestToTime(samples, time) {
   return samples.length - 1;
 }
 
-export function getJankInstances(samples, threadName, thresholdInMs) {
+export function getJankInstances(samples, processType, thresholdInMs) {
   let lastResponsiveness = 0;
   let lastTimestamp = 0;
   const jankInstances = [];
@@ -453,7 +453,7 @@ export function getJankInstances(samples, threadName, thresholdInMs) {
         jankInstances.push({
           start: lastTimestamp - lastResponsiveness,
           dur: lastResponsiveness,
-          title: `${lastResponsiveness.toFixed(2)}ms event processing delay on thread ${threadName}`,
+          title: `${lastResponsiveness.toFixed(2)}ms event processing delay on ${processType} thread`,
           name: 'Jank',
         });
       }
@@ -465,7 +465,7 @@ export function getJankInstances(samples, threadName, thresholdInMs) {
     jankInstances.push({
       start: lastTimestamp - lastResponsiveness,
       dur: lastResponsiveness,
-      title: `${lastResponsiveness.toFixed(2)}ms event processing delay on thread ${threadName}`,
+      title: `${lastResponsiveness.toFixed(2)}ms event processing delay on ${processType} thread`,
       name: 'Jank',
     });
   }
