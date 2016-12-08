@@ -61,22 +61,23 @@ export function stateFromCurrentLocation() {
 
   if (pathname === '/') {
     const legacyQuery = Object.assign({}, query, queryString.parse(hash));
-    if ('filter' in legacyQuery) {
-      const filters = JSON.parse(legacyQuery.filter);
-      // We can't convert these parameters to the new URL parameters here
-      // because they're relative to different things - the legacy range
-      // filters were relative to profile.meta.startTime, and the new
-      // rangeFilters param is relative to
-      // getTimeRangeIncludingAllThreads(profile).start.
-      // So we stuff this information into a global here, and then later,
-      // once we have the profile, we convert that information into URL params
-      // again. This is not pretty.
-      window.legacyRangeFilters =
-        filters.filter(f => f.type === 'RangeSampleFilter').map(({ start, end }) => ({ start, end }));
-
+    if ('report' in legacyQuery) {
+      if ('filter' in legacyQuery) {
+        const filters = JSON.parse(legacyQuery.filter);
+        // We can't convert these parameters to the new URL parameters here
+        // because they're relative to different things - the legacy range
+        // filters were relative to profile.meta.startTime, and the new
+        // rangeFilters param is relative to
+        // getTimeRangeIncludingAllThreads(profile).start.
+        // So we stuff this information into a global here, and then later,
+        // once we have the profile, we convert that information into URL params
+        // again. This is not pretty.
+        window.legacyRangeFilters =
+          filters.filter(f => f.type === 'RangeSampleFilter').map(({ start, end }) => ({ start, end }));
+      }
       return {
         dataSource: 'public',
-        hash: ('report' in legacyQuery) ? legacyQuery.report : '',
+        hash: legacyQuery.report,
         selectedTab: 'calltree',
         rangeFilters: [],
         selectedThread: 0,
