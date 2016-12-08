@@ -3,7 +3,7 @@ import { connect, Provider } from 'react-redux';
 import * as actions from '../actions';
 import ProfileViewer from '../components/ProfileViewer';
 import Home from '../containers/Home';
-import { urlFromState, stateFromURL } from '../url-handling';
+import { urlFromState, stateFromCurrentLocation } from '../url-handling';
 import { getView, getDataSource, getHash } from '../selectors';
 import URLManager from './URLManager';
 
@@ -68,7 +68,7 @@ export default class Root extends Component {
     const { store } = this.props;
     return (
       <Provider store={store}>
-        <URLManager urlFromState={urlFromState} stateFromURL={stateFromURL}>
+        <URLManager urlFromState={urlFromState} stateFromCurrentLocation={stateFromCurrentLocation}>
           <ProfileViewWhenReady/>
         </URLManager>
       </Provider>

@@ -9,7 +9,6 @@ import Root from './src/content/containers/Root';
 import threadDispatcher from './src/common/thread-middleware';
 import messages from './src/content/messages';
 import handleMessages from './src/common/message-handler';
-import { redirectLegacyUrls } from './src/content/cleopatra-legacy-urls';
 import CleopatraWorker from 'worker-loader!./src/worker';
 
 import './res/style.css';
@@ -22,8 +21,6 @@ if (process.env.NODE_ENV === 'production') {
     },
   });
 }
-
-redirectLegacyUrls();
 
 window.geckoProfilerPromise = new Promise(function (resolve) {
   window.connectToGeckoProfiler = resolve;

@@ -101,8 +101,9 @@ class ProfileViewer extends Component {
             {
               threadOrder.map(threadIndex => {
                 const threadName = threads[threadIndex].name;
+                const processType = threads[threadIndex].processType;
                 return (
-                  ((threadName === 'GeckoMain') ?
+                  ((threadName === 'GeckoMain' && processType !== 'plugin') ?
                     <ProfileThreadJankTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineJank`}
                                                rangeStart={timeRange.start}
                                                rangeEnd={timeRange.end}
@@ -117,8 +118,9 @@ class ProfileViewer extends Component {
             {
               threadOrder.map(threadIndex => {
                 const threadName = threads[threadIndex].name;
+                const processType = threads[threadIndex].processType;
                 return (
-                  ((threadName === 'GeckoMain' || threadName === 'Compositor') ?
+                  (((threadName === 'GeckoMain' || threadName === 'Compositor') && processType !== 'plugin') ?
                     <ProfileThreadTracingMarkerTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineGfx ${className}HeaderIntervalMarkerTimelineThread${threadName}`}
                                                         rangeStart={timeRange.start}
                                                         rangeEnd={timeRange.end}

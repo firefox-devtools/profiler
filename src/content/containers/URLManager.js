@@ -3,14 +3,15 @@ import { connect } from 'react-redux';
 
 class URLManager extends Component {
   componentDidMount() {
-    const { updateURLState, urlSetupDone, stateFromURL, show404 } = this.props;
+    const { updateURLState, urlSetupDone, stateFromCurrentLocation, show404 } = this.props;
     if (window.history.state) {
       updateURLState(window.history.state);
     } else {
       try {
-        const urlState = stateFromURL(window.location.pathname + window.location.search);
+        const urlState = stateFromCurrentLocation();
         updateURLState(urlState);
       } catch (e) {
+        console.error(e);
         show404(window.location.pathname + window.location.search);
       }
     }
@@ -39,7 +40,7 @@ class URLManager extends Component {
 }
 
 URLManager.propTypes = {
-  stateFromURL: PropTypes.func.isRequired,
+  stateFromCurrentLocation: PropTypes.func.isRequired,
   urlFromState: PropTypes.func.isRequired,
   children: PropTypes.any.isRequired,
   urlState: PropTypes.object.isRequired,
