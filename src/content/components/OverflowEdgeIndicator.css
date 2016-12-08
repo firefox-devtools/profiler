@@ -37,12 +37,12 @@
 
 .overflowEdgeIndicatorEdge.leftEdge,
 .overflowEdgeIndicatorEdge.rightEdge {
-  width: 20px;
+  width: 15px;
 }
 
 .overflowEdgeIndicatorEdge.topEdge,
 .overflowEdgeIndicatorEdge.bottomEdge {
-  height: 20px;
+  height: 15px;
 }
 
 .overflowEdgeIndicator.overflowsOnTop > .overflowEdgeIndicatorEdge.topEdge,
