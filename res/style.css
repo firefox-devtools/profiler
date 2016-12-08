@@ -462,6 +462,9 @@ body, #root, .profileViewer {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .threadStackGraph {
