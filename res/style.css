@@ -295,6 +295,13 @@ body, #root, .profileViewer {
   padding-right: 5px;
 }
 
+.profileViewerHeaderOverflowEdgeIndicatorScrollbox {
+  margin: 0 0 0 -115px;
+  padding-left: 115px;
+  max-height: 180px;
+  overflow: auto;
+}
+
 .profileViewerHeaderIntervalMarkerTimelineContainerJank {
   padding: 8px 0;
 }

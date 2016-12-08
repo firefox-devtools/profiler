@@ -1,0 +1,70 @@
+.overflowEdgeIndicator {
+  position: relative;
+}
+
+.overflowEdgeIndicatorEdge {
+  position: absolute;
+  pointer-events: none;
+  visibility: hidden;
+  z-index: 2;
+  opacity: 0;
+  transition: 150ms opacity ease-in-out;
+}
+
+.overflowEdgeIndicatorEdge.topEdge,
+.overflowEdgeIndicatorEdge.leftEdge,
+.overflowEdgeIndicatorEdge.bottomEdge {
+  left: 0;
+}
+
+.overflowEdgeIndicatorEdge.topEdge,
+.overflowEdgeIndicatorEdge.rightEdge,
+.overflowEdgeIndicatorEdge.bottomEdge {
+  right: 0;
+}
+
+.overflowEdgeIndicatorEdge.topEdge,
+.overflowEdgeIndicatorEdge.leftEdge,
+.overflowEdgeIndicatorEdge.rightEdge {
+  top: 0;
+}
+
+.overflowEdgeIndicatorEdge.leftEdge,
+.overflowEdgeIndicatorEdge.rightEdge,
+.overflowEdgeIndicatorEdge.bottomEdge {
+  bottom: 0;
+}
+
+.overflowEdgeIndicatorEdge.leftEdge,
+.overflowEdgeIndicatorEdge.rightEdge {
+  width: 20px;
+}
+
+.overflowEdgeIndicatorEdge.topEdge,
+.overflowEdgeIndicatorEdge.bottomEdge {
+  height: 20px;
+}
+
+.overflowEdgeIndicator.overflowsOnTop > .overflowEdgeIndicatorEdge.topEdge,
+.overflowEdgeIndicator.overflowsOnRight > .overflowEdgeIndicatorEdge.rightEdge,
+.overflowEdgeIndicator.overflowsOnBottom > .overflowEdgeIndicatorEdge.bottomEdge,
+.overflowEdgeIndicator.overflowsOnLeft > .overflowEdgeIndicatorEdge.leftEdge {
+  visibility: visible;
+  opacity: 1;
+}
+
+.overflowEdgeIndicatorEdge.topEdge {
+  background: radial-gradient(ellipse at center top, rgba(0,0,0,0.4), transparent 60%)
+}
+
+.overflowEdgeIndicatorEdge.rightEdge {
+  background: radial-gradient(ellipse at right center, rgba(0,0,0,0.4), transparent 60%)
+}
+
+.overflowEdgeIndicatorEdge.bottomEdge {
+  background: radial-gradient(ellipse at center bottom, rgba(0,0,0,0.4), transparent 60%)
+}
+
+.overflowEdgeIndicatorEdge.leftEdge {
+  background: radial-gradient(ellipse at left center, rgba(0,0,0,0.4), transparent 60%)
+}

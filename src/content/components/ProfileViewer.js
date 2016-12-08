@@ -14,6 +14,7 @@ import ProfileThreadTracingMarkerTimeline from '../containers/ProfileThreadTraci
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
 import ProfileSharing from '../containers/ProfileSharing';
 import SymbolicationStatusOverlay from '../containers/SymbolicationStatusOverlay';
+import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import * as actions from '../actions';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt, getSelectedTab } from '../selectors/';
 
@@ -118,21 +119,23 @@ class ProfileViewer extends Component {
               })
             }
           </div>
-          <Reorderable tagName='ol'
-                       className={`${className}HeaderThreadList`}
-                       order={threadOrder}
-                       orient='vertical'
-                       onChangeOrder={changeThreadOrder}>
-          {
-            threads.map((thread, threadIndex) =>
-              <ProfileThreadHeaderBar key={threadIndex}
-                                      index={threadIndex}
-                                      interval={profile.meta.interval}
-                                      rangeStart={timeRange.start}
-                                      rangeEnd={timeRange.end}/>
-            )
-          }
-          </Reorderable>
+          <OverflowEdgeIndicator className={`${className}HeaderOverflowEdgeIndicator`}>
+            <Reorderable tagName='ol'
+                         className={`${className}HeaderThreadList`}
+                         order={threadOrder}
+                         orient='vertical'
+                         onChangeOrder={changeThreadOrder}>
+            {
+              threads.map((thread, threadIndex) =>
+                <ProfileThreadHeaderBar key={threadIndex}
+                                        index={threadIndex}
+                                        interval={profile.meta.interval}
+                                        rangeStart={timeRange.start}
+                                        rangeEnd={timeRange.end}/>
+              )
+            }
+            </Reorderable>
+          </OverflowEdgeIndicator>
         </TimelineWithRangeSelection>
         <TabBar tabs={this._tabs}
                 selectedTabName={selectedTab}
