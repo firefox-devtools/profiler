@@ -1,7 +1,9 @@
 import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
+import classNames from 'classnames';
 import { timeCode } from '../../common/time-code';
 import { getSampleFuncStacks } from '../profile-data';
+import ThreadMarkerOverlay from './ThreadMarkerOverlay';
 
 class ThreadStackGraph extends Component {
 
@@ -106,7 +108,14 @@ class ThreadStackGraph extends Component {
 
   render() {
     this._scheduleDraw();
-    return <canvas className={this.props.className} ref='canvas' onMouseUp={this._onMouseUp}/>;
+    const { thread, rangeStart, rangeEnd } = this.props;
+    return (
+      <div className={this.props.className}>
+        <canvas className={classNames(`${this.props.className}Canvas`, 'threadStackGraphCanvas')}
+                ref='canvas'
+                onMouseUp={this._onMouseUp}/>
+      </div>
+    );
   }
 
 }
