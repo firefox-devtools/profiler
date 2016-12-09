@@ -8,7 +8,8 @@
   visibility: hidden;
   z-index: 2;
   opacity: 0;
-  transition: 150ms opacity ease-in-out;
+  transition: 150ms ease-in-out;
+  transition-property: opacity, visibility;
 }
 
 .overflowEdgeIndicatorEdge.topEdge,
