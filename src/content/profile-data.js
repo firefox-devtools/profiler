@@ -322,20 +322,43 @@ function getSampleIndexRangeForSelection(samples, rangeStart, rangeEnd) {
   return [firstSample, firstSample + afterLastSample];
 }
 
+function getMarkerIndexRangeForSelection(markers, rangeStart, rangeEnd) {
+  // TODO: This should really use bisect. samples.time is sorted.
+  const firstMarker = markers.time.findIndex(t => t >= rangeStart);
+  if (firstMarker === -1) {
+    return [markers.length, markers.length];
+  }
+  const afterLastSample = markers.time.slice(firstMarker).findIndex(t => t >= rangeEnd);
+  if (afterLastSample === -1) {
+    return [firstMarker, markers.length];
+  }
+  return [firstMarker, firstMarker + afterLastSample];
+}
+
 export function filterThreadToRange(thread, rangeStart, rangeEnd) {
-  const { samples } = thread;
-  const [begin, end] = getSampleIndexRangeForSelection(samples, rangeStart, rangeEnd);
+  const { samples, markers } = thread;
+  const [sBegin, sEnd] = getSampleIndexRangeForSelection(samples, rangeStart, rangeEnd);
   const newSamples = {
-    length: end - begin,
-    time: samples.time.slice(begin, end),
-    stack: samples.stack.slice(begin, end),
-    responsiveness: samples.responsiveness.slice(begin, end),
-    rss: samples.rss.slice(begin, end),
-    uss: samples.uss.slice(begin, end),
-    frameNumber: samples.frameNumber.slice(begin, end),
-    power: samples.power.slice(begin, end),
+    length: sEnd - sBegin,
+    time: samples.time.slice(sBegin, sEnd),
+    stack: samples.stack.slice(sBegin, sEnd),
+    responsiveness: samples.responsiveness.slice(sBegin, sEnd),
+    rss: samples.rss.slice(sBegin, sEnd),
+    uss: samples.uss.slice(sBegin, sEnd),
+    frameNumber: samples.frameNumber.slice(sBegin, sEnd),
+    power: samples.power.slice(sBegin, sEnd),
   };
-  return Object.assign({}, thread, { samples: newSamples });
+  const [mBegin, mEnd] = getMarkerIndexRangeForSelection(markers, rangeStart, rangeEnd);
+  const newMarkers = {
+    length: mEnd - mBegin,
+    time: markers.time.slice(mBegin, mEnd),
+    name: markers.name.slice(mBegin, mEnd),
+    data: markers.data.slice(mBegin, mEnd),
+  };
+  return Object.assign({}, thread, {
+    samples: newSamples,
+    markers: newMarkers,
+  });
 }
 
 export function getFuncStackFromFuncArray(funcArray, funcStackTable) {
