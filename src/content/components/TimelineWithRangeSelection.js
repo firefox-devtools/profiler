@@ -104,9 +104,6 @@ class TimelineWithRangeSelectionImpl extends Component {
     if (!this._container) {
       return;
     }
-    const {
-      rangeStart, rangeEnd,
-    } = this.props;
 
     const r = this._container.getBoundingClientRect();
     this.setState({ hoverLocation: e.pageX - r.left });
@@ -120,7 +117,7 @@ class TimelineWithRangeSelectionImpl extends Component {
     } = this.props;
 
     const {
-      hoverLocation
+      hoverLocation,
     } = this.state;
 
     return (
@@ -145,8 +142,8 @@ class TimelineWithRangeSelectionImpl extends Component {
                        : null }
         <div className='timelineWithRangeSelectionHoverIndicator'
              style={{
-                visibility: isModifying ? 'hidden' : undefined,
-                left: `${hoverLocation}px`,
+               visibility: isModifying ? 'hidden' : undefined,
+               left: `${hoverLocation}px`,
              }}/>
       </div>
     );
