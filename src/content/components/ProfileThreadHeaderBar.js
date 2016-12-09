@@ -38,13 +38,13 @@ class ProfileThreadHeaderBar extends Component {
       <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')} style={style}>
         <h1 onMouseDown={this._onLabelMouseDown} className='grippy' title={title}>{title}</h1>
         <ThreadStackGraph interval={interval}
-                   thread={thread}
-                   className='threadStackGraph'
-                   rangeStart={rangeStart}
-                   rangeEnd={rangeEnd}
-                   funcStackInfo={funcStackInfo}
-                   selectedFuncStack={selectedFuncStack}
-                   onClick={this._onGraphClick}/>
+                          thread={thread}
+                          className='threadStackGraph'
+                          rangeStart={rangeStart}
+                          rangeEnd={rangeEnd}
+                          funcStackInfo={funcStackInfo}
+                          selectedFuncStack={selectedFuncStack}
+                          onClick={this._onGraphClick}/>
       </li>
     );    
   }
