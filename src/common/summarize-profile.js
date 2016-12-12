@@ -6,7 +6,7 @@ import { timeCode } from './time-code';
 const match = {
   exact: (symbol, pattern) => symbol === pattern,
   prefix: (symbol, pattern) => symbol.startsWith(pattern),
-  substring: (symbol, pattern) => symbol.indexOf(pattern) > -1,
+  substring: (symbol, pattern) => symbol.includes(pattern),
   stem: (symbol, pattern) => {
     return symbol === pattern || (symbol && symbol.startsWith(pattern + '('));
   },
@@ -291,11 +291,11 @@ export function calculateRollingSummaries(profile, threadCategories, segmentCoun
 
       for (let sampleIndex = 0; sampleIndex < thread.samples.time.length; sampleIndex++) {
         const time = thread.samples.time[sampleIndex];
-        const category = categories[sampleIndex];
         if (time > rollingMinTime) {
           if (time > rollingMaxTime) {
             break;
           }
+          const category = categories[sampleIndex];
           samples[category] = (samples[category] || 0) + 1;
           samplesInRange++;
         }
