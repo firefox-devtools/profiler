@@ -9,7 +9,7 @@ class TimelineWithRangeSelectionImpl extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      hoverLocation: 0,
+      hoverLocation: null,
     };
     this._onMouseDown = this._onMouseDown.bind(this);
     this._onMouseMove = this._onMouseMove.bind(this);
@@ -106,7 +106,12 @@ class TimelineWithRangeSelectionImpl extends Component {
     }
 
     const r = this._container.getBoundingClientRect();
-    this.setState({ hoverLocation: e.pageX - r.left });
+    if (e.pageX < r.left || e.pageX >= r.right ||
+        e.pageY < r.top || e.pageY >= r.bottom) {
+      this.setState({ hoverLocation: null });
+    } else {
+      this.setState({ hoverLocation: e.pageX - r.left });
+    }
   }
 
   render() {
@@ -142,8 +147,8 @@ class TimelineWithRangeSelectionImpl extends Component {
                        : null }
         <div className='timelineWithRangeSelectionHoverIndicator'
              style={{
-               visibility: isModifying ? 'hidden' : undefined,
-               left: `${hoverLocation}px`,
+               visibility: isModifying || (hoverLocation === null) ? 'hidden' : undefined,
+               left: (hoverLocation === null) ? '0' : `${hoverLocation}px`,
              }}/>
       </div>
     );
