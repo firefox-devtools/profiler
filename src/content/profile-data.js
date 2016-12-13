@@ -71,6 +71,9 @@ export function getSampleFuncStacks(samples, stackIndexToFuncStackIndex) {
 }
 
 function getTimeRangeForThread(thread, interval) {
+  if (thread.samples.length === 0) {
+    return { start: Infinity, end: -Infinity };
+  }
   return { start: thread.samples.time[0], end: thread.samples.time[thread.samples.length - 1] + interval};
 }
 
