@@ -216,6 +216,7 @@ function emptyTaskTracerData() {
       processId: [],
       threadIndex: [],
       endTime: [],
+      ipdlMsg: [],
       label: [],
       address: [],
     },
@@ -310,7 +311,13 @@ function addPreprocessedTaskTracerData(tasktracer, result, libs, startTime) {
         {
           const thirdSpacePos = line.indexOf(' ', secondSpacePos + 1);
           const label = line.substring(thirdSpacePos + 1 + 1, line.length - 1);
-          taskTable.label[taskIndex] = stringTable.indexForString(label);
+          if (/^P.+::Msg_/.test(label)) {
+            taskTable.ipdlMsg[taskIndex] = stringTable.indexForString(label);
+          } else if (taskTable.label[taskIndex] === undefined) {
+            taskTable.label[taskIndex] = [stringTable.indexForString(label)];
+          } else {
+            taskTable.label[taskIndex].push(stringTable.indexForString(label));
+          }
         }
         break;
       case '4': // GET_VTABLE, '4 taskId address'

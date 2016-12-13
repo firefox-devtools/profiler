@@ -46,8 +46,12 @@ class ThreadTaskTracerTracksImpl extends Component {
                   const beginDelayWidth = (beginTime - dispatchTime) / (rangeEnd - rangeStart) * width;
 
                   const addressIndex = taskTable.address[taskIndex];
-                  const classNameStringIndex = addressTable.className[addressIndex];
-                  const title = classNameStringIndex !== undefined ? stringTable.getString(addressTable.className[addressIndex]) : 'undefined';
+                  const classNameStringIndex = taskTable.ipdlMsg[taskIndex] !== undefined ? taskTable.ipdlMsg[taskIndex] : addressTable.className[addressIndex];
+                  const labelStringIndices = taskTable.label[taskIndex];
+                  let title = classNameStringIndex !== undefined ? stringTable.getString(classNameStringIndex) : 'undefined';
+                  if (labelStringIndices !== undefined) {
+                    title += '\n' + labelStringIndices.map(index => ` - ${stringTable.getString(index)}`).join('\n');
+                  }
                   return (
                     <li key={i}
                         className='taskTracerThreadViewTrackTask'
