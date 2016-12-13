@@ -497,35 +497,6 @@ body, #root, .profileViewer {
   visibility: visible;
 }
 
-.threadMarkerOverlay {
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.threadMarkerOverlayMarkerItem {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  border-left: 1px solid magenta;
-  white-space: nowrap;
-  max-width: 40px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.threadMarkerOverlayMarkerItem::before {
-  content: '';
-  display: inline-block;
-  border-left: 5px solid magenta;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-}
-
 .overlay {
   position: absolute;
   z-index: 2;

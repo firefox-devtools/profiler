@@ -11,6 +11,7 @@ class ProfileThreadHeaderBar extends Component {
     super(props);
     this._onLabelMouseDown = this._onLabelMouseDown.bind(this);
     this._onGraphClick = this._onGraphClick.bind(this);
+    this._onMarkerSelect = this._onMarkerSelect.bind(this);
   }
 
   _onLabelMouseDown(e) {
@@ -22,13 +23,19 @@ class ProfileThreadHeaderBar extends Component {
   }
 
   _onGraphClick(time) {
-    const { thread, threadIndex, funcStackInfo, changeSelectedThread, changeSelectedFuncStack } = this.props;
-    const sampleIndex = getSampleIndexClosestToTime(thread.samples, time);
-    const newSelectedStack = thread.samples.stack[sampleIndex];
-    const newSelectedFuncStack = newSelectedStack === null ? -1 : funcStackInfo.stackIndexToFuncStackIndex[newSelectedStack];
+    const { threadIndex, changeSelectedThread } = this.props;
     changeSelectedThread(threadIndex);
-    changeSelectedFuncStack(threadIndex,
-      getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable));
+    if (time !== undefined) {
+    const { thread, funcStackInfo, changeSelectedFuncStack } = this.props;
+      const sampleIndex = getSampleIndexClosestToTime(thread.samples, time);
+      const newSelectedStack = thread.samples.stack[sampleIndex];
+      const newSelectedFuncStack = newSelectedStack === null ? -1 : funcStackInfo.stackIndexToFuncStackIndex[newSelectedStack];
+      changeSelectedFuncStack(threadIndex,
+        getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable));
+    }
+  }
+
+  _onMarkerSelect(markerIndex) {
   }
 
   render() {
@@ -44,7 +51,8 @@ class ProfileThreadHeaderBar extends Component {
                           rangeEnd={rangeEnd}
                           funcStackInfo={funcStackInfo}
                           selectedFuncStack={selectedFuncStack}
-                          onClick={this._onGraphClick}/>
+                          onClick={this._onGraphClick}
+                          onMarkerSelect={this._onMarkerSelect}/>
       </li>
     );    
   }

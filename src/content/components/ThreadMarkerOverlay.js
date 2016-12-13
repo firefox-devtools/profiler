@@ -1,6 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 
+import './ThreadMarkerOverlay.css';
+
 class ThreadMarkerOverlay extends Component {
 
   constructor(props) {
@@ -9,7 +11,10 @@ class ThreadMarkerOverlay extends Component {
   }
 
   _mouseDownListener(e) {
-    this.props.onSelectMarker(e.target.dataset.index);
+    if (!('index' in e.target.dataset)) {
+      return;
+    }
+    this.props.onSelectMarker(+e.target.dataset.index);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -20,20 +25,31 @@ class ThreadMarkerOverlay extends Component {
     const { thread, rangeStart, rangeEnd } = this.props;
     const { markers, stringTable } = thread;
     return (
-      <ol className='threadMarkerOverlay'>
+      <ol className='threadMarkerOverlay'
+          onMouseDown={this._mouseDownListener}>
         {
-          thread.markers.name.map((markerName, markerIndex) => {
+          markers.name.map((markerName, markerIndex) => {
             const time = markers.time[markerIndex];
             if (time < rangeStart || time > rangeEnd) {
               return null;
             }
+            let category = 'unknown';
+            const data = markers.data[markerIndex];
+            if (data) {
+              if ('interval' in data) {
+                return null;
+              }
+              if ('category' in data) {
+                category = data.category;
+              }
+            }
             return (
               <li className='threadMarkerOverlayMarkerItem'
+                  key={markerIndex}
+                  data-index={markerIndex}
                   style={{
                     left: (time - rangeStart) / (rangeEnd - rangeStart) * 100 + '%',
-                  }}>
-                {stringTable.getString(markerName)}
-              </li>
+                  }} />
             );
           })
         }

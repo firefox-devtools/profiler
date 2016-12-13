@@ -12,6 +12,7 @@ class ThreadStackGraph extends Component {
     this._resizeListener = () => this.forceUpdate();
     this._requestedAnimationFrame = false;
     this._onMouseUp = this._onMouseUp.bind(this);
+    this._onMarkerSelected = this._onMarkerSelected.bind(this);
   }
 
   _scheduleDraw() {
@@ -106,6 +107,13 @@ class ThreadStackGraph extends Component {
     }
   }
 
+  _onMarkerSelected(markerIndex) {
+    if (this.props.onMarkerSelect) {
+      this.props.onMarkerSelect(markerIndex);
+    }
+    this.props.onClick();
+  }
+
   render() {
     this._scheduleDraw();
     const { thread, rangeStart, rangeEnd } = this.props;
@@ -114,6 +122,10 @@ class ThreadStackGraph extends Component {
         <canvas className={classNames(`${this.props.className}Canvas`, 'threadStackGraphCanvas')}
                 ref='canvas'
                 onMouseUp={this._onMouseUp}/>
+        <ThreadMarkerOverlay rangeStart={rangeStart}
+                             rangeEnd={rangeEnd}
+                             thread={thread}
+                             onSelectMarker={this._onMarkerSelected} />
       </div>
     );
   }
@@ -134,6 +146,7 @@ ThreadStackGraph.propTypes = {
   selectedFuncStack: PropTypes.number,
   className: PropTypes.string,
   onClick: PropTypes.func,
+  onMarkerSelect: PropTypes.func,
 };
 
 export default ThreadStackGraph;
