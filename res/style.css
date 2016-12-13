@@ -485,6 +485,7 @@ body, #root, .profileViewer {
 
 .timelineWithRangeSelectionHoverIndicator {
   position: absolute;
+  pointer-events: none;
   visibility: hidden;
   top: 0;
   bottom: 0;
