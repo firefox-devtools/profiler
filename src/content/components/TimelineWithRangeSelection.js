@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import TimeLine from './TimeLine';
 import RangeSelectionOverlay from './RangeSelectionOverlay';
 import clamp from 'clamp';
+import { getContentRect } from '../css-geometry-tools';
 import { withSize } from '../with-size';
 
 class TimelineWithRangeSelectionImpl extends Component {
@@ -23,7 +24,7 @@ class TimelineWithRangeSelectionImpl extends Component {
       return;
     }
 
-    const r = this._container.getBoundingClientRect();
+    const r = getContentRect(this._container);
     if (e.pageX < r.left || e.pageX >= r.right ||
         e.pageY < r.top || e.pageY >= r.bottom) {
       return;
@@ -105,7 +106,7 @@ class TimelineWithRangeSelectionImpl extends Component {
       return;
     }
 
-    const r = this._container.getBoundingClientRect();
+    const r = getContentRect(this._container);
     if (e.pageX < r.left || e.pageX >= r.right ||
         e.pageY < r.top || e.pageY >= r.bottom) {
       this.setState({ hoverLocation: null });
