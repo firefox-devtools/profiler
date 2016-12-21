@@ -116,16 +116,11 @@ class ThreadStackGraph extends Component {
 
   render() {
     this._scheduleDraw();
-    const { thread, rangeStart, rangeEnd } = this.props;
     return (
       <div className={this.props.className}>
         <canvas className={classNames(`${this.props.className}Canvas`, 'threadStackGraphCanvas')}
                 ref='canvas'
                 onMouseUp={this._onMouseUp}/>
-        <ThreadMarkerOverlay rangeStart={rangeStart}
-                             rangeEnd={rangeEnd}
-                             thread={thread}
-                             onSelectMarker={this._onMarkerSelected} />
       </div>
     );
   }
