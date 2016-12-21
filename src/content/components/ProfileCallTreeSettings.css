@@ -26,6 +26,13 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
+  display: inline-flex;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+.profileCallTreeSettingsCheckbox {
+  margin: 0 5px;
 }
 
 .profileCallTreeSettingsSearchbar {
