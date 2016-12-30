@@ -83,7 +83,9 @@ describe('preprocess-profile', function () {
       }
     });
     it('should shift the content process by 1 second', function () {
-      assert.equal(profile.threads[2].name, 'Content');
+      // Should be Content, but modified by workaround for bug 1322471.
+      assert.equal(profile.threads[2].name, 'GeckoMain');
+      
       assert.equal(profile.threads[0].samples.time[0], 0);
       assert.equal(profile.threads[0].samples.time[1], 1);
       assert.equal(profile.threads[2].samples.time[0], 1000);
