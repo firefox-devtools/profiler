@@ -83,18 +83,18 @@ describe('summarize-profile', function () {
     assert.ok(rollingSummary.reduce(hasPercentages, true),
       'Each summary has percentages');
 
-    rollingSummary.forEach(({samples}) => {
-      forEachObj(samples, (value, name) => {
+    for (const {samples} of rollingSummary) {
+      for (const [name, value] of Object.entries(samples)) {
         assert.ok(value > 0, `"${name}" has a sample count greater than 0.`);
-      });
-    });
+      }
+    }
 
-    rollingSummary.forEach(({percentage}) => {
-      forEachObj(percentage, (value, name) => {
+    for (const {percentage} of rollingSummary) {
+      for (const [name, value] of Object.entries(percentage)) {
         assert.ok(value > 0, `"${name}" has a percentage count greater than 0.`);
         assert.ok(value <= 1, `"${name}" has a percentage count greater than 0.`);
-      });
-    });
+      }
+    }
   });
 
   it('provides sane rolling summary values', () => {
@@ -112,16 +112,6 @@ describe('summarize-profile', function () {
     assertFloatEquals(percentage.dom, 0.05263157894736842);
   });
 });
-
-function forEachObj(object, fn) {
-  let i = 0;
-  for (const key in object) {
-    if (object.hasOwnProperty(key)) {
-      i++;
-      fn(object[key], key, i);
-    }
-  }
-}
 
 function assertFloatEquals(a, b, message) {
   assert.ok(Math.abs(a - b) < 0.0001, message);
