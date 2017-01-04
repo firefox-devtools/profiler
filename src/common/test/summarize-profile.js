@@ -18,57 +18,31 @@ describe('summarize-profile', function () {
   // a previous run on a profile.
   it('categorizes samples', () => {
     const {summary} = geckoMain;
-    assert.equal(summary[0].category, 'idle');
-    assert.equal(summary[0].samples, 142);
-    assertFloatEquals(summary[0].percentage, 0.48464163822525597);
 
-    assert.equal(summary[1].category, 'script');
-    assert.equal(summary[1].samples, 113);
-    assertFloatEquals(summary[1].percentage, 0.3856655290102389);
-
-    assert.equal(summary[2].category, 'dom');
-    assert.equal(summary[2].samples, 18);
-    assertFloatEquals(summary[2].percentage, 0.06143344709897611);
-
-    assert.equal(summary[3].category, 'script.compile');
-    assert.equal(summary[3].samples, 16);
-    assertFloatEquals(summary[3].percentage, 0.05460750853242321);
-
-    assert.equal(summary[4].category, 'script.compile.baseline');
-    assert.equal(summary[4].samples, 14);
-    assertFloatEquals(summary[4].percentage, 0.04778156996587031);
-
-    assert.equal(summary[5].category, 'uncategorized');
-    assert.equal(summary[5].samples, 7);
-    assertFloatEquals(summary[5].percentage, 0.023890784982935155);
-
-    assert.equal(summary[6].category, 'frameconstruction');
-    assert.equal(summary[6].samples, 6);
-    assertFloatEquals(summary[6].percentage, 0.020477815699658702);
-
-    assert.equal(summary[7].category, 'network');
-    assert.equal(summary[7].samples, 4);
-    assertFloatEquals(summary[7].percentage, 0.013651877133105802);
-
-    assert.equal(summary[8].category, 'script.parse');
-    assert.equal(summary[8].samples, 4);
-    assertFloatEquals(summary[8].percentage, 0.013651877133105802);
-
-    assert.equal(summary[9].category, 'script.compile.ion');
-    assert.equal(summary[9].samples, 2);
-    assertFloatEquals(summary[9].percentage, 0.006825938566552901);
-
-    assert.equal(summary[10].category, 'wait');
-    assert.equal(summary[10].samples, 2);
-    assertFloatEquals(summary[10].percentage, 0.006825938566552901);
-
-    assert.equal(summary[11].category, 'script.icupdate');
-    assert.equal(summary[11].samples, 2);
-    assertFloatEquals(summary[11].percentage, 0.006825938566552901);
-
-    assert.equal(summary[12].category, 'restyle');
-    assert.equal(summary[12].samples, 1);
-    assertFloatEquals(summary[12].percentage, 0.0034129692832764505);
+    let i = 0;
+    for (const { category, samples, percentage } of [
+      { category: 'idle', samples: 142, percentage: 0.48464163822525597 },
+      { category: 'script', samples: 113, percentage: 0.3856655290102389 },
+      { category: 'script.baseline', samples: 28, percentage: 0.09556313993174062 },
+      { category: 'dom', samples: 18, percentage: 0.06143344709897611 },
+      { category: 'script.compile', samples: 16, percentage: 0.05460750853242321 },
+      { category: 'script.compile.baseline', samples: 14, percentage: 0.04778156996587031 },
+      { category: 'uncategorized', samples: 7, percentage: 0.023890784982935155 },
+      { category: 'frameconstruction', samples: 6, percentage: 0.020477815699658702 },
+      { category: 'network', samples: 4, percentage: 0.013651877133105802 },
+      { category: 'script.parse', samples: 4, percentage: 0.013651877133105802 },
+      { category: 'script.compile.ion', samples: 2, percentage: 0.006825938566552901 },
+      { category: 'wait', samples: 2, percentage: 0.006825938566552901 },
+      { category: 'script.icupdate', samples: 2, percentage: 0.006825938566552901 },
+      { category: 'restyle', samples: 1, percentage: 0.0034129692832764505 }
+    ]) {
+      assert.equal(summary[i].category, category,
+                   `summary ${i} should be category ${category}, not ${summary[i].category}`);
+      assert.equal(summary[i].samples, samples,
+                   `summary ${i} should have ${samples} in category ${category}, not ${summary[i].samples}`);
+      assertFloatEquals(summary[i].percentage, percentage);
+      i++;
+    }
   });
 
   it('provides a rolling summary', () => {
@@ -102,17 +76,17 @@ describe('summarize-profile', function () {
     assert.equal(samples.wait, 2);
     assert.equal(samples.idle, 1);
     assert.equal(samples['script.compile.baseline'], 2);
-    assert.equal(samples.script, 13);
+    assert.equal(samples.script, 12);
     assert.equal(samples.dom, 1);
 
     assertFloatEquals(percentage.wait, 0.10526315789473684);
     assertFloatEquals(percentage.idle, 0.05263157894736842);
     assertFloatEquals(percentage['script.compile.baseline'], 0.10526315789473684);
-    assertFloatEquals(percentage.script, 0.6842105263157895);
+    assertFloatEquals(percentage.script, 0.631578947368421);
     assertFloatEquals(percentage.dom, 0.05263157894736842);
   });
 });
 
 function assertFloatEquals(a, b, message) {
-  assert.ok(Math.abs(a - b) < 0.0001, message);
+  assert.ok(Math.abs(a - b) < 0.0001, message || `expected ${a} to be ${b}`);
 }

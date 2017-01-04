@@ -128,6 +128,14 @@ function sampleCategorizer(thread) {
     }
 
     const frameIndex = thread.stackTable.frame[stackIndex];
+    const implIndex = thread.frameTable.implementation[frameIndex];
+    if (implIndex !== null) {
+      // script.baseline or script.ion
+      category = 'script.' + thread.stringTable._array[implIndex];
+      stackCategoryCache.set(stackIndex, category);
+      return category;
+    }
+    
     const funcIndex = thread.frameTable.func[frameIndex];
     const name = thread.stringTable._array[thread.funcTable.name[funcIndex]];
     category = categorizeFuncName(name);
