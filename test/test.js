@@ -98,36 +98,41 @@ describe('preprocess-profile', function () {
     });
     it('should create one function per frame', function () {
       const thread = profile.threads[0];
-      assert.equal(thread.frameTable.length, 4);
+      assert.equal(thread.frameTable.length, 5);
       assert.notProperty(thread.frameTable, 'location');
       assert.property(thread.frameTable, 'func');
       assert.property(thread.funcTable, 'resource');
-      assert.equal(thread.funcTable.length, 4);
+      assert.equal(thread.funcTable.length, 5);
       assert.equal(thread.frameTable.func[0], 0);
       assert.equal(thread.frameTable.func[1], 1);
       assert.equal(thread.frameTable.func[2], 2);
       assert.equal(thread.frameTable.func[3], 3);
+      assert.equal(thread.frameTable.func[4], 4);
       assert.equal(thread.frameTable.address[0], -1);
       assert.equal(thread.frameTable.address[1], 3972);
       assert.equal(thread.frameTable.address[2], 6725);
       assert.equal(thread.frameTable.address[3], -1);
+      assert.equal(thread.frameTable.address[4], -1);
       assert.equal(thread.funcTable.name[0], 0);
       assert.equal(thread.funcTable.name[1], 1);
       assert.equal(thread.funcTable.name[2], 2);
       assert.equal(thread.funcTable.name[3], 3);
+      assert.equal(thread.funcTable.name[4], 7);
       assert.equal(thread.funcTable.address[0], -1);
       assert.equal(thread.funcTable.address[1], 3972);
       assert.equal(thread.funcTable.address[2], 6725);
       assert.equal(thread.funcTable.address[3], -1);
+      assert.equal(thread.funcTable.address[4], -1);
     });
     it('should create one resource per used library', function () {
       const thread = profile.threads[0];
-      assert.equal(thread.resourceTable.length, 1);
+      assert.equal(thread.resourceTable.length, 2);
       assert.equal(thread.resourceTable.type[0], resourceTypes.library);
-      const nameStringIndex = thread.resourceTable.name[0];
-      assert.equal(thread.stringTable.getString(nameStringIndex), 'firefox');
+      assert.equal(thread.resourceTable.type[1], resourceTypes.url);
+      const [ name0, name1 ] = thread.resourceTable.name;
+      assert.equal(thread.stringTable.getString(name0), 'firefox');
+      assert.equal(thread.stringTable.getString(name1), 'chrome://blargh');
     });
-    // TODO: add a JS frame to the example profile and check that we get a resource for the JS file
   });
 });
 
@@ -138,8 +143,8 @@ describe('profile-data', function () {
     const { funcStackTable } =
       getFuncStackInfo(thread.stackTable, thread.frameTable, thread.funcTable, thread.samples);
     it('should create one funcStack per stack', function () {
-      assert.equal(thread.stackTable.length, 4);
-      assert.equal(funcStackTable.length, 4);
+      assert.equal(thread.stackTable.length, 5);
+      assert.equal(funcStackTable.length, 5);
       assert.property(funcStackTable, 'prefix');
       assert.property(funcStackTable, 'func');
       assert.equal(funcStackTable.func[0], 0);
