@@ -44,6 +44,7 @@ const thread = {
       [3, 3, 0], // (root), 0x100000f84, Startup::XRE_Main
       [0, 4, 0], // (root)
       [1, 5, 0], // (root), 0x100000f84
+      [4, 6, 0], // (root), 0x100000f84, frobnicate
     ]
   },
   stackTable: {
@@ -53,6 +54,7 @@ const thread = {
       [0, 1],    // (root), 0x100000f84
       [1, 2],    // (root), 0x100000f84, 0x100001a45
       [1, 3],    // (root), 0x100000f84, Startup::XRE_Main
+      [1, 4],    // (root), 0x100000f84, frobnicate
     ],
   },
   frameTable: {
@@ -62,6 +64,7 @@ const thread = {
       [1],                       // 0x100000f84
       [2],                       // 0x100001a45
       [3, null, null, 4391, 16], // Startup::XRE_Main, line 4391, category 16
+      [7, 6, null, 34],          // frobnicate, implementation 'baseline', line 34
     ]
   },
   markers: {
@@ -95,6 +98,8 @@ const thread = {
     'Startup::XRE_Main',
     'VsyncTimestamp',
     'Reflow',
+    'baseline',
+    'frobnicate (chrome://blargh:34)',
   ],
 };
 
