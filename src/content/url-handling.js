@@ -4,7 +4,7 @@ import { stringifyCallTreeFilters, parseCallTreeFilters } from './call-tree-filt
 
 // {
 //   // general:
-//   dataSource: 'from-addon', 'local', 'public',
+//   dataSource: 'from-addon', 'from-file', 'local', 'public',
 //   hash: '' or 'aoeurschsaoeuch',
 //   selectedTab: 'summary' or 'calltree' or ...,
 //   rangeFilters: [] or [{ start, end }, ...],
@@ -22,6 +22,8 @@ function dataSourceDirs(urlState) {
   switch (dataSource) {
     case 'from-addon':
       return ['from-addon'];
+    case 'from-file':
+      return ['from-file'];
     case 'local':
       return ['local', urlState.hash];
     case 'public':
@@ -91,7 +93,7 @@ export function stateFromCurrentLocation() {
 
   const dirs = pathname.split('/').filter(d => d);
   const dataSource = dirs[0] || 'none';
-  if (!['none', 'from-addon', 'local', 'public'].includes(dataSource)) {
+  if (!['none', 'from-addon', 'from-file', 'local', 'public'].includes(dataSource)) {
     throw new Error('unexpected data source');
   }
   const needHash = ['local', 'public'].includes(dataSource);

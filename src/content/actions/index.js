@@ -3,6 +3,7 @@ import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
 import { getProfile } from '../selectors/';
+import { decompress } from '../gz';
 
 export function profileSummaryProcessed(summary) {
   return {
@@ -250,6 +251,79 @@ export function retrieveProfileFromWeb(hash) {
 
     }).catch(error => {
       dispatch(errorReceivingProfileFromWeb(error));
+    });
+  };
+}
+
+export function waitingForProfileFromFile() {
+  return {
+    type: 'WAITING_FOR_PROFILE_FROM_FILE',
+  };
+}
+
+export function receiveProfileFromFile(profile) {
+  return dispatch => {
+    dispatch({
+      type: 'RECEIVE_PROFILE_FROM_FILE',
+      profile,
+    });
+    dispatch({
+      toWorker: true,
+      type: 'PROFILE_PROCESSED',
+      profile: profile,
+    });
+    dispatch({
+      toWorker: true,
+      type: 'SUMMARIZE_PROFILE',
+    });
+  };
+}
+
+export function errorReceivingProfileFromFile(error) {
+  return {
+    type: 'ERROR_RECEIVING_PROFILE_FROM_FILE',
+    error,
+  };
+}
+
+export function retrieveProfileFromFile(file) {
+  return dispatch => {
+    dispatch(waitingForProfileFromFile());
+
+    (new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsText(file);
+    })).then(text => {
+      const profile = unserializeProfile(text);
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+
+      dispatch(receiveProfileFromFile(profile));
+    }).catch(error => {
+      return (new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      }));
+    }).then(buffer => {
+      const arrayBuffer = new Uint8Array(buffer);
+      return decompress(arrayBuffer);
+    }).then(decompressedArrayBuffer => {
+      const textDecoder = new TextDecoder();
+      return textDecoder.decode(decompressedArrayBuffer);
+    }).then(text => {
+      const profile = unserializeProfile(text);
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+
+      dispatch(receiveProfileFromFile(profile));
+    }).catch(error => {
+      dispatch(errorReceivingProfileFromFile(error));
     });
   };
 }

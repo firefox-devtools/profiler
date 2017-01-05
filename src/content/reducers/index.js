@@ -6,9 +6,11 @@ function status(state = 'INITIALIZING', action) {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_ADDON':
     case 'WAITING_FOR_PROFILE_FROM_WEB':
+    case 'WAITING_FOR_PROFILE_FROM_FILE':
       return 'WAITING_FOR_PROFILE';
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_FILE':
       return 'DONE';
     default:
       return state;
@@ -21,6 +23,7 @@ function view(state = 'INITIALIZING', action) {
       return 'FILE_NOT_FOUND';
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_FILE':
       return 'PROFILE';
     default:
       return state;
@@ -31,6 +34,7 @@ function threadOrder(state = [], action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_FILE':
       return defaultThreadOrder(action.profile.threads);
     case 'CHANGE_THREAD_ORDER':
       return action.threadOrder;
@@ -58,6 +62,7 @@ function viewOptionsThreads(state = [], action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_FILE':
       return action.profile.threads.map(() => ({
         selectedFuncStack: [],
         expandedFuncStacks: [],
@@ -185,6 +190,7 @@ function rootRange(state = { start: 0, end: 1 }, action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_FILE':
       return getTimeRangeIncludingAllThreads(action.profile);
     default:
       return state;
@@ -195,6 +201,7 @@ function zeroAt(state = 0, action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_FILE':
       return getTimeRangeIncludingAllThreads(action.profile).start;
     default:
       return state;
@@ -214,6 +221,7 @@ function profile(state = {}, action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_FILE':
       return action.profile;
     case 'COALESCED_FUNCTIONS_UPDATE': {
       const { functionsUpdatePerThread } = action;
@@ -268,6 +276,8 @@ const profileView = combineReducers({ viewOptions, profile });
 
 function dataSource(state = 'none', action) {
   switch (action.type) {
+    case 'WAITING_FOR_PROFILE_FROM_FILE':
+      return 'from-file';
     case 'PROFILE_PUBLISHED':
       return 'public';
     default:

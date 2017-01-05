@@ -14,6 +14,9 @@ class ProfileViewWhenReadyImpl extends Component {
       case 'from-addon':
         retrieveProfileFromAddon();
         break;
+      case 'from-file':
+        // retrieveProfileFromFile should already have been called
+        break;
       case 'local':
         break;
       case 'public':
@@ -31,6 +34,8 @@ class ProfileViewWhenReadyImpl extends Component {
             return <Home />;
           case 'from-addon':
             return <div>Retrieving profile from the gecko profiler addon...</div>;
+          case 'from-file':
+            return <div>Reading the file and parsing the profile in it...</div>;
           case 'local':
             return <div>Not implemented yet.</div>;
           case 'public':

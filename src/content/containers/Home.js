@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
+import ProfileUploadField from './ProfileUploadField';
 import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2016-12-06.png';
 
 require('./Home.css');
@@ -31,6 +32,12 @@ const Home = ({ className, profilerURL }) => {
           <li><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd>: Capture the profile and open up this interface.</li>
         </ul>
         <p><img src={AddonScreenshot} style={{ width: '390px', height: '268px' }}/></p>
+        <p>
+          You can also open a profile that you've saved to a file:
+        </p>
+        <p>
+          <ProfileUploadField />
+        </p>
       </section>
     </div>
   );
