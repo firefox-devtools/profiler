@@ -182,7 +182,7 @@ function calculateSummaryPercentages(summary) {
   const sampleCount = rows.reduce((sum, [name, count]) => {
     // Only count the sample if it's not a sub-category. For instance "script.link"
     // is a sub-category of "script".
-    return sum + (name.indexOf('.') > -1 ? 0 : count);
+    return sum + (name.includes('.') ? 0 : count);
   }, 0);
 
   return rows
@@ -193,15 +193,15 @@ function calculateSummaryPercentages(summary) {
     .sort((a, b) => b.samples - a.samples);
 }
 
-
-function logUncategorizedSamples(uncategorized, maxLogLength = 10) {
-  const entries = Object.entries(uncategorized);
+function logStacks(samples, maxLogLength = 10) {
+  const entries = Object.entries(samples);
   /* eslint-disable no-console */
-  console.log(`Top ${maxLogLength} uncategorized stacks`);
+  console.log(`Top ${maxLogLength} stacks in selected category`);
   const log = typeof console.table === 'function' ? console.table : console.log;
   log(
     entries
-      .sort(([, a], [, b]) => b - a)
+      .sort(([, {total: a}], [, {total: b}]) => b - a)
+      .map(([stack,counts]) => [stack, counts])
       .slice(0, Math.min(maxLogLength, entries.length))
   );
   /* eslint-enable no-console */
@@ -221,15 +221,22 @@ function stackToString(stackIndex, thread) {
   return stack.join('\n');
 }
 
-function countUncategorizedStacks(profile, summaries) {
+function incrementPerThreadCount(container, key, threadName) {
+  const count = container[key] || { total: 0, [threadName]: 0 };
+  count['total']++;
+  count[threadName]++;
+  container[key] = count;
+}
+
+function countStacksInCategory(profile, summaries, category = 'uncategorized') {
   const uncategorized = {};
   profile.threads.forEach((thread, i) => {
     const threadSummary = summaries[i];
     const { samples } = thread;
     for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-      if (threadSummary[sampleIndex] === 'uncategorized') {
+      if (threadSummary[sampleIndex] === category) {
         const stringCallStack = stackToString(samples.stack[sampleIndex], thread);
-        uncategorized[stringCallStack] = (uncategorized[stringCallStack] || 0) + 1;
+        incrementPerThreadCount(uncategorized, stringCallStack, thread.name);
       }
     }
   });
@@ -250,8 +257,10 @@ export function categorizeThreadSamples(profile) {
     });
 
     if (process.env.NODE_ENV === 'development') {
-      const uncategorized = countUncategorizedStacks(profile, summaries);
-      logUncategorizedSamples(uncategorized);
+      const cat = process.env.DUMP_CATEGORY || 'uncategorized';
+      const stacks = countStacksInCategory(profile, summaries, cat);
+      console.log(`${Object.keys(stacks).length} stacks labeled '${cat}'`);
+      logStacks(stacks);
     }
 
     return summaries;
