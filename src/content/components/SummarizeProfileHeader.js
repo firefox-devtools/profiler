@@ -13,10 +13,10 @@ const PERCENT_TIME_TITLE = 'The percentage of time represents the percentage of 
 
 class SummarizeProfileHeader extends Component {
   render() {
-    const {threadName} = this.props;
+    const { threadName, processType } = this.props;
     return (
       <div>
-        <div className='summarize-profile-thread' colSpan='3'>{threadName} Thread</div>
+        <div className='summarize-profile-thread' colSpan='3'>{threadName} Thread, {processType} process</div>
         <div className='summarize-profile-header'>
           <div className='summarize-line-graph' title={LINE_GRAPH_TITLE}>
             Rolling Average of Samples
@@ -33,7 +33,8 @@ class SummarizeProfileHeader extends Component {
 }
 
 SummarizeProfileHeader.propTypes = {
-  threadName: PropTypes.string,
+  threadName: PropTypes.string.isRequired,
+  processType: PropTypes.string.isRequired,
 };
 
 export default SummarizeProfileHeader;

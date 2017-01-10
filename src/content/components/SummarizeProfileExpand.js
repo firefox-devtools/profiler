@@ -3,7 +3,7 @@ import SummarizeLineGraph from './SummarizeLineGraph';
 
 class SummarizeProfileExpand extends Component {
   render() {
-    const {summary, thread, isExpanded, expand, collapse, expandLength} = this.props;
+    const {summary, threadIndex, isExpanded, expand, collapse, expandLength} = this.props;
     // Only show the expand/collapse button when it is warranted.
     if (summary.length > expandLength) {
       return (
@@ -12,8 +12,8 @@ class SummarizeProfileExpand extends Component {
           <div className='summarize-profile-details'>
             {
               isExpanded
-                ? <a className='summarize-profile-collapse expanded' onClick={() => collapse(thread) }>Collapse</a>
-                : <a className='summarize-profile-collapse' onClick={() => expand(thread) }>Expand remaining categories...</a>
+                ? <a className='summarize-profile-collapse expanded' onClick={() => collapse(threadIndex) }>Collapse</a>
+                : <a className='summarize-profile-collapse' onClick={() => expand(threadIndex) }>Expand remaining categories...</a>
             }
           </div>
         </div>
@@ -25,7 +25,7 @@ class SummarizeProfileExpand extends Component {
 
 SummarizeProfileExpand.propTypes = {
   summary: PropTypes.array,
-  thread: PropTypes.string,
+  threadIndex: PropTypes.number.isRequired,
   isExpanded: PropTypes.bool,
   expand: PropTypes.func,
   collapse: PropTypes.func,

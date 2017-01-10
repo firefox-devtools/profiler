@@ -12,17 +12,17 @@ export function profileSummaryProcessed(summary) {
   };
 }
 
-export function expandProfileSummaryThread(threadName) {
+export function expandProfileSummaryThread(threadIndex) {
   return {
     type: 'PROFILE_SUMMARY_EXPAND',
-    threadName,
+    threadIndex,
   };
 }
 
-export function collapseProfileSummaryThread(threadName) {
+export function collapseProfileSummaryThread(threadIndex) {
   return {
     type: 'PROFILE_SUMMARY_COLLAPSE',
-    threadName,
+    threadIndex,
   };
 }
 

@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { getProfileSummaries, getThreadNames, getProfileExpandedSummaries } from '../selectors/';
+import { getProfileSummaries, getProfile, getProfileExpandedSummaries } from '../selectors/';
 import SummarizeLineGraph from '../components/SummarizeLineGraph';
 import SummarizeProfileHeader from '../components/SummarizeProfileHeader';
 import SummarizeProfileExpand from '../components/SummarizeProfileExpand';
@@ -14,7 +14,7 @@ const EXPAND_LENGTH = 5;
 class ProfileSummaryView extends Component {
   render() {
     const {
-      summaries, expanded, threadNames,
+      summaries, expanded, threads,
       collapseProfileSummaryThread: collapse,
       expandProfileSummaryThread: expand,
     } = this.props;
@@ -23,13 +23,15 @@ class ProfileSummaryView extends Component {
       return (
         <div className='summarize-profile'>
           <div className='summarize-profile-inner'>
-            {summaries.map(({thread, summary, rollingSummary}) => {
-              const isExpanded = expanded.has(thread);
+            {summaries.map(({threadIndex, summary, rollingSummary}) => {
+              const { processType, name: threadName } = threads[threadIndex];
+              const isExpanded = expanded.has(threadIndex);
 
               return (
-                <div key={thread}>
+                <div key={threadIndex}>
                   <div className='summarize-profile-table'>
-                    <SummarizeProfileHeader threadName={thread} />
+                    <SummarizeProfileHeader threadName={threadName}
+                                            processType={processType} />
                     {summary.map((summaryTable, index) => (
                       <SummarizeProfileThread
                         summaryTable={summaryTable}
@@ -41,7 +43,7 @@ class ProfileSummaryView extends Component {
                     ))}
                     <SummarizeProfileExpand
                       summary={summary}
-                      thread={thread}
+                      threadIndex={threadIndex}
                       isExpanded={isExpanded}
                       expand={expand}
                       collapse={collapse}
@@ -58,10 +60,11 @@ class ProfileSummaryView extends Component {
     return (
       <div className='summarize-profile'>
         <div className='summarize-profile-inner'>
-          {threadNames.map(thread => (
-            <div key={thread}>
+          {threads.map((thread, threadIndex) => (
+            <div key={threadIndex}>
               <div className='summarize-profile-table'>
-                <SummarizeProfileHeader threadName={thread} />
+                <SummarizeProfileHeader threadName={thread.name}
+                                        processType={thread.processType} />
                 {fill(3, i => (
                   <div className='summarize-profile-row' key={i}>
                     <SummarizeLineGraph />
@@ -84,7 +87,7 @@ class ProfileSummaryView extends Component {
 ProfileSummaryView.propTypes = {
   summaries: PropTypes.array,
   expanded: PropTypes.object,
-  threadNames: PropTypes.array,
+  threads: PropTypes.array,
   collapseProfileSummaryThread: PropTypes.func,
   expandProfileSummaryThread: PropTypes.func,
 };
@@ -102,6 +105,6 @@ export default connect(state => {
   return {
     expanded: getProfileExpandedSummaries(state),
     summaries: getProfileSummaries(state),
-    threadNames: getThreadNames(state),
+    threads: getProfile(state).threads,
   };
 }, actions)(ProfileSummaryView);

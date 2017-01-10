@@ -252,12 +252,12 @@ function summaryView(state = {summary: null, expanded: null}, action) {
     }
     case 'PROFILE_SUMMARY_EXPAND': {
       const expanded = new Set(state.expanded);
-      expanded.add(action.threadName);
+      expanded.add(action.threadIndex);
       return Object.assign({}, state, { expanded });
     }
     case 'PROFILE_SUMMARY_COLLAPSE': {
       const expanded = new Set(state.expanded);
-      expanded.delete(action.threadName);
+      expanded.delete(action.threadIndex);
       return Object.assign({}, state, { expanded });
     }
     default:

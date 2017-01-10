@@ -76,7 +76,8 @@ export function summarizeProfile(profile) {
     const summaries = summarizeCategories(profile, categories);
 
     return profile.threads.map((thread, i) => ({
-      thread: thread.name,
+      threadIndex: i,
+      threadName: thread.name,
       rollingSummary: rollingSummaries[i],
       summary: summaries[i],
     }));

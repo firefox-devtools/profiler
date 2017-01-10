@@ -9,9 +9,12 @@ describe('summarize-profile', function () {
   const [geckoMain, compositor, content] = summarizeProfile(profile);
 
   it('has the thread names', function () {
-    assert.equal(geckoMain.thread, 'GeckoMain');
-    assert.equal(compositor.thread, 'Compositor');
-    assert.equal(content.thread, 'Content');
+    assert.equal(geckoMain.threadName, 'GeckoMain');
+    assert.equal(compositor.threadName, 'Compositor');
+    assert.equal(content.threadName, 'Content');
+    assert.equal(profile.threads[geckoMain.threadIndex].name, 'GeckoMain');
+    assert.equal(profile.threads[compositor.threadIndex].name, 'Compositor');
+    assert.equal(profile.threads[content.threadIndex].name, 'Content');
   });
 
   // Probably not the most brilliant test, but assert that the values are the same from
