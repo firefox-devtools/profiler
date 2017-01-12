@@ -118,37 +118,40 @@ function sampleCategorizer(thread) {
   const categorizeFuncName = functionNameCategorizer();
   const stackCategoryCache = new Map();
 
-  return function categorizeSampleStack(stackIndex) {
+  function computeCategory(stackIndex) {
     if (stackIndex === null) {
       return 'uncategorized';
-    }
-
-    let category = stackCategoryCache.get(stackIndex);
-    if (category !== undefined) {
-      return category;
     }
 
     const frameIndex = thread.stackTable.frame[stackIndex];
     const implIndex = thread.frameTable.implementation[frameIndex];
     if (implIndex !== null) {
       // script.execute.baseline or script.execute.ion
-      category = 'script.execute.' + thread.stringTable._array[implIndex];
-      stackCategoryCache.set(stackIndex, category);
-      return category;
+      return 'script.execute.' + thread.stringTable._array[implIndex];
     }
-    
+
     const funcIndex = thread.frameTable.func[frameIndex];
     const name = thread.stringTable._array[thread.funcTable.name[funcIndex]];
-    category = categorizeFuncName(name);
+    let category = categorizeFuncName(name);
     if (category !== false) {
-      stackCategoryCache.set(stackIndex, category);
       return category;
     }
 
-    category = categorizeSampleStack(thread.stackTable.prefix[stackIndex]);
+    return categorizeSampleStack(thread.stackTable.prefix[stackIndex]);
+  }
+
+  function categorizeSampleStack(stackIndex) {
+    let category = stackCategoryCache.get(stackIndex);
+    if (category !== undefined) {
+      return category;
+    }
+
+    category = computeCategory(stackIndex);
     stackCategoryCache.set(stackIndex, category);
     return category;
-  };
+  }
+
+  return categorizeSampleStack;
 }
 
 /**
