@@ -557,7 +557,16 @@ function preprocessThreadFromProfileJSONWithSymbolicationTable(thread, symbolica
   }
 
   let threadName = thread.name;
-  const processType = thread.processType || (threadName === 'Content' ? 'tab' : (threadName === 'Plugin' ? 'plugin' : 'default'));
+  let processType;
+  if (thread.processType) {
+    processType = thread.processType;
+  } else if (threadName === 'Content') {
+    processType = 'tab';
+  } else if (threadName === 'Plugin') {
+    processType = 'plugin';
+  } else {
+    processType ='default';
+  }
 
   if (threadName === 'Content') {
     threadName = 'GeckoMain';

@@ -320,8 +320,15 @@ function selectedThread(state = 0, action) {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
       return action.selectedThread;
-    case 'RECEIVE_PROFILE_FROM_ADDON': {
-      const contentThreadId = action.profile.threads.findIndex(thread => thread.name === 'Content');
+    case 'RECEIVE_PROFILE_FROM_ADDON':
+    case 'RECEIVE_PROFILE_FROM_FILE': {
+      // When loading in a brand new profile, select either the GeckoMain [tab] thread,
+      // or the first thread in the thread order. For profiles from the Web, the
+      // selectedThread has already been initialized from the URL and does not require
+      // looking at the profile.
+      const contentThreadId = action.profile.threads.findIndex(thread => {
+        return thread.name === 'GeckoMain' && thread.processType === 'tab';
+      });
       return contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(action.profile.threads)[0];
     }
     default:
