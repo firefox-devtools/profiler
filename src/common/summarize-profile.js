@@ -61,9 +61,10 @@ const categories = [
   [match.prefix, 'js::jit::CodeGenerator::link(', 'script.link'],
 
   [match.exact, 'base::WaitableEvent::Wait()', 'idle'],
-  // TODO - The mach msg trap is dependent on being called from RunCurrentEventLoopInMode
-  // Probably add a fourth entry to this tuple for child checks.
-  [match.exact, 'mach_msg_trap', 'idle'],
+  // TODO - if mach_msg_trap is called by RunCurrentEventLoopInMode, then it
+  // should be considered idle time. Add a fourth entry to this tuple
+  // for child checks?
+  [match.exact, 'mach_msg_trap', 'wait'],
 
   // Can't do this until we come up with a way of labeling ion/baseline.
   [match.prefix, 'Interpret(', 'script.execute.interpreter'],
@@ -132,12 +133,23 @@ function sampleCategorizer(thread) {
 
     const funcIndex = thread.frameTable.func[frameIndex];
     const name = thread.stringTable._array[thread.funcTable.name[funcIndex]];
-    let category = categorizeFuncName(name);
-    if (category !== false) {
+    const category = categorizeFuncName(name);
+    if (category !== false && category !== 'wait') {
       return category;
     }
 
-    return categorizeSampleStack(thread.stackTable.prefix[stackIndex]);
+    const prefixCategory = categorizeSampleStack(thread.stackTable.prefix[stackIndex]);
+    if (category === 'wait') {
+      if (prefixCategory === 'uncategorized') {
+        return 'wait';
+      }
+      if (prefixCategory.endsWith('.wait') || prefixCategory === 'wait') {
+        return prefixCategory;
+      }
+      return prefixCategory + '.wait';
+    }
+
+    return prefixCategory;
   }
 
   function categorizeSampleStack(stackIndex) {
@@ -204,7 +216,6 @@ function logStacks(samples, maxLogLength = 10) {
   log(
     entries
       .sort(([, {total: a}], [, {total: b}]) => b - a)
-      .map(([stack,counts]) => [stack, counts])
       .slice(0, Math.min(maxLogLength, entries.length))
   );
   /* eslint-enable no-console */
@@ -226,7 +237,7 @@ function stackToString(stackIndex, thread) {
 
 function incrementPerThreadCount(container, key, threadName) {
   const count = container[key] || { total: 0, [threadName]: 0 };
-  count['total']++;
+  count.total++;
   count[threadName]++;
   container[key] = count;
 }
