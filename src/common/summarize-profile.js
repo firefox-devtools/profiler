@@ -66,7 +66,7 @@ const categories = [
   [match.exact, 'mach_msg_trap', 'idle'],
 
   // Can't do this until we come up with a way of labeling ion/baseline.
-  // [match.prefix, 'Interpret(', 'script.interpreter',
+  [match.prefix, 'Interpret(', 'script.execute.interpreter'],
 ];
 
 export function summarizeProfile(profile) {
@@ -131,8 +131,8 @@ function sampleCategorizer(thread) {
     const frameIndex = thread.stackTable.frame[stackIndex];
     const implIndex = thread.frameTable.implementation[frameIndex];
     if (implIndex !== null) {
-      // script.baseline or script.ion
-      category = 'script.' + thread.stringTable._array[implIndex];
+      // script.execute.baseline or script.execute.ion
+      category = 'script.execute.' + thread.stringTable._array[implIndex];
       stackCategoryCache.set(stackIndex, category);
       return category;
     }
