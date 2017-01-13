@@ -3,3 +3,5 @@ node_modules/
 .DS_Store
 dist/
 public_html/
+.nyc_output
+coverage.lcov

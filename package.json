@@ -4,7 +4,8 @@
   "description": "Cleopatra, the gecko profiler UI",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --compilers js:babel-core/register test/**/*.js src/**/test/*.js",
+    "test": "nyc mocha --compilers js:babel-core/register test/**/*.js src/**/test/*.js",
+    "test-report": "nyc report --reporter=text-lcov > coverage.lcov",
     "start": "NODE_ENV=development node server.js",
     "start-no-hot": "npm run start",
     "start-prod": "npm run build-prod && npm run serve-static",
@@ -54,6 +55,7 @@
     "local-web-server": "^1.2.6",
     "mkdirp": "^0.5.1",
     "mocha": "^3.1.1",
+    "nyc": "^10.0.0",
     "offline-plugin": "^4.5.2",
     "pretty-bytes": "^4.0.2",
     "query-string": "^4.2.3",
