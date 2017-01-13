@@ -30,4 +30,4 @@ ProfileUploadField.propTypes = {
   retrieveProfileFromFile: PropTypes.func.isRequired,
 };
 
-export default connect(state => ({}), actions)(ProfileUploadField);
+export default connect(() => ({}), actions)(ProfileUploadField);

@@ -124,7 +124,7 @@ function preprocessThreadStageTwo(thread, libs) {
         }
       }
     } else {
-      const cppMatch = 
+      const cppMatch =
         /^(.*) \(in ([^)]*)\) (\+ [0-9]+)$/.exec(locationString) ||
         /^(.*) \(in ([^)]*)\) (\(.*:.*\))$/.exec(locationString) ||
         /^(.*) \(in ([^)]*)\)$/.exec(locationString);
@@ -557,7 +557,7 @@ function preprocessThreadFromProfileJSONWithSymbolicationTable(thread, symbolica
   }
 
   let threadName = thread.name;
-  let processType = thread.processType || (threadName === 'Content' ? 'tab' : (threadName === 'Plugin' ? 'plugin' : 'default'));
+  const processType = thread.processType || (threadName === 'Content' ? 'tab' : (threadName === 'Plugin' ? 'plugin' : 'default'));
 
   if (threadName === 'Content') {
     threadName = 'GeckoMain';

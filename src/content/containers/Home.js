@@ -12,7 +12,13 @@ const InstallButton = ({ name, xpiURL, children }) => {
     }
     e.preventDefault();
   }}>{children}</a>;
-}
+};
+
+InstallButton.propTypes = {
+  name: PropTypes.string.isRequired,
+  xpiURL: PropTypes.string.isRequired,
+  children: PropTypes.node,
+};
 
 const Home = ({ className, profilerURL }) => {
   return (

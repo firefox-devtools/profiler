@@ -26,7 +26,7 @@ class ProfileThreadHeaderBar extends Component {
     const { threadIndex, changeSelectedThread } = this.props;
     changeSelectedThread(threadIndex);
     if (time !== undefined) {
-    const { thread, funcStackInfo, changeSelectedFuncStack } = this.props;
+      const { thread, funcStackInfo, changeSelectedFuncStack } = this.props;
       const sampleIndex = getSampleIndexClosestToTime(thread.samples, time);
       const newSelectedStack = thread.samples.stack[sampleIndex];
       const newSelectedFuncStack = newSelectedStack === null ? -1 : funcStackInfo.stackIndexToFuncStackIndex[newSelectedStack];
@@ -35,7 +35,7 @@ class ProfileThreadHeaderBar extends Component {
     }
   }
 
-  _onMarkerSelect(markerIndex) {
+  _onMarkerSelect(/* markerIndex */) {
   }
 
   render() {
@@ -54,7 +54,7 @@ class ProfileThreadHeaderBar extends Component {
                           onClick={this._onGraphClick}
                           onMarkerSelect={this._onMarkerSelect}/>
       </li>
-    );    
+    );
   }
 
 }

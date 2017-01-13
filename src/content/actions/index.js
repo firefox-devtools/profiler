@@ -302,7 +302,7 @@ export function retrieveProfileFromFile(file) {
       }
 
       dispatch(receiveProfileFromFile(profile));
-    }).catch(error => {
+    }).catch(() => {
       return (new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
