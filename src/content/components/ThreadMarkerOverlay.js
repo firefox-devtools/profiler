@@ -23,7 +23,7 @@ class ThreadMarkerOverlay extends Component {
 
   render() {
     const { thread, rangeStart, rangeEnd } = this.props;
-    const { markers, stringTable } = thread;
+    const { markers } = thread;
     return (
       <ol className='threadMarkerOverlay'
           onMouseDown={this._mouseDownListener}>
@@ -33,14 +33,10 @@ class ThreadMarkerOverlay extends Component {
             if (time < rangeStart || time > rangeEnd) {
               return null;
             }
-            let category = 'unknown';
             const data = markers.data[markerIndex];
             if (data) {
               if ('interval' in data) {
                 return null;
-              }
-              if ('category' in data) {
-                category = data.category;
               }
             }
             return (

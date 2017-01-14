@@ -37,7 +37,7 @@ describe('summarize-profile', function () {
       { category: 'script.compile.ion', samples: 2, percentage: 0.006825938566552901 },
       { category: 'wait', samples: 2, percentage: 0.006825938566552901 },
       { category: 'script.icupdate', samples: 2, percentage: 0.006825938566552901 },
-      { category: 'restyle', samples: 1, percentage: 0.0034129692832764505 }
+      { category: 'restyle', samples: 1, percentage: 0.0034129692832764505 },
     ]) {
       assert.equal(summary[i].category, category,
                    `summary ${i} should be category ${category}, not ${summary[i].category}`);

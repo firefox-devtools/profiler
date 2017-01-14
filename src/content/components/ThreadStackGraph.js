@@ -3,7 +3,6 @@ import shallowCompare from 'react-addons-shallow-compare';
 import classNames from 'classnames';
 import { timeCode } from '../../common/time-code';
 import { getSampleFuncStacks } from '../profile-data';
-import ThreadMarkerOverlay from './ThreadMarkerOverlay';
 
 class ThreadStackGraph extends Component {
 
