@@ -4,3 +4,6 @@ machine:
 test:
   pre:
     - npm run eslint
+  post:
+    - npm run test-report
+    - bash <(curl -s https://codecov.io/bash)
