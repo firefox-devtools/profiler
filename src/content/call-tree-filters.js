@@ -37,9 +37,6 @@ export function parseCallTreeFilters(stringValue = '') {
   }).filter(f => f);
 }
 
-window.uintArrayToString = uintArrayToString;
-window.stringToUintArray = stringToUintArray;
-
 export function stringifyCallTreeFilters(arrayValue = []) {
   return arrayValue.map(filter => {
     switch (filter.type) {
