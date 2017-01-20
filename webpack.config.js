@@ -21,14 +21,14 @@ module.exports = {
       options: {
         worker: {
           output: {
-            filename: "[hash].worker.js",
-            chunkFilename: "[id].[hash].worker.js"
-          }
-        }
-      }
+            filename: '[hash].worker.js',
+            chunkFilename: '[id].[hash].worker.js',
+          },
+        },
+      },
     }),
     new HtmlWebpackPlugin({
-      title: 'Cleopatra',
+      title: 'perf.html',
       template: 'res/index.html',
       favicon: 'res/favicon.png',
     }),

@@ -34,5 +34,5 @@ Initializing.propTypes = {
 
 export default connect(() => ({
   className: 'initializing',
-  profilerUrl: 'https://github.com/mstange/Gecko-Profiler-Addon/tree/for-cleopatra-react',
+  profilerUrl: 'https://github.com/devtools-html/Gecko-Profiler-Addon',
 }), actions)(Initializing);

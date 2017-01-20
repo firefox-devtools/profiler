@@ -1,4 +1,4 @@
-// Imported from cleopatra, needs to be double-checked.
+// Imported from the original cleopatra, needs to be double-checked.
 
 const resources = {};
 const meta = { addons: [] };
