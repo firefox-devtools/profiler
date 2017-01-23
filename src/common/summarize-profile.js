@@ -117,7 +117,6 @@ function functionNameCategorizer() {
  */
 function sampleCategorizer(thread) {
   const categorizeFuncName = functionNameCategorizer();
-  const stackCategoryCache = new Map();
 
   function computeCategory(stackIndex) {
     if (stackIndex === null) {
@@ -152,6 +151,7 @@ function sampleCategorizer(thread) {
     return prefixCategory;
   }
 
+  const stackCategoryCache = new Map();
   function categorizeSampleStack(stackIndex) {
     let category = stackCategoryCache.get(stackIndex);
     if (category !== undefined) {
