@@ -105,8 +105,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
                            // e.g. 1.437998
           rss,             // TODO
           uss,             // TODO
-          frameNumber,     // TODO
-          power            // TODO
+          frameNumber      // TODO
         }),
         ...
       ],
