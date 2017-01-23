@@ -24,8 +24,8 @@ const Home = ({ className, profilerURL }) => {
   return (
     <div className={className}>
       <section className={`${className}-text`}>
-        <h1>Cleopatra - UI for the Gecko Profiler</h1>
-        <p>Welcome to cleopatra. You can look at profiles here.</p>
+        <h1>perf.html - UI for the Gecko Profiler</h1>
+        <p>Welcome to perf.html. You can look at profiles here.</p>
         <p>
           Capture profiles using
           the <InstallButton name='Gecko Profiler' xpiURL={profilerURL}>new

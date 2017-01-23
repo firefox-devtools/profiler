@@ -484,7 +484,6 @@ function preprocessThreadFromProfileJSONWithSymbolicationTable(thread, symbolica
   const samples = {
     length: 0,
     frameNumber: [],
-    power: [],
     responsiveness: [],
     rss: [],
     stack: [],
@@ -551,7 +550,6 @@ function preprocessThreadFromProfileJSONWithSymbolicationTable(thread, symbolica
     samples.time[sampleIndex] = ('time' in sample.extraInfo) ? sample.extraInfo.time : null;
     samples.responsiveness[sampleIndex] = ('responsiveness' in sample.extraInfo) ? sample.extraInfo.responsiveness : null;
     samples.frameNumber[sampleIndex] = ('frameNumber' in sample.extraInfo) ? sample.extraInfo.frameNumber : null;
-    samples.power[sampleIndex] = ('power' in sample.extraInfo) ? sample.extraInfo.power : null;
     samples.rss[sampleIndex] = ('rss' in sample.extraInfo) ? sample.extraInfo.rss : null;
     samples.uss[sampleIndex] = ('uss' in sample.extraInfo) ? sample.extraInfo.uss : null;
   }

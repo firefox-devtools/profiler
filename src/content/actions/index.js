@@ -164,7 +164,7 @@ export function retrieveProfileFromAddon() {
 
         dispatch(receiveProfileFromAddon(profile));
 
-        const symbolStore = new SymbolStore('cleopatra-async-storage', {
+        const symbolStore = new SymbolStore('perf-html-async-storage', {
           requestSymbolTable: (pdbName, breakpadId) => {
             const requestedLib = { pdbName, breakpadId };
             dispatch(requestingSymbolTable(requestedLib));

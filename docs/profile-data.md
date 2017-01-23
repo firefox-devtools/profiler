@@ -105,8 +105,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
                            // e.g. 1.437998
           rss,             // TODO
           uss,             // TODO
-          frameNumber,     // TODO
-          power            // TODO
+          frameNumber      // TODO
         }),
         ...
       ],
@@ -172,7 +171,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
 }
 ```
 
-The problem with this provided format for the use in Cleopatra is that it creates a lot of little objects. Because of this GC pauses become a real issue. So rather than have a bunch of small objects that get passed around, the data is mapped into a new form. For instance looking at markers the data goes through the following mapping.
+The problem with this provided format for the use in perf.html is that it creates a lot of little objects. Because of this GC pauses become a real issue. So rather than have a bunch of small objects that get passed around, the data is mapped into a new form. For instance looking at markers the data goes through the following mapping.
 
 ### Original data
 
@@ -198,7 +197,7 @@ markers: {
 }
 ```
 
-While this format is a little more difficult to work with compared to mapping into the shape of `[{name, time, data}, {name, time, data}, ...]`, it has benefits in the speed of the Cleopatra client and the lack of GC pauses.
+While this format is a little more difficult to work with compared to mapping into the shape of `[{name, time, data}, {name, time, data}, ...]`, it has benefits in the speed of the perf.html client and the lack of GC pauses.
 
 ### Processed Profile Format
 
@@ -223,7 +222,7 @@ Miscellaneous data:
  * libs
  * tid
 
-Different frames can be created from the same function, and thus do not represent the unique set of functions. This function table is generated during Cleopatra's pre-processing step. Frames can provide additional information about the various ways the function was executed, while it's also useful to have a list of only the functions, so both types of information are retained.
+Different frames can be created from the same function, and thus do not represent the unique set of functions. This function table is generated during perf.html's pre-processing step. Frames can provide additional information about the various ways the function was executed, while it's also useful to have a list of only the functions, so both types of information are retained.
 
 ```js
 funcTable: {

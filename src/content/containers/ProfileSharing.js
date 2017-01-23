@@ -4,10 +4,10 @@ import classNames from 'classnames';
 import { getProfile, getProfileViewOptions, getDataSource, getHash, getURLPredictor } from '../selectors/';
 import * as actions from '../actions';
 import { compress } from '../gz';
-import { uploadBinaryProfileData } from '../cleopatra-profile-store';
+import { uploadBinaryProfileData } from '../profile-store';
 import ArrowPanel from '../components/ArrowPanel';
 import ButtonWithPanel from '../components/ButtonWithPanel';
-import shortenCleopatraURL from '../shorten-cleopatra-url';
+import shortenURL from '../shorten-url';
 import { serializeProfile } from '../preprocess-profile';
 import prettyBytes from 'pretty-bytes';
 import sha1 from '../sha1';
@@ -84,7 +84,7 @@ class ProfileSharingCompositeButton extends Component {
   }
 
   _shortenURLAndFocusTextFieldOnCompletion() {
-    return shortenCleopatraURL(this.state.fullURL).then(shortURL => {
+    return shortenURL(this.state.fullURL).then(shortURL => {
       this.setState({ shortURL });
       if (this._permalinkTextField) {
         this._permalinkTextField.focus();
@@ -140,8 +140,8 @@ class ProfileSharingCompositeButton extends Component {
           shortURL: newShortURL,
         });
       });
-      const shortenCleopatraURLPromise = this._shortenURLAndFocusTextFieldOnCompletion();
-      Promise.race([uploadPromise, shortenCleopatraURLPromise]).then(() => {
+      const shortenURLPromise = this._shortenURLAndFocusTextFieldOnCompletion();
+      Promise.race([uploadPromise, shortenURLPromise]).then(() => {
         if (this._permalinkButton) {
           this._permalinkButton.openPanel();
         }

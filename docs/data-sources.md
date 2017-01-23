@@ -1,6 +1,6 @@
 # Performance Data Sources
 
-Cleopatra is only a client, it doesn't actually create the data it displays and analyzes. This page documents, from a high level, the various systems that are available for recording performance data within Gecko.
+perf.html is only a client, it doesn't actually create the data it displays and analyzes. This page documents, from a high level, the various systems that are available for recording performance data within Gecko.
 
 * [nsIProfiler.idl](https://dxr.mozilla.org/mozilla-central/source/tools/profiler/gecko/nsIProfiler.idl)
 * [Profile Data Format](./profile-data)
@@ -11,7 +11,7 @@ The profiler collects two types of information, samples and markers. The profile
 
 ### Samples in the profiler
 
-Samples are taken of the current executing function at a fixed interval, e.g. every 1 millisecond. These samples are collected and provide a general statistical view of where time was spent executing code. The more a function is executed, the more samples show up in the buffer. These samples include a variety of data including their call stacks, and information about the function name. In JavaScript a string is provided with the function name, the file location, and the line number. C++ functions only contain their memory address. Cleopatra then must take the additional step of "symbolicating" these memory addresses, by looking up the original function names in a function table that is specific to that individual build of Firefox.
+Samples are taken of the current executing function at a fixed interval, e.g. every 1 millisecond. These samples are collected and provide a general statistical view of where time was spent executing code. The more a function is executed, the more samples show up in the buffer. These samples include a variety of data including their call stacks, and information about the function name. In JavaScript a string is provided with the function name, the file location, and the line number. C++ functions only contain their memory address. perf.html then must take the additional step of "symbolicating" these memory addresses, by looking up the original function names in a function table that is specific to that individual build of Firefox.
 
 ### Markers in the profiler
 
@@ -19,7 +19,7 @@ Samples don't record every event that happens within the system, so some informa
 
 ## Timeline - DocShell Markers
 
-The Gecko Profiler records marker data, but it doesn't include all of the markers available in the system. There is a competing implementation of markers used exclusively by the Firefox Devtools that are recorded per DocShell. These are not currently integrated into Cleopatra.
+The Gecko Profiler records marker data, but it doesn't include all of the markers available in the system. There is a competing implementation of markers used exclusively by the Firefox Devtools that are recorded per DocShell. These are not currently integrated into perf.html.
 
 * [Timeline C++ Implementation](https://dxr.mozilla.org/mozilla-central/source/docshell/base/timeline)
 * [Timeline Devtools JS Server](https://dxr.mozilla.org/mozilla-central/source/devtools/server/performance/timeline.js)
@@ -35,6 +35,6 @@ Source Events are usually some kinds of I/O events we're interested in, such as 
 
 ## Tracelogger
 
-While the previous performance tools collect information about how Gecko runs as a whole, Tracelogger is specific to the SpiderMonkey engine. Tracelogger is not sample based, therefore it records every step that the SpiderMonkey engine performs to run a given chunk of JavaScript code. It's primarily used by JavaScript engineers, and includes a firehose of information often reaching into the several gigs of information. There is no current integration of this information with Cleopatra.
+While the previous performance tools collect information about how Gecko runs as a whole, Tracelogger is specific to the SpiderMonkey engine. Tracelogger is not sample based, therefore it records every step that the SpiderMonkey engine performs to run a given chunk of JavaScript code. It's primarily used by JavaScript engineers, and includes a firehose of information often reaching into the several gigs of information. There is no current integration of this information with perf.html.
 
 * [Tracelogger on GitHub](https://github.com/h4writer/tracelogger)

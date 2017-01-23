@@ -1,7 +1,7 @@
 {
-  "name": "cleopatra",
+  "name": "perf.html",
   "version": "0.0.1",
-  "description": "Cleopatra, the gecko profiler UI",
+  "description": "perf.html, the gecko profiler UI",
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha --compilers js:babel-core/register test/**/*.js src/**/test/*.js",
@@ -24,7 +24,7 @@
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mstange/cleopatra.git"
+    "url": "https://github.com/devtools-html/perf.html"
   },
   "devDependencies": {
     "array-move": "^1.0.0",
