@@ -271,9 +271,10 @@ export function categorizeThreadSamples(profile) {
     });
 
     if (process.env.NODE_ENV === 'development') {
-      const cat = process.env.DUMP_CATEGORY || 'uncategorized';
-      const stacks = countStacksInCategory(profile, summaries, cat);
-      console.log(`${Object.keys(stacks).length} stacks labeled '${cat}'`);
+      // Change the constant to display the top stacks of a different category.
+      const categoryToDump = 'uncategorized';
+      const stacks = countStacksInCategory(profile, summaries, categoryToDump);
+      console.log(`${Object.keys(stacks).length} stacks labeled '${categoryToDump}'`);
       logStacks(stacks);
     }
 
