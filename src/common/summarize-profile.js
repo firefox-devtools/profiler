@@ -61,12 +61,13 @@ const categories = [
   [match.prefix, 'js::jit::CodeGenerator::link(', 'script.link'],
 
   [match.exact, 'base::WaitableEvent::Wait()', 'idle'],
-  // TODO - The mach msg trap is dependent on being called from RunCurrentEventLoopInMode
-  // Probably add a fourth entry to this tuple for child checks.
-  [match.exact, 'mach_msg_trap', 'idle'],
+  // TODO - if mach_msg_trap is called by RunCurrentEventLoopInMode, then it
+  // should be considered idle time. Add a fourth entry to this tuple
+  // for child checks?
+  [match.exact, 'mach_msg_trap', 'wait'],
 
   // Can't do this until we come up with a way of labeling ion/baseline.
-  // [match.prefix, 'Interpret(', 'script.interpreter',
+  [match.prefix, 'Interpret(', 'script.execute.interpreter'],
 ];
 
 export function summarizeProfile(profile) {
@@ -116,39 +117,53 @@ function functionNameCategorizer() {
  */
 function sampleCategorizer(thread) {
   const categorizeFuncName = functionNameCategorizer();
-  const stackCategoryCache = new Map();
 
-  return function categorizeSampleStack(stackIndex) {
+  function computeCategory(stackIndex) {
     if (stackIndex === null) {
       return 'uncategorized';
-    }
-
-    let category = stackCategoryCache.get(stackIndex);
-    if (category !== undefined) {
-      return category;
     }
 
     const frameIndex = thread.stackTable.frame[stackIndex];
     const implIndex = thread.frameTable.implementation[frameIndex];
     if (implIndex !== null) {
-      // script.baseline or script.ion
-      category = 'script.' + thread.stringTable._array[implIndex];
-      stackCategoryCache.set(stackIndex, category);
-      return category;
+      // script.execute.baseline or script.execute.ion
+      return 'script.execute.' + thread.stringTable._array[implIndex];
     }
-    
+
     const funcIndex = thread.frameTable.func[frameIndex];
     const name = thread.stringTable._array[thread.funcTable.name[funcIndex]];
-    category = categorizeFuncName(name);
-    if (category !== false) {
-      stackCategoryCache.set(stackIndex, category);
+    const category = categorizeFuncName(name);
+    if (category !== false && category !== 'wait') {
       return category;
     }
 
-    category = categorizeSampleStack(thread.stackTable.prefix[stackIndex]);
+    const prefixCategory = categorizeSampleStack(thread.stackTable.prefix[stackIndex]);
+    if (category === 'wait') {
+      if (prefixCategory === 'uncategorized') {
+        return 'wait';
+      }
+      if (prefixCategory.endsWith('.wait') || prefixCategory === 'wait') {
+        return prefixCategory;
+      }
+      return prefixCategory + '.wait';
+    }
+
+    return prefixCategory;
+  }
+
+  const stackCategoryCache = new Map();
+  function categorizeSampleStack(stackIndex) {
+    let category = stackCategoryCache.get(stackIndex);
+    if (category !== undefined) {
+      return category;
+    }
+
+    category = computeCategory(stackIndex);
     stackCategoryCache.set(stackIndex, category);
     return category;
-  };
+  }
+
+  return categorizeSampleStack;
 }
 
 /**
@@ -182,7 +197,7 @@ function calculateSummaryPercentages(summary) {
   const sampleCount = rows.reduce((sum, [name, count]) => {
     // Only count the sample if it's not a sub-category. For instance "script.link"
     // is a sub-category of "script".
-    return sum + (name.indexOf('.') > -1 ? 0 : count);
+    return sum + (name.includes('.') ? 0 : count);
   }, 0);
 
   return rows
@@ -193,15 +208,14 @@ function calculateSummaryPercentages(summary) {
     .sort((a, b) => b.samples - a.samples);
 }
 
-
-function logUncategorizedSamples(uncategorized, maxLogLength = 10) {
-  const entries = Object.entries(uncategorized);
+function logStacks(samples, maxLogLength = 10) {
+  const entries = Object.entries(samples);
   /* eslint-disable no-console */
-  console.log(`Top ${maxLogLength} uncategorized stacks`);
+  console.log(`Top ${maxLogLength} stacks in selected category`);
   const log = typeof console.table === 'function' ? console.table : console.log;
   log(
     entries
-      .sort(([, a], [, b]) => b - a)
+      .sort(([, {total: a}], [, {total: b}]) => b - a)
       .slice(0, Math.min(maxLogLength, entries.length))
   );
   /* eslint-enable no-console */
@@ -221,15 +235,22 @@ function stackToString(stackIndex, thread) {
   return stack.join('\n');
 }
 
-function countUncategorizedStacks(profile, summaries) {
+function incrementPerThreadCount(container, key, threadName) {
+  const count = container[key] || { total: 0, [threadName]: 0 };
+  count.total++;
+  count[threadName]++;
+  container[key] = count;
+}
+
+function countStacksInCategory(profile, summaries, category = 'uncategorized') {
   const uncategorized = {};
   profile.threads.forEach((thread, i) => {
     const threadSummary = summaries[i];
     const { samples } = thread;
     for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-      if (threadSummary[sampleIndex] === 'uncategorized') {
+      if (threadSummary[sampleIndex] === category) {
         const stringCallStack = stackToString(samples.stack[sampleIndex], thread);
-        uncategorized[stringCallStack] = (uncategorized[stringCallStack] || 0) + 1;
+        incrementPerThreadCount(uncategorized, stringCallStack, thread.name);
       }
     }
   });
@@ -250,8 +271,11 @@ export function categorizeThreadSamples(profile) {
     });
 
     if (process.env.NODE_ENV === 'development') {
-      const uncategorized = countUncategorizedStacks(profile, summaries);
-      logUncategorizedSamples(uncategorized);
+      // Change the constant to display the top stacks of a different category.
+      const categoryToDump = 'uncategorized';
+      const stacks = countStacksInCategory(profile, summaries, categoryToDump);
+      console.log(`${Object.keys(stacks).length} stacks labeled '${categoryToDump}'`);
+      logStacks(stacks);
     }
 
     return summaries;
