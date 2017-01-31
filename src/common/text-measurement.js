@@ -1,7 +1,7 @@
 /**
  * Measure the size of text for drawing within a 2d context. This will allow text
  * to be drawn in a constrained space. This class uses a variety of heuristics and
- * caching to make this processes fast.
+ * caching to make this process fast.
  */
 class TextMeasurement {
   constructor(ctx) {
@@ -22,18 +22,8 @@ class TextMeasurement {
    * @return {number} The average letter width.
    */
   _calcAverageCharWidth() {
-    let letterWidthsSum = 0;
-    // space
-    const start = 32;
-    // "z"
-    const end = 123;
-
-    for (let i = start; i < end; i++) {
-      const char = String.fromCharCode(i);
-      letterWidthsSum += this.getTextWidth(char);
-    }
-
-    return letterWidthsSum / (end - start);
+    const string = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_';
+    return this.getTextWidth(string) / string.length;
   }
 
   /**

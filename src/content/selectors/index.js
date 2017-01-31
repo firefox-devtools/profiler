@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect';
 import * as ProfileData from '../profile-data';
+import * as StackTiming from '../stack-timing';
 import * as ProfileTree from '../profile-tree';
 import * as TaskTracer from '../task-tracer';
 import * as reducers from '../reducers';
@@ -165,12 +166,6 @@ export const selectorsForThread = threadIndex => {
         return ProfileData.getFuncStackInfo(stackTable, frameTable, funcTable);
       }
     );
-    const getRangedOnlyFuncStackInfo = createSelector(
-      getRangeFilteredThread,
-      ({stackTable, frameTable, funcTable}) => {
-        return ProfileData.getFuncStackInfo(stackTable, frameTable, funcTable);
-      }
-    );
     const getSelectedFuncStackAsFuncArray = createSelector(
       getViewOptions,
       threadViewOptions => threadViewOptions.selectedFuncStack
@@ -193,23 +188,24 @@ export const selectorsForThread = threadIndex => {
         return funcArrays.map(funcArray => ProfileData.getFuncStackFromFuncArray(funcArray, funcStackInfo.funcStackTable));
       }
     );
-    const getRangedOnlyFuncStackMaxDepth = createSelector(
-      getRangedOnlyFuncStackInfo,
-      ProfileData.computeFuncStackMaxDepth
+    const getFuncStackMaxDepth = createSelector(
+      getFilteredThread,
+      getFuncStackInfo,
+      StackTiming.computeFuncStackMaxDepth
     );
-    // TODO - Memoize off of the intial profile.
+    // TODO - Memoize off of the initial profile, ignore changes to the symbol information.
     const getStackTimingByDepth = createSelector(
-      getRangeFilteredThread,
-      getRangedOnlyFuncStackInfo,
-      getRangedOnlyFuncStackMaxDepth,
+      getFilteredThread,
+      getFuncStackInfo,
+      getFuncStackMaxDepth,
       getProfileInterval,
-      getJSOnly,
-      ProfileData.getStackTimingByDepth
+      StackTiming.getStackTimingByDepth
     );
     const getCallTree = createSelector(
       getRangeSelectionFilteredThread,
       getProfileInterval,
       getFuncStackInfo,
+      getJSOnly,
       ProfileTree.getCallTree
     );
     selectorsForThreads[threadIndex] = {
@@ -224,7 +220,7 @@ export const selectorsForThread = threadIndex => {
       getFuncStackInfo,
       getSelectedFuncStack,
       getExpandedFuncStacks,
-      getRangedOnlyFuncStackMaxDepth,
+      getFuncStackMaxDepth,
       getStackTimingByDepth,
       getCallTree,
     };

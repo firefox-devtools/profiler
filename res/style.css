@@ -141,6 +141,9 @@ body, #root, .profileViewer {
   background-color: -moz-dialog;
   color: black;
 }
+.treeViewRow.dim > .treeViewMainColumn {
+  color: #aaa;
+}
 .treeViewBody:focus > * > * > * > .treeViewRow.selected,
 .treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeViewFixedColumn {
   background-color: highlight;

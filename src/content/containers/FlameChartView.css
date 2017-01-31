@@ -1,3 +1,9 @@
+.flameChartView {
+  flex: 1;
+  display: flex;
+  flex-flow: column;
+}
+
 .flameChartViewport {
   border-top: 1px solid #d6d6d6;
   flex: 1;

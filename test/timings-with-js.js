@@ -1,39 +1,5 @@
 import exampleProfile from './example-profile';
 
-/**
- * This table shows off how a flame chart gets collapsed, where the number is the stack
- * index, and P is platform code, and J javascript.
- *
- *          Unfiltered             ->             JS Only
- *  =============================      =============================
- *  0P 0P 0P 0P 0P 0P 0P 0P 0P 0P      -P -P -P -P -P -P -P -P -P -P
- *  1P 1P 1P 1P    1P 1P 1P 1P 1P                        4j 4J 4J 4J
- *     2P 2P 3P       4J 4J 4J 4J                           5J 5J
- *                       5J 5J                                 -P
- *                          6P                                 8J
- *                          7P
- *                          8J
- *
- *        Unfiltered Timing
- *  =============================
- *  {stack: 0, start: 0, end: 91}
- *  {stack: 1, start: 0, end 40}, {stack: 1, start: 50, end: 91},
- *  {stack: 2, start: 10, end: 30}, {stack: 3, start:30, end: 40}, {stack: 4, start: 60, end: 91}
- *  {stack: 5, start: 70, end: 90}
- *  {stack: 6, start: 80, end: 90}
- *  {stack: 7, start: 80, end: 90}
- *  {stack: 8, start: 80, end: 90}
- *
- *          JS Only Timing
- *  ==============================
- *  {stack: -1, start: 0, end: 91}
- *  {stack: 4, start: 60, end: 91}
- *  {stack: 5, start: 70: end: 90}
- *  {stack: -1, start: 80, end: 90}
- *  {stack: 8, start: 80: end: 90}
- *
- */
-
 const thread = {
   samples: {
     schema: { stack: 0, time: 1, responsiveness: 2, rss: 3, uss: 4, frameNumber: 5, power: 6 },
