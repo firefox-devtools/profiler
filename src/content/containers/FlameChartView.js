@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import FlameChartViewport from '../components/FlameChartViewport';
 import { getSelectedThreadIndex, selectedThreadSelectors, getDisplayRange, getProfileInterval } from '../selectors/';
 import * as actions from '../actions';
+import ProfileCallTreeSettings from '../components/ProfileCallTreeSettings';
 
 require('./FlameChartView.css');
 
@@ -16,9 +17,14 @@ class FlameChartView extends Component {
     const {maxStackDepth} = this.props;
     const maxViewportHeight = (maxStackDepth + 1) * ROW_HEIGHT;
 
-    return <FlameChartViewport connectedProps={this.props}
-                               maxViewportHeight={maxViewportHeight}
-                               rowHeight={ROW_HEIGHT} />;
+    return (
+      <div className='flameChartView'>
+        <ProfileCallTreeSettings />
+        <FlameChartViewport connectedProps={this.props}
+                            maxViewportHeight={maxViewportHeight}
+                            rowHeight={ROW_HEIGHT} />
+      </div>
+    );
   }
 }
 
@@ -33,8 +39,8 @@ FlameChartView.propTypes = {
 
 export default connect(state => {
   return {
-    thread: selectedThreadSelectors.getRangeFilteredThread(state),
-    maxStackDepth: selectedThreadSelectors.getRangedOnlyFuncStackMaxDepth(state),
+    thread: selectedThreadSelectors.getFilteredThread(state),
+    maxStackDepth: selectedThreadSelectors.getFuncStackMaxDepth(state),
     stackTimingByDepth: selectedThreadSelectors.getStackTimingByDepth(state),
     isSelected: true,
     timeRange: getDisplayRange(state),

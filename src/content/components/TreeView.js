@@ -126,7 +126,7 @@ class TreeViewRowScrolledColumns extends Component {
     } = this.props;
     const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
     return (
-      <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
+      <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''} ${node.dim ? 'dim' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
         <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
@@ -333,7 +333,7 @@ class TreeView extends Component {
       if (!isCollapsed) {
         this._toggle(selected);
       } else {
-        const parent = this.props.tree.getParent(selected); 
+        const parent = this.props.tree.getParent(selected);
         if (parent !== -1) {
           this._select(parent);
         }
