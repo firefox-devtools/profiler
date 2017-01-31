@@ -2,7 +2,7 @@
   "name": "perf.html",
   "version": "0.0.1",
   "description": "perf.html, the gecko profiler UI",
-  "main": "index.js",
+  "main": "src/content/index.js",
   "scripts": {
     "test": "npm run build && npm run test-all",
     "test-all": "NODE_ENV=test nyc mocha --compilers js:babel-core/register 'test/**/*.js' 'src/**/test/*.js'",
@@ -18,8 +18,8 @@
     "build-prod": "npm run build:clean && NODE_ENV=production webpack -p --progress",
     "build:clean": "rimraf dist && mkdirp dist && cp res/.htaccess dist/ && cp res/zee-worker.js dist/",
     "publish": "rimraf public_html && cp -r dist public_html",
-    "eslint": "eslint index.js src",
-    "eslint-fix": "eslint --fix index.js src",
+    "eslint": "eslint src",
+    "eslint-fix": "eslint --fix src",
     "documentation": "documentation"
   },
   "author": "Markus Stange <mstange@themasta.com>",

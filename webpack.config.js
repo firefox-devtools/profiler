@@ -2,7 +2,10 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OfflinePlugin = require('offline-plugin');
-
+const includes = [
+  path.join(__dirname, 'src'),
+  path.join(__dirname, 'res'),
+];
 const baseConfig = {
   plugins: [
     new webpack.DefinePlugin({
@@ -36,15 +39,15 @@ const baseConfig = {
     rules: [{
       test: /\.js$/,
       loaders: ['babel-loader'],
-      include: __dirname,
+      include: includes,
     }, {
       test: /\.json$/,
       loaders: ['json-loader'],
-      include: __dirname,
+      include: includes,
     }, {
       test: /\.css?$/,
       loaders: ['style-loader', 'css-loader?minimize'],
-      include: __dirname,
+      include: includes,
     }, {
       test: /\.jpg$/,
       loader: 'file-loader',
@@ -85,7 +88,7 @@ if (process.env.NODE_ENV === 'production') {
 module.exports = [
   {
     entry: [
-      './index',
+      './src/content/index',
     ],
     output: {
       path: path.join(__dirname, 'dist'),
