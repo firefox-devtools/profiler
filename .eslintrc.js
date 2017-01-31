@@ -21,6 +21,9 @@ module.exports = {
         // Flow type rules:
         "flowtype/define-flow-type": 1,
         "flowtype/use-flow-type": 1,
+        "flowtype/generic-spacing": [2, "never"],
+        "flowtype/space-before-type-colon": [ 2, "never" ],
+        "flowtype/space-after-type-colon": [ 2, "always" ],
 
         // JS Rules:
         "indent": [

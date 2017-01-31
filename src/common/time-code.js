@@ -1,6 +1,6 @@
 // @flow
 
-export function timeCode(label : string, codeAsACallback : any => any): any {
+export function timeCode(label: string, codeAsACallback: any => any): any {
   if (typeof performance !== 'undefined' &&
       process.env.NODE_ENV === 'development') {
     const start = performance.now();

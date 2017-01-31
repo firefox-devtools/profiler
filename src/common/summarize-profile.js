@@ -1,19 +1,22 @@
 // @flow
 import { timeCode } from './time-code';
 import type { Profile, Thread, IndexIntoStackTable } from './types/profile';
+
+type MatchingFunction = (string, string) => boolean;
+type Summary = { [id: string]: number };
+type StacksInCategory = { [id: string]: { [id: string]: number } }
+type SummarySegment = {
+  percentage: {[id: string]: number},
+  samples: {[id: string]: number}
+}
+type RollingSummary = SummarySegment[];
+type Categories = string[];
+type ThreadCategories = Categories[];
+
 /**
  * A list of strategies for matching sample names to patterns.
  */
-type MatchingFunction = (string, string) => boolean;
-type Summary = { [id:string]: number };
-type StacksInCategory = { [id:string]: { [id:string]: number } }
-type SummarySegment = {
-  percentage: {[id:string]: number},
-  samples: {[id:string]: number}
-}
-type RollingSummary = SummarySegment[];
-
-const match: {[id:string]: MatchingFunction} = {
+const match: {[id: string]: MatchingFunction} = {
   exact: (symbol, pattern) => symbol === pattern,
   prefix: (symbol, pattern) => symbol.startsWith(pattern),
   substring: (symbol, pattern) => symbol.includes(pattern),
@@ -83,9 +86,9 @@ const categories = [
 
 export function summarizeProfile(profile: Profile) {
   return timeCode('summarizeProfile', () => {
-    const categories: Array<string[]> = categorizeThreadSamples(profile);
-    const rollingSummaries:RollingSummary[] = calculateRollingSummaries(profile, categories);
-    const summaries = summarizeCategories(profile, categories);
+    const threadCategories: ThreadCategories = categorizeThreadSamples(profile);
+    const rollingSummaries:RollingSummary[] = calculateRollingSummaries(profile, threadCategories);
+    const summaries = summarizeCategories(profile, threadCategories);
 
     return profile.threads.map((thread, i) => ({
       threadIndex: i,
@@ -126,7 +129,7 @@ function functionNameCategorizer() {
  * @param {object} thread Thread from a profile.
  * @return {function} Sample stack categorizer.
  */
-function sampleCategorizer(thread : Thread): (stackIndex: IndexIntoStackTable) => string {
+function sampleCategorizer(thread: Thread): (stackIndex: IndexIntoStackTable) => string {
   const categorizeFuncName = functionNameCategorizer();
 
   function computeCategory(stackIndex: IndexIntoStackTable): string {
@@ -204,7 +207,7 @@ function summarizeSampleCategories(summary: Summary, fullCategoryName: string): 
  * @return {array} The summary with percentages.
  */
 function calculateSummaryPercentages(summary: Summary) {
-  const rows:Array<[string, number]> = objectEntries(summary);
+  const rows = objectEntries(summary);
 
   const sampleCount = rows.reduce((sum: number, [name: string, count: number]) => {
     // Only count the sample if it's not a sub-category. For instance "script.link"
@@ -221,7 +224,7 @@ function calculateSummaryPercentages(summary: Summary) {
 }
 
 function logStacks(stacksInCategory: StacksInCategory, maxLogLength = 10) {
-  const entries:Array<[string, { [id:string]: number }]> = objectEntries(stacksInCategory);
+  const entries = objectEntries(stacksInCategory);
   const data = entries
     .sort(([, {total: a}], [, {total: b}]) => b - a)
     .slice(0, Math.min(maxLogLength, entries.length));
@@ -254,14 +257,14 @@ function incrementPerThreadCount(container: StacksInCategory, key: string, threa
 }
 
 function countStacksInCategory(
-  profile: Profile, summaries: Array<string[]>, category: string = 'uncategorized'
+  profile: Profile, threadCategories: ThreadCategories, category: string = 'uncategorized'
 ): StacksInCategory {
   const stacksInCategory = {};
   profile.threads.forEach((thread, i) => {
-    const threadSummary: string[] = summaries[i];
+    const categories = threadCategories[i];
     const { samples } = thread;
     for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-      if (threadSummary[sampleIndex] === category) {
+      if (categories[sampleIndex] === category) {
         const stringCallStack: string = stackToString(samples.stack[sampleIndex], thread);
         incrementPerThreadCount(stacksInCategory, stringCallStack, thread.name);
       }
@@ -276,22 +279,26 @@ function countStacksInCategory(
  * @param {array} profile - The current profile.
  * @returns {array} Stacks mapped to categories.
  */
-export function categorizeThreadSamples(profile: Profile): Array<string[]> {
+export function categorizeThreadSamples(profile: Profile): ThreadCategories {
   return timeCode('categorizeThreadSamples', () => {
-    const summaries:Array<string[]> = profile.threads.map(thread => {
-      const categorizer = sampleCategorizer(thread);
-      return thread.samples.stack.map(categorizer);
-    });
+    const threadCategories = mapProfileToThreadCategories(profile);
 
     if (process.env.NODE_ENV === 'development') {
       // Change the constant to display the top stacks of a different category.
       const categoryToDump = 'uncategorized';
-      const stacks: StacksInCategory = countStacksInCategory(profile, summaries, categoryToDump);
+      const stacks: StacksInCategory = countStacksInCategory(profile, threadCategories, categoryToDump);
       console.log(`${Object.keys(stacks).length} stacks labeled '${categoryToDump}'`);
       logStacks(stacks);
     }
 
-    return summaries;
+    return threadCategories;
+  });
+}
+
+function mapProfileToThreadCategories(profile: Profile): ThreadCategories {
+  return profile.threads.map(thread => {
+    const categorizer = sampleCategorizer(thread);
+    return thread.samples.stack.map(categorizer);
   });
 }
 
@@ -302,7 +309,7 @@ export function categorizeThreadSamples(profile: Profile): Array<string[]> {
  * @param {object} threadCategories - Each thread's categories for the samples.
  * @returns {object} The summaries of each thread.
  */
-export function summarizeCategories(profile: Profile, threadCategories: Array<string[]>) {
+export function summarizeCategories(profile: Profile, threadCategories: ThreadCategories) {
   return threadCategories.map(categories => (
       categories.reduce(summarizeSampleCategories, {})
     ))
@@ -312,7 +319,7 @@ export function summarizeCategories(profile: Profile, threadCategories: Array<st
 }
 
 export function calculateRollingSummaries(
-  profile: Profile, threadCategories: Array<string[]>, segmentCount: number = 40, rolling: number = 4
+  profile: Profile, threadCategories: ThreadCategories, segmentCount: number = 40, rolling: number = 4
 ): RollingSummary[] {
   const [minTime, maxTime] = profile.threads.map(thread => {
     return [thread.samples.time[0], thread.samples.time[thread.samples.time.length - 1]];
@@ -329,7 +336,7 @@ export function calculateRollingSummaries(
 
   return profile.threads.map((thread, threadIndex) => {
     const categories = threadCategories[threadIndex];
-    const rollingSummary:RollingSummary = [];
+    const rollingSummary: RollingSummary = [];
 
     for (let i = 0; i < segmentCount; i++) {
       let samplesInRange = 0;
@@ -376,7 +383,7 @@ function mapObj(object, fn) {
  * Flow requires a type-safe implementation of Object.entries().
  * See: https://github.com/facebook/flow/issues/2174
  */
-function objectEntries<T>(object: { [id:string]: T }): Array<[string, T]> {
+function objectEntries<T>(object: { [id: string]: T }): Array<[string, T]> {
   const entries = [];
   for (const key in object) {
     if (object.hasOwnProperty(key)) {
