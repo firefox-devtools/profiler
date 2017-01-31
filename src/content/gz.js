@@ -1,8 +1,10 @@
-// Use file-loader instead of worker-loader so that the file does not get
-// transpiled and so that webpack does not parse the require() calls in it.
-import ZeeWorker from 'file-loader!./zee-worker.js';
-
-const zeeWorker = new Worker(ZeeWorker);
+let zeeWorker;
+if (process.env.NODE_ENV === 'test') {
+  const Worker = require('workerjs');
+  zeeWorker = new Worker(__dirname + '/../../res/zee-worker.js');
+} else {
+  zeeWorker = new window.Worker('/zee-worker.js');
+}
 const zeeCallbacks = [];
 
 zeeWorker.onmessage = function (msg) {

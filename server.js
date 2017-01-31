@@ -1,10 +1,11 @@
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const config = require('./webpack.config');
+const baseConfig = config[0];
 
 new WebpackDevServer(webpack(config), {
-  contentBase: config.output.path,
-  publicPath: config.output.publicPath,
+  contentBase: baseConfig.output.path,
+  publicPath: baseConfig.output.publicPath,
   hot: process.env.NODE_ENV === 'development' ? true : false,
   historyApiFallback: true,
   stats: {

@@ -3,16 +3,7 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OfflinePlugin = require('offline-plugin');
 
-module.exports = {
-  entry: [
-    './index',
-  ],
-  output: {
-    path: path.join(__dirname, 'dist'),
-    filename: '[hash].bundle.js',
-    chunkFilename: '[id].[hash].bundle.js',
-    publicPath: '/',
-  },
+const baseConfig = {
   plugins: [
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
@@ -68,7 +59,7 @@ module.exports = {
 };
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports.plugins.push(
+  baseConfig.plugins.push(
     new OfflinePlugin({
       relativePaths: false,
       AppCache: false,
@@ -76,6 +67,7 @@ if (process.env.NODE_ENV === 'production') {
         scope: '/',
         events: true,
       },
+      externals: ['/zee-worker.js'],
       cacheMaps: [
         {
           requestTypes: null,
@@ -86,6 +78,30 @@ if (process.env.NODE_ENV === 'production') {
       ],
     }));
 } else if (process.env.NODE_ENV === 'development') {
-  module.exports.devtool = 'source-map';
-  module.exports.entry = ['webpack-dev-server/client?http://localhost:4242'].concat(module.exports.entry);
+  baseConfig.devtool = 'source-map';
+  baseConfig.entry = ['webpack-dev-server/client?http://localhost:4242'].concat(baseConfig.entry);
 }
+
+module.exports = [
+  {
+    entry: [
+      './index',
+    ],
+    output: {
+      path: path.join(__dirname, 'dist'),
+      filename: '[hash].bundle.js',
+      chunkFilename: '[id].[hash].bundle.js',
+      publicPath: '/',
+    },
+  },
+  {
+    entry: [
+      './src/worker/index',
+    ],
+    output: {
+      path: path.join(__dirname, 'dist'),
+      filename: 'worker.js',
+      publicPath: '/',
+    },
+  },
+].map(config => Object.assign({}, baseConfig, config));

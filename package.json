@@ -4,9 +4,11 @@
   "description": "perf.html, the gecko profiler UI",
   "main": "index.js",
   "scripts": {
-    "test": "nyc mocha --compilers js:babel-core/register test/**/*.js src/**/test/*.js",
+    "test": "npm run build && npm run test-all",
+    "test-all": "NODE_ENV=test nyc mocha --compilers js:babel-core/register 'test/**/*.js' 'src/**/test/*.js'",
+    "test-file": "NODE_ENV=test mocha --compilers js:babel-core/register",
     "test-report": "nyc report --reporter=text-lcov > coverage.lcov",
-    "start": "NODE_ENV=development node server.js",
+    "start": "mkdir -p dist && cp res/zee-worker.js dist/ && NODE_ENV=development node server.js",
     "start-no-hot": "npm run start",
     "start-prod": "npm run build-prod && npm run serve-static",
     "start-prod-readable": "npm run build-prod-readable && npm run serve-static",
@@ -14,7 +16,7 @@
     "build": "npm run build:clean && NODE_ENV=development webpack --progress",
     "build-prod-readable": "npm run build:clean && NODE_ENV=production webpack --progress",
     "build-prod": "npm run build:clean && NODE_ENV=production webpack -p --progress",
-    "build:clean": "rimraf dist && mkdirp dist && cp res/.htaccess dist/",
+    "build:clean": "rimraf dist && mkdirp dist && cp res/.htaccess dist/ && cp res/zee-worker.js dist/",
     "publish": "rimraf public_html && cp -r dist public_html",
     "eslint": "eslint index.js src",
     "eslint-fix": "eslint --fix index.js src",
@@ -77,7 +79,8 @@
     "webpack-dev-middleware": "^1.8.4",
     "webpack-dev-server": "^2.1.0-beta.12",
     "webpack-hot-middleware": "^2.13.2",
-    "worker-loader": "^0.7.1"
+    "webworker": "0.8.4",
+    "workerjs": "^0.1.1"
   },
   "babel": {
     "presets": [
