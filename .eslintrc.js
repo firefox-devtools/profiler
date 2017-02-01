@@ -4,6 +4,7 @@ module.exports = {
         "es6": true,
         "node": true
     },
+    "parser": "babel-eslint",
     "extends": ["eslint:recommended", "plugin:react/recommended"],
     "parserOptions": {
         "ecmaFeatures": {
@@ -13,9 +14,18 @@ module.exports = {
         "sourceType": "module"
     },
     "plugins": [
-        "react"
+        "react",
+        "flowtype"
     ],
     "rules": {
+        // Flow type rules:
+        "flowtype/define-flow-type": 1,
+        "flowtype/use-flow-type": 1,
+        "flowtype/generic-spacing": [2, "never"],
+        "flowtype/space-before-type-colon": [ 2, "never" ],
+        "flowtype/space-after-type-colon": [ 2, "always" ],
+
+        // JS Rules:
         "indent": [
             "error",
             2,
@@ -28,7 +38,6 @@ module.exports = {
         "comma-dangle": [ "error", "always-multiline" ],
         "no-console": [ "error", { allow: ["log", "warn", "error"] } ],
         "eqeqeq": "error",
-        "valid-jsdoc": "error",
         "consistent-return": "error",
         "curly": ["error", "all" ],
         "dot-location": ["error", "property"],

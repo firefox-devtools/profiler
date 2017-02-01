@@ -1,14 +1,27 @@
+// @flow
 import { timeCode } from './time-code';
+import type { Profile, Thread, IndexIntoStackTable } from './types/profile';
+
+type MatchingFunction = (string, string) => boolean;
+type Summary = { [id: string]: number };
+type StacksInCategory = { [id: string]: { [id: string]: number } }
+type SummarySegment = {
+  percentage: {[id: string]: number},
+  samples: {[id: string]: number}
+}
+type RollingSummary = SummarySegment[];
+type Categories = string[];
+type ThreadCategories = Categories[];
 
 /**
  * A list of strategies for matching sample names to patterns.
  */
-const match = {
+const match: {[id: string]: MatchingFunction} = {
   exact: (symbol, pattern) => symbol === pattern,
   prefix: (symbol, pattern) => symbol.startsWith(pattern),
   substring: (symbol, pattern) => symbol.includes(pattern),
   stem: (symbol, pattern) => {
-    return symbol === pattern || (symbol && symbol.startsWith(pattern + '('));
+    return symbol === pattern || symbol.startsWith(pattern + '(');
   },
 };
 
@@ -23,6 +36,7 @@ const match = {
  *   category, // The category to finally label the sample.
  * ]
  */
+
 const categories = [
   [match.exact, 'js::RunScript', 'script'],
   [match.stem, 'js::Nursery::collect', 'GC'],
@@ -70,11 +84,11 @@ const categories = [
   [match.prefix, 'Interpret(', 'script.execute.interpreter'],
 ];
 
-export function summarizeProfile(profile) {
+export function summarizeProfile(profile: Profile) {
   return timeCode('summarizeProfile', () => {
-    const categories = categorizeThreadSamples(profile);
-    const rollingSummaries = calculateRollingSummaries(profile, categories);
-    const summaries = summarizeCategories(profile, categories);
+    const threadCategories: ThreadCategories = categorizeThreadSamples(profile);
+    const rollingSummaries:RollingSummary[] = calculateRollingSummaries(profile, threadCategories);
+    const summaries = summarizeCategories(profile, threadCategories);
 
     return profile.threads.map((thread, i) => ({
       threadIndex: i,
@@ -115,10 +129,10 @@ function functionNameCategorizer() {
  * @param {object} thread Thread from a profile.
  * @return {function} Sample stack categorizer.
  */
-function sampleCategorizer(thread) {
+function sampleCategorizer(thread: Thread): (stackIndex: IndexIntoStackTable) => string {
   const categorizeFuncName = functionNameCategorizer();
 
-  function computeCategory(stackIndex) {
+  function computeCategory(stackIndex: IndexIntoStackTable): string {
     if (stackIndex === null) {
       return 'uncategorized';
     }
@@ -151,8 +165,9 @@ function sampleCategorizer(thread) {
     return prefixCategory;
   }
 
-  const stackCategoryCache = new Map();
-  function categorizeSampleStack(stackIndex) {
+  const stackCategoryCache: Map<IndexIntoStackTable, string> = new Map();
+
+  function categorizeSampleStack(stackIndex: IndexIntoStackTable): string {
     let category = stackCategoryCache.get(stackIndex);
     if (category !== undefined) {
       return category;
@@ -174,7 +189,7 @@ function sampleCategorizer(thread) {
  * @param {string} fullCategoryName - The name of the category.
  * @returns {object} summary
  */
-function summarizeSampleCategories(summary, fullCategoryName) {
+function summarizeSampleCategories(summary: Summary, fullCategoryName: string): Summary {
   const categories = fullCategoryName.split('.');
 
   while (categories.length > 0) {
@@ -191,10 +206,10 @@ function summarizeSampleCategories(summary, fullCategoryName) {
  * @param {object} summary - The object that summarizes the times of the samples.
  * @return {array} The summary with percentages.
  */
-function calculateSummaryPercentages(summary) {
-  const rows = Object.entries(summary);
+function calculateSummaryPercentages(summary: Summary) {
+  const rows = objectEntries(summary);
 
-  const sampleCount = rows.reduce((sum, [name, count]) => {
+  const sampleCount = rows.reduce((sum: number, [name: string, count: number]) => {
     // Only count the sample if it's not a sub-category. For instance "script.link"
     // is a sub-category of "script".
     return sum + (name.includes('.') ? 0 : count);
@@ -208,20 +223,19 @@ function calculateSummaryPercentages(summary) {
     .sort((a, b) => b.samples - a.samples);
 }
 
-function logStacks(samples, maxLogLength = 10) {
-  const entries = Object.entries(samples);
+function logStacks(stacksInCategory: StacksInCategory, maxLogLength = 10) {
+  const entries = objectEntries(stacksInCategory);
+  const data = entries
+    .sort(([, {total: a}], [, {total: b}]) => b - a)
+    .slice(0, Math.min(maxLogLength, entries.length));
+
   /* eslint-disable no-console */
   console.log(`Top ${maxLogLength} stacks in selected category`);
-  const log = typeof console.table === 'function' ? console.table : console.log;
-  log(
-    entries
-      .sort(([, {total: a}], [, {total: b}]) => b - a)
-      .slice(0, Math.min(maxLogLength, entries.length))
-  );
+  console.log(data);
   /* eslint-enable no-console */
 }
 
-function stackToString(stackIndex, thread) {
+function stackToString(stackIndex: IndexIntoStackTable, thread: Thread): string {
   const { stackTable, frameTable, funcTable, stringTable } = thread;
   const stack = [];
   let nextStackIndex = stackIndex;
@@ -235,26 +249,28 @@ function stackToString(stackIndex, thread) {
   return stack.join('\n');
 }
 
-function incrementPerThreadCount(container, key, threadName) {
+function incrementPerThreadCount(container: StacksInCategory, key: string, threadName: string) {
   const count = container[key] || { total: 0, [threadName]: 0 };
   count.total++;
   count[threadName]++;
   container[key] = count;
 }
 
-function countStacksInCategory(profile, summaries, category = 'uncategorized') {
-  const uncategorized = {};
+function countStacksInCategory(
+  profile: Profile, threadCategories: ThreadCategories, category: string = 'uncategorized'
+): StacksInCategory {
+  const stacksInCategory = {};
   profile.threads.forEach((thread, i) => {
-    const threadSummary = summaries[i];
+    const categories = threadCategories[i];
     const { samples } = thread;
     for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
-      if (threadSummary[sampleIndex] === category) {
-        const stringCallStack = stackToString(samples.stack[sampleIndex], thread);
-        incrementPerThreadCount(uncategorized, stringCallStack, thread.name);
+      if (categories[sampleIndex] === category) {
+        const stringCallStack: string = stackToString(samples.stack[sampleIndex], thread);
+        incrementPerThreadCount(stacksInCategory, stringCallStack, thread.name);
       }
     }
   });
-  return uncategorized;
+  return stacksInCategory;
 }
 
 /**
@@ -263,22 +279,26 @@ function countStacksInCategory(profile, summaries, category = 'uncategorized') {
  * @param {array} profile - The current profile.
  * @returns {array} Stacks mapped to categories.
  */
-export function categorizeThreadSamples(profile) {
+export function categorizeThreadSamples(profile: Profile): ThreadCategories {
   return timeCode('categorizeThreadSamples', () => {
-    const summaries = profile.threads.map(thread => {
-      const categorizer = sampleCategorizer(thread);
-      return thread.samples.stack.map(categorizer);
-    });
+    const threadCategories = mapProfileToThreadCategories(profile);
 
     if (process.env.NODE_ENV === 'development') {
       // Change the constant to display the top stacks of a different category.
       const categoryToDump = 'uncategorized';
-      const stacks = countStacksInCategory(profile, summaries, categoryToDump);
+      const stacks: StacksInCategory = countStacksInCategory(profile, threadCategories, categoryToDump);
       console.log(`${Object.keys(stacks).length} stacks labeled '${categoryToDump}'`);
       logStacks(stacks);
     }
 
-    return summaries;
+    return threadCategories;
+  });
+}
+
+function mapProfileToThreadCategories(profile: Profile): ThreadCategories {
+  return profile.threads.map(thread => {
+    const categorizer = sampleCategorizer(thread);
+    return thread.samples.stack.map(categorizer);
   });
 }
 
@@ -289,7 +309,7 @@ export function categorizeThreadSamples(profile) {
  * @param {object} threadCategories - Each thread's categories for the samples.
  * @returns {object} The summaries of each thread.
  */
-export function summarizeCategories(profile, threadCategories) {
+export function summarizeCategories(profile: Profile, threadCategories: ThreadCategories) {
   return threadCategories.map(categories => (
       categories.reduce(summarizeSampleCategories, {})
     ))
@@ -298,7 +318,9 @@ export function summarizeCategories(profile, threadCategories) {
     // .sort((a, b) => Object.keys(b.summary).length - Object.keys(a.summary).length);
 }
 
-export function calculateRollingSummaries(profile, threadCategories, segmentCount = 40, rolling = 4) {
+export function calculateRollingSummaries(
+  profile: Profile, threadCategories: ThreadCategories, segmentCount: number = 40, rolling: number = 4
+): RollingSummary[] {
   const [minTime, maxTime] = profile.threads.map(thread => {
     return [thread.samples.time[0], thread.samples.time[thread.samples.time.length - 1]];
   })
@@ -314,12 +336,13 @@ export function calculateRollingSummaries(profile, threadCategories, segmentCoun
 
   return profile.threads.map((thread, threadIndex) => {
     const categories = threadCategories[threadIndex];
+    const rollingSummary: RollingSummary = [];
 
-    return times(segmentCount, segmentIndex => {
+    for (let i = 0; i < segmentCount; i++) {
       let samplesInRange = 0;
       const samples = {};
 
-      const rollingMinTime = minTime + (segmentIndex * segmentLength) + segmentHalfLength - rollingHalfLength;
+      const rollingMinTime = minTime + (i * segmentLength) + segmentHalfLength - rollingHalfLength;
       const rollingMaxTime = rollingMinTime + rollingLength;
 
       for (let sampleIndex = 0; sampleIndex < thread.samples.time.length; sampleIndex++) {
@@ -334,20 +357,14 @@ export function calculateRollingSummaries(profile, threadCategories, segmentCoun
         }
       }
 
-      return {
+      rollingSummary.push({
         samples,
         percentage: mapObj(samples, count => count / samplesInRange),
-      };
-    });
-  });
-}
+      });
+    }
 
-function times(n, fn) {
-  const results = Array(n);
-  for (let i = 0; i < n; i++) {
-    results[i] = fn(i);
-  }
-  return results;
+    return rollingSummary;
+  });
 }
 
 function mapObj(object, fn) {
@@ -360,4 +377,18 @@ function mapObj(object, fn) {
     }
   }
   return mappedObj;
+}
+
+/**
+ * Flow requires a type-safe implementation of Object.entries().
+ * See: https://github.com/facebook/flow/issues/2174
+ */
+function objectEntries<T>(object: { [id: string]: T }): Array<[string, T]> {
+  const entries = [];
+  for (const key in object) {
+    if (object.hasOwnProperty(key)) {
+      entries.push([key, object[key]]);
+    }
+  }
+  return entries;
 }

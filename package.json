@@ -4,23 +4,23 @@
   "description": "perf.html, the gecko profiler UI",
   "main": "src/content/index.js",
   "scripts": {
-    "test": "npm run build && npm run test-all",
-    "test-all": "NODE_ENV=test nyc mocha --compilers js:babel-core/register 'test/**/*.js' 'src/**/test/*.js'",
-    "test-file": "NODE_ENV=test mocha --compilers js:babel-core/register",
-    "test-report": "nyc report --reporter=text-lcov > coverage.lcov",
+    "build": "npm run build:clean && NODE_ENV=development webpack --progress",
+    "build:clean": "rimraf dist && mkdirp dist && cp res/.htaccess dist/ && cp res/zee-worker.js dist/",
+    "build-prod": "npm run build:clean && NODE_ENV=production webpack -p --progress",
+    "build-prod-readable": "npm run build:clean && NODE_ENV=production webpack --progress",
+    "eslint": "eslint index.js src",
+    "eslint-fix": "eslint --fix index.js src",
+    "flow": "flow",
+    "publish": "rimraf public_html && cp -r dist public_html",
+    "serve-static": "ws -d dist/ -s index.html -p 4242",
     "start": "mkdir -p dist && cp res/zee-worker.js dist/ && NODE_ENV=development node server.js",
     "start-no-hot": "npm run start",
     "start-prod": "npm run build-prod && npm run serve-static",
     "start-prod-readable": "npm run build-prod-readable && npm run serve-static",
-    "serve-static": "ws -d dist/ -s index.html -p 4242",
-    "build": "npm run build:clean && NODE_ENV=development webpack --progress",
-    "build-prod-readable": "npm run build:clean && NODE_ENV=production webpack --progress",
-    "build-prod": "npm run build:clean && NODE_ENV=production webpack -p --progress",
-    "build:clean": "rimraf dist && mkdirp dist && cp res/.htaccess dist/ && cp res/zee-worker.js dist/",
-    "publish": "rimraf public_html && cp -r dist public_html",
-    "eslint": "eslint src",
-    "eslint-fix": "eslint --fix src",
-    "documentation": "documentation"
+    "test": "npm run build && npm run test-all",
+    "test-all": "NODE_ENV=test nyc mocha --compilers js:babel-core/register 'test/**/*.js' 'src/**/test/*.js'",
+    "test-file": "NODE_ENV=test mocha --compilers js:babel-core/register",
+    "test-report": "nyc report --reporter=text-lcov > coverage.lcov"
   },
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MPL-2.0",
@@ -33,7 +33,9 @@
     "array-range": "^1.0.1",
     "babel-cli": "^6.2.0",
     "babel-core": "^6.2.1",
+    "babel-eslint": "^7.1.1",
     "babel-loader": "^6.2.4",
+    "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "babel-polyfill": "^6.2.0",
     "babel-preset-es2015": "^6.18.0",
     "babel-preset-react": "^6.5.0",
@@ -44,13 +46,14 @@
     "clamp": "^1.0.1",
     "classnames": "^2.2.5",
     "css-loader": "^0.26.0",
-    "documentation": "^4.0.0-beta2",
     "eslint": "^3.10.2",
     "eslint-config-google": "^0.6.0",
+    "eslint-plugin-flowtype": "^2.30.0",
     "eslint-plugin-react": "^6.4.0",
     "express": "^4.13.4",
     "fetch-jsonp": "^1.0.2",
     "file-loader": "^0.9.0",
+    "flow-bin": "^0.37.0",
     "html-webpack-plugin": "^2.24.1",
     "http-server": "^0.9.0",
     "json-loader": "^0.5.4",
@@ -86,6 +89,9 @@
     "presets": [
       "react",
       "es2015"
+    ],
+    "plugins": [
+      "transform-flow-strip-types"
     ]
   }
 }
