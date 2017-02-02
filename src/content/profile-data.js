@@ -1,4 +1,7 @@
 // @flow
+
+/** @module profile-data */
+
 import type {
   SamplesTable,
   StackTable,
@@ -15,9 +18,8 @@ import { timeCode } from '../common/time-code';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
- * @module profile-data
+ * @memberof profile-data
  */
-
 export const resourceTypes = {
   unknown: 0,
   library: 1,
@@ -31,10 +33,11 @@ export const resourceTypes = {
  * Takes the stack table and the frame table, creates a func stack table and
  * returns a map from each stack to its corresponding func stack which can be
  * used to provide funcStack information for the samples data.
- * @param  {Object} stackTable The thread's stackTable.
- * @param  {Object} frameTable The thread's frameTable.
- * @param  {Object} funcTable  The thread's funcTable.
- * @return {Object}            The funcStackTable and the stackIndexToFuncStackIndex map.
+ * @memberof profile-data
+ * @param stackTable The thread's stackTable.
+ * @param frameTable The thread's frameTable.
+ * @param funcTable  The thread's funcTable.
+ * @return {Object}  The funcStackTable and the stackIndexToFuncStackIndex map.
  */
 export function getFuncStackInfo(stackTable: StackTable, frameTable: FrameTable, funcTable: FuncTable) {
   return timeCode('getFuncStackInfo', () => {
@@ -225,10 +228,11 @@ export function filterThreadToSearchString(thread: Thread, searchString: string)
  * Filter thread to only contain stacks which start with |prefixFuncs|, and
  * only samples witth those stacks. The new stacks' roots will be frames whose
  * func is the last element of the prefix func array.
- * @param  {object} thread      The thread.
- * @param  {array} prefixFuncs  The prefix stack, as an array of funcs.
- * @param  {bool} matchJSOnly   Ignore non-JS frames during matching.
- * @return {object}             The filtered thread.
+ * @memberof profile-data
+ * @param thread        The thread.
+ * @param prefixFuncs   The prefix stack, as an array of funcs.
+ * @param matchJSOnly   Ignore non-JS frames during matching.
+ * @return {object}     The filtered thread.
  */
 export function filterThreadToPrefixStack(thread: Thread, prefixFuncs: IndexIntoFuncTable[], matchJSOnly: boolean) {
   return timeCode('filterThreadToPrefixStack', () => {
@@ -287,11 +291,12 @@ export function filterThreadToPrefixStack(thread: Thread, prefixFuncs: IndexInto
  * Filter thread to only contain stacks which end with |postfixFuncs|, and
  * only samples witth those stacks. The new stacks' leaf frames will be
  * frames whose func is the last element of the postfix func array.
- * @param  {object} thread      The thread.
- * @param  {array} postfixFuncs The postfix stack, as an array of funcs,
- *                              starting from the leaf func.
- * @param  {bool} matchJSOnly   Ignore non-JS frames during matching.
- * @return {object}             The filtered thread.
+ * @memberof profile-data
+ * @param thread       The thread.
+ * @param postfixFuncs The postfix stack, as an array of funcs,
+ *                     starting from the leaf func.
+ * @param matchJSOnly  Ignore non-JS frames during matching.
+ * @return {object}    The filtered thread.
  */
 export function filterThreadToPostfixStack(thread: Thread, postfixFuncs: IndexIntoFuncTable[], matchJSOnly: boolean) {
   return timeCode('filterThreadToPostfixStack', () => {
