@@ -14,6 +14,7 @@ import ProfileThreadTracingMarkerTimeline from '../containers/ProfileThreadTraci
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
 import ProfileSharing from '../containers/ProfileSharing';
 import SymbolicationStatusOverlay from '../containers/SymbolicationStatusOverlay';
+import FlameChartView from '../containers/FlameChartView';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import * as actions from '../actions';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt, getSelectedTab } from '../selectors/';
@@ -25,6 +26,7 @@ class ProfileViewer extends Component {
     this._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(this);
     this._onSelectTab = this._onSelectTab.bind(this);
 
+    // If updating this list, make sure and update the tabOrder reducer with another index.
     this._tabs = [
       {
         name: 'summary',
@@ -45,6 +47,10 @@ class ProfileViewer extends Component {
       {
         name: 'log',
         title: 'Log',
+      },
+      {
+        name: 'flameChart',
+        title: 'Timeline',
       },
     ];
   }
@@ -159,9 +165,10 @@ class ProfileViewer extends Component {
           calltree: <ProfileCallTreeView />,
           markers: <ProfileMarkersView />,
           tasktracer: <ProfileTaskTracerView rangeStart={timeRange.start} rangeEnd={timeRange.end} />,
+          flameChart: <FlameChartView />,
           log: <ProfileLogView />,
         }[selectedTab]}
-        
+
         <SymbolicationStatusOverlay />
 
       </div>
