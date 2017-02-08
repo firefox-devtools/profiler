@@ -8,12 +8,12 @@ export function uploadBinaryProfileData(data, progressChangeCallback = undefined
       if (xhr.status === 200) {
         resolve(xhr.responseText);
       } else {
-        reject(xhr.status);
+        reject(`xhr onload with status != 200, xhr.statusText: ${xhr.statusText}`);
       }
     };
 
     xhr.onerror = () => {
-      reject(xhr.status);
+      reject(`xhr onerror was called, xhr.statusText: ${xhr.statusText}`);
     };
 
     xhr.upload.onprogress = e => {
