@@ -56,5 +56,5 @@ Home.propTypes = {
 
 export default connect(() => ({
   className: 'home',
-  profilerURL: 'https://raw.githubusercontent.com/mstange/Gecko-Profiler-Addon/master/gecko_profiler.xpi',
+  profilerURL: 'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi',
 }))(Home);
