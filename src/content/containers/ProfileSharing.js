@@ -146,6 +146,7 @@ class ProfileSharingCompositeButton extends Component {
           this._permalinkButton.openPanel();
         }
       });
+      return Promise.all([uploadPromise, shortenURLPromise]);
     }).catch(error => {
       this.setState({
         state: 'error',
