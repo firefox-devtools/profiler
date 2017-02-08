@@ -142,6 +142,10 @@ class FlameChartCanvas extends Component {
           const w = ((unitEndTime - unitStartTime) * containerWidth / viewportLength);
           const h = ROW_HEIGHT - 1;
 
+          if (w < 2) {
+            // Skip sending draw calls for sufficiently small boxes.
+            continue;
+          }
           ctx.fillRect(x, y, w, h);
           // Ensure spacing between blocks.
           ctx.clearRect(x, y, 1, h);

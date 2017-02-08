@@ -510,8 +510,11 @@ export function invertCallstack(thread: Thread) {
       frame: [],
       prefix: [],
     };
+    // Create a Map that keys off of two values, both the prefix and frame combination
+    // by using a bit of math: prefix * frameCount + frame => stackIndex
+    const prefixAndFrameToStack = new Map();
     const frameCount = frameTable.length;
-    const prefixAndFrameToStack = new Map(); // prefix * frameCount + frame => stackIndex
+
     function stackFor(prefix, frame) {
       const prefixAndFrameIndex = (prefix === null ? -1 : prefix) * frameCount + frame;
       let stackIndex = prefixAndFrameToStack.get(prefixAndFrameIndex);

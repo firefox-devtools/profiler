@@ -1,5 +1,5 @@
 // @flow
-import type { IndexIntoStackTable, Thread } from '../common/types/profile';
+import type { IndexIntoStackTable, Thread, StackTable } from '../common/types/profile';
 import type { FuncStackInfo } from '../common/types/profile-derived';
 
 /**
@@ -91,8 +91,8 @@ export function getStackTimingByDepth(
       const funcStackIndex = stackIndexToFuncStackIndex[stackIndex];
       const depth = funcStackTable.depth[funcStackIndex];
 
-      // If the two samples at the top of the stack are different, pop the last stack frame.
-      const depthToPop = lastSeen.stackIndexByDepth[depth] === stackIndex ? depth : depth - 1;
+      // Find the depth of the nearest shared stack.
+      const depthToPop = _findNearestSharedStackDepth(thread.stackTable, stackIndex, lastSeen, depth);
       _popStacks(stackTimingByDepth, lastSeen, depthToPop, previousDepth, sampleTime);
       _pushStacks(thread, lastSeen, depth, stackIndex, sampleTime);
       previousDepth = depth;
@@ -104,6 +104,19 @@ export function getStackTimingByDepth(
   _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, endingTime);
 
   return stackTimingByDepth;
+}
+
+function _findNearestSharedStackDepth(
+  stackTable: StackTable, stackIndex: IndexIntoStackTable, lastSeen: LastSeen, depthStart: number
+): number {
+  let nextStackIndex = stackIndex;
+  for (let depth = depthStart; depth >= 0; depth--) {
+    if (lastSeen.stackIndexByDepth[depth] === nextStackIndex) {
+      return depth;
+    }
+    nextStackIndex = stackTable.prefix[nextStackIndex];
+  }
+  return -1;
 }
 
 function _popStacks(
