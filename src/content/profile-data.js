@@ -88,7 +88,11 @@ export function getFuncStackInfo(stackTable: StackTable, frameTable: FrameTable,
 }
 
 export function getSampleFuncStacks(samples: SamplesTable, stackIndexToFuncStackIndex: { [key: number]: number }) {
-  return samples.stack.map(stack => stackIndexToFuncStackIndex[stack]);
+  return samples.stack.map(stack => {
+    return stack === null
+      ? null :
+      stackIndexToFuncStackIndex[stack];
+  });
 }
 
 function getTimeRangeForThread(thread: Thread, interval: number) {
@@ -208,7 +212,7 @@ export function filterThreadToJSOnly(thread: Thread) {
               const newFuncIndex = newFuncTable.length++;
               newFuncTable.name.push(stringTable.indexForString('Platform'));
               newFuncTable.resource.push(null);
-              newFuncTable.address.push(null);
+              newFuncTable.address.push(stringTable.indexForString(''));
               newFuncTable.isJS.push(false);
 
               newFrameTable.implementation.push(null);
@@ -345,7 +349,7 @@ export function filterThreadToPrefixStack(thread: Thread, prefixFuncs: IndexInto
     }
     const newSamples = Object.assign({}, samples, {
       stack: samples.stack.map(oldStack => {
-        if (stackMatches[oldStack] !== prefixDepth) {
+        if (oldStack === null || stackMatches[oldStack] !== prefixDepth) {
           return null;
         }
         return oldStackToNewStack.get(oldStack);

@@ -19,7 +19,7 @@ export type StackTable = {
 export type SamplesTable = {
   frameNumber: IndexIntoFrameTable[],
   responsiveness: number[],
-  stack: IndexIntoStackTable[],
+  stack: Array<IndexIntoStackTable|null>,
   time: number[],
   rss: any, // TODO
   uss: any, // TODO
@@ -74,7 +74,7 @@ export type FuncTable = {
   isJS: boolean[],
   length: number,
   name: IndexIntoStringTable[],
-  resource: IndexIntoResourceTable[],
+  resource: Array<IndexIntoResourceTable|null>,
 }
 
 export type ResourceTable = {

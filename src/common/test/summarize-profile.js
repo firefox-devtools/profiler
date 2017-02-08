@@ -22,31 +22,33 @@ describe('summarize-profile', function () {
   it('categorizes samples', () => {
     const {summary} = geckoMain;
 
-    let i = 0;
-    for (const { category, samples, percentage } of [
-      { category: 'wait', samples: 141, percentage: 0.4812286689419795 },
-      { category: 'script', samples: 113, percentage: 0.3856655290102389 },
-      { category: 'script.execute.baseline', samples: 28, percentage: 0.09556313993174062 },
-      { category: 'script.execute', samples: 28, percentage: 0.09556313993174062 },
-      { category: 'dom', samples: 20, percentage: 0.06825938566552901 },
-      { category: 'script.compile', samples: 16, percentage: 0.05460750853242321 },
-      { category: 'script.compile.baseline', samples: 14, percentage: 0.04778156996587031 },
-      { category: 'uncategorized', samples: 7, percentage: 0.023890784982935155 },
-      { category: 'frameconstruction', samples: 6, percentage: 0.020477815699658702 },
-      { category: 'script.parse', samples: 4, percentage: 0.013651877133105802 },
-      { category: 'network', samples: 4, percentage: 0.013651877133105802 },
-      { category: 'dom.wait', samples: 2, percentage: 0.006825938566552901 },
-      { category: 'script.compile.ion', samples: 2, percentage: 0.006825938566552901 },
-      { category: 'script.icupdate', samples: 2, percentage: 0.006825938566552901 },
-      { category: 'restyle', samples: 1, percentage: 0.0034129692832764505 },
-    ]) {
-      assert.equal(summary[i].category, category,
-                   `summary ${i} should be category ${category}, not ${summary[i].category}`);
-      assert.equal(summary[i].samples, samples,
-                   `summary ${i} should have ${samples} in category ${category}, not ${summary[i].samples}`);
-      assertFloatEquals(summary[i].percentage, percentage);
-      i++;
-    }
+    const expectedSummary = [
+      { category: 'wait', samples: 141 },
+      { category: 'script', samples: 113 },
+      { category: 'script.execute', samples: 28 },
+      { category: 'script.execute.baseline', samples: 28 },
+      { category: 'dom', samples: 20 },
+      { category: 'script.compile', samples: 16 },
+      { category: 'script.compile.baseline', samples: 14 },
+      { category: 'frameconstruction', samples: 6 },
+      { category: 'script.parse', samples: 4 },
+      { category: 'network', samples: 4 },
+      { category: 'script.compile.ion', samples: 2 },
+      { category: 'dom.wait', samples: 2 },
+      { category: 'script.icupdate', samples: 2 },
+      { category: 'CC', samples: 1 },
+      { category: 'CC.wait', samples: 1 },
+      { category: 'restyle', samples: 1 },
+    ];
+
+    // Go ahead and calculate the percentages dynamically for the test, this way
+    // the float equalities will pass a strict equality test.
+    const sampleCount = 286;
+    expectedSummary.forEach(row => {
+      row.percentage = row.samples / sampleCount;
+    });
+
+    assert.deepEqual(summary, expectedSummary);
   });
 
   it('provides a rolling summary', () => {
