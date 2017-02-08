@@ -7,3 +7,8 @@ export type FuncStackTable = {
   depth: number[],
   length: number,
 }
+
+export type FuncStackInfo = {
+  funcStackTable: FuncStackTable,
+  stackIndexToFuncStackIndex: Uint32Array
+}

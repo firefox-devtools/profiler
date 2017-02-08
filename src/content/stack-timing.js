@@ -1,6 +1,10 @@
+// @flow
+import type { IndexIntoStackTable, Thread } from '../common/types/profile';
+import type { FuncStackInfo } from '../common/types/profile-derived';
+
 /**
- * Build a sample timing table that lists all of the sample's timing information
- * by call stack depth. This optimizes sample data for Flame Chart timeline views. It
+ * The StackTimingByDepth data structure organizes stack frames by their depth, and start
+ * and end times. This optimizes sample data for Flame Chart timeline views. It
  * makes it really easy to draw a large amount of boxes at once based on where the
  * viewport is in the stack frame data. Plus the end timings for frames need to be
  * reconstructed from the sample data, as the samples only contain start timings.
@@ -31,6 +35,23 @@
  *   ...
  *   {start: [25, 45], end: [35, 55], stack: [123, 159, 160]}
  * ]
+ */
+export type StackTimingByDepth = Array<{
+  // Start time of stack in milliseconds.
+  start: number[],
+  // Start time of stack in milliseconds.
+  end: number[],
+  stack: IndexIntoStackTable[],
+  length: number,
+}>
+
+type LastSeen = {
+  startTimeByDepth: number[],
+  stackIndexByDepth: IndexIntoStackTable[],
+}
+
+/**
+ * Build a StackTimingByDepth table from a given thread.
  *
  * @param {object} thread - The profile thread.
  * @param {object} funcStackInfo - from the funcStackInfo selector.
@@ -38,7 +59,9 @@
  * @param {number} interval - The sampling interval that the profile was recorded with.
  * @return {array} stackTimingByDepth
  */
-export function getStackTimingByDepth(thread, funcStackInfo, maxDepth, interval) {
+export function getStackTimingByDepth(
+  thread: Thread, funcStackInfo: FuncStackInfo, maxDepth: number, interval: number
+): StackTimingByDepth {
   const {funcStackTable, stackIndexToFuncStackIndex} = funcStackInfo;
   const stackTimingByDepth = Array.from({length: maxDepth + 1}, () => ({
     start: [],
@@ -47,7 +70,7 @@ export function getStackTimingByDepth(thread, funcStackInfo, maxDepth, interval)
     length: 0,
   }));
 
-  const lastSeen = {
+  const lastSeen:LastSeen = {
     startTimeByDepth: [],
     stackIndexByDepth: [],
   };
@@ -58,14 +81,22 @@ export function getStackTimingByDepth(thread, funcStackInfo, maxDepth, interval)
   for (let i = 0; i < thread.samples.length; i++) {
     const stackIndex = thread.samples.stack[i];
     const sampleTime = thread.samples.time[i];
-    const funcStackIndex = stackIndexToFuncStackIndex[stackIndex];
-    const depth = funcStackTable.depth[funcStackIndex];
 
-    // If the two samples at the top of the stack are different, pop the last stack frame.
-    const depthToPop = lastSeen.stackIndexByDepth[depth] === stackIndex ? depth : depth - 1;
-    _popStacks(stackTimingByDepth, lastSeen, depthToPop, previousDepth, sampleTime);
-    _pushStacks(thread, lastSeen, depth, stackIndex, sampleTime);
-    previousDepth = depth;
+    // If this stack index is null (for instance if it was filtered out) then pop back
+    // down to the base stack.
+    if (stackIndex === null) {
+      _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, sampleTime);
+      previousDepth = -1;
+    } else {
+      const funcStackIndex = stackIndexToFuncStackIndex[stackIndex];
+      const depth = funcStackTable.depth[funcStackIndex];
+
+      // If the two samples at the top of the stack are different, pop the last stack frame.
+      const depthToPop = lastSeen.stackIndexByDepth[depth] === stackIndex ? depth : depth - 1;
+      _popStacks(stackTimingByDepth, lastSeen, depthToPop, previousDepth, sampleTime);
+      _pushStacks(thread, lastSeen, depth, stackIndex, sampleTime);
+      previousDepth = depth;
+    }
   }
 
   // Pop the remaining stacks
@@ -75,7 +106,10 @@ export function getStackTimingByDepth(thread, funcStackInfo, maxDepth, interval)
   return stackTimingByDepth;
 }
 
-function _popStacks(stackTimingByDepth, lastSeen, depth, previousDepth, sampleTime) {
+function _popStacks(
+  stackTimingByDepth: StackTimingByDepth, lastSeen: LastSeen, depth: number,
+  previousDepth: number, sampleTime: number
+) {
   // "Pop" off the stack, and commit the timing of the frames
   for (let stackDepth = depth + 1; stackDepth <= previousDepth; stackDepth++) {
     // Push on the new information.
@@ -85,12 +119,15 @@ function _popStacks(stackTimingByDepth, lastSeen, depth, previousDepth, sampleTi
     stackTimingByDepth[stackDepth].length++;
 
     // Delete that this stack frame has been seen.
-    lastSeen.stackIndexByDepth[stackDepth] = undefined;
-    lastSeen.startTimeByDepth[stackDepth] = undefined;
+    delete lastSeen.stackIndexByDepth[stackDepth];
+    delete lastSeen.startTimeByDepth[stackDepth];
   }
 }
 
-function _pushStacks(thread, lastSeen, depth, startingIndex, sampleTime) {
+function _pushStacks(
+  thread: Thread, lastSeen: LastSeen, depth: number, startingIndex: IndexIntoStackTable,
+  sampleTime: number
+) {
   let stackIndex = startingIndex;
   // "Push" onto the stack with new frames
   for (let parentDepth = depth; parentDepth >= 0; parentDepth--) {
@@ -103,16 +140,18 @@ function _pushStacks(thread, lastSeen, depth, startingIndex, sampleTime) {
   }
 }
 
-export function computeFuncStackMaxDepth(rangedThread, funcStackInfo) {
+export function computeFuncStackMaxDepth(rangedThread: Thread, funcStackInfo: FuncStackInfo): number {
   let maxDepth = 0;
   const {samples} = rangedThread;
   const {funcStackTable, stackIndexToFuncStackIndex} = funcStackInfo;
   for (let i = 0; i < rangedThread.samples.length; i++) {
     const stackIndex = samples.stack[i];
-    const funcStackIndex = stackIndexToFuncStackIndex[stackIndex];
-    const depth = funcStackTable.depth[funcStackIndex];
-    if (depth > maxDepth) {
-      maxDepth = depth;
+    if (stackIndex !== null) {
+      const funcStackIndex = stackIndexToFuncStackIndex[stackIndex];
+      const depth = funcStackTable.depth[funcStackIndex];
+      if (depth > maxDepth) {
+        maxDepth = depth;
+      }
     }
   }
   return maxDepth;

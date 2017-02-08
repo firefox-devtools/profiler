@@ -10,7 +10,7 @@ type SummarySegment = {
   samples: {[id: string]: number}
 }
 type RollingSummary = SummarySegment[];
-type Categories = string[];
+type Categories = Array<(string|null)>;
 type ThreadCategories = Categories[];
 
 /**
@@ -125,16 +125,21 @@ function functionNameCategorizer() {
 }
 
 /**
+ * A function that categorizes a sample.
+ */
+type SampleCategorizer = (stackIndex: (IndexIntoStackTable|null)) => (string|null);
+
+/**
  * Given a profile, return a function that categorizes a sample.
  * @param {object} thread Thread from a profile.
  * @return {function} Sample stack categorizer.
  */
-function sampleCategorizer(thread: Thread): (stackIndex: IndexIntoStackTable) => string {
+function sampleCategorizer(thread: Thread): SampleCategorizer {
   const categorizeFuncName = functionNameCategorizer();
 
-  function computeCategory(stackIndex: IndexIntoStackTable): string {
+  function computeCategory(stackIndex: (IndexIntoStackTable|null)): (string|null) {
     if (stackIndex === null) {
-      return 'uncategorized';
+      return null;
     }
 
     const frameIndex = thread.stackTable.frame[stackIndex];
@@ -153,7 +158,7 @@ function sampleCategorizer(thread: Thread): (stackIndex: IndexIntoStackTable) =>
 
     const prefixCategory = categorizeSampleStack(thread.stackTable.prefix[stackIndex]);
     if (category === 'wait') {
-      if (prefixCategory === 'uncategorized') {
+      if (prefixCategory === null || prefixCategory === 'uncategorized') {
         return 'wait';
       }
       if (prefixCategory.endsWith('.wait') || prefixCategory === 'wait') {
@@ -165,9 +170,12 @@ function sampleCategorizer(thread: Thread): (stackIndex: IndexIntoStackTable) =>
     return prefixCategory;
   }
 
-  const stackCategoryCache: Map<IndexIntoStackTable, string> = new Map();
+  const stackCategoryCache: Map<IndexIntoStackTable, (string|null)> = new Map();
 
-  function categorizeSampleStack(stackIndex: IndexIntoStackTable): string {
+  function categorizeSampleStack(stackIndex: (IndexIntoStackTable|null)): (string|null) {
+    if (stackIndex === null) {
+      return null;
+    }
     let category = stackCategoryCache.get(stackIndex);
     if (category !== undefined) {
       return category;
@@ -189,15 +197,16 @@ function sampleCategorizer(thread: Thread): (stackIndex: IndexIntoStackTable) =>
  * @param {string} fullCategoryName - The name of the category.
  * @returns {object} summary
  */
-function summarizeSampleCategories(summary: Summary, fullCategoryName: string): Summary {
-  const categories = fullCategoryName.split('.');
+function summarizeSampleCategories(summary: Summary, fullCategoryName: (string|null)): Summary {
+  if (fullCategoryName !== null) {
+    const categories = fullCategoryName.split('.');
 
-  while (categories.length > 0) {
-    const category = categories.join('.');
-    summary[category] = (summary[category] || 0) + 1;
-    categories.pop();
+    while (categories.length > 0) {
+      const category = categories.join('.');
+      summary[category] = (summary[category] || 0) + 1;
+      categories.pop();
+    }
   }
-
   return summary;
 }
 
@@ -220,6 +229,9 @@ function calculateSummaryPercentages(summary: Summary) {
       const percentage = samples / sampleCount;
       return { category, samples, percentage };
     })
+    // Sort by name first so that the results are deterministic.
+    .sort((a, b) => a.category > b.category ? -1 : 1)
+    // Sort by sample count second.
     .sort((a, b) => b.samples - a.samples);
 }
 
@@ -265,8 +277,11 @@ function countStacksInCategory(
     const { samples } = thread;
     for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
       if (categories[sampleIndex] === category) {
-        const stringCallStack: string = stackToString(samples.stack[sampleIndex], thread);
-        incrementPerThreadCount(stacksInCategory, stringCallStack, thread.name);
+        const stackIndex = samples.stack[sampleIndex];
+        if (stackIndex !== null) {
+          const stringCallStack: string = stackToString(stackIndex, thread);
+          incrementPerThreadCount(stacksInCategory, stringCallStack, thread.name);
+        }
       }
     }
   });
@@ -314,8 +329,6 @@ export function summarizeCategories(profile: Profile, threadCategories: ThreadCa
       categories.reduce(summarizeSampleCategories, {})
     ))
     .map(calculateSummaryPercentages);
-    // Sort the threads based on how many categories they have.
-    // .sort((a, b) => Object.keys(b.summary).length - Object.keys(a.summary).length);
 }
 
 export function calculateRollingSummaries(
@@ -352,8 +365,10 @@ export function calculateRollingSummaries(
             break;
           }
           const category = categories[sampleIndex];
-          samples[category] = (samples[category] || 0) + 1;
-          samplesInRange++;
+          if (category !== null) {
+            samples[category] = (samples[category] || 0) + 1;
+            samplesInRange++;
+          }
         }
       }
 
