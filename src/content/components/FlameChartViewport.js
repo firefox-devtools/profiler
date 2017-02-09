@@ -75,7 +75,7 @@ class FlameChartViewport extends Component {
   _mouseWheelListener(event) {
     event.preventDefault();
     const { containerLeft, containerWidth } = this.state;
-    const mouseCenter = (event.screenX - containerLeft) / containerWidth;
+    const mouseCenter = (event.clientX - containerLeft) / containerWidth;
     const deltaY = event.deltaMode === LINE_SCROLL_MODE
       ? event.deltaY * SCROLL_LINE_SIZE
       : event.deltaY;
@@ -130,13 +130,18 @@ class FlameChartViewport extends Component {
       // Calculate top and bottom in terms of pixels.
       let newViewportTop = viewportTop - (event.clientY - dragY);
       let newViewportBottom = newViewportTop + containerHeight;
-      if (newViewportTop < 0) {
-        newViewportTop = 0;
-        newViewportBottom = containerHeight;
-      }
+
+      // Constrain the viewport to the bottom.
       if (newViewportBottom > maxViewportHeight) {
         newViewportTop = maxViewportHeight - containerHeight;
         newViewportBottom = maxViewportHeight;
+      }
+
+      // Constrain the viewport to the top. This must be after constraining to the bottom
+      // so if the view is extra small the content is anchored to the top, and not the bottom.
+      if (newViewportTop < 0) {
+        newViewportTop = 0;
+        newViewportBottom = containerHeight;
       }
 
       this.setState({
