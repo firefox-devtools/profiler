@@ -9,6 +9,7 @@ export type IndexIntoResourceTable = number;
 export type IndexIntoLibs = number;
 export type categoryBitMask = number;
 export type resourceTypeEnum = number;
+export type MemoryOffset = number;
 
 export type StackTable = {
   frame: number[],
@@ -33,7 +34,7 @@ export type Marker = {
   dur?: number,
   title?: string,
   start?: number,
-  name?: string
+  name?: string,
 };
 
 export type MarkersTable = {
@@ -50,7 +51,7 @@ export type FrameTable = {
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
   optimizations: ({} | null)[],
-  length: number
+  length: number,
 };
 
 export type StringTable = {
@@ -62,7 +63,7 @@ export type StringTable = {
 };
 
 export type FuncTable = {
-  address: IndexIntoStringTable[],
+  address: MemoryOffset[],
   libs: {
     breakpadId: string,
     end: number,
@@ -83,7 +84,7 @@ export type ResourceTable = {
   length: number,
   lib: IndexIntoLibs[],
   name: IndexIntoStringTable,
-  type: resourceTypeEnum
+  type: resourceTypeEnum,
 }
 
 export type Thread = {
@@ -97,11 +98,11 @@ export type Thread = {
   stringTable: StringTable,
   libs: [],
   funcTable: FuncTable,
-  resourceTable: {}
+  resourceTable: {},
 };
 
 export type ProfileMeta = {
-  interval: number
+  interval: number,
 };
 
 export type TaskTracer = {};

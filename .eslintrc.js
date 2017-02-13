@@ -24,6 +24,7 @@ module.exports = {
         "flowtype/generic-spacing": [2, "never"],
         "flowtype/space-before-type-colon": [ 2, "never" ],
         "flowtype/space-after-type-colon": [ 2, "always" ],
+        "flowtype/delimiter-dangle": [ 2, "always-multiline" ],
 
         // JS Rules:
         "indent": [

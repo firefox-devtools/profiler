@@ -33,13 +33,13 @@ import type { FuncStackInfo } from '../common/types/profile-derived';
  *   {start: [20, 40, 60], end: [40, 60, 80], stack: [1, 2, 3]}
  *   {start: [20, 40, 60], end: [40, 60, 80], stack: [34, 59, 72]}
  *   ...
- *   {start: [25, 45], end: [35, 55], stack: [123, 159, 160]}
+ *   {start: [25, 45], end: [35, 55], stack: [123, 159]}
  * ]
  */
 export type StackTimingByDepth = Array<{
   // Start time of stack in milliseconds.
   start: number[],
-  // Start time of stack in milliseconds.
+  // End time of stack in milliseconds.
   end: number[],
   stack: IndexIntoStackTable[],
   length: number,

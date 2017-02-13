@@ -10,5 +10,5 @@ export type FuncStackTable = {
 
 export type FuncStackInfo = {
   funcStackTable: FuncStackTable,
-  stackIndexToFuncStackIndex: Uint32Array
+  stackIndexToFuncStackIndex: Uint32Array,
 }
