@@ -6,6 +6,14 @@ const includes = [
   path.join(__dirname, 'src'),
   path.join(__dirname, 'res'),
 ];
+
+const es6modules = [
+  'pretty-bytes',
+];
+const es6modulePaths = es6modules.map(module => {
+  return path.join(__dirname, 'node_modules', module);
+});
+
 const baseConfig = {
   plugins: [
     new webpack.DefinePlugin({
@@ -39,7 +47,7 @@ const baseConfig = {
     rules: [{
       test: /\.js$/,
       loaders: ['babel-loader'],
-      include: includes,
+      include: includes.concat(es6modulePaths),
     }, {
       test: /\.json$/,
       loaders: ['json-loader'],
