@@ -212,7 +212,7 @@ export function filterThreadToJSOnly(thread: Thread) {
               const newFuncIndex = newFuncTable.length++;
               newFuncTable.name.push(stringTable.indexForString('Platform'));
               newFuncTable.resource.push(null);
-              newFuncTable.address.push(stringTable.indexForString(''));
+              newFuncTable.address.push(-1);
               newFuncTable.isJS.push(false);
 
               newFrameTable.implementation.push(null);

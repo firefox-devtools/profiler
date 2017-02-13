@@ -7,7 +7,7 @@ type Summary = { [id: string]: number };
 type StacksInCategory = { [id: string]: { [id: string]: number } }
 type SummarySegment = {
   percentage: {[id: string]: number},
-  samples: {[id: string]: number}
+  samples: {[id: string]: number},
 }
 type RollingSummary = SummarySegment[];
 type Categories = Array<(string|null)>;
@@ -229,10 +229,13 @@ function calculateSummaryPercentages(summary: Summary) {
       const percentage = samples / sampleCount;
       return { category, samples, percentage };
     })
-    // Sort by name first so that the results are deterministic.
-    .sort((a, b) => a.category > b.category ? -1 : 1)
-    // Sort by sample count second.
-    .sort((a, b) => b.samples - a.samples);
+    // Sort by sample count, then by name so that the results are deterministic.
+    .sort((a, b) => {
+      if (a.samples === b.samples) {
+        return a.category.localeCompare(b.category);
+      }
+      return b.samples - a.samples;
+    });
 }
 
 function logStacks(stacksInCategory: StacksInCategory, maxLogLength = 10) {
