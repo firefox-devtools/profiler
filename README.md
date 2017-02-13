@@ -6,10 +6,12 @@ perf.html
 
 perf.html is a webpage to visualize performance profiles. It was written to be used by the Gecko Profiler but can in theory be used by any profiler that can output to JSON. The UI runs entirely client-side.
 
+This project was called cleopatra in the past.
+
 Running
 =======
 
-This project is live on [https://new.cleopatra.io/](https://new.cleopatra.io/). The project is currently going through a name change, and this URL will change soon. In order to obtain profiles from Firefox, you need to install an add-on, which you can do by clicking the link on that website.
+This project is live on [https://perf-html.io/](https://perf-html.io/). In order to obtain profiles from Firefox, you need to install an add-on, which you can do by clicking the link on that website.
 
 If you want to hack on perf.html and run your own version locally, you need to point the add-on at your local instance:
 
