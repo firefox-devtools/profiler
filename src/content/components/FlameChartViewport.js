@@ -1,8 +1,25 @@
-import React, { Component, PropTypes } from 'react';
+// @flow
+import React, { Component } from 'react';
 import FlameChartCanvas from './FlameChartCanvas';
+import type { Thread } from '../../common/types/profile';
+import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../common/types/units';
+import type { StackTimingByDepth } from '../stack-timing';
+
+type Props = {
+  connectedProps: {
+    thread: Thread,
+    interval: Milliseconds,
+    timeRange: { start: Milliseconds, end: Milliseconds },
+    maxStackDepth: number,
+    stackTimingByDepth: StackTimingByDepth,
+  },
+  maxViewportHeight: number,
+  rowHeight: number,
+};
 
 const LINE_SCROLL_MODE = 1;
 const SCROLL_LINE_SIZE = 15;
+
 
 /**
  * Viewport terminology:
@@ -33,15 +50,30 @@ const SCROLL_LINE_SIZE = 15;
  **/
 class FlameChartViewport extends Component {
 
-  constructor(props) {
+  props: Props
+
+  state: {
+    containerWidth: CssPixels,
+    containerHeight: CssPixels,
+    containerLeft: CssPixels,
+    viewportLeft: UnitIntervalOfProfileRange,
+    viewportRight: UnitIntervalOfProfileRange,
+    viewportTop: CssPixels,
+    viewportBottom: CssPixels,
+    dragX: CssPixels,
+    dragY: CssPixels,
+    isDragging: boolean,
+  }
+
+  constructor(props: Props) {
     super(props);
 
-    this._mouseWheelListener = this._mouseWheelListener.bind(this);
-    this._mouseDownListener = this._mouseDownListener.bind(this);
-    this._mouseMoveListener = this._mouseMoveListener.bind(this);
-    this._mouseUpListener = this._mouseUpListener.bind(this);
+    (this: any)._mouseWheelListener = this._mouseWheelListener.bind(this);
+    (this: any)._mouseDownListener = this._mouseDownListener.bind(this);
+    (this: any)._mouseMoveListener = this._mouseMoveListener.bind(this);
+    (this: any)._mouseUpListener = this._mouseUpListener.bind(this);
 
-    this._setSize = this._setSize.bind(this);
+    (this: any)._setSize = this._setSize.bind(this);
 
     /**
      * TODO - Evaluate whether this state should stay in the component, or go out to
@@ -51,18 +83,22 @@ class FlameChartViewport extends Component {
     this.state = {
       containerWidth: 0,
       containerHeight: 0,
+      containerLeft: 0,
       // Unit interval of the profile range.
       viewportLeft: 0,
       viewportRight: 1,
       // Positioning in pixels.
       viewportTop: 0,
       viewportBottom: 0,
+      dragX: 0,
+      dragY: 0,
+      isDragging: false,
     };
   }
 
   _setSize() {
     const rect = this.refs.container.getBoundingClientRect();
-    if (this.state.width !== rect.width || this.state.height !== rect.height) {
+    if (this.state.containerWidth !== rect.width || this.state.containerHeight !== rect.height) {
       this.setState({
         containerWidth: rect.width,
         containerHeight: rect.height,
@@ -72,7 +108,7 @@ class FlameChartViewport extends Component {
     }
   }
 
-  _mouseWheelListener(event) {
+  _mouseWheelListener(event: SyntheticWheelEvent) {
     event.preventDefault();
     const { containerLeft, containerWidth } = this.state;
     const mouseCenter = (event.clientX - containerLeft) / containerWidth;
@@ -81,10 +117,10 @@ class FlameChartViewport extends Component {
       : event.deltaY;
 
     const { viewportLeft, viewportRight } = this.state;
-    const viewportLength = viewportRight - viewportLeft;
+    const viewportLength:CssPixels = viewportRight - viewportLeft;
     const scale = viewportLength - viewportLength / (1 + deltaY * 0.001);
-    const newBoundsLeft = clamp(0, 1, viewportLeft - scale * mouseCenter);
-    const newBoundsRight = clamp(0, 1, viewportRight + scale * (1 - mouseCenter));
+    const newBoundsLeft:UnitIntervalOfProfileRange = clamp(0, 1, viewportLeft - scale * mouseCenter);
+    const newBoundsRight:UnitIntervalOfProfileRange = clamp(0, 1, viewportRight + scale * (1 - mouseCenter));
 
     if (newBoundsLeft === 0 && newBoundsRight === 1) {
       if (viewportLeft === 0 && viewportRight === 1) {
@@ -98,7 +134,7 @@ class FlameChartViewport extends Component {
     });
   }
 
-  _mouseDownListener(event) {
+  _mouseDownListener(event: SyntheticMouseEvent) {
     this.setState({
       dragX: event.clientX,
       dragY: event.clientY,
@@ -106,7 +142,7 @@ class FlameChartViewport extends Component {
     });
   }
 
-  _mouseMoveListener(event) {
+  _mouseMoveListener(event: SyntheticMouseEvent) {
     if (this.state.isDragging) {
       event.stopPropagation();
       const { maxViewportHeight } = this.props;
@@ -114,10 +150,10 @@ class FlameChartViewport extends Component {
               viewportTop } = this.state;
 
       // Calculate left and right in terms of the unit interval of the profile range.
-      const viewportLength = viewportRight - viewportLeft;
-      const unitOffsetX = viewportLength * (event.clientX - dragX) / containerWidth;
-      let newViewportLeft = viewportLeft - unitOffsetX;
-      let newViewportRight = viewportRight - unitOffsetX;
+      const viewportLength:CssPixels = viewportRight - viewportLeft;
+      const unitOffsetX:UnitIntervalOfProfileRange = viewportLength * (event.clientX - dragX) / containerWidth;
+      let newViewportLeft:CssPixels = viewportLeft - unitOffsetX;
+      let newViewportRight:CssPixels = viewportRight - unitOffsetX;
       if (newViewportLeft < 0) {
         newViewportLeft = 0;
         newViewportRight = viewportLength;
@@ -128,8 +164,8 @@ class FlameChartViewport extends Component {
       }
 
       // Calculate top and bottom in terms of pixels.
-      let newViewportTop = viewportTop - (event.clientY - dragY);
-      let newViewportBottom = newViewportTop + containerHeight;
+      let newViewportTop:CssPixels = viewportTop - (event.clientY - dragY);
+      let newViewportBottom:CssPixels = newViewportTop + containerHeight;
 
       // Constrain the viewport to the bottom.
       if (newViewportBottom > maxViewportHeight) {
@@ -155,7 +191,7 @@ class FlameChartViewport extends Component {
     }
   }
 
-  _mouseUpListener(event) {
+  _mouseUpListener(event: SyntheticMouseEvent) {
     if (this.state.isDragging) {
       event.stopPropagation();
       this.setState({
@@ -210,12 +246,6 @@ class FlameChartViewport extends Component {
     );
   }
 }
-
-FlameChartViewport.propTypes = {
-  connectedProps: PropTypes.object.isRequired,
-  maxViewportHeight: PropTypes.number.isRequired,
-  rowHeight: PropTypes.number.isRequired,
-};
 
 export default FlameChartViewport;
 

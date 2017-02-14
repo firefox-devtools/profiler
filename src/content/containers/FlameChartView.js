@@ -1,15 +1,32 @@
-import React, { Component, PropTypes } from 'react';
+// @flow
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import FlameChartViewport from '../components/FlameChartViewport';
 import { getSelectedThreadIndex, selectedThreadSelectors, getDisplayRange, getProfileInterval } from '../selectors/';
 import * as actions from '../actions';
 import ProfileCallTreeSettings from '../components/ProfileCallTreeSettings';
 
+import type { Thread } from '../../common/types/profile';
+import type { Milliseconds } from '../../common/types/units';
+import type { StackTimingByDepth } from '../stack-timing';
+
 require('./FlameChartView.css');
 
 const ROW_HEIGHT = 16;
 
+type Props = {
+  thread: Thread,
+  maxStackDepth: number,
+  stackTimingByDepth: StackTimingByDepth,
+  isSelected: boolean,
+  timeRange: { start: Milliseconds, end: Milliseconds },
+  threadIndex: number,
+  interval: Milliseconds,
+};
+
 class FlameChartView extends Component {
+
+  props: Props
 
   render() {
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -27,15 +44,6 @@ class FlameChartView extends Component {
     );
   }
 }
-
-FlameChartView.propTypes = {
-  threadIndex: PropTypes.number.isRequired,
-  thread: PropTypes.object.isRequired,
-  interval: PropTypes.number.isRequired,
-  timeRange: PropTypes.object.isRequired,
-  isSelected: PropTypes.bool.isRequired,
-  maxStackDepth: PropTypes.number.isRequired,
-};
 
 export default connect(state => {
   return {
