@@ -41,6 +41,7 @@ body, #root, .profileViewer {
   position: relative;
   outline: 0;
   will-change: scroll-position;
+  line-height: 16px;
 }
 
 .treeViewBodyInnerWrapper {
