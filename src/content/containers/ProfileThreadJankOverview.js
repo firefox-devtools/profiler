@@ -1,12 +1,13 @@
 import { connect } from 'react-redux';
-import IntervalMarkerTimeline from '../components/IntervalMarkerTimeline';
+import IntervalMarkerOverview from '../components/IntervalMarkerOverview';
 import { selectorsForThread } from '../selectors/';
 
 export default connect((state, props) => {
   const { threadIndex } = props;
   const selectors = selectorsForThread(threadIndex);
+  const threadName = selectors.getThread(state).name;
   return {
-    intervalMarkers: selectors.getTracingMarkers(state),
-    threadName: selectors.getThread(state).name,
+    intervalMarkers: selectors.getJankInstances(state),
+    threadName,
   };
-})(IntervalMarkerTimeline);
+})(IntervalMarkerOverview);
