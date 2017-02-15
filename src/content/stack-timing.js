@@ -1,7 +1,7 @@
 // @flow
-import type { IndexIntoStackTable, Thread, StackTable } from '../common/types/profile';
+import type { IndexIntoStackTable, IndexIntoFrameTable, Thread, StackTable } from '../common/types/profile';
 import type { FuncStackInfo } from '../common/types/profile-derived';
-
+import type { GetCategory } from './color-categories';
 /**
  * The StackTimingByDepth data structure organizes stack frames by their depth, and start
  * and end times. This optimizes sample data for Flame Chart timeline views. It
@@ -144,7 +144,7 @@ function _pushStacks(
   let stackIndex = startingIndex;
   // "Push" onto the stack with new frames
   for (let parentDepth = depth; parentDepth >= 0; parentDepth--) {
-    if (lastSeen.stackIndexByDepth[parentDepth] !== undefined) {
+    if (stackIndex === null || lastSeen.stackIndexByDepth[parentDepth] !== undefined) {
       break;
     }
     lastSeen.stackIndexByDepth[parentDepth] = stackIndex;
@@ -168,4 +168,71 @@ export function computeFuncStackMaxDepth(rangedThread: Thread, funcStackInfo: Fu
     }
   }
   return maxDepth;
+}
+
+type GetRelevantFrame = (Thread, IndexIntoStackTable) => IndexIntoFrameTable;
+
+export function getLeafCategoryStackTiming(
+  thread: Thread, interval: number, getCategory: GetCategory,
+  getRelevantLeafStack: GetRelevantFrame = getNearestJSFrame
+) {
+  const stackTiming = {
+    start: [],
+    end: [],
+    stack: [],
+    length: 0,
+  };
+
+  let previousName = null;
+  let previousSampleTime = null;
+  for (let i = 0; i < thread.samples.length; i++) {
+    const stackIndex = thread.samples.stack[i];
+    if (stackIndex === null) {
+      if (previousSampleTime !== null) {
+        stackTiming.end.push(previousSampleTime);
+      }
+      previousName = null;
+    } else {
+      const relevantStackIndex = getRelevantLeafStack(thread, stackIndex);
+      const frameIndex = thread.stackTable.frame[relevantStackIndex];
+      const {name} = getCategory(thread, frameIndex);
+
+      if (name !== previousName) {
+        const sampleTime = thread.samples.time[i];
+        stackTiming.start.push(sampleTime);
+        stackTiming.stack.push(relevantStackIndex);
+        stackTiming.length++;
+        if (previousName !== null) {
+          stackTiming.end.push(sampleTime);
+        }
+        previousName = name;
+        previousSampleTime = sampleTime;
+      }
+    }
+  }
+
+  if (stackTiming.end.length !== stackTiming.start.length) {
+    // Calculate the final end time.
+    stackTiming.end.push(thread.samples.time[thread.samples.length - 1] + interval);
+  }
+
+  return [stackTiming];
+}
+
+function _getLeafStack(thread: Thread, stackIndex: IndexIntoStackTable): IndexIntoStackTable {
+  return stackIndex;
+}
+
+function getNearestJSFrame(thread: Thread, stackIndex: IndexIntoStackTable): IndexIntoStackTable {
+  let nextStackIndex = stackIndex;
+  while (nextStackIndex !== null) {
+    const frameIndex = thread.stackTable.frame[nextStackIndex];
+    const funcIndex = thread.frameTable.func[frameIndex];
+    const isJS = thread.funcTable.isJS[funcIndex];
+    if (isJS) {
+      return nextStackIndex;
+    }
+    nextStackIndex = thread.stackTable.prefix[nextStackIndex];
+  }
+  return stackIndex;
 }

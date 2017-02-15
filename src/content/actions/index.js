@@ -462,3 +462,22 @@ export function popCallTreeFilters(threadIndex, firstRemovedFilterIndex) {
     firstRemovedFilterIndex,
   };
 }
+
+export function changeFlameChartColorStrategy(getCategory) {
+  return {
+    type: 'CHANGE_FLAME_CHART_COLOR_STRATEGY',
+    getCategory,
+  };
+}
+
+export function changeFlameChartLabelingStrategy(getLabel) {
+  return {
+    type: 'CHANGE_FLAME_CHART_LABELING_STRATEGY',
+    getLabel,
+  };
+}
+
+export function changeTimelineExpandedThread(threadIndex, isExpanded) {
+  const type = 'CHANGE_TIMELINE_EXPANDED_THREAD';
+  return { type, threadIndex, isExpanded };
+}

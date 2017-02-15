@@ -1,9 +1,10 @@
 // @flow
 import React, { Component } from 'react';
 import FlameChartCanvas from './FlameChartCanvas';
-import type { Thread } from '../../common/types/profile';
+import type { Thread, IndexIntoFrameTable, IndexIntoStackTable } from '../../common/types/profile';
 import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../common/types/units';
 import type { StackTimingByDepth } from '../stack-timing';
+import type { GetCategory } from '../color-categories';
 
 type Props = {
   thread: Thread,
@@ -14,7 +15,10 @@ type Props = {
   threadIndex: number,
   interval: Milliseconds,
   maxViewportHeight: number,
-  rowHeight: number,
+  stackFrameHeight: number,
+  getCategory: GetCategory,
+  getLabel: (Thread, IndexIntoStackTable) => string,
+  isThreadExpanded: boolean,
 };
 
 const LINE_SCROLL_MODE = 1;
@@ -80,7 +84,11 @@ class FlameChartViewport extends Component {
      * the redux stores. This state information potentially gets changed very frequently
      * with mouse events.
      */
-    this.state = {
+    this.state = this.getDefaultState();
+  }
+
+  getDefaultState() {
+    return {
       containerWidth: 0,
       containerHeight: 0,
       containerLeft: 0,
@@ -96,6 +104,13 @@ class FlameChartViewport extends Component {
     };
   }
 
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.stackTimingByDepth !== this.props.stackTimingByDepth) {
+      this.setState({ viewportTop: 0 });
+      this._setSize();
+    }
+  }
+
   _setSize() {
     const rect = this.refs.container.getBoundingClientRect();
     if (this.state.containerWidth !== rect.width || this.state.containerHeight !== rect.height) {
@@ -109,6 +124,10 @@ class FlameChartViewport extends Component {
   }
 
   _mouseWheelListener(event: SyntheticWheelEvent) {
+    if (!this.props.isThreadExpanded) {
+      // Maybe this should only be listening when expanded.
+      return;
+    }
     event.preventDefault();
     const { containerLeft, containerWidth } = this.state;
     const mouseCenter = (event.clientX - containerLeft) / containerWidth;
@@ -117,10 +136,10 @@ class FlameChartViewport extends Component {
       : event.deltaY;
 
     const { viewportLeft, viewportRight } = this.state;
-    const viewportLength:CssPixels = viewportRight - viewportLeft;
+    const viewportLength: CssPixels = viewportRight - viewportLeft;
     const scale = viewportLength - viewportLength / (1 + deltaY * 0.001);
-    const newBoundsLeft:UnitIntervalOfProfileRange = clamp(0, 1, viewportLeft - scale * mouseCenter);
-    const newBoundsRight:UnitIntervalOfProfileRange = clamp(0, 1, viewportRight + scale * (1 - mouseCenter));
+    const newBoundsLeft: UnitIntervalOfProfileRange = clamp(0, 1, viewportLeft - scale * mouseCenter);
+    const newBoundsRight: UnitIntervalOfProfileRange = clamp(0, 1, viewportRight + scale * (1 - mouseCenter));
 
     if (newBoundsLeft === 0 && newBoundsRight === 1) {
       if (viewportLeft === 0 && viewportRight === 1) {
@@ -216,14 +235,19 @@ class FlameChartViewport extends Component {
 
   render() {
     const {
-      thread, interval, timeRange, maxStackDepth, stackTimingByDepth, rowHeight,
+      thread, interval, timeRange, maxStackDepth, stackTimingByDepth, getCategory,
+      getLabel, stackFrameHeight, isThreadExpanded,
     } = this.props;
 
     const { containerWidth, containerHeight, viewportLeft, viewportRight, viewportTop,
             viewportBottom, isDragging } = this.state;
 
+    const viewportClassName = 'flameChartViewport' +
+      (isThreadExpanded ? ' expanded' : ' collapsed') +
+      (isDragging ? ' dragging' : '');
+
     return (
-      <div className={'flameChartViewport ' + (isDragging ? 'dragging' : '')}
+      <div className={viewportClassName}
            onWheel={this._mouseWheelListener}
            onMouseDown={this._mouseDownListener}
            ref='container'>
@@ -235,12 +259,14 @@ class FlameChartViewport extends Component {
                           stackTimingByDepth={stackTimingByDepth}
                           containerWidth={containerWidth}
                           containerHeight={containerHeight}
+                          getCategory={getCategory}
+                          getLabel={getLabel}
                           viewportLeft={viewportLeft}
                           viewportRight={viewportRight}
                           viewportTop={viewportTop}
                           viewportBottom={viewportBottom}
                           maxStackDepth={maxStackDepth}
-                          rowHeight={rowHeight} />
+                          stackFrameHeight={stackFrameHeight} />
       </div>
     );
   }

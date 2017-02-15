@@ -10,6 +10,7 @@ import { sortDataTable } from '../src/content/data-table-utils';
 import { isOldCleopatraFormat, convertOldCleopatraProfile } from '../src/content/old-cleopatra-profile-format';
 import { isPreprocessedProfile, upgradePreprocessedProfileToCurrentVersion } from '../src/content/preprocessed-profile-versioning';
 import { upgradeRawProfileToCurrentVersion } from '../src/content/raw-profile-versioning';
+import { getImplementationColor, getCategoryByImplementation, implementationCategoryMap } from '../src/content/color-categories';
 
 config.truncateThreshold = 0;
 
@@ -54,7 +55,7 @@ describe('data-table-utils', function () {
     it('should sort this data table by order', function () {
       // sort by order
       sortDataTable(dt, dt.order, (a, b) => a - b);
-    
+
       assert.equal(dt.length, originalDataTable.length, 'length should be unaffected');
       assert.equal(dt.word.length, originalDataTable.length, 'length should be unaffected');
       assert.equal(dt.order.length, originalDataTable.length, 'length should be unaffected');
@@ -126,7 +127,7 @@ describe('preprocess-profile', function () {
     it('should shift the content process by 1 second', function () {
       // Should be Content, but modified by workaround for bug 1322471.
       assert.equal(profile.threads[2].name, 'GeckoMain');
-      
+
       assert.equal(profile.threads[0].samples.time[0], 0);
       assert.equal(profile.threads[0].samples.time[1], 1);
       assert.equal(profile.threads[2].samples.time[0], 1000);
@@ -178,7 +179,7 @@ describe('preprocess-profile', function () {
       assert.equal(thread.resourceTable.length, 2);
       assert.equal(thread.resourceTable.type[0], resourceTypes.library);
       assert.equal(thread.resourceTable.type[1], resourceTypes.url);
-      const [ name0, name1 ] = thread.resourceTable.name;
+      const [name0, name1] = thread.resourceTable.name;
       assert.equal(thread.stringTable.getString(name0), 'firefox');
       assert.equal(thread.stringTable.getString(name1), 'chrome://blargh');
     });
@@ -212,7 +213,7 @@ describe('profile-data', function () {
         start: 2,
         name: 'Reflow',
         dur: 6,
-        title: 'Reflow for 6.00ms'
+        title: 'Reflow for 6.00ms',
       });
     });
     it('should fold the two Rasterize markers into one tracing marker, after the reflow tracing marker', function () {
@@ -221,7 +222,7 @@ describe('profile-data', function () {
         start: 4,
         name: 'Rasterize',
         dur: 1,
-        title: 'Rasterize for 1.00ms'
+        title: 'Rasterize for 1.00ms',
       });
     });
     it('should create a tracing marker for the MinorGC startTime/endTime marker', function () {
@@ -368,5 +369,25 @@ describe('upgrades', function () {
     // const rawProfile4 = require('./upgrades/raw-4.sps.json');
     // upgradeRawProfileToCurrentVersion(rawProfile4);
     // assert.deepEqual(upgradedProfile4, exampleProfile);
+  });
+});
+
+describe('color-categories', function () {
+  const profile = preprocessProfile(exampleProfile);
+  const [thread] = profile.threads;
+  it('calculates the category for each frame', function () {
+    const categories = thread.samples.stack.map(stackIndex => {
+      return getCategoryByImplementation(thread, thread.stackTable.frame[stackIndex]);
+    });
+    for (let i = 0; i < 6; i++) {
+      assert.equal(categories[i].name, 'Platform',
+        'The platform frames are labeled platform');
+      assert.equal(categories[i].color, implementationCategoryMap.Platform,
+        'The platform frames are colored according to the color definition');
+    }
+    assert.equal(categories[6].name, 'JS Baseline',
+      'The JS Baseline frame is labeled as as JS Baseline.');
+    assert.equal(categories[6].color, implementationCategoryMap['JS Baseline'],
+      'The platform frames are colored according to the color definition');
   });
 });

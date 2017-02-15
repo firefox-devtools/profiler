@@ -41,7 +41,7 @@ const thread = {
       [8, 6, null, 2],           // 5: javascriptTwo, implementation 'baseline', line 2
       [9],                       // 6: 0x10000f0f0
       [10],                      // 7: 0x100fefefe
-      [11, 6, null, 3],          // 8: javascriptThree, implementation 'baseline', line 3
+      [11, null, null, 3],         // 8: javascriptThree, implementation null, line 3
     ],
   },
   markers: {
