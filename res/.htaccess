@@ -1,7 +1,15 @@
 RewriteEngine On
 
+# Rewrite new.cleopatra.io/sw.js to an empty service worker so that existing
+# service workers on new.cleopatra.io can update to it and we don't leave
+# people stranded on the old service worker.
+RewriteCond %{REQUEST_URI} ^/sw\.js$
+RewriteCond %{HTTP_HOST} ^new\.cleopatra\.io$ [NC]
+RewriteRule ^ /new-cleopatra-io-serviceworker.js [L]
+
 # Redirect requests from www.perf-html.io and from new.cleoptra.io to perf-html.io
 RewriteCond %{HTTP_HOST} !^perf-html\.io$ [NC]
+RewriteCond %{REQUEST_URI} !^/new-cleopatra-io-serviceworker\.js$
 RewriteRule ^(.*)$ https://perf-html.io/$1 [L,R=301]
 
 # If an existing asset or directory is requested go to it as it is

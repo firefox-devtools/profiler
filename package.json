@@ -5,7 +5,7 @@
   "main": "src/content/index.js",
   "scripts": {
     "build": "npm run build:clean && NODE_ENV=development webpack --progress",
-    "build:clean": "rimraf dist && mkdirp dist && cp res/.htaccess dist/ && cp res/zee-worker.js dist/",
+    "build:clean": "rimraf dist && mkdirp dist && cp res/.htaccess dist/ && cp res/new-cleopatra-io-serviceworker.js dist/ && cp res/zee-worker.js dist/",
     "build-prod": "npm run build:clean && NODE_ENV=production webpack -p --progress",
     "build-prod-readable": "npm run build:clean && NODE_ENV=production webpack --progress",
     "eslint": "eslint index.js src",
