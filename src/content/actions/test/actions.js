@@ -3,7 +3,8 @@ import { describe, it } from 'mocha';
 import { assert } from 'chai';
 import { blankStore, storeWithProfile } from './fixtures/stores';
 import * as selectors from '../../reducers/profile-view';
-import { changeCallTreeSearchString, receiveProfileFromAddon, changeHidePlatformDetails, addRangeFilter, changeInvertCallstack } from '../';
+import { changeCallTreeSearchString, receiveProfileFromAddon, changeHidePlatformDetails, addRangeFilter, changeInvertCallstack, changeFlameChartColorStrategy } from '../';
+import { getCategoryByImplementation } from '../../color-categories';
 const { selectedThreadSelectors } = selectors;
 
 const profile = require('../../../common/test/fixtures/profile-2d-canvas.json');
@@ -148,5 +149,38 @@ describe('selectors/getFuncStackMaxDepthForFlameChart', function () {
     store.dispatch(changeHidePlatformDetails(true));
     const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
     assert.equal(jsOnlySamplesMaxDepth, 0);
+  });
+});
+
+describe('selectors/getLeafCategoryStackTiming', function () {
+  /**
+   * This table shows off how stack timings get filtered to a single row by concurrent
+   * color categories. P is platform code, J javascript baseline, and I is javascript
+   * interpreter.
+   *
+   *            Unfiltered             ->      By Concurrent Leaf Category
+   *   0-10-20-30-40-50-60-70-80-90-91      0-10-20-30-40-50-60-70-80-90-91 <- Timing (ms)
+   *  ================================     ================================
+   *  0P 0P 0P 0P 0P 0P 0P 0P 0P 0P  |     1P 1P 1P 1P 1P 1P 4J 4J 8I 4J  |
+   *  1P 1P 1P 1P    1P 1P 1P 1P 1P  |
+   *     2P 2P 3P       4J 4J 4J 4J  |
+   *                       5J 5J     |
+   *                          6P     |
+   *                          7P     |
+   *                          8I     |
+   */
+  it('gets the unfiltered leaf stack timing by implementation', function () {
+    const store = storeWithProfile();
+    store.dispatch(changeFlameChartColorStrategy(getCategoryByImplementation));
+    const leafStackTiming = selectedThreadSelectors.getLeafCategoryStackTiming(store.getState());
+
+    assert.deepEqual(leafStackTiming, [
+      {
+        start: [0, 60, 80, 90],
+        end: [60, 80, 90, 91],
+        stack: [1, 4, 8, 4],
+        length: 4,
+      },
+    ]);
   });
 });

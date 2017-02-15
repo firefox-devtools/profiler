@@ -4,9 +4,10 @@ import shallowCompare from 'react-addons-shallow-compare';
 import { timeCode } from '../../common/time-code';
 import TextMeasurement from '../../common/text-measurement';
 
-import type { Thread } from '../../common/types/profile';
+import type { Thread, IndexIntoFrameTable, IndexIntoStackTable } from '../../common/types/profile';
 import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange, DevicePixels } from '../../common/types/units';
 import type { StackTimingByDepth } from '../stack-timing';
+import type { GetCategory } from '../color-categories';
 
 type Props = {
   thread: Thread,
@@ -21,7 +22,9 @@ type Props = {
   viewportTop: CssPixels,
   viewportBottom: CssPixels,
   stackTimingByDepth: StackTimingByDepth,
-  rowHeight: CssPixels,
+  stackFrameHeight: CssPixels,
+  getCategory: GetCategory,
+  getLabel: (Thread, IndexIntoStackTable) => string,
 };
 
 const ROW_HEIGHT = 16;
@@ -101,8 +104,8 @@ class FlameChartCanvas extends Component {
    * @returns {undefined}
    */
   drawCanvas() {
-    const { thread, rangeStart, rangeEnd, containerWidth,
-            containerHeight, stackTimingByDepth, rowHeight,
+    const { thread, rangeStart, rangeEnd, containerWidth, getLabel,
+            containerHeight, stackTimingByDepth, stackFrameHeight, getCategory,
             viewportLeft, viewportRight, viewportTop, viewportBottom } = this.props;
 
     const ctx = this._prepCanvas();
@@ -112,8 +115,8 @@ class FlameChartCanvas extends Component {
     const viewportLength: UnitIntervalOfProfileRange = viewportRight - viewportLeft;
 
     // Convert CssPixels to Stack Depth
-    const startDepth = Math.floor(viewportTop / rowHeight);
-    const endDepth = Math.ceil(viewportBottom / rowHeight);
+    const startDepth = Math.floor(viewportTop / stackFrameHeight);
+    const endDepth = Math.ceil(viewportBottom / stackFrameHeight);
 
     // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {
@@ -138,32 +141,6 @@ class FlameChartCanvas extends Component {
       for (let i = 0; i < stackTiming.length; i++) {
         // Only draw samples that are in bounds.
         if (stackTiming.end[i] > timeAtViewportLeft && stackTiming.start[i] < timeAtViewportRight) {
-          const stackIndex = stackTiming.stack[i];
-          let name, isJS, implementation;
-          if (stackIndex === -1) {
-            name = 'Platform';
-            isJS = false;
-          } else {
-            const frameIndex = thread.stackTable.frame[stackIndex];
-            const funcIndex = thread.frameTable.func[frameIndex];
-            const implementationIndex = thread.frameTable.implementation[frameIndex];
-            implementation = implementationIndex ? thread.stringTable.getString(implementationIndex) : null;
-            name = thread.stringTable.getString(thread.funcTable.name[funcIndex]);
-            isJS = thread.funcTable.isJS[funcIndex];
-          }
-          if (implementation) {
-            ctx.fillStyle = implementation === 'baseline'
-              // Baseline
-              ? '#B5ECA8'
-              // Ion (JIT)
-              : '#3CCF55';
-          } else {
-            ctx.fillStyle = isJS
-              // JS code
-              ? 'rgb(200, 200, 200)'
-              // Platform code
-              : 'rgb(240, 240, 240)';
-          }
           const startTime: UnitIntervalOfProfileRange = (stackTiming.start[i] - rangeStart) / rangeLength;
           const endTime: UnitIntervalOfProfileRange = (stackTiming.end[i] - rangeStart) / rangeLength;
 
@@ -176,6 +153,13 @@ class FlameChartCanvas extends Component {
             // Skip sending draw calls for sufficiently small boxes.
             continue;
           }
+
+          const stackIndex = stackTiming.stack[i];
+          const frameIndex = thread.stackTable.frame[stackIndex];
+          const text = getLabel(thread, stackIndex);
+          const category = getCategory(thread, frameIndex);
+
+          ctx.fillStyle = category.color;
           ctx.fillRect(x, y, w, h);
           // Ensure spacing between blocks.
           ctx.clearRect(x, y, 1, h);
@@ -186,10 +170,10 @@ class FlameChartCanvas extends Component {
           const w2: CssPixels = Math.max(0, w - (x2 - x));
 
           if (this._textMeasurement !== null && w2 > this._textMeasurement.minWidth) {
-            const text = this._textMeasurement.getFittedText(name, w2);
-            if (text) {
+            const fittedText = this._textMeasurement.getFittedText(text, w2);
+            if (fittedText) {
               ctx.fillStyle = 'rgb(0, 0, 0)';
-              ctx.fillText(text, x2, y + TEXT_OFFSET_TOP);
+              ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
             }
           }
         }

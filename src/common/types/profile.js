@@ -15,7 +15,7 @@ export type ThreadIndex = number;
 export type StackTable = {
   frame: number[],
   length: number,
-  prefix: number[],
+  prefix: Array<number|null>,
 };
 
 export type SamplesTable = {

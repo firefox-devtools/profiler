@@ -9,7 +9,7 @@ import ProfileLogView from '../containers/ProfileLogView';
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
 import ProfileSharing from '../containers/ProfileSharing';
 import SymbolicationStatusOverlay from '../containers/SymbolicationStatusOverlay';
-import FlameChartView from '../containers/FlameChartView';
+import TimelineView from '../containers/TimelineView';
 import * as actions from '../actions';
 import { getProfileViewOptions, getDisplayRange } from '../reducers/profile-view';
 import { getSelectedTab } from '../reducers/url-state';
@@ -43,7 +43,7 @@ class ProfileViewer extends PureComponent {
         title: 'Log',
       },
       {
-        name: 'flameChart',
+        name: 'timeline',
         title: 'Timeline',
       },
     ];
@@ -76,7 +76,7 @@ class ProfileViewer extends PureComponent {
           calltree: <ProfileCallTreeView />,
           markers: <ProfileMarkersView />,
           tasktracer: <ProfileTaskTracerView rangeStart={timeRange.start} rangeEnd={timeRange.end} />,
-          flameChart: <FlameChartView />,
+          timeline: <TimelineView />,
           log: <ProfileLogView />,
         }[selectedTab]}
         <SymbolicationStatusOverlay />

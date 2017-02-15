@@ -7,6 +7,7 @@ import * as ProfileData from '../profile-data';
 import * as StackTiming from '../stack-timing';
 import * as ProfileTree from '../profile-tree';
 import * as TaskTracer from '../task-tracer';
+import { getCategoryColorStrategy } from './flame-chart';
 
 function profile(state = {}, action) {
   switch (action.type) {
@@ -280,6 +281,7 @@ export const getTasksByThread = createSelector(
  */
 export const getProfile = state => getProfileView(state).profile;
 export const getProfileInterval = state => getProfile(state).meta.interval;
+export const getThreads = state => getProfile(state).threads;
 export const getThreadNames = state => getProfile(state).threads.map(t => t.name);
 export const getProfileTaskTracerData = state => getProfile(state).tasktracer;
 
@@ -452,6 +454,13 @@ export const selectorsForThread = threadIndex => {
       getProfileInterval,
       StackTiming.getStackTimingByDepth
     );
+    const getLeafCategoryStackTimingForFlameChart = createSelector(
+      getFilteredThreadForFlameChart,
+      getProfileInterval,
+      getCategoryColorStrategy,
+      StackTiming.getLeafCategoryStackTiming
+    );
+
     selectorsForThreads[threadIndex] = {
       getThread,
       getRangeFilteredThread,
@@ -470,6 +479,7 @@ export const selectorsForThread = threadIndex => {
       getFuncStackInfoOfFilteredThreadForFlameChart,
       getFuncStackMaxDepthForFlameChart,
       getStackTimingByDepthForFlameChart,
+      getLeafCategoryStackTimingForFlameChart,
       getCallTree,
     };
   }
