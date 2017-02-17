@@ -27,18 +27,16 @@ export type SamplesTable = {
   length: number,
 };
 
-export type Marker = {
+export type MarkerData = {
   category?: string,
   interval?: string,
   type?: string,
-  dur?: number,
   title?: string,
   start?: number,
-  name?: string,
 };
 
 export type MarkersTable = {
-  data: Marker[],
+  data: MarkerData[],
   name: IndexIntoStringTable[],
   time: number[],
   length: number,
