@@ -1,6 +1,6 @@
 RewriteEngine On
 
-# Redirect requests from www.perf-html.io and from new.cleoptra.io to perf-html.io
+# Redirect requests from www.perf-html.io to perf-html.io
 RewriteCond %{HTTP_HOST} !^perf-html\.io$ [NC]
 RewriteRule ^(.*)$ https://perf-html.io/$1 [L,R=301]
 
