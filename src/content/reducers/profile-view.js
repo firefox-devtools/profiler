@@ -301,10 +301,6 @@ export const selectorsForThread = threadIndex => {
       getRangeFilteredThread,
       thread => thread.samples
     );
-    const getRangeFilteredThreadMarkers = createSelector(
-      getRangeFilteredThread,
-      thread => thread.markers
-    );
     const getJankInstances = createSelector(
       getRangeFilteredThreadSamples,
       state => getThread(state).processType,
@@ -312,8 +308,15 @@ export const selectorsForThread = threadIndex => {
     );
     const getTracingMarkers = createSelector(
       getThread,
-      getRangeFilteredThreadMarkers,
-      (thread, markers) => ProfileData.getTracingMarkers(thread, markers)
+      ProfileData.getTracingMarkers
+    );
+    const getRangeSelectionFilteredTracingMarkers = createSelector(
+      getTracingMarkers,
+      getDisplayRange,
+      (thread, range) => {
+        const { start, end } = range;
+        return ProfileData.filterTracingMarkersToRange(thread, start, end);
+      }
     );
     const getRangeAndCallTreeFilteredThread = createSelector(
       getRangeFilteredThread,
@@ -419,6 +422,7 @@ export const selectorsForThread = threadIndex => {
       getFilteredThread,
       getJankInstances,
       getTracingMarkers,
+      getRangeSelectionFilteredTracingMarkers,
       getRangeSelectionFilteredThread,
       getFuncStackInfo,
       getSelectedFuncStack,

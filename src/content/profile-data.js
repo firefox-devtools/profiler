@@ -5,13 +5,20 @@ import type {
   FrameTable,
   FuncTable,
   IndexIntoFuncTable,
+  IndexIntoStringTable,
   Thread,
   Profile,
   MarkersTable,
-  Marker,
 } from '../common/types/profile';
 import type { FuncStackTable, IndexIntoFuncStack } from '../common/types/profile-derived';
 import { timeCode } from '../common/time-code';
+
+export type TracingMarker = {
+  name: string,
+  start: number,
+  dur: number,
+  title: string|null,
+}
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -600,26 +607,27 @@ export function getJankInstances(samples: SamplesTable, processType: string, thr
   return jankInstances;
 }
 
-export function getTracingMarkers(thread: Thread, markers: MarkersTable) {
-  const { stringTable } = thread;
-  const tracingMarkers: Marker[] = [];
-  const openMarkers: Marker[] = [];
+export function getTracingMarkers(thread: Thread): TracingMarker[] {
+  const { stringTable, markers } = thread;
+  const tracingMarkers: TracingMarker[] = [];
+  const openMarkers: Map<IndexIntoStringTable, TracingMarker> = new Map();
   for (let i = 0; i < markers.length; i++) {
     const data = markers.data[i];
     if (!data || data.type !== 'tracing') {
-      // console.log('non-tracing marker:', name);
       continue;
     }
 
     const time = markers.time[i];
-    const name = stringTable.getString(markers.name[i]);
+    const nameStringIndex = markers.name[i];
     if (data.interval === 'start') {
-      openMarkers.push({
+      openMarkers.set(nameStringIndex, {
         start: time,
-        name,
+        name: stringTable.getString(nameStringIndex),
+        dur: 0,
+        title: null,
       });
     } else if (data.interval === 'end') {
-      const marker = openMarkers.pop();
+      const marker = openMarkers.get(nameStringIndex);
       if (marker === undefined) {
         continue;
       }
@@ -633,4 +641,10 @@ export function getTracingMarkers(thread: Thread, markers: MarkersTable) {
     }
   }
   return tracingMarkers;
+}
+
+export function filterTracingMarkersToRange(tracingMarkers: TracingMarker[],
+                                            rangeStart: number,
+                                            rangeEnd: number): TracingMarker[] {
+  return tracingMarkers.filter(tm => tm.start < rangeEnd && tm.start + tm.dur >= rangeStart);
 }
