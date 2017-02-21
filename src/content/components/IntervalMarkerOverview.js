@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import { withSize } from '../with-size';
 
-class IntervalMarkerTimeline extends Component {
+class IntervalMarkerOverview extends Component {
   constructor(props) {
     super(props);
     this._onSelect = this._onSelect.bind(this);
@@ -43,7 +43,7 @@ class IntervalMarkerTimeline extends Component {
 
 }
 
-IntervalMarkerTimeline.propTypes = {
+IntervalMarkerOverview.propTypes = {
   className: PropTypes.string.isRequired,
   rangeStart: PropTypes.number.isRequired,
   rangeEnd: PropTypes.number.isRequired,
@@ -59,4 +59,4 @@ IntervalMarkerTimeline.propTypes = {
   onSelect: PropTypes.func.isRequired,
 };
 
-export default withSize(IntervalMarkerTimeline);
+export default withSize(IntervalMarkerOverview);
