@@ -6,27 +6,31 @@ const includes = [
   path.join(__dirname, 'src'),
   path.join(__dirname, 'res'),
 ];
-const baseConfig = {
-  plugins: [
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
-    }),
-    new webpack.LoaderOptionsPlugin({
-      options: {
-        worker: {
-          output: {
-            filename: '[hash].worker.js',
-            chunkFilename: '[id].[hash].worker.js',
-          },
+
+const es6modules = [
+  'pretty-bytes',
+];
+const es6modulePaths = es6modules.map(module => {
+  return path.join(__dirname, 'node_modules', module);
+});
+
+const basePlugins = [
+  new webpack.DefinePlugin({
+    'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
+  }),
+  new webpack.LoaderOptionsPlugin({
+    options: {
+      worker: {
+        output: {
+          filename: '[hash].worker.js',
+          chunkFilename: '[id].[hash].worker.js',
         },
       },
-    }),
-    new HtmlWebpackPlugin({
-      title: 'perf.html',
-      template: 'res/index.html',
-      favicon: 'res/favicon.png',
-    }),
-  ],
+    },
+  }),
+];
+
+const baseConfig = {
   resolve: {
     alias: {
       'redux-devtools/lib': path.join(__dirname, '..', '..', 'src'),
@@ -39,7 +43,7 @@ const baseConfig = {
     rules: [{
       test: /\.js$/,
       loaders: ['babel-loader'],
-      include: includes,
+      include: includes.concat(es6modulePaths),
     }, {
       test: /\.json$/,
       loaders: ['json-loader'],
@@ -61,8 +65,31 @@ const baseConfig = {
   },
 };
 
+if (process.env.NODE_ENV === 'development') {
+  baseConfig.devtool = 'source-map';
+  baseConfig.entry = ['webpack-dev-server/client?http://localhost:4242'].concat(baseConfig.entry);
+}
+
+const contentConfig = Object.assign({}, baseConfig, {
+  plugins: basePlugins.concat(
+    new HtmlWebpackPlugin({
+      title: 'perf.html',
+      template: 'res/index.html',
+      favicon: 'res/favicon.png',
+    })),
+  entry: [
+    './src/content/index',
+  ],
+  output: {
+    path: path.join(__dirname, 'dist'),
+    filename: '[hash].bundle.js',
+    chunkFilename: '[id].[hash].bundle.js',
+    publicPath: '/',
+  },
+});
+
 if (process.env.NODE_ENV === 'production') {
-  baseConfig.plugins.push(
+  contentConfig.plugins.push(
     new OfflinePlugin({
       relativePaths: false,
       AppCache: false,
@@ -80,31 +107,18 @@ if (process.env.NODE_ENV === 'production') {
         },
       ],
     }));
-} else if (process.env.NODE_ENV === 'development') {
-  baseConfig.devtool = 'source-map';
-  baseConfig.entry = ['webpack-dev-server/client?http://localhost:4242'].concat(baseConfig.entry);
 }
 
-module.exports = [
-  {
-    entry: [
-      './src/content/index',
-    ],
-    output: {
-      path: path.join(__dirname, 'dist'),
-      filename: '[hash].bundle.js',
-      chunkFilename: '[id].[hash].bundle.js',
-      publicPath: '/',
-    },
+const workerConfig = Object.assign({}, baseConfig, {
+  plugins: basePlugins.slice(0),
+  entry: [
+    './src/worker/index',
+  ],
+  output: {
+    path: path.join(__dirname, 'dist'),
+    filename: 'worker.js',
+    publicPath: '/',
   },
-  {
-    entry: [
-      './src/worker/index',
-    ],
-    output: {
-      path: path.join(__dirname, 'dist'),
-      filename: 'worker.js',
-      publicPath: '/',
-    },
-  },
-].map(config => Object.assign({}, baseConfig, config));
+});
+
+module.exports = [ contentConfig, workerConfig ];
