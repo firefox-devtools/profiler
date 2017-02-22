@@ -6,7 +6,13 @@ import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../
 import type { StackTimingByDepth } from '../stack-timing';
 
 type Props = {
-  connectedProps: {[key: any]: any},
+  thread: Thread,
+  maxStackDepth: number,
+  stackTimingByDepth: StackTimingByDepth,
+  isSelected: boolean,
+  timeRange: { start: Milliseconds, end: Milliseconds },
+  threadIndex: number,
+  interval: Milliseconds,
   maxViewportHeight: number,
   rowHeight: number,
 };
@@ -210,8 +216,7 @@ class FlameChartViewport extends Component {
 
   render() {
     const {
-      connectedProps: { thread, interval, timeRange, maxStackDepth, stackTimingByDepth },
-      rowHeight,
+      thread, interval, timeRange, maxStackDepth, stackTimingByDepth, rowHeight,
     } = this.props;
 
     const { containerWidth, containerHeight, viewportLeft, viewportRight, viewportTop,

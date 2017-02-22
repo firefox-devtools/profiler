@@ -31,13 +31,21 @@ class FlameChartView extends Component {
   render() {
     // The viewport needs to know about the height of what it's drawing, calculate
     // that here at the top level component.
-    const {maxStackDepth} = this.props;
+    const {
+      thread, maxStackDepth, stackTimingByDepth, isSelected, timeRange, threadIndex, interval,
+    } = this.props;
     const maxViewportHeight = (maxStackDepth + 1) * ROW_HEIGHT;
 
     return (
       <div className='flameChartView'>
         <ProfileCallTreeSettings />
-        <FlameChartViewport connectedProps={this.props}
+        <FlameChartViewport thread={thread}
+                            maxStackDepth={maxStackDepth}
+                            stackTimingByDepth={stackTimingByDepth}
+                            isSelected={isSelected}
+                            timeRange={timeRange}
+                            threadIndex={threadIndex}
+                            interval={interval}
                             maxViewportHeight={maxViewportHeight}
                             rowHeight={ROW_HEIGHT} />
       </div>
