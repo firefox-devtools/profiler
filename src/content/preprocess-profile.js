@@ -36,12 +36,19 @@ function getRealScriptURI(url) {
   return url;
 }
 
+function sortByField(fieldName, rawTable) {
+  const fieldIndex = rawTable.schema[fieldName];
+  const sortedData = rawTable.data.slice(0);
+  sortedData.sort((a, b) => a[fieldIndex] - b[fieldIndex]);
+  return Object.assign({}, rawTable, { data: sortedData });
+}
+
 function preprocessThreadStageOne(thread) {
   const stringTable = new UniqueStringArray(thread.stringTable);
   const frameTable = toStructOfArrays(thread.frameTable);
   const stackTable = toStructOfArrays(thread.stackTable);
   const samples = toStructOfArrays(thread.samples);
-  const markers = toStructOfArrays(thread.markers);
+  const markers = toStructOfArrays(sortByField('time', thread.markers));
   return Object.assign({}, thread, {
     frameTable, stackTable, markers, stringTable, samples,
   });
