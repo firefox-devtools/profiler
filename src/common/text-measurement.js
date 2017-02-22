@@ -1,10 +1,19 @@
+// @flow
+
 /**
  * Measure the size of text for drawing within a 2d context. This will allow text
  * to be drawn in a constrained space. This class uses a variety of heuristics and
  * caching to make this process fast.
  */
 class TextMeasurement {
-  constructor(ctx) {
+
+  _ctx: CanvasRenderingContext2D
+  _cache: {[id: string]: number}
+  _averageCharWidth: number
+  overflowChar: string
+  minWidth: number
+
+  constructor(ctx: CanvasRenderingContext2D) {
     this._ctx = ctx;
     this._cache = {};
     this._averageCharWidth = this._calcAverageCharWidth();
@@ -21,7 +30,7 @@ class TextMeasurement {
    *
    * @return {number} The average letter width.
    */
-  _calcAverageCharWidth() {
+  _calcAverageCharWidth(): number {
     const string = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_';
     return this.getTextWidth(string) / string.length;
   }
@@ -33,7 +42,7 @@ class TextMeasurement {
    * @param {string} text - The text to analyze.
    * @return {number} The text width.
    */
-  getTextWidth(text) {
+  getTextWidth(text: string): number {
     const cachedWidth = this._cache[text];
     if (cachedWidth) {
       return cachedWidth;
@@ -50,7 +59,7 @@ class TextMeasurement {
    * @param {string} text - The text to analyze.
    * @return {number} The approximate text width.
    */
-  getTextWidthApprox(text) {
+  getTextWidthApprox(text: string): number {
     return text.length * this._averageCharWidth;
   }
 
@@ -62,7 +71,7 @@ class TextMeasurement {
    * @param {number} maxWidth - The available width for the given text.
    * @return {string} The fitted text.
    */
-  getFittedText(text, maxWidth) {
+  getFittedText(text: string, maxWidth: number): string {
     if (this.minWidth > maxWidth) {
       return '';
     }

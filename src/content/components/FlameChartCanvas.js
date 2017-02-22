@@ -1,7 +1,28 @@
-import React, { Component, PropTypes } from 'react';
+// @flow
+import React, { Component } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import { timeCode } from '../../common/time-code';
 import TextMeasurement from '../../common/text-measurement';
+
+import type { Thread } from '../../common/types/profile';
+import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange, DevicePixels } from '../../common/types/units';
+import type { StackTimingByDepth } from '../stack-timing';
+
+type Props = {
+  thread: Thread,
+  interval: Milliseconds,
+  rangeStart: Milliseconds,
+  rangeEnd: Milliseconds,
+  className: string,
+  containerWidth: CssPixels,
+  containerHeight: CssPixels,
+  viewportLeft: UnitIntervalOfProfileRange,
+  viewportRight: UnitIntervalOfProfileRange,
+  viewportTop: CssPixels,
+  viewportBottom: CssPixels,
+  stackTimingByDepth: StackTimingByDepth,
+  rowHeight: CssPixels,
+};
 
 const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
@@ -9,11 +30,18 @@ const TEXT_OFFSET_TOP = 11;
 
 class FlameChartCanvas extends Component {
 
-  constructor(props) {
+  _requestedAnimationFrame: boolean
+  _devicePixelRatio: number
+  _textMeasurement: null|TextMeasurement
+  _ctx: null|CanvasRenderingContext2D
+
+  props: Props
+
+  constructor(props: Props) {
     super(props);
     this._requestedAnimationFrame = false;
     this._devicePixelRatio = 1;
-    this._textWidthsCache = {};
+    this._textMeasurement = null;
   }
 
   _scheduleDraw() {
@@ -30,8 +58,8 @@ class FlameChartCanvas extends Component {
     }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
+  shouldComponentUpdate(nextProps: Props) {
+    return shallowCompare(this, nextProps);
   }
 
   componentDidMount() {
@@ -42,8 +70,8 @@ class FlameChartCanvas extends Component {
     const {canvas} = this.refs;
     const {containerWidth, containerHeight} = this.props;
     const {devicePixelRatio} = window;
-    const pixelWidth = containerWidth * devicePixelRatio;
-    const pixelHeight = containerHeight * devicePixelRatio;
+    const pixelWidth: DevicePixels = containerWidth * devicePixelRatio;
+    const pixelHeight: DevicePixels = containerHeight * devicePixelRatio;
     if (!this._ctx) {
       this._ctx = canvas.getContext('2d');
     }
@@ -80,12 +108,14 @@ class FlameChartCanvas extends Component {
     const ctx = this._prepCanvas();
     ctx.clearRect(0, 0, containerWidth, containerHeight);
 
-    const rangeLength = rangeEnd - rangeStart;
-    const viewportLength = viewportRight - viewportLeft;
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const viewportLength: UnitIntervalOfProfileRange = viewportRight - viewportLeft;
 
-    // Only draw the stack frames that are vertically within view.
+    // Convert CssPixels to Stack Depth
     const startDepth = Math.floor(viewportTop / rowHeight);
     const endDepth = Math.ceil(viewportBottom / rowHeight);
+
+    // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {
       // Get the timing information for a row of stack frames.
       const stackTiming = stackTimingByDepth[depth];
@@ -102,8 +132,8 @@ class FlameChartCanvas extends Component {
        */
 
       // Decide which samples to actually draw
-      const timeAtViewportLeft = rangeStart + rangeLength * viewportLeft;
-      const timeAtViewportRight = rangeStart + rangeLength * viewportRight;
+      const timeAtViewportLeft: Milliseconds = rangeStart + rangeLength * viewportLeft;
+      const timeAtViewportRight: Milliseconds = rangeStart + rangeLength * viewportRight;
 
       for (let i = 0; i < stackTiming.length; i++) {
         // Only draw samples that are in bounds.
@@ -134,13 +164,13 @@ class FlameChartCanvas extends Component {
               // Platform code
               : 'rgb(240, 240, 240)';
           }
-          const unitStartTime = (stackTiming.start[i] - rangeStart) / rangeLength;
-          const unitEndTime = (stackTiming.end[i] - rangeStart) / rangeLength;
+          const startTime: UnitIntervalOfProfileRange = (stackTiming.start[i] - rangeStart) / rangeLength;
+          const endTime: UnitIntervalOfProfileRange = (stackTiming.end[i] - rangeStart) / rangeLength;
 
-          const x = ((unitStartTime - viewportLeft) * containerWidth / viewportLength);
-          const y = depth * ROW_HEIGHT - viewportTop;
-          const w = ((unitEndTime - unitStartTime) * containerWidth / viewportLength);
-          const h = ROW_HEIGHT - 1;
+          const x: CssPixels = ((startTime - viewportLeft) * containerWidth / viewportLength);
+          const y: CssPixels = depth * ROW_HEIGHT - viewportTop;
+          const w: CssPixels = ((endTime - startTime) * containerWidth / viewportLength);
+          const h: CssPixels = ROW_HEIGHT - 1;
 
           if (w < 2) {
             // Skip sending draw calls for sufficiently small boxes.
@@ -152,10 +182,10 @@ class FlameChartCanvas extends Component {
 
           // TODO - L10N RTL.
           // Constrain the x coordinate to the leftmost area.
-          const x2 = Math.max(x, 0) + TEXT_OFFSET_START;
-          const w2 = Math.max(0, w - (x2 - x));
+          const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
+          const w2: CssPixels = Math.max(0, w - (x2 - x));
 
-          if (w2 > this._textMeasurement.minWidth) {
+          if (this._textMeasurement !== null && w2 > this._textMeasurement.minWidth) {
             const text = this._textMeasurement.getFittedText(name, w2);
             if (text) {
               ctx.fillStyle = 'rgb(0, 0, 0)';
@@ -172,23 +202,5 @@ class FlameChartCanvas extends Component {
     return <canvas className='flameChartCanvas' ref='canvas'/>;
   }
 }
-
-FlameChartCanvas.propTypes = {
-  thread: PropTypes.shape({
-    samples: PropTypes.object.isRequired,
-  }).isRequired,
-  interval: PropTypes.number.isRequired,
-  rangeStart: PropTypes.number.isRequired,
-  rangeEnd: PropTypes.number.isRequired,
-  className: PropTypes.string,
-  containerWidth: PropTypes.number,
-  containerHeight: PropTypes.number,
-  viewportLeft: PropTypes.number,
-  viewportRight: PropTypes.number,
-  stackTimingByDepth: PropTypes.array,
-  rowHeight: PropTypes.number.isRequired,
-  viewportTop: PropTypes.number.isRequired,
-  viewportBottom: PropTypes.number.isRequired,
-};
 
 export default FlameChartCanvas;
