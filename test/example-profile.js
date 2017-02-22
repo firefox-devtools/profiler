@@ -89,15 +89,15 @@ const thread = {
         interval: 'end',
         type: 'tracing'
       }],
+      [9, 7, { // MinorGC at time 7ms from 7ms to 8ms
+        startTime: 7,
+        endTime: 8,
+      }],
       [8, 5, { // DOMEvent at time 5ms from 5ms to 6ms
         startTime: 5,
         endTime: 6,
         type: 'mouseout',
         phase: 3,
-      }],
-      [9, 7, { // MinorGC at time 7ms from 7ms to 8ms
-        startTime: 7,
-        endTime: 8,
       }],
     ]
   },
