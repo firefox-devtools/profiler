@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 
-class TimeLine extends Component {
+class TimeRuler extends Component {
 
   _findNiceNumberGreaterOrEqualTo(uglyNumber) {
     // Write uglyNumber as a * 10^b, with 1 <= a < 10.
@@ -37,11 +37,11 @@ class TimeLine extends Component {
     const { className } = this.props;
     const { notches, decimalPlaces } = this._getNotches();
     return (<div className={className}>
-      <ol className='timeLineContainer'>
+      <ol className='timeRulerContainer'>
         {
           notches.map(({ time, pos }, i) => (
-            <li className='timeLineNotch' key={i} style={{left: `${pos}px`}}>
-              <span className='timeLineNotchText'>{`${time.toFixed(decimalPlaces)}s`}</span>
+            <li className='timeRulerNotch' key={i} style={{left: `${pos}px`}}>
+              <span className='timeRulerNotchText'>{`${time.toFixed(decimalPlaces)}s`}</span>
             </li>
           ))
         }
@@ -51,7 +51,7 @@ class TimeLine extends Component {
 
 }
 
-TimeLine.propTypes = {
+TimeRuler.propTypes = {
   className: PropTypes.string.isRequired,
   zeroAt: PropTypes.number.isRequired,
   rangeStart: PropTypes.number.isRequired,
@@ -59,4 +59,4 @@ TimeLine.propTypes = {
   width: PropTypes.number.isRequired,
 };
 
-export default TimeLine;
+export default TimeRuler;

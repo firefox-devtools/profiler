@@ -247,12 +247,12 @@ body, #root, .profileViewer {
   -moz-user-focus: ignore;
 }
 
-.profileViewerHeaderTimeLine {
+.profileViewerHeaderTimeRuler {
   height: 20px;
   overflow: hidden;
 }
 
-.profileViewerHeaderTimeLine::after {
+.profileViewerHeaderTimeRuler::after {
   content: '';
   position: absolute;
   top: 20px;
@@ -263,7 +263,7 @@ body, #root, .profileViewer {
   z-index: 3;
 }
 
-.timeLineContainer {
+.timeRulerContainer {
   overflow: hidden;
   list-style: none;
   margin: 0;
@@ -282,7 +282,7 @@ body, #root, .profileViewer {
   cursor: default;
 }
 
-.timeLineNotch {
+.timeRulerNotch {
   display: block;
   position: absolute;
   top: 0;
@@ -294,7 +294,7 @@ body, #root, .profileViewer {
   background: linear-gradient(transparent, #D6D6D6 19px, #D6D6D6 20px, #D6D6D666 0);
 }
 
-.timeLineNotchText {
+.timeRulerNotchText {
   position: absolute;
   right: 0;
   padding-right: 5px;
@@ -307,16 +307,16 @@ body, #root, .profileViewer {
   overflow: auto;
 }
 
-.profileViewerHeaderIntervalMarkerTimelineContainerJank {
+.profileViewerHeaderIntervalMarkerOverviewContainerJank {
   padding: 6px 0;
   border-bottom: 1px solid #D6D6D6;
 }
 
-.profileViewerHeaderIntervalMarkerTimelineJank {
+.profileViewerHeaderIntervalMarkerOverviewJank {
   padding: 2px 0;
 }
 
-.profileViewerHeaderIntervalMarkerTimeline {
+.profileViewerHeaderIntervalMarkerOverview {
   list-style: none;
   display: block;
   margin: 0;
@@ -325,12 +325,12 @@ body, #root, .profileViewer {
   overflow: hidden;
 }
 
-.profileViewerHeaderIntervalMarkerTimelineThreadGeckoMain {
+.profileViewerHeaderIntervalMarkerOverviewThreadGeckoMain {
   height: 18px;
   border-bottom: 1px solid #D6D6D6;
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItem {
+.profileViewerHeaderIntervalMarkerOverviewItem {
   margin: 0;
   position: absolute;
   z-index: 2;
@@ -341,8 +341,8 @@ body, #root, .profileViewer {
 }
 
 /* Make the four corner pixels white so that it looks a little like rounded corners */
-.profileViewerHeaderIntervalMarkerTimelineItem::before,
-.profileViewerHeaderIntervalMarkerTimelineItem::after {
+.profileViewerHeaderIntervalMarkerOverviewItem::before,
+.profileViewerHeaderIntervalMarkerOverviewItem::after {
   content: '';
   position: absolute;
   top: 0;
@@ -352,88 +352,88 @@ body, #root, .profileViewer {
   border-width: 0.5px 0;
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItem::before {
+.profileViewerHeaderIntervalMarkerOverviewItem::before {
   left: 0;
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItem::after {
+.profileViewerHeaderIntervalMarkerOverviewItem::after {
   right: 0;
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItem:hover,
-.profileViewerHeaderIntervalMarkerTimelineItem:active {
+.profileViewerHeaderIntervalMarkerOverviewItem:hover,
+.profileViewerHeaderIntervalMarkerOverviewItem:active {
   background-image: linear-gradient(hsla(0,0%,100%,0.3),hsla(0,0%,100%,0.3));
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItem:active:hover {
+.profileViewerHeaderIntervalMarkerOverviewItem:active:hover {
   background-image: linear-gradient(hsla(0,0%,0%,0.3),hsla(0,0%,0%,0.3));
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeStyles,
-.profileViewerHeaderIntervalMarkerTimelineItemTypeReflow,
-.profileViewerHeaderIntervalMarkerTimelineItemTypeDisplayList {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeStyles,
+.profileViewerHeaderIntervalMarkerOverviewItemTypeReflow,
+.profileViewerHeaderIntervalMarkerOverviewItemTypeDisplayList {
   top: 6px;
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeRasterize {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeRasterize {
   top: 12px;
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeRD {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeRD {
   background: hsla(0,0%,0%,0.05);
   height: 100%;
   z-index: 0;
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeScripts {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeScripts {
   background: rgb(250,100,40);
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeStyles {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeStyles {
   background: rgb(40,40,100);
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeReflow {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeReflow {
   background: rgb(40,40,100);
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeDisplayList {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeDisplayList {
   background: rgb(150, 40, 100);
 }
-.profileViewerHeaderIntervalMarkerTimelineItemTypeRasterize {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeRasterize {
   background: rgb(100, 250, 40);
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeComposite {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeComposite {
   background: rgb(100,40,250);
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeVsync {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeVsync {
   background: rgb(255, 128, 0);
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeLayerTransaction {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeLayerTransaction {
   background: rgb(250, 0, 33);
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeLayerContentGPU {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeLayerContentGPU {
   background: rgba(0,200,0,0.5);
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeLayerCompositorGPU {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeLayerCompositorGPU {
   background: rgba(0,200,0,0.5);
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeLayerOther {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeLayerOther {
   background: rgb(200,0,0);
 }
 
-.profileViewerHeaderIntervalMarkerTimelineItemTypeJank {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeJank {
   background: hsl(0,90%,70%);
   box-shadow: inset 1px 0 hsl(0,90%,50%), inset -1px 0 hsl(0,90%,50%);
 }
-.profileViewerHeaderIntervalMarkerTimelineItemTypeJank::before,
-.profileViewerHeaderIntervalMarkerTimelineItemTypeJank::after {
+.profileViewerHeaderIntervalMarkerOverviewItemTypeJank::before,
+.profileViewerHeaderIntervalMarkerOverviewItemTypeJank::after {
   content: none;
 }
 
@@ -489,7 +489,7 @@ body, #root, .profileViewer {
   width: 100%;
 }
 
-.timelineWithRangeSelectionHoverIndicator {
+.timeSelectionScrubberHoverIndicator {
   position: absolute;
   pointer-events: none;
   visibility: hidden;
@@ -499,7 +499,7 @@ body, #root, .profileViewer {
   background: rgba(0,0,0,0.4);
 }
 
-.profileViewerHeader:hover > .timelineWithRangeSelectionHoverIndicator {
+.profileViewerHeader:hover > .timeSelectionScrubberHoverIndicator {
   visibility: visible;
 }
 
@@ -528,7 +528,7 @@ body, #root, .profileViewer {
   flex: 1;
 }
 
-.rangeSelectionGrippy {
+.selectionScrubberGrippy {
   height: 20px;
   pointer-events: auto;
   display: flex;
@@ -564,12 +564,12 @@ body, #root, .profileViewer {
   cursor: grabbing;
 }
 
-.rangeSelectionWrapper {
+.selectionScrubberWrapper {
   display: flex;
   flex-flow: column nowrap;
 }
 
-.rangeSelectionInner {
+.selectionScrubberInner {
   flex: 1;
   justify-content: center;
   align-items: center;
@@ -578,7 +578,7 @@ body, #root, .profileViewer {
   min-height: 0;
 }
 
-.rangeSelectionZoomButton {
+.selectionScrubberZoomButton {
   width: 30px;
   height: 30px;
   pointer-events: auto;
@@ -593,21 +593,21 @@ body, #root, .profileViewer {
   opacity: 0.5;
 }
 
-.rangeSelectionZoomButton.hidden {
+.selectionScrubberZoomButton.hidden {
   opacity: 0.0 !important;
   pointer-events: none;
 }
 
-.profileViewerHeader:hover .rangeSelectionZoomButton,
-.rangeSelectionZoomButton:active {
+.profileViewerHeader:hover .selectionScrubberZoomButton,
+.selectionScrubberZoomButton:active {
   opacity: 1.0;
 }
 
-.rangeSelectionZoomButton:hover {
+.selectionScrubberZoomButton:hover {
   background-color: rgba(255, 255, 255, 0.9);
 }
 
-.rangeSelectionZoomButton:active:hover {
+.selectionScrubberZoomButton:active:hover {
   background-color: rgba(160, 160, 160, 0.6);
 }
 
