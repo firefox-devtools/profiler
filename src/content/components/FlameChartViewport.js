@@ -6,13 +6,7 @@ import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../
 import type { StackTimingByDepth } from '../stack-timing';
 
 type Props = {
-  connectedProps: {
-    thread: Thread,
-    interval: Milliseconds,
-    timeRange: { start: Milliseconds, end: Milliseconds },
-    maxStackDepth: number,
-    stackTimingByDepth: StackTimingByDepth,
-  },
+  connectedProps: {[key: any]: any},
   maxViewportHeight: number,
   rowHeight: number,
 };
@@ -150,10 +144,10 @@ class FlameChartViewport extends Component {
               viewportTop } = this.state;
 
       // Calculate left and right in terms of the unit interval of the profile range.
-      const viewportLength:CssPixels = viewportRight - viewportLeft;
-      const unitOffsetX:UnitIntervalOfProfileRange = viewportLength * (event.clientX - dragX) / containerWidth;
-      let newViewportLeft:CssPixels = viewportLeft - unitOffsetX;
-      let newViewportRight:CssPixels = viewportRight - unitOffsetX;
+      const viewportLength: CssPixels = viewportRight - viewportLeft;
+      const unitOffsetX: UnitIntervalOfProfileRange = viewportLength * (event.clientX - dragX) / containerWidth;
+      let newViewportLeft: CssPixels = viewportLeft - unitOffsetX;
+      let newViewportRight: CssPixels = viewportRight - unitOffsetX;
       if (newViewportLeft < 0) {
         newViewportLeft = 0;
         newViewportRight = viewportLength;
@@ -164,8 +158,8 @@ class FlameChartViewport extends Component {
       }
 
       // Calculate top and bottom in terms of pixels.
-      let newViewportTop:CssPixels = viewportTop - (event.clientY - dragY);
-      let newViewportBottom:CssPixels = newViewportTop + containerHeight;
+      let newViewportTop: CssPixels = viewportTop - (event.clientY - dragY);
+      let newViewportBottom: CssPixels = newViewportTop + containerHeight;
 
       // Constrain the viewport to the bottom.
       if (newViewportBottom > maxViewportHeight) {

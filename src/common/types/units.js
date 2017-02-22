@@ -1,8 +1,8 @@
 export type Milliseconds = number;
 
 /**
- * The pixels represented by a unit of CSS, e.g. the height of a div by setting the
- * div.style.height = 15. This may not be the actual size of pixels in a canvas or
+ * The pixels represented by the px unit of CSS, e.g. the height of a div by setting the
+ * div.style.height = "15px". This may not be the actual size of pixels in a canvas or
  * displayed on the screen.
  */
 export type CssPixels = number;

@@ -35,6 +35,8 @@ class FlameChartCanvas extends Component {
   _textMeasurement: null|TextMeasurement
   _ctx: null|CanvasRenderingContext2D
 
+  props: Props
+
   constructor(props: Props) {
     super(props);
     this._requestedAnimationFrame = false;
