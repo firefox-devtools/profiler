@@ -348,27 +348,8 @@ body, #root, .profileViewer {
   top: 0;
   height: 6px;
   background: black;
+  border-radius: 1px;
   box-sizing: border-box;
-}
-
-/* Make the four corner pixels white so that it looks a little like rounded corners */
-.profileViewerHeaderIntervalMarkerOverviewItem::before,
-.profileViewerHeaderIntervalMarkerOverviewItem::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 0.5px;
-  border: solid white;
-  border-width: 0.5px 0;
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItem::before {
-  left: 0;
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItem::after {
-  right: 0;
 }
 
 .profileViewerHeaderIntervalMarkerOverviewItem:hover,
