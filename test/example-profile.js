@@ -89,6 +89,12 @@ const thread = {
         interval: 'end',
         type: 'tracing'
       }],
+      [8, 5, {
+        startTime: 5,
+        endTime: 6,
+        type: 'mouseout',
+        phase: 3,
+      }],
     ]
   },
   stringTable: [
@@ -100,6 +106,7 @@ const thread = {
     'Reflow',
     'baseline',
     'frobnicate (chrome://blargh:34)',
+    'DOMEvent',
   ],
 };
 

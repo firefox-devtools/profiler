@@ -357,14 +357,45 @@ function addPreprocessedTaskTracerData(tasktracer, result, libs, startTime) {
 }
 
 /**
- * Adjust the "time" field by the given delta.
- * @param {object} samplesOrMarkers The table of samples/markers.
+ * Adjust the "time" field by the given delta. This is needed when integrating
+ * subprocess profiles into the parent process profile; each profile's process
+ * has its own timebase, and we don't want to keep converting timestamps when
+ * we deal with the integrated profile.
+ * @param {object} samples The table of samples/markers.
  * @param {number} delta The time delta, in milliseconds, by which to adjust.
- * @return {object} A samples/markers table with adjusted time values.
+ * @return {object} A samples table with adjusted time values.
  */
-function adjustTimestamps(samplesOrMarkers, delta) {
-  return Object.assign({}, samplesOrMarkers, {
-    time: samplesOrMarkers.time.map(time => time === undefined ? undefined : time + delta),
+function adjustSampleTimestamps(samples, delta) {
+  return Object.assign({}, samples, {
+    time: samples.time.map(time => time === undefined ? undefined : time + delta),
+  });
+}
+
+/**
+ * Adjust all timestamp fields by the given delta. This is needed when
+ * integrating subprocess profiles into the parent process profile; each
+ * profile's process has its own timebase, and we don't want to keep
+ * converting timestamps when we deal with the integrated profile.
+ * @param {object} samples The table of markers.
+ * @param {number} delta The time delta, in milliseconds, by which to adjust.
+ * @return {object} A markers table with adjusted time values.
+ */
+function adjustMarkerTimestamps(markers, delta) {
+  return Object.assign({}, markers, {
+    time: markers.time.map(time => time === undefined ? undefined : time + delta),
+    data: markers.data.map(data => {
+      if (!data) {
+        return data;
+      }
+      const newData = Object.assign({}, data);
+      if ('startTime' in newData) {
+        newData.startTime += delta;
+      }
+      if ('endTime' in newData) {
+        newData.endTime += delta;
+      }
+      return newData;
+    }),
   });
 }
 
@@ -391,8 +422,8 @@ export function preprocessProfile(profile) {
       const adjustTimestampsBy = subprocessProfile.meta.startTime - profile.meta.startTime;
       threads = threads.concat(subprocessProfile.threads.map((thread, threadIndex) => {
         const newThread = preprocessThread(thread, subprocessLibs);
-        newThread.samples = adjustTimestamps(newThread.samples, adjustTimestampsBy);
-        newThread.markers = adjustTimestamps(newThread.markers, adjustTimestampsBy);
+        newThread.samples = adjustSampleTimestamps(newThread.samples, adjustTimestampsBy);
+        newThread.markers = adjustMarkerTimestamps(newThread.markers, adjustTimestampsBy);
         if (newThread.name === 'Content') {
           // Workaround for bug 1322471.
           if (threadIndex === 0) {

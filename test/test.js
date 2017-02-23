@@ -92,8 +92,16 @@ describe('preprocess-profile', function () {
       assert.equal(profile.threads[2].samples.time[1], 1001);
       assert.equal(profile.threads[0].markers.time[0], 0);
       assert.equal(profile.threads[0].markers.time[1], 2);
+      assert.equal(profile.threads[0].markers.time[2], 4);
+      assert.equal(profile.threads[0].markers.time[3], 5);
+      assert.equal(profile.threads[0].markers.data[3].startTime, 5);
+      assert.equal(profile.threads[0].markers.data[3].endTime, 6);
       assert.equal(profile.threads[2].markers.time[0], 1000);
       assert.equal(profile.threads[2].markers.time[1], 1002);
+      assert.equal(profile.threads[2].markers.time[2], 1004);
+      assert.equal(profile.threads[2].markers.time[3], 1005);
+      assert.equal(profile.threads[2].markers.data[3].startTime, 1005);
+      assert.equal(profile.threads[2].markers.data[3].endTime, 1006);
       // TODO: also shift the samples inside marker callstacks
     });
     it('should create one function per frame', function () {
