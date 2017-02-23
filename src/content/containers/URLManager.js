@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
+import { getIsUrlSetupDone } from '../reducers/app';
 
 class URLManager extends Component {
   componentDidMount() {
@@ -22,10 +23,10 @@ class URLManager extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const { urlFromState, isUrlSetupDone } = this.props;
+    const { urlFromState, isURLSetupDone } = this.props;
     const newURL = urlFromState(nextProps.urlState);
     if (newURL !== window.location.pathname + window.location.search) {
-      if (isUrlSetupDone) {
+      if (isURLSetupDone) {
         window.history.pushState(nextProps.urlState, document.title, newURL);
       } else {
         window.history.replaceState(nextProps.urlState, document.title, newURL);
@@ -34,8 +35,8 @@ class URLManager extends Component {
   }
 
   render() {
-    const { isUrlSetupDone } = this.props;
-    return isUrlSetupDone ? this.props.children : <div className='processingURL'/>;
+    const { isURLSetupDone } = this.props;
+    return isURLSetupDone ? this.props.children : <div className='processingURL'/>;
   }
 }
 
@@ -44,7 +45,7 @@ URLManager.propTypes = {
   urlFromState: PropTypes.func.isRequired,
   children: PropTypes.any.isRequired,
   urlState: PropTypes.object.isRequired,
-  isUrlSetupDone: PropTypes.bool.isRequired,
+  isURLSetupDone: PropTypes.bool.isRequired,
   updateURLState: PropTypes.func.isRequired,
   urlSetupDone: PropTypes.func.isRequired,
   show404: PropTypes.func.isRequired,
@@ -52,7 +53,7 @@ URLManager.propTypes = {
 
 export default connect(state => ({
   urlState: state.urlState,
-  isUrlSetupDone: state.isUrlSetupDone,
+  isURLSetupDone: getIsUrlSetupDone(state),
 }), dispatch => ({
   updateURLState: urlState => dispatch({ type: '@@urlenhancer/updateURLState', urlState }),
   urlSetupDone: () => dispatch({ type: '@@urlenhancer/urlSetupDone' }),
