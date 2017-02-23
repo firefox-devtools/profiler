@@ -2,7 +2,7 @@ import { preprocessProfile, unserializeProfile } from '../preprocess-profile';
 import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
-import { getProfile } from '../selectors/profile-view';
+import { getProfile } from '../reducers/profile-view';
 import { decompress } from '../gz';
 
 export function profileSummaryProcessed(summary) {

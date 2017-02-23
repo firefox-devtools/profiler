@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { getIsUrlSetupDone } from '../reducers/app';
+import { getIsURLSetupDone } from '../reducers/app';
 
 class URLManager extends Component {
   componentDidMount() {
@@ -53,7 +53,7 @@ URLManager.propTypes = {
 
 export default connect(state => ({
   urlState: state.urlState,
-  isURLSetupDone: getIsUrlSetupDone(state),
+  isURLSetupDone: getIsURLSetupDone(state),
 }), dispatch => ({
   updateURLState: urlState => dispatch({ type: '@@urlenhancer/updateURLState', urlState }),
   urlSetupDone: () => dispatch({ type: '@@urlenhancer/urlSetupDone' }),

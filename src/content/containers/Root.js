@@ -4,7 +4,8 @@ import * as actions from '../actions';
 import ProfileViewer from '../components/ProfileViewer';
 import Home from '../containers/Home';
 import { urlFromState, stateFromCurrentLocation } from '../url-handling';
-import { getView, getDataSource, getHash } from '../selectors';
+import { getView } from '../reducers/app';
+import { getDataSource, getHash } from '../reducers/url-state';
 import URLManager from './URLManager';
 
 class ProfileViewWhenReadyImpl extends Component {

@@ -2,7 +2,7 @@ import 'babel-polyfill';
 import { describe, it } from 'mocha';
 import { assert } from 'chai';
 import { blankStore, storeWithProfile } from './fixtures/stores';
-import * as selectors from '../../selectors';
+import * as selectors from '../../reducers/profile-view';
 import { changeCallTreeSearchString, receiveProfileFromAddon, changeJSOnly, addRangeFilter, changeInvertCallstack } from '../';
 const { selectedThreadSelectors } = selectors;
 

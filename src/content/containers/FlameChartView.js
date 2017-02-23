@@ -1,7 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import FlameChartViewport from '../components/FlameChartViewport';
-import { getSelectedThreadIndex, selectedThreadSelectors, getDisplayRange, getProfileInterval } from '../reducers/profile-view';
+import { selectedThreadSelectors, getDisplayRange, getProfileInterval } from '../reducers/profile-view';
+import { getSelectedThreadIndex } from '../reducers/url-state';
 import * as actions from '../actions';
 import ProfileCallTreeSettings from '../components/ProfileCallTreeSettings';
 

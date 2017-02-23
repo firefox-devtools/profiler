@@ -1,7 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TreeView from '../components/TreeView';
-import { getZeroAt, selectedThreadSelectors, getSelectedThreadIndex } from '../selectors/';
+import { getZeroAt, selectedThreadSelectors } from '../reducers/profile-view';
+import { getSelectedThreadIndex } from '../reducers/url-state';
 import * as actions from '../actions';
 
 class MarkerTree {
