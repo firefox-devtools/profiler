@@ -2,7 +2,7 @@ import 'babel-polyfill';
 import { assert } from 'chai';
 import { getContainingLibrary, symbolicateProfile, applyFunctionMerging, setFuncNames } from '../src/content/symbolication';
 import { preprocessProfile } from '../src/content/preprocess-profile';
-import { resourceTypes, getFuncStackInfo } from '../src/content/profile-data';
+import { resourceTypes, getFuncStackInfo, getTracingMarkers } from '../src/content/profile-data';
 import exampleProfile from './example-profile';
 import { UniqueStringArray } from '../src/content/unique-string-array';
 import { FakeSymbolStore } from './fake-symbol-store';
@@ -159,6 +159,29 @@ describe('profile-data', function () {
       assert.equal(funcStackTable.func[1], 1);
       assert.equal(funcStackTable.func[2], 2);
       assert.equal(funcStackTable.func[3], 3);
+    });
+  });
+  describe('getTracingMarkers', function () {
+    const profile = preprocessProfile(exampleProfile);
+    const thread = profile.threads[0];
+    const tracingMarkers = getTracingMarkers(thread);
+    it('should fold the two reflow markers into one tracing marker', function () {
+      assert.equal(tracingMarkers.length, 2);
+      assert.deepEqual(tracingMarkers[0], {
+        start: 2,
+        name: 'Reflow',
+        dur: 2,
+        title: 'Reflow for 2.00ms'
+      });
+    });
+    it('should create a tracing marker for the MinorGC startTime/endTime marker', function () {
+      assert.equal(tracingMarkers.length, 2);
+      assert.deepEqual(tracingMarkers[1], {
+        start: 7,
+        name: 'MinorGC',
+        dur: 1,
+        title: 'MinorGC for 1.00ms',
+      });
     });
   });
 });

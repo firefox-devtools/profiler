@@ -613,31 +613,46 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
   const openMarkers: Map<IndexIntoStringTable, TracingMarker> = new Map();
   for (let i = 0; i < markers.length; i++) {
     const data = markers.data[i];
-    if (!data || data.type !== 'tracing') {
+    if (!data) {
       continue;
     }
-
-    const time = markers.time[i];
-    const nameStringIndex = markers.name[i];
-    if (data.interval === 'start') {
-      openMarkers.set(nameStringIndex, {
-        start: time,
-        name: stringTable.getString(nameStringIndex),
-        dur: 0,
-        title: null,
-      });
-    } else if (data.interval === 'end') {
-      const marker = openMarkers.get(nameStringIndex);
-      if (marker === undefined) {
-        continue;
+    if (data.type === 'tracing') {
+      const time = markers.time[i];
+      const nameStringIndex = markers.name[i];
+      if (data.interval === 'start') {
+        openMarkers.set(nameStringIndex, {
+          start: time,
+          name: stringTable.getString(nameStringIndex),
+          dur: 0,
+          title: null,
+        });
+      } else if (data.interval === 'end') {
+        const marker = openMarkers.get(nameStringIndex);
+        if (marker === undefined) {
+          continue;
+        }
+        if (marker.start !== undefined) {
+          marker.dur = time - marker.start;
+        }
+        if (marker.name !== undefined && marker.dur !== undefined) {
+          marker.title = `${marker.name} for ${marker.dur.toFixed(2)}ms`;
+        }
+        tracingMarkers.push(marker);
       }
-      if (marker.start !== undefined) {
-        marker.dur = time - marker.start;
+    } else if (('startTime' in data) && ('endTime' in data)) {
+      const { startTime, endTime } = data;
+      if (typeof startTime === 'number' && typeof endTime === 'number') {
+        const name = stringTable.getString(markers.name[i]);
+        if (name !== 'DOMEvent') {
+          const duration = endTime - startTime;
+          tracingMarkers.push({
+            start: startTime,
+            dur: duration,
+            name,
+            title: `${name} for ${duration.toFixed(2)}ms`,
+          });
+        }
       }
-      if (marker.name !== undefined && marker.dur !== undefined) {
-        marker.title = `${marker.name} for ${marker.dur.toFixed(2)}ms`;
-      }
-      tracingMarkers.push(marker);
     }
   }
   return tracingMarkers;
