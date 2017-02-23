@@ -32,11 +32,12 @@ export type MarkerData = {
   interval?: string,
   type?: string,
   title?: string,
-  start?: number,
+  startTime?: number,
+  endTime?: number,
 };
 
 export type MarkersTable = {
-  data: MarkerData[],
+  data: (MarkerData|null)[],
   name: IndexIntoStringTable[],
   time: number[],
   length: number,
