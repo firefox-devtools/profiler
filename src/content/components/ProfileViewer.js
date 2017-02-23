@@ -17,7 +17,8 @@ import SymbolicationStatusOverlay from '../containers/SymbolicationStatusOverlay
 import FlameChartView from '../containers/FlameChartView';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import * as actions from '../actions';
-import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt, getSelectedTab } from '../selectors/';
+import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../reducers/profile-view';
+import { getSelectedTab } from '../reducers/url-state';
 
 class ProfileViewer extends Component {
   constructor(props) {

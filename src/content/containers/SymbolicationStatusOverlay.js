@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import * as actions from '../actions';
-import { getProfileViewOptions } from '../selectors/';
+import { getProfileViewOptions } from '../reducers/profile-view';
 
 function englishSgPlLibrary(count) {
   return count === 1 ? 'library' : 'libraries';

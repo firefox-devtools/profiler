@@ -2,10 +2,11 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TreeView from './TreeView';
 import { getStackAsFuncArray } from '../profile-data';
+import { getInvertCallstack, getJSOnly, getSearchString, getSelectedThreadIndex } from '../reducers/url-state';
 import {
-  getProfile, selectedThreadSelectors, getSelectedThreadIndex, getScrollToSelectionGeneration,
-  getSearchString, getProfileViewOptions, getInvertCallstack, getJSOnly,
-} from '../selectors/';
+  getProfile, selectedThreadSelectors, getScrollToSelectionGeneration, getProfileViewOptions,
+} from '../reducers/profile-view';
+
 import * as actions from '../actions';
 
 class ProfileTreeView extends Component {

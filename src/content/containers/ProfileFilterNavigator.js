@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import * as actions from '../actions';
-import { getRangeFilters } from '../selectors';
+import { getRangeFilters } from '../reducers/url-state';
 import FilterNavigatorBar from '../components/FilterNavigatorBar';
 
 function rangeString(range) {

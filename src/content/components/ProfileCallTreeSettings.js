@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import * as actions from '../actions';
-import { getJSOnly, getInvertCallstack, getSearchString } from '../selectors';
+import { getJSOnly, getInvertCallstack, getSearchString } from '../reducers/url-state';
 import IdleSearchField from '../components/IdleSearchField';
 
 import './ProfileCallTreeSettings.css';

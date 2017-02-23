@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import IntervalMarkerOverview from '../components/IntervalMarkerOverview';
-import { selectorsForThread } from '../selectors/';
+import { selectorsForThread } from '../reducers/profile-view';
 
 export default connect((state, props) => {
   const { threadIndex } = props;

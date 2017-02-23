@@ -1,7 +1,8 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { getProfile, getProfileViewOptions, getDataSource, getHash, getURLPredictor } from '../selectors/';
+import { getProfile, getProfileViewOptions } from '../reducers/profile-view';
+import { getDataSource, getHash, getURLPredictor } from '../reducers/url-state';
 import * as actions from '../actions';
 import { compress } from '../gz';
 import { uploadBinaryProfileData } from '../profile-store';

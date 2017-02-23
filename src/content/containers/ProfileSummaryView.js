@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { getProfileSummaries, getProfile, getProfileExpandedSummaries } from '../selectors/';
+import { getProfile } from '../reducers/profile-view';
+import { getProfileSummaries, getProfileExpandedSummaries } from '../reducers/summary-view';
 import SummarizeLineGraph from '../components/SummarizeLineGraph';
 import SummarizeProfileHeader from '../components/SummarizeProfileHeader';
 import SummarizeProfileExpand from '../components/SummarizeProfileExpand';

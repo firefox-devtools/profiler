@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import * as actions from '../actions';
-import { getSelectedThreadIndex, selectedThreadSelectors } from '../selectors';
+import { selectedThreadSelectors } from '../reducers/profile-view';
+import { getSelectedThreadIndex } from '../reducers/url-state';
 import FilterNavigatorBar from '../components/FilterNavigatorBar';
 
 import './ProfileCallTreeFilterNavigator.css';
