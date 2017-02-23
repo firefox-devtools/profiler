@@ -1,11 +1,11 @@
 import React, { Component, PropTypes } from 'react';
-import TimeLine from './TimeLine';
-import RangeSelectionOverlay from './RangeSelectionOverlay';
+import TimeRuler from './TimeRuler';
+import SelectionScrubberOverlay from './SelectionScrubberOverlay';
 import clamp from 'clamp';
 import { getContentRect } from '../css-geometry-tools';
 import { withSize } from '../with-size';
 
-class TimelineWithRangeSelectionImpl extends Component {
+class TimeSelectionScrubberImpl extends Component {
 
   constructor(props) {
     super(props);
@@ -131,22 +131,22 @@ class TimelineWithRangeSelectionImpl extends Component {
            ref={this._containerCreated}
            onMouseDown={this._onMouseDown}
            onMouseMove={this._onMouseMove}>
-        <TimeLine className={`${className}TimeLine`}
+        <TimeRuler className={`${className}TimeRuler`}
                   zeroAt={zeroAt}
                   rangeStart={rangeStart}
                   rangeEnd={rangeEnd}
                   width={width}/>
         { children }
-        { hasSelection ? <RangeSelectionOverlay rangeStart={rangeStart}
-                                                rangeEnd={rangeEnd}
-                                                selectionStart={selectionStart}
-                                                selectionEnd={selectionEnd}
-                                                isModifying={isModifying}
-                                                width={width}
-                                                onSelectionChange={onSelectionChange}
-                                                onZoomButtonClick={onZoomButtonClick}/>
+        { hasSelection ? <SelectionScrubberOverlay rangeStart={rangeStart}
+                                                   rangeEnd={rangeEnd}
+                                                   selectionStart={selectionStart}
+                                                   selectionEnd={selectionEnd}
+                                                   isModifying={isModifying}
+                                                   width={width}
+                                                   onSelectionChange={onSelectionChange}
+                                                   onZoomButtonClick={onZoomButtonClick}/>
                        : null }
-        <div className='timelineWithRangeSelectionHoverIndicator'
+        <div className='timeSelectionScrubberHoverIndicator'
              style={{
                visibility: isModifying || (hoverLocation === null) ? 'hidden' : undefined,
                left: (hoverLocation === null) ? '0' : `${hoverLocation}px`,
@@ -157,7 +157,7 @@ class TimelineWithRangeSelectionImpl extends Component {
 
 }
 
-TimelineWithRangeSelectionImpl.propTypes = {
+TimeSelectionScrubberImpl.propTypes = {
   className: PropTypes.string.isRequired,
   zeroAt: PropTypes.number.isRequired,
   rangeStart: PropTypes.number.isRequired,
@@ -173,6 +173,6 @@ TimelineWithRangeSelectionImpl.propTypes = {
   children: PropTypes.node,
 };
 
-const TimelineWithRangeSelection = withSize(TimelineWithRangeSelectionImpl);
+const TimeSelectionScrubber = withSize(TimeSelectionScrubberImpl);
 
-export default TimelineWithRangeSelection;
+export default TimeSelectionScrubber;

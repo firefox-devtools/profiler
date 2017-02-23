@@ -2,15 +2,15 @@ import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
 import Reorderable from '../components/Reorderable';
-import TimelineWithRangeSelection from '../components/TimelineWithRangeSelection';
+import TimeSelectionScrubber from '../components/TimeSelectionScrubber';
 import TabBar from '../components/TabBar';
 import ProfileSummaryView from '../containers/ProfileSummaryView';
 import ProfileCallTreeView from '../containers/ProfileCallTreeView';
 import ProfileMarkersView from '../containers/ProfileMarkersView';
 import ProfileTaskTracerView from '../containers/ProfileTaskTracerView';
 import ProfileLogView from '../containers/ProfileLogView';
-import ProfileThreadJankTimeline from '../containers/ProfileThreadJankTimeline';
-import ProfileThreadTracingMarkerTimeline from '../containers/ProfileThreadTracingMarkerTimeline';
+import ProfileThreadJankOverview from '../containers/ProfileThreadJankOverview';
+import ProfileThreadTracingMarkerOverview from '../containers/ProfileThreadTracingMarkerOverview';
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
 import ProfileSharing from '../containers/ProfileSharing';
 import SymbolicationStatusOverlay from '../containers/SymbolicationStatusOverlay';
@@ -92,25 +92,25 @@ class ProfileViewer extends Component {
           <ProfileFilterNavigator />
           <ProfileSharing />
         </div>
-        <TimelineWithRangeSelection className={`${className}Header`}
-                                    zeroAt={zeroAt}
-                                    rangeStart={timeRange.start}
-                                    rangeEnd={timeRange.end}
-                                    minSelectionStartWidth={profile.meta.interval}
-                                    hasSelection={hasSelection}
-                                    isModifying={isModifying}
-                                    selectionStart={selectionStart}
-                                    selectionEnd={selectionEnd}
-                                    onSelectionChange={updateProfileSelection}
-                                    onZoomButtonClick={this._onZoomButtonClick}>
-          <div className={`${className}HeaderIntervalMarkerTimelineContainer ${className}HeaderIntervalMarkerTimelineContainerJank`}>
+        <TimeSelectionScrubber className={`${className}Header`}
+                               zeroAt={zeroAt}
+                               rangeStart={timeRange.start}
+                               rangeEnd={timeRange.end}
+                               minSelectionStartWidth={profile.meta.interval}
+                               hasSelection={hasSelection}
+                               isModifying={isModifying}
+                               selectionStart={selectionStart}
+                               selectionEnd={selectionEnd}
+                               onSelectionChange={updateProfileSelection}
+                               onZoomButtonClick={this._onZoomButtonClick}>
+          <div className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerJank`}>
             {
               threadOrder.map(threadIndex => {
                 const threadName = threads[threadIndex].name;
                 const processType = threads[threadIndex].processType;
                 return (
                   ((threadName === 'GeckoMain' && processType !== 'plugin') ?
-                    <ProfileThreadJankTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineJank`}
+                    <ProfileThreadJankOverview className={`${className}HeaderIntervalMarkerOverview ${className}HeaderIntervalMarkerOverviewJank`}
                                                rangeStart={timeRange.start}
                                                rangeEnd={timeRange.end}
                                                threadIndex={threadIndex}
@@ -120,14 +120,14 @@ class ProfileViewer extends Component {
               })
             }
           </div>
-          <div className={`${className}HeaderIntervalMarkerTimelineContainer ${className}HeaderIntervalMarkerTimelineContainerGfx`}>
+          <div className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerGfx`}>
             {
               threadOrder.map(threadIndex => {
                 const threadName = threads[threadIndex].name;
                 const processType = threads[threadIndex].processType;
                 return (
                   (((threadName === 'GeckoMain' || threadName === 'Compositor') && processType !== 'plugin') ?
-                    <ProfileThreadTracingMarkerTimeline className={`${className}HeaderIntervalMarkerTimeline ${className}HeaderIntervalMarkerTimelineGfx ${className}HeaderIntervalMarkerTimelineThread${threadName}`}
+                    <ProfileThreadTracingMarkerOverview className={`${className}HeaderIntervalMarkerOverview ${className}HeaderIntervalMarkerOverviewGfx ${className}HeaderIntervalMarkerOverviewThread${threadName}`}
                                                         rangeStart={timeRange.start}
                                                         rangeEnd={timeRange.end}
                                                         threadIndex={threadIndex}
@@ -154,7 +154,7 @@ class ProfileViewer extends Component {
             }
             </Reorderable>
           </OverflowEdgeIndicator>
-        </TimelineWithRangeSelection>
+        </TimeSelectionScrubber>
         <TabBar tabs={this._tabs}
                 selectedTabName={selectedTab}
                 tabOrder={tabOrder}
