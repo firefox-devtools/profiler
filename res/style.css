@@ -323,17 +323,6 @@ body, #root, .profileViewer {
   height: 6px;
   position: relative;
   overflow: hidden;
-
-  /* stolen from the light theme at devtools/client/themes/variables.css */
-  --theme-highlight-green: #2cbb0f;
-  --theme-highlight-blue: #0088cc;
-  --theme-highlight-bluegrey: #0072ab;
-  --theme-highlight-purple: #5b5fff;
-  --theme-highlight-lightorange: #d97e00;
-  --theme-highlight-orange: #f13c00;
-  --theme-highlight-red: #ed2655;
-  --theme-highlight-pink: #b82ee5;
-  --theme-highlight-gray: #b4babf; /* except for this one, I made this one darker */
 }
 
 .profileViewerHeaderIntervalMarkerOverviewThreadGeckoMain {
@@ -341,138 +330,10 @@ body, #root, .profileViewer {
   border-bottom: 1px solid #D6D6D6;
 }
 
-.profileViewerHeaderIntervalMarkerOverviewItem {
-  margin: 0;
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  height: 6px;
-  background: black;
-  border-radius: 1px;
-  box-sizing: border-box;
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItem:hover,
-.profileViewerHeaderIntervalMarkerOverviewItem:active {
-  background-image: linear-gradient(hsla(0,0%,100%,0.3),hsla(0,0%,100%,0.3));
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItem:active:hover {
-  background-image: linear-gradient(hsla(0,0%,0%,0.3),hsla(0,0%,0%,0.3));
-}
-
-/**
- * Create a bit of a waterfall for the different phases of a RefreshDriverTick.
- */
-.profileViewerHeaderIntervalMarkerOverviewItemTypeScripts {
-  top: 6px;
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeStyles,
-.profileViewerHeaderIntervalMarkerOverviewItemTypeFireScrollEvent, /* strange order: bug 1340684 */
-.profileViewerHeaderIntervalMarkerOverviewItemTypeReflow {
-  top: 7px;
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeDispatchSynthMouseMove {
-  top: 8px;
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeDisplayList,
-.profileViewerHeaderIntervalMarkerOverviewItemTypeLayerBuilding {
-  top: 9px;
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeRasterize {
-  top: 10px;
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeForwardTransaction {
-  top: 11px;
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeNotifyDidPaint {
-  top: 12px;
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeRD, /* pre bug 1340709 */
-.profileViewerHeaderIntervalMarkerOverviewItemTypeRefreshDriverTick {
-  background: hsla(0,0%,0%,0.05);
+.intervalMarkerTimelineCanvas {
+  display: block;
+  width: 100%;
   height: 100%;
-  z-index: 0;
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeScripts {
-  background: var(--theme-highlight-orange);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeStyles {
-  background: var(--theme-highlight-bluegrey);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeFireScrollEvent {
-  background: var(--theme-highlight-orange);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeReflow {
-  background: var(--theme-highlight-blue);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeDispatchSynthMouseMove {
-  background: var(--theme-highlight-orange);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeDisplayList {
-  background: var(--theme-highlight-purple);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeLayerBuilding {
-  background: var(--theme-highlight-pink);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeRasterize {
-  background: var(--theme-highlight-green);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeForwardTransaction {
-  background: var(--theme-highlight-red);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeNotifyDidPaint {
-  background: var(--theme-highlight-gray);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeComposite {
-  background: var(--theme-highlight-blue);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeVsync {
-  background: rgb(255, 128, 0);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeLayerTransaction {
-  background: var(--theme-highlight-red);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeLayerContentGPU {
-  background: rgba(0,200,0,0.5);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeLayerCompositorGPU {
-  background: rgba(0,200,0,0.5);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeLayerOther {
-  background: rgb(200,0,0);
-}
-
-.profileViewerHeaderIntervalMarkerOverviewItemTypeJank {
-  background: hsl(0,90%,70%);
-  box-shadow: inset 1px 0 hsl(0,90%,50%), inset -1px 0 hsl(0,90%,50%);
-}
-.profileViewerHeaderIntervalMarkerOverviewItemTypeJank::before,
-.profileViewerHeaderIntervalMarkerOverviewItemTypeJank::after {
-  content: none;
 }
 
 .profileViewerHeaderThreadList {
