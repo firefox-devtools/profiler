@@ -84,18 +84,28 @@ const thread = {
         },
         type: 'tracing'
       }],
-      [5, 4, {
+      [10, 4, {
+        category: 'Paint',
+        interval: 'start',
+        type: 'tracing'
+      }],
+      [10, 5, {
         category: 'Paint',
         interval: 'end',
         type: 'tracing'
       }],
-      [9, 7, { // MinorGC at time 7ms from 7ms to 8ms
-        startTime: 7,
-        endTime: 8,
+      [5, 8, {
+        category: 'Paint',
+        interval: 'end',
+        type: 'tracing'
       }],
-      [8, 5, { // DOMEvent at time 5ms from 5ms to 6ms
-        startTime: 5,
-        endTime: 6,
+      [9, 11, { // MinorGC at time 7ms from 7ms to 8ms
+        startTime: 11,
+        endTime: 12,
+      }],
+      [8, 9, { // DOMEvent at time 5ms from 5ms to 6ms
+        startTime: 9,
+        endTime: 10,
         type: 'mouseout',
         phase: 3,
       }],
@@ -112,6 +122,7 @@ const thread = {
     'frobnicate (chrome://blargh:34)',
     'DOMEvent',
     'MinorGC',
+    'Rasterize',
   ],
 };
 
