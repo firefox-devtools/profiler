@@ -94,14 +94,14 @@ describe('preprocess-profile', function () {
       assert.equal(profile.threads[0].markers.time[1], 2);
       assert.equal(profile.threads[0].markers.time[2], 4);
       assert.equal(profile.threads[0].markers.time[3], 5);
-      assert.equal(profile.threads[0].markers.data[3].startTime, 5);
-      assert.equal(profile.threads[0].markers.data[3].endTime, 6);
+      assert.equal(profile.threads[0].markers.data[5].startTime, 9);
+      assert.equal(profile.threads[0].markers.data[5].endTime, 10);
       assert.equal(profile.threads[2].markers.time[0], 1000);
       assert.equal(profile.threads[2].markers.time[1], 1002);
       assert.equal(profile.threads[2].markers.time[2], 1004);
       assert.equal(profile.threads[2].markers.time[3], 1005);
-      assert.equal(profile.threads[2].markers.data[3].startTime, 1005);
-      assert.equal(profile.threads[2].markers.data[3].endTime, 1006);
+      assert.equal(profile.threads[2].markers.data[5].startTime, 1009);
+      assert.equal(profile.threads[2].markers.data[5].endTime, 1010);
       // TODO: also shift the samples inside marker callstacks
     });
     it('should create one function per frame', function () {
@@ -166,18 +166,27 @@ describe('profile-data', function () {
     const thread = profile.threads[0];
     const tracingMarkers = getTracingMarkers(thread);
     it('should fold the two reflow markers into one tracing marker', function () {
-      assert.equal(tracingMarkers.length, 2);
+      assert.equal(tracingMarkers.length, 3);
       assert.deepEqual(tracingMarkers[0], {
         start: 2,
         name: 'Reflow',
-        dur: 2,
-        title: 'Reflow for 2.00ms'
+        dur: 6,
+        title: 'Reflow for 6.00ms'
+      });
+    });
+    it('should fold the two Rasterize markers into one tracing marker, after the reflow tracing marker', function () {
+      assert.equal(tracingMarkers.length, 3);
+      assert.deepEqual(tracingMarkers[1], {
+        start: 4,
+        name: 'Rasterize',
+        dur: 1,
+        title: 'Rasterize for 1.00ms'
       });
     });
     it('should create a tracing marker for the MinorGC startTime/endTime marker', function () {
-      assert.equal(tracingMarkers.length, 2);
-      assert.deepEqual(tracingMarkers[1], {
-        start: 7,
+      assert.equal(tracingMarkers.length, 3);
+      assert.deepEqual(tracingMarkers[2], {
+        start: 11,
         name: 'MinorGC',
         dur: 1,
         title: 'MinorGC for 1.00ms',

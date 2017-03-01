@@ -655,6 +655,7 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
       }
     }
   }
+  tracingMarkers.sort((a, b) => a.start - b.start);
   return tracingMarkers;
 }
 
