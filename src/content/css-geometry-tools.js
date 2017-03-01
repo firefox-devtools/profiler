@@ -10,15 +10,26 @@ function getFloatStyle(elem, cssProperty, win) {
   return parseFloat(win.getComputedStyle(elem, null).getPropertyValue(cssProperty)) || 0;
 }
 
+const DOMRect = window.DOMRect || function (x = 0, y = 0, w = 0, h = 0) {
+  this.x = x;
+  this.y = y;
+  this.width = w;
+  this.height = h;
+  this.left = x;
+  this.top = y;
+  this.right = x + w;
+  this.bottom = y + h;
+};
+
 function subtractBorder(elem, rect, win) {
   const borderTop = getFloatStyle(elem, 'border-top-width', win);
   const borderRight = getFloatStyle(elem, 'border-right-width', win);
   const borderBottom = getFloatStyle(elem, 'border-bottom-width', win);
   const borderLeft = getFloatStyle(elem, 'border-left-width', win);
-  return new window.DOMRect(rect.left + borderLeft,
-                            rect.top + borderTop,
-                            rect.width - borderLeft - borderRight,
-                            rect.height - borderTop - borderBottom);
+  return new DOMRect(rect.left + borderLeft,
+                     rect.top + borderTop,
+                     rect.width - borderLeft - borderRight,
+                     rect.height - borderTop - borderBottom);
 }
 
 function subtractPadding(elem, rect, win) {
@@ -26,10 +37,10 @@ function subtractPadding(elem, rect, win) {
   const paddingRight = getFloatStyle(elem, 'padding-right', win);
   const paddingBottom = getFloatStyle(elem, 'padding-bottom', win);
   const paddingLeft = getFloatStyle(elem, 'padding-left', win);
-  return new window.DOMRect(rect.left + paddingLeft,
-                            rect.top + paddingTop,
-                            rect.width - paddingLeft - paddingRight,
-                            rect.height - paddingTop - paddingBottom);
+  return new DOMRect(rect.left + paddingLeft,
+                     rect.top + paddingTop,
+                     rect.width - paddingLeft - paddingRight,
+                     rect.height - paddingTop - paddingBottom);
 }
 
 function addMargin(elem, rect, win) {
@@ -37,10 +48,10 @@ function addMargin(elem, rect, win) {
   const marginRight = getFloatStyle(elem, 'margin-right', win);
   const marginBottom = getFloatStyle(elem, 'margin-bottom', win);
   const marginLeft = getFloatStyle(elem, 'margin-left', win);
-  return new window.DOMRect(rect.left - marginLeft,
-                            rect.top - marginTop,
-                            rect.width + marginLeft + marginRight,
-                            rect.height + marginTop + marginBottom);
+  return new DOMRect(rect.left - marginLeft,
+                     rect.top - marginTop,
+                     rect.width + marginLeft + marginRight,
+                     rect.height + marginTop + marginBottom);
 }
 
 /**
@@ -52,7 +63,7 @@ function addMargin(elem, rect, win) {
 export function getContentRect(elem) {
   const clientRects = elem.getClientRects();
   if (clientRects.length !== 1) {
-    return new window.DOMRect();
+    return new DOMRect();
   }
 
   const borderRect = clientRects[0];
@@ -69,7 +80,7 @@ export function getContentRect(elem) {
 export function getMarginRect(elem) {
   const clientRects = elem.getClientRects();
   if (clientRects.length !== 1) {
-    return new window.DOMRect();
+    return new DOMRect();
   }
 
   const borderRect = clientRects[0];
