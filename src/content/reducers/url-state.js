@@ -113,6 +113,15 @@ function invertCallstack(state = false, action) {
   }
 }
 
+function hidePlatformDetails(state = false, action) {
+  switch (action.type) {
+    case 'CHANGE_HIDE_PLATFORM_DETAILS':
+      return action.hidePlatformDetails;
+    default:
+      return state;
+  }
+}
+
 const urlState = (regularUrlStateReducer => (state, action) => {
   switch (action.type) {
     case '@@urlenhancer/updateURLState':
@@ -123,6 +132,7 @@ const urlState = (regularUrlStateReducer => (state, action) => {
 })(combineReducers({
   dataSource, hash, selectedTab, rangeFilters, selectedThread,
   callTreeSearchString, callTreeFilters, jsOnly, invertCallstack,
+  hidePlatformDetails,
 }));
 
 export default urlState;
@@ -133,6 +143,7 @@ export const getDataSource = state => getURLState(state).dataSource;
 export const getHash = state => getURLState(state).hash;
 export const getRangeFilters = state => getURLState(state).rangeFilters;
 export const getJSOnly = state => getURLState(state).jsOnly;
+export const getHidePlatformDetails = state => getURLState(state).hidePlatformDetails;
 export const getInvertCallstack = state => getURLState(state).invertCallstack;
 export const getSearchString = state => getURLState(state).callTreeSearchString;
 export const getSelectedTab = state => getURLState(state).selectedTab;

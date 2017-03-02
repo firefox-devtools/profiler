@@ -5,7 +5,7 @@ import FlameChartViewport from '../components/FlameChartViewport';
 import { selectedThreadSelectors, getDisplayRange, getProfileInterval } from '../reducers/profile-view';
 import { getSelectedThreadIndex } from '../reducers/url-state';
 import * as actions from '../actions';
-import ProfileCallTreeSettings from '../components/ProfileCallTreeSettings';
+import FlameChartSettings from '../components/FlameChartSettings';
 
 import type { Thread } from '../../common/types/profile';
 import type { Milliseconds } from '../../common/types/units';
@@ -39,7 +39,7 @@ class FlameChartView extends Component {
 
     return (
       <div className='flameChartView'>
-        <ProfileCallTreeSettings />
+        <FlameChartSettings />
         <FlameChartViewport thread={thread}
                             maxStackDepth={maxStackDepth}
                             stackTimingByDepth={stackTimingByDepth}
@@ -56,9 +56,9 @@ class FlameChartView extends Component {
 
 export default connect(state => {
   return {
-    thread: selectedThreadSelectors.getFilteredThread(state),
-    maxStackDepth: selectedThreadSelectors.getFuncStackMaxDepth(state),
-    stackTimingByDepth: selectedThreadSelectors.getStackTimingByDepth(state),
+    thread: selectedThreadSelectors.getFilteredThreadForFlameChart(state),
+    maxStackDepth: selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(state),
+    stackTimingByDepth: selectedThreadSelectors.getStackTimingByDepthForFlameChart(state),
     isSelected: true,
     timeRange: getDisplayRange(state),
     threadIndex: getSelectedThreadIndex(state),

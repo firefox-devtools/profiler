@@ -133,6 +133,57 @@ export function defaultThreadOrder(threads: Thread[]) {
   return threadOrder;
 }
 
+export function filterThreadToJSOnly(thread: Thread) {
+  return timeCode('filterThreadToJSOnly', () => {
+    const { stackTable, funcTable, frameTable, samples } = thread;
+
+    const newStackTable = {
+      length: 0,
+      frame: [],
+      prefix: [],
+    };
+
+    const oldStackToNewStack = new Map();
+    const frameCount = frameTable.length;
+    const prefixStackAndFrameToStack = new Map(); // prefixNewStack * frameCount + frame => newStackIndex
+
+    function convertStack(stackIndex) {
+      if (stackIndex === null) {
+        return null;
+      }
+      let newStack = oldStackToNewStack.get(stackIndex);
+      if (newStack === undefined) {
+        const prefixNewStack = convertStack(stackTable.prefix[stackIndex]);
+        const frameIndex = stackTable.frame[stackIndex];
+        const funcIndex = frameTable.func[frameIndex];
+        if (!funcTable.isJS[funcIndex]) {
+          newStack = prefixNewStack;
+        } else {
+          const prefixStackAndFrameIndex = (prefixNewStack === null ? -1 : prefixNewStack) * frameCount + frameIndex;
+          newStack = prefixStackAndFrameToStack.get(prefixStackAndFrameIndex);
+          if (newStack === undefined) {
+            newStack = newStackTable.length++;
+            newStackTable.prefix[newStack] = prefixNewStack;
+            newStackTable.frame[newStack] = frameIndex;
+          }
+          oldStackToNewStack.set(stackIndex, newStack);
+          prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
+        }
+      }
+      return newStack;
+    }
+
+    const newSamples = Object.assign({}, samples, {
+      stack: samples.stack.map(oldStack => convertStack(oldStack)),
+    });
+
+    return Object.assign({}, thread, {
+      samples: newSamples,
+      stackTable: newStackTable,
+    });
+  });
+}
+
 /**
  * Given a thread with stacks like below, collapse together the platform stack frames into
  * a single pseudo platform stack frame. In the diagram "J" represents JavaScript stack
@@ -150,8 +201,8 @@ export function defaultThreadOrder(threads: Thread[]) {
  * @param {Object} thread - A thread.
  * @returns {Object} The thread with collapsed samples.
  */
-export function filterThreadToJSOnly(thread: Thread) {
-  return timeCode('filterThreadToJSOnly', () => {
+export function collapsePlatformStackFrames(thread: Thread) {
+  return timeCode('collapsePlatformStackFrames', () => {
     const { stackTable, funcTable, frameTable, samples, stringTable } = thread;
 
     // Create new tables for the data.
@@ -221,6 +272,9 @@ export function filterThreadToJSOnly(thread: Thread) {
               newFuncTable.resource.push(null);
               newFuncTable.address.push(-1);
               newFuncTable.isJS.push(false);
+              if (newFuncTable.name.length !== newFuncTable.length) {
+                console.error('length is not correct', newFuncTable.name.length, newFuncTable.length);
+              }
 
               newFrameTable.implementation.push(null);
               newFrameTable.optimizations.push(null);
