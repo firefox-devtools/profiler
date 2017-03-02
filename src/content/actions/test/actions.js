@@ -3,7 +3,7 @@ import { describe, it } from 'mocha';
 import { assert } from 'chai';
 import { blankStore, storeWithProfile } from './fixtures/stores';
 import * as selectors from '../../reducers/profile-view';
-import { changeCallTreeSearchString, receiveProfileFromAddon, changeJSOnly, addRangeFilter, changeInvertCallstack } from '../';
+import { changeCallTreeSearchString, receiveProfileFromAddon, changeHidePlatformDetails, addRangeFilter, changeInvertCallstack } from '../';
 const { selectedThreadSelectors } = selectors;
 
 const profile = require('../../../common/test/fixtures/profile-2d-canvas.json');
@@ -18,7 +18,7 @@ describe('actions/profile', function () {
   });
 });
 
-describe('selectors/getStackTimingByDepth', function () {
+describe('selectors/getStackTimingByDepthForFlameChart', function () {
   /**
    * This table shows off how a flame chart gets filtered to JS only, where the number is
    * the stack index, and P is platform code, and J javascript.
@@ -37,7 +37,7 @@ describe('selectors/getStackTimingByDepth', function () {
 
   it('computes unfiltered stack timing by depth', function () {
     const store = storeWithProfile();
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(store.getState());
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(store.getState());
     assert.deepEqual(stackTimingByDepth, [
       { start: [0], end: [91], stack: [0], length: 1 },
       { start: [0, 50], end: [40, 91], stack: [1, 1], length: 2 },
@@ -49,10 +49,10 @@ describe('selectors/getStackTimingByDepth', function () {
     ]);
   });
 
-  it('computes JS only stack timing by depth', function () {
+  it('computes "Hide platform details" stack timing by depth', function () {
     const store = storeWithProfile();
-    store.dispatch(changeJSOnly(true));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(store.getState());
+    store.dispatch(changeHidePlatformDetails(true));
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(store.getState());
 
     assert.deepEqual(stackTimingByDepth, [
       { start: [0], end: [91], stack: [0], length: 1 },
@@ -66,7 +66,7 @@ describe('selectors/getStackTimingByDepth', function () {
   it('uses search strings', function () {
     const store = storeWithProfile();
     store.dispatch(changeCallTreeSearchString('javascript'));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(store.getState());
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(store.getState());
     assert.deepEqual(stackTimingByDepth, [
       { start: [60], end: [91], stack: [0], length: 1 },
       { start: [60], end: [91], stack: [1], length: 1 },
@@ -97,7 +97,7 @@ describe('selectors/getStackTimingByDepth', function () {
   it('can handle inverted stacks', function () {
     const store = storeWithProfile();
     store.dispatch(changeInvertCallstack(true));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(store.getState());
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(store.getState());
     assert.deepEqual(stackTimingByDepth, [
       {
         start: [0, 10, 30, 40, 50, 60, 70, 80, 90],
@@ -130,23 +130,23 @@ describe('selectors/getStackTimingByDepth', function () {
   });
 });
 
-describe('selectors/getFuncStackMaxDepth', function () {
-  it('calculates the max func depth and observes of JS filters', function () {
+describe('selectors/getFuncStackMaxDepthForFlameChart', function () {
+  it('calculates the max func depth and observes of platform detail filters', function () {
     const store = storeWithProfile();
-    const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepth(store.getState());
+    const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
     assert.equal(allSamplesMaxDepth, 6);
-    store.dispatch(changeJSOnly(true));
-    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepth(store.getState());
+    store.dispatch(changeHidePlatformDetails(true));
+    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
     assert.equal(jsOnlySamplesMaxDepth, 4);
   });
 
   it('acts upon the current range', function () {
     const store = storeWithProfile();
     store.dispatch(addRangeFilter(0, 20));
-    const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepth(store.getState());
+    const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
     assert.equal(allSamplesMaxDepth, 2);
-    store.dispatch(changeJSOnly(true));
-    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepth(store.getState());
+    store.dispatch(changeHidePlatformDetails(true));
+    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
     assert.equal(jsOnlySamplesMaxDepth, 0);
   });
 });

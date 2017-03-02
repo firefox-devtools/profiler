@@ -395,24 +395,56 @@ export const selectorsForThread = threadIndex => {
         return funcArrays.map(funcArray => ProfileData.getFuncStackFromFuncArray(funcArray, funcStackInfo.funcStackTable));
       }
     );
-    const getFuncStackMaxDepth = createSelector(
-      getFilteredThread,
-      getFuncStackInfo,
-      StackTiming.computeFuncStackMaxDepth
-    );
-    const getStackTimingByDepth = createSelector(
-      getFilteredThread,
-      getFuncStackInfo,
-      getFuncStackMaxDepth,
-      getProfileInterval,
-      StackTiming.getStackTimingByDepth
-    );
     const getCallTree = createSelector(
       getRangeSelectionFilteredThread,
       getProfileInterval,
       getFuncStackInfo,
       URLState.getJSOnly,
       ProfileTree.getCallTree
+    );
+
+    // The selectors below diverge from the thread filtering that's done above;
+    // they respect the "hidePlatformDetails" setting instead of the "jsOnly"
+    // setting. This type of filtering is needed for the flame chart.
+    // This divergence is hopefully temporary, as we figure out how to filter
+    // out unneeded detail from stacks in a way that satisfy both the flame
+    // chart and the call tree.
+    const getFilteredThreadForFlameChart = createSelector(
+      getRangeFilteredThread,
+      URLState.getHidePlatformDetails,
+      URLState.getInvertCallstack,
+      URLState.getSearchString,
+      (thread, shouldHidePlatformDetails, shouldInvertCallstack, searchString) => {
+        // Unlike for the call tree filtered profile, the individual steps of
+        // this filtering are not memoized. I hope it's not too bad.
+        let filteredThread = thread;
+        filteredThread = ProfileData.filterThreadToSearchString(filteredThread, searchString);
+        if (shouldHidePlatformDetails) {
+          filteredThread = ProfileData.collapsePlatformStackFrames(filteredThread);
+        }
+        if (shouldInvertCallstack) {
+          filteredThread = ProfileData.invertCallstack(filteredThread);
+        }
+        return filteredThread;
+      }
+    );
+    const getFuncStackInfoOfFilteredThreadForFlameChart = createSelector(
+      getFilteredThreadForFlameChart,
+      ({stackTable, frameTable, funcTable}) => {
+        return ProfileData.getFuncStackInfo(stackTable, frameTable, funcTable);
+      }
+    );
+    const getFuncStackMaxDepthForFlameChart = createSelector(
+      getFilteredThreadForFlameChart,
+      getFuncStackInfoOfFilteredThreadForFlameChart,
+      StackTiming.computeFuncStackMaxDepth
+    );
+    const getStackTimingByDepthForFlameChart = createSelector(
+      getFilteredThreadForFlameChart,
+      getFuncStackInfoOfFilteredThreadForFlameChart,
+      getFuncStackMaxDepthForFlameChart,
+      getProfileInterval,
+      StackTiming.getStackTimingByDepth
     );
     selectorsForThreads[threadIndex] = {
       getThread,
@@ -427,8 +459,10 @@ export const selectorsForThread = threadIndex => {
       getFuncStackInfo,
       getSelectedFuncStack,
       getExpandedFuncStacks,
-      getFuncStackMaxDepth,
-      getStackTimingByDepth,
+      getFilteredThreadForFlameChart,
+      getFuncStackInfoOfFilteredThreadForFlameChart,
+      getFuncStackMaxDepthForFlameChart,
+      getStackTimingByDepthForFlameChart,
       getCallTree,
     };
   }

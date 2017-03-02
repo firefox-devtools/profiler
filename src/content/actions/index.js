@@ -405,6 +405,13 @@ export function changeInvertCallstack(invertCallstack) {
   };
 }
 
+export function changeHidePlatformDetails(hidePlatformDetails) {
+  return {
+    type: 'CHANGE_HIDE_PLATFORM_DETAILS',
+    hidePlatformDetails,
+  };
+}
+
 export function updateProfileSelection(selection) {
   return {
     type: 'UPDATE_PROFILE_SELECTION',

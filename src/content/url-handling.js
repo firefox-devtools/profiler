@@ -42,15 +42,26 @@ export function urlFromState(urlState) {
     ...dataSourceDirs(urlState),
     urlState.selectedTab,
   ].join('/') + '/';
-  const query = Object.assign({
+
+  // Start with the query parameters that are shown regardless of the active tab.
+  const query = {
     range: stringifyRangeFilters(urlState.rangeFilters) || undefined,
     thread: `${urlState.selectedThread}`,
-  }, urlState.selectedTab === 'calltree' ? {
-    search: urlState.callTreeSearchString || undefined,
-    invertCallstack: urlState.invertCallstack ? null : undefined,
-    jsOnly: urlState.jsOnly ? null : undefined,
-    callTreeFilters: stringifyCallTreeFilters(urlState.callTreeFilters[urlState.selectedThread]) || undefined,
-  } : {});
+  };
+
+  // Depending on which tab is active, also show tab-specific query parameters.
+  switch (urlState.selectedTab) {
+    case 'calltree':
+      query.search = urlState.callTreeSearchString || undefined;
+      query.invertCallstack = urlState.invertCallstack ? null : undefined;
+      query.jsOnly = urlState.jsOnly ? null : undefined;
+      query.callTreeFilters = stringifyCallTreeFilters(urlState.callTreeFilters[urlState.selectedThread]) || undefined;
+      break;
+    case 'flameChart':
+      query.invertCallstack = urlState.invertCallstack ? null : undefined;
+      query.hidePlatformDetails = urlState.hidePlatformDetails ? null : undefined;
+      break;
+  }
   const qString = queryString.stringify(query);
   return pathname + (qString ? '?' + qString : '');
 }
@@ -110,5 +121,6 @@ export function stateFromCurrentLocation() {
     },
     jsOnly: query.jsOnly !== undefined,
     invertCallstack: query.invertCallstack !== undefined,
+    hidePlatformDetails: query.hidePlatformDetails !== undefined,
   };
 }
