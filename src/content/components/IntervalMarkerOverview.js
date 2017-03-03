@@ -44,6 +44,7 @@ class IntervalMarkerOverview extends Component {
     (this: any)._onMouseMove = this._onMouseMove.bind(this);
     (this: any)._onMouseUp = this._onMouseUp.bind(this);
     (this: any)._onMouseOut = this._onMouseOut.bind(this);
+    (this: any)._takeCanvasRef = this._takeCanvasRef.bind(this);
     this._canvas = null;
   }
 
