@@ -1,9 +1,9 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 
 import './FilterNavigatorBar.css';
 
-class FilterNavigatorBar extends Component {
+class FilterNavigatorBar extends PureComponent {
   constructor(props) {
     super(props);
     this._onLiClick = this._onLiClick.bind(this);

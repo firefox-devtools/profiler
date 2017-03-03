@@ -1,30 +1,23 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
-import Reorderable from '../components/Reorderable';
-import TimeSelectionScrubber from '../components/TimeSelectionScrubber';
 import TabBar from '../components/TabBar';
 import ProfileSummaryView from '../containers/ProfileSummaryView';
 import ProfileCallTreeView from '../containers/ProfileCallTreeView';
 import ProfileMarkersView from '../containers/ProfileMarkersView';
 import ProfileTaskTracerView from '../containers/ProfileTaskTracerView';
 import ProfileLogView from '../containers/ProfileLogView';
-import ProfileThreadJankOverview from '../containers/ProfileThreadJankOverview';
-import ProfileThreadTracingMarkerOverview from '../containers/ProfileThreadTracingMarkerOverview';
 import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
 import ProfileSharing from '../containers/ProfileSharing';
 import SymbolicationStatusOverlay from '../containers/SymbolicationStatusOverlay';
 import FlameChartView from '../containers/FlameChartView';
-import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import * as actions from '../actions';
-import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../reducers/profile-view';
+import { getProfileViewOptions, getDisplayRange } from '../reducers/profile-view';
 import { getSelectedTab } from '../reducers/url-state';
+import ProfileViewerHeader from '../containers/ProfileViewerHeader';
 
-class ProfileViewer extends Component {
+class ProfileViewer extends PureComponent {
   constructor(props) {
     super(props);
-    this._onZoomButtonClick = this._onZoomButtonClick.bind(this);
-    this._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(this);
     this._onSelectTab = this._onSelectTab.bind(this);
 
     // If updating this list, make sure and update the tabOrder reducer with another index.
@@ -56,22 +49,6 @@ class ProfileViewer extends Component {
     ];
   }
 
-  _onZoomButtonClick(start, end) {
-    const { addRangeFilterAndUnsetSelection, zeroAt } = this.props;
-    addRangeFilterAndUnsetSelection(start - zeroAt, end - zeroAt);
-  }
-
-  _onIntervalMarkerSelect(threadIndex, start, end) {
-    const { timeRange, updateProfileSelection, changeSelectedThread } = this.props;
-    updateProfileSelection({
-      hasSelection: true,
-      isModifying: false,
-      selectionStart: Math.max(timeRange.start, start),
-      selectionEnd: Math.min(timeRange.end, end),
-    });
-    changeSelectedThread(threadIndex);
-  }
-
   _onSelectTab(selectedTab) {
     const { changeSelectedTab } = this.props;
     changeSelectedTab(selectedTab);
@@ -79,83 +56,16 @@ class ProfileViewer extends Component {
 
   render() {
     const {
-      profile, className, threadOrder, changeThreadOrder,
-      viewOptions, updateProfileSelection,
-      timeRange, zeroAt,
-      changeTabOrder, selectedTab,
+      className, viewOptions, timeRange, changeTabOrder, selectedTab,
     } = this.props;
-    const threads = profile.threads;
-    const { selection, tabOrder } = viewOptions;
-    const { hasSelection, isModifying, selectionStart, selectionEnd } = selection;
+    const { tabOrder } = viewOptions;
     return (
       <div className={className}>
         <div className={`${className}TopBar`}>
           <ProfileFilterNavigator />
           <ProfileSharing />
         </div>
-        <TimeSelectionScrubber className={`${className}Header`}
-                               zeroAt={zeroAt}
-                               rangeStart={timeRange.start}
-                               rangeEnd={timeRange.end}
-                               minSelectionStartWidth={profile.meta.interval}
-                               hasSelection={hasSelection}
-                               isModifying={isModifying}
-                               selectionStart={selectionStart}
-                               selectionEnd={selectionEnd}
-                               onSelectionChange={updateProfileSelection}
-                               onZoomButtonClick={this._onZoomButtonClick}>
-          <div className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerJank`}>
-            {
-              threadOrder.map(threadIndex => {
-                const threadName = threads[threadIndex].name;
-                const processType = threads[threadIndex].processType;
-                return (
-                  ((threadName === 'GeckoMain' && processType !== 'plugin') ?
-                    <ProfileThreadJankOverview className={`${className}HeaderIntervalMarkerOverview ${className}HeaderIntervalMarkerOverviewJank`}
-                                               rangeStart={timeRange.start}
-                                               rangeEnd={timeRange.end}
-                                               threadIndex={threadIndex}
-                                               key={threadIndex}
-                                               onSelect={this._onIntervalMarkerSelect} /> : null)
-                );
-              })
-            }
-          </div>
-          <div className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerGfx`}>
-            {
-              threadOrder.map(threadIndex => {
-                const threadName = threads[threadIndex].name;
-                const processType = threads[threadIndex].processType;
-                return (
-                  (((threadName === 'GeckoMain' || threadName === 'Compositor') && processType !== 'plugin') ?
-                    <ProfileThreadTracingMarkerOverview className={`${className}HeaderIntervalMarkerOverview ${className}HeaderIntervalMarkerOverviewGfx ${className}HeaderIntervalMarkerOverviewThread${threadName}`}
-                                                        rangeStart={timeRange.start}
-                                                        rangeEnd={timeRange.end}
-                                                        threadIndex={threadIndex}
-                                                        key={threadIndex}
-                                                        onSelect={this._onIntervalMarkerSelect} /> : null)
-                );
-              })
-            }
-          </div>
-          <OverflowEdgeIndicator className={`${className}HeaderOverflowEdgeIndicator`}>
-            <Reorderable tagName='ol'
-                         className={`${className}HeaderThreadList`}
-                         order={threadOrder}
-                         orient='vertical'
-                         onChangeOrder={changeThreadOrder}>
-            {
-              threads.map((thread, threadIndex) =>
-                <ProfileThreadHeaderBar key={threadIndex}
-                                        index={threadIndex}
-                                        interval={profile.meta.interval}
-                                        rangeStart={timeRange.start}
-                                        rangeEnd={timeRange.end}/>
-              )
-            }
-            </Reorderable>
-          </OverflowEdgeIndicator>
-        </TimeSelectionScrubber>
+        <ProfileViewerHeader />
         <TabBar tabs={this._tabs}
                 selectedTabName={selectedTab}
                 tabOrder={tabOrder}
@@ -169,36 +79,24 @@ class ProfileViewer extends Component {
           flameChart: <FlameChartView />,
           log: <ProfileLogView />,
         }[selectedTab]}
-
         <SymbolicationStatusOverlay />
-
       </div>
     );
   }
 }
 
 ProfileViewer.propTypes = {
-  profile: PropTypes.object.isRequired,
   className: PropTypes.string.isRequired,
-  threadOrder: PropTypes.array.isRequired,
-  changeThreadOrder: PropTypes.func.isRequired,
   viewOptions: PropTypes.object.isRequired,
-  updateProfileSelection: PropTypes.func.isRequired,
-  addRangeFilterAndUnsetSelection: PropTypes.func.isRequired,
   timeRange: PropTypes.object.isRequired,
-  zeroAt: PropTypes.number.isRequired,
   selectedTab: PropTypes.string.isRequired,
-  changeSelectedThread: PropTypes.func.isRequired,
   changeSelectedTab: PropTypes.func.isRequired,
   changeTabOrder: PropTypes.func.isRequired,
 };
 
 export default connect(state => ({
-  profile: getProfile(state),
   viewOptions: getProfileViewOptions(state),
   selectedTab: getSelectedTab(state),
   className: 'profileViewer',
-  threadOrder: getThreadOrder(state),
   timeRange: getDisplayRange(state),
-  zeroAt: getZeroAt(state),
 }), actions)(ProfileViewer);

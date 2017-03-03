@@ -1,17 +1,13 @@
 import { connect } from 'react-redux';
 import * as actions from '../actions';
-import { getRangeFilters } from '../reducers/url-state';
+import { getRangeFilterLabels } from '../reducers/url-state';
 import FilterNavigatorBar from '../components/FilterNavigatorBar';
 
-function rangeString(range) {
-  return `Range: ${(range.start / 1000).toFixed(2)}s–${(range.end / 1000).toFixed(2)}s`;
-}
-
 export default connect(state => {
-  const items = ['Complete Profile', ...getRangeFilters(state).map(rangeString)];
+  const items = getRangeFilterLabels(state);
   return {
     className: 'profileFilterNavigator',
-    items,
+    items: items,
     selectedItem: items.length - 1,
   };
 }, {

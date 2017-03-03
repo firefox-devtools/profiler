@@ -1,10 +1,10 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import bisection from 'bisection';
 import clamp from 'clamp';
 import arrayMove from 'array-move';
 import { getContentRect, getMarginRect } from '../css-geometry-tools';
 
-class Reorderable extends Component {
+class Reorderable extends PureComponent {
 
   constructor(props) {
     super(props);
