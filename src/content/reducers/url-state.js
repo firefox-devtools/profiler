@@ -1,10 +1,40 @@
+// @flow
 import { combineReducers } from 'redux';
 import { defaultThreadOrder } from '../profile-data';
 import { createSelector } from 'reselect';
 import { urlFromState } from '../url-handling';
 import * as RangeFilters from '../range-filters';
 
-function dataSource(state = 'none', action) {
+import type { ThreadIndex, IndexIntoFuncTable } from '../../common/types/profile';
+import type { Action } from '../actions/types';
+
+type CallTreeFilter = {
+  type: 'postfix' | 'prefix',
+  postfixFuncs: null | IndexIntoFuncTable[],
+  prefixFuncs: null | IndexIntoFuncTable[],
+  matchJSOnly: boolean,
+};
+
+type RangeFilter = { start: number, end: number};
+
+type DataSourceState = 'none' | 'from-file' | 'public';
+type RangeFiltersState = RangeFilter[];
+type CallTreeFiltersState = { [key: ThreadIndex]: CallTreeFilter }
+
+type URLState = {
+  dataSource: DataSourceState,
+  hash: string,
+  selectedTab: string,
+  rangeFilters: RangeFiltersState,
+  selectedThread: ThreadIndex,
+  callTreeSearchString: string,
+  callTreeFilters: CallTreeFiltersState,
+  jsOnly: boolean,
+  invertCallstack: boolean,
+  hidePlatformDetails: boolean,
+}
+
+function dataSource(state: DataSourceState = 'none', action: Action) {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_FILE':
       return 'from-file';
@@ -15,7 +45,7 @@ function dataSource(state = 'none', action) {
   }
 }
 
-function hash(state = '', action) {
+function hash(state: string = '', action: Action) {
   switch (action.type) {
     case 'PROFILE_PUBLISHED':
       return action.hash;
@@ -24,7 +54,7 @@ function hash(state = '', action) {
   }
 }
 
-function selectedTab(state = 'calltree', action) {
+function selectedTab(state: string = 'calltree', action: Action) {
   switch (action.type) {
     case 'CHANGE_SELECTED_TAB':
       return action.selectedTab;
@@ -33,7 +63,7 @@ function selectedTab(state = 'calltree', action) {
   }
 }
 
-function rangeFilters(state = [], action) {
+function rangeFilters(state: RangeFiltersState = [], action: Action) {
   switch (action.type) {
     case 'ADD_RANGE_FILTER': {
       const { start, end } = action;
@@ -46,7 +76,7 @@ function rangeFilters(state = [], action) {
   }
 }
 
-function selectedThread(state = 0, action) {
+function selectedThread(state: ThreadIndex = 0, action: Action) {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
       return action.selectedThread;
@@ -66,7 +96,7 @@ function selectedThread(state = 0, action) {
   }
 }
 
-function callTreeSearchString(state = '', action) {
+function callTreeSearchString(state: string = '', action: Action) {
   switch (action.type) {
     case 'CHANGE_CALL_TREE_SEARCH_STRING':
       return action.searchString;
@@ -75,7 +105,7 @@ function callTreeSearchString(state = '', action) {
   }
 }
 
-function callTreeFilters(state = {}, action) {
+function callTreeFilters(state: CallTreeFiltersState = {}, action: Action) {
   switch (action.type) {
     case 'ADD_CALL_TREE_FILTER': {
       const { threadIndex, filter } = action;
@@ -96,7 +126,7 @@ function callTreeFilters(state = {}, action) {
   }
 }
 
-function jsOnly(state = false, action) {
+function jsOnly(state: boolean = false, action: Action) {
   switch (action.type) {
     case 'CHANGE_JS_ONLY':
       return action.jsOnly;
@@ -105,7 +135,7 @@ function jsOnly(state = false, action) {
   }
 }
 
-function invertCallstack(state = false, action) {
+function invertCallstack(state: boolean = false, action: Action) {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
       return action.invertCallstack;
@@ -114,7 +144,7 @@ function invertCallstack(state = false, action) {
   }
 }
 
-function hidePlatformDetails(state = false, action) {
+function hidePlatformDetails(state: boolean = false, action: Action) {
   switch (action.type) {
     case 'CHANGE_HIDE_PLATFORM_DETAILS':
       return action.hidePlatformDetails;
@@ -123,7 +153,7 @@ function hidePlatformDetails(state = false, action) {
   }
 }
 
-const urlState = (regularUrlStateReducer => (state, action) => {
+const urlState = (regularUrlStateReducer => (state: URLState, action: Action) => {
   switch (action.type) {
     case '@@urlenhancer/updateURLState':
       return action.urlState;
@@ -138,18 +168,18 @@ const urlState = (regularUrlStateReducer => (state, action) => {
 
 export default urlState;
 
-const getURLState = state => state.urlState;
+const getURLState = (state: Object): URLState => state.urlState;
 
-export const getDataSource = state => getURLState(state).dataSource;
-export const getHash = state => getURLState(state).hash;
-export const getRangeFilters = state => getURLState(state).rangeFilters;
-export const getJSOnly = state => getURLState(state).jsOnly;
-export const getHidePlatformDetails = state => getURLState(state).hidePlatformDetails;
-export const getInvertCallstack = state => getURLState(state).invertCallstack;
-export const getSearchString = state => getURLState(state).callTreeSearchString;
-export const getSelectedTab = state => getURLState(state).selectedTab;
-export const getSelectedThreadIndex = state => getURLState(state).selectedThread;
-export const getCallTreeFilters = (state, threadIndex) => getURLState(state).callTreeFilters[threadIndex] || [];
+export const getDataSource = (state: Object) => getURLState(state).dataSource;
+export const getHash = (state: Object) => getURLState(state).hash;
+export const getRangeFilters = (state: Object) => getURLState(state).rangeFilters;
+export const getJSOnly = (state: Object) => getURLState(state).jsOnly;
+export const getHidePlatformDetails = (state: Object) => getURLState(state).hidePlatformDetails;
+export const getInvertCallstack = (state: Object) => getURLState(state).invertCallstack;
+export const getSearchString = (state: Object) => getURLState(state).callTreeSearchString;
+export const getSelectedTab = (state: Object) => getURLState(state).selectedTab;
+export const getSelectedThreadIndex = (state: Object) => getURLState(state).selectedThread;
+export const getCallTreeFilters = (state: Object, threadIndex: ThreadIndex) => getURLState(state).callTreeFilters[threadIndex] || [];
 
 export const getURLPredictor = createSelector(
   getURLState,
