@@ -10,6 +10,7 @@ export type IndexIntoLibs = number;
 export type categoryBitMask = number;
 export type resourceTypeEnum = number;
 export type MemoryOffset = number;
+export type ThreadIndex = number;
 
 export type StackTable = {
   frame: number[],

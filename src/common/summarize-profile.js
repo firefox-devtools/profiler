@@ -2,8 +2,8 @@
 import { timeCode } from './time-code';
 import type { Profile, Thread, IndexIntoStackTable } from './types/profile';
 
+export type Summary = { [id: string]: number };
 type MatchingFunction = (string, string) => boolean;
-type Summary = { [id: string]: number };
 type StacksInCategory = { [id: string]: { [id: string]: number } }
 type SummarySegment = {
   percentage: {[id: string]: number},
