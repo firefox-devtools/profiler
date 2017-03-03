@@ -1,11 +1,11 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import TimeRuler from './TimeRuler';
 import SelectionScrubberOverlay from './SelectionScrubberOverlay';
 import clamp from 'clamp';
 import { getContentRect } from '../css-geometry-tools';
 import { withSize } from '../with-size';
 
-class TimeSelectionScrubberImpl extends Component {
+class TimeSelectionScrubberImpl extends PureComponent {
 
   constructor(props) {
     super(props);
@@ -154,7 +154,6 @@ class TimeSelectionScrubberImpl extends Component {
       </div>
     );
   }
-
 }
 
 TimeSelectionScrubberImpl.propTypes = {

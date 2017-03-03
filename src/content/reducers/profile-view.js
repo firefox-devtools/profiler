@@ -1,6 +1,7 @@
 import { applyFunctionMerging, setFuncNames, setTaskTracerNames } from '../symbolication';
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
+import * as CallTreeFilters from '../call-tree-filters';
 import * as URLState from './url-state';
 import * as ProfileData from '../profile-data';
 import * as StackTiming from '../stack-timing';
@@ -289,6 +290,11 @@ export const selectorsForThread = threadIndex => {
     const getThread = state => getProfile(state).threads[threadIndex];
     const getViewOptions = state => getProfileViewOptions(state).threads[threadIndex];
     const getCallTreeFilters = state => URLState.getCallTreeFilters(state, threadIndex);
+    const getCallTreeFilterLabels = createSelector(
+      getThread,
+      getCallTreeFilters,
+      CallTreeFilters.getCallTreeFilterLabels
+    );
     const getRangeFilteredThread = createSelector(
       getThread,
       getDisplayRange,
@@ -419,6 +425,7 @@ export const selectorsForThread = threadIndex => {
       getRangeFilteredThread,
       getViewOptions,
       getCallTreeFilters,
+      getCallTreeFilterLabels,
       getFilteredThread,
       getJankInstances,
       getTracingMarkers,

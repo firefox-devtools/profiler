@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import { getProfile, getProfileViewOptions } from '../reducers/profile-view';
@@ -47,7 +47,7 @@ UploadingStatus.propTypes = {
   progress: PropTypes.number.isRequired,
 };
 
-class ProfileSharingCompositeButton extends Component {
+class ProfileSharingCompositeButton extends PureComponent {
   constructor(props) {
     super(props);
     const { dataSource, hash } = props;
@@ -226,7 +226,7 @@ function filenameDateString(d) {
   return `${pad(d.getFullYear())}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}.${pad(d.getMinutes())}`;
 }
 
-class ProfileDownloadButton extends Component {
+class ProfileDownloadButton extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {

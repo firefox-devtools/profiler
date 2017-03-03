@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import * as actions from '../actions';
 import { getProfileViewOptions } from '../reducers/profile-view';
@@ -20,10 +20,9 @@ function englishListJoin(list) {
   }
 }
 
-class SymbolicationStatusOverlay extends Component {
+class SymbolicationStatusOverlay extends PureComponent {
   render() {
-    const { viewOptions } = this.props;
-    const { symbolicationStatus, waitingForLibs } = viewOptions;
+    const { symbolicationStatus, waitingForLibs } = this.props;
     if (symbolicationStatus === 'SYMBOLICATING') {
       if (waitingForLibs.size > 0) {
         const libNames = Array.from(waitingForLibs.values()).map(lib => lib.pdbName);
@@ -48,9 +47,11 @@ class SymbolicationStatusOverlay extends Component {
 }
 
 SymbolicationStatusOverlay.propTypes = {
-  viewOptions: PropTypes.object.isRequired,
+  symbolicationStatus: PropTypes.string.isRequired,
+  waitingForLibs: PropTypes.object.isRequired,
 };
 
 export default connect(state => ({
-  viewOptions: getProfileViewOptions(state),
+  symbolicationStatus: getProfileViewOptions(state).symbolicationStatus,
+  waitingForLibs: getProfileViewOptions(state).waitingForLibs,
 }), actions)(SymbolicationStatusOverlay);
