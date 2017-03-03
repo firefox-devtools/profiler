@@ -51,24 +51,3 @@ export function stringifyCallTreeFilters(arrayValue = []) {
     }
   }).join('~');
 }
-
-export function getCallTreeFilterLabels(thread, callTreeFilters) {
-  const { funcTable, stringTable } = thread;
-  const labels = callTreeFilters.map(filter => {
-    function lastFuncString(funcArray) {
-      const lastFunc = funcArray[funcArray.length - 1];
-      const nameIndex = funcTable.name[lastFunc];
-      return stringTable.getString(nameIndex);
-    }
-    switch (filter.type) {
-      case 'prefix':
-        return lastFuncString(filter.prefixFuncs);
-      case 'postfix':
-        return lastFuncString(filter.postfixFuncs);
-      default:
-        throw new Error('Unexpected filter type');
-    }
-  });
-  labels.unshift('Complete Thread');
-  return labels;
-}

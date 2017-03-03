@@ -19,11 +19,3 @@ export function stringifyRangeFilters(arrayValue = []) {
     return `${startStr}_${endStr}`;
   }).join('~');
 }
-
-export function getRangeFilterLabels(rangeFilters) {
-  const labels = rangeFilters.map(range => {
-    return `Range: ${(range.start / 1000).toFixed(2)}s–${(range.end / 1000).toFixed(2)}s`;
-  });
-  labels.unshift('Complete Profile');
-  return labels;
-}
