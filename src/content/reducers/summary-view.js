@@ -1,4 +1,18 @@
-export default function summaryView(state = {summary: null, expanded: null}, action) {
+// @flow
+import type { Summary } from '../../common/summarize-profile';
+import type { ThreadIndex } from '../../common/types/profile';
+import type { Action } from '../actions/types';
+
+type ExpandedSet = Set<ThreadIndex>;
+
+type SummaryViewState = {
+  summary: null|Summary,
+  expanded: null|ExpandedSet,
+}
+
+export default function summaryView(
+  state: SummaryViewState = {summary: null, expanded: null}, action: Action
+) {
   switch (action.type) {
     case 'PROFILE_SUMMARY_PROCESSED': {
       return Object.assign({}, state, { summary: action.summary, expanded: new Set() });
@@ -18,12 +32,12 @@ export default function summaryView(state = {summary: null, expanded: null}, act
   }
 }
 
-export const getSummaryView = state => state.summaryView;
+export const getSummaryView = (state: Object): SummaryViewState => state.summaryView;
 
-export const getProfileSummaries = state => {
+export const getProfileSummaries = (state: Object) => {
   return getSummaryView(state).summary;
 };
 
-export const getProfileExpandedSummaries = state => {
+export const getProfileExpandedSummaries = (state: Object) => {
   return getSummaryView(state).expanded;
 };
