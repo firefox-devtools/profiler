@@ -3,6 +3,7 @@ import { combineReducers } from 'redux';
 import { defaultThreadOrder } from '../profile-data';
 import { createSelector } from 'reselect';
 import { urlFromState } from '../url-handling';
+import * as RangeFilters from '../range-filters';
 
 import type { ThreadIndex, IndexIntoFuncTable } from '../../common/types/profile';
 import type { Action } from '../actions/types';
@@ -187,4 +188,9 @@ export const getURLPredictor = createSelector(
     const newURLState = actionList.reduce(urlState, oldURLState);
     return urlFromState(newURLState);
   }
+);
+
+export const getRangeFilterLabels = createSelector(
+  getRangeFilters,
+  RangeFilters.getRangeFilterLabels
 );

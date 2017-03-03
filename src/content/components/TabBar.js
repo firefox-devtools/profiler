@@ -1,8 +1,8 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import Reorderable from './Reorderable';
 
-class TabBar extends Component {
+class TabBar extends PureComponent {
 
   constructor(props) {
     super(props);

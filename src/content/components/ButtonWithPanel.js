@@ -1,9 +1,9 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 
 require('./ButtonWithPanel.css');
 
-class ButtonWithPanel extends Component {
+class ButtonWithPanel extends PureComponent {
   constructor(props) {
     super(props);
     this.state = { open: false };
