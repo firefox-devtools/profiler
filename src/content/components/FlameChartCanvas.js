@@ -4,17 +4,17 @@ import shallowCompare from 'react-addons-shallow-compare';
 import { timeCode } from '../../common/time-code';
 import TextMeasurement from '../../common/text-measurement';
 
-import type { Thread, IndexIntoFrameTable, IndexIntoStackTable } from '../../common/types/profile';
+import type { Thread } from '../../common/types/profile';
 import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange, DevicePixels } from '../../common/types/units';
 import type { StackTimingByDepth } from '../stack-timing';
 import type { GetCategory } from '../color-categories';
+import type { GetLabel } from '../labeling-strategies';
 
 type Props = {
   thread: Thread,
   interval: Milliseconds,
   rangeStart: Milliseconds,
   rangeEnd: Milliseconds,
-  className: string,
   containerWidth: CssPixels,
   containerHeight: CssPixels,
   viewportLeft: UnitIntervalOfProfileRange,
@@ -24,8 +24,10 @@ type Props = {
   stackTimingByDepth: StackTimingByDepth,
   stackFrameHeight: CssPixels,
   getCategory: GetCategory,
-  getLabel: (Thread, IndexIntoStackTable) => string,
+  getLabel: GetLabel,
 };
+
+require('./FlameChartCanvas.css');
 
 const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
@@ -81,6 +83,8 @@ class FlameChartCanvas extends Component {
     if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
       canvas.width = pixelWidth;
       canvas.height = pixelHeight;
+      canvas.style.width = containerWidth + 'px';
+      canvas.style.height = containerHeight + 'px';
       this._ctx.scale(this._devicePixelRatio, this._devicePixelRatio);
     }
     if (this._devicePixelRatio !== devicePixelRatio) {

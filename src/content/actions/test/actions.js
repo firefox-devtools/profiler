@@ -2,10 +2,20 @@ import 'babel-polyfill';
 import { describe, it } from 'mocha';
 import { assert } from 'chai';
 import { blankStore, storeWithProfile } from './fixtures/stores';
-import * as selectors from '../../reducers/profile-view';
-import { changeCallTreeSearchString, receiveProfileFromAddon, changeHidePlatformDetails, addRangeFilter, changeInvertCallstack, changeFlameChartColorStrategy } from '../';
+import * as ProfileViewSelectors from '../../reducers/profile-view';
+import * as TimelineSelectors from '../../reducers/timeline-view';
+import {
+  changeCallTreeSearchString,
+  receiveProfileFromAddon,
+  changeHidePlatformDetails,
+  addRangeFilter,
+  changeInvertCallstack,
+  changeFlameChartColorStrategy,
+  changeTimelineHorizontalViewport,
+  changeTimelineExpandedThread,
+} from '../';
 import { getCategoryByImplementation } from '../../color-categories';
-const { selectedThreadSelectors } = selectors;
+const { selectedThreadSelectors } = ProfileViewSelectors;
 
 const profile = require('../../../common/test/fixtures/profile-2d-canvas.json');
 
@@ -13,9 +23,9 @@ describe('actions/profile', function () {
   it('can take a profile from an addon and save it to state', function () {
     const store = blankStore();
 
-    assert.deepEqual(selectors.getProfile(store.getState()), {}, 'No profile initially exists');
+    assert.deepEqual(ProfileViewSelectors.getProfile(store.getState()), {}, 'No profile initially exists');
     store.dispatch(receiveProfileFromAddon(profile));
-    assert.strictEqual(selectors.getProfile(store.getState()), profile, 'The passed in profile is saved in state.');
+    assert.strictEqual(ProfileViewSelectors.getProfile(store.getState()), profile, 'The passed in profile is saved in state.');
   });
 });
 
@@ -152,7 +162,7 @@ describe('selectors/getFuncStackMaxDepthForFlameChart', function () {
   });
 });
 
-describe('selectors/getLeafCategoryStackTiming', function () {
+describe('selectors/getLeafCategoryStackTimingForFlameChart', function () {
   /**
    * This table shows off how stack timings get filtered to a single row by concurrent
    * color categories. P is platform code, J javascript baseline, and I is javascript
@@ -172,7 +182,7 @@ describe('selectors/getLeafCategoryStackTiming', function () {
   it('gets the unfiltered leaf stack timing by implementation', function () {
     const store = storeWithProfile();
     store.dispatch(changeFlameChartColorStrategy(getCategoryByImplementation));
-    const leafStackTiming = selectedThreadSelectors.getLeafCategoryStackTiming(store.getState());
+    const leafStackTiming = selectedThreadSelectors.getLeafCategoryStackTimingForFlameChart(store.getState());
 
     assert.deepEqual(leafStackTiming, [
       {
@@ -182,5 +192,41 @@ describe('selectors/getLeafCategoryStackTiming', function () {
         length: 4,
       },
     ]);
+  });
+});
+
+describe('actions/changeTimelineExpandedThread', function () {
+  it('can set one timeline thread as expanded', function () {
+    const store = storeWithProfile();
+    const threads = ProfileViewSelectors.getThreads(store.getState());
+
+    function isExpanded(thread, threadIndex) {
+      return TimelineSelectors.getIsThreadExpanded(store.getState(), threadIndex);
+    }
+
+    assert.deepEqual(threads.map(isExpanded), [false, false, false]);
+
+    store.dispatch(changeTimelineExpandedThread(1, true));
+    assert.deepEqual(threads.map(isExpanded), [false, true, false]);
+
+    store.dispatch(changeTimelineExpandedThread(2, true));
+    assert.deepEqual(threads.map(isExpanded), [false, false, true]);
+
+    store.dispatch(changeTimelineExpandedThread(2, false));
+    assert.deepEqual(threads.map(isExpanded), [false, false, false]);
+  });
+});
+
+describe('actions/changeTimelineHorizontalViewport', function () {
+  it('can update the viewport with new values', function () {
+    const store = storeWithProfile();
+
+    const initialHorizontalViewport = TimelineSelectors.getTimelineHorizontalViewport(store.getState());
+    assert.deepEqual(initialHorizontalViewport, {left: 0, right: 1});
+
+    store.dispatch(changeTimelineHorizontalViewport(0.1, 0.8));
+
+    const newHorizontalViewport = TimelineSelectors.getTimelineHorizontalViewport(store.getState());
+    assert.deepEqual(newHorizontalViewport, {left: 0.1, right: 0.8});
   });
 });

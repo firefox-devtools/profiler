@@ -457,10 +457,12 @@ body, #root, .profileViewer {
 
 .grippyMoveRange {
   flex: 1;
+  cursor: -webkit-grab;
   cursor: grab;
 }
 
 .grippyMoveRange.dragging {
+  cursor: -webkit-grabbing;
   cursor: grabbing;
 }
 

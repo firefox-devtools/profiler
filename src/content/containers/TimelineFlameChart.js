@@ -7,13 +7,16 @@ import { getCategoryColorStrategy, getLabelingStrategy } from '../reducers/flame
 import { getIsThreadExpanded } from '../reducers/timeline-view';
 import * as actions from '../actions';
 import { getImplementationName } from '../labeling-strategies';
+import classNames from 'classnames';
 
-import type { Thread, IndexIntoFrameTable, IndexIntoStackTable } from '../../common/types/profile';
-import type { Milliseconds, CssPixels } from '../../common/types/units';
+import type { Thread } from '../../common/types/profile';
+import type { Milliseconds, CssPixels, HorizontalViewport, UnitIntervalOfProfileRange } from '../../common/types/units';
 import type { StackTimingByDepth } from '../stack-timing';
 import type { GetCategory } from '../color-categories';
+import type { GetLabel } from '../labeling-strategies';
+import type { ChangeTimelineHorizontalViewport } from '../actions';
 
-require('./FlameChartView.css');
+require('./TimelineFlameChart.css');
 
 const STACK_FRAME_HEIGHT = 16;
 const TIMELINE_ROW_HEIGHT = 34;
@@ -28,12 +31,14 @@ type Props = {
   threadIndex: number,
   interval: Milliseconds,
   getCategory: GetCategory,
-  getLabel: (Thread, IndexIntoStackTable) => string,
+  getLabel: GetLabel,
   changeTimelineExpandedThread: (number, boolean) => {},
+  changeTimelineHorizontalViewport: ChangeTimelineHorizontalViewport,
+  horizontalViewport: HorizontalViewport,
   viewHeight: CssPixels,
 };
 
-class FlameChartView extends Component {
+class TimelineFlameChart extends Component {
 
   props: Props
 
@@ -64,24 +69,39 @@ class FlameChartView extends Component {
     return Math.max(smallGraph, Math.min(exactSize, largeGraph));
   }
 
+  /**
+   * Determine
+   */
+  getMaximumZoom(): UnitIntervalOfProfileRange {
+    const {
+      timeRange: { start, end },
+      interval,
+    } = this.props;
+    return interval / (end - start);
+  }
+
   render() {
-    // The viewport needs to know about the height of what it's drawing, calculate
-    // that here at the top level component.
     const {
       thread, isThreadExpanded, maxStackDepth, stackTimingByDepth, isSelected, timeRange,
-      threadIndex, interval, getCategory, getLabel,
+      threadIndex, interval, getCategory, getLabel, horizontalViewport,
+      changeTimelineHorizontalViewport,
     } = this.props;
 
-    const maxViewportHeight = (maxStackDepth + 1) * STACK_FRAME_HEIGHT;
+    // The viewport needs to know about the height of what it's drawing, calculate
+    // that here at the top level component.
+    const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
     const title = thread.processType ? `${thread.name} [${thread.processType}]` : thread.name;
     const height = this.getViewHeight(maxViewportHeight);
+    const buttonClass = classNames('timelineFlameChartCollapseButton', {
+      expanded: isThreadExpanded,
+      collapsed: !isThreadExpanded,
+    });
 
     return (
-      <div className='flameChartView' style={{ height }}>
-        <div className='flameChartViewLabels'>
+      <div className='timelineFlameChart' style={{ height }}>
+        <div className='timelineFlameChartLabels grippy'>
           <span>{title}</span>
-          <button className={'flameChartViewCollapseButton ' + (isThreadExpanded ? 'expanded' : 'collapsed')}
-                  onClick={this.toggleThreadCollapse} />
+          <button className={buttonClass} onClick={this.toggleThreadCollapse} />
         </div>
         <FlameChartViewport key={threadIndex}
                             thread={thread}
@@ -95,7 +115,10 @@ class FlameChartView extends Component {
                             maxViewportHeight={maxViewportHeight}
                             stackFrameHeight={STACK_FRAME_HEIGHT}
                             getCategory={getCategory}
-                            getLabel={getLabel} />
+                            getLabel={getLabel}
+                            maximumZoom={this.getMaximumZoom()}
+                            horizontalViewport={horizontalViewport}
+                            changeTimelineHorizontalViewport={changeTimelineHorizontalViewport }/>
       </div>
     );
   }
@@ -121,4 +144,4 @@ export default connect((state, ownProps) => {
     getLabel: isThreadExpanded ? getLabelingStrategy(state) : getImplementationName,
     threadIndex,
   };
-}, actions)(FlameChartView);
+}, actions)(TimelineFlameChart);

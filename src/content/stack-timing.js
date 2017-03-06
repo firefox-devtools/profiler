@@ -219,10 +219,6 @@ export function getLeafCategoryStackTiming(
   return [stackTiming];
 }
 
-function _getLeafStack(thread: Thread, stackIndex: IndexIntoStackTable): IndexIntoStackTable {
-  return stackIndex;
-}
-
 function getNearestJSFrame(thread: Thread, stackIndex: IndexIntoStackTable): IndexIntoStackTable {
   let nextStackIndex = stackIndex;
   while (nextStackIndex !== null) {
