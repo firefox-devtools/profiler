@@ -110,5 +110,5 @@ export type TaskTracer = {};
 export type Profile = {
   meta: ProfileMeta,
   tasktracer: TaskTracer,
-  threads: [Thread],
+  threads: Thread[],
 };

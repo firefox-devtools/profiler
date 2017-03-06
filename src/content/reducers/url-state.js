@@ -5,21 +5,14 @@ import { createSelector } from 'reselect';
 import { urlFromState } from '../url-handling';
 import * as RangeFilters from '../range-filters';
 
-import type { ThreadIndex, IndexIntoFuncTable } from '../../common/types/profile';
-import type { Action } from '../actions/types';
-
-type CallTreeFilter = {
-  type: 'postfix' | 'prefix',
-  postfixFuncs: null | IndexIntoFuncTable[],
-  prefixFuncs: null | IndexIntoFuncTable[],
-  matchJSOnly: boolean,
-};
+import type { ThreadIndex } from '../../common/types/profile';
+import type { Action, CallTreeFilter } from '../actions/types';
 
 type RangeFilter = { start: number, end: number};
 
 type DataSourceState = 'none' | 'from-file' | 'public';
 type RangeFiltersState = RangeFilter[];
-type CallTreeFiltersState = { [key: ThreadIndex]: CallTreeFilter }
+type CallTreeFiltersState = { [key: ThreadIndex]: CallTreeFilter[] }
 
 type URLState = {
   dataSource: DataSourceState,

@@ -5,19 +5,17 @@ import { getFunctionName } from '../labeling-strategies';
 function categoryColorStrategy(state = getCategoryByImplementation, action) {
   switch (action.type) {
     case 'CHANGE_FLAME_CHART_COLOR_STRATEGY':
-      return action.categoryColorStrategy;
-    default:
-      return state;
+      return action.getCategory;
   }
+  return state;
 }
 
 function labelingStrategy(state = getFunctionName, action) {
   switch (action.type) {
     case 'CHANGE_FLAME_CHART_LABELING_STRATEGY':
-      return action.labelingStrategy;
-    default:
-      return state;
+      return action.getLabel;
   }
+  return state;
 }
 
 export default combineReducers({ categoryColorStrategy, labelingStrategy });

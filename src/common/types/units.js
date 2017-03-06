@@ -18,3 +18,12 @@ export type DevicePixels = number;
  * and 1 is the right-most.
  */
 export type UnitIntervalOfProfileRange = number;
+
+/**
+ * For the a viewport into the profile range.
+ */
+export type HorizontalViewport = {
+  left: UnitIntervalOfProfileRange,
+  right: UnitIntervalOfProfileRange,
+  length: UnitIntervalOfProfileRange,
+}

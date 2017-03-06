@@ -65,7 +65,11 @@ const thread = {
 };
 
 const profile = Object.assign({}, exampleProfile, {
-  threads: [Object.assign({ name: 'GeckoMain'}, thread)],
+  threads: [
+    Object.assign({ name: 'GeckoMain'}, thread),
+    Object.assign({ name: 'Compositor'}, thread),
+    Object.assign({ name: 'GeckoMain'}, thread),
+  ],
 });
 
 export default profile;
