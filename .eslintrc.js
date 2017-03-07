@@ -15,7 +15,8 @@ module.exports = {
     },
     "plugins": [
         "react",
-        "flowtype"
+        "flowtype",
+        "import"
     ],
     "rules": {
         // Flow type rules:
@@ -25,6 +26,11 @@ module.exports = {
         "flowtype/space-before-type-colon": [ 2, "never" ],
         "flowtype/space-after-type-colon": [ 2, "always" ],
         "flowtype/delimiter-dangle": [ 2, "always-multiline" ],
+
+        // ES6 Import rules:
+        "import/no-duplicates": "error",
+        "import/no-unresolved": "error",
+        "import/named": "error",
 
         // JS Rules:
         "indent": [
@@ -85,7 +91,6 @@ module.exports = {
         "space-in-parens": ["error", "never"],
         "spaced-comment": "error",
         "generator-star-spacing": "error",
-        "no-duplicate-imports": "error",
         "no-var": "error",
         "prefer-const": "error",
         "array-bracket-spacing": "error",
