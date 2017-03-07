@@ -6,7 +6,7 @@ import React, { Component, PropTypes } from 'react';
  * While the mouse button is pressed, onMove is called on each mouse move with
  * three arguments: the value of its 'value' field at mousedown time, and the
  * x and y deltas compared to the mouse position at mousedown.
- * During the drag, the additional className 'draggable' is set on the element.
+ * During the drag, the additional className 'dragging' is set on the element.
  */
 export default class Draggable extends Component {
 
