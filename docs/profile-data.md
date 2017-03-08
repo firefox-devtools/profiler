@@ -23,9 +23,13 @@ profiler.StartProfiler(
 );
 
 setTimeout(() => {
-  console.log(profiler.getProfileData());
-  // Stopping the profiler will delete the data.
-  profiler.StopProfiler();
+  profiler.getProfileDataAsync().then(profile => {
+    // Parse the libs which were passed in as a string.
+    profile.libs = JSON.parse(profile.libs);
+    console.log(profile);
+    // Stopping the profiler will delete the data in the buffer.
+    profiler.StopProfiler();
+  });
 }, 500);
 ```
 
