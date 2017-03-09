@@ -25,7 +25,7 @@ class SymbolicationStatusOverlay extends PureComponent {
     const { symbolicationStatus, waitingForLibs } = this.props;
     if (symbolicationStatus === 'SYMBOLICATING') {
       if (waitingForLibs.size > 0) {
-        const libNames = Array.from(waitingForLibs.values()).map(lib => lib.pdbName);
+        const libNames = Array.from(waitingForLibs.values()).map(lib => lib.debugName);
         return (
           <div className='symbolicationStatusOverlay'>
             <span className='symbolicationStatusOverlayThrobber'></span>

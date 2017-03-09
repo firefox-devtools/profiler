@@ -5,32 +5,38 @@
 
 const parentProcessBinary = {
   breakpadId: 'F1D957D30B413D55A539BBA06F90DD8F0',
-  name: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox',
+  debugName: 'firefox',
+  name: 'firefox',
+  path: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox',
   start: 0x100000000,
   end: 0x100000000 + 10000
 };
 
 const contentProcessBinary = {
   breakpadId: '9F950E2CE3CD3E1ABD06D80788B606E60',
-  name: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
+  debugName: 'firefox-webcontent',
+  name: 'firefox-webcontent',
+  path: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
   start: 0x100000000,
   end: 0x100000000 + 10000
 };
 
-const extraBinaries = [ // intentionally wrong sort order, preprocessProfile will sort them
-  {
-    pdbName: 'examplebinary2.pdb',
-    pdbSignature: '{10000000-0000-0000-0000-0000000000a2}',
-    pdbAge: 7,
-    name: 'C:\\examplebinary2',
-    start: 0x200000000 + 20,
-    end: 0x200000000 + 40
-  },
+const extraBinaries = [
   {
     breakpadId: '1000000000000000000000000000000A1',
-    name: '/tmp/examplebinary',
+    debugName: 'examplebinary',
+    name: 'examplebinary',
+    path: '/tmp/examplebinary',
     start: 0x200000000,
     end: 0x200000000 + 20
+  },
+  {
+    breakpadId: '100000000000000000000000000000A27',
+    debugName: 'examplebinary2.pdb',
+    name: 'examplebinary2',
+    path: 'C:\\examplebinary2',
+    start: 0x200000000 + 20,
+    end: 0x200000000 + 40
   },
 ];
 
@@ -137,7 +143,7 @@ const parentProcessMeta = {
   stackwalk: 1,
   startTime: 1460221352723.438,
   toolkit: 'cocoa',
-  version: 3,
+  version: 4,
 };
 
 const contentProcessMeta = Object.assign({}, parentProcessMeta, {
@@ -147,20 +153,20 @@ const contentProcessMeta = Object.assign({}, parentProcessMeta, {
 
 const contentProcessProfile = {
   meta: contentProcessMeta,
-  libs: JSON.stringify([contentProcessBinary].concat(extraBinaries)), // libs are stringified in the raw profile
+  libs: [contentProcessBinary].concat(extraBinaries), // libs are stringified in the raw profile
   threads: [
-    Object.assign({ name: 'GeckoMain', processType: 'tab' }, thread)
-  ]
+    Object.assign({ name: 'GeckoMain', processType: 'tab' }, thread),
+  ],
 };
 
 const profile = {
   meta: parentProcessMeta,
-  libs: JSON.stringify([parentProcessBinary].concat(extraBinaries)),
+  libs: [parentProcessBinary].concat(extraBinaries),
   threads: [
     Object.assign({ name: 'GeckoMain', processType: 'default' }, thread),
     Object.assign({ name: 'Compositor', processType: 'default' }, thread),
-    JSON.stringify(contentProcessProfile) // subprocesses are stringified, too
-  ]
+    JSON.stringify(contentProcessProfile), // subprocesses are stringified, too
+  ],
 };
 
 export default profile;

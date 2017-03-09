@@ -165,10 +165,10 @@ export function retrieveProfileFromAddon() {
         dispatch(receiveProfileFromAddon(profile));
 
         const symbolStore = new SymbolStore('perf-html-async-storage', {
-          requestSymbolTable: (pdbName, breakpadId) => {
-            const requestedLib = { pdbName, breakpadId };
+          requestSymbolTable: (debugName, breakpadId) => {
+            const requestedLib = { debugName, breakpadId };
             dispatch(requestingSymbolTable(requestedLib));
-            return geckoProfiler.getSymbolTable(pdbName, breakpadId).then(symbolTable => {
+            return geckoProfiler.getSymbolTable(debugName, breakpadId).then(symbolTable => {
               dispatch(receivedSymbolTableReply(requestedLib));
               return symbolTable;
             }, error => {

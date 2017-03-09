@@ -127,7 +127,7 @@ function preprocessThread(thread, libs) {
         } else {
           resourceIndex = resourceTable.length;
           libToResourceIndex.set(lib, resourceIndex);
-          const nameStringIndex = stringTable.indexForString(lib.pdbName);
+          const nameStringIndex = stringTable.indexForString(lib.debugName);
           addLibResource(nameStringIndex, libs.indexOf(lib));
         }
       }
@@ -181,26 +181,6 @@ function preprocessThread(thread, libs) {
     processType: thread.processType,
     libs, frameTable, funcTable, resourceTable, stackTable, markers, stringTable, samples,
   };
-}
-
-/**
- * Ensure every lib has pdbName and breakpadId fields, and sort them by start address.
- * @param {string} libs The sharedLibrary JSON string as found in a profile in the 'raw' format.
- * @return {array} An array of lib objects, sorted by startAddress.
- */
-function preprocessSharedLibraries(libs) {
-  return JSON.parse(libs).map(lib => {
-    let pdbName, breakpadId;
-    if ('breakpadId' in lib) {
-      pdbName = lib.name.substr(lib.name.lastIndexOf('/') + 1);
-      breakpadId = lib.breakpadId;
-    } else {
-      pdbName = lib.pdbName;
-      const pdbSig = lib.pdbSignature.replace(/[{}-]/g, '').toUpperCase();
-      breakpadId = pdbSig + lib.pdbAge;
-    }
-    return Object.assign({}, lib, { pdbName, breakpadId });
-  }).sort((a, b) => a.start - b.start);
 }
 
 function emptyTaskTracerData() {
@@ -331,7 +311,7 @@ function addPreprocessedTaskTracerData(tasktracer, result, libs, startTime) {
             let addressRelativeToLib = -1;
             if (lib) {
               addressRelativeToLib = address - lib.start;
-              stringIndex = stringTable.indexForString(`<0x${addressRelativeToLib.toString(16)} in ${lib.pdbName}>`);
+              stringIndex = stringTable.indexForString(`<0x${addressRelativeToLib.toString(16)} in ${lib.debugName}>`);
               let addressIndicesForThisLib = addressIndicesByLib.get(lib);
               if (addressIndicesForThisLib === undefined) {
                 addressIndicesForThisLib = [];
@@ -411,7 +391,7 @@ export function preprocessProfile(profile) {
   // exception.
   upgradeRawProfileToCurrentVersion(profile);
 
-  const libs = preprocessSharedLibraries(profile.libs);
+  const libs = profile.libs;
   let threads = [];
   const tasktracer = emptyTaskTracerData();
 
@@ -422,7 +402,7 @@ export function preprocessProfile(profile) {
   for (const threadOrSubprocess of profile.threads) {
     if (typeof threadOrSubprocess === 'string') {
       const subprocessProfile = JSON.parse(threadOrSubprocess);
-      const subprocessLibs = preprocessSharedLibraries(subprocessProfile.libs);
+      const subprocessLibs = subprocessProfile.libs;
       const adjustTimestampsBy = subprocessProfile.meta.startTime - profile.meta.startTime;
       threads = threads.concat(subprocessProfile.threads.map((thread, threadIndex) => {
         const newThread = preprocessThread(thread, subprocessLibs);
