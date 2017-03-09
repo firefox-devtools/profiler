@@ -2,6 +2,9 @@ import { getContainingLibrary, getClosestLibrary } from './symbolication';
 import { UniqueStringArray } from './unique-string-array';
 import { resourceTypes } from './profile-data';
 import { provideHostSide } from './promise-worker';
+import { CURRENT_VERSION, upgradePreprocessedProfileToCurrentVersion, isPreprocessedProfile } from './preprocessed-profile-versioning';
+import { upgradeRawProfileToCurrentVersion } from './raw-profile-versioning';
+import { isOldCleopatraFormat, convertOldCleopatraProfile } from './old-cleopatra-profile-format';
 
 /**
  * Module for converting a profile into the 'preprocessed' format.
@@ -43,18 +46,6 @@ function sortByField(fieldName, rawTable) {
   return Object.assign({}, rawTable, { data: sortedData });
 }
 
-function preprocessThreadStageOne(thread) {
-  const stringTable = new UniqueStringArray(thread.stringTable);
-  const frameTable = toStructOfArrays(thread.frameTable);
-  const stackTable = toStructOfArrays(thread.stackTable);
-  const samples = toStructOfArrays(thread.samples);
-  const markers = toStructOfArrays(sortByField('time', thread.markers));
-  return Object.assign({}, thread, {
-    frameTable, stackTable, markers, stringTable, samples,
-  });
-}
-
-
 function cleanFunctionName(functionName) {
   const ignoredPrefix = 'non-virtual thunk to ';
   if (functionName.startsWith && functionName.startsWith(ignoredPrefix)) {
@@ -63,7 +54,19 @@ function cleanFunctionName(functionName) {
   return functionName;
 }
 
-function preprocessThreadStageTwo(thread, libs) {
+/**
+ * Convert the given thread into preprocessed form. See docs/profile-data.md for more
+ * information.
+ * @param {object} thread The thread object, in the 'raw' format.
+ * @param {array} libs A libs array.
+ * @return {object} A new thread object in the 'preprocessed' format.
+ */
+function preprocessThread(thread, libs) {
+  const stringTable = new UniqueStringArray(thread.stringTable);
+  const frameTable = toStructOfArrays(thread.frameTable);
+  const stackTable = toStructOfArrays(thread.stackTable);
+  const samples = toStructOfArrays(thread.samples);
+  const markers = toStructOfArrays(sortByField('time', thread.markers));
   const funcTable = {
     length: 0,
     name: [],
@@ -97,8 +100,6 @@ function preprocessThreadStageTwo(thread, libs) {
     resourceTable.type[index] = resourceTypes.url;
     resourceTable.name[index] = url;
   }
-
-  const { stringTable, frameTable, stackTable, samples, markers } = thread;
 
   const libToResourceIndex = new Map();
   const libNameToResourceIndex = new Map();
@@ -175,20 +176,11 @@ function preprocessThreadStageTwo(thread, libs) {
   frameTable.address = frameTable.func.map(funcIndex => funcTable.address[funcIndex]);
   delete frameTable.location;
 
-  return Object.assign({}, thread, {
+  return {
+    name: thread.name,
+    processType: thread.processType,
     libs, frameTable, funcTable, resourceTable, stackTable, markers, stringTable, samples,
-  });
-}
-
-/**
- * Convert the given thread into preprocessed form. See docs/profile-data.md for more
- * information.
- * @param {object} thread The thread object, in the 'raw' format.
- * @param {array} libs A libs array, in preprocessed format (as returned by preprocessSharedLibraries).
- * @return {object} A new thread object in the 'preprocessed' format.
- */
-function preprocessThread(thread, libs) {
-  return preprocessThreadStageTwo(preprocessThreadStageOne(thread), libs);
+  };
 }
 
 /**
@@ -408,12 +400,17 @@ function adjustMarkerTimestamps(markers, delta) {
 
 /**
  * Convert a profile from "raw" format into the preprocessed format.
+ * Throws an exception if it encounters an incompatible profile.
  * For a description of the preprocessed format, look at docs/profile-data.md or
  * alternately the tests for this function.
  * @param {object} profile A profile object, in the 'raw' format.
  * @return {object} A new profile object, in the 'preprocessed' format.
  */
 export function preprocessProfile(profile) {
+  // Handle profiles from older versions of Gecko. This call might throw an
+  // exception.
+  upgradeRawProfileToCurrentVersion(profile);
+
   const libs = preprocessSharedLibraries(profile.libs);
   let threads = [];
   const tasktracer = emptyTaskTracerData();
@@ -452,8 +449,11 @@ export function preprocessProfile(profile) {
     }
   }
   const result = {
-    meta: profile.meta,
-    threads, tasktracer,
+    meta: Object.assign({}, profile.meta, {
+      preprocessedProfileVersion: CURRENT_VERSION,
+    }),
+    threads,
+    tasktracer,
   };
   return result;
 }
@@ -479,16 +479,7 @@ export function serializeProfile(profile) {
   return JSON.stringify(newProfile);
 }
 
-function attemptToUnserializePreprocessedProfileFormat(profile) {
-  try {
-    if (!('threads' in profile) || profile.threads.length < 1 ||
-        !('stringArray' in profile.threads[0])) {
-      return undefined;
-    }
-  } catch (e) {
-    return undefined;
-  }
-
+function unserializeProfile(profile) {
   // stringArray -> stringTable
   profile.threads.forEach(thread => {
     const stringArray = thread.stringArray;
@@ -504,164 +495,28 @@ function attemptToUnserializePreprocessedProfileFormat(profile) {
   return profile;
 }
 
-function preprocessThreadFromProfileJSONWithSymbolicationTable(thread, symbolicationTable) {
-  const stringTable = new UniqueStringArray();
-  const frameTable = {
-    length: 0,
-    category: [],
-    location: [],
-    implementation: [],
-    line: [],
-    optimizations: [],
-  };
-  const stackTable = {
-    length: 0,
-    frame: [],
-    prefix: [],
-  };
-  const samples = {
-    length: 0,
-    frameNumber: [],
-    responsiveness: [],
-    rss: [],
-    stack: [],
-    time: [],
-    uss: [],
-  };
-  const markers = {
-    length: 0,
-    data: [],
-    name: [],
-    time: [],
-  };
-
-  // Do markers first. Markers are easy.
-  for (let i = 0; i < thread.markers.length; i++) {
-    const marker = thread.markers[i];
-    const markerIndex = markers.length++;
-    markers.data[markerIndex] = ('data' in marker) ? marker.data : null;
-    markers.name[markerIndex] = stringTable.indexForString(marker.name);
-    markers.time[markerIndex] = ('time' in marker) ? marker.time : null;
-  }
-
-  const frameMap = new Map();
-  const stackMap = new Map();
-
-  for (let i = 0; i < thread.samples.length; i++) {
-    const sample = thread.samples[i];
-    // sample has the shape: {
-    //   frames: [symbolicationTableIndices for the stack frames]
-    //   extraInfo: {
-    //     responsiveness,
-    //     time,
-    //   }
-    // }
-    //
-    // We map every stack frame to a frame.
-    // Then we walk the stack, creating "stacks" (= (prefix stack, frame) pairs)
-    // as needed, and arrive at the sample's stackIndex.
-    const frames = sample.frames;
-    let prefix = null;
-    for (let i = 0; i < frames.length; i++) {
-      const frameSymbolicationTableIndex = frames[i];
-      let frameIndex = frameMap.get(frameSymbolicationTableIndex);
-      if (frameIndex === undefined) {
-        frameIndex = frameTable.length++;
-        frameTable.location[frameIndex] = stringTable.indexForString(symbolicationTable[frameSymbolicationTableIndex]);
-        frameTable.category[frameIndex] = null;
-        frameTable.implementation[frameIndex] = null;
-        frameTable.line[frameIndex] = null;
-        frameTable.optimizations[frameIndex] = null;
-        frameMap.set(frameSymbolicationTableIndex, frameIndex);
-      }
-      let stackIndex = stackMap.get(`${prefix}:${frameIndex}`);
-      if (stackIndex === undefined) {
-        stackIndex = stackTable.length++;
-        stackTable.prefix[stackIndex] = prefix;
-        stackTable.frame[stackIndex] = frameIndex;
-        stackMap.set(`${prefix}:${frameIndex}`, stackIndex);
-      }
-      prefix = stackIndex;
-    }
-    const sampleIndex = samples.length++;
-    samples.stack[sampleIndex] = prefix;
-    samples.time[sampleIndex] = ('time' in sample.extraInfo) ? sample.extraInfo.time : null;
-    samples.responsiveness[sampleIndex] = ('responsiveness' in sample.extraInfo) ? sample.extraInfo.responsiveness : null;
-    samples.frameNumber[sampleIndex] = ('frameNumber' in sample.extraInfo) ? sample.extraInfo.frameNumber : null;
-    samples.rss[sampleIndex] = ('rss' in sample.extraInfo) ? sample.extraInfo.rss : null;
-    samples.uss[sampleIndex] = ('uss' in sample.extraInfo) ? sample.extraInfo.uss : null;
-  }
-
-  let threadName = thread.name;
-  let processType;
-  if (thread.processType) {
-    processType = thread.processType;
-  } else if (threadName === 'Content') {
-    processType = 'tab';
-  } else if (threadName === 'Plugin') {
-    processType = 'plugin';
-  } else {
-    processType ='default';
-  }
-
-  if (threadName === 'Content') {
-    threadName = 'GeckoMain';
-  }
-
-  return {
-    name: threadName, processType,
-    frameTable, stackTable, markers, stringTable, samples,
-  };
-}
-
-function attemptToUnserializeRawProfileFormat(profile) {
+export function unserializeProfileOfArbitraryFormat(jsonString) {
   try {
-    if (!('libs' in profile) || typeof profile.libs !== 'string' ||
-        !('threads' in profile) || profile.threads.length < 1 ||
-        !('frameTable' in profile.threads[0]) ||
-        !('schema' in profile.threads[0].frameTable)) {
-      return undefined;
+    let profile = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+    if (isOldCleopatraFormat(profile)) {
+      profile = convertOldCleopatraProfile(profile); // outputs proprocessed profile
     }
-  } catch (e) {
-    return undefined;
-  }
-  return preprocessProfile(profile);
-}
-
-function attemptToUnserializeProfileJSONWithSymbolicationTableProfileFormat(profile) {
-  try {
-    if (!('format' in profile) || profile.format !== 'profileJSONWithSymbolicationTable,1') {
-      return undefined;
+    if (isPreprocessedProfile(profile)) {
+      upgradePreprocessedProfileToCurrentVersion(profile);
+      return unserializeProfile(profile);
     }
+    // Else: Treat it as a raw profile and just attempt to preprocess it.
+    return preprocessProfile(profile);
   } catch (e) {
-    return undefined;
+    throw new Error(`Unserializing the profile failed: ${e}`);
   }
-
-  const { meta, profileJSON, symbolicationTable } = profile;
-
-  const threads = [];
-  const tasktracer = emptyTaskTracerData();
-
-  for (const threadIndex in profileJSON.threads) {
-    const thread = profileJSON.threads[threadIndex];
-    threads.push(preprocessThreadStageTwo(preprocessThreadFromProfileJSONWithSymbolicationTable(thread, symbolicationTable), []));
-  }
-  const result = {
-    meta, threads, tasktracer,
-  };
-  return result;
-}
-
-export function unserializeProfile(jsonString) {
-  const profile = JSON.parse(jsonString);
-  return attemptToUnserializePreprocessedProfileFormat(profile) ||
-         attemptToUnserializeRawProfileFormat(profile) ||
-         attemptToUnserializeProfileJSONWithSymbolicationTableProfileFormat(profile);
 }
 
 export class ProfilePreprocessor {
   preprocessProfile(profile) {
-    return Promise.resolve(preprocessProfile(profile));
+    return new Promise(resolve => {
+      resolve(preprocessProfile(profile));
+    });
   }
 }
 
