@@ -10,7 +10,7 @@
 
 import { sortDataTable } from './data-table-utils';
 
-export const CURRENT_VERSION = 1; // The current version of the 'preprocessed profile' format.
+export const CURRENT_VERSION = 2; // The current version of the 'preprocessed profile' format.
 
 // Preprocessed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -83,6 +83,21 @@ const _upgraders = {
           thread.processType = 'plugin';
         } else {
           thread.processType = 'default';
+        }
+      }
+    }
+  },
+  [2]: profile => {
+    // pdbName -> debugName
+    for (const thread of profile.threads) {
+      for (const lib of thread.libs) {
+        if (!('debugName' in lib)) {
+          lib.debugName = lib.pdbName;
+          lib.path = lib.name;
+          lib.name = lib.debugName.endsWith('.pdb') ? lib.debugName.substr(0, lib.debugName.length - 4) : lib.debugName;
+          delete lib.pdbName;
+          delete lib.pdbAge;
+          delete lib.pdbSignature;
         }
       }
     }

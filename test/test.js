@@ -9,6 +9,7 @@ import { FakeSymbolStore } from './fake-symbol-store';
 import { sortDataTable } from '../src/content/data-table-utils';
 import { isOldCleopatraFormat, convertOldCleopatraProfile } from '../src/content/old-cleopatra-profile-format';
 import { isPreprocessedProfile, upgradePreprocessedProfileToCurrentVersion } from '../src/content/preprocessed-profile-versioning';
+import { upgradeRawProfileToCurrentVersion } from '../src/content/raw-profile-versioning';
 
 config.truncateThreshold = 0;
 
@@ -100,18 +101,18 @@ describe('preprocess-profile', function () {
         lastStartAddress = lib.start;
       }
     });
-    it('should have reasonable pdbName fields on each library', function () {
-      assert.equal(profile.threads[0].libs[0].pdbName, 'firefox');
-      assert.equal(profile.threads[0].libs[1].pdbName, 'examplebinary');
-      assert.equal(profile.threads[0].libs[2].pdbName, 'examplebinary2.pdb');
-      assert.equal(profile.threads[1].libs[0].pdbName, 'firefox');
-      assert.equal(profile.threads[1].libs[1].pdbName, 'examplebinary');
-      assert.equal(profile.threads[1].libs[2].pdbName, 'examplebinary2.pdb');
+    it('should have reasonable debugName fields on each library', function () {
+      assert.equal(profile.threads[0].libs[0].debugName, 'firefox');
+      assert.equal(profile.threads[0].libs[1].debugName, 'examplebinary');
+      assert.equal(profile.threads[0].libs[2].debugName, 'examplebinary2.pdb');
+      assert.equal(profile.threads[1].libs[0].debugName, 'firefox');
+      assert.equal(profile.threads[1].libs[1].debugName, 'examplebinary');
+      assert.equal(profile.threads[1].libs[2].debugName, 'examplebinary2.pdb');
 
       // Thread 2 is the content process main thread
-      assert.equal(profile.threads[2].libs[0].pdbName, 'firefox-webcontent');
-      assert.equal(profile.threads[2].libs[1].pdbName, 'examplebinary');
-      assert.equal(profile.threads[2].libs[2].pdbName, 'examplebinary2.pdb');
+      assert.equal(profile.threads[2].libs[0].debugName, 'firefox-webcontent');
+      assert.equal(profile.threads[2].libs[1].debugName, 'examplebinary');
+      assert.equal(profile.threads[2].libs[2].debugName, 'examplebinary2.pdb');
     });
     it('should have reasonable breakpadId fields on each library', function () {
       for (const thread of profile.threads) {
@@ -325,20 +326,47 @@ describe('upgrades', function () {
       upgradePreprocessedProfileToCurrentVersion(profile);
     });
   });
-  describe('preprocessed-profile-versioning', function () {
-    function comparePreprocessedProfiles(lhs, rhs) {
-      // Preprocessed profiles contain a stringTable which isn't easily comparable.
-      // Instead, serialize the profiles first, so that the stringTable becomes a
-      // stringArray, and compare the serialized versions.
-      const serializedLhsAsObject = JSON.parse(serializeProfile(lhs));
-      const serializedRhsAsObject = JSON.parse(serializeProfile(rhs));
-      assert.deepEqual(serializedLhsAsObject, serializedRhsAsObject);
-    }
-    const currentProfile = preprocessProfile(exampleProfile);
-    it('should import an old profile and upgrade it to be the same as the current exampleProfile', function () {
-      const serializedOldPreprocessedProfile = require('./upgrades/prepr-0.sps.json');
-      const upgradedProfile = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile);
-      comparePreprocessedProfiles(upgradedProfile, currentProfile);
-    });
+  function comparePreprocessedProfiles(lhs, rhs) {
+    // Preprocessed profiles contain a stringTable which isn't easily comparable.
+    // Instead, serialize the profiles first, so that the stringTable becomes a
+    // stringArray, and compare the serialized versions.
+    const serializedLhsAsObject = JSON.parse(serializeProfile(lhs));
+    const serializedRhsAsObject = JSON.parse(serializeProfile(rhs));
+
+    // Don't compare the version of the raw profile that these profiles originated from.
+    delete serializedLhsAsObject.meta.version;
+    delete serializedRhsAsObject.meta.version;
+
+    assert.deepEqual(serializedLhsAsObject, serializedRhsAsObject);
+  }
+  const currentProfile = preprocessProfile(exampleProfile);
+  it('should import an old profile and upgrade it to be the same as the current exampleProfile', function () {
+    const serializedOldPreprocessedProfile0 = require('./upgrades/prepr-0.sps.json');
+    const upgradedProfile0 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile0);
+    comparePreprocessedProfiles(upgradedProfile0, currentProfile);
+    const serializedOldPreprocessedProfile1 = require('./upgrades/prepr-1.sps.json');
+    const upgradedProfile1 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile1);
+    comparePreprocessedProfiles(upgradedProfile1, currentProfile);
+    const rawProfile3 = require('./upgrades/raw-3.sps.json');
+    const upgradedRawProfile3 = unserializeProfileOfArbitraryFormat(rawProfile3);
+    comparePreprocessedProfiles(upgradedRawProfile3, currentProfile);
+    // const serializedOldPreprocessedProfile2 = require('./upgrades/prepr-2.sps.json');
+    // const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile2);
+    // comparePreprocessedProfiles(upgradedProfile2, currentProfile);
+    // const rawProfile4 = require('./upgrades/raw-4.sps.json');
+    // const upgradedRawProfile4 = unserializeProfileOfArbitraryFormat(rawProfile4);
+    // comparePreprocessedProfiles(upgradedRawProfile4, currentProfile);
+  });
+  it('should import an old raw profile and upgrade it to be the same as the current exampleProfile', function () {
+    // This is not working. We have JSON strings in the profile, so it tries to
+    // compare those strings, but objects inside them have different property
+    // orders.
+
+    // const rawProfile3 = require('./upgrades/raw-3.sps.json');
+    // upgradeRawProfileToCurrentVersion(rawProfile3);
+    // assert.deepEqual(rawProfile3, exampleProfile);
+    // const rawProfile4 = require('./upgrades/raw-4.sps.json');
+    // upgradeRawProfileToCurrentVersion(rawProfile4);
+    // assert.deepEqual(upgradedProfile4, exampleProfile);
   });
 });

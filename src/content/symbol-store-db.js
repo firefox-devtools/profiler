@@ -23,7 +23,7 @@ export class SymbolStoreDB {
         const db = openreq.result;
         db.onerror = reject;
         const tableStore = db.createObjectStore('symbol-tables', { autoIncrement: true });
-        tableStore.createIndex('libKey', ['pdbName', 'breakpadId'], { unique: true });
+        tableStore.createIndex('libKey', ['debugName', 'breakpadId'], { unique: true });
       };
       openreq.onsuccess = () => {
         this._db = openreq.result;
@@ -32,16 +32,16 @@ export class SymbolStoreDB {
     });
   }
 
-  getLibKey(pdbName, breakpadId) {
+  getLibKey(debugName, breakpadId) {
     if (!this._db) {
-      return this._setupDBPromise.then(() => this.getLibKey(pdbName, breakpadId));
+      return this._setupDBPromise.then(() => this.getLibKey(debugName, breakpadId));
     }
 
     return new Promise((resolve, reject) => {
       const transaction = this._db.transaction('symbol-tables', 'readonly');
       const store = transaction.objectStore('symbol-tables');
       const index = store.index('libKey');
-      const req = index.openKeyCursor(IDBKeyRange.only([pdbName, breakpadId]));
+      const req = index.openKeyCursor(IDBKeyRange.only([debugName, breakpadId]));
       req.onerror = reject;
       req.onsuccess = () => {
         const cursor = req.result;
@@ -54,16 +54,16 @@ export class SymbolStoreDB {
     });
   }
 
-  importLibrary(pdbName, breakpadId, [addrs, index, buffer]) {
+  importLibrary(debugName, breakpadId, [addrs, index, buffer]) {
     if (!this._db) {
-      return this._setupDBPromise.then(() => this.importLibrary(pdbName, breakpadId, [addrs, index, buffer]));
+      return this._setupDBPromise.then(() => this.importLibrary(debugName, breakpadId, [addrs, index, buffer]));
     }
 
     return new Promise((resolve, reject) => {
       const transaction = this._db.transaction('symbol-tables', 'readwrite');
       transaction.onerror = reject;
       const tableStore = transaction.objectStore('symbol-tables');
-      const putReq = tableStore.put({ pdbName, breakpadId, addrs, index, buffer });
+      const putReq = tableStore.put({ debugName, breakpadId, addrs, index, buffer });
       putReq.onsuccess = () => {
         resolve(putReq.result);
       };

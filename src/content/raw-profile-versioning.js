@@ -7,7 +7,7 @@
  * current format.
 */
 
-export const CURRENT_VERSION = 3; // The current version of the 'raw profile' format.
+export const CURRENT_VERSION = 4; // The current version of the 'raw profile' format.
 
 // Raw profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -63,5 +63,57 @@ const _upgraders = {
     throw new Error(
       'Raw profile version 2 is very old and no conversion code has been written for that version of the profile format.'
     );
+  },
+  [4]: profile => {
+    function convertToVersionFourRecursive(p) {
+      // In version < 3, p.libs was a JSON string.
+      // Starting with version 4, libs is an actual array, each lib has
+      // "debugName", "breakpadId" and "path" fields, and the array is sorted by
+      // start address.
+      p.libs = JSON.parse(p.libs)
+        .map(lib => {
+          if ('breakpadId' in lib) {
+            lib.debugName = lib.name.substr(lib.name.lastIndexOf('/') + 1);
+            lib.breakpadId = lib.breakpadId;
+          } else {
+            lib.debugName = lib.pdbName;
+            const pdbSig = lib.pdbSignature.replace(/[{}-]/g, '').toUpperCase();
+            lib.breakpadId = pdbSig + lib.pdbAge;
+          }
+          delete lib.pdbName;
+          delete lib.pdbAge;
+          delete lib.pdbSignature;
+          lib.path = lib.name;
+          lib.name = lib.debugName.endsWith('.pdb') ? lib.debugName.substr(0, lib.debugName.length - 4) : lib.debugName;
+          return lib;
+        })
+        .sort((a, b) => a.start - b.start);
+
+      for (let threadIndex = 0; threadIndex < p.threads.length; threadIndex++) {
+        if (typeof p.threads[threadIndex] === 'string') {
+          // Also do the modification to embedded subprocess profiles.
+          const subprocessProfile = JSON.parse(p.threads[threadIndex]);
+          convertToVersionFourRecursive(subprocessProfile);
+          p.threads[threadIndex] = JSON.stringify(subprocessProfile);
+        } else {
+          // At the beginning of format version 3, the thread name for any
+          // threads in a "tab" process was "Content", and the processType
+          // field did not exist. When this was changed, the version was not
+          // updated, so we handle both cases here.
+          const thread = p.threads[threadIndex];
+          if (!('processType' in thread)) {
+            if (thread.name === 'Content') {
+              thread.processType = 'tab';
+              thread.name = 'GeckoMain';
+            } else if (thread.name === 'Plugin') {
+              thread.processType = 'plugin';
+            } else {
+              thread.processType = 'default';
+            }
+          }
+        }
+      }
+    }
+    convertToVersionFourRecursive(profile);
   },
 };
