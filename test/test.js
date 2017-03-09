@@ -1,11 +1,16 @@
 import 'babel-polyfill';
-import { assert } from 'chai';
+import { assert, config } from 'chai';
 import { getContainingLibrary, symbolicateProfile, applyFunctionMerging, setFuncNames } from '../src/content/symbolication';
-import { preprocessProfile } from '../src/content/preprocess-profile';
+import { preprocessProfile, unserializeProfileOfArbitraryFormat, serializeProfile } from '../src/content/preprocess-profile';
 import { resourceTypes, getFuncStackInfo, getTracingMarkers } from '../src/content/profile-data';
 import exampleProfile from './example-profile';
 import { UniqueStringArray } from '../src/content/unique-string-array';
 import { FakeSymbolStore } from './fake-symbol-store';
+import { sortDataTable } from '../src/content/data-table-utils';
+import { isOldCleopatraFormat, convertOldCleopatraProfile } from '../src/content/old-cleopatra-profile-format';
+import { isPreprocessedProfile, upgradePreprocessedProfileToCurrentVersion } from '../src/content/preprocessed-profile-versioning';
+
+config.truncateThreshold = 0;
 
 describe('unique-string-array', function () {
   const u = new UniqueStringArray(['foo', 'bar', 'baz']);
@@ -27,6 +32,41 @@ describe('unique-string-array', function () {
     assert.equal(u.indexForString('qux'), 3);
     assert.equal(u.getString(3), 'qux');
     assert.equal(u.getString(4), 'hello');
+  });
+});
+
+describe('data-table-utils', function () {
+  describe('sortDataTable', function () {
+    const originalDataTable = {
+      length: 6,
+      word: ['a', 'is', 'now', 'This', 'array', 'sorted'],
+      order: [13, 0.7, 2, -0.2, 100, 20.1],
+      wordLength: [1, 2, 3, 4, 5, 6],
+    };
+    const dt = JSON.parse(JSON.stringify(originalDataTable));
+    it('test preparation', function () {
+      // verify copy
+      assert.notEqual(dt, originalDataTable);
+      assert.deepEqual(dt, originalDataTable);
+      assert.deepEqual(dt.word.map(w => w.length), dt.wordLength, 'wordLength is correct');
+    });
+    it('should sort this data table by order', function () {
+      // sort by order
+      sortDataTable(dt, dt.order, (a, b) => a - b);
+    
+      assert.equal(dt.length, originalDataTable.length, 'length should be unaffected');
+      assert.equal(dt.word.length, originalDataTable.length, 'length should be unaffected');
+      assert.equal(dt.order.length, originalDataTable.length, 'length should be unaffected');
+      assert.equal(dt.wordLength.length, originalDataTable.length, 'length should be unaffected');
+      assert.deepEqual(dt.word.map(w => w.length), dt.wordLength, 'wordLength is still correct (was adjusted the same way)');
+      assert.deepEqual(dt.order, [...dt.order].sort((a, b) => a - b), 'dt.order is sorted');
+      assert.equal(dt.word.join(' '), 'This is now a sorted array', 'dt.words was reordered the same way');
+    });
+    it('should sort this data table by wordLength', function () {
+      // sort by wordLength
+      sortDataTable(dt, dt.wordLength, (a, b) => a - b);
+      assert.deepEqual(dt, originalDataTable);
+    });
   });
 });
 
@@ -270,4 +310,35 @@ describe('symbolication', function () {
     });
   });
   // TODO: check that functions are collapsed correctly
+});
+
+describe('upgrades', function () {
+  describe('old-cleopatra-profile', function () {
+    const exampleOldCleopatraProfile = require('./upgrades/old-cleopatra-profile.sps.json');
+    it('should detect the profile as an old cleopatra profile', function () {
+      assert.isTrue(isOldCleopatraFormat(exampleOldCleopatraProfile));
+    });
+    it('should be able to convert the old cleopatra profile into a preprocessed profile', function () {
+      const profile = convertOldCleopatraProfile(exampleOldCleopatraProfile);
+      assert.isTrue(isPreprocessedProfile(profile));
+      // For now, just test that upgrading doesn't throw any exceptions.
+      upgradePreprocessedProfileToCurrentVersion(profile);
+    });
+  });
+  describe('preprocessed-profile-versioning', function () {
+    function comparePreprocessedProfiles(lhs, rhs) {
+      // Preprocessed profiles contain a stringTable which isn't easily comparable.
+      // Instead, serialize the profiles first, so that the stringTable becomes a
+      // stringArray, and compare the serialized versions.
+      const serializedLhsAsObject = JSON.parse(serializeProfile(lhs));
+      const serializedRhsAsObject = JSON.parse(serializeProfile(rhs));
+      assert.deepEqual(serializedLhsAsObject, serializedRhsAsObject);
+    }
+    const currentProfile = preprocessProfile(exampleProfile);
+    it('should import an old profile and upgrade it to be the same as the current exampleProfile', function () {
+      const serializedOldPreprocessedProfile = require('./upgrades/prepr-0.sps.json');
+      const upgradedProfile = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile);
+      comparePreprocessedProfiles(upgradedProfile, currentProfile);
+    });
+  });
 });

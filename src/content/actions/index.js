@@ -1,4 +1,4 @@
-import { preprocessProfile, unserializeProfile } from '../preprocess-profile';
+import { preprocessProfile, unserializeProfileOfArbitraryFormat } from '../preprocess-profile';
 import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import { symbolicateProfile } from '../symbolication';
 import { SymbolStore } from '../symbol-store';
@@ -231,7 +231,7 @@ export function retrieveProfileFromWeb(hash) {
     dispatch(waitingForProfileFromWeb());
 
     fetch(`https://profile-store.commondatastorage.googleapis.com/${hash}`).then(response => response.text()).then(text => {
-      const profile = unserializeProfile(text);
+      const profile = unserializeProfileOfArbitraryFormat(text);
       if (profile === undefined) {
         throw new Error('Unable to parse the profile.');
       }
@@ -296,7 +296,7 @@ export function retrieveProfileFromFile(file) {
       reader.onerror = reject;
       reader.readAsText(file);
     })).then(text => {
-      const profile = unserializeProfile(text);
+      const profile = unserializeProfileOfArbitraryFormat(text);
       if (profile === undefined) {
         throw new Error('Unable to parse the profile.');
       }
@@ -316,7 +316,7 @@ export function retrieveProfileFromFile(file) {
       const textDecoder = new TextDecoder();
       return textDecoder.decode(decompressedArrayBuffer);
     }).then(text => {
-      const profile = unserializeProfile(text);
+      const profile = unserializeProfileOfArbitraryFormat(text);
       if (profile === undefined) {
         throw new Error('Unable to parse the profile.');
       }

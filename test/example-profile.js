@@ -149,7 +149,7 @@ const contentProcessProfile = {
   meta: contentProcessMeta,
   libs: JSON.stringify([contentProcessBinary].concat(extraBinaries)), // libs are stringified in the raw profile
   threads: [
-    Object.assign({ name: 'Content' }, thread)
+    Object.assign({ name: 'GeckoMain', processType: 'tab' }, thread)
   ]
 };
 
@@ -157,8 +157,8 @@ const profile = {
   meta: parentProcessMeta,
   libs: JSON.stringify([parentProcessBinary].concat(extraBinaries)),
   threads: [
-    Object.assign({ name: 'GeckoMain'}, thread),
-    Object.assign({ name: 'Compositor'}, thread),
+    Object.assign({ name: 'GeckoMain', processType: 'default' }, thread),
+    Object.assign({ name: 'Compositor', processType: 'default' }, thread),
     JSON.stringify(contentProcessProfile) // subprocesses are stringified, too
   ]
 };
