@@ -1,8 +1,47 @@
+// @flow
 import { timeCode } from '../common/time-code';
 import { getSampleFuncStacks } from './profile-data';
+import type { Thread, FuncTable, ResourceTable, StringTable } from '../common/types/profile';
+import type { FuncStackTable, IndexIntoFuncStackTable, FuncStackInfo } from '../common/types/profile-derived';
+import type { Milliseconds } from '../common/types/units';
+
+type Node = {
+  totalTime: string,
+  totalTimePercent: string,
+  selfTime: string,
+  name: string,
+  lib: string,
+  dim: boolean,
+};
+
+type FuncStackChildren = IndexIntoFuncStackTable[];
+type FuncStackTimes = { selfTime: Milliseconds, totalTime: Milliseconds };
 
 class ProfileTree {
-  constructor(funcStackTable, funcStackTimes, funcStackChildCount, funcTable, resourceTable, stringTable, rootTotalTime, rootCount, jsOnly) {
+
+  _funcStackTable: FuncStackTable;
+  _funcStackTimes: FuncStackTimes;
+  _funcStackChildCount: Uint32Array; // A table column matching the funcStackTable
+  _funcTable: FuncTable;
+  _resourceTable: ResourceTable;
+  _stringTable: StringTable;
+  _rootTotalTime: number;
+  _rootCount: number;
+  _nodes: Map<IndexIntoFuncStackTable, Node>;
+  _children: Map<IndexIntoFuncStackTable, FuncStackChildren>;
+  _jsOnly: boolean;
+
+  constructor(
+    funcStackTable: FuncStackTable,
+    funcStackTimes: FuncStackTimes,
+    funcStackChildCount: Uint32Array,
+    funcTable: FuncTable,
+    resourceTable: ResourceTable,
+    stringTable: StringTable,
+    rootTotalTime: number,
+    rootCount: number,
+    jsOnly: boolean
+  ) {
     this._funcStackTable = funcStackTable;
     this._funcStackTimes = funcStackTimes;
     this._funcStackChildCount = funcStackChildCount;
@@ -25,7 +64,7 @@ class ProfileTree {
    * @param  {[type]} funcStackIndex [description]
    * @return {[type]}                [description]
    */
-  getChildren(funcStackIndex) {
+  getChildren(funcStackIndex: IndexIntoFuncStackTable): FuncStackChildren {
     let children = this._children.get(funcStackIndex);
     if (children === undefined) {
       const childCount = funcStackIndex === -1 ? this._rootCount : this._funcStackChildCount[funcStackIndex];
@@ -44,19 +83,19 @@ class ProfileTree {
     return children;
   }
 
-  hasChildren(funcStackIndex) {
+  hasChildren(funcStackIndex: IndexIntoFuncStackTable): boolean {
     return this.getChildren(funcStackIndex).length !== 0;
   }
 
-  getParent(funcStackIndex) {
+  getParent(funcStackIndex: IndexIntoFuncStackTable): IndexIntoFuncStackTable {
     return this._funcStackTable.prefix[funcStackIndex];
   }
 
-  getDepth(funcStackIndex) {
+  getDepth(funcStackIndex: IndexIntoFuncStackTable): number {
     return this._funcStackTable.depth[funcStackIndex];
   }
 
-  hasSameNodeIds(tree) {
+  hasSameNodeIds(tree: ProfileTree): boolean {
     return this._funcStackTable === tree._funcStackTable;
   }
 
@@ -65,7 +104,7 @@ class ProfileTree {
    * @param  {[type]} funcStackIndex [description]
    * @return {[type]}                [description]
    */
-  getNode(funcStackIndex) {
+  getNode(funcStackIndex: IndexIntoFuncStackTable): Node {
     let node = this._nodes.get(funcStackIndex);
     if (node === undefined) {
       const funcIndex = this._funcStackTable.func[funcStackIndex];
@@ -88,7 +127,11 @@ class ProfileTree {
   }
 }
 
-export function getCallTree(thread, interval, funcStackInfo, jsOnly) {
+export type ProfileTreeClass = ProfileTree;
+
+export function getCallTree(
+  thread: Thread, interval: Milliseconds, funcStackInfo: FuncStackInfo, jsOnly: boolean
+): ProfileTree {
   return timeCode('getCallTree', () => {
     const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
     const sampleFuncStacks = getSampleFuncStacks(thread.samples, stackIndexToFuncStackIndex);
@@ -97,7 +140,10 @@ export function getCallTree(thread, interval, funcStackInfo, jsOnly) {
     const funcStackTotalTime = new Float32Array(funcStackTable.length);
     const numChildren = new Uint32Array(funcStackTable.length);
     for (let sampleIndex = 0; sampleIndex < sampleFuncStacks.length; sampleIndex++) {
-      funcStackSelfTime[sampleFuncStacks[sampleIndex]] += interval;
+      const funcStackIndex = sampleFuncStacks[sampleIndex];
+      if (funcStackIndex !== null) {
+        funcStackSelfTime[funcStackIndex] += interval;
+      }
     }
     let rootTotalTime = 0;
     let numRoots = 0;

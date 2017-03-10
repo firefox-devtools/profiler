@@ -27,3 +27,5 @@ export type HorizontalViewport = {
   right: UnitIntervalOfProfileRange,
   length: UnitIntervalOfProfileRange,
 }
+
+export type StartEndRange = { start: Milliseconds, end: Milliseconds };

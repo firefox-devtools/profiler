@@ -1,24 +1,19 @@
 // @flow
 import type {
+  Profile,
+  Thread,
   SamplesTable,
   StackTable,
   FrameTable,
   FuncTable,
+  MarkersTable,
   IndexIntoFuncTable,
   IndexIntoStringTable,
-  Thread,
-  Profile,
-  MarkersTable,
+  IndexIntoSamplesTable,
+  IndexIntoStackTable,
 } from '../common/types/profile';
-import type { FuncStackTable, IndexIntoFuncStack } from '../common/types/profile-derived';
+import type { FuncStackTable, IndexIntoFuncStackTable, TracingMarker } from '../common/types/profile-derived';
 import { timeCode } from '../common/time-code';
-
-export type TracingMarker = {
-  name: string,
-  start: number,
-  dur: number,
-  title: string|null,
-}
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -94,11 +89,14 @@ export function getFuncStackInfo(stackTable: StackTable, frameTable: FrameTable,
   });
 }
 
-export function getSampleFuncStacks(samples: SamplesTable, stackIndexToFuncStackIndex: { [key: number]: number }) {
+export function getSampleFuncStacks(
+  samples: SamplesTable,
+  stackIndexToFuncStackIndex: { [key: IndexIntoStackTable]: IndexIntoFuncStackTable }
+): Array<IndexIntoFuncStackTable | null> {
   return samples.stack.map(stack => {
     return stack === null
-      ? null :
-      stackIndexToFuncStackIndex[stack];
+      ? null
+      : stackIndexToFuncStackIndex[stack];
   });
 }
 
@@ -269,7 +267,7 @@ export function collapsePlatformStackFrames(thread: Thread) {
               // Create a new platform frame
               const newFuncIndex = newFuncTable.length++;
               newFuncTable.name.push(stringTable.indexForString('Platform'));
-              newFuncTable.resource.push(null);
+              newFuncTable.resource.push(-1);
               newFuncTable.address.push(-1);
               newFuncTable.isJS.push(false);
               if (newFuncTable.name.length !== newFuncTable.length) {
@@ -544,7 +542,7 @@ export function getFuncStackFromFuncArray(funcArray: IndexIntoFuncTable[], funcS
   return fs;
 }
 
-export function getStackAsFuncArray(funcStackIndex: IndexIntoFuncStack, funcStackTable: FuncStackTable) {
+export function getStackAsFuncArray(funcStackIndex: IndexIntoFuncStackTable, funcStackTable: FuncStackTable): IndexIntoFuncTable[] {
   if (funcStackIndex === null) {
     return [];
   }
@@ -552,7 +550,7 @@ export function getStackAsFuncArray(funcStackIndex: IndexIntoFuncStack, funcStac
     console.log('bad funcStackIndex in getStackAsFuncArray:', funcStackIndex);
     return [];
   }
-  const funcArray: IndexIntoFuncTable[] = [];
+  const funcArray = [];
   let fs = funcStackIndex;
   while (fs !== -1) {
     funcArray.push(funcStackTable.func[fs]);
@@ -562,7 +560,7 @@ export function getStackAsFuncArray(funcStackIndex: IndexIntoFuncStack, funcStac
   return funcArray;
 }
 
-export function invertCallstack(thread: Thread) {
+export function invertCallstack(thread: Thread): Thread {
   return timeCode('invertCallstack', () => {
     const { stackTable, frameTable, samples } = thread;
 
@@ -616,7 +614,7 @@ export function invertCallstack(thread: Thread) {
   });
 }
 
-export function getSampleIndexClosestToTime(samples: SamplesTable, time: number) {
+export function getSampleIndexClosestToTime(samples: SamplesTable, time: number): IndexIntoSamplesTable {
   // TODO: This should really use bisect. samples.time is sorted.
   for (let i = 0; i < samples.length; i++) {
     if (samples.time[i] >= time) {
@@ -631,7 +629,7 @@ export function getSampleIndexClosestToTime(samples: SamplesTable, time: number)
   return samples.length - 1;
 }
 
-export function getJankInstances(samples: SamplesTable, processType: string, thresholdInMs: number) {
+export function getJankInstances(samples: SamplesTable, processType: string, thresholdInMs: number): TracingMarker[] {
   let lastResponsiveness = 0;
   let lastTimestamp = 0;
   const jankInstances = [];

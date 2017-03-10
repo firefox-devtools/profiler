@@ -1,5 +1,6 @@
 import bisection from 'bisection';
 import { resourceTypes } from './profile-data';
+import type { Thread, IndexIntoFuncTable } from '../common/types/profile';
 
 /**
  * Return the library object that contains address.
@@ -166,7 +167,7 @@ function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsTo
  * @param {Map}    addrToFuncIndexMap A Map that maps a func address to the funcIndex.
  * @return {Object}                   The new thread object.
  */
-export function setFuncNames(thread, funcIndices, funcNames) {
+export function setFuncNames(thread: Thread, funcIndices: IndexIntoFuncTable, funcNames: string[]): Thread {
   const funcTable = Object.assign({}, thread.funcTable);
   funcTable.name = funcTable.name.slice();
   const stringTable = thread.stringTable;
@@ -191,7 +192,10 @@ export function setFuncNames(thread, funcIndices, funcNames) {
  * @param  {Map}    oldFuncToNewFuncMap A map that defines which function should be collapsed into which other function.
  * @return {Object}                     The new thread object.
  */
-export function applyFunctionMerging(thread, oldFuncToNewFuncMap) {
+export function applyFunctionMerging(
+  thread: Thread,
+  oldFuncToNewFuncMap: Map<IndexIntoFuncTable, IndexIntoFuncTable>
+): Thread {
   const frameTable = Object.assign({}, thread.frameTable, {
     func: thread.frameTable.func.map(oldFunc => {
       const newFunc = oldFuncToNewFuncMap.get(oldFunc);

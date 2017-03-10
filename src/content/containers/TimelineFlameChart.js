@@ -144,4 +144,4 @@ export default connect((state, ownProps) => {
     getLabel: isThreadExpanded ? getLabelingStrategy(state) : getImplementationName,
     threadIndex,
   };
-}, actions)(TimelineFlameChart);
+}, (actions: Object))(TimelineFlameChart);
