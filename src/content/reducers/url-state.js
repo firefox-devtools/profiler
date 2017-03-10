@@ -6,28 +6,11 @@ import { urlFromState } from '../url-handling';
 import * as RangeFilters from '../range-filters';
 
 import type { ThreadIndex } from '../../common/types/profile';
-import type { Action, CallTreeFilter } from '../actions/types';
+import type { StartEndRange } from '../../common/types/units';
+import type { Action, CallTreeFiltersPerThread, CallTreeFilter, DataSource } from '../actions/types';
+import type { State, URLState, Reducer } from './types';
 
-type RangeFilter = { start: number, end: number};
-
-type DataSourceState = 'none' | 'from-file' | 'public';
-type RangeFiltersState = RangeFilter[];
-type CallTreeFiltersState = { [key: ThreadIndex]: CallTreeFilter[] }
-
-type URLState = {
-  dataSource: DataSourceState,
-  hash: string,
-  selectedTab: string,
-  rangeFilters: RangeFiltersState,
-  selectedThread: ThreadIndex,
-  callTreeSearchString: string,
-  callTreeFilters: CallTreeFiltersState,
-  jsOnly: boolean,
-  invertCallstack: boolean,
-  hidePlatformDetails: boolean,
-}
-
-function dataSource(state: DataSourceState = 'none', action: Action) {
+function dataSource(state: DataSource = 'none', action: Action) {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_FILE':
       return 'from-file';
@@ -56,7 +39,7 @@ function selectedTab(state: string = 'calltree', action: Action) {
   }
 }
 
-function rangeFilters(state: RangeFiltersState = [], action: Action) {
+function rangeFilters(state: StartEndRange[] = [], action: Action) {
   switch (action.type) {
     case 'ADD_RANGE_FILTER': {
       const { start, end } = action;
@@ -98,7 +81,7 @@ function callTreeSearchString(state: string = '', action: Action) {
   }
 }
 
-function callTreeFilters(state: CallTreeFiltersState = {}, action: Action) {
+function callTreeFilters(state: CallTreeFiltersPerThread = {}, action: Action) {
   switch (action.type) {
     case 'ADD_CALL_TREE_FILTER': {
       const { threadIndex, filter } = action;
@@ -146,7 +129,7 @@ function hidePlatformDetails(state: boolean = false, action: Action) {
   }
 }
 
-const urlState = (regularUrlStateReducer => (state: URLState, action: Action) => {
+const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (state: URLState, action: Action): URLState => {
   switch (action.type) {
     case '@@urlenhancer/updateURLState':
       return action.urlState;
@@ -158,27 +141,28 @@ const urlState = (regularUrlStateReducer => (state: URLState, action: Action) =>
   callTreeSearchString, callTreeFilters, jsOnly, invertCallstack,
   hidePlatformDetails,
 }));
+export default urlStateReducer;
 
-export default urlState;
+const getURLState = (state: State): URLState => state.urlState;
 
-const getURLState = (state: Object): URLState => state.urlState;
-
-export const getDataSource = (state: Object) => getURLState(state).dataSource;
-export const getHash = (state: Object) => getURLState(state).hash;
-export const getRangeFilters = (state: Object) => getURLState(state).rangeFilters;
-export const getJSOnly = (state: Object) => getURLState(state).jsOnly;
-export const getHidePlatformDetails = (state: Object) => getURLState(state).hidePlatformDetails;
-export const getInvertCallstack = (state: Object) => getURLState(state).invertCallstack;
-export const getSearchString = (state: Object) => getURLState(state).callTreeSearchString;
-export const getSelectedTab = (state: Object) => getURLState(state).selectedTab;
-export const getSelectedThreadIndex = (state: Object) => getURLState(state).selectedThread;
-export const getCallTreeFilters = (state: Object, threadIndex: ThreadIndex) => getURLState(state).callTreeFilters[threadIndex] || [];
+export const getDataSource = (state: State) => getURLState(state).dataSource;
+export const getHash = (state: State) => getURLState(state).hash;
+export const getRangeFilters = (state: State) => getURLState(state).rangeFilters;
+export const getJSOnly = (state: State) => getURLState(state).jsOnly;
+export const getHidePlatformDetails = (state: State) => getURLState(state).hidePlatformDetails;
+export const getInvertCallstack = (state: State) => getURLState(state).invertCallstack;
+export const getSearchString = (state: State) => getURLState(state).callTreeSearchString;
+export const getSelectedTab = (state: State) => getURLState(state).selectedTab;
+export const getSelectedThreadIndex = (state: State) => getURLState(state).selectedThread;
+export const getCallTreeFilters = (state: State, threadIndex: ThreadIndex): CallTreeFilter[] => {
+  return getURLState(state).callTreeFilters[threadIndex] || [];
+};
 
 export const getURLPredictor = createSelector(
   getURLState,
-  oldURLState => actionOrActionList => {
+  (oldURLState: URLState) => actionOrActionList => {
     const actionList = ('type' in actionOrActionList) ? [actionOrActionList] : actionOrActionList;
-    const newURLState = actionList.reduce(urlState, oldURLState);
+    const newURLState = actionList.reduce(urlStateReducer, oldURLState);
     return urlFromState(newURLState);
   }
 );

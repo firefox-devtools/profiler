@@ -23,7 +23,7 @@ describe('actions/profile', function () {
   it('can take a profile from an addon and save it to state', function () {
     const store = blankStore();
 
-    assert.deepEqual(ProfileViewSelectors.getProfile(store.getState()), {}, 'No profile initially exists');
+    assert.deepEqual(ProfileViewSelectors.getProfile(store.getState()), null, 'No profile initially exists');
     store.dispatch(receiveProfileFromAddon(profile));
     assert.strictEqual(ProfileViewSelectors.getProfile(store.getState()), profile, 'The passed in profile is saved in state.');
   });

@@ -75,7 +75,7 @@ export type FuncTable = {
   isJS: boolean[],
   length: number,
   name: IndexIntoStringTable[],
-  resource: Array<IndexIntoResourceTable|null>,
+  resource: Array<IndexIntoResourceTable|-1>,
 }
 
 export type ResourceTable = {
@@ -83,7 +83,7 @@ export type ResourceTable = {
   icon: [any],
   length: number,
   lib: IndexIntoLibs[],
-  name: IndexIntoStringTable,
+  name: IndexIntoStringTable[],
   type: resourceTypeEnum,
 }
 
@@ -98,7 +98,7 @@ export type Thread = {
   stringTable: StringTable,
   libs: [],
   funcTable: FuncTable,
-  resourceTable: {},
+  resourceTable: ResourceTable,
 };
 
 export type ProfileMeta = {

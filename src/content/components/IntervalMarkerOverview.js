@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { timeCode } from '../../common/time-code';
 import { withSize } from '../with-size';
 import type { Milliseconds, CssPixels } from '../../common/types/units';
-import type { TracingMarker } from '../profile-data';
+import type { TracingMarker } from '../../common/types/profile-derived';
 
 type MarkerState = 'PRESSED' | 'HOVERED' | 'NONE';
 

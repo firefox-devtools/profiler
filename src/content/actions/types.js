@@ -1,18 +1,63 @@
 // @flow
 import type { Summary } from '../../common/summarize-profile';
-import type { ThreadIndex, Profile, IndexIntoFuncTable } from '../../common/types/profile';
+import type { Profile, ThreadIndex, IndexIntoMarkersTable, IndexIntoFuncTable } from '../../common/types/profile';
+
+export type ExpandedSet = Set<ThreadIndex>;
+export type PrefixCallTreeFilter = {
+  type: 'prefix',
+  prefixFuncs: IndexIntoFuncTable[],
+  matchJSOnly: boolean,
+};
+export type PostfixCallTreeFilter = {
+  type: 'postfix',
+  postfixFuncs: IndexIntoFuncTable[],
+  matchJSOnly: boolean,
+};
+export type CallTreeFilter = PrefixCallTreeFilter | PostfixCallTreeFilter;
+export type CallTreeFiltersPerThread = { [id: ThreadIndex]: CallTreeFilter[] };
+export type DataSource = 'none' | 'from-file' | 'public';
+export type ProfileSelection =
+  { hasSelection: false, isModifying: false } |
+  {
+    hasSelection: true,
+    isModifying: boolean,
+    selectionStart: number,
+    selectionEnd: number,
+  };
 
 type ProfileSummaryAction =
   { type: "PROFILE_SUMMARY_PROCESSED", summary: Summary } |
   { type: "PROFILE_SUMMARY_EXPAND", threadIndex: ThreadIndex } |
   { type: "PROFILE_SUMMARY_COLLAPSE", threadIndex: ThreadIndex };
 
-export type CallTreeFilter = {
-  type: 'postfix' | 'prefix',
-  postfixFuncs: null | IndexIntoFuncTable[],
-  prefixFuncs: null | IndexIntoFuncTable[],
-  matchJSOnly: boolean,
-};
+type ProfileAction =
+  { type: "FILE_NOT_FOUND", url: string } |
+  { type: "RECEIVE_PROFILE_FROM_ADDON", profile: Profile } |
+  { type: "RECEIVE_PROFILE_FROM_WEB", profile: Profile } |
+  { type: "RECEIVE_PROFILE_FROM_FILE", profile: Profile } |
+  {
+    type: 'COALESCED_FUNCTIONS_UPDATE',
+    functionsUpdatePerThread: { [id: ThreadIndex]: {
+      oldFuncToNewFuncMap: Map<IndexIntoFuncTable, IndexIntoFuncTable>,
+      funcIndices: IndexIntoFuncTable[],
+      funcNames: string[],
+    }},
+  } |
+  { type: 'ADD_CALL_TREE_FILTER', threadIndex: ThreadIndex, filter: CallTreeFilter } |
+  { type: 'CHANGE_THREAD_ORDER', threadOrder: ThreadIndex[] } |
+  { type: 'ASSIGN_TASK_TRACER_NAMES', addressIndices: number[], symbolNames: string[] } |
+  { type: 'CHANGE_SELECTED_FUNC_STACK', threadIndex: ThreadIndex, selectedFuncStack: IndexIntoFuncTable[] } |
+  { type: 'CHANGE_EXPANDED_FUNC_STACKS', threadIndex: ThreadIndex, expandedFuncStacks: Array<IndexIntoFuncTable[]> } |
+  { type: 'CHANGE_SELECTED_MARKER', threadIndex: ThreadIndex, selectedMarker: IndexIntoMarkersTable | -1 } |
+  { type: 'UPDATE_PROFILE_SELECTION', selection: ProfileSelection } |
+  { type: 'CHANGE_TAB_ORDER', tabOrder: number[] };
+
+type TimelineAction =
+  { type: 'CHANGE_TIMELINE_HORIZONTAL_VIEWPORT', left: number, right: number } |
+  { type: 'CHANGE_TIMELINE_EXPANDED_THREAD', threadIndex: ThreadIndex, isExpanded: boolean };
+
+type URLEnhancerAction =
+  { type: "@@urlenhancer/urlSetupDone" };
 
 type URLStateAction =
   { type: 'WAITING_FOR_PROFILE_FROM_FILE' } |
@@ -29,11 +74,9 @@ type URLStateAction =
   { type: 'CHANGE_INVERT_CALLSTACK', invertCallstack: boolean } |
   { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean };
 
-type TimelineAction =
-  { type: 'CHANGE_TIMELINE_HORIZONTAL_VIEWPORT', left: number, right: number } |
-  { type: 'CHANGE_TIMELINE_EXPANDED_THREAD', threadIndex: ThreadIndex, isExpanded: boolean };
-
 export type Action =
-  URLStateAction |
   ProfileSummaryAction |
-  TimelineAction;
+  ProfileAction |
+  TimelineAction |
+  URLEnhancerAction |
+  URLStateAction;

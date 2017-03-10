@@ -93,4 +93,4 @@ export default connect(state => {
     threadOrder: getThreadOrder(state),
     horizontalViewport: getTimelineHorizontalViewport(state),
   };
-}, actions)(TimelineView);
+}, (actions: Object))(TimelineView);
