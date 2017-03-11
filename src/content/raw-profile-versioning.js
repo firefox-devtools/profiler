@@ -46,6 +46,13 @@ export function upgradeRawProfileToCurrentVersion(profile: Object) {
   profile.meta.version = CURRENT_VERSION;
 }
 
+function _archFromAbi(abi) {
+  if (abi === 'x86_64-gcc3') {
+    return 'x86_64';
+  }
+  return abi;
+}
+
 // _upgraders[i] converts from version i - 1 to version i.
 // Every "upgrader" takes the profile as its single argument and mutates it.
 const _upgraders = {
@@ -85,6 +92,7 @@ const _upgraders = {
           delete lib.pdbSignature;
           lib.path = lib.name;
           lib.name = lib.debugName.endsWith('.pdb') ? lib.debugName.substr(0, lib.debugName.length - 4) : lib.debugName;
+          lib.arch = _archFromAbi(p.meta.abi);
           return lib;
         })
         .sort((a, b) => a.start - b.start);
