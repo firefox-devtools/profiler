@@ -1,44 +1,62 @@
-![Screenshot from June 24th, 2016](./screenshot-2016-06-24.png?raw=true)
+# perf.html
 
+[![slack-badge]][slack]
 
-perf.html
-=========
+[perf.html] visualizes performance data recorded from web browsers. It is a tool designed to consume performance profiles from the Gecko Profiler but can visualize data from any profiler able to output in JSON. The interface is is a web application built using [React] and [Redux] and runs entirely client-side.
 
-perf.html is a webpage to visualize performance profiles. It was written to be used by the Gecko Profiler but can in theory be used by any profiler that can output to JSON. The UI runs entirely client-side.
+[Mozilla] develops this tool for examining the performance of [Firefox] as well as examining web page performance in the Firefox Developer Tools.
 
-This project was called cleopatra in the past.
+![](./screenshot.png?raw=true)
 
-Running
-=======
+_This project was previously called [Cleopatra]._
 
-This project is live on [https://perf-html.io/](https://perf-html.io/). In order to obtain profiles from Firefox, you need to install an add-on, which you can do by clicking the link on that website.
+### Usage
 
-If you want to hack on perf.html and run your own version locally, you need to point the add-on at your local instance:
+> Visit [perf-html.io](https://perf-html.io/) :rocket:
 
- 1. Go to `about:addons`.
- 2. Find the Gecko Profiler add-on.
- 3. Click Preferences.
- 4. Change the value of the “Reporter URL” textbox to `http://localhost:4242/from-addon/`.
+This project is live on [https://perf-html.io/](https://perf-html.io/). You need to install the add-on provided at that website to record profile data from Firefox.
 
-Then clone this repository and start your local perf.html instance like this:
+### Development
 
-    $ # First, make sure you have somewhat recent versions of node and npm.
-    $ # Then, clone this repository and check out this branch:
-    $ git clone https://github.com/devtools-html/perf.html.git
-    $ cd perf.html
-    $ # Now, install the necessary node modules:
-    $ npm install
-    $ # Run webpack to process + bundle the JS, and start a local webserver at
-    $ # localhost:4242:
-    $ npm run start-prod
+> You'll find documentation for the project in the [docs folder](./docs).
 
-This builds and runs the production version.
+```bash
+git clone git@github.com:devtools-html/perf.html.git
 
-Alternatively, you can run the development version. The development has lots of runtime checks and logging and is not minified. However, that means that it runs a lot slower.
+cd perf.html
+npm install
 
-To run the development version, run `npm run start` instead of `npm run start-prod`.
+npm start
+```
 
-Development Docs
-=======
+> To run a faster production version use `npm run start-prod` instead of `npm start`
 
-The documentation for the project is just getting started, but it is located at [in the docs folder](./docs).
+Assuming you've installed the add-on from [perf-html.io](https://perf-html.io/) you'll need to configure it to point to your local web development server.
+
+ 1. Go to `about:addons`
+ 2. Find the [Gecko Profiler add-on](https://cloud.githubusercontent.com/assets/2134/23817925/d02e5620-05ab-11e7-90dc-f28545d32dde.png)
+ 3. Click [Preferences button](https://cloud.githubusercontent.com/assets/2134/23817941/ea20d800-05ab-11e7-8e0f-aa4558fe2b1b.png)
+ 4. Change the value of the [Reporter URL](https://cloud.githubusercontent.com/assets/2134/23817954/00ad2ba0-05ac-11e7-8814-1dda83a45d43.png) to `http://localhost:4242/from-addon/`
+
+**add-on**
+
+If you'd like to develop the add-on perf.html uses see the [Gecko Profiler] repository.
+
+### Discussion
+
+Say hello on [slack] in the #perf channel.
+
+### License
+
+[MPL v2](./LICENSE)
+
+[slack-badge]: https://devtools-html-slack.herokuapp.com/badge.svg
+[slack]: https://devtools-html-slack.herokuapp.com/
+
+[perf.html]:https://perf-html.io/
+[React]:https://facebook.github.io/react/
+[Redux]:http://redux.js.org/
+[Mozilla]:https://www.mozilla.org/
+[Firefox]:https://www.mozilla.org/firefox/
+[Cleopatra]: https://github.com/mozilla/cleopatra
+[Gecko Profiler]: https://github.com/devtools-html/Gecko-Profiler-Addon
