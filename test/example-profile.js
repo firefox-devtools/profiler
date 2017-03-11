@@ -9,7 +9,8 @@ const parentProcessBinary = {
   name: 'firefox',
   path: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox',
   start: 0x100000000,
-  end: 0x100000000 + 10000
+  end: 0x100000000 + 10000,
+  arch: 'x86_64',
 };
 
 const contentProcessBinary = {
@@ -18,7 +19,8 @@ const contentProcessBinary = {
   name: 'firefox-webcontent',
   path: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
   start: 0x100000000,
-  end: 0x100000000 + 10000
+  end: 0x100000000 + 10000,
+  arch: 'x86_64',
 };
 
 const extraBinaries = [
@@ -28,7 +30,8 @@ const extraBinaries = [
     name: 'examplebinary',
     path: '/tmp/examplebinary',
     start: 0x200000000,
-    end: 0x200000000 + 20
+    end: 0x200000000 + 20,
+    arch: 'x86_64',
   },
   {
     breakpadId: '100000000000000000000000000000A27',
@@ -36,7 +39,8 @@ const extraBinaries = [
     name: 'examplebinary2',
     path: 'C:\\examplebinary2',
     start: 0x200000000 + 20,
-    end: 0x200000000 + 40
+    end: 0x200000000 + 40,
+    arch: 'x86_64',
   },
 ];
 
