@@ -10,7 +10,7 @@
 
 import { sortDataTable } from './data-table-utils';
 
-export const CURRENT_VERSION = 2; // The current version of the 'preprocessed profile' format.
+export const CURRENT_VERSION = 3; // The current version of the 'preprocessed profile' format.
 
 // Preprocessed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -107,6 +107,16 @@ const _upgraders = {
           delete lib.pdbAge;
           delete lib.pdbSignature;
         }
+      }
+    }
+  },
+  [3]: profile => {
+    // Make sure every lib has a debugPath property. We can't infer this
+    // value from the other properties on the lib so we just set it to the
+    // empty string.
+    for (const thread of profile.threads) {
+      for (const lib of thread.libs) {
+        lib.debugPath = lib.debugPath || '';
       }
     }
   },

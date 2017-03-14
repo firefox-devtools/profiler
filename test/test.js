@@ -340,23 +340,26 @@ describe('upgrades', function () {
 
     assert.deepEqual(serializedLhsAsObject, serializedRhsAsObject);
   }
-  const currentProfile = preprocessProfile(exampleProfile);
-  it('should import an old profile and upgrade it to be the same as the current exampleProfile', function () {
+  const afterUpgradeReference = unserializeProfileOfArbitraryFormat(require('./upgrades/prepr-3.sps.json'));
+  it('should import an old profile and upgrade it to be the same as the reference preprocessed profile', function () {
     const serializedOldPreprocessedProfile0 = require('./upgrades/prepr-0.sps.json');
     const upgradedProfile0 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile0);
-    comparePreprocessedProfiles(upgradedProfile0, currentProfile);
+    comparePreprocessedProfiles(upgradedProfile0, afterUpgradeReference);
     const serializedOldPreprocessedProfile1 = require('./upgrades/prepr-1.sps.json');
     const upgradedProfile1 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile1);
-    comparePreprocessedProfiles(upgradedProfile1, currentProfile);
+    comparePreprocessedProfiles(upgradedProfile1, afterUpgradeReference);
+    const serializedOldPreprocessedProfile2 = require('./upgrades/prepr-2.sps.json');
+    const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile2);
+    comparePreprocessedProfiles(upgradedProfile2, afterUpgradeReference);
     const rawProfile3 = require('./upgrades/raw-3.sps.json');
     const upgradedRawProfile3 = unserializeProfileOfArbitraryFormat(rawProfile3);
-    comparePreprocessedProfiles(upgradedRawProfile3, currentProfile);
+    comparePreprocessedProfiles(upgradedRawProfile3, afterUpgradeReference);
     // const serializedOldPreprocessedProfile2 = require('./upgrades/prepr-2.sps.json');
     // const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile2);
-    // comparePreprocessedProfiles(upgradedProfile2, currentProfile);
+    // comparePreprocessedProfiles(upgradedProfile2, afterUpgradeReference);
     // const rawProfile4 = require('./upgrades/raw-4.sps.json');
     // const upgradedRawProfile4 = unserializeProfileOfArbitraryFormat(rawProfile4);
-    // comparePreprocessedProfiles(upgradedRawProfile4, currentProfile);
+    // comparePreprocessedProfiles(upgradedRawProfile4, afterUpgradeReference);
   });
   it('should import an old raw profile and upgrade it to be the same as the current exampleProfile', function () {
     // This is not working. We have JSON strings in the profile, so it tries to

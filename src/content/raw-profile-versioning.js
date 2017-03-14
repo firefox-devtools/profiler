@@ -75,8 +75,8 @@ const _upgraders = {
     function convertToVersionFourRecursive(p) {
       // In version < 3, p.libs was a JSON string.
       // Starting with version 4, libs is an actual array, each lib has
-      // "debugName", "breakpadId" and "path" fields, and the array is sorted by
-      // start address.
+      // "debugName", "debugPath", "breakpadId" and "path" fields, and the
+      // array is sorted by start address.
       p.libs = JSON.parse(p.libs)
         .map(lib => {
           if ('breakpadId' in lib) {
@@ -93,6 +93,7 @@ const _upgraders = {
           lib.path = lib.name;
           lib.name = lib.debugName.endsWith('.pdb') ? lib.debugName.substr(0, lib.debugName.length - 4) : lib.debugName;
           lib.arch = _archFromAbi(p.meta.abi);
+          lib.debugPath = '';
           return lib;
         })
         .sort((a, b) => a.start - b.start);
