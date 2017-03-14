@@ -2,7 +2,7 @@
 
 [![slack-badge]][slack]
 
-[perf.html] visualizes performance data recorded from web browsers. It is a tool designed to consume performance profiles from the Gecko Profiler but can visualize data from any profiler able to output in JSON. The interface is is a web application built using [React] and [Redux] and runs entirely client-side.
+[perf.html] visualizes performance data recorded from web browsers. It is a tool designed to consume performance profiles from the Gecko Profiler but can visualize data from any profiler able to output in JSON. The interface is a web application built using [React] and [Redux] and runs entirely client-side.
 
 [Mozilla] develops this tool for examining the performance of [Firefox] as well as examining web page performance in the Firefox Developer Tools.
 
