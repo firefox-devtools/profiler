@@ -1,4 +1,4 @@
-import { profileSummaryProcessed } from '../actions';
+import { profileSummaryProcessed } from '../actions/profile-summary';
 /**
  * Messages are the translation layer from actions dispatched by the worker
  * thread to the content thread. This de-couples the state of the two threads.

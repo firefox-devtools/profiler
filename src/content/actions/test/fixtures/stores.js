@@ -1,5 +1,5 @@
 import createStore from '../../../create-store';
-import { receiveProfileFromAddon } from '../../';
+import { receiveProfileFromAddon } from '../../receive-profile';
 import exampleProfile from '../../../../../test/timings-with-js';
 import { preprocessProfile } from '../../../preprocess-profile';
 

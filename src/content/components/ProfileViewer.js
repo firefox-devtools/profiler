@@ -10,7 +10,7 @@ import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
 import ProfileSharing from '../containers/ProfileSharing';
 import SymbolicationStatusOverlay from '../containers/SymbolicationStatusOverlay';
 import TimelineView from '../containers/TimelineView';
-import * as actions from '../actions';
+import actions from '../actions';
 import { getProfileViewOptions, getDisplayRange } from '../reducers/profile-view';
 import { getSelectedTab } from '../reducers/url-state';
 import ProfileViewerHeader from '../containers/ProfileViewerHeader';

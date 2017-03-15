@@ -5,7 +5,7 @@ import type { Thread, IndexIntoStackTable } from '../../common/types/profile';
 import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange, HorizontalViewport } from '../../common/types/units';
 import type { StackTimingByDepth } from '../stack-timing';
 import type { GetCategory } from '../color-categories';
-import type { ChangeTimelineHorizontalViewport } from '../actions';
+import type { ChangeTimelineHorizontalViewport } from '../actions/timeline';
 
 type Props = {
   thread: Thread,

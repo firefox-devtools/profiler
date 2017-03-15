@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { getThreads, getThreadOrder } from '../reducers/profile-view';
 import { getTimelineHorizontalViewport } from '../reducers/timeline-view';
-import * as actions from '../actions';
+import actions from '../actions';
 import FlameChartSettings from '../components/FlameChartSettings';
 import TimelineFlameChart from './TimelineFlameChart';
 import Reorderable from '../components/Reorderable';
@@ -11,7 +11,7 @@ import { withSize } from '../with-size';
 
 import type { HorizontalViewport } from '../../common/types/units';
 import type { Thread } from '../../common/types/profile';
-import type { ChangeTimelineHorizontalViewport } from '../actions';
+import type { ChangeTimelineHorizontalViewport } from '../actions/timeline';
 
 require('./TimelineView.css');
 
