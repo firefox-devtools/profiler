@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../reducers/profile-view';
 import { getTimelineHorizontalViewport } from '../reducers/timeline-view';
 
-import * as actions from '../actions';
+import actions from '../actions';
 
 class ProfileViewerHeader extends PureComponent {
 

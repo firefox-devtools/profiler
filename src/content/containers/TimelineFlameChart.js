@@ -5,7 +5,7 @@ import FlameChartViewport from '../components/FlameChartViewport';
 import { selectorsForThread, getDisplayRange, getProfileInterval } from '../reducers/profile-view';
 import { getCategoryColorStrategy, getLabelingStrategy } from '../reducers/flame-chart';
 import { getIsThreadExpanded } from '../reducers/timeline-view';
-import * as actions from '../actions';
+import actions from '../actions';
 import { getImplementationName } from '../labeling-strategies';
 import classNames from 'classnames';
 
@@ -14,7 +14,7 @@ import type { Milliseconds, CssPixels, HorizontalViewport, UnitIntervalOfProfile
 import type { StackTimingByDepth } from '../stack-timing';
 import type { GetCategory } from '../color-categories';
 import type { GetLabel } from '../labeling-strategies';
-import type { ChangeTimelineHorizontalViewport } from '../actions';
+import type { ChangeTimelineHorizontalViewport } from '../actions/timeline';
 
 require('./TimelineFlameChart.css');
 

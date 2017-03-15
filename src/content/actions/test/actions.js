@@ -6,14 +6,16 @@ import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as TimelineSelectors from '../../reducers/timeline-view';
 import {
   changeCallTreeSearchString,
-  receiveProfileFromAddon,
   changeHidePlatformDetails,
   addRangeFilter,
   changeInvertCallstack,
+} from '../profile-view';
+import {
   changeFlameChartColorStrategy,
   changeTimelineHorizontalViewport,
   changeTimelineExpandedThread,
-} from '../';
+} from '../timeline';
+import { receiveProfileFromAddon } from '../receive-profile';
 import { getCategoryByImplementation } from '../../color-categories';
 const { selectedThreadSelectors } = ProfileViewSelectors;
 

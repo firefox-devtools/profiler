@@ -6,7 +6,7 @@ import SummarizeLineGraph from '../components/SummarizeLineGraph';
 import SummarizeProfileHeader from '../components/SummarizeProfileHeader';
 import SummarizeProfileExpand from '../components/SummarizeProfileExpand';
 import SummarizeProfileThread from '../components/SummarizeProfileThread';
-import * as actions from '../actions';
+import actions from '../actions';
 
 require('./ProfileSummaryView.css');
 
