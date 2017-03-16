@@ -17,6 +17,7 @@ export default function shortenURL(urlToShorten) {
     queryString.stringify({
       'longUrl': longURL,
       'domain': 'perfht.ml',
+      'format': 'json',
       'access_token': 'b177b00a130faf3ecda6960e8b59fde73e902422',
     });
   return fetchJsonP(bitlyQueryURL).then(response => response.json()).then(json => json.data.url);
