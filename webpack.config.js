@@ -97,7 +97,7 @@ if (process.env.NODE_ENV === 'production') {
         scope: '/',
         events: true,
       },
-      externals: ['/zee-worker.js'],
+      externals: ['/zee-worker.js', '/worker.js'],
       cacheMaps: [
         {
           requestTypes: null,
