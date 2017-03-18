@@ -22,13 +22,3 @@ export function changeTimelineExpandedThread(threadIndex: ThreadIndex, isExpande
   const type = 'CHANGE_TIMELINE_EXPANDED_THREAD';
   return { type, threadIndex, isExpanded };
 }
-
-export type ChangeTimelineHorizontalViewport = (number, number) => Action
-
-export function changeTimelineHorizontalViewport(left: number, right: number): Action {
-  return {
-    type: 'CHANGE_TIMELINE_HORIZONTAL_VIEWPORT',
-    left,
-    right,
-  };
-}

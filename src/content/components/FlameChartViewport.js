@@ -1,18 +1,24 @@
 // @flow
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import FlameChartCanvas from './FlameChartCanvas';
 import type { Thread, IndexIntoStackTable } from '../../common/types/profile';
-import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange, HorizontalViewport } from '../../common/types/units';
+import type {
+  Milliseconds,
+  CssPixels,
+  UnitIntervalOfProfileRange,
+  StartEndRange,
+} from '../../common/types/units';
 import type { StackTimingByDepth } from '../stack-timing';
 import type { GetCategory } from '../color-categories';
-import type { ChangeTimelineHorizontalViewport } from '../actions/timeline';
+import type { UpdateProfileSelection } from '../actions/profile-view';
+import type { ProfileSelection } from '../actions/types';
 
 type Props = {
   thread: Thread,
   maxStackDepth: number,
   stackTimingByDepth: StackTimingByDepth,
   isSelected: boolean,
-  timeRange: { start: Milliseconds, end: Milliseconds },
+  timeRange: StartEndRange,
   threadIndex: number,
   interval: Milliseconds,
   maxViewportHeight: number,
@@ -21,8 +27,8 @@ type Props = {
   getLabel: (Thread, IndexIntoStackTable) => string,
   isThreadExpanded: boolean,
   maximumZoom: UnitIntervalOfProfileRange,
-  horizontalViewport: HorizontalViewport,
-  changeTimelineHorizontalViewport: ChangeTimelineHorizontalViewport,
+  updateProfileSelection: UpdateProfileSelection,
+  selection: ProfileSelection,
 };
 
 require('./FlameChartViewport.css');
@@ -45,19 +51,19 @@ const SCROLL_LINE_SIZE = 15;
  *        |_______|___________________________|________________________________|
  *                |___________________________|
  *        ^       ^                           ^                                ^
- *        0.0    0.1 <- horizontalViewport -> 0.6                              1.0
+ *        0.0    0.1                          0.6                              1.0
+ *                 ^ viewportLeft               ^ viewportRight
  *
- *
- * horizontalViewport.left = 0.1 <- shared across timelines
- * horizontalViewport.right = 0.6 <- shared across timelines
- * viewportLength = horizontalViewport.right - horizontalViewport.left
+ * viewportLeft = 0.1 <- shared across timelines
+ * viewportRight = 0.6 <- shared across timelines
+ * viewportLength = viewportRight - viewportLeft
  * viewportTop = 30 (in pixels)
  * screenWidth = 1000
  * unitPixel = viewportLength / screenWidth
- * horizontalViewport.right += mouseMoveDelta * unitPixel
- * horizontalViewport.left += mouseMoveDelta * unitPixel
+ * viewportRight += mouseMoveDelta * unitPixel
+ * viewportLeft += mouseMoveDelta * unitPixel
  **/
-class FlameChartViewport extends Component {
+class FlameChartViewport extends PureComponent {
 
   props: Props
 
@@ -67,6 +73,8 @@ class FlameChartViewport extends Component {
     containerLeft: CssPixels,
     viewportTop: CssPixels,
     viewportBottom: CssPixels,
+    viewportLeft: UnitIntervalOfProfileRange,
+    viewportRight: UnitIntervalOfProfileRange,
     dragX: CssPixels,
     dragY: CssPixels,
     isDragging: boolean,
@@ -87,17 +95,34 @@ class FlameChartViewport extends Component {
      * the redux stores. This state information potentially gets changed very frequently
      * with mouse events.
      */
-    this.state = this.getDefaultState();
+    this.state = this.getDefaultState(props);
   }
 
-  getDefaultState() {
+  getHorizontalViewport({ selection, timeRange }: Props) {
+    if (selection.hasSelection) {
+      const { selectionStart, selectionEnd } = selection;
+      const timeRangeLength = timeRange.end - timeRange.start;
+      return {
+        viewportLeft: (selectionStart - timeRange.start) / timeRangeLength,
+        viewportRight: (selectionEnd - timeRange.start) / timeRangeLength,
+      };
+    }
+    return {
+      viewportLeft: 0,
+      viewportRight: 1,
+    };
+  }
+
+  getDefaultState(props: Props) {
+    const { viewportLeft, viewportRight } = this.getHorizontalViewport(props);
     return {
       containerWidth: 0,
       containerHeight: 0,
       containerLeft: 0,
-      // Positioning in pixels.
       viewportTop: 0,
       viewportBottom: 0,
+      viewportLeft,
+      viewportRight,
       dragX: 0,
       dragY: 0,
       isDragging: false,
@@ -108,6 +133,15 @@ class FlameChartViewport extends Component {
     if (prevProps.stackTimingByDepth !== this.props.stackTimingByDepth) {
       this.setState({ viewportTop: 0 });
       this._setSize();
+    }
+  }
+
+  componentWillReceiveProps(newProps: Props) {
+    if (
+      this.props.selection !== newProps.selection ||
+      this.props.timeRange !== newProps.timeRange
+    ) {
+      this.setState(this.getHorizontalViewport(newProps));
     }
   }
 
@@ -133,31 +167,42 @@ class FlameChartViewport extends Component {
     }
     event.preventDefault();
     const { maximumZoom } = this.props;
-    const { containerLeft, containerWidth } = this.state;
+    const { containerLeft, containerWidth, viewportLeft, viewportRight } = this.state;
     const mouseCenter = (event.clientX - containerLeft) / containerWidth;
     const deltaY = event.deltaMode === LINE_SCROLL_MODE
       ? event.deltaY * SCROLL_LINE_SIZE
       : event.deltaY;
 
-    const { horizontalViewport } = this.props;
-    const viewportLength: CssPixels = horizontalViewport.right - horizontalViewport.left;
+    const viewportLength: CssPixels = viewportRight - viewportLeft;
     const scale = viewportLength - viewportLength / (1 + deltaY * 0.001);
-    let newViewportLeft: UnitIntervalOfProfileRange = clamp(0, 1, horizontalViewport.left - scale * mouseCenter);
-    let newViewportRight: UnitIntervalOfProfileRange = clamp(0, 1, horizontalViewport.right + scale * (1 - mouseCenter));
+    let newViewportLeft: UnitIntervalOfProfileRange = clamp(0, 1, viewportLeft - scale * mouseCenter);
+    let newViewportRight: UnitIntervalOfProfileRange = clamp(0, 1, viewportRight + scale * (1 - mouseCenter));
 
     if (newViewportRight - newViewportLeft < maximumZoom) {
-      const newViewportMiddle = (horizontalViewport.left + horizontalViewport.right) * 0.5;
+      const newViewportMiddle = (viewportLeft + viewportRight) * 0.5;
       newViewportLeft = newViewportMiddle - maximumZoom * 0.5;
       newViewportRight = newViewportMiddle + maximumZoom * 0.5;
     }
 
+    const { updateProfileSelection, timeRange } = this.props;
     if (newViewportLeft === 0 && newViewportRight === 1) {
-      if (horizontalViewport.left === 0 && horizontalViewport.right === 1) {
+      if (viewportLeft === 0 && viewportRight === 1) {
         // Do not update if at the maximum bounds.
         return;
       }
+      updateProfileSelection({
+        hasSelection: false,
+        isModifying: false,
+      });
+    } else {
+      const timeRangeLength = timeRange.end - timeRange.start;
+      updateProfileSelection({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: timeRange.start + timeRangeLength * newViewportLeft,
+        selectionEnd: timeRange.start + timeRangeLength * newViewportRight,
+      });
     }
-    this.props.changeTimelineHorizontalViewport(newViewportLeft, newViewportRight);
   }
 
   _mouseDownListener(event: SyntheticMouseEvent) {
@@ -176,14 +221,14 @@ class FlameChartViewport extends Component {
   _mouseMoveListener(event: SyntheticMouseEvent) {
     event.stopPropagation();
     event.preventDefault();
-    const { maxViewportHeight, horizontalViewport } = this.props;
-    const { dragX, dragY, containerWidth, containerHeight, viewportTop } = this.state;
+    const { maxViewportHeight, timeRange, updateProfileSelection } = this.props;
+    const { dragX, dragY, containerWidth, containerHeight, viewportTop, viewportLeft, viewportRight } = this.state;
 
     // Calculate left and right in terms of the unit interval of the profile range.
-    const viewportLength: CssPixels = horizontalViewport.right - horizontalViewport.left;
+    const viewportLength: CssPixels = viewportRight - viewportLeft;
     const unitOffsetX: UnitIntervalOfProfileRange = viewportLength * (event.clientX - dragX) / containerWidth;
-    let newViewportLeft: CssPixels = horizontalViewport.left - unitOffsetX;
-    let newViewportRight: CssPixels = horizontalViewport.right - unitOffsetX;
+    let newViewportLeft: CssPixels = viewportLeft - unitOffsetX;
+    let newViewportRight: CssPixels = viewportRight - unitOffsetX;
     if (newViewportLeft < 0) {
       newViewportLeft = 0;
       newViewportRight = viewportLength;
@@ -210,7 +255,13 @@ class FlameChartViewport extends Component {
       newViewportBottom = containerHeight;
     }
 
-    this.props.changeTimelineHorizontalViewport(newViewportLeft, newViewportRight);
+    const timeRangeLength = timeRange.end - timeRange.start;
+    updateProfileSelection({
+      hasSelection: true,
+      isModifying: false,
+      selectionStart: timeRange.start + timeRangeLength * newViewportLeft,
+      selectionEnd: timeRange.start + timeRangeLength * newViewportRight,
+    });
 
     this.setState({
       dragX: event.clientX,
@@ -244,11 +295,13 @@ class FlameChartViewport extends Component {
   render() {
     const {
       thread, interval, timeRange, maxStackDepth, stackTimingByDepth, getCategory,
-      getLabel, stackFrameHeight, isThreadExpanded, horizontalViewport,
+      getLabel, stackFrameHeight, isThreadExpanded,
     } = this.props;
 
-    const { containerWidth, containerHeight, viewportTop,
-            viewportBottom, isDragging } = this.state;
+    const {
+      containerWidth, containerHeight, viewportTop, viewportBottom, viewportLeft,
+      viewportRight, isDragging,
+    } = this.state;
 
     const viewportClassName = 'flameChartViewport' +
       (isThreadExpanded ? ' expanded' : ' collapsed') +
@@ -268,8 +321,8 @@ class FlameChartViewport extends Component {
                           containerHeight={containerHeight}
                           getCategory={getCategory}
                           getLabel={getLabel}
-                          viewportLeft={horizontalViewport.left}
-                          viewportRight={horizontalViewport.right}
+                          viewportLeft={viewportLeft}
+                          viewportRight={viewportRight}
                           viewportTop={viewportTop}
                           viewportBottom={viewportBottom}
                           maxStackDepth={maxStackDepth}
