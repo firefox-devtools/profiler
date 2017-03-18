@@ -146,18 +146,22 @@ class FlameChartViewport extends PureComponent {
   }
 
   _setSize() {
-    const rect = this.refs.container.getBoundingClientRect();
-    if (this.state.containerWidth !== rect.width || this.state.containerHeight !== rect.height) {
-      const style = window.getComputedStyle(this.refs.container);
+    // Defer setting the size until the next animation frame to ensure proper layout of
+    // the container element.
+    requestAnimationFrame(() => {
+      const rect = this.refs.container.getBoundingClientRect();
+      if (this.state.containerWidth !== rect.width || this.state.containerHeight !== rect.height) {
+        const style = window.getComputedStyle(this.refs.container);
 
-      // Obey margins of the containing element.
-      const containerWidth = rect.width - parseFloat(style.marginLeft) - parseFloat(style.marginRight);
-      const containerHeight = rect.height - parseFloat(style.marginTop) - parseFloat(style.marginBottom);
-      const containerLeft = rect.left + parseFloat(style.marginLeft);
-      const viewportBottom = this.state.viewportTop + containerHeight;
+        // Obey margins of the containing element.
+        const containerWidth = rect.width - parseFloat(style.marginLeft) - parseFloat(style.marginRight);
+        const containerHeight = rect.height - parseFloat(style.marginTop) - parseFloat(style.marginBottom);
+        const containerLeft = rect.left + parseFloat(style.marginLeft);
+        const viewportBottom = this.state.viewportTop + containerHeight;
 
-      this.setState({ containerWidth, containerHeight, containerLeft, viewportBottom });
-    }
+        this.setState({ containerWidth, containerHeight, containerLeft, viewportBottom });
+      }
+    });
   }
 
   _mouseWheelListener(event: SyntheticWheelEvent) {
