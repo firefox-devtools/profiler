@@ -168,6 +168,8 @@ describe('preprocess-profile', function () {
       assert.equal(thread.funcTable.name[2], 2);
       assert.equal(thread.funcTable.name[3], 3);
       assert.equal(thread.stringTable.getString(thread.funcTable.name[4]), 'frobnicate');
+      assert.equal(thread.stringTable.getString(thread.funcTable.fileName[4]), 'chrome://blargh');
+      assert.equal(thread.funcTable.lineNumber[4], 34);
       assert.equal(thread.funcTable.address[0], -1);
       assert.equal(thread.funcTable.address[1], 3972);
       assert.equal(thread.funcTable.address[2], 6725);

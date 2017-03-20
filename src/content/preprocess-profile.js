@@ -73,13 +73,17 @@ function preprocessThread(thread, libs) {
     resource: [],
     address: [],
     isJS: [],
+    fileName: [],
+    lineNumber: [],
   };
-  function addFunc(name, resource, address, isJS) {
+  function addFunc(name, resource, address, isJS, fileName, lineNumber) {
     const index = funcTable.length++;
     funcTable.name[index] = name;
     funcTable.resource[index] = resource;
     funcTable.address[index] = address;
     funcTable.isJS[index] = isJS;
+    funcTable.fileName[index] = fileName;
+    funcTable.lineNumber[index] = lineNumber;
   }
   const resourceTable = {
     length: 0,
@@ -116,6 +120,8 @@ function preprocessThread(thread, libs) {
     let resourceIndex = -1;
     let addressRelativeToLib = -1;
     let isJS = false;
+    let fileName = null;
+    let lineNumber = null;
     const locationString = stringTable.getString(funcNameIndex);
     if (locationString.startsWith('0x')) {
       const address = parseInt(locationString.substr(2), 16);
@@ -168,13 +174,18 @@ function preprocessThread(thread, libs) {
           if (jsMatch[1]) {
             funcNameIndex = stringTable.indexForString(jsMatch[1]);
           } else {
+            // Some JS frames don't have a function because they are for the
+            // initial evaluation of the whole JS file. In that case, use the
+            // file name itself as the function name.
             funcNameIndex = stringTable.indexForString(scriptURI);
           }
+          fileName = stringTable.indexForString(scriptURI);
+          lineNumber = jsMatch[3] | 0;
         }
       }
     }
     funcIndex = funcTable.length;
-    addFunc(funcNameIndex, resourceIndex, addressRelativeToLib, isJS);
+    addFunc(funcNameIndex, resourceIndex, addressRelativeToLib, isJS, fileName, lineNumber);
     stringTableIndexToNewFuncIndex.set(locationIndex, funcIndex);
     return funcIndex;
   });

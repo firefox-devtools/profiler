@@ -76,6 +76,8 @@ export type FuncTable = {
   length: number,
   name: IndexIntoStringTable[],
   resource: Array<IndexIntoResourceTable|-1>,
+  fileName: Array<IndexIntoStringTable|null>,
+  lineNumber: Array<number|null>,
 }
 
 export type ResourceTable = {
