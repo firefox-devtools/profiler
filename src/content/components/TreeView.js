@@ -2,6 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import classNames from 'classnames';
 import VirtualList from './VirtualList';
+import DefaultFavicon from '../../../res/default-favicon.svg';
 
 const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
   <div className='treeViewHeader'>
@@ -119,16 +120,25 @@ class TreeViewRowScrolledColumns extends Component {
     }
   }
 
+  _renderIcon(iconUrl) {
+    return <img
+            src={iconUrl}
+            referrerPolicy='no-referrer'
+            className='treeRowIcon'
+            onError={ e => this.props.onIconError(this.props.nodeId, e.target.src) } />;
+  }
+
   render() {
     const {
       node, depth, mainColumn, appendageColumn, index, canBeExpanded,
-      isExpanded, selected, highlightString, appendageButtons,
+      isExpanded, selected, highlightString, appendageButtons, icon,
     } = this.props;
     const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
     return (
       <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''} ${node.dim ? 'dim' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
         <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
+        { icon && this._renderIcon(icon) }
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
           {reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting')}
         </span>
@@ -168,20 +178,26 @@ TreeViewRowScrolledColumns.propTypes = {
   onToggle: PropTypes.func.isRequired,
   selected: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
+  onIconError: PropTypes.func.isRequired,
   onAppendageButtonClick: PropTypes.func,
   highlightString: PropTypes.string,
+  icon: PropTypes.string,
 };
 
 class TreeView extends Component {
 
   constructor(props) {
     super(props);
+    this.state = { failedIcons: new Set() };
+
     this._renderRow = this._renderRow.bind(this);
     this._toggle = this._toggle.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onRowClicked = this._onRowClicked.bind(this);
-    this._specialItems = [props.selectedNodeId];
+    this._onIconError = this._onIconError.bind(this);
     this._visibleRows = this._getAllVisibleRows(props);
+    this._forceRender = [];
+    this._specialItems = [props.selectedNodeId];
   }
 
   scrollSelectionIntoView() {
@@ -208,6 +224,21 @@ class TreeView extends Component {
     }
   }
 
+  _onIconError(nodeId, failedUrl) {
+    this.setState(prevState => ({
+      failedIcons: new Set([...prevState.failedIcons, failedUrl]),
+    }));
+    this._forceRender.push(nodeId);
+  }
+
+  _getIconForNode(node) {
+    if (!node.icon) {
+      return null;
+    }
+
+    return this.state.failedIcons.has(node.icon) ? DefaultFavicon : node.icon;
+  }
+
   _renderRow(nodeId, index, columnIndex) {
     const {
       tree, expandedNodeIds, fixedColumns, mainColumn, appendageColumn,
@@ -228,6 +259,7 @@ class TreeView extends Component {
     }
     const canBeExpanded = tree.hasChildren(nodeId);
     const isExpanded = expandedNodeIds.includes(nodeId);
+    const iconUrl = this._getIconForNode(node);
     return (
       <TreeViewRowScrolledColumns node={node}
                                   mainColumn={mainColumn}
@@ -241,8 +273,10 @@ class TreeView extends Component {
                                   onToggle={this._toggle}
                                   selected={nodeId === selectedNodeId}
                                   onClick={this._onRowClicked}
+                                  onIconError={this._onIconError}
                                   onAppendageButtonClick={onAppendageButtonClick}
-                                  highlightString={highlightString}/>
+                                  highlightString={highlightString}
+                                  icon={iconUrl}/>
     );
   }
 
@@ -367,6 +401,11 @@ class TreeView extends Component {
 
   render() {
     const { fixedColumns, mainColumn, disableOverscan } = this.props;
+    let specialItems = this._specialItems;
+    if (this._forceRender.length) {
+      specialItems = [...specialItems, ...this._forceRender];
+      this._forceRender = [];
+    }
     return (
       <div className='treeView'>
         <TreeViewHeader fixedColumns={fixedColumns}
@@ -378,7 +417,7 @@ class TreeView extends Component {
                      columnCount={2}
                      focusable={true}
                      onKeyDown={this._onKeyDown}
-                     specialItems={this._specialItems}
+                     specialItems={specialItems}
                      disableOverscan={disableOverscan}
                      ref='list'/>
       </div>
