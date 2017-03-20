@@ -1,7 +1,7 @@
 // @flow
 import { timeCode } from '../common/time-code';
 import { getSampleFuncStacks } from './profile-data';
-import type { Thread, FuncTable, ResourceTable, StringTable } from '../common/types/profile';
+import type { Thread, FuncTable, ResourceTable, StringTable, IndexIntoFuncTable } from '../common/types/profile';
 import type { FuncStackTable, IndexIntoFuncStackTable, FuncStackInfo } from '../common/types/profile-derived';
 import type { Milliseconds } from '../common/types/units';
 
@@ -109,21 +109,40 @@ class ProfileTree {
     if (node === undefined) {
       const funcIndex = this._funcStackTable.func[funcStackIndex];
       const funcName = this._stringTable.getString(this._funcTable.name[funcIndex]);
-      const libNameIndex = this._resourceTable.name[this._funcTable.resource[funcIndex]];
-      const libName = libNameIndex !== undefined ? this._stringTable.getString(libNameIndex) : '';
       const isJS = this._funcTable.isJS[funcIndex];
+
       node = {
         totalTime: `${this._funcStackTimes.totalTime[funcStackIndex].toFixed(1)}ms`,
         totalTimePercent: `${(100 * this._funcStackTimes.totalTime[funcStackIndex] / this._rootTotalTime).toFixed(1)}%`,
         selfTime: `${this._funcStackTimes.selfTime[funcStackIndex].toFixed(1)}ms`,
         name: funcName,
-        lib: libName,
+        lib: this._getOriginAnnotation(funcIndex),
         // Dim platform pseudo-stacks.
         dim: !isJS && this._jsOnly,
       };
       this._nodes.set(funcStackIndex, node);
     }
     return node;
+  }
+
+  _getOriginAnnotation(funcIndex: IndexIntoFuncTable): string {
+    const fileNameIndex = this._funcTable.fileName[funcIndex];
+    if (fileNameIndex !== null) {
+      const fileName = this._stringTable.getString(fileNameIndex);
+      const lineNumber = this._funcTable.lineNumber[funcIndex];
+      if (lineNumber !== null) {
+        return fileName + ':' + lineNumber;
+      }
+      return fileName;
+    }
+
+    const resourceIndex = this._funcTable.resource[funcIndex];
+    const resourceNameIndex = this._resourceTable.name[resourceIndex];
+    if (resourceNameIndex !== undefined) {
+      return this._stringTable.getString(resourceNameIndex);
+    }
+
+    return '';
   }
 }
 
