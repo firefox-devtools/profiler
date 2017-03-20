@@ -22,3 +22,7 @@ export function changeTimelineExpandedThread(threadIndex: ThreadIndex, isExpande
   const type = 'CHANGE_TIMELINE_EXPANDED_THREAD';
   return { type, threadIndex, isExpanded };
 }
+
+export function setHasZoomedViaMousewheel() {
+  return { type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' };
+}
