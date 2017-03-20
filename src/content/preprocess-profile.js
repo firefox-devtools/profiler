@@ -107,12 +107,12 @@ function preprocessThread(thread, libs) {
   const stringTableIndexToNewFuncIndex = new Map();
 
   frameTable.func = frameTable.location.map(locationIndex => {
-    let funcNameIndex = locationIndex;
-    let funcIndex = stringTableIndexToNewFuncIndex.get(funcNameIndex);
+    let funcIndex = stringTableIndexToNewFuncIndex.get(locationIndex);
     if (funcIndex !== undefined) {
       return funcIndex;
     }
 
+    let funcNameIndex = locationIndex;
     let resourceIndex = -1;
     let addressRelativeToLib = -1;
     let isJS = false;
@@ -170,7 +170,7 @@ function preprocessThread(thread, libs) {
     }
     funcIndex = funcTable.length;
     addFunc(funcNameIndex, resourceIndex, addressRelativeToLib, isJS);
-    stringTableIndexToNewFuncIndex.set(funcNameIndex, funcIndex);
+    stringTableIndexToNewFuncIndex.set(locationIndex, funcIndex);
     return funcIndex;
   });
   frameTable.address = frameTable.func.map(funcIndex => funcTable.address[funcIndex]);
