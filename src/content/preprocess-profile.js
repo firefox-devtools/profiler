@@ -92,12 +92,19 @@ function preprocessThread(thread, libs) {
     lib: [],
     icon: [],
     addonId: [],
+    host: [],
   };
   function addLibResource(name, lib) {
     const index = resourceTable.length++;
     resourceTable.type[index] = resourceTypes.library;
     resourceTable.name[index] = name;
     resourceTable.lib[index] = lib;
+  }
+  function addWebhostResource(origin, host) {
+    const index = resourceTable.length++;
+    resourceTable.type[index] = resourceTypes.webhost;
+    resourceTable.name[index] = origin;
+    resourceTable.host[index] = host;
   }
   function addURLResource(url) {
     const index = resourceTable.length++;
@@ -107,7 +114,7 @@ function preprocessThread(thread, libs) {
 
   const libToResourceIndex = new Map();
   const libNameToResourceIndex = new Map();
-  const urlToResourceIndex = new Map();
+  const originToResourceIndex = new Map();
   const stringTableIndexToNewFuncIndex = new Map();
 
   frameTable.func = frameTable.location.map(locationIndex => {
@@ -163,13 +170,31 @@ function preprocessThread(thread, libs) {
         if (jsMatch) {
           isJS = true;
           const scriptURI = getRealScriptURI(jsMatch[2]);
-          if (urlToResourceIndex.has(scriptURI)) {
-            resourceIndex = urlToResourceIndex.get(scriptURI);
+          let origin, host;
+          try {
+            const url = new URL(scriptURI);
+            if (!(url.protocol === 'http:' || url.protocol === 'https:')) {
+              throw new Error('not a webhost protocol');
+            }
+            origin = url.origin;
+            host = url.host;
+          } catch (e) {
+            origin = scriptURI;
+            host = null;
+          }
+          if (originToResourceIndex.has(origin)) {
+            resourceIndex = originToResourceIndex.get(origin);
           } else {
             resourceIndex = resourceTable.length;
-            urlToResourceIndex.set(scriptURI, resourceIndex);
-            const urlStringIndex = stringTable.indexForString(scriptURI);
-            addURLResource(urlStringIndex);
+            originToResourceIndex.set(origin, resourceIndex);
+            const originStringIndex = stringTable.indexForString(origin);
+            if (host) {
+              const hostIndex = stringTable.indexForString(host);
+              addWebhostResource(originStringIndex, hostIndex);
+            } else {
+              const urlStringIndex = stringTable.indexForString(scriptURI);
+              addURLResource(urlStringIndex);
+            }
           }
           if (jsMatch[1]) {
             funcNameIndex = stringTable.indexForString(jsMatch[1]);
