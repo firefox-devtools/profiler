@@ -3,6 +3,7 @@ import shallowCompare from 'react-addons-shallow-compare';
 import classNames from 'classnames';
 import VirtualList from './VirtualList';
 import { ContextMenuTrigger } from 'react-contextmenu';
+import NodeIcon from './NodeIcon';
 
 const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
   <div className='treeViewHeader'>
@@ -131,6 +132,7 @@ class TreeViewRowScrolledColumns extends Component {
       <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''} ${node.dim ? 'dim' : ''}`} style={{height: '16px'}} onMouseDown={this._onClick}>
         <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
+        <NodeIcon node={ node } />
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
           {reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting')}
         </span>
