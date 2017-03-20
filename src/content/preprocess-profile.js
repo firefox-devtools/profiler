@@ -165,6 +165,11 @@ function preprocessThread(thread, libs) {
             const urlStringIndex = stringTable.indexForString(scriptURI);
             addURLResource(urlStringIndex);
           }
+          if (jsMatch[1]) {
+            funcNameIndex = stringTable.indexForString(jsMatch[1]);
+          } else {
+            funcNameIndex = stringTable.indexForString(scriptURI);
+          }
         }
       }
     }
