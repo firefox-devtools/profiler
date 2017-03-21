@@ -103,3 +103,32 @@
 .filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):not(.filterNavigatorBarLeafItem):active:hover::after {
   border-color: rgba(0, 0, 0, 0.2);
 }
+
+.filterNavigatorBarLeafItem::after {
+  border-left-color: #7990c8;
+}
+
+/* Animation */
+
+.filterNavigatorBarTransition-enter {
+  opacity: 0.1;
+  transform: translateX(-100%);
+  z-index:0;
+}
+
+.filterNavigatorBarTransition-enter.filterNavigatorBarTransition-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+.filterNavigatorBarTransition-leave {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.filterNavigatorBarTransition-leave.filterNavigatorBarTransition-leave-active {
+  opacity: 0.01;
+  transform: translateX(100%);
+  transition: opacity 300ms, transform 300ms;
+}
