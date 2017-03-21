@@ -73,8 +73,7 @@ type ReceiveProfileAction =
 type TimelineAction =
    { type: 'CHANGE_FLAME_CHART_COLOR_STRATEGY', getCategory: GetCategory } |
    { type: 'CHANGE_FLAME_CHART_LABELING_STRATEGY', getLabel: GetLabel } |
-   { type: 'CHANGE_TIMELINE_EXPANDED_THREAD', threadIndex: ThreadIndex, isExpanded: boolean } |
-   { type: 'CHANGE_TIMELINE_HORIZONTAL_VIEWPORT', left: number, right: number };
+   { type: 'CHANGE_TIMELINE_EXPANDED_THREAD', threadIndex: ThreadIndex, isExpanded: boolean };
 
 type URLEnhancerAction =
   { type: "@@urlenhancer/urlSetupDone" };

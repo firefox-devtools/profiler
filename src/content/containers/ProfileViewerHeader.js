@@ -5,10 +5,8 @@ import TimeSelectionScrubber from '../components/TimeSelectionScrubber';
 import ProfileThreadJankOverview from './ProfileThreadJankOverview';
 import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOverview';
 import OverflowEdgeIndicator from '../components/OverflowEdgeIndicator';
-import ScrubberViewportIndicator from '../components/ScrubberViewportIndicator';
 import { connect } from 'react-redux';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../reducers/profile-view';
-import { getTimelineHorizontalViewport } from '../reducers/timeline-view';
 
 import actions from '../actions';
 
@@ -39,7 +37,7 @@ class ProfileViewerHeader extends PureComponent {
   render() {
     const {
       profile, className, threadOrder, changeThreadOrder, selection,
-      updateProfileSelection, timeRange, zeroAt, timelineHorizontalViewport,
+      updateProfileSelection, timeRange, zeroAt,
     } = this.props;
     const threads = profile.threads;
     const { hasSelection, isModifying, selectionStart, selectionEnd } = selection;
@@ -106,7 +104,6 @@ class ProfileViewerHeader extends PureComponent {
           }
         </Reorderable>}
       </OverflowEdgeIndicator>
-      <ScrubberViewportIndicator timelineHorizontalViewport={timelineHorizontalViewport} />
     </TimeSelectionScrubber>;
   }
 }
@@ -122,7 +119,6 @@ ProfileViewerHeader.propTypes = {
   timeRange: PropTypes.object.isRequired,
   zeroAt: PropTypes.number.isRequired,
   changeSelectedThread: PropTypes.func.isRequired,
-  timelineHorizontalViewport: PropTypes.object.isRequired,
 };
 
 export default connect(state => ({
@@ -132,5 +128,4 @@ export default connect(state => ({
   threadOrder: getThreadOrder(state),
   timeRange: getDisplayRange(state),
   zeroAt: getZeroAt(state),
-  timelineHorizontalViewport: getTimelineHorizontalViewport(state),
 }), actions)(ProfileViewerHeader);

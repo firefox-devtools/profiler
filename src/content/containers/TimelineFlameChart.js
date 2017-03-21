@@ -2,7 +2,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import FlameChartViewport from '../components/FlameChartViewport';
-import { selectorsForThread, getDisplayRange, getProfileInterval } from '../reducers/profile-view';
+import { selectorsForThread, getDisplayRange, getProfileInterval, getProfileViewOptions } from '../reducers/profile-view';
 import { getCategoryColorStrategy, getLabelingStrategy } from '../reducers/flame-chart';
 import { getIsThreadExpanded } from '../reducers/timeline-view';
 import actions from '../actions';
@@ -14,7 +14,8 @@ import type { Milliseconds, CssPixels, HorizontalViewport, UnitIntervalOfProfile
 import type { StackTimingByDepth } from '../stack-timing';
 import type { GetCategory } from '../color-categories';
 import type { GetLabel } from '../labeling-strategies';
-import type { ChangeTimelineHorizontalViewport } from '../actions/timeline';
+import type { UpdateProfileSelection } from '../actions/profile-view';
+import type { ProfileSelection } from '../actions/types';
 
 require('./TimelineFlameChart.css');
 
@@ -33,9 +34,10 @@ type Props = {
   getCategory: GetCategory,
   getLabel: GetLabel,
   changeTimelineExpandedThread: (number, boolean) => {},
-  changeTimelineHorizontalViewport: ChangeTimelineHorizontalViewport,
+  updateProfileSelection: UpdateProfileSelection,
   horizontalViewport: HorizontalViewport,
   viewHeight: CssPixels,
+  selection: ProfileSelection,
 };
 
 class TimelineFlameChart extends Component {
@@ -84,7 +86,7 @@ class TimelineFlameChart extends Component {
     const {
       thread, isThreadExpanded, maxStackDepth, stackTimingByDepth, isSelected, timeRange,
       threadIndex, interval, getCategory, getLabel, horizontalViewport,
-      changeTimelineHorizontalViewport,
+      updateProfileSelection, selection,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -118,7 +120,8 @@ class TimelineFlameChart extends Component {
                             getLabel={getLabel}
                             maximumZoom={this.getMaximumZoom()}
                             horizontalViewport={horizontalViewport}
-                            changeTimelineHorizontalViewport={changeTimelineHorizontalViewport }/>
+                            selection={selection}
+                            updateProfileSelection={updateProfileSelection }/>
       </div>
     );
   }
@@ -143,5 +146,6 @@ export default connect((state, ownProps) => {
     getCategory: getCategoryColorStrategy(state),
     getLabel: isThreadExpanded ? getLabelingStrategy(state) : getImplementationName,
     threadIndex,
+    selection: getProfileViewOptions(state).selection,
   };
 }, (actions: Object))(TimelineFlameChart);

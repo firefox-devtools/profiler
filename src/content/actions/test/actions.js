@@ -9,10 +9,10 @@ import {
   changeHidePlatformDetails,
   addRangeFilter,
   changeInvertCallstack,
+  updateProfileSelection,
 } from '../profile-view';
 import {
   changeFlameChartColorStrategy,
-  changeTimelineHorizontalViewport,
   changeTimelineExpandedThread,
 } from '../timeline';
 import { receiveProfileFromAddon } from '../receive-profile';
@@ -219,16 +219,29 @@ describe('actions/changeTimelineExpandedThread', function () {
   });
 });
 
-describe('actions/changeTimelineHorizontalViewport', function () {
-  it('can update the viewport with new values', function () {
+describe('actions/updateProfileSelection', function () {
+  it('can the update the selection with new values', function () {
     const store = storeWithProfile();
 
-    const initialHorizontalViewport = TimelineSelectors.getTimelineHorizontalViewport(store.getState());
-    assert.deepEqual(initialHorizontalViewport, {left: 0, right: 1});
+    const initialSelection = ProfileViewSelectors.getProfileViewOptions(store.getState()).selection;
+    assert.deepEqual(initialSelection, {
+      hasSelection: false,
+      isModifying: false,
+    });
 
-    store.dispatch(changeTimelineHorizontalViewport(0.1, 0.8));
+    store.dispatch(updateProfileSelection({
+      hasSelection: true,
+      isModifying: false,
+      selectionStart: 100,
+      selectionEnd: 200,
+    }));
 
-    const newHorizontalViewport = TimelineSelectors.getTimelineHorizontalViewport(store.getState());
-    assert.deepEqual(newHorizontalViewport, {left: 0.1, right: 0.8});
+    const secondSelection = ProfileViewSelectors.getProfileViewOptions(store.getState()).selection;
+    assert.deepEqual(secondSelection, {
+      hasSelection: true,
+      isModifying: false,
+      selectionStart: 100,
+      selectionEnd: 200,
+    });
   });
 });
