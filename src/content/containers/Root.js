@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { connect, Provider } from 'react-redux';
-import * as actions from '../actions';
+import actions from '../actions';
 import ProfileViewer from '../components/ProfileViewer';
 import Home from '../containers/Home';
 import { urlFromState, stateFromCurrentLocation } from '../url-handling';

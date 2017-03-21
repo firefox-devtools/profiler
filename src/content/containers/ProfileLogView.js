@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { selectedThreadSelectors } from '../reducers/profile-view';
-import * as actions from '../actions';
+import actions from '../actions';
 
 class ProfileLogView extends Component {
   render() {

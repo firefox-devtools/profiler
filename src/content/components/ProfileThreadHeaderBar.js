@@ -4,7 +4,7 @@ import ThreadStackGraph from './ThreadStackGraph';
 import { selectorsForThread } from '../reducers/profile-view';
 import { getSelectedThreadIndex } from '../reducers/url-state';
 import { getSampleIndexClosestToTime, getStackAsFuncArray } from '../profile-data';
-import * as actions from '../actions';
+import actions from '../actions';
 
 class ProfileThreadHeaderBar extends Component {
 

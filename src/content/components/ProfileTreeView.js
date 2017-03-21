@@ -7,7 +7,7 @@ import {
   getProfile, selectedThreadSelectors, getScrollToSelectionGeneration, getProfileViewOptions,
 } from '../reducers/profile-view';
 
-import * as actions from '../actions';
+import actions from '../actions';
 
 class ProfileTreeView extends Component {
   constructor(props) {

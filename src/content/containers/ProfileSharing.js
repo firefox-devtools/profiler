@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import classNames from 'classnames';
 import { getProfile, getProfileViewOptions } from '../reducers/profile-view';
 import { getDataSource, getHash, getURLPredictor } from '../reducers/url-state';
-import * as actions from '../actions';
+import actions from '../actions';
 import { compress } from '../gz';
 import { uploadBinaryProfileData } from '../profile-store';
 import ArrowPanel from '../components/ArrowPanel';
