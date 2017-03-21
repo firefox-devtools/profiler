@@ -20,10 +20,18 @@ export function stringifyRangeFilters(arrayValue = []) {
   }).join('~');
 }
 
+export function getFormattedTimeLength(length: number) {
+  if (length >= 10000) {
+    return `${(length / 1000).toFixed(0)} sec`;
+  }
+  if (length >= 1000) {
+    return `${(length / 1000).toFixed(1)} sec`;
+  }
+  return `${(length).toFixed(0)} ms`;
+}
+
 export function getRangeFilterLabels(rangeFilters) {
-  const labels = rangeFilters.map(range => {
-    return `Range: ${(range.start / 1000).toFixed(2)}s–${(range.end / 1000).toFixed(2)}s`;
-  });
-  labels.unshift('Complete Profile');
+  const labels = rangeFilters.map(range => getFormattedTimeLength(range.end - range.start));
+  labels.unshift('Full Range');
   return labels;
 }

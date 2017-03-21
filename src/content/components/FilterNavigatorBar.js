@@ -1,6 +1,6 @@
 import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
-
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import './FilterNavigatorBar.css';
 
 class FilterNavigatorBar extends PureComponent {
@@ -17,7 +17,11 @@ class FilterNavigatorBar extends PureComponent {
   render() {
     const { className, items, selectedItem } = this.props;
     return (
-      <ol className={classNames('filterNavigatorBar', className)}>
+      <ReactCSSTransitionGroup transitionName='filterNavigatorBarTransition'
+                               transitionEnterTimeout={300}
+                               transitionLeaveTimeout={300}
+                               component='ol'
+                               className={classNames('filterNavigatorBar', className)}>
         {
           items.map((item, i) => (
             <li key={i}
@@ -34,7 +38,7 @@ class FilterNavigatorBar extends PureComponent {
             </li>
           ))
         }
-      </ol>
+      </ReactCSSTransitionGroup>
     );
   }
 }
