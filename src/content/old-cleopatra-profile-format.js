@@ -14,7 +14,7 @@ import { CURRENT_VERSION } from './raw-profile-versioning.js';
  * compatibility conversion. Consequently, when the preprocessed profile
  * format changes, this file does not need to be touched and instead we will
  * automatically take advantage of the preprocess profile format conversion.
- * 
+ *
  * A lot of this code will remind you of very similar code in
  * preprocess-profile.js. However, we intentionally do not share code with it:
  * We want preprocess-profile to be exclusively concerned with converting the
@@ -57,7 +57,7 @@ type OldCleopatraProfile = {
   symbolicationTable: { [symbolIndex: string]: string },
 };
 
-function _getRealScriptURI(url: ?string) {
+function _getRealScriptURI(url: ?string): ?string {
   if (url) {
     const urls = url.split(' -> ');
     return urls[urls.length - 1];
@@ -203,10 +203,10 @@ function _convertThread(thread: OldCleopatraProfileThread, symbolicationTable) {
     resourceTable.name[index] = name;
     resourceTable.lib[index] = lib;
   }
-  function addURLResource(url) {
+  function addURLResource(urlStringIndex) {
     const index = resourceTable.length++;
     resourceTable.type[index] = resourceTypes.url;
-    resourceTable.name[index] = url;
+    resourceTable.name[index] = urlStringIndex;
   }
 
   const libNameToResourceIndex = new Map();
@@ -257,7 +257,7 @@ function _convertThread(thread: OldCleopatraProfileThread, symbolicationTable) {
           } else {
             resourceIndex = resourceTable.length;
             urlToResourceIndex.set(scriptURI, resourceIndex);
-            const urlStringIndex = stringTable.indexForString(scriptURI);
+            const urlStringIndex = scriptURI ? stringTable.indexForString(scriptURI) : null;
             addURLResource(urlStringIndex);
           }
         }
