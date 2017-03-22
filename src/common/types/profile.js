@@ -90,7 +90,8 @@ export type ResourceTable = {
 export type Thread = {
   processType: string,
   name: string,
-  tid: number,
+  pid: number | void,
+  tid: number | void,
   samples: SamplesTable,
   markers: MarkersTable,
   stackTable: StackTable,

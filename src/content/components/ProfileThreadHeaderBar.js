@@ -39,12 +39,31 @@ class ProfileThreadHeaderBar extends Component {
   _onMarkerSelect(/* markerIndex */) {
   }
 
+  getThreadTooltip(): string {
+    // The tid and pid weren't always included, so they are optional for displaying.
+    const { thread } = this.props;
+    let tooltip = '';
+    if (thread.pid !== undefined) {
+      tooltip = `pid: ${thread.pid}`;
+    }
+    if (thread.tid !== undefined) {
+      if (thread.pid !== undefined) {
+        tooltip += ', ';
+      }
+      tooltip += `tid: ${thread.tid}`;
+    }
+    return tooltip;
+  }
+
   render() {
     const { thread, interval, rangeStart, rangeEnd, funcStackInfo, selectedFuncStack, isSelected, style } = this.props;
-    const title = thread.processType ? `${thread.name} [${thread.processType}]` : thread.name;
+    const label = thread.processType ? `${thread.name} [${thread.processType}]` : thread.name;
+
     return (
       <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')} style={style}>
-        <h1 onMouseDown={this._onLabelMouseDown} className='grippy' title={title}>{title}</h1>
+        <h1 onMouseDown={this._onLabelMouseDown} className='grippy' title={this.getThreadTooltip()}>
+          {label}
+        </h1>
         <ThreadStackGraph interval={interval}
                           thread={thread}
                           className='threadStackGraph'
