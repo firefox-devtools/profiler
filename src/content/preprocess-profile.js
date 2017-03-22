@@ -179,6 +179,8 @@ function preprocessThread(thread, libs) {
   return {
     name: thread.name,
     processType: thread.processType,
+    tid: thread.tid,
+    pid: thread.pid,
     libs, frameTable, funcTable, resourceTable, stackTable, markers, stringTable, samples,
   };
 }
