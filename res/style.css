@@ -36,6 +36,11 @@ body, #root, .profileViewer {
   flex: 1;
 }
 
+.treeViewContextMenu {
+  flex: 1;
+  display: flex;
+}
+
 .treeViewBody {
   flex: 1;
   overflow: auto;
@@ -43,6 +48,7 @@ body, #root, .profileViewer {
   outline: 0;
   will-change: scroll-position;
   line-height: 16px;
+  z-index: 0;
 }
 
 .treeViewBodyInnerWrapper {
@@ -750,4 +756,70 @@ body, #root, .profileViewer {
   0% { opacity: 1; animation-timing-function: ease-out; }
   50% { opacity: 0.5; animation-timing-function: ease-in-out; }
   100% { opacity: 1; animation-timing-function: ease-in; }
+}
+
+.react-contextmenu {
+  min-width: 160px;
+  padding: 3px 0;
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: #000;
+  text-align: left;
+  background-color: #fff;
+  border-radius: 3px;
+  display: none;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 10px 12px rgba(0, 0, 0, 0.3);
+}
+
+.react-contextmenu.react-contextmenu--visible {
+  display: block;
+}
+
+.react-contextmenu-item {
+  padding: 2px 8px;
+  line-height: 1.5;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.react-contextmenu-item.react-contextmenu-item--active,
+.react-contextmenu-item:hover {
+  color: highlighttext;
+  background-color: highlight;
+  border-color: highlight;
+  text-decoration: none;
+}
+
+.react-contextmenu-item.react-contextmenu-item--disabled,
+.react-contextmenu-item.react-contextmenu-item--disabled:hover {
+  color: #888;
+  background-color: transparent;
+}
+
+.react-contextmenu-item--divider {
+  margin-bottom: 3px;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(0,0,0,.15);
+}
+
+.react-contextmenu-item.react-contextmenu-submenu {
+	padding: 0;
+}
+
+/* Submenu arrow */
+.react-contextmenu-item.react-contextmenu-submenu > .react-contextmenu-item:after {
+  position: absolute;
+  right: 7px;
+  width: 0;
+  height: 0;
+  border: 6px solid transparent;
+  content: "";
+  border-left-color: #000;
+  top: 5px;
+}
+
+/* Submenu arrow highlighted color */
+.react-contextmenu-item:hover.react-contextmenu-submenu > .react-contextmenu-item:after,
+.react-contextmenu-item.react-contextmenu-submenu > .react-contextmenu-item--active:after {
+  border-left-color: highlighttext;
 }
