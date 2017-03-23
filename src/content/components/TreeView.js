@@ -1,7 +1,9 @@
 import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import classNames from 'classnames';
+import copy from 'copy-to-clipboard';
 import VirtualList from './VirtualList';
+import { ContextMenuTrigger } from 'react-contextmenu';
 
 const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
   <div className='treeViewHeader'>
@@ -67,7 +69,7 @@ class TreeViewRowFixedColumns extends Component {
     const { node, columns, index, selected, highlightString } = this.props;
     const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
     return (
-      <div className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
+      <div className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onMouseDownCapture={this._onClick}>
         {
           columns.map(col =>
             <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
@@ -125,8 +127,9 @@ class TreeViewRowScrolledColumns extends Component {
       isExpanded, selected, highlightString, appendageButtons,
     } = this.props;
     const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
+
     return (
-      <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''} ${node.dim ? 'dim' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
+      <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''} ${node.dim ? 'dim' : ''}`} style={{height: '16px'}} onMouseDownCapture={this._onClick}>
         <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
@@ -306,6 +309,14 @@ class TreeView extends Component {
   }
 
   _onKeyDown(event) {
+    if ((event.ctrlKey || event.metaKey) && event.keyCode === 67) { // COPY
+      event.preventDefault();
+      const { tree, selectedNodeId, mainColumn } = this.props;
+      const node = tree.getNode(selectedNodeId);
+      copy(node[mainColumn.propName]);
+      return;
+    }
+
     if (event.ctrlKey || event.altKey || event.metaKey) {
       return;
     }
@@ -366,21 +377,25 @@ class TreeView extends Component {
   }
 
   render() {
-    const { fixedColumns, mainColumn, disableOverscan } = this.props;
+    const { fixedColumns, mainColumn, disableOverscan, contextMenu, contextMenuId } = this.props;
     return (
       <div className='treeView'>
         <TreeViewHeader fixedColumns={fixedColumns}
                          mainColumn={mainColumn}/>
-        <VirtualList className='treeViewBody'
-                     items={this._visibleRows}
-                     renderItem={this._renderRow}
-                     itemHeight={16}
-                     columnCount={2}
-                     focusable={true}
-                     onKeyDown={this._onKeyDown}
-                     specialItems={this._specialItems}
-                     disableOverscan={disableOverscan}
-                     ref='list'/>
+        <ContextMenuTrigger id={contextMenuId}
+                            attributes={{ className: 'treeViewContextMenu' }}>
+            <VirtualList className='treeViewBody'
+                         items={this._visibleRows}
+                         renderItem={this._renderRow}
+                         itemHeight={16}
+                         columnCount={2}
+                         focusable={true}
+                         onKeyDown={this._onKeyDown}
+                         specialItems={this._specialItems}
+                         disableOverscan={disableOverscan}
+                         ref='list'/>
+        </ContextMenuTrigger>
+        {contextMenu}
       </div>
     );
   }
@@ -409,6 +424,8 @@ TreeView.propTypes = {
   appendageButtons: PropTypes.arrayOf(PropTypes.string),
   onAppendageButtonClick: PropTypes.func,
   disableOverscan: PropTypes.bool,
+  contextMenu: PropTypes.object,
+  contextMenuId: PropTypes.string,
 };
 
 export default TreeView;

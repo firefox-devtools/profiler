@@ -6,8 +6,11 @@ import { getInvertCallstack, getJSOnly, getSearchString, getSelectedThreadIndex 
 import {
   getProfile, selectedThreadSelectors, getScrollToSelectionGeneration, getProfileViewOptions,
 } from '../reducers/profile-view';
+import ProfileCallTreeContextMenu from '../containers/ProfileCallTreeContextMenu';
 
 import actions from '../actions';
+
+const CONTEXT_MENU_ID = 'ProfileTreeView';
 
 class ProfileTreeView extends Component {
   constructor(props) {
@@ -106,7 +109,9 @@ class ProfileTreeView extends Component {
                 disableOverscan={disableOverscan}
                 appendageButtons={this._appendageButtons}
                 onAppendageButtonClick={this._onAppendageButtonClick}
-                ref='treeView'/>
+                ref='treeView'
+                contextMenu={<ProfileCallTreeContextMenu contextMenuId={CONTEXT_MENU_ID} />}
+                contextMenuId={CONTEXT_MENU_ID}/>
     );
 
   }
