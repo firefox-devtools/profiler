@@ -176,8 +176,9 @@ function preprocessThread(thread, libs) {
           } else {
             // Some JS frames don't have a function because they are for the
             // initial evaluation of the whole JS file. In that case, use the
-            // file name itself as the function name.
-            funcNameIndex = stringTable.indexForString(scriptURI);
+            // file name itself, prepended by '(root scope) ', as the function
+            // name.
+            funcNameIndex = stringTable.indexForString(`(root scope) ${scriptURI}`);
           }
           fileName = stringTable.indexForString(scriptURI);
           lineNumber = jsMatch[3] | 0;
