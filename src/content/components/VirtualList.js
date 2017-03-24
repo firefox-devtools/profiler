@@ -210,11 +210,11 @@ class VirtualList extends Component {
   }
 
   render() {
-    const { itemHeight, className, renderItem, items, focusable, specialItems, onKeyDown } = this.props;
+    const { itemHeight, className, renderItem, items, focusable, specialItems, onKeyDown, onCopy } = this.props;
     const columnCount = this.props.columnCount || 1;
     const { visibleRangeStart, visibleRangeEnd } = this.computeVisibleRange();
     return (
-      <div className={className} ref={this._containerCreated} tabIndex={ focusable ? 0 : -1 } onKeyDown={onKeyDown}>
+      <div className={className} ref={this._containerCreated} tabIndex={ focusable ? 0 : -1 } onKeyDown={onKeyDown} onCopy={onCopy}>
         <div className={`${className}InnerWrapper`}>
           {
             range(columnCount).map(columnIndex => (
@@ -245,6 +245,7 @@ VirtualList.propTypes = {
   focusable: PropTypes.bool.isRequired,
   specialItems: PropTypes.array.isRequired,
   onKeyDown: PropTypes.func.isRequired,
+  onCopy: PropTypes.func.isRequired,
   disableOverscan: PropTypes.bool,
   columnCount: PropTypes.number,
 };

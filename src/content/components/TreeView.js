@@ -1,7 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import classNames from 'classnames';
-import copy from 'copy-to-clipboard';
 import VirtualList from './VirtualList';
 import { ContextMenuTrigger } from 'react-contextmenu';
 
@@ -69,7 +68,7 @@ class TreeViewRowFixedColumns extends Component {
     const { node, columns, index, selected, highlightString } = this.props;
     const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
     return (
-      <div className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onMouseDownCapture={this._onClick}>
+      <div className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onMouseDown={this._onClick}>
         {
           columns.map(col =>
             <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
@@ -129,7 +128,7 @@ class TreeViewRowScrolledColumns extends Component {
     const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
 
     return (
-      <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''} ${node.dim ? 'dim' : ''}`} style={{height: '16px'}} onMouseDownCapture={this._onClick}>
+      <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''} ${node.dim ? 'dim' : ''}`} style={{height: '16px'}} onMouseDown={this._onClick}>
         <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
@@ -182,6 +181,7 @@ class TreeView extends Component {
     this._renderRow = this._renderRow.bind(this);
     this._toggle = this._toggle.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
+    this._onCopy = this._onCopy.bind(this);
     this._onRowClicked = this._onRowClicked.bind(this);
     this._specialItems = [props.selectedNodeId];
     this._visibleRows = this._getAllVisibleRows(props);
@@ -308,15 +308,14 @@ class TreeView extends Component {
     }
   }
 
-  _onKeyDown(event) {
-    if ((event.ctrlKey || event.metaKey) && event.keyCode === 67) { // COPY
-      event.preventDefault();
-      const { tree, selectedNodeId, mainColumn } = this.props;
-      const node = tree.getNode(selectedNodeId);
-      copy(node[mainColumn.propName]);
-      return;
-    }
+  _onCopy(event) {
+    event.preventDefault();
+    const { tree, selectedNodeId, mainColumn } = this.props;
+    const node = tree.getNode(selectedNodeId);
+    event.clipboardData.setData('text/plain', node[mainColumn.propName]);
+  }
 
+  _onKeyDown(event) {
     if (event.ctrlKey || event.altKey || event.metaKey) {
       return;
     }
@@ -391,6 +390,7 @@ class TreeView extends Component {
                          columnCount={2}
                          focusable={true}
                          onKeyDown={this._onKeyDown}
+                         onCopy={this._onCopy}
                          specialItems={this._specialItems}
                          disableOverscan={disableOverscan}
                          ref='list'/>
