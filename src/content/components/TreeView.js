@@ -390,9 +390,9 @@ class TreeView extends Component {
                          columnCount={2}
                          focusable={true}
                          onKeyDown={this._onKeyDown}
-                         onCopy={this._onCopy}
                          specialItems={this._specialItems}
                          disableOverscan={disableOverscan}
+                         onCopy={this._onCopy}
                          ref='list'/>
         </ContextMenuTrigger>
         {contextMenu}
