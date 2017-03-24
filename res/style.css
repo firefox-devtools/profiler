@@ -17,6 +17,9 @@ body, #root, .profileViewer {
   display: flex;
   flex-flow: column nowrap;
   flex: 1;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
   cursor: default;
   border-top: 1px solid #D6D6D6;
 }
@@ -27,7 +30,6 @@ body, #root, .profileViewer {
   position: relative;
   height: 16px;
   background: white;
-  user-select: none;
 }
 
 .treeViewHeaderMainColumn {
@@ -74,7 +76,6 @@ body, #root, .profileViewer {
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
-  user-select: none;
 }
 
 .treeViewHeaderColumn {

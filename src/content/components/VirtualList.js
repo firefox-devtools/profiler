@@ -131,17 +131,20 @@ class VirtualList extends Component {
   constructor(props) {
     super(props);
     this._onScroll = this._onScroll.bind(this);
+    this._onCopy = this._onCopy.bind(this);
     this._geometry = undefined;
     this._containerCreated = elem => { this._container = elem; };
     this._innerCreated = elem => { this._inner = elem; };
   }
 
   componentDidMount() {
+    document.addEventListener('copy', this._onCopy, false);
     this._container.addEventListener('scroll', this._onScroll);
     this._onScroll(); // for initial size
   }
 
   componentWillUnmount() {
+    document.removeEventListener('copy', this._onCopy, false);
     this._container.removeEventListener('scroll', this._onScroll);
   }
 
@@ -152,6 +155,12 @@ class VirtualList extends Component {
   _onScroll() {
     this._geometry = this._queryGeometry();
     this.forceUpdate();
+  }
+
+  _onCopy(event) {
+    if (document.activeElement === this._container) {
+      this.props.onCopy(event);
+    }
   }
 
   _queryGeometry() {
@@ -210,11 +219,11 @@ class VirtualList extends Component {
   }
 
   render() {
-    const { itemHeight, className, renderItem, items, focusable, specialItems, onKeyDown, onCopy } = this.props;
+    const { itemHeight, className, renderItem, items, focusable, specialItems, onKeyDown } = this.props;
     const columnCount = this.props.columnCount || 1;
     const { visibleRangeStart, visibleRangeEnd } = this.computeVisibleRange();
     return (
-      <div className={className} ref={this._containerCreated} tabIndex={ focusable ? 0 : -1 } onKeyDown={onKeyDown} onCopy={onCopy}>
+      <div className={className} ref={this._containerCreated} tabIndex={ focusable ? 0 : -1 } onKeyDown={onKeyDown}>
         <div className={`${className}InnerWrapper`}>
           {
             range(columnCount).map(columnIndex => (
