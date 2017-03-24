@@ -72,6 +72,13 @@ body, #root, .profileViewer {
   justify-content: flex-start;
 }
 
+.treeRowIcon {
+  display: block;
+  height: 12px;
+  width: 12px;
+  margin: auto 2px;
+}
+
 .treeViewHeaderColumn {
   position: absolute;
   box-sizing: border-box;
