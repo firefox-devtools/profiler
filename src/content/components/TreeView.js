@@ -138,7 +138,7 @@ class TreeViewRowScrolledColumns extends Component {
       <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''} ${node.dim ? 'dim' : ''}`} style={{height: '16px'}} onClick={this._onClick}>
         <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
-        { icon && this._renderIcon(icon) }
+        { icon ? this._renderIcon(icon) : null }
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
           {reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting')}
         </span>
