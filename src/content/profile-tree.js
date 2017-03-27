@@ -19,10 +19,6 @@ type FuncStackChildren = IndexIntoFuncStackTable[];
 type FuncStackTimes = { selfTime: Milliseconds, totalTime: Milliseconds };
 
 function extractFaviconFromLibname(libname: string): string | null {
-  if (!libname.startsWith('http://') && !libname.startsWith('https://')) {
-    return null;
-  }
-
   const url = new URL('/favicon.ico', libname);
   return url.href;
 }
@@ -133,8 +129,7 @@ class ProfileTree {
         lib: libName,
         // Dim platform pseudo-stacks.
         dim: !isJS && this._jsOnly,
-        // http(s) resources should have "webhost" type but currently all URLs are of type "url". Let's be future proof.
-        icon: [resourceTypes.url, resourceTypes.webhost].includes(resourceType) ? extractFaviconFromLibname(libName) : null,
+        icon: resourceType === resourceTypes.webhost ? extractFaviconFromLibname(libName) : null,
       };
       this._nodes.set(funcStackIndex, node);
     }
