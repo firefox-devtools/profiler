@@ -52,7 +52,6 @@ function DOMStyle(content) {
 }
 
 function incrStyleContent(content) {
-  console.log('content is', content);
   for (let i = 0; i < mountedDomStyles.length; i++) {
     if (mountedDomStyles[i].content === content) {
       mountedDomStyles[i].refCounter += 1;
