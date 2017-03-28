@@ -1,7 +1,12 @@
 import React, { PureComponent, PropTypes } from 'react';
+import StyleDef from './StyleDef';
 import DefaultFavicon from '../../../res/default-favicon.svg';
 
 const failedIcons = new Set();
+
+function sanitizeCSSClass(className) {
+  return className.replace(/[/:.+>< ~()#,]/g, '_');
+}
 
 class NodeIcon extends PureComponent {
   constructor(props) {
@@ -39,11 +44,19 @@ class NodeIcon extends PureComponent {
   }
 
   render() {
-    return <img
-            src={this.state.icon}
-            referrerPolicy='no-referrer'
-            className='treeRowIcon'
-            onError={ e => this._onIconError(e.target.src) } />;
+    if (!this.state.icon) {
+      return <div className='treeRowIcon'></div>;
+    }
+
+    const className = sanitizeCSSClass(this.state.icon);
+    const stylesheet = `
+      .${className} {
+        background-image: url(${this.state.icon});
+      }
+    `;
+    return <div className={`treeRowIcon ${className}`}>
+             <StyleDef content={ stylesheet } />
+           </div>;
   }
 }
 
