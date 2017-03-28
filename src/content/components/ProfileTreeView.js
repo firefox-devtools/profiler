@@ -7,6 +7,7 @@ import {
   getProfile, selectedThreadSelectors, getScrollToSelectionGeneration, getProfileViewOptions,
 } from '../reducers/profile-view';
 import ProfileCallTreeContextMenu from '../containers/ProfileCallTreeContextMenu';
+import NodeIcon from './NodeIcon';
 
 import actions from '../actions';
 
@@ -19,6 +20,7 @@ class ProfileTreeView extends Component {
       { propName: 'totalTime', title: 'Running Time' },
       { propName: 'totalTimePercent', title: '' },
       { propName: 'selfTime', title: 'Self' },
+      { propName: 'icon', title: '', component: NodeIcon },
     ];
     this._mainColumn = { propName: 'name', title: '' };
     this._appendageColumn = { propName: 'lib', title: '' };

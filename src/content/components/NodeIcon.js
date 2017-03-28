@@ -39,11 +39,11 @@ class NodeIcon extends PureComponent {
   }
 
   render() {
-    return this.state.icon && <img
-           src={this.state.icon}
-           referrerPolicy='no-referrer'
-           className='treeRowIcon'
-           onError={ e => this._onIconError(e.target.src) } />;
+    return <img
+            src={this.state.icon}
+            referrerPolicy='no-referrer'
+            className='treeRowIcon'
+            onError={ e => this._onIconError(e.target.src) } />;
   }
 }
 

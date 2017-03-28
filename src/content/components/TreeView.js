@@ -3,7 +3,6 @@ import shallowCompare from 'react-addons-shallow-compare';
 import classNames from 'classnames';
 import VirtualList from './VirtualList';
 import { ContextMenuTrigger } from 'react-contextmenu';
-import NodeIcon from './NodeIcon';
 
 const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
   <div className='treeViewHeader'>
@@ -24,6 +23,7 @@ TreeViewHeader.propTypes = {
   fixedColumns: PropTypes.arrayOf(PropTypes.shape({
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
+    component: PropTypes.function,
   })).isRequired,
   mainColumn: PropTypes.shape({
     propName: PropTypes.string.isRequired,
@@ -71,11 +71,16 @@ class TreeViewRowFixedColumns extends Component {
     return (
       <div className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onMouseDown={this._onClick}>
         {
-          columns.map(col =>
-            <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
-                  key={col.propName}>
-              { reactStringWithHighlightedSubstrings(node[col.propName], highlightString, 'treeViewHighlighting') }
-            </span>)
+          columns.map(col => {
+            const RenderComponent = col.component;
+            return <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
+                    key={col.propName}>
+                    { RenderComponent ?
+                        <RenderComponent node={ node } /> :
+                        reactStringWithHighlightedSubstrings(node[col.propName], highlightString, 'treeViewHighlighting')
+                    }
+                   </span>;
+          })
         }
       </div>
     );
@@ -88,6 +93,7 @@ TreeViewRowFixedColumns.propTypes = {
   columns: PropTypes.arrayOf(PropTypes.shape({
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
+    component: PropTypes.function,
   })).isRequired,
   index: PropTypes.number.isRequired,
   selected: PropTypes.bool.isRequired,
@@ -132,7 +138,6 @@ class TreeViewRowScrolledColumns extends Component {
       <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''} ${node.dim ? 'dim' : ''}`} style={{height: '16px'}} onMouseDown={this._onClick}>
         <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
-        <NodeIcon node={ node } />
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
           {reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting')}
         </span>
@@ -408,6 +413,7 @@ TreeView.propTypes = {
   fixedColumns: PropTypes.arrayOf(PropTypes.shape({
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
+    component: PropTypes.function,
   })).isRequired,
   mainColumn: PropTypes.shape({
     propName: PropTypes.string.isRequired,
