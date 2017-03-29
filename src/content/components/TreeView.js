@@ -2,7 +2,13 @@ import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import classNames from 'classnames';
 import VirtualList from './VirtualList';
+import NodeIcon from './NodeIcon';
+import { BackgroundImageStyleDef } from './StyleDef';
 import { ContextMenuTrigger } from 'react-contextmenu';
+
+function sanitizeCSSClass(className) {
+  return className.replace(/[/:.+>< ~()#,]/g, '_');
+}
 
 const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
   <div className='treeViewHeader'>
@@ -23,7 +29,6 @@ TreeViewHeader.propTypes = {
   fixedColumns: PropTypes.arrayOf(PropTypes.shape({
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
-    component: PropTypes.function,
   })).isRequired,
   mainColumn: PropTypes.shape({
     propName: PropTypes.string.isRequired,
@@ -72,13 +77,17 @@ class TreeViewRowFixedColumns extends Component {
       <div className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onMouseDown={this._onClick}>
         {
           columns.map(col => {
-            const RenderComponent = col.component;
+            let renderedComponent;
+            if (col.propName === 'icon') {
+              renderedComponent = <NodeIcon node={ node } onDisplayIcon={ icon => this.props.onDisplayIcon(icon) }/>;
+            } else {
+              renderedComponent = reactStringWithHighlightedSubstrings(
+                node[col.propName], highlightString, 'treeViewHighlighting'
+              );
+            }
             return <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
                     key={col.propName}>
-                    { RenderComponent ?
-                        <RenderComponent node={ node } /> :
-                        reactStringWithHighlightedSubstrings(node[col.propName], highlightString, 'treeViewHighlighting')
-                    }
+                    { renderedComponent }
                    </span>;
           })
         }
@@ -93,12 +102,12 @@ TreeViewRowFixedColumns.propTypes = {
   columns: PropTypes.arrayOf(PropTypes.shape({
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
-    component: PropTypes.function,
   })).isRequired,
   index: PropTypes.number.isRequired,
   selected: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
   highlightString: PropTypes.string,
+  onDisplayIcon: PropTypes.func.isRequired,
 };
 
 class TreeViewRowScrolledColumns extends Component {
@@ -189,9 +198,13 @@ class TreeView extends Component {
     this._toggle = this._toggle.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);
     this._onCopy = this._onCopy.bind(this);
+    this._onDisplayIcon = this._onDisplayIcon.bind(this);
     this._onRowClicked = this._onRowClicked.bind(this);
     this._specialItems = [props.selectedNodeId];
     this._visibleRows = this._getAllVisibleRows(props);
+    this.state = {
+      icons: new Map(),
+    };
   }
 
   scrollSelectionIntoView() {
@@ -218,6 +231,21 @@ class TreeView extends Component {
     }
   }
 
+  _onDisplayIcon(url) {
+    const { icons } = this.state;
+    if (icons.has(url)) {
+      return icons.get(url);
+    }
+
+    const className = sanitizeCSSClass(url);
+
+    this.setState(prevState => ({
+      icons: new Map([...prevState.icons, [url, className]]),
+    }));
+
+    return className;
+  }
+
   _renderRow(nodeId, index, columnIndex) {
     const {
       tree, expandedNodeIds, fixedColumns, mainColumn, appendageColumn,
@@ -233,6 +261,7 @@ class TreeView extends Component {
                                  index={index}
                                  selected={nodeId === selectedNodeId}
                                  onClick={this._onRowClicked}
+                                 onDisplayIcon={this._onDisplayIcon}
                                  highlightString={highlightString}/>
       );
     }
@@ -386,6 +415,10 @@ class TreeView extends Component {
     const { fixedColumns, mainColumn, disableOverscan, contextMenu, contextMenuId } = this.props;
     return (
       <div className='treeView'>
+        { [...this.state.icons].map(
+          ([url, className]) =>
+            <BackgroundImageStyleDef key={className} className={className} url={url} />
+        ) }
         <TreeViewHeader fixedColumns={fixedColumns}
                          mainColumn={mainColumn}/>
         <ContextMenuTrigger id={contextMenuId}
@@ -413,7 +446,6 @@ TreeView.propTypes = {
   fixedColumns: PropTypes.arrayOf(PropTypes.shape({
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
-    component: PropTypes.function,
   })).isRequired,
   mainColumn: PropTypes.shape({
     propName: PropTypes.string.isRequired,

@@ -1,10 +1,12 @@
 import React, { PureComponent, PropTypes } from 'react';
-import StyleDef from './StyleDef';
-import DefaultFavicon from '../../../res/default-favicon.svg';
 
 const icons = new Map();
 
 function getIconForNode(node) {
+  if (!node.icon) {
+    return Promise.resolve(null);
+  }
+
   if (icons.has(node.icon)) {
     return icons.get(node.icon);
   }
@@ -17,7 +19,7 @@ function getIconForNode(node) {
       resolve(node.icon);
     };
     image.onerror = () => {
-      resolve(DefaultFavicon);
+      resolve(null);
     };
   });
 
@@ -25,23 +27,21 @@ function getIconForNode(node) {
   return result;
 }
 
-function sanitizeCSSClass(className) {
-  return className.replace(/[/:.+>< ~()#,]/g, '_');
-}
-
 class NodeIcon extends PureComponent {
   constructor(props) {
     super(props);
 
     this.state = {
-      icon: null,
+      className: null,
     };
     this._updateState(props);
   }
 
   _updateState(props) {
     getIconForNode(props.node)
-      .then(icon => this.setState({ icon }));
+      .then(icon => icon && this.setState({
+        className: this.props.onDisplayIcon(icon),
+      }));
   }
 
   componentWillReceiveProps(nextProps) {
@@ -51,24 +51,13 @@ class NodeIcon extends PureComponent {
   }
 
   render() {
-    if (!this.state.icon) {
-      return <div className='treeRowIcon'></div>;
-    }
-
-    const className = sanitizeCSSClass(this.state.icon);
-    const stylesheet = `
-      .${className} {
-        background-image: url(${this.state.icon});
-      }
-    `;
-    return <div className={`treeRowIcon ${className}`}>
-             <StyleDef content={ stylesheet } />
-           </div>;
+    return <div className={`treeRowIcon ${this.state.className || ''}`}></div>;
   }
 }
 
 NodeIcon.propTypes = {
   node: PropTypes.object.isRequired,
+  onDisplayIcon: PropTypes.func.isRequired,
 };
 
 export default NodeIcon;
