@@ -1,4 +1,4 @@
-// from https://gist.github.com/jviereck/9a71734afcfe848ddbe2
+// from https://gist.github.com/jviereck/9a71734afcfe848ddbe2 -- fixed
 import React from 'react';
 
 // EXAMPLE:
@@ -73,15 +73,15 @@ function decrStyleContent(content) {
   }
 }
 
-export default class StyleDef extends React.Component {
+export default class StyleDef extends React.PureComponent {
   componentDidMount() {
     incrStyleContent(this.props.content);
   }
 
-  componentDidUpdate(nextProps) {
-    if (nextProps.content !== this.props.content) {
-      decrStyleContent(this.props.content);
-      incrStyleContent(nextProps.content);
+  componentDidUpdate(prevProps) {
+    if (prevProps.content !== this.props.content) {
+      decrStyleContent(prevProps.content);
+      incrStyleContent(this.props.content);
     }
   }
 

@@ -79,8 +79,10 @@ body, #root, .profileViewer {
 }
 
 .treeRowIcon {
-  width: 12px;
-  margin: auto 2px;
+  min-width: 12px;
+  min-height: 12px;
+  height: 100%;
+  margin: 2px;
   background: center / contain no-repeat;
 }
 
