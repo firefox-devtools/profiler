@@ -86,7 +86,7 @@ export type ResourceTable = {
   length: number,
   lib: IndexIntoLibs[],
   name: IndexIntoStringTable[],
-  type: resourceTypeEnum,
+  type: resourceTypeEnum[],
 }
 
 export type Thread = {

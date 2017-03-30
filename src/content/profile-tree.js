@@ -1,6 +1,6 @@
 // @flow
 import { timeCode } from '../common/time-code';
-import { getSampleFuncStacks } from './profile-data';
+import { getSampleFuncStacks, resourceTypes } from './profile-data';
 import type { Thread, FuncTable, ResourceTable, StringTable, IndexIntoFuncTable } from '../common/types/profile';
 import type { FuncStackTable, IndexIntoFuncStackTable, FuncStackInfo } from '../common/types/profile-derived';
 import type { Milliseconds } from '../common/types/units';
@@ -12,10 +12,17 @@ type Node = {
   name: string,
   lib: string,
   dim: boolean,
+  icon: string | null,
 };
 
 type FuncStackChildren = IndexIntoFuncStackTable[];
 type FuncStackTimes = { selfTime: Milliseconds, totalTime: Milliseconds };
+
+function extractFaviconFromLibname(libname: string): string | null {
+  const url = new URL('/favicon.ico', libname);
+  return url.href;
+}
+
 
 class ProfileTree {
 
@@ -109,16 +116,20 @@ class ProfileTree {
     if (node === undefined) {
       const funcIndex = this._funcStackTable.func[funcStackIndex];
       const funcName = this._stringTable.getString(this._funcTable.name[funcIndex]);
+      const resourceIndex = this._funcTable.resource[funcIndex];
+      const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
+      const libName = this._getOriginAnnotation(funcIndex);
 
       node = {
         totalTime: `${this._funcStackTimes.totalTime[funcStackIndex].toFixed(1)}ms`,
         totalTimePercent: `${(100 * this._funcStackTimes.totalTime[funcStackIndex] / this._rootTotalTime).toFixed(1)}%`,
         selfTime: `${this._funcStackTimes.selfTime[funcStackIndex].toFixed(1)}ms`,
         name: funcName,
-        lib: this._getOriginAnnotation(funcIndex),
+        lib: libName,
         // Dim platform pseudo-stacks.
         dim: !isJS && this._jsOnly,
+        icon: resourceType === resourceTypes.webhost ? extractFaviconFromLibname(libName) : null,
       };
       this._nodes.set(funcStackIndex, node);
     }
