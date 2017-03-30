@@ -19,6 +19,7 @@ class ProfileTreeView extends Component {
       { propName: 'totalTime', title: 'Running Time' },
       { propName: 'totalTimePercent', title: '' },
       { propName: 'selfTime', title: 'Self' },
+      { propName: 'icon', title: '' },
     ];
     this._mainColumn = { propName: 'name', title: '' };
     this._appendageColumn = { propName: 'lib', title: '' };
