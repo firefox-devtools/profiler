@@ -31,23 +31,41 @@ class NodeIcon extends PureComponent {
   constructor(props) {
     super(props);
 
+    this._mounted = false;
+
     this.state = {
       className: null,
     };
+
     this._updateState(props);
   }
 
-  _updateState(props) {
-    getIconForNode(props.node)
-      .then(icon => icon && this.setState({
-        className: this.props.onDisplayIcon(icon),
-      }));
+  componentWillMount() {
+    this._mounted = true;
+  }
+
+  componentWillUnmount() {
+    this._mounted = false;
   }
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.node !== this.props.node) {
       this._updateState(nextProps);
     }
+  }
+
+  _updateState(props) {
+    getIconForNode(props.node)
+      .then(icon => {
+        if (icon && props.node === this.props.node) {
+          const className = props.onDisplayIcon(icon);
+          if (this._mounted) {
+            this.setState({ className });
+          } else {
+            this.state = { className };
+          }
+        }
+      });
   }
 
   render() {
