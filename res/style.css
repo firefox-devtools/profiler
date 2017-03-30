@@ -81,8 +81,7 @@ body, #root, .profileViewer {
 .treeRowIcon {
   min-width: 12px;
   min-height: 12px;
-  height: 100%;
-  margin: 2px;
+  margin: 0 2px 0 0;
   background: center / contain no-repeat;
 }
 

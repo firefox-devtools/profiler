@@ -74,17 +74,9 @@ class TreeViewRowFixedColumns extends Component {
       <div className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onMouseDown={this._onClick}>
         {
           columns.map(col => {
-            let renderedComponent;
-            if (col.propName === 'icon') {
-              renderedComponent = <NodeIcon node={ node }/>;
-            } else {
-              renderedComponent = reactStringWithHighlightedSubstrings(
-                node[col.propName], highlightString, 'treeViewHighlighting'
-              );
-            }
             return <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
                     key={col.propName}>
-                    { renderedComponent }
+                    { reactStringWithHighlightedSubstrings(node[col.propName], highlightString, 'treeViewHighlighting') }
                    </span>;
           })
         }
@@ -143,6 +135,7 @@ class TreeViewRowScrolledColumns extends Component {
       <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''} ${node.dim ? 'dim' : ''}`} style={{height: '16px'}} onMouseDown={this._onClick}>
         <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
+        <NodeIcon node={node} />
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
           {reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting')}
         </span>
@@ -183,6 +176,7 @@ TreeViewRowScrolledColumns.propTypes = {
   selected: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
   onAppendageButtonClick: PropTypes.func,
+  onDisplayIcon: PropTypes.func.isRequired,
   highlightString: PropTypes.string,
 };
 
@@ -257,6 +251,7 @@ class TreeView extends Component {
                                   selected={nodeId === selectedNodeId}
                                   onClick={this._onRowClicked}
                                   onAppendageButtonClick={onAppendageButtonClick}
+                                  onDisplayIcon={this._onDisplayIcon}
                                   highlightString={highlightString}/>
     );
   }
