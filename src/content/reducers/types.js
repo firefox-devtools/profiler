@@ -49,3 +49,8 @@ export type State = {
   summaryView: SummaryViewState,
   urlState: URLState,
 };
+
+export type IconWithClassName = {
+  icon: string,
+  className: string,
+};

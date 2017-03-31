@@ -21,3 +21,17 @@ export function changeTabOrder(tabOrder: number[]): Action {
     tabOrder,
   };
 }
+
+export function iconHasLoaded(icon): Action {
+  return {
+    type: 'ICON_HAS_LOADED',
+    icon,
+  };
+}
+
+export function iconIsInError(icon): Action {
+  return {
+    type: 'ICON_IN_ERROR',
+    icon,
+  };
+}

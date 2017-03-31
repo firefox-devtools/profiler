@@ -1,4 +1,8 @@
 import React, { PureComponent, PropTypes } from 'react';
+import { connect } from 'react-redux';
+
+import { getIconClassNameForNode } from '../reducers/app';
+import actions from '../actions';
 
 const icons = new Map();
 
@@ -28,54 +32,15 @@ function getIconForNode(node) {
 }
 
 class NodeIcon extends PureComponent {
-  constructor(props) {
-    super(props);
-
-    this._mounted = false;
-
-    this.state = {
-      className: null,
-    };
-
-    this._updateState(props);
-  }
-
-  componentWillMount() {
-    this._mounted = true;
-  }
-
-  componentWillUnmount() {
-    this._mounted = false;
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.node !== this.props.node) {
-      this._updateState(nextProps);
-    }
-  }
-
-  _updateState(props) {
-    getIconForNode(props.node)
-      .then(icon => {
-        if (icon && props.node === this.props.node) {
-          const className = props.onDisplayIcon(icon);
-          if (this._mounted) {
-            this.setState({ className });
-          } else {
-            this.state = { className };
-          }
-        }
-      });
-  }
-
   render() {
-    return <div className={`treeRowIcon ${this.state.className || ''}`}></div>;
+    return <div className={`treeRowIcon ${this.props.className || ''}`}></div>;
   }
 }
 
 NodeIcon.propTypes = {
-  node: PropTypes.object.isRequired,
-  onDisplayIcon: PropTypes.func.isRequired,
+  className: PropTypes.string.isRequired,
 };
 
-export default NodeIcon;
+export default connect((state, { node }) => ({
+  className: getIconClassNameForNode(state, node),
+}), actions)(NodeIcon);
