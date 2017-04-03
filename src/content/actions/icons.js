@@ -1,49 +1,55 @@
 // @flow
 import type { Action, ThunkAction } from './types';
 
-export function iconHasLoaded(icon): Action {
+export function iconHasLoaded(icon: string): Action {
   return {
     type: 'ICON_HAS_LOADED',
     icon,
   };
 }
 
-export function iconIsInError(icon): Action {
+export function iconIsInError(icon: string): Action {
   return {
     type: 'ICON_IN_ERROR',
     icon,
   };
 }
 
-const icons = new Map();
+const icons: Map<string, Promise<string | null>> = new Map();
 
-function getIconForNode(node) {
-  if (!node.icon) {
+function getIcon(icon: string): Promise<string | null> {
+  if (!icon) {
     return Promise.resolve(null);
   }
 
-  if (icons.has(node.icon)) {
-    return icons.get(node.icon);
+  if (icons.has(icon)) {
+    return icons.get(icon);
   }
 
   const result = new Promise(resolve => {
     const image = new Image();
-    image.src = node.icon;
+    image.src = icon;
     image.referrerPolicy = 'no-referrer';
     image.onload = () => {
-      resolve(node.icon);
+      resolve(icon);
     };
     image.onerror = () => {
       resolve(null);
     };
   });
 
-  icons.set(node.icon, result);
+  icons.set(icon, result);
   return result;
 }
 
-export function iconStartLoad(icon): ThunkAction {
+export function iconStartLoading(icon: string): ThunkAction {
   return dispatch => {
-    getIconForNode(icon)
+    getIcon(icon).then(result => {
+      if (result) {
+        dispatch(iconHasLoaded(icon));
+      } else {
+        dispatch(iconIsInError(icon));
+      }
+    });
   };
 }

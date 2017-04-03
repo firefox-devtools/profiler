@@ -1,6 +1,8 @@
-import { combineReducers } from 'redux';
+// @flow
 import { createSelector } from 'reselect';
-import type { IconWithClassName } from './types';
+import type { Action } from '../actions/types';
+import type { IconWithClassName, State, Reducer } from './types';
+import type { Node } from '../../common/types/profile';
 
 function classNameFromUrl(url) {
   return url.replace(/[/:.+>< ~()#,]/g, '_');
@@ -16,11 +18,11 @@ function favicons(state: Set<string>, action: Action) {
   }
 }
 
-const iconsStateReducer: Reducer<IconsState> = combineReducers({ favicons });
+const iconsStateReducer: Reducer<Set<string>> = favicons;
 export default iconsStateReducer;
 
-export const getIcons = (state: State): Set<string> => state.icons.favicons;
-export const getIconForNode = (state: State, node): string => getIcons(state).has(node.icon) ? node.icon : null;
+export const getIcons = (state: State) => state.icons.favicons;
+export const getIconForNode = (state: State, node: Node) => getIcons(state).has(node.icon) ? node.icon : null;
 export const getIconClassNameForNode = createSelector(
   getIcons, (state, node) => node,
   (icons, node) => (icons.has(node.icon) ? classNameFromUrl(node.icon) : null)

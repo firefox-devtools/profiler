@@ -1,19 +1,9 @@
 // @flow
 import { timeCode } from '../common/time-code';
 import { getSampleFuncStacks, resourceTypes } from './profile-data';
-import type { Thread, FuncTable, ResourceTable, StringTable, IndexIntoFuncTable } from '../common/types/profile';
+import type { Node, Thread, FuncTable, ResourceTable, StringTable, IndexIntoFuncTable } from '../common/types/profile';
 import type { FuncStackTable, IndexIntoFuncStackTable, FuncStackInfo } from '../common/types/profile-derived';
 import type { Milliseconds } from '../common/types/units';
-
-type Node = {
-  totalTime: string,
-  totalTimePercent: string,
-  selfTime: string,
-  name: string,
-  lib: string,
-  dim: boolean,
-  icon: string | null,
-};
 
 type FuncStackChildren = IndexIntoFuncStackTable[];
 type FuncStackTimes = { selfTime: Milliseconds, totalTime: Milliseconds };
@@ -22,7 +12,6 @@ function extractFaviconFromLibname(libname: string): string | null {
   const url = new URL('/favicon.ico', libname);
   return url.href;
 }
-
 
 class ProfileTree {
 
