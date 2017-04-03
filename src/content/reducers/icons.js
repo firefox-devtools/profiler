@@ -8,7 +8,7 @@ function classNameFromUrl(url) {
   return url.replace(/[/:.+>< ~()#,]/g, '_');
 }
 
-function favicons(state: Set<string>, action: Action) {
+function favicons(state: Set<string> = new Set(), action: Action) {
   switch (action.type) {
     case 'ICON_HAS_LOADED':
       return new Set([...state, action.icon]);
@@ -21,7 +21,7 @@ function favicons(state: Set<string>, action: Action) {
 const iconsStateReducer: Reducer<Set<string>> = favicons;
 export default iconsStateReducer;
 
-export const getIcons = (state: State) => state.icons.favicons;
+export const getIcons = (state: State) => state.icons;
 export const getIconForNode = (state: State, node: Node) => getIcons(state).has(node.icon) ? node.icon : null;
 export const getIconClassNameForNode = createSelector(
   getIcons, (state, node) => node,

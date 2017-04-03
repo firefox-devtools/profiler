@@ -15,16 +15,14 @@ export function iconIsInError(icon: string): Action {
   };
 }
 
-const icons: Map<string, Promise<string | null>> = new Map();
+const icons: Set<string> = new Set();
 
-function getIcon(icon: string): Promise<string | null> {
-  if (!icon) {
-    return Promise.resolve(null);
+function getIcon(icon: string | null): Promise<string> {
+  if (!icon || icons.has(icon)) {
+    return Promise.reject();
   }
 
-  if (icons.has(icon)) {
-    return icons.get(icon);
-  }
+  icons.add(icon);
 
   const result = new Promise(resolve => {
     const image = new Image();
@@ -38,11 +36,10 @@ function getIcon(icon: string): Promise<string | null> {
     };
   });
 
-  icons.set(icon, result);
   return result;
 }
 
-export function iconStartLoading(icon: string): ThunkAction {
+export function iconStartLoading(icon: string | null): ThunkAction {
   return dispatch => {
     getIcon(icon).then(result => {
       if (result) {

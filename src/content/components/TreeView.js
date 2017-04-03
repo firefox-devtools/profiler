@@ -3,6 +3,8 @@ import shallowCompare from 'react-addons-shallow-compare';
 import classNames from 'classnames';
 import VirtualList from './VirtualList';
 import NodeIcon from './NodeIcon';
+import { BackgroundImageStyleDef } from './StyleDef';
+
 import { ContextMenuTrigger } from 'react-contextmenu';
 
 const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
@@ -386,9 +388,14 @@ class TreeView extends Component {
   }
 
   render() {
-    const { fixedColumns, mainColumn, disableOverscan, contextMenu, contextMenuId } = this.props;
+    const { fixedColumns, mainColumn, disableOverscan, contextMenu, contextMenuId, icons } = this.props;
     return (
       <div className='treeView'>
+        { icons.map(
+            ({ className, icon }) =>
+              <BackgroundImageStyleDef key={className} className={className} url={icon} />
+            )
+        }
         <TreeViewHeader fixedColumns={fixedColumns}
                          mainColumn={mainColumn}/>
         <ContextMenuTrigger id={contextMenuId}
@@ -436,6 +443,7 @@ TreeView.propTypes = {
   disableOverscan: PropTypes.bool,
   contextMenu: PropTypes.object,
   contextMenuId: PropTypes.string,
+  icons: PropTypes.object.isRequired,
 };
 
 export default TreeView;

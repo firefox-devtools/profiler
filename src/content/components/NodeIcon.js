@@ -5,15 +5,27 @@ import { getIconClassNameForNode } from '../reducers/icons';
 import actions from '../actions';
 
 class NodeIcon extends PureComponent {
+  constructor(props) {
+    super(props);
+    props.iconStartLoading(props.icon);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    nextProps.iconStartLoading(nextProps.icon);
+  }
+
   render() {
     return <div className={`treeRowIcon ${this.props.className || ''}`}></div>;
   }
 }
 
 NodeIcon.propTypes = {
-  className: PropTypes.string.isRequired,
+  className: PropTypes.string,
+  icon: PropTypes.string,
+  iconStartLoading: PropTypes.func.isRequired,
 };
 
 export default connect((state, { node }) => ({
   className: getIconClassNameForNode(state, node),
+  icon: node.icon,
 }), actions)(NodeIcon);
