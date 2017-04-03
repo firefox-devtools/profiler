@@ -7,11 +7,15 @@ import actions from '../actions';
 class NodeIcon extends PureComponent {
   constructor(props) {
     super(props);
-    props.iconStartLoading(props.icon);
+    if (props.icon) {
+      props.iconStartLoading(props.icon);
+    }
   }
 
   componentWillReceiveProps(nextProps) {
-    nextProps.iconStartLoading(nextProps.icon);
+    if (nextProps.icon) {
+      nextProps.iconStartLoading(nextProps.icon);
+    }
   }
 
   render() {

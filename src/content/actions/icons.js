@@ -17,8 +17,8 @@ export function iconIsInError(icon: string): Action {
 
 const icons: Set<string> = new Set();
 
-function getIcon(icon: string | null): Promise<string> {
-  if (!icon || icons.has(icon)) {
+function getIcon(icon: string): Promise<string | null> {
+  if (icons.has(icon)) {
     return Promise.reject();
   }
 
@@ -39,7 +39,7 @@ function getIcon(icon: string | null): Promise<string> {
   return result;
 }
 
-export function iconStartLoading(icon: string | null): ThunkAction {
+export function iconStartLoading(icon: string): ThunkAction {
   return dispatch => {
     getIcon(icon).then(result => {
       if (result) {
