@@ -1,35 +1,8 @@
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 
-import { getIconClassNameForNode } from '../reducers/app';
+import { getIconClassNameForNode } from '../reducers/icons';
 import actions from '../actions';
-
-const icons = new Map();
-
-function getIconForNode(node) {
-  if (!node.icon) {
-    return Promise.resolve(null);
-  }
-
-  if (icons.has(node.icon)) {
-    return icons.get(node.icon);
-  }
-
-  const result = new Promise(resolve => {
-    const image = new Image();
-    image.src = node.icon;
-    image.referrerPolicy = 'no-referrer';
-    image.onload = () => {
-      resolve(node.icon);
-    };
-    image.onerror = () => {
-      resolve(null);
-    };
-  });
-
-  icons.set(node.icon, result);
-  return result;
-}
 
 class NodeIcon extends PureComponent {
   render() {

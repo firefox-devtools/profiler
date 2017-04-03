@@ -5,9 +5,10 @@ import summaryView from './summary-view';
 import urlState from './url-state';
 import flameChart from './flame-chart';
 import timelineView from './timeline-view';
+import icons from './icons';
 
 import type { State, Reducer } from './types';
 
-const reducer: Reducer<State> = { app, profileView, summaryView, urlState, flameChart, timelineView };
+const reducer: Reducer<State> = { app, profileView, summaryView, urlState, flameChart, timelineView, icons };
 
 export default reducer;
