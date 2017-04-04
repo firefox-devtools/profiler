@@ -17,9 +17,11 @@ export function iconIsInError(icon: string): Action {
 
 const icons: Set<string> = new Set();
 
-function getIcon(icon: string): Promise<string | null> {
+type IconRequestResult = 'loaded' | 'error' | 'cached';
+
+function getIcon(icon: string): Promise<IconRequestResult> {
   if (icons.has(icon)) {
-    return Promise.reject();
+    return Promise.resolve('cached');
   }
 
   icons.add(icon);
@@ -29,10 +31,10 @@ function getIcon(icon: string): Promise<string | null> {
     image.src = icon;
     image.referrerPolicy = 'no-referrer';
     image.onload = () => {
-      resolve(icon);
+      resolve('loaded');
     };
     image.onerror = () => {
-      resolve(null);
+      resolve('error');
     };
   });
 
@@ -42,10 +44,15 @@ function getIcon(icon: string): Promise<string | null> {
 export function iconStartLoading(icon: string): ThunkAction {
   return dispatch => {
     getIcon(icon).then(result => {
-      if (result) {
-        dispatch(iconHasLoaded(icon));
-      } else {
-        dispatch(iconIsInError(icon));
+      switch (result) {
+        case 'loaded':
+          dispatch(iconHasLoaded(icon));
+          break;
+        case 'error':
+          dispatch(iconIsInError(icon));
+          break;
+        case 'cached':
+          // nothing to do
       }
     });
   };

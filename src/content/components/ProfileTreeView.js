@@ -141,7 +141,7 @@ ProfileTreeView.propTypes = {
   addCallTreeFilter: PropTypes.func.isRequired,
   jsOnly: PropTypes.bool.isRequired,
   invertCallstack: PropTypes.bool.isRequired,
-  icons: PropTypes.object.isRequired,
+  icons: PropTypes.array.isRequired,
 };
 
 export default connect(state => ({

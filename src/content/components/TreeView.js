@@ -433,7 +433,7 @@ TreeView.propTypes = {
   disableOverscan: PropTypes.bool,
   contextMenu: PropTypes.object,
   contextMenuId: PropTypes.string,
-  icons: PropTypes.object.isRequired,
+  icons: PropTypes.array.isRequired,
 };
 
 export default TreeView;
