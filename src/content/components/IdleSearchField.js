@@ -6,42 +6,35 @@ import './IdleSearchField.css';
 class IdleSearchField extends Component {
   constructor(props) {
     super(props);
-    this._onSearchFieldInput = this._onSearchFieldInput.bind(this);
-    this._onSearchFieldClick = this._onSearchFieldClick.bind(this);
+    this._onSearchFieldChange = this._onSearchFieldChange.bind(this);
+    this._onSearchFieldFocus = this._onSearchFieldFocus.bind(this);
     this._onClearButtonClick = this._onClearButtonClick.bind(this);
     this._onTimeout = this._onTimeout.bind(this);
-    this._searchFieldCreated = elem => { this._searchField = elem; };
     this._timeout = 0;
-    this._previouslyNotifiedValue = props.defaultValue || '';
+    this.state = {
+      value: props.defaultValue || '',
+    };
+    this._previouslyNotifiedValue = this.state.value;
   }
 
-  _onSearchFieldClick() {
-    if (this._searchField) {
-      this._searchField.select();
-    }
+  _onSearchFieldFocus(e) {
+    e.target.select();
   }
 
-  _onClearButtonClick() {
-    if (this._searchField) {
-      this._searchField.value = '';
-      this._notifyIfChanged('');
-      this._searchField.focus();
-    }
-  }
+  _onSearchFieldChange(e) {
+    this.setState({
+      value: e.target.value,
+    });
 
-  _onSearchFieldInput() {
     if (this._timeout) {
       clearTimeout(this._timeout);
     }
-    const { idlePeriod } = this.props;
-    this._timeout = setTimeout(this._onTimeout, idlePeriod);
+    this._timeout = setTimeout(this._onTimeout, this.props.idlePeriod);
   }
 
   _onTimeout() {
-    if (this._searchField) {
-      const value = this._searchField.value;
-      this._notifyIfChanged(value);
-    }
+    this._timeout = 0;
+    this._notifyIfChanged(this.state.value);
   }
 
   _notifyIfChanged(value) {
@@ -51,23 +44,45 @@ class IdleSearchField extends Component {
     }
   }
 
+  _onClearButtonClick() {
+    this.setState({ value: '' });
+    this._notifyIfChanged('');
+  }
+
+  _onClearButtonFocus(e) {
+    // prevent the focus on the clear button
+    if (e.relatedTarget) {
+      e.relatedTarget.focus();
+    } else {
+      e.target.blur();
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.defaultValue !== this.props.defaultValue) {
+      this._notifyIfChanged(nextProps.defaultValue || '');
+      this.setState({
+        value: nextProps.defaultValue || '',
+      });
+    }
+  }
+
   render() {
-    const { className, title, defaultValue } = this.props;
+    const { className, title } = this.props;
     return (
-      <span className={classNames('idleSearchField', className)}>
-        <input type='search'
+      <form className={classNames('idleSearchField', className)} onSubmit={e => e.preventDefault()}>
+        <input type='search' name='search'
                className='idleSearchFieldInput'
                required='required'
                title={title}
-               defaultValue={defaultValue}
-               ref={this._searchFieldCreated}
-               onInput={this._onSearchFieldInput}
-               onClick={this._onSearchFieldClick}/>
+               value={this.state.value}
+               onChange={this._onSearchFieldChange}
+               onFocus={this._onSearchFieldFocus}/>
         <input type='button'
                className='idleSearchFieldButton'
-               value='Clear'
-               onClick={this._onClearButtonClick}/>
-      </span>
+               onClick={this._onClearButtonClick}
+               onFocus={this._onClearButtonFocus}/>
+      </form>
     );
   }
 }
