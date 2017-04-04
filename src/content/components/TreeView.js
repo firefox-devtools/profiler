@@ -73,12 +73,11 @@ class TreeViewRowFixedColumns extends Component {
     return (
       <div className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onMouseDown={this._onClick}>
         {
-          columns.map(col => {
-            return <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
-                    key={col.propName}>
-                    { reactStringWithHighlightedSubstrings(node[col.propName], highlightString, 'treeViewHighlighting') }
-                   </span>;
-          })
+          columns.map(col =>
+            <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
+                  key={col.propName}>
+              { reactStringWithHighlightedSubstrings(node[col.propName], highlightString, 'treeViewHighlighting') }
+            </span>)
         }
       </div>
     );
@@ -176,7 +175,6 @@ TreeViewRowScrolledColumns.propTypes = {
   selected: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
   onAppendageButtonClick: PropTypes.func,
-  onDisplayIcon: PropTypes.func.isRequired,
   highlightString: PropTypes.string,
 };
 
@@ -251,7 +249,6 @@ class TreeView extends Component {
                                   selected={nodeId === selectedNodeId}
                                   onClick={this._onRowClicked}
                                   onAppendageButtonClick={onAppendageButtonClick}
-                                  onDisplayIcon={this._onDisplayIcon}
                                   highlightString={highlightString}/>
     );
   }
@@ -387,10 +384,8 @@ class TreeView extends Component {
     return (
       <div className='treeView'>
         { icons.map(
-            ({ className, icon }) =>
-              <BackgroundImageStyleDef key={className} className={className} url={icon} />
-            )
-        }
+            ({ className, icon }) => <BackgroundImageStyleDef className={className} url={icon} key={className} />
+        ) }
         <TreeViewHeader fixedColumns={fixedColumns}
                          mainColumn={mainColumn}/>
         <ContextMenuTrigger id={contextMenuId}

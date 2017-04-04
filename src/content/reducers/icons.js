@@ -31,4 +31,3 @@ export const getIconsWithClassNames: (State => IconWithClassName[]) = createSele
   getIcons,
   icons => [...icons].map(icon => ({ icon, className: classNameFromUrl(icon) }))
 );
-

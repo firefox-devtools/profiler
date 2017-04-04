@@ -25,8 +25,6 @@ function isURLSetupDone(state: boolean = false, action: Action) {
       return state;
   }
 }
-
-
 const appStateReducer: Reducer<AppState> = combineReducers({ view, isURLSetupDone });
 export default appStateReducer;
 
