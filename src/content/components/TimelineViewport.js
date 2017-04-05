@@ -63,6 +63,9 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
   class TimelineViewport extends PureComponent {
 
     props: Props
+    shiftScrollId: number
+    zoomRangeSelectionScheduled: boolean
+    zoomRangeSelectionScrollDelta: number
 
     state: {
       containerWidth: CssPixels,
@@ -75,10 +78,8 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
       dragX: CssPixels,
       dragY: CssPixels,
       isDragging: boolean,
-      isScrolling: boolean,
+      isShiftScrollHintVisible: boolean,
     }
-
-    scrollId: number
 
     constructor(props: Props) {
       super(props);
@@ -89,14 +90,12 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
       (this: any)._mouseUpListener = this._mouseUpListener.bind(this);
 
       (this: any)._setSize = this._setSize.bind(this);
+      (this: any)._setSizeNextFrame = this._setSizeNextFrame.bind(this);
 
-      this.scrollId = 0;
+      this.shiftScrollId = 0;
+      this.zoomRangeSelectionScheduled = false;
+      this.zoomRangeSelectionScrollDelta = 0;
 
-      /**
-       * TODO - Evaluate whether this state should stay in the component, or go out to
-       * the redux stores. This state information potentially gets changed very frequently
-       * with mouse events.
-       */
       this.state = this.getDefaultState(props);
     }
 
@@ -128,7 +127,7 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
         dragX: 0,
         dragY: 0,
         isDragging: false,
-        isScrolling: false,
+        isShiftScrollHintVisible: false,
       };
     }
 
@@ -141,21 +140,21 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
         return;
       }
 
-      const scollId = ++this.scrollId;
-      if (!this.state.isScrolling) {
-        this.setState({ isScrolling: true });
+      const scollId = ++this.shiftScrollId;
+      if (!this.state.isShiftScrollHintVisible) {
+        this.setState({ isShiftScrollHintVisible: true });
       }
       setTimeout(() => {
-        if (scollId === this.scrollId) {
-          this.setState({ isScrolling: false });
+        if (scollId === this.shiftScrollId) {
+          this.setState({ isShiftScrollHintVisible: false });
         }
       }, 1000);
     }
 
     componentDidUpdate(prevProps: Props) {
       if (this.props.viewportNeedsUpdate(prevProps, this.props)) {
-        this.setState({ viewportTop: 0 });
-        this._setSize();
+        this.setState(this.getDefaultState(this.props));
+        requestAnimationFrame(this._setSize);
       }
     }
 
@@ -173,20 +172,22 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
     }
 
     _setSize() {
-      requestAnimationFrame(() => {
-        const rect = this.refs.container.getBoundingClientRect();
-        if (this.state.containerWidth !== rect.width || this.state.containerHeight !== rect.height) {
-          const style = window.getComputedStyle(this.refs.container);
+      const rect = this.refs.container.getBoundingClientRect();
+      if (this.state.containerWidth !== rect.width || this.state.containerHeight !== rect.height) {
+        const style = window.getComputedStyle(this.refs.container);
 
-          // Obey margins of the containing element.
-          const containerWidth = rect.width - parseFloat(style.marginLeft) - parseFloat(style.marginRight);
-          const containerHeight = rect.height - parseFloat(style.marginTop) - parseFloat(style.marginBottom);
-          const containerLeft = rect.left + parseFloat(style.marginLeft);
-          const viewportBottom = this.state.viewportTop + containerHeight;
+        // Obey margins of the containing element.
+        const containerWidth = rect.width - parseFloat(style.marginLeft) - parseFloat(style.marginRight);
+        const containerHeight = rect.height - parseFloat(style.marginTop) - parseFloat(style.marginBottom);
+        const containerLeft = rect.left + parseFloat(style.marginLeft);
+        const viewportBottom = this.state.viewportTop + containerHeight;
 
-          this.setState({ containerWidth, containerHeight, containerLeft, viewportBottom });
-        }
-      });
+        this.setState({ containerWidth, containerHeight, containerLeft, viewportBottom });
+      }
+    }
+
+    _setSizeNextFrame() {
+      requestAnimationFrame(this._setSize);
     }
 
     _mouseWheelListener(event: SyntheticWheelEvent) {
@@ -246,45 +247,60 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
         this.props.setHasZoomedViaMousewheel();
       }
       event.preventDefault();
-      const { maximumZoom } = this.props;
-      const {
-        containerLeft,
-        containerWidth,
-        containerHeight,
-        viewportLeft,
-        viewportRight,
-      } = this.state;
-      const mouseCenter = (event.clientX - containerLeft) / containerWidth;
-      const deltaY = getNormalizedScrollDelta(event, containerHeight, 'deltaY');
+      // Accumulate the scroll delta here. Only apply it once per frame to avoid
+      // spamming the Redux store with updates.
+      this.zoomRangeSelectionScrollDelta += getNormalizedScrollDelta(event, this.state.containerHeight, 'deltaY');
 
-      const viewportLength: CssPixels = viewportRight - viewportLeft;
-      const scale = viewportLength - viewportLength / (1 + deltaY * 0.001);
-      let newViewportLeft: UnitIntervalOfProfileRange = clamp(0, 1, viewportLeft - scale * mouseCenter);
-      let newViewportRight: UnitIntervalOfProfileRange = clamp(0, 1, viewportRight + scale * (1 - mouseCenter));
+      // See if an update needs to be scheduled.
+      if (!this.zoomRangeSelectionScheduled) {
+        const mouseX = event.clientX;
+        this.zoomRangeSelectionScheduled = true;
+        requestAnimationFrame(() => {
+          // Grab and reset the scroll delta accumulated up until this frame.
+          // Let another frame be scheduled.
+          const deltaY = this.zoomRangeSelectionScrollDelta;
+          this.zoomRangeSelectionScrollDelta = 0;
+          this.zoomRangeSelectionScheduled = false;
 
-      if (newViewportRight - newViewportLeft < maximumZoom) {
-        const newViewportMiddle = (viewportLeft + viewportRight) * 0.5;
-        newViewportLeft = newViewportMiddle - maximumZoom * 0.5;
-        newViewportRight = newViewportMiddle + maximumZoom * 0.5;
-      }
+          const { maximumZoom } = this.props;
+          const {
+            containerLeft,
+            containerWidth,
+            viewportLeft,
+            viewportRight,
+          } = this.state;
+          const mouseCenter = (mouseX - containerLeft) / containerWidth;
 
-      const { updateProfileSelection, timeRange } = this.props;
-      if (newViewportLeft === 0 && newViewportRight === 1) {
-        if (viewportLeft === 0 && viewportRight === 1) {
-          // Do not update if at the maximum bounds.
-          return;
-        }
-        updateProfileSelection({
-          hasSelection: false,
-          isModifying: false,
-        });
-      } else {
-        const timeRangeLength = timeRange.end - timeRange.start;
-        updateProfileSelection({
-          hasSelection: true,
-          isModifying: false,
-          selectionStart: timeRange.start + timeRangeLength * newViewportLeft,
-          selectionEnd: timeRange.start + timeRangeLength * newViewportRight,
+          const viewportLength: CssPixels = viewportRight - viewportLeft;
+          const scale = viewportLength - viewportLength / (1 + deltaY * 0.001);
+          let newViewportLeft: UnitIntervalOfProfileRange = clamp(0, 1, viewportLeft - scale * mouseCenter);
+          let newViewportRight: UnitIntervalOfProfileRange = clamp(0, 1, viewportRight + scale * (1 - mouseCenter));
+
+          if (newViewportRight - newViewportLeft < maximumZoom) {
+            const newViewportMiddle = (viewportLeft + viewportRight) * 0.5;
+            newViewportLeft = newViewportMiddle - maximumZoom * 0.5;
+            newViewportRight = newViewportMiddle + maximumZoom * 0.5;
+          }
+
+          const { updateProfileSelection, timeRange } = this.props;
+          if (newViewportLeft === 0 && newViewportRight === 1) {
+            if (viewportLeft === 0 && viewportRight === 1) {
+              // Do not update if at the maximum bounds.
+              return;
+            }
+            updateProfileSelection({
+              hasSelection: false,
+              isModifying: false,
+            });
+          } else {
+            const timeRangeLength = timeRange.end - timeRange.start;
+            updateProfileSelection({
+              hasSelection: true,
+              isModifying: false,
+              selectionStart: timeRange.start + timeRangeLength * newViewportLeft,
+              selectionEnd: timeRange.start + timeRangeLength * newViewportRight,
+            });
+          }
         });
       }
     }
@@ -387,12 +403,16 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
     }
 
     componentDidMount() {
-      window.addEventListener('resize', this._setSize, false);
+      window.addEventListener('resize', this._setSizeNextFrame, false);
+      // The first _setSize ensures that the screen does not blip when mounting
+      // the component, while the second ensures that it lays out correctly if the DOM
+      // is not fully layed out correctly yet.
       this._setSize();
+      this._setSizeNextFrame();
     }
 
     componentWillUnmount() {
-      window.removeEventListener('resize', this._setSize, false);
+      window.removeEventListener('resize', this._setSizeNextFrame, false);
       window.removeEventListener('mousemove', this._mouseMoveListener, true);
       window.removeEventListener('mouseup', this._mouseUpListener, true);
     }
@@ -402,7 +422,7 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
 
       const {
         containerWidth, containerHeight, viewportTop, viewportBottom, viewportLeft,
-        viewportRight, isDragging, isScrolling,
+        viewportRight, isDragging, isShiftScrollHintVisible,
       } = this.state;
 
       const viewportClassName = classNames({
@@ -414,7 +434,7 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
 
       const shiftScrollClassName = classNames({
         timelineViewportShiftScroll: true,
-        hidden: hasZoomedViaMousewheel || !(isScrolling && isRowExpanded),
+        hidden: hasZoomedViaMousewheel || !(isShiftScrollHintVisible && isRowExpanded),
       });
 
       return (

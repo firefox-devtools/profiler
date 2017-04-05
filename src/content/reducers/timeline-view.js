@@ -6,6 +6,7 @@ import type { Action } from '../actions/types';
 type IsThreadExpandedMap = Map<ThreadIndex, boolean>;
 type TimelineViewState = {
   isThreadExpanded: IsThreadExpandedMap,
+  hasZoomedViaMousewheel: boolean,
 }
 
 function isThreadExpanded(state: IsThreadExpandedMap = new Map(), action: Action) {
