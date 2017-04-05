@@ -2,7 +2,7 @@
 import { createSelector } from 'reselect';
 import type { Action } from '../actions/types';
 import type { IconWithClassName, State, Reducer } from './types';
-import type { Node } from '../../common/types/profile';
+import type { Node } from '../../common/types/profile-derived';
 
 function classNameFromUrl(url) {
   return url.replace(/[/:.+>< ~()#,]/g, '_');

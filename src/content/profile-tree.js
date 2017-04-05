@@ -1,8 +1,8 @@
 // @flow
 import { timeCode } from '../common/time-code';
 import { getSampleFuncStacks, resourceTypes } from './profile-data';
-import type { Node, Thread, FuncTable, ResourceTable, StringTable, IndexIntoFuncTable } from '../common/types/profile';
-import type { FuncStackTable, IndexIntoFuncStackTable, FuncStackInfo } from '../common/types/profile-derived';
+import type { Thread, FuncTable, ResourceTable, StringTable, IndexIntoFuncTable } from '../common/types/profile';
+import type { FuncStackTable, IndexIntoFuncStackTable, FuncStackInfo, Node } from '../common/types/profile-derived';
 import type { Milliseconds } from '../common/types/units';
 
 type FuncStackChildren = IndexIntoFuncStackTable[];
