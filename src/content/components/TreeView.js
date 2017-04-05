@@ -2,6 +2,9 @@ import React, { Component, PropTypes } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import classNames from 'classnames';
 import VirtualList from './VirtualList';
+import NodeIcon from './NodeIcon';
+import { BackgroundImageStyleDef } from './StyleDef';
+
 import { ContextMenuTrigger } from 'react-contextmenu';
 
 const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
@@ -131,6 +134,7 @@ class TreeViewRowScrolledColumns extends Component {
       <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''} ${node.dim ? 'dim' : ''}`} style={{height: '16px'}} onMouseDown={this._onClick}>
         <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
+        <NodeIcon node={node} />
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
           {reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting')}
         </span>
@@ -376,9 +380,12 @@ class TreeView extends Component {
   }
 
   render() {
-    const { fixedColumns, mainColumn, disableOverscan, contextMenu, contextMenuId } = this.props;
+    const { fixedColumns, mainColumn, disableOverscan, contextMenu, contextMenuId, icons } = this.props;
     return (
       <div className='treeView'>
+        { icons.map(
+            ({ className, icon }) => <BackgroundImageStyleDef className={className} url={icon} key={className} />
+        ) }
         <TreeViewHeader fixedColumns={fixedColumns}
                          mainColumn={mainColumn}/>
         <ContextMenuTrigger id={contextMenuId}
@@ -426,6 +433,7 @@ TreeView.propTypes = {
   disableOverscan: PropTypes.bool,
   contextMenu: PropTypes.object,
   contextMenuId: PropTypes.string,
+  icons: PropTypes.array.isRequired,
 };
 
 export default TreeView;
