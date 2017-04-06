@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import { getIsURLSetupDone } from '../reducers/app';
 
 class URLManager extends Component {
-  componentDidMount() {
-    const { updateURLState, urlSetupDone, stateFromCurrentLocation, show404 } = this.props;
+  _updateState() {
+    const { updateURLState, stateFromCurrentLocation, show404 } = this.props;
     if (window.history.state) {
       updateURLState(window.history.state);
     } else {
@@ -16,9 +16,12 @@ class URLManager extends Component {
         show404(window.location.pathname + window.location.search);
       }
     }
-    window.onpopstate = e => {
-      updateURLState(e.state);
-    };
+  }
+  componentDidMount() {
+    const { urlSetupDone } = this.props;
+
+    this._updateState();
+    window.onpopstate = () => this._updateState();
     urlSetupDone();
   }
 
