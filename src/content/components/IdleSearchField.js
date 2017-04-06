@@ -20,6 +20,8 @@ class IdleSearchField extends Component {
   _timeout: number;
   _previouslyNotifiedValue: string;
 
+  props: Props;
+
   state: {
     value: string,
   };
