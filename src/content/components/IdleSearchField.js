@@ -1,10 +1,30 @@
+// @flow
 import React, { Component, PropTypes } from 'react';
 import classNames from 'classnames';
 
 import './IdleSearchField.css';
 
+type Props = {
+  onIdleAfterChange: (string) => void,
+  idlePeriod: number,
+  defaultValue: ?string,
+  className: ?string,
+  title: ?string,
+};
+
 class IdleSearchField extends Component {
-  constructor(props) {
+  _onSearchFieldChange: Event => void;
+  _onSearchFieldFocus: Event => void;
+  _onClearButtonClick: Event => void;
+  _onTimeout: void => void;
+  _timeout: number;
+  _previouslyNotifiedValue: string;
+
+  state: {
+    value: string,
+  };
+
+  constructor(props: Props) {
     super(props);
     this._onSearchFieldChange = this._onSearchFieldChange.bind(this);
     this._onSearchFieldFocus = this._onSearchFieldFocus.bind(this);
@@ -17,13 +37,13 @@ class IdleSearchField extends Component {
     this._previouslyNotifiedValue = this.state.value;
   }
 
-  _onSearchFieldFocus(e) {
-    e.target.select();
+  _onSearchFieldFocus(e: Event & { currentTarget: HTMLInputElement }) {
+    e.currentTarget.select();
   }
 
-  _onSearchFieldChange(e) {
+  _onSearchFieldChange(e: Event & { currentTarget: HTMLInputElement }) {
     this.setState({
-      value: e.target.value,
+      value: e.currentTarget.value,
     });
 
     if (this._timeout) {
@@ -37,7 +57,7 @@ class IdleSearchField extends Component {
     this._notifyIfChanged(this.state.value);
   }
 
-  _notifyIfChanged(value) {
+  _notifyIfChanged(value: string) {
     if (value !== this._previouslyNotifiedValue) {
       this._previouslyNotifiedValue = value;
       this.props.onIdleAfterChange(value);
@@ -49,16 +69,16 @@ class IdleSearchField extends Component {
     this._notifyIfChanged('');
   }
 
-  _onClearButtonFocus(e) {
+  _onClearButtonFocus(e: Event & { relatedTarget: HTMLElement; currentTarget: HTMLElement }) {
     // prevent the focus on the clear button
     if (e.relatedTarget) {
       e.relatedTarget.focus();
     } else {
-      e.target.blur();
+      e.currentTarget.blur();
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps: Props) {
     if (nextProps.defaultValue !== this.props.defaultValue) {
       this._notifyIfChanged(nextProps.defaultValue || '');
       this.setState({
@@ -78,7 +98,7 @@ class IdleSearchField extends Component {
                value={this.state.value}
                onChange={this._onSearchFieldChange}
                onFocus={this._onSearchFieldFocus}/>
-        <input type='button'
+        <input type='reset'
                className='idleSearchFieldButton'
                onClick={this._onClearButtonClick}
                onFocus={this._onClearButtonFocus}/>
