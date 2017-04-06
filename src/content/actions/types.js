@@ -76,7 +76,8 @@ type TimelineAction =
    { type: 'CHANGE_TIMELINE_EXPANDED_THREAD', threadIndex: ThreadIndex, isExpanded: boolean };
 
 type URLEnhancerAction =
-  { type: "@@urlenhancer/urlSetupDone" };
+  { type: "@@urlenhancer/urlSetupDone" } |
+  { type: '@@urlenhancer/updateURLState', urlState: any };
 
 type URLStateAction =
   { type: 'WAITING_FOR_PROFILE_FROM_FILE' } |
