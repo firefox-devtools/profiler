@@ -317,15 +317,43 @@ export function filterThreadToSearchString(thread: Thread, searchString: string)
       return thread;
     }
     const lowercaseSearchString = searchString.toLowerCase();
-    const { samples, funcTable, frameTable, stackTable, stringTable } = thread;
+    const {
+      samples, funcTable, frameTable, stackTable, stringTable,
+      resourceTable,
+    } = thread;
+
+    function computeFuncMatchesFilter(func) {
+      const nameIndex = funcTable.name[func];
+      const nameString = stringTable.getString(nameIndex);
+      if (nameString.toLowerCase().includes(lowercaseSearchString)) {
+        return true;
+      }
+
+      const fileNameIndex = funcTable.fileName[func];
+      if (fileNameIndex !== null) {
+        const fileNameString = stringTable.getString(fileNameIndex);
+        if (fileNameString.toLowerCase().includes(lowercaseSearchString)) {
+          return true;
+        }
+      }
+
+      const resourceIndex = funcTable.resource[func];
+      const resourceNameIndex = resourceTable.name[resourceIndex];
+      if (resourceNameIndex !== undefined) {
+        const resourceNameString = stringTable.getString(resourceNameIndex);
+        if (resourceNameString.toLowerCase().includes(lowercaseSearchString)) {
+          return true;
+        }
+      }
+
+      return false;
+    }
 
     const funcMatchesFilterCache = new Map();
     function funcMatchesFilter(func) {
       let result = funcMatchesFilterCache.get(func);
       if (result === undefined) {
-        const nameIndex = funcTable.name[func];
-        const nameString = stringTable.getString(nameIndex);
-        result = nameString.toLowerCase().includes(lowercaseSearchString);
+        result = computeFuncMatchesFilter(func);
         funcMatchesFilterCache.set(func, result);
       }
       return result;
