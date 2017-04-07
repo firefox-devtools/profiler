@@ -132,11 +132,11 @@ class TreeViewRowScrolledColumns extends Component {
         <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
         <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
         <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
-          {reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting')}
+          { reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting') }
         </span>
         { appendageColumn ? (
           <span className={`treeViewRowColumn treeViewAppendageColumn ${appendageColumn.propName}`}>
-            {node[appendageColumn.propName]}
+            { reactStringWithHighlightedSubstrings(node[appendageColumn.propName], highlightString, 'treeViewHighlighting') }
           </span>
           ) : null}
         { appendageButtons ? appendageButtons.map(buttonName => (
