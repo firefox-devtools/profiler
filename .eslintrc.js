@@ -39,7 +39,7 @@ module.exports = {
             { "SwitchCase": 1 }
         ],
         "linebreak-style": [ "error", "unix" ],
-        "quotes": [ "error", "single" ],
+        "quotes": [ "error", "single", { "avoidEscape": true } ],
         "semi": [ "error", "always" ],
         "no-extra-semi": "error",
         "comma-dangle": [ "error", "always-multiline" ],
@@ -51,6 +51,7 @@ module.exports = {
         "dot-notation": "error",
         "no-alert": "error",
         "no-caller": "error",
+        "no-constant-condition": ["error", { checkLoops: false }],
         "no-else-return": "error",
         "no-eval": "error",
         "no-implied-eval": "error",

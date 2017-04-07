@@ -2,16 +2,23 @@
 import { combineReducers } from 'redux';
 
 import type { Action } from '../actions/types';
-import type { State, AppState, Reducer } from './types';
+import type { State, AppState, AppViewState, Reducer } from './types';
 
-function view(state: string = 'INITIALIZING', action: Action) {
+function view(state: AppViewState = { phase: 'INITIALIZING' }, action: Action): AppViewState {
   switch (action.type) {
-    case 'FILE_NOT_FOUND':
-      return 'FILE_NOT_FOUND';
+    case 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_WEB':
+      return {
+        phase: 'INITIALIZING',
+        additionalData: { attempt: action.error.attempt },
+      };
+    case 'FATAL_ERROR_RECEIVING_PROFILE_FROM_WEB':
+      return { phase: 'FATAL_ERROR' };
+    case 'ROUTE_NOT_FOUND':
+      return { phase: 'ROUTE_NOT_FOUND' };
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_WEB':
     case 'RECEIVE_PROFILE_FROM_FILE':
-      return 'PROFILE';
+      return { phase: 'PROFILE' };
     default:
       return state;
   }
@@ -29,5 +36,5 @@ const appStateReducer: Reducer<AppState> = combineReducers({ view, isURLSetupDon
 export default appStateReducer;
 
 export const getApp = (state: State): AppState => state.app;
-export const getView = (state: State): string => getApp(state).view;
+export const getView = (state: State): AppViewState => getApp(state).view;
 export const getIsURLSetupDone = (state: State): boolean => getApp(state).isURLSetupDone;

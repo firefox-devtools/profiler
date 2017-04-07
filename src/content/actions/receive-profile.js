@@ -1,10 +1,12 @@
 // @flow
+import { oneLine } from 'common-tags';
 import { getProfile } from '../reducers/profile-view';
 import { processProfile, unserializeProfileOfArbitraryFormat } from '../process-profile';
 import { SymbolStore } from '../symbol-store';
 import { symbolicateProfile } from '../symbolication';
 import { decompress } from '../gz';
 import { getTimeRangeIncludingAllThreads } from '../profile-data';
+import { TemporaryError } from '../errors';
 
 import type {
   Action,
@@ -232,24 +234,91 @@ export function receiveProfileFromWeb(profile: Profile): ThunkAction {
   };
 }
 
-export function errorReceivingProfileFromWeb(error: any): Action {
+export function temporaryErrorReceivingProfileFromWeb(error: TemporaryError): Action {
   return {
-    type: 'ERROR_RECEIVING_PROFILE_FROM_WEB',
+    type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_WEB',
     error,
   };
 }
 
+export function fatalErrorReceivingProfileFromWeb(error: Error): Action {
+  return {
+    type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_WEB',
+    error,
+  };
+}
+
+function _wait(delayMs) {
+  return new Promise(resolve => setTimeout(resolve, delayMs));
+}
+
+type FetchProfileArgs = {
+  url: string,
+  onTemporaryError: TemporaryError => void,
+};
+/**
+ * Tries to fetch a profile on URL url. If the profile is not found,
+ * onTemporaryError is called with an appropriate error, we wait 1 second, and
+ * then tries again. If we still can't find the profile after 11 tries, we throw
+ * a permanent error.
+ * @param {string} url URL to fetch
+ * @param {Function} onTemporaryError callback that will be called for
+ * tempoerary errors.
+ * @returns {Promise.<String>} Resolves to the text profile if successful,
+ * rejects with an error for fatal errors.
+ */
+async function _fetchProfile({ url, onTemporaryError }: FetchProfileArgs) {
+  const MAX_WAIT_SECONDS = 10;
+  let i = 0;
+
+  while (true) {
+    const response = await fetch(url);
+    if (response.ok) {
+      const text = await response.json();
+      return text;
+    }
+
+    if (response.status !== 404) {
+      throw new Error(oneLine`
+        Could not fetch the profile on remote server.
+        Response was: ${response.status} ${response.statusText}.
+      `);
+    }
+
+    if (i++ === MAX_WAIT_SECONDS) {
+      break;
+    }
+
+    onTemporaryError(new TemporaryError(
+      'Profile not found on remote server.',
+      { count: i, total: MAX_WAIT_SECONDS + 1 } // 11 tries during 10 seconds
+    ));
+
+    await _wait(1000);
+  }
+
+  throw new Error(oneLine`
+    Could not fetch the profile on remote server:
+    still not found after ${MAX_WAIT_SECONDS} seconds.
+  `);
+}
+
 export function retrieveProfileFromWeb(hash: string): ThunkAction {
-  return dispatch => {
+  return async function (dispatch) {
     dispatch(waitingForProfileFromWeb());
 
-    fetch(`https://profile-store.commondatastorage.googleapis.com/${hash}`).then(response => response.text()).then(text => {
-      const profile = unserializeProfileOfArbitraryFormat(text);
+    try {
+      const serializedProfile = await _fetchProfile({
+        url: `https://profile-store.commondatastorage.googleapis.com/${hash}`,
+        onTemporaryError: e => dispatch(temporaryErrorReceivingProfileFromWeb(e)),
+      });
+
+      const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
       if (profile === undefined) {
         throw new Error('Unable to parse the profile.');
       }
 
-      if (window.legacyRangeFilters) {
+      if (typeof window !== 'undefined' && window.legacyRangeFilters) {
         const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
         window.legacyRangeFilters.forEach(
           ({ start, end }) => dispatch({
@@ -261,10 +330,9 @@ export function retrieveProfileFromWeb(hash: string): ThunkAction {
       }
 
       dispatch(receiveProfileFromWeb(profile));
-
-    }).catch(error => {
-      dispatch(errorReceivingProfileFromWeb(error));
-    });
+    } catch (error) {
+      dispatch(fatalErrorReceivingProfileFromWeb(error));
+    }
   };
 }
 
