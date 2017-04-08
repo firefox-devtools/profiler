@@ -7,7 +7,7 @@
  * current format.
 */
 
-export const CURRENT_VERSION = 4; // The current version of the 'raw profile' format.
+export const CURRENT_VERSION = 5; // The current version of the 'raw profile' format.
 
 // Raw profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -122,7 +122,34 @@ const _upgraders = {
           }
         }
       }
+
+      p.meta.version = 4;
     }
     convertToVersionFourRecursive(profile);
+  },
+  [5]: profile => {
+    // In version 4, profiles from other processes were embedded as JSON
+    // strings in the threads array. Version 5 breaks those out into a
+    // separate "processes" array and no longer stringifies them.
+    function convertToVersionFiveRecursive(p) {
+      const allThreadsAndProcesses = p.threads.map(threadOrProcess => {
+        if (typeof threadOrProcess === 'string') {
+          const processProfile = JSON.parse(threadOrProcess);
+          convertToVersionFiveRecursive(processProfile);
+          return {
+            type: 'process',
+            data: processProfile,
+          };
+        }
+        return {
+          type: 'thread',
+          data: threadOrProcess,
+        };
+      });
+      p.processes = allThreadsAndProcesses.filter(x => x.type === 'process').map(p => p.data);
+      p.threads = allThreadsAndProcesses.filter(x => x.type === 'thread').map(t => t.data);
+      p.meta.version = 5;
+    }
+    convertToVersionFiveRecursive(profile);
   },
 };

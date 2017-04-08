@@ -70,6 +70,7 @@ const profile = Object.assign({}, exampleProfile, {
     Object.assign({ name: 'Compositor'}, thread),
     Object.assign({ name: 'GeckoMain'}, thread),
   ],
+  processes: [],
 });
 
 export default profile;

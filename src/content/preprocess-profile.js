@@ -409,35 +409,24 @@ export function preprocessProfile(profile) {
     addPreprocessedTaskTracerData(profile.tasktracer, tasktracer, libs, profile.meta.startTime);
   }
 
-  for (const threadOrSubprocess of profile.threads) {
-    if (typeof threadOrSubprocess === 'string') {
-      const subprocessProfile = JSON.parse(threadOrSubprocess);
-      const subprocessLibs = subprocessProfile.libs;
-      const adjustTimestampsBy = subprocessProfile.meta.startTime - profile.meta.startTime;
-      threads = threads.concat(subprocessProfile.threads.map((thread, threadIndex) => {
-        const newThread = preprocessThread(thread, subprocessLibs);
-        newThread.samples = adjustSampleTimestamps(newThread.samples, adjustTimestampsBy);
-        newThread.markers = adjustMarkerTimestamps(newThread.markers, adjustTimestampsBy);
-        if (newThread.name === 'Content') {
-          // Workaround for bug 1322471.
-          if (threadIndex === 0) {
-            newThread.name = 'GeckoMain';
-          } else {
-            newThread.name = 'Unknown';
-          }
-          newThread.processType = newThread.processType || 'tab';
-        }
-        return newThread;
-      }));
-      if (('tasktracer' in subprocessProfile) && ('threads' in subprocessProfile.tasktracer)) {
-        addPreprocessedTaskTracerData(subprocessProfile.tasktracer, tasktracer, subprocessLibs, profile.meta.startTime);
-      }
-    } else {
-      const newThread = preprocessThread(threadOrSubprocess, libs);
-      newThread.processType = newThread.processType || 'default';
-      threads.push(newThread);
+  for (const thread of profile.threads) {
+    threads.push(preprocessThread(thread, libs));
+  }
+
+  for (const subprocessProfile of profile.processes) {
+    const subprocessLibs = subprocessProfile.libs;
+    const adjustTimestampsBy = subprocessProfile.meta.startTime - profile.meta.startTime;
+    threads = threads.concat(subprocessProfile.threads.map(thread => {
+      const newThread = preprocessThread(thread, subprocessLibs);
+      newThread.samples = adjustSampleTimestamps(newThread.samples, adjustTimestampsBy);
+      newThread.markers = adjustMarkerTimestamps(newThread.markers, adjustTimestampsBy);
+      return newThread;
+    }));
+    if (('tasktracer' in subprocessProfile) && ('threads' in subprocessProfile.tasktracer)) {
+      addPreprocessedTaskTracerData(subprocessProfile.tasktracer, tasktracer, subprocessLibs, profile.meta.startTime);
     }
   }
+
   const result = {
     meta: Object.assign({}, profile.meta, {
       preprocessedProfileVersion: CURRENT_VERSION,
