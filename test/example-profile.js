@@ -151,7 +151,7 @@ const parentProcessMeta = {
   stackwalk: 1,
   startTime: 1460221352723.438,
   toolkit: 'cocoa',
-  version: 4,
+  version: 5,
 };
 
 const contentProcessMeta = Object.assign({}, parentProcessMeta, {
@@ -173,7 +173,9 @@ const profile = {
   threads: [
     Object.assign({ name: 'GeckoMain', processType: 'default' }, thread),
     Object.assign({ name: 'Compositor', processType: 'default' }, thread),
-    JSON.stringify(contentProcessProfile), // subprocesses are stringified, too
+  ],
+  processes: [
+    contentProcessProfile,
   ],
 };
 

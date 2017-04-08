@@ -9,7 +9,7 @@ import { FakeSymbolStore } from './fake-symbol-store';
 import { sortDataTable } from '../src/content/data-table-utils';
 import { isOldCleopatraFormat, convertOldCleopatraProfile } from '../src/content/old-cleopatra-profile-format';
 import { isPreprocessedProfile, upgradePreprocessedProfileToCurrentVersion } from '../src/content/preprocessed-profile-versioning';
-import { upgradeRawProfileToCurrentVersion } from '../src/content/raw-profile-versioning';
+import { upgradeRawProfileToCurrentVersion, CURRENT_VERSION } from '../src/content/raw-profile-versioning';
 import { getImplementationColor, getCategoryByImplementation, implementationCategoryMap } from '../src/content/color-categories';
 
 config.truncateThreshold = 0;
@@ -344,7 +344,7 @@ describe('upgrades', function () {
   }
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(require('./upgrades/prepr-4.sps.json'));
 
-  // Uncomment this to output your next ./upgrades-prepr-X.sps.json
+  // Uncomment this to output your next ./upgrades/prepr-X.sps.json
   // console.log(serializeProfile(afterUpgradeReference));
 
   it('should import an old profile and upgrade it to be the same as the reference preprocessed profile', function () {
@@ -370,17 +370,20 @@ describe('upgrades', function () {
     // const upgradedRawProfile4 = unserializeProfileOfArbitraryFormat(rawProfile4);
     // comparePreprocessedProfiles(upgradedRawProfile4, afterUpgradeReference);
   });
-  it('should import an old raw profile and upgrade it to be the same as the current exampleProfile', function () {
-    // This is not working. We have JSON strings in the profile, so it tries to
-    // compare those strings, but objects inside them have different property
-    // orders.
+  it('should import an old raw profile and upgrade it to be the same as the newest raw profile', function () {
+    const afterUpgradeRawReference = require('./upgrades/raw-5.sps.json');
+    // Uncomment this to output your next ./upgrades/raw-X.sps.json
+    // upgradeRawProfileToCurrentVersion(afterUpgradeRawReference);
+    // console.log(JSON.stringify(afterUpgradeRawReference));
+    assert.equal(afterUpgradeRawReference.meta.version, CURRENT_VERSION);
 
-    // const rawProfile3 = require('./upgrades/raw-3.sps.json');
-    // upgradeRawProfileToCurrentVersion(rawProfile3);
-    // assert.deepEqual(rawProfile3, exampleProfile);
-    // const rawProfile4 = require('./upgrades/raw-4.sps.json');
-    // upgradeRawProfileToCurrentVersion(rawProfile4);
-    // assert.deepEqual(upgradedProfile4, exampleProfile);
+    const rawProfile3 = require('./upgrades/raw-3.sps.json');
+    upgradeRawProfileToCurrentVersion(rawProfile3);
+    assert.deepEqual(rawProfile3, afterUpgradeRawReference);
+
+    const rawProfile4 = require('./upgrades/raw-4.sps.json');
+    upgradeRawProfileToCurrentVersion(rawProfile4);
+    assert.deepEqual(rawProfile4, afterUpgradeRawReference);
   });
 });
 
