@@ -93,13 +93,18 @@ type URLStateAction =
   { type: 'CHANGE_INVERT_CALLSTACK', invertCallstack: boolean } |
   { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean };
 
+type IconsAction =
+  { type: 'ICON_HAS_LOADED', icon: string } |
+  { type: 'ICON_IN_ERROR', icon: string };
+
 export type Action =
   ProfileSummaryAction |
   ProfileAction |
   ReceiveProfileAction |
   TimelineAction |
   URLEnhancerAction |
-  URLStateAction;
+  URLStateAction |
+  IconsAction;
 
 export type GetState = () => State;
 export type Dispatch = (Action | ThunkAction) => any;

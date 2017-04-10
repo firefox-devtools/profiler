@@ -1,11 +1,14 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TreeView from './TreeView';
+import NodeIcon from './NodeIcon';
 import { getStackAsFuncArray } from '../profile-data';
 import { getInvertCallstack, getJSOnly, getSearchString, getSelectedThreadIndex } from '../reducers/url-state';
 import {
   getProfile, selectedThreadSelectors, getScrollToSelectionGeneration, getProfileViewOptions,
 } from '../reducers/profile-view';
+import { getIconsWithClassNames } from '../reducers/icons';
+
 import ProfileCallTreeContextMenu from '../containers/ProfileCallTreeContextMenu';
 
 import actions from '../actions';
@@ -19,6 +22,7 @@ class ProfileTreeView extends Component {
       { propName: 'totalTime', title: 'Running Time' },
       { propName: 'totalTimePercent', title: '' },
       { propName: 'selfTime', title: 'Self' },
+      { propName: 'icon', title: '', component: NodeIcon },
     ];
     this._mainColumn = { propName: 'name', title: '' };
     this._appendageColumn = { propName: 'lib', title: '' };
@@ -111,7 +115,8 @@ class ProfileTreeView extends Component {
                 onAppendageButtonClick={this._onAppendageButtonClick}
                 ref='treeView'
                 contextMenu={<ProfileCallTreeContextMenu contextMenuId={CONTEXT_MENU_ID} />}
-                contextMenuId={CONTEXT_MENU_ID}/>
+                contextMenuId={CONTEXT_MENU_ID}
+                icons={this.props.icons}/>
     );
 
   }
@@ -138,6 +143,7 @@ ProfileTreeView.propTypes = {
   addCallTreeFilter: PropTypes.func.isRequired,
   jsOnly: PropTypes.bool.isRequired,
   invertCallstack: PropTypes.bool.isRequired,
+  icons: PropTypes.array.isRequired,
 };
 
 export default connect(state => ({
@@ -153,4 +159,5 @@ export default connect(state => ({
   disableOverscan: getProfileViewOptions(state).selection.isModifying,
   invertCallstack: getInvertCallstack(state),
   jsOnly: getJSOnly(state),
+  icons: getIconsWithClassNames(state),
 }), actions, null, { withRef: true })(ProfileTreeView);
