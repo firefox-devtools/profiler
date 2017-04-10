@@ -108,7 +108,10 @@ export type ProfileMeta = {
   interval: number,
 };
 
-export type TaskTracer = {};
+export type TaskTracer = {
+  taskTable: Object,
+  threadTable: Object,
+};
 
 export type Profile = {
   meta: ProfileMeta,

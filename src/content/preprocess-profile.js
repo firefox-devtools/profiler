@@ -5,6 +5,7 @@ import { provideHostSide } from './promise-worker';
 import { CURRENT_VERSION, upgradePreprocessedProfileToCurrentVersion, isPreprocessedProfile } from './preprocessed-profile-versioning';
 import { upgradeRawProfileToCurrentVersion } from './raw-profile-versioning';
 import { isOldCleopatraFormat, convertOldCleopatraProfile } from './old-cleopatra-profile-format';
+import { emptyTaskTracerData } from './task-tracer';
 
 /**
  * Module for converting a profile into the 'preprocessed' format.
@@ -224,41 +225,6 @@ function preprocessThread(thread, libs) {
     tid: thread.tid,
     pid: thread.pid,
     libs, frameTable, funcTable, resourceTable, stackTable, markers, stringTable, samples,
-  };
-}
-
-function emptyTaskTracerData() {
-  return {
-    taskTable: {
-      length: 0,
-      dispatchTime: [],
-      sourceEventId: [],
-      sourceEventType: [],
-      parentTaskId: [],
-      beginTime: [],
-      processId: [],
-      threadIndex: [],
-      endTime: [],
-      ipdlMsg: [],
-      label: [],
-      address: [],
-    },
-    tasksIdToTaskIndexMap: new Map(),
-    stringTable: new UniqueStringArray(),
-    addressTable: {
-      length: 0,
-      address: [],
-      className: [],
-      lib: [],
-    },
-    addressIndicesByLib: new Map(),
-    threadTable: {
-      length: 0,
-      tid: [],
-      name: [],
-      start: [],
-    },
-    tidToThreadIndexMap: new Map(),
   };
 }
 
