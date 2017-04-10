@@ -1,10 +1,27 @@
+// @flow
+
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { getIsURLSetupDone } from '../reducers/app';
 
+import type { Dispatch } from '../actions/types.js';
+
+type Props = {
+  stateFromCurrentLocation: void => any,
+  urlFromState: any => string,
+  children: any,
+  urlState: any,
+  isURLSetupDone: boolean,
+  updateURLState: string => void,
+  urlSetupDone: void => void,
+  show404: string => void,
+};
+
 class URLManager extends Component {
-  componentDidMount() {
-    const { updateURLState, urlSetupDone, stateFromCurrentLocation, show404 } = this.props;
+  props: Props;
+
+  _updateState() {
+    const { updateURLState, stateFromCurrentLocation, show404 } = this.props;
     if (window.history.state) {
       updateURLState(window.history.state);
     } else {
@@ -16,13 +33,16 @@ class URLManager extends Component {
         show404(window.location.pathname + window.location.search);
       }
     }
-    window.onpopstate = e => {
-      updateURLState(e.state);
-    };
+  }
+  componentDidMount() {
+    const { urlSetupDone } = this.props;
+
+    this._updateState();
+    window.onpopstate = () => this._updateState();
     urlSetupDone();
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps: Props) {
     const { urlFromState, isURLSetupDone } = this.props;
     const newURL = urlFromState(nextProps.urlState);
     if (newURL !== window.location.pathname + window.location.search) {
@@ -54,7 +74,7 @@ URLManager.propTypes = {
 export default connect(state => ({
   urlState: state.urlState,
   isURLSetupDone: getIsURLSetupDone(state),
-}), dispatch => ({
+}), (dispatch: Dispatch) => ({
   updateURLState: urlState => dispatch({ type: '@@urlenhancer/updateURLState', urlState }),
   urlSetupDone: () => dispatch({ type: '@@urlenhancer/urlSetupDone' }),
   show404: url => dispatch({ type: 'FILE_NOT_FOUND', url }),

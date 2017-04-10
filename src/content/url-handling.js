@@ -57,7 +57,8 @@ export function urlFromState(urlState) {
       query.jsOnly = urlState.jsOnly ? null : undefined;
       query.callTreeFilters = stringifyCallTreeFilters(urlState.callTreeFilters[urlState.selectedThread]) || undefined;
       break;
-    case 'flameChart':
+    case 'timeline':
+      query.search = urlState.callTreeSearchString || undefined;
       query.invertCallstack = urlState.invertCallstack ? null : undefined;
       query.hidePlatformDetails = urlState.hidePlatformDetails ? null : undefined;
       break;
