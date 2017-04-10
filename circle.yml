@@ -1,6 +1,6 @@
 machine:
   node:
-    # version: 0.11.8
+    version: 7.8
 test:
   pre:
     - npm run eslint
