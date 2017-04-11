@@ -2,6 +2,7 @@
 import { UniqueStringArray } from './unique-string-array';
 import { resourceTypes } from './profile-data';
 import { CURRENT_VERSION } from './raw-profile-versioning.js';
+import { emptyTaskTracerData } from './task-tracer';
 
 /**
  * The "old cleopatra format" is the profile format that was used by the
@@ -329,37 +330,6 @@ export function convertOldCleopatraProfile(
   return {
     meta: Object.assign({}, meta, { version: CURRENT_VERSION }),
     threads: threads.map(t => _convertThread(t, symbolicationTable)),
-    tasktracer: {
-      taskTable: {
-        length: 0,
-        dispatchTime: [],
-        sourceEventId: [],
-        sourceEventType: [],
-        parentTaskId: [],
-        beginTime: [],
-        processId: [],
-        threadIndex: [],
-        endTime: [],
-        ipdlMsg: [],
-        label: [],
-        address: [],
-      },
-      tasksIdToTaskIndexMap: new Map(),
-      stringArray: [],
-      addressTable: {
-        length: 0,
-        address: [],
-        className: [],
-        lib: [],
-      },
-      addressIndicesByLib: new Map(),
-      threadTable: {
-        length: 0,
-        tid: [],
-        name: [],
-        start: [],
-      },
-      tidToThreadIndexMap: new Map(),
-    },
+    tasktracer: emptyTaskTracerData(),
   };
 }

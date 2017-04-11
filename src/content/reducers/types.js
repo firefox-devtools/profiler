@@ -1,14 +1,23 @@
+// @flow
+
 import type { Summary } from '../../common/summarize-profile';
-import type { Action, ExpandedSet, CallTreeFiltersPerThread, DataSource } from '../actions/types';
+import type { Action, ExpandedSet, CallTreeFiltersPerThread, DataSource, ProfileSelection } from '../actions/types';
 import type { Milliseconds, StartEndRange } from '../../common/types/units';
-import type { Profile, ThreadIndex } from '../../common/types/profile';
+import type { IndexIntoMarkersTable, IndexIntoFuncTable, Profile, ThreadIndex } from '../../common/types/profile';
 
 export type Reducer<T> = (T, Action) => T;
 
+export type RequestedLib = { pdbName: string, breakpadId: string };
+export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
+export type ThreadViewOptions = {
+  selectedFuncStack: IndexIntoFuncTable[],
+  expandedFuncStacks: Array<IndexIntoFuncTable[]>,
+  selectedMarker: IndexIntoMarkersTable | -1,
+};
 export type ProfileViewState = {
   viewOptions: {
-    threads: ThreadViewOptions[],
     threadOrder: number[],
+    perThread: ThreadViewOptions[],
     symbolicationStatus: SymbolicationStatus,
     waitingForLibs: Set<RequestedLib>,
     selection: ProfileSelection,
@@ -17,7 +26,7 @@ export type ProfileViewState = {
     zeroAt: Milliseconds,
     tabOrder: number[],
   },
-  profile: Profile | null,
+  profile: Profile,
 };
 
 export type AppState = {
@@ -30,11 +39,16 @@ export type SummaryViewState = {
   expanded: null|ExpandedSet,
 };
 
+export type RangeFilterState = {
+  start: number,
+  end: number,
+};
+
 export type URLState = {
   dataSource: DataSource,
   hash: string,
   selectedTab: string,
-  rangeFilters: RangeFiltersState,
+  rangeFilters: RangeFilterState[],
   selectedThread: ThreadIndex,
   callTreeSearchString: string,
   callTreeFilters: CallTreeFiltersPerThread,

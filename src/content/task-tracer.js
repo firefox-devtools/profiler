@@ -1,5 +1,9 @@
+// @flow
 
-export function getTasksByThread(taskTable, threadTable) {
+import { UniqueStringArray } from './unique-string-array';
+import type { TaskTracer } from '../common/types/profile';
+
+export function getTasksByThread(taskTable: Object, threadTable: Object) {
   const threadIndexToTaskIndicesMap = new Map();
   for (let threadIndex = 0; threadIndex < threadTable.length; threadIndex++) {
     const taskIndices = [];
@@ -13,4 +17,39 @@ export function getTasksByThread(taskTable, threadTable) {
     threadIndexToTaskIndicesMap.set(threadIndex, taskIndices);
   }
   return threadIndexToTaskIndicesMap;
+}
+
+export function emptyTaskTracerData(): TaskTracer {
+  return {
+    taskTable: {
+      length: 0,
+      dispatchTime: [],
+      sourceEventId: [],
+      sourceEventType: [],
+      parentTaskId: [],
+      beginTime: [],
+      processId: [],
+      threadIndex: [],
+      endTime: [],
+      ipdlMsg: [],
+      label: [],
+      address: [],
+    },
+    tasksIdToTaskIndexMap: new Map(),
+    stringTable: new UniqueStringArray(),
+    addressTable: {
+      length: 0,
+      address: [],
+      className: [],
+      lib: [],
+    },
+    addressIndicesByLib: new Map(),
+    threadTable: {
+      length: 0,
+      tid: [],
+      name: [],
+      start: [],
+    },
+    tidToThreadIndexMap: new Map(),
+  };
 }

@@ -7,7 +7,7 @@ import * as URLState from './url-state';
 import * as ProfileData from '../profile-data';
 import * as StackTiming from '../stack-timing';
 import * as ProfileTree from '../profile-tree';
-import * as TaskTracer from '../task-tracer';
+import * as TaskTracerTools from '../task-tracer';
 import { getCategoryColorStrategy } from './flame-chart';
 
 import type {
@@ -15,31 +15,37 @@ import type {
   Thread,
   ThreadIndex,
   IndexIntoFuncTable,
-  IndexIntoMarkersTable,
   SamplesTable,
+  TaskTracer,
 } from '../../common/types/profile';
 import type { TracingMarker, FuncStackInfo, IndexIntoFuncStackTable } from '../../common/types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../../common/types/units';
 import type { Action, CallTreeFilter, ProfileSelection } from '../actions/types';
-import type { State, Reducer, ProfileViewState } from './types';
+import type {
+  State,
+  Reducer,
+  ProfileViewState,
+  RequestedLib,
+  SymbolicationStatus,
+  ThreadViewOptions,
+} from './types';
 
-type RequestedLib = { pdbName: string, breakpadId: string };
-type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
-type ThreadViewOptions = {
-  selectedFuncStack: IndexIntoFuncTable[],
-  expandedFuncStacks: Array<IndexIntoFuncTable[]>,
-  selectedMarker: IndexIntoMarkersTable | -1,
+function emptyProfile(): Profile {
+  return {
+    meta: { interval: 1 },
+    threads: [],
+    tasktracer: TaskTracerTools.emptyTaskTracerData(),
+  };
 }
-
-function profile(state: Profile | null = null, action: Action) {
+function profile(state: Profile = emptyProfile(), action: Action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_WEB':
     case 'RECEIVE_PROFILE_FROM_FILE':
       return action.profile;
     case 'COALESCED_FUNCTIONS_UPDATE': {
-      if (state === null) {
-        return null;
+      if (!state.threads.length) {
+        return state;
       }
       const { functionsUpdatePerThread } = action;
       const threads = state.threads.map((thread, threadIndex) => {
@@ -53,8 +59,8 @@ function profile(state: Profile | null = null, action: Action) {
       return Object.assign({}, state, { threads });
     }
     case 'ASSIGN_TASK_TRACER_NAMES': {
-      if (state === null) {
-        return null;
+      if (!state.tasktracer.taskTable.length) {
+        return state;
       }
       const { addressIndices, symbolNames } = action;
       const tasktracer = setTaskTracerNames(state.tasktracer, addressIndices, symbolNames);
@@ -287,7 +293,7 @@ export const getDisplayRange = createSelector(
   (state: State) => getProfileViewOptions(state).rootRange,
   (state: State) => getProfileViewOptions(state).zeroAt,
   URLState.getRangeFilters,
-  (rootRange, zeroAt, rangeFilters) => {
+  (rootRange, zeroAt, rangeFilters): StartEndRange => {
     if (rangeFilters.length > 0) {
       let { start, end } = rangeFilters[rangeFilters.length - 1];
       start += zeroAt;
@@ -301,7 +307,7 @@ export const getDisplayRange = createSelector(
 export const getTasksByThread = createSelector(
   (state: State) => getProfileTaskTracerData(state).taskTable,
   (state: State) => getProfileTaskTracerData(state).threadTable,
-  TaskTracer.getTasksByThread
+  TaskTracerTools.getTasksByThread
 );
 
 /**
@@ -311,7 +317,7 @@ export const getProfile = (state: State): Profile => getProfileView(state).profi
 export const getProfileInterval = (state: State): Milliseconds => getProfile(state).meta.interval;
 export const getThreads = (state: State): Thread[] => getProfile(state).threads;
 export const getThreadNames = (state: State): string[] => getProfile(state).threads.map(t => t.name);
-export const getProfileTaskTracerData = (state: State): Object => getProfile(state).tasktracer;
+export const getProfileTaskTracerData = (state: State): TaskTracer => getProfile(state).tasktracer;
 
 export type SelectorsForThread = {
   getThread: State => Thread,
@@ -347,39 +353,39 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
       getCallTreeFilters,
       CallTreeFilters.getCallTreeFilterLabels
     );
-    const getRangeFilteredThread: State => Thread = createSelector(
+    const getRangeFilteredThread = createSelector(
       getThread,
       getDisplayRange,
-      (thread: Thread, range: StartEndRange) => {
+      (thread, range): Thread => {
         const { start, end } = range;
         return ProfileData.filterThreadToRange(thread, start, end);
       }
     );
-    const _getRangeFilteredThreadSamples: State => SamplesTable = createSelector(
+    const _getRangeFilteredThreadSamples = createSelector(
       getRangeFilteredThread,
-      thread => thread.samples
+      (thread): SamplesTable => thread.samples
     );
-    const getJankInstances: State => TracingMarker[] = createSelector(
+    const getJankInstances = createSelector(
       _getRangeFilteredThreadSamples,
       (state: State): string => getThread(state).processType,
-      (samples, processType) => ProfileData.getJankInstances(samples, processType, 50)
+      (samples, processType): TracingMarker[] => ProfileData.getJankInstances(samples, processType, 50)
     );
-    const getTracingMarkers: State => TracingMarker[] = createSelector(
+    const getTracingMarkers = createSelector(
       getThread,
       ProfileData.getTracingMarkers
     );
-    const getRangeSelectionFilteredTracingMarkers: State => TracingMarker[] = createSelector(
+    const getRangeSelectionFilteredTracingMarkers = createSelector(
       getTracingMarkers,
       getDisplayRange,
-      (thread, range) => {
+      (markers, range): TracingMarker[] => {
         const { start, end } = range;
-        return ProfileData.filterTracingMarkersToRange(thread, start, end);
+        return ProfileData.filterTracingMarkersToRange(markers, start, end);
       }
     );
-    const _getRangeAndCallTreeFilteredThread: State => Thread = createSelector(
+    const _getRangeAndCallTreeFilteredThread = createSelector(
       getRangeFilteredThread,
       getCallTreeFilters,
-      (thread, callTreeFilters) => {
+      (thread, callTreeFilters): Thread => {
         const result = callTreeFilters.reduce((t, filter) => {
           switch (filter.type) {
             case 'prefix':
@@ -393,31 +399,31 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
         return result;
       }
     );
-    const _getJSOnlyFilteredThread: State => Thread = createSelector(
+    const _getJSOnlyFilteredThread = createSelector(
       _getRangeAndCallTreeFilteredThread,
       URLState.getJSOnly,
-      (thread, jsOnly) => {
+      (thread, jsOnly): Thread => {
         return jsOnly ? ProfileData.filterThreadToJSOnly(thread) : thread;
       }
     );
-    const _getJSOnlyAndSearchFilteredThread: State => Thread = createSelector(
+    const _getJSOnlyAndSearchFilteredThread = createSelector(
       _getJSOnlyFilteredThread,
       URLState.getSearchString,
-      (thread, searchString) => {
+      (thread, searchString): Thread => {
         return ProfileData.filterThreadToSearchString(thread, searchString);
       }
     );
-    const getFilteredThread: State => Thread = createSelector(
+    const getFilteredThread = createSelector(
       _getJSOnlyAndSearchFilteredThread,
       URLState.getInvertCallstack,
-      (thread, shouldInvertCallstack) => {
+      (thread, shouldInvertCallstack): Thread => {
         return shouldInvertCallstack ? ProfileData.invertCallstack(thread) : thread;
       }
     );
-    const getRangeSelectionFilteredThread: State => Thread = createSelector(
+    const getRangeSelectionFilteredThread = createSelector(
       getFilteredThread,
       getProfileViewOptions,
-      (thread, viewOptions) => {
+      (thread, viewOptions): Thread => {
         if (!viewOptions.selection.hasSelection) {
           return thread;
         }
@@ -425,35 +431,35 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
         return ProfileData.filterThreadToRange(thread, selectionStart, selectionEnd);
       }
     );
-    const getFuncStackInfo: State => FuncStackInfo = createSelector(
+    const getFuncStackInfo = createSelector(
       getFilteredThread,
-      ({stackTable, frameTable, funcTable}: Thread) => {
+      ({stackTable, frameTable, funcTable}: Thread): FuncStackInfo => {
         return ProfileData.getFuncStackInfo(stackTable, frameTable, funcTable);
       }
     );
-    const _getSelectedFuncStackAsFuncArray: State => IndexIntoFuncTable[] = createSelector(
+    const _getSelectedFuncStackAsFuncArray = createSelector(
       getViewOptions,
-      threadViewOptions => threadViewOptions.selectedFuncStack
+      (threadViewOptions): IndexIntoFuncTable[] => threadViewOptions.selectedFuncStack
     );
-    const getSelectedFuncStack: State => IndexIntoFuncStackTable = createSelector(
+    const getSelectedFuncStack = createSelector(
       getFuncStackInfo,
       _getSelectedFuncStackAsFuncArray,
-      (funcStackInfo: FuncStackInfo, funcArray: IndexIntoFuncTable[]) => {
+      (funcStackInfo, funcArray): IndexIntoFuncStackTable | null => {
         return ProfileData.getFuncStackFromFuncArray(funcArray, funcStackInfo.funcStackTable);
       }
     );
-    const _getExpandedFuncStacksAsFuncArrays: State => Array<IndexIntoFuncTable[]> = createSelector(
+    const _getExpandedFuncStacksAsFuncArrays = createSelector(
       getViewOptions,
-      threadViewOptions => threadViewOptions.expandedFuncStacks
+      (threadViewOptions): Array<IndexIntoFuncTable[]> => threadViewOptions.expandedFuncStacks
     );
-    const getExpandedFuncStacks: State => IndexIntoFuncStackTable[] = createSelector(
+    const getExpandedFuncStacks = createSelector(
       getFuncStackInfo,
       _getExpandedFuncStacksAsFuncArrays,
-      (funcStackInfo: FuncStackInfo, funcArrays: Array<IndexIntoFuncTable[]>) => {
+      (funcStackInfo, funcArrays): (IndexIntoFuncStackTable|null)[] => {
         return funcArrays.map(funcArray => ProfileData.getFuncStackFromFuncArray(funcArray, funcStackInfo.funcStackTable));
       }
     );
-    const getCallTree: State => ProfileTree.ProfileTreeClass = createSelector(
+    const getCallTree = createSelector(
       getRangeSelectionFilteredThread,
       getProfileInterval,
       getFuncStackInfo,
@@ -467,7 +473,7 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
     // This divergence is hopefully temporary, as we figure out how to filter
     // out unneeded detail from stacks in a way that satisfy both the flame
     // chart and the call tree.
-    const getFilteredThreadForFlameChart: State => Thread = createSelector(
+    const getFilteredThreadForFlameChart = createSelector(
       getRangeFilteredThread,
       URLState.getHidePlatformDetails,
       URLState.getInvertCallstack,
@@ -477,7 +483,7 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
         shouldHidePlatformDetails: boolean,
         shouldInvertCallstack: boolean,
         searchString: string
-      ) => {
+      ): Thread => {
         // Unlike for the call tree filtered profile, the individual steps of
         // this filtering are not memoized. I hope it's not too bad.
         let filteredThread = thread;
@@ -491,25 +497,25 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
         return filteredThread;
       }
     );
-    const getFuncStackInfoOfFilteredThreadForFlameChart: State => FuncStackInfo = createSelector(
+    const getFuncStackInfoOfFilteredThreadForFlameChart = createSelector(
       getFilteredThreadForFlameChart,
-      ({stackTable, frameTable, funcTable}: Thread) => {
+      ({stackTable, frameTable, funcTable}): FuncStackInfo => {
         return ProfileData.getFuncStackInfo(stackTable, frameTable, funcTable);
       }
     );
-    const getFuncStackMaxDepthForFlameChart: State => number = createSelector(
+    const getFuncStackMaxDepthForFlameChart = createSelector(
       getFilteredThreadForFlameChart,
       getFuncStackInfoOfFilteredThreadForFlameChart,
       StackTiming.computeFuncStackMaxDepth
     );
-    const getStackTimingByDepthForFlameChart: State => StackTiming.StackTimingByDepth = createSelector(
+    const getStackTimingByDepthForFlameChart = createSelector(
       getFilteredThreadForFlameChart,
       getFuncStackInfoOfFilteredThreadForFlameChart,
       getFuncStackMaxDepthForFlameChart,
       getProfileInterval,
       StackTiming.getStackTimingByDepth
     );
-    const getLeafCategoryStackTimingForFlameChart: State => StackTiming.StackTimingByDepth = createSelector(
+    const getLeafCategoryStackTimingForFlameChart = createSelector(
       getFilteredThreadForFlameChart,
       getProfileInterval,
       getCategoryColorStrategy,
