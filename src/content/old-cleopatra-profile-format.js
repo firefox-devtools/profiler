@@ -1,7 +1,7 @@
 // @flow
 import { UniqueStringArray } from './unique-string-array';
 import { resourceTypes } from './profile-data';
-import { CURRENT_VERSION } from './raw-profile-versioning.js';
+import { CURRENT_VERSION } from './gecko-profile-versioning.js';
 import { emptyTaskTracerData } from './task-tracer';
 
 /**
@@ -10,18 +10,18 @@ import { emptyTaskTracerData } from './task-tracer';
  * in the profile store, and there are links to those profiles strewn across
  * bugzilla. We want to be able to display those profiles.
  * This file's purpose is to convert "old cleopatra" profiles into
- * preprocessed profiles of "preprocessed profile format" version zero.
- * The result will be run through the preprocessed profile format
- * compatibility conversion. Consequently, when the preprocessed profile
+ * processed profiles of "processed profile format" version zero.
+ * The result will be run through the processed profile format
+ * compatibility conversion. Consequently, when the processed profile
  * format changes, this file does not need to be touched and instead we will
- * automatically take advantage of the preprocess profile format conversion.
+ * automatically take advantage of the process profile format conversion.
  *
  * A lot of this code will remind you of very similar code in
- * preprocess-profile.js. However, we intentionally do not share code with it:
- * We want preprocess-profile to be exclusively concerned with converting the
- * most recent raw profile format into the most recent preprocessed profile
+ * process-profile.js. However, we intentionally do not share code with it:
+ * We want process-profile to be exclusively concerned with converting the
+ * most recent Gecko profile format into the most recent processed profile
  * format.
- * Some of the code below is basically a snapshot of the preprocessing code as
+ * Some of the code below is basically a snapshot of the processing code as
  * it was before the versioning scheme was introduced.
  */
 
@@ -307,11 +307,11 @@ function arrayFromArrayLikeObject<T>(obj: { [index: string]: T }): T[] {
 }
 
 /**
- * Convert the old cleopatra format into the serialized preprocessed format
+ * Convert the old cleopatra format into the serialized processed format
  * version zero.
  * @param {object} profile The input profile.
- * @returns A "preprocessed" profile that needs to be run through the
- *          "preprocessed format" compatibility conversion.
+ * @returns A "processed" profile that needs to be run through the
+ *          "processed format" compatibility conversion.
  */
 export function convertOldCleopatraProfile(
   profile: OldCleopatraProfile

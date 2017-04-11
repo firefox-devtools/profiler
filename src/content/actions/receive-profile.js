@@ -1,6 +1,6 @@
 // @flow
 import { getProfile } from '../reducers/profile-view';
-import { preprocessProfile, unserializeProfileOfArbitraryFormat } from '../preprocess-profile';
+import { processProfile, unserializeProfileOfArbitraryFormat } from '../process-profile';
 import { SymbolStore } from '../symbol-store';
 import { symbolicateProfile } from '../symbolication';
 import { decompress } from '../gz';
@@ -19,7 +19,7 @@ import type { Profile, ThreadIndex, IndexIntoFuncTable } from '../../common/type
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
- * client and getting it into the preprocessed format.
+ * client and getting it into the processed format.
  */
 
 export function waitingForProfileFromAddon(): Action {
@@ -172,8 +172,8 @@ export function retrieveProfileFromAddon(): ThunkAction {
     // XXX use Promise.race with a 5 second timeout promise to show an error message
     window.geckoProfilerPromise.then(geckoProfiler => {
       // XXX update state to show that we're connected to the profiler addon
-      geckoProfiler.getProfile().then(rawProfile => {
-        const profile = preprocessProfile(rawProfile);
+      geckoProfiler.getProfile().then(rawGeckoProfile => {
+        const profile = processProfile(rawGeckoProfile);
 
         dispatch(receiveProfileFromAddon(profile));
 

@@ -1,41 +1,48 @@
-# Profile Data
+# Gecko profile format
 
-The profile data is obtained from the [nsIProfiler][nsIProfiler] component in Gecko. The following code can be run from a browser chrome context, like from the Browser Console in Firefox (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>J</kbd>):
+Profile data visualized in perf.html is obtained from the [Gecko Profiler][nsIProfiler], a C++ component inside of Gecko. perf.html assumes that the Gecko Profiler add-on will activate the Gecko Profiler, gather the data, and then provide it to the client. This document talks about the Gecko profile format, which is distinct from the format that the perf.html client uses. The plan is to migrate the Gecko profile format closer and closer perf.html's desired processed profile format.
+
+## Running the Gecko Profiler independently from the add-on and client
+
+The Gecko Profiler can be run on its own by executing the following code from a browser chrome context, like from the Browser Console in Firefox (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>J</kbd>):
 
 ```js
-const profiler = Components.classes["@mozilla.org/tools/profiler;1"]
-  .getService(Components.interfaces.nsIProfiler);
+(() => {
+  const profiler = Components.classes["@mozilla.org/tools/profiler;1"]
+    .getService(Components.interfaces.nsIProfiler);
 
-const settings = {
-  entries: 1000000,
-  interval: 0.4,
-  features: ["js", "stackwalk", "threads", "leaf"],
-  threads: ["GeckoMain", "Compositor"]
-}
+  const settings = {
+    entries: 1000000,
+    interval: 0.4,
+    features: ["js", "stackwalk", "threads", "leaf"],
+    threads: ["GeckoMain", "Compositor"]
+  };
 
-profiler.StartProfiler(
-  settings.entries,
-  settings.interval,
-  settings.features,
-  settings.features.length,
-  settings.threads,
-  settings.threads.length
-);
+  profiler.StartProfiler(
+    settings.entries,
+    settings.interval,
+    settings.features,
+    settings.features.length,
+    settings.threads,
+    settings.threads.length
+  );
 
-setTimeout(() => {
-  profiler.getProfileDataAsync().then(profile => {
-    // Parse the libs which were passed in as a string.
-    profile.libs = JSON.parse(profile.libs);
-    console.log(profile);
-    // Stopping the profiler will delete the data in the buffer.
-    profiler.StopProfiler();
-  });
-}, 500);
+  setTimeout(() => {
+    profiler.getProfileDataAsync().then(profile => {
+      for (let i = 0; i < profile.threads.length; i++) {
+        const thread = profile.threads[i];
+      }
+      console.log(profile);
+      // Stopping the profiler will delete the data in the buffer.
+      profiler.StopProfiler();
+    });
+  }, 500);
+})();
 ```
 
 # Source data format
 
-The source data format is de-duplicated to make it quicker to transfer in the JSON format. This specific format is documented in [ProfileEntry.h]. In order to actually work with the data it must be re-mapped or have an interface wrapped around it to fetch all of the relevant information. The following is the general shape of the returned data in pseudo-code.
+The source data format is de-duplicated to make it quicker to transfer in the JSON format. This specific format is documented in [ProfileBufferEntry.h]. In order to actually work with the data it must be re-mapped or have an interface wrapped around it to fetch all of the relevant information. The following is the general shape of the returned data in pseudo-code.
 
 ```js
 {
@@ -287,4 +294,4 @@ funcTable: {
 ```
 
 [nsIProfiler]: https://dxr.mozilla.org/mozilla-central/source/tools/profiler/gecko/nsIProfiler.idl
-[ProfileEntry.h]: https://dxr.mozilla.org/mozilla-central/rev/8464f02a2798cf9ff8759df712f2c77ec0b15d23/tools/profiler/core/ProfileEntry.h?offset=0#314-405
+[ProfileBufferEntry.h]: https://dxr.mozilla.org/mozilla-central/rev/b043233ec04f06768d59dcdfb9e928142280f3cc/tools/profiler/core/ProfileBufferEntry.h#322-411

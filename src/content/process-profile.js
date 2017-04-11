@@ -2,30 +2,30 @@ import { getContainingLibrary, getClosestLibrary } from './symbolication';
 import { UniqueStringArray } from './unique-string-array';
 import { resourceTypes } from './profile-data';
 import { provideHostSide } from './promise-worker';
-import { CURRENT_VERSION, upgradePreprocessedProfileToCurrentVersion, isPreprocessedProfile } from './preprocessed-profile-versioning';
-import { upgradeRawProfileToCurrentVersion } from './raw-profile-versioning';
+import { CURRENT_VERSION, upgradeProcessedProfileToCurrentVersion, isProcessedProfile } from './processed-profile-versioning';
+import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import { isOldCleopatraFormat, convertOldCleopatraProfile } from './old-cleopatra-profile-format';
 import { emptyTaskTracerData } from './task-tracer';
 
 /**
- * Module for converting a profile into the 'preprocessed' format.
- * @module preprocess-profile
+ * Module for converting a Gecko profile into the 'processed' format.
+ * @module process-profile
  */
 
 /**
- * Turn a data table from the form `{ schema, data }` (as used in the raw profile
+ * Turn a data table from the form `{ schema, data }` (as used in the Gecko profile
  * JSON) into a struct of arrays. This isn't very nice to read, but it
  * drastically reduces the number of JS objects the JS engine has to deal with,
  * resulting in fewer GC pauses and hopefully better performance.
  *
- * @param {object} rawTable A data table of the form `{ schema, data }`.
+ * @param {object} geckoTable A data table of the form `{ schema, data }`.
  * @return {object} A data table of the form `{ length: number, field1: array, field2: array }`
  */
-function toStructOfArrays(rawTable) {
-  const result = { length: rawTable.data.length };
-  for (const fieldName in rawTable.schema) {
-    const fieldIndex = rawTable.schema[fieldName];
-    result[fieldName] = rawTable.data.map(entry => (fieldIndex in entry) ? entry[fieldIndex] : null);
+function toStructOfArrays(geckoTable) {
+  const result = { length: geckoTable.data.length };
+  for (const fieldName in geckoTable.schema) {
+    const fieldIndex = geckoTable.schema[fieldName];
+    result[fieldName] = geckoTable.data.map(entry => (fieldIndex in entry) ? entry[fieldIndex] : null);
   }
   return result;
 }
@@ -40,11 +40,11 @@ function getRealScriptURI(url) {
   return url;
 }
 
-function sortByField(fieldName, rawTable) {
-  const fieldIndex = rawTable.schema[fieldName];
-  const sortedData = rawTable.data.slice(0);
+function sortByField(fieldName, geckoTable) {
+  const fieldIndex = geckoTable.schema[fieldName];
+  const sortedData = geckoTable.data.slice(0);
   sortedData.sort((a, b) => a[fieldIndex] - b[fieldIndex]);
-  return Object.assign({}, rawTable, { data: sortedData });
+  return Object.assign({}, geckoTable, { data: sortedData });
 }
 
 function cleanFunctionName(functionName) {
@@ -56,13 +56,13 @@ function cleanFunctionName(functionName) {
 }
 
 /**
- * Convert the given thread into preprocessed form. See docs/profile-data.md for more
+ * Convert the given thread into processed form. See docs/gecko-profile-format for more
  * information.
- * @param {object} thread The thread object, in the 'raw' format.
+ * @param {object} thread The thread object, in the Gecko format.
  * @param {array} libs A libs array.
- * @return {object} A new thread object in the 'preprocessed' format.
+ * @return {object} A new thread object in the 'processed' format.
  */
-function preprocessThread(thread, libs) {
+function processThread(thread, libs) {
   const stringTable = new UniqueStringArray(thread.stringTable);
   const frameTable = toStructOfArrays(thread.frameTable);
   const stackTable = toStructOfArrays(thread.stackTable);
@@ -228,7 +228,7 @@ function preprocessThread(thread, libs) {
   };
 }
 
-function addPreprocessedTaskTracerData(tasktracer, result, libs, startTime) {
+function addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
   const { data, start, threads } = tasktracer;
 
   const {
@@ -389,41 +389,41 @@ function adjustMarkerTimestamps(markers, delta) {
 }
 
 /**
- * Convert a profile from "raw" format into the preprocessed format.
+ * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
- * For a description of the preprocessed format, look at docs/profile-data.md or
+ * For a description of the processed format, look at docs/gecko-profile-format or
  * alternately the tests for this function.
- * @param {object} profile A profile object, in the 'raw' format.
- * @return {object} A new profile object, in the 'preprocessed' format.
+ * @param {object} profile A profile object, in the Gecko format.
+ * @return {object} A new profile object, in the 'processed' format.
  */
-export function preprocessProfile(profile) {
+export function processProfile(profile) {
   // Handle profiles from older versions of Gecko. This call might throw an
   // exception.
-  upgradeRawProfileToCurrentVersion(profile);
+  upgradeGeckoProfileToCurrentVersion(profile);
 
   const libs = profile.libs;
   let threads = [];
   const tasktracer = emptyTaskTracerData();
 
   if (('tasktracer' in profile) && ('threads' in profile.tasktracer)) {
-    addPreprocessedTaskTracerData(profile.tasktracer, tasktracer, libs, profile.meta.startTime);
+    addProcessedTaskTracerData(profile.tasktracer, tasktracer, libs, profile.meta.startTime);
   }
 
   for (const thread of profile.threads) {
-    threads.push(preprocessThread(thread, libs));
+    threads.push(processThread(thread, libs));
   }
 
   for (const subprocessProfile of profile.processes) {
     const subprocessLibs = subprocessProfile.libs;
     const adjustTimestampsBy = subprocessProfile.meta.startTime - profile.meta.startTime;
     threads = threads.concat(subprocessProfile.threads.map(thread => {
-      const newThread = preprocessThread(thread, subprocessLibs);
+      const newThread = processThread(thread, subprocessLibs);
       newThread.samples = adjustSampleTimestamps(newThread.samples, adjustTimestampsBy);
       newThread.markers = adjustMarkerTimestamps(newThread.markers, adjustTimestampsBy);
       return newThread;
     }));
     if (('tasktracer' in subprocessProfile) && ('threads' in subprocessProfile.tasktracer)) {
-      addPreprocessedTaskTracerData(subprocessProfile.tasktracer, tasktracer, subprocessLibs, profile.meta.startTime);
+      addProcessedTaskTracerData(subprocessProfile.tasktracer, tasktracer, subprocessLibs, profile.meta.startTime);
     }
   }
 
@@ -480,23 +480,23 @@ export function unserializeProfileOfArbitraryFormat(jsonString) {
     if (isOldCleopatraFormat(profile)) {
       profile = convertOldCleopatraProfile(profile); // outputs proprocessed profile
     }
-    if (isPreprocessedProfile(profile)) {
-      upgradePreprocessedProfileToCurrentVersion(profile);
+    if (isProcessedProfile(profile)) {
+      upgradeProcessedProfileToCurrentVersion(profile);
       return unserializeProfile(profile);
     }
-    // Else: Treat it as a raw profile and just attempt to preprocess it.
-    return preprocessProfile(profile);
+    // Else: Treat it as a Gecko profile and just attempt to process it.
+    return processProfile(profile);
   } catch (e) {
     throw new Error(`Unserializing the profile failed: ${e}`);
   }
 }
 
-export class ProfilePreprocessor {
-  preprocessProfile(profile) {
+export class ProfileProcessor {
+  processProfile(profile) {
     return new Promise(resolve => {
-      resolve(preprocessProfile(profile));
+      resolve(processProfile(profile));
     });
   }
 }
 
-export const ProfilePreprocessorThreaded = provideHostSide('profile-preprocessor-worker.js', ['preprocessProfile']);
+export const ProfileProcessorThreaded = provideHostSide('profile-processor-worker.js', ['processProfile']);

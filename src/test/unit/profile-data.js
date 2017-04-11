@@ -1,7 +1,7 @@
 import 'babel-polyfill';
 import { assert, config } from 'chai';
 import { getContainingLibrary, symbolicateProfile, applyFunctionMerging, setFuncNames } from '../../content/symbolication';
-import { preprocessProfile, unserializeProfileOfArbitraryFormat, serializeProfile } from '../../content/preprocess-profile';
+import { processProfile, unserializeProfileOfArbitraryFormat, serializeProfile } from '../../content/process-profile';
 import { resourceTypes, getFuncStackInfo, getTracingMarkers, filterThreadByImplementation } from '../../content/profile-data';
 import exampleProfile from '.././fixtures/profiles/example-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
@@ -9,8 +9,8 @@ import { UniqueStringArray } from '../../content/unique-string-array';
 import { FakeSymbolStore } from '.././fixtures/fake-symbol-store';
 import { sortDataTable } from '../../content/data-table-utils';
 import { isOldCleopatraFormat, convertOldCleopatraProfile } from '../../content/old-cleopatra-profile-format';
-import { isPreprocessedProfile, upgradePreprocessedProfileToCurrentVersion } from '../../content/preprocessed-profile-versioning';
-import { upgradeRawProfileToCurrentVersion, CURRENT_VERSION } from '../../content/raw-profile-versioning';
+import { isProcessedProfile, upgradeProcessedProfileToCurrentVersion } from '../../content/processed-profile-versioning';
+import { upgradeGeckoProfileToCurrentVersion, CURRENT_VERSION } from '../../content/gecko-profile-versioning';
 import { getCategoryByImplementation, implementationCategoryMap } from '../../content/color-categories';
 
 config.truncateThreshold = 0;
@@ -81,9 +81,9 @@ describe('data-table-utils', function () {
   });
 });
 
-describe('preprocess-profile', function () {
-  describe('preprocessProfile', function () {
-    const profile = preprocessProfile(exampleProfile);
+describe('process-profile', function () {
+  describe('processProfile', function () {
+    const profile = processProfile(exampleProfile);
     it('should have three threads', function () {
       assert.equal(profile.threads.length, 3);
     });
@@ -199,7 +199,7 @@ describe('preprocess-profile', function () {
 
 describe('profile-data', function () {
   describe('createFuncStackTableAndFixupSamples', function () {
-    const profile = preprocessProfile(exampleProfile);
+    const profile = processProfile(exampleProfile);
     const thread = profile.threads[0];
     const { funcStackTable } =
       getFuncStackInfo(thread.stackTable, thread.frameTable, thread.funcTable, thread.samples);
@@ -215,7 +215,7 @@ describe('profile-data', function () {
     });
   });
   describe('getTracingMarkers', function () {
-    const profile = preprocessProfile(exampleProfile);
+    const profile = processProfile(exampleProfile);
     const thread = profile.threads[0];
     const tracingMarkers = getTracingMarkers(thread);
     it('should fold the two reflow markers into one tracing marker', function () {
@@ -290,7 +290,7 @@ describe('symbolication', function () {
     let symbolicatedProfile = null;
 
     before(function () {
-      unsymbolicatedProfile = preprocessProfile(exampleProfile);
+      unsymbolicatedProfile = processProfile(exampleProfile);
       const symbolTable = {
         0: 'first symbol',
         0xf00: 'second symbol',
@@ -336,89 +336,89 @@ describe('upgrades', function () {
     it('should detect the profile as an old cleopatra profile', function () {
       assert.isTrue(isOldCleopatraFormat(exampleOldCleopatraProfile));
     });
-    it('should be able to convert the old cleopatra profile into a preprocessed profile', function () {
+    it('should be able to convert the old cleopatra profile into a processed profile', function () {
       const profile = convertOldCleopatraProfile(exampleOldCleopatraProfile);
-      assert.isTrue(isPreprocessedProfile(profile));
+      assert.isTrue(isProcessedProfile(profile));
       // For now, just test that upgrading doesn't throw any exceptions.
-      upgradePreprocessedProfileToCurrentVersion(profile);
+      upgradeProcessedProfileToCurrentVersion(profile);
     });
   });
-  function comparePreprocessedProfiles(lhs, rhs) {
-    // Preprocessed profiles contain a stringTable which isn't easily comparable.
+  function compareProcessedProfiles(lhs, rhs) {
+    // Processed profiles contain a stringTable which isn't easily comparable.
     // Instead, serialize the profiles first, so that the stringTable becomes a
     // stringArray, and compare the serialized versions.
     const serializedLhsAsObject = JSON.parse(serializeProfile(lhs));
     const serializedRhsAsObject = JSON.parse(serializeProfile(rhs));
 
-    // Don't compare the version of the raw profile that these profiles originated from.
+    // Don't compare the version of the Gecko profile that these profiles originated from.
     delete serializedLhsAsObject.meta.version;
     delete serializedRhsAsObject.meta.version;
 
     assert.deepEqual(serializedLhsAsObject, serializedRhsAsObject);
   }
-  const afterUpgradeReference = unserializeProfileOfArbitraryFormat(require('../fixtures/upgrades/prepr-5.sps.json'));
+  const afterUpgradeReference = unserializeProfileOfArbitraryFormat(require('../fixtures/upgrades/processed-5.json'));
 
-  // Uncomment this to output your next ./upgrades/prepr-X.sps.json
+  // Uncomment this to output your next ./upgrades/processed-X.json
   // console.log(serializeProfile(afterUpgradeReference));
 
-  it('should import an old profile and upgrade it to be the same as the reference preprocessed profile', function () {
+  it('should import an old profile and upgrade it to be the same as the reference processed profile', function () {
     /* eslint-disable no-invalid-this */
     // This can take awhile, increase the timeout.
     this.timeout(10000);
     /* eslint-enable no-invalid-this */
-    const serializedOldPreprocessedProfile0 = require('../fixtures/upgrades/prepr-0.sps.json');
-    const upgradedProfile0 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile0);
-    comparePreprocessedProfiles(upgradedProfile0, afterUpgradeReference);
-    const serializedOldPreprocessedProfile1 = require('../fixtures/upgrades/prepr-1.sps.json');
-    const upgradedProfile1 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile1);
-    comparePreprocessedProfiles(upgradedProfile1, afterUpgradeReference);
-    const serializedOldPreprocessedProfile2 = require('../fixtures/upgrades/prepr-2.sps.json');
-    const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile2);
-    comparePreprocessedProfiles(upgradedProfile2, afterUpgradeReference);
-    const serializedOldPreprocessedProfile3 = require('../fixtures/upgrades/prepr-3.sps.json');
-    const upgradedProfile3 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile3);
-    comparePreprocessedProfiles(upgradedProfile3, afterUpgradeReference);
-    const serializedOldPreprocessedProfile4 = require('../fixtures/upgrades/prepr-4.sps.json');
-    const upgradedProfile4 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile4);
-    comparePreprocessedProfiles(upgradedProfile4, afterUpgradeReference);
-    const rawProfile3 = require('../fixtures/upgrades/raw-3.sps.json');
-    const upgradedRawProfile3 = unserializeProfileOfArbitraryFormat(rawProfile3);
-    comparePreprocessedProfiles(upgradedRawProfile3, afterUpgradeReference);
-    // const serializedOldPreprocessedProfile2 = require('../fixtures/upgrades/prepr-2.sps.json');
-    // const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile2);
-    // comparePreprocessedProfiles(upgradedProfile2, afterUpgradeReference);
-    // const rawProfile4 = require('../fixtures/upgrades/raw-4.sps.json');
-    // const upgradedRawProfile4 = unserializeProfileOfArbitraryFormat(rawProfile4);
-    // comparePreprocessedProfiles(upgradedRawProfile4, afterUpgradeReference);
+    const serializedOldProcessedProfile0 = require('../fixtures/upgrades/processed-0.json');
+    const upgradedProfile0 = unserializeProfileOfArbitraryFormat(serializedOldProcessedProfile0);
+    compareProcessedProfiles(upgradedProfile0, afterUpgradeReference);
+    const serializedOldProcessedProfile1 = require('../fixtures/upgrades/processed-1.json');
+    const upgradedProfile1 = unserializeProfileOfArbitraryFormat(serializedOldProcessedProfile1);
+    compareProcessedProfiles(upgradedProfile1, afterUpgradeReference);
+    const serializedOldProcessedProfile2 = require('../fixtures/upgrades/processed-2.json');
+    const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldProcessedProfile2);
+    compareProcessedProfiles(upgradedProfile2, afterUpgradeReference);
+    const serializedOldProcessedProfile3 = require('../fixtures/upgrades/processed-3.json');
+    const upgradedProfile3 = unserializeProfileOfArbitraryFormat(serializedOldProcessedProfile3);
+    compareProcessedProfiles(upgradedProfile3, afterUpgradeReference);
+    const serializedOldProcessedProfile4 = require('../fixtures/upgrades/processed-4.json');
+    const upgradedProfile4 = unserializeProfileOfArbitraryFormat(serializedOldProcessedProfile4);
+    compareProcessedProfiles(upgradedProfile4, afterUpgradeReference);
+    const geckoProfile3 = require('../fixtures/upgrades/gecko-3.json');
+    const upgradedGeckoProfile3 = unserializeProfileOfArbitraryFormat(geckoProfile3);
+    compareProcessedProfiles(upgradedGeckoProfile3, afterUpgradeReference);
+    // const serializedOldProcessedProfile2 = require('../fixtures/upgrades/processed-2.json');
+    // const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldProcessedProfile2);
+    // compareProcessedProfiles(upgradedProfile2, afterUpgradeReference);
+    // const geckoProfile4 = require('../fixtures/upgrades/gecko-4.json');
+    // const upgradedGeckoProfile4 = unserializeProfileOfArbitraryFormat(geckoProfile4);
+    // compareProcessedProfiles(upgradedGeckoProfile4, afterUpgradeReference);
   });
-  it('should import an old raw profile and upgrade it to be the same as the newest raw profile', function () {
+  it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function () {
     /* eslint-disable no-invalid-this */
     // This can take awhile, increase the timeout.
     this.timeout(10000);
     /* eslint-enable no-invalid-this */
 
-    const afterUpgradeRawReference = require('../fixtures/upgrades/raw-6.sps.json');
-    // Uncomment this to output your next ./upgrades/raw-X.sps.json
-    // upgradeRawProfileToCurrentVersion(afterUpgradeRawReference);
-    // console.log(JSON.stringify(afterUpgradeRawReference));
-    assert.equal(afterUpgradeRawReference.meta.version, CURRENT_VERSION);
+    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-6.json');
+    // Uncomment this to output your next ./upgrades/gecko-X.json
+    // upgradeGeckoProfileToCurrentVersion(afterUpgradeGeckoReference);
+    // console.log(JSON.stringify(afterUpgradeGeckoReference));
+    assert.equal(afterUpgradeGeckoReference.meta.version, CURRENT_VERSION);
 
-    const rawProfile3 = require('../fixtures/upgrades/raw-3.sps.json');
-    upgradeRawProfileToCurrentVersion(rawProfile3);
-    assert.deepEqual(rawProfile3, afterUpgradeRawReference);
+    const geckoProfile3 = require('../fixtures/upgrades/gecko-3.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile3);
+    assert.deepEqual(geckoProfile3, afterUpgradeGeckoReference);
 
-    const rawProfile4 = require('../fixtures/upgrades/raw-4.sps.json');
-    upgradeRawProfileToCurrentVersion(rawProfile4);
-    assert.deepEqual(rawProfile4, afterUpgradeRawReference);
+    const geckoProfile4 = require('../fixtures/upgrades/gecko-4.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile4);
+    assert.deepEqual(geckoProfile4, afterUpgradeGeckoReference);
 
-    const rawProfile5 = require('../fixtures/upgrades/raw-5.sps.json');
-    upgradeRawProfileToCurrentVersion(rawProfile5);
-    assert.deepEqual(rawProfile5, afterUpgradeRawReference);
+    const geckoProfile5 = require('../fixtures/upgrades/gecko-5.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile5);
+    assert.deepEqual(geckoProfile5, afterUpgradeGeckoReference);
   });
 });
 
 describe('color-categories', function () {
-  const profile = preprocessProfile(exampleProfile);
+  const profile = processProfile(exampleProfile);
   const [thread] = profile.threads;
   it('calculates the category for each frame', function () {
     const categories = thread.samples.stack.map(stackIndex => {
@@ -438,7 +438,7 @@ describe('color-categories', function () {
 });
 
 describe('filter-by-implementation', function () {
-  const profile = preprocessProfile(profileWithJS);
+  const profile = processProfile(profileWithJS);
   const thread = profile.threads[0];
 
   function stackIsJS(filteredThread, stackIndex) {

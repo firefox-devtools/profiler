@@ -1,5 +1,5 @@
 /**
- * export defaults one object that is an example profile, in the 'raw' format,
+ * export defaults one object that is an example profile, in the Gecko format,
  * i.e. the format that nsIProfiler.getProfileDataAsync outputs.
  */
 
@@ -161,7 +161,7 @@ const contentProcessMeta = Object.assign({}, parentProcessMeta, {
 
 const contentProcessProfile = {
   meta: contentProcessMeta,
-  libs: [contentProcessBinary].concat(extraBinaries), // libs are stringified in the raw profile
+  libs: [contentProcessBinary].concat(extraBinaries), // libs are stringified in the Gecko profile
   threads: [
     Object.assign({ name: 'GeckoMain', processType: 'tab' }, thread),
   ],

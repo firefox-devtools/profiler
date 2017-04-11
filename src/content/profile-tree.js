@@ -1,7 +1,8 @@
 // @flow
 import { timeCode } from '../common/time-code';
 import { getSampleFuncStacks, resourceTypes } from './profile-data';
-import type { Thread, FuncTable, ResourceTable, StringTable, IndexIntoFuncTable } from '../common/types/profile';
+import { UniqueStringArray } from './unique-string-array';
+import type { Thread, FuncTable, ResourceTable, IndexIntoFuncTable } from '../common/types/profile';
 import type { FuncStackTable, IndexIntoFuncStackTable, FuncStackInfo, Node } from '../common/types/profile-derived';
 import type { Milliseconds } from '../common/types/units';
 
@@ -20,7 +21,7 @@ class ProfileTree {
   _funcStackChildCount: Uint32Array; // A table column matching the funcStackTable
   _funcTable: FuncTable;
   _resourceTable: ResourceTable;
-  _stringTable: StringTable;
+  _stringTable: UniqueStringArray;
   _rootTotalTime: number;
   _rootCount: number;
   _nodes: Map<IndexIntoFuncStackTable, Node>;
@@ -33,7 +34,7 @@ class ProfileTree {
     funcStackChildCount: Uint32Array,
     funcTable: FuncTable,
     resourceTable: ResourceTable,
-    stringTable: StringTable,
+    stringTable: UniqueStringArray,
     rootTotalTime: number,
     rootCount: number,
     jsOnly: boolean

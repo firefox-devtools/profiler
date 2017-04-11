@@ -8,6 +8,7 @@
     "build:clean": "rimraf dist && mkdirp dist && cp res/.htaccess dist/ && cp res/zee-worker.js dist/",
     "build-prod": "npm run build:clean && NODE_ENV=production webpack -p --progress",
     "build-prod-readable": "npm run build:clean && NODE_ENV=production webpack --progress",
+    "build-docs": "documentation build src/common/types/profile.js -f md > docs/processed-profile-format.md; cat docs/processed-profile-format.md",
     "eslint": "eslint index.js src",
     "eslint-fix": "eslint --fix index.js src",
     "flow": "flow",

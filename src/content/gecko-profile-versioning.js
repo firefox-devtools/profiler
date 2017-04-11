@@ -1,6 +1,6 @@
 // @flow
 /**
- * This file deals with old versions of the "raw" profile format, i.e. the
+ * This file deals with old versions of the Gecko profile format, i.e. the
  * format that the Gecko profiler platform outputs. We want to be able to
  * run perf.html on non-Nightly versions of Firefox, and we want to be able
  * to load old saved profiles, so this file upgrades old profiles to the
@@ -9,16 +9,16 @@
 
 export const CURRENT_VERSION = 6; // The current version of the 'raw profile' format.
 
-// Raw profiles before version 1 did not have a profile.meta.version field.
+// Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
 const UNANNOTATED_VERSION = 0;
 
 /**
  * Upgrades the supplied profile to the current version, by mutating |profile|.
  * Throws an exception if the profile is too new.
- * @param {object} profile The profile in the "raw profile" format.
+ * @param {object} profile The profile in the "Gecko profile" format.
  */
-export function upgradeRawProfileToCurrentVersion(profile: Object) {
+export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
   const profileVersion = profile.meta.version || UNANNOTATED_VERSION;
   if (profileVersion === CURRENT_VERSION) {
     return;
@@ -26,7 +26,7 @@ export function upgradeRawProfileToCurrentVersion(profile: Object) {
 
   if (profileVersion > CURRENT_VERSION) {
     throw new Error(
-      `Unable to parse a raw profile of version ${profileVersion} - are you running an outdated version of perf.html? ` +
+      `Unable to parse a Gecko profile of version ${profileVersion} - are you running an outdated version of perf.html? ` +
         `The most recent version understood by this version of perf.html is version ${CURRENT_VERSION}.\n` +
         'You can try refreshing this page in case perf.html has updated in the meantime.'
     );
@@ -58,17 +58,17 @@ function _archFromAbi(abi) {
 const _upgraders = {
   [1]: () => {
     throw new Error(
-      'Raw profiles without version numbers are very old and no conversion code has been written for that version of the profile format.'
+      'Gecko profiles without version numbers are very old and no conversion code has been written for that version of the profile format.'
     );
   },
   [2]: () => {
     throw new Error(
-      'Raw profile version 1 is very old and no conversion code has been written for that version of the profile format.'
+      'Gecko profile version 1 is very old and no conversion code has been written for that version of the profile format.'
     );
   },
   [3]: () => {
     throw new Error(
-      'Raw profile version 2 is very old and no conversion code has been written for that version of the profile format.'
+      'Gecko profile version 2 is very old and no conversion code has been written for that version of the profile format.'
     );
   },
   [4]: profile => {
