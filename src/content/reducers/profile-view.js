@@ -293,7 +293,7 @@ export const getDisplayRange = createSelector(
   (state: State) => getProfileViewOptions(state).rootRange,
   (state: State) => getProfileViewOptions(state).zeroAt,
   URLState.getRangeFilters,
-  (rootRange, zeroAt, rangeFilters) => {
+  (rootRange, zeroAt, rangeFilters): StartEndRange => {
     if (rangeFilters.length > 0) {
       let { start, end } = rangeFilters[rangeFilters.length - 1];
       start += zeroAt;
@@ -356,19 +356,19 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
     const getRangeFilteredThread = createSelector(
       getThread,
       getDisplayRange,
-      (thread: Thread, range: StartEndRange): Thread => {
+      (thread, range): Thread => {
         const { start, end } = range;
         return ProfileData.filterThreadToRange(thread, start, end);
       }
     );
     const _getRangeFilteredThreadSamples = createSelector(
       getRangeFilteredThread,
-      (thread: Thread): SamplesTable => thread.samples
+      (thread): SamplesTable => thread.samples
     );
     const getJankInstances = createSelector(
       _getRangeFilteredThreadSamples,
       (state: State): string => getThread(state).processType,
-      (samples: SamplesTable, processType: string): TracingMarker[] => ProfileData.getJankInstances(samples, processType, 50)
+      (samples, processType): TracingMarker[] => ProfileData.getJankInstances(samples, processType, 50)
     );
     const getTracingMarkers = createSelector(
       getThread,
@@ -377,7 +377,7 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
     const getRangeSelectionFilteredTracingMarkers = createSelector(
       getTracingMarkers,
       getDisplayRange,
-      (markers, range: StartEndRange): TracingMarker[] => {
+      (markers, range): TracingMarker[] => {
         const { start, end } = range;
         return ProfileData.filterTracingMarkersToRange(markers, start, end);
       }
