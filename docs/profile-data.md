@@ -57,7 +57,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
 
   // Array of shared library data.
 
-  libs: [{
+  libs: [
     {
       "start": 4461400064,
       "end": 4461424640,
@@ -69,12 +69,29 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
       "breakpadId": "E54D3AF274383256B9F6144F83F3F7510"
     },
     ...
-  }],
+  ],
 
   // All of the threads that were profiled.
 
   threads: [
     {
+      //--------------------------------------------------------
+      // Thread description properties
+      //--------------------------------------------------------
+
+      // The name of the thread (see Sampler::RegisterCurrentThread)
+      name: "GeckoMain", // String
+
+      // The process type string of this process, XRE_ChildProcessTypeToString(XRE_GetProcessType())
+      // See http://searchfox.org/mozilla-central/rev/2fc8c8d483d9ec9fd0ec319c6c53807f7fa8e8a2/xpcom/build/nsXULAppAPI.h#396
+      processType: "default",
+
+      // The thread ID
+      tid: 7442229,
+
+      // The process's PID
+      pid: 51580,
+
       //--------------------------------------------------------
       // Profile data
       //--------------------------------------------------------
@@ -126,23 +143,6 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
           ]
         ]
       },
-
-      //--------------------------------------------------------
-      // Misc properties
-      //--------------------------------------------------------
-
-      // The thread ID - TODO: how is this useful?
-      tid: 7442229,
-
-      // The process's PID
-      pid: 51580,
-
-      // The name of the thread (see Sampler::RegisterCurrentThread)
-      name: "GeckoMain", // String
-
-      // The process type string of this process, XRE_ChildProcessTypeToString(XRE_GetProcessType())
-      // See http://searchfox.org/mozilla-central/rev/2fc8c8d483d9ec9fd0ec319c6c53807f7fa8e8a2/xpcom/build/nsXULAppAPI.h#396
-      processType: "default",
 
       //--------------------------------------------------------
       // Table data, this information is referenced by index
