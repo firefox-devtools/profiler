@@ -49,7 +49,7 @@ export function getClosestLibrary(libs, address) {
 
 /**
  * Find the functions in this thread's funcTable that we need symbols for.
- * @param  {Object} thread The thread, in "preprocessed profile" format.
+ * @param  {Object} thread The thread, in "processed profile" format.
  * @return {Map}           A map containing the funcIndices of the functions that
  *                         need to be symbolicated. Each entry's key is a lib
  *                         object from the thread's libs array, and the value is
@@ -208,7 +208,7 @@ export function applyFunctionMerging(
 /**
  * Symbolicate the given thread. Calls cbo.onMergeFunctions and cb.onGotFuncNames after each bit of
  * symbolication, and resolves the returned promise once completely done.
- * @param  {Object}  thread      The thread to symbolicate, in the "preprocessed profile" format.
+ * @param  {Object}  thread      The thread to symbolicate, in the "processed profile" format.
  * @param  {Number}  threadIndex The index of the thread. This is needed because it gets supplied in the callbacks.
  * @param  {Object}  symbolStore A SymbolStore object that can be used for getting the required symbol tables.
  * @param  {Object}  cbo         An object containing callback functions 'onMergeFunctions'  and 'onGotFuncNames'.
@@ -308,7 +308,7 @@ export function setTaskTracerNames(tasktracer, addressIndices, symbolNames) {
 
 /**
  * Symbolicate a profile.
- * @param  {Object} profile     The profile to symbolicate, in preprocessed format.
+ * @param  {Object} profile     The profile to symbolicate, in processed format.
  * @param  {Object} symbolStore A SymbolStore object with a getFuncAddressTableForLib and getSymbolsForAddressesInLib methods.
  * @param  {Object} cbo         An object containing callback functions 'onMergeFunctions', 'onGotFuncNames' and 'onGotTaskTracerNames'.
  * @return {Promise}            A promise that resolves (with nothing) once symbolication has completed.

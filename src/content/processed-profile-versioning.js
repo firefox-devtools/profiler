@@ -1,6 +1,6 @@
 // @flow
 /**
- * This file deals with old versions of the "preprocessed" profile format,
+ * This file deals with old versions of the "processed" profile format,
  * i.e. the format that perf.html uses internally. Profiles in this format
  * can be saved out to files or uploaded to the profile store server, and we
  * want to be able to display profiles that were saved at any point in the
@@ -15,11 +15,11 @@ import { timeCode } from '../common/time-code';
 
 export const CURRENT_VERSION = 5; // The current version of the 'preprocessed profile' format.
 
-// Preprocessed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
+// Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
 const UNANNOTATED_VERSION = 0;
 
-export function isPreprocessedProfile(profile: Object): boolean {
+export function isProcessedProfile(profile: Object): boolean {
   // If this profile has a .meta.preprocessedProfileVersion field,
   // then it is definitely a preprocessed profile.
   if ('meta' in profile && 'preprocessedProfileVersion' in profile.meta) {
@@ -35,10 +35,10 @@ export function isPreprocessedProfile(profile: Object): boolean {
 /**
  * Upgrades the supplied profile to the current version, by mutating |profile|.
  * Throws an exception if the profile is too new.
- * @param {object} profile The "serialized" form of a preprocessed profile,
+ * @param {object} profile The "serialized" form of a processed profile,
  *                         i.e. stringArray instead of stringTable.
  */
-export function upgradePreprocessedProfileToCurrentVersion(profile: Object) {
+export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
   const profileVersion = profile.meta.preprocessedProfileVersion ||
     UNANNOTATED_VERSION;
   if (profileVersion === CURRENT_VERSION) {
@@ -47,7 +47,7 @@ export function upgradePreprocessedProfileToCurrentVersion(profile: Object) {
 
   if (profileVersion > CURRENT_VERSION) {
     throw new Error(
-      `Unable to parse a preprocessed profile of version ${profileVersion} - are you running an outdated version of perf.html? ` +
+      `Unable to parse a processed profile of version ${profileVersion} - are you running an outdated version of perf.html? ` +
         `The most recent version understood by this version of perf.html is version ${CURRENT_VERSION}.\n` +
         'You can try refreshing this page in case perf.html has updated in the meantime.'
     );

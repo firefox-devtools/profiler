@@ -9,7 +9,7 @@ import { uploadBinaryProfileData } from '../profile-store';
 import ArrowPanel from '../components/ArrowPanel';
 import ButtonWithPanel from '../components/ButtonWithPanel';
 import shortenURL from '../shorten-url';
-import { serializeProfile } from '../preprocess-profile';
+import { serializeProfile } from '../process-profile';
 import prettyBytes from 'pretty-bytes';
 import sha1 from '../sha1';
 import url from 'url';
