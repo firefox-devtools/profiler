@@ -35,28 +35,14 @@ setTimeout(() => {
 
 # Source data format
 
-The source data format is de-duplicated to make it quicker to transfer in the JSON format. This specific format is documented in [ProfileEntry.h]. In order to actually work with the data it must be re-mapped or have an interface wrapped around it to fetch all of the relevant information. The following is the general shape of the returned data in pseudo-code. For readability below any property of the form `{ schema: {}, data: [] }` has been reworked with the form `[SchemaData({ prop1, prop1 }), ...]` as if the data were reassembled according to the given schema.
+The source data format is de-duplicated to make it quicker to transfer in the JSON format. This specific format is documented in [ProfileEntry.h]. In order to actually work with the data it must be re-mapped or have an interface wrapped around it to fetch all of the relevant information. The following is the general shape of the returned data in pseudo-code.
 
 ```js
 {
-  // JSON string of the executable library data. This needs to be JSON parsed a
-  // second time.
-
-  libs: `[{
-    {
-      "start": 4461400064,
-      "end": 4461424640,
-      "offset": 0,
-      "name": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
-      "breakpadId": "E54D3AF274383256B9F6144F83F3F7510"
-    },
-    ...
-  }]`,
-
   // Key/pair meta values about the profile.
 
   meta: {
-    version: 3,
+    version: 5,
     interval: 0.4,
     stackwalk: 1,
     startTime: 1477063882018.4387,
@@ -68,6 +54,22 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
     toolkit: "cocoa",
     product: "Firefox"
   },
+
+  // Array of shared library data.
+
+  libs: [{
+    {
+      "start": 4461400064,
+      "end": 4461424640,
+      "offset": 0,
+      "name": "firefox",
+      "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
+      "debugName": "firefox",
+      "debugPath": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
+      "breakpadId": "E54D3AF274383256B9F6144F83F3F7510"
+    },
+    ...
+  }],
 
   // All of the threads that were profiled.
 
@@ -81,38 +83,49 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
       // events from different systems within the browser. For instance these can
       // include GC pauses, Paints, Reflows, DOM events, etc.
 
-      markers: [
-        SchemaData({
-          name // index into stringTable - Marker name
-          time // milliseconds since since profile.meta.startTime, e.g. 37070.186708
-          data // arbitrary JSON about the marker. e.g.
-               // {
-               //   "type": "tracing",
-               //   "category": "Paint",
-               //   "interval": "start"
-               // }
-        }),
-        ...
-      ],
+      markers: {
+        schema: {
+          name: 0,
+          time: 1,
+          data: 2
+        },
+        data: [
+          [
+            24,           // index into stringTable - Marker name
+            37070.186708, // milliseconds since since profile.meta.startTime
+            {             // arbitrary JSON about the marker
+              "type": "tracing",
+              "category": "Paint",
+              "interval": "start"
+            }
+          ],
+          ...
+        ]
+      },
 
       // The profiler regularly samples the current frame on the call stack. These
       // samples provide a picture into what is executing through the time of the
       // profile. These can be C++ frames or JS frames.
 
-      samples: [
-        SchemaData({
-          stack,           // index into stackTable - The current stack of the sample.
-          time,            // milliseconds since since profile.meta.startTime
-                           // e.g 37067.409299
-          responsiveness,  // milliseconds since the last event was processed in this
+      samples: {
+        schema: {
+          stack: 0,
+          time: 1,
+          responsiveness: 2,
+          rss: 3,
+          uss: 4,
+          frameNumber: 5
+        },
+        data: [
+          [
+            1,             // index into stackTable - The current stack of the sample.
+            37067.409299,  // milliseconds since since profile.meta.startTime
+            1.437998,      // milliseconds since the last event was processed in this
                            // thread's event loop at the time that the sample was taken
-                           // e.g. 1.437998
-          rss,             // TODO
-          uss,             // TODO
-          frameNumber      // TODO
-        }),
-        ...
-      ],
+            ...            // TODO
+          ]
+        ]
+      },
 
       //--------------------------------------------------------
       // Misc properties
@@ -121,8 +134,15 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
       // The thread ID - TODO: how is this useful?
       tid: 7442229,
 
+      // The process's PID
+      pid: 51580,
+
       // The name of the thread (see Sampler::RegisterCurrentThread)
-      name, // String e.g. "GeckoMain", "Compositor", etc.
+      name: "GeckoMain", // String
+
+      // The process type string of this process, XRE_ChildProcessTypeToString(XRE_GetProcessType())
+      // See http://searchfox.org/mozilla-central/rev/2fc8c8d483d9ec9fd0ec319c6c53807f7fa8e8a2/xpcom/build/nsXULAppAPI.h#396
+      processType: "default",
 
       //--------------------------------------------------------
       // Table data, this information is referenced by index
@@ -132,43 +152,72 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
       // execution. The stackTable uses this frame information to build the call stack
       // of a profile sample.
 
-      frameTable: [
-        SchemaData({
-          location, // index into stringTable, points to strings like:
-                    // JS: "Startup::XRE_Main"
-                    // C++: "0x7fff7d962da1"
-          // JS Only:
-          implementation, // TODO
-          optimizations, // JSON info about JIT optimizations.
-          line, // The line of code
-          category // int bitmask of the category
-            // 16 - js::ProfileEntry::Category::OTHER
-            // 32 - js::ProfileEntry::Category::CSS
-            // 64 - js::ProfileEntry::Category::JS
-            // 128 - js::ProfileEntry::Category::GC
-            // 256 - js::ProfileEntry::Category::CC
-            // 512 - js::ProfileEntry::Category::NETWORK
-            // 1024 - js::ProfileEntry::Category::GRAPHICS
-            // 2048 - js::ProfileEntry::Category::STORAGE
-            // 4096 - js::ProfileEntry::Category::EVENTS
-            // 9000 - other non-bitmask category
-        }),
-        ...
-      ],
+      frameTable: {
+        schema: {
+          location: 0,
+          implementation: 1,
+          optimizations: 2,
+          line: 3,
+          category: 4
+        },
+        data: [
+          [
+            18,    // index into stringTable, points to strings like:
+                   // JS: "Startup::XRE_Main"
+                   // C++: "0x7fff7d962da1"
+            40,    // for JS frames, an index into the string table, usually "Baseline" or "Ion"
+            null,  // JSON info about JIT optimizations.
+            1536,  // The line of code
+            16     // int bitmask of the category
+                   // 16 - js::ProfileEntry::Category::OTHER
+                   // 32 - js::ProfileEntry::Category::CSS
+                   // 64 - js::ProfileEntry::Category::JS
+                   // 128 - js::ProfileEntry::Category::GC
+                   // 256 - js::ProfileEntry::Category::CC
+                   // 512 - js::ProfileEntry::Category::NETWORK
+                   // 1024 - js::ProfileEntry::Category::GRAPHICS
+                   // 2048 - js::ProfileEntry::Category::STORAGE
+                   // 4096 - js::ProfileEntry::Category::EVENTS
+                   // 9000 - other non-bitmask category
+          ],
+          ...
+        ]
+      },
 
       // A table of stacks. Each entry contains references to the current frame and
       // the parent frame (if one exists). This can then be used to reconstruct
       // the call stack.
 
-      stackTable: SchemaData({
-        frame, // The current frame: index of the frame in the frameTable
-        prefix // The calling frame: Index of the frame in the frameTable
-      }),
+      stackTable: {
+        schema: {
+          frame: 0,
+          prefix: 1
+        },
+        data: [
+          [
+            0,   // The current frame: index of the frame in the frameTable
+            null // The rest of the stack: Index of the stack in the stackTable, or null
+          ],
+          ...
+        ]
+      },
 
       // A list of arbitrary strings used within the profile.
 
       stringTable: ["(root)", "0x109eba3b4", "Events::ProcessGeckoEvents", ...],
 
+    },
+    ...
+  ],
+
+  // An array of profiles from other processes that were associated with this process.
+  // For example, in Firefox, the profile from the parent process has a profiles from
+  // the content processes in its processes array.
+  processes: [
+    {
+      meta: ...,
+      libs: ...,
+      threads: ...
     },
     ...
   ]
