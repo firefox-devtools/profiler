@@ -59,7 +59,7 @@
   transform: translateY(30px);
 }
 
-.timelineViewportShiftScroll kbd {
+.timelineViewportShiftScrollKbd {
   background-color: #f6f6f6;
   border: 1px solid #ccc;
   border-radius: .2em;

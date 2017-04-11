@@ -13,6 +13,8 @@ import type {
 import type { UpdateProfileSelection } from '../actions/profile-view';
 import type { ProfileSelection } from '../actions/types';
 
+const { DOM_DELTA_PAGE, DOM_DELTA_LINE } = new WheelEvent('mouse');
+
 type Props = {
   viewportNeedsUpdate: any,
   timeRange: StartEndRange,
@@ -154,7 +156,7 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
     componentDidUpdate(prevProps: Props) {
       if (this.props.viewportNeedsUpdate(prevProps, this.props)) {
         this.setState(this.getDefaultState(this.props));
-        requestAnimationFrame(this._setSize);
+        this._setSizeNextFrame();
       }
     }
 
@@ -174,15 +176,12 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
     _setSize() {
       const rect = this.refs.container.getBoundingClientRect();
       if (this.state.containerWidth !== rect.width || this.state.containerHeight !== rect.height) {
-        const style = window.getComputedStyle(this.refs.container);
-
-        // Obey margins of the containing element.
-        const containerWidth = rect.width - parseFloat(style.marginLeft) - parseFloat(style.marginRight);
-        const containerHeight = rect.height - parseFloat(style.marginTop) - parseFloat(style.marginBottom);
-        const containerLeft = rect.left + parseFloat(style.marginLeft);
-        const viewportBottom = this.state.viewportTop + containerHeight;
-
-        this.setState({ containerWidth, containerHeight, containerLeft, viewportBottom });
+        this.setState({
+          containerWidth: rect.width,
+          containerHeight: rect.height,
+          containerLeft: rect.left,
+          viewportBottom: this.state.viewportTop + rect.height,
+        });
       }
     }
 
@@ -202,27 +201,8 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
 
       // Only move the viewport if the entire canvas is in frame, otherwise let the
       // TimelineView scrolling element scroll.
-      const maybeScrollElement = this.props.getScrollElement();
-      const viewScrollTop = maybeScrollElement ? maybeScrollElement.scrollTop : 0;
-      const offsetTopAndCollapsedRow = Math.max(0, this.refs.container.offsetTop - COLLAPSED_ROW_HEIGHT);
-
-      // Do not move the contents if the chart is not fully within view.
-      if (event.deltaY < 0) {
-        // Scrolling up.
-        if (viewScrollTop > offsetTopAndCollapsedRow) {
-          return;
-        }
-      } else {
-        if (
-          // The top of the viewport is not within a single collapsed row height.
-          (viewScrollTop < offsetTopAndCollapsedRow) &&
-          // Can the scroll element still scroll?
-          (maybeScrollElement
-            ? maybeScrollElement.scrollTop !== maybeScrollElement.scrollHeight - maybeScrollElement.offsetHeight
-            : false)
-        ) {
-          return;
-        }
+      if (this.isViewportOccluded(event)) {
+        return;
       }
 
       this.showShiftScrollingHint();
@@ -238,6 +218,45 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
       }
     }
 
+    isViewportOccluded(event: SyntheticWheelEvent): boolean {
+      const scrollElement = this.props.getScrollElement();
+      if (!scrollElement) {
+        return false;
+      }
+      // Calculate using getBoundingClientRect to get non-rounded CssPixels.
+      const innerScrollRect = scrollElement.children[0].getBoundingClientRect();
+      const scrollRect = scrollElement.getBoundingClientRect();
+      const viewportRect = this.refs.container.getBoundingClientRect();
+
+      if (event.deltaY < 0) {
+        //    ______________ viewportRect
+        //  _|______________|_
+        // | |              | |
+        // | |              | |                  ^
+        // | |______________| |     scrolling up |
+        // |__________________|
+        //                    ^ scrollRect
+
+        // Try to leave a gap of a collapsed row, if it's the top-most element then use
+        // the offsetTop of the viewport from the inner scroll area.
+        const minimumGap = Math.min(COLLAPSED_ROW_HEIGHT, viewportRect.top - innerScrollRect.top);
+        return viewportRect.top < scrollRect.top + minimumGap;
+      }
+
+      //  __________________ scrollRect
+      // |  ______________  |
+      // | |              | |                    |
+      // | |              | |     scrolling down v
+      // |_|______________|_|
+      //   |______________|
+      //                  ^ viewportRect
+
+      // Try to leave a gap of a collapsed row, if it's the bottom-most element then use the
+      // offsetBottom of the viewport from the inner scroll area.
+      const minimumGap = Math.min(COLLAPSED_ROW_HEIGHT, innerScrollRect.bottom - viewportRect.bottom);
+      return viewportRect.bottom > scrollRect.bottom - minimumGap;
+    }
+
     zoomRangeSelection(event: SyntheticWheelEvent) {
       if (!this.props.isRowExpanded) {
         // Maybe this should only be listening when expanded.
@@ -247,9 +266,14 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
         this.props.setHasZoomedViaMousewheel();
       }
       event.preventDefault();
+
+      // Shift is a modifier that will change some mice to scroll horizontally, check
+      // for that here.
+      const deltaKey = event.deltaY === 0 ? 'deltaX' : 'deltaY';
+
       // Accumulate the scroll delta here. Only apply it once per frame to avoid
       // spamming the Redux store with updates.
-      this.zoomRangeSelectionScrollDelta += getNormalizedScrollDelta(event, this.state.containerHeight, 'deltaY');
+      this.zoomRangeSelectionScrollDelta += getNormalizedScrollDelta(event, this.state.containerHeight, deltaKey);
 
       // See if an update needs to be scheduled.
       if (!this.zoomRangeSelectionScheduled) {
@@ -449,7 +473,11 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
                             viewportTop={viewportTop}
                             viewportBottom={viewportBottom}
                             {...this.props} />
-          <div className={shiftScrollClassName}>Zoom Timeline: <kbd>Shift</kbd> <kbd>Scroll</kbd></div>
+          <div className={shiftScrollClassName}>
+            Zoom Timeline:
+            <kbd className='timelineViewportShiftScrollKbd'>Shift</kbd>
+            <kbd className='timelineViewportShiftScrollKbd'>Scroll</kbd>
+          </div>
         </div>
       );
     }
@@ -481,9 +509,9 @@ function getNormalizedScrollDelta(
 ): CssPixels {
   const delta = key === 'deltaY' ? event.deltaY : event.deltaX;
   switch (event.deltaMode) {
-    case 0x02: // Scroll by page.
+    case DOM_DELTA_PAGE:
       return delta * pageHeight;
-    case 0x01: // Scroll by line.
+    case DOM_DELTA_LINE:
       return delta * SCROLL_LINE_SIZE;
   }
   // Scroll by pixel.
