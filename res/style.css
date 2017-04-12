@@ -791,6 +791,10 @@ body, #root, .profileViewer {
   border-radius: 3px;
   display: none;
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 10px 12px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
 }
 
 .react-contextmenu.react-contextmenu--visible {
@@ -844,4 +848,28 @@ body, #root, .profileViewer {
 .react-contextmenu-item:hover.react-contextmenu-submenu > .react-contextmenu-item:after,
 .react-contextmenu-item.react-contextmenu-submenu > .react-contextmenu-item--active:after {
   border-left-color: highlighttext;
+}
+
+
+.react-contextmenu-item.checkable {
+  padding-left: 21px;
+  position: relative;
+}
+
+.react-contextmenu-item.checked::before {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  width: 3px;
+  height: 6px;
+  border: solid #000;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.react-contextmenu-item.react-contextmenu-item--active.checked,
+.react-contextmenu-item.checked:hover {
+  border-color: #fff;
 }

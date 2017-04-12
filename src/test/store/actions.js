@@ -3,6 +3,8 @@ import { blankStore, storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../content/reducers/profile-view';
 import * as TimelineSelectors from '../../content/reducers/timeline-view';
 import * as UrlStateSelectors from '../../content/reducers/url-state';
+import { getProfileWithNamedThreads } from './fixtures/profiles';
+
 import {
   changeCallTreeSearchString,
   changeHidePlatformDetails,
@@ -10,6 +12,9 @@ import {
   changeInvertCallstack,
   updateProfileSelection,
   changeImplementationFilter,
+  changeThreadOrder,
+  hideThread,
+  showThread,
 } from '../../content/actions/profile-view';
 import {
   changeFlameChartColorStrategy,
@@ -27,7 +32,7 @@ describe('actions/profile', function () {
     const store = blankStore();
 
     const initialProfile = ProfileViewSelectors.getProfile(store.getState());
-    assert.ok(initialProfile, 'A blank profile initially exists');
+    assert.isOk(initialProfile, 'A blank profile initially exists');
     assert.lengthOf(initialProfile.threads, 0, 'The blank profile contains no data');
     store.dispatch(receiveProfileFromAddon(profile));
     assert.strictEqual(ProfileViewSelectors.getProfile(store.getState()), profile, 'The passed-in profile is saved in state.');
@@ -260,6 +265,70 @@ describe('actions/updateProfileSelection', function () {
       isModifying: false,
       selectionStart: 100,
       selectionEnd: 200,
+    });
+  });
+});
+
+describe('thread ordering and toggling', function () {
+  // Give names to thread indexes.
+  const A = 0;
+  const C = 2;
+
+  function getOrderedNames(state) {
+    const threads = ProfileViewSelectors.getThreads(state);
+    return ProfileViewSelectors.getThreadOrder(state).map(i => threads[i].name);
+  }
+
+  describe('toggling threads on original sort order', function () {
+    const { dispatch, getState } = storeWithProfile(getProfileWithNamedThreads(['A', 'B', 'C', 'D']));
+    const threads = ProfileViewSelectors.getThreads(getState());
+
+    it('starts out with the initial sorting', function () {
+      assert.deepEqual(getOrderedNames(getState()), ['A', 'B', 'C', 'D']);
+    });
+
+    it('can hide threads', function () {
+      dispatch(hideThread(C));
+      assert.deepEqual(getOrderedNames(getState()), ['A', 'B', 'D']);
+
+      dispatch(hideThread(A));
+      assert.deepEqual(getOrderedNames(getState()), ['B', 'D']);
+    });
+
+    it('can show threads', function () {
+      dispatch(showThread(threads, C));
+      assert.deepEqual(getOrderedNames(getState()), ['B', 'C', 'D']);
+
+      dispatch(showThread(threads, A));
+      assert.deepEqual(getOrderedNames(getState()), ['A', 'B', 'C', 'D']);
+    });
+  });
+
+  describe('toggling threads on a sorted thread', function () {
+    const { dispatch, getState } = storeWithProfile(getProfileWithNamedThreads(['A', 'B', 'C', 'D']));
+    const threads = ProfileViewSelectors.getThreads(getState());
+
+    it('starts out with the initial sorting', function () {
+      assert.deepEqual(getOrderedNames(getState()), ['A', 'B', 'C', 'D']);
+    });
+
+    it('is resortable', function () {
+      dispatch(changeThreadOrder([3, 2, 1, 0]));
+      assert.deepEqual(getOrderedNames(getState()), ['D', 'C', 'B', 'A']);
+    });
+
+    it('can hide sorted threads', function () {
+      dispatch(hideThread(C));
+      dispatch(hideThread(A));
+      assert.deepEqual(getOrderedNames(getState()), ['D', 'B']);
+    });
+
+    it('can show sorted threads', function () {
+      dispatch(showThread(threads, C));
+      assert.deepEqual(getOrderedNames(getState()), ['D', 'B', 'C']);
+
+      dispatch(showThread(threads, A));
+      assert.deepEqual(getOrderedNames(getState()), ['A', 'D', 'B', 'C']);
     });
   });
 });

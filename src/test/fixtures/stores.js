@@ -7,8 +7,8 @@ export function blankStore() {
   return createStore();
 }
 
-export function storeWithProfile() {
+export function storeWithProfile(profile = preprocessProfile(exampleProfile)) {
   const store = createStore();
-  store.dispatch(receiveProfileFromAddon(processProfile(exampleProfile)));
+  store.dispatch(receiveProfileFromAddon(profile));
   return store;
 }

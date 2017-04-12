@@ -9,11 +9,7 @@ import {
 } from '../reducers/profile-view';
 import { getIconsWithClassNames } from '../reducers/icons';
 
-import ProfileCallTreeContextMenu from '../containers/ProfileCallTreeContextMenu';
-
 import actions from '../actions';
-
-const CONTEXT_MENU_ID = 'ProfileTreeView';
 
 class ProfileTreeView extends Component {
   constructor(props) {
@@ -118,9 +114,8 @@ class ProfileTreeView extends Component {
                 appendageButtons={this._appendageButtons}
                 onAppendageButtonClick={this._onAppendageButtonClick}
                 ref='treeView'
-                contextMenu={<ProfileCallTreeContextMenu contextMenuId={CONTEXT_MENU_ID} />}
-                contextMenuId={CONTEXT_MENU_ID}
-                icons={this.props.icons}/>
+                contextMenuId={'ProfileCallTreeContextMenu'}
+                icons={this.props.icons} />
     );
 
   }

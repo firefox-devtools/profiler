@@ -8,6 +8,7 @@ import { getIsThreadExpanded } from '../reducers/timeline-view';
 import actions from '../actions';
 import { getImplementationName } from '../labeling-strategies';
 import classNames from 'classnames';
+import { ContextMenuTrigger } from 'react-contextmenu';
 
 import type { Thread } from '../../common/types/profile';
 import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../common/types/units';
@@ -102,10 +103,16 @@ class TimelineFlameChart extends Component {
 
     return (
       <div className='timelineFlameChart' style={{ height }}>
-        <div className='timelineFlameChartLabels grippy' title={processDetails}>
+        {/**
+          * The timeline will eventually have its own context menu, but for now re-use
+          * the one in the header for hiding threads.
+          */}
+        <ContextMenuTrigger id={'ProfileThreadHeaderContextMenu'}
+                            title={processDetails}
+                            attributes={{ className: 'timelineFlameChartLabels grippy' }}>
           <span>{threadName}</span>
           <button className={buttonClass} onClick={this.toggleThreadCollapse} />
-        </div>
+        </ContextMenuTrigger>
         <FlameChartCanvas key={threadIndex}
                             // TimelineViewport props
                             isRowExpanded={isRowExpanded}

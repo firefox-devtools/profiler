@@ -14,6 +14,8 @@ import actions from '../actions';
 import { getProfileViewOptions, getDisplayRange } from '../reducers/profile-view';
 import { getSelectedTab } from '../reducers/url-state';
 import ProfileViewerHeader from '../containers/ProfileViewerHeader';
+import ProfileCallTreeContextMenu from '../containers/ProfileCallTreeContextMenu';
+import ProfileThreadHeaderContextMenu from '../containers/ProfileThreadHeaderContextMenu';
 
 class ProfileViewer extends PureComponent {
   constructor(props) {
@@ -80,6 +82,8 @@ class ProfileViewer extends PureComponent {
           log: <ProfileLogView />,
         }[selectedTab]}
         <SymbolicationStatusOverlay />
+        <ProfileCallTreeContextMenu />
+        <ProfileThreadHeaderContextMenu />
       </div>
     );
   }

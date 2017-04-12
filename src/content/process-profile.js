@@ -5,7 +5,7 @@ import { provideHostSide } from './promise-worker';
 import { CURRENT_VERSION, upgradeProcessedProfileToCurrentVersion, isProcessedProfile } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import { isOldCleopatraFormat, convertOldCleopatraProfile } from './old-cleopatra-profile-format';
-import { emptyTaskTracerData } from './task-tracer';
+import { getEmptyTaskTracerData } from './task-tracer';
 
 /**
  * Module for converting a Gecko profile into the 'processed' format.
@@ -403,7 +403,7 @@ export function processProfile(profile) {
 
   const libs = profile.libs;
   let threads = [];
-  const tasktracer = emptyTaskTracerData();
+  const tasktracer = getEmptyTaskTracerData();
 
   if (('tasktracer' in profile) && ('threads' in profile.tasktracer)) {
     addProcessedTaskTracerData(profile.tasktracer, tasktracer, libs, profile.meta.startTime);

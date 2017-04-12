@@ -19,7 +19,7 @@ export function getTasksByThread(taskTable: Object, threadTable: Object) {
   return threadIndexToTaskIndicesMap;
 }
 
-export function emptyTaskTracerData(): TaskTracer {
+export function getEmptyTaskTracerData(): TaskTracer {
   return {
     taskTable: {
       length: 0,

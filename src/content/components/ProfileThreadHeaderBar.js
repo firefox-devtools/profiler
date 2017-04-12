@@ -5,6 +5,7 @@ import { selectorsForThread } from '../reducers/profile-view';
 import { getSelectedThreadIndex } from '../reducers/url-state';
 import { getSampleIndexClosestToTime, getStackAsFuncArray } from '../profile-data';
 import actions from '../actions';
+import { ContextMenuTrigger } from 'react-contextmenu';
 
 class ProfileThreadHeaderBar extends Component {
 
@@ -47,9 +48,13 @@ class ProfileThreadHeaderBar extends Component {
 
     return (
       <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')} style={style}>
-        <h1 onMouseDown={this._onLabelMouseDown} className='grippy' title={processDetails}>
+        <ContextMenuTrigger id={'ProfileThreadHeaderContextMenu'}
+                            renderTag='h1'
+                            title={processDetails}
+                            onMouseDown={this._onLabelMouseDown}
+                            attributes={{ className: 'grippy' }}>
           {threadName}
-        </h1>
+        </ContextMenuTrigger>
         <ThreadStackGraph interval={interval}
                           thread={thread}
                           className='threadStackGraph'
