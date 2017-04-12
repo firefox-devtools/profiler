@@ -1,5 +1,5 @@
 // @flow
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
 import shallowCompare from 'react-addons-shallow-compare';
 import classNames from 'classnames';
 import { timeCode } from '../../common/time-code';
@@ -19,13 +19,14 @@ type Props = {
   threadName: string,
   onSelect: any,
   styles: any,
+  isSelected: boolean,
   overlayFills: {
     HOVERED: string,
     PRESSED: string,
   },
 };
 
-class IntervalMarkerOverview extends Component {
+class IntervalMarkerOverview extends PureComponent {
 
   props: Props
 
@@ -142,12 +143,14 @@ class IntervalMarkerOverview extends Component {
 
   render() {
     this._scheduleDraw();
-    const { className } = this.props;
+    const { className, isSelected } = this.props;
     const { mouseDownItem, hoveredItem } = this.state;
     const title = !mouseDownItem && hoveredItem ? hoveredItem.title : null;
+    const canvasClassName = className.split(' ').map(name => `${name}Canvas`).join(' ');
+
     return (
-      <div className={className}>
-        <canvas className={classNames(`${className}Canvas`, 'intervalMarkerTimelineCanvas')}
+      <div className={classNames(className, isSelected ? 'selected' : null)}>
+        <canvas className={classNames(canvasClassName, 'intervalMarkerTimelineCanvas')}
                 ref={this._takeCanvasRef}
                 onMouseDown={this._onMouseDown}
                 onMouseMove={this._onMouseMove}
@@ -236,26 +239,5 @@ class IntervalMarkerOverview extends Component {
   }
 
 }
-
-IntervalMarkerOverview.propTypes = {
-  className: PropTypes.string.isRequired,
-  rangeStart: PropTypes.number.isRequired,
-  rangeEnd: PropTypes.number.isRequired,
-  intervalMarkers: PropTypes.arrayOf(PropTypes.shape({
-    start: PropTypes.number.isRequired,
-    dur: PropTypes.number.isRequired,
-    title: PropTypes.string.isRequired,
-    name: PropTypes.string,
-  })).isRequired,
-  width: PropTypes.number.isRequired, // provided by withSize
-  threadIndex: PropTypes.number.isRequired,
-  threadName: PropTypes.string.isRequired,
-  onSelect: PropTypes.func.isRequired,
-  styles: PropTypes.object.isRequired,
-  overlayFills: PropTypes.shape({
-    HOVERED: PropTypes.string.isRequired,
-    PRESSED: PropTypes.string.isRequired,
-  }).isRequired,
-};
 
 export default withSize(IntervalMarkerOverview);

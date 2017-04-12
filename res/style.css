@@ -330,6 +330,14 @@ body, #root, .profileViewer {
   height: 6px;
   position: relative;
   overflow: hidden;
+  opacity: 0.75;
+  background-color: transparent;
+  transition: background-color 500ms;
+}
+
+.profileViewerHeaderIntervalMarkerOverview.selected {
+  opacity: 1;
+  background-color: #e4eaf6;
 }
 
 .profileViewerHeaderIntervalMarkerOverviewThreadGeckoMain {
@@ -353,7 +361,7 @@ body, #root, .profileViewer {
 .profileThreadHeaderBar {
   margin: 0;
   padding: 0;
-  height: 40px;
+  height: 30px;
   display: flex;
   flex-flow: row nowrap;
   border-top: 1px solid #D6D6D6;
@@ -370,7 +378,7 @@ body, #root, .profileViewer {
   font-weight: normal;
   font: message-box;
   font-size: 100%;
-  line-height: 40px;
+  line-height: 30px;
   border-right: 1px solid #D6D6D6;
   margin: 0;
   margin-left: 14px;
@@ -384,14 +392,14 @@ body, #root, .profileViewer {
 }
 
 .threadStackGraph {
-  height: 40px;
+  height: 30px;
   width: calc(100% - 150px);
   position: relative;
 }
 
 .threadStackGraphCanvas {
   display: block;
-  height: 40px;
+  height: 30px;
   width: 100%;
 }
 

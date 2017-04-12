@@ -744,3 +744,52 @@ export function filterTracingMarkersToRange(tracingMarkers: TracingMarker[],
                                             rangeEnd: number): TracingMarker[] {
   return tracingMarkers.filter(tm => tm.start < rangeEnd && tm.start + tm.dur >= rangeStart);
 }
+
+export function getFriendlyThreadName(threads: Thread[], thread: Thread): string {
+  let label;
+  switch (thread.name) {
+    case 'GeckoMain':
+      switch (thread.processType) {
+        case 'default':
+          label = 'Main Thread';
+          break;
+        case 'tab': {
+          const contentThreads = threads.filter(thread => {
+            return thread.name === 'GeckoMain' && thread.processType === 'tab';
+          });
+          if (contentThreads.length > 1) {
+            const index = 1 + contentThreads.indexOf(thread);
+            label = `Content (${index} of ${contentThreads.length})`;
+          } else {
+            label = 'Content';
+          }
+          break;
+        }
+        case 'plugin':
+          label = 'Plugin';
+          break;
+      }
+      break;
+  }
+
+  if (!label) {
+    label = thread.name;
+  }
+  return label;
+}
+
+export function getThreadProcessDetails(thread: Thread): string {
+  let label = `thread: "${thread.name}"`;
+  if (thread.tid !== undefined) {
+    label += ` (${thread.tid})`;
+  }
+
+  if (thread.processType) {
+    label += `\nprocess: "${thread.processType}"`;
+    if (thread.pid !== undefined) {
+      label += ` (${thread.pid})`;
+    }
+  }
+
+  return label;
+}

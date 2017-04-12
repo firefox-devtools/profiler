@@ -38,6 +38,8 @@ type Props = {
   horizontalViewport: HorizontalViewport,
   viewHeight: CssPixels,
   selection: ProfileSelection,
+  threadName: string,
+  processDetails: string,
 };
 
 class TimelineFlameChart extends Component {
@@ -86,13 +88,12 @@ class TimelineFlameChart extends Component {
     const {
       thread, isThreadExpanded, maxStackDepth, stackTimingByDepth, isSelected, timeRange,
       threadIndex, interval, getCategory, getLabel, horizontalViewport,
-      updateProfileSelection, selection,
+      updateProfileSelection, selection, threadName, processDetails,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
     // that here at the top level component.
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
-    const title = thread.processType ? `${thread.name} [${thread.processType}]` : thread.name;
     const height = this.getViewHeight(maxViewportHeight);
     const buttonClass = classNames('timelineFlameChartCollapseButton', {
       expanded: isThreadExpanded,
@@ -101,8 +102,8 @@ class TimelineFlameChart extends Component {
 
     return (
       <div className='timelineFlameChart' style={{ height }}>
-        <div className='timelineFlameChartLabels grippy'>
-          <span>{title}</span>
+        <div className='timelineFlameChartLabels grippy' title={processDetails}>
+          <span>{threadName}</span>
           <button className={buttonClass} onClick={this.toggleThreadCollapse} />
         </div>
         <FlameChartViewport key={threadIndex}
@@ -147,5 +148,7 @@ export default connect((state, ownProps) => {
     getLabel: isThreadExpanded ? getLabelingStrategy(state) : getImplementationName,
     threadIndex,
     selection: getProfileViewOptions(state).selection,
+    threadName: threadSelectors.getFriendlyThreadName(state),
+    processDetails: threadSelectors.getThreadProcessDetails(state),
   };
 }, (actions: Object))(TimelineFlameChart);
