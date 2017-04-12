@@ -52,7 +52,7 @@ export function stringifyCallTreeFilters(arrayValue = []) {
   }).join('~');
 }
 
-export function getCallTreeFilterLabels(thread, callTreeFilters) {
+export function getCallTreeFilterLabels(thread, threadName, callTreeFilters) {
   const { funcTable, stringTable } = thread;
   const labels = callTreeFilters.map(filter => {
     function lastFuncString(funcArray) {
@@ -69,6 +69,6 @@ export function getCallTreeFilterLabels(thread, callTreeFilters) {
         throw new Error('Unexpected filter type');
     }
   });
-  labels.unshift('Complete Thread');
+  labels.unshift(`Complete "${threadName}"`);
   return labels;
 }

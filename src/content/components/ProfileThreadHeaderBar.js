@@ -39,30 +39,16 @@ class ProfileThreadHeaderBar extends Component {
   _onMarkerSelect(/* markerIndex */) {
   }
 
-  getThreadTooltip(): string {
-    // The tid and pid weren't always included, so they are optional for displaying.
-    const { thread } = this.props;
-    let tooltip = '';
-    if (thread.pid !== undefined) {
-      tooltip = `pid: ${thread.pid}`;
-    }
-    if (thread.tid !== undefined) {
-      if (thread.pid !== undefined) {
-        tooltip += ', ';
-      }
-      tooltip += `tid: ${thread.tid}`;
-    }
-    return tooltip;
-  }
-
   render() {
-    const { thread, interval, rangeStart, rangeEnd, funcStackInfo, selectedFuncStack, isSelected, style } = this.props;
-    const label = thread.processType ? `${thread.name} [${thread.processType}]` : thread.name;
+    const {
+      thread, interval, rangeStart, rangeEnd, funcStackInfo, selectedFuncStack,
+      isSelected, style, threadName, processDetails,
+    } = this.props;
 
     return (
       <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')} style={style}>
-        <h1 onMouseDown={this._onLabelMouseDown} className='grippy' title={this.getThreadTooltip()}>
-          {label}
+        <h1 onMouseDown={this._onLabelMouseDown} className='grippy' title={processDetails}>
+          {threadName}
         </h1>
         <ThreadStackGraph interval={interval}
                           thread={thread}
@@ -91,6 +77,8 @@ ProfileThreadHeaderBar.propTypes = {
   selectedFuncStack: PropTypes.number.isRequired,
   isSelected: PropTypes.bool.isRequired,
   style: PropTypes.object,
+  threadName: PropTypes.string,
+  processDetails: PropTypes.string,
 };
 
 export default connect((state, props) => {
@@ -99,6 +87,8 @@ export default connect((state, props) => {
   const selectedThread = getSelectedThreadIndex(state);
   return {
     thread: selectors.getFilteredThread(state),
+    threadName: selectors.getFriendlyThreadName(state),
+    processDetails: selectors.getThreadProcessDetails(state),
     funcStackInfo: selectors.getFuncStackInfo(state),
     selectedFuncStack: threadIndex === selectedThread ? selectors.getSelectedFuncStack(state) : -1,
     isSelected: threadIndex === selectedThread,

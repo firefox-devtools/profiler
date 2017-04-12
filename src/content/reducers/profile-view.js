@@ -321,6 +321,8 @@ export const getProfileTaskTracerData = (state: State): TaskTracer => getProfile
 
 export type SelectorsForThread = {
   getThread: State => Thread,
+  getFriendlyThreadName: State => string,
+  getThreadProcessDetails: State => string,
   getViewOptions: State => ThreadViewOptions,
   getCallTreeFilters: State => CallTreeFilter[],
   getCallTreeFilterLabels: State => string[],
@@ -348,8 +350,18 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
     const getThread = (state: State): Thread => getProfile(state).threads[threadIndex];
     const getViewOptions = (state: State): ThreadViewOptions => getProfileViewOptions(state).perThread[threadIndex];
     const getCallTreeFilters = (state: State): CallTreeFilter[] => URLState.getCallTreeFilters(state, threadIndex);
+    const getFriendlyThreadName = createSelector(
+      getThreads,
+      getThread,
+      ProfileData.getFriendlyThreadName
+    );
+    const getThreadProcessDetails = createSelector(
+      getThread,
+      ProfileData.getThreadProcessDetails
+    );
     const getCallTreeFilterLabels: (state: State) => string[] = createSelector(
       getThread,
+      getFriendlyThreadName,
       getCallTreeFilters,
       CallTreeFilters.getCallTreeFilterLabels
     );
@@ -542,6 +554,8 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
       getFuncStackMaxDepthForFlameChart,
       getStackTimingByDepthForFlameChart,
       getLeafCategoryStackTimingForFlameChart,
+      getFriendlyThreadName,
+      getThreadProcessDetails,
     };
   }
   return selectorsForThreads[threadIndex];
