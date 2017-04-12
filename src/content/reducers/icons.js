@@ -22,11 +22,25 @@ const iconsStateReducer: Reducer<Set<string>> = favicons;
 export default iconsStateReducer;
 
 export const getIcons = (state: State) => state.icons;
-export const getIconForNode = (state: State, node: Node) => getIcons(state).has(node.icon) ? node.icon : null;
+
+export const getIconForNode = (state: State, node: Node) => {
+  // Without an intermediary variable, flow doesn't seem to be able to refine
+  // node.icon type from `string | null` to `string`.
+  // See https://github.com/facebook/flow/issues/3715
+  const icons = getIcons(state);
+  return (node.icon !== null && icons.has(node.icon)
+    ? node.icon
+    : null);
+};
+
 export const getIconClassNameForNode = createSelector(
   getIcons, (state, node) => node,
-  (icons, node) => (icons.has(node.icon) ? classNameFromUrl(node.icon) : null)
+  (icons, node) =>
+    (node.icon !== null && icons.has(node.icon)
+      ? classNameFromUrl(node.icon)
+      : null)
 );
+
 export const getIconsWithClassNames: (State => IconWithClassName[]) = createSelector(
   getIcons,
   icons => [...icons].map(icon => ({ icon, className: classNameFromUrl(icon) }))
