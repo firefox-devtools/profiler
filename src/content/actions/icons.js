@@ -19,7 +19,7 @@ const icons: Set<string> = new Set();
 
 type IconRequestResult = 'loaded' | 'error' | 'cached';
 
-function getIcon(icon: string): Promise<IconRequestResult> {
+function _getIcon(icon: string): Promise<IconRequestResult> {
   if (icons.has(icon)) {
     return Promise.resolve('cached');
   }
@@ -43,7 +43,7 @@ function getIcon(icon: string): Promise<IconRequestResult> {
 
 export function iconStartLoading(icon: string): ThunkAction {
   return dispatch => {
-    return getIcon(icon).then(result => {
+    return _getIcon(icon).then(result => {
       switch (result) {
         case 'loaded':
           dispatch(iconHasLoaded(icon));

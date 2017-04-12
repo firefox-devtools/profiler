@@ -1,5 +1,3 @@
-import 'babel-polyfill';
-import { describe, it } from 'mocha';
 import { assert } from 'chai';
 import { blankStore, storeWithProfile } from './fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
