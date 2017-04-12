@@ -10,7 +10,6 @@ import type { IndexIntoFuncStackTable, FuncStackInfo } from '../../common/types/
 import type { Thread } from '../../common/types/profile';
 
 type Props = {
-  contextMenuId: string,
   thread: Thread,
   funcStackInfo: FuncStackInfo,
   selectedFuncStack: IndexIntoFuncStackTable,
@@ -68,10 +67,8 @@ class ProfileCallTreeContextMenu extends PureComponent {
   }
 
   render() {
-    const { contextMenuId } = this.props;
-
     return (
-      <ContextMenu id={contextMenuId}>
+      <ContextMenu id={'ProfileCallTreeContextMenu'}>
         <SubMenu title='Copy' hoverDelay={200}>
           <MenuItem onClick={this.handleClick} data={{type: 'copyFunctionName'}}>Function Name</MenuItem>
           <MenuItem onClick={this.handleClick} data={{type: 'copyStack'}}>Stack</MenuItem>

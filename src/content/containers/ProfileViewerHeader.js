@@ -7,7 +7,6 @@ import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOver
 import OverflowEdgeIndicator from '../components/OverflowEdgeIndicator';
 import { connect } from 'react-redux';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../reducers/profile-view';
-
 import actions from '../actions';
 
 class ProfileViewerHeader extends PureComponent {

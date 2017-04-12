@@ -14,6 +14,7 @@ import type {
 } from '../common/types/profile';
 import type { FuncStackTable, IndexIntoFuncStackTable, TracingMarker } from '../common/types/profile-derived';
 import { timeCode } from '../common/time-code';
+import { getEmptyTaskTracerData } from './task-tracer';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -806,4 +807,12 @@ export function getThreadProcessDetails(thread: Thread): string {
   }
 
   return label;
+}
+
+export function getEmptyProfile(): Profile {
+  return {
+    meta: { interval: 1 },
+    threads: [],
+    tasktracer: getEmptyTaskTracerData(),
+  };
 }

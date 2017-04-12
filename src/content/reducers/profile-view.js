@@ -30,14 +30,7 @@ import type {
   ThreadViewOptions,
 } from './types';
 
-function emptyProfile(): Profile {
-  return {
-    meta: { interval: 1 },
-    threads: [],
-    tasktracer: TaskTracerTools.emptyTaskTracerData(),
-  };
-}
-function profile(state: Profile = emptyProfile(), action: Action) {
+function profile(state: Profile = ProfileData.getEmptyProfile(), action: Action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_WEB':
@@ -86,7 +79,7 @@ function removePrefixFromFuncArray(prefixFuncs: IndexIntoFuncTable[], funcArray:
   return funcArray.slice(prefixFuncs.length - 1);
 }
 
-function threadOrder(state: number[] = [], action: Action) {
+function threadOrder(state: ThreadIndex[] = [], action: Action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_WEB':
@@ -94,6 +87,40 @@ function threadOrder(state: number[] = [], action: Action) {
       return ProfileData.defaultThreadOrder(action.profile.threads);
     case 'CHANGE_THREAD_ORDER':
       return action.threadOrder;
+    case 'HIDE_THREAD': {
+      const { threadIndex } = action;
+      return state.filter(i => i !== threadIndex);
+    }
+    case 'SHOW_THREAD': {
+      // There is a little bit of complexity here, due to deciding (on a potentially
+      // re-sorted list) where to actually insert a thread. This strategy tries to
+      // place it back in the list based on the original sort order.
+      const defaultThreadOrder = ProfileData.defaultThreadOrder(action.threads);
+      const originalOrderIndex = defaultThreadOrder.indexOf(action.threadIndex);
+
+      let previousThreadIndex;
+      for (let orderIndex = 0; orderIndex < defaultThreadOrder.length; orderIndex++) {
+        const threadIndex = defaultThreadOrder[orderIndex];
+        if (!state.includes(threadIndex)) {
+          continue;
+        }
+        if (orderIndex > originalOrderIndex) {
+          break;
+        }
+        previousThreadIndex = threadIndex;
+      }
+
+      const insertionIndex = previousThreadIndex === undefined
+        // Insert at the beginning.
+        ? 0
+        // Insert after
+        : state.indexOf(previousThreadIndex) + 1;
+
+      const newState = state.slice();
+      newState.splice(insertionIndex, 0, action.threadIndex);
+
+      return newState;
+    }
     default:
       return state;
   }
