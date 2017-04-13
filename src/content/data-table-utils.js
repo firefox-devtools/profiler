@@ -37,34 +37,60 @@ export function sortDataTable<KeyColumnElementType>(
   keyColumn: KeyColumnElementType[],
   comparator: compareFn<KeyColumnElementType>
 ): DataTable {
+
   function swap(i, j) {
-    for (const columnName in table) {
-      if (columnName !== 'length') {
-        const column = table[columnName];
-        const temp = column[i];
-        column[i] = column[j];
-        column[j] = temp;
+    if (i !== j) {
+      for (const columnName in table) {
+        if (columnName !== 'length') {
+          const column = table[columnName];
+          const temp = column[i];
+          column[i] = column[j];
+          column[j] = temp;
+        }
       }
     }
   }
 
+  // Reorders the values in the range left <= k <= right and returns an index
+  // "partitionIndex" such that the elements at k for left <= k < partitionIndex
+  // are < pivotValue and the elements at k for partitionIndex <= k <= right
+  // are >= pivotValue.
+  // If the range is already sorted, no swaps are performed.
   function partition(pivot, left, right) {
     const pivotValue = keyColumn[pivot];
-    let partitionIndex = left;
 
-    for (let i = left; i < right; i++) {
+    // At the end of each iteration, the following is true:
+    // All elements at k for left <= k < partitionIndex are < pivotValue.
+    // All elements at k for partitionIndex <= k <= i are >= pivotValue.
+    // Specifically, the element at partitionIndex is the first one in the
+    // range left <= k <= right which is potentially >= pivotValue, and which
+    // will need to be moved out of the way when encountering an element
+    // that's < pivotValue.
+    let partitionIndex = left;
+    for (let i = left; i <= right; i++) {
       if (comparator(keyColumn[i], pivotValue) < 0) {
         swap(i, partitionIndex);
         partitionIndex++;
       }
     }
-    swap(right, partitionIndex);
     return partitionIndex;
   }
 
   function quickSort(left, right) {
     if (left < right) {
-      const pivot = right;
+      // QuickSort's effectiveness depends on its ability to partition the
+      // sequence being sorted into two subsequences of roughly equal length:
+      // by halving the length at each recursion level, the subproblems get
+      // smaller faster. To get a good partition, we must choose a pivot value
+      // that is close to the median of the values in the sequence: by
+      // definition, half of the values will fall before the median, half
+      // after it.
+      // If the sequence is already mostly sorted, then choosing the first or
+      // last value as the pivot is probably as far from the median as you
+      // could possibly get; this is a "pessimal", not optimal, choice.
+      // Choosing the middle value as the pivot is likely to be much closer to
+      // the median.
+      const pivot = (left + right) >> 1;
       const partitionIndex = partition(pivot, left, right);
 
       // Sort left and right
