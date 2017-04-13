@@ -79,10 +79,9 @@ body, #root, .profileViewer {
 }
 
 .treeRowIcon {
-  min-width: 12px;
-  min-height: 12px;
+  min-width: 14px;
+  min-height: 14px;
   height: 100%;
-  margin: 2px;
   background: center / contain no-repeat;
 }
 
@@ -124,6 +123,13 @@ body, #root, .profileViewer {
 }
 .treeViewHeaderColumn.totalTime {
   width: 120px;
+}
+.treeViewFixedColumn.icon {
+  left: 190px;
+  width: 19px;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
 }
 .treeViewRowColumn.totalTime,
 .treeViewRowColumn.totalTimePercent,
