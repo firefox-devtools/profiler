@@ -55,11 +55,19 @@ export type URLState = {
   jsOnly: boolean,
   invertCallstack: boolean,
   hidePlatformDetails: boolean,
-}
+};
+
+export type IconState = Set<string>;
 
 export type State = {
   app: AppState,
   profileView: ProfileViewState,
   summaryView: SummaryViewState,
   urlState: URLState,
+  icons: IconState,
+};
+
+export type IconWithClassName = {
+  icon: string,
+  className: string,
 };

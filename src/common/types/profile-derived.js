@@ -21,3 +21,13 @@ export type TracingMarker = {
   name: string,
   title: string|null,
 };
+
+export type Node = {
+  totalTime: string,
+  totalTimePercent: string,
+  selfTime: string,
+  name: string,
+  lib: string,
+  dim: boolean,
+  icon: string | null,
+};
