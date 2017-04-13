@@ -39,17 +39,6 @@ describe('actions/icons', function () {
     store = null;
   });
 
-  function waitForActions({ count } = { count: 1 }) {
-    return new Promise(resolve => {
-      const unsubscribe = store.subscribe(() => {
-        if (--count === 0) { // eslint-disable-line no-param-reassign
-          unsubscribe();
-          resolve();
-        }
-      });
-    });
-  }
-
   describe('With the initial state', function () {
     let state;
     beforeEach(function () {
@@ -84,11 +73,13 @@ describe('actions/icons', function () {
 
   describe('Requesting an existing icon', function () {
     it('will populate the local cache', async function () {
-      store.dispatch(iconsActions.iconStartLoading(validIcons[0]));
-      // Second request for the same icon shouldn't dspatch anything
-      store.dispatch(iconsActions.iconStartLoading(validIcons[0]));
-      // 3rd request for another icon should dispatch the loaded action
-      store.dispatch(iconsActions.iconStartLoading(validIcons[1]));
+      const promises = [
+        store.dispatch(iconsActions.iconStartLoading(validIcons[0])),
+        // Second request for the same icon shouldn't dspatch anything
+        store.dispatch(iconsActions.iconStartLoading(validIcons[0])),
+        // 3rd request for another icon should dispatch the loaded action
+        store.dispatch(iconsActions.iconStartLoading(validIcons[1])),
+      ];
 
       // Only 2 requests because only 2 different icons
       assert.lengthOf(instances, 2);
@@ -97,7 +88,7 @@ describe('actions/icons', function () {
         assert.equal(instance.referrerPolicy, 'no-referrer');
       });
       instances.forEach(instance => instance.onload());
-      await waitForActions({ count: 2 });
+      await Promise.all(promises);
 
       const state = store.getState();
       let subject = iconsAccessors.getIcons(state);
@@ -122,11 +113,11 @@ describe('actions/icons', function () {
 
   describe('Requesting a non-existing image', function () {
     it('will not populate the local cache', async function () {
-      store.dispatch(iconsActions.iconStartLoading(invalidIcon));
+      const actionPromise = store.dispatch(iconsActions.iconStartLoading(invalidIcon));
       assert.lengthOf(instances, 1);
       instances[0].onerror();
 
-      await waitForActions();
+      await actionPromise;
 
       const state = store.getState();
       let subject = iconsAccessors.getIcons(state);
