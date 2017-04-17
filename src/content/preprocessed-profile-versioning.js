@@ -11,6 +11,7 @@
 import { sortDataTable } from './data-table-utils';
 import { resourceTypes } from './profile-data';
 import { UniqueStringArray } from './unique-string-array';
+import { timeCode } from '../common/time-code';
 
 export const CURRENT_VERSION = 4; // The current version of the 'preprocessed profile' format.
 
@@ -86,9 +87,11 @@ function _getRealScriptURI(url) {
 const _upgraders = {
   [1]: profile => {
     // Starting with version 1, markers are sorted.
-    for (const thread of profile.threads) {
-      sortDataTable(thread.markers, thread.markers.time, (a, b) => a - b);
-    }
+    timeCode('sorting thread markers', () => {
+      for (const thread of profile.threads) {
+        sortDataTable(thread.markers, thread.markers.time, (a, b) => a - b);
+      }
+    });
 
     // And threads have proper names and processType fields.
     for (const thread of profile.threads) {
