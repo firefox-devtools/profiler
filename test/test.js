@@ -69,6 +69,14 @@ describe('data-table-utils', function () {
       sortDataTable(dt, dt.wordLength, (a, b) => a - b);
       assert.deepEqual(dt, originalDataTable);
     });
+    const differentDataTable = {
+      length: 7,
+      keyColumn: [1, 2, 3, 5, 6, 4, 7],
+    };
+    it('should sort this other data table', function () {
+      sortDataTable(differentDataTable, differentDataTable.keyColumn, (a, b) => a - b);
+      assert.deepEqual(differentDataTable.keyColumn, [1, 2, 3, 4, 5, 6, 7]);
+    });
   });
 });
 
