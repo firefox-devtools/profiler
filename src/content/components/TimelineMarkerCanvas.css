@@ -1,0 +1,9 @@
+.timelineMarkerCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.timelineMarkerCanvas.hover {
+  cursor: default;
+}

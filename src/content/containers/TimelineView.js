@@ -5,6 +5,7 @@ import { getThreads, getThreadOrder } from '../reducers/profile-view';
 import actions from '../actions';
 import FlameChartSettings from '../components/FlameChartSettings';
 import TimelineFlameChart from './TimelineFlameChart';
+import TimelineMarkers from './TimelineMarkers';
 import Reorderable from '../components/Reorderable';
 import { withSize } from '../with-size';
 
@@ -34,16 +35,17 @@ class TimlineViewTimelinesImpl extends PureComponent {
   render() {
     const { threads, threadOrder, changeThreadOrder, height } = this.props;
 
-    const className = 'timelineViewTimelines';
-
     return (
       <div className='timelineViewTimelines'>
         <div className='timelineViewTimelinesScroller'
              ref={element => {
                this.scrollElement = element;
              }}>
+          <div className='timelineViewDivider'>
+            Sample based callstacks
+          </div>
           <Reorderable tagName='div'
-                       className={`${className}ThreadList`}
+                       className={'timelineViewTimelinesThreadList'}
                        order={threadOrder}
                        orient='vertical'
                        onChangeOrder={changeThreadOrder}>
@@ -55,6 +57,18 @@ class TimlineViewTimelinesImpl extends PureComponent {
               </div>
             ))}
           </Reorderable>
+          <div className='timelineViewDivider'>
+            Marker Events
+          </div>
+          <div className={'timelineViewTimelinesThreadList'}>
+            {threads.map((thread, threadIndex) => (
+              <div className='timelineViewRow' key={threadIndex}>
+                <TimelineMarkers threadIndex={threadIndex}
+                                 viewHeight={height}
+                                 getScrollElement={this.getScrollElement} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );

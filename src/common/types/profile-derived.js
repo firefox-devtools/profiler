@@ -31,3 +31,14 @@ export type Node = {
   dim: boolean,
   icon: string | null,
 };
+
+export type MarkerTiming = {
+  // Start time in milliseconds.
+  start: number[],
+  // End time in milliseconds.
+  end: number[],
+  index: number[],
+  name: string,
+  length: number,
+};
+export type MarkerTimingRows = Array<MarkerTiming>

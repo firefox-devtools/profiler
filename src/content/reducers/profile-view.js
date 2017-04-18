@@ -6,6 +6,7 @@ import * as CallTreeFilters from '../call-tree-filters';
 import * as URLState from './url-state';
 import * as ProfileData from '../profile-data';
 import * as StackTiming from '../stack-timing';
+import * as MarkerTiming from '../marker-timing';
 import * as ProfileTree from '../profile-tree';
 import * as TaskTracerTools from '../task-tracer';
 import { getCategoryColorStrategy } from './flame-chart';
@@ -357,6 +358,7 @@ export type SelectorsForThread = {
   getRangeFilteredThread: State => Thread,
   getJankInstances: State => TracingMarker[],
   getTracingMarkers: State => TracingMarker[],
+  getMarkerTiming: State => MarkerTiming.MarkerTimingRows,
   getRangeSelectionFilteredTracingMarkers: State => TracingMarker[],
   getFilteredThread: State => Thread,
   getRangeSelectionFilteredThread: State => Thread,
@@ -413,6 +415,10 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
     const getTracingMarkers = createSelector(
       getThread,
       ProfileData.getTracingMarkers
+    );
+    const getMarkerTiming = createSelector(
+      getTracingMarkers,
+      MarkerTiming.getMarkerTiming
     );
     const getRangeSelectionFilteredTracingMarkers = createSelector(
       getTracingMarkers,
@@ -568,6 +574,7 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
       getRangeFilteredThread,
       getJankInstances,
       getTracingMarkers,
+      getMarkerTiming,
       getRangeSelectionFilteredTracingMarkers,
       getFilteredThread,
       getRangeSelectionFilteredThread,

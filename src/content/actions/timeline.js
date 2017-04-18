@@ -18,8 +18,13 @@ export function changeFlameChartLabelingStrategy(getLabel: GetLabel): Action {
   };
 }
 
-export function changeTimelineExpandedThread(threadIndex: ThreadIndex, isExpanded: boolean): Action {
-  const type = 'CHANGE_TIMELINE_EXPANDED_THREAD';
+export function changeTimelineFlameChartExpandedThread(threadIndex: ThreadIndex, isExpanded: boolean): Action {
+  const type = 'CHANGE_TIMELINE_FLAME_CHART_EXPANDED_THREAD';
+  return { type, threadIndex, isExpanded };
+}
+
+export function changeTimelineMarkersExpandedThread(threadIndex: ThreadIndex, isExpanded: boolean): Action {
+  const type = 'CHANGE_TIMELINE_MARKERS_EXPANDED_THREAD';
   return { type, threadIndex, isExpanded };
 }
 

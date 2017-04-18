@@ -70,7 +70,7 @@ class ProfileViewerHeader extends PureComponent {
         }
       </div>
       <div className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerGfx`}>
-        {
+        {/*
           threadOrder.map(threadIndex => {
             const threadName = threads[threadIndex].name;
             const processType = threads[threadIndex].processType;
@@ -84,7 +84,7 @@ class ProfileViewerHeader extends PureComponent {
                                                     onSelect={this._onIntervalMarkerSelect} /> : null)
             );
           })
-        }
+        */}
       </div>
       <OverflowEdgeIndicator className={`${className}HeaderOverflowEdgeIndicator`}>
         {<Reorderable tagName='ol'
