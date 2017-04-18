@@ -1,16 +1,16 @@
 // @flow
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import FlameChartCanvas from '../components/FlameChartCanvas';
+import TimelineMarkerCanvas from '../components/TimelineMarkerCanvas';
 import { selectorsForThread, getDisplayRange, getProfileInterval, getProfileViewOptions } from '../reducers/profile-view';
 import { getCategoryColorStrategy, getLabelingStrategy } from '../reducers/flame-chart';
-import { getIsFlameChartExpanded } from '../reducers/timeline-view';
+import { getAreMarkersExpanded } from '../reducers/timeline-view';
 import actions from '../actions';
 import { getImplementationName } from '../labeling-strategies';
 import classNames from 'classnames';
-import { ContextMenuTrigger } from 'react-contextmenu';
 
 import type { Thread } from '../../common/types/profile';
+import type { TracingMarker, MarkerTimingRows } from '../../common/types/profile-derived';
 import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../common/types/units';
 import type { StackTimingByDepth } from '../stack-timing';
 import type { GetCategory } from '../color-categories';
@@ -18,15 +18,15 @@ import type { GetLabel } from '../labeling-strategies';
 import type { UpdateProfileSelection } from '../actions/profile-view';
 import type { ProfileSelection } from '../actions/types';
 
-require('./TimelineFlameChart.css');
+require('./TimelineMarkers.css');
 
-const STACK_FRAME_HEIGHT = 16;
+const ROW_HEIGHT = 16;
 const TIMELINE_ROW_HEIGHT = 34;
 
 type Props = {
   thread: Thread,
   isRowExpanded: boolean,
-  maxStackDepth: number,
+  maxMarkerRows: number,
   stackTimingByDepth: StackTimingByDepth,
   isSelected: boolean,
   timeRange: { start: Milliseconds, end: Milliseconds },
@@ -34,16 +34,18 @@ type Props = {
   interval: Milliseconds,
   getCategory: GetCategory,
   getLabel: GetLabel,
-  changeTimelineFlameChartExpandedThread: (number, boolean) => {},
+  changeTimelineMarkersExpandedThread: (number, boolean) => {},
   updateProfileSelection: UpdateProfileSelection,
   viewHeight: CssPixels,
   getScrollElement: () => HTMLElement,
   selection: ProfileSelection,
   threadName: string,
   processDetails: string,
+  markerTimingRows: MarkerTimingRows,
+  markers: TracingMarker[],
 };
 
-class TimelineFlameChart extends PureComponent {
+class TimelineMarkers extends Component {
 
   props: Props
 
@@ -53,8 +55,8 @@ class TimelineFlameChart extends PureComponent {
   }
 
   toggleThreadCollapse() {
-    const { changeTimelineFlameChartExpandedThread, threadIndex, isRowExpanded } = this.props;
-    changeTimelineFlameChartExpandedThread(threadIndex, !isRowExpanded);
+    const { changeTimelineMarkersExpandedThread, threadIndex, isRowExpanded } = this.props;
+    changeTimelineMarkersExpandedThread(threadIndex, !isRowExpanded);
   }
 
   /**
@@ -87,33 +89,27 @@ class TimelineFlameChart extends PureComponent {
 
   render() {
     const {
-      thread, isRowExpanded, maxStackDepth, stackTimingByDepth, isSelected, timeRange,
-      threadIndex, interval, getCategory, getLabel,
+      thread, isRowExpanded, maxMarkerRows, stackTimingByDepth, isSelected, timeRange,
+      threadIndex, interval, getCategory, getLabel, markerTimingRows, markers,
       updateProfileSelection, selection, threadName, processDetails, getScrollElement,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
     // that here at the top level component.
-    const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
+    const maxViewportHeight = maxMarkerRows * ROW_HEIGHT;
     const height = this.getViewHeight(maxViewportHeight);
-    const buttonClass = classNames('timelineFlameChartCollapseButton', {
+    const buttonClass = classNames('timelineMarkersCollapseButton', {
       expanded: isRowExpanded,
       collapsed: !isRowExpanded,
     });
 
     return (
-      <div className='timelineFlameChart' style={{ height }}>
-        {/**
-          * The timeline will eventually have its own context menu, but for now re-use
-          * the one in the header for hiding threads.
-          */}
-        <ContextMenuTrigger id={'ProfileThreadHeaderContextMenu'}
-                            title={processDetails}
-                            attributes={{ className: 'timelineFlameChartLabels grippy' }}>
+      <div className='timelineMarkers' style={{ height }}>
+        <div className='timelineMarkersLabels grippy' title={processDetails}>
           <span>{threadName}</span>
           <button className={buttonClass} onClick={this.toggleThreadCollapse} />
-        </ContextMenuTrigger>
-        <FlameChartCanvas key={threadIndex}
+        </div>
+        <TimelineMarkerCanvas key={threadIndex}
                             // TimelineViewport props
                             isRowExpanded={isRowExpanded}
                             isSelected={isSelected}
@@ -127,34 +123,42 @@ class TimelineFlameChart extends PureComponent {
                               return prevProps.stackTimingByDepth !== newProps.stackTimingByDepth;
                             }}
 
-                            // FlameChartCanvas props
+                            // TimelineMarkerCanvas props
                             interval={interval}
                             thread={thread}
                             rangeStart={timeRange.start}
                             rangeEnd={timeRange.end}
-                            stackTimingByDepth={stackTimingByDepth}
+                            markerTimingRows={markerTimingRows}
                             getCategory={getCategory}
                             getLabel={getLabel}
-                            maxStackDepth={maxStackDepth}
-                            stackFrameHeight={STACK_FRAME_HEIGHT} />
+                            maxMarkerRows={maxMarkerRows}
+                            markers={markers}
+                            rowHeight={ROW_HEIGHT} />
       </div>
     );
   }
 }
 
+
+
 export default connect((state, ownProps) => {
   const { threadIndex } = ownProps;
   const threadSelectors = selectorsForThread(threadIndex);
-  const isRowExpanded = getIsFlameChartExpanded(state, threadIndex);
-  const stackTimingByDepth = isRowExpanded
-    ? threadSelectors.getStackTimingByDepthForFlameChart(state)
-    : threadSelectors.getLeafCategoryStackTimingForFlameChart(state);
+  const isRowExpanded = getAreMarkersExpanded(state, threadIndex);
+
+  const thread = threadSelectors.getThread(state);
+  const markers = threadSelectors.getTracingMarkers(state);
+  const markerTimingRows = isRowExpanded
+    ? threadSelectors.getMarkerTiming(state)
+    : [];
+  console.log('!!! markerTimingRows', markerTimingRows);
 
   return {
     thread: threadSelectors.getFilteredThreadForFlameChart(state),
     isRowExpanded,
-    maxStackDepth: isRowExpanded ? threadSelectors.getFuncStackMaxDepthForFlameChart(state) : 1,
-    stackTimingByDepth,
+    markers,
+    markerTimingRows,
+    maxMarkerRows: markerTimingRows.length,
     isSelected: true,
     timeRange: getDisplayRange(state),
     interval: getProfileInterval(state),
@@ -165,4 +169,4 @@ export default connect((state, ownProps) => {
     threadName: threadSelectors.getFriendlyThreadName(state),
     processDetails: threadSelectors.getThreadProcessDetails(state),
   };
-}, (actions: Object))(TimelineFlameChart);
+}, (actions: Object))(TimelineMarkers);

@@ -46,6 +46,12 @@
   background-color:#d6d6d6;
 }
 
-.timelineViewRow {
-  /*padding-bottom: 5px;*/
+.timelineViewDivider {
+  background-color: #f9f9f9;
+  border: solid #d6d6d6;
+  border-width: 1px 0;
+  height: 25px;
+  line-height: 25px;
+  padding-left: 14px;
+  z-index: 1;
 }

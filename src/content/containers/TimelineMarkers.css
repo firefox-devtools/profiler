@@ -1,0 +1,53 @@
+.timelineMarkersLabels {
+  width: 135px;
+  display: flex;
+  padding: 9px 0 9px 14px 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.timelineMarkersLabels > span {
+  flex: 1;
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timelineMarkers {
+  display: flex;
+  flex-direction: row;
+}
+
+.timelineMarkersCollapseButton {
+  width: 17px;
+  height: 22px;
+  background: transparent;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  margin: -4px 0px;
+  border: none;
+  cursor: pointer;
+  transition: transform 100ms;
+}
+
+.timelineMarkersCollapseButton.expanded {
+  transform: rotate(90deg);
+}
+
+.timelineMarkersCollapseButton::after {
+  content: "";
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 0 6px 8px;
+  border-color: transparent transparent transparent #888;
+  background: transparent;
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  top: 5px;
+  left: 5px;
+}
