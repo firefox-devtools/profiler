@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 
-import { createImageMock } from './mocks/image';
-import { blankStore } from './fixtures/stores';
-import * as iconsAccessors from '../../reducers/icons';
-import * as iconsActions from '../icons';
+import { createImageMock } from '../fixtures/mocks/image';
+import { blankStore } from '../fixtures/stores';
+import * as iconsAccessors from '../../content/reducers/icons';
+import * as iconsActions from '../../content/actions/icons';
 
 describe('actions/icons', function () {
   const validIcons = [
@@ -134,4 +134,3 @@ describe('actions/icons', function () {
     });
   });
 });
-

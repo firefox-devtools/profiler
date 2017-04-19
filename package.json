@@ -20,7 +20,7 @@
     "start-prod": "npm run build-prod && npm run serve-static",
     "start-prod-readable": "npm run build-prod-readable && npm run serve-static",
     "test": "npm run build && npm run test-all",
-    "test-all": "NODE_ENV=test nyc mocha --compilers js:babel-core/register 'test/**/*.js' 'src/**/test/**/*.js'",
+    "test-all": "NODE_ENV=test nyc mocha --compilers js:babel-core/register 'src/test/**/*.js'",
     "test-file": "NODE_ENV=test mocha --compilers js:babel-core/register",
     "test-report": "nyc report --reporter=text-lcov > coverage.lcov"
   },

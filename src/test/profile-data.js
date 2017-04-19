@@ -1,16 +1,16 @@
 import 'babel-polyfill';
 import { assert, config } from 'chai';
-import { getContainingLibrary, symbolicateProfile, applyFunctionMerging, setFuncNames } from '../src/content/symbolication';
-import { preprocessProfile, unserializeProfileOfArbitraryFormat, serializeProfile } from '../src/content/preprocess-profile';
-import { resourceTypes, getFuncStackInfo, getTracingMarkers } from '../src/content/profile-data';
-import exampleProfile from './example-profile';
-import { UniqueStringArray } from '../src/content/unique-string-array';
-import { FakeSymbolStore } from './fake-symbol-store';
-import { sortDataTable } from '../src/content/data-table-utils';
-import { isOldCleopatraFormat, convertOldCleopatraProfile } from '../src/content/old-cleopatra-profile-format';
-import { isPreprocessedProfile, upgradePreprocessedProfileToCurrentVersion } from '../src/content/preprocessed-profile-versioning';
-import { upgradeRawProfileToCurrentVersion, CURRENT_VERSION } from '../src/content/raw-profile-versioning';
-import { getImplementationColor, getCategoryByImplementation, implementationCategoryMap } from '../src/content/color-categories';
+import { getContainingLibrary, symbolicateProfile, applyFunctionMerging, setFuncNames } from '../content/symbolication';
+import { preprocessProfile, unserializeProfileOfArbitraryFormat, serializeProfile } from '../content/preprocess-profile';
+import { resourceTypes, getFuncStackInfo, getTracingMarkers } from '../content/profile-data';
+import exampleProfile from './fixtures/profiles/example-profile';
+import { UniqueStringArray } from '../content/unique-string-array';
+import { FakeSymbolStore } from './fixtures/fake-symbol-store';
+import { sortDataTable } from '../content/data-table-utils';
+import { isOldCleopatraFormat, convertOldCleopatraProfile } from '../content/old-cleopatra-profile-format';
+import { isPreprocessedProfile, upgradePreprocessedProfileToCurrentVersion } from '../content/preprocessed-profile-versioning';
+import { upgradeRawProfileToCurrentVersion, CURRENT_VERSION } from '../content/raw-profile-versioning';
+import { getCategoryByImplementation, implementationCategoryMap } from '../content/color-categories';
 
 config.truncateThreshold = 0;
 
@@ -276,7 +276,7 @@ describe('symbolication', function () {
     });
   });
 
-  describe('symbolicateProfile', function (done) {
+  describe('symbolicateProfile', function () {
     let unsymbolicatedProfile = null;
     let symbolicatedProfile = null;
 
@@ -318,7 +318,7 @@ describe('symbolication', function () {
 
 describe('upgrades', function () {
   describe('old-cleopatra-profile', function () {
-    const exampleOldCleopatraProfile = require('./upgrades/old-cleopatra-profile.sps.json');
+    const exampleOldCleopatraProfile = require('./fixtures/upgrades/old-cleopatra-profile.sps.json');
     it('should detect the profile as an old cleopatra profile', function () {
       assert.isTrue(isOldCleopatraFormat(exampleOldCleopatraProfile));
     });
@@ -342,46 +342,46 @@ describe('upgrades', function () {
 
     assert.deepEqual(serializedLhsAsObject, serializedRhsAsObject);
   }
-  const afterUpgradeReference = unserializeProfileOfArbitraryFormat(require('./upgrades/prepr-4.sps.json'));
+  const afterUpgradeReference = unserializeProfileOfArbitraryFormat(require('./fixtures/upgrades/prepr-4.sps.json'));
 
   // Uncomment this to output your next ./upgrades/prepr-X.sps.json
   // console.log(serializeProfile(afterUpgradeReference));
 
   it('should import an old profile and upgrade it to be the same as the reference preprocessed profile', function () {
-    const serializedOldPreprocessedProfile0 = require('./upgrades/prepr-0.sps.json');
+    const serializedOldPreprocessedProfile0 = require('./fixtures/upgrades/prepr-0.sps.json');
     const upgradedProfile0 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile0);
     comparePreprocessedProfiles(upgradedProfile0, afterUpgradeReference);
-    const serializedOldPreprocessedProfile1 = require('./upgrades/prepr-1.sps.json');
+    const serializedOldPreprocessedProfile1 = require('./fixtures/upgrades/prepr-1.sps.json');
     const upgradedProfile1 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile1);
     comparePreprocessedProfiles(upgradedProfile1, afterUpgradeReference);
-    const serializedOldPreprocessedProfile2 = require('./upgrades/prepr-2.sps.json');
+    const serializedOldPreprocessedProfile2 = require('./fixtures/upgrades/prepr-2.sps.json');
     const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile2);
     comparePreprocessedProfiles(upgradedProfile2, afterUpgradeReference);
-    const serializedOldPreprocessedProfile3 = require('./upgrades/prepr-3.sps.json');
+    const serializedOldPreprocessedProfile3 = require('./fixtures/upgrades/prepr-3.sps.json');
     const upgradedProfile3 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile3);
     comparePreprocessedProfiles(upgradedProfile3, afterUpgradeReference);
-    const rawProfile3 = require('./upgrades/raw-3.sps.json');
+    const rawProfile3 = require('./fixtures/upgrades/raw-3.sps.json');
     const upgradedRawProfile3 = unserializeProfileOfArbitraryFormat(rawProfile3);
     comparePreprocessedProfiles(upgradedRawProfile3, afterUpgradeReference);
-    // const serializedOldPreprocessedProfile2 = require('./upgrades/prepr-2.sps.json');
+    // const serializedOldPreprocessedProfile2 = require('./fixtures/upgrades/prepr-2.sps.json');
     // const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile2);
     // comparePreprocessedProfiles(upgradedProfile2, afterUpgradeReference);
-    // const rawProfile4 = require('./upgrades/raw-4.sps.json');
+    // const rawProfile4 = require('./fixtures/upgrades/raw-4.sps.json');
     // const upgradedRawProfile4 = unserializeProfileOfArbitraryFormat(rawProfile4);
     // comparePreprocessedProfiles(upgradedRawProfile4, afterUpgradeReference);
   });
   it('should import an old raw profile and upgrade it to be the same as the newest raw profile', function () {
-    const afterUpgradeRawReference = require('./upgrades/raw-5.sps.json');
+    const afterUpgradeRawReference = require('./fixtures/upgrades/raw-5.sps.json');
     // Uncomment this to output your next ./upgrades/raw-X.sps.json
     // upgradeRawProfileToCurrentVersion(afterUpgradeRawReference);
     // console.log(JSON.stringify(afterUpgradeRawReference));
     assert.equal(afterUpgradeRawReference.meta.version, CURRENT_VERSION);
 
-    const rawProfile3 = require('./upgrades/raw-3.sps.json');
+    const rawProfile3 = require('./fixtures/upgrades/raw-3.sps.json');
     upgradeRawProfileToCurrentVersion(rawProfile3);
     assert.deepEqual(rawProfile3, afterUpgradeRawReference);
 
-    const rawProfile4 = require('./upgrades/raw-4.sps.json');
+    const rawProfile4 = require('./fixtures/upgrades/raw-4.sps.json');
     upgradeRawProfileToCurrentVersion(rawProfile4);
     assert.deepEqual(rawProfile4, afterUpgradeRawReference);
   });

@@ -1,23 +1,23 @@
 import { assert } from 'chai';
-import { blankStore, storeWithProfile } from './fixtures/stores';
-import * as ProfileViewSelectors from '../../reducers/profile-view';
-import * as TimelineSelectors from '../../reducers/timeline-view';
+import { blankStore, storeWithProfile } from '../fixtures/stores';
+import * as ProfileViewSelectors from '../../content/reducers/profile-view';
+import * as TimelineSelectors from '../../content/reducers/timeline-view';
 import {
   changeCallTreeSearchString,
   changeHidePlatformDetails,
   addRangeFilter,
   changeInvertCallstack,
   updateProfileSelection,
-} from '../profile-view';
+} from '../../content/actions/profile-view';
 import {
   changeFlameChartColorStrategy,
   changeTimelineExpandedThread,
-} from '../timeline';
-import { receiveProfileFromAddon } from '../receive-profile';
-import { getCategoryByImplementation } from '../../color-categories';
+} from '../../content/actions/timeline';
+import { receiveProfileFromAddon } from '../../content/actions/receive-profile';
+import { getCategoryByImplementation } from '../../content/color-categories';
 const { selectedThreadSelectors } = ProfileViewSelectors;
 
-const profile = require('../../../common/test/fixtures/profile-2d-canvas.json');
+const profile = require('../fixtures/profiles/profile-2d-canvas.json');
 
 describe('actions/profile', function () {
   it('can take a profile from an addon and save it to state', function () {

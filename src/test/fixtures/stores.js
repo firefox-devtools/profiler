@@ -1,7 +1,7 @@
-import createStore from '../../../create-store';
-import { receiveProfileFromAddon } from '../../receive-profile';
-import exampleProfile from '../../../../../test/timings-with-js';
-import { preprocessProfile } from '../../../preprocess-profile';
+import createStore from '../../content/create-store';
+import { receiveProfileFromAddon } from '../../content/actions/receive-profile';
+import exampleProfile from './profiles/timings-with-js';
+import { preprocessProfile } from '../../content/preprocess-profile';
 
 export function blankStore() {
   return createStore();
