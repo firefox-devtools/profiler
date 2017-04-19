@@ -72,7 +72,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
 
     return (
       <ContextMenu id={contextMenuId}>
-        <SubMenu title='Copy'>
+        <SubMenu title='Copy' hoverDelay='200'>
           <MenuItem onClick={this.handleClick} data={{type: 'copyFunctionName'}}>Function Name</MenuItem>
           <MenuItem onClick={this.handleClick} data={{type: 'copyStack'}}>Stack</MenuItem>
         </SubMenu>
