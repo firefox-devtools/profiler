@@ -9,13 +9,13 @@ import './ProfileCallTreeSettings.css';
 class ProfileCallTreeSettings extends Component {
   constructor(props) {
     super(props);
-    this._onJSOnlyClick = this._onJSOnlyClick.bind(this);
+    this._onImplementationFilterChange = this._onImplementationFilterChange.bind(this);
     this._onInvertCallstackClick = this._onInvertCallstackClick.bind(this);
     this._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(this);
   }
 
-  _onJSOnlyClick(e) {
-    this.props.changeImplementationFilter(e.target.checked ? 'js' : 'all');
+  _onImplementationFilterChange(e) {
+    this.props.changeImplementationFilter(e.target.value);
   }
 
   _onInvertCallstackClick(e) {
@@ -33,11 +33,15 @@ class ProfileCallTreeSettings extends Component {
         <ul className='profileCallTreeSettingsList'>
           <li className='profileCallTreeSettingsListItem'>
             <label className='profileCallTreeSettingsLabel'>
-              <input type='checkbox'
+              Filter:
+              <select
                      className='profileCallTreeSettingsCheckbox'
-                     onChange={this._onJSOnlyClick}
-                     checked={implementationFilter === 'js'}/>
-              { ' JavaScript only' }
+                     onChange={this._onImplementationFilterChange}
+                     value={implementationFilter}>
+                <option value='all'>All samples</option>
+                <option value='js'>JS Only</option>
+                <option value='cpp'>C++ Only</option>
+              </select>
             </label>
           </li>
           <li className='profileCallTreeSettingsListItem'>

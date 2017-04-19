@@ -2,8 +2,9 @@ import 'babel-polyfill';
 import { assert, config } from 'chai';
 import { getContainingLibrary, symbolicateProfile, applyFunctionMerging, setFuncNames } from '../src/content/symbolication';
 import { preprocessProfile, unserializeProfileOfArbitraryFormat, serializeProfile } from '../src/content/preprocess-profile';
-import { resourceTypes, getFuncStackInfo, getTracingMarkers } from '../src/content/profile-data';
+import { resourceTypes, getFuncStackInfo, getTracingMarkers, filterThreadByImplementation } from '../src/content/profile-data';
 import exampleProfile from './example-profile';
+import profileWithJS from './timings-with-js';
 import { UniqueStringArray } from '../src/content/unique-string-array';
 import { FakeSymbolStore } from './fake-symbol-store';
 import { sortDataTable } from '../src/content/data-table-utils';
@@ -404,5 +405,42 @@ describe('color-categories', function () {
       'The JS Baseline frame is labeled as as JS Baseline.');
     assert.equal(categories[6].color, implementationCategoryMap['JS Baseline'],
       'The platform frames are colored according to the color definition');
+  });
+});
+
+describe('filter-by-implementation', function () {
+  const profile = preprocessProfile(profileWithJS);
+  const thread = profile.threads[0];
+
+  function stackIsJS(filteredThread, stackIndex) {
+    const frameIndex = filteredThread.stackTable.frame[stackIndex];
+    const funcIndex = filteredThread.frameTable.func[frameIndex];
+    return filteredThread.funcTable.isJS[funcIndex];
+  }
+
+  it('will return the same thread if filtering to "all"', function () {
+    assert.equal(filterThreadByImplementation(thread, 'all'), thread);
+  });
+
+  it('will return only JS samples if filtering to "js"', function () {
+    const jsOnlyThread = filterThreadByImplementation(thread, 'js');
+    const nonNullSampleStacks = jsOnlyThread.samples.stack.filter(stack => stack !== null);
+    const samplesAreAllJS = nonNullSampleStacks
+      .map(stack => stackIsJS(jsOnlyThread, stack))
+      .reduce((a, b) => a && b);
+
+    assert.isTrue(samplesAreAllJS, 'samples are all js');
+    assert.lengthOf(nonNullSampleStacks, 4);
+  });
+
+  it('will return only C++ samples if filtering to "cpp"', function () {
+    const cppOnlyThread = filterThreadByImplementation(thread, 'cpp');
+    const nonNullSampleStacks = cppOnlyThread.samples.stack.filter(stack => stack !== null);
+    const samplesAreAllJS = nonNullSampleStacks
+      .map(stack => !stackIsJS(cppOnlyThread, stack))
+      .reduce((a, b) => a && b);
+
+    assert.isTrue(samplesAreAllJS, 'samples are all cpp');
+    assert.lengthOf(nonNullSampleStacks, 10);
   });
 });

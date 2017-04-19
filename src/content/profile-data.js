@@ -131,9 +131,24 @@ export function defaultThreadOrder(threads: Thread[]) {
   return threadOrder;
 }
 
-export function filterThreadToJSOnly(thread: Thread) {
-  return timeCode('filterThreadToJSOnly', () => {
-    const { stackTable, funcTable, frameTable, samples } = thread;
+export function filterThreadByImplementation(thread: Thread, implementation: string): Thread {
+  const { funcTable } = thread;
+
+  switch (implementation) {
+    case 'cpp':
+      return _filterThreadByFunc(thread, funcIndex => !funcTable.isJS[funcIndex]);
+    case 'js':
+      return _filterThreadByFunc(thread, funcIndex => funcTable.isJS[funcIndex]);
+  }
+  return thread;
+}
+
+function _filterThreadByFunc(
+  thread: Thread,
+  filter: IndexIntoFuncTable => boolean
+): Thread {
+  return timeCode('filterThread', () => {
+    const { stackTable, frameTable, samples } = thread;
 
     const newStackTable = {
       length: 0,
@@ -154,9 +169,7 @@ export function filterThreadToJSOnly(thread: Thread) {
         const prefixNewStack = convertStack(stackTable.prefix[stackIndex]);
         const frameIndex = stackTable.frame[stackIndex];
         const funcIndex = frameTable.func[frameIndex];
-        if (!funcTable.isJS[funcIndex]) {
-          newStack = prefixNewStack;
-        } else {
+        if (filter(funcIndex)) {
           const prefixStackAndFrameIndex = (prefixNewStack === null ? -1 : prefixNewStack) * frameCount + frameIndex;
           newStack = prefixStackAndFrameToStack.get(prefixStackAndFrameIndex);
           if (newStack === undefined) {
@@ -166,6 +179,8 @@ export function filterThreadToJSOnly(thread: Thread) {
           }
           oldStackToNewStack.set(stackIndex, newStack);
           prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
+        } else {
+          newStack = prefixNewStack;
         }
       }
       return newStack;
@@ -180,11 +195,6 @@ export function filterThreadToJSOnly(thread: Thread) {
       stackTable: newStackTable,
     });
   });
-}
-
-export function filterThreadToCppOnly(thread: Thread) {
-  // TODO
-  return thread;
 }
 
 /**

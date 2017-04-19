@@ -414,15 +414,7 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
     const _getImplementationFilteredThread = createSelector(
       _getRangeAndCallTreeFilteredThread,
       URLState.getImplementationFilter,
-      (thread, implementationFilter): Thread => {
-        switch (implementationFilter) {
-          case 'js':
-            return ProfileData.filterThreadToJSOnly(thread);
-          case 'cpp':
-            return ProfileData.filterThreadToCppOnly(thread);
-        }
-        return thread;
-      }
+      ProfileData.filterThreadByImplementation
     );
     const _getImplementationAndSearchFilteredThread = createSelector(
       _getImplementationFilteredThread,

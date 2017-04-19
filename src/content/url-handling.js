@@ -68,10 +68,6 @@ export function urlFromState(urlState: URLState) {
       break;
   }
   const qString = queryString.stringify(query);
-  console.log(
-    '!!! query',
-    { urlState, query, qString}
-  );
   return pathname + (qString ? '?' + qString : '');
 }
 
