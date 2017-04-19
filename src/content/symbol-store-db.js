@@ -1,4 +1,12 @@
-import { provideHostSide } from './promise-worker';
+// @flow
+
+export type SymbolTableAsTuple = [
+  Uint32Array, // addrs
+  Uint32Array, // index
+  Uint8Array,  // buffer
+];
+
+const kTwoWeeksInMilliseconds = 2 * 7 * 24 * 60 * 60 * 1000;
 
 /**
  * A wrapper around an IndexedDB table that stores symbol tables.
@@ -6,129 +14,219 @@ import { provideHostSide } from './promise-worker';
  * @classdesc Where does this description show up?
  */
 export class SymbolStoreDB {
+  _dbPromise: Promise<IDBDatabase> | null;
+  _maxCount: number;
+  _maxAge: number; // in milliseconds
+
   /**
-   * @param {string} dbName The name of the indexedDB database that's used
-   *                        to store the symbol tables.
+   * @param {string} dbName   The name of the indexedDB database that's used
+   *                          to store the symbol tables.
+   * @param {number} maxCount The maximum number of symbol tables to have in
+   *                          storage at the same time.
+   * @param {number} maxAge   The maximum age, in milliseconds, before stored
+   *                          symbol tables should get evicted.
    */
-  constructor(dbName) {
-    this._db = null;
-    this._setupDBPromise = this._setupDB(dbName);
+  constructor(dbName: string, maxCount: number = 200, maxAge: number = kTwoWeeksInMilliseconds) {
+    this._dbPromise = this._setupDB(dbName);
+    this._maxCount = maxCount;
+    this._maxAge = maxAge;
   }
 
-  _setupDB(dbName) {
+  _getDB(): Promise<IDBDatabase> {
+    if (this._dbPromise) {
+      return this._dbPromise;
+    }
+    return Promise.reject(new Error('The database is closed.'));
+  }
+
+  _setupDB(dbName: string): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      const openreq = indexedDB.open(dbName, 1);
-      openreq.onerror = reject;
-      openreq.onupgradeneeded = () => {
-        const db = openreq.result;
+      const openReq = window.indexedDB.open(dbName, 2);
+      openReq.onerror = () => {
+        if (openReq.error.name === 'VersionError') {
+          // This error fires if the database already exists, and the existing
+          // database has a higher version than what we requested. So either
+          // this version of perf.html is outdated, or somebody briefly tried
+          // to change this database format (and increased the version number)
+          // and then downgraded to a version of perf.html without those
+          // changes.
+          // We delete the database and try again.
+          const deleteDBReq = window.indexedDB.deleteDatabase(dbName);
+          deleteDBReq.onerror = () => reject(deleteDBReq.error);
+          deleteDBReq.onsuccess = () => {
+            // Try to open the database again.
+            this._setupDB(dbName).then(resolve, reject);
+          };
+        } else {
+          reject(openReq.error);
+        }
+      };
+      openReq.onupgradeneeded = upgradeEvent => {
+        const db = openReq.result;
         db.onerror = reject;
-        const tableStore = db.createObjectStore('symbol-tables', { autoIncrement: true });
-        tableStore.createIndex('libKey', ['debugName', 'breakpadId'], { unique: true });
-      };
-      openreq.onsuccess = () => {
-        this._db = openreq.result;
-        resolve();
-      };
-    });
-  }
-
-  getLibKey(debugName, breakpadId) {
-    if (!this._db) {
-      return this._setupDBPromise.then(() => this.getLibKey(debugName, breakpadId));
-    }
-
-    return new Promise((resolve, reject) => {
-      const transaction = this._db.transaction('symbol-tables', 'readonly');
-      const store = transaction.objectStore('symbol-tables');
-      const index = store.index('libKey');
-      const req = index.openKeyCursor(IDBKeyRange.only([debugName, breakpadId]));
-      req.onerror = reject;
-      req.onsuccess = () => {
-        const cursor = req.result;
-        if (cursor) {
-          resolve(cursor.primaryKey);
-        } else {
-          reject(new Error('Nothing in the async cache for this library.'));
+        if (upgradeEvent.oldVersion === 1) {
+          db.deleteObjectStore('symbol-tables');
         }
+        const store = db.createObjectStore('symbol-tables', {
+          keyPath: ['debugName', 'breakpadId'],
+        });
+        store.createIndex('lastUsedDate', 'lastUsedDate');
       };
-    });
-  }
-
-  importLibrary(debugName, breakpadId, [addrs, index, buffer]) {
-    if (!this._db) {
-      return this._setupDBPromise.then(() => this.importLibrary(debugName, breakpadId, [addrs, index, buffer]));
-    }
-
-    return new Promise((resolve, reject) => {
-      const transaction = this._db.transaction('symbol-tables', 'readwrite');
-      transaction.onerror = reject;
-      const tableStore = transaction.objectStore('symbol-tables');
-      const putReq = tableStore.put({ debugName, breakpadId, addrs, index, buffer });
-      putReq.onsuccess = () => {
-        resolve(putReq.result);
+      openReq.onblocked = () => {
+        reject(new Error(
+          'The symbol store database could not be upgraded because it is ' +
+          'open in another tab. Please close all your other perf-html.io ' +
+          'tabs and refresh.'));
       };
-    });
-  }
-
-  getFuncAddressTableForLib(libKey) {
-    if (!this._db) {
-      return this._setupDBPromise.then(() => this.getFuncAddressTableForLib(libKey));
-    }
-
-    return new Promise((resolve, reject) => {
-      const transaction = this._db.transaction('symbol-tables', 'readonly');
-      const store = transaction.objectStore('symbol-tables');
-      const req = store.get(libKey);
-      req.onerror = reject;
-      req.onsuccess = () => {
-        if (req.result) {
-          const { addrs } = req.result;
-          resolve(addrs);
-        } else {
-          reject();
-        }
+      openReq.onsuccess = () => {
+        const db = openReq.result;
+        db.onupgradeneeded = () => {
+          db.close();
+        };
+        resolve(db);
+        this._deleteAllBeforeDate(db, new Date(+new Date - this._maxAge)).catch(e => {
+          console.error('Encountered error while cleaning out database:', e);
+        });
       };
     });
   }
 
   /**
-   * Returns a promise of an array with symbol names, matching the order of
-   * the requested addresses.
-   * @param  {Array<Number>} requestedAddressesIndices The indices of each symbol that should be looked up.
-   * @param  {Number} libKey The primary key for the library, as returned by getLibKey
-   * @return {Array<String>} The symbols, one for each address in requestedAddresses.
+   * Store the symbol table for a given library.
+   * @param {string}      The debugName of the library.
+   * @param {string}      The breakpadId of the library.
+   * @param {symbolTable} The symbol table, in SymbolTableAsTuple format.
+   * @return              A promise that resolves (with nothing) once storage
+   *                      has succeeded.
    */
-  getSymbolsForAddressesInLib(requestedAddressesIndices, libKey) {
-    if (!this._db) {
-      return this._setupDBPromise.then(() => this.getSymbolsForAddressesInLib(requestedAddressesIndices, libKey));
-    }
+  storeSymbolTable(debugName: string, breakpadId: string, [addrs, index, buffer]: SymbolTableAsTuple): Promise<void> {
+    return this._getDB().then(db => {
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction('symbol-tables', 'readwrite');
+        transaction.onerror = () => reject(transaction.error);
+        const store = transaction.objectStore('symbol-tables');
+        this._deleteLeastRecentlyUsedUntilCountIsNoMoreThanN(store, this._maxCount - 1, () => {
+          const lastUsedDate = new Date();
+          const addReq = store.add({ debugName, breakpadId, addrs, index, buffer, lastUsedDate });
+          addReq.onsuccess = resolve;
+        });
+      });
+    });
+  }
 
+  /**
+   * Retrieve the symbol table for the given library.
+   * @param {string}      The debugName of the library.
+   * @param {string}      The breakpadId of the library.
+   * @return              A promise that resolves with the symbol table (in
+   *                      SymbolTableAsTuple format), or fails if we couldn't
+   *                      find a symbol table for the requested library.
+   */
+  getSymbolTable(debugName: string, breakpadId: string): Promise<SymbolTableAsTuple> {
+    return this._getDB().then(db => {
+      return new Promise((resolve, reject) => {
+        const transaction = db.transaction('symbol-tables', 'readwrite');
+        transaction.onerror = () => reject(transaction.error);
+        const store = transaction.objectStore('symbol-tables');
+        const req = store.openCursor([debugName, breakpadId]);
+        req.onsuccess = () => {
+          const cursor = (req.result: any);
+          if (cursor) {
+            const value = (cursor: IDBCursorWithValue).value;
+            value.lastUsedDate = new Date();
+            const updateDateReq = cursor.update(value);
+            const { addrs, index, buffer } = value;
+            updateDateReq.onsuccess = () => resolve([addrs, index, buffer]);
+          } else {
+            reject(new Error('The requested library does not exist in the database.'));
+          }
+        };
+      });
+    });
+  }
+
+  close(): Promise<void> {
+    // Close the database and make all methods uncallable.
+    return this._getDB().then(db => {
+      db.close();
+      this._dbPromise = null;
+    });
+  }
+
+  // Many of the utility functions below use callback functions instead of
+  // promises. That's because IndexedDB transactions auto-close at the end of
+  // the current event tick if there hasn't been a new request after the last
+  // success event. So we need to synchronously add more work inside the
+  // onsuccess handler, and we do that by calling the callback function.
+  // Resolving a promise only calls any then() callback at the next microtask,
+  // and by that time the transaction will already have closed.
+  // We don't propagate errors because those will be caught by the onerror
+  // handler of the transaction that we got `store` from.
+  _deleteAllBeforeDate(db: IDBDatabase, beforeDate: Date): Promise<void> {
     return new Promise((resolve, reject) => {
-      const transaction = this._db.transaction('symbol-tables', 'readonly');
+      const transaction = db.transaction('symbol-tables', 'readwrite');
+      transaction.onerror = () => reject(transaction.error);
       const store = transaction.objectStore('symbol-tables');
-      const req = store.get(libKey);
-      req.onerror = reject;
-      req.onsuccess = () => {
-        if (!req.result) {
-          reject(new Error('unexpected null result'));
-          return;
-        }
-        const { index, buffer } = req.result;
-        const decoder = new TextDecoder();
-        resolve(requestedAddressesIndices.map(addrIndex => {
-          const startOffset = index[addrIndex];
-          const endOffset = index[addrIndex + 1];
-          const subarray = buffer.subarray(startOffset, endOffset);
-          return decoder.decode(subarray);
-        }));
-      };
+      this._deleteRecordsLastUsedBeforeDate(store, beforeDate, resolve);
+    });
+  }
+
+  _deleteRecordsLastUsedBeforeDate(store: IDBObjectStore, beforeDate: Date, callback: () => void): void {
+    const lastUsedDateIndex = store.index('lastUsedDate');
+    // Get a cursor that walks all records whose lastUsedDate is less than beforeDate.
+    const cursorReq = lastUsedDateIndex.openCursor(
+      window.IDBKeyRange.upperBound(beforeDate, true));
+    // Iterate over all records in this cursor and delete them.
+    cursorReq.onsuccess = () => {
+      const cursor: IDBCursor = (cursorReq: any).result;
+      if (cursor) {
+        cursor.delete().onsuccess = () => {
+          cursor.continue();
+        };
+      } else {
+        callback();
+      }
+    };
+  }
+
+  _deleteNLeastRecentlyUsedRecords(store: IDBObjectStore, n: number, callback: () => void): void {
+    // Get a cursor that walks the records from oldest to newest
+    // lastUsedDate.
+    const lastUsedDateIndex = store.index('lastUsedDate');
+    const cursorReq = lastUsedDateIndex.openCursor();
+    let deletedCount = 0;
+    cursorReq.onsuccess = () => {
+      const cursor: IDBCursor = (cursorReq: any).result;
+      if (cursor) {
+        const deleteReq = cursor.delete();
+        deleteReq.onsuccess = () => {
+          deletedCount++;
+          if (deletedCount < n) {
+            cursor.continue();
+          } else {
+            callback();
+          }
+        };
+      } else {
+        callback();
+      }
+    };
+  }
+
+  _count(store: IDBObjectStore, callback: (number) => void): void {
+    const countReq = store.count();
+    countReq.onsuccess = () => callback((countReq: any).result);
+  }
+
+  _deleteLeastRecentlyUsedUntilCountIsNoMoreThanN(store: IDBObjectStore, n: number, callback: () => void): void {
+    this._count(store, symbolTableCount => {
+      if (symbolTableCount > n) {
+        // We'll need to remove at least one symbol table.
+        const needToRemoveCount = symbolTableCount - n;
+        this._deleteNLeastRecentlyUsedRecords(store, needToRemoveCount, callback);
+      } else {
+        callback();
+      }
     });
   }
 }
-
-export const SymbolStoreDBThreaded = provideHostSide('symbol-store-db-worker.js', [
-  'getLibKey',
-  'importLibrary',
-  'getFuncAddressTableForLib',
-  'getSymbolsForAddressesInLib',
-]);
