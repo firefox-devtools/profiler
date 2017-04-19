@@ -411,22 +411,28 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
         return result;
       }
     );
-    const _getJSOnlyFilteredThread = createSelector(
+    const _getImplementationFilteredThread = createSelector(
       _getRangeAndCallTreeFilteredThread,
-      URLState.getJSOnly,
-      (thread, jsOnly): Thread => {
-        return jsOnly ? ProfileData.filterThreadToJSOnly(thread) : thread;
+      URLState.getImplementationFilter,
+      (thread, implementationFilter): Thread => {
+        switch (implementationFilter) {
+          case 'js':
+            return ProfileData.filterThreadToJSOnly(thread);
+          case 'cpp':
+            return ProfileData.filterThreadToCppOnly(thread);
+        }
+        return thread;
       }
     );
-    const _getJSOnlyAndSearchFilteredThread = createSelector(
-      _getJSOnlyFilteredThread,
+    const _getImplementationAndSearchFilteredThread = createSelector(
+      _getImplementationFilteredThread,
       URLState.getSearchString,
       (thread, searchString): Thread => {
         return ProfileData.filterThreadToSearchString(thread, searchString);
       }
     );
     const getFilteredThread = createSelector(
-      _getJSOnlyAndSearchFilteredThread,
+      _getImplementationAndSearchFilteredThread,
       URLState.getInvertCallstack,
       (thread, shouldInvertCallstack): Thread => {
         return shouldInvertCallstack ? ProfileData.invertCallstack(thread) : thread;
@@ -475,7 +481,7 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
       getRangeSelectionFilteredThread,
       getProfileInterval,
       getFuncStackInfo,
-      URLState.getJSOnly,
+      URLState.getImplementationFilter,
       ProfileTree.getCallTree
     );
 

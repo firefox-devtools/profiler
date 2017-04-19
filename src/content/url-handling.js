@@ -1,6 +1,8 @@
+// @flow
 import queryString from 'query-string';
 import { stringifyRangeFilters, parseRangeFilters } from './range-filters';
 import { stringifyCallTreeFilters, parseCallTreeFilters } from './call-tree-filters';
+import type { URLState } from './reducers/types';
 
 // {
 //   // general:
@@ -9,7 +11,7 @@ import { stringifyCallTreeFilters, parseCallTreeFilters } from './call-tree-filt
 //   selectedTab: 'summary' or 'calltree' or ...,
 //   rangeFilters: [] or [{ start, end }, ...],
 //   selectedThread: 0 or 1 or ...,
-//   
+//
 //   // only when selectedTab === 'calltree':
 //   callTreeSearchString: '' or '::RunScript' or ...,
 //   callTreeFilters: [[], [{type:'prefix', matchJSOnly:true, prefixFuncs:[1,3,7]}, {}, ...], ...], // one per thread
@@ -17,7 +19,7 @@ import { stringifyCallTreeFilters, parseCallTreeFilters } from './call-tree-filt
 //   invertCallstack: false or true,
 // }
 
-function dataSourceDirs(urlState) {
+function dataSourceDirs(urlState: URLState) {
   const { dataSource } = urlState;
   switch (dataSource) {
     case 'from-addon':
@@ -33,7 +35,7 @@ function dataSourceDirs(urlState) {
   }
 }
 
-export function urlFromState(urlState) {
+export function urlFromState(urlState: URLState) {
   const { dataSource } = urlState;
   if (dataSource === 'none') {
     return '/';
@@ -44,7 +46,7 @@ export function urlFromState(urlState) {
   ].join('/') + '/';
 
   // Start with the query parameters that are shown regardless of the active tab.
-  const query = {
+  const query: Object = {
     range: stringifyRangeFilters(urlState.rangeFilters) || undefined,
     thread: `${urlState.selectedThread}`,
   };
@@ -54,7 +56,9 @@ export function urlFromState(urlState) {
     case 'calltree':
       query.search = urlState.callTreeSearchString || undefined;
       query.invertCallstack = urlState.invertCallstack ? null : undefined;
-      query.jsOnly = urlState.jsOnly ? null : undefined;
+      query.implementation = urlState.implementation === 'all'
+        ? undefined
+        : urlState.implementation;
       query.callTreeFilters = stringifyCallTreeFilters(urlState.callTreeFilters[urlState.selectedThread]) || undefined;
       break;
     case 'timeline':
@@ -64,10 +68,14 @@ export function urlFromState(urlState) {
       break;
   }
   const qString = queryString.stringify(query);
+  console.log(
+    '!!! query',
+    { urlState, query, qString}
+  );
   return pathname + (qString ? '?' + qString : '');
 }
 
-export function stateFromCurrentLocation() {
+export function stateFromCurrentLocation(): URLState {
   const pathname = window.location.pathname;
   const qString = window.location.search.substr(1);
   const hash = window.location.hash;
@@ -97,8 +105,9 @@ export function stateFromCurrentLocation() {
         selectedThread: 0,
         callTreeSearchString: '',
         callTreeFilters: {},
-        jsOnly: false,
+        implementation: 'all',
         invertCallstack: false,
+        hidePlatformDetails: false,
       };
     }
   }
@@ -110,6 +119,15 @@ export function stateFromCurrentLocation() {
   }
   const needHash = ['local', 'public'].includes(dataSource);
   const selectedThread = query.thread !== undefined ? +query.thread : 0;
+
+  let implementation = 'all';
+  if (query.implementation === 'js' || query.implementation === 'cpp') {
+    implementation = query.implementation;
+  } else if (query.jsOnly !== undefined) {
+    // Support the old URL structure that had a jsOnly flag.
+    implementation = 'js';
+  }
+
   return {
     dataSource,
     hash: needHash ? dirs[1] : '',
@@ -120,7 +138,7 @@ export function stateFromCurrentLocation() {
     callTreeFilters: {
       [selectedThread]: query.callTreeFilters ? parseCallTreeFilters(query.callTreeFilters) : [],
     },
-    jsOnly: query.jsOnly !== undefined,
+    implementation,
     invertCallstack: query.invertCallstack !== undefined,
     hidePlatformDetails: query.hidePlatformDetails !== undefined,
   };

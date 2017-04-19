@@ -182,6 +182,11 @@ export function filterThreadToJSOnly(thread: Thread) {
   });
 }
 
+export function filterThreadToCppOnly(thread: Thread) {
+  // TODO
+  return thread;
+}
+
 /**
  * Given a thread with stacks like below, collapse together the platform stack frames into
  * a single pseudo platform stack frame. In the diagram "J" represents JavaScript stack

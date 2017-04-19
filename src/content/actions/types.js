@@ -35,6 +35,7 @@ export type FunctionsUpdatePerThread = { [id: ThreadIndex]: {
 }}
 
 export type RequestedLib = { debugName: string, breakpadId: string };
+export type ImplementationFilter = 'all' | 'js' | 'cpp';
 
 type ProfileSummaryAction =
   { type: "PROFILE_SUMMARY_PROCESSED", summary: Summary } |
@@ -89,7 +90,7 @@ type URLStateAction =
   { type: 'CHANGE_CALL_TREE_SEARCH_STRING', searchString: string } |
   { type: 'ADD_CALL_TREE_FILTER', threadIndex: ThreadIndex, filter: CallTreeFilter } |
   { type: 'POP_CALL_TREE_FILTERS', threadIndex: ThreadIndex, firstRemovedFilterIndex: number } |
-  { type: 'CHANGE_JS_ONLY', jsOnly: boolean } |
+  { type: 'CHANGE_IMPLEMENTATION_FILTER', implementation: ImplementationFilter } |
   { type: 'CHANGE_INVERT_CALLSTACK', invertCallstack: boolean } |
   { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean };
 

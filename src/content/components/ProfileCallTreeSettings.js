@@ -1,7 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import actions from '../actions';
-import { getJSOnly, getInvertCallstack, getSearchString } from '../reducers/url-state';
+import { getImplementationFilter, getInvertCallstack, getSearchString } from '../reducers/url-state';
 import IdleSearchField from '../components/IdleSearchField';
 
 import './ProfileCallTreeSettings.css';
@@ -15,7 +15,7 @@ class ProfileCallTreeSettings extends Component {
   }
 
   _onJSOnlyClick(e) {
-    this.props.changeJSOnly(e.target.checked);
+    this.props.changeImplementationFilter(e.target.checked ? 'js' : 'all');
   }
 
   _onInvertCallstackClick(e) {
@@ -27,7 +27,7 @@ class ProfileCallTreeSettings extends Component {
   }
 
   render() {
-    const { jsOnly, invertCallstack, searchString } = this.props;
+    const { implementationFilter, invertCallstack, searchString } = this.props;
     return (
       <div className='profileCallTreeSettings'>
         <ul className='profileCallTreeSettingsList'>
@@ -36,7 +36,7 @@ class ProfileCallTreeSettings extends Component {
               <input type='checkbox'
                      className='profileCallTreeSettingsCheckbox'
                      onChange={this._onJSOnlyClick}
-                     checked={jsOnly}/>
+                     checked={implementationFilter === 'js'}/>
               { ' JavaScript only' }
             </label>
           </li>
@@ -66,8 +66,8 @@ class ProfileCallTreeSettings extends Component {
 }
 
 ProfileCallTreeSettings.propTypes = {
-  jsOnly: PropTypes.bool.isRequired,
-  changeJSOnly: PropTypes.func.isRequired,
+  implementationFilter: PropTypes.string.isRequired,
+  changeImplementationFilter: PropTypes.func.isRequired,
   invertCallstack: PropTypes.bool.isRequired,
   changeInvertCallstack: PropTypes.func.isRequired,
   changeCallTreeSearchString: PropTypes.func.isRequired,
@@ -76,6 +76,6 @@ ProfileCallTreeSettings.propTypes = {
 
 export default connect(state => ({
   invertCallstack: getInvertCallstack(state),
-  jsOnly: getJSOnly(state),
+  implementationFilter: getImplementationFilter(state),
   searchString: getSearchString(state),
 }), actions)(ProfileCallTreeSettings);

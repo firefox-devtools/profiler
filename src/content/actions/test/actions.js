@@ -2,17 +2,20 @@ import { assert } from 'chai';
 import { blankStore, storeWithProfile } from './fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as TimelineSelectors from '../../reducers/timeline-view';
+import * as UrlStateSelectors from '../../reducers/url-state';
 import {
   changeCallTreeSearchString,
   changeHidePlatformDetails,
   addRangeFilter,
   changeInvertCallstack,
   updateProfileSelection,
+  changeImplementationFilter,
 } from '../profile-view';
 import {
   changeFlameChartColorStrategy,
   changeTimelineExpandedThread,
 } from '../timeline';
+
 import { receiveProfileFromAddon } from '../receive-profile';
 import { getCategoryByImplementation } from '../../color-categories';
 const { selectedThreadSelectors } = ProfileViewSelectors;
@@ -216,6 +219,21 @@ describe('actions/changeTimelineExpandedThread', function () {
 
     store.dispatch(changeTimelineExpandedThread(2, false));
     assert.deepEqual(threads.map(isExpanded), [false, false, false]);
+  });
+});
+
+describe('actions/changeImplementationFilter', function () {
+  const store = storeWithProfile();
+
+  it('is initially set to filter to all', function () {
+    const filter = UrlStateSelectors.getImplementationFilter(store.getState());
+    assert.equal(filter, 'all');
+  });
+
+  it('can be changed to cpp', function () {
+    store.dispatch(changeImplementationFilter('cpp'));
+    const filter = UrlStateSelectors.getImplementationFilter(store.getState());
+    assert.equal(filter, 'cpp');
   });
 });
 
