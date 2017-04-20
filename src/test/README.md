@@ -5,6 +5,8 @@ To run the tests make sure that the node_modules are installed with `npm install
 Tests are run with [Mocha](https://mochajs.org/) and use a behavior-driven testing style, with plain language descriptions.
 
 ```javascript
+import { assert } from 'chai';
+
 describe('the thing to be tested', function() {
   it('does some piece of work', function() {
     assert( ... );

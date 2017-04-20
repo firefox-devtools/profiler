@@ -24,7 +24,7 @@ The reducer, actions, and selectors each do a small part of the functionality of
  5. Assert the modified state.
  6. Repeat as needed.
 
-These tests are typically short and easy to read, especially when written in a behavior-driven testing style, using plain language (BDD). They use the public-facing APIs that the rest of the application is designed with. They provide a large amount of coverage with minimal lines of code. They allow for easy refactors of the internals of the state representation and action shapes, while actually providing overage for how the state actually behaves.
+These tests are typically short and easy to read, especially when written in a behavior-driven testing style, using plain language (BDD). They use the public-facing APIs that the rest of the application is designed with. They provide a large amount of coverage with minimal lines of code. They allow for easy refactors of the internals of the state representation and action shapes, while actually providing coverage for how the state actually behaves.
 
 ## Unit testing derived data and non-Redux store logic
 
