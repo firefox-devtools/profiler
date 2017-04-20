@@ -20,14 +20,14 @@ const { selectedThreadSelectors } = ProfileViewSelectors;
 const profile = require('../fixtures/profiles/profile-2d-canvas.json');
 
 describe('actions/profile', function () {
-  it('can take a profile from an addon and save it to state', function () {
+  it('can take a profile from an add-on and save it to state', function () {
     const store = blankStore();
 
     const initialProfile = ProfileViewSelectors.getProfile(store.getState());
     assert.ok(initialProfile, 'A blank profile initially exists');
     assert.lengthOf(initialProfile.threads, 0, 'The blank profile contains no data');
     store.dispatch(receiveProfileFromAddon(profile));
-    assert.strictEqual(ProfileViewSelectors.getProfile(store.getState()), profile, 'The passed in profile is saved in state.');
+    assert.strictEqual(ProfileViewSelectors.getProfile(store.getState()), profile, 'The passed-in profile is saved in state.');
   });
 });
 
@@ -144,7 +144,7 @@ describe('selectors/getStackTimingByDepthForFlameChart', function () {
 });
 
 describe('selectors/getFuncStackMaxDepthForFlameChart', function () {
-  it('calculates the max func depth and observes of platform detail filters', function () {
+  it('calculates the max func depth and observes of platform-detail filters', function () {
     const store = storeWithProfile();
     const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
     assert.equal(allSamplesMaxDepth, 6);
@@ -181,7 +181,7 @@ describe('selectors/getLeafCategoryStackTimingForFlameChart', function () {
    *                          7P     |
    *                          8I     |
    */
-  it('gets the unfiltered leaf stack timing by implementation', function () {
+  it('gets the unfiltered leaf-stack timing by implementation', function () {
     const store = storeWithProfile();
     store.dispatch(changeFlameChartColorStrategy(getCategoryByImplementation));
     const leafStackTiming = selectedThreadSelectors.getLeafCategoryStackTimingForFlameChart(store.getState());
@@ -220,7 +220,7 @@ describe('actions/changeTimelineExpandedThread', function () {
 });
 
 describe('actions/updateProfileSelection', function () {
-  it('can the update the selection with new values', function () {
+  it('can update the selection with new values', function () {
     const store = storeWithProfile();
 
     const initialSelection = ProfileViewSelectors.getProfileViewOptions(store.getState()).selection;

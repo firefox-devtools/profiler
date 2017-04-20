@@ -390,7 +390,7 @@ class TreeView extends Component {
     const { fixedColumns, mainColumn, disableOverscan, contextMenu, contextMenuId, icons } = this.props;
     return (
       <div className='treeView'>
-        { icons.map(
+        { icons && icons.map(
             ({ className, icon }) => <BackgroundImageStyleDef className={className} url={icon} key={className} />
         ) }
         <TreeViewHeader fixedColumns={fixedColumns}
@@ -441,7 +441,7 @@ TreeView.propTypes = {
   disableOverscan: PropTypes.bool,
   contextMenu: PropTypes.object,
   contextMenuId: PropTypes.string,
-  icons: PropTypes.array.isRequired,
+  icons: PropTypes.array,
 };
 
 export default TreeView;

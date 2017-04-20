@@ -12,13 +12,23 @@ import type { Thread } from '../../common/types/profile';
 
 require('./TimelineView.css');
 
+type Props = {
+  threads: Thread[],
+  threadOrder: number[],
+  height: number,
+  changeThreadOrder: any => any,
+};
+
 class TimlineViewTimelinesImpl extends Component {
 
-  props: {
-    threads: Thread[],
-    threadOrder: number[],
-    height: number,
-    changeThreadOrder: any => any,
+  props: Props
+
+  getScrollElement: () => ?HTMLElement
+  scrollElement: ?HTMLElement
+
+  constructor(props: Props) {
+    super(props);
+    this.getScrollElement = () => this.scrollElement;
   }
 
   render() {
@@ -28,7 +38,10 @@ class TimlineViewTimelinesImpl extends Component {
 
     return (
       <div className='timelineViewTimelines'>
-        <div className='timelineViewTimelinesScroller'>
+        <div className='timelineViewTimelinesScroller'
+             ref={element => {
+               this.scrollElement = element;
+             }}>
           <Reorderable tagName='div'
                        className={`${className}ThreadList`}
                        order={threadOrder}
@@ -37,7 +50,8 @@ class TimlineViewTimelinesImpl extends Component {
             {threads.map((thread, threadIndex) => (
               <div className='timelineViewRow' key={threadIndex}>
                 <TimelineFlameChart threadIndex={threadIndex}
-                                    viewHeight={height} />
+                                    viewHeight={height}
+                                    getScrollElement={this.getScrollElement} />
               </div>
             ))}
           </Reorderable>

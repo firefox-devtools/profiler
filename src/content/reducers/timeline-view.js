@@ -6,6 +6,7 @@ import type { Action } from '../actions/types';
 type IsThreadExpandedMap = Map<ThreadIndex, boolean>;
 type TimelineViewState = {
   isThreadExpanded: IsThreadExpandedMap,
+  hasZoomedViaMousewheel: boolean,
 }
 
 function isThreadExpanded(state: IsThreadExpandedMap = new Map(), action: Action) {
@@ -28,9 +29,21 @@ function isThreadExpanded(state: IsThreadExpandedMap = new Map(), action: Action
   return state;
 }
 
-export default combineReducers({ isThreadExpanded });
+function hasZoomedViaMousewheel(state: boolean = false, action: Action) {
+  switch (action.type) {
+    case 'HAS_ZOOMED_VIA_MOUSEWHEEL': {
+      return true;
+    }
+  }
+  return state;
+}
+
+export default combineReducers({ isThreadExpanded, hasZoomedViaMousewheel });
 
 export const getTimelineView = (state: Object): TimelineViewState => state.timelineView;
 export const getIsThreadExpanded = (state: Object, threadIndex: ThreadIndex) => {
   return Boolean(getTimelineView(state).isThreadExpanded.get(threadIndex));
+};
+export const getHasZoomedViaMousewheel = (state: Object): boolean => {
+  return getTimelineView(state).hasZoomedViaMousewheel;
 };
