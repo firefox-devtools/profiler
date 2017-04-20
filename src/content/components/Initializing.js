@@ -14,7 +14,7 @@ class Initializing extends Component {
           <h1>Waiting on Gecko Profiler to provide a profile.</h1>
           <p>
             Make sure Firefox is running the <a href={profilerUrl}> new version of the
-            gecko profiler addon</a>. You can control the profiler with the following two
+            Gecko Profiler add-on</a>. You can control the profiler with the following two
             shortcuts.
           </p>
           <ul>
