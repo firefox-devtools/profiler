@@ -11,8 +11,10 @@ function view(state: AppViewState = { phase: 'INITIALIZING' }, action: Action): 
         phase: 'INITIALIZING',
         additionalData: { attempt: action.error.attempt },
       };
+    case 'ERROR_RECEIVING_PROFILE_FROM_FILE':
+    case 'ERROR_RECEIVING_PROFILE_FROM_ADDON':
     case 'FATAL_ERROR_RECEIVING_PROFILE_FROM_WEB':
-      return { phase: 'FATAL_ERROR' };
+      return { phase: 'FATAL_ERROR', error: action.error };
     case 'ROUTE_NOT_FOUND':
       return { phase: 'ROUTE_NOT_FOUND' };
     case 'RECEIVE_PROFILE_FROM_ADDON':

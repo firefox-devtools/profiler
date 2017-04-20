@@ -7,6 +7,7 @@ import type {
 } from '../actions/types';
 import type { Milliseconds, StartEndRange } from '../../common/types/units';
 import type { IndexIntoMarkersTable, IndexIntoFuncTable, Profile, ThreadIndex } from '../../common/types/profile';
+import type { Attempt } from '../errors';
 
 export type Reducer<T> = (T, Action) => T;
 
@@ -32,10 +33,10 @@ export type ProfileViewState = {
   profile: Profile,
 };
 
-export type AppViewState = {
-  phase: string,
-  additionalData?: Object,
-};
+export type AppViewState =
+  {| phase: string |} |
+  { phase: 'INITIALIZING', additionalData: { attempt: Attempt }} |
+  { phase: 'FATAL_ERROR', error: Error };
 
 export type AppState = {
   view: AppViewState,

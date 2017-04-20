@@ -61,7 +61,8 @@ type ReceiveProfileAction =
     functionsUpdatePerThread: FunctionsUpdatePerThread,
   } |
   { type: 'DONE_SYMBOLICATING' } |
-  { type: 'ERROR_RECEIVING_PROFILE_FROM_FILE', error: any } |
+  { type: 'ERROR_RECEIVING_PROFILE_FROM_FILE', error: Error } |
+  { type: 'ERROR_RECEIVING_PROFILE_FROM_ADDON', error: Error } |
   { type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_WEB', error: TemporaryError } |
   { type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_WEB', error: Error } |
   { type: 'PROFILE_PROCESSED', profile: Profile, toWorker: true } |

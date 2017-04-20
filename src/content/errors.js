@@ -1,6 +1,6 @@
 // @flow
 
-type Attempt = {
+export type Attempt = {
   count: number,
   total: number,
 };
