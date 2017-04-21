@@ -53,8 +53,8 @@ export function sortDataTable<KeyColumnElementType>(
 
   // Reorders the values in the range left <= k <= right and returns an index
   // "partitionIndex" such that the elements at k for left <= k < partitionIndex
-  // are < pivotValue and the elements at k for partitionIndex <= k <= right
-  // are >= pivotValue.
+  // are < pivotValue, the elements at k for partitionIndex < k <= right
+  // are >= pivotValue, and the element at partitionIndex is == pivotValue.
   // If the range is already sorted, no swaps are performed.
   function partition(pivot, left, right) {
     const pivotValue = keyColumn[pivot];
@@ -67,12 +67,20 @@ export function sortDataTable<KeyColumnElementType>(
     // will need to be moved out of the way when encountering an element
     // that's < pivotValue.
     let partitionIndex = left;
+    let pivotIndex = pivot;
     for (let i = left; i <= right; i++) {
       if (comparator(keyColumn[i], pivotValue) < 0) {
         swap(i, partitionIndex);
+        if (partitionIndex === pivotIndex) {
+          // We just swapped our pivot away. Update pivotIndex to keep track
+          // of it.
+          pivotIndex = i;
+        }
         partitionIndex++;
       }
     }
+    // Swap the pivot back into the position at partitionIndex.
+    swap(partitionIndex, pivotIndex);
     return partitionIndex;
   }
 
