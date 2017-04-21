@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import TreeView from './TreeView';
 import NodeIcon from './NodeIcon';
 import { getStackAsFuncArray } from '../profile-data';
-import { getInvertCallstack, getJSOnly, getSearchString, getSelectedThreadIndex } from '../reducers/url-state';
+import { getInvertCallstack, getImplementationFilter, getSearchString, getSelectedThreadIndex } from '../reducers/url-state';
 import {
   getProfile, selectedThreadSelectors, getScrollToSelectionGeneration, getProfileViewOptions,
 } from '../reducers/profile-view';
@@ -62,7 +62,11 @@ class ProfileTreeView extends Component {
   }
 
   _onAppendageButtonClick(funcStackIndex) {
-    const { funcStackInfo, threadIndex, addCallTreeFilter, jsOnly, invertCallstack } = this.props;
+    const {
+      funcStackInfo, threadIndex, addCallTreeFilter, implementationFilter,
+      invertCallstack,
+    } = this.props;
+    const jsOnly = implementationFilter === 'js';
     if (invertCallstack) {
       addCallTreeFilter(threadIndex, {
         type: 'postfix',
@@ -141,7 +145,7 @@ ProfileTreeView.propTypes = {
   searchString: PropTypes.string,
   disableOverscan: PropTypes.bool,
   addCallTreeFilter: PropTypes.func.isRequired,
-  jsOnly: PropTypes.bool.isRequired,
+  implementationFilter: PropTypes.string.isRequired,
   invertCallstack: PropTypes.bool.isRequired,
   icons: PropTypes.array.isRequired,
 };
@@ -158,6 +162,6 @@ export default connect(state => ({
   searchString: getSearchString(state),
   disableOverscan: getProfileViewOptions(state).selection.isModifying,
   invertCallstack: getInvertCallstack(state),
-  jsOnly: getJSOnly(state),
+  implementationFilter: getImplementationFilter(state),
   icons: getIconsWithClassNames(state),
 }), actions, null, { withRef: true })(ProfileTreeView);

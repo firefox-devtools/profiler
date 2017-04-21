@@ -149,7 +149,8 @@ class ProfileTree {
 export type ProfileTreeClass = ProfileTree;
 
 export function getCallTree(
-  thread: Thread, interval: Milliseconds, funcStackInfo: FuncStackInfo, jsOnly: boolean
+  thread: Thread, interval: Milliseconds, funcStackInfo: FuncStackInfo,
+  implementationFilter: string
 ): ProfileTree {
   return timeCode('getCallTree', () => {
     const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
@@ -181,6 +182,10 @@ export function getCallTree(
       }
     }
     const funcStackTimes = { selfTime: funcStackSelfTime, totalTime: funcStackTotalTime };
-    return new ProfileTree(funcStackTable, funcStackTimes, numChildren, thread.funcTable, thread.resourceTable, thread.stringTable, rootTotalTime, numRoots, jsOnly);
+    const jsOnly = implementationFilter === 'js';
+    return new ProfileTree(
+      funcStackTable, funcStackTimes, numChildren, thread.funcTable,
+      thread.resourceTable, thread.stringTable, rootTotalTime, numRoots, jsOnly
+    );
   });
 }

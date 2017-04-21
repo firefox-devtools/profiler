@@ -1,5 +1,7 @@
 // @flow
-import type { Action, ThunkAction, ProfileSelection, CallTreeFilter } from './types';
+import type {
+  Action, ThunkAction, ProfileSelection, CallTreeFilter, ImplementationFilter,
+} from './types';
 import type { ThreadIndex, IndexIntoFuncTable, IndexIntoMarkersTable } from '../../common/types/profile';
 
 /**
@@ -58,10 +60,10 @@ export function changeSelectedMarker(
   };
 }
 
-export function changeJSOnly(jsOnly: boolean): Action {
+export function changeImplementationFilter(implementation: ImplementationFilter): Action {
   return {
-    type: 'CHANGE_JS_ONLY',
-    jsOnly,
+    type: 'CHANGE_IMPLEMENTATION_FILTER',
+    implementation,
   };
 }
 

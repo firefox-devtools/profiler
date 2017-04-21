@@ -1,7 +1,10 @@
 // @flow
 
 import type { Summary } from '../../common/summarize-profile';
-import type { Action, ExpandedSet, CallTreeFiltersPerThread, DataSource, ProfileSelection } from '../actions/types';
+import type {
+  Action, ExpandedSet, CallTreeFiltersPerThread, DataSource, ProfileSelection,
+  ImplementationFilter,
+} from '../actions/types';
 import type { Milliseconds, StartEndRange } from '../../common/types/units';
 import type { IndexIntoMarkersTable, IndexIntoFuncTable, Profile, ThreadIndex } from '../../common/types/profile';
 
@@ -52,7 +55,7 @@ export type URLState = {
   selectedThread: ThreadIndex,
   callTreeSearchString: string,
   callTreeFilters: CallTreeFiltersPerThread,
-  jsOnly: boolean,
+  implementation: ImplementationFilter,
   invertCallstack: boolean,
   hidePlatformDetails: boolean,
 };
