@@ -227,7 +227,7 @@ describe('actions/changeImplementationFilter', function () {
 
   it('is initially set to filter to all', function () {
     const filter = UrlStateSelectors.getImplementationFilter(store.getState());
-    assert.equal(filter, 'all');
+    assert.equal(filter, 'combined');
   });
 
   it('can be changed to cpp', function () {

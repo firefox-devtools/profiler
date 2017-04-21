@@ -56,7 +56,7 @@ export function urlFromState(urlState: URLState) {
     case 'calltree':
       query.search = urlState.callTreeSearchString || undefined;
       query.invertCallstack = urlState.invertCallstack ? null : undefined;
-      query.implementation = urlState.implementation === 'all'
+      query.implementation = urlState.implementation === 'combined'
         ? undefined
         : urlState.implementation;
       query.callTreeFilters = stringifyCallTreeFilters(urlState.callTreeFilters[urlState.selectedThread]) || undefined;
@@ -101,7 +101,7 @@ export function stateFromCurrentLocation(): URLState {
         selectedThread: 0,
         callTreeSearchString: '',
         callTreeFilters: {},
-        implementation: 'all',
+        implementation: 'combined',
         invertCallstack: false,
         hidePlatformDetails: false,
       };
@@ -116,7 +116,7 @@ export function stateFromCurrentLocation(): URLState {
   const needHash = ['local', 'public'].includes(dataSource);
   const selectedThread = query.thread !== undefined ? +query.thread : 0;
 
-  let implementation = 'all';
+  let implementation = 'combined';
   if (query.implementation === 'js' || query.implementation === 'cpp') {
     implementation = query.implementation;
   } else if (query.jsOnly !== undefined) {

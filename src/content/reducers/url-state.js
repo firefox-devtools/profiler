@@ -108,7 +108,7 @@ function callTreeFilters(state: CallTreeFiltersPerThread = {}, action: Action) {
  * Represents the current filter applied to the stack frames, where it will show
  * frames only by implementation.
  */
-function implementation(state: ImplementationFilter = 'all', action: Action) {
+function implementation(state: ImplementationFilter = 'combined', action: Action) {
   switch (action.type) {
     case 'CHANGE_IMPLEMENTATION_FILTER':
       return action.implementation;

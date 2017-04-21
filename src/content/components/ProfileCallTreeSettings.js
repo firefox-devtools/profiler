@@ -35,12 +35,12 @@ class ProfileCallTreeSettings extends Component {
             <label className='profileCallTreeSettingsLabel'>
               Filter:
               <select
-                     className='profileCallTreeSettingsCheckbox'
+                     className='profileCallTreeSettingsSelect'
                      onChange={this._onImplementationFilterChange}
                      value={implementationFilter}>
-                <option value='all'>All samples</option>
-                <option value='js'>JS Only</option>
-                <option value='cpp'>C++ Only</option>
+                <option value='combined'>Combined stacks</option>
+                <option value='js'>JS only</option>
+                <option value='cpp'>C++ only</option>
               </select>
             </label>
           </li>

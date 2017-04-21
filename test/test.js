@@ -419,7 +419,7 @@ describe('filter-by-implementation', function () {
   }
 
   it('will return the same thread if filtering to "all"', function () {
-    assert.equal(filterThreadByImplementation(thread, 'all'), thread);
+    assert.equal(filterThreadByImplementation(thread, 'combined'), thread);
   });
 
   it('will return only JS samples if filtering to "js"', function () {

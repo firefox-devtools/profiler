@@ -35,7 +35,7 @@ export type FunctionsUpdatePerThread = { [id: ThreadIndex]: {
 }}
 
 export type RequestedLib = { debugName: string, breakpadId: string };
-export type ImplementationFilter = 'all' | 'js' | 'cpp';
+export type ImplementationFilter = 'combined' | 'js' | 'cpp';
 
 type ProfileSummaryAction =
   { type: "PROFILE_SUMMARY_PROCESSED", summary: Summary } |
