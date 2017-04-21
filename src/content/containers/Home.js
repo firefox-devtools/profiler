@@ -29,7 +29,7 @@ const Home = ({ className, profilerURL }) => {
         <p>
           Capture profiles using
           the <InstallButton name='Gecko Profiler' xpiURL={profilerURL}>new
-          version of the gecko profiler addon</InstallButton>.
+          version of the Gecko Profiler add-on</InstallButton>.
           You can control the profiler with the following two
           shortcuts:
         </p>
