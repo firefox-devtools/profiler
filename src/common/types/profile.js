@@ -19,7 +19,6 @@ export type StackTable = {
 };
 
 export type SamplesTable = {
-  frameNumber: IndexIntoFrameTable[],
   responsiveness: number[],
   stack: Array<IndexIntoStackTable|null>,
   time: number[],

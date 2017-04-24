@@ -2,7 +2,7 @@ import exampleProfile from './example-profile';
 
 const thread = {
   samples: {
-    schema: { stack: 0, time: 1, responsiveness: 2, rss: 3, uss: 4, frameNumber: 5, power: 6 },
+    schema: { stack: 0, time: 1, responsiveness: 2, rss: 3, uss: 4 },
     data: [
       [1, 0, 0], // (root), 0x100000f84
       [2, 10, 0], // (root), 0x100000f84, 0x100001a45

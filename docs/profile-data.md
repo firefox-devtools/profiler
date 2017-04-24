@@ -131,7 +131,6 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
           responsiveness: 2,
           rss: 3,
           uss: 4,
-          frameNumber: 5
         },
         data: [
           [

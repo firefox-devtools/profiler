@@ -7,7 +7,7 @@
  * current format.
 */
 
-export const CURRENT_VERSION = 5; // The current version of the 'raw profile' format.
+export const CURRENT_VERSION = 6; // The current version of the 'raw profile' format.
 
 // Raw profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -151,5 +151,22 @@ const _upgraders = {
       p.meta.version = 5;
     }
     convertToVersionFiveRecursive(profile);
+  },
+  [6]: profile => {
+    // The frameNumber column was removed from the samples table.
+    function convertToVersionSixRecursive(p) {
+      for (const thread of p.threads) {
+        delete thread.samples.schema.frameNumber;
+        for (let sampleIndex = 0; sampleIndex < thread.samples.data.length; sampleIndex++) {
+          // Truncate the array to a maximum length of 5.
+          // The frameNumber used to be the last item, at index 5.
+          thread.samples.data[sampleIndex].splice(5);
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersionSixRecursive(subprocessProfile);
+      }
+    }
+    convertToVersionSixRecursive(profile);
   },
 };

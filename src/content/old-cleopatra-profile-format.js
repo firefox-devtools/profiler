@@ -93,7 +93,6 @@ function _convertThread(thread: OldCleopatraProfileThread, symbolicationTable) {
   };
   const samples = {
     length: 0,
-    frameNumber: [],
     responsiveness: [],
     rss: [],
     stack: [],
@@ -156,9 +155,6 @@ function _convertThread(thread: OldCleopatraProfileThread, symbolicationTable) {
       : null;
     samples.responsiveness[sampleIndex] = 'responsiveness' in sample.extraInfo
       ? sample.extraInfo.responsiveness
-      : null;
-    samples.frameNumber[sampleIndex] = 'frameNumber' in sample.extraInfo
-      ? sample.extraInfo.frameNumber
       : null;
     samples.rss[sampleIndex] = 'rss' in sample.extraInfo
       ? sample.extraInfo.rss

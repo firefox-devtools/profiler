@@ -356,7 +356,7 @@ describe('upgrades', function () {
 
     assert.deepEqual(serializedLhsAsObject, serializedRhsAsObject);
   }
-  const afterUpgradeReference = unserializeProfileOfArbitraryFormat(require('../fixtures/upgrades/prepr-4.sps.json'));
+  const afterUpgradeReference = unserializeProfileOfArbitraryFormat(require('../fixtures/upgrades/prepr-5.sps.json'));
 
   // Uncomment this to output your next ./upgrades/prepr-X.sps.json
   // console.log(serializeProfile(afterUpgradeReference));
@@ -378,6 +378,9 @@ describe('upgrades', function () {
     const serializedOldPreprocessedProfile3 = require('../fixtures/upgrades/prepr-3.sps.json');
     const upgradedProfile3 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile3);
     comparePreprocessedProfiles(upgradedProfile3, afterUpgradeReference);
+    const serializedOldPreprocessedProfile4 = require('../fixtures/upgrades/prepr-4.sps.json');
+    const upgradedProfile4 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile4);
+    comparePreprocessedProfiles(upgradedProfile4, afterUpgradeReference);
     const rawProfile3 = require('../fixtures/upgrades/raw-3.sps.json');
     const upgradedRawProfile3 = unserializeProfileOfArbitraryFormat(rawProfile3);
     comparePreprocessedProfiles(upgradedRawProfile3, afterUpgradeReference);
@@ -394,7 +397,7 @@ describe('upgrades', function () {
     this.timeout(10000);
     /* eslint-enable no-invalid-this */
 
-    const afterUpgradeRawReference = require('../fixtures/upgrades/raw-5.sps.json');
+    const afterUpgradeRawReference = require('../fixtures/upgrades/raw-6.sps.json');
     // Uncomment this to output your next ./upgrades/raw-X.sps.json
     // upgradeRawProfileToCurrentVersion(afterUpgradeRawReference);
     // console.log(JSON.stringify(afterUpgradeRawReference));
@@ -407,6 +410,10 @@ describe('upgrades', function () {
     const rawProfile4 = require('../fixtures/upgrades/raw-4.sps.json');
     upgradeRawProfileToCurrentVersion(rawProfile4);
     assert.deepEqual(rawProfile4, afterUpgradeRawReference);
+
+    const rawProfile5 = require('../fixtures/upgrades/raw-5.sps.json');
+    upgradeRawProfileToCurrentVersion(rawProfile5);
+    assert.deepEqual(rawProfile5, afterUpgradeRawReference);
   });
 });
 

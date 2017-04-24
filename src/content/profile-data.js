@@ -550,7 +550,6 @@ export function filterThreadToRange(thread: Thread, rangeStart: number, rangeEnd
     responsiveness: samples.responsiveness.slice(sBegin, sEnd),
     rss: samples.rss.slice(sBegin, sEnd),
     uss: samples.uss.slice(sBegin, sEnd),
-    frameNumber: samples.frameNumber.slice(sBegin, sEnd),
   };
   const [mBegin, mEnd] = getMarkerIndexRangeForSelection(markers, rangeStart, rangeEnd);
   const newMarkers = {
