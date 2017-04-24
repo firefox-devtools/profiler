@@ -18,6 +18,11 @@
   background-size: 11px 11px;
 }
 
+.idleSearchFieldInput:not([value=""]) {
+  background-color: #ffee99;
+  border-color: #ffbf00;
+}
+
 @media(-moz-mac-yosemite-theme) {
   .idleSearchFieldInput:focus {
     box-shadow: 0 0 0 3px -moz-mac-focusring, inset 0 0 0.5px rgba(0,0,0,0.15), 0 0 0.5px rgba(0,0,0,0.1);
