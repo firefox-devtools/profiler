@@ -13,7 +13,7 @@ import { resourceTypes } from './profile-data';
 import { UniqueStringArray } from './unique-string-array';
 import { timeCode } from '../common/time-code';
 
-export const CURRENT_VERSION = 4; // The current version of the 'preprocessed profile' format.
+export const CURRENT_VERSION = 5; // The current version of the 'preprocessed profile' format.
 
 // Preprocessed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -246,5 +246,11 @@ const _upgraders = {
       thread.resourceTable = newResourceTable;
       thread.stringArray = stringTable.serializeToArray();
     });
+  },
+  [5]: profile => {
+    // The "frameNumber" column was removed from the samples table.
+    for (const thread of profile.threads) {
+      delete thread.samples.frameNumber;
+    }
   },
 };
