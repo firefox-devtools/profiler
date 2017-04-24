@@ -1,12 +1,12 @@
 export class FakeSymbolStore {
   constructor(symbolTables) {
     this._symbolTables = {};
-    for (let debugName in symbolTables) {
+    for (const debugName in symbolTables) {
       const entries = Array.from(Object.entries(symbolTables[debugName]));
-      entries.sort(([addr1, sym1], [addr2, sym2]) => addr1 - addr2);
+      entries.sort(([addr1], [addr2]) => addr1 - addr2);
       this._symbolTables[debugName] = {
-        addrs: new Uint32Array(entries.map(([addr, sym]) => addr)),
-        syms: entries.map(([addr, sym]) => sym),
+        addrs: new Uint32Array(entries.map(([addr]) => addr)),
+        syms: entries.map(([, sym]) => sym),
       };
     }
   }
@@ -25,4 +25,4 @@ export class FakeSymbolStore {
     }
     return Promise.reject();
   }
-};
+}

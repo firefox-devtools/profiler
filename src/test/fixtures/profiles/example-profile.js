@@ -59,7 +59,7 @@ const thread = {
       [0, 4, 0], // (root)
       [1, 5, 0], // (root), 0x100000f84
       [4, 6, 0], // (root), 0x100000f84, frobnicate
-    ]
+    ],
   },
   stackTable: {
     schema: { prefix: 0, frame: 1 },
@@ -79,7 +79,7 @@ const thread = {
       [2],                       // 0x100001a45
       [3, null, null, 4391, 16], // Startup::XRE_Main, line 4391, category 16
       [7, 6, null, 34],          // frobnicate, implementation 'baseline', line 34
-    ]
+    ],
   },
   markers: {
     schema: { name: 0, time: 1, data: 2 },
@@ -93,25 +93,25 @@ const thread = {
           name: 'SyncProfile',
           samples: {
             schema: { stack: 0, time: 1, responsiveness: 2, rss: 3, uss: 4, frameNumber: 5, power: 6 },
-            data: [[2, 1]] // (root), 0x100000f84, 0x100001a45
-          }
+            data: [[2, 1]], // (root), 0x100000f84, 0x100001a45
+          },
         },
-        type: 'tracing'
+        type: 'tracing',
       }],
       [10, 4, {
         category: 'Paint',
         interval: 'start',
-        type: 'tracing'
+        type: 'tracing',
       }],
       [10, 5, {
         category: 'Paint',
         interval: 'end',
-        type: 'tracing'
+        type: 'tracing',
       }],
       [5, 8, {
         category: 'Paint',
         interval: 'end',
-        type: 'tracing'
+        type: 'tracing',
       }],
       [9, 11, { // MinorGC at time 7ms from 7ms to 8ms
         startTime: 11,
@@ -123,7 +123,7 @@ const thread = {
         type: 'mouseout',
         phase: 3,
       }],
-    ]
+    ],
   },
   stringTable: [
     '(root)',
@@ -156,7 +156,7 @@ const parentProcessMeta = {
 
 const contentProcessMeta = Object.assign({}, parentProcessMeta, {
   processType: 2,
-  startTime: parentProcessMeta.startTime + 1000 // content process was launched 1 second after parent process
+  startTime: parentProcessMeta.startTime + 1000, // content process was launched 1 second after parent process
 });
 
 const contentProcessProfile = {

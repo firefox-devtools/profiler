@@ -1,9 +1,9 @@
 import 'babel-polyfill';
 import { describe, it } from 'mocha';
 import { assert } from 'chai';
-import { summarizeProfile } from '../summarize-profile';
+import { summarizeProfile } from '../../common/summarize-profile';
 
-const profile = require('./fixtures/profile-2d-canvas.json');
+const profile = require('../fixtures/profiles/profile-2d-canvas.json');
 
 describe('summarize-profile', function () {
   const [geckoMain, compositor, content] = summarizeProfile(profile);
