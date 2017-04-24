@@ -7,7 +7,9 @@ import * as RangeFilters from '../range-filters';
 
 import type { ThreadIndex } from '../../common/types/profile';
 import type { StartEndRange } from '../../common/types/units';
-import type { Action, CallTreeFiltersPerThread, CallTreeFilter, DataSource } from '../actions/types';
+import type {
+  Action, CallTreeFiltersPerThread, CallTreeFilter, DataSource, ImplementationFilter,
+} from '../actions/types';
 import type { State, URLState, Reducer } from './types';
 
 function dataSource(state: DataSource = 'none', action: Action) {
@@ -102,10 +104,14 @@ function callTreeFilters(state: CallTreeFiltersPerThread = {}, action: Action) {
   }
 }
 
-function jsOnly(state: boolean = false, action: Action) {
+/**
+ * Represents the current filter applied to the stack frames, where it will show
+ * frames only by implementation.
+ */
+function implementation(state: ImplementationFilter = 'combined', action: Action) {
   switch (action.type) {
-    case 'CHANGE_JS_ONLY':
-      return action.jsOnly;
+    case 'CHANGE_IMPLEMENTATION_FILTER':
+      return action.implementation;
     default:
       return state;
   }
@@ -138,7 +144,7 @@ const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (state: UR
   }
 })(combineReducers({
   dataSource, hash, selectedTab, rangeFilters, selectedThread,
-  callTreeSearchString, callTreeFilters, jsOnly, invertCallstack,
+  callTreeSearchString, callTreeFilters, implementation, invertCallstack,
   hidePlatformDetails,
 }));
 export default urlStateReducer;
@@ -148,7 +154,7 @@ const getURLState = (state: State): URLState => state.urlState;
 export const getDataSource = (state: State) => getURLState(state).dataSource;
 export const getHash = (state: State) => getURLState(state).hash;
 export const getRangeFilters = (state: State) => getURLState(state).rangeFilters;
-export const getJSOnly = (state: State) => getURLState(state).jsOnly;
+export const getImplementationFilter = (state: State) => getURLState(state).implementation;
 export const getHidePlatformDetails = (state: State) => getURLState(state).hidePlatformDetails;
 export const getInvertCallstack = (state: State) => getURLState(state).invertCallstack;
 export const getSearchString = (state: State) => getURLState(state).callTreeSearchString;

@@ -2,12 +2,14 @@ import { assert } from 'chai';
 import { blankStore, storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../content/reducers/profile-view';
 import * as TimelineSelectors from '../../content/reducers/timeline-view';
+import * as UrlStateSelectors from '../../content/reducers/url-state';
 import {
   changeCallTreeSearchString,
   changeHidePlatformDetails,
   addRangeFilter,
   changeInvertCallstack,
   updateProfileSelection,
+  changeImplementationFilter,
 } from '../../content/actions/profile-view';
 import {
   changeFlameChartColorStrategy,
@@ -15,6 +17,7 @@ import {
 } from '../../content/actions/timeline';
 import { receiveProfileFromAddon } from '../../content/actions/receive-profile';
 import { getCategoryByImplementation } from '../../content/color-categories';
+
 const { selectedThreadSelectors } = ProfileViewSelectors;
 
 const profile = require('../fixtures/profiles/profile-2d-canvas.json');
@@ -216,6 +219,21 @@ describe('actions/changeTimelineExpandedThread', function () {
 
     store.dispatch(changeTimelineExpandedThread(2, false));
     assert.deepEqual(threads.map(isExpanded), [false, false, false]);
+  });
+});
+
+describe('actions/changeImplementationFilter', function () {
+  const store = storeWithProfile();
+
+  it('is initially set to filter to all', function () {
+    const filter = UrlStateSelectors.getImplementationFilter(store.getState());
+    assert.equal(filter, 'combined');
+  });
+
+  it('can be changed to cpp', function () {
+    store.dispatch(changeImplementationFilter('cpp'));
+    const filter = UrlStateSelectors.getImplementationFilter(store.getState());
+    assert.equal(filter, 'cpp');
   });
 });
 
