@@ -277,7 +277,7 @@ describe('symbolication', function () {
     });
   });
 
-  describe('symbolicateProfile', function (done) {
+  describe('symbolicateProfile', function () {
     let unsymbolicatedProfile = null;
     let symbolicatedProfile = null;
 
@@ -318,18 +318,16 @@ describe('symbolication', function () {
 });
 
 describe('upgrades', function () {
-  describe('old-cleopatra-profile', function (done) {
+  describe('old-cleopatra-profile', function () {
     const exampleOldCleopatraProfile = require('./upgrades/old-cleopatra-profile.sps.json');
-    it('should detect the profile as an old cleopatra profile', function (done) {
+    it('should detect the profile as an old cleopatra profile', function () {
       assert.isTrue(isOldCleopatraFormat(exampleOldCleopatraProfile));
-      done();
     });
-    it('should be able to convert the old cleopatra profile into a preprocessed profile', function (done) {
+    it('should be able to convert the old cleopatra profile into a preprocessed profile', function () {
       const profile = convertOldCleopatraProfile(exampleOldCleopatraProfile);
       assert.isTrue(isPreprocessedProfile(profile));
       // For now, just test that upgrading doesn't throw any exceptions.
       upgradePreprocessedProfileToCurrentVersion(profile);
-      done();
     });
   });
   function comparePreprocessedProfiles(lhs, rhs) {
@@ -350,7 +348,7 @@ describe('upgrades', function () {
   // Uncomment this to output your next ./upgrades/prepr-X.sps.json
   // console.log(serializeProfile(afterUpgradeReference));
 
-  it('should import an old profile and upgrade it to be the same as the reference preprocessed profile', function (done) {
+  it('should import an old profile and upgrade it to be the same as the reference preprocessed profile', function () {
     const serializedOldPreprocessedProfile0 = require('./upgrades/prepr-0.sps.json');
     const upgradedProfile0 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile0);
     comparePreprocessedProfiles(upgradedProfile0, afterUpgradeReference);
@@ -372,9 +370,8 @@ describe('upgrades', function () {
     // const rawProfile4 = require('./upgrades/raw-4.sps.json');
     // const upgradedRawProfile4 = unserializeProfileOfArbitraryFormat(rawProfile4);
     // comparePreprocessedProfiles(upgradedRawProfile4, afterUpgradeReference);
-    done();
   });
-  it('should import an old raw profile and upgrade it to be the same as the newest raw profile', function (done) {
+  it('should import an old raw profile and upgrade it to be the same as the newest raw profile', function () {
     const afterUpgradeRawReference = require('./upgrades/raw-5.sps.json');
     // Uncomment this to output your next ./upgrades/raw-X.sps.json
     // upgradeRawProfileToCurrentVersion(afterUpgradeRawReference);
@@ -388,7 +385,6 @@ describe('upgrades', function () {
     const rawProfile4 = require('./upgrades/raw-4.sps.json');
     upgradeRawProfileToCurrentVersion(rawProfile4);
     assert.deepEqual(rawProfile4, afterUpgradeRawReference);
-    done();
   });
 });
 

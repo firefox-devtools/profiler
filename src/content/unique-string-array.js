@@ -8,7 +8,10 @@ export class UniqueStringArray {
 
   constructor(originalArray: string[] = []) {
     this._array = originalArray.slice(0);
-    this._stringToIndex = new Map(originalArray.map((s, i) => [s, i]));
+    this._stringToIndex = new Map();
+    for (let i = 0; i < originalArray.length; i++) {
+      this._stringToIndex.set(originalArray[i], i);
+    }
   }
 
   getString(index: IndexIntoStringTable): string {

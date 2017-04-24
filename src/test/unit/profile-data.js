@@ -318,6 +318,11 @@ describe('symbolication', function () {
 
 describe('upgrades', function () {
   describe('old-cleopatra-profile', function () {
+    /* eslint-disable no-invalid-this */
+    // This can take awhile, increase the timeout.
+    this.timeout(10000);
+    /* eslint-enable no-invalid-this */
+
     const exampleOldCleopatraProfile = require('../fixtures/upgrades/old-cleopatra-profile.sps.json');
     it('should detect the profile as an old cleopatra profile', function () {
       assert.isTrue(isOldCleopatraFormat(exampleOldCleopatraProfile));
@@ -348,6 +353,10 @@ describe('upgrades', function () {
   // console.log(serializeProfile(afterUpgradeReference));
 
   it('should import an old profile and upgrade it to be the same as the reference preprocessed profile', function () {
+    /* eslint-disable no-invalid-this */
+    // This can take awhile, increase the timeout.
+    this.timeout(10000);
+    /* eslint-enable no-invalid-this */
     const serializedOldPreprocessedProfile0 = require('../fixtures/upgrades/prepr-0.sps.json');
     const upgradedProfile0 = unserializeProfileOfArbitraryFormat(serializedOldPreprocessedProfile0);
     comparePreprocessedProfiles(upgradedProfile0, afterUpgradeReference);
@@ -371,6 +380,11 @@ describe('upgrades', function () {
     // comparePreprocessedProfiles(upgradedRawProfile4, afterUpgradeReference);
   });
   it('should import an old raw profile and upgrade it to be the same as the newest raw profile', function () {
+    /* eslint-disable no-invalid-this */
+    // This can take awhile, increase the timeout.
+    this.timeout(10000);
+    /* eslint-enable no-invalid-this */
+
     const afterUpgradeRawReference = require('../fixtures/upgrades/raw-5.sps.json');
     // Uncomment this to output your next ./upgrades/raw-X.sps.json
     // upgradeRawProfileToCurrentVersion(afterUpgradeRawReference);
