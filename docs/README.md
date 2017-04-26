@@ -10,4 +10,4 @@ This project is a client for reading profiles from the Gecko Profiler and potent
  * [TraskTracer](./tasktracer.md) - TODO
  * [Upgrading profiles](./upgrading-profiles.md)
  * [Testing docs](../src/test)
- * [Potential performance data sources in Gecko](./data-source.md)
+ * [Potential performance data sources in Gecko](./data-sources.md)
