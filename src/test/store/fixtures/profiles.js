@@ -1,7 +1,7 @@
 // @flow
-import { getEmptyProfile } from '../../../profile-data';
-import { UniqueStringArray } from '../../../unique-string-array';
-import type { Profile, Thread } from '../../../../common/types/profile';
+import { getEmptyProfile } from '../../../content/profile-data';
+import { UniqueStringArray } from '../../../content/unique-string-array';
+import type { Profile, Thread } from '../../../common/types/profile';
 
 export function getProfileWithNamedThreads(threadNames: string[]): Profile {
   const profile = getEmptyProfile();
