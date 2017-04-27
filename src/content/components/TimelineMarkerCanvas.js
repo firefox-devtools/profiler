@@ -107,7 +107,7 @@ class TimelineMarkerCanvas extends PureComponent {
           }
 
           const markerIndex = markerTiming.index[i];
-          ctx.fillStyle = hoveredItem === markerIndex ? '#38445F' : '#8296cb';
+          ctx.fillStyle = hoveredItem === markerIndex ? 'Highlight' : '#8296cb';
 
           if (w >= h) {
             this.drawRoundedRect(ctx, x, y + 1, w, h - 1, 1);
@@ -160,7 +160,7 @@ class TimelineMarkerCanvas extends PureComponent {
 
   hitTest(x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null {
     const {
-       rangeStart, rangeEnd, markerTimingRows, viewportLeft, viewportRight,
+       rangeStart, rangeEnd, markerTimingRows, viewportLeft, viewportRight, viewportTop,
        containerWidth, rowHeight,
      } = this.props;
 
@@ -168,7 +168,7 @@ class TimelineMarkerCanvas extends PureComponent {
     const viewportLength: UnitIntervalOfProfileRange = viewportRight - viewportLeft;
     const unitIntervalTime: UnitIntervalOfProfileRange = viewportLeft + viewportLength * (x / containerWidth);
     const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
-    const rowIndex = Math.floor(y / rowHeight);
+    const rowIndex = Math.floor((y + viewportTop) / rowHeight);
     const minDuration = rangeLength * viewportLength * (rowHeight * 2 * MARKER_DOT_RADIUS / containerWidth);
     const markerTiming = markerTimingRows[rowIndex];
 
@@ -232,8 +232,7 @@ class TimelineMarkerCanvas extends PureComponent {
   render() {
     const { containerWidth, containerHeight } = this.props;
 
-    return <TimelineCanvas ref='canvas'
-                           className='timelineMarkerCanvas'
+    return <TimelineCanvas className='timelineMarkerCanvas'
                            containerWidth={containerWidth}
                            containerHeight={containerHeight}
                            onDoubleClickItem={this.onDoubleClickMarker}
