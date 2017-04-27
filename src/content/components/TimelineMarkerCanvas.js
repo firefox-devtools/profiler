@@ -1,12 +1,10 @@
 // @flow
-import React, { Component } from 'react';
-import shallowCompare from 'react-addons-shallow-compare';
-import { timeCode } from '../../common/time-code';
+import React, { PureComponent } from 'react';
 import withTimelineViewport from './TimelineViewport';
-import classNames from 'classnames';
+import TimelineCanvas from './TimelineCanvas';
 
-import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange, DevicePixels } from '../../common/types/units';
-import type { TracingMarker, MarkerTimingRows } from '../../common/types/profile-derived';
+import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../common/types/units';
+import type { TracingMarker, MarkerTimingRows, IndexIntoMarkerTiming } from '../../common/types/profile-derived';
 import type { Action, ProfileSelection } from '../actions/types';
 
 type Props = {
@@ -25,15 +23,12 @@ type Props = {
   updateProfileSelection: ProfileSelection => Action,
 };
 
-require('./TimelineMarkerCanvas.css');
-
 const ROW_HEIGHT = 16;
-const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
 
-class TimelineMarkerCanvas extends Component {
+class TimelineMarkerCanvas extends PureComponent {
 
   _requestedAnimationFrame: boolean
   _devicePixelRatio: number
@@ -47,61 +42,13 @@ class TimelineMarkerCanvas extends Component {
 
   constructor(props: Props) {
     super(props);
-    this._requestedAnimationFrame = false;
-    this._devicePixelRatio = 1;
-    this.state = { hoveredItem: null };
-
-    (this: any).onMouseMove = this.onMouseMove.bind(this);
-    (this: any).onMouseOut = this.onMouseOut.bind(this);
-    (this: any).onDoubleClick = this.onDoubleClick.bind(this);
+    (this: any).onDoubleClickMarker = this.onDoubleClickMarker.bind(this);
+    (this: any).getHoveredMarkerInfo = this.getHoveredMarkerInfo.bind(this);
+    (this: any).drawCanvas = this.drawCanvas.bind(this);
+    (this: any).hitTest = this.hitTest.bind(this);
   }
 
-  _scheduleDraw() {
-    if (!this._requestedAnimationFrame) {
-      this._requestedAnimationFrame = true;
-      window.requestAnimationFrame(() => {
-        this._requestedAnimationFrame = false;
-        if (this.refs.canvas) {
-          timeCode('TimelineMarkerCanvas render', () => {
-            this.drawCanvas();
-          });
-        }
-      });
-    }
-  }
-
-  shouldComponentUpdate(nextProps: Props) {
-    return shallowCompare(this, nextProps);
-  }
-
-  _prepCanvas() {
-    const {canvas} = this.refs;
-    const {containerWidth, containerHeight} = this.props;
-    const {devicePixelRatio} = window;
-    const pixelWidth: DevicePixels = containerWidth * devicePixelRatio;
-    const pixelHeight: DevicePixels = containerHeight * devicePixelRatio;
-    if (!this._ctx) {
-      this._ctx = canvas.getContext('2d');
-    }
-    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
-      canvas.width = pixelWidth;
-      canvas.height = pixelHeight;
-      canvas.style.width = containerWidth + 'px';
-      canvas.style.height = containerHeight + 'px';
-      this._ctx.scale(this._devicePixelRatio, this._devicePixelRatio);
-    }
-    if (this._devicePixelRatio !== devicePixelRatio) {
-      // Make sure and multiply by the inverse of the previous ratio, as the scaling
-      // operates off of the previous set scale.
-      const scale = (1 / this._devicePixelRatio) * devicePixelRatio;
-      this._ctx.scale(scale, scale);
-      this._devicePixelRatio = devicePixelRatio;
-    }
-    return this._ctx;
-  }
-
-  drawCanvas() {
-    const ctx = this._prepCanvas();
+  drawCanvas(ctx: CanvasRenderingContext2D, hoveredItem: IndexIntoMarkerTiming) {
     const {
       viewportTop, viewportBottom, rowHeight, containerWidth, containerHeight, markerTimingRows,
     } = this.props;
@@ -111,15 +58,20 @@ class TimelineMarkerCanvas extends Component {
 
     ctx.clearRect(0, 0, containerWidth, containerHeight);
 
-    this.drawMarkers(ctx, startRow, endRow);
+    this.drawMarkers(ctx, hoveredItem, startRow, endRow);
     this.drawSeparatorsAndLabels(ctx, startRow, endRow);
   }
 
-  drawMarkers(ctx, startRow, endRow) {
-    const { rangeStart, rangeEnd, containerWidth, markers,
-            containerHeight, markerTimingRows, rowHeight,
-            viewportLeft, viewportRight, viewportTop, viewportBottom } = this.props;
-    const { hoveredItem } = this.state;
+  drawMarkers(
+    ctx: CanvasRenderingContext2D,
+    hoveredItem: IndexIntoMarkerTiming,
+    startRow: number,
+    endRow: number
+  ) {
+    const {
+      rangeStart, rangeEnd, containerWidth, markerTimingRows, viewportLeft,
+      viewportRight, viewportTop,
+    } = this.props;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange = viewportRight - viewportLeft;
@@ -155,9 +107,6 @@ class TimelineMarkerCanvas extends Component {
           }
 
           const markerIndex = markerTiming.index[i];
-          const marker = markers[markerIndex];
-          const text = marker.name;
-
           ctx.fillStyle = hoveredItem === markerIndex ? '#38445F' : '#8296cb';
 
           if (w >= h) {
@@ -178,14 +127,12 @@ class TimelineMarkerCanvas extends Component {
     }
   }
 
-  drawSeparatorsAndLabels(ctx, startRow, endRow) {
+  drawSeparatorsAndLabels(ctx: CanvasRenderingContext2D, startRow: number, endRow: number) {
     const { markerTimingRows, rowHeight, viewportTop, containerWidth } = this.props;
 
     // Draw separators
     ctx.fillStyle = '#eee';
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-      // Get the timing information for a row of stack frames.
-      const markerTiming = markerTimingRows[rowIndex];
       const y = (rowIndex + 1) * rowHeight - viewportTop;
       ctx.fillRect(0, y, containerWidth, 1);
     }
@@ -197,9 +144,7 @@ class TimelineMarkerCanvas extends Component {
     ctx.fillStyle = gradient;
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       // Get the timing information for a row of stack frames.
-      const { name } = markerTimingRows[rowIndex];
       const y = rowIndex * rowHeight - viewportTop;
-      const textWidth = ctx.measureText(name);
       ctx.fillRect(0, y, 150, rowHeight);
     }
 
@@ -213,20 +158,11 @@ class TimelineMarkerCanvas extends Component {
     }
   }
 
-  hitTest(event): number|null {
-    const { canvas } = this.refs;
-    if (!canvas) {
-      return null;
-    }
-
-    const rect = canvas.getBoundingClientRect();
+  hitTest(x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null {
     const {
-      rangeStart, rangeEnd, markerTimingRows, viewportLeft, viewportRight,
-      containerWidth, rowHeight, markers,
-    } = this.props;
-    const x: CssPixels = event.pageX - rect.left;
-    const y: CssPixels = event.pageY - rect.top;
-
+       rangeStart, rangeEnd, markerTimingRows, viewportLeft, viewportRight,
+       containerWidth, rowHeight,
+     } = this.props;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange = viewportRight - viewportLeft;
@@ -251,26 +187,9 @@ class TimelineMarkerCanvas extends Component {
     return null;
   }
 
-  onMouseMove(event: SyntheticMouseEvent) {
-    const hoveredItem = this.hitTest(event);
-    if (this.state.hoveredItem !== hoveredItem) {
-      this.setState({ hoveredItem });
-    }
-  }
-
-  onMouseOut() {
-    if (this.state.hoveredItem !== null) {
-      this.setState({ hoveredItem: null });
-    }
-  }
-
-  onDoubleClick() {
-    const { hoveredItem } = this.state;
-    if (hoveredItem === null) {
-      return;
-    }
+  onDoubleClickMarker(markerIndex: IndexIntoMarkerTiming) {
     const { markers, updateProfileSelection } = this.props;
-    const marker = markers[hoveredItem];
+    const marker = markers[markerIndex];
     updateProfileSelection({
       hasSelection: true,
       isModifying: false,
@@ -279,9 +198,14 @@ class TimelineMarkerCanvas extends Component {
     });
   }
 
-  drawRoundedRect(ctx: CanvasRenderingContext2D,
-                   x: CssPixels, y: CssPixels, width: CssPixels, height: CssPixels,
-                   cornerSize: CssPixels) {
+  drawRoundedRect(
+    ctx: CanvasRenderingContext2D,
+    x: CssPixels,
+    y: CssPixels,
+    width: CssPixels,
+    height: CssPixels,
+    cornerSize: CssPixels
+  ) {
     // Cut out c x c -sized squares in the corners.
     const c = Math.min(width / 2, Math.min(height / 2, cornerSize));
     const bottom = y + height;
@@ -290,12 +214,7 @@ class TimelineMarkerCanvas extends Component {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  getHoveredMarkerInfo(): null | string {
-    const { hoveredItem } = this.state;
-    if (hoveredItem === null) {
-      return null;
-    }
-
+  getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): string {
     const { name, dur } = this.props.markers[hoveredItem];
     let duration;
     if (dur >= 10) {
@@ -311,20 +230,16 @@ class TimelineMarkerCanvas extends Component {
   }
 
   render() {
-    const { hoveredItem } = this.state;
-    this._scheduleDraw();
+    const { containerWidth, containerHeight } = this.props;
 
-    const className = classNames({
-      timelineMarkerCanvas: true,
-      hover: hoveredItem !== null,
-    });
-
-    return <canvas className={className}
-                   ref='canvas'
-                   onMouseMove={this.onMouseMove}
-                   onMouseOut={this.onMouseOut}
-                   onDoubleClick={this.onDoubleClick}
-                   title={this.getHoveredMarkerInfo()} />;
+    return <TimelineCanvas ref='canvas'
+                           className='timelineMarkerCanvas'
+                           containerWidth={containerWidth}
+                           containerHeight={containerHeight}
+                           onDoubleClickItem={this.onDoubleClickMarker}
+                           getHoveredItemInfo={this.getHoveredMarkerInfo}
+                           drawCanvas={this.drawCanvas}
+                           hitTest={this.hitTest} />;
   }
 }
 
