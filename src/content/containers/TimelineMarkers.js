@@ -12,7 +12,6 @@ import classNames from 'classnames';
 import type { Thread } from '../../common/types/profile';
 import type { TracingMarker, MarkerTimingRows } from '../../common/types/profile-derived';
 import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../common/types/units';
-import type { StackTimingByDepth } from '../stack-timing';
 import type { GetCategory } from '../color-categories';
 import type { GetLabel } from '../labeling-strategies';
 import type { UpdateProfileSelection } from '../actions/profile-view';
@@ -27,7 +26,6 @@ type Props = {
   thread: Thread,
   isRowExpanded: boolean,
   maxMarkerRows: number,
-  stackTimingByDepth: StackTimingByDepth,
   isSelected: boolean,
   timeRange: { start: Milliseconds, end: Milliseconds },
   threadIndex: number,
@@ -89,7 +87,7 @@ class TimelineMarkers extends Component {
 
   render() {
     const {
-      thread, isRowExpanded, maxMarkerRows, stackTimingByDepth, isSelected, timeRange,
+      thread, isRowExpanded, maxMarkerRows, isSelected, timeRange,
       threadIndex, interval, getCategory, getLabel, markerTimingRows, markers,
       updateProfileSelection, selection, threadName, processDetails, getScrollElement,
     } = this.props;
@@ -120,7 +118,7 @@ class TimelineMarkers extends Component {
                             selection={selection}
                             updateProfileSelection={updateProfileSelection}
                             viewportNeedsUpdate={(prevProps, newProps) => {
-                              return prevProps.stackTimingByDepth !== newProps.stackTimingByDepth;
+                              return prevProps.markerTimingRows !== newProps.markerTimingRows;
                             }}
 
                             // TimelineMarkerCanvas props
@@ -146,12 +144,10 @@ export default connect((state, ownProps) => {
   const threadSelectors = selectorsForThread(threadIndex);
   const isRowExpanded = getAreMarkersExpanded(state, threadIndex);
 
-  const thread = threadSelectors.getThread(state);
   const markers = threadSelectors.getTracingMarkers(state);
   const markerTimingRows = isRowExpanded
     ? threadSelectors.getMarkerTiming(state)
     : [];
-  console.log('!!! markerTimingRows', markerTimingRows);
 
   return {
     thread: threadSelectors.getFilteredThreadForFlameChart(state),

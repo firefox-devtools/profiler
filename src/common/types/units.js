@@ -29,3 +29,8 @@ export type HorizontalViewport = {
 }
 
 export type StartEndRange = { start: Milliseconds, end: Milliseconds };
+
+/**
+ * This is not really a unit, but doesn't warrant a separate file.
+ */
+export type NonNull = number | string | () => mixed | Object | Array<any>;

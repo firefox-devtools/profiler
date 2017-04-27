@@ -32,6 +32,8 @@ export type Node = {
   icon: string | null,
 };
 
+export type IndexIntoMarkerTiming = number;
+
 export type MarkerTiming = {
   // Start time in milliseconds.
   start: number[],
