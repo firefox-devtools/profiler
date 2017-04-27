@@ -1,5 +1,6 @@
 // @flow
 import type { IndexIntoStackTable, IndexIntoFrameTable, Thread, StackTable } from '../common/types/profile';
+import type { Milliseconds } from '../common/types/units';
 import type { FuncStackInfo } from '../common/types/profile-derived';
 import type { GetCategory } from './color-categories';
 /**
@@ -36,11 +37,13 @@ import type { GetCategory } from './color-categories';
  *   {start: [25, 45], end: [35, 55], stack: [123, 159]}
  * ]
  */
+
+export type StackTimingDepth = number;
+export type IndexIntoStackTiming = number;
+
 export type StackTimingByDepth = Array<{
-  // Start time of stack in milliseconds.
-  start: number[],
-  // End time of stack in milliseconds.
-  end: number[],
+  start: Milliseconds[],
+  end: Milliseconds[],
   stack: IndexIntoStackTable[],
   length: number,
 }>
