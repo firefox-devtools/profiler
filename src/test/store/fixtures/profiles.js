@@ -1,7 +1,34 @@
 // @flow
 import { getEmptyProfile } from '../../../content/profile-data';
 import { UniqueStringArray } from '../../../content/unique-string-array';
-import type { Profile, Thread } from '../../../common/types/profile';
+import type { Profile, Thread, MarkersTable } from '../../../common/types/profile';
+import type { Milliseconds } from '../../../common/types/units';
+
+// Array<[MarkerName, Milliseconds, Data]>
+type MarkerName = string;
+type MarkerTime = Milliseconds;
+type DataPayload = Object;
+type TestDefinedMarkers = Array<[MarkerName, MarkerTime, DataPayload]>;
+
+export function getProfileWithMarkers(markers: TestDefinedMarkers): Profile {
+  const profile = getEmptyProfile();
+  const thread = getEmptyThread();
+  const stringTable = thread.stringTable;
+  const markersTable: MarkersTable = {
+    name: [],
+    time: [],
+    data: [],
+    length: 0,
+  };
+  markers.map(([name, time, data]) => {
+    markersTable.name.push(stringTable.indexForString(name));
+    markersTable.time.push(time);
+    markersTable.data.push(data);
+    markersTable.length++;
+  });
+  profile.threads.push(Object.assign({}, thread, { markers: markersTable }));
+  return profile;
+}
 
 export function getProfileWithNamedThreads(threadNames: string[]): Profile {
   const profile = getEmptyProfile();
@@ -9,7 +36,7 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
   return profile;
 }
 
-export function getEmptyThread(overrides: Object): Thread {
+export function getEmptyThread(overrides: ?Object): Thread {
   return Object.assign({
     processType: 'default',
     name: 'Empty',
