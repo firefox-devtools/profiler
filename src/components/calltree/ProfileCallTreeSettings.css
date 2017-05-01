@@ -10,6 +10,7 @@
   background: #F9F9F9;
   display: flex;
   flex-flow: row nowrap;
+  z-index: 1;
 }
 
 .profileCallTreeSettingsList {
@@ -35,6 +36,7 @@
   flex-flow: row nowrap;
   align-items: center;
   height: 25px;
+  position: relative;
 }
 
 .profileCallTreeSettingsSelect {

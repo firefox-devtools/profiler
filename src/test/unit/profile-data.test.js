@@ -18,7 +18,7 @@ import {
   resourceTypes,
   getFuncStackInfo,
   getTracingMarkers,
-  filterThreadByImplementation,
+  filterThreadByFunc,
 } from '../../profile-logic/profile-data';
 import exampleProfile from '.././fixtures/profiles/example-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
@@ -41,6 +41,12 @@ import {
   getCategoryByImplementation,
   implementationCategoryMap,
 } from '../../profile-logic/color-categories';
+import {
+  mapSamplesToStackHeight,
+  mapSamplesToHasFunc,
+  getFuncIndexByName,
+  stackIsJS,
+} from '../utils/analyze-profile';
 
 describe('unique-string-array', function() {
   const u = new UniqueStringArray(['foo', 'bar', 'baz']);
@@ -510,22 +516,16 @@ describe('color-categories', function() {
   });
 });
 
-describe('filter-by-implementation', function() {
+describe('filter threads by implementation', function() {
   const profile = processProfile(profileWithJS);
   const thread = profile.threads[0];
 
-  function stackIsJS(filteredThread, stackIndex) {
-    const frameIndex = filteredThread.stackTable.frame[stackIndex];
-    const funcIndex = filteredThread.frameTable.func[frameIndex];
-    return filteredThread.funcTable.isJS[funcIndex];
-  }
-
-  it('will return the same thread if filtering to "all"', function() {
-    expect(filterThreadByImplementation(thread, 'combined')).toEqual(thread);
+  it('will return the same thread if filtering to "combined"', function() {
+    expect(filterThreadByFunc(thread, 'combined', [], [])).toEqual(thread);
   });
 
   it('will return only JS samples if filtering to "js"', function() {
-    const jsOnlyThread = filterThreadByImplementation(thread, 'js');
+    const jsOnlyThread = filterThreadByFunc(thread, 'js', [], []);
     const nonNullSampleStacks = jsOnlyThread.samples.stack.filter(
       stack => stack !== null
     );
@@ -538,7 +538,7 @@ describe('filter-by-implementation', function() {
   });
 
   it('will return only C++ samples if filtering to "cpp"', function() {
-    const cppOnlyThread = filterThreadByImplementation(thread, 'cpp');
+    const cppOnlyThread = filterThreadByFunc(thread, 'cpp', [], []);
     const nonNullSampleStacks = cppOnlyThread.samples.stack.filter(
       stack => stack !== null
     );
@@ -548,5 +548,172 @@ describe('filter-by-implementation', function() {
 
     expect(samplesAreAllJS).toBe(true);
     expect(nonNullSampleStacks.length).toBe(10);
+  });
+});
+
+describe('filter threads by charging to caller', function() {
+  const profile = processProfile(profileWithJS);
+  const thread = profile.threads[0];
+
+  const javascriptOneFuncIndex = getFuncIndexByName(thread, 'javascriptOne');
+
+  it('will not filter the thread if filtering no charging is done', function() {
+    const filteredThread = filterThreadByFunc(thread, 'combined', [], []);
+
+    expect(thread).toBe(filteredThread);
+    expect(mapSamplesToStackHeight(filteredThread)).toEqual([
+      2,
+      3,
+      3,
+      3,
+      1,
+      2,
+      3,
+      4,
+      7,
+      3,
+    ]);
+    expect(
+      mapSamplesToHasFunc(filteredThread, javascriptOneFuncIndex)
+    ).toEqual([
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+    ]);
+  });
+
+  it('will filter out the function "javascriptOne"', function() {
+    const filteredThread = filterThreadByFunc(
+      thread,
+      'combined',
+      [javascriptOneFuncIndex],
+      []
+    );
+
+    expect(mapSamplesToStackHeight(filteredThread)).toEqual([
+      2,
+      3,
+      3,
+      3,
+      1,
+      2,
+      2,
+      3,
+      6,
+      2,
+    ]);
+    expect(
+      mapSamplesToHasFunc(filteredThread, javascriptOneFuncIndex)
+    ).toEqual([
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+    ]);
+  });
+});
+
+describe('filter threads by merging a subtree', function() {
+  const profile = processProfile(profileWithJS);
+  const thread = profile.threads[0];
+
+  const javascriptOneFuncIndex = getFuncIndexByName(thread, 'javascriptOne');
+  const javascriptTwoFuncIndex = getFuncIndexByName(thread, 'javascriptTwo');
+  const mergedAddressFuncIndex = getFuncIndexByName(thread, '0x10000f0f0');
+  const nonMergedAddressFuncIndex = getFuncIndexByName(thread, '0x100000f84');
+
+  it('will not filter the thread if no charging is done', function() {
+    const filteredThread = filterThreadByFunc(thread, 'combined', [], []);
+
+    expect(thread).toBe(filteredThread);
+    expect(mapSamplesToStackHeight(filteredThread)).toEqual([
+      2,
+      3,
+      3,
+      3,
+      1,
+      2,
+      3,
+      4,
+      7,
+      3,
+    ]);
+    expect(
+      mapSamplesToHasFunc(filteredThread, javascriptOneFuncIndex)
+    ).toEqual([
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+    ]);
+  });
+
+  it('will filter out the function "javascriptOne" and all its descendants', function() {
+    const filteredThread = filterThreadByFunc(
+      thread,
+      'combined',
+      [],
+      [javascriptOneFuncIndex]
+    );
+    const allFalse = [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+    ];
+
+    expect(mapSamplesToStackHeight(filteredThread)).toEqual([
+      2,
+      3,
+      3,
+      3,
+      1,
+      2,
+      2,
+      2,
+      2,
+      2,
+    ]);
+
+    // These funcs are all merged in the sample profile.
+    expect(mapSamplesToHasFunc(filteredThread, javascriptOneFuncIndex)).toEqual(
+      allFalse
+    );
+    expect(mapSamplesToHasFunc(filteredThread, javascriptTwoFuncIndex)).toEqual(
+      allFalse
+    );
+    expect(mapSamplesToHasFunc(filteredThread, mergedAddressFuncIndex)).toEqual(
+      allFalse
+    );
+
+    // The func "0x100000f84" is an example func not in the merged subtree.
+    expect(
+      mapSamplesToHasFunc(filteredThread, nonMergedAddressFuncIndex)
+    ).toEqual([true, true, true, true, false, true, true, true, true, true]);
   });
 });

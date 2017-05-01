@@ -9,6 +9,7 @@ import type {
   Action,
   ExpandedSet,
   CallTreeFiltersPerThread,
+  FuncsPerThread,
   DataSource,
   ProfileSelection,
   ImplementationFilter,
@@ -26,6 +27,10 @@ import type { GetCategory } from '../profile-logic/color-categories';
 
 export type Reducer<T> = (T, Action) => T;
 
+export type LastAddedFilter = null | {
+  threadIndex: ThreadIndex,
+  funcIndex: IndexIntoFuncTable,
+};
 export type RequestedLib = { debugName: string, breakpadId: string };
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {
@@ -45,6 +50,7 @@ export type ProfileViewState = {
     tabOrder: number[],
   },
   profile: Profile,
+  lastAddedFilter: LastAddedFilter | null,
 };
 
 export type AppViewState =
@@ -84,6 +90,8 @@ export type URLState = {
   hidePlatformDetails: boolean,
   threadOrder: ThreadIndex[],
   hiddenThreads: ThreadIndex[],
+  mergeFunctions: FuncsPerThread,
+  mergeSubtree: FuncsPerThread,
 };
 
 export type IconState = Set<string>;

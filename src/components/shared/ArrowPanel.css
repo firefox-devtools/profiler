@@ -10,7 +10,7 @@
 }
 
 .arrowPanel {
-  --internal-offset-from-right: var(--offset-from-right, 60px);
+  --internal-offset-horizontal: var(--offset-horizontal, 60px);
   --internal-offset-from-top: 15px;
   --internal-width: var(--width, auto);
   --internal-button-height: 30px;
@@ -18,7 +18,6 @@
   --internal-ok-button-color: var(--ok-button-color, white);
   position: absolute;
   top: var(--internal-offset-from-top);
-  right: calc(0px - var(--internal-offset-from-right));
   min-width: var(--internal-width);
   filter: drop-shadow(0 0 0.5px rgba(0,0,0,0.4)) drop-shadow(0 4px 5px rgba(0,0,0,0.4));
   filter: url(../../../res/shadowfilter.svg#menushadow);
@@ -27,7 +26,16 @@
   line-height: 1.3;
   background: hsla(0, 0%, 97%, 0.95);
   border-radius: 5px;
-  transform-origin: calc(100% - var(--internal-offset-from-right))
+}
+.arrowPanel.right {
+  right: calc(0px - var(--internal-offset-horizontal));
+  transform-origin: calc(100% - var(--internal-offset-horizontal))
+                    calc(0px - var(--internal-offset-from-top));
+}
+
+.arrowPanel.left {
+  left: calc(0px - var(--internal-offset-horizontal));
+  transform-origin: var(--internal-offset-horizontal)
                     calc(0px - var(--internal-offset-from-top));
 }
 
@@ -77,13 +85,20 @@
   display: block;
   position: absolute;
   top: 0;
-  left: calc(100% - var(--internal-offset-from-right));
   width: calc(1.42 * var(--internal-offset-from-top));
   height: calc(1.42 * var(--internal-offset-from-top));
   background: hsla(0, 0%, 97%, 0.95);
   transform: rotate(45deg);
   transform-origin: top left;
   z-index: -1;
+}
+
+.arrowPanelArrow.right::before {
+  left: calc(100% - var(--internal-offset-horizontal));
+}
+
+.arrowPanelArrow.left::before {
+  left: var(--internal-offset-horizontal);
 }
 
 .arrowPanelTitle {

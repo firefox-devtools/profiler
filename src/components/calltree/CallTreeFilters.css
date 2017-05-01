@@ -1,0 +1,214 @@
+.callTreeFilters {
+  z-index: 1;
+}
+
+.callTreeFiltersPanelarrowPanelAnchor {
+  top: 16px;
+}
+
+.callTreeFiltersButton {
+  background: none 0 0 no-repeat transparent;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: 16px;
+  height: 16px;
+  overflow: hidden;
+  vertical-align: top;
+  color: transparent;
+  opacity: 0.9;
+}
+
+.callTreeFiltersButton,
+.callTreeFiltersButton:hover,
+.callTreeFiltersButton:hover:active,
+.buttonWithPanel.open > * > .callTreeFiltersButton {
+  background-image: url(../../../res/filter.svg);
+}
+
+.callTreeFiltersButton:hover,
+.callTreeFiltersButton:hover:active {
+  opacity: 1;
+}
+
+.callTreeFiltersScroller {
+  max-height: 250px;
+  overflow: scroll;
+}
+
+.callTreeFiltersTable {
+  min-width: 300px;
+  min-width: 300px;
+  background-color: #fff;
+  border: 1px solid #d6d6d6;
+  margin-bottom: 10px;
+  border-collapse: collapse;
+}
+
+.callTreeFiltersRow {
+  padding: 4px 0px;
+  color: #000;
+}
+
+.callTreeFiltersEmpty {
+  padding: 10px 20px;
+}
+.callTreeFiltersEmptyP {
+  min-width: 300px;
+}
+
+.callTreeFiltersCell,
+.callTreeFiltersCellHeader {
+  padding: 5px 9px;
+  white-space: nowrap;
+}
+
+.callTreeFiltersCellHeader {
+  border: 1px solid #eaeaea;
+}
+
+.callTreeFiltersListItemName {
+  max-width: 300px;
+  padding: 0 7px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+.callTreeFiltersType {
+  position: relative;
+  padding-right: 25px;
+  color: #486cc9;
+  text-decoration: underline;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.callTreeFiltersType::before,
+.callTreeFiltersType::after
+{
+  content: "";
+  width: 0;
+  height: 0;
+  border-style: solid;
+  position: absolute;
+  right: 5px;
+  pointer-events: none;
+}
+
+.callTreeFiltersType::before {
+  border-width: 0 4px 3px 4px;
+  border-color: transparent transparent #000 transparent;
+  top: 8px;
+}
+
+.callTreeFiltersType::after {
+  border-width: 3px 4px 0 4px;
+  border-color: #000 transparent transparent transparent;
+  top: 14px;
+}
+
+.callTreeFiltersSelect {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  border: 0;
+  background: none;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.callTreeFiltersCheckbox {
+  margin: 0 0 0 5px;
+}
+
+.callTreeFiltersTransitionGroup {
+  position: absolute;
+  top: 29px;
+  left: -10px;
+}
+
+.callTreeFiltersHintContainer {
+  transform-origin: 30px 13px;
+}
+
+.callTreeFiltersHint {
+    padding: 6px 9px;
+    border-radius: 3px;
+    line-height: 13px;
+    background-color: #798fc8;
+    color: #fff;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    max-width: 150px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.callTreeFiltersHint::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: -7px;
+  width: 10px;
+  height: 10px;
+  background: #798fc8;
+  transform: rotate(45deg);
+  transform-origin: top left;
+  z-index: -1;
+  left: 18px;
+}
+
+.callTreeFiltersTransition-enter {
+  animation: callTreeFiltersEnter 150ms;
+}
+
+.callTreeFiltersTransition-leave {
+  animation: callTreeFiltersLeave 200ms;
+}
+
+@keyframes callTreeFiltersEnter {
+  0% {
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.0, 0.2, 0.2, 0);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes callTreeFiltersLeave {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-10px,-22px) scale(0.1);
+    animation-timing-function: ease-out;
+  }
+}
+
+.callTreeFiltersFlash > .buttonWithPanelButtonWrapper {
+  animation: callTreeFiltersButtonFlash 0.5s;
+}
+
+@keyframes callTreeFiltersButtonFlash {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

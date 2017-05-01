@@ -12,23 +12,13 @@ import {
   stringifyCallTreeFilters,
   parseCallTreeFilters,
 } from './profile-logic/call-tree-filters';
+import {
+  uintArrayToString,
+  stringToUintArray,
+} from './utils/uintarray-encoding';
+
 import type { URLState } from './types/reducers';
 import type { DataSource } from './types/actions';
-
-// {
-//   // general:
-//   dataSource: 'from-addon', 'from-file', 'local', 'public',
-//   hash: '' or 'aoeurschsaoeuch',
-//   selectedTab: 'summary' or 'calltree' or ...,
-//   rangeFilters: [] or [{ start, end }, ...],
-//   selectedThread: 0 or 1 or ...,
-//
-//   // only when selectedTab === 'calltree':
-//   callTreeSearchString: '' or '::RunScript' or ...,
-//   callTreeFilters: [[], [{type:'prefix', matchJSOnly:true, prefixFuncs:[1,3,7]}, {}, ...], ...], // one per thread
-//   jsOnly: false or true,
-//   invertCallstack: false or true,
-// }
 
 function dataSourceDirs(urlState: URLState) {
   const { dataSource } = urlState;
@@ -92,6 +82,17 @@ export function urlFromState(urlState: URLState) {
         : undefined;
       break;
   }
+
+  const mergeFunctionsList = urlState.mergeFunctions[urlState.selectedThread];
+  if (mergeFunctionsList && mergeFunctionsList.length > 0) {
+    query.mergeFunctions = uintArrayToString(mergeFunctionsList);
+  }
+
+  const mergeSubtreeList = urlState.mergeSubtree[urlState.selectedThread];
+  if (mergeSubtreeList && mergeSubtreeList.length > 0) {
+    query.mergeSubtree = uintArrayToString(mergeSubtreeList);
+  }
+
   const qString = queryString.stringify(query);
   return pathname + (qString ? '?' + qString : '');
 }
@@ -158,6 +159,8 @@ export function stateFromLocation(location: Location): URLState {
         hidePlatformDetails: false,
         threadOrder: [],
         hiddenThreads: [],
+        mergeFunctions: {},
+        mergeSubtree: {},
       };
     }
   }
@@ -199,5 +202,15 @@ export function stateFromLocation(location: Location): URLState {
     threadOrder: query.threadOrder
       ? query.threadOrder.split('-').map(index => Number(index))
       : [],
+    mergeFunctions: {
+      [selectedThread]: query.mergeFunctions
+        ? stringToUintArray(query.mergeFunctions)
+        : [],
+    },
+    mergeSubtree: {
+      [selectedThread]: query.mergeSubtree
+        ? stringToUintArray(query.mergeSubtree)
+        : [],
+    },
   };
 }

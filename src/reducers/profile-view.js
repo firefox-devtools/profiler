@@ -46,6 +46,7 @@ import type {
   RequestedLib,
   SymbolicationStatus,
   ThreadViewOptions,
+  LastAddedFilter,
 } from '../types/reducers';
 
 function profile(
@@ -306,6 +307,23 @@ function tabOrder(state: number[] = [0, 1, 2, 3, 4, 5], action: Action) {
   }
 }
 
+/**
+ * Remember which merged functions were last applied to the call tree to be able to
+ * display helpful hints to the user as they add filters.
+ */
+function lastAddedFilter(state: LastAddedFilter = null, action: Action) {
+  switch (action.type) {
+    case 'MERGE_FUNCTION':
+    case 'MERGE_SUBTREE':
+      return {
+        threadIndex: action.threadIndex,
+        funcIndex: action.funcIndex,
+      };
+    default:
+      return state;
+  }
+}
+
 const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
   viewOptions: combineReducers({
     perThread: viewOptionsPerThread,
@@ -317,6 +335,7 @@ const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
     zeroAt,
     tabOrder,
   }),
+  lastAddedFilter,
   profile,
 });
 export default profileViewReducer;
@@ -362,6 +381,9 @@ export const getTasksByThread = createSelector(
   (state: State) => getProfileTaskTracerData(state).threadTable,
   TaskTracerTools.getTasksByThread
 );
+
+export const getLastAddedFilter = (state: State): LastAddedFilter =>
+  getProfileView(state).lastAddedFilter;
 
 /**
  * Profile
@@ -413,6 +435,10 @@ export const selectorsForThread = (
       getProfileViewOptions(state).perThread[threadIndex];
     const getCallTreeFilters = (state: State): CallTreeFilter[] =>
       URLState.getCallTreeFilters(state, threadIndex);
+    const getMergeFunctionsList = (state: State): IndexIntoFuncTable[] =>
+      URLState.getMergeFunctionsList(state, threadIndex);
+    const getMergeSubtreeList = (state: State): IndexIntoFuncTable[] =>
+      URLState.getMergeSubtreeList(state, threadIndex);
     const getFriendlyThreadName = createSelector(
       getThreads,
       getThread,
@@ -490,7 +516,9 @@ export const selectorsForThread = (
     const _getImplementationFilteredThread = createSelector(
       _getRangeAndCallTreeFilteredThread,
       URLState.getImplementationFilter,
-      ProfileData.filterThreadByImplementation
+      getMergeFunctionsList,
+      getMergeSubtreeList,
+      ProfileData.filterThreadByFunc
     );
     const _getImplementationAndSearchFilteredThread = createSelector(
       _getImplementationFilteredThread,

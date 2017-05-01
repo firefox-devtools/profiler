@@ -98,7 +98,7 @@
 }
 
 .profileSharingProfileDownloadPanel {
-  --offset-from-right: 25px;
+  --offset-horizontal: 25px;
   --width: 30em;
 }
 

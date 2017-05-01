@@ -15,10 +15,14 @@ import type {
   Action,
   CallTreeFiltersPerThread,
   CallTreeFilter,
+  FuncsPerThread,
   DataSource,
   ImplementationFilter,
 } from '../types/actions';
 import type { State, URLState, Reducer } from '../types/reducers';
+
+// Allow proper memoization and component update checks by passing in the same empty array.
+const EMPTY_ARRAY = Object.freeze([]);
 
 function dataSource(state: DataSource = 'none', action: Action) {
   switch (action.type) {
@@ -182,6 +186,56 @@ function hidePlatformDetails(state: boolean = false, action: Action) {
   }
 }
 
+function mergeFunctions(state: FuncsPerThread = {}, action: Action) {
+  switch (action.type) {
+    case 'MERGE_FUNCTION': {
+      const { threadIndex, funcIndex } = action;
+      const funcs = state[threadIndex] || [];
+      if (!funcs.includes(funcIndex)) {
+        return Object.assign({}, state, {
+          [threadIndex]: funcs.concat(funcIndex),
+        });
+      }
+      break;
+    }
+    case 'UNMERGE_FUNCTION': {
+      const { threadIndex, funcIndex } = action;
+      const funcs = state[threadIndex];
+      if (funcs !== undefined) {
+        return Object.assign({}, state, {
+          [threadIndex]: funcs.filter(index => index !== funcIndex),
+        });
+      }
+    }
+  }
+  return state;
+}
+
+function mergeSubtree(state: FuncsPerThread = {}, action: Action) {
+  switch (action.type) {
+    case 'MERGE_SUBTREE': {
+      const { threadIndex, funcIndex } = action;
+      const funcs = state[threadIndex] || [];
+      if (!funcs.includes(funcIndex)) {
+        return Object.assign({}, state, {
+          [threadIndex]: funcs.concat(funcIndex),
+        });
+      }
+      break;
+    }
+    case 'UNMERGE_SUBTREE': {
+      const { threadIndex, funcIndex } = action;
+      const funcs = state[threadIndex];
+      if (funcs !== undefined) {
+        return Object.assign({}, state, {
+          [threadIndex]: funcs.filter(index => index !== funcIndex),
+        });
+      }
+    }
+  }
+  return state;
+}
+
 function threadOrder(state: ThreadIndex[] = [], action: Action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
@@ -251,6 +305,8 @@ const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (
     hidePlatformDetails,
     threadOrder,
     hiddenThreads,
+    mergeFunctions,
+    mergeSubtree,
   })
 );
 export default urlStateReducer;
@@ -278,6 +334,15 @@ export const getCallTreeFilters = (
   threadIndex: ThreadIndex
 ): CallTreeFilter[] => {
   return getURLState(state).callTreeFilters[threadIndex] || [];
+};
+export const getMergeFunctionsList = (
+  state: State,
+  threadIndex: ThreadIndex
+) => {
+  return getURLState(state).mergeFunctions[threadIndex] || EMPTY_ARRAY;
+};
+export const getMergeSubtreeList = (state: State, threadIndex: ThreadIndex) => {
+  return getURLState(state).mergeSubtree[threadIndex] || EMPTY_ARRAY;
 };
 export const getThreadOrder = (state: State) => getURLState(state).threadOrder;
 export const getHiddenThreads = (state: State) =>

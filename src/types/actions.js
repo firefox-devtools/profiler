@@ -27,6 +27,7 @@ export type PostfixCallTreeFilter = {
 };
 export type CallTreeFilter = PrefixCallTreeFilter | PostfixCallTreeFilter;
 export type CallTreeFiltersPerThread = { [id: ThreadIndex]: CallTreeFilter[] };
+export type FuncsPerThread = { [id: ThreadIndex]: IndexIntoFuncTable[] };
 export type DataSource =
   | 'none'
   | 'from-file'
@@ -168,7 +169,28 @@ type URLStateAction =
       implementation: ImplementationFilter,
     }
   | { type: 'CHANGE_INVERT_CALLSTACK', invertCallstack: boolean }
-  | { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean };
+  | { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean }
+  | { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean }
+  | {
+      type: 'MERGE_FUNCTION',
+      funcIndex: IndexIntoFuncTable,
+      threadIndex: ThreadIndex,
+    }
+  | {
+      type: 'UNMERGE_FUNCTION',
+      funcIndex: IndexIntoFuncTable,
+      threadIndex: ThreadIndex,
+    }
+  | {
+      type: 'MERGE_SUBTREE',
+      funcIndex: IndexIntoFuncTable,
+      threadIndex: ThreadIndex,
+    }
+  | {
+      type: 'UNMERGE_SUBTREE',
+      funcIndex: IndexIntoFuncTable,
+      threadIndex: ThreadIndex,
+    };
 
 type IconsAction =
   | { type: 'ICON_HAS_LOADED', icon: string }

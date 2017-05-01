@@ -170,41 +170,105 @@ export function defaultThreadOrder(threads: Thread[]): ThreadIndex[] {
   return threadOrder;
 }
 
-export function filterThreadByImplementation(
+/**
+ * There are two filtering strategies for functions. Either an individual stack frame
+ * is hidden, in which case its timing is charged to its caller. The other case
+ * is that the entire subtree needs to be removed. _applyFuncFilters handles both of
+ * these cases, and arbitrarily performs these actions based on what is passed in.
+ * From a higher level, filterThreadByFunc wires together those specific strategies
+ * without caring about the implementation details of how those strategies are
+ * specifically applied to create a new filtered thread.
+ */
+export function filterThreadByFunc(
   thread: Thread,
-  implementation: string
+  implementation: string,
+  chargeToCallerList: IndexIntoFuncTable[],
+  mergeSubtreeList: IndexIntoFuncTable[]
 ): Thread {
+  // Return the existing thread if no filters need to be applied.
+  if (
+    implementation === 'combined' &&
+    chargeToCallerList.length === 0 &&
+    mergeSubtreeList.length === 0
+  ) {
+    return thread;
+  }
+
+  // Prepare the filtering functions.
+  const filterFuncByImplementation = _getFuncImplementationFilter(
+    thread,
+    implementation
+  );
+  const filterOutFrameByFunc = funcIndex =>
+    filterFuncByImplementation(funcIndex) ||
+    chargeToCallerList.includes(funcIndex);
+  const filterOutSubtreeByFunc = funcIndex =>
+    mergeSubtreeList.includes(funcIndex);
+
+  // Apply all the filters to the thread.
+  return _applyFuncFilters(
+    thread,
+    filterOutFrameByFunc,
+    filterOutSubtreeByFunc
+  );
+}
+
+function _getFuncImplementationFilter(
+  thread,
+  implementation: string
+): IndexIntoFuncTable => boolean {
   const { funcTable, stringTable } = thread;
 
   switch (implementation) {
     case 'cpp':
-      return _filterThreadByFunc(thread, funcIndex => {
-        // Return quickly if this is a JS frame.
+      return funcIndex => {
+        // Discard quickly if this is a JS frame.
         if (funcTable.isJS[funcIndex]) {
-          return false;
+          return true;
         }
         // Regular C++ functions are associated with a resource that describes the
         // shared library that these C++ functions were loaded from. Jitcode is not
         // loaded from shared libraries but instead generated at runtime, so Jitcode
-        // frames are not associated with a shared library and thus have no resource
+        // frames are not associated with a shared library and thus have no resource.
+        // These stack frames should be discarded when looking at C++ only.
         const locationString = stringTable.getString(funcTable.name[funcIndex]);
         const isProbablyJitCode =
           funcTable.resource[funcIndex] === -1 &&
           locationString.startsWith('0x');
-        return !isProbablyJitCode;
-      });
+        return isProbablyJitCode;
+      };
     case 'js':
-      return _filterThreadByFunc(
-        thread,
-        funcIndex => funcTable.isJS[funcIndex]
-      );
+      // Discard if not JS.
+      return funcIndex => !funcTable.isJS[funcIndex];
   }
-  return thread;
+  return () => false;
 }
 
-function _filterThreadByFunc(
+/**
+ * Take two arbitrary functions. The first filters out individual stack frames based
+ * on the function. The second merges the entire subtree based on the function.
+ *
+ * filterOutFrameByFunc:
+ *
+ *          0                    0
+ *        /  \      Func 1     / | \
+ *      1     2      ->       3  4  2
+ *     /\     /\                   / \
+ *    3 4    5  6                 5  6
+ *
+ * filterOutSubtreeByFunc:
+ *
+ *          0                    0
+ *        /  \      Func 1       |
+ *      1     2      ->          2
+ *     /\     /\                / \
+ *    3 4    5  6              5  6
+ *
+ */
+function _applyFuncFilters(
   thread: Thread,
-  filter: IndexIntoFuncTable => boolean
+  filterOutFrameByFunc: IndexIntoFuncTable => boolean,
+  filterOutSubtreeByFunc: IndexIntoFuncTable => boolean
 ): Thread {
   return timeCode('filterThread', () => {
     const { stackTable, frameTable, samples } = thread;
@@ -219,6 +283,9 @@ function _filterThreadByFunc(
     const frameCount = frameTable.length;
     const prefixStackAndFrameToStack = new Map(); // prefixNewStack * frameCount + frame => newStackIndex
 
+    /**
+     * Create a new StackTable by applying filterOutFrameByFunc.
+     */
     function convertStack(stackIndex) {
       if (stackIndex === null) {
         return null;
@@ -228,7 +295,11 @@ function _filterThreadByFunc(
         const prefixNewStack = convertStack(stackTable.prefix[stackIndex]);
         const frameIndex = stackTable.frame[stackIndex];
         const funcIndex = frameTable.func[frameIndex];
-        if (filter(funcIndex)) {
+        if (filterOutFrameByFunc(funcIndex)) {
+          // Discard this stack frame, and use the prefix.
+          newStack = prefixNewStack;
+        } else {
+          // Keep this stack frame, and remember the new stack index.
           const prefixStackAndFrameIndex =
             (prefixNewStack === null ? -1 : prefixNewStack) * frameCount +
             frameIndex;
@@ -240,15 +311,32 @@ function _filterThreadByFunc(
           }
           oldStackToNewStack.set(stackIndex, newStack);
           prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
-        } else {
-          newStack = prefixNewStack;
         }
       }
       return newStack;
     }
 
+    /**
+     * Find the correct leaf stack by merging subtrees that match filterOutSubtreeByFunc.
+     */
+    function mergeStack(stackIn: IndexIntoStackTable | null) {
+      let leafStack = stackIn;
+      let stackIndex = stackIn;
+      // Walk up the stack, and find the leaf-most stack.
+      while (stackIndex !== null) {
+        const prefix = newStackTable.prefix[stackIndex];
+        const frameIndex = newStackTable.frame[stackIndex];
+        const funcIndex = frameTable.func[frameIndex];
+        if (filterOutSubtreeByFunc(funcIndex)) {
+          leafStack = prefix;
+        }
+        stackIndex = prefix;
+      }
+      return leafStack;
+    }
+
     const newSamples = Object.assign({}, samples, {
-      stack: samples.stack.map(oldStack => convertStack(oldStack)),
+      stack: samples.stack.map(oldStack => mergeStack(convertStack(oldStack))),
     });
 
     return Object.assign({}, thread, {
