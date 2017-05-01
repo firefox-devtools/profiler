@@ -3,7 +3,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../content/reducers/profile-view';
 import * as TimelineSelectors from '../../content/reducers/timeline-view';
 import * as UrlStateSelectors from '../../content/reducers/url-state';
-import { getProfileWithNamedThreads } from './fixtures/profiles';
+import { getProfileWithNamedThreads, getProfileWithMarkers } from './fixtures/profiles';
 
 import {
   changeCallTreeSearchString,
@@ -337,6 +337,78 @@ describe('thread ordering and toggling', function () {
 
       dispatch(showThread(threads, A));
       assert.deepEqual(getOrderedNames(getState()), ['A', 'D', 'B', 'C']);
+    });
+  });
+});
+
+describe('selectors/getMarkerTiming', function () {
+  function getMarkerTiming(testMarkers) {
+    const profile = getProfileWithMarkers(testMarkers);
+    const { getState } = storeWithProfile(profile);
+    return selectedThreadSelectors.getMarkerTiming(getState());
+  }
+
+  it('has no marker timing if no markers are present', function () {
+    assert.deepEqual(getMarkerTiming([]), []);
+  });
+
+  describe('markers of the same name', function () {
+    it('puts markers of the same time in two rows', function () {
+      // The timing should look like this:
+      // 'Marker Name': *------*
+      //              : *------*
+      const markerTiming = getMarkerTiming([
+        ['Marker Name', 0, {startTime: 0, endTime: 10}],
+        ['Marker Name', 0, {startTime: 0, endTime: 10}],
+      ]);
+      assert.lengthOf(markerTiming, 2);
+    });
+
+    it('puts markers of disjoint times in one row', function () {
+      // The timing should look like this:
+      // 'Marker Name': *------*  *------*
+      const markerTiming = getMarkerTiming([
+        ['Marker Name', 0, {startTime: 0, endTime: 10}],
+        ['Marker Name', 0, {startTime: 15, endTime: 25}],
+      ]);
+      assert.lengthOf(markerTiming, 1);
+    });
+
+    it('puts markers of overlapping times in two rows', function () {
+      // The timing should look like this:
+      // 'Marker Name': *------*
+      //              :     *------*
+      const markerTiming = getMarkerTiming([
+        ['Marker Name', 0, {startTime: 0, endTime: 10}],
+        ['Marker Name', 0, {startTime: 5, endTime: 15}],
+      ]);
+      assert.lengthOf(markerTiming, 2);
+    });
+
+    it('puts markers of inclusive overlapping times in two rows', function () {
+      // The timing should look like this:
+      // 'Marker Name': *--------*
+      //              :   *---*
+      const markerTiming = getMarkerTiming([
+        ['Marker Name', 0, {startTime: 0, endTime: 20}],
+        ['Marker Name', 0, {startTime: 5, endTime: 15}],
+      ]);
+      assert.lengthOf(markerTiming, 2);
+    });
+  });
+
+  describe('markers of the different names', function () {
+    it('puts them in different rows', function () {
+      // The timing should look like this:
+      // 'Marker Name A': *------*
+      // 'Marker Name B':           *------*
+      const markerTiming = getMarkerTiming([
+        ['Marker Name A', 0, {startTime: 0, endTime: 10}],
+        ['Marker Name B', 0, {startTime: 20, endTime: 30}],
+      ]);
+      assert.lengthOf(markerTiming, 2);
+      assert.equal(markerTiming[0].name, 'Marker Name A');
+      assert.equal(markerTiming[1].name, 'Marker Name B');
     });
   });
 });

@@ -1,11 +1,53 @@
 // @flow
-import type {
-  UserTimingMarkerPayload, MarkerPayload,
-} from '../common/types/profile';
-import type {
-  TracingMarker, MarkerTiming, MarkerTimingRows,
-} from '../common/types/profile-derived';
+import type { UserTimingMarkerPayload, MarkerPayload } from '../common/types/profile';
+import type { TracingMarker, MarkerTiming, MarkerTimingRows } from '../common/types/profile-derived';
 
+/**
+ * This function computes the timing information for laying out the markers in the
+ * TimelineMarkers component. Each marker is put into a single row based on its name.
+ *
+ * e.g. An array of 15 markers named either "A", "B", or "C" would be translated into
+ *      something that looks like:
+ *
+ *  [
+ *    {
+ *      name: "A",
+ *      start: [0, 23, 35, 65, 75],
+ *      end: [1, 25, 37, 67, 77],
+ *      index: [0, 2, 5, 6, 8],
+ *      label: ["Aye", "Aye", "Aye", "Aye", "Aye"]
+ *    }
+ *    {
+ *      name: "B",
+ *      start: [1, 28, 39, 69, 70],
+ *      end: [2, 29, 49, 70, 77],
+ *      index: [1, 3, 7, 9, 10],
+ *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"]
+ *    }
+ *    {
+ *      name: "C",
+ *      start: [10, 33, 45, 75, 85],
+ *      end: [11, 35, 47, 77, 87],
+ *      index: [4, 11, 12, 13, 14],
+ *      label: ["Sea", "Sea", "Sea", "Sea", "Sea"]
+ *    }
+ *  ]
+ *
+ * If a marker of a name has timings that overlap in a single row, then it is broken
+ * out into multiple rows, with the overlapping timings going in the next rows. The
+ * getMarkerTiming tests show the behavior of how this works in practice.
+ *
+ * This structure allows the markers to easily be laid out like this example below:
+ *    ____________________________________________
+ *   | GC           | *--*       *--*        *--* |
+ *   |              |                             |
+ *   | Scripts      | *---------------------*     |
+ *   |              |                             |
+ *   | User Timings |    *----------------*       |
+ *   | User Timings |       *------------*        |
+ *   | User Timings |       *--*     *---*        |
+ *   |______________|_____________________________|
+ */
 export function getMarkerTiming(
   tracingMarkers: TracingMarker[]
 ): MarkerTimingRows {
