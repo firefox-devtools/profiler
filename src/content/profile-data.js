@@ -133,11 +133,21 @@ export function defaultThreadOrder(threads: Thread[]) {
 }
 
 export function filterThreadByImplementation(thread: Thread, implementation: string): Thread {
-  const { funcTable } = thread;
+  const { funcTable, stringTable } = thread;
 
   switch (implementation) {
     case 'cpp':
-      return _filterThreadByFunc(thread, funcIndex => !funcTable.isJS[funcIndex]);
+      return _filterThreadByFunc(thread, funcIndex => {
+        // Return quickly if this is a JS frame.
+        if (funcTable.isJS[funcIndex]) {
+          return false;
+        }
+        // Try to filter out jitcode frames, they are named like 0xNNNNNNN where N is some
+        // number, and they don't have any resource associated with them.
+        const locationString = stringTable.getString(funcTable.name[funcIndex]);
+        const isJitcode = funcTable.resource[funcIndex] === -1 && locationString.startsWith('0x');
+        return !isJitcode;
+      });
     case 'js':
       return _filterThreadByFunc(thread, funcIndex => funcTable.isJS[funcIndex]);
   }
