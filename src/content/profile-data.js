@@ -142,11 +142,14 @@ export function filterThreadByImplementation(thread: Thread, implementation: str
         if (funcTable.isJS[funcIndex]) {
           return false;
         }
-        // Try to filter out jitcode frames, they are named like 0xNNNNNNN where N is some
-        // number, and they don't have any resource associated with them.
+        // Regular C++ functions are associated with a resource that describes the
+        // shared library that these C++ functions were loaded from. Jitcode is not
+        // loaded from shared libraries but instead generated at runtime, so Jitcode
+        // frames are not associated with a shared library and thus have no resource
         const locationString = stringTable.getString(funcTable.name[funcIndex]);
-        const isJitcode = funcTable.resource[funcIndex] === -1 && locationString.startsWith('0x');
-        return !isJitcode;
+        const isProbablyJitCode =
+          funcTable.resource[funcIndex] === -1 && locationString.startsWith('0x');
+        return !isProbablyJitCode;
       });
     case 'js':
       return _filterThreadByFunc(thread, funcIndex => funcTable.isJS[funcIndex]);
