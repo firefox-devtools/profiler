@@ -4,7 +4,8 @@
   "description": "perf.html, the gecko profiler UI",
   "main": "src/content/index.js",
   "scripts": {
-    "build": "npm run build:clean && NODE_ENV=development webpack --progress",
+    "build": "npm run build:quiet -- --progress",
+    "build:quiet": "npm run build:clean && NODE_ENV=development webpack",
     "build:clean": "rimraf dist && mkdirp dist && cp res/.htaccess dist/ && cp res/zee-worker.js dist/",
     "build-prod": "npm run build:clean && NODE_ENV=production webpack -p --progress",
     "build-prod-readable": "npm run build:clean && NODE_ENV=production webpack --progress",
@@ -21,6 +22,7 @@
     "start-prod": "npm run build-prod && npm run serve-static",
     "start-prod-readable": "npm run build-prod-readable && npm run serve-static",
     "test": "npm run build && npm run test-all",
+    "test:quiet": "npm run build:quiet && npm run test-all",
     "test-all": "NODE_ENV=test nyc mocha --compilers js:babel-core/register 'src/test/**/*.js'",
     "test-file": "NODE_ENV=test mocha --compilers js:babel-core/register",
     "test-report": "nyc report --reporter=text-lcov > coverage.lcov"
