@@ -300,6 +300,7 @@ export const getProfileView = (state: State): ProfileViewState => state.profileV
  * Profile View Options
  */
 export const getProfileViewOptions = (state: State) => getProfileView(state).viewOptions;
+export const getProfileRootRange = (state: State) => getProfileViewOptions(state).rootRange;
 
 export const getScrollToSelectionGeneration = createSelector(
   getProfileViewOptions,

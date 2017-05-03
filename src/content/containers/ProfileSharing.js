@@ -1,7 +1,7 @@
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { getProfile, getProfileViewOptions } from '../reducers/profile-view';
+import { getProfile, getProfileRootRange } from '../reducers/profile-view';
 import { getDataSource, getHash, getURLPredictor } from '../reducers/url-state';
 import actions from '../actions';
 import { compress } from '../gz';
@@ -240,8 +240,8 @@ class ProfileDownloadButton extends PureComponent {
   }
 
   _onPanelOpen() {
-    const { profile, viewOptions } = this.props;
-    const profileDate = new Date(profile.meta.startTime + viewOptions.rootRange.start);
+    const { profile, rootRange } = this.props;
+    const profileDate = new Date(profile.meta.startTime + rootRange.start);
     const serializedProfile = serializeProfile(profile);
     const blob = new Blob([serializedProfile], { type: 'application/octet-binary' });
     const blobURL = URL.createObjectURL(blob);
@@ -300,23 +300,23 @@ class ProfileDownloadButton extends PureComponent {
 
 ProfileDownloadButton.propTypes = {
   profile: PropTypes.object,
-  viewOptions: PropTypes.object,
+  rootRange: PropTypes.object,
 };
 
-const ProfileSharing = ({ profile, viewOptions, dataSource, hash, profilePublished, predictURL }) => (
+const ProfileSharing = ({ profile, rootRange, dataSource, hash, profilePublished, predictURL }) => (
   <div className='profileSharing'>
     <ProfileSharingCompositeButton profile={profile}
                                    dataSource={dataSource}
                                    hash={hash}
                                    onProfilePublished={profilePublished}
                                    predictURL={predictURL}/>
-    <ProfileDownloadButton profile={profile} viewOptions={viewOptions}/>
+    <ProfileDownloadButton profile={profile} rootRange={rootRange}/>
   </div>
 );
 
 ProfileSharing.propTypes = {
   profile: PropTypes.object,
-  viewOptions: PropTypes.object,
+  rootRange: PropTypes.object,
   dataSource: PropTypes.string.isRequired,
   hash: PropTypes.string,
   profilePublished: PropTypes.func.isRequired,
@@ -325,7 +325,7 @@ ProfileSharing.propTypes = {
 
 export default connect(state => ({
   profile: getProfile(state),
-  viewOptions: getProfileViewOptions(state),
+  rootRange: getProfileRootRange(state),
   dataSource: getDataSource(state),
   hash: getHash(state),
   predictURL: getURLPredictor(state),
