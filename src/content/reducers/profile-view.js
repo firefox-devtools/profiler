@@ -19,7 +19,12 @@ import type {
   SamplesTable,
   TaskTracer,
 } from '../../common/types/profile';
-import type { TracingMarker, FuncStackInfo, IndexIntoFuncStackTable } from '../../common/types/profile-derived';
+import type {
+  TracingMarker,
+  FuncStackInfo,
+  IndexIntoFuncStackTable,
+  MarkerTimingRows,
+} from '../../common/types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../../common/types/units';
 import type { Action, CallTreeFilter, ProfileSelection } from '../actions/types';
 import type {
@@ -358,7 +363,7 @@ export type SelectorsForThread = {
   getRangeFilteredThread: State => Thread,
   getJankInstances: State => TracingMarker[],
   getTracingMarkers: State => TracingMarker[],
-  getMarkerTiming: State => MarkerTiming.MarkerTimingRows,
+  getMarkerTiming: State => MarkerTimingRows,
   getRangeSelectionFilteredTracingMarkers: State => TracingMarker[],
   getFilteredThread: State => Thread,
   getRangeSelectionFilteredThread: State => Thread,

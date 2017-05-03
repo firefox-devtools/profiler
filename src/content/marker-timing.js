@@ -1,6 +1,14 @@
-import type { TracingMarker, MarkerTiming, MarkerTimingRows } from '../common/types/profile-derived';
+// @flow
+import type {
+  UserTimingMarkerPayload, MarkerPayload,
+} from '../common/types/profile';
+import type {
+  TracingMarker, MarkerTiming, MarkerTimingRows,
+} from '../common/types/profile-derived';
 
-export function getMarkerTiming(tracingMarkers: TracingMarker[]): MarkerTimingRows {
+export function getMarkerTiming(
+  tracingMarkers: TracingMarker[]
+): MarkerTimingRows {
   // Each marker type will have it's own timing information, later collapse these into
   // a single array.
   const markerTimingsMap: Map<string, MarkerTiming[]> = new Map();
@@ -23,6 +31,7 @@ export function getMarkerTiming(tracingMarkers: TracingMarker[]): MarkerTimingRo
           start: [],
           end: [],
           index: [],
+          label: [],
           name: marker.name,
           length: 0,
         };
@@ -44,6 +53,7 @@ export function getMarkerTiming(tracingMarkers: TracingMarker[]): MarkerTimingRo
       // An empty spot was found, fill the values in the table.
       markerTimingsRow.start.push(marker.start);
       markerTimingsRow.end.push(marker.start + marker.dur);
+      markerTimingsRow.label.push(computeMarkerLabel(marker.data));
       markerTimingsRow.index.push(tracingMarkerIndex);
       markerTimingsRow.length++;
       break;
@@ -56,4 +66,17 @@ export function getMarkerTiming(tracingMarkers: TracingMarker[]): MarkerTimingRo
     markerTimingRows = markerTimingRows.concat(value);
   }
   return markerTimingRows;
+}
+
+function computeMarkerLabel(data: MarkerPayload): string {
+  // Satisfy flow's type checker.
+  if (data !== null && typeof data === 'object') {
+    // Handle different marker payloads.
+    switch (data.type) {
+      case 'UserTiming':
+        return (data: UserTimingMarkerPayload).name;
+    }
+  }
+
+  return '';
 }

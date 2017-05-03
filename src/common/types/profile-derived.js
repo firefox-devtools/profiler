@@ -1,5 +1,6 @@
 // @flow
 import type { Milliseconds } from './units';
+import type { MarkerPayload } from './profile';
 
 export type IndexIntoFuncStackTable = number;
 
@@ -20,7 +21,10 @@ export type TracingMarker = {
   dur: Milliseconds,
   name: string,
   title: string|null,
+  data: MarkerPayload,
 };
+
+export type IndexIntoTracingMarkers = number;
 
 export type Node = {
   totalTime: string,
@@ -39,7 +43,8 @@ export type MarkerTiming = {
   start: number[],
   // End time in milliseconds.
   end: number[],
-  index: number[],
+  index: IndexIntoTracingMarkers[],
+  label: string[],
   name: string,
   length: number,
 };

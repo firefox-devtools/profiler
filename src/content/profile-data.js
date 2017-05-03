@@ -698,6 +698,7 @@ export function getJankInstances(samples: SamplesTable, processType: string, thr
           dur: lastResponsiveness,
           title: `${lastResponsiveness.toFixed(2)}ms event processing delay on ${processType} thread`,
           name: 'Jank',
+          data: null,
         });
       }
     }
@@ -710,6 +711,7 @@ export function getJankInstances(samples: SamplesTable, processType: string, thr
       dur: lastResponsiveness,
       title: `${lastResponsiveness.toFixed(2)}ms event processing delay on ${processType} thread`,
       name: 'Jank',
+      data: null,
     });
   }
   return jankInstances;
@@ -733,6 +735,7 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
           name: stringTable.getString(nameStringIndex),
           dur: 0,
           title: null,
+          data,
         });
       } else if (data.interval === 'end') {
         const marker = openMarkers.get(nameStringIndex);
@@ -757,6 +760,7 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
             start: startTime,
             dur: duration,
             name,
+            data,
             title: `${name} for ${duration.toFixed(2)}ms`,
           });
         }

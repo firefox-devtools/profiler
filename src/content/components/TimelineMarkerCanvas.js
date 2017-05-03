@@ -2,6 +2,7 @@
 import React, { PureComponent } from 'react';
 import withTimelineViewport from './TimelineViewport';
 import TimelineCanvas from './TimelineCanvas';
+import TextMeasurement from '../../common/text-measurement';
 
 import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../common/types/units';
 import type { TracingMarker, MarkerTimingRows, IndexIntoMarkerTiming } from '../../common/types/profile-derived';
@@ -27,12 +28,14 @@ const ROW_HEIGHT = 16;
 const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
+const TEXT_OFFSET_START = 3;
 
 class TimelineMarkerCanvas extends PureComponent {
 
   _requestedAnimationFrame: boolean
   _devicePixelRatio: number
   _ctx: null|CanvasRenderingContext2D
+  _textMeasurement: null | TextMeasurement
 
   props: Props
 
@@ -73,6 +76,13 @@ class TimelineMarkerCanvas extends PureComponent {
       viewportRight, viewportTop,
     } = this.props;
 
+    // Ensure the text measurement tool is created, since this is the first time
+    // this class has access to a ctx.
+    if (!this._textMeasurement) {
+      this._textMeasurement = new TextMeasurement(ctx);
+    }
+    const textMeasurement = this._textMeasurement;
+
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange = viewportRight - viewportLeft;
 
@@ -106,11 +116,27 @@ class TimelineMarkerCanvas extends PureComponent {
             continue;
           }
 
-          const markerIndex = markerTiming.index[i];
-          ctx.fillStyle = hoveredItem === markerIndex ? 'Highlight' : '#8296cb';
+          const tracingMarkerIndex = markerTiming.index[i];
+          const isHovered = hoveredItem === tracingMarkerIndex;
+          ctx.fillStyle = isHovered ? 'Highlight' : '#8296cb';
 
           if (w >= h) {
             this.drawRoundedRect(ctx, x, y + 1, w, h - 1, 1);
+
+            const text = markerTiming.label[i];
+            // Draw the text label
+            // TODO - L10N RTL.
+            // Constrain the x coordinate to the leftmost area.
+            const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
+            const w2: CssPixels = Math.max(0, w - (x2 - x));
+
+            if (w2 > textMeasurement.minWidth) {
+              const fittedText = textMeasurement.getFittedText(text, w2);
+              if (fittedText) {
+                ctx.fillStyle = isHovered ? 'HighlightText' : '#ffffff';
+                ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
+              }
+            }
           } else {
             ctx.beginPath();
             ctx.arc(
@@ -149,10 +175,13 @@ class TimelineMarkerCanvas extends PureComponent {
     }
 
     // Draw the text
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = '#000000';
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       // Get the timing information for a row of stack frames.
       const { name } = markerTimingRows[rowIndex];
+      if (rowIndex > 0 && name === markerTimingRows[rowIndex - 1].name) {
+        continue;
+      }
       const y = rowIndex * rowHeight - viewportTop;
       ctx.fillText(name, 5, y + TEXT_OFFSET_TOP);
     }
