@@ -1,8 +1,8 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import actions from '../actions';
 
-class ProfileUploadField extends Component {
+class ProfileUploadField extends PureComponent {
   constructor(props) {
     super(props);
     this._onInputChange = this._onInputChange.bind(this);

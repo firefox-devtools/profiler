@@ -1,9 +1,9 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { selectedThreadSelectors } from '../reducers/profile-view';
 import actions from '../actions';
 
-class ProfileLogView extends Component {
+class ProfileLogView extends PureComponent {
   render() {
     const { thread } = this.props;
     const { markers, stringTable } = thread;

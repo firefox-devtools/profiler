@@ -1,9 +1,9 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import clamp from 'clamp';
 import Draggable from './Draggable';
 
-export default class SelectionScubberOverlay extends Component {
+export default class SelectionScubberOverlay extends PureComponent {
   constructor(props) {
     super(props);
 

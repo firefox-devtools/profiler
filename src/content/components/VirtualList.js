@@ -1,12 +1,8 @@
-import React, { Component, PropTypes } from 'react';
-import shallowCompare from 'react-addons-shallow-compare';
+import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import range from 'array-range';
 
-class VirtualListRow extends Component {
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
-  }
+class VirtualListRow extends PureComponent {
 
   render() {
     const { renderItem, item, index, columnIndex } = this.props;
@@ -22,11 +18,7 @@ VirtualListRow.propTypes = {
   isSpecial: PropTypes.bool,
 };
 
-class VirtualListInnerChunk extends Component {
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
-  }
-
+class VirtualListInnerChunk extends PureComponent {
   render() {
     const { className, renderItem, items, specialItems, visibleRangeStart, visibleRangeEnd, columnIndex } = this.props;
 
@@ -61,14 +53,10 @@ VirtualListInnerChunk.propTypes = {
   columnIndex: PropTypes.number.isRequired,
 };
 
-class VirtualListInner extends Component {
+class VirtualListInner extends PureComponent {
   constructor(props) {
     super(props);
     this._containerCreated = e => { this._container = e; };
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
   }
 
   getBoundingClientRect() {
@@ -126,7 +114,7 @@ VirtualListInner.propTypes = {
   columnIndex: PropTypes.number.isRequired,
 };
 
-class VirtualList extends Component {
+class VirtualList extends PureComponent {
 
   constructor(props) {
     super(props);
@@ -146,10 +134,6 @@ class VirtualList extends Component {
   componentWillUnmount() {
     document.removeEventListener('copy', this._onCopy, false);
     this._container.removeEventListener('scroll', this._onScroll);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
   }
 
   _onScroll() {

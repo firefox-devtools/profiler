@@ -1,8 +1,8 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import actions from '../actions';
 
-class Initializing extends Component {
+class Initializing extends PureComponent {
   render() {
     const {
       className, profilerUrl,

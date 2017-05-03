@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import actions from '../actions';
 import { getImplementationFilter, getInvertCallstack, getSearchString } from '../reducers/url-state';
@@ -6,7 +6,7 @@ import IdleSearchField from '../components/IdleSearchField';
 
 import './ProfileCallTreeSettings.css';
 
-class ProfileCallTreeSettings extends Component {
+class ProfileCallTreeSettings extends PureComponent {
   constructor(props) {
     super(props);
     this._onImplementationFilterChange = this._onImplementationFilterChange.bind(this);

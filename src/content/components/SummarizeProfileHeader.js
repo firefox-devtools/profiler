@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 
 const LINE_GRAPH_TITLE = 'The line graph represents the number of samples that were in ' +
   'a given category over time. In order to present a high-level summary, the samples ' +
@@ -11,7 +11,7 @@ const PERCENT_TIME_TITLE = 'The percentage of time represents the percentage of 
   'many samples of a given category were observed over the entire course of the ' +
   'recording.';
 
-class SummarizeProfileHeader extends Component {
+class SummarizeProfileHeader extends PureComponent {
   render() {
     const { threadName, processType } = this.props;
     return (

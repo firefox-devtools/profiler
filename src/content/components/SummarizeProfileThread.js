@@ -1,7 +1,7 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import SummarizeLineGraph from './SummarizeLineGraph';
 
-class SummarizeProfileThread extends Component {
+class SummarizeProfileThread extends PureComponent {
   render() {
     const {summaryTable, rollingSummary, isExpanded, index, expandLength} = this.props;
     if (index > expandLength && !isExpanded) {

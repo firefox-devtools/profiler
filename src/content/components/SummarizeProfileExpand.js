@@ -1,7 +1,7 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import SummarizeLineGraph from './SummarizeLineGraph';
 
-class SummarizeProfileExpand extends Component {
+class SummarizeProfileExpand extends PureComponent {
   render() {
     const {summary, threadIndex, isExpanded, expand, collapse, expandLength} = this.props;
     // Only show the expand/collapse button when it is warranted.

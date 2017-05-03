@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import actions from '../actions';
 import { getHidePlatformDetails, getInvertCallstack, getSearchString } from '../reducers/url-state';
@@ -6,7 +6,7 @@ import IdleSearchField from '../components/IdleSearchField';
 
 import './FlameChartSettings.css';
 
-class FlameChartSettings extends Component {
+class FlameChartSettings extends PureComponent {
   constructor(props) {
     super(props);
     this._onHidePlatformDetailsClick = this._onHidePlatformDetailsClick.bind(this);
