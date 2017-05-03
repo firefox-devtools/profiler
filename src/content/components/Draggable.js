@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 
 /**
  * A component that reports mouse dragging (left mouse button only) in its
@@ -8,7 +8,7 @@ import React, { Component, PropTypes } from 'react';
  * x and y deltas compared to the mouse position at mousedown.
  * During the drag, the additional className 'dragging' is set on the element.
  */
-export default class Draggable extends Component {
+export default class Draggable extends PureComponent {
 
   constructor(props) {
     super(props);

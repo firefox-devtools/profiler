@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TreeView from '../components/TreeView';
 import { getZeroAt, selectedThreadSelectors } from '../reducers/profile-view';
@@ -79,7 +79,7 @@ class MarkerTree {
   }
 }
 
-class ProfileMarkersView extends Component {
+class ProfileMarkersView extends PureComponent {
   constructor(props) {
     super(props);
     this._fixedColumns = [

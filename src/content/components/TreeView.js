@@ -1,5 +1,4 @@
-import React, { Component, PropTypes } from 'react';
-import shallowCompare from 'react-addons-shallow-compare';
+import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import VirtualList from './VirtualList';
 import { BackgroundImageStyleDef } from './StyleDef';
@@ -51,15 +50,11 @@ function reactStringWithHighlightedSubstrings(string, substring, className) {
   return result;
 }
 
-class TreeViewRowFixedColumns extends Component {
+class TreeViewRowFixedColumns extends PureComponent {
 
   constructor(props) {
     super(props);
     this._onClick = this._onClick.bind(this);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
   }
 
   _onClick(event) {
@@ -105,15 +100,11 @@ TreeViewRowFixedColumns.propTypes = {
   highlightString: PropTypes.string,
 };
 
-class TreeViewRowScrolledColumns extends Component {
+class TreeViewRowScrolledColumns extends PureComponent {
 
   constructor(props) {
     super(props);
     this._onClick = this._onClick.bind(this);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
   }
 
   _onClick(event) {
@@ -185,7 +176,7 @@ TreeViewRowScrolledColumns.propTypes = {
   highlightString: PropTypes.string,
 };
 
-class TreeView extends Component {
+class TreeView extends PureComponent {
 
   constructor(props) {
     super(props);
@@ -206,10 +197,6 @@ class TreeView extends Component {
       this.refs.list.scrollItemIntoView(rowIndex, depth * 10);
     }
 
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
   }
 
   componentWillReceiveProps(nextProps) {

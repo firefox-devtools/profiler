@@ -1,9 +1,8 @@
-import React, { Component, PropTypes } from 'react';
-import shallowCompare from 'react-addons-shallow-compare';
+import React, { PureComponent, PropTypes } from 'react';
 
 import './ThreadMarkerOverlay.css';
 
-class ThreadMarkerOverlay extends Component {
+class ThreadMarkerOverlay extends PureComponent {
 
   constructor(props) {
     super(props);
@@ -15,10 +14,6 @@ class ThreadMarkerOverlay extends Component {
       return;
     }
     this.props.onSelectMarker(+e.target.dataset.index);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
   }
 
   render() {

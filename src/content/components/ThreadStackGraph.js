@@ -1,10 +1,9 @@
-import React, { Component, PropTypes } from 'react';
-import shallowCompare from 'react-addons-shallow-compare';
+import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import { timeCode } from '../../common/time-code';
 import { getSampleFuncStacks } from '../profile-data';
 
-class ThreadStackGraph extends Component {
+class ThreadStackGraph extends PureComponent {
 
   constructor(props) {
     super(props);
@@ -26,10 +25,6 @@ class ThreadStackGraph extends Component {
         }
       });
     }
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
   }
 
   componentDidMount() {

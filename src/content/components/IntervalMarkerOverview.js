@@ -1,6 +1,5 @@
 // @flow
 import React, { PureComponent } from 'react';
-import shallowCompare from 'react-addons-shallow-compare';
 import classNames from 'classnames';
 import { timeCode } from '../../common/time-code';
 import { withSize } from '../with-size';
@@ -135,10 +134,6 @@ class IntervalMarkerOverview extends PureComponent {
     this.setState({
       hoveredItem: null,
     });
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return shallowCompare(this, nextProps, nextState);
   }
 
   render() {

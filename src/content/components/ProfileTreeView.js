@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TreeView from './TreeView';
 import NodeIcon from './NodeIcon';
@@ -11,7 +11,7 @@ import { getIconsWithClassNames } from '../reducers/icons';
 
 import actions from '../actions';
 
-class ProfileTreeView extends Component {
+class ProfileTreeView extends PureComponent {
   constructor(props) {
     super(props);
     this._fixedColumns = [

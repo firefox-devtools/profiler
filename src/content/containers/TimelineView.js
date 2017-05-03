@@ -1,5 +1,5 @@
 // @flow
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { getThreads, getThreadOrder } from '../reducers/profile-view';
 import actions from '../actions';
@@ -19,7 +19,7 @@ type Props = {
   changeThreadOrder: any => any,
 };
 
-class TimlineViewTimelinesImpl extends Component {
+class TimlineViewTimelinesImpl extends PureComponent {
 
   props: Props
 
@@ -63,7 +63,7 @@ class TimlineViewTimelinesImpl extends Component {
 
 const TimelineViewTimelines = withSize(TimlineViewTimelinesImpl);
 
-class TimelineView extends Component {
+class TimelineView extends PureComponent {
 
   props: {
     threads: Thread[],

@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import ThreadStackGraph from './ThreadStackGraph';
 import { selectorsForThread } from '../reducers/profile-view';
@@ -7,7 +7,7 @@ import { getSampleIndexClosestToTime, getStackAsFuncArray } from '../profile-dat
 import actions from '../actions';
 import { ContextMenuTrigger } from 'react-contextmenu';
 
-class ProfileThreadHeaderBar extends Component {
+class ProfileThreadHeaderBar extends PureComponent {
 
   constructor(props) {
     super(props);
