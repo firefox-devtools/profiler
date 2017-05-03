@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash.clonedeep';
 import exampleProfile from './example-profile';
 
 const thread = {
@@ -64,13 +65,15 @@ const thread = {
   ],
 };
 
-const profile = Object.assign({}, exampleProfile, {
+const profile = {
+  meta: cloneDeep(exampleProfile.meta),
+  libs: cloneDeep(exampleProfile),
   threads: [
     Object.assign({ name: 'GeckoMain'}, thread),
     Object.assign({ name: 'Compositor'}, thread),
     Object.assign({ name: 'GeckoMain'}, thread),
   ],
   processes: [],
-});
+};
 
 export default profile;
