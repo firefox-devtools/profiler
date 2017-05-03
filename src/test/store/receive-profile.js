@@ -1,12 +1,12 @@
 import { assert } from 'chai';
 import sinon from 'sinon';
-import { blankStore } from './fixtures/stores';
-import * as ProfileViewSelectors from '../../reducers/profile-view';
-import { getView } from '../../reducers/app';
-import { receiveProfileFromAddon, retrieveProfileFromWeb } from '../receive-profile';
+import { blankStore } from '../fixtures/stores';
+import * as ProfileViewSelectors from '../../content/reducers/profile-view';
+import { getView } from '../../content/reducers/app';
+import { receiveProfileFromAddon, retrieveProfileFromWeb } from '../../content/actions/receive-profile';
 
-import preprocessedProfile from '../../../common/test/fixtures/profile-2d-canvas.json';
-import exampleProfile from '../../../../test/example-profile';
+import preprocessedProfile from '../fixtures/profiles/profile-2d-canvas.json';
+import exampleProfile from '../fixtures/profiles/example-profile';
 
 describe('actions/receive-profile', function () {
   describe('receiveProfileFromAddon', function () {
@@ -22,8 +22,6 @@ describe('actions/receive-profile', function () {
   });
 
   describe('retrieveProfileFromWeb', function () {
-    let sandbox;
-
     const fetch404Response = { ok: false, status: 404 };
     const fetch500Response = { ok: false, status: 500 };
     const fetch200Response = {
@@ -32,19 +30,40 @@ describe('actions/receive-profile', function () {
     };
 
     beforeEach(function () {
-      sandbox = sinon.sandbox.create();
-      sandbox.useFakeTimers();
-
+      // The stub makes it easy to return different values for different
+      // arguments. Here we define the default return value because there is no
+      // argument specified.
       global.fetch = sinon.stub();
       global.fetch.resolves(fetch404Response);
+
+      sinon.stub(global, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
     });
 
     afterEach(function () {
-      sandbox.restore();
-      sandbox = null;
-
       delete global.fetch;
+      global.setTimeout.restore();
     });
+
+    /**
+     * This function allows to observe all state changes in a Redux store while
+     * something's going on.
+     * @param {ReduxStore} store
+     * @param {() => Promise<any>} func Process that will be started while
+     * observing the store.
+     * @returns {Promise<State[]>} All states that happened while waiting for
+     * the end of func.
+     */
+    async function observeStoreStateChanges(store, func) {
+      const states = [];
+      const unsubscribe = store.subscribe(() => {
+        states.push(store.getState());
+      });
+
+      await func();
+
+      unsubscribe();
+      return states;
+    }
 
     it('can retrieve a profile from the web and save it to state', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
@@ -64,22 +83,25 @@ describe('actions/receive-profile', function () {
     it('requests several times in case of 404', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://profile-store.commondatastorage.googleapis.com/${hash}`;
-      global.fetch.withArgs(expectedUrl).onCall(1).resolves(fetch200Response);
+      // The first call will still be a 404 -- remember, it's the default return value.
+      global.fetch.withArgs(expectedUrl).onSecondCall().resolves(fetch200Response);
 
       const store = blankStore();
-      const dispatchPromise = store.dispatch(retrieveProfileFromWeb(hash));
-      await global.fetch.lastCall.returnValue;
+      const views = (await observeStoreStateChanges(
+        store,
+        () => store.dispatch(retrieveProfileFromWeb(hash))
+      )).map(state => getView(state));
 
       assert.deepEqual(
-        getView(store.getState()),
-        { phase: 'INITIALIZING', additionalData: { attempt: { count: 1, total: 11 }}}
+        views,
+        [
+          { phase: 'INITIALIZING' },
+          { phase: 'INITIALIZING', additionalData: { attempt: { count: 1, total: 11 }}},
+          { phase: 'PROFILE' },
+        ]
       );
 
-      sandbox.clock.tick(1000);
-      await dispatchPromise;
-
       const state = store.getState();
-      assert.deepEqual(getView(state), { phase: 'PROFILE' });
       assert.deepEqual(ProfileViewSelectors.getDisplayRange(state), { start: 0, end: 1007 });
       assert.deepEqual(ProfileViewSelectors.getThreadOrder(state), [0, 2, 1]); // 1 is last because it's the Compositor thread
       assert.lengthOf(ProfileViewSelectors.getProfile(state).threads, 3); // not empty
@@ -88,22 +110,21 @@ describe('actions/receive-profile', function () {
     it('fails in case the profile cannot be found after several tries', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const store = blankStore();
-      const dispatchPromise = store.dispatch(retrieveProfileFromWeb(hash));
-      for (let i = 1; i < 11; i++) {
-        await global.fetch.lastCall.returnValue;
+      const views = (await observeStoreStateChanges(
+        store,
+        () => store.dispatch(retrieveProfileFromWeb(hash))
+      )).map(state => getView(state));
 
-        assert.deepEqual(
-          getView(store.getState()),
-          { phase: 'INITIALIZING', additionalData: { attempt: { count: i, total: 11 }}}
-        );
+      const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-        sandbox.clock.tick(1000);
-        await Promise.resolve(); // hack because the code uses a promise to wait 1 second
-      }
-
-      await dispatchPromise;
-
-      assert.deepEqual(getView(store.getState()), { phase: 'FATAL_ERROR' });
+      assert.deepEqual(
+        views,
+        [
+          { phase: 'INITIALIZING' },
+          ...steps.map(step => ({ phase: 'INITIALIZING', additionalData: { attempt: { count: step, total: 11 }}})),
+          { phase: 'FATAL_ERROR' },
+        ]
+      );
     });
 
     it('fails in case the fetch returns a server error', async function () {

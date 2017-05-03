@@ -256,16 +256,14 @@ type FetchProfileArgs = {
   url: string,
   onTemporaryError: TemporaryError => void,
 };
+
 /**
- * Tries to fetch a profile on URL url. If the profile is not found,
- * onTemporaryError is called with an appropriate error, we wait 1 second, and
- * then tries again. If we still can't find the profile after 11 tries, we throw
- * a permanent error.
- * @param {string} url URL to fetch
- * @param {Function} onTemporaryError callback that will be called for
- * tempoerary errors.
- * @returns {Promise.<String>} Resolves to the text profile if successful,
- * rejects with an error for fatal errors.
+ * Tries to fetch a profile on `url`. If the profile is not found,
+ * `onTemporaryError` is called with an appropriate error, we wait 1 second, and
+ * then tries again. If we still can't find the profile after 11 tries, the
+ * returned promise is rejected with a fatal error.
+ * If we can retrieve the profile properly, the returned promise is resolved
+ * with the JSON.parsed profile.
  */
 async function _fetchProfile({ url, onTemporaryError }: FetchProfileArgs) {
   const MAX_WAIT_SECONDS = 10;
@@ -273,11 +271,13 @@ async function _fetchProfile({ url, onTemporaryError }: FetchProfileArgs) {
 
   while (true) {
     const response = await fetch(url);
+    // Case 1: successful answer.
     if (response.ok) {
-      const text = await response.json();
-      return text;
+      const json = await response.json();
+      return json;
     }
 
+    // case 2: unrecoverable error.
     if (response.status !== 404) {
       throw new Error(oneLine`
         Could not fetch the profile on remote server.
@@ -285,7 +285,11 @@ async function _fetchProfile({ url, onTemporaryError }: FetchProfileArgs) {
       `);
     }
 
+    // case 3: 404 errors can be transient while a profile is uploaded.
+
     if (i++ === MAX_WAIT_SECONDS) {
+      // In the last iteration we don't send a temporary error because we'll
+      // throw an error right after the while loop.
       break;
     }
 
