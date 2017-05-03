@@ -98,6 +98,28 @@ export type ProfilerMarkerTracing = {
 );
 
 /**
+ * The payload for the UserTimings API. These are added through performance.measure()
+ * and performance.mark(). https://developer.mozilla.org/en-US/docs/Web/API/Performance
+ */
+export type UserTimingMarkerPayload = {
+  type: "UserTiming",
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  name: string,
+  entryType: "measure" | "mark",
+}
+
+/**
+ * The union of all the different marker payloads that perf.html knows about, this is
+ * not guaranteed to be all the payloads that we actually get from the profiler.
+ */
+export type MarkerPayload =
+  GPUMarkerPayload |
+  ProfilerMarkerTracing |
+  UserTimingMarkerPayload |
+  null;
+
+/**
  * Markers represent arbitrary events that happen within the browser. They have a
  * name, time, and potentially a JSON data payload. These can come from all over the
  * system. For instance Paint markers instrument the rendering and layout process.
@@ -105,13 +127,7 @@ export type ProfilerMarkerTracing = {
  * perf.html to instrument their code.
  */
 export type MarkersTable = {
-  data: (
-    GPUMarkerPayload |
-    ProfilerMarkerTracing |
-    Object |
-    null |
-    void
-  )[],
+  data: MarkerPayload[],
   name: IndexIntoStringTable[],
   time: number[],
   length: number,
