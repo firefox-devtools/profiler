@@ -2,6 +2,9 @@
 import type { UserTimingMarkerPayload, MarkerPayload } from '../common/types/profile';
 import type { TracingMarker, MarkerTiming, MarkerTimingRows } from '../common/types/profile-derived';
 
+// Arbitrarily set an upper limit for adding marker depths, avoiding an infinite loop.
+const MAX_STACKING_DEPTH = 300;
+
 /**
  * This function computes the timing information for laying out the markers in the
  * TimelineMarkers component. Each marker is put into a single row based on its name.
@@ -65,7 +68,7 @@ export function getMarkerTiming(
     }
 
     // Place the marker in the closest row that is empty.
-    markerTimingsLoop: for (let i = 0; true; i++) {
+    for (let i = 0; i < MAX_STACKING_DEPTH; i++) {
       // Get or create a row for marker timings.
       let markerTimingsRow = markerTimingsByName[i];
       if (!markerTimingsRow) {
@@ -80,25 +83,30 @@ export function getMarkerTiming(
         markerTimingsByName.push(markerTimingsRow);
       }
 
+      let continueSearching = false;
+
       // Search for a spot not already taken up by another marker of this type.
-      otherMarkerLoop: for (let j = 0; j < markerTimingsRow.length; j++) {
+      for (let j = 0; j < markerTimingsRow.length; j++) {
         const otherStart = markerTimingsRow.start[j];
         const otherEnd = markerTimingsRow.end[j];
         if (otherStart > marker.start + marker.dur) {
-          break otherMarkerLoop;
+          break;
         }
         if (otherEnd > marker.start) {
-          continue markerTimingsLoop;
+          continueSearching = true;
+          break;
         }
       }
 
-      // An empty spot was found, fill the values in the table.
-      markerTimingsRow.start.push(marker.start);
-      markerTimingsRow.end.push(marker.start + marker.dur);
-      markerTimingsRow.label.push(computeMarkerLabel(marker.data));
-      markerTimingsRow.index.push(tracingMarkerIndex);
-      markerTimingsRow.length++;
-      break;
+      if (!continueSearching) {
+        // An empty spot was found, fill the values in the table.
+        markerTimingsRow.start.push(marker.start);
+        markerTimingsRow.end.push(marker.start + marker.dur);
+        markerTimingsRow.label.push(computeMarkerLabel(marker.data));
+        markerTimingsRow.index.push(tracingMarkerIndex);
+        markerTimingsRow.length++;
+        break;
+      }
     }
   }
 
