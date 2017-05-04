@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { assert } from 'chai';
 import { storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../content/reducers/profile-view';
 import * as TimelineSelectors from '../../content/reducers/timeline-view';
@@ -49,7 +48,7 @@ describe('selectors/getStackTimingByDepthForFlameChart', function () {
   it('computes unfiltered stack timing by depth', function () {
     const store = storeWithProfile();
     const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(store.getState());
-    assert.deepEqual(stackTimingByDepth, [
+    expect(stackTimingByDepth).toEqual([
       { start: [0], end: [91], stack: [0], length: 1 },
       { start: [0, 50], end: [40, 91], stack: [1, 1], length: 2 },
       { start: [10, 30, 60], end: [30, 40, 91], stack: [2, 3, 4], length: 3 },
@@ -65,7 +64,7 @@ describe('selectors/getStackTimingByDepthForFlameChart', function () {
     store.dispatch(changeHidePlatformDetails(true));
     const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(store.getState());
 
-    assert.deepEqual(stackTimingByDepth, [
+    expect(stackTimingByDepth).toEqual([
       { start: [0], end: [91], stack: [0], length: 1 },
       { start: [60], end: [91], stack: [1], length: 1 },
       { start: [70], end: [90], stack: [2], length: 1 },
@@ -78,7 +77,7 @@ describe('selectors/getStackTimingByDepthForFlameChart', function () {
     const store = storeWithProfile();
     store.dispatch(changeCallTreeSearchString('javascript'));
     const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(store.getState());
-    assert.deepEqual(stackTimingByDepth, [
+    expect(stackTimingByDepth).toEqual([
       { start: [60], end: [91], stack: [0], length: 1 },
       { start: [60], end: [91], stack: [1], length: 1 },
       { start: [60], end: [91], stack: [4], length: 1 },
@@ -109,7 +108,7 @@ describe('selectors/getStackTimingByDepthForFlameChart', function () {
     const store = storeWithProfile();
     store.dispatch(changeInvertCallstack(true));
     const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(store.getState());
-    assert.deepEqual(stackTimingByDepth, [
+    expect(stackTimingByDepth).toEqual([
       {
         start: [0, 10, 30, 40, 50, 60, 70, 80, 90],
         end: [10, 30, 40, 50, 60, 70, 80, 90, 91],
@@ -145,20 +144,20 @@ describe('selectors/getFuncStackMaxDepthForFlameChart', function () {
   it('calculates the max func depth and observes of platform-detail filters', function () {
     const store = storeWithProfile();
     const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
-    assert.equal(allSamplesMaxDepth, 6);
+    expect(allSamplesMaxDepth).toEqual(6);
     store.dispatch(changeHidePlatformDetails(true));
     const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
-    assert.equal(jsOnlySamplesMaxDepth, 4);
+    expect(jsOnlySamplesMaxDepth).toEqual(4);
   });
 
   it('acts upon the current range', function () {
     const store = storeWithProfile();
     store.dispatch(addRangeFilter(0, 20));
     const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
-    assert.equal(allSamplesMaxDepth, 2);
+    expect(allSamplesMaxDepth).toEqual(2);
     store.dispatch(changeHidePlatformDetails(true));
     const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
-    assert.equal(jsOnlySamplesMaxDepth, 0);
+    expect(jsOnlySamplesMaxDepth).toEqual(0);
   });
 });
 
@@ -184,7 +183,7 @@ describe('selectors/getLeafCategoryStackTimingForFlameChart', function () {
     store.dispatch(changeFlameChartColorStrategy(getCategoryByImplementation));
     const leafStackTiming = selectedThreadSelectors.getLeafCategoryStackTimingForFlameChart(store.getState());
 
-    assert.deepEqual(leafStackTiming, [
+    expect(leafStackTiming).toEqual([
       {
         start: [0, 60, 80, 90],
         end: [60, 80, 90, 91],
@@ -204,16 +203,16 @@ describe('actions/changeTimelineFlameChartExpandedThread', function () {
       return TimelineSelectors.getIsFlameChartExpanded(store.getState(), threadIndex);
     }
 
-    assert.deepEqual(threads.map(isExpanded), [false, false, false]);
+    expect(threads.map(isExpanded)).toEqual([false, false, false]);
 
     store.dispatch(changeTimelineFlameChartExpandedThread(1, true));
-    assert.deepEqual(threads.map(isExpanded), [false, true, false]);
+    expect(threads.map(isExpanded)).toEqual([false, true, false]);
 
     store.dispatch(changeTimelineFlameChartExpandedThread(2, true));
-    assert.deepEqual(threads.map(isExpanded), [false, false, true]);
+    expect(threads.map(isExpanded)).toEqual([false, false, true]);
 
     store.dispatch(changeTimelineFlameChartExpandedThread(2, false));
-    assert.deepEqual(threads.map(isExpanded), [false, false, false]);
+    expect(threads.map(isExpanded)).toEqual([false, false, false]);
   });
 });
 
@@ -226,16 +225,16 @@ describe('actions/changeTimelineMarkersExpandedThread', function () {
       return TimelineSelectors.getAreMarkersExpanded(store.getState(), threadIndex);
     }
     // Timeline markers are open by default.
-    assert.deepEqual(threads.map(isExpanded), [true, true, true]);
+    expect(threads.map(isExpanded)).toEqual([true, true, true]);
 
     store.dispatch(changeTimelineMarkersExpandedThread(1, false));
-    assert.deepEqual(threads.map(isExpanded), [true, false, true]);
+    expect(threads.map(isExpanded)).toEqual([true, false, true]);
 
     store.dispatch(changeTimelineMarkersExpandedThread(2, false));
-    assert.deepEqual(threads.map(isExpanded), [true, false, false]);
+    expect(threads.map(isExpanded)).toEqual([true, false, false]);
 
     store.dispatch(changeTimelineMarkersExpandedThread(2, true));
-    assert.deepEqual(threads.map(isExpanded), [true, false, true]);
+    expect(threads.map(isExpanded)).toEqual([true, false, true]);
   });
 });
 
@@ -244,13 +243,13 @@ describe('actions/changeImplementationFilter', function () {
 
   it('is initially set to filter to all', function () {
     const filter = UrlStateSelectors.getImplementationFilter(store.getState());
-    assert.equal(filter, 'combined');
+    expect(filter).toEqual('combined');
   });
 
   it('can be changed to cpp', function () {
     store.dispatch(changeImplementationFilter('cpp'));
     const filter = UrlStateSelectors.getImplementationFilter(store.getState());
-    assert.equal(filter, 'cpp');
+    expect(filter).toEqual('cpp');
   });
 });
 
@@ -259,7 +258,7 @@ describe('actions/updateProfileSelection', function () {
     const store = storeWithProfile();
 
     const initialSelection = ProfileViewSelectors.getProfileViewOptions(store.getState()).selection;
-    assert.deepEqual(initialSelection, {
+    expect(initialSelection).toEqual({
       hasSelection: false,
       isModifying: false,
     });
@@ -272,7 +271,7 @@ describe('actions/updateProfileSelection', function () {
     }));
 
     const secondSelection = ProfileViewSelectors.getProfileViewOptions(store.getState()).selection;
-    assert.deepEqual(secondSelection, {
+    expect(secondSelection).toEqual({
       hasSelection: true,
       isModifying: false,
       selectionStart: 100,
@@ -296,23 +295,23 @@ describe('thread ordering and toggling', function () {
     const threads = ProfileViewSelectors.getThreads(getState());
 
     it('starts out with the initial sorting', function () {
-      assert.deepEqual(getOrderedNames(getState()), ['A', 'B', 'C', 'D']);
+      expect(getOrderedNames(getState())).toEqual(['A', 'B', 'C', 'D']);
     });
 
     it('can hide threads', function () {
       dispatch(hideThread(C));
-      assert.deepEqual(getOrderedNames(getState()), ['A', 'B', 'D']);
+      expect(getOrderedNames(getState())).toEqual(['A', 'B', 'D']);
 
       dispatch(hideThread(A));
-      assert.deepEqual(getOrderedNames(getState()), ['B', 'D']);
+      expect(getOrderedNames(getState())).toEqual(['B', 'D']);
     });
 
     it('can show threads', function () {
       dispatch(showThread(threads, C));
-      assert.deepEqual(getOrderedNames(getState()), ['B', 'C', 'D']);
+      expect(getOrderedNames(getState())).toEqual(['B', 'C', 'D']);
 
       dispatch(showThread(threads, A));
-      assert.deepEqual(getOrderedNames(getState()), ['A', 'B', 'C', 'D']);
+      expect(getOrderedNames(getState())).toEqual(['A', 'B', 'C', 'D']);
     });
   });
 
@@ -321,26 +320,26 @@ describe('thread ordering and toggling', function () {
     const threads = ProfileViewSelectors.getThreads(getState());
 
     it('starts out with the initial sorting', function () {
-      assert.deepEqual(getOrderedNames(getState()), ['A', 'B', 'C', 'D']);
+      expect(getOrderedNames(getState())).toEqual(['A', 'B', 'C', 'D']);
     });
 
     it('is resortable', function () {
       dispatch(changeThreadOrder([3, 2, 1, 0]));
-      assert.deepEqual(getOrderedNames(getState()), ['D', 'C', 'B', 'A']);
+      expect(getOrderedNames(getState())).toEqual(['D', 'C', 'B', 'A']);
     });
 
     it('can hide sorted threads', function () {
       dispatch(hideThread(C));
       dispatch(hideThread(A));
-      assert.deepEqual(getOrderedNames(getState()), ['D', 'B']);
+      expect(getOrderedNames(getState())).toEqual(['D', 'B']);
     });
 
     it('can show sorted threads', function () {
       dispatch(showThread(threads, C));
-      assert.deepEqual(getOrderedNames(getState()), ['D', 'B', 'C']);
+      expect(getOrderedNames(getState())).toEqual(['D', 'B', 'C']);
 
       dispatch(showThread(threads, A));
-      assert.deepEqual(getOrderedNames(getState()), ['A', 'D', 'B', 'C']);
+      expect(getOrderedNames(getState())).toEqual(['A', 'D', 'B', 'C']);
     });
   });
 });
@@ -353,7 +352,7 @@ describe('selectors/getMarkerTiming', function () {
   }
 
   it('has no marker timing if no markers are present', function () {
-    assert.deepEqual(getMarkerTiming([]), []);
+    expect(getMarkerTiming([])).toEqual([]);
   });
 
   describe('markers of the same name', function () {
@@ -365,7 +364,7 @@ describe('selectors/getMarkerTiming', function () {
         ['Marker Name', 0, {startTime: 0, endTime: 10}],
         ['Marker Name', 0, {startTime: 0, endTime: 10}],
       ]);
-      assert.lengthOf(markerTiming, 2);
+      expect(markerTiming).toHaveLength(2);
     });
 
     it('puts markers of disjoint times in one row', function () {
@@ -375,7 +374,7 @@ describe('selectors/getMarkerTiming', function () {
         ['Marker Name', 0, {startTime: 0, endTime: 10}],
         ['Marker Name', 0, {startTime: 15, endTime: 25}],
       ]);
-      assert.lengthOf(markerTiming, 1);
+      expect(markerTiming).toHaveLength(1);
     });
 
     it('puts markers of overlapping times in two rows', function () {
@@ -386,7 +385,7 @@ describe('selectors/getMarkerTiming', function () {
         ['Marker Name', 0, {startTime: 0, endTime: 10}],
         ['Marker Name', 0, {startTime: 5, endTime: 15}],
       ]);
-      assert.lengthOf(markerTiming, 2);
+      expect(markerTiming).toHaveLength(2);
     });
 
     it('puts markers of inclusive overlapping times in two rows', function () {
@@ -397,7 +396,7 @@ describe('selectors/getMarkerTiming', function () {
         ['Marker Name', 0, {startTime: 0, endTime: 20}],
         ['Marker Name', 0, {startTime: 5, endTime: 15}],
       ]);
-      assert.lengthOf(markerTiming, 2);
+      expect(markerTiming).toHaveLength(2);
     });
   });
 
@@ -410,9 +409,9 @@ describe('selectors/getMarkerTiming', function () {
         ['Marker Name A', 0, {startTime: 0, endTime: 10}],
         ['Marker Name B', 0, {startTime: 20, endTime: 30}],
       ]);
-      assert.lengthOf(markerTiming, 2);
-      assert.equal(markerTiming[0].name, 'Marker Name A');
-      assert.equal(markerTiming[1].name, 'Marker Name B');
+      expect(markerTiming).toHaveLength(2);
+      expect(markerTiming[0].name).toBe('Marker Name A');
+      expect(markerTiming[1].name).toBe('Marker Name B');
     });
   });
 });

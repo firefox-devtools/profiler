@@ -2,13 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-let zeeWorker;
-if (process.env.NODE_ENV === 'test') {
-  const Worker = require('workerjs');
-  zeeWorker = new Worker(__dirname + '/../../res/zee-worker.js');
-} else {
-  zeeWorker = new window.Worker('/zee-worker.js');
-}
+import Worker from './worker-factory';
+
+const zeeWorker = new Worker('zee-worker');
 const zeeCallbacks = [];
 
 zeeWorker.onmessage = function (msg) {
