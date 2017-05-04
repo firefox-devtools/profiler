@@ -165,6 +165,7 @@ const contentProcessProfile = {
   threads: [
     Object.assign({ name: 'GeckoMain', processType: 'tab' }, thread),
   ],
+  processes: [],
 };
 
 const profile = {
