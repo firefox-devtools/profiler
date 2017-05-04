@@ -77,5 +77,5 @@ export default connect(state => ({
 }), (dispatch: Dispatch) => ({
   updateURLState: urlState => dispatch({ type: '@@urlenhancer/updateURLState', urlState }),
   urlSetupDone: () => dispatch({ type: '@@urlenhancer/urlSetupDone' }),
-  show404: url => dispatch({ type: 'FILE_NOT_FOUND', url }),
+  show404: url => dispatch({ type: 'ROUTE_NOT_FOUND', url }),
 }))(URLManager);

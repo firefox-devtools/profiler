@@ -63,6 +63,9 @@ const baseConfig = {
       loader: 'file-loader',
     }],
   },
+  node: {
+    process: false,
+  },
 };
 
 if (process.env.NODE_ENV === 'development') {

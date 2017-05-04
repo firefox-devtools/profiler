@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { blankStore, storeWithProfile } from '../fixtures/stores';
+import { storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../content/reducers/profile-view';
 import * as TimelineSelectors from '../../content/reducers/timeline-view';
 import * as UrlStateSelectors from '../../content/reducers/url-state';
@@ -20,24 +20,9 @@ import {
   changeFlameChartColorStrategy,
   changeTimelineExpandedThread,
 } from '../../content/actions/timeline';
-import { receiveProfileFromAddon } from '../../content/actions/receive-profile';
 import { getCategoryByImplementation } from '../../content/color-categories';
 
 const { selectedThreadSelectors } = ProfileViewSelectors;
-
-const profile = require('../fixtures/profiles/profile-2d-canvas.json');
-
-describe('actions/profile', function () {
-  it('can take a profile from an add-on and save it to state', function () {
-    const store = blankStore();
-
-    const initialProfile = ProfileViewSelectors.getProfile(store.getState());
-    assert.isOk(initialProfile, 'A blank profile initially exists');
-    assert.lengthOf(initialProfile.threads, 0, 'The blank profile contains no data');
-    store.dispatch(receiveProfileFromAddon(profile));
-    assert.strictEqual(ProfileViewSelectors.getProfile(store.getState()), profile, 'The passed-in profile is saved in state.');
-  });
-});
 
 describe('selectors/getStackTimingByDepthForFlameChart', function () {
   /**

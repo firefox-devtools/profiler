@@ -4,6 +4,7 @@ import type { Profile, Thread, ThreadIndex, IndexIntoMarkersTable, IndexIntoFunc
 import type { State } from '../reducers/types';
 import type { GetLabel } from '../labeling-strategies';
 import type { GetCategory } from '../color-categories';
+import type { TemporaryError } from '../errors';
 
 export type ExpandedSet = Set<ThreadIndex>;
 export type PrefixCallTreeFilter = {
@@ -43,7 +44,7 @@ type ProfileSummaryAction =
   { type: "PROFILE_SUMMARY_COLLAPSE", threadIndex: ThreadIndex };
 
 type ProfileAction =
-  { type: "FILE_NOT_FOUND", url: string } |
+  { type: "ROUTE_NOT_FOUND", url: string } |
   { type: 'CHANGE_THREAD_ORDER', threadOrder: ThreadIndex[] } |
   { type: 'HIDE_THREAD', threadIndex: ThreadIndex } |
   { type: 'SHOW_THREAD', threads: Thread[], threadIndex: ThreadIndex } |
@@ -61,7 +62,8 @@ type ReceiveProfileAction =
   } |
   { type: 'DONE_SYMBOLICATING' } |
   { type: 'ERROR_RECEIVING_PROFILE_FROM_FILE', error: any } |
-  { type: 'ERROR_RECEIVING_PROFILE_FROM_WEB', error: any } |
+  { type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_WEB', error: TemporaryError } |
+  { type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_WEB', error: Error } |
   { type: 'PROFILE_PROCESSED', profile: Profile, toWorker: true } |
   { type: "RECEIVE_PROFILE_FROM_ADDON", profile: Profile } |
   { type: "RECEIVE_PROFILE_FROM_FILE", profile: Profile } |

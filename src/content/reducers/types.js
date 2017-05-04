@@ -32,8 +32,13 @@ export type ProfileViewState = {
   profile: Profile,
 };
 
+export type AppViewState = {
+  phase: string,
+  additionalData?: Object,
+};
+
 export type AppState = {
-  view: string,
+  view: AppViewState,
   isURLSetupDone: boolean,
 };
 
