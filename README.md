@@ -50,6 +50,12 @@ Say hello on [slack] in the #perf channel.
 
 [MPL v2](./LICENSE)
 
+### Optional Notices
+
+Some permissive software licenses request but do not require an acknowledgement of the use of their software. We are very grateful to the following people and projects for their contributions to this product:
+
+* The [zlib] compression library (Jean-loup Gailly, Mark Adler and team)
+
 [slack-badge]: https://devtools-html-slack.herokuapp.com/badge.svg
 [slack]: https://devtools-html-slack.herokuapp.com/
 
@@ -60,3 +66,4 @@ Say hello on [slack] in the #perf channel.
 [Firefox]:https://www.mozilla.org/firefox/
 [Cleopatra]: https://github.com/mozilla/cleopatra
 [Gecko Profiler]: https://github.com/devtools-html/Gecko-Profiler-Addon
+[zlib]: http://www.zlib.net/

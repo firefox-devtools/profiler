@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /**
  * Create a middleware that allows for dispatching actions between threads. This
  * inspects each action, hijacks it if it has a certain key, and then uses postMessage
