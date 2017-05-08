@@ -42,16 +42,16 @@ const TEXT_OFFSET_TOP = 11;
 
 class FlameChartCanvas extends PureComponent {
 
-  _textMeasurement: null | TextMeasurement
+  _textMeasurement: null | TextMeasurement;
 
-  props: Props
+  props: Props;
 
   constructor(props: Props) {
     super(props);
-    (this: any).onDoubleClickStack = this.onDoubleClickStack.bind(this);
-    (this: any).getHoveredStackInfo = this.getHoveredStackInfo.bind(this);
-    (this: any).drawCanvas = this.drawCanvas.bind(this);
-    (this: any).hitTest = this.hitTest.bind(this);
+    (this: any)._onDoubleClickStack = this._onDoubleClickStack.bind(this);
+    (this: any)._getHoveredStackInfo = this._getHoveredStackInfo.bind(this);
+    (this: any)._drawCanvas = this._drawCanvas.bind(this);
+    (this: any)._hitTest = this._hitTest.bind(this);
   }
 
   /**
@@ -62,7 +62,7 @@ class FlameChartCanvas extends PureComponent {
    * and translated views independent of any particular scale. See TimelineViewport.js
    * for a diagram detailing the various components of this set-up.
    */
-  drawCanvas(
+  _drawCanvas(
     ctx: CanvasRenderingContext2D,
     hoveredItem: HoveredStackTiming | null
   ) {
@@ -150,7 +150,7 @@ class FlameChartCanvas extends PureComponent {
     }
   }
 
-  getHoveredStackInfo(
+  _getHoveredStackInfo(
     {depth, stackTableIndex}: HoveredStackTiming
   ): string {
     const { thread, getLabel, stackTimingByDepth } = this.props;
@@ -172,7 +172,7 @@ class FlameChartCanvas extends PureComponent {
     return `${durationString}ms - ${label}`;
   }
 
-  onDoubleClickStack({depth, stackTableIndex}: HoveredStackTiming) {
+  _onDoubleClickStack({depth, stackTableIndex}: HoveredStackTiming) {
     const { stackTimingByDepth, updateProfileSelection } = this.props;
     updateProfileSelection({
       hasSelection: true,
@@ -182,7 +182,7 @@ class FlameChartCanvas extends PureComponent {
     });
   }
 
-  hitTest(x: CssPixels, y: CssPixels): HoveredStackTiming | null {
+  _hitTest(x: CssPixels, y: CssPixels): HoveredStackTiming | null {
     const {
        rangeStart, rangeEnd, viewportLeft, viewportRight, viewportTop,
        containerWidth, stackTimingByDepth,
@@ -217,10 +217,10 @@ class FlameChartCanvas extends PureComponent {
     return <TimelineCanvas className='flameChartCanvas'
                            containerWidth={containerWidth}
                            containerHeight={containerHeight}
-                           onDoubleClickItem={this.onDoubleClickStack}
-                           getHoveredItemInfo={this.getHoveredStackInfo}
-                           drawCanvas={this.drawCanvas}
-                           hitTest={this.hitTest} />;
+                           onDoubleClickItem={this._onDoubleClickStack}
+                           getHoveredItemInfo={this._getHoveredStackInfo}
+                           drawCanvas={this._drawCanvas}
+                           hitTest={this._hitTest} />;
   }
 }
 

@@ -218,7 +218,6 @@ describe('profile-data', function () {
     const profile = processProfile(exampleProfile);
     const thread = profile.threads[0];
     const tracingMarkers = getTracingMarkers(thread);
-    console.log(tracingMarkers);
     it('should fold the two reflow markers into one tracing marker', function () {
       assert.equal(tracingMarkers.length, 3);
       assert.equal(tracingMarkers[0].start, 2);

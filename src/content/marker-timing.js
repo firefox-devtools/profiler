@@ -110,12 +110,8 @@ export function getMarkerTiming(
     }
   }
 
-  // Flatten out the map into an array.
-  let markerTimingRows = [];
-  for (const [, value] of markerTimingsMap) {
-    markerTimingRows = markerTimingRows.concat(value);
-  }
-  return markerTimingRows;
+  // Flatten out the map into a single array.
+  return [].concat(...markerTimingsMap.values());
 }
 
 function computeMarkerLabel(data: MarkerPayload): string {

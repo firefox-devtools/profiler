@@ -123,9 +123,7 @@ class TimelineFlameChart extends PureComponent {
                             maximumZoom={this.getMaximumZoom()}
                             selection={selection}
                             updateProfileSelection={updateProfileSelection}
-                            viewportNeedsUpdate={(prevProps, newProps) => {
-                              return prevProps.stackTimingByDepth !== newProps.stackTimingByDepth;
-                            }}
+                            viewportNeedsUpdate={viewportNeedsUpdate}
 
                             // FlameChartCanvas props
                             interval={interval}
@@ -166,3 +164,7 @@ export default connect((state, ownProps) => {
     processDetails: threadSelectors.getThreadProcessDetails(state),
   };
 }, (actions: Object))(TimelineFlameChart);
+
+function viewportNeedsUpdate(prevProps, newProps) {
+  return prevProps.stackTimingByDepth !== newProps.stackTimingByDepth;
+}

@@ -17,6 +17,7 @@ import type { GetLabel } from '../labeling-strategies';
 import type { UpdateProfileSelection } from '../actions/profile-view';
 import type { ProfileSelection } from '../actions/types';
 
+
 require('./TimelineMarkers.css');
 
 const ROW_HEIGHT = 16;
@@ -45,14 +46,14 @@ type Props = {
 
 class TimelineMarkers extends Component {
 
-  props: Props
+  props: Props;
 
   constructor(props) {
     super(props);
-    (this: any).toggleThreadCollapse = this.toggleThreadCollapse.bind(this);
+    (this: any)._toggleThreadCollapse = this._toggleThreadCollapse.bind(this);
   }
 
-  toggleThreadCollapse() {
+  _toggleThreadCollapse() {
     const { changeTimelineMarkersExpandedThread, threadIndex, isRowExpanded } = this.props;
     changeTimelineMarkersExpandedThread(threadIndex, !isRowExpanded);
   }
@@ -104,8 +105,8 @@ class TimelineMarkers extends Component {
     return (
       <div className='timelineMarkers' style={{ height }}>
         <div className='timelineMarkersLabels grippy' title={processDetails}>
-          <span>{threadName}</span>
-          <button className={buttonClass} onClick={this.toggleThreadCollapse} />
+          <span className='timelineMarkersLabelsName'>{threadName}</span>
+          <button className={buttonClass} onClick={this._toggleThreadCollapse} />
         </div>
         <TimelineMarkerCanvas key={threadIndex}
                             // TimelineViewport props
@@ -117,10 +118,7 @@ class TimelineMarkers extends Component {
                             maximumZoom={this.getMaximumZoom()}
                             selection={selection}
                             updateProfileSelection={updateProfileSelection}
-                            viewportNeedsUpdate={(prevProps, newProps) => {
-                              return prevProps.markerTimingRows !== newProps.markerTimingRows;
-                            }}
-
+                            viewportNeedsUpdate={viewportNeedsUpdate}
                             // TimelineMarkerCanvas props
                             interval={interval}
                             thread={thread}
@@ -137,6 +135,9 @@ class TimelineMarkers extends Component {
   }
 }
 
+function viewportNeedsUpdate(prevProps, newProps) {
+  return prevProps.markerTimingRows !== newProps.markerTimingRows;
+}
 
 
 export default connect((state, ownProps) => {
