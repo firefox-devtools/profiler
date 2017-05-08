@@ -16,12 +16,14 @@ class ProfileThreadHeaderBar extends PureComponent {
     this._onMarkerSelect = this._onMarkerSelect.bind(this);
   }
 
-  _onLabelMouseDown(e) {
-    const { changeSelectedThread, threadIndex } = this.props;
-    changeSelectedThread(threadIndex);
+  _onLabelMouseDown(event) {
+    if (event.button === 0) {
+      const { changeSelectedThread, threadIndex } = this.props;
+      changeSelectedThread(threadIndex);
 
-    // Don't allow clicks on the threads list to steal focus from the tree view.
-    e.preventDefault();
+      // Don't allow clicks on the threads list to steal focus from the tree view.
+      event.preventDefault();
+    }
   }
 
   _onGraphClick(time) {
@@ -51,8 +53,11 @@ class ProfileThreadHeaderBar extends PureComponent {
         <ContextMenuTrigger id={'ProfileThreadHeaderContextMenu'}
                             renderTag='h1'
                             title={processDetails}
-                            onMouseDown={this._onLabelMouseDown}
-                            attributes={{ className: 'grippy' }}>
+                            attributes={{
+                              className: 'grippy',
+                              // Capture to bypass the context menu.
+                              onMouseDownCapture: this._onLabelMouseDown,
+                            }}>
           {threadName}
         </ContextMenuTrigger>
         <ThreadStackGraph interval={interval}
