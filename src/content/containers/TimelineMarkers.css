@@ -1,13 +1,14 @@
 .timelineMarkersLabels {
   width: 135px;
   display: flex;
-  padding: 9px 0 9px 14px 0;
+  padding: 9px 0 9px 14px;
   -webkit-user-select: none;
   -moz-user-select: none;
+  -ms-user-select: none;
   user-select: none;
 }
 
-.timelineMarkersLabels > span {
+.timelineMarkersLabelsName {
   flex: 1;
   cursor: default;
   white-space: nowrap;
@@ -21,16 +22,16 @@
 }
 
 .timelineMarkersCollapseButton {
+  position: relative;
   width: 17px;
   height: 22px;
-  background: transparent;
-  position: relative;
   margin: 0;
   padding: 0;
-  margin: -4px 0px;
   border: none;
+  margin: -4px 0px;
   cursor: pointer;
   transition: transform 100ms;
+  background: transparent;
 }
 
 .timelineMarkersCollapseButton.expanded {
@@ -38,16 +39,16 @@
 }
 
 .timelineMarkersCollapseButton::after {
-  content: "";
+  position: absolute;
+  top: 5px;
+  left: 5px;
   width: 0;
   height: 0;
+  margin: 0;
+  padding: 0;
+  content: "";
   border-style: solid;
   border-width: 6px 0 6px 8px;
   border-color: transparent transparent transparent #888;
   background: transparent;
-  position: absolute;
-  margin: 0;
-  padding: 0;
-  top: 5px;
-  left: 5px;
 }

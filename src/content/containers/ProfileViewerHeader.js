@@ -3,7 +3,7 @@ import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
 import Reorderable from '../components/Reorderable';
 import TimeSelectionScrubber from '../components/TimeSelectionScrubber';
 import ProfileThreadJankOverview from './ProfileThreadJankOverview';
-// import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOverview';
+import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOverview';
 import OverflowEdgeIndicator from '../components/OverflowEdgeIndicator';
 import { connect } from 'react-redux';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../reducers/profile-view';
@@ -70,7 +70,7 @@ class ProfileViewerHeader extends PureComponent {
         }
       </div>
       <div className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerGfx`}>
-        {/*
+        {
           threadOrder.map(threadIndex => {
             const threadName = threads[threadIndex].name;
             const processType = threads[threadIndex].processType;
@@ -84,7 +84,7 @@ class ProfileViewerHeader extends PureComponent {
                                                     onSelect={this._onIntervalMarkerSelect} /> : null)
             );
           })
-        */}
+        }
       </div>
       <OverflowEdgeIndicator className={`${className}HeaderOverflowEdgeIndicator`}>
         {<Reorderable tagName='ol'

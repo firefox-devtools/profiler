@@ -32,16 +32,16 @@ const TEXT_OFFSET_START = 3;
 
 class TimelineMarkerCanvas extends PureComponent {
 
-  _requestedAnimationFrame: boolean
-  _devicePixelRatio: number
-  _ctx: null|CanvasRenderingContext2D
-  _textMeasurement: null | TextMeasurement
+  _requestedAnimationFrame: boolean;
+  _devicePixelRatio: number;
+  _ctx: null | CanvasRenderingContext2D;
+  _textMeasurement: null | TextMeasurement;
 
-  props: Props
+  props: Props;
 
   state: {
-    hoveredItem: null | number;
-  }
+    hoveredItem: null | number,
+  };
 
   constructor(props: Props) {
     super(props);

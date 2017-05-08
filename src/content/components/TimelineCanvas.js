@@ -21,13 +21,13 @@ require('./TimelineCanvas.css');
 
 export default class TimelineCanvas extends Component {
 
-  props: Props
-  _requestedAnimationFrame: boolean
-  _devicePixelRatio: 1
-  _ctx: CanvasRenderingContext2D
+  props: Props;
+  _requestedAnimationFrame: boolean;
+  _devicePixelRatio: 1;
+  _ctx: CanvasRenderingContext2D;
   state: {
     hoveredItem: null | HoveredItem;
-  }
+  };
 
   constructor(props: Props) {
     super(props);
@@ -35,10 +35,10 @@ export default class TimelineCanvas extends Component {
     this._devicePixelRatio = 1;
     this.state = { hoveredItem: null };
 
-    (this: any).onMouseMove = this.onMouseMove.bind(this);
-    (this: any).onMouseOut = this.onMouseOut.bind(this);
-    (this: any).onDoubleClick = this.onDoubleClick.bind(this);
-    (this: any).getHoveredItemInfo = this.getHoveredItemInfo.bind(this);
+    (this: any)._onMouseMove = this._onMouseMove.bind(this);
+    (this: any)._onMouseOut = this._onMouseOut.bind(this);
+    (this: any)._onDoubleClick = this._onDoubleClick.bind(this);
+    (this: any)._getHoveredItemInfo = this._getHoveredItemInfo.bind(this);
   }
 
   shouldComponentUpdate() {
@@ -68,6 +68,7 @@ export default class TimelineCanvas extends Component {
     const {devicePixelRatio} = window;
     const pixelWidth: DevicePixels = containerWidth * devicePixelRatio;
     const pixelHeight: DevicePixels = containerHeight * devicePixelRatio;
+    // Satisfy the null check for Flow.
     if (!this._ctx) {
       this._ctx = canvas.getContext('2d');
     }
@@ -88,7 +89,7 @@ export default class TimelineCanvas extends Component {
     return this._ctx;
   }
 
-  onMouseMove(event: SyntheticMouseEvent) {
+  _onMouseMove(event: SyntheticMouseEvent) {
     const { canvas } = this.refs;
     if (!canvas) {
       return;
@@ -104,13 +105,13 @@ export default class TimelineCanvas extends Component {
     }
   }
 
-  onMouseOut() {
+  _onMouseOut() {
     if (this.state.hoveredItem !== null) {
       this.setState({ hoveredItem: null });
     }
   }
 
-  onDoubleClick() {
+  _onDoubleClick() {
     const { hoveredItem } = this.state;
     if (hoveredItem === null) {
       return;
@@ -118,7 +119,7 @@ export default class TimelineCanvas extends Component {
     this.props.onDoubleClickItem(hoveredItem);
   }
 
-  getHoveredItemInfo(): null | string {
+  _getHoveredItemInfo(): null | string {
     const { hoveredItem } = this.state;
     if (hoveredItem === null) {
       return null;
@@ -138,10 +139,10 @@ export default class TimelineCanvas extends Component {
 
     return <canvas className={className}
                    ref='canvas'
-                   onMouseMove={this.onMouseMove}
-                   onMouseOut={this.onMouseOut}
-                   onDoubleClick={this.onDoubleClick}
-                   title={this.getHoveredItemInfo()} />;
+                   onMouseMove={this._onMouseMove}
+                   onMouseOut={this._onMouseOut}
+                   onDoubleClick={this._onDoubleClick}
+                   title={this._getHoveredItemInfo()} />;
   }
 }
 
