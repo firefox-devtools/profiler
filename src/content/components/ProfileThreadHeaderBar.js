@@ -52,8 +52,8 @@ class ProfileThreadHeaderBar extends PureComponent {
       <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')} style={style}>
         <ContextMenuTrigger id={'ProfileThreadHeaderContextMenu'}
                             renderTag='h1'
-                            title={processDetails}
                             attributes={{
+                              title: processDetails,
                               className: 'grippy',
                               // Capture to bypass the context menu.
                               onMouseDownCapture: this._onLabelMouseDown,
