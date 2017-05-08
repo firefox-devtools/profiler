@@ -1,10 +1,10 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 
 const HEIGHT = 30;
 const STROKE = 3;
 const HALF_STROKE = STROKE / 2;
 
-class SummarizeLineGraph extends Component {
+class SummarizeLineGraph extends PureComponent {
   componentDidMount() {
     const resize = () => this.updateWidth();
     window.addEventListener('resize', resize);

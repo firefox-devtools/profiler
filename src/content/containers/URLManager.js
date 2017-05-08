@@ -1,6 +1,6 @@
 // @flow
 
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { getIsURLSetupDone } from '../reducers/app';
 
@@ -17,7 +17,7 @@ type Props = {
   show404: string => void,
 };
 
-class URLManager extends Component {
+class URLManager extends PureComponent {
   props: Props;
 
   _updateState() {

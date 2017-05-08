@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { getProfile } from '../reducers/profile-view';
 import { getProfileSummaries, getProfileExpandedSummaries } from '../reducers/summary-view';
@@ -12,7 +12,7 @@ require('./ProfileSummaryView.css');
 
 const EXPAND_LENGTH = 5;
 
-class ProfileSummaryView extends Component {
+class ProfileSummaryView extends PureComponent {
   render() {
     const {
       summaries, expanded, threads,

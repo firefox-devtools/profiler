@@ -1,4 +1,4 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect, Provider } from 'react-redux';
 import actions from '../actions';
 import ProfileViewer from '../components/ProfileViewer';
@@ -35,7 +35,7 @@ type ProfileViewProps = {
   retrieveProfileFromWeb: string => void,
 };
 
-class ProfileViewWhenReadyImpl extends Component {
+class ProfileViewWhenReadyImpl extends PureComponent {
   props: ProfileViewProps;
 
   componentDidMount() {
@@ -110,7 +110,7 @@ type RootProps = {
   store: Store<State, Action>,
 };
 
-export default class Root extends Component {
+export default class Root extends PureComponent {
   props: RootProps;
 
   render() {

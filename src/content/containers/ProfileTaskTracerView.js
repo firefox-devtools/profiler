@@ -1,10 +1,10 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import actions from '../actions';
 import { getTasksByThread, getProfileTaskTracerData } from '../reducers/profile-view';
 import { withSize } from '../with-size';
 
-class ThreadTaskTracerTracksImpl extends Component {
+class ThreadTaskTracerTracksImpl extends PureComponent {
   render() {
     const { tasks, tasktracer, rangeStart, rangeEnd, width } = this.props;
     const { taskTable, stringTable, addressTable } = tasktracer;
@@ -82,7 +82,7 @@ ThreadTaskTracerTracksImpl.propTypes = {
 
 const ThreadTaskTracerTracks = withSize(ThreadTaskTracerTracksImpl);
 
-class ThreadTaskTracerView extends Component {
+class ThreadTaskTracerView extends PureComponent {
   render() {
     const { name, tasks, tasktracer, rangeStart, rangeEnd } = this.props;
     if (tasks.length === 0) {
@@ -105,7 +105,7 @@ ThreadTaskTracerView.propTypes = {
   rangeEnd: PropTypes.number.isRequired,
 };
 
-class ProfileTaskTracerView extends Component {
+class ProfileTaskTracerView extends PureComponent {
   render() {
     const { tasktracer, tasksByThread, rangeStart, rangeEnd } = this.props;
     const { threadTable, stringTable } = tasktracer;

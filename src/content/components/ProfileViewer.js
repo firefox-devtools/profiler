@@ -58,9 +58,9 @@ class ProfileViewer extends PureComponent {
 
   render() {
     const {
-      className, viewOptions, timeRange, changeTabOrder, selectedTab,
+      className, tabOrder, timeRange, changeTabOrder, selectedTab,
     } = this.props;
-    const { tabOrder } = viewOptions;
+
     return (
       <div className={className}>
         <div className={`${className}TopBar`}>
@@ -91,7 +91,7 @@ class ProfileViewer extends PureComponent {
 
 ProfileViewer.propTypes = {
   className: PropTypes.string.isRequired,
-  viewOptions: PropTypes.object.isRequired,
+  tabOrder: PropTypes.arrayOf(PropTypes.number).isRequired,
   timeRange: PropTypes.object.isRequired,
   selectedTab: PropTypes.string.isRequired,
   changeSelectedTab: PropTypes.func.isRequired,
@@ -99,7 +99,7 @@ ProfileViewer.propTypes = {
 };
 
 export default connect(state => ({
-  viewOptions: getProfileViewOptions(state),
+  tabOrder: getProfileViewOptions(state).tabOrder,
   selectedTab: getSelectedTab(state),
   className: 'profileViewer',
   timeRange: getDisplayRange(state),

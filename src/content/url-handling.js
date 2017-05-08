@@ -51,6 +51,12 @@ export function urlFromState(urlState: URLState) {
     thread: `${urlState.selectedThread}`,
   };
 
+  if (process.env.NODE_ENV === 'development') {
+    /* eslint-disable camelcase */
+    query.react_perf = null;
+    /* eslint-enable camelcase */
+  }
+
   // Depending on which tab is active, also show tab-specific query parameters.
   switch (urlState.selectedTab) {
     case 'calltree':

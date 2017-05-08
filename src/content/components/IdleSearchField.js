@@ -1,5 +1,5 @@
 // @flow
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 
 import './IdleSearchField.css';
@@ -12,7 +12,7 @@ type Props = {
   title: ?string,
 };
 
-class IdleSearchField extends Component {
+class IdleSearchField extends PureComponent {
   _onSearchFieldChange: Event => void;
   _onSearchFieldFocus: Event => void;
   _onClearButtonClick: Event => void;

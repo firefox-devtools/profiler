@@ -1,6 +1,5 @@
 // @flow
-import React, { Component } from 'react';
-import shallowCompare from 'react-addons-shallow-compare';
+import React, { PureComponent } from 'react';
 import { timeCode } from '../../common/time-code';
 import TextMeasurement from '../../common/text-measurement';
 import withTimelineViewport from './TimelineViewport';
@@ -34,7 +33,7 @@ const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
 
-class FlameChartCanvas extends Component {
+class FlameChartCanvas extends PureComponent {
 
   _requestedAnimationFrame: boolean
   _devicePixelRatio: number
@@ -62,10 +61,6 @@ class FlameChartCanvas extends Component {
         }
       });
     }
-  }
-
-  shouldComponentUpdate(nextProps: Props) {
-    return shallowCompare(this, nextProps);
   }
 
   componentDidMount() {

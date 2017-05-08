@@ -1,6 +1,6 @@
-import React, { Component, PropTypes } from 'react';
+import React, { PureComponent, PropTypes } from 'react';
 
-class TimeRuler extends Component {
+class TimeRuler extends PureComponent {
 
   _findNiceNumberGreaterOrEqualTo(uglyNumber) {
     // Write uglyNumber as a * 10^b, with 1 <= a < 10.

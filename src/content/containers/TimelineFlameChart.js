@@ -1,5 +1,5 @@
 // @flow
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import FlameChartCanvas from '../components/FlameChartCanvas';
 import { selectorsForThread, getDisplayRange, getProfileInterval, getProfileViewOptions } from '../reducers/profile-view';
@@ -43,7 +43,7 @@ type Props = {
   processDetails: string,
 };
 
-class TimelineFlameChart extends Component {
+class TimelineFlameChart extends PureComponent {
 
   props: Props
 
