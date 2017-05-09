@@ -84,25 +84,39 @@ export function coalescedFunctionsUpdate(functionsUpdatePerThread: FunctionsUpda
 
 class ColascedFunctionsUpdateDispatcher {
 
-  _requestedAnimationFrame: boolean
-  _updates: FunctionsUpdatePerThread
+  _updates: FunctionsUpdatePerThread;
+  _requestedUpdate: boolean;
+  _requestIdleTimeout: { timeout: number };
+  scheduledUpdatesDone: Promise<void>;
 
   constructor() {
-    this._requestedAnimationFrame = false;
     this._updates = {};
+    this._requestedUpdate = false;
+    this._requestIdleTimeout = { timeout: 2000 };
+    this.scheduledUpdatesDone = Promise.resolve();
   }
 
   _scheduleUpdate(dispatch) {
-    if (!this._requestedAnimationFrame) {
-      window.requestAnimationFrame(() => this._dispatchUpdate(dispatch));
-      this._requestedAnimationFrame = true;
+    // Only request an update if one hasn't already been schedule.
+    if (!this._requestedUpdate) {
+      // Let any consumers of this class be able to know when all scheduled updates
+      // are done.
+      this.scheduledUpdatesDone = new Promise(resolve => {
+        // A cross-browser polyfill for requestIdleCallback isn't needed here, since
+        // symbolication only happens in Firefox with the Gecko Profiler Add-on installed.
+        window.requestIdleCallback(() => {
+          this._dispatchUpdate(dispatch);
+          resolve();
+        }, this._requestIdleTimeout);
+      });
+      this._requestedUpdate = true;
     }
   }
 
   _dispatchUpdate(dispatch) {
     const updates = this._updates;
     this._updates = {};
-    this._requestedAnimationFrame = false;
+    this._requestedUpdate = false;
     dispatch(coalescedFunctionsUpdate(updates));
   }
 
@@ -221,6 +235,9 @@ async function doSymbolicateProfile(dispatch, profile, symbolStore) {
       dispatch(assignTaskTracerNames(addressIndices, symbolNames));
     },
   });
+
+  await gCoalescedFunctionsUpdateDispatcher.scheduledUpdatesDone;
+
   dispatch(doneSymbolicating());
 }
 
