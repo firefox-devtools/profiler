@@ -192,12 +192,24 @@ async function getGeckoProfiler() {
   return geckoProfiler;
 }
 
+/**
+ * If the profile object we got from the add-on is an ArrayBuffer, convert it
+ * to a gecko profile object by parsing the JSON.
+ */
+function _unpackGeckoProfileFromAddon(profile) {
+  if (profile instanceof ArrayBuffer) {
+    const textDecoder = new TextDecoder();
+    return JSON.parse(textDecoder.decode(profile));
+  }
+  return profile;
+}
+
 async function getProfileFromAddon(dispatch, geckoProfiler) {
   dispatch(waitingForProfileFromAddon());
 
   // XXX update state to show that we're connected to the profiler addon
   const rawGeckoProfile = await geckoProfiler.getProfile();
-  const profile = processProfile(rawGeckoProfile);
+  const profile = processProfile(_unpackGeckoProfileFromAddon(rawGeckoProfile));
   dispatch(receiveProfileFromAddon(profile));
 
   return profile;
