@@ -7,7 +7,7 @@ import classNames from 'classnames';
 import VirtualList from './VirtualList';
 import { BackgroundImageStyleDef } from './StyleDef';
 
-import { ContextMenuTrigger } from 'react-contextmenu';
+import ContextMenuTrigger from './ContextMenuTrigger';
 
 const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
   <div className='treeViewHeader'>

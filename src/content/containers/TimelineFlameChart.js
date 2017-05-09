@@ -12,7 +12,7 @@ import { getIsFlameChartExpanded } from '../reducers/timeline-view';
 import actions from '../actions';
 import { getImplementationName } from '../labeling-strategies';
 import classNames from 'classnames';
-import { ContextMenuTrigger } from 'react-contextmenu';
+import ContextMenuTrigger from '../components/ContextMenuTrigger';
 
 import type { Thread } from '../../common/types/profile';
 import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../common/types/units';
