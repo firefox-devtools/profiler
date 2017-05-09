@@ -9,7 +9,7 @@ import { selectorsForThread } from '../reducers/profile-view';
 import { getSelectedThreadIndex } from '../reducers/url-state';
 import { getSampleIndexClosestToTime, getStackAsFuncArray } from '../profile-data';
 import actions from '../actions';
-import { ContextMenuTrigger } from 'react-contextmenu';
+import ContextMenuTrigger from './ContextMenuTrigger';
 
 class ProfileThreadHeaderBar extends PureComponent {
 
