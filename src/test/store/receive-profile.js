@@ -122,7 +122,8 @@ describe('actions/receive-profile', function () {
         [
           { phase: 'INITIALIZING' },
           ...steps.map(step => ({ phase: 'INITIALIZING', additionalData: { attempt: { count: step, total: 11 }}})),
-          { phase: 'FATAL_ERROR' },
+          // errors do not have any inherited properties so we don't need to specify the actual error for deepEqual to succeed
+          { phase: 'FATAL_ERROR', error: new Error() },
         ]
       );
     });
@@ -133,7 +134,8 @@ describe('actions/receive-profile', function () {
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromWeb(hash));
-      assert.deepEqual(getView(store.getState()), { phase: 'FATAL_ERROR' });
+      // errors do not have any inherited properties so we don't need to specify the actual error for deepEqual to succeed
+      assert.deepEqual(getView(store.getState()), { phase: 'FATAL_ERROR', error: new Error() });
     });
   });
 });

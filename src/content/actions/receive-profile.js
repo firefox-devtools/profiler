@@ -167,46 +167,83 @@ export function assignTaskTracerNames(addressIndices: number[], symbolNames: str
   };
 }
 
+async function getGeckoProfiler() {
+  const geckoProfiler = await Promise.race([
+    window.geckoProfilerPromise,
+    _wait(5000).then(() => Promise.reject(new Error(
+      'Unable to connect to the Gecko profiler add-on within five seconds.'
+    ))),
+  ]);
+
+  return geckoProfiler;
+}
+
+async function getProfileFromAddon(dispatch, geckoProfiler) {
+  dispatch(waitingForProfileFromAddon());
+
+  // XXX update state to show that we're connected to the profiler addon
+  const rawGeckoProfile = await geckoProfiler.getProfile();
+  const profile = processProfile(rawGeckoProfile);
+  dispatch(receiveProfileFromAddon(profile));
+
+  return profile;
+}
+
+async function getSymbolStore(dispatch, geckoProfiler) {
+  const symbolStore = new SymbolStore('perf-html-async-storage', {
+    requestSymbolTable: async (debugName, breakpadId) => {
+      const requestedLib = { debugName, breakpadId };
+      dispatch(requestingSymbolTable(requestedLib));
+      try {
+        const symbolTable = await geckoProfiler.getSymbolTable(debugName, breakpadId);
+        dispatch(receivedSymbolTableReply(requestedLib));
+        return symbolTable;
+      } catch (error) {
+        dispatch(receivedSymbolTableReply(requestedLib));
+        throw error;
+      }
+    },
+  });
+
+  return symbolStore;
+}
+
+async function doSymbolicateProfile(dispatch, profile, symbolStore) {
+  dispatch(startSymbolicating());
+  await symbolicateProfile(profile, symbolStore, {
+    onMergeFunctions: (threadIndex: ThreadIndex, oldFuncToNewFuncMap: FuncToFuncMap) => {
+      dispatch(mergeFunctions(threadIndex, oldFuncToNewFuncMap));
+    },
+    onGotFuncNames: (threadIndex: ThreadIndex, funcIndices: IndexIntoFuncTable[], funcNames: string[]) => {
+      dispatch(assignFunctionNames(threadIndex, funcIndices, funcNames));
+    },
+    onGotTaskTracerNames: (addressIndices, symbolNames) => {
+      dispatch(assignTaskTracerNames(addressIndices, symbolNames));
+    },
+  });
+  dispatch(doneSymbolicating());
+}
+
+export function errorReceivingProfileFromAddon(error: Error) {
+  return {
+    type: 'ERROR_RECEIVING_PROFILE_FROM_ADDON',
+    error,
+  };
+}
+
 export function retrieveProfileFromAddon(): ThunkAction {
-  return dispatch => {
-    dispatch(waitingForProfileFromAddon());
-
-    // XXX use Promise.race with a 5 second timeout promise to show an error message
-    window.geckoProfilerPromise.then(geckoProfiler => {
-      // XXX update state to show that we're connected to the profiler addon
-      geckoProfiler.getProfile().then(rawGeckoProfile => {
-        const profile = processProfile(rawGeckoProfile);
-
-        dispatch(receiveProfileFromAddon(profile));
-
-        const symbolStore = new SymbolStore('perf-html-async-storage', {
-          requestSymbolTable: (debugName, breakpadId) => {
-            const requestedLib = { debugName, breakpadId };
-            dispatch(requestingSymbolTable(requestedLib));
-            return geckoProfiler.getSymbolTable(debugName, breakpadId).then(symbolTable => {
-              dispatch(receivedSymbolTableReply(requestedLib));
-              return symbolTable;
-            }, error => {
-              dispatch(receivedSymbolTableReply(requestedLib));
-              throw error;
-            });
-          },
-        });
-
-        dispatch(startSymbolicating());
-        symbolicateProfile(profile, symbolStore, {
-          onMergeFunctions: (threadIndex: ThreadIndex, oldFuncToNewFuncMap: FuncToFuncMap) => {
-            dispatch(mergeFunctions(threadIndex, oldFuncToNewFuncMap));
-          },
-          onGotFuncNames: (threadIndex: ThreadIndex, funcIndices: IndexIntoFuncTable[], funcNames: string[]) => {
-            dispatch(assignFunctionNames(threadIndex, funcIndices, funcNames));
-          },
-          onGotTaskTracerNames: (addressIndices, symbolNames) => {
-            dispatch(assignTaskTracerNames(addressIndices, symbolNames));
-          },
-        }).then(() => dispatch(doneSymbolicating()));
-      });
-    });
+  return async dispatch => {
+    try {
+      const geckoProfiler = await getGeckoProfiler();
+      const [profile, symbolStore] = await Promise.all([
+        getProfileFromAddon(dispatch, geckoProfiler),
+        getSymbolStore(dispatch, geckoProfiler),
+      ]);
+      await doSymbolicateProfile(dispatch, profile, symbolStore);
+    } catch (error) {
+      dispatch(errorReceivingProfileFromAddon(error));
+      throw error;
+    }
   };
 }
 
@@ -364,51 +401,64 @@ export function receiveProfileFromFile(profile: Profile): ThunkAction {
   };
 }
 
-export function errorReceivingProfileFromFile(error: any): Action {
+export function errorReceivingProfileFromFile(error: Error): Action {
   return {
     type: 'ERROR_RECEIVING_PROFILE_FROM_FILE',
     error,
   };
 }
 
+function _fileReader(input) {
+  const reader = new FileReader();
+  const promise = new Promise((resolve, reject) => {
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+  });
+
+  return {
+    asText() {
+      reader.readAsText(input);
+      return promise;
+    },
+
+    asArrayBuffer() {
+      reader.readAsArrayBuffer(input);
+      return promise;
+    },
+  };
+}
+
 export function retrieveProfileFromFile(file: File): ThunkAction {
-  return dispatch => {
+  return async dispatch => {
     dispatch(waitingForProfileFromFile());
 
-    (new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsText(file);
-    })).then(text => {
+    try {
+      const text = await _fileReader(file).asText();
       const profile = unserializeProfileOfArbitraryFormat(text);
       if (profile === undefined) {
         throw new Error('Unable to parse the profile.');
       }
 
       dispatch(receiveProfileFromFile(profile));
-    }).catch(() => {
-      return (new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsArrayBuffer(file);
-      }));
-    }).then(buffer => {
+      return;
+    } catch (e) {
+      // continuing the function normally, as we return in the try block above;
+    }
+
+    try {
+      const buffer = await _fileReader(file).asArrayBuffer();
       const arrayBuffer = new Uint8Array(buffer);
-      return decompress(arrayBuffer);
-    }).then(decompressedArrayBuffer => {
+      const decompressedArrayBuffer = await decompress(arrayBuffer);
       const textDecoder = new TextDecoder();
-      return textDecoder.decode(decompressedArrayBuffer);
-    }).then(text => {
+      const text = await textDecoder.decode(decompressedArrayBuffer);
       const profile = unserializeProfileOfArbitraryFormat(text);
       if (profile === undefined) {
         throw new Error('Unable to parse the profile.');
       }
 
       dispatch(receiveProfileFromFile(profile));
-    }).catch(error => {
+    } catch (error) {
       dispatch(errorReceivingProfileFromFile(error));
-    });
+    }
   };
 }

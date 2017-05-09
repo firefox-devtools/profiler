@@ -18,6 +18,13 @@ const LOADING_MESSAGES = Object.freeze({
   'public': 'Retrieving profile from the public profile store...',
 });
 
+const ERROR_MESSAGES = Object.freeze({
+  'from-addon': "Couldn't retrieve the profile from the gecko profiler addon.",
+  'from-file': "Couldn't read the file or parse the profile in it.",
+  'local': 'Not implemented yet.',
+  'public': "Couldn't Retrieve the profile from the public profile store.",
+});
+
 // TODO Switch to a proper i18n library
 function fewTimes(count: number) {
   switch (count) {
@@ -77,8 +84,21 @@ class ProfileViewWhenReadyImpl extends PureComponent {
           </div>
         );
       }
-      case 'FATAL_ERROR':
-        return <div>{"Couldn't load the profile from the store."}</div>;
+      case 'FATAL_ERROR': {
+        const message = ERROR_MESSAGES[dataSource] || "Couldn't retrieve the profile.";
+        let additionalMessage = null;
+        if (view.error) {
+          console.error(view.error);
+          additionalMessage = `Error was "${view.error}". The full stack has been written to the Web Console.`;
+        }
+
+        return (
+          <div>
+            <div>{ message }</div>
+            { additionalMessage && <div>{ additionalMessage }</div>}
+          </div>
+        );
+      }
       case 'PROFILE':
         return <ProfileViewer/>;
       case 'ROUTE_NOT_FOUND':
@@ -92,7 +112,8 @@ class ProfileViewWhenReadyImpl extends PureComponent {
 ProfileViewWhenReadyImpl.propTypes = {
   view: PropTypes.shape({
     phase: PropTypes.string.isRequired,
-    additionalMessage: PropTypes.object,
+    additionalData: PropTypes.object,
+    error: PropTypes.instanceOf(Error),
   }).isRequired,
   dataSource: PropTypes.string.isRequired,
   hash: PropTypes.string,
