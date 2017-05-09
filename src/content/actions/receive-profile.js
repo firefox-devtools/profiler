@@ -170,8 +170,8 @@ export function assignTaskTracerNames(addressIndices: number[], symbolNames: str
 async function getGeckoProfiler() {
   const geckoProfiler = await Promise.race([
     window.geckoProfilerPromise,
-    _wait(5000).then(() => Promise.reject(new Error(
-      'Unable to connect to the Gecko profiler add-on within five seconds.'
+    _wait(30000).then(() => Promise.reject(new Error(
+      'Unable to connect to the Gecko profiler add-on within thirty seconds.'
     ))),
   ]);
 
