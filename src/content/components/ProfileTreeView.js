@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import TreeView from './TreeView';
 import NodeIcon from './NodeIcon';
 import { getStackAsFuncArray } from '../profile-data';
-import { getInvertCallstack, getImplementationFilter, getSearchString, getSelectedThreadIndex } from '../reducers/url-state';
+import { getInvertCallstack, getImplementationFilter, getSelectedThreadIndex, getUserFilters } from '../reducers/url-state';
 import {
   getProfile, selectedThreadSelectors, getScrollToSelectionGeneration, getProfileViewOptions,
 } from '../reducers/profile-view';
@@ -22,6 +22,7 @@ import type { ProfileTreeClass } from '../profile-tree';
 import type { Thread, ThreadIndex } from '../../common/types/profile';
 import type { FuncStackInfo, IndexIntoFuncStackTable } from '../../common/types/profile-derived';
 import type { Column } from './TreeView';
+import type { Filter } from '../filtering-string';
 
 type Props = {
   thread: Thread,
@@ -32,7 +33,7 @@ type Props = {
   funcStackInfo: FuncStackInfo,
   selectedFuncStack: IndexIntoFuncStackTable | null,
   expandedFuncStacks: Array<IndexIntoFuncStackTable | null>;
-  searchString: string,
+  userFilters: Filter,
   disableOverscan: boolean,
   implementationFilter: string,
   invertCallstack: boolean,
@@ -140,7 +141,9 @@ class ProfileTreeView extends PureComponent {
   }
 
   render() {
-    const { tree, selectedFuncStack, expandedFuncStacks, searchString, disableOverscan } = this.props;
+    const { tree, selectedFuncStack, expandedFuncStacks, userFilters, disableOverscan } = this.props;
+    const highlightString = // TODO properly highlight the full filter
+      userFilters.include && userFilters.include.substrings.join(' ').toLowerCase();
     return (
       <TreeView tree={tree}
                 fixedColumns={this._fixedColumns}
@@ -150,7 +153,7 @@ class ProfileTreeView extends PureComponent {
                 onExpandedNodesChange={this._onExpandedFuncStacksChange}
                 selectedNodeId={selectedFuncStack}
                 expandedNodeIds={expandedFuncStacks}
-                highlightString={searchString.toLowerCase()}
+                highlightString={highlightString}
                 disableOverscan={disableOverscan}
                 appendageButtons={this._appendageButtons}
                 onAppendageButtonClick={this._onAppendageButtonClick}
@@ -172,7 +175,7 @@ export default connect(
     funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state),
     selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state),
     expandedFuncStacks: selectedThreadSelectors.getExpandedFuncStacks(state),
-    searchString: getSearchString(state),
+    userFilters: getUserFilters(state),
     disableOverscan: getProfileViewOptions(state).selection.isModifying,
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),

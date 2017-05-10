@@ -3,6 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { timeCode } from '../common/time-code';
+import { getEmptyTaskTracerData } from './task-tracer';
+
 import type {
   Profile,
   Thread,
@@ -25,8 +28,8 @@ import type {
   TracingMarker,
 } from '../common/types/profile-derived';
 import type { StartEndRange } from '../common/types/units';
-import { timeCode } from '../common/time-code';
-import { getEmptyTaskTracerData } from './task-tracer';
+import type { ImplementationFilter } from './actions/types';
+import type { Filter } from './filtering-string';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -156,7 +159,7 @@ export function defaultThreadOrder(threads: Thread[]): ThreadIndex[] {
   return threadOrder;
 }
 
-export function filterThreadByImplementation(thread: Thread, implementation: string): Thread {
+export function filterThreadByImplementation(thread: Thread, implementation: ImplementationFilter): Thread {
   const { funcTable, stringTable } = thread;
 
   switch (implementation) {
@@ -368,11 +371,12 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
   });
 }
 
-export function filterThreadToSearchString(thread: Thread, searchString: string): Thread {
+export function filterThreadToSearchString(thread: Thread, searchFilter: Filter): Thread {
   return timeCode('filterThreadToSearchString', () => {
-    if (searchString === '') {
+    if (!searchFilter.include || !searchFilter.include.substrings.length) {
       return thread;
     }
+    const searchString = searchFilter.include.substrings.join(' '); // TODO filter using the full filter
     const lowercaseSearchString = searchString.toLowerCase();
     const {
       samples, funcTable, frameTable, stackTable, stringTable,

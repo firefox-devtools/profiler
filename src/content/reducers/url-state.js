@@ -4,17 +4,20 @@
 
 // @flow
 import { combineReducers } from 'redux';
+import { cloneDeep } from 'lodash-es';
 import { defaultThreadOrder } from '../profile-data';
 import { createSelector } from 'reselect';
 import { urlFromState } from '../url-handling';
+import { emptyUserFilter, filterFromString, stringFromFilter } from '../filtering-string';
 import * as RangeFilters from '../range-filters';
 
 import type { ThreadIndex } from '../../common/types/profile';
 import type { StartEndRange } from '../../common/types/units';
 import type {
-  Action, CallTreeFiltersPerThread, CallTreeFilter, DataSource, ImplementationFilter,
+  Action, CallTreeFiltersPerThread, CallTreeFilter, DataSource,
 } from '../actions/types';
 import type { State, URLState, Reducer } from './types';
+import type { Filter, FilterDescription } from '../filtering-string';
 
 function dataSource(state: DataSource = 'none', action: Action) {
   switch (action.type) {
@@ -98,15 +101,6 @@ function selectedThread(state: ThreadIndex = 0, action: Action) {
   }
 }
 
-function callTreeSearchString(state: string = '', action: Action) {
-  switch (action.type) {
-    case 'CHANGE_CALL_TREE_SEARCH_STRING':
-      return action.searchString;
-    default:
-      return state;
-  }
-}
-
 function callTreeFilters(state: CallTreeFiltersPerThread = {}, action: Action) {
   switch (action.type) {
     case 'ADD_CALL_TREE_FILTER': {
@@ -132,28 +126,32 @@ function callTreeFilters(state: CallTreeFiltersPerThread = {}, action: Action) {
  * Represents the current filter applied to the stack frames, where it will show
  * frames only by implementation.
  */
-function implementation(state: ImplementationFilter = 'combined', action: Action) {
+function userFilters(state: Filter = emptyUserFilter(), action: Action) {
   switch (action.type) {
-    case 'CHANGE_IMPLEMENTATION_FILTER':
-      return action.implementation;
-    default:
-      return state;
-  }
-}
-
-function invertCallstack(state: boolean = false, action: Action) {
-  switch (action.type) {
-    case 'CHANGE_INVERT_CALLSTACK':
-      return action.invertCallstack;
-    default:
-      return state;
-  }
-}
-
-function hidePlatformDetails(state: boolean = false, action: Action) {
-  switch (action.type) {
-    case 'CHANGE_HIDE_PLATFORM_DETAILS':
-      return action.hidePlatformDetails;
+    case 'CHANGE_IMPLEMENTATION_FILTER': {
+      const newState = cloneDeep(state);
+      if (!newState.include) {
+        newState.include = ({
+          implementation: null,
+          substrings: [],
+          paths: [],
+        }: FilterDescription);
+      }
+      newState.include.implementation = action.implementation;
+      return newState;
+    }
+    case 'CHANGE_HIDE_PLATFORM_DETAILS': {
+      const newState = cloneDeep(state);
+      newState.hidePlatformDetails = action.hidePlatformDetails;
+      return newState;
+    }
+    case 'CHANGE_CALL_TREE_SEARCH_STRING':
+      return filterFromString(action.searchString);
+    case 'CHANGE_INVERT_CALLSTACK': {
+      const newState = cloneDeep(state);
+      newState.display.invertCallstack = action.invertCallstack;
+      return newState;
+    }
     default:
       return state;
   }
@@ -168,8 +166,7 @@ const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (state: UR
   }
 })(combineReducers({
   dataSource, hash, profileURL, selectedTab, rangeFilters, selectedThread,
-  callTreeSearchString, callTreeFilters, implementation, invertCallstack,
-  hidePlatformDetails,
+  callTreeFilters, userFilters,
 }));
 export default urlStateReducer;
 
@@ -179,10 +176,18 @@ export const getDataSource = (state: State) => getURLState(state).dataSource;
 export const getHash = (state: State) => getURLState(state).hash;
 export const getProfileURL = (state: State) => getURLState(state).profileURL;
 export const getRangeFilters = (state: State) => getURLState(state).rangeFilters;
-export const getImplementationFilter = (state: State) => getURLState(state).implementation;
-export const getHidePlatformDetails = (state: State) => getURLState(state).hidePlatformDetails;
-export const getInvertCallstack = (state: State) => getURLState(state).invertCallstack;
-export const getSearchString = (state: State) => getURLState(state).callTreeSearchString;
+export const getUserFilters = (state: State) => getURLState(state).userFilters;
+export const getImplementationFilter = (state: State) => {
+  const include = getUserFilters(state).include;
+  if (!include) {
+    return null;
+  }
+  return include.implementation;
+};
+
+export const getHidePlatformDetails = (state: State) => getUserFilters(state).display.hidePlatformDetails;
+export const getInvertCallstack = (state: State) => getUserFilters(state).display.invertCallstack;
+export const getSearchString = (state: State) => stringFromFilter(getUserFilters(state));
 export const getSelectedTab = (state: State) => getURLState(state).selectedTab;
 export const getSelectedThreadIndex = (state: State) => getURLState(state).selectedThread;
 export const getCallTreeFilters = (state: State, threadIndex: ThreadIndex): CallTreeFilter[] => {
