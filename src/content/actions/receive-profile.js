@@ -86,7 +86,7 @@ export function coalescedFunctionsUpdate(functionsUpdatePerThread: FunctionsUpda
   };
 }
 
-const requestIdleCallbackPolyfill = window.requestIdleCallback
+const requestIdleCallbackPolyfill = (typeof window === 'object' && window.requestIdleCallback)
   ? window.requestIdleCallback
   : callback => setTimeout(callback, 0);
 
