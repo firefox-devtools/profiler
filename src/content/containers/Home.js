@@ -58,7 +58,18 @@ Home.propTypes = {
   profilerURL: PropTypes.string.isRequired,
 };
 
+function _getProfilerAddonURL() {
+  // Serve the SDK-based add-on to a few pre-55 Firefox versions that don't
+  // have the profiler WebExtensions API yet.
+  if (navigator.userAgent.endsWith('Firefox/52.0') ||
+      navigator.userAgent.endsWith('Firefox/53.0') ||
+      navigator.userAgent.endsWith('Firefox/54.0')) {
+    return 'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
+  }
+  return 'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
+}
+
 export default connect(() => ({
   className: 'home',
-  profilerURL: 'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi',
+  profilerURL: _getProfilerAddonURL(),
 }))(Home);
