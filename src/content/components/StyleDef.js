@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 // inspired from https://gist.github.com/jviereck/9a71734afcfe848ddbe2 -- simplified
 //
 // Because JSX isn't nice with CSS content because of the braces, we use a

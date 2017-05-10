@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 .profileSharing {
   --internal-share-button-background-color: var(--share-button-background-color, hsl(137,81%,44%));
   --internal-uploading-button-background-color: var(--uploading-button-background-color, #38445f);
@@ -55,7 +59,7 @@
 
 .profileSharingUploadingButtonProgress::-moz-progress-bar {
   background: var(--internal-uploading-progress-fill-color);
-} 
+}
 
 .profileSharingShareButtonButton {
   background-color: var(--internal-share-button-background-color);
