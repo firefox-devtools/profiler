@@ -59,8 +59,7 @@ class ProfileThreadHeaderBar extends PureComponent {
                             attributes={{
                               title: processDetails,
                               className: 'grippy',
-                              // Capture to bypass the context menu.
-                              onMouseDownCapture: this._onLabelMouseDown,
+                              onMouseDown: this._onLabelMouseDown,
                             }}>
           {threadName}
         </ContextMenuTrigger>
