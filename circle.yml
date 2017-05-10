@@ -3,6 +3,7 @@ machine:
     version: 7.8
 test:
   pre:
+    - npm run license-check
     - npm run eslint
     - npm run flow -- --quiet
   override:
