@@ -1,5 +1,6 @@
 [ignore]
 .*node_modules/fbjs.*
+.*custom_format_broken.json
 
 [libs]
 flow-typed
