@@ -86,6 +86,10 @@ export function coalescedFunctionsUpdate(functionsUpdatePerThread: FunctionsUpda
   };
 }
 
+const requestIdleCallbackPolyfill = window.requestIdleCallback
+  ? window.requestIdleCallback
+  : callback => setTimeout(callback, 0);
+
 class ColascedFunctionsUpdateDispatcher {
 
   _updates: FunctionsUpdatePerThread;
@@ -106,9 +110,7 @@ class ColascedFunctionsUpdateDispatcher {
       // Let any consumers of this class be able to know when all scheduled updates
       // are done.
       this.scheduledUpdatesDone = new Promise(resolve => {
-        // A cross-browser polyfill for requestIdleCallback isn't needed here, since
-        // symbolication only happens in Firefox with the Gecko Profiler Add-on installed.
-        window.requestIdleCallback(() => {
+        requestIdleCallbackPolyfill(() => {
           this._dispatchUpdate(dispatch);
           resolve();
         }, this._requestIdleTimeout);
