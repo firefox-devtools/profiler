@@ -96,11 +96,12 @@ describe('actions/receive-profile', function () {
         () => store.dispatch(retrieveProfileFromWeb(hash))
       )).map(state => getView(state));
 
+      const errorMessage = 'Profile not found on remote server.';
       assert.deepEqual(
         views,
         [
           { phase: 'INITIALIZING' },
-          { phase: 'INITIALIZING', additionalData: { attempt: { count: 1, total: 11 }}},
+          { phase: 'INITIALIZING', additionalData: { attempt: { count: 1, total: 11 }, message: errorMessage }},
           { phase: 'PROFILE' },
         ]
       );
@@ -121,11 +122,14 @@ describe('actions/receive-profile', function () {
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
+      const errorMessage = 'Profile not found on remote server.';
       assert.deepEqual(
         views,
         [
           { phase: 'INITIALIZING' },
-          ...steps.map(step => ({ phase: 'INITIALIZING', additionalData: { attempt: { count: step, total: 11 }}})),
+          ...steps.map(step => (
+            { phase: 'INITIALIZING', additionalData: { attempt: { count: step, total: 11 }, message: errorMessage }}
+          )),
           // errors do not have any inherited properties so we don't need to specify the actual error for deepEqual to succeed
           { phase: 'FATAL_ERROR', error: new Error() },
         ]

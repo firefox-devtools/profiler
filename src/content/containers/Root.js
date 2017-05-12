@@ -77,10 +77,16 @@ class ProfileViewWhenReadyImpl extends PureComponent {
         }
 
         const message = LOADING_MESSAGES[dataSource] || 'View not found';
-        let additionalMessage = null;
-        if (view.additionalData && view.additionalData.attempt) {
-          const attempt = view.additionalData.attempt;
-          additionalMessage = `Tried ${fewTimes(attempt.count)} out of ${attempt.total}.`;
+        let additionalMessage = '';
+        if (view.additionalData) {
+          if (view.additionalData.message) {
+            additionalMessage = view.additionalData.message;
+          }
+
+          if (view.additionalData.attempt) {
+            const attempt = view.additionalData.attempt;
+            additionalMessage += `Tried ${fewTimes(attempt.count)} out of ${attempt.total}.`;
+          }
         }
 
         return (

@@ -187,17 +187,6 @@ export function assignTaskTracerNames(addressIndices: number[], symbolNames: str
   };
 }
 
-async function getGeckoProfiler() {
-  const geckoProfiler = await Promise.race([
-    window.geckoProfilerPromise,
-    _wait(30000).then(() => Promise.reject(new Error(
-      'Unable to connect to the Gecko profiler add-on within thirty seconds.'
-    ))),
-  ]);
-
-  return geckoProfiler;
-}
-
 /**
  * If the profile object we got from the add-on is an ArrayBuffer, convert it
  * to a gecko profile object by parsing the JSON.
@@ -259,24 +248,44 @@ async function doSymbolicateProfile(dispatch, profile, symbolStore) {
   dispatch(doneSymbolicating());
 }
 
-export function errorReceivingProfileFromAddon(error: Error) {
+export function temporaryErrorReceivingProfileFromAddon(error: TemporaryError) {
   return {
-    type: 'ERROR_RECEIVING_PROFILE_FROM_ADDON',
+    type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_ADDON',
     error,
   };
 }
 
+export function fatalErrorReceivingProfileFromAddon(error: Error) {
+  return {
+    type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_ADDON',
+    error,
+  };
+}
+
+
 export function retrieveProfileFromAddon(): ThunkAction {
   return async dispatch => {
     try {
-      const geckoProfiler = await getGeckoProfiler();
+      const timeoutId = setTimeout(() => {
+        dispatch(temporaryErrorReceivingProfileFromAddon(
+          new TemporaryError(oneLine`
+            We were unable to connect to the Gecko profiler add-on within thirty seconds.
+            This might be because the profile is big or your machine is slower than usual.
+            Still waiting...
+          `)
+        ));
+      }, 30000);
+      const geckoProfiler = await window.geckoProfilerPromise;
+      clearTimeout(timeoutId);
+
       const [profile, symbolStore] = await Promise.all([
         getProfileFromAddon(dispatch, geckoProfiler),
         getSymbolStore(dispatch, geckoProfiler),
       ]);
+
       await doSymbolicateProfile(dispatch, profile, symbolStore);
     } catch (error) {
-      dispatch(errorReceivingProfileFromAddon(error));
+      dispatch(fatalErrorReceivingProfileFromAddon(error));
       throw error;
     }
   };

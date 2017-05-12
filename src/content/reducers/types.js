@@ -41,7 +41,10 @@ export type ProfileViewState = {
 
 export type AppViewState =
   {| phase: string |} |
-  { phase: 'INITIALIZING', additionalData: { attempt: Attempt }} |
+  {
+    phase: 'INITIALIZING',
+    additionalData: { attempt: Attempt | null, message: string },
+  } |
   { phase: 'FATAL_ERROR', error: Error };
 
 export type AppState = {
