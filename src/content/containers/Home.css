@@ -3,38 +3,190 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .home {
+  width: 100%;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1.5;
+  background-color: #34405D;
 }
 
-.home-text {
-  max-width: 50%;
+.homeDrop {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 1em;
+  box-sizing: border-box;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms;
+}
+
+.homeDropMessage {
+  width: 100%;
+  border: 2px dashed #888;
+  font-size: 30px;
+  color: #666;
+  text-align: center;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.homeDrop.dragging {
+  opacity: 1;
+}
+
+.homeSection {
+  position: relative;
+  width: 75%;
+  max-width: 1200px;
+  box-sizing: border-box;
   border: 1px solid #CCC;
-  border-radius: 5px;
-  padding: 3em;
+  border-radius: 3px;
+  padding: 8em;
   font-size: 130%;
+  box-shadow: 0 5px 25px #0b1f50;
+  background-color: #fff;
+  overflow: hidden;
 }
 
-.home-text h1 {
+.homeSection kbd {
+  display: inline-block;
+  border: 1px solid #CCC;
+  border-radius: 0.2em;
+  margin: 0 0.2em;
+  padding: 0.0em 0.5em;
+  background-color: #F6F6F6;
+  box-shadow: 0.1em 0.1em 0 #BBB;
+}
+
+.homeTitle {
   margin-top: 0;
   margin-bottom: 0.5em;
   padding-bottom: 0.5em;
   border-bottom: 1px solid #DDD;
 }
 
-.home-text kbd {
-  background-color: #F6F6F6;
-  border: 1px solid #CCC;
-  border-radius: 0.2em;
-  display: inline-block;
-  padding: 0.0em 0.5em;
-  box-shadow: 0.1em 0.1em 0 #BBB;
-  margin: 0 0.2em;
+.homeTitleSubtext {
+  font-weight: normal;
 }
 
-.home-text li {
+.homeSectionItems {
   margin: 1em 0;
+}
+
+.homeSectionScreenshot {
+  width: 390px;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #d1d1d1;
+  border-radius: 0.4em;
+  box-shadow: 0 2px 4px #ddd;
+}
+
+.homeSectionInstallButton {
+  display: inline-block;
+  padding: 0.7em;
+  border: 2px solid #557de0;
+  color: #557de0;
+  text-decoration: none;
+  transition: background-color 300ms;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.homeSectionInstallButton:hover {
+  color: #fff;
+  background-color: #557de0;
+}
+
+.homeSectionPlus {
+  font-size: 26px;
+  line-height: 0;
+  position: relative;
+  top: 2px;
+  padding-right: 12px;
+  padding-left: 5px;
+}
+
+.homeSectionPerfScreenshot {
+  width: 1346px;
+  max-width: 90%;
+  height: auto;
+  margin-top: 15px;
+  margin-bottom: -40px;
+}
+
+.homeGithubIcon {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  top: 0;
+  right: 0;
+  display: block;
+  background: url(../../../res/github.svg) top right no-repeat;
+}
+
+.homeInstructions {
+  display: flex;
+  margin-top: 30px;
+}
+
+.homeInstructionsLeft,
+.homeInstructionsRight {
+  width: 50%;
+}
+
+.homeInstructionsRight {
+  padding-left: 30px;
+}
+
+.homeInstructionsTransitionGroup {
+  position: relative;
+}
+
+.homeTransition-enter {
+  opacity: 0.1;
+  transform: translateX(100px);
+}
+
+.homeTransition-enter.homeTransition-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+@media (max-width: 1300px) {
+  .homeSection {
+    padding: 5em;
+  }
+}
+
+@media (max-width: 1100px) {
+  .homeSection {
+    padding: 3em;
+    max-width: 80%;
+  }
+  .homeInstructions {
+    display: block;
+  }
+  .homeInstructionsLeft,
+  .homeInstructionsRight {
+    width: 100%;
+  }
+  .homeInstructionsLeft {
+    text-align: center;
+  }
+  .homeInstructionsRight {
+    padding-left: 0;
+  }
 }
