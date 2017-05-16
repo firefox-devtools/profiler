@@ -206,10 +206,10 @@ class Home extends PureComponent {
           <h2>How to view and record profiles</h2>
           <p>
             Recording performance profiles requires{' '}
-            <a href='https://www.mozilla.org/en-US/firefox/new/'>Firefox</a>, however
-            perf.html itself is a a web app, and still works cross-browser for viewing
-            existing profiles. Either follow a link to an already shared profile, or drag
-            a saved profile onto this screen.
+            <a href='https://www.mozilla.org/en-US/firefox/new/'>Firefox</a>.
+            However, existing profiles can be viewed in any modern browser. To view a
+            profile, either follow a link to a public profile, or drag a saved profile
+            onto this screen.
           </p>
         </div>
       </div>
