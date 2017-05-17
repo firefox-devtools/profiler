@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
@@ -92,18 +93,22 @@ class Home extends PureComponent {
     document.removeEventListener(('drop': string), _preventDefault, false);
   }
 
-  _startDragging(event) {
+  _startDragging(event: Event) {
     event.preventDefault();
     this.setState({ isDragging: true });
   }
 
-  _stopDragging(event) {
+  _stopDragging(event: Event) {
     event.preventDefault();
     this.setState({ isDragging: false });
   }
 
-  _handleProfileDrop(event) {
+  _handleProfileDrop(event: DragEvent) {
     event.preventDefault();
+    if (!event.dataTransfer) {
+      return;
+    }
+
     const { files } = event.dataTransfer;
     if (files.length > 0) {
       this.props.retrieveProfileFromFile(files[0]);

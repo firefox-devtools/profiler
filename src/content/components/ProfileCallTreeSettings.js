@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import actions from '../actions';
@@ -10,23 +12,34 @@ import IdleSearchField from '../components/IdleSearchField';
 
 import './ProfileCallTreeSettings.css';
 
+type Props = {
+  implementationFilter: string,
+  invertCallstack: boolean,
+  searchString: string,
+  changeImplementationFilter: string => void,
+  changeInvertCallstack: boolean => void,
+  changeCallTreeSearchString: string => void,
+};
+
 class ProfileCallTreeSettings extends PureComponent {
+  props: Props;
+
   constructor(props) {
     super(props);
-    this._onImplementationFilterChange = this._onImplementationFilterChange.bind(this);
-    this._onInvertCallstackClick = this._onInvertCallstackClick.bind(this);
-    this._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(this);
+    (this: any)._onImplementationFilterChange = this._onImplementationFilterChange.bind(this);
+    (this: any)._onInvertCallstackClick = this._onInvertCallstackClick.bind(this);
+    (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(this);
   }
 
-  _onImplementationFilterChange(e) {
+  _onImplementationFilterChange(e: Event & { target: HTMLSelectElement }) {
     this.props.changeImplementationFilter(e.target.value);
   }
 
-  _onInvertCallstackClick(e) {
+  _onInvertCallstackClick(e: Event & { target: HTMLInputElement }) {
     this.props.changeInvertCallstack(e.target.checked);
   }
 
-  _onSearchFieldIdleAfterChange(value) {
+  _onSearchFieldIdleAfterChange(value: string) {
     this.props.changeCallTreeSearchString(value);
   }
 

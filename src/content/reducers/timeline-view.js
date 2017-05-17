@@ -6,13 +6,7 @@
 import { combineReducers } from 'redux';
 import type { ThreadIndex } from '../../common/types/profile';
 import type { Action } from '../actions/types';
-
-type IsThreadExpandedMap = Map<ThreadIndex, boolean>;
-type TimelineViewState = {
-  isFlameChartExpanded: IsThreadExpandedMap,
-  areMarkersExpanded: IsThreadExpandedMap,
-  hasZoomedViaMousewheel: boolean,
-}
+import type { IsThreadExpandedMap, TimelineViewState } from './types';
 
 function isFlameChartExpanded(state: IsThreadExpandedMap = new Map(), action: Action) {
   switch (action.type) {

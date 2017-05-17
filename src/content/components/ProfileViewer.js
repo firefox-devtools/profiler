@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TabBar from '../components/TabBar';
@@ -21,10 +23,24 @@ import ProfileViewerHeader from '../containers/ProfileViewerHeader';
 import ProfileCallTreeContextMenu from '../containers/ProfileCallTreeContextMenu';
 import ProfileThreadHeaderContextMenu from '../containers/ProfileThreadHeaderContextMenu';
 
+import type { StartEndRange } from '../../common/types/units';
+
+type Props = {
+  className: string,
+  tabOrder: number[],
+  timeRange: StartEndRange,
+  selectedTab: string,
+  changeSelectedTab: string => void,
+  changeTabOrder: number[] => void,
+};
+
 class ProfileViewer extends PureComponent {
+  props: Props;
+  _tabs: { name: string, title: string }[];
+
   constructor(props) {
     super(props);
-    this._onSelectTab = this._onSelectTab.bind(this);
+    (this: any)._onSelectTab = this._onSelectTab.bind(this);
 
     // If updating this list, make sure and update the tabOrder reducer with another index.
     this._tabs = [
@@ -55,7 +71,7 @@ class ProfileViewer extends PureComponent {
     ];
   }
 
-  _onSelectTab(selectedTab) {
+  _onSelectTab(selectedTab: string) {
     const { changeSelectedTab } = this.props;
     changeSelectedTab(selectedTab);
   }

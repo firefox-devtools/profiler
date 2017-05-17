@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import ThreadStackGraph from './ThreadStackGraph';
@@ -11,16 +13,37 @@ import { getSampleIndexClosestToTime, getStackAsFuncArray } from '../profile-dat
 import actions from '../actions';
 import ContextMenuTrigger from './ContextMenuTrigger';
 
+import type { IndexIntoFuncTable, Thread, ThreadIndex } from '../../common/types/profile';
+import type { Milliseconds } from '../../common/types/units';
+import type { FuncStackInfo, IndexIntoFuncStackTable } from '../../common/types/profile-derived';
+
+type Props = {
+  threadIndex: ThreadIndex,
+  thread: Thread,
+  funcStackInfo: FuncStackInfo,
+  interval: Milliseconds,
+  rangeStart: Milliseconds,
+  rangeEnd: Milliseconds,
+  selectedFuncStack: IndexIntoFuncStackTable,
+  isSelected: boolean,
+  style: Object,
+  threadName: string,
+  processDetails: string,
+  changeSelectedThread: ThreadIndex => void,
+  changeSelectedFuncStack: (IndexIntoFuncStackTable, IndexIntoFuncTable[]) => void,
+};
+
 class ProfileThreadHeaderBar extends PureComponent {
+  props: Props;
 
   constructor(props) {
     super(props);
-    this._onLabelMouseDown = this._onLabelMouseDown.bind(this);
-    this._onGraphClick = this._onGraphClick.bind(this);
-    this._onMarkerSelect = this._onMarkerSelect.bind(this);
+    (this: any)._onLabelMouseDown = this._onLabelMouseDown.bind(this);
+    (this: any)._onGraphClick = this._onGraphClick.bind(this);
+    (this: any)._onMarkerSelect = this._onMarkerSelect.bind(this);
   }
 
-  _onLabelMouseDown(event) {
+  _onLabelMouseDown(event: MouseEvent) {
     if (event.button === 0) {
       const { changeSelectedThread, threadIndex } = this.props;
       changeSelectedThread(threadIndex);
@@ -30,7 +53,7 @@ class ProfileThreadHeaderBar extends PureComponent {
     }
   }
 
-  _onGraphClick(time) {
+  _onGraphClick(time: number) {
     const { threadIndex, changeSelectedThread } = this.props;
     changeSelectedThread(threadIndex);
     if (time !== undefined) {

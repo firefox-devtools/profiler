@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent, PropTypes } from 'react';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
 import Reorderable from '../components/Reorderable';
@@ -13,20 +15,38 @@ import { connect } from 'react-redux';
 import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../reducers/profile-view';
 import actions from '../actions';
 
+import type { Profile, ThreadIndex } from '../../common/types/profile';
+import type { ProfileSelection } from '../actions/types';
+import type { Milliseconds, StartEndRange } from '../../common/types/units';
+
+type Props = {
+  profile: Profile,
+  className: string,
+  threadOrder: ThreadIndex[],
+  selection: ProfileSelection,
+  timeRange: StartEndRange,
+  zeroAt: Milliseconds,
+  changeThreadOrder: ThreadIndex[] => void,
+  updateProfileSelection: ProfileSelection => void,
+  addRangeFilterAndUnsetSelection: (Milliseconds, Milliseconds) => void,
+  changeSelectedThread: ThreadIndex => void,
+};
+
 class ProfileViewerHeader extends PureComponent {
+  props: Props;
 
   constructor(props) {
     super(props);
-    this._onZoomButtonClick = this._onZoomButtonClick.bind(this);
-    this._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(this);
+    (this: any)._onZoomButtonClick = this._onZoomButtonClick.bind(this);
+    (this: any)._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(this);
   }
 
-  _onZoomButtonClick(start, end) {
+  _onZoomButtonClick(start: Milliseconds, end: Milliseconds) {
     const { addRangeFilterAndUnsetSelection, zeroAt } = this.props;
     addRangeFilterAndUnsetSelection(start - zeroAt, end - zeroAt);
   }
 
-  _onIntervalMarkerSelect(threadIndex, start, end) {
+  _onIntervalMarkerSelect(threadIndex: ThreadIndex, start: Milliseconds, end: Milliseconds) {
     const { timeRange, updateProfileSelection, changeSelectedThread } = this.props;
     updateProfileSelection({
       hasSelection: true,
@@ -43,17 +63,13 @@ class ProfileViewerHeader extends PureComponent {
       updateProfileSelection, timeRange, zeroAt,
     } = this.props;
     const threads = profile.threads;
-    const { hasSelection, isModifying, selectionStart, selectionEnd } = selection;
 
     return <TimeSelectionScrubber className={`${className}Header`}
                            zeroAt={zeroAt}
                            rangeStart={timeRange.start}
                            rangeEnd={timeRange.end}
                            minSelectionStartWidth={profile.meta.interval}
-                           hasSelection={hasSelection}
-                           isModifying={isModifying}
-                           selectionStart={selectionStart}
-                           selectionEnd={selectionEnd}
+                           selection={selection}
                            onSelectionChange={updateProfileSelection}
                            onZoomButtonClick={this._onZoomButtonClick}>
       <div className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerJank`}>

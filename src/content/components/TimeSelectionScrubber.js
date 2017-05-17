@@ -73,8 +73,13 @@ class TimeSelectionScrubberImpl extends PureComponent {
         return;
       }
 
+      const { selection } = this.props;
+      if (!selection.hasSelection) {
+        return;
+      }
+
       const mouseUpTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
-      const { selectionStart, selectionEnd } = this.props;
+      const { selectionStart, selectionEnd } = selection;
       if (mouseUpTime < selectionStart ||
           mouseUpTime >= selectionEnd) {
         // Unset selection.
@@ -122,7 +127,7 @@ class TimeSelectionScrubberImpl extends PureComponent {
   render() {
     const {
       className, zeroAt, rangeStart, rangeEnd, children,
-      hasSelection, isModifying, selectionStart, selectionEnd,
+      selection,
       width, onSelectionChange, onZoomButtonClick,
     } = this.props;
 
@@ -141,18 +146,18 @@ class TimeSelectionScrubberImpl extends PureComponent {
                   rangeEnd={rangeEnd}
                   width={width}/>
         { children }
-        { hasSelection ? <SelectionScrubberOverlay rangeStart={rangeStart}
+        { selection.hasSelection ? <SelectionScrubberOverlay rangeStart={rangeStart}
                                                    rangeEnd={rangeEnd}
-                                                   selectionStart={selectionStart}
-                                                   selectionEnd={selectionEnd}
-                                                   isModifying={isModifying}
+                                                   selectionStart={selection.selectionStart}
+                                                   selectionEnd={selection.selectionEnd}
+                                                   isModifying={selection.isModifying}
                                                    width={width}
                                                    onSelectionChange={onSelectionChange}
                                                    onZoomButtonClick={onZoomButtonClick}/>
                        : null }
         <div className='timeSelectionScrubberHoverIndicator'
              style={{
-               visibility: isModifying || (hoverLocation === null) ? 'hidden' : undefined,
+               visibility: selection.isModifying || (hoverLocation === null) ? 'hidden' : undefined,
                left: (hoverLocation === null) ? '0' : `${hoverLocation}px`,
              }}/>
       </div>
@@ -166,10 +171,7 @@ TimeSelectionScrubberImpl.propTypes = {
   rangeStart: PropTypes.number.isRequired,
   rangeEnd: PropTypes.number.isRequired,
   minSelectionStartWidth: PropTypes.number.isRequired,
-  hasSelection: PropTypes.bool.isRequired,
-  isModifying: PropTypes.bool.isRequired,
-  selectionStart: PropTypes.number,
-  selectionEnd: PropTypes.number,
+  selection: PropTypes.object.isRequired,
   width: PropTypes.number.isRequired,
   onSelectionChange: PropTypes.func,
   onZoomButtonClick: PropTypes.func,
