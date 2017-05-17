@@ -16,7 +16,12 @@ import type {
   IndexIntoSamplesTable,
   IndexIntoStackTable,
 } from '../common/types/profile';
-import type { FuncStackTable, IndexIntoFuncStackTable, TracingMarker } from '../common/types/profile-derived';
+import type {
+  FuncStackInfo,
+  FuncStackTable,
+  IndexIntoFuncStackTable,
+  TracingMarker,
+} from '../common/types/profile-derived';
 import { timeCode } from '../common/time-code';
 import { getEmptyTaskTracerData } from './task-tracer';
 
@@ -35,27 +40,36 @@ export const resourceTypes = {
 };
 
 /**
- * Takes the stack table and the frame table, creates a func stack table and
- * returns a map from each stack to its corresponding func stack which can be
- * used to provide funcStack information for the samples data.
- * @param  {Object} stackTable The thread's stackTable.
- * @param  {Object} frameTable The thread's frameTable.
- * @param  {Object} funcTable  The thread's funcTable.
- * @return {Object}            The funcStackTable and the stackIndexToFuncStackIndex map.
+ * Generate the FuncStackInfo which contains the FuncStackTable, and a map to convert
+ * an IndexIntoStackTable to a IndexIntoFuncStackTable. This function runs through
+ * a stackTable, and de-duplicates stacks that have frames that point to the same
+ * function.
+ *
+ * See `src/common/types/profile-derived.js` for the type definitions.
+ * See `docs/func-stacks.md` for a detailed explanation of funcStacks.
  */
-export function getFuncStackInfo(stackTable: StackTable, frameTable: FrameTable, funcTable: FuncTable) {
+export function getFuncStackInfo(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable
+): FuncStackInfo {
   return timeCode('getFuncStackInfo', () => {
     const stackIndexToFuncStackIndex = new Uint32Array(stackTable.length);
     const funcCount = funcTable.length;
-    const prefixFuncStackAndFuncToFuncStackMap = new Map(); // prefixFuncStack * funcCount + func => funcStack
+    // Maps can't key off of two items, so combine the prefixFuncStack and the funcIndex
+    // using the following formula: prefixFuncStack * funcCount + funcIndex => funcStack
+    const prefixFuncStackAndFuncToFuncStackMap = new Map();
 
     // The funcStackTable components.
-    const prefix: Array<number> = [];
-    const func: Array<number> = [];
+    const prefix: Array<IndexIntoFuncStackTable> = [];
+    const func: Array<IndexIntoFuncTable> = [];
     const depth: Array<number> = [];
     let length = 0;
 
-    function addFuncStack(prefixIndex, funcIndex) {
+    function addFuncStack(
+      prefixIndex: IndexIntoFuncStackTable,
+      funcIndex: IndexIntoFuncTable
+    ) {
       const index = length++;
       prefix[index] = prefixIndex;
       func[index] = funcIndex;
@@ -66,8 +80,11 @@ export function getFuncStackInfo(stackTable: StackTable, frameTable: FrameTable,
       }
     }
 
+    // Go through each stack, and create a new funcStack table, which is based off of
+    // functions rather than frames.
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefixStack = stackTable.prefix[stackIndex];
+      // We know that at this point the following condition holds:
       // assert(prefixStack === null || prefixStack < stackIndex);
       const prefixFuncStack = (prefixStack === null) ? -1 :
          stackIndexToFuncStackIndex[prefixStack];

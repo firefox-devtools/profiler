@@ -8,6 +8,30 @@ import type { MarkerPayload } from './profile';
 
 export type IndexIntoFuncStackTable = number;
 
+/**
+ * Contains a table of stack information that is unique to the function as opposed to
+ * being unique to the frame. There can be multiple frames for a single C++ function.
+ * Using stacks as opposed to funcStacks can cause duplicated functions in reports
+ * like the call tree.
+ *
+ * For example:
+ *
+ *            stack1 (funcA)                             funcStack1 (funcA)
+ *                 |                                            |
+ *                 v                                            v
+ *            stack2 (funcB)         stackTable to       funcStack2 (funcB)
+ *                 |                funcStackTable              |
+ *                 v                      ->                    v
+ *            stack3 (funcC)                             funcStack3 (funcC)
+ *            /            \                                    |
+ *           V              V                                   v
+ *    stack4 (funcD)     stack5 (funcD)                  funcStack4 (funcD)
+ *         |                  |                          /               \
+ *         v                  V                         V                 V
+ *    stack6 (funcE)     stack7 (funcF)       funcStack5 (funcE)     funcStack6 (funcF)
+ *
+ * For a detailed explanation of funcStacks see `docs/func-stacks.md`.
+ */
 export type FuncStackTable = {
   prefix: Int32Array,
   func: Int32Array,
@@ -15,8 +39,13 @@ export type FuncStackTable = {
   length: number,
 };
 
+/**
+ * Both the funcStackTable and a map that converts an IndexIntoStackTable
+ * into an IndexIntoFuncStackTable.
+ */
 export type FuncStackInfo = {
   funcStackTable: FuncStackTable,
+  // IndexIntoStackTable -> IndexIntoFuncStackTable
   stackIndexToFuncStackIndex: Uint32Array,
 };
 
