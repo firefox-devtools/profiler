@@ -4,7 +4,6 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import actions from '../actions';
 
 class Initializing extends PureComponent {
   render() {
@@ -39,4 +38,4 @@ Initializing.propTypes = {
 export default connect(() => ({
   className: 'initializing',
   profilerUrl: 'https://github.com/devtools-html/Gecko-Profiler-Addon',
-}), actions)(Initializing);
+}))(Initializing);

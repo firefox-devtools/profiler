@@ -2,10 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import actions from '../actions';
 import { getProfileViewOptions } from '../reducers/profile-view';
+import type { RequestedLib } from '../reducers/types';
 
 function englishSgPlLibrary(count) {
   return count === 1 ? 'library' : 'libraries';
@@ -24,7 +26,14 @@ function englishListJoin(list) {
   }
 }
 
+type Props = {
+  symbolicationStatus: string,
+  waitingForLibs: Set<RequestedLib>,
+};
+
 class SymbolicationStatusOverlay extends PureComponent {
+  props: Props;
+
   render() {
     const { symbolicationStatus, waitingForLibs } = this.props;
     if (symbolicationStatus === 'SYMBOLICATING') {
@@ -58,4 +67,4 @@ SymbolicationStatusOverlay.propTypes = {
 export default connect(state => ({
   symbolicationStatus: getProfileViewOptions(state).symbolicationStatus,
   waitingForLibs: getProfileViewOptions(state).waitingForLibs,
-}), actions)(SymbolicationStatusOverlay);
+}))(SymbolicationStatusOverlay);

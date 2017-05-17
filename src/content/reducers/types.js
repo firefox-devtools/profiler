@@ -12,10 +12,12 @@ import type {
 import type { Milliseconds, StartEndRange } from '../../common/types/units';
 import type { IndexIntoMarkersTable, IndexIntoFuncTable, Profile, ThreadIndex } from '../../common/types/profile';
 import type { Attempt } from '../errors';
+import type { GetLabel } from '../labeling-strategies';
+import type { GetCategory } from '../color-categories';
 
 export type Reducer<T> = (T, Action) => T;
 
-export type RequestedLib = { pdbName: string, breakpadId: string };
+export type RequestedLib = { debugName: string, breakpadId: string };
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {
   selectedFuncStack: IndexIntoFuncTable[],
@@ -72,12 +74,27 @@ export type URLState = {
 
 export type IconState = Set<string>;
 
+export type FlameChartState = {
+  categoryColorStrategy: GetCategory,
+  labelingStrategy: GetLabel,
+};
+
+export type IsThreadExpandedMap = Map<ThreadIndex, boolean>;
+export type TimelineViewState = {
+  isFlameChartExpanded: IsThreadExpandedMap,
+  areMarkersExpanded: IsThreadExpandedMap,
+  hasZoomedViaMousewheel: boolean,
+}
+
 export type State = {
   app: AppState,
   profileView: ProfileViewState,
   summaryView: SummaryViewState,
   urlState: URLState,
+  flameChart: FlameChartState,
+  timelineView: TimelineViewState,
   icons: IconState,
+  worker: any,
 };
 
 export type IconWithClassName = {

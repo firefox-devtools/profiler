@@ -4,7 +4,9 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import { connect, Provider } from 'react-redux';
-import actions from '../actions';
+import { oneLine } from 'common-tags';
+
+import { retrieveProfileFromAddon, retrieveProfileFromWeb } from '../actions/receive-profile';
 import ProfileViewer from '../components/ProfileViewer';
 import Home from '../containers/Home';
 import { urlFromState, stateFromCurrentLocation } from '../url-handling';
@@ -12,8 +14,8 @@ import { getView } from '../reducers/app';
 import { getDataSource, getHash } from '../reducers/url-state';
 import URLManager from './URLManager';
 
-import type { State, AppViewState } from '../reducers/types';
-import type { Action } from '../actions/types';
+import type { Store } from '../types';
+import type { AppViewState } from '../reducers/types';
 
 const LOADING_MESSAGES = Object.freeze({
   'from-addon': 'Retrieving profile from the gecko profiler addon...',
@@ -93,7 +95,10 @@ class ProfileViewWhenReadyImpl extends PureComponent {
         let additionalMessage = null;
         if (view.error) {
           console.error(view.error);
-          additionalMessage = `Error was "${view.error}". The full stack has been written to the Web Console.`;
+          additionalMessage = oneLine`
+            Error was "${view.error.toString}".
+            The full stack has been written to the Web Console.
+          `;
         }
 
         return (
@@ -125,14 +130,17 @@ ProfileViewWhenReadyImpl.propTypes = {
   retrieveProfileFromWeb: PropTypes.func.isRequired,
 };
 
-const ProfileViewWhenReady = connect(state => ({
-  view: getView(state),
-  dataSource: getDataSource(state),
-  hash: getHash(state),
-}), actions)(ProfileViewWhenReadyImpl);
+const ProfileViewWhenReady = connect(
+  state => ({
+    view: getView(state),
+    dataSource: getDataSource(state),
+    hash: getHash(state),
+  }),
+  { retrieveProfileFromWeb, retrieveProfileFromAddon }
+)(ProfileViewWhenReadyImpl);
 
 type RootProps = {
-  store: Store<State, Action>,
+  store: Store,
 };
 
 export default class Root extends PureComponent {

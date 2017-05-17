@@ -13,7 +13,7 @@
     "eslint": "eslint index.js src",
     "eslint-fix": "eslint --fix index.js src",
     "flow": "flow",
-    "flow-coverage": "flow-coverage-report -i 'src/content/reducers/**/*.js' -t html -t text",
+    "flow-coverage": "flow-coverage-report -i 'src/content/**/*.js' -t html -t text",
     "flow-generate-libdefs": "flow-typed install",
     "license-check": "devtools-license-check",
     "publish": "rimraf public_html && cp -r dist public_html",
