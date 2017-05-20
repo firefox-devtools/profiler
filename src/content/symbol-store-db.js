@@ -65,10 +65,11 @@ export class SymbolStoreDB {
           reject(openReq.error);
         }
       };
-      openReq.onupgradeneeded = upgradeEvent => {
+      openReq.onupgradeneeded = ({ oldVersion }) => {
         const db = openReq.result;
         db.onerror = reject;
-        if (upgradeEvent.oldVersion === 1) {
+
+        if (oldVersion === 1) {
           db.deleteObjectStore('symbol-tables');
         }
         const store = db.createObjectStore('symbol-tables', {
@@ -76,15 +77,17 @@ export class SymbolStoreDB {
         });
         store.createIndex('lastUsedDate', 'lastUsedDate');
       };
+
       openReq.onblocked = () => {
         reject(new Error(
           'The symbol store database could not be upgraded because it is ' +
           'open in another tab. Please close all your other perf-html.io ' +
           'tabs and refresh.'));
       };
+
       openReq.onsuccess = () => {
         const db = openReq.result;
-        db.onupgradeneeded = () => {
+        db.onversionchange = () => {
           db.close();
         };
         resolve(db);
