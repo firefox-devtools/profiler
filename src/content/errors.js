@@ -10,9 +10,9 @@ export type Attempt = {
 };
 
 export class TemporaryError extends Error {
-  attempt: Attempt;
+  attempt: Attempt | null;
 
-  constructor(message: string, attempt: Attempt) {
+  constructor(message: string, attempt: Attempt | null = null) {
     super(message);
     this.name = 'TemporaryError';
     this.attempt = attempt;

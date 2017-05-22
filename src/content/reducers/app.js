@@ -9,16 +9,27 @@ import type { Action } from '../actions/types';
 import type { State, AppState, AppViewState, Reducer } from './types';
 
 function view(state: AppViewState = { phase: 'INITIALIZING' }, action: Action): AppViewState {
+  if (state.phase === 'PROFILE') {
+    // Let's not come back at another phase if we're already displaying a profile
+    return state;
+  }
+
   switch (action.type) {
     case 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_WEB':
+    case 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_ADDON':
       return {
         phase: 'INITIALIZING',
-        additionalData: { attempt: action.error.attempt },
+        additionalData: {
+          message: action.error.message,
+          attempt: action.error.attempt,
+        },
       };
     case 'ERROR_RECEIVING_PROFILE_FROM_FILE':
-    case 'ERROR_RECEIVING_PROFILE_FROM_ADDON':
+    case 'FATAL_ERROR_RECEIVING_PROFILE_FROM_ADDON':
     case 'FATAL_ERROR_RECEIVING_PROFILE_FROM_WEB':
       return { phase: 'FATAL_ERROR', error: action.error };
+    case 'WAITING_FOR_PROFILE_FROM_ADDON':
+      return { phase: 'INITIALIZING' };
     case 'ROUTE_NOT_FOUND':
       return { phase: 'ROUTE_NOT_FOUND' };
     case 'RECEIVE_PROFILE_FROM_ADDON':
