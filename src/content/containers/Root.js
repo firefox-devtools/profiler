@@ -102,7 +102,7 @@ class ProfileViewWhenReadyImpl extends PureComponent {
         if (view.error) {
           console.error(view.error);
           additionalMessage = oneLine`
-            Error was "${view.error.toString}".
+            Error was "${view.error.toString()}".
             The full stack has been written to the Web Console.
           `;
         }
