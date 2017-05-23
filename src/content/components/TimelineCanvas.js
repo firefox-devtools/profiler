@@ -31,6 +31,7 @@ export default class TimelineCanvas<HoveredItem> extends Component<
   _requestedAnimationFrame: boolean;
   _devicePixelRatio: 1;
   _ctx: CanvasRenderingContext2D;
+  _canvas: ?HTMLCanvasElement;
 
   constructor(props: Props<HoveredItem>) {
     super(props);
@@ -38,6 +39,7 @@ export default class TimelineCanvas<HoveredItem> extends Component<
     this._devicePixelRatio = 1;
     this.state = { hoveredItem: null };
 
+    (this: any)._setCanvasRef = this._setCanvasRef.bind(this);
     (this: any)._onMouseMove = this._onMouseMove.bind(this);
     (this: any)._onMouseOut = this._onMouseOut.bind(this);
     (this: any)._onDoubleClick = this._onDoubleClick.bind(this);
@@ -55,7 +57,7 @@ export default class TimelineCanvas<HoveredItem> extends Component<
       this._requestedAnimationFrame = true;
       window.requestAnimationFrame(() => {
         this._requestedAnimationFrame = false;
-        if (this.refs.canvas) {
+        if (this._canvas) {
           timeCode(`${className} render`, () => {
             this._prepCanvas();
             drawCanvas(this._ctx, this.state.hoveredItem);
@@ -66,39 +68,41 @@ export default class TimelineCanvas<HoveredItem> extends Component<
   }
 
   _prepCanvas() {
-    const {canvas} = this.refs;
+    const canvas = this._canvas;
     const {containerWidth, containerHeight} = this.props;
     const {devicePixelRatio} = window;
     const pixelWidth: DevicePixels = containerWidth * devicePixelRatio;
     const pixelHeight: DevicePixels = containerHeight * devicePixelRatio;
+    if (!canvas) {
+      return;
+    }
     // Satisfy the null check for Flow.
+    const ctx = this._ctx || canvas.getContext('2d');
     if (!this._ctx) {
-      this._ctx = canvas.getContext('2d');
+      this._ctx = ctx;
     }
     if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
       canvas.width = pixelWidth;
       canvas.height = pixelHeight;
       canvas.style.width = containerWidth + 'px';
       canvas.style.height = containerHeight + 'px';
-      this._ctx.scale(this._devicePixelRatio, this._devicePixelRatio);
+      ctx.scale(this._devicePixelRatio, this._devicePixelRatio);
     }
     if (this._devicePixelRatio !== devicePixelRatio) {
       // Make sure and multiply by the inverse of the previous ratio, as the scaling
       // operates off of the previous set scale.
       const scale = (1 / this._devicePixelRatio) * devicePixelRatio;
-      this._ctx.scale(scale, scale);
+      ctx.scale(scale, scale);
       this._devicePixelRatio = devicePixelRatio;
     }
-    return this._ctx;
   }
 
   _onMouseMove(event: SyntheticMouseEvent) {
-    const { canvas } = this.refs;
-    if (!canvas) {
+    if (!this._canvas) {
       return;
     }
 
-    const rect = canvas.getBoundingClientRect();
+    const rect = this._canvas.getBoundingClientRect();
     const x: CssPixels = event.pageX - rect.left;
     const y: CssPixels = event.pageY - rect.top;
 
@@ -126,6 +130,10 @@ export default class TimelineCanvas<HoveredItem> extends Component<
     return this.props.getHoveredItemInfo(hoveredItem);
   }
 
+  _setCanvasRef(canvas: HTMLCanvasElement) {
+    this._canvas = canvas;
+  }
+
   render() {
     const { hoveredItem } = this.state;
     this._scheduleDraw();
@@ -137,7 +145,7 @@ export default class TimelineCanvas<HoveredItem> extends Component<
     });
 
     return <canvas className={className}
-                   ref='canvas'
+                   ref={this._setCanvasRef}
                    onMouseMove={this._onMouseMove}
                    onMouseOut={this._onMouseOut}
                    onDoubleClick={this._onDoubleClick}
