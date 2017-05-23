@@ -12,6 +12,7 @@ import threadDispatcher from '../common/thread-middleware';
 import messages from './messages';
 import handleMessages from '../common/message-handler';
 import type { Store } from './types';
+import Worker from './worker-factory';
 
 /**
  * Isolate the store creation into a function, so that it can be used outside of the
@@ -19,13 +20,7 @@ import type { Store } from './types';
  * @return {object} Redux store.
  */
 export default function initializeStore(): Store {
-  let worker;
-  if (process.env.NODE_ENV === 'test') {
-    const Worker = require('workerjs');
-    worker = new Worker(__dirname + '/../../dist/worker.js', true);
-  } else {
-    worker = new window.Worker('/worker.js');
-  }
+  const worker = new Worker('worker');
 
   const middlewares = [
     thunk,

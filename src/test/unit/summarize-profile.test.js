@@ -3,8 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import 'babel-polyfill';
-import { describe, it } from 'mocha';
-import { assert } from 'chai';
 import { summarizeProfile } from '../../common/summarize-profile';
 
 const profile = require('../fixtures/profiles/profile-2d-canvas.json');
@@ -13,12 +11,12 @@ describe('summarize-profile', function () {
   const [geckoMain, compositor, content] = summarizeProfile(profile);
 
   it('has the thread names', function () {
-    assert.equal(geckoMain.threadName, 'GeckoMain');
-    assert.equal(compositor.threadName, 'Compositor');
-    assert.equal(content.threadName, 'Content');
-    assert.equal(profile.threads[geckoMain.threadIndex].name, 'GeckoMain');
-    assert.equal(profile.threads[compositor.threadIndex].name, 'Compositor');
-    assert.equal(profile.threads[content.threadIndex].name, 'Content');
+    expect(geckoMain.threadName).toEqual('GeckoMain');
+    expect(compositor.threadName).toEqual('Compositor');
+    expect(content.threadName).toEqual('Content');
+    expect(profile.threads[geckoMain.threadIndex].name).toEqual('GeckoMain');
+    expect(profile.threads[compositor.threadIndex].name).toEqual('Compositor');
+    expect(profile.threads[content.threadIndex].name).toEqual('Content');
   });
 
   // Probably not the most brilliant test, but assert that the values are the same from
@@ -52,49 +50,49 @@ describe('summarize-profile', function () {
       row.percentage = row.samples / sampleCount;
     });
 
-    assert.deepEqual(summary, expectedSummary);
+    expect(summary).toEqual(expectedSummary);
   });
 
   it('provides a rolling summary', () => {
     const {rollingSummary} = geckoMain;
-    assert.ok(Array.isArray(rollingSummary));
+    expect(Array.isArray(rollingSummary)).toBeTruthy();
 
     const hasSamples = (memo, {samples}) => memo && typeof samples === 'object';
-    assert.ok(rollingSummary.reduce(hasSamples, true),
-      'Each summary has samples');
+
+    // Each summary has samples
+    expect(rollingSummary.reduce(hasSamples, true)).toBeTruthy();
+
 
     const hasPercentages = (memo, {percentage}) => memo && typeof percentage === 'object';
-    assert.ok(rollingSummary.reduce(hasPercentages, true),
-      'Each summary has percentages');
+    expect(rollingSummary.reduce(hasPercentages, true)).toBeTruthy();
 
     for (const {samples} of rollingSummary) {
-      for (const [name, value] of Object.entries(samples)) {
-        assert.ok(value > 0, `"${name}" has a sample count greater than 0.`);
+      for (const value of Object.values(samples)) {
+        // This sample has a sample count greater than 0.
+        expect(value).toBeGreaterThan(0);
       }
     }
 
     for (const {percentage} of rollingSummary) {
-      for (const [name, value] of Object.entries(percentage)) {
-        assert.ok(value > 0, `"${name}" has a percentage count greater than 0.`);
-        assert.ok(value <= 1, `"${name}" has a percentage count greater than 0.`);
+      for (const value of Object.values(percentage)) {
+        // This sample has a percentage count greater than 0.
+        expect(value).toBeGreaterThan(0);
+        // This sample has a percentage count greater than 0.
+        expect(value).toBeLessThanOrEqual(1);
       }
     }
   });
 
   it('provides sane rolling summary values', () => {
     const {samples, percentage} = geckoMain.rollingSummary[0];
-    assert.equal(samples['dom.wait'], 2);
-    assert.equal(samples['script.compile.baseline'], 2);
-    assert.equal(samples.script, 12);
-    assert.equal(samples.dom, 1);
+    expect(samples['dom.wait']).toEqual(2);
+    expect(samples['script.compile.baseline']).toEqual(2);
+    expect(samples.script).toEqual(12);
+    expect(samples.dom).toEqual(1);
 
-    assertFloatEquals(percentage['CC.wait'], 0.05263157894736842);
-    assertFloatEquals(percentage['script.compile.baseline'], 0.10526315789473684);
-    assertFloatEquals(percentage.script, 0.631578947368421);
-    assertFloatEquals(percentage.dom, 0.05263157894736842);
+    expect(percentage['CC.wait']).toBeCloseTo(0.05263157894736842);
+    expect(percentage['script.compile.baseline']).toBeCloseTo(0.10526315789473684);
+    expect(percentage.script).toBeCloseTo(0.631578947368421);
+    expect(percentage.dom).toBeCloseTo(0.05263157894736842);
   });
 });
-
-function assertFloatEquals(a, b, message) {
-  assert.ok(Math.abs(a - b) < 0.0001, message || `expected ${a} to be ${b}`);
-}

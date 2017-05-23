@@ -19,14 +19,12 @@
     "publish": "rimraf public_html && cp -r dist public_html",
     "serve-static": "ws -d dist/ -s index.html -p 4242",
     "start": "mkdir -p dist && cp res/zee-worker.js dist/ && NODE_ENV=development node server.js",
-    "start-no-hot": "npm run start",
-    "start-prod": "npm run build-prod && npm run serve-static",
-    "start-prod-readable": "npm run build-prod-readable && npm run serve-static",
-    "test": "npm run build && npm run test-all",
-    "test:quiet": "npm run build:quiet && npm run test-all",
-    "test-all": "NODE_ENV=test nyc mocha --compilers js:babel-core/register 'src/test/**/*.js'",
-    "test-file": "NODE_ENV=test mocha --compilers js:babel-core/register",
-    "test-report": "nyc report --reporter=text-lcov > coverage.lcov"
+    "start-no-hot": "npm run start --",
+    "start-prod": "npm run build-prod && npm run serve-static --",
+    "start-prod-readable": "npm run build-prod-readable && npm run serve-static --",
+    "test": "npm run build && npm run test-all --",
+    "test:quiet": "npm run build:quiet && npm run test-all --",
+    "test-all": "NODE_ENV=test jest"
   },
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MPL-2.0",
@@ -93,6 +91,7 @@
     "babel-cli": "^6.24.0",
     "babel-core": "^6.24.0",
     "babel-eslint": "^7.2.1",
+    "babel-jest": "^20.0.3",
     "babel-loader": "^6.4.1",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.23.0",
@@ -116,12 +115,11 @@
     "flow-typed": "^2.0.0",
     "html-webpack-plugin": "^2.24.1",
     "http-server": "^0.9.0",
+    "jest": "^20.0.3",
     "json-loader": "^0.5.4",
     "local-web-server": "^1.2.6",
     "lodash.clonedeep": "^4.5.0",
     "mkdirp": "^0.5.1",
-    "mocha": "^3.1.1",
-    "nyc": "^10.0.0",
     "raw-loader": "^0.5.1",
     "rimraf": "^2.5.4",
     "sinon": "^2.1.0",
@@ -130,5 +128,17 @@
     "webpack-dev-middleware": "^1.8.4",
     "webpack-dev-server": "^2.1.0-beta.12",
     "webpack-hot-middleware": "^2.13.2"
+  },
+  "jest": {
+    "collectCoverageFrom" : ["src/**/*.{js,jsx}", "!**/node_modules/**"],
+    "testEnvironment": "node",
+    "moduleFileExtensions": ["js", "jsx"],
+    "moduleDirectories": ["node_modules"],
+    "moduleNameMapper": {
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/test/fixtures/mocks/file-mock.js",
+      "\\.(css|less)$": "<rootDir>/src/test/fixtures/mocks/style-mock.js"
+    },
+    "setupTestFrameworkScriptFile": "./src/test/setup.js",
+    "verbose": true
   }
 }

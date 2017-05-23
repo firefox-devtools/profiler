@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { assert } from 'chai';
 import sinon from 'sinon';
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../content/reducers/profile-view';
@@ -39,10 +38,10 @@ describe('actions/receive-profile', function () {
       const store = blankStore();
 
       const initialProfile = ProfileViewSelectors.getProfile(store.getState());
-      assert.ok(initialProfile, 'A blank profile initially exists');
-      assert.lengthOf(initialProfile.threads, 0, 'The blank profile contains no data');
+      expect(initialProfile).toBeTruthy();
+      expect(initialProfile.threads).toHaveLength(0);
       store.dispatch(receiveProfileFromAddon(preprocessedProfile));
-      assert.strictEqual(ProfileViewSelectors.getProfile(store.getState()), preprocessedProfile, 'The passed in profile is saved in state.');
+      expect(ProfileViewSelectors.getProfile(store.getState())).toBe(preprocessedProfile);
     });
   });
 
@@ -72,10 +71,10 @@ describe('actions/receive-profile', function () {
       await store.dispatch(retrieveProfileFromAddon());
 
       const state = store.getState();
-      assert.deepEqual(getView(state), { phase: 'PROFILE' });
-      assert.deepEqual(ProfileViewSelectors.getDisplayRange(state), { start: 0, end: 1007 });
-      assert.deepEqual(ProfileViewSelectors.getThreadOrder(state), [0, 2, 1]); // 1 is last because it's the Compositor thread
-      assert.lengthOf(ProfileViewSelectors.getProfile(state).threads, 3); // not empty
+      expect(getView(state)).toEqual({ phase: 'PROFILE' });
+      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({ start: 0, end: 1007 });
+      expect(ProfileViewSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
 
     it('displays a warning after 30 seconds', async function () {
@@ -94,8 +93,7 @@ describe('actions/receive-profile', function () {
       const errorMessage =
         'We were unable to connect to the Gecko profiler add-on within thirty seconds. This might be because the profile is big or your machine is slower than usual. Still waiting...';
 
-      assert.deepEqual(
-        views.slice(0, 3),
+      expect(views.slice(0, 3)).toEqual(
         [
           { phase: 'INITIALIZING', additionalData: { attempt: null, message: errorMessage }}, // when the error happens
           { phase: 'INITIALIZING' }, // when we could connect to the addon but waiting for the profile
@@ -104,10 +102,10 @@ describe('actions/receive-profile', function () {
       );
 
       const state = store.getState();
-      assert.deepEqual(getView(state), { phase: 'PROFILE' });
-      assert.deepEqual(ProfileViewSelectors.getDisplayRange(state), { start: 0, end: 1007 });
-      assert.deepEqual(ProfileViewSelectors.getThreadOrder(state), [0, 2, 1]); // 1 is last because it's the Compositor thread
-      assert.lengthOf(ProfileViewSelectors.getProfile(state).threads, 3); // not empty
+      expect(getView(state)).toEqual({ phase: 'PROFILE' });
+      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({ start: 0, end: 1007 });
+      expect(ProfileViewSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
   });
 
@@ -143,10 +141,10 @@ describe('actions/receive-profile', function () {
       await store.dispatch(retrieveProfileFromWeb(hash));
 
       const state = store.getState();
-      assert.deepEqual(getView(state), { phase: 'PROFILE' });
-      assert.deepEqual(ProfileViewSelectors.getDisplayRange(state), { start: 0, end: 1007 });
-      assert.deepEqual(ProfileViewSelectors.getThreadOrder(state), [0, 2, 1]); // 1 is last because it's the Compositor thread
-      assert.lengthOf(ProfileViewSelectors.getProfile(state).threads, 3); // not empty
+      expect(getView(state)).toEqual({ phase: 'PROFILE' });
+      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({ start: 0, end: 1007 });
+      expect(ProfileViewSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
     it('requests several times in case of 404', async function () {
@@ -162,19 +160,16 @@ describe('actions/receive-profile', function () {
       )).map(state => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
-      assert.deepEqual(
-        views,
-        [
-          { phase: 'INITIALIZING' },
-          { phase: 'INITIALIZING', additionalData: { attempt: { count: 1, total: 11 }, message: errorMessage }},
-          { phase: 'PROFILE' },
-        ]
-      );
+      expect(views).toEqual([
+        { phase: 'INITIALIZING' },
+        { phase: 'INITIALIZING', additionalData: { attempt: { count: 1, total: 11 }, message: errorMessage }},
+        { phase: 'PROFILE' },
+      ]);
 
       const state = store.getState();
-      assert.deepEqual(ProfileViewSelectors.getDisplayRange(state), { start: 0, end: 1007 });
-      assert.deepEqual(ProfileViewSelectors.getThreadOrder(state), [0, 2, 1]); // 1 is last because it's the Compositor thread
-      assert.lengthOf(ProfileViewSelectors.getProfile(state).threads, 3); // not empty
+      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({ start: 0, end: 1007 });
+      expect(ProfileViewSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
     it('fails in case the profile cannot be found after several tries', async function () {
@@ -188,17 +183,13 @@ describe('actions/receive-profile', function () {
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
       const errorMessage = 'Profile not found on remote server.';
-      assert.deepEqual(
-        views,
-        [
-          { phase: 'INITIALIZING' },
-          ...steps.map(step => (
-            { phase: 'INITIALIZING', additionalData: { attempt: { count: step, total: 11 }, message: errorMessage }}
-          )),
-          // errors do not have any inherited properties so we don't need to specify the actual error for deepEqual to succeed
-          { phase: 'FATAL_ERROR', error: new Error() },
-        ]
-      );
+      expect(views).toEqual([
+        { phase: 'INITIALIZING' },
+        ...steps.map(step => (
+          { phase: 'INITIALIZING', additionalData: { attempt: { count: step, total: 11 }, message: errorMessage }}
+        )),
+        { phase: 'FATAL_ERROR', error: expect.any(Error) },
+      ]);
     });
 
     it('fails in case the fetch returns a server error', async function () {
@@ -207,8 +198,7 @@ describe('actions/receive-profile', function () {
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromWeb(hash));
-      // errors do not have any inherited properties so we don't need to specify the actual error for deepEqual to succeed
-      assert.deepEqual(getView(store.getState()), { phase: 'FATAL_ERROR', error: new Error() });
+      expect(getView(store.getState())).toEqual({ phase: 'FATAL_ERROR', error: expect.any(Error) });
     });
   });
 });

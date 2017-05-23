@@ -7,7 +7,6 @@ test:
     - npm run eslint
     - npm run flow -- --quiet
   override:
-    - npm run test:quiet
+    - npm run test:quiet -- --coverage --runInBand
   post:
-    - npm run test-report
     - bash <(curl -s https://codecov.io/bash)
