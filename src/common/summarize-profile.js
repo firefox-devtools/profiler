@@ -94,8 +94,9 @@ export function summarizeProfile(profile: Profile) {
  * are cached between calls.
  * @returns {function} Function categorizer.
  */
-function functionNameCategorizer(): (number, string[]) => (string|false) {
-  const cache = [];
+function functionNameCategorizer(numFunctions): (number, number[], string[]) => string {
+  const cache = new Array(numFunctions);
+  cache.fill('', 0, numFunctions);
 
   // Compile set of categories into a single regular expression that produces
   // the pattern (whether it's a prefix, stem, substring, or exact match).
@@ -123,21 +124,21 @@ function functionNameCategorizer(): (number, string[]) => (string|false) {
                            + '|\\b(?:' + matchPatterns.stem.join('|') + ')'
                            + '|^(?:' + matchPatterns.exact.join('|') + ')$');
 
-  return function functionNameToCategory(funcNameIndex, stringArray): (string|false) {
-    const existingCategory = cache[funcNameIndex];
-    if (existingCategory !== undefined) {
+  return function functionNameToCategory(funcIndex, funcNames, stringArray) {
+    const existingCategory = cache[funcIndex];
+    if (existingCategory !== '') {
       return existingCategory;
     }
 
-    const match = stringArray[funcNameIndex].match(regex);
+    const match = stringArray[funcNames[funcIndex]].match(regex);
     if (match) {
       const category = patternToCategory.get(match[0]) || 'internal error';
-      cache[funcNameIndex] = category;
+      cache[funcIndex] = category;
       return category;
     }
 
-    cache[funcNameIndex] = false;
-    return false;
+    cache[funcIndex] = 'none';
+    return 'none';
   };
 }
 
@@ -152,7 +153,7 @@ type SampleCategorizer = (stackIndex: (IndexIntoStackTable|null)) => (string|nul
  * @return {function} Sample stack categorizer.
  */
 function sampleCategorizer(thread: Thread): SampleCategorizer {
-  const categorizeFuncName = functionNameCategorizer();
+  const categorizeFuncName = functionNameCategorizer(thread.funcTable.name.length);
 
   function computeCategory(stackIndex: (IndexIntoStackTable|null)): (string|null) {
     if (stackIndex === null) {
@@ -167,8 +168,8 @@ function sampleCategorizer(thread: Thread): SampleCategorizer {
     }
 
     const funcIndex = thread.frameTable.func[frameIndex];
-    const category = categorizeFuncName(thread.funcTable.name[funcIndex], thread.stringTable._array);
-    if (category !== false && category !== 'wait') {
+    const category = categorizeFuncName(funcIndex, thread.funcTable.name, thread.stringTable._array);
+    if (category !== 'none' && category !== 'wait') {
       return category;
     }
 
