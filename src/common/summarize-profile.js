@@ -187,7 +187,7 @@ function sampleCategorizer(thread: Thread): SampleCategorizer {
     return prefixCategory;
   }
 
-  const stackCategoryCache: Map<IndexIntoStackTable, (string|null)> = new Map();
+  const stackCategoryCache: Map<IndexIntoStackTable, string> = new Map();
 
   function categorizeSampleStack(stackIndex: (IndexIntoStackTable|null)): (string|null) {
     if (stackIndex === null) {
@@ -198,7 +198,7 @@ function sampleCategorizer(thread: Thread): SampleCategorizer {
       return category;
     }
 
-    category = computeCategory(stackIndex);
+    category = computeCategory(stackIndex) || 'uncategorized';
     stackCategoryCache.set(stackIndex, category);
     return category;
   }

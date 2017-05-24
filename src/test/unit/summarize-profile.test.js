@@ -32,6 +32,7 @@ describe('summarize-profile', function () {
       { category: 'dom', samples: 20 },
       { category: 'script.compile', samples: 16 },
       { category: 'script.compile.baseline', samples: 14 },
+      { category: 'uncategorized', samples: 7 },
       { category: 'frameconstruction', samples: 6 },
       { category: 'network', samples: 4 },
       { category: 'script.parse', samples: 4 },
@@ -45,7 +46,7 @@ describe('summarize-profile', function () {
 
     // Go ahead and calculate the percentages dynamically for the test, this way
     // the float equalities will pass a strict equality test.
-    const sampleCount = 286;
+    const sampleCount = 293;
     expectedSummary.forEach(row => {
       row.percentage = row.samples / sampleCount;
     });
