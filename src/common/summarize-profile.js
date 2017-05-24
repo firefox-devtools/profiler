@@ -95,7 +95,7 @@ export function summarizeProfile(profile: Profile) {
  * @returns {function} Function categorizer.
  */
 function functionNameCategorizer(): (number, string[]) => (string|false) {
-  const cache = new Map();
+  const cache = [];
 
   // Compile set of categories into a single regular expression that produces
   // the pattern (whether it's a prefix, stem, substring, or exact match).
@@ -124,7 +124,7 @@ function functionNameCategorizer(): (number, string[]) => (string|false) {
                            + '|^(?:' + matchPatterns.exact.join('|') + ')$');
 
   return function functionNameToCategory(funcNameIndex, stringArray): (string|false) {
-    const existingCategory = cache.get(funcNameIndex);
+    const existingCategory = cache[funcNameIndex];
     if (existingCategory !== undefined) {
       return existingCategory;
     }
@@ -132,11 +132,11 @@ function functionNameCategorizer(): (number, string[]) => (string|false) {
     const match = stringArray[funcNameIndex].match(regex);
     if (match) {
       const category = patternToCategory.get(match[0]) || 'internal error';
-      cache.set(funcNameIndex, category);
+      cache[funcNameIndex] = category;
       return category;
     }
 
-    cache.set(funcNameIndex, false);
+    cache[funcNameIndex] = false;
     return false;
   };
 }
