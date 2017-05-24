@@ -94,7 +94,7 @@ export function summarizeProfile(profile: Profile) {
  * are cached between calls.
  * @returns {function} Function categorizer.
  */
-function functionNameCategorizer(): string => (string|false) {
+function functionNameCategorizer(): (number, string[]) => (string|false) {
   const cache = new Map();
 
   // Compile set of categories into a single regular expression that produces
@@ -123,20 +123,20 @@ function functionNameCategorizer(): string => (string|false) {
                            + '|\\b(?:' + matchPatterns.stem.join('|') + ')'
                            + '|^(?:' + matchPatterns.exact.join('|') + ')$');
 
-  return function functionNameToCategory(name: string): (string|false) {
-    const existingCategory = cache.get(name);
+  return function functionNameToCategory(funcNameIndex, stringArray): (string|false) {
+    const existingCategory = cache.get(funcNameIndex);
     if (existingCategory !== undefined) {
       return existingCategory;
     }
 
-    const match = name.match(regex);
+    const match = stringArray[funcNameIndex].match(regex);
     if (match) {
       const category = patternToCategory.get(match[0]) || 'internal error';
-      cache.set(name, category);
+      cache.set(funcNameIndex, category);
       return category;
     }
 
-    cache.set(name, false);
+    cache.set(funcNameIndex, false);
     return false;
   };
 }
@@ -167,8 +167,7 @@ function sampleCategorizer(thread: Thread): SampleCategorizer {
     }
 
     const funcIndex = thread.frameTable.func[frameIndex];
-    const name = thread.stringTable._array[thread.funcTable.name[funcIndex]];
-    const category = categorizeFuncName(name);
+    const category = categorizeFuncName(thread.funcTable.name[funcIndex], thread.stringTable._array);
     if (category !== false && category !== 'wait') {
       return category;
     }
