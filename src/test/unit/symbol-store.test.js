@@ -21,13 +21,15 @@ describe('SymbolStore', function () {
   }
 
   beforeAll(function () {
-    global.window = { indexedDB: fakeIndexedDB, IDBKeyRange: FDBKeyRange };
-    global.TextDecoder = TextDecoder;
+    window.indexedDB = fakeIndexedDB;
+    window.IDBKeyRange = FDBKeyRange;
+    window.TextDecoder = TextDecoder;
   });
 
   afterAll(function () {
-    delete global.window;
-    delete global.TextDecoder;
+    delete window.indexedDB;
+    delete window.IDBKeyRange;
+    delete window.TextDecoder;
 
     symbolStore = null;
   });

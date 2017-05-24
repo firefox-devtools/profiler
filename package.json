@@ -131,7 +131,7 @@
   },
   "jest": {
     "collectCoverageFrom" : ["src/**/*.{js,jsx}", "!**/node_modules/**"],
-    "testEnvironment": "node",
+    "testEnvironment": "jsdom",
     "moduleFileExtensions": ["js", "jsx"],
     "moduleDirectories": ["node_modules"],
     "moduleNameMapper": {

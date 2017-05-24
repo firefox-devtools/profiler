@@ -56,14 +56,14 @@ describe('actions/receive-profile', function () {
         getProfile: () => Promise.resolve(exampleProfile),
         getSymbolTable: () => Promise.resolve(),
       };
-      global.window = { geckoProfilerPromise: Promise.resolve(geckoProfiler) };
+      window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
     });
 
     afterEach(function () {
       clock.restore();
 
       geckoProfiler = null;
-      delete global.window;
+      delete window.geckoProfilerPromise;
     });
 
     it('can retrieve a profile from the addon', async function () {
@@ -121,21 +121,21 @@ describe('actions/receive-profile', function () {
       // The stub makes it easy to return different values for different
       // arguments. Here we define the default return value because there is no
       // argument specified.
-      global.fetch = sinon.stub();
-      global.fetch.resolves(fetch404Response);
+      window.fetch = sinon.stub();
+      window.fetch.resolves(fetch404Response);
 
-      sinon.stub(global, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
+      sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
     });
 
     afterEach(function () {
-      delete global.fetch;
-      global.setTimeout.restore();
+      delete window.fetch;
+      window.setTimeout.restore();
     });
 
     it('can retrieve a profile from the web and save it to state', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://profile-store.commondatastorage.googleapis.com/${hash}`;
-      global.fetch.withArgs(expectedUrl).resolves(fetch200Response);
+      window.fetch.withArgs(expectedUrl).resolves(fetch200Response);
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromWeb(hash));
@@ -151,7 +151,7 @@ describe('actions/receive-profile', function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://profile-store.commondatastorage.googleapis.com/${hash}`;
       // The first call will still be a 404 -- remember, it's the default return value.
-      global.fetch.withArgs(expectedUrl).onSecondCall().resolves(fetch200Response);
+      window.fetch.withArgs(expectedUrl).onSecondCall().resolves(fetch200Response);
 
       const store = blankStore();
       const views = (await observeStoreStateChanges(
@@ -194,7 +194,7 @@ describe('actions/receive-profile', function () {
 
     it('fails in case the fetch returns a server error', async function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
-      global.fetch.resolves(fetch500Response);
+      window.fetch.resolves(fetch500Response);
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromWeb(hash));

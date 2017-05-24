@@ -12,14 +12,13 @@ describe('SymbolStoreDB', function () {
   const libs = Array.from({ length: 10 }).map((_, i) => ({ debugName: `firefox${i}`, breakpadId: `breakpadId${i}` }));
 
   beforeAll(function () {
-    global.window = {
-      indexedDB: fakeIndexedDB,
-      IDBKeyRange: FDBKeyRange,
-    };
+    window.indexedDB = fakeIndexedDB;
+    window.IDBKeyRange = FDBKeyRange;
   });
 
   afterAll(function () {
-    delete global.window;
+    delete window.indexedDB;
+    delete window.IDBKeyRange;
   });
 
   it('should respect the maximum number of tables limit', async function () {
