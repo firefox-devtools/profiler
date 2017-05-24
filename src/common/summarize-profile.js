@@ -154,10 +154,16 @@ type SampleCategorizer = (stackIndex: (IndexIntoStackTable|null)) => (string|nul
  */
 function sampleCategorizer(thread: Thread): SampleCategorizer {
   const categorizeFuncName = functionNameCategorizer(thread.funcTable.name.length);
+  const stackCategoryCache: Map<IndexIntoStackTable, (string|null)> = new Map();
 
-  function computeCategory(stackIndex: (IndexIntoStackTable|null)): (string|null) {
-    if (stackIndex === null) {
-      return null;
+  /*
+   * Return the category for the entire stack rooted at stackIndex, if known, otherwise
+   * just the category for the top frame.
+   */
+  function categorizeStack(stackIndex: IndexIntoStackTable): string {
+    const category = stackCategoryCache.get(stackIndex);
+    if (category) {
+      return category;
     }
 
     const frameIndex = thread.stackTable.frame[stackIndex];
@@ -168,39 +174,59 @@ function sampleCategorizer(thread: Thread): SampleCategorizer {
     }
 
     const funcIndex = thread.frameTable.func[frameIndex];
-    const category = categorizeFuncName(funcIndex, thread.funcTable.name, thread.stringTable._array);
-    if (category !== 'none' && category !== 'wait') {
-      return category;
-    }
-
-    const prefixCategory = categorizeSampleStack(thread.stackTable.prefix[stackIndex]);
-    if (category === 'wait') {
-      if (prefixCategory === null || prefixCategory === 'uncategorized') {
-        return 'wait';
-      }
-      if (prefixCategory.endsWith('.wait') || prefixCategory === 'wait') {
-        return prefixCategory;
-      }
-      return prefixCategory + '.wait';
-    }
-
-    return prefixCategory;
+    return categorizeFuncName(funcIndex, thread.funcTable.name, thread.stringTable._array);
   }
-
-  const stackCategoryCache: Map<IndexIntoStackTable, string> = new Map();
 
   function categorizeSampleStack(stackIndex: (IndexIntoStackTable|null)): (string|null) {
     if (stackIndex === null) {
       return null;
     }
-    let category = stackCategoryCache.get(stackIndex);
-    if (category !== undefined) {
-      return category;
+
+    let category = 'uncategorized';
+    let lastWaitIndex;
+    let firstCategorizedIndex;
+
+    /*
+     * Scan the stack, youngest to oldest frame, to find the last 'wait'
+     * function and the first fully categorized function.
+     */
+    for (let index = stackIndex; index !== null; index = thread.stackTable.prefix[index]) {
+      const topCategory = categorizeStack(index);
+
+      if (topCategory === 'wait') {
+        lastWaitIndex = index;
+      } else if (topCategory !== 'none') {
+        category = topCategory;
+        firstCategorizedIndex = index;
+        break;
+      }
     }
 
-    category = computeCategory(stackIndex) || 'uncategorized';
-    stackCategoryCache.set(stackIndex, category);
-    return category;
+    /*
+     * Stacks in [youngest .. firstCategorizedIndex] should be labeled
+     * <category>, except if there are 'wait' frames, in which case
+     * [youngest .. lastWaitIndex] should have a '.wait' appended. So scan
+     * through all the stacks, youngest first up to the first fully categorized
+     * stack, and record the category name.
+     */
+
+    let currentCat = category;
+    if (lastWaitIndex !== undefined && !currentCat.endsWith('.wait')) {
+      currentCat += '.wait';
+    }
+
+    for (let index = stackIndex; index !== null; index = thread.stackTable.prefix[index]) {
+      stackCategoryCache.set(index, currentCat);
+      if (index === lastWaitIndex) {
+        currentCat = category;
+      }
+      if (index === firstCategorizedIndex) {
+        break;
+      }
+    }
+
+    category = stackCategoryCache.get(stackIndex) || 'uncategorized';
+    return (category === 'uncategorized.wait') ? 'wait' : category;
   }
 
   return categorizeSampleStack;
