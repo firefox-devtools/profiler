@@ -7,7 +7,6 @@ import { timeCode } from './time-code';
 import type { Profile, Thread, IndexIntoStackTable } from './types/profile';
 
 export type Summary = { [id: string]: number };
-type MatchingFunction = (string, string) => boolean;
 type StacksInCategory = { [id: string]: { [id: string]: number } }
 type SummarySegment = {
   percentage: {[id: string]: number},
@@ -18,74 +17,61 @@ type Categories = Array<(string|null)>;
 type ThreadCategories = Categories[];
 
 /**
- * A list of strategies for matching sample names to patterns.
- */
-const match: {[id: string]: MatchingFunction} = {
-  exact: (symbol, pattern) => symbol === pattern,
-  prefix: (symbol, pattern) => symbol.startsWith(pattern),
-  substring: (symbol, pattern) => symbol.includes(pattern),
-  stem: (symbol, pattern) => {
-    return symbol === pattern || symbol.startsWith(pattern + '(');
-  },
-};
-
-/**
  * Categories is a list that includes the necessary information to match a sample to
  * a category. This list will need to be adjusted as the engine implementation switches.
  * Each category definition is a tuple that takes the following form:
  *
  * [
- *   matches, // A function that returns true/false for how the pattern should be matched.
+ *   matchType, // The type of match to perform (exact, stem, prefix, or substring).
  *   pattern, // The pattern that should match the sample name.
  *   category, // The category to finally label the sample.
  * ]
  */
 
 const categories = [
-  [match.exact, 'js::RunScript', 'script'],
-  [match.stem, 'js::Nursery::collect', 'GC'],
-  [match.stem, 'js::GCRuntime::collect', 'GC'],
-  [match.prefix, 'mozilla::RestyleManager::', 'restyle'],
-  [match.substring, 'RestyleManager', 'restyle'],
-  [match.stem, 'PresShell::ProcessReflowCommands', 'layout'],
-  [match.prefix, 'nsCSSFrameConstructor::', 'frameconstruction'],
-  [match.stem, 'PresShell::DoReflow', 'layout'],
-  [match.substring, '::compileScript(', 'script'],
+  ['exact', 'js::RunScript', 'script'],
+  ['stem', 'js::Nursery::collect', 'GC'],
+  ['stem', 'js::GCRuntime::collect', 'GC'],
+  ['prefix', 'mozilla::RestyleManager::', 'restyle'],
+  ['substring', 'RestyleManager', 'restyle'],
+  ['stem', 'PresShell::ProcessReflowCommands', 'layout'],
+  ['prefix', 'nsCSSFrameConstructor::', 'frameconstruction'],
+  ['stem', 'PresShell::DoReflow', 'layout'],
+  ['substring', '::compileScript(', 'script'],
 
-  [match.prefix, 'nsCycleCollector', 'CC'],
-  [match.prefix, 'nsPurpleBuffer', 'CC'],
-  [match.substring, 'pthread_mutex_lock', 'wait'], // eg __GI___pthread_mutex_lock
-  [match.prefix, 'nsRefreshDriver::IsWaitingForPaint', 'paint'], // arguable, I suppose
-  [match.stem, 'PresShell::Paint', 'paint'],
-  [match.prefix, '__poll', 'wait'],
-  [match.prefix, '__pthread_cond_wait', 'wait'],
-  [match.stem, 'PresShell::DoUpdateApproximateFrameVisibility', 'layout'], // could just as well be paint
-  [match.substring, 'mozilla::net::', 'network'],
-  [match.stem, 'nsInputStreamReadyEvent::Run', 'network'],
+  ['prefix', 'nsCycleCollector', 'CC'],
+  ['prefix', 'nsPurpleBuffer', 'CC'],
+  ['substring', 'pthread_mutex_lock', 'wait'], // eg __GI___pthread_mutex_lock
+  ['prefix', 'nsRefreshDriver::IsWaitingForPaint', 'paint'], // arguable, I suppose
+  ['stem', 'PresShell::Paint', 'paint'],
+  ['prefix', '__poll', 'wait'],
+  ['prefix', '__pthread_cond_wait', 'wait'],
+  ['stem', 'PresShell::DoUpdateApproximateFrameVisibility', 'layout'], // could just as well be paint
+  ['substring', 'mozilla::net::', 'network'],
+  ['stem', 'nsInputStreamReadyEvent::Run', 'network'],
 
-  // [match.stem, 'NS_ProcessNextEvent', 'eventloop'],
-  [match.exact, 'nsJSUtil::EvaluateString', 'script'],
-  [match.prefix, 'js::frontend::Parser', 'script.parse'],
-  [match.prefix, 'js::jit::IonCompile', 'script.compile.ion'],
-  [match.prefix, 'js::jit::BaselineCompiler::compile', 'script.compile.baseline'],
+  // ['stem', 'NS_ProcessNextEvent', 'eventloop'],
+  ['exact', 'nsJSUtil::EvaluateString', 'script'],
+  ['prefix', 'js::frontend::Parser', 'script.parse'],
+  ['prefix', 'js::jit::IonCompile', 'script.compile.ion'],
+  ['prefix', 'js::jit::BaselineCompiler::compile', 'script.compile.baseline'],
 
-  [match.prefix, 'CompositorBridgeParent::Composite', 'paint'],
-  [match.prefix, 'mozilla::layers::PLayerTransactionParent::Read(', 'messageread'],
+  ['prefix', 'CompositorBridgeParent::Composite', 'paint'],
+  ['prefix', 'mozilla::layers::PLayerTransactionParent::Read(', 'messageread'],
 
-  [match.prefix, 'mozilla::dom::', 'dom'],
-  [match.prefix, 'nsDOMCSSDeclaration::', 'restyle'],
-  [match.prefix, 'nsHTMLDNS', 'network'],
-  [match.substring, 'IC::update(', 'script.icupdate'],
-  [match.prefix, 'js::jit::CodeGenerator::link(', 'script.link'],
+  ['prefix', 'mozilla::dom::', 'dom'],
+  ['prefix', 'nsDOMCSSDeclaration::', 'restyle'],
+  ['prefix', 'nsHTMLDNS', 'network'],
+  ['substring', 'IC::update(', 'script.icupdate'],
+  ['prefix', 'js::jit::CodeGenerator::link(', 'script.link'],
 
-  [match.exact, 'base::WaitableEvent::Wait()', 'idle'],
+  ['exact', 'base::WaitableEvent::Wait()', 'idle'],
   // TODO - if mach_msg_trap is called by RunCurrentEventLoopInMode, then it
   // should be considered idle time. Add a fourth entry to this tuple
   // for child checks?
-  [match.exact, 'mach_msg_trap', 'wait'],
+  ['exact', 'mach_msg_trap', 'wait'],
 
-  // Can't do this until we come up with a way of labeling ion/baseline.
-  [match.prefix, 'Interpret(', 'script.execute.interpreter'],
+  ['prefix', 'Interpret(', 'script.execute.interpreter'],
 ];
 
 export function summarizeProfile(profile: Profile) {
@@ -108,19 +94,46 @@ export function summarizeProfile(profile: Profile) {
  * are cached between calls.
  * @returns {function} Function categorizer.
  */
-function functionNameCategorizer() {
+function functionNameCategorizer(): string => (string|false) {
   const cache = new Map();
-  return function functionNameToCategory(name) {
+
+  // Compile set of categories into a single regular expression that produces
+  // the pattern (whether it's a prefix, stem, substring, or exact match).
+
+  const patternToCategory = new Map();
+
+  const matchPatterns = {
+    prefix: [],
+    stem: [],
+    substring: [],
+    exact: [],
+  };
+
+  for (const [matchType, pattern, category] of categories) {
+    patternToCategory.set(pattern, category);
+    let pat = pattern.replace(/\W/g, '\\$&');
+    if (matchType === 'stem') {
+      pat += '\\b';
+    }
+    matchPatterns[matchType].push(pat);
+  }
+
+  const regex = new RegExp('^(?:' + matchPatterns.prefix.join('|') + ')'
+                           + '|(?:' + matchPatterns.substring.join('|') + ')'
+                           + '|\\b(?:' + matchPatterns.stem.join('|') + ')'
+                           + '|^(?:' + matchPatterns.exact.join('|') + ')$');
+
+  return function functionNameToCategory(name: string): (string|false) {
     const existingCategory = cache.get(name);
     if (existingCategory !== undefined) {
       return existingCategory;
     }
 
-    for (const [matches, pattern, category] of categories) {
-      if (matches(name, pattern)) {
-        cache.set(name, category);
-        return category;
-      }
+    const match = name.match(regex);
+    if (match) {
+      const category = patternToCategory.get(match[0]) || 'internal error';
+      cache.set(name, category);
+      return category;
     }
 
     cache.set(name, false);
