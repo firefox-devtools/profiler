@@ -29,13 +29,14 @@ exports[`renders TimelineMarkers correctly 1`] = `
     onMouseDown={[Function]}
     onWheel={[Function]}
   >
-    <canvas
-      className="timelineCanvas timelineMarkerCanvas"
-      onDoubleClick={[Function]}
-      onMouseMove={[Function]}
-      onMouseOut={[Function]}
-      title={null}
-    />
+    <div>
+      <canvas
+        className="timelineCanvas timelineMarkerCanvas"
+        onDoubleClick={[Function]}
+        onMouseMove={[Function]}
+        onMouseOut={[Function]}
+      />
+    </div>
     <div
       className="timelineViewportShiftScroll hidden"
     >

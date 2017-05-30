@@ -2,21 +2,25 @@
 import React, { PureComponent } from 'react';
 import { timeCode } from '../../common/time-code';
 import classNames from 'classnames';
-
 import type { CssPixels, DevicePixels } from '../../common/types/units';
+import Tooltip from './Tooltip';
 
 type Props<HoveredItem> = {
   containerWidth: CssPixels,
   containerHeight: CssPixels,
   className: string,
   onDoubleClickItem: (HoveredItem | null) => void,
-  getHoveredItemInfo: HoveredItem => string,
+  isDragging: boolean,
+  getHoveredItemInfo: HoveredItem => React$Element<*>,
   drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
+  onDoubleClickItem: (HoveredItem | null) => void,
   hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
 };
 
 type State<HoveredItem> = {
   hoveredItem: HoveredItem | null,
+  mouseX: CssPixels,
+  mouseY: CssPixels,
 };
 
 require('./TimelineCanvas.css');
@@ -37,7 +41,11 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
     super(props);
     this._requestedAnimationFrame = false;
     this._devicePixelRatio = 1;
-    this.state = { hoveredItem: null };
+    this.state = {
+      hoveredItem: null,
+      mouseX: 0,
+      mouseY: 0,
+    };
 
     (this: any)._setCanvasRef = this._setCanvasRef.bind(this);
     (this: any)._onMouseMove = this._onMouseMove.bind(this);
@@ -110,6 +118,11 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
     if (!hoveredItemsAreEqual(maybeHoveredItem, this.state.hoveredItem)) {
       this.setState({ hoveredItem: maybeHoveredItem });
     }
+
+    this.setState({
+      mouseX: event.pageX,
+      mouseY: event.pageY,
+    });
   }
 
   _onMouseOut() {
@@ -122,7 +135,7 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
     this.props.onDoubleClickItem(this.state.hoveredItem);
   }
 
-  _getHoveredItemInfo(): null | string {
+  _getHoveredItemInfo(): null | React$Element<*> {
     const { hoveredItem } = this.state;
     if (hoveredItem === null) {
       return null;
@@ -135,7 +148,8 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
   }
 
   render() {
-    const { hoveredItem } = this.state;
+    const { isDragging } = this.props;
+    const { hoveredItem, mouseX, mouseY } = this.state;
     this._scheduleDraw();
 
     const className = classNames({
@@ -144,12 +158,25 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
       hover: hoveredItem !== null,
     });
 
-    return <canvas className={className}
-                   ref={this._setCanvasRef}
-                   onMouseMove={this._onMouseMove}
-                   onMouseOut={this._onMouseOut}
-                   onDoubleClick={this._onDoubleClick}
-                   title={this._getHoveredItemInfo()} />;
+    const tooltipContents = this._getHoveredItemInfo();
+
+    return (
+      <div>
+        <canvas className={className}
+                ref={this._setCanvasRef}
+                onMouseMove={this._onMouseMove}
+                onMouseOut={this._onMouseOut}
+                onDoubleClick={this._onDoubleClick} />
+        {
+          !isDragging && tooltipContents
+            ? <Tooltip mouseX={mouseX}
+                       mouseY={mouseY}>
+                {tooltipContents}
+              </Tooltip>
+            : null
+        }
+      </div>
+    );
   }
 }
 

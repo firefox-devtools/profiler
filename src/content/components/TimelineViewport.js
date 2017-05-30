@@ -484,6 +484,7 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
                             viewportRight={viewportRight}
                             viewportTop={viewportTop}
                             viewportBottom={viewportBottom}
+                            isDragging={isDragging}
                             {...this.props} />
           <div className={shiftScrollClassName}>
             Zoom Timeline:

@@ -31,6 +31,8 @@ type Props = {
   getCategory: GetCategory,
   getLabel: GetLabel,
   updateProfileSelection: ProfileSelection => Action,
+  isDragging: boolean,
+  isRowExpanded: boolean,
 };
 
 type HoveredStackTiming = {
@@ -156,12 +158,14 @@ class FlameChartCanvas extends PureComponent {
 
   _getHoveredStackInfo(
     {depth, stackTableIndex}: HoveredStackTiming
-  ): string {
-    const { thread, getLabel, stackTimingByDepth } = this.props;
-    const label = getLabel(thread, stackTimingByDepth[depth].stack[stackTableIndex]);
+  ): React$Element<*> {
+    const {
+      thread, getLabel, getCategory, stackTimingByDepth, isRowExpanded,
+    } = this.props;
+    const stackTiming = stackTimingByDepth[depth];
 
-    const duration = stackTimingByDepth[depth].end[stackTableIndex] -
-      stackTimingByDepth[depth].start[stackTableIndex];
+    const duration = stackTiming.end[stackTableIndex] -
+      stackTiming.start[stackTableIndex];
     let durationString;
     if (duration >= 10) {
       durationString = duration.toFixed(0);
@@ -173,7 +177,59 @@ class FlameChartCanvas extends PureComponent {
       durationString = duration.toFixed(3);
     }
 
-    return `${durationString}ms - ${label}`;
+    const stackIndex = stackTiming.stack[stackTableIndex];
+    const frameIndex = thread.stackTable.frame[stackIndex];
+    const label = getLabel(thread, stackIndex);
+    const category = getCategory(thread, frameIndex);
+    const funcIndex = thread.frameTable.func[frameIndex];
+
+    let resourceOrFileName = null;
+    // Only show resources or filenames if the chart is expanded, as collapsed stacks
+    // would show incorrect details about a group of stacks.
+    if (isRowExpanded) {
+      // Only JavaScript functions have a filename.
+      const fileNameIndex = thread.funcTable.fileName[funcIndex];
+      if (fileNameIndex !== null) {
+        resourceOrFileName = (
+          <div className='tooltipOneLine tooltipDetails'>
+            <div className='tooltipLabel'>File:</div>
+            {thread.stringTable.getString(fileNameIndex)}
+          </div>
+        );
+      } else {
+        const resourceIndex = thread.funcTable.resource[funcIndex];
+        if (resourceIndex !== -1) {
+          const resourceNameIndex = thread.resourceTable.name[resourceIndex];
+          if (resourceNameIndex !== -1) {
+            resourceOrFileName = (
+              <div className='tooltipOneLine tooltipDetails'>
+                <div className='tooltipLabel'>Resource:</div>
+                {thread.stringTable.getString(resourceNameIndex)}
+              </div>
+            );
+          }
+        }
+      }
+    }
+
+    return (
+      <div className='flameChartCanvasTooltip'>
+        <div className='tooltipOneLine tooltipHeader'>
+          <div className='tooltipTiming'>
+            {durationString}ms
+          </div>
+          <div className='tooltipName'>
+            {label}
+          </div>
+        </div>
+        <div className='tooltipOneLine tooltipDetails'>
+          <div className='tooltipLabel'>Category:</div>
+          <div className='tooltipSwatch' style={{backgroundColor: category.color}} />
+          {category.name}
+        </div>
+        {resourceOrFileName}
+      </div>
+    );
   }
 
   _onDoubleClickStack(hoveredItem: HoveredStackTiming | null) {
@@ -220,11 +276,12 @@ class FlameChartCanvas extends PureComponent {
 
 
   render() {
-    const { containerWidth, containerHeight } = this.props;
+    const { containerWidth, containerHeight, isDragging } = this.props;
 
     return <TimelineCanvas className='flameChartCanvas'
                            containerWidth={containerWidth}
                            containerHeight={containerHeight}
+                           isDragging={isDragging}
                            onDoubleClickItem={this._onDoubleClickStack}
                            getHoveredItemInfo={this._getHoveredStackInfo}
                            drawCanvas={this._drawCanvas}

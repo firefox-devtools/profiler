@@ -17,6 +17,23 @@ body, #root, .profileViewer {
   max-height: 100%;
 }
 
+body {
+  /* Stolen from the light theme at devtools/client/themes/variables.css */
+  --theme-highlight-green: #2cbb0f;
+  --theme-highlight-blue: #0088cc;
+  --theme-highlight-bluegrey: #0072ab;
+  --theme-highlight-purple: #5b5fff;
+  --theme-highlight-lightorange: #d97e00;
+  --theme-highlight-orange: #f13c00;
+  --theme-highlight-red: #ed2655;
+  --theme-highlight-pink: #b82ee5;
+  --theme-highlight-gray: #b4babf;/* except for this one, I made this one darker */
+}
+
+#root {
+  z-index: 0;
+}
+
 .treeView {
   display: flex;
   flex-flow: column nowrap;
