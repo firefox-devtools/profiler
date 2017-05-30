@@ -80,26 +80,26 @@ export type ProfilerMarkerTracing = {
   endTime: Milliseconds, // Same as cpuend
   stack?: Thread,
   interval: "start" | "end",
-} & (
-  { category?: string } |
-  {
-    category: "Paint",
-    name: "RefreshDriverTick" |
-      "FireScrollEvent" |
-      "Scripts" |
-      "Styles" |
-      "Reflow" |
-      "DispatchSynthMouseMove" |
-      "DisplayList" |
-      "LayerBuilding" |
-      "Rasterize" |
-      "ForwardTransaction" |
-      "NotifyDidPaint" |
-      "LayerTransaction" |
-      "Composite",
-  }
-  // TODO - Add more markers.
-);
+}
+
+export type PaintProfilerMarkerTracing = ProfilerMarkerTracing & {
+  category: "Paint",
+  name: "RefreshDriverTick" |
+    "FireScrollEvent" |
+    "Scripts" |
+    "Styles" |
+    "Reflow" |
+    "DispatchSynthMouseMove" |
+    "DisplayList" |
+    "LayerBuilding" |
+    "Rasterize" |
+    "ForwardTransaction" |
+    "NotifyDidPaint" |
+    "LayerTransaction" |
+    "Composite",
+}
+
+// TODO - Add more markers.
 
 /**
  * The payload for the UserTimings API. These are added through performance.measure()
@@ -119,8 +119,8 @@ export type UserTimingMarkerPayload = {
  */
 export type MarkerPayload =
   GPUMarkerPayload |
-  ProfilerMarkerTracing |
   UserTimingMarkerPayload |
+  PaintProfilerMarkerTracing |
   null;
 
 /**
@@ -176,8 +176,9 @@ export type ResourceTable = {
   addonId: any[], // TODO
   icon: any[], // TODO
   length: number,
-  lib: IndexIntoLibs[],
-  name: IndexIntoStringTable[],
+  lib: Array<IndexIntoLibs|null>,
+  name: Array<IndexIntoStringTable|-1>,
+  host: Array<IndexIntoStringTable|null>,
   type: resourceTypeEnum[],
 }
 

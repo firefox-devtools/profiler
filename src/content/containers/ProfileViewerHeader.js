@@ -84,7 +84,8 @@ class ProfileViewerHeader extends PureComponent {
                                            rangeEnd={timeRange.end}
                                            threadIndex={threadIndex}
                                            key={threadIndex}
-                                           onSelect={this._onIntervalMarkerSelect} /> : null)
+                                           onSelect={this._onIntervalMarkerSelect}
+                                           isModifyingSelection={selection.isModifying} /> : null)
             );
           })
         }
@@ -101,7 +102,8 @@ class ProfileViewerHeader extends PureComponent {
                                                     rangeEnd={timeRange.end}
                                                     threadIndex={threadIndex}
                                                     key={threadIndex}
-                                                    onSelect={this._onIntervalMarkerSelect} /> : null)
+                                                    onSelect={this._onIntervalMarkerSelect}
+                                                    isModifyingSelection={selection.isModifying} /> : null)
             );
           })
         }

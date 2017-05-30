@@ -22,6 +22,7 @@ type Props = {
   rowHeight: CssPixels,
   markers: TracingMarker[],
   updateProfileSelection: ProfileSelection => Action,
+  isDragging: boolean,
 };
 
 const ROW_HEIGHT = 16;
@@ -246,8 +247,8 @@ class TimelineMarkerCanvas extends PureComponent {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): string {
-    const { name, dur } = this.props.markers[hoveredItem];
+  getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React$Element<*> {
+    const { name, dur, data } = this.props.markers[hoveredItem];
     let duration;
     if (dur >= 10) {
       duration = dur.toFixed(0);
@@ -258,15 +259,35 @@ class TimelineMarkerCanvas extends PureComponent {
     } else {
       duration = dur.toFixed(3);
     }
-    return `${name} - ${duration}ms`;
+
+    let tooltipName = name;
+    if (data) {
+      switch (data.type) {
+        case 'UserTiming': {
+          tooltipName = data.name;
+        }
+      }
+    }
+
+    return (
+      <div className='tooltipOneLine'>
+        <div className='tooltipTiming'>
+          {duration}ms
+        </div>
+        <div className='tooltipName'>
+          {tooltipName}
+        </div>
+      </div>
+    );
   }
 
   render() {
-    const { containerWidth, containerHeight } = this.props;
+    const { containerWidth, containerHeight, isDragging } = this.props;
 
     return <TimelineCanvas className='timelineMarkerCanvas'
                            containerWidth={containerWidth}
                            containerHeight={containerHeight}
+                           isDragging={isDragging}
                            onDoubleClickItem={this.onDoubleClickMarker}
                            getHoveredItemInfo={this.getHoveredMarkerInfo}
                            drawCanvas={this.drawCanvas}
