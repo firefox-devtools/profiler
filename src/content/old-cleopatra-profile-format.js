@@ -53,7 +53,7 @@ type OldCleopatraProfileThread = {
 
 type OldCleopatraProfileJSON = {
   threads: { [threadIndex: string]: OldCleopatraProfileThread },
-};
+} | OldCleopatraSample[];
 
 type OldCleopatraProfile = {
   format: 'profileJSONWithSymbolicationTable,1',
@@ -78,7 +78,7 @@ function _cleanFunctionName(functionName: string) {
   return functionName;
 }
 
-function _convertThread(thread: OldCleopatraProfileThread, symbolicationTable) {
+function _convertThread(thread: OldCleopatraProfileThread, interval: number, symbolicationTable) {
   const stringTable = new UniqueStringArray(symbolicationTable);
   const frameTable = {
     length: 0,
@@ -112,6 +112,8 @@ function _convertThread(thread: OldCleopatraProfileThread, symbolicationTable) {
 
   const frameMap = new Map();
   const stackMap = new Map();
+
+  let lastSampleTime = 0;
 
   for (let i = 0; i < thread.samples.length; i++) {
     const sample = thread.samples[i];
@@ -154,9 +156,10 @@ function _convertThread(thread: OldCleopatraProfileThread, symbolicationTable) {
     }
     const sampleIndex = samples.length++;
     samples.stack[sampleIndex] = prefix;
-    samples.time[sampleIndex] = 'time' in sample.extraInfo
-      ? sample.extraInfo.time
-      : null;
+    const hasTime ='time' in sample.extraInfo && typeof sample.extraInfo.time === 'number';
+    const sampleTime = hasTime ? sample.extraInfo.time : lastSampleTime + interval;
+    samples.time[sampleIndex] = sampleTime;
+    lastSampleTime = sampleTime;
     samples.responsiveness[sampleIndex] = 'responsiveness' in sample.extraInfo
       ? sample.extraInfo.responsiveness
       : null;
@@ -310,6 +313,22 @@ function arrayFromArrayLikeObject<T>(obj: { [index: string]: T }): T[] {
   return result;
 }
 
+function _extractThreadList(profileJSON: OldCleopatraProfileJSON): OldCleopatraProfileThread[] {
+  if (Array.isArray(profileJSON)) {
+    // Ancient versions of the old cleopatra format did not have a threads list
+    // or markers. Instead, profileJSON was just the list of samples.
+    const oneThread = {
+      name: 'GeckoMain',
+      markers: [],
+      samples: profileJSON,
+    };
+
+    return [oneThread];
+  }
+
+  return arrayFromArrayLikeObject(profileJSON.threads);
+}
+
 /**
  * Convert the old cleopatra format into the serialized processed format
  * version zero.
@@ -322,14 +341,14 @@ export function convertOldCleopatraProfile(
 ): Object {
   const { meta, profileJSON } = profile;
 
-  const threads = arrayFromArrayLikeObject(profileJSON.threads);
+  const threads = _extractThreadList(profileJSON);
   const symbolicationTable = arrayFromArrayLikeObject(
     profile.symbolicationTable
   );
 
   return {
     meta: Object.assign({}, meta, { version: CURRENT_VERSION }),
-    threads: threads.map(t => _convertThread(t, symbolicationTable)),
+    threads: threads.map(t => _convertThread(t, meta.interval, symbolicationTable)),
     tasktracer: getEmptyTaskTracerData(),
   };
 }
