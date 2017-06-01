@@ -25,7 +25,10 @@ var Ca=[ic,Kb];var Da=[jc,Nb,Lb,Cb,Mb,jc,jc,jc];var Ea=[kc,Db];var Fa=[lc,Xa,Ya,
     compress: function (data, compressionLevel) {
       var arrayData = (typeof data === 'string') ? (new TextEncoder()).encode(data) : data;
       var mode = (compressionLevel === undefined) ? 'wb' : 'wb' + compressionLevel;
-      var gzModule = createGzModule(arrayData.length * 2.5);
+      // Estimate the required heap memory size. We assume a fixed overhead of
+      // 512KB and 2.5 times the input size. These numbers have been derived
+      // through trial and error.
+      var gzModule = createGzModule(512 * 1024 + arrayData.length * 2.5);
       return gzModule['gzcompress'](arrayData, mode);
     },
     decompress: gzModuleWithDefaultHeapSize['gzdecompress']
