@@ -322,15 +322,22 @@ describe('symbolication', function () {
 
 describe('upgrades', function () {
   describe('old-cleopatra-profile', function () {
-    const exampleOldCleopatraProfile = require('../fixtures/upgrades/old-cleopatra-profile.sps.json');
-    it('should detect the profile as an old cleopatra profile', function () {
-      expect(isOldCleopatraFormat(exampleOldCleopatraProfile)).toBe(true);
-    });
-    it('should be able to convert the old cleopatra profile into a processed profile', function () {
-      const profile = convertOldCleopatraProfile(exampleOldCleopatraProfile);
-      expect(isProcessedProfile(profile)).toBe(true);
-      // For now, just test that upgrading doesn't throw any exceptions.
-      upgradeProcessedProfileToCurrentVersion(profile);
+    const exampleOldCleopatraProfiles = [
+      require('../fixtures/upgrades/old-cleopatra-profile.sps.json'),
+      require('../fixtures/upgrades/ancient-cleopatra-profile.sps.json'),
+    ];
+    exampleOldCleopatraProfiles.forEach(exampleOldCleopatraProfile => {
+      it('should detect the profile as an old cleopatra profile', function () {
+        expect(isOldCleopatraFormat(exampleOldCleopatraProfile)).toBe(true);
+      });
+      it('should be able to convert the old cleopatra profile into a processed profile', function () {
+        const profile = convertOldCleopatraProfile(exampleOldCleopatraProfile);
+        expect(isProcessedProfile(profile)).toBe(true);
+        // For now, just test that upgrading doesn't throw any exceptions.
+        upgradeProcessedProfileToCurrentVersion(profile);
+        expect(profile.threads.length).toBeGreaterThanOrEqual(1);
+        expect(profile.threads[0].name).toBe('GeckoMain');
+      });
     });
   });
   function compareProcessedProfiles(lhs, rhs) {
