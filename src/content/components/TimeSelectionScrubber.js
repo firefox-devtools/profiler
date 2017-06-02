@@ -74,19 +74,17 @@ class TimeSelectionScrubberImpl extends PureComponent {
       }
 
       const { selection } = this.props;
-      if (!selection.hasSelection) {
-        return;
-      }
-
-      const mouseUpTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
-      const { selectionStart, selectionEnd } = selection;
-      if (mouseUpTime < selectionStart ||
-          mouseUpTime >= selectionEnd) {
-        // Unset selection.
-        this.props.onSelectionChange({
-          hasSelection: false,
-          isModifying: false,
-        });
+      if (selection.hasSelection) {
+        const mouseUpTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
+        const { selectionStart, selectionEnd } = selection;
+        if (mouseUpTime < selectionStart ||
+            mouseUpTime >= selectionEnd) {
+          // Unset selection.
+          this.props.onSelectionChange({
+            hasSelection: false,
+            isModifying: false,
+          });
+        }
       }
 
       // Do not stopPropagation(), so that graph gets mouseup event.
