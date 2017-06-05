@@ -267,7 +267,8 @@ class FlameChartCanvas extends PureComponent {
       const start = stackTiming.start[i];
       const end = stackTiming.end[i];
       if (start < time && end > time) {
-        return { depth, stackTableIndex: i };
+        const timing: HoveredStackTiming = { depth, stackTableIndex: i };
+        return timing;
       }
     }
 
