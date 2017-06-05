@@ -3,33 +3,36 @@ import React, { Component } from 'react';
 import { timeCode } from '../../common/time-code';
 import classNames from 'classnames';
 
-import type { CssPixels, DevicePixels, NonNull } from '../../common/types/units';
+import type { CssPixels, DevicePixels } from '../../common/types/units';
 
-type HoveredItem = NonNull;
-
-type Props = {
+type Props<HoveredItem> = {
   containerWidth: CssPixels,
   containerHeight: CssPixels,
   className: string,
-  onDoubleClickItem: HoveredItem => void,
+  onDoubleClickItem: (HoveredItem | null) => void,
   getHoveredItemInfo: HoveredItem => string,
-  drawCanvas: (CanvasRenderingContext2D, HoveredItem) => void,
-  hitTest: (x: CssPixels, y: CssPixels) => null | HoveredItem,
+  drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
+  hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
+};
+
+type State<HoveredItem> = {
+  hoveredItem: HoveredItem | null,
 };
 
 require('./TimelineCanvas.css');
 
-export default class TimelineCanvas extends Component {
-
-  props: Props;
+export default class TimelineCanvas<HoveredItem> extends Component<
+  void,
+  Props<HoveredItem>,
+  State<HoveredItem>
+> {
+  props: Props<HoveredItem>;
+  state: State<HoveredItem>;
   _requestedAnimationFrame: boolean;
   _devicePixelRatio: 1;
   _ctx: CanvasRenderingContext2D;
-  state: {
-    hoveredItem: null | HoveredItem;
-  };
 
-  constructor(props: Props) {
+  constructor(props: Props<HoveredItem>) {
     super(props);
     this._requestedAnimationFrame = false;
     this._devicePixelRatio = 1;
@@ -112,11 +115,7 @@ export default class TimelineCanvas extends Component {
   }
 
   _onDoubleClick() {
-    const { hoveredItem } = this.state;
-    if (hoveredItem === null) {
-      return;
-    }
-    this.props.onDoubleClickItem(hoveredItem);
+    this.props.onDoubleClickItem(this.state.hoveredItem);
   }
 
   _getHoveredItemInfo(): null | string {

@@ -51,7 +51,7 @@ class TimelineMarkerCanvas extends PureComponent {
     (this: any).hitTest = this.hitTest.bind(this);
   }
 
-  drawCanvas(ctx: CanvasRenderingContext2D, hoveredItem: IndexIntoMarkerTiming) {
+  drawCanvas(ctx: CanvasRenderingContext2D, hoveredItem: IndexIntoMarkerTiming | null) {
     const {
       viewportTop, viewportBottom, rowHeight, containerWidth, containerHeight, markerTimingRows,
     } = this.props;
@@ -67,7 +67,7 @@ class TimelineMarkerCanvas extends PureComponent {
 
   drawMarkers(
     ctx: CanvasRenderingContext2D,
-    hoveredItem: IndexIntoMarkerTiming,
+    hoveredItem: IndexIntoMarkerTiming | null,
     startRow: number,
     endRow: number
   ) {
@@ -216,7 +216,10 @@ class TimelineMarkerCanvas extends PureComponent {
     return null;
   }
 
-  onDoubleClickMarker(markerIndex: IndexIntoMarkerTiming) {
+  onDoubleClickMarker(markerIndex: IndexIntoMarkerTiming | null) {
+    if (markerIndex === null) {
+      return;
+    }
     const { markers, updateProfileSelection } = this.props;
     const marker = markers[markerIndex];
     updateProfileSelection({

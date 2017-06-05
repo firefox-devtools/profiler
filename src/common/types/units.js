@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
 
 export type Milliseconds = number;
 
@@ -33,8 +34,3 @@ export type HorizontalViewport = {
 }
 
 export type StartEndRange = { start: Milliseconds, end: Milliseconds };
-
-/**
- * This is not really a unit, but doesn't warrant a separate file.
- */
-export type NonNull = number | string | () => mixed | Object | Array<any>;
