@@ -11,7 +11,10 @@ import type { FuncStackTable, IndexIntoFuncStackTable, FuncStackInfo, Node } fro
 import type { Milliseconds } from '../common/types/units';
 
 type FuncStackChildren = IndexIntoFuncStackTable[];
-type FuncStackTimes = { selfTime: Milliseconds, totalTime: Milliseconds };
+type FuncStackTimes = {
+  selfTime: Float32Array,
+  totalTime: Float32Array,
+};
 
 function extractFaviconFromLibname(libname: string): string | null {
   const url = new URL('/favicon.ico', libname);

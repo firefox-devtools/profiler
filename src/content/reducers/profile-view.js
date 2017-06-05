@@ -359,8 +359,6 @@ export const getProfileTaskTracerData = (state: State): TaskTracer => getProfile
 
 export type SelectorsForThread = {
   getThread: State => Thread,
-  getFriendlyThreadName: State => string,
-  getThreadProcessDetails: State => string,
   getViewOptions: State => ThreadViewOptions,
   getCallTreeFilters: State => CallTreeFilter[],
   getCallTreeFilterLabels: State => string[],
@@ -372,14 +370,16 @@ export type SelectorsForThread = {
   getFilteredThread: State => Thread,
   getRangeSelectionFilteredThread: State => Thread,
   getFuncStackInfo: State => FuncStackInfo,
-  getSelectedFuncStack: State => IndexIntoFuncStackTable,
-  getExpandedFuncStacks: State => IndexIntoFuncStackTable[],
+  getSelectedFuncStack: State => IndexIntoFuncStackTable | null,
+  getExpandedFuncStacks: State => Array<IndexIntoFuncStackTable | null>,
   getCallTree: State => ProfileTree.ProfileTreeClass,
   getFilteredThreadForFlameChart: State => Thread,
   getFuncStackInfoOfFilteredThreadForFlameChart: State => FuncStackInfo,
   getFuncStackMaxDepthForFlameChart: State => number,
   getStackTimingByDepthForFlameChart: State => StackTiming.StackTimingByDepth,
   getLeafCategoryStackTimingForFlameChart: State => StackTiming.StackTimingByDepth,
+  getFriendlyThreadName: State => string,
+  getThreadProcessDetails: State => string,
 };
 
 const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
@@ -508,7 +508,7 @@ export const selectorsForThread = (threadIndex: ThreadIndex): SelectorsForThread
     const getExpandedFuncStacks = createSelector(
       getFuncStackInfo,
       _getExpandedFuncStacksAsFuncArrays,
-      (funcStackInfo, funcArrays): (IndexIntoFuncStackTable|null)[] => {
+      (funcStackInfo, funcArrays): (IndexIntoFuncStackTable | null)[] => {
         return funcArrays.map(funcArray => ProfileData.getFuncStackFromFuncArray(funcArray, funcStackInfo.funcStackTable));
       }
     );

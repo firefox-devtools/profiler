@@ -176,7 +176,11 @@ class FlameChartCanvas extends PureComponent {
     return `${durationString}ms - ${label}`;
   }
 
-  _onDoubleClickStack({depth, stackTableIndex}: HoveredStackTiming) {
+  _onDoubleClickStack(hoveredItem: HoveredStackTiming | null) {
+    if (hoveredItem === null) {
+      return;
+    }
+    const {depth, stackTableIndex} = hoveredItem;
     const { stackTimingByDepth, updateProfileSelection } = this.props;
     updateProfileSelection({
       hasSelection: true,
