@@ -33,7 +33,7 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
   props: Props<HoveredItem>;
   state: State<HoveredItem>;
   _requestedAnimationFrame: boolean;
-  _devicePixelRatio: 1;
+  _devicePixelRatio: number;
   _ctx: CanvasRenderingContext2D;
   _canvas: ?HTMLCanvasElement;
 
