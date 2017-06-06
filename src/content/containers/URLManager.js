@@ -42,7 +42,7 @@ class URLManager extends PureComponent {
     const { urlSetupDone } = this.props;
 
     this._updateState();
-    window.onpopstate = () => this._updateState();
+    window.addEventListener('popstate', () => this._updateState());
     urlSetupDone();
   }
 
