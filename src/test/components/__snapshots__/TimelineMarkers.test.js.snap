@@ -1,0 +1,184 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders TimelineMarkers correctly 1`] = `
+<div
+  className="timelineMarkers"
+  style={
+    Object {
+      "height": 72,
+    }
+  }
+>
+  <div
+    className="timelineMarkersLabels grippy"
+    title="thread: \\"Empty\\" (0)
+  process: \\"default\\" (0)"
+  >
+    <span
+      className="timelineMarkersLabelsName"
+    >
+      Empty
+    </span>
+    <button
+      className="timelineMarkersCollapseButton expanded"
+      onClick={[Function]}
+    />
+  </div>
+  <div
+    className="timelineViewport expanded"
+    onMouseDown={[Function]}
+    onWheel={[Function]}
+  >
+    <canvas
+      className="timelineCanvas timelineMarkerCanvas"
+      onDoubleClick={[Function]}
+      onMouseMove={[Function]}
+      onMouseOut={[Function]}
+      title={null}
+    />
+    <div
+      className="timelineViewportShiftScroll hidden"
+    >
+      Zoom Timeline:
+      <kbd
+        className="timelineViewportShiftScrollKbd"
+      >
+        Shift
+      </kbd>
+      <kbd
+        className="timelineViewportShiftScrollKbd"
+      >
+        Scroll
+      </kbd>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders TimelineMarkers correctly 2`] = `
+Array [
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#eee",
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    32,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    48,
+    200,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    150,
+    0,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "rgba(255, 255, 255, 0.8)",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "rgba(255, 255, 255, 0.0)",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [Function],
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    150,
+    16,
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    150,
+    16,
+  ],
+  Array [
+    "fillRect",
+    0,
+    32,
+    150,
+    16,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Marker A",
+    5,
+    11,
+  ],
+  Array [
+    "fillText",
+    "Marker B",
+    5,
+    27,
+  ],
+  Array [
+    "fillText",
+    "Marker C",
+    5,
+    43,
+  ],
+]
+`;

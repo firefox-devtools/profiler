@@ -17,7 +17,9 @@ import type {
 import type { UpdateProfileSelection } from '../actions/profile-view';
 import type { ProfileSelection } from '../actions/types';
 
-const { DOM_DELTA_PAGE, DOM_DELTA_LINE } = new WheelEvent('mouse');
+const { DOM_DELTA_PAGE, DOM_DELTA_LINE } = (typeof window === 'object' && window.WheelEvent)
+  ? new WheelEvent('mouse')
+  : { DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2 };
 
 type Props = {
   viewportNeedsUpdate: any,
@@ -68,10 +70,11 @@ const COLLAPSED_ROW_HEIGHT = 34;
 export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>) {
   class TimelineViewport extends PureComponent {
 
-    props: Props
-    shiftScrollId: number
-    zoomRangeSelectionScheduled: boolean
-    zoomRangeSelectionScrollDelta: number
+    props: Props;
+    shiftScrollId: number;
+    zoomRangeSelectionScheduled: boolean;
+    zoomRangeSelectionScrollDelta: number;
+    _container: ?HTMLElement;
 
     state: {
       containerWidth: CssPixels,
@@ -178,14 +181,16 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
     }
 
     _setSize() {
-      const rect = this.refs.container.getBoundingClientRect();
-      if (this.state.containerWidth !== rect.width || this.state.containerHeight !== rect.height) {
-        this.setState({
-          containerWidth: rect.width,
-          containerHeight: rect.height,
-          containerLeft: rect.left,
-          viewportBottom: this.state.viewportTop + rect.height,
-        });
+      if (this._container) {
+        const rect = this._container.getBoundingClientRect();
+        if (this.state.containerWidth !== rect.width || this.state.containerHeight !== rect.height) {
+          this.setState({
+            containerWidth: rect.width,
+            containerHeight: rect.height,
+            containerLeft: rect.left,
+            viewportBottom: this.state.viewportTop + rect.height,
+          });
+        }
       }
     }
 
@@ -224,13 +229,14 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
 
     isViewportOccluded(event: SyntheticWheelEvent): boolean {
       const scrollElement = this.props.getScrollElement();
-      if (!scrollElement) {
+      const container = this._container;
+      if (!scrollElement || !container) {
         return false;
       }
       // Calculate using getBoundingClientRect to get non-rounded CssPixels.
       const innerScrollRect = scrollElement.children[0].getBoundingClientRect();
       const scrollRect = scrollElement.getBoundingClientRect();
-      const viewportRect = this.refs.container.getBoundingClientRect();
+      const viewportRect = container.getBoundingClientRect();
 
       if (event.deltaY < 0) {
         //    ______________ viewportRect
@@ -469,7 +475,9 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
         <div className={viewportClassName}
              onWheel={this._mouseWheelListener}
              onMouseDown={this._mouseDownListener}
-             ref='container'>
+             ref={container => {
+               this._container = container;
+             }}>
           <WrappedComponent containerWidth={containerWidth}
                             containerHeight={containerHeight}
                             viewportLeft={viewportLeft}

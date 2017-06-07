@@ -23,11 +23,11 @@ describe('actions/icons', function () {
   beforeEach(() => {
     const mock = createImageMock();
     instances = mock.instances;
-    global.Image = mock.Image;
+    window.Image = mock.Image;
   });
 
   afterEach(() => {
-    delete global.Image;
+    delete window.Image;
     instances = null;
   });
 
