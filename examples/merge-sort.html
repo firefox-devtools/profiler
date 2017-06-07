@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>perf.html example &mdash; Garbage Collection With Merge Sort</title>
+    <link rel='stylesheet' href='examples.css'>
+    <style>
+      #container p {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>perf.html example &mdash; Garbage Collection With Merge Sort</h1>
+    <p>
+      This example runs two different implementations of the merge sort algorithm. The
+      first button runs an implementation that creates lots of small arrays. All of these
+      small arrays must be cleaned up. The second implementation pre-allocates a single
+      array, and operates within two arrays. It avoids the problem of making the garbage
+      collector work too hard.
+    </p>
+    <p>
+      <label for='number'>Array size:</label>
+      <input id='number' type='number' value='1000000' />
+    </p>
+    <p>
+      <button id="button1">Sort randomized array</button>
+    </p>
+    <p>
+      <button id="button2">Sort randomized array (GC Optimized)</button>
+    </p>
+
+    <div id='container'>
+    </div>
+
+    <script>
+      const container = document.querySelector("#container");
+      const numberEl = document.querySelector("#number");
+      let randomNumbers = generateRandomArray();
+
+      numberEl.addEventListener("change", () => {
+        randomNumbers = generateRandomArray()
+      });
+      document.querySelector("#button1")
+        .addEventListener("click", () => runSort(mergeSort), false);
+      document.querySelector("#button2")
+        .addEventListener("click", () => runSort(mergeSortOptimized), false);
+
+      function runSort(fn) {
+        // Measure the timing with the User Timings API.
+        const name = fn.name;
+        performance.mark(`${name}-start`);
+
+        // Run the sort algorithm.
+        const result = fn(randomNumbers.slice());
+
+        // Get the timing information.
+        performance.mark(`${name}-end`);
+        performance.measure(name, `${name}-start`, `${name}-end`);
+        const duration = performance.getEntriesByName(name)[0].duration.toFixed(2);
+        performance.clearMarks();
+        performance.clearMeasures();
+
+        // Update the UI
+        container.innerHTML = `
+          <p>Unsorted array: ${randomNumbers.slice(0, 50)}</p>
+          <p>Sorted array: ${result.slice(0, 50)}</p>
+          <p>"${name}" duration: ${duration}ms</p>
+        `;
+      }
+
+      /**
+       * This is a typical merge sort operation. It's terse and simple, but does require
+       * the browser to allocate quite a few small arrays.
+       */
+      function mergeSort(A) {
+        let result;
+        if (A.length < 2) {
+          result = A;
+        } else {
+          const mid = Math.floor(A.length / 2);
+          const left = mergeSort(A.slice(0, mid));
+          const right = mergeSort(A.slice(mid));
+
+          result = merge(left, right);
+        }
+        return result;
+      }
+
+      function merge(A, B) {
+        const result = [];
+        while (A.length > 0 && B.length > 0) {
+          result.push(A[0] < B[0] ? A.shift() : B.shift());
+        }
+        return result.concat(A.length ? A : B);
+      }
+
+      /**
+       * This optimized merge sort pre-allocates another array of the same size to hold
+       * intermediate sorting values. This has the benefit of not requiring additional
+       * allocations while performing the merge. There are no small intermediate arrays,
+       * and expensive operations such as concatenation are not needed. In addition,
+       * there is no garbage collection pressure of cleaning up lots of small arrays.
+       */
+      function mergeSortOptimized(A, B = Array(A.length), p = 0, r = A.length - 1) {
+        if (p < r) {
+          const q = Math.floor((p + r) / 2);
+          mergeSortOptimized(A, B, p, q);
+          mergeSortOptimized(A, B, q + 1, r);
+          mergeOptimized(A, B, p, q, r);
+        }
+        return A;
+      }
+
+      function mergeOptimized(A, B, p, q, r) {
+        let n1 = q - p + 1;
+        let n2 = r - q;
+
+        for (let i = p; i <= r; i++) {
+          B[i] = A[i];
+        }
+
+        let i = 0;
+        let j = 0;
+
+        for (let k = p; k < r + 1; k++) {
+          const L = B[p + i];
+          const R = B[q + j + 1];
+          const comparison = L <= R;
+          const isDoneL = i >= n1;
+          const isDoneR = j >= n2;
+          if (!isDoneL && (comparison || isDoneR)) {
+            A[k] = L;
+            i++;
+          } else {
+            A[k] = R;
+            j++;
+          }
+        }
+      }
+
+      function generateRandomArray() {
+        const length = +numberEl.value;
+        const array = Array(length);
+        for (let i = 0; i < length; i++) {
+          array[i] = Math.round(Math.random() * 100);
+        }
+        container.innerHTML = `<p>Unsorted array: ${array.slice(0, 50)}</p>`;
+        return array;
+      }
+    </script>
+  </body>
+</html>
