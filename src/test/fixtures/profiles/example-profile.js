@@ -117,15 +117,20 @@ const thread = {
         interval: 'end',
         type: 'tracing',
       }],
-      [9, 11, { // MinorGC at time 7ms from 7ms to 8ms
+      [9, 11, { // MinorGC
         startTime: 11,
         endTime: 12,
       }],
-      [8, 9, { // DOMEvent at time 5ms from 5ms to 6ms
+      [8, 9, { // DOMEvent
         startTime: 9,
         endTime: 10,
         type: 'mouseout',
         phase: 3,
+      }],
+      [11, 11, { // GCMajor
+        startTime: 11,
+        endTime: 12,
+        type: 'GCMajor',
       }],
     ],
   },
@@ -141,6 +146,7 @@ const thread = {
     'DOMEvent',
     'MinorGC',
     'Rasterize',
+    'GCMajor',
   ],
 };
 

@@ -739,6 +739,11 @@ export function getJankInstances(samples: SamplesTable, processType: string, thr
 }
 
 export function getTracingMarkers(thread: Thread): TracingMarker[] {
+  const ignoredTracingMarkers = [
+    'DOMEvent',
+    'GCMajor',
+  ];
+
   const { stringTable, markers } = thread;
   const tracingMarkers: TracingMarker[] = [];
   const openMarkers: Map<IndexIntoStringTable, TracingMarker> = new Map();
@@ -775,7 +780,7 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
       const { startTime, endTime } = data;
       if (typeof startTime === 'number' && typeof endTime === 'number') {
         const name = stringTable.getString(markers.name[i]);
-        if (name !== 'DOMEvent') {
+        if (!ignoredTracingMarkers.includes(name)) {
           const duration = endTime - startTime;
           tracingMarkers.push({
             start: startTime,
