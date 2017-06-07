@@ -23,7 +23,7 @@ export type PostfixCallTreeFilter = {
 };
 export type CallTreeFilter = PrefixCallTreeFilter | PostfixCallTreeFilter;
 export type CallTreeFiltersPerThread = { [id: ThreadIndex]: CallTreeFilter[] };
-export type DataSource = 'none' | 'from-file' | 'public';
+export type DataSource = 'none' | 'from-file' | 'from-addon' | 'local' | 'public';
 export type ProfileSelection =
   { hasSelection: false, isModifying: false } |
   {

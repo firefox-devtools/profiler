@@ -7,6 +7,7 @@ import queryString from 'query-string';
 import { stringifyRangeFilters, parseRangeFilters } from './range-filters';
 import { stringifyCallTreeFilters, parseCallTreeFilters } from './call-tree-filters';
 import type { URLState } from './reducers/types';
+import type { DataSource } from './actions/types';
 
 // {
 //   // general:
@@ -81,10 +82,24 @@ export function urlFromState(urlState: URLState) {
   return pathname + (qString ? '?' + qString : '');
 }
 
-export function stateFromCurrentLocation(): URLState {
-  const pathname = window.location.pathname;
-  const qString = window.location.search.substr(1);
-  const hash = window.location.hash;
+function toDataSourceEnum(str: string): DataSource {
+  // With this switch, flow is able to understand that we return a valid value
+  switch (str) {
+    case 'none':
+    case 'from-addon':
+    case 'from-file':
+    case 'local':
+    case 'public':
+      return str;
+  }
+
+  throw new Error('unexpected data source');
+}
+
+export function stateFromLocation(location: Location): URLState {
+  const pathname = location.pathname;
+  const qString = location.search.substr(1);
+  const hash = location.hash;
   const query = queryString.parse(qString);
 
   if (pathname === '/') {
@@ -119,10 +134,8 @@ export function stateFromCurrentLocation(): URLState {
   }
 
   const dirs = pathname.split('/').filter(d => d);
-  const dataSource = dirs[0] || 'none';
-  if (!['none', 'from-addon', 'from-file', 'local', 'public'].includes(dataSource)) {
-    throw new Error('unexpected data source');
-  }
+  const dataSource = toDataSourceEnum(dirs[0] || 'none');
+
   const needHash = ['local', 'public'].includes(dataSource);
   const selectedThread = query.thread !== undefined ? +query.thread : 0;
 
