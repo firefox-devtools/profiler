@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>perf.html example &mdash; Canvas Drawing</title>
+    <link rel='stylesheet' href='examples.css'>
+  </head>
+  <body>
+    <h1>perf.html example &mdash; Canvas Drawing</h1>
+    <p>
+      This example shows the performance impacts of drawing rectangles using canvas
+      context calls. It shows how the CSS parser is used when setting the colors for
+      fillStyle, as well as what requestAnimationFrame loops look like.
+    </p>
+    <p>
+      <label for='number'>Rectangles:</label>
+      <input id='number' type='number' value='10000' />
+    </p>
+    <p>
+      <button id='toggle'>Toggle mixed colors</button>
+    </p>
+
+    <div id='container'>
+      <canvas></canvas>
+    </div>
+
+    <script>
+      const container = document.querySelector('#container');
+      const canvas = document.querySelector('canvas');
+      const ctx = canvas.getContext('2d');
+      const numberEl = document.querySelector('#number');
+      const toggleEl = document.querySelector('#toggle');
+
+      canvas.width = container.offsetWidth;
+      canvas.height = container.offsetWidth * 9 / 16;
+      const w = canvas.width;
+      const h = canvas.height;
+
+      let useMixedColors = false;
+      toggleEl.addEventListener('click', () => {
+        useMixedColors = !useMixedColors;
+      }, false);
+
+      function draw () {
+        const count = +numberEl.value;
+        const now = Date.now()
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'red';
+        for (let i = 0; i < count; i++) {
+          const unitI = i / count;
+          const waveHeight = (
+            0.1 * Math.sin(now * 0.013 + 100 * unitI) +
+            0.8 * Math.sin(now * 0.001 + 10 * unitI)
+          );
+
+          if (useMixedColors) {
+            const hue = Math.floor((waveHeight + 1) * 0.5 * 360);
+            ctx.fillStyle = `hsl(${hue}, 100%, 50%)`
+          }
+
+          ctx.fillRect(
+            w * unitI,
+            h * 0.5 + h * 0.5 * waveHeight - 2.5,
+            5,
+            5
+          );
+        }
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    </script>
+  </body>
+</html>
