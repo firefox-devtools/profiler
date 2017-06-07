@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { findDOMNode } from 'react-dom';
 
 /**
@@ -16,7 +16,7 @@ import { findDOMNode } from 'react-dom';
  * @param  {class} Wrapped The class that gets wrapped.
  * @return {class}         The resulting Component class.
  */
-export const withSize = Wrapped => class WithSizeWrapper extends Component {
+export const withSize = Wrapped => class WithSizeWrapper extends PureComponent {
   constructor(props) {
     super(props);
     this.state = { width: 0, height: 0 };

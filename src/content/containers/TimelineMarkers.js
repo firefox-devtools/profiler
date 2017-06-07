@@ -1,5 +1,5 @@
 // @flow
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import TimelineMarkerCanvas from '../components/TimelineMarkerCanvas';
 import { selectorsForThread, getDisplayRange, getProfileInterval, getProfileViewOptions } from '../reducers/profile-view';
@@ -44,7 +44,7 @@ type Props = {
   markers: TracingMarker[],
 };
 
-class TimelineMarkers extends Component {
+class TimelineMarkers extends PureComponent {
 
   props: Props;
 

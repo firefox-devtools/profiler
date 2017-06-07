@@ -1,5 +1,5 @@
 // @flow
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { timeCode } from '../../common/time-code';
 import classNames from 'classnames';
 
@@ -21,7 +21,7 @@ type State<HoveredItem> = {
 
 require('./TimelineCanvas.css');
 
-export default class TimelineCanvas<HoveredItem> extends Component<
+export default class TimelineCanvas<HoveredItem> extends PureComponent<
   void,
   Props<HoveredItem>,
   State<HoveredItem>
