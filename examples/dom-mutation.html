@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <title>perf.html example &mdash; DOM Mutation</title>
+    <link rel='stylesheet' href='examples.css'>
+  </head>
+  <body>
+    <h1>perf.html example &mdash; DOM Mutation</h1>
+    <p>
+      This demo creates 100 divs, and then randomly mutates the contents of some divs
+      with random letters. It either changes the content straight, or flushes the layout
+      through computing the boundingClientRect, forcing the browser to compute the layout.
+      Reflows are a common performance problem in web apps.
+    </p>
+    <p>
+      <label for='number'>Times to mutate:</label>
+      <input id='number' type='number' value='10000' />
+    </p>
+    <p>
+      <button id="button1">Mutate DOM nodes (flush layout)</button>
+    </p>
+    <p>
+      <button id="button2">Mutate DOM nodes</button>
+    </p>
+
+    <div id='container'>
+      <script>
+      for (let i = 0; i < 100; i++) {
+        document.write('<div>div</div>');
+      }
+      </script>
+    </div>
+
+    <script>
+      const container = document.querySelector('#container');
+      const alphabet = "abcdefghijklmnopqrstuvwxyz";
+
+      document.querySelector('#button1')
+        .addEventListener('click', () => mutateDOM(true), false);
+      document.querySelector('#button2')
+        .addEventListener('click', () => mutateDOM(false), false);
+
+      function mutateDOM (flushLayout) {
+        const times = +document.querySelector('#number').value;
+        for (let i = 0; i < times; i++) {
+          const div = container.children[
+            Math.floor(container.children.length * Math.random())
+          ];
+          div.innerHTML = generateLetters();
+          if (flushLayout) {
+            const rect = div.getBoundingClientRect();
+          }
+        }
+      }
+
+      function generateLetters () {
+        const length = Math.random() * 100;
+        let letters = "";
+        for (let i = 0; i < length; i++) {
+          letters += alphabet[Math.floor(alphabet.length * Math.random())];
+        }
+        return letters;
+      }
+    </script>
+  </body>
+</html>
