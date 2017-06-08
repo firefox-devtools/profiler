@@ -9,7 +9,7 @@ import { oneLine } from 'common-tags';
 import { retrieveProfileFromAddon, retrieveProfileFromWeb } from '../actions/receive-profile';
 import ProfileViewer from '../components/ProfileViewer';
 import Home from '../containers/Home';
-import { urlFromState, stateFromCurrentLocation } from '../url-handling';
+import { urlFromState, stateFromLocation } from '../url-handling';
 import { getView } from '../reducers/app';
 import { getDataSource, getHash } from '../reducers/url-state';
 import URLManager from './URLManager';
@@ -156,7 +156,7 @@ export default class Root extends PureComponent {
     const { store } = this.props;
     return (
       <Provider store={store}>
-        <URLManager urlFromState={urlFromState} stateFromCurrentLocation={stateFromCurrentLocation}>
+        <URLManager urlFromState={urlFromState} stateFromLocation={stateFromLocation}>
           <ProfileViewWhenReady/>
         </URLManager>
       </Provider>

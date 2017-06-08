@@ -59,6 +59,13 @@ function rangeFilters(state: StartEndRange[] = [], action: Action) {
 }
 
 function selectedThread(state: ThreadIndex = 0, action: Action) {
+  function findDefaultThreadIndex(threads) {
+    const contentThreadId = threads.findIndex(
+      thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
+    );
+    return contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(threads)[0];
+  }
+
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
       return action.selectedThread;
@@ -68,10 +75,15 @@ function selectedThread(state: ThreadIndex = 0, action: Action) {
       // or the first thread in the thread order. For profiles from the Web, the
       // selectedThread has already been initialized from the URL and does not require
       // looking at the profile.
-      const contentThreadId = action.profile.threads.findIndex(thread => {
-        return thread.name === 'GeckoMain' && thread.processType === 'tab';
-      });
-      return contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(action.profile.threads)[0];
+      return findDefaultThreadIndex(action.profile.threads);
+    }
+    case 'RECEIVE_PROFILE_FROM_WEB': {
+      // For profiles from the web, we only need to ensure the selected thread
+      // is actually valid.
+      if (state < action.profile.threads.length) {
+        return state;
+      }
+      return findDefaultThreadIndex(action.profile.threads);
     }
     default:
       return state;

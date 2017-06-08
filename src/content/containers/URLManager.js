@@ -11,7 +11,7 @@ import { getIsURLSetupDone } from '../reducers/app';
 import type { Dispatch } from '../actions/types.js';
 
 type Props = {
-  stateFromCurrentLocation: void => any,
+  stateFromLocation: Location => any,
   urlFromState: any => string,
   children: any,
   urlState: any,
@@ -25,12 +25,12 @@ class URLManager extends PureComponent {
   props: Props;
 
   _updateState() {
-    const { updateURLState, stateFromCurrentLocation, show404 } = this.props;
+    const { updateURLState, stateFromLocation, show404 } = this.props;
     if (window.history.state) {
       updateURLState(window.history.state);
     } else {
       try {
-        const urlState = stateFromCurrentLocation();
+        const urlState = stateFromLocation(window.location);
         updateURLState(urlState);
       } catch (e) {
         console.error(e);
@@ -65,7 +65,7 @@ class URLManager extends PureComponent {
 }
 
 URLManager.propTypes = {
-  stateFromCurrentLocation: PropTypes.func.isRequired,
+  stateFromLocation: PropTypes.func.isRequired,
   urlFromState: PropTypes.func.isRequired,
   children: PropTypes.any.isRequired,
   urlState: PropTypes.object.isRequired,
