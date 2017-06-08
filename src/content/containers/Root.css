@@ -1,0 +1,166 @@
+.rootMessageContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.rootMessage {
+  background-color: #fff;
+  max-width: 600px;
+  width: 80%;
+  padding: 3em;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 130%;
+  box-shadow: 0 5px 25px #0b1f50;
+  overflow: hidden;
+}
+
+.rootMessageText, .rootMessageAdditional {
+  line-height: 2;
+}
+
+.rootMessageTitle {
+  margin-top: 0;
+}
+
+.rootMessageAdditional {
+  border-top: 1px solid #ccc;
+  padding-top: 1em;
+  margin-top: 1em;
+  font-size: 12px;
+}
+
+.loading {
+  position: relative;
+  height: 40px;
+  margin-top: 10px;
+}
+
+.loading-div {
+  position: absolute;
+  height: 8px;
+  border-radius: 2px;
+  animation-name: loadingdiv;
+
+  animation-duration: 4000ms;
+  animation-iteration-count: infinite;
+}
+
+.loading-row-1 {
+  top: 0;
+}
+
+.loading-row-2 {
+  top: 10px;
+}
+
+.loading-row-3 {
+  top: 20px;
+}
+
+.loading-row-4 {
+  top: 30px;
+}
+
+.loading-div-1 {
+  animation-delay: -900ms;
+  background-color: var(--theme-highlight-purple);
+  width: 100%;
+}
+
+.loading-div-2 {
+  animation-delay: -800ms;
+  background-color: var(--theme-highlight-pink);
+  left: 1%;
+  width: 97%;
+}
+
+.loading-div-3 {
+  animation-delay: -700ms;
+  width: 30%;
+  left: 5%;
+  background-color: var(--theme-highlight-orange);
+}
+
+.loading-div-4 {
+  animation-delay: -600ms;
+  width: 53%;
+  left: 43%;
+  background-color: var(--theme-highlight-lightorange);
+}
+
+.loading-div-5 {
+  animation-delay: -500ms;
+  width: 14%;
+  left: 8%;
+  background-color: var(--theme-highlight-purple);
+}
+
+.loading-div-6 {
+  animation-delay: -400ms;
+  width: 11%;
+  left: 23%;
+  background-color: var(--theme-highlight-green);
+}
+
+.loading-div-7 {
+  animation-delay: -300ms;
+  width: 15%;
+  left: 44%;
+  background-color: var(--theme-highlight-red);
+}
+
+.loading-div-8 {
+  animation-delay: -200ms;
+  width: 17%;
+  left: 60%;
+  background-color: var(--theme-highlight-red);
+}
+
+.loading-div-9 {
+  animation-delay: -100ms;
+  width: 2%;
+  left: 78%;
+  background-color: var(--theme-highlight-blue);
+}
+
+.loading-div-10 {
+  animation-delay: 0ms;
+  width: 11%;
+  left: 81%;
+  background-color: var(--theme-highlight-red);
+}
+
+@keyframes loadingdiv {
+  0% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+
+  20% {
+    transform: translateX(100px);
+    opacity: 0;
+  }
+
+  45% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  65% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(-100px);
+    opacity: 0;
+  }
+}

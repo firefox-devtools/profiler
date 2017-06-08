@@ -9,7 +9,6 @@
   align-items: center;
   justify-content: center;
   line-height: 1.5;
-  background-color: #34405D;
 }
 
 .homeDrop {
@@ -43,6 +42,15 @@
 
 .homeDrop.dragging {
   opacity: 1;
+}
+
+.homeSpecialMessage {
+  padding: 8px 16px;
+  background-color: #798FC8;
+  border: 1px solid #000;
+  border-radius: 3px;
+  color: #fff;
+  margin: 17px 0;
 }
 
 .homeSection {
