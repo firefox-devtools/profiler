@@ -7,6 +7,7 @@
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TabBar from '../components/TabBar';
+import classNames from 'classnames';
 import ProfileSummaryView from '../containers/ProfileSummaryView';
 import ProfileCallTreeView from '../containers/ProfileCallTreeView';
 import ProfileMarkersView from '../containers/ProfileMarkersView';
@@ -36,12 +37,15 @@ type Props = {
 
 class ProfileViewer extends PureComponent {
   props: Props;
+  state: {
+    isMounted: boolean,
+  };
   _tabs: { name: string, title: string }[];
 
   constructor(props) {
     super(props);
     (this: any)._onSelectTab = this._onSelectTab.bind(this);
-
+    this.state = { isMounted: false };
     // If updating this list, make sure and update the tabOrder reducer with another index.
     this._tabs = [
       {
@@ -76,13 +80,18 @@ class ProfileViewer extends PureComponent {
     changeSelectedTab(selectedTab);
   }
 
+  componentDidMount() {
+    this.setState({ isMounted: true });
+  }
+
   render() {
     const {
       className, tabOrder, timeRange, changeTabOrder, selectedTab,
     } = this.props;
+    const { isMounted } = this.state;
 
     return (
-      <div className={className}>
+      <div className={classNames(className, isMounted ? `${className}IsMounted` : null)}>
         <div className={`${className}TopBar`}>
           <ProfileFilterNavigator />
           <ProfileSharing />

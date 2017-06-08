@@ -72,6 +72,7 @@ window.geckoProfilerAddonInstalled = function () {
 };
 
 type HomeProps = {
+  specialMessage?: string,
   retrieveProfileFromFile: File => void,
 };
 
@@ -271,7 +272,7 @@ class Home extends PureComponent {
 
   render() {
     const { isDragging } = this.state;
-
+    const { specialMessage } = this.props;
     return (
       <div className='home'
           onDragEnter={this._startDragging}
@@ -283,6 +284,13 @@ class Home extends PureComponent {
             <span className='homeTitleText'>perf.html</span>
             <span className='homeTitleSubtext'> &mdash; Web app for Firefox performance analysis</span>
           </h1>
+          {
+            specialMessage
+              ? <div className='homeSpecialMessage'>
+                  {specialMessage}
+                </div>
+              : null
+          }
           <p>Capture a performance profile. Analyze it. Share it. Make the web faster.</p>
           <CSSTransitionGroup transitionName='homeTransition'
                                    transitionEnterTimeout={300}

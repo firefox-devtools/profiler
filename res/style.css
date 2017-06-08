@@ -8,6 +8,7 @@ html, body {
   font: message-box;
   font-size: 11px;
   height: 100%;
+  /* background-color is defined in the HTML file to prevent flashing a white screen. */
 }
 
 body, #root, .profileViewer {
@@ -32,6 +33,16 @@ body {
 
 #root {
   z-index: 0;
+}
+
+.profileViewer {
+  background-color: #fff;
+  opacity: 0;
+  transition: opacity 200ms;
+}
+
+.profileViewerIsMounted {
+  opacity: 1;
 }
 
 .treeView {
