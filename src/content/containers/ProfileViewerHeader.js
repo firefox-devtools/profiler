@@ -95,7 +95,7 @@ class ProfileViewerHeader extends PureComponent {
             const threadName = threads[threadIndex].name;
             const processType = threads[threadIndex].processType;
             return (
-              (((threadName === 'GeckoMain' || threadName === 'Compositor') && processType !== 'plugin') ?
+              (((threadName === 'GeckoMain' || threadName === 'Compositor' || threadName ==='Renderer') && processType !== 'plugin') ?
                 <ProfileThreadTracingMarkerOverview className={`${className}HeaderIntervalMarkerOverview ${className}HeaderIntervalMarkerOverviewGfx ${className}HeaderIntervalMarkerOverviewThread${threadName}`}
                                                     rangeStart={timeRange.start}
                                                     rangeEnd={timeRange.end}

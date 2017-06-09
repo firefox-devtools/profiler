@@ -140,7 +140,7 @@ export function getTimeRangeIncludingAllThreads(profile: Profile) {
 }
 
 export function defaultThreadOrder(threads: Thread[]) {
-  // Put the compositor thread last.
+  // Put the compositor/renderer thread last.
   const threadOrder = threads.map((thread, i) => i);
   threadOrder.sort((a, b) => {
     const nameA = threads[a].name;
@@ -148,7 +148,7 @@ export function defaultThreadOrder(threads: Thread[]) {
     if (nameA === nameB) {
       return a - b;
     }
-    return (nameA === 'Compositor') ? 1 : -1;
+    return (nameA === 'Compositor' || nameA === 'Renderer') ? 1 : -1;
   });
   return threadOrder;
 }
