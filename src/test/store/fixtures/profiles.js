@@ -79,7 +79,6 @@ export function getEmptyThread(overrides: ?Object): Thread {
     libs: [],
     funcTable: {
       address: [],
-      libs: [],
       isJS: false,
       name: [],
       resource: [],

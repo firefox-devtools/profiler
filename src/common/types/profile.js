@@ -160,14 +160,6 @@ export type FrameTable = {
  */
 export type FuncTable = {
   address: MemoryOffset[],
-  libs: {
-    breakpadId: string,
-    end: number,
-    name: string,
-    offset: number,
-    pdbName: string,
-    start: number,
-  }[],
   isJS: boolean[],
   length: number,
   name: IndexIntoStringTable[],
