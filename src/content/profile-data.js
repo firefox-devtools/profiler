@@ -249,17 +249,17 @@ function _filterThreadByFunc(
  * @param {Object} thread - A thread.
  * @returns {Object} The thread with collapsed samples.
  */
-export function collapsePlatformStackFrames(thread: Thread) {
+export function collapsePlatformStackFrames(thread: Thread): Thread {
   return timeCode('collapsePlatformStackFrames', () => {
     const { stackTable, funcTable, frameTable, samples, stringTable } = thread;
 
     // Create new tables for the data.
-    const newStackTable = {
+    const newStackTable: StackTable = {
       length: 0,
       frame: [],
       prefix: [],
     };
-    const newFrameTable = {
+    const newFrameTable: FrameTable = {
       length: frameTable.length,
       implementation: frameTable.implementation.slice(),
       optimizations: frameTable.optimizations.slice(),
@@ -268,12 +268,14 @@ export function collapsePlatformStackFrames(thread: Thread) {
       func: frameTable.func.slice(),
       address: frameTable.address.slice(),
     };
-    const newFuncTable = {
+    const newFuncTable: FuncTable = {
       length: funcTable.length,
       name: funcTable.name.slice(),
       resource: funcTable.resource.slice(),
       address: funcTable.address.slice(),
       isJS: funcTable.isJS.slice(),
+      fileName: funcTable.fileName.slice(),
+      lineNumber: funcTable.lineNumber.slice(),
     };
 
     // Create a Map that takes a prefix and frame as input, and maps it to the new stack
@@ -320,6 +322,8 @@ export function collapsePlatformStackFrames(thread: Thread) {
               newFuncTable.resource.push(-1);
               newFuncTable.address.push(-1);
               newFuncTable.isJS.push(false);
+              newFuncTable.fileName.push(null);
+              newFuncTable.lineNumber.push(null);
               if (newFuncTable.name.length !== newFuncTable.length) {
                 console.error('length is not correct', newFuncTable.name.length, newFuncTable.length);
               }
