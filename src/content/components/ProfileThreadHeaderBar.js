@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import ThreadStackGraph from './ThreadStackGraph';
 import { selectorsForThread } from '../reducers/profile-view';
@@ -16,6 +16,7 @@ import ContextMenuTrigger from './ContextMenuTrigger';
 import type { IndexIntoFuncTable, Thread, ThreadIndex } from '../../common/types/profile';
 import type { Milliseconds } from '../../common/types/units';
 import type { FuncStackInfo, IndexIntoFuncStackTable } from '../../common/types/profile-derived';
+import type { State } from '../reducers/types';
 
 type Props = {
   threadIndex: ThreadIndex,
@@ -26,6 +27,7 @@ type Props = {
   rangeEnd: Milliseconds,
   selectedFuncStack: IndexIntoFuncStackTable,
   isSelected: boolean,
+  isHidden: boolean,
   style: Object,
   threadName: string,
   processDetails: string,
@@ -72,9 +74,13 @@ class ProfileThreadHeaderBar extends PureComponent {
   render() {
     const {
       thread, interval, rangeStart, rangeEnd, funcStackInfo, selectedFuncStack,
-      isSelected, style, threadName, processDetails,
+      isSelected, style, threadName, processDetails, isHidden,
     } = this.props;
-
+    if (isHidden) {
+      // If this thread is hidden, render out a stub element so that the Reorderable
+      // Component still works across all the threads.
+      return <li className='profileThreadHeaderBarHidden' />;
+    }
     return (
       <li className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')} style={style}>
         <ContextMenuTrigger id={'ProfileThreadHeaderContextMenu'}
@@ -101,24 +107,8 @@ class ProfileThreadHeaderBar extends PureComponent {
 
 }
 
-ProfileThreadHeaderBar.propTypes = {
-  threadIndex: PropTypes.number.isRequired,
-  thread: PropTypes.object.isRequired,
-  funcStackInfo: PropTypes.object.isRequired,
-  changeSelectedThread: PropTypes.func.isRequired,
-  changeSelectedFuncStack: PropTypes.func.isRequired,
-  interval: PropTypes.number.isRequired,
-  rangeStart: PropTypes.number.isRequired,
-  rangeEnd: PropTypes.number.isRequired,
-  selectedFuncStack: PropTypes.number.isRequired,
-  isSelected: PropTypes.bool.isRequired,
-  style: PropTypes.object,
-  threadName: PropTypes.string,
-  processDetails: PropTypes.string,
-};
-
-export default connect((state, props) => {
-  const threadIndex = props.index;
+export default connect((state: State, props) => {
+  const threadIndex: ThreadIndex = props.index;
   const selectors = selectorsForThread(threadIndex);
   const selectedThread = getSelectedThreadIndex(state);
   return {

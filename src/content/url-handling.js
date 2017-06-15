@@ -56,6 +56,8 @@ export function urlFromState(urlState: URLState) {
   const query: Object = {
     range: stringifyRangeFilters(urlState.rangeFilters) || undefined,
     thread: `${urlState.selectedThread}`,
+    threadOrder: urlState.threadOrder.join('-'),
+    hiddenThreads: urlState.hiddenThreads.join('-'),
   };
 
   if (process.env.NODE_ENV === 'development') {
@@ -133,6 +135,8 @@ export function stateFromLocation(location: Location): URLState {
         implementation: 'combined',
         invertCallstack: false,
         hidePlatformDetails: false,
+        threadOrder: [],
+        hiddenThreads: [],
       };
     }
   }
@@ -166,5 +170,11 @@ export function stateFromLocation(location: Location): URLState {
     implementation,
     invertCallstack: query.invertCallstack !== undefined,
     hidePlatformDetails: query.hidePlatformDetails !== undefined,
+    hiddenThreads: query.hiddenThreads
+      ? query.hiddenThreads.split('-').map(index => Number(index))
+      : [],
+    threadOrder: query.threadOrder
+      ? query.threadOrder.split('-').map(index => Number(index))
+      : [],
   };
 }
