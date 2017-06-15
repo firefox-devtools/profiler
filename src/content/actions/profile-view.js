@@ -6,7 +6,7 @@
 import type {
   Action, ThunkAction, ProfileSelection, CallTreeFilter, ImplementationFilter,
 } from './types';
-import type { Thread, ThreadIndex, IndexIntoFuncTable, IndexIntoMarkersTable } from '../../common/types/profile';
+import type { ThreadIndex, IndexIntoFuncTable, IndexIntoMarkersTable } from '../../common/types/profile';
 
 /**
  * The actions that pertain to changing the view on the profile, including searching
@@ -37,17 +37,29 @@ export function changeThreadOrder(threadOrder: ThreadIndex[]): Action {
   };
 }
 
-export function hideThread(threadIndex: ThreadIndex): Action {
-  return {
-    type: 'HIDE_THREAD',
-    threadIndex,
+export function hideThread(
+  threadIndex: ThreadIndex,
+  threadOrder: ThreadIndex[],
+  hiddenThreads: ThreadIndex[]
+): ThunkAction {
+  return dispatch => {
+    // Do not allow hiding the last thread.
+    if (hiddenThreads.length + 1 === threadOrder.length) {
+      return;
+    }
+
+    dispatch({
+      type: 'HIDE_THREAD',
+      threadIndex,
+      threadOrder,
+      hiddenThreads,
+    });
   };
 }
 
-export function showThread(threads: Thread[], threadIndex: ThreadIndex): Action {
+export function showThread(threadIndex: ThreadIndex): Action {
   return {
     type: 'SHOW_THREAD',
-    threads,
     threadIndex,
   };
 }

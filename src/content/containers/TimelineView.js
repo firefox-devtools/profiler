@@ -5,46 +5,55 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { getThreads, getThreadOrder } from '../reducers/profile-view';
-import actions from '../actions';
+import { getThreads } from '../reducers/profile-view';
+import { getThreadOrder, getHiddenThreads } from '../reducers/url-state';
+import { changeThreadOrder } from '../actions/profile-view';
 import FlameChartSettings from '../components/FlameChartSettings';
 import TimelineFlameChart from './TimelineFlameChart';
 import TimelineMarkers from './TimelineMarkers';
 import Reorderable from '../components/Reorderable';
 import { withSize } from '../with-size';
 
-import type { Thread } from '../../common/types/profile';
+import type { State } from '../reducers/types';
+import type { Thread, ThreadIndex } from '../../common/types/profile';
 
 require('./TimelineView.css');
 
 type Props = {
   threads: Thread[],
-  threadOrder: number[],
+  threadOrder: ThreadIndex[],
+  hiddenThreads: ThreadIndex[],
   height: number,
-  changeThreadOrder: any => any,
+  changeThreadOrder: typeof changeThreadOrder,
 };
 
 class TimlineViewTimelinesImpl extends PureComponent {
 
   props: Props
 
-  getScrollElement: () => ?HTMLElement
-  scrollElement: ?HTMLElement
+  _scrollElement: ?HTMLElement
 
   constructor(props: Props) {
     super(props);
-    this.getScrollElement = () => this.scrollElement;
+    (this: any)._getScrollElement = this._getScrollElement.bind(this);
+    (this: any)._setScrollElementRef = this._setScrollElementRef.bind(this);
+  }
+
+  _getScrollElement(): ?HTMLElement {
+    return this._scrollElement;
+  }
+
+  _setScrollElementRef(element: HTMLElement) {
+    this._scrollElement = element;
   }
 
   render() {
-    const { threads, threadOrder, changeThreadOrder, height } = this.props;
+    const { threads, threadOrder, changeThreadOrder, height, hiddenThreads } = this.props;
 
     return (
       <div className='timelineViewTimelines'>
         <div className='timelineViewTimelinesScroller'
-             ref={element => {
-               this.scrollElement = element;
-             }}>
+             ref={this._setScrollElementRef}>
           <div className='timelineViewDivider'>
             Sample based callstacks
           </div>
@@ -53,26 +62,39 @@ class TimlineViewTimelinesImpl extends PureComponent {
                        order={threadOrder}
                        orient='vertical'
                        onChangeOrder={changeThreadOrder}>
-            {threads.map((thread, threadIndex) => (
-              <div className='timelineViewRow' key={threadIndex}>
-                <TimelineFlameChart threadIndex={threadIndex}
-                                    viewHeight={height}
-                                    getScrollElement={this.getScrollElement} />
-              </div>
+            {threads.map((_, threadIndex) => (
+              hiddenThreads.includes(threadIndex)
+                // If this thread is hidden, render out a stub element so that the
+                // Reorderable Component still works across all the threads.
+                ? <div className='timelineViewRowHidden' />
+                : <div className='timelineViewRow' key={threadIndex}>
+                    <TimelineFlameChart threadIndex={threadIndex}
+                                        viewHeight={height}
+                                        getScrollElement={this._getScrollElement} />
+                  </div>
             ))}
           </Reorderable>
           <div className='timelineViewDivider'>
             Marker Events
           </div>
-          <div className='timelineViewTimelinesThreadList'>
-            {threads.map((thread, threadIndex) => (
-              <div className='timelineViewRow' key={threadIndex}>
-                <TimelineMarkers threadIndex={threadIndex}
-                                 viewHeight={height}
-                                 getScrollElement={this.getScrollElement} />
-              </div>
+          <Reorderable tagName='div'
+                       className='timelineViewTimelinesThreadList'
+                       order={threadOrder}
+                       orient='vertical'
+                       onChangeOrder={changeThreadOrder}>
+
+            {threads.map((_, threadIndex) => (
+              hiddenThreads.includes(threadIndex)
+                // If this thread is hidden, render out a stub element so that the
+                // Reorderable Component still works across all the threads.
+                ? <div className='timelineViewRowHidden' />
+                : <div className='timelineViewRow' key={threadIndex}>
+                  <TimelineMarkers threadIndex={threadIndex}
+                                   viewHeight={height}
+                                   getScrollElement={this._getScrollElement} />
+                </div>
             ))}
-          </div>
+          </Reorderable>
         </div>
       </div>
     );
@@ -85,26 +107,30 @@ class TimelineView extends PureComponent {
 
   props: {
     threads: Thread[],
-    threadOrder: number[],
-    changeThreadOrder: number[] => any,
+    threadOrder: ThreadIndex[],
+    hiddenThreads: ThreadIndex[],
+    changeThreadOrder: typeof changeThreadOrder,
   }
 
   render() {
-    const { threads, threadOrder, changeThreadOrder } = this.props;
+    const { threads, threadOrder, changeThreadOrder, hiddenThreads } = this.props;
     return (
       <div className='timelineView'>
         <FlameChartSettings />
         <TimelineViewTimelines threads={threads}
                                threadOrder={threadOrder}
+                               hiddenThreads={hiddenThreads}
                                changeThreadOrder={changeThreadOrder} />
       </div>
     );
   }
 }
 
-export default connect(state => {
-  return {
+export default connect(
+  (state: State) => ({
     threads: getThreads(state),
     threadOrder: getThreadOrder(state),
-  };
-}, (actions: Object))(TimelineView);
+    hiddenThreads: getHiddenThreads(state),
+  }),
+  { changeThreadOrder }
+)(TimelineView);

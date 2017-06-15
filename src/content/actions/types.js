@@ -4,7 +4,7 @@
 
 // @flow
 import type { Summary } from '../../common/summarize-profile';
-import type { Profile, Thread, ThreadIndex, IndexIntoMarkersTable, IndexIntoFuncTable } from '../../common/types/profile';
+import type { Profile, ThreadIndex, IndexIntoMarkersTable, IndexIntoFuncTable } from '../../common/types/profile';
 import type { State } from '../reducers/types';
 import type { GetLabel } from '../labeling-strategies';
 import type { GetCategory } from '../color-categories';
@@ -50,8 +50,8 @@ type ProfileSummaryAction =
 type ProfileAction =
   { type: "ROUTE_NOT_FOUND", url: string } |
   { type: 'CHANGE_THREAD_ORDER', threadOrder: ThreadIndex[] } |
-  { type: 'HIDE_THREAD', threadIndex: ThreadIndex } |
-  { type: 'SHOW_THREAD', threads: Thread[], threadIndex: ThreadIndex } |
+  { type: 'HIDE_THREAD', threadIndex: ThreadIndex, hiddenThreads: ThreadIndex[], threadOrder: ThreadIndex[] } |
+  { type: 'SHOW_THREAD', threadIndex: ThreadIndex } |
   { type: 'ASSIGN_TASK_TRACER_NAMES', addressIndices: number[], symbolNames: string[] } |
   { type: 'CHANGE_SELECTED_FUNC_STACK', threadIndex: ThreadIndex, selectedFuncStack: IndexIntoFuncTable[] } |
   { type: 'CHANGE_EXPANDED_FUNC_STACKS', threadIndex: ThreadIndex, expandedFuncStacks: Array<IndexIntoFuncTable[]> } |

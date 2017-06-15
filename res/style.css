@@ -393,6 +393,11 @@ body {
   box-shadow: inset 0 1px #D6D6D6;
 }
 
+.profileThreadHeaderBarHidden {
+  height: 0;
+  pointer-events: none;
+}
+
 .profileThreadHeaderBar {
   margin: 0;
   padding: 0;

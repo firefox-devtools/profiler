@@ -5,6 +5,7 @@
 import sinon from 'sinon';
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../content/reducers/profile-view';
+import * as URLStateSelectors from '../../content/reducers/url-state';
 import { getView } from '../../content/reducers/app';
 import { receiveProfileFromAddon, retrieveProfileFromAddon, retrieveProfileFromStore, retrieveProfileFromUrl } from '../../content/actions/receive-profile';
 
@@ -73,7 +74,7 @@ describe('actions/receive-profile', function () {
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'PROFILE' });
       expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({ start: 0, end: 1007 });
-      expect(ProfileViewSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(URLStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
 
@@ -104,7 +105,7 @@ describe('actions/receive-profile', function () {
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'PROFILE' });
       expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({ start: 0, end: 1007 });
-      expect(ProfileViewSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(URLStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
   });
@@ -143,7 +144,7 @@ describe('actions/receive-profile', function () {
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'PROFILE' });
       expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({ start: 0, end: 1007 });
-      expect(ProfileViewSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(URLStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
@@ -168,7 +169,7 @@ describe('actions/receive-profile', function () {
 
       const state = store.getState();
       expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({ start: 0, end: 1007 });
-      expect(ProfileViewSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(URLStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
@@ -235,7 +236,7 @@ describe('actions/receive-profile', function () {
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'PROFILE' });
       expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({ start: 0, end: 1007 });
-      expect(ProfileViewSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(URLStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
@@ -259,7 +260,7 @@ describe('actions/receive-profile', function () {
 
       const state = store.getState();
       expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({ start: 0, end: 1007 });
-      expect(ProfileViewSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(URLStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 

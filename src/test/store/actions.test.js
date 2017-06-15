@@ -6,7 +6,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../content/reducers/profile-view';
 import * as TimelineSelectors from '../../content/reducers/timeline-view';
 import * as UrlStateSelectors from '../../content/reducers/url-state';
-import { getProfileWithNamedThreads, getProfileWithMarkers } from './fixtures/profiles';
+import { getProfileWithMarkers } from './fixtures/profiles';
 
 import {
   changeCallTreeSearchString,
@@ -15,9 +15,6 @@ import {
   changeInvertCallstack,
   updateProfileSelection,
   changeImplementationFilter,
-  changeThreadOrder,
-  hideThread,
-  showThread,
 } from '../../content/actions/profile-view';
 import {
   changeFlameChartColorStrategy,
@@ -276,70 +273,6 @@ describe('actions/updateProfileSelection', function () {
       isModifying: false,
       selectionStart: 100,
       selectionEnd: 200,
-    });
-  });
-});
-
-describe('thread ordering and toggling', function () {
-  // Give names to thread indexes.
-  const A = 0;
-  const C = 2;
-
-  function getOrderedNames(state) {
-    const threads = ProfileViewSelectors.getThreads(state);
-    return ProfileViewSelectors.getThreadOrder(state).map(i => threads[i].name);
-  }
-
-  describe('toggling threads on original sort order', function () {
-    const { dispatch, getState } = storeWithProfile(getProfileWithNamedThreads(['A', 'B', 'C', 'D']));
-    const threads = ProfileViewSelectors.getThreads(getState());
-
-    it('starts out with the initial sorting', function () {
-      expect(getOrderedNames(getState())).toEqual(['A', 'B', 'C', 'D']);
-    });
-
-    it('can hide threads', function () {
-      dispatch(hideThread(C));
-      expect(getOrderedNames(getState())).toEqual(['A', 'B', 'D']);
-
-      dispatch(hideThread(A));
-      expect(getOrderedNames(getState())).toEqual(['B', 'D']);
-    });
-
-    it('can show threads', function () {
-      dispatch(showThread(threads, C));
-      expect(getOrderedNames(getState())).toEqual(['B', 'C', 'D']);
-
-      dispatch(showThread(threads, A));
-      expect(getOrderedNames(getState())).toEqual(['A', 'B', 'C', 'D']);
-    });
-  });
-
-  describe('toggling threads on a sorted thread', function () {
-    const { dispatch, getState } = storeWithProfile(getProfileWithNamedThreads(['A', 'B', 'C', 'D']));
-    const threads = ProfileViewSelectors.getThreads(getState());
-
-    it('starts out with the initial sorting', function () {
-      expect(getOrderedNames(getState())).toEqual(['A', 'B', 'C', 'D']);
-    });
-
-    it('is resortable', function () {
-      dispatch(changeThreadOrder([3, 2, 1, 0]));
-      expect(getOrderedNames(getState())).toEqual(['D', 'C', 'B', 'A']);
-    });
-
-    it('can hide sorted threads', function () {
-      dispatch(hideThread(C));
-      dispatch(hideThread(A));
-      expect(getOrderedNames(getState())).toEqual(['D', 'B']);
-    });
-
-    it('can show sorted threads', function () {
-      dispatch(showThread(threads, C));
-      expect(getOrderedNames(getState())).toEqual(['D', 'B', 'C']);
-
-      dispatch(showThread(threads, A));
-      expect(getOrderedNames(getState())).toEqual(['A', 'D', 'B', 'C']);
     });
   });
 });

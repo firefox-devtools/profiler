@@ -5,21 +5,23 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
-import actions from '../actions';
+import { hideThread, showThread } from '../actions/profile-view';
 import { connect } from 'react-redux';
-import { getThreads, getThreadOrder } from '../reducers/profile-view';
+import { getThreads } from '../reducers/profile-view';
+import { getThreadOrder, getHiddenThreads } from '../reducers/url-state';
 import { getFriendlyThreadName } from '../profile-data';
 import classNames from 'classnames';
 
 import type { Thread, ThreadIndex } from '../../common/types/profile';
-import type { Action } from '../actions/types';
+import type { State } from '../reducers/types';
 
-type Props = {
+type Props = {|
   threads: Thread[],
   threadOrder: ThreadIndex[],
-  hideThread: ThreadIndex => Action,
-  showThread: (Thread[], ThreadIndex) => Action,
-}
+  hiddenThreads: ThreadIndex[],
+  hideThread: typeof hideThread,
+  showThread: typeof showThread,
+|};
 
 class ProfileThreadHeaderContextMenu extends PureComponent {
 
@@ -27,36 +29,43 @@ class ProfileThreadHeaderContextMenu extends PureComponent {
 
   constructor(props: Props) {
     super(props);
-    (this: any).handleClick = this.handleClick.bind(this);
+    (this: any)._toggleThreadVisibility = this._toggleThreadVisibility.bind(this);
   }
 
-  handleClick(
-    event: SyntheticEvent,
-    data: { threadIndex: ThreadIndex, isVisible: boolean }
+  _toggleThreadVisibility(
+    _,
+    data: {
+      threadOrder: ThreadIndex[],
+      hiddenThreads: ThreadIndex[],
+      threadIndex: ThreadIndex,
+      isHidden: boolean,
+    }
   ): void {
-    if (data.isVisible) {
-      this.props.hideThread(data.threadIndex);
+    const { threadOrder, hiddenThreads, threadIndex, isHidden } = data;
+    const { hideThread, showThread } = this.props;
+    if (isHidden) {
+      showThread(threadIndex, threadOrder, hiddenThreads);
     } else {
-      this.props.showThread(this.props.threads, data.threadIndex);
+      hideThread(threadIndex, threadOrder, hiddenThreads);
     }
   }
 
   render() {
-    const { threads, threadOrder } = this.props;
+    const { threads, threadOrder, hiddenThreads } = this.props;
 
     return (
       <ContextMenu id={'ProfileThreadHeaderContextMenu'}>
-        {threads.map((thread, threadIndex) => {
-          const isVisible = threadOrder.includes(threadIndex);
+        {threadOrder.map(threadIndex => {
+          const isHidden = hiddenThreads.includes(threadIndex);
           return (
-            <MenuItem onClick={this.handleClick}
-                      data={{threadIndex, isVisible}}
-                      key={threadIndex}
+            <MenuItem key={threadIndex}
                       preventClose={true}
+                      data={{ threadOrder, hiddenThreads, threadIndex, isHidden }}
+                      onClick={this._toggleThreadVisibility}
                       attributes={{
-                        className: classNames({ checkable: true, checked: isVisible }),
+                        className: classNames({ checkable: true, checked: !isHidden }),
                       }}>
-              {getFriendlyThreadName(threads, thread)}
+              {getFriendlyThreadName(threads, threads[threadIndex])}
             </MenuItem>
           );
         })}
@@ -65,7 +74,11 @@ class ProfileThreadHeaderContextMenu extends PureComponent {
   }
 }
 
-export default connect(state => ({
-  threads: getThreads(state),
-  threadOrder: getThreadOrder(state),
-}), actions)(ProfileThreadHeaderContextMenu);
+export default connect(
+  (state: State) => ({
+    threads: getThreads(state),
+    threadOrder: getThreadOrder(state),
+    hiddenThreads: getHiddenThreads(state),
+  }),
+  { hideThread, showThread }
+)(ProfileThreadHeaderContextMenu);

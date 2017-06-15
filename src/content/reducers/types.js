@@ -26,7 +26,6 @@ export type ThreadViewOptions = {
 };
 export type ProfileViewState = {
   viewOptions: {
-    threadOrder: number[],
     perThread: ThreadViewOptions[],
     symbolicationStatus: SymbolicationStatus,
     waitingForLibs: Set<RequestedLib>,
@@ -74,6 +73,8 @@ export type URLState = {
   implementation: ImplementationFilter,
   invertCallstack: boolean,
   hidePlatformDetails: boolean,
+  threadOrder: ThreadIndex[],
+  hiddenThreads: ThreadIndex[],
 };
 
 export type IconState = Set<string>;

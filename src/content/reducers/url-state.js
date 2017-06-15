@@ -93,6 +93,20 @@ function selectedThread(state: ThreadIndex = 0, action: Action) {
       }
       return findDefaultThreadIndex(action.profile.threads);
     }
+    case 'HIDE_THREAD': {
+      const { threadIndex, hiddenThreads, threadOrder } = action;
+      // If the currently selected thread is being hidden, then re-select a new one.
+      if (state === threadIndex) {
+        const index = threadOrder.find(index => {
+          return index !== threadIndex && !hiddenThreads.includes(index);
+        });
+        if (index === undefined) {
+          throw new Error('A new thread index must be found');
+        }
+        return index;
+      }
+      return state;
+    }
     default:
       return state;
   }
@@ -159,6 +173,48 @@ function hidePlatformDetails(state: boolean = false, action: Action) {
   }
 }
 
+function threadOrder(state: ThreadIndex[] = [], action: Action) {
+  switch (action.type) {
+    case 'RECEIVE_PROFILE_FROM_ADDON':
+    case 'RECEIVE_PROFILE_FROM_STORE':
+    case 'RECEIVE_PROFILE_FROM_URL':
+    case 'RECEIVE_PROFILE_FROM_FILE': {
+      // When receiving a new profile, try to use the thread order specified in the URL,
+      // but ensure that the IDs are correct.
+      const threads = defaultThreadOrder(action.profile.threads);
+      const validURLThreads = state.filter(index => threads.includes(index));
+      const missingThreads = threads.filter(index => !state.includes(index));
+      return validURLThreads.concat(missingThreads);
+    }
+    case 'CHANGE_THREAD_ORDER':
+      return action.threadOrder;
+    default:
+      return state;
+  }
+}
+
+function hiddenThreads(state: ThreadIndex[] = [], action: Action) {
+  switch (action.type) {
+    case 'RECEIVE_PROFILE_FROM_ADDON':
+    case 'RECEIVE_PROFILE_FROM_STORE':
+    case 'RECEIVE_PROFILE_FROM_URL':
+    case 'RECEIVE_PROFILE_FROM_FILE': {
+      // When receiving a new profile, try to use the hidden threads specified in the URL,
+      // but ensure that the IDs are correct.
+      const threads = action.profile.threads.map((_, threadIndex) => threadIndex);
+      return state.filter(index => threads.includes(index));
+    }
+    case 'HIDE_THREAD':
+      return [...state, action.threadIndex];
+    case 'SHOW_THREAD': {
+      const { threadIndex } = action;
+      return state.filter(index => index !== threadIndex);
+    }
+    default:
+      return state;
+  }
+}
+
 const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (state: URLState, action: Action): URLState => {
   switch (action.type) {
     case '@@urlenhancer/updateURLState':
@@ -169,7 +225,7 @@ const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (state: UR
 })(combineReducers({
   dataSource, hash, profileURL, selectedTab, rangeFilters, selectedThread,
   callTreeSearchString, callTreeFilters, implementation, invertCallstack,
-  hidePlatformDetails,
+  hidePlatformDetails, threadOrder, hiddenThreads,
 }));
 export default urlStateReducer;
 
@@ -188,7 +244,15 @@ export const getSelectedThreadIndex = (state: State) => getURLState(state).selec
 export const getCallTreeFilters = (state: State, threadIndex: ThreadIndex): CallTreeFilter[] => {
   return getURLState(state).callTreeFilters[threadIndex] || [];
 };
-
+export const getThreadOrder = (state: State) => getURLState(state).threadOrder;
+export const getHiddenThreads = (state: State) => getURLState(state).hiddenThreads;
+export const getVisibleThreadOrder = createSelector(
+  getThreadOrder,
+  getHiddenThreads,
+  (threadOrder: ThreadIndex[], hiddenThreads: ThreadIndex[]) => {
+    return threadOrder.filter(index => !hiddenThreads.includes(index));
+  }
+);
 export const getURLPredictor = createSelector(
   getURLState,
   (oldURLState: URLState) => actionOrActionList => {

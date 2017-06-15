@@ -90,54 +90,6 @@ function removePrefixFromFuncArray(prefixFuncs: IndexIntoFuncTable[], funcArray:
   return funcArray.slice(prefixFuncs.length - 1);
 }
 
-function threadOrder(state: ThreadIndex[] = [], action: Action) {
-  switch (action.type) {
-    case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_STORE':
-    case 'RECEIVE_PROFILE_FROM_URL':
-    case 'RECEIVE_PROFILE_FROM_FILE':
-      return ProfileData.defaultThreadOrder(action.profile.threads);
-    case 'CHANGE_THREAD_ORDER':
-      return action.threadOrder;
-    case 'HIDE_THREAD': {
-      const { threadIndex } = action;
-      return state.filter(i => i !== threadIndex);
-    }
-    case 'SHOW_THREAD': {
-      // There is a little bit of complexity here, due to deciding (on a potentially
-      // re-sorted list) where to actually insert a thread. This strategy tries to
-      // place it back in the list based on the original sort order.
-      const defaultThreadOrder = ProfileData.defaultThreadOrder(action.threads);
-      const originalOrderIndex = defaultThreadOrder.indexOf(action.threadIndex);
-
-      let previousThreadIndex;
-      for (let orderIndex = 0; orderIndex < defaultThreadOrder.length; orderIndex++) {
-        const threadIndex = defaultThreadOrder[orderIndex];
-        if (!state.includes(threadIndex)) {
-          continue;
-        }
-        if (orderIndex > originalOrderIndex) {
-          break;
-        }
-        previousThreadIndex = threadIndex;
-      }
-
-      const insertionIndex = previousThreadIndex === undefined
-        // Insert at the beginning.
-        ? 0
-        // Insert after
-        : state.indexOf(previousThreadIndex) + 1;
-
-      const newState = state.slice();
-      newState.splice(insertionIndex, 0, action.threadIndex);
-
-      return newState;
-    }
-    default:
-      return state;
-  }
-}
-
 function symbolicationStatus(state: SymbolicationStatus = 'DONE', action: Action) {
   switch (action.type) {
     case 'START_SYMBOLICATING':
@@ -259,6 +211,7 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
     case 'CHANGE_JS_ONLY':
     case 'CHANGE_SELECTED_FUNC_STACK':
     case 'CHANGE_SELECTED_THREAD':
+    case 'HIDE_THREAD':
       return state + 1;
     default:
       return state;
@@ -300,8 +253,7 @@ function tabOrder(state: number[] = [0, 1, 2, 3, 4, 5], action: Action) {
 
 const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
   viewOptions: combineReducers({
-    perThread: viewOptionsPerThread,
-    threadOrder, symbolicationStatus, waitingForLibs,
+    perThread: viewOptionsPerThread, symbolicationStatus, waitingForLibs,
     selection, scrollToSelectionGeneration, rootRange, zeroAt,
     tabOrder,
   }),
@@ -325,11 +277,6 @@ export const getScrollToSelectionGeneration = createSelector(
 export const getZeroAt = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.zeroAt
-);
-
-export const getThreadOrder = createSelector(
-  getProfileViewOptions,
-  viewOptions => viewOptions.threadOrder
 );
 
 export const getDisplayRange = createSelector(

@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
 import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
 import Reorderable from '../components/Reorderable';
 import TimeSelectionScrubber from '../components/TimeSelectionScrubber';
@@ -12,30 +12,40 @@ import ProfileThreadJankOverview from './ProfileThreadJankOverview';
 import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOverview';
 import OverflowEdgeIndicator from '../components/OverflowEdgeIndicator';
 import { connect } from 'react-redux';
-import { getProfile, getProfileViewOptions, getThreadOrder, getDisplayRange, getZeroAt } from '../reducers/profile-view';
-import actions from '../actions';
+import { getProfile, getProfileViewOptions, getDisplayRange, getZeroAt } from '../reducers/profile-view';
+import { getVisibleThreadOrder, getHiddenThreads, getThreadOrder } from '../reducers/url-state';
+
+import {
+  changeThreadOrder,
+  updateProfileSelection,
+  addRangeFilterAndUnsetSelection,
+  changeSelectedThread,
+} from '../actions/profile-view';
 
 import type { Profile, ThreadIndex } from '../../common/types/profile';
 import type { ProfileSelection } from '../actions/types';
+import type { State } from '../reducers/types';
 import type { Milliseconds, StartEndRange } from '../../common/types/units';
 
-type Props = {
+type Props = {|
   profile: Profile,
   className: string,
+  visibleThreadOrder: ThreadIndex[],
+  hiddenThreads: ThreadIndex[],
   threadOrder: ThreadIndex[],
   selection: ProfileSelection,
   timeRange: StartEndRange,
   zeroAt: Milliseconds,
-  changeThreadOrder: ThreadIndex[] => void,
-  updateProfileSelection: ProfileSelection => void,
-  addRangeFilterAndUnsetSelection: (Milliseconds, Milliseconds) => void,
-  changeSelectedThread: ThreadIndex => void,
-};
+  changeThreadOrder: typeof changeThreadOrder,
+  updateProfileSelection: typeof updateProfileSelection,
+  addRangeFilterAndUnsetSelection: typeof addRangeFilterAndUnsetSelection,
+  changeSelectedThread: typeof changeSelectedThread,
+|};
 
 class ProfileViewerHeader extends PureComponent {
   props: Props;
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     (this: any)._onZoomButtonClick = this._onZoomButtonClick.bind(this);
     (this: any)._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(this);
@@ -59,8 +69,8 @@ class ProfileViewerHeader extends PureComponent {
 
   render() {
     const {
-      profile, className, threadOrder, changeThreadOrder, selection,
-      updateProfileSelection, timeRange, zeroAt,
+      profile, className, threadOrder, visibleThreadOrder, changeThreadOrder,
+      selection, updateProfileSelection, timeRange, zeroAt, hiddenThreads,
     } = this.props;
     const threads = profile.threads;
 
@@ -74,7 +84,7 @@ class ProfileViewerHeader extends PureComponent {
                            onZoomButtonClick={this._onZoomButtonClick}>
       <div className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerJank`}>
         {
-          threadOrder.map(threadIndex => {
+          visibleThreadOrder.map(threadIndex => {
             const threadName = threads[threadIndex].name;
             const processType = threads[threadIndex].processType;
             return (
@@ -92,7 +102,7 @@ class ProfileViewerHeader extends PureComponent {
       </div>
       <div className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerGfx`}>
         {
-          threadOrder.map(threadIndex => {
+          visibleThreadOrder.map(threadIndex => {
             const threadName = threads[threadIndex].name;
             const processType = threads[threadIndex].processType;
             return (
@@ -120,7 +130,8 @@ class ProfileViewerHeader extends PureComponent {
                                       index={threadIndex}
                                       interval={profile.meta.interval}
                                       rangeStart={timeRange.start}
-                                      rangeEnd={timeRange.end}/>
+                                      rangeEnd={timeRange.end}
+                                      isHidden={hiddenThreads.includes(threadIndex)}/>
             )
           }
         </Reorderable>}
@@ -129,24 +140,21 @@ class ProfileViewerHeader extends PureComponent {
   }
 }
 
-ProfileViewerHeader.propTypes = {
-  profile: PropTypes.object.isRequired,
-  className: PropTypes.string.isRequired,
-  threadOrder: PropTypes.array.isRequired,
-  changeThreadOrder: PropTypes.func.isRequired,
-  selection: PropTypes.object.isRequired,
-  updateProfileSelection: PropTypes.func.isRequired,
-  addRangeFilterAndUnsetSelection: PropTypes.func.isRequired,
-  timeRange: PropTypes.object.isRequired,
-  zeroAt: PropTypes.number.isRequired,
-  changeSelectedThread: PropTypes.func.isRequired,
-};
-
-export default connect(state => ({
-  profile: getProfile(state),
-  selection: getProfileViewOptions(state).selection,
-  className: 'profileViewer',
-  threadOrder: getThreadOrder(state),
-  timeRange: getDisplayRange(state),
-  zeroAt: getZeroAt(state),
-}), actions)(ProfileViewerHeader);
+export default connect(
+  (state: State) => ({
+    profile: getProfile(state),
+    selection: getProfileViewOptions(state).selection,
+    className: 'profileViewer',
+    visibleThreadOrder: getVisibleThreadOrder(state),
+    threadOrder: getThreadOrder(state),
+    hiddenThreads: getHiddenThreads(state),
+    timeRange: getDisplayRange(state),
+    zeroAt: getZeroAt(state),
+  }),
+  {
+    changeThreadOrder,
+    updateProfileSelection,
+    addRangeFilterAndUnsetSelection,
+    changeSelectedThread,
+  }
+)(ProfileViewerHeader);
