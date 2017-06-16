@@ -6,7 +6,7 @@ import sinon from 'sinon';
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../content/reducers/profile-view';
 import { getView } from '../../content/reducers/app';
-import { receiveProfileFromAddon, retrieveProfileFromAddon, retrieveProfileFromWeb } from '../../content/actions/receive-profile';
+import { receiveProfileFromAddon, retrieveProfileFromAddon, retrieveProfileFromStore } from '../../content/actions/receive-profile';
 
 import preprocessedProfile from '../fixtures/profiles/profile-2d-canvas.json';
 import exampleProfile from '../fixtures/profiles/example-profile';
@@ -109,7 +109,7 @@ describe('actions/receive-profile', function () {
     });
   });
 
-  describe('retrieveProfileFromWeb', function () {
+  describe('retrieveProfileFromStore', function () {
     const fetch404Response = { ok: false, status: 404 };
     const fetch500Response = { ok: false, status: 500 };
     const fetch200Response = {
@@ -138,7 +138,7 @@ describe('actions/receive-profile', function () {
       window.fetch.withArgs(expectedUrl).resolves(fetch200Response);
 
       const store = blankStore();
-      await store.dispatch(retrieveProfileFromWeb(hash));
+      await store.dispatch(retrieveProfileFromStore(hash));
 
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'PROFILE' });
@@ -156,7 +156,7 @@ describe('actions/receive-profile', function () {
       const store = blankStore();
       const views = (await observeStoreStateChanges(
         store,
-        () => store.dispatch(retrieveProfileFromWeb(hash))
+        () => store.dispatch(retrieveProfileFromStore(hash))
       )).map(state => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
@@ -177,7 +177,7 @@ describe('actions/receive-profile', function () {
       const store = blankStore();
       const views = (await observeStoreStateChanges(
         store,
-        () => store.dispatch(retrieveProfileFromWeb(hash))
+        () => store.dispatch(retrieveProfileFromStore(hash))
       )).map(state => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -197,7 +197,7 @@ describe('actions/receive-profile', function () {
       window.fetch.resolves(fetch500Response);
 
       const store = blankStore();
-      await store.dispatch(retrieveProfileFromWeb(hash));
+      await store.dispatch(retrieveProfileFromStore(hash));
       expect(getView(store.getState())).toEqual({ phase: 'FATAL_ERROR', error: expect.any(Error) });
     });
   });

@@ -6,7 +6,7 @@ import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import { getProfile, getProfileRootRange } from '../reducers/profile-view';
-import { getDataSource, getHash, getURLPredictor } from '../reducers/url-state';
+import { getDataSource, getHash, getProfileURL, getURLPredictor } from '../reducers/url-state';
 import actions from '../actions';
 import { compress } from '../gz';
 import { uploadBinaryProfileData } from '../profile-store';
@@ -332,5 +332,6 @@ export default connect(state => ({
   rootRange: getProfileRootRange(state),
   dataSource: getDataSource(state),
   hash: getHash(state),
+  profileURL: getProfileURL(state),
   predictURL: getURLPredictor(state),
 }), actions)(ProfileSharing);

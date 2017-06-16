@@ -6,12 +6,12 @@ import React, { PureComponent, PropTypes } from 'react';
 import { connect, Provider } from 'react-redux';
 import { oneLine } from 'common-tags';
 
-import { retrieveProfileFromAddon, retrieveProfileFromWeb } from '../actions/receive-profile';
+import { retrieveProfileFromAddon, retrieveProfileFromStore, retrieveProfileFromUrl } from '../actions/receive-profile';
 import ProfileViewer from '../components/ProfileViewer';
 import Home from '../containers/Home';
 import { urlFromState, stateFromLocation } from '../url-handling';
 import { getView } from '../reducers/app';
-import { getDataSource, getHash } from '../reducers/url-state';
+import { getDataSource, getHash, getProfileURL } from '../reducers/url-state';
 import URLManager from './URLManager';
 
 import type { Store } from '../types';
@@ -30,7 +30,7 @@ const ERROR_MESSAGES = Object.freeze({
   'from-file': "Couldn't read the file or parse the profile in it.",
   'local': 'Not implemented yet.',
   'public': "Couldn't Retrieve the profile from the public profile store.",
-  'from-url': "Couldn't Retrieving profile from URL...",
+  'from-url': "Couldn't Retrieving profile from specified URL...",
 });
 
 // TODO Switch to a proper i18n library
@@ -46,15 +46,17 @@ type ProfileViewProps = {
   view: AppViewState,
   dataSource: string,
   hash: string,
+  profileURL: string,
   retrieveProfileFromAddon: void => void,
-  retrieveProfileFromWeb: string => void,
+  retrieveProfileFromStore: string => void,
+  retrieveProfileFromUrl: string => void,
 };
 
 class ProfileViewWhenReadyImpl extends PureComponent {
   props: ProfileViewProps;
 
   componentDidMount() {
-    const { dataSource, hash, retrieveProfileFromAddon, retrieveProfileFromWeb } = this.props;
+    const { dataSource, hash, profileURL, retrieveProfileFromAddon, retrieveProfileFromStore, retrieveProfileFromUrl } = this.props;
     switch (dataSource) {
       case 'from-addon':
         retrieveProfileFromAddon();
@@ -65,10 +67,10 @@ class ProfileViewWhenReadyImpl extends PureComponent {
       case 'local':
         break;
       case 'public':
-        retrieveProfileFromWeb(hash);
+        retrieveProfileFromStore(hash);
         break;
       case 'from-url':
-        retrieveProfileFromWeb(hash);
+        retrieveProfileFromUrl(profileURL);
         break;
     }
   }
@@ -138,7 +140,8 @@ ProfileViewWhenReadyImpl.propTypes = {
   dataSource: PropTypes.string.isRequired,
   hash: PropTypes.string,
   retrieveProfileFromAddon: PropTypes.func.isRequired,
-  retrieveProfileFromWeb: PropTypes.func.isRequired,
+  retrieveProfileFromStore: PropTypes.func.isRequired,
+  retrieveProfileFromUrl: PropTypes.func.isRequired,
 };
 
 const ProfileViewWhenReady = connect(
@@ -146,8 +149,9 @@ const ProfileViewWhenReady = connect(
     view: getView(state),
     dataSource: getDataSource(state),
     hash: getHash(state),
+    profileURL: getProfileURL(state),
   }),
-  { retrieveProfileFromWeb, retrieveProfileFromAddon }
+  { retrieveProfileFromStore, retrieveProfileFromUrl, retrieveProfileFromAddon }
 )(ProfileViewWhenReadyImpl);
 
 type RootProps = {

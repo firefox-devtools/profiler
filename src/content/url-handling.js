@@ -36,7 +36,7 @@ function dataSourceDirs(urlState: URLState) {
     case 'public':
       return ['public', urlState.hash];
     case 'from-url':
-      return ['from-url', urlState.hash];
+      return ['from-url', urlState.profileURL];
     default:
       return [];
   }
@@ -139,7 +139,8 @@ export function stateFromLocation(location: Location): URLState {
   const dirs = pathname.split('/').filter(d => d);
   const dataSource = toDataSourceEnum(dirs[0] || 'none');
 
-  const needHash = ['local', 'public', 'from-url'].includes(dataSource);
+  const needHash = ['local', 'public'].includes(dataSource);
+  const needProfileURL = ['from-url'].includes(dataSource);
   const selectedThread = query.thread !== undefined ? +query.thread : 0;
 
   let implementation = 'combined';
@@ -153,7 +154,8 @@ export function stateFromLocation(location: Location): URLState {
   return {
     dataSource,
     hash: needHash ? dirs[1] : '',
-    selectedTab: (needHash ? dirs[2] : dirs[1]) || 'calltree',
+    profileURL: needProfileURL ? dirs[1] : '',
+    selectedTab: ((needHash || needProfileURL) ? dirs[2] : dirs[1]) || 'calltree',
     rangeFilters: query.range ? parseRangeFilters(query.range) : [],
     selectedThread: selectedThread,
     callTreeSearchString: query.search || '',
