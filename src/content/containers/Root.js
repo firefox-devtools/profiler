@@ -22,6 +22,7 @@ const LOADING_MESSAGES = Object.freeze({
   'from-file': 'Reading the file and parsing the profile in it...',
   'local': 'Not implemented yet.',
   'public': 'Retrieving profile from the public profile store...',
+  'from-url': 'Retrieving profile from URL...',
 });
 
 const ERROR_MESSAGES = Object.freeze({
@@ -29,6 +30,7 @@ const ERROR_MESSAGES = Object.freeze({
   'from-file': "Couldn't read the file or parse the profile in it.",
   'local': 'Not implemented yet.',
   'public': "Couldn't Retrieve the profile from the public profile store.",
+  'from-url': "Couldn't Retrieving profile from URL...",
 });
 
 // TODO Switch to a proper i18n library
@@ -63,6 +65,9 @@ class ProfileViewWhenReadyImpl extends PureComponent {
       case 'local':
         break;
       case 'public':
+        retrieveProfileFromWeb(hash);
+        break;
+      case 'from-url':
         retrieveProfileFromWeb(hash);
         break;
     }

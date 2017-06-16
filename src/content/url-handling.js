@@ -35,6 +35,8 @@ function dataSourceDirs(urlState: URLState) {
       return ['local', urlState.hash];
     case 'public':
       return ['public', urlState.hash];
+    case 'from-url':
+      return ['from-url', urlState.hash];
     default:
       return [];
   }
@@ -90,6 +92,7 @@ function toDataSourceEnum(str: string): DataSource {
     case 'from-file':
     case 'local':
     case 'public':
+    case 'from-url':
       return str;
   }
 
@@ -136,7 +139,7 @@ export function stateFromLocation(location: Location): URLState {
   const dirs = pathname.split('/').filter(d => d);
   const dataSource = toDataSourceEnum(dirs[0] || 'none');
 
-  const needHash = ['local', 'public'].includes(dataSource);
+  const needHash = ['local', 'public', 'from-url'].includes(dataSource);
   const selectedThread = query.thread !== undefined ? +query.thread : 0;
 
   let implementation = 'combined';

@@ -393,8 +393,8 @@ export function retrieveProfileFromWeb(hash: string): ThunkAction {
     dispatch(waitingForProfileFromWeb());
 
     try {
-      const url = hash.endsWith('=')
-        ? atob(hash)
+      const url = hash.startsWith('http')
+        ? decodeURIComponent(hash)
         : `https://profile-store.commondatastorage.googleapis.com/${hash}`;
       const serializedProfile = await _fetchProfile({
         url: url,
