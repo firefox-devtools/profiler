@@ -177,7 +177,7 @@ const getURLState = (state: State): URLState => state.urlState;
 
 export const getDataSource = (state: State) => getURLState(state).dataSource;
 export const getHash = (state: State) => getURLState(state).hash;
-export const getProfileURL = (state: State) => getURLState(state).getProfileURL;
+export const getProfileURL = (state: State) => getURLState(state).profileURL;
 export const getRangeFilters = (state: State) => getURLState(state).rangeFilters;
 export const getImplementationFilter = (state: State) => getURLState(state).implementation;
 export const getHidePlatformDetails = (state: State) => getURLState(state).hidePlatformDetails;

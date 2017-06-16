@@ -139,6 +139,7 @@ ProfileViewWhenReadyImpl.propTypes = {
   }).isRequired,
   dataSource: PropTypes.string.isRequired,
   hash: PropTypes.string,
+  profileURL: PropTypes.string,
   retrieveProfileFromAddon: PropTypes.func.isRequired,
   retrieveProfileFromStore: PropTypes.func.isRequired,
   retrieveProfileFromUrl: PropTypes.func.isRequired,
