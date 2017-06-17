@@ -124,6 +124,7 @@ export function stateFromLocation(location: Location): URLState {
       return {
         dataSource: 'public',
         hash: legacyQuery.report,
+        profileURL: '',
         selectedTab: 'calltree',
         rangeFilters: [],
         selectedThread: 0,

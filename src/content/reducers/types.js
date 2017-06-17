@@ -65,6 +65,7 @@ export type RangeFilterState = {
 export type URLState = {
   dataSource: DataSource,
   hash: string,
+  profileURL: string,
   selectedTab: string,
   rangeFilters: RangeFilterState[],
   selectedThread: ThreadIndex,
