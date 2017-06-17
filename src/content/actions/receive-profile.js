@@ -464,9 +464,8 @@ export function retrieveProfileFromUrl(profileURL: string): ThunkAction {
     dispatch(waitingForProfileFromUrl());
 
     try {
-      const url = decodeURIComponent(profileURL);
       const serializedProfile = await _fetchProfile({
-        url: url,
+        url: profileURL,
         onTemporaryError: e => dispatch(temporaryErrorReceivingProfileFromUrl(e)),
       });
 

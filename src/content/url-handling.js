@@ -36,7 +36,7 @@ function dataSourceDirs(urlState: URLState) {
     case 'public':
       return ['public', urlState.hash];
     case 'from-url':
-      return ['from-url', urlState.profileURL];
+      return ['from-url', encodeURIComponent(urlState.profileURL)];
     default:
       return [];
   }
@@ -154,7 +154,7 @@ export function stateFromLocation(location: Location): URLState {
   return {
     dataSource,
     hash: needHash ? dirs[1] : '',
-    profileURL: needProfileURL ? dirs[1] : '',
+    profileURL: needProfileURL ? decodeURIComponent(dirs[1]) : '',
     selectedTab: ((needHash || needProfileURL) ? dirs[2] : dirs[1]) || 'calltree',
     rangeFilters: query.range ? parseRangeFilters(query.range) : [],
     selectedThread: selectedThread,
