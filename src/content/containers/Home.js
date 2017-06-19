@@ -33,6 +33,32 @@ type InstallButtonProps = {
   className?: string,
 };
 
+type UploadButtonProps = {
+  retrieveProfileFromFile: File => void,
+};
+
+class UploadButton extends PureComponent {
+  props: UploadButtonProps;
+  _input: HTMLInputElement;
+
+  constructor(props: UploadButtonProps) {
+    super(props);
+    (this: any)._upload = this._upload.bind(this);
+  }
+
+  render() {
+    return (
+      <div>
+        <input type='file' ref={input => { this._input = input; }} onChange={this._upload}></input>
+      </div>
+    );
+  }
+
+  _upload() {
+    this.props.retrieveProfileFromFile(this._input.files[0]);
+  }
+}
+
 /**
  * Provide a global function for the add-on to to notify this component that it has
  * been installed.
@@ -141,13 +167,14 @@ class Home extends PureComponent {
           <h2>Getting started</h2>
           <p>
             Install the Gecko Profiler Add-on to start recording a performance profile in
-            Firefox, then analyze it and share it with perf.html, or drag a saved profile
-            here to load it in perf.html.
+            Firefox, then analyze it and share it with perf.html.
           </p>
           <InstallButton name='Gecko Profiler' className='homeSectionInstallButton' xpiURL={ADDON_URL}>
             <span className='homeSectionPlus'>+</span>
             Install add-on
           </InstallButton>
+          <p>You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.</p>
+          <UploadButton {...this.props}/>
         </div>
       </div>
     );
