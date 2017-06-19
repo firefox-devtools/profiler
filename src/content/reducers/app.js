@@ -15,7 +15,8 @@ function view(state: AppViewState = { phase: 'INITIALIZING' }, action: Action): 
   }
 
   switch (action.type) {
-    case 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_WEB':
+    case 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_STORE':
+    case 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_URL':
     case 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_ADDON':
       return {
         phase: 'INITIALIZING',
@@ -26,14 +27,16 @@ function view(state: AppViewState = { phase: 'INITIALIZING' }, action: Action): 
       };
     case 'ERROR_RECEIVING_PROFILE_FROM_FILE':
     case 'FATAL_ERROR_RECEIVING_PROFILE_FROM_ADDON':
-    case 'FATAL_ERROR_RECEIVING_PROFILE_FROM_WEB':
+    case 'FATAL_ERROR_RECEIVING_PROFILE_FROM_STORE':
+    case 'FATAL_ERROR_RECEIVING_PROFILE_FROM_URL':
       return { phase: 'FATAL_ERROR', error: action.error };
     case 'WAITING_FOR_PROFILE_FROM_ADDON':
       return { phase: 'INITIALIZING' };
     case 'ROUTE_NOT_FOUND':
       return { phase: 'ROUTE_NOT_FOUND' };
     case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_STORE':
+    case 'RECEIVE_PROFILE_FROM_URL':
     case 'RECEIVE_PROFILE_FROM_FILE':
       return { phase: 'PROFILE' };
     default:

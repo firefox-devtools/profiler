@@ -43,7 +43,8 @@ import type {
 function profile(state: Profile = ProfileData.getEmptyProfile(), action: Action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_STORE':
+    case 'RECEIVE_PROFILE_FROM_URL':
     case 'RECEIVE_PROFILE_FROM_FILE':
       return action.profile;
     case 'COALESCED_FUNCTIONS_UPDATE': {
@@ -92,7 +93,8 @@ function removePrefixFromFuncArray(prefixFuncs: IndexIntoFuncTable[], funcArray:
 function threadOrder(state: ThreadIndex[] = [], action: Action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_STORE':
+    case 'RECEIVE_PROFILE_FROM_URL':
     case 'RECEIVE_PROFILE_FROM_FILE':
       return ProfileData.defaultThreadOrder(action.profile.threads);
     case 'CHANGE_THREAD_ORDER':
@@ -150,7 +152,8 @@ function symbolicationStatus(state: SymbolicationStatus = 'DONE', action: Action
 function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_STORE':
+    case 'RECEIVE_PROFILE_FROM_URL':
     case 'RECEIVE_PROFILE_FROM_FILE':
       return action.profile.threads.map(() => ({
         selectedFuncStack: [],
@@ -265,7 +268,8 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
 function rootRange(state: StartEndRange = { start: 0, end: 1 }, action: Action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_STORE':
+    case 'RECEIVE_PROFILE_FROM_URL':
     case 'RECEIVE_PROFILE_FROM_FILE':
       return ProfileData.getTimeRangeIncludingAllThreads(action.profile);
     default:
@@ -276,7 +280,8 @@ function rootRange(state: StartEndRange = { start: 0, end: 1 }, action: Action) 
 function zeroAt(state: Milliseconds = 0, action: Action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_WEB':
+    case 'RECEIVE_PROFILE_FROM_STORE':
+    case 'RECEIVE_PROFILE_FROM_URL':
     case 'RECEIVE_PROFILE_FROM_FILE':
       return ProfileData.getTimeRangeIncludingAllThreads(action.profile).start;
     default:

@@ -6,7 +6,7 @@ import { stateFromLocation } from '../content/url-handling';
 import { blankStore } from './fixtures/stores';
 import exampleProfile from './fixtures/profiles/example-profile';
 import { processProfile } from '../content/process-profile';
-import { receiveProfileFromWeb } from '../content/actions/receive-profile';
+import { receiveProfileFromStore } from '../content/actions/receive-profile';
 
 describe('selectedThread', function () {
   function storeWithThread(threadIndex) {
@@ -25,7 +25,7 @@ describe('selectedThread', function () {
     const profile = processProfile(exampleProfile);
 
     const store = storeWithThread(1);
-    store.dispatch(receiveProfileFromWeb(profile));
+    store.dispatch(receiveProfileFromStore(profile));
 
     expect(urlStateReducers.getSelectedThreadIndex(store.getState())).toBe(1);
   });
@@ -34,7 +34,7 @@ describe('selectedThread', function () {
     const profile = processProfile(exampleProfile);
 
     const store = storeWithThread(100);
-    store.dispatch(receiveProfileFromWeb(profile));
+    store.dispatch(receiveProfileFromStore(profile));
 
     // "2" is the content process' main tab
     expect(urlStateReducers.getSelectedThreadIndex(store.getState())).toBe(2);

@@ -35,6 +35,8 @@ function dataSourceDirs(urlState: URLState) {
       return ['local', urlState.hash];
     case 'public':
       return ['public', urlState.hash];
+    case 'from-url':
+      return ['from-url', encodeURIComponent(urlState.profileURL)];
     default:
       return [];
   }
@@ -90,6 +92,7 @@ function toDataSourceEnum(str: string): DataSource {
     case 'from-file':
     case 'local':
     case 'public':
+    case 'from-url':
       return str;
   }
 
@@ -121,6 +124,7 @@ export function stateFromLocation(location: Location): URLState {
       return {
         dataSource: 'public',
         hash: legacyQuery.report,
+        profileURL: '',
         selectedTab: 'calltree',
         rangeFilters: [],
         selectedThread: 0,
@@ -137,6 +141,7 @@ export function stateFromLocation(location: Location): URLState {
   const dataSource = toDataSourceEnum(dirs[0] || 'none');
 
   const needHash = ['local', 'public'].includes(dataSource);
+  const needProfileURL = ['from-url'].includes(dataSource);
   const selectedThread = query.thread !== undefined ? +query.thread : 0;
 
   let implementation = 'combined';
@@ -150,7 +155,8 @@ export function stateFromLocation(location: Location): URLState {
   return {
     dataSource,
     hash: needHash ? dirs[1] : '',
-    selectedTab: (needHash ? dirs[2] : dirs[1]) || 'calltree',
+    profileURL: needProfileURL ? decodeURIComponent(dirs[1]) : '',
+    selectedTab: ((needHash || needProfileURL) ? dirs[2] : dirs[1]) || 'calltree',
     rangeFilters: query.range ? parseRangeFilters(query.range) : [],
     selectedThread: selectedThread,
     callTreeSearchString: query.search || '',
