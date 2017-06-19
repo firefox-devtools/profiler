@@ -29,8 +29,8 @@ const ERROR_MESSAGES = Object.freeze({
   'from-addon': "Couldn't retrieve the profile from the gecko profiler addon.",
   'from-file': "Couldn't read the file or parse the profile in it.",
   'local': 'Not implemented yet.',
-  'public': "Couldn't Retrieve the profile from the public profile store.",
-  'from-url': "Couldn't Retrieving profile from specified URL...",
+  'public': "Couldn't retrieve the profile from the public profile store.",
+  'from-url': "Couldn't retrieve profile from specified URL.",
 });
 
 // TODO Switch to a proper i18n library
