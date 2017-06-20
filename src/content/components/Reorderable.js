@@ -84,7 +84,9 @@ class Reorderable extends PureComponent {
     if (
       !this._container ||
       event.target === this._container ||
-      !(event.target instanceof HTMLElement)
+      !(event.target instanceof HTMLElement) ||
+      // Only run for left clicks.
+      event.button !== 0
     ) {
       return;
     }
