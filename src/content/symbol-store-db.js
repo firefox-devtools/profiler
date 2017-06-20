@@ -4,11 +4,29 @@
 
 // @flow
 
+import type {
+  // eslint-disable-next-line import/named
+  IDBFactory, IDBDatabase, IDBObjectStore, IDBIndex, IDBKeyRange,
+} from '../common/types/indexeddb';
+
 export type SymbolTableAsTuple = [
   Uint32Array, // addrs
   Uint32Array, // index
   Uint8Array,  // buffer
 ];
+
+type SymbolItem = {|
+  debugName: string,
+  breakpadId: string,
+  addrs: Uint32Array,
+  index: Uint32Array,
+  buffer: Uint8Array,
+  lastUsedDate: Date,
+|};
+
+type SymbolPrimaryKey = [string, string];
+type SymbolDateKey = $PropertyType<SymbolItem, 'lastUsedDate'>;
+type SymbolStore = IDBObjectStore<SymbolPrimaryKey, SymbolItem>;
 
 const kTwoWeeksInMilliseconds = 2 * 7 * 24 * 60 * 60 * 1000;
 
@@ -45,7 +63,8 @@ export class SymbolStoreDB {
 
   _setupDB(dbName: string): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      const openReq = window.indexedDB.open(dbName, 2);
+      const indexedDB: IDBFactory = window.indexedDB;
+      const openReq = indexedDB.open(dbName, 2);
       openReq.onerror = () => {
         if (openReq.error.name === 'VersionError') {
           // This error fires if the database already exists, and the existing
@@ -55,7 +74,7 @@ export class SymbolStoreDB {
           // and then downgraded to a version of perf.html without those
           // changes.
           // We delete the database and try again.
-          const deleteDBReq = window.indexedDB.deleteDatabase(dbName);
+          const deleteDBReq = indexedDB.deleteDatabase(dbName);
           deleteDBReq.onerror = () => reject(deleteDBReq.error);
           deleteDBReq.onsuccess = () => {
             // Try to open the database again.
@@ -72,7 +91,7 @@ export class SymbolStoreDB {
         if (oldVersion === 1) {
           db.deleteObjectStore('symbol-tables');
         }
-        const store = db.createObjectStore('symbol-tables', {
+        const store: SymbolStore = db.createObjectStore('symbol-tables', {
           keyPath: ['debugName', 'breakpadId'],
         });
         store.createIndex('lastUsedDate', 'lastUsedDate');
@@ -111,11 +130,11 @@ export class SymbolStoreDB {
       return new Promise((resolve, reject) => {
         const transaction = db.transaction('symbol-tables', 'readwrite');
         transaction.onerror = () => reject(transaction.error);
-        const store = transaction.objectStore('symbol-tables');
+        const store: SymbolStore = transaction.objectStore('symbol-tables');
         this._deleteLeastRecentlyUsedUntilCountIsNoMoreThanN(store, this._maxCount - 1, () => {
           const lastUsedDate = new Date();
           const addReq = store.add({ debugName, breakpadId, addrs, index, buffer, lastUsedDate });
-          addReq.onsuccess = resolve;
+          addReq.onsuccess = () => resolve();
         });
       });
     });
@@ -134,12 +153,12 @@ export class SymbolStoreDB {
       return new Promise((resolve, reject) => {
         const transaction = db.transaction('symbol-tables', 'readwrite');
         transaction.onerror = () => reject(transaction.error);
-        const store = transaction.objectStore('symbol-tables');
+        const store: SymbolStore = transaction.objectStore('symbol-tables');
         const req = store.openCursor([debugName, breakpadId]);
         req.onsuccess = () => {
-          const cursor = (req.result: any);
+          const cursor = req.result;
           if (cursor) {
-            const value = (cursor: IDBCursorWithValue).value;
+            const value = cursor.value;
             value.lastUsedDate = new Date();
             const updateDateReq = cursor.update(value);
             const { addrs, index, buffer } = value;
@@ -173,19 +192,19 @@ export class SymbolStoreDB {
     return new Promise((resolve, reject) => {
       const transaction = db.transaction('symbol-tables', 'readwrite');
       transaction.onerror = () => reject(transaction.error);
-      const store = transaction.objectStore('symbol-tables');
+      const store: SymbolStore = transaction.objectStore('symbol-tables');
       this._deleteRecordsLastUsedBeforeDate(store, beforeDate, resolve);
     });
   }
 
-  _deleteRecordsLastUsedBeforeDate(store: IDBObjectStore, beforeDate: Date, callback: () => void): void {
+  _deleteRecordsLastUsedBeforeDate(store: SymbolStore, beforeDate: Date, callback: () => void): void {
     const lastUsedDateIndex = store.index('lastUsedDate');
     // Get a cursor that walks all records whose lastUsedDate is less than beforeDate.
     const cursorReq = lastUsedDateIndex.openCursor(
-      window.IDBKeyRange.upperBound(beforeDate, true));
+      (window.IDBKeyRange: IDBKeyRange<SymbolDateKey>).upperBound(beforeDate, true));
     // Iterate over all records in this cursor and delete them.
     cursorReq.onsuccess = () => {
-      const cursor: IDBCursor = (cursorReq: any).result;
+      const cursor = cursorReq.result;
       if (cursor) {
         cursor.delete().onsuccess = () => {
           cursor.continue();
@@ -196,14 +215,14 @@ export class SymbolStoreDB {
     };
   }
 
-  _deleteNLeastRecentlyUsedRecords(store: IDBObjectStore, n: number, callback: () => void): void {
+  _deleteNLeastRecentlyUsedRecords(store: SymbolStore, n: number, callback: () => void): void {
     // Get a cursor that walks the records from oldest to newest
     // lastUsedDate.
-    const lastUsedDateIndex = store.index('lastUsedDate');
+    const lastUsedDateIndex: IDBIndex<*, Date, *> = store.index('lastUsedDate');
     const cursorReq = lastUsedDateIndex.openCursor();
     let deletedCount = 0;
     cursorReq.onsuccess = () => {
-      const cursor: IDBCursor = (cursorReq: any).result;
+      const cursor = cursorReq.result;
       if (cursor) {
         const deleteReq = cursor.delete();
         deleteReq.onsuccess = () => {
@@ -220,12 +239,12 @@ export class SymbolStoreDB {
     };
   }
 
-  _count(store: IDBObjectStore, callback: (number) => void): void {
+  _count(store: SymbolStore, callback: (number) => void): void {
     const countReq = store.count();
-    countReq.onsuccess = () => callback((countReq: any).result);
+    countReq.onsuccess = () => callback(countReq.result);
   }
 
-  _deleteLeastRecentlyUsedUntilCountIsNoMoreThanN(store: IDBObjectStore, n: number, callback: () => void): void {
+  _deleteLeastRecentlyUsedUntilCountIsNoMoreThanN(store: SymbolStore, n: number, callback: () => void): void {
     this._count(store, symbolTableCount => {
       if (symbolTableCount > n) {
         // We'll need to remove at least one symbol table.
