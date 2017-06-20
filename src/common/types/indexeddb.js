@@ -2,120 +2,131 @@
 // https://github.com/facebook/flow/blob/c8b17be6770568bb0ab4f7d865adbd6b38d5aa0e/lib/indexeddb.js
 // See issue https://github.com/facebook/flow/issues/4143
 
+// Fixed the interfaces, especially added some genericity,
+// and changed so that it can be simply `import`ed.
+
 // Implemented by window & worker
-declare interface IDBEnvironment {
+export interface IDBEnvironment {
   indexedDB: IDBFactory;
 }
 
-type IDBDirection = 'next' | 'nextunique' | 'prev' | 'prevunique';
+export type IDBDirection = 'next' | 'nextunique' | 'prev' | 'prevunique';
+
+export interface IDBVersionChangeEvent extends Event {
+  oldVersion: number,
+  newVersion: number | null,
+}
 
 // Implemented by window.indexedDB & worker.indexedDB
-declare interface IDBFactory {
+export interface IDBFactory {
   open(name: string, version?: number): IDBOpenDBRequest;
   deleteDatabase(name: string): IDBOpenDBRequest;
-  cmp(a: any, b: any): -1|0|1;
+  cmp<K>(a: K, b: K): -1|0|1;
 }
 
-declare interface IDBRequest extends EventTarget {
-  result: IDBObjectStore;
+export interface IDBRequest<V> extends EventTarget {
+  result: V,
   error: Error;
-  source: ?(IDBIndex | IDBObjectStore | IDBCursor);
+  source: ?(IDBIndex<any, any, V> | IDBObjectStore<any, V> | IDBCursor<any, any, V>);
   transaction: IDBTransaction;
   readyState: 'pending'|'done';
-  onerror: (err: any) => mixed;
-  onsuccess: (e: any) => mixed;
+  onerror: (e: Event & { target: IDBRequest<V> }) => mixed;
+  onsuccess: (e: Event & { target: IDBRequest<V> }) => mixed;
 }
 
-declare interface IDBOpenDBRequest extends IDBRequest {
-  onblocked: (e: any) => mixed;
-  onupgradeneeded: (e: any) => mixed;
+export interface IDBOpenDBRequest extends IDBRequest<IDBDatabase> {
+  onblocked: (e: IDBVersionChangeEvent & { target: IDBDatabase }) => mixed;
+  onupgradeneeded: (e: IDBVersionChangeEvent & { target: IDBDatabase }) => mixed;
 }
 
-declare interface IDBDatabase extends EventTarget {
+export interface IDBDatabase extends EventTarget {
   close(): void;
-  createObjectStore(name: string, options?: {
+  createObjectStore<K, V>(name: string, options?: {
     keyPath?: ?(string|string[]),
-    autoIncrement?: bool
-  }): IDBObjectStore;
+    autoIncrement?: bool,
+  }): IDBObjectStore<K, V>;
   deleteObjectStore(name: string): void;
   transaction(storeNames: string|string[], mode?: 'readonly'|'readwrite'|'versionchange'): IDBTransaction;
   name: string;
   version: number;
   objectStoreNames: string[];
-  onabort: (e: any) => mixed;
-  onerror: (e: any) => mixed;
-  onversionchange: (e: any) => mixed;
+  onabort: (e: Event) => mixed;
+  onerror: (e: Event) => mixed;
+  onversionchange: (e: Event) => mixed;
 }
 
-declare interface IDBTransaction extends EventTarget {
+export interface IDBTransaction extends EventTarget {
   abort(): void;
   db: IDBDatabase;
   error: Error;
   mode: 'readonly'|'readwrite'|'versionchange';
   name: string;
-  objectStore(name: string): IDBObjectStore;
-  onabort: (e: any) => mixed;
-  oncomplete: (e: any) => mixed;
-  onerror: (e: any) => mixed;
+  objectStore<K, V>(name: string): IDBObjectStore<K, V>;
+  onabort: (e: Event) => mixed;
+  oncomplete: (e: Event) => mixed;
+  onerror: (e: Event) => mixed;
 }
 
-declare interface IDBObjectStore {
-  add(value: any, key?: any): IDBRequest;
+export interface IDBObjectStore<K, V> {
+  add(value: V, key?: K | null): IDBRequest<void>;
   autoIncrement: bool;
-  clear(): IDBRequest;
-  createIndex(indexName: string, keyPath: string|string[], optionalParameter?: {
+  clear(): IDBRequest<void>;
+  createIndex<L>(indexName: string, keyPath: string|string[], optionalParameter?: {
     unique?: bool,
     multiEntry?: bool,
-  }): IDBIndex;
-  count(keyRange?: any|IDBKeyRange): IDBRequest;
-  delete(key: any): IDBRequest;
+  }): IDBIndex<K, L, V>;
+  count(keyRange?: K|IDBKeyRange<K>): IDBRequest<number>;
+  delete(key: K): IDBRequest<void>;
   deleteIndex(indexName: string): void;
-  get(key: any): IDBRequest;
-  index(indexName: string): IDBIndex;
+  get(key: K): IDBRequest<V>;
+  getKey(key: K|IDBKeyRange<K>): IDBRequest<K>;
+  index<L>(indexName: string): IDBIndex<K, L, V>;
   indexNames: string[];
   name: string;
-  keyPath: any;
-  openCursor(range?: any|IDBKeyRange, direction?: IDBDirection): IDBRequest;
-  openKeyCursor(range?: any|IDBKeyRange, direction?: IDBDirection): IDBRequest;
-  put(value: any, key?: any): IDBRequest;
-  transaction : IDBTransaction;
+  keyPath: string | string[] | null;
+  openCursor(range?: K|IDBKeyRange<K>, direction?: IDBDirection): IDBRequest<IDBCursorWithValue<K, K, V> | null>;
+  openKeyCursor(range?: K|IDBKeyRange<K>, direction?: IDBDirection): IDBRequest<IDBCursor<K, K, V> | null>;
+  put(value: V, key?: K): IDBRequest<void>;
+  transaction: IDBTransaction;
 }
 
-declare interface IDBIndex extends EventTarget {
-  count(key?: any|IDBKeyRange): IDBRequest;
-  get(key: any|IDBKeyRange): IDBRequest;
-  getKey(key: any|IDBKeyRange): IDBRequest;
-  openCursor(range?: any|IDBKeyRange, direction?: IDBDirection): IDBRequest;
-  openKeyCursor(range?: any|IDBKeyRange, direction?: IDBDirection): IDBRequest;
+export interface IDBIndex<K, L, V> extends EventTarget {
+  count(key?: L|IDBKeyRange<L>): IDBRequest<number>;
+  get(key: L|IDBKeyRange<L>): IDBRequest<V>;
+  getKey(key: L|IDBKeyRange<L>): IDBRequest<K>;
+  openCursor(range?: L|IDBKeyRange<L>, direction?: IDBDirection): IDBRequest<IDBCursorWithValue<K, L, V> | null>;
+  openKeyCursor(range?: L|IDBKeyRange<L>, direction?: IDBDirection): IDBRequest<IDBCursor<K, L, V> | null>;
   name: string;
-  objectStore: IDBObjectStore;
-  keyPath: any;
+  objectStore: IDBObjectStore<K, V>;
+  keyPath: string | string[] | null;
   multiEntry: bool;
   unique: bool;
 }
 
-declare interface IDBKeyRange {
-  bound(lower: any, upper: any, lowerOpen?: bool, upperOpen?: bool): IDBKeyRange;
-  only(value: any): IDBKeyRange;
-  lowerBound(bound: any, open?: bool): IDBKeyRange;
-  upperBound(bound: any, open?: bool): IDBKeyRange;
-  lower: any;
-  upper: any;
+// Theorically we'd need to have static functions with a different generic key,
+// but this doesn't make a practical difference in this case.
+export interface IDBKeyRange<K> {
+  bound(lower: K, upper: K, lowerOpen?: bool, upperOpen?: bool): IDBKeyRange<K>;
+  only(value: K): IDBKeyRange<K>;
+  lowerBound(bound: K, open?: bool): IDBKeyRange<K>;
+  upperBound(bound: K, open?: bool): IDBKeyRange<K>;
+  lower: K;
+  upper: K;
   lowerOpen: bool;
   upperOpen: bool;
 }
 
-declare interface IDBCursor {
+export interface IDBCursor<K, L, V> {
   advance(count: number): void;
-  continue(key?: any): void;
-  delete(): IDBRequest;
-  update(newValue: any): IDBRequest;
-  source: IDBObjectStore|IDBIndex;
+  continue(key?: L): void;
+  continuePrimaryKey(key: L, primaryKey: K): void;
+  delete(): IDBRequest<void>;
+  update(newValue: V): IDBRequest<void>;
+  source: IDBObjectStore<K, V>|IDBIndex<K, L, V>;
   direction: IDBDirection;
-  key: any;
-  primaryKey: any;
+  key: L;
+  primaryKey: K;
 }
-
-declare interface IDBCursorWithValue extends IDBCursor {
-  value: any;
+export interface IDBCursorWithValue<K, L, V> extends IDBCursor<K, L, V> {
+  value: V;
 }
