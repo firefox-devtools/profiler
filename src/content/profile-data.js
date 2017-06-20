@@ -648,7 +648,7 @@ export function getFuncStackFromFuncArray(
   return fs;
 }
 
-export function getStackAsFuncArray(funcStackIndex: IndexIntoFuncStackTable, funcStackTable: FuncStackTable): IndexIntoFuncTable[] {
+export function getStackAsFuncArray(funcStackIndex: IndexIntoFuncStackTable | null, funcStackTable: FuncStackTable): IndexIntoFuncTable[] {
   if (funcStackIndex === null) {
     return [];
   }
