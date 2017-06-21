@@ -352,7 +352,7 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
       window.addEventListener('mouseup', this._mouseUpListener, true);
     }
 
-    _mouseMoveListener(event: SyntheticMouseEvent) {
+    _mouseMoveListener(event: MouseEvent) {
       event.stopPropagation();
       event.preventDefault();
 
@@ -426,7 +426,7 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
       return viewportVerticalChanged || viewportHorizontalChanged;
     }
 
-    _mouseUpListener(event: SyntheticMouseEvent) {
+    _mouseUpListener(event: MouseEvent) {
       event.stopPropagation();
       event.preventDefault();
       window.removeEventListener('mousemove', this._mouseMoveListener, true);
@@ -484,6 +484,7 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
                             viewportRight={viewportRight}
                             viewportTop={viewportTop}
                             viewportBottom={viewportBottom}
+                            isDragging={isDragging}
                             {...this.props} />
           <div className={shiftScrollClassName}>
             Zoom Timeline:

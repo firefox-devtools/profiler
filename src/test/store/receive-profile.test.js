@@ -6,7 +6,7 @@ import sinon from 'sinon';
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../content/reducers/profile-view';
 import { getView } from '../../content/reducers/app';
-import { receiveProfileFromAddon, retrieveProfileFromAddon, retrieveProfileFromWeb } from '../../content/actions/receive-profile';
+import { receiveProfileFromAddon, retrieveProfileFromAddon, retrieveProfileFromStore, retrieveProfileFromUrl } from '../../content/actions/receive-profile';
 
 import preprocessedProfile from '../fixtures/profiles/profile-2d-canvas.json';
 import exampleProfile from '../fixtures/profiles/example-profile';
@@ -109,7 +109,7 @@ describe('actions/receive-profile', function () {
     });
   });
 
-  describe('retrieveProfileFromWeb', function () {
+  describe('retrieveProfileFromStore', function () {
     const fetch404Response = { ok: false, status: 404 };
     const fetch500Response = { ok: false, status: 500 };
     const fetch200Response = {
@@ -138,7 +138,7 @@ describe('actions/receive-profile', function () {
       window.fetch.withArgs(expectedUrl).resolves(fetch200Response);
 
       const store = blankStore();
-      await store.dispatch(retrieveProfileFromWeb(hash));
+      await store.dispatch(retrieveProfileFromStore(hash));
 
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'PROFILE' });
@@ -156,7 +156,7 @@ describe('actions/receive-profile', function () {
       const store = blankStore();
       const views = (await observeStoreStateChanges(
         store,
-        () => store.dispatch(retrieveProfileFromWeb(hash))
+        () => store.dispatch(retrieveProfileFromStore(hash))
       )).map(state => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
@@ -177,7 +177,7 @@ describe('actions/receive-profile', function () {
       const store = blankStore();
       const views = (await observeStoreStateChanges(
         store,
-        () => store.dispatch(retrieveProfileFromWeb(hash))
+        () => store.dispatch(retrieveProfileFromStore(hash))
       )).map(state => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -197,7 +197,98 @@ describe('actions/receive-profile', function () {
       window.fetch.resolves(fetch500Response);
 
       const store = blankStore();
-      await store.dispatch(retrieveProfileFromWeb(hash));
+      await store.dispatch(retrieveProfileFromStore(hash));
+      expect(getView(store.getState())).toEqual({ phase: 'FATAL_ERROR', error: expect.any(Error) });
+    });
+  });
+
+  describe('retrieveProfileFromUrl', function () {
+    const fetch404Response = { ok: false, status: 404 };
+    const fetch500Response = { ok: false, status: 500 };
+    const fetch200Response = {
+      ok: true, status: 200,
+      json: () => Promise.resolve(exampleProfile),
+    };
+
+    beforeEach(function () {
+      // The stub makes it easy to return different values for different
+      // arguments. Here we define the default return value because there is no
+      // argument specified.
+      window.fetch = sinon.stub();
+      window.fetch.resolves(fetch404Response);
+
+      sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
+    });
+
+    afterEach(function () {
+      delete window.fetch;
+      window.setTimeout.restore();
+    });
+
+    it('can retrieve a profile from the web and save it to state', async function () {
+      const expectedUrl = 'https://profiles.club/shared.json';
+      window.fetch.withArgs(expectedUrl).resolves(fetch200Response);
+
+      const store = blankStore();
+      await store.dispatch(retrieveProfileFromUrl(expectedUrl));
+
+      const state = store.getState();
+      expect(getView(state)).toEqual({ phase: 'PROFILE' });
+      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({ start: 0, end: 1007 });
+      expect(ProfileViewSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
+    });
+
+    it('requests several times in case of 404', async function () {
+      const expectedUrl = 'https://profiles.club/shared.json';
+      // The first call will still be a 404 -- remember, it's the default return value.
+      window.fetch.withArgs(expectedUrl).onSecondCall().resolves(fetch200Response);
+
+      const store = blankStore();
+      const views = (await observeStoreStateChanges(
+        store,
+        () => store.dispatch(retrieveProfileFromUrl(expectedUrl))
+      )).map(state => getView(state));
+
+      const errorMessage = 'Profile not found on remote server.';
+      expect(views).toEqual([
+        { phase: 'INITIALIZING' },
+        { phase: 'INITIALIZING', additionalData: { attempt: { count: 1, total: 11 }, message: errorMessage }},
+        { phase: 'PROFILE' },
+      ]);
+
+      const state = store.getState();
+      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({ start: 0, end: 1007 });
+      expect(ProfileViewSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
+    });
+
+    it('fails in case the profile cannot be found after several tries', async function () {
+      const expectedUrl = 'https://profiles.club/shared.json';
+      const store = blankStore();
+      const views = (await observeStoreStateChanges(
+        store,
+        () => store.dispatch(retrieveProfileFromUrl(expectedUrl))
+      )).map(state => getView(state));
+
+      const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+      const errorMessage = 'Profile not found on remote server.';
+      expect(views).toEqual([
+        { phase: 'INITIALIZING' },
+        ...steps.map(step => (
+          { phase: 'INITIALIZING', additionalData: { attempt: { count: step, total: 11 }, message: errorMessage }}
+        )),
+        { phase: 'FATAL_ERROR', error: expect.any(Error) },
+      ]);
+    });
+
+    it('fails in case the fetch returns a server error', async function () {
+      const expectedUrl = 'https://profiles.club/shared.json';
+      window.fetch.resolves(fetch500Response);
+
+      const store = blankStore();
+      await store.dispatch(retrieveProfileFromUrl(expectedUrl));
       expect(getView(store.getState())).toEqual({ phase: 'FATAL_ERROR', error: expect.any(Error) });
     });
   });

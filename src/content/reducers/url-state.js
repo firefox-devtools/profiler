@@ -36,6 +36,13 @@ function hash(state: string = '', action: Action) {
   }
 }
 
+function profileURL(state: string = '', action: Action) {
+  switch (action.type) {
+    default:
+      return state;
+  }
+}
+
 function selectedTab(state: string = 'calltree', action: Action) {
   switch (action.type) {
     case 'CHANGE_SELECTED_TAB':
@@ -77,7 +84,8 @@ function selectedThread(state: ThreadIndex = 0, action: Action) {
       // looking at the profile.
       return findDefaultThreadIndex(action.profile.threads);
     }
-    case 'RECEIVE_PROFILE_FROM_WEB': {
+    case 'RECEIVE_PROFILE_FROM_STORE':
+    case 'RECEIVE_PROFILE_FROM_URL': {
       // For profiles from the web, we only need to ensure the selected thread
       // is actually valid.
       if (state < action.profile.threads.length) {
@@ -159,7 +167,7 @@ const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (state: UR
       return regularUrlStateReducer(state, action);
   }
 })(combineReducers({
-  dataSource, hash, selectedTab, rangeFilters, selectedThread,
+  dataSource, hash, profileURL, selectedTab, rangeFilters, selectedThread,
   callTreeSearchString, callTreeFilters, implementation, invertCallstack,
   hidePlatformDetails,
 }));
@@ -169,6 +177,7 @@ const getURLState = (state: State): URLState => state.urlState;
 
 export const getDataSource = (state: State) => getURLState(state).dataSource;
 export const getHash = (state: State) => getURLState(state).hash;
+export const getProfileURL = (state: State) => getURLState(state).profileURL;
 export const getRangeFilters = (state: State) => getURLState(state).rangeFilters;
 export const getImplementationFilter = (state: State) => getURLState(state).implementation;
 export const getHidePlatformDetails = (state: State) => getURLState(state).hidePlatformDetails;

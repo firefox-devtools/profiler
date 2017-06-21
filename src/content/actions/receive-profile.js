@@ -86,9 +86,10 @@ export function coalescedFunctionsUpdate(functionsUpdatePerThread: FunctionsUpda
   };
 }
 
-const requestIdleCallbackPolyfill = (typeof window === 'object' && window.requestIdleCallback)
-  ? window.requestIdleCallback
-  : callback => setTimeout(callback, 0);
+const requestIdleCallbackPolyfill: typeof requestIdleCallback =
+  typeof window === 'object' && window.requestIdleCallback
+    ? window.requestIdleCallback
+    : callback => setTimeout(callback, 0);
 
 class ColascedFunctionsUpdateDispatcher {
 
@@ -291,16 +292,22 @@ export function retrieveProfileFromAddon(): ThunkAction {
   };
 }
 
-export function waitingForProfileFromWeb(): Action {
+export function waitingForProfileFromStore(): Action {
   return {
-    type: 'WAITING_FOR_PROFILE_FROM_WEB',
+    type: 'WAITING_FOR_PROFILE_FROM_STORE',
   };
 }
 
-export function receiveProfileFromWeb(profile: Profile): ThunkAction {
+export function waitingForProfileFromUrl(): Action {
+  return {
+    type: 'WAITING_FOR_PROFILE_FROM_URL',
+  };
+}
+
+export function receiveProfileFromStore(profile: Profile): ThunkAction {
   return dispatch => {
     dispatch({
-      type: 'RECEIVE_PROFILE_FROM_WEB',
+      type: 'RECEIVE_PROFILE_FROM_STORE',
       profile,
     });
     dispatch({
@@ -315,16 +322,48 @@ export function receiveProfileFromWeb(profile: Profile): ThunkAction {
   };
 }
 
-export function temporaryErrorReceivingProfileFromWeb(error: TemporaryError): Action {
+export function receiveProfileFromUrl(profile: Profile): ThunkAction {
+  return dispatch => {
+    dispatch({
+      type: 'RECEIVE_PROFILE_FROM_URL',
+      profile,
+    });
+    dispatch({
+      toWorker: true,
+      type: 'PROFILE_PROCESSED',
+      profile: profile,
+    });
+    dispatch({
+      toWorker: true,
+      type: 'SUMMARIZE_PROFILE',
+    });
+  };
+}
+
+export function temporaryErrorReceivingProfileFromStore(error: TemporaryError): Action {
   return {
-    type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_WEB',
+    type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_STORE',
     error,
   };
 }
 
-export function fatalErrorReceivingProfileFromWeb(error: Error): Action {
+export function fatalErrorReceivingProfileFromStore(error: Error): Action {
   return {
-    type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_WEB',
+    type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_STORE',
+    error,
+  };
+}
+
+export function temporaryErrorReceivingProfileFromUrl(error: TemporaryError): Action {
+  return {
+    type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_URL',
+    error,
+  };
+}
+
+export function fatalErrorReceivingProfileFromUrl(error: Error): Action {
+  return {
+    type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_URL',
     error,
   };
 }
@@ -388,14 +427,14 @@ async function _fetchProfile({ url, onTemporaryError }: FetchProfileArgs) {
   `);
 }
 
-export function retrieveProfileFromWeb(hash: string): ThunkAction {
+export function retrieveProfileFromStore(hash: string): ThunkAction {
   return async function (dispatch) {
-    dispatch(waitingForProfileFromWeb());
+    dispatch(waitingForProfileFromStore());
 
     try {
       const serializedProfile = await _fetchProfile({
         url: `https://profile-store.commondatastorage.googleapis.com/${hash}`,
-        onTemporaryError: e => dispatch(temporaryErrorReceivingProfileFromWeb(e)),
+        onTemporaryError: e => dispatch(temporaryErrorReceivingProfileFromStore(e)),
       });
 
       const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
@@ -414,9 +453,42 @@ export function retrieveProfileFromWeb(hash: string): ThunkAction {
         );
       }
 
-      dispatch(receiveProfileFromWeb(profile));
+      dispatch(receiveProfileFromStore(profile));
     } catch (error) {
-      dispatch(fatalErrorReceivingProfileFromWeb(error));
+      dispatch(fatalErrorReceivingProfileFromStore(error));
+    }
+  };
+}
+
+export function retrieveProfileFromUrl(profileURL: string): ThunkAction {
+  return async function (dispatch) {
+    dispatch(waitingForProfileFromUrl());
+
+    try {
+      const serializedProfile = await _fetchProfile({
+        url: profileURL,
+        onTemporaryError: e => dispatch(temporaryErrorReceivingProfileFromUrl(e)),
+      });
+
+      const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+
+      if (typeof window !== 'undefined' && window.legacyRangeFilters) {
+        const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
+        window.legacyRangeFilters.forEach(
+          ({ start, end }) => dispatch({
+            type: 'ADD_RANGE_FILTER',
+            start: start - zeroAt,
+            end: end - zeroAt,
+          })
+        );
+      }
+
+      dispatch(receiveProfileFromUrl(profile));
+    } catch (error) {
+      dispatch(fatalErrorReceivingProfileFromUrl(error));
     }
   };
 }

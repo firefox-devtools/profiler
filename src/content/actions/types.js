@@ -23,7 +23,7 @@ export type PostfixCallTreeFilter = {
 };
 export type CallTreeFilter = PrefixCallTreeFilter | PostfixCallTreeFilter;
 export type CallTreeFiltersPerThread = { [id: ThreadIndex]: CallTreeFilter[] };
-export type DataSource = 'none' | 'from-file' | 'from-addon' | 'local' | 'public';
+export type DataSource = 'none' | 'from-file' | 'from-addon' | 'local' | 'public' | 'from-url';
 export type ProfileSelection =
   { hasSelection: false, isModifying: false } |
   {
@@ -68,18 +68,22 @@ type ReceiveProfileAction =
   { type: 'ERROR_RECEIVING_PROFILE_FROM_FILE', error: Error } |
   { type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_ADDON', error: TemporaryError } |
   { type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_ADDON', error: Error } |
-  { type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_WEB', error: TemporaryError } |
-  { type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_WEB', error: Error } |
+  { type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_STORE', error: TemporaryError } |
+  { type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_URL', error: TemporaryError } |
+  { type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_STORE', error: Error } |
+  { type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_URL', error: Error } |
   { type: 'PROFILE_PROCESSED', profile: Profile, toWorker: true } |
   { type: "RECEIVE_PROFILE_FROM_ADDON", profile: Profile } |
   { type: "RECEIVE_PROFILE_FROM_FILE", profile: Profile } |
-  { type: "RECEIVE_PROFILE_FROM_WEB", profile: Profile } |
+  { type: "RECEIVE_PROFILE_FROM_STORE", profile: Profile } |
+  { type: "RECEIVE_PROFILE_FROM_URL", profile: Profile } |
   { type: 'REQUESTING_SYMBOL_TABLE', requestedLib: RequestedLib } |
   { type: 'RECEIVED_SYMBOL_TABLE_REPLY', requestedLib: RequestedLib } |
   { type: 'START_SYMBOLICATING' } |
   { type: 'SUMMARIZE_PROFILE', toWorker: true } |
   { type: 'WAITING_FOR_PROFILE_FROM_ADDON' } |
-  { type: 'WAITING_FOR_PROFILE_FROM_WEB' };
+  { type: 'WAITING_FOR_PROFILE_FROM_STORE' } |
+  { type: 'WAITING_FOR_PROFILE_FROM_URL' };
 
 type TimelineAction =
    { type: 'CHANGE_FLAME_CHART_COLOR_STRATEGY', getCategory: GetCategory } |

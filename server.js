@@ -7,7 +7,9 @@ new WebpackDevServer(webpack(config), {
   contentBase: baseConfig.output.path,
   publicPath: baseConfig.output.publicPath,
   hot: process.env.NODE_ENV === 'development' ? true : false,
-  historyApiFallback: true,
+  historyApiFallback: {
+    disableDotRule: true,
+  },
   stats: {
     colors: true,
   },

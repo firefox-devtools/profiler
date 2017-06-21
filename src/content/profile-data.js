@@ -14,7 +14,9 @@ import type {
   IndexIntoFuncTable,
   IndexIntoStringTable,
   IndexIntoSamplesTable,
+  IndexIntoMarkersTable,
   IndexIntoStackTable,
+  ThreadIndex,
 } from '../common/types/profile';
 import type {
   FuncStackInfo,
@@ -22,6 +24,7 @@ import type {
   IndexIntoFuncStackTable,
   TracingMarker,
 } from '../common/types/profile-derived';
+import type { StartEndRange } from '../common/types/units';
 import { timeCode } from '../common/time-code';
 import { getEmptyTaskTracerData } from './task-tracer';
 
@@ -122,24 +125,24 @@ export function getSampleFuncStacks(
   });
 }
 
-function getTimeRangeForThread(thread: Thread, interval: number) {
+function _getTimeRangeForThread(thread: Thread, interval: number): StartEndRange {
   if (thread.samples.length === 0) {
     return { start: Infinity, end: -Infinity };
   }
   return { start: thread.samples.time[0], end: thread.samples.time[thread.samples.length - 1] + interval};
 }
 
-export function getTimeRangeIncludingAllThreads(profile: Profile) {
+export function getTimeRangeIncludingAllThreads(profile: Profile): StartEndRange {
   const completeRange = { start: Infinity, end: -Infinity };
   profile.threads.forEach(thread => {
-    const threadRange = getTimeRangeForThread(thread, profile.meta.interval);
+    const threadRange = _getTimeRangeForThread(thread, profile.meta.interval);
     completeRange.start = Math.min(completeRange.start, threadRange.start);
     completeRange.end = Math.max(completeRange.end, threadRange.end);
   });
   return completeRange;
 }
 
-export function defaultThreadOrder(threads: Thread[]) {
+export function defaultThreadOrder(threads: Thread[]): ThreadIndex[] {
   // Put the compositor/renderer thread last.
   const threadOrder = threads.map((thread, i) => i);
   threadOrder.sort((a, b) => {
@@ -249,17 +252,17 @@ function _filterThreadByFunc(
  * @param {Object} thread - A thread.
  * @returns {Object} The thread with collapsed samples.
  */
-export function collapsePlatformStackFrames(thread: Thread) {
+export function collapsePlatformStackFrames(thread: Thread): Thread {
   return timeCode('collapsePlatformStackFrames', () => {
     const { stackTable, funcTable, frameTable, samples, stringTable } = thread;
 
     // Create new tables for the data.
-    const newStackTable = {
+    const newStackTable: StackTable = {
       length: 0,
       frame: [],
       prefix: [],
     };
-    const newFrameTable = {
+    const newFrameTable: FrameTable = {
       length: frameTable.length,
       implementation: frameTable.implementation.slice(),
       optimizations: frameTable.optimizations.slice(),
@@ -268,12 +271,14 @@ export function collapsePlatformStackFrames(thread: Thread) {
       func: frameTable.func.slice(),
       address: frameTable.address.slice(),
     };
-    const newFuncTable = {
+    const newFuncTable: FuncTable = {
       length: funcTable.length,
       name: funcTable.name.slice(),
       resource: funcTable.resource.slice(),
       address: funcTable.address.slice(),
       isJS: funcTable.isJS.slice(),
+      fileName: funcTable.fileName.slice(),
+      lineNumber: funcTable.lineNumber.slice(),
     };
 
     // Create a Map that takes a prefix and frame as input, and maps it to the new stack
@@ -320,6 +325,8 @@ export function collapsePlatformStackFrames(thread: Thread) {
               newFuncTable.resource.push(-1);
               newFuncTable.address.push(-1);
               newFuncTable.isJS.push(false);
+              newFuncTable.fileName.push(null);
+              newFuncTable.lineNumber.push(null);
               if (newFuncTable.name.length !== newFuncTable.length) {
                 console.error('length is not correct', newFuncTable.name.length, newFuncTable.length);
               }
@@ -361,7 +368,7 @@ export function collapsePlatformStackFrames(thread: Thread) {
   });
 }
 
-export function filterThreadToSearchString(thread: Thread, searchString: string) {
+export function filterThreadToSearchString(thread: Thread, searchString: string): Thread {
   return timeCode('filterThreadToSearchString', () => {
     if (searchString === '') {
       return thread;
@@ -446,12 +453,16 @@ export function filterThreadToSearchString(thread: Thread, searchString: string)
  * @param  {bool} matchJSOnly   Ignore non-JS frames during matching.
  * @return {object}             The filtered thread.
  */
-export function filterThreadToPrefixStack(thread: Thread, prefixFuncs: IndexIntoFuncTable[], matchJSOnly: boolean) {
+export function filterThreadToPrefixStack(
+  thread: Thread,
+  prefixFuncs: IndexIntoFuncTable[],
+  matchJSOnly: boolean
+): Thread {
   return timeCode('filterThreadToPrefixStack', () => {
     const { stackTable, frameTable, funcTable, samples } = thread;
     const prefixDepth = prefixFuncs.length;
     const stackMatches = new Int32Array(stackTable.length);
-    const oldStackToNewStack = new Map();
+    const oldStackToNewStack: Map<IndexIntoStackTable | null, IndexIntoStackTable | null> = new Map();
     oldStackToNewStack.set(null, null);
     const newStackTable = {
       length: 0,
@@ -489,7 +500,11 @@ export function filterThreadToPrefixStack(thread: Thread, prefixFuncs: IndexInto
         if (oldStack === null || stackMatches[oldStack] !== prefixDepth) {
           return null;
         }
-        return oldStackToNewStack.get(oldStack);
+        const newStack = oldStackToNewStack.get(oldStack);
+        if (newStack === undefined) {
+          throw new Error('Converting from the old stack to a new stack cannot be undefined');
+        }
+        return newStack;
       }),
     });
     return Object.assign({}, thread, {
@@ -509,7 +524,11 @@ export function filterThreadToPrefixStack(thread: Thread, prefixFuncs: IndexInto
  * @param  {bool} matchJSOnly   Ignore non-JS frames during matching.
  * @return {object}             The filtered thread.
  */
-export function filterThreadToPostfixStack(thread: Thread, postfixFuncs: IndexIntoFuncTable[], matchJSOnly: boolean) {
+export function filterThreadToPostfixStack(
+  thread: Thread,
+  postfixFuncs: IndexIntoFuncTable[],
+  matchJSOnly: boolean
+): Thread {
   return timeCode('filterThreadToPostfixStack', () => {
     const postfixDepth = postfixFuncs.length;
     const { stackTable, frameTable, funcTable, samples } = thread;
@@ -549,7 +568,11 @@ export function filterThreadToPostfixStack(thread: Thread, postfixFuncs: IndexIn
   });
 }
 
-function getSampleIndexRangeForSelection(samples: SamplesTable, rangeStart: number, rangeEnd: number) {
+function _getSampleIndexRangeForSelection(
+  samples: SamplesTable,
+  rangeStart: number,
+  rangeEnd: number
+): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
   // TODO: This should really use bisect. samples.time is sorted.
   const firstSample = samples.time.findIndex(t => t >= rangeStart);
   if (firstSample === -1) {
@@ -562,7 +585,10 @@ function getSampleIndexRangeForSelection(samples: SamplesTable, rangeStart: numb
   return [firstSample, firstSample + afterLastSample];
 }
 
-function getMarkerIndexRangeForSelection(markers: MarkersTable, rangeStart: number, rangeEnd: number) {
+function _getMarkerIndexRangeForSelection(
+  markers: MarkersTable,
+  rangeStart: number, rangeEnd: number
+): [IndexIntoMarkersTable, IndexIntoMarkersTable] {
   // TODO: This should really use bisect. samples.time is sorted.
   const firstMarker = markers.time.findIndex(t => t >= rangeStart);
   if (firstMarker === -1) {
@@ -575,9 +601,9 @@ function getMarkerIndexRangeForSelection(markers: MarkersTable, rangeStart: numb
   return [firstMarker, firstMarker + afterLastSample];
 }
 
-export function filterThreadToRange(thread: Thread, rangeStart: number, rangeEnd: number) {
+export function filterThreadToRange(thread: Thread, rangeStart: number, rangeEnd: number): Thread {
   const { samples, markers } = thread;
-  const [sBegin, sEnd] = getSampleIndexRangeForSelection(samples, rangeStart, rangeEnd);
+  const [sBegin, sEnd] = _getSampleIndexRangeForSelection(samples, rangeStart, rangeEnd);
   const newSamples = {
     length: sEnd - sBegin,
     time: samples.time.slice(sBegin, sEnd),
@@ -586,7 +612,7 @@ export function filterThreadToRange(thread: Thread, rangeStart: number, rangeEnd
     rss: samples.rss.slice(sBegin, sEnd),
     uss: samples.uss.slice(sBegin, sEnd),
   };
-  const [mBegin, mEnd] = getMarkerIndexRangeForSelection(markers, rangeStart, rangeEnd);
+  const [mBegin, mEnd] = _getMarkerIndexRangeForSelection(markers, rangeStart, rangeEnd);
   const newMarkers = {
     length: mEnd - mBegin,
     time: markers.time.slice(mBegin, mEnd),
@@ -599,7 +625,10 @@ export function filterThreadToRange(thread: Thread, rangeStart: number, rangeEnd
   });
 }
 
-export function getFuncStackFromFuncArray(funcArray: IndexIntoFuncTable[], funcStackTable: FuncStackTable) {
+export function getFuncStackFromFuncArray(
+  funcArray: IndexIntoFuncTable[],
+  funcStackTable: FuncStackTable
+): IndexIntoFuncStackTable | null {
   let fs = -1;
   for (let i = 0; i < funcArray.length; i++) {
     const func = funcArray[i];
@@ -693,7 +722,7 @@ export function invertCallstack(thread: Thread): Thread {
 
 export function getSampleIndexClosestToTime(samples: SamplesTable, time: number): IndexIntoSamplesTable {
   // TODO: This should really use bisect. samples.time is sorted.
-  for (let i = 0; i < samples.length; i++) {
+  for (let i: number = 0; i < samples.length; i++) {
     if (samples.time[i] >= time) {
       if (i === 0) {
         return 0;
