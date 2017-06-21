@@ -12,15 +12,8 @@ import { decompress } from '../gz';
 import { getTimeRangeIncludingAllThreads } from '../profile-data';
 import { TemporaryError } from '../errors';
 
-import type {
-  Action,
-  Dispatch,
-  FunctionsUpdatePerThread,
-  FuncToFuncMap,
-  GetState,
-  RequestedLib,
-  ThunkAction,
-} from './types';
+import type { FunctionsUpdatePerThread, FuncToFuncMap, RequestedLib } from './types';
+import type { Action, ThunkAction, Dispatch } from '../types';
 import type { Profile, ThreadIndex, IndexIntoFuncTable } from '../../common/types/profile';
 
 /**
@@ -61,8 +54,8 @@ export function startSymbolicating(): Action {
   };
 }
 
-export function doneSymbolicating(): ThunkAction {
-  return function (dispatch: Dispatch, getState: GetState) {
+export function doneSymbolicating(): ThunkAction<void> {
+  return function (dispatch, getState) {
     dispatch({ type: 'DONE_SYMBOLICATING' });
 
     // TODO - Do not use selectors here.
@@ -165,7 +158,7 @@ const gCoalescedFunctionsUpdateDispatcher = new ColascedFunctionsUpdateDispatche
 export function mergeFunctions(
   threadIndex: ThreadIndex,
   oldFuncToNewFuncMap: FuncToFuncMap
-): ThunkAction {
+): ThunkAction<void> {
   return dispatch => {
     gCoalescedFunctionsUpdateDispatcher.mergeFunctions(dispatch, threadIndex, oldFuncToNewFuncMap);
   };
@@ -175,7 +168,7 @@ export function assignFunctionNames(
   threadIndex: ThreadIndex,
   funcIndices: IndexIntoFuncTable[],
   funcNames: string[]
-): ThunkAction {
+): ThunkAction<void> {
   return dispatch => {
     gCoalescedFunctionsUpdateDispatcher.assignFunctionNames(dispatch, threadIndex, funcIndices, funcNames);
   };
@@ -230,7 +223,7 @@ async function getSymbolStore(dispatch, geckoProfiler) {
   return symbolStore;
 }
 
-async function doSymbolicateProfile(dispatch, profile, symbolStore) {
+async function doSymbolicateProfile(dispatch: Dispatch, profile: Profile, symbolStore: SymbolStore) {
   dispatch(startSymbolicating());
   await symbolicateProfile(profile, symbolStore, {
     onMergeFunctions: (threadIndex: ThreadIndex, oldFuncToNewFuncMap: FuncToFuncMap) => {
@@ -264,7 +257,7 @@ export function fatalErrorReceivingProfileFromAddon(error: Error) {
 }
 
 
-export function retrieveProfileFromAddon(): ThunkAction {
+export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
   return async dispatch => {
     try {
       const timeoutId = setTimeout(() => {
@@ -304,7 +297,7 @@ export function waitingForProfileFromUrl(): Action {
   };
 }
 
-export function receiveProfileFromStore(profile: Profile): ThunkAction {
+export function receiveProfileFromStore(profile: Profile): ThunkAction<void> {
   return dispatch => {
     dispatch({
       type: 'RECEIVE_PROFILE_FROM_STORE',
@@ -322,7 +315,7 @@ export function receiveProfileFromStore(profile: Profile): ThunkAction {
   };
 }
 
-export function receiveProfileFromUrl(profile: Profile): ThunkAction {
+export function receiveProfileFromUrl(profile: Profile): ThunkAction<void> {
   return dispatch => {
     dispatch({
       type: 'RECEIVE_PROFILE_FROM_URL',
@@ -427,14 +420,16 @@ async function _fetchProfile({ url, onTemporaryError }: FetchProfileArgs) {
   `);
 }
 
-export function retrieveProfileFromStore(hash: string): ThunkAction {
+export function retrieveProfileFromStore(hash: string): ThunkAction<Promise<void>> {
   return async function (dispatch) {
     dispatch(waitingForProfileFromStore());
 
     try {
       const serializedProfile = await _fetchProfile({
         url: `https://profile-store.commondatastorage.googleapis.com/${hash}`,
-        onTemporaryError: e => dispatch(temporaryErrorReceivingProfileFromStore(e)),
+        onTemporaryError: (e: TemporaryError) => {
+          dispatch(temporaryErrorReceivingProfileFromStore(e));
+        },
       });
 
       const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
@@ -460,14 +455,16 @@ export function retrieveProfileFromStore(hash: string): ThunkAction {
   };
 }
 
-export function retrieveProfileFromUrl(profileURL: string): ThunkAction {
+export function retrieveProfileFromUrl(profileURL: string): ThunkAction<Promise<void>> {
   return async function (dispatch) {
     dispatch(waitingForProfileFromUrl());
 
     try {
       const serializedProfile = await _fetchProfile({
         url: profileURL,
-        onTemporaryError: e => dispatch(temporaryErrorReceivingProfileFromUrl(e)),
+        onTemporaryError: (e: TemporaryError) => {
+          dispatch(temporaryErrorReceivingProfileFromUrl(e));
+        },
       });
 
       const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
@@ -499,7 +496,7 @@ export function waitingForProfileFromFile(): Action {
   };
 }
 
-export function receiveProfileFromFile(profile: Profile): ThunkAction {
+export function receiveProfileFromFile(profile: Profile): ThunkAction<void> {
   return dispatch => {
     dispatch({
       type: 'RECEIVE_PROFILE_FROM_FILE',
@@ -544,7 +541,7 @@ function _fileReader(input) {
   };
 }
 
-export function retrieveProfileFromFile(file: File): ThunkAction {
+export function retrieveProfileFromFile(file: File): ThunkAction<Promise<void>> {
   return async dispatch => {
     dispatch(waitingForProfileFromFile());
 

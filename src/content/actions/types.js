@@ -5,7 +5,6 @@
 // @flow
 import type { Summary } from '../../common/summarize-profile';
 import type { Profile, ThreadIndex, IndexIntoMarkersTable, IndexIntoFuncTable } from '../../common/types/profile';
-import type { State } from '../reducers/types';
 import type { GetLabel } from '../labeling-strategies';
 import type { GetCategory } from '../color-categories';
 import type { TemporaryError } from '../errors';
@@ -121,7 +120,3 @@ export type Action =
   URLEnhancerAction |
   URLStateAction |
   IconsAction;
-
-export type GetState = () => State;
-export type Dispatch = (Action | ThunkAction) => any;
-export type ThunkAction = (Dispatch, GetState) => any;

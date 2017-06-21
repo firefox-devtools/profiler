@@ -10,7 +10,6 @@ import { CURRENT_VERSION, upgradeProcessedProfileToCurrentVersion, isProcessedPr
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import { isOldCleopatraFormat, convertOldCleopatraProfile } from './old-cleopatra-profile-format';
 import { getEmptyTaskTracerData } from './task-tracer';
-
 /**
  * Module for converting a Gecko profile into the 'processed' format.
  * @module process-profile

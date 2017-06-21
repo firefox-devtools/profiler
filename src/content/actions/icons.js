@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Action, ThunkAction } from './types';
+import type { Action, ThunkAction } from '../types';
 
 export function iconHasLoaded(icon: string): Action {
   return {
@@ -45,7 +45,7 @@ function _getIcon(icon: string): Promise<IconRequestResult> {
   return result;
 }
 
-export function iconStartLoading(icon: string): ThunkAction {
+export function iconStartLoading(icon: string): ThunkAction<Promise<void>> {
   return dispatch => {
     return _getIcon(icon).then(result => {
       switch (result) {

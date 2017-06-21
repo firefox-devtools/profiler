@@ -4,8 +4,9 @@
 
 // @flow
 import type {
-  Action, ThunkAction, ProfileSelection, CallTreeFilter, ImplementationFilter,
+  ProfileSelection, CallTreeFilter, ImplementationFilter,
 } from './types';
+import type { Action, ThunkAction } from '../types';
 import type { ThreadIndex, IndexIntoFuncTable, IndexIntoMarkersTable } from '../../common/types/profile';
 
 /**
@@ -41,19 +42,19 @@ export function hideThread(
   threadIndex: ThreadIndex,
   threadOrder: ThreadIndex[],
   hiddenThreads: ThreadIndex[]
-): ThunkAction {
+): ThunkAction<void> {
   return dispatch => {
     // Do not allow hiding the last thread.
     if (hiddenThreads.length + 1 === threadOrder.length) {
       return;
     }
 
-    dispatch({
+    dispatch(({
       type: 'HIDE_THREAD',
       threadIndex,
       threadOrder,
       hiddenThreads,
-    });
+    }: Action));
   };
 }
 
@@ -128,7 +129,7 @@ export function addRangeFilter(start: number, end: number): Action {
   };
 }
 
-export function addRangeFilterAndUnsetSelection(start: number, end: number): ThunkAction {
+export function addRangeFilterAndUnsetSelection(start: number, end: number): ThunkAction<void> {
   return dispatch => {
     dispatch(addRangeFilter(start, end));
     dispatch(updateProfileSelection({ hasSelection: false, isModifying: false }));
@@ -142,7 +143,7 @@ export function popRangeFilters(firstRemovedFilterIndex: number): Action {
   };
 }
 
-export function popRangeFiltersAndUnsetSelection(firstRemovedFilterIndex: number): ThunkAction {
+export function popRangeFiltersAndUnsetSelection(firstRemovedFilterIndex: number): ThunkAction<void> {
   return dispatch => {
     dispatch(popRangeFilters(firstRemovedFilterIndex));
     dispatch(updateProfileSelection({ hasSelection: false, isModifying: false }));

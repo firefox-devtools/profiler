@@ -3,6 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 declare class DOMRect {
+  constructor(
+    x: ?number,
+    y: ?number,
+    width: ?number,
+    height: ?number
+  ): DOMRect;
   x: number;
   y: number;
   width: number;
