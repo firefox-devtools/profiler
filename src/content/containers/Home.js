@@ -92,7 +92,7 @@ class Home extends PureComponent {
     (this: any)._handleProfileDrop = this._handleProfileDrop.bind(this);
     this.state = {
       isDragging: false,
-      isAddonInstalled: window.isGeckoProfilerAddonInstalled,
+      isAddonInstalled: Boolean(window.isGeckoProfilerAddonInstalled),
     };
 
     this._supportsWebExtensionAPI = _supportsWebExtensionAPI();

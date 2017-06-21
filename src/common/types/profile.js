@@ -41,8 +41,8 @@ export type SamplesTable = {
   responsiveness: number[],
   stack: Array<IndexIntoStackTable|null>,
   time: number[],
-  rss: any, // TODO
-  uss: any, // TODO
+  rss: any[], // TODO
+  uss: any[], // TODO
   length: number,
 };
 

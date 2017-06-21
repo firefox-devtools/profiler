@@ -360,7 +360,7 @@ export function calculateRollingSummaries(
 
     for (let i = 0; i < segmentCount; i++) {
       let samplesInRange = 0;
-      const samples = {};
+      const samples: { [string]: number } = {};
 
       const rollingMinTime = minTime + (i * segmentLength) + segmentHalfLength - rollingHalfLength;
       const rollingMaxTime = rollingMinTime + rollingLength;

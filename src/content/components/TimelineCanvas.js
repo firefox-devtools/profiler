@@ -2,18 +2,18 @@
 import React, { PureComponent } from 'react';
 import { timeCode } from '../../common/time-code';
 import classNames from 'classnames';
-import type { CssPixels, DevicePixels } from '../../common/types/units';
 import Tooltip from './Tooltip';
+
+import type { CssPixels, DevicePixels } from '../../common/types/units';
 
 type Props<HoveredItem> = {
   containerWidth: CssPixels,
   containerHeight: CssPixels,
   className: string,
   onDoubleClickItem: (HoveredItem | null) => void,
-  isDragging: boolean,
   getHoveredItemInfo: HoveredItem => React$Element<*>,
   drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
-  onDoubleClickItem: (HoveredItem | null) => void,
+  isDragging: boolean,
   hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
 };
 
@@ -33,7 +33,7 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
   props: Props<HoveredItem>;
   state: State<HoveredItem>;
   _requestedAnimationFrame: boolean;
-  _devicePixelRatio: 1;
+  _devicePixelRatio: number;
   _ctx: CanvasRenderingContext2D;
   _canvas: ?HTMLCanvasElement;
 

@@ -4,7 +4,7 @@
 
 // @flow
 
-import { createStore, applyMiddleware, combineReducers } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import createLogger from 'redux-logger';
 import reducers from './reducers';
@@ -32,9 +32,7 @@ export default function initializeStore(): Store {
   }
 
   const store = createStore(
-    combineReducers(Object.assign({}, reducers, {
-      worker,
-    })),
+    reducers,
     applyMiddleware(...middlewares)
   );
 

@@ -98,7 +98,6 @@ export type State = {
   flameChart: FlameChartState,
   timelineView: TimelineViewState,
   icons: IconState,
-  worker: any,
 };
 
 export type IconWithClassName = {
