@@ -4,7 +4,7 @@
 
 // @flow
 import { combineReducers } from 'redux';
-import { cloneDeep } from 'lodash-es';
+import cloneDeep from 'lodash.clonedeep';
 import { defaultThreadOrder } from '../profile-data';
 import { createSelector } from 'reselect';
 import { urlFromState } from '../url-handling';

@@ -1,6 +1,6 @@
 // @flow
 
-import { isEqual } from 'lodash-es';
+import isEqual from 'lodash.isequal';
 
 import type { IndexIntoStackTable } from '../common/types/profile';
 import type { ImplementationFilter } from './actions/types';
