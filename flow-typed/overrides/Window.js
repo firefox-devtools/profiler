@@ -37,6 +37,8 @@ declare class Window extends EventTarget {
   };
 
   // Built-ins.
+  getComputedStyle: (element: HTMLElement, pseudoEl: ?string) => CSSStyleDeclaration,
+  DOMRect: typeof DOMRect,
   requestIdleCallback: typeof requestIdleCallback;
   requestAnimationFrame: typeof requestAnimationFrame;
   devicePixelRatio: number;

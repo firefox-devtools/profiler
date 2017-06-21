@@ -8,7 +8,8 @@ import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { getIsURLSetupDone } from '../reducers/app';
 
-import type { Dispatch } from '../actions/types.js';
+// eslint-disable-next-line import/named
+import type { Dispatch } from '../types';
 
 type Props = {
   stateFromLocation: Location => any,

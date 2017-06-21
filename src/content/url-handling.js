@@ -101,6 +101,16 @@ function toDataSourceEnum(str: string): DataSource {
   throw new Error('unexpected data source');
 }
 
+/**
+ * Define only the properties of the window.location object that the function uses
+ * so that it can be mocked in tests.
+ */
+type Location = {
+  pathname: string,
+  search: string,
+  hash: string,
+};
+
 export function stateFromLocation(location: Location): URLState {
   const pathname = location.pathname;
   const qString = location.search.substr(1);

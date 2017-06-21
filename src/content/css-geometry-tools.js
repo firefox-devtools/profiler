@@ -14,7 +14,7 @@ import type { DOMRectInterface } from './dom-rect'; // eslint-disable-line impor
  */
 function getFloatStyle(element: HTMLElement, cssProperty: string): number {
   // flow doesn't know about getComputedStyle.
-  const getComputedStyle: (HTMLElement) => CSSStyleDeclaration = window.getComputedStyle;
+  const getComputedStyle = window.getComputedStyle;
   return parseFloat(getComputedStyle(element).getPropertyValue(cssProperty)) || 0;
 }
 

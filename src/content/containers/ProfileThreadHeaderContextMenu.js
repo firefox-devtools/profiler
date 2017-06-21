@@ -44,7 +44,7 @@ class ProfileThreadHeaderContextMenu extends PureComponent {
     const { threadOrder, hiddenThreads, threadIndex, isHidden } = data;
     const { hideThread, showThread } = this.props;
     if (isHidden) {
-      showThread(threadIndex, threadOrder, hiddenThreads);
+      showThread(threadIndex);
     } else {
       hideThread(threadIndex, threadOrder, hiddenThreads);
     }
