@@ -196,6 +196,8 @@ class Home extends PureComponent {
             <kbd>Capture Profile</kbd> to load the data into perf.html.
           </p>
           {this._renderShortcuts()}
+          <p>You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.</p>
+          <UploadButton {...this.props}/>
         </div>
       </div>
     );
@@ -221,6 +223,8 @@ class Home extends PureComponent {
             Hit <kbd>Capture Profile</kbd> to load the data into perf.html.
           </p>
           {this._renderShortcuts()}
+          <p>You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.</p>
+          <UploadButton {...this.props}/>
         </div>
       </div>
     );
@@ -240,9 +244,9 @@ class Home extends PureComponent {
             Recording performance profiles requires{' '}
             <a href='https://www.mozilla.org/en-US/firefox/new/'>Firefox</a>.
             However, existing profiles can be viewed in any modern browser. To view a
-            profile, either follow a link to a public profile, or drag a saved profile
-            onto this screen.
-          </p>
+            profile, either follow a link to a public profile, drag a saved local profile
+            onto this screen or select it using the button below.</p>
+          <UploadButton {...this.props}/>
         </div>
       </div>
     );
