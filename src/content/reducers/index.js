@@ -10,7 +10,6 @@ import urlState from './url-state';
 import flameChart from './flame-chart';
 import timelineView from './timeline-view';
 import icons from './icons';
+import { combineReducers } from 'redux';
 
-const reducer = { app, profileView, summaryView, urlState, flameChart, timelineView, icons };
-
-export default reducer;
+export default combineReducers({ app, profileView, summaryView, urlState, flameChart, timelineView, icons });
