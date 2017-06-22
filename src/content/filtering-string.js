@@ -87,7 +87,7 @@ export function emptyUserFilter(): Filter {
   };
 }
 
-const reFilterFromString = /([-+])?\b(\w+)(?::(\S+))?(?=\s|$)/g;
+const reFilterFromString = /([-+])?\b(\w+)(?::(\S+))?/g;
 const reChargeArgument = /^(\d+):(\d+)$/;
 
 export function filterFromString(string: string = ''): Filter {
