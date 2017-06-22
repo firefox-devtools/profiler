@@ -710,7 +710,11 @@ export function getSampleIndexClosestToTime(samples: SamplesTable, time: number)
   return samples.length - 1;
 }
 
-export function getJankInstances(samples: SamplesTable, processType: string, thresholdInMs: number): TracingMarker[] {
+function addTracingMarker(tracingMarkers: TracingMarker[], start, dur, title, name, data) {
+  tracingMarkers.push({start, dur, title, name, data});
+}
+
+export function getJankInstances(samples: SamplesTable, threadName: string, thresholdInMs: number): TracingMarker[] {
   let lastResponsiveness = 0;
   let lastTimestamp = 0;
   const jankInstances = [];
@@ -718,26 +722,24 @@ export function getJankInstances(samples: SamplesTable, processType: string, thr
     const currentResponsiveness = samples.responsiveness[i];
     if (currentResponsiveness < lastResponsiveness) {
       if (lastResponsiveness >= thresholdInMs) {
-        jankInstances.push({
-          start: lastTimestamp - lastResponsiveness,
-          dur: lastResponsiveness,
-          title: `${lastResponsiveness.toFixed(2)}ms event processing delay on ${processType} thread`,
-          name: 'Jank',
-          data: null,
-        });
+        addTracingMarker(jankInstances,
+                         lastTimestamp - lastResponsiveness,
+                         lastResponsiveness,
+                         `${lastResponsiveness.toFixed(2)}ms event processing delay on ${threadName}`,
+                         'Jank',
+                         null);
       }
     }
     lastResponsiveness = currentResponsiveness;
     lastTimestamp = samples.time[i];
   }
   if (lastResponsiveness >= thresholdInMs) {
-    jankInstances.push({
-      start: lastTimestamp - lastResponsiveness,
-      dur: lastResponsiveness,
-      title: `${lastResponsiveness.toFixed(2)}ms event processing delay on ${processType} thread`,
-      name: 'Jank',
-      data: null,
-    });
+    addTracingMarker(jankInstances,
+                     lastTimestamp - lastResponsiveness,
+                     lastResponsiveness,
+                     `${lastResponsiveness.toFixed(2)}ms event processing delay on ${threadName}`,
+                     'Jank',
+                     null);
   }
   return jankInstances;
 }
