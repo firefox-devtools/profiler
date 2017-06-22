@@ -735,7 +735,15 @@ export function getSampleIndexClosestToTime(samples: SamplesTable, time: number)
   return samples.length - 1;
 }
 
-export function getJankInstances(samples: SamplesTable, processType: string, thresholdInMs: number): TracingMarker[] {
+export function getJankInstances(samples: SamplesTable, threadName: string, thresholdInMs: number): TracingMarker[] {
+  const addTracingMarker = () => jankInstances.push({
+    start: lastTimestamp - lastResponsiveness,
+    dur: lastResponsiveness,
+    title: `${lastResponsiveness.toFixed(2)}ms event processing delay on ${threadName}`,
+    name: 'Jank',
+    data: null,
+  });
+
   let lastResponsiveness = 0;
   let lastTimestamp = 0;
   const jankInstances = [];
@@ -743,26 +751,14 @@ export function getJankInstances(samples: SamplesTable, processType: string, thr
     const currentResponsiveness = samples.responsiveness[i];
     if (currentResponsiveness < lastResponsiveness) {
       if (lastResponsiveness >= thresholdInMs) {
-        jankInstances.push({
-          start: lastTimestamp - lastResponsiveness,
-          dur: lastResponsiveness,
-          title: `${lastResponsiveness.toFixed(2)}ms event processing delay on ${processType} thread`,
-          name: 'Jank',
-          data: null,
-        });
+        addTracingMarker();
       }
     }
     lastResponsiveness = currentResponsiveness;
     lastTimestamp = samples.time[i];
   }
   if (lastResponsiveness >= thresholdInMs) {
-    jankInstances.push({
-      start: lastTimestamp - lastResponsiveness,
-      dur: lastResponsiveness,
-      title: `${lastResponsiveness.toFixed(2)}ms event processing delay on ${processType} thread`,
-      name: 'Jank',
-      data: null,
-    });
+    addTracingMarker();
   }
   return jankInstances;
 }
