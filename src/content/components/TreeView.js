@@ -11,10 +11,15 @@ import { BackgroundImageStyleDef } from './StyleDef';
 
 import ContextMenuTrigger from './ContextMenuTrigger';
 
-import type { Column } from './types';
 import type { IndexIntoFuncStackTable, Node } from '../../common/types/profile-derived';
 import type { ProfileTreeClass } from '../profile-tree';
 import type { IconWithClassName } from '../reducers/types';
+
+export type Column = {
+  propName: string,
+  title: string,
+  component?: ReactClass<*>,
+};
 
 type TreeViewHeaderProps = {
   fixedColumns: Column[],
@@ -60,14 +65,14 @@ type TreeViewRowFixedColumnsProps = {
   columns: Column[],
   index: number,
   selected: boolean,
-  onClick: (IndexIntoFuncStackTable, MouseEvent) => any,
+  onClick: (IndexIntoFuncStackTable, MouseEvent) => mixed,
   highlightString: string,
 };
 
 class TreeViewRowFixedColumns extends PureComponent {
   props: TreeViewRowFixedColumnsProps;
 
-  constructor(props) {
+  constructor(props: TreeViewRowFixedColumnsProps) {
     super(props);
     (this: any)._onClick = this._onClick.bind(this);
   }
@@ -113,16 +118,16 @@ type TreeViewRowScrolledColumnsProps = {
   canBeExpanded: boolean,
   isExpanded: boolean,
   selected: boolean,
-  onToggle: (IndexIntoFuncStackTable, boolean, boolean) => any,
-  onClick: (IndexIntoFuncStackTable, MouseEvent) => any,
-  onAppendageButtonClick: ((IndexIntoFuncStackTable | null, string) => any) | null,
+  onToggle: (IndexIntoFuncStackTable, boolean, boolean) => mixed,
+  onClick: (IndexIntoFuncStackTable, MouseEvent) => mixed,
+  onAppendageButtonClick: ((IndexIntoFuncStackTable | null, string) => mixed) | null,
   highlightString: string,
 };
 
 class TreeViewRowScrolledColumns extends PureComponent {
   props: TreeViewRowScrolledColumnsProps;
 
-  constructor(props) {
+  constructor(props: TreeViewRowScrolledColumnsProps) {
     super(props);
     (this: any)._onClick = this._onClick.bind(this);
   }
@@ -173,7 +178,7 @@ class TreeViewRowScrolledColumns extends PureComponent {
   }
 }
 
-type TreeViewPropsBase = {
+type TreeViewProps = {
   fixedColumns: Column[],
   mainColumn: Column,
   tree: ProfileTreeClass,
@@ -185,16 +190,17 @@ type TreeViewPropsBase = {
   appendageButtons: string[],
   disableOverscan: boolean,
   icons: IconWithClassName[],
-  onAppendageButtonClick: ((IndexIntoFuncStackTable | null, string) => any) | null,
-  onSelectionChange: IndexIntoFuncStackTable => any,
+  contextMenu?: React$Element<*>,
+  contextMenuId?: string,
+  onAppendageButtonClick: ((IndexIntoFuncStackTable | null, string) => mixed) | null,
+  onSelectionChange: IndexIntoFuncStackTable => mixed,
 };
-
-type TreeViewProps = TreeViewPropsBase & ({ contextMenu: any } | { contextMenuId: string });
 
 class TreeView extends PureComponent {
   props: TreeViewProps;
   _specialItems: (IndexIntoFuncStackTable | null)[];
   _visibleRows: IndexIntoFuncStackTable[];
+  _list: VirtualList | null;
 
   constructor(props: TreeViewProps) {
     super(props);
@@ -205,16 +211,17 @@ class TreeView extends PureComponent {
     (this: any)._onRowClicked = this._onRowClicked.bind(this);
     this._specialItems = [props.selectedNodeId];
     this._visibleRows = this._getAllVisibleRows(props);
+    this._list = null;
   }
 
   scrollSelectionIntoView() {
-    if (this.refs.list) {
-      const { selectedNodeId, tree } = this.props;
+    const { selectedNodeId, tree } = this.props;
+    if (this._list && selectedNodeId !== null) {
+      const list = this._list; // this temp variable so that flow knows that it's non-null
       const rowIndex = this._visibleRows.indexOf(selectedNodeId);
       const depth = tree.getDepth(selectedNodeId);
-      this.refs.list.scrollItemIntoView(rowIndex, depth * 10);
+      list.scrollItemIntoView(rowIndex, depth * 10);
     }
-
   }
 
   componentWillReceiveProps(nextProps: TreeViewProps) {
@@ -327,8 +334,10 @@ class TreeView extends PureComponent {
   _onCopy(event: ClipboardEvent) {
     event.preventDefault();
     const { tree, selectedNodeId, mainColumn } = this.props;
-    const node = tree.getNode(selectedNodeId);
-    event.clipboardData.setData('text/plain', node[mainColumn.propName]);
+    if (selectedNodeId) {
+      const node = tree.getNode(selectedNodeId);
+      event.clipboardData.setData('text/plain', node[mainColumn.propName]);
+    }
   }
 
   _onKeyDown(event: KeyboardEvent) {
@@ -349,7 +358,7 @@ class TreeView extends PureComponent {
     const visibleRows = this._getAllVisibleRows(this.props);
     const selectedRowIndex = visibleRows.findIndex(nodeId => nodeId === selected);
 
-    if (selectedRowIndex === -1) {
+    if (selected === null || selectedRowIndex === -1) { // the first condition is redundant, but it makes flow happy
       this._select(visibleRows[0]);
       return;
     }
@@ -388,7 +397,9 @@ class TreeView extends PureComponent {
   }
 
   focus() {
-    this.refs.list.focus();
+    if (this._list) {
+      this._list.focus();
+    }
   }
 
   render() {
@@ -412,7 +423,7 @@ class TreeView extends PureComponent {
                          specialItems={this._specialItems}
                          disableOverscan={disableOverscan}
                          onCopy={this._onCopy}
-                         ref='list'/>
+                         ref={ ref => { this._list = ref; }}/>
         </ContextMenuTrigger>
         {contextMenu}
       </div>
