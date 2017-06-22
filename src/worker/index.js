@@ -7,7 +7,7 @@ import threadDispatcher from '../common/thread-middleware';
 import handleMessages from '../common/message-handler';
 import messages from './messages';
 import reducers from './reducers';
-import createLogger from 'redux-logger';
+import { createLogger } from 'redux-logger';
 import thunk from 'redux-thunk';
 
 const store = createStore(

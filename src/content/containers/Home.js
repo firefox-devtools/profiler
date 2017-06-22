@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2016-12-06.png';
 import PerfScreenshot from '../../../res/perf-screenshot-2017-05-11.jpg';
 import actions from '../actions';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import { CSSTransitionGroup } from 'react-transition-group';
 
 require('./Home.css');
 
@@ -284,13 +284,13 @@ class Home extends PureComponent {
             <span className='homeTitleSubtext'> &mdash; Web app for Firefox performance analysis</span>
           </h1>
           <p>Capture a performance profile. Analyze it. Share it. Make the web faster.</p>
-          <ReactCSSTransitionGroup transitionName='homeTransition'
+          <CSSTransitionGroup transitionName='homeTransition'
                                    transitionEnterTimeout={300}
                                    transitionLeave={false}
                                    component='div'
                                    className='homeInstructionsTransitionGroup'>
             {this._renderInstructions()}
-          </ReactCSSTransitionGroup>
+          </CSSTransitionGroup>
           <div className={classNames('homeDrop', isDragging ? 'dragging' : false)}>
             <div className='homeDropMessage'>Drop a saved profile here</div>
           </div>
