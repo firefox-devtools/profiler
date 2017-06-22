@@ -4,7 +4,7 @@
 
 // @flow
 import { combineReducers } from 'redux';
-import cloneDeep from 'lodash.clonedeep';
+import { cloneDeep } from 'lodash';
 import { defaultThreadOrder } from '../profile-data';
 import { createSelector } from 'reselect';
 import { urlFromState } from '../url-handling';
@@ -142,7 +142,7 @@ function userFilters(state: Filter = emptyUserFilter(), action: Action) {
     }
     case 'CHANGE_HIDE_PLATFORM_DETAILS': {
       const newState = cloneDeep(state);
-      newState.hidePlatformDetails = action.hidePlatformDetails;
+      newState.display.hidePlatformDetails = action.hidePlatformDetails;
       return newState;
     }
     case 'CHANGE_CALL_TREE_SEARCH_STRING':

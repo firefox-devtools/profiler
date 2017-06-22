@@ -1,6 +1,6 @@
 // @flow
 
-import isEqual from 'lodash.isequal';
+import { isEqual } from 'lodash';
 
 import type { IndexIntoStackTable } from '../common/types/profile';
 import type { ImplementationFilter } from './actions/types';
@@ -107,8 +107,10 @@ export function filterFromString(string: string = ''): Filter {
 
     switch (verb.toLowerCase()) {
       case 'invertcallstack':
+        filter.display.invertCallstack = true;
+        break;
       case 'hideplatformdetails':
-        filter.display[verb] = true;
+        filter.display.hidePlatformDetails = true;
         break;
       case 'hide':
         filter.display.hide.push(+argument);
