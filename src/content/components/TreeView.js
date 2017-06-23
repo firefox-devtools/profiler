@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import VirtualList from './VirtualList';
@@ -9,7 +11,22 @@ import { BackgroundImageStyleDef } from './StyleDef';
 
 import ContextMenuTrigger from './ContextMenuTrigger';
 
-const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
+import type { IndexIntoFuncStackTable, Node } from '../../common/types/profile-derived';
+import type { ProfileTreeClass } from '../profile-tree';
+import type { IconWithClassName } from '../reducers/types';
+
+export type Column = {
+  propName: string,
+  title: string,
+  component?: ReactClass<*>,
+};
+
+type TreeViewHeaderProps = {
+  fixedColumns: Column[],
+  mainColumn: Column,
+};
+
+const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => (
   <div className='treeViewHeader'>
     {
       fixedColumns.map(col =>
@@ -24,19 +41,7 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }) => (
   </div>
 );
 
-TreeViewHeader.propTypes = {
-  fixedColumns: PropTypes.arrayOf(PropTypes.shape({
-    propName: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    component: PropTypes.func,
-  })).isRequired,
-  mainColumn: PropTypes.shape({
-    propName: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-  }).isRequired,
-};
-
-function reactStringWithHighlightedSubstrings(string, substring, className) {
+function reactStringWithHighlightedSubstrings(string: string, substring: string | null, className: string) {
   if (!substring) {
     return string;
   }
@@ -54,14 +59,25 @@ function reactStringWithHighlightedSubstrings(string, substring, className) {
   return result;
 }
 
-class TreeViewRowFixedColumns extends PureComponent {
+type TreeViewRowFixedColumnsProps = {
+  node: Node,
+  nodeId: IndexIntoFuncStackTable,
+  columns: Column[],
+  index: number,
+  selected: boolean,
+  onClick: (IndexIntoFuncStackTable, MouseEvent) => mixed,
+  highlightString: string,
+};
 
-  constructor(props) {
+class TreeViewRowFixedColumns extends PureComponent {
+  props: TreeViewRowFixedColumnsProps;
+
+  constructor(props: TreeViewRowFixedColumnsProps) {
     super(props);
-    this._onClick = this._onClick.bind(this);
+    (this: any)._onClick = this._onClick.bind(this);
   }
 
-  _onClick(event) {
+  _onClick(event: MouseEvent) {
     const { nodeId, onClick } = this.props;
     onClick(nodeId, event);
   }
@@ -91,27 +107,32 @@ class TreeViewRowFixedColumns extends PureComponent {
   }
 }
 
-TreeViewRowFixedColumns.propTypes = {
-  node: PropTypes.object.isRequired,
-  nodeId: PropTypes.number.isRequired,
-  columns: PropTypes.arrayOf(PropTypes.shape({
-    propName: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-  })).isRequired,
-  index: PropTypes.number.isRequired,
-  selected: PropTypes.bool.isRequired,
-  onClick: PropTypes.func.isRequired,
-  highlightString: PropTypes.string,
+type TreeViewRowScrolledColumnsProps = {
+  node: Node,
+  nodeId: IndexIntoFuncStackTable,
+  depth: number,
+  mainColumn: Column,
+  appendageColumn: Column,
+  appendageButtons: string[],
+  index: number,
+  canBeExpanded: boolean,
+  isExpanded: boolean,
+  selected: boolean,
+  onToggle: (IndexIntoFuncStackTable, boolean, boolean) => mixed,
+  onClick: (IndexIntoFuncStackTable, MouseEvent) => mixed,
+  onAppendageButtonClick: ((IndexIntoFuncStackTable | null, string) => mixed) | null,
+  highlightString: string,
 };
 
 class TreeViewRowScrolledColumns extends PureComponent {
+  props: TreeViewRowScrolledColumnsProps;
 
-  constructor(props) {
+  constructor(props: TreeViewRowScrolledColumnsProps) {
     super(props);
-    this._onClick = this._onClick.bind(this);
+    (this: any)._onClick = this._onClick.bind(this);
   }
 
-  _onClick(event) {
+  _onClick(event: MouseEvent & { target: Element }) {
     const {
       nodeId, isExpanded, onToggle, onClick, onAppendageButtonClick,
     } = this.props;
@@ -119,7 +140,7 @@ class TreeViewRowScrolledColumns extends PureComponent {
       onToggle(nodeId, !isExpanded, event.altKey === true);
     } else if (event.target.classList.contains('treeViewRowAppendageButton')) {
       if (onAppendageButtonClick) {
-        onAppendageButtonClick(nodeId, event.target.getAttribute('data-appendage-button-name'));
+        onAppendageButtonClick(nodeId, event.target.getAttribute('data-appendage-button-name') || '');
       }
     } else {
       onClick(nodeId, event);
@@ -157,53 +178,53 @@ class TreeViewRowScrolledColumns extends PureComponent {
   }
 }
 
-TreeViewRowScrolledColumns.propTypes = {
-  node: PropTypes.object.isRequired,
-  nodeId: PropTypes.number.isRequired,
-  depth: PropTypes.number.isRequired,
-  mainColumn: PropTypes.shape({
-    propName: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-  }).isRequired,
-  appendageColumn: PropTypes.shape({
-    propName: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-  }),
-  appendageButtons: PropTypes.arrayOf(PropTypes.string),
-  index: PropTypes.number.isRequired,
-  canBeExpanded: PropTypes.bool.isRequired,
-  isExpanded: PropTypes.bool.isRequired,
-  onToggle: PropTypes.func.isRequired,
-  selected: PropTypes.bool.isRequired,
-  onClick: PropTypes.func.isRequired,
-  onAppendageButtonClick: PropTypes.func,
-  highlightString: PropTypes.string,
+type TreeViewProps = {
+  fixedColumns: Column[],
+  mainColumn: Column,
+  tree: ProfileTreeClass,
+  expandedNodeIds: Array<IndexIntoFuncStackTable | null>,
+  selectedNodeId: IndexIntoFuncStackTable | null,
+  onExpandedNodesChange: PropTypes.func.isRequired,
+  highlightString: string,
+  appendageColumn: Column,
+  appendageButtons: string[],
+  disableOverscan: boolean,
+  icons: IconWithClassName[],
+  contextMenu?: React$Element<*>,
+  contextMenuId?: string,
+  onAppendageButtonClick: ((IndexIntoFuncStackTable | null, string) => mixed) | null,
+  onSelectionChange: IndexIntoFuncStackTable => mixed,
 };
 
 class TreeView extends PureComponent {
+  props: TreeViewProps;
+  _specialItems: (IndexIntoFuncStackTable | null)[];
+  _visibleRows: IndexIntoFuncStackTable[];
+  _list: VirtualList | null;
 
-  constructor(props) {
+  constructor(props: TreeViewProps) {
     super(props);
-    this._renderRow = this._renderRow.bind(this);
-    this._toggle = this._toggle.bind(this);
-    this._onKeyDown = this._onKeyDown.bind(this);
-    this._onCopy = this._onCopy.bind(this);
-    this._onRowClicked = this._onRowClicked.bind(this);
+    (this: any)._renderRow = this._renderRow.bind(this);
+    (this: any)._toggle = this._toggle.bind(this);
+    (this: any)._onKeyDown = this._onKeyDown.bind(this);
+    (this: any)._onCopy = this._onCopy.bind(this);
+    (this: any)._onRowClicked = this._onRowClicked.bind(this);
     this._specialItems = [props.selectedNodeId];
     this._visibleRows = this._getAllVisibleRows(props);
+    this._list = null;
   }
 
   scrollSelectionIntoView() {
-    if (this.refs.list) {
-      const { selectedNodeId, tree } = this.props;
+    const { selectedNodeId, tree } = this.props;
+    if (this._list && selectedNodeId !== null) {
+      const list = this._list; // this temp variable so that flow knows that it's non-null
       const rowIndex = this._visibleRows.indexOf(selectedNodeId);
       const depth = tree.getDepth(selectedNodeId);
-      this.refs.list.scrollItemIntoView(rowIndex, depth * 10);
+      list.scrollItemIntoView(rowIndex, depth * 10);
     }
-
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps: TreeViewProps) {
     if (nextProps.selectedNodeId !== this.props.selectedNodeId) {
       this._specialItems = [nextProps.selectedNodeId];
     }
@@ -213,7 +234,7 @@ class TreeView extends PureComponent {
     }
   }
 
-  _renderRow(nodeId, index, columnIndex) {
+  _renderRow(nodeId: IndexIntoFuncStackTable, index: number, columnIndex: number) {
     const {
       tree, expandedNodeIds, fixedColumns, mainColumn, appendageColumn,
       selectedNodeId, highlightString, appendageButtons,
@@ -251,7 +272,7 @@ class TreeView extends PureComponent {
     );
   }
 
-  _addVisibleRowsFromNode(props, arr, nodeId, depth) {
+  _addVisibleRowsFromNode(props: TreeViewProps, arr: IndexIntoFuncStackTable[], nodeId: IndexIntoFuncStackTable, depth: number) {
     arr.push(nodeId);
     if (!props.expandedNodeIds.includes(nodeId)) {
       return;
@@ -262,7 +283,7 @@ class TreeView extends PureComponent {
     }
   }
 
-  _getAllVisibleRows(props) {
+  _getAllVisibleRows(props: TreeViewProps) {
     const roots = props.tree.getRoots();
     const allRows = [];
     for (let i = 0; i < roots.length; i++) {
@@ -271,18 +292,18 @@ class TreeView extends PureComponent {
     return allRows;
   }
 
-  _isCollapsed(nodeId) {
+  _isCollapsed(nodeId: IndexIntoFuncStackTable) {
     return !this.props.expandedNodeIds.includes(nodeId);
   }
 
-  _addAllDescendants(newSet, nodeId) {
+  _addAllDescendants(newSet: Set<IndexIntoFuncStackTable | null>, nodeId: IndexIntoFuncStackTable) {
     this.props.tree.getChildren(nodeId).forEach(childId => {
       newSet.add(childId);
       this._addAllDescendants(newSet, childId);
     });
   }
 
-  _toggle(nodeId, newExpanded = this._isCollapsed(nodeId), toggleAll = false) {
+  _toggle(nodeId: IndexIntoFuncStackTable, newExpanded: boolean = this._isCollapsed(nodeId), toggleAll: * = false) {
     const newSet = new Set(this.props.expandedNodeIds);
     if (newExpanded) {
       newSet.add(nodeId);
@@ -295,29 +316,31 @@ class TreeView extends PureComponent {
     this.props.onExpandedNodesChange(Array.from(newSet.values()));
   }
 
-  _toggleAll(nodeId, newExpanded = this._isCollapsed(nodeId)) {
+  _toggleAll(nodeId: IndexIntoFuncStackTable, newExpanded: boolean = this._isCollapsed(nodeId)) {
     this._toggle(nodeId, newExpanded, true);
   }
 
-  _select(nodeId) {
+  _select(nodeId: IndexIntoFuncStackTable) {
     this.props.onSelectionChange(nodeId);
   }
 
-  _onRowClicked(nodeId, event) {
+  _onRowClicked(nodeId: IndexIntoFuncStackTable, event: MouseEvent) {
     this._select(nodeId);
     if (event.detail === 2) { // double click
       this._toggle(nodeId);
     }
   }
 
-  _onCopy(event) {
+  _onCopy(event: ClipboardEvent) {
     event.preventDefault();
     const { tree, selectedNodeId, mainColumn } = this.props;
-    const node = tree.getNode(selectedNodeId);
-    event.clipboardData.setData('text/plain', node[mainColumn.propName]);
+    if (selectedNodeId) {
+      const node = tree.getNode(selectedNodeId);
+      event.clipboardData.setData('text/plain', node[mainColumn.propName]);
+    }
   }
 
-  _onKeyDown(event) {
+  _onKeyDown(event: KeyboardEvent) {
     if (event.ctrlKey || event.altKey || event.metaKey) {
       return;
     }
@@ -335,7 +358,7 @@ class TreeView extends PureComponent {
     const visibleRows = this._getAllVisibleRows(this.props);
     const selectedRowIndex = visibleRows.findIndex(nodeId => nodeId === selected);
 
-    if (selectedRowIndex === -1) {
+    if (selected === null || selectedRowIndex === -1) { // the first condition is redundant, but it makes flow happy
       this._select(visibleRows[0]);
       return;
     }
@@ -374,7 +397,9 @@ class TreeView extends PureComponent {
   }
 
   focus() {
-    this.refs.list.focus();
+    if (this._list) {
+      this._list.focus();
+    }
   }
 
   render() {
@@ -398,7 +423,7 @@ class TreeView extends PureComponent {
                          specialItems={this._specialItems}
                          disableOverscan={disableOverscan}
                          onCopy={this._onCopy}
-                         ref='list'/>
+                         ref={ ref => { this._list = ref; }}/>
         </ContextMenuTrigger>
         {contextMenu}
       </div>
