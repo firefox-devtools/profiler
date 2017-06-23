@@ -73,7 +73,7 @@ export function stringFromFilter(filter: Filter | null = null): string {
   return result.join(' ');
 }
 
-export function emptyUserFilter(): Filter {
+export function getEmptyUserFilter(): Filter {
   return {
     include: null,
     exclude: null,
@@ -98,7 +98,7 @@ const reChargeArgument = /^(\d+):(\d+)$/;
 export function filterFromString(string: string = ''): Filter {
   let searchResult;
 
-  const filter: Filter = emptyUserFilter();
+  const filter: Filter = getEmptyUserFilter();
   filter.cachedString = string;
 
   while ((searchResult = reFilterFromString.exec(string)) !== null) {

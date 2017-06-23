@@ -8,7 +8,7 @@ import { cloneDeep } from 'lodash';
 import { defaultThreadOrder } from '../profile-data';
 import { createSelector } from 'reselect';
 import { urlFromState } from '../url-handling';
-import { emptyUserFilter, filterFromString, stringFromFilter } from '../filtering-string';
+import { getEmptyUserFilter, filterFromString, stringFromFilter } from '../filtering-string';
 import * as RangeFilters from '../range-filters';
 
 import type { ThreadIndex } from '../../common/types/profile';
@@ -126,7 +126,7 @@ function callTreeFilters(state: CallTreeFiltersPerThread = {}, action: Action) {
  * Represents the current filter applied to the stack frames, where it will show
  * frames only by implementation.
  */
-function userFilters(state: Filter = emptyUserFilter(), action: Action) {
+function userFilters(state: Filter = getEmptyUserFilter(), action: Action) {
   switch (action.type) {
     case 'CHANGE_IMPLEMENTATION_FILTER': {
       const newState = cloneDeep(state);

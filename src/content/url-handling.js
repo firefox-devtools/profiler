@@ -8,7 +8,7 @@ import { stringifyRangeFilters, parseRangeFilters } from './range-filters';
 import { stringifyCallTreeFilters, parseCallTreeFilters } from './call-tree-filters';
 import type { URLState } from './reducers/types';
 import type { DataSource } from './actions/types';
-import { filterFromString, stringFromFilter, emptyUserFilter } from './filtering-string';
+import { filterFromString, stringFromFilter, getEmptyUserFilter } from './filtering-string';
 
 // {
 //   // general:
@@ -122,7 +122,7 @@ export function stateFromLocation(location: Location): URLState {
         rangeFilters: [],
         selectedThread: 0,
         callTreeFilters: {},
-        userFilters: emptyUserFilter(),
+        userFilters: getEmptyUserFilter(),
       };
     }
   }
