@@ -33,7 +33,7 @@ type Props = {
   funcStackInfo: FuncStackInfo,
   selectedFuncStack: IndexIntoFuncStackTable | null,
   expandedFuncStacks: Array<IndexIntoFuncStackTable | null>;
-  userFilters: Filter,
+  userFilters: Filter | null,
   disableOverscan: boolean,
   implementationFilter: string,
   invertCallstack: boolean,

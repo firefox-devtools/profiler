@@ -15,7 +15,7 @@ import type { ImplementationFilter } from '../actions/types';
 import './ProfileCallTreeSettings.css';
 
 type Props = {
-  implementationFilter: ImplementationFilter,
+  implementationFilter: ImplementationFilter | null,
   invertCallstack: boolean,
   searchString: string,
   changeImplementationFilter: ImplementationFilter => void,
@@ -103,7 +103,7 @@ class ProfileCallTreeSettings extends PureComponent {
 }
 
 ProfileCallTreeSettings.propTypes = {
-  implementationFilter: PropTypes.string.isRequired,
+  implementationFilter: PropTypes.string,
   changeImplementationFilter: PropTypes.func.isRequired,
   invertCallstack: PropTypes.bool.isRequired,
   changeInvertCallstack: PropTypes.func.isRequired,
