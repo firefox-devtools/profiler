@@ -87,6 +87,11 @@ export function emptyUserFilter(): Filter {
   };
 }
 
+/* This regular expression matches strings like `verb:argument`, where the
+ * argument can be missing, and with an optional prefix + or -. The optional
+ * argument can be any character but spaces (eg: a path with /), including
+ * colons as well like with the charge filter.
+ */
 const reFilterFromString = /([-+])?\b(\w+)(?::(\S+))?/g;
 const reChargeArgument = /^(\d+):(\d+)$/;
 
