@@ -28,6 +28,7 @@ const basePlugins = [
       },
     },
   }),
+  new webpack.optimize.ModuleConcatenationPlugin(),
 ];
 
 const baseConfig = {

@@ -4,7 +4,7 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
+import { CSSTransitionGroup } from 'react-transition-group';
 import './FilterNavigatorBar.css';
 
 class FilterNavigatorBar extends PureComponent {
@@ -21,7 +21,7 @@ class FilterNavigatorBar extends PureComponent {
   render() {
     const { className, items, selectedItem } = this.props;
     return (
-      <ReactCSSTransitionGroup transitionName='filterNavigatorBarTransition'
+      <CSSTransitionGroup transitionName='filterNavigatorBarTransition'
                                transitionEnterTimeout={300}
                                transitionLeaveTimeout={300}
                                component='ol'
@@ -42,7 +42,7 @@ class FilterNavigatorBar extends PureComponent {
             </li>
           ))
         }
-      </ReactCSSTransitionGroup>
+      </CSSTransitionGroup>
     );
   }
 }

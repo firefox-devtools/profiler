@@ -389,7 +389,7 @@ export function calculateRollingSummaries(
   });
 }
 
-function mapObj(object, fn) {
+function mapObj<T>(object: { [string]: T }, fn: (T, string, number) => T) {
   let i = 0;
   const mappedObj = {};
   for (const key in object) {

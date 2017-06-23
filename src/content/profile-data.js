@@ -90,7 +90,7 @@ export function getFuncStackInfo(
       // We know that at this point the following condition holds:
       // assert(prefixStack === null || prefixStack < stackIndex);
       const prefixFuncStack = (prefixStack === null) ? -1 :
-         stackIndexToFuncStackIndex[prefixStack];
+        stackIndexToFuncStackIndex[prefixStack];
       const frameIndex = stackTable.frame[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
       const prefixFuncStackAndFuncIndex = prefixFuncStack * funcCount + funcIndex;
@@ -356,7 +356,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
     }
 
     const newSamples = Object.assign({}, samples, {
-      stack: samples.stack.map(oldStack => convertStack(oldStack, true)),
+      stack: samples.stack.map(oldStack => convertStack(oldStack)),
     });
 
     return Object.assign({}, thread, {
@@ -817,9 +817,11 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
   return tracingMarkers;
 }
 
-export function filterTracingMarkersToRange(tracingMarkers: TracingMarker[],
-                                            rangeStart: number,
-                                            rangeEnd: number): TracingMarker[] {
+export function filterTracingMarkersToRange(
+  tracingMarkers: TracingMarker[],
+  rangeStart: number,
+  rangeEnd: number
+): TracingMarker[] {
   return tracingMarkers.filter(tm => tm.start < rangeEnd && tm.start + tm.dur >= rangeStart);
 }
 
