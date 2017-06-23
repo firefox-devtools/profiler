@@ -9,6 +9,7 @@ import { UniqueStringArray } from './unique-string-array';
 import type { Thread, FuncTable, ResourceTable, IndexIntoFuncTable } from '../common/types/profile';
 import type { FuncStackTable, IndexIntoFuncStackTable, FuncStackInfo, Node } from '../common/types/profile-derived';
 import type { Milliseconds } from '../common/types/units';
+import type { ImplementationFilter } from './actions/types';
 
 type FuncStackChildren = IndexIntoFuncStackTable[];
 type FuncStackTimes = {
@@ -158,7 +159,7 @@ export type ProfileTreeClass = ProfileTree;
 
 export function getCallTree(
   thread: Thread, interval: Milliseconds, funcStackInfo: FuncStackInfo,
-  implementationFilter: string
+  implementationFilter: ImplementationFilter
 ): ProfileTree {
   return timeCode('getCallTree', () => {
     const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;

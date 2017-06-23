@@ -8,6 +8,7 @@ import { stringifyRangeFilters, parseRangeFilters } from './range-filters';
 import { stringifyCallTreeFilters, parseCallTreeFilters } from './call-tree-filters';
 import type { URLState } from './reducers/types';
 import type { DataSource } from './actions/types';
+import { filterFromString, stringFromFilter, getEmptyUserFilter } from './filtering-string';
 
 // {
 //   // general:
@@ -20,8 +21,6 @@ import type { DataSource } from './actions/types';
 //   // only when selectedTab === 'calltree':
 //   callTreeSearchString: '' or '::RunScript' or ...,
 //   callTreeFilters: [[], [{type:'prefix', matchJSOnly:true, prefixFuncs:[1,3,7]}, {}, ...], ...], // one per thread
-//   jsOnly: false or true,
-//   invertCallstack: false or true,
 // }
 
 function dataSourceDirs(urlState: URLState) {
@@ -67,17 +66,11 @@ export function urlFromState(urlState: URLState) {
   // Depending on which tab is active, also show tab-specific query parameters.
   switch (urlState.selectedTab) {
     case 'calltree':
-      query.search = urlState.callTreeSearchString || undefined;
-      query.invertCallstack = urlState.invertCallstack ? null : undefined;
-      query.implementation = urlState.implementation === 'combined'
-        ? undefined
-        : urlState.implementation;
+      query.userFilters = stringFromFilter(urlState.userFilters);
       query.callTreeFilters = stringifyCallTreeFilters(urlState.callTreeFilters[urlState.selectedThread]) || undefined;
       break;
     case 'timeline':
-      query.search = urlState.callTreeSearchString || undefined;
-      query.invertCallstack = urlState.invertCallstack ? null : undefined;
-      query.hidePlatformDetails = urlState.hidePlatformDetails ? null : undefined;
+      query.userFilters = stringFromFilter(urlState.userFilters);
       break;
   }
   const qString = queryString.stringify(query);
@@ -128,11 +121,8 @@ export function stateFromLocation(location: Location): URLState {
         selectedTab: 'calltree',
         rangeFilters: [],
         selectedThread: 0,
-        callTreeSearchString: '',
         callTreeFilters: {},
-        implementation: 'combined',
-        invertCallstack: false,
-        hidePlatformDetails: false,
+        userFilters: getEmptyUserFilter(),
       };
     }
   }
@@ -144,12 +134,29 @@ export function stateFromLocation(location: Location): URLState {
   const needProfileURL = ['from-url'].includes(dataSource);
   const selectedThread = query.thread !== undefined ? +query.thread : 0;
 
-  let implementation = 'combined';
-  if (query.implementation === 'js' || query.implementation === 'cpp') {
-    implementation = query.implementation;
-  } else if (query.jsOnly !== undefined) {
-    // Support the old URL structure that had a jsOnly flag.
-    implementation = 'js';
+  let userFilters;
+  if (query.filteringString) {
+    userFilters = filterFromString(query.filteringString);
+  } else {
+    let implementation = '';
+    // Support the old URL structures (jsOnly flag, implementation values)
+    if (query.implementation === 'js' || query.implementation === 'cpp') {
+      implementation = query.implementation;
+    } else if (query.jsOnly !== undefined) {
+      implementation = 'js';
+    }
+
+    userFilters = {
+      include: implementation ? { implementation, paths: [], substrings: [] } : null,
+      exclude: null,
+      display: {
+        invertCallstack: query.invertCallstack !== undefined,
+        hidePlatformDetails: query.hidePlatformDetails !== undefined,
+        hide: [],
+        charge: [],
+      },
+      cachedString: '',
+    };
   }
 
   return {
@@ -158,13 +165,10 @@ export function stateFromLocation(location: Location): URLState {
     profileURL: needProfileURL ? decodeURIComponent(dirs[1]) : '',
     selectedTab: ((needHash || needProfileURL) ? dirs[2] : dirs[1]) || 'calltree',
     rangeFilters: query.range ? parseRangeFilters(query.range) : [],
+    userFilters,
     selectedThread: selectedThread,
-    callTreeSearchString: query.search || '',
     callTreeFilters: {
       [selectedThread]: query.callTreeFilters ? parseCallTreeFilters(query.callTreeFilters) : [],
     },
-    implementation,
-    invertCallstack: query.invertCallstack !== undefined,
-    hidePlatformDetails: query.hidePlatformDetails !== undefined,
   };
 }

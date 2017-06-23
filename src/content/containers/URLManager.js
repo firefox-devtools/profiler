@@ -9,14 +9,15 @@ import { connect } from 'react-redux';
 import { getIsURLSetupDone } from '../reducers/app';
 
 import type { Dispatch } from '../actions/types.js';
+import type { URLState } from '../reducers/types';
 
 type Props = {
-  stateFromLocation: Location => any,
-  urlFromState: any => string,
+  stateFromLocation: Location => URLState,
+  urlFromState: URLState => string,
   children: any,
-  urlState: any,
+  urlState: URLState,
   isURLSetupDone: boolean,
-  updateURLState: string => void,
+  updateURLState: URLState => void,
   urlSetupDone: void => void,
   show404: string => void,
 };

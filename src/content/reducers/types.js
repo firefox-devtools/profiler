@@ -7,13 +7,13 @@
 import type { Summary } from '../../common/summarize-profile';
 import type {
   Action, ExpandedSet, CallTreeFiltersPerThread, DataSource, ProfileSelection,
-  ImplementationFilter,
 } from '../actions/types';
 import type { Milliseconds, StartEndRange } from '../../common/types/units';
 import type { IndexIntoMarkersTable, IndexIntoFuncTable, Profile, ThreadIndex } from '../../common/types/profile';
 import type { Attempt } from '../errors';
 import type { GetLabel } from '../labeling-strategies';
 import type { GetCategory } from '../color-categories';
+import type { Filter } from '../filtering-string';
 
 export type Reducer<T> = (T, Action) => T;
 
@@ -69,11 +69,8 @@ export type URLState = {
   selectedTab: string,
   rangeFilters: RangeFilterState[],
   selectedThread: ThreadIndex,
-  callTreeSearchString: string,
   callTreeFilters: CallTreeFiltersPerThread,
-  implementation: ImplementationFilter,
-  invertCallstack: boolean,
-  hidePlatformDetails: boolean,
+  userFilters: Filter,
 };
 
 export type IconState = Set<string>;

@@ -10,13 +10,15 @@ import actions from '../actions';
 import { getImplementationFilter, getInvertCallstack, getSearchString } from '../reducers/url-state';
 import IdleSearchField from '../components/IdleSearchField';
 
+import type { ImplementationFilter } from '../actions/types';
+
 import './ProfileCallTreeSettings.css';
 
 type Props = {
-  implementationFilter: string,
+  implementationFilter: ImplementationFilter | null,
   invertCallstack: boolean,
   searchString: string,
-  changeImplementationFilter: string => void,
+  changeImplementationFilter: ImplementationFilter => void,
   changeInvertCallstack: boolean => void,
   changeCallTreeSearchString: string => void,
 };
@@ -32,7 +34,21 @@ class ProfileCallTreeSettings extends PureComponent {
   }
 
   _onImplementationFilterChange(e: Event & { target: HTMLSelectElement }) {
-    this.props.changeImplementationFilter(e.target.value);
+    let implementationFilter: ImplementationFilter;
+    switch (e.target.value) {
+      case 'combined':
+        implementationFilter = null;
+        break;
+      case 'js':
+      case 'cpp':
+        implementationFilter = e.target.value;
+        break;
+      default:
+        console.error(`Value for select "${e.target.value}" is unknown, ignoring.`);
+        return;
+    }
+
+    this.props.changeImplementationFilter(implementationFilter);
   }
 
   _onInvertCallstackClick(e: Event & { target: HTMLInputElement }) {
@@ -54,7 +70,7 @@ class ProfileCallTreeSettings extends PureComponent {
               <select
                      className='profileCallTreeSettingsSelect'
                      onChange={this._onImplementationFilterChange}
-                     value={implementationFilter}>
+                     value={implementationFilter || 'combined'}>
                 <option value='combined'>Combined stacks</option>
                 <option value='js'>JS only</option>
                 <option value='cpp'>C++ only</option>
@@ -87,7 +103,7 @@ class ProfileCallTreeSettings extends PureComponent {
 }
 
 ProfileCallTreeSettings.propTypes = {
-  implementationFilter: PropTypes.string.isRequired,
+  implementationFilter: PropTypes.string,
   changeImplementationFilter: PropTypes.func.isRequired,
   invertCallstack: PropTypes.bool.isRequired,
   changeInvertCallstack: PropTypes.func.isRequired,
