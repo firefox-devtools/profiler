@@ -33,7 +33,7 @@ type Props = {
   funcStackInfo: FuncStackInfo,
   selectedFuncStack: IndexIntoFuncStackTable | null,
   expandedFuncStacks: Array<IndexIntoFuncStackTable | null>;
-  userFilters: Filter | null,
+  userFilters: Filter,
   disableOverscan: boolean,
   implementationFilter: string,
   invertCallstack: boolean,
@@ -142,7 +142,8 @@ class ProfileTreeView extends PureComponent {
 
   render() {
     const { tree, selectedFuncStack, expandedFuncStacks, userFilters, disableOverscan } = this.props;
-    const highlightString = // TODO properly highlight the full filter
+    // TODO properly highlight the full filter
+    const highlightString =
       userFilters.include && userFilters.include.substrings.join(' ').toLowerCase();
     return (
       <TreeView tree={tree}
@@ -153,7 +154,7 @@ class ProfileTreeView extends PureComponent {
                 onExpandedNodesChange={this._onExpandedFuncStacksChange}
                 selectedNodeId={selectedFuncStack}
                 expandedNodeIds={expandedFuncStacks}
-                highlightString={highlightString}
+                highlightString={highlightString || ''}
                 disableOverscan={disableOverscan}
                 appendageButtons={this._appendageButtons}
                 onAppendageButtonClick={this._onAppendageButtonClick}
