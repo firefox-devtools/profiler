@@ -5,22 +5,22 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import FlameChartCanvas from '../components/FlameChartCanvas';
-import { selectorsForThread, getDisplayRange, getProfileInterval, getProfileViewOptions } from '../reducers/profile-view';
-import { getCategoryColorStrategy, getLabelingStrategy } from '../reducers/flame-chart';
-import { getIsFlameChartExpanded } from '../reducers/timeline-view';
-import actions from '../actions';
-import { getImplementationName } from '../labeling-strategies';
+import FlameChartCanvas from './FlameChartCanvas';
+import { selectorsForThread, getDisplayRange, getProfileInterval, getProfileViewOptions } from '../../reducers/profile-view';
+import { getCategoryColorStrategy, getLabelingStrategy } from '../../reducers/flame-chart';
+import { getIsFlameChartExpanded } from '../../reducers/timeline-view';
+import actions from '../../actions';
+import { getImplementationName } from '../../profile-logic/labeling-strategies';
 import classNames from 'classnames';
-import ContextMenuTrigger from '../components/ContextMenuTrigger';
+import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 
-import type { Thread } from '../../common/types/profile';
-import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../common/types/units';
-import type { StackTimingByDepth } from '../stack-timing';
-import type { GetCategory } from '../color-categories';
-import type { GetLabel } from '../labeling-strategies';
-import type { UpdateProfileSelection } from '../actions/profile-view';
-import type { ProfileSelection } from '../actions/types';
+import type { Thread } from '../../types/profile';
+import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../types/units';
+import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
+import type { GetCategory } from '../../profile-logic/color-categories';
+import type { GetLabel } from '../../profile-logic/labeling-strategies';
+import type { UpdateProfileSelection } from '../../actions/profile-view';
+import type { ProfileSelection } from '../../types/actions';
 
 require('./TimelineFlameChart.css');
 

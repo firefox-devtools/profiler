@@ -5,17 +5,17 @@
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { getProfile, getProfileRootRange } from '../reducers/profile-view';
-import { getDataSource, getHash, getProfileURL, getURLPredictor } from '../reducers/url-state';
-import actions from '../actions';
-import { compress } from '../gz';
-import { uploadBinaryProfileData } from '../profile-store';
-import ArrowPanel from '../components/ArrowPanel';
-import ButtonWithPanel from '../components/ButtonWithPanel';
-import shortenURL from '../shorten-url';
-import { serializeProfile } from '../process-profile';
+import { getProfile, getProfileRootRange } from '../../reducers/profile-view';
+import { getDataSource, getHash, getProfileURL, getURLPredictor } from '../../reducers/url-state';
+import actions from '../../actions';
+import { compress } from '../../utils/gz';
+import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
+import ArrowPanel from '../shared/ArrowPanel';
+import ButtonWithPanel from '../shared/ButtonWithPanel';
+import shortenURL from '../../utils/shorten-url';
+import { serializeProfile } from '../../profile-logic/process-profile';
 import prettyBytes from 'pretty-bytes';
-import sha1 from '../sha1';
+import sha1 from '../../utils/sha1';
 import url from 'url';
 
 require('./ProfileSharing.css');

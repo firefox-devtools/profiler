@@ -1,6 +1,6 @@
 // @flow
-import type { UserTimingMarkerPayload, MarkerPayload } from '../common/types/profile';
-import type { TracingMarker, MarkerTiming, MarkerTimingRows } from '../common/types/profile-derived';
+import type { UserTimingMarkerPayload, MarkerPayload } from '../types/profile';
+import type { TracingMarker, MarkerTiming, MarkerTimingRows } from '../types/profile-derived';
 
 // Arbitrarily set an upper limit for adding marker depths, avoiding an infinite loop.
 const MAX_STACKING_DEPTH = 300;

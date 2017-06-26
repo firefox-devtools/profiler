@@ -7,8 +7,8 @@
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 
-import { getIconClassNameForNode } from '../reducers/icons';
-import actions from '../actions';
+import { getIconClassNameForNode } from '../../reducers/icons';
+import actions from '../../actions';
 
 type Props = {
   className: string,

@@ -4,8 +4,8 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
-import { timeCode } from '../../common/time-code';
-import { getSampleFuncStacks } from '../profile-data';
+import { timeCode } from '../../utils/time-code';
+import { getSampleFuncStacks } from '../../profile-logic/profile-data';
 
 class ThreadStackGraph extends PureComponent {
 

@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import classNames from 'classnames';
 import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2016-12-06.png';
 import PerfScreenshot from '../../../res/perf-screenshot-2017-05-11.jpg';
-import actions from '../actions';
+import actions from '../../actions';
 import { CSSTransitionGroup } from 'react-transition-group';
 
 require('./Home.css');

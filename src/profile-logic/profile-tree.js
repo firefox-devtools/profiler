@@ -3,12 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { timeCode } from '../common/time-code';
+import { timeCode } from '../utils/time-code';
 import { getSampleFuncStacks, resourceTypes } from './profile-data';
-import { UniqueStringArray } from './unique-string-array';
-import type { Thread, FuncTable, ResourceTable, IndexIntoFuncTable } from '../common/types/profile';
-import type { FuncStackTable, IndexIntoFuncStackTable, FuncStackInfo, Node } from '../common/types/profile-derived';
-import type { Milliseconds } from '../common/types/units';
+import { UniqueStringArray } from '../utils/unique-string-array';
+import type { Thread, FuncTable, ResourceTable, IndexIntoFuncTable } from '../types/profile';
+import type { FuncStackTable, IndexIntoFuncStackTable, FuncStackInfo, Node } from '../types/profile-derived';
+import type { Milliseconds } from '../types/units';
 
 type FuncStackChildren = IndexIntoFuncStackTable[];
 type FuncStackTimes = {

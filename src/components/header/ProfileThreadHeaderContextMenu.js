@@ -5,15 +5,15 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
-import { hideThread, showThread } from '../actions/profile-view';
+import { hideThread, showThread } from '../../actions/profile-view';
 import { connect } from 'react-redux';
-import { getThreads } from '../reducers/profile-view';
-import { getThreadOrder, getHiddenThreads } from '../reducers/url-state';
-import { getFriendlyThreadName } from '../profile-data';
+import { getThreads } from '../../reducers/profile-view';
+import { getThreadOrder, getHiddenThreads } from '../../reducers/url-state';
+import { getFriendlyThreadName } from '../../profile-logic/profile-data';
 import classNames from 'classnames';
 
-import type { Thread, ThreadIndex } from '../../common/types/profile';
-import type { State } from '../reducers/types';
+import type { Thread, ThreadIndex } from '../../types/profile';
+import type { State } from '../../types/reducers';
 
 type Props = {|
   threads: Thread[],

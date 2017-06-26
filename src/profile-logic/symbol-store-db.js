@@ -7,7 +7,7 @@
 import type {
   // eslint-disable-next-line import/named
   IDBFactory, IDBDatabase, IDBObjectStore, IDBIndex, IDBKeyRange,
-} from '../common/types/indexeddb';
+} from '../types/indexeddb';
 
 export type SymbolTableAsTuple = [
   Uint32Array, // addrs

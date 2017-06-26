@@ -1,21 +1,21 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import TimelineMarkerCanvas from '../components/TimelineMarkerCanvas';
-import { selectorsForThread, getDisplayRange, getProfileInterval, getProfileViewOptions } from '../reducers/profile-view';
-import { getCategoryColorStrategy, getLabelingStrategy } from '../reducers/flame-chart';
-import { getAreMarkersExpanded } from '../reducers/timeline-view';
-import actions from '../actions';
-import { getImplementationName } from '../labeling-strategies';
+import TimelineMarkerCanvas from './TimelineMarkerCanvas';
+import { selectorsForThread, getDisplayRange, getProfileInterval, getProfileViewOptions } from '../../reducers/profile-view';
+import { getCategoryColorStrategy, getLabelingStrategy } from '../../reducers/flame-chart';
+import { getAreMarkersExpanded } from '../../reducers/timeline-view';
+import actions from '../../actions';
+import { getImplementationName } from '../../profile-logic/labeling-strategies';
 import classNames from 'classnames';
 
-import type { Thread } from '../../common/types/profile';
-import type { TracingMarker, MarkerTimingRows } from '../../common/types/profile-derived';
-import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../common/types/units';
-import type { GetCategory } from '../color-categories';
-import type { GetLabel } from '../labeling-strategies';
-import type { UpdateProfileSelection } from '../actions/profile-view';
-import type { ProfileSelection } from '../actions/types';
+import type { Thread } from '../../types/profile';
+import type { TracingMarker, MarkerTimingRows } from '../../types/profile-derived';
+import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../types/units';
+import type { GetCategory } from '../../profile-logic/color-categories';
+import type { GetLabel } from '../../profile-logic/labeling-strategies';
+import type { UpdateProfileSelection } from '../../actions/profile-view';
+import type { ProfileSelection } from '../../types/actions';
 
 
 require('./TimelineMarkers.css');

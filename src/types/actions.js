@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Summary } from '../../common/summarize-profile';
-import type { Profile, ThreadIndex, IndexIntoMarkersTable, IndexIntoFuncTable } from '../../common/types/profile';
-import type { GetLabel } from '../labeling-strategies';
-import type { GetCategory } from '../color-categories';
-import type { TemporaryError } from '../errors';
+import type { Summary } from '../profile-logic/summarize-profile';
+import type { Profile, ThreadIndex, IndexIntoMarkersTable, IndexIntoFuncTable } from './profile';
+import type { GetLabel } from '../profile-logic/labeling-strategies';
+import type { GetCategory } from '../profile-logic/color-categories';
+import type { TemporaryError } from '../utils/errors';
 
 export type ExpandedSet = Set<ThreadIndex>;
 export type PrefixCallTreeFilter = {

@@ -3,18 +3,18 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import 'babel-polyfill';
-import { getContainingLibrary, symbolicateProfile, applyFunctionMerging, setFuncNames } from '../../content/symbolication';
-import { processProfile, unserializeProfileOfArbitraryFormat, serializeProfile } from '../../content/process-profile';
-import { resourceTypes, getFuncStackInfo, getTracingMarkers, filterThreadByImplementation } from '../../content/profile-data';
+import { getContainingLibrary, symbolicateProfile, applyFunctionMerging, setFuncNames } from '../../profile-logic/symbolication';
+import { processProfile, unserializeProfileOfArbitraryFormat, serializeProfile } from '../../profile-logic/process-profile';
+import { resourceTypes, getFuncStackInfo, getTracingMarkers, filterThreadByImplementation } from '../../profile-logic/profile-data';
 import exampleProfile from '.././fixtures/profiles/example-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
-import { UniqueStringArray } from '../../content/unique-string-array';
-import { FakeSymbolStore } from '.././fixtures/fake-symbol-store';
-import { sortDataTable } from '../../content/data-table-utils';
-import { isOldCleopatraFormat, convertOldCleopatraProfile } from '../../content/old-cleopatra-profile-format';
-import { isProcessedProfile, upgradeProcessedProfileToCurrentVersion } from '../../content/processed-profile-versioning';
-import { upgradeGeckoProfileToCurrentVersion, CURRENT_VERSION } from '../../content/gecko-profile-versioning';
-import { getCategoryByImplementation, implementationCategoryMap } from '../../content/color-categories';
+import { UniqueStringArray } from '../../utils/unique-string-array';
+import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
+import { sortDataTable } from '../../utils/data-table-utils';
+import { isOldCleopatraFormat, convertOldCleopatraProfile } from '../../profile-logic/old-cleopatra-profile-format';
+import { isProcessedProfile, upgradeProcessedProfileToCurrentVersion } from '../../profile-logic/processed-profile-versioning';
+import { upgradeGeckoProfileToCurrentVersion, CURRENT_VERSION } from '../../profile-logic/gecko-profile-versioning';
+import { getCategoryByImplementation, implementationCategoryMap } from '../../profile-logic/color-categories';
 
 describe('unique-string-array', function () {
   const u = new UniqueStringArray(['foo', 'bar', 'baz']);

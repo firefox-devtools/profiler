@@ -5,16 +5,16 @@
 // @flow
 import { oneLine } from 'common-tags';
 import { getProfile } from '../reducers/profile-view';
-import { processProfile, unserializeProfileOfArbitraryFormat } from '../process-profile';
-import { SymbolStore } from '../symbol-store';
-import { symbolicateProfile } from '../symbolication';
-import { decompress } from '../gz';
-import { getTimeRangeIncludingAllThreads } from '../profile-data';
-import { TemporaryError } from '../errors';
+import { processProfile, unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
+import { SymbolStore } from '../profile-logic/symbol-store';
+import { symbolicateProfile } from '../profile-logic/symbolication';
+import { decompress } from '../utils/gz';
+import { getTimeRangeIncludingAllThreads } from '../profile-logic/profile-data';
+import { TemporaryError } from '../utils/errors';
 
-import type { FunctionsUpdatePerThread, FuncToFuncMap, RequestedLib } from './types';
-import type { Action, ThunkAction, Dispatch } from '../types';
-import type { Profile, ThreadIndex, IndexIntoFuncTable } from '../../common/types/profile';
+import type { FunctionsUpdatePerThread, FuncToFuncMap, RequestedLib } from '../types/actions';
+import type { Action, ThunkAction, Dispatch } from '../types/store';
+import type { Profile, ThreadIndex, IndexIntoFuncTable } from '../types/profile';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the

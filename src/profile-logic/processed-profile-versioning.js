@@ -12,10 +12,10 @@
  * the current format.
  */
 
-import { sortDataTable } from './data-table-utils';
+import { sortDataTable } from '../utils/data-table-utils';
 import { resourceTypes } from './profile-data';
-import { UniqueStringArray } from './unique-string-array';
-import { timeCode } from '../common/time-code';
+import { UniqueStringArray } from '../utils/unique-string-array';
+import { timeCode } from '../utils/time-code';
 
 export const CURRENT_VERSION = 5; // The current version of the 'preprocessed profile' format.
 

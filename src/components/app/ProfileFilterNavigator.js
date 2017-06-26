@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { connect } from 'react-redux';
-import actions from '../actions';
-import { getRangeFilterLabels } from '../reducers/url-state';
-import FilterNavigatorBar from '../components/FilterNavigatorBar';
+import actions from '../../actions';
+import { getRangeFilterLabels } from '../../reducers/url-state';
+import FilterNavigatorBar from '../calltree/FilterNavigatorBar';
 
 export default connect(state => {
   const items = getRangeFilterLabels(state);

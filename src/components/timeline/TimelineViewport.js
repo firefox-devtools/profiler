@@ -6,16 +6,16 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
-import { getHasZoomedViaMousewheel } from '../reducers/timeline-view';
-import actions from '../actions';
+import { getHasZoomedViaMousewheel } from '../../reducers/timeline-view';
+import actions from '../../actions';
 
 import type {
   CssPixels,
   UnitIntervalOfProfileRange,
   StartEndRange,
-} from '../../common/types/units';
-import type { UpdateProfileSelection } from '../actions/profile-view';
-import type { ProfileSelection } from '../actions/types';
+} from '../../types/units';
+import type { UpdateProfileSelection } from '../../actions/profile-view';
+import type { ProfileSelection } from '../../types/actions';
 
 const { DOM_DELTA_PAGE, DOM_DELTA_LINE } = (typeof window === 'object' && window.WheelEvent)
   ? new WheelEvent('mouse')

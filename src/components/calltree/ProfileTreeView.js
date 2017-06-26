@@ -6,22 +6,22 @@
 
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import TreeView from './TreeView';
+import TreeView from '../shared/TreeView';
 import NodeIcon from './NodeIcon';
-import { getStackAsFuncArray } from '../profile-data';
-import { getInvertCallstack, getImplementationFilter, getSearchString, getSelectedThreadIndex } from '../reducers/url-state';
+import { getStackAsFuncArray } from '../../profile-logic/profile-data';
+import { getInvertCallstack, getImplementationFilter, getSearchString, getSelectedThreadIndex } from '../../reducers/url-state';
 import {
   getProfile, selectedThreadSelectors, getScrollToSelectionGeneration, getProfileViewOptions,
-} from '../reducers/profile-view';
-import { getIconsWithClassNames } from '../reducers/icons';
+} from '../../reducers/profile-view';
+import { getIconsWithClassNames } from '../../reducers/icons';
 
-import { changeSelectedFuncStack, changeExpandedFuncStacks, addCallTreeFilter } from '../actions/profile-view';
+import { changeSelectedFuncStack, changeExpandedFuncStacks, addCallTreeFilter } from '../../actions/profile-view';
 
-import type { IconWithClassName, State } from '../reducers/types';
-import type { ProfileTreeClass } from '../profile-tree';
-import type { Thread, ThreadIndex } from '../../common/types/profile';
-import type { FuncStackInfo, IndexIntoFuncStackTable } from '../../common/types/profile-derived';
-import type { Column } from './TreeView';
+import type { IconWithClassName, State } from '../../types/reducers';
+import type { ProfileTreeClass } from '../../profile-logic/profile-tree';
+import type { Thread, ThreadIndex } from '../../types/profile';
+import type { FuncStackInfo, IndexIntoFuncStackTable } from '../../types/profile-derived';
+import type { Column } from '../shared/TreeView';
 
 type Props = {
   thread: Thread,

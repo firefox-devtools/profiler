@@ -6,8 +6,8 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { getProfileViewOptions } from '../reducers/profile-view';
-import type { RequestedLib } from '../reducers/types';
+import { getProfileViewOptions } from '../../reducers/profile-view';
+import type { RequestedLib } from '../../types/reducers';
 
 function englishSgPlLibrary(count) {
   return count === 1 ? 'library' : 'libraries';

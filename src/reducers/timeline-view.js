@@ -4,9 +4,9 @@
 
 // @flow
 import { combineReducers } from 'redux';
-import type { ThreadIndex } from '../../common/types/profile';
-import type { Action } from '../actions/types';
-import type { IsThreadExpandedMap, TimelineViewState } from './types';
+import type { ThreadIndex } from '../types/profile';
+import type { Action } from '../types/actions';
+import type { IsThreadExpandedMap, TimelineViewState } from '../types/reducers';
 
 function isFlameChartExpanded(state: IsThreadExpandedMap = new Map(), action: Action) {
   switch (action.type) {

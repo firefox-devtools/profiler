@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { timeCode } from './time-code';
-import type { Profile, Thread, IndexIntoStackTable } from './types/profile';
+import { timeCode } from '../utils/time-code';
+import type { Profile, Thread, IndexIntoStackTable } from '../types/profile';
 
 export type Summary = { [id: string]: number };
 type MatchingFunction = (string, string) => boolean;

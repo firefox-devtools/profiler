@@ -5,17 +5,17 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import { getThreads } from '../reducers/profile-view';
-import { getThreadOrder, getHiddenThreads } from '../reducers/url-state';
-import { changeThreadOrder } from '../actions/profile-view';
-import FlameChartSettings from '../components/FlameChartSettings';
+import { getThreads } from '../../reducers/profile-view';
+import { getThreadOrder, getHiddenThreads } from '../../reducers/url-state';
+import { changeThreadOrder } from '../../actions/profile-view';
+import FlameChartSettings from './FlameChartSettings';
 import TimelineFlameChart from './TimelineFlameChart';
 import TimelineMarkers from './TimelineMarkers';
-import Reorderable from '../components/Reorderable';
-import { withSize } from '../with-size';
+import Reorderable from '../shared/Reorderable';
+import { withSize } from '../shared/WithSize';
 
-import type { State } from '../reducers/types';
-import type { Thread, ThreadIndex } from '../../common/types/profile';
+import type { State } from '../../types/reducers';
+import type { Thread, ThreadIndex } from '../../types/profile';
 
 require('./TimelineView.css');
 

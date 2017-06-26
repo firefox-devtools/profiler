@@ -7,16 +7,16 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import ThreadStackGraph from './ThreadStackGraph';
-import { selectorsForThread } from '../reducers/profile-view';
-import { getSelectedThreadIndex } from '../reducers/url-state';
-import { getSampleIndexClosestToTime, getStackAsFuncArray } from '../profile-data';
-import actions from '../actions';
-import ContextMenuTrigger from './ContextMenuTrigger';
+import { selectorsForThread } from '../../reducers/profile-view';
+import { getSelectedThreadIndex } from '../../reducers/url-state';
+import { getSampleIndexClosestToTime, getStackAsFuncArray } from '../../profile-logic/profile-data';
+import actions from '../../actions';
+import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 
-import type { IndexIntoFuncTable, Thread, ThreadIndex } from '../../common/types/profile';
-import type { Milliseconds } from '../../common/types/units';
-import type { FuncStackInfo, IndexIntoFuncStackTable } from '../../common/types/profile-derived';
-import type { State } from '../reducers/types';
+import type { IndexIntoFuncTable, Thread, ThreadIndex } from '../../types/profile';
+import type { Milliseconds } from '../../types/units';
+import type { FuncStackInfo, IndexIntoFuncStackTable } from '../../types/profile-derived';
+import type { State } from '../../types/reducers';
 
 type Props = {
   threadIndex: ThreadIndex,

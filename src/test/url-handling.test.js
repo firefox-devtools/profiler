@@ -6,13 +6,13 @@
 /**
  * @jest-environment jsdom
  */
-import * as urlStateReducers from '../content/reducers/url-state';
-import { stateFromLocation } from '../content/url-handling';
+import * as urlStateReducers from '../reducers/url-state';
+import { stateFromLocation } from '../url-handling';
 import { blankStore } from './fixtures/stores';
 import exampleProfile from './fixtures/profiles/example-profile';
-import { processProfile } from '../content/process-profile';
-import { receiveProfileFromStore } from '../content/actions/receive-profile';
-import type { Profile } from '../common/types/profile';
+import { processProfile } from '../profile-logic/process-profile';
+import { receiveProfileFromStore } from '../actions/receive-profile';
+import type { Profile } from '../types/profile';
 
 describe('selectedThread', function () {
   function storeWithThread(threadIndex) {

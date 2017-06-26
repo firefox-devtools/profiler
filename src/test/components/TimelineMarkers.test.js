@@ -4,7 +4,7 @@
 
 // @flow
 import React from 'react';
-import TimelineMarkers from '../../content/containers/TimelineMarkers';
+import TimelineMarkers from '../../components/timeline/TimelineMarkers';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';

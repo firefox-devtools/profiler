@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { IndexIntoStringTable } from '../common/types/profile';
+import type { IndexIntoStringTable } from '../types/profile';
 
 export class UniqueStringArray {
 

@@ -4,10 +4,10 @@
 
 import sinon from 'sinon';
 import { blankStore } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../content/reducers/profile-view';
-import * as URLStateSelectors from '../../content/reducers/url-state';
-import { getView } from '../../content/reducers/app';
-import { receiveProfileFromAddon, retrieveProfileFromAddon, retrieveProfileFromStore, retrieveProfileFromUrl } from '../../content/actions/receive-profile';
+import * as ProfileViewSelectors from '../../reducers/profile-view';
+import * as URLStateSelectors from '../../reducers/url-state';
+import { getView } from '../../reducers/app';
+import { receiveProfileFromAddon, retrieveProfileFromAddon, retrieveProfileFromStore, retrieveProfileFromUrl } from '../../actions/receive-profile';
 
 import preprocessedProfile from '../fixtures/profiles/profile-2d-canvas.json';
 import exampleProfile from '../fixtures/profiles/example-profile';

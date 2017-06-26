@@ -4,8 +4,8 @@
 
 // @flow
 
-import { UniqueStringArray } from './unique-string-array';
-import type { TaskTracer } from '../common/types/profile';
+import { UniqueStringArray } from '../utils/unique-string-array';
+import type { TaskTracer } from '../types/profile';
 
 export function getTasksByThread(taskTable: Object, threadTable: Object) {
   const threadIndexToTaskIndicesMap = new Map();

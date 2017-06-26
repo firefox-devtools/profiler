@@ -4,7 +4,7 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
-import Reorderable from './Reorderable';
+import Reorderable from '../shared/Reorderable';
 
 class TabBar extends PureComponent {
 

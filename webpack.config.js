@@ -82,7 +82,7 @@ const contentConfig = Object.assign({}, baseConfig, {
       favicon: 'res/favicon.png',
     })),
   entry: [
-    './src/content/index',
+    './src/index',
   ],
   output: {
     path: path.join(__dirname, 'dist'),
@@ -116,7 +116,7 @@ if (process.env.NODE_ENV === 'production') {
 const workerConfig = Object.assign({}, baseConfig, {
   plugins: basePlugins.slice(0),
   entry: [
-    './src/worker/index',
+    './src/profile-logic/summary-worker/index',
   ],
   output: {
     path: path.join(__dirname, 'dist'),
@@ -125,4 +125,4 @@ const workerConfig = Object.assign({}, baseConfig, {
   },
 });
 
-module.exports = [ contentConfig, workerConfig ];
+module.exports = [contentConfig, workerConfig];

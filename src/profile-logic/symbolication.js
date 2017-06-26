@@ -4,7 +4,7 @@
 
 import bisection from 'bisection';
 import { resourceTypes } from './profile-data';
-import type { Thread, IndexIntoFuncTable } from '../common/types/profile';
+import type { Thread, IndexIntoFuncTable } from '../types/profile';
 
 /**
  * Return the library object that contains address.

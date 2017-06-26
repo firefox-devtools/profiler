@@ -4,8 +4,8 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { selectedThreadSelectors } from '../reducers/profile-view';
-import actions from '../actions';
+import { selectedThreadSelectors } from '../../reducers/profile-view';
+import actions from '../../actions';
 
 class ProfileLogView extends PureComponent {
   render() {

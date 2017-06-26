@@ -11,9 +11,9 @@ import { BackgroundImageStyleDef } from './StyleDef';
 
 import ContextMenuTrigger from './ContextMenuTrigger';
 
-import type { IndexIntoFuncStackTable, Node } from '../../common/types/profile-derived';
-import type { ProfileTreeClass } from '../profile-tree';
-import type { IconWithClassName } from '../reducers/types';
+import type { IndexIntoFuncStackTable, Node } from '../../types/profile-derived';
+import type { ProfileTreeClass } from '../../profile-logic/profile-tree';
+import type { IconWithClassName } from '../../types/reducers';
 
 export type Column = {
   propName: string,

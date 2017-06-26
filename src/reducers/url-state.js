@@ -4,17 +4,17 @@
 
 // @flow
 import { combineReducers } from 'redux';
-import { defaultThreadOrder } from '../profile-data';
+import { defaultThreadOrder } from '../profile-logic/profile-data';
 import { createSelector } from 'reselect';
 import { urlFromState } from '../url-handling';
-import * as RangeFilters from '../range-filters';
+import * as RangeFilters from '../profile-logic/range-filters';
 
-import type { ThreadIndex } from '../../common/types/profile';
-import type { StartEndRange } from '../../common/types/units';
+import type { ThreadIndex } from '../types/profile';
+import type { StartEndRange } from '../types/units';
 import type {
   Action, CallTreeFiltersPerThread, CallTreeFilter, DataSource, ImplementationFilter,
-} from '../actions/types';
-import type { State, URLState, Reducer } from './types';
+} from '../types/actions';
+import type { State, URLState, Reducer } from '../types/reducers';
 
 function dataSource(state: DataSource = 'none', action: Action) {
   switch (action.type) {

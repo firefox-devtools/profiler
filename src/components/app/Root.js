@@ -7,16 +7,16 @@ import React, { PureComponent } from 'react';
 import { connect, Provider } from 'react-redux';
 import { oneLine } from 'common-tags';
 
-import { retrieveProfileFromAddon, retrieveProfileFromStore, retrieveProfileFromUrl } from '../actions/receive-profile';
-import ProfileViewer from '../components/ProfileViewer';
-import Home from '../containers/Home';
-import { urlFromState, stateFromLocation } from '../url-handling';
-import { getView } from '../reducers/app';
-import { getDataSource, getHash, getProfileURL } from '../reducers/url-state';
+import { retrieveProfileFromAddon, retrieveProfileFromStore, retrieveProfileFromUrl } from '../../actions/receive-profile';
+import ProfileViewer from './ProfileViewer';
+import Home from './Home';
+import { urlFromState, stateFromLocation } from '../../url-handling';
+import { getView } from '../../reducers/app';
+import { getDataSource, getHash, getProfileURL } from '../../reducers/url-state';
 import URLManager from './URLManager';
 
-import type { Store } from '../types';
-import type { AppViewState, State } from '../reducers/types';
+import type { Store } from '../../types/store';
+import type { AppViewState, State } from '../../types/reducers';
 
 require('./Root.css');
 

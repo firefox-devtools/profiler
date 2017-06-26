@@ -3,16 +3,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { applyFunctionMerging, setFuncNames, setTaskTracerNames } from '../symbolication';
+import { applyFunctionMerging, setFuncNames, setTaskTracerNames } from '../profile-logic/symbolication';
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
-import * as CallTreeFilters from '../call-tree-filters';
+import * as CallTreeFilters from '../profile-logic/call-tree-filters';
 import * as URLState from './url-state';
-import * as ProfileData from '../profile-data';
-import * as StackTiming from '../stack-timing';
-import * as MarkerTiming from '../marker-timing';
-import * as ProfileTree from '../profile-tree';
-import * as TaskTracerTools from '../task-tracer';
+import * as ProfileData from '../profile-logic/profile-data';
+import * as StackTiming from '../profile-logic/stack-timing';
+import * as MarkerTiming from '../profile-logic/marker-timing';
+import * as ProfileTree from '../profile-logic/profile-tree';
+import * as TaskTracerTools from '../profile-logic/task-tracer';
 import { getCategoryColorStrategy } from './flame-chart';
 
 import type {
@@ -22,15 +22,15 @@ import type {
   IndexIntoFuncTable,
   SamplesTable,
   TaskTracer,
-} from '../../common/types/profile';
+} from '../types/profile';
 import type {
   TracingMarker,
   FuncStackInfo,
   IndexIntoFuncStackTable,
   MarkerTimingRows,
-} from '../../common/types/profile-derived';
-import type { Milliseconds, StartEndRange } from '../../common/types/units';
-import type { Action, CallTreeFilter, ProfileSelection } from '../actions/types';
+} from '../types/profile-derived';
+import type { Milliseconds, StartEndRange } from '../types/units';
+import type { Action, CallTreeFilter, ProfileSelection } from '../types/actions';
 import type {
   State,
   Reducer,
@@ -38,7 +38,7 @@ import type {
   RequestedLib,
   SymbolicationStatus,
   ThreadViewOptions,
-} from './types';
+} from '../types/reducers';
 
 function profile(state: Profile = ProfileData.getEmptyProfile(), action: Action) {
   switch (action.type) {
