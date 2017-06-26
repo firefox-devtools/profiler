@@ -6,25 +6,25 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import TabBar from '../components/TabBar';
+import TabBar from './TabBar';
 import classNames from 'classnames';
-import ProfileSummaryView from '../containers/ProfileSummaryView';
-import ProfileCallTreeView from '../containers/ProfileCallTreeView';
-import ProfileMarkersView from '../containers/ProfileMarkersView';
-import ProfileTaskTracerView from '../containers/ProfileTaskTracerView';
-import ProfileLogView from '../containers/ProfileLogView';
-import ProfileFilterNavigator from '../containers/ProfileFilterNavigator';
-import ProfileSharing from '../containers/ProfileSharing';
-import SymbolicationStatusOverlay from '../containers/SymbolicationStatusOverlay';
-import TimelineView from '../containers/TimelineView';
-import actions from '../actions';
-import { getProfileViewOptions, getDisplayRange } from '../reducers/profile-view';
-import { getSelectedTab } from '../reducers/url-state';
-import ProfileViewerHeader from '../containers/ProfileViewerHeader';
-import ProfileCallTreeContextMenu from '../containers/ProfileCallTreeContextMenu';
-import ProfileThreadHeaderContextMenu from '../containers/ProfileThreadHeaderContextMenu';
+import ProfileSummaryView from '../summary/ProfileSummaryView';
+import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
+import ProfileMarkersView from '../markers/ProfileMarkersView';
+import ProfileTaskTracerView from '../tasktracer/ProfileTaskTracerView';
+import ProfileLogView from '../log/ProfileLogView';
+import ProfileFilterNavigator from './ProfileFilterNavigator';
+import ProfileSharing from './ProfileSharing';
+import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
+import TimelineView from '../timeline/TimelineView';
+import actions from '../../actions';
+import { getProfileViewOptions, getDisplayRange } from '../../reducers/profile-view';
+import { getSelectedTab } from '../../reducers/url-state';
+import ProfileViewerHeader from '../header/ProfileViewerHeader';
+import ProfileCallTreeContextMenu from '../calltree/ProfileCallTreeContextMenu';
+import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
 
-import type { StartEndRange } from '../../common/types/units';
+import type { StartEndRange } from '../../types/units';
 
 type Props = {
   className: string,

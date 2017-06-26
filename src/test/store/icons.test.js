@@ -4,8 +4,8 @@
 
 import { createImageMock } from '../fixtures/mocks/image';
 import { blankStore } from '../fixtures/stores';
-import * as iconsAccessors from '../../content/reducers/icons';
-import * as iconsActions from '../../content/actions/icons';
+import * as iconsAccessors from '../../reducers/icons';
+import * as iconsActions from '../../actions/icons';
 
 describe('actions/icons', function () {
   const validIcons = [

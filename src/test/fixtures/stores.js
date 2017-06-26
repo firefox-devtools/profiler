@@ -3,12 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import createStore from '../../content/create-store';
-import { receiveProfileFromAddon } from '../../content/actions/receive-profile';
+import createStore from '../../create-store';
+import { receiveProfileFromAddon } from '../../actions/receive-profile';
 import exampleProfile from './profiles/timings-with-js';
-import { processProfile } from '../../content/process-profile';
-import type { Store } from '../../content/types';
-import type { Profile } from '../../common/types/profile';
+import { processProfile } from '../../profile-logic/process-profile';
+import type { Store } from '../../types/store';
+import type { Profile } from '../../types/profile';
 
 export function blankStore() {
   return createStore();

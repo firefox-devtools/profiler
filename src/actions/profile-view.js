@@ -5,9 +5,9 @@
 // @flow
 import type {
   ProfileSelection, CallTreeFilter, ImplementationFilter,
-} from './types';
-import type { Action, ThunkAction } from '../types';
-import type { ThreadIndex, IndexIntoFuncTable, IndexIntoMarkersTable } from '../../common/types/profile';
+} from '../types/actions';
+import type { Action, ThunkAction } from '../types/store';
+import type { ThreadIndex, IndexIntoFuncTable, IndexIntoMarkersTable } from '../types/profile';
 
 /**
  * The actions that pertain to changing the view on the profile, including searching

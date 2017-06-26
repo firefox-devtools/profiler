@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../content/reducers/profile-view';
-import * as UrlStateSelectors from '../../content/reducers/url-state';
+import * as ProfileViewSelectors from '../../reducers/profile-view';
+import * as UrlStateSelectors from '../../reducers/url-state';
 import { getProfileWithNamedThreads } from './fixtures/profiles';
 
-import * as ProfileViewActions from '../../content/actions/profile-view';
+import * as ProfileViewActions from '../../actions/profile-view';
 
 describe('thread ordering and toggling', function () {
   // Give names to thread indexes.

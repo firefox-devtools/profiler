@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import 'babel-polyfill';
-import { SymbolStore } from '../../content/symbol-store';
+import { SymbolStore } from '../../profile-logic/symbol-store';
 import { TextDecoder } from 'text-encoding';
 import exampleSymbolTable from '../fixtures/example-symbol-table';
 import fakeIndexedDB from 'fake-indexeddb';

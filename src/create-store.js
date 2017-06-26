@@ -8,11 +8,11 @@ import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { createLogger } from 'redux-logger';
 import reducers from './reducers';
-import threadDispatcher from '../common/thread-middleware';
-import messages from './messages';
-import handleMessages from '../common/message-handler';
-import type { Store } from './types';
-import Worker from './worker-factory';
+import threadDispatcher from './utils/thread-middleware';
+import messages from './profile-logic/summary-worker/messages-content';
+import handleMessages from './utils/message-handler';
+import type { Store } from './types/store';
+import Worker from './utils/worker-factory';
 
 /**
  * Isolate the store creation into a function, so that it can be used outside of the

@@ -4,10 +4,10 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import TreeView from '../components/TreeView';
-import { getZeroAt, selectedThreadSelectors } from '../reducers/profile-view';
-import { getSelectedThreadIndex } from '../reducers/url-state';
-import actions from '../actions';
+import TreeView from '../shared/TreeView';
+import { getZeroAt, selectedThreadSelectors } from '../../reducers/profile-view';
+import { getSelectedThreadIndex } from '../../reducers/url-state';
+import actions from '../../actions';
 
 class MarkerTree {
   constructor(thread, zeroAt) {

@@ -3,10 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getEmptyProfile } from '../../../content/profile-data';
-import { UniqueStringArray } from '../../../content/unique-string-array';
-import type { Profile, Thread, MarkersTable } from '../../../common/types/profile';
-import type { Milliseconds } from '../../../common/types/units';
+import { getEmptyProfile } from '../../../profile-logic/profile-data';
+import { UniqueStringArray } from '../../../utils/unique-string-array';
+import type { Profile, Thread, MarkersTable } from '../../../types/profile';
+import type { Milliseconds } from '../../../types/units';
 
 // Array<[MarkerName, Milliseconds, Data]>
 type MarkerName = string;

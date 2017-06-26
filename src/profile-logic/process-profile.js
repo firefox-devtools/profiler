@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { getContainingLibrary, getClosestLibrary } from './symbolication';
-import { UniqueStringArray } from './unique-string-array';
+import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes } from './profile-data';
-import { provideHostSide } from './promise-worker';
+import { provideHostSide } from '../utils/promise-worker';
 import { CURRENT_VERSION, upgradeProcessedProfileToCurrentVersion, isProcessedProfile } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
 import { isOldCleopatraFormat, convertOldCleopatraProfile } from './old-cleopatra-profile-format';

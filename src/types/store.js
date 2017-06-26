@@ -11,8 +11,8 @@ import type {
   GetState as ReduxGetState,
 } from 'redux'; // eslint-disable-line import/named
 /* eslint-enable import/named */
-import type { Action as ActionsRef } from './actions/types';
-import type { State as StateRef } from './reducers/types';
+import type { Action as ActionsRef } from './actions';
+import type { State as StateRef } from './reducers';
 
 // Re-export these here so they are easily available from wherever and avoids
 // circular dependencies.

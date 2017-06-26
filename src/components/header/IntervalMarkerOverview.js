@@ -5,11 +5,11 @@
 // @flow
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
-import { timeCode } from '../../common/time-code';
-import { withSize } from '../with-size';
-import Tooltip from './Tooltip';
-import type { Milliseconds, CssPixels } from '../../common/types/units';
-import type { TracingMarker } from '../../common/types/profile-derived';
+import { timeCode } from '../../utils/time-code';
+import { withSize } from '../shared/WithSize';
+import Tooltip from '../shared/Tooltip';
+import type { Milliseconds, CssPixels } from '../../types/units';
+import type { TracingMarker } from '../../types/profile-derived';
 
 type MarkerState = 'PRESSED' | 'HOVERED' | 'NONE';
 

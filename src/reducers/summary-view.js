@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Action } from '../actions/types';
-import type { State, SummaryViewState } from './types';
+import type { Action } from '../types/actions';
+import type { State, SummaryViewState } from '../types/reducers';
 
 export default function summaryViewReducer(
   state: SummaryViewState = {summary: null, expanded: null},

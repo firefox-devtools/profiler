@@ -5,27 +5,27 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import ProfileThreadHeaderBar from '../components/ProfileThreadHeaderBar';
-import Reorderable from '../components/Reorderable';
-import TimeSelectionScrubber from '../components/TimeSelectionScrubber';
+import ProfileThreadHeaderBar from './ProfileThreadHeaderBar';
+import Reorderable from '../shared/Reorderable';
+import TimeSelectionScrubber from './TimeSelectionScrubber';
 import ProfileThreadJankOverview from './ProfileThreadJankOverview';
 import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOverview';
-import OverflowEdgeIndicator from '../components/OverflowEdgeIndicator';
+import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import { connect } from 'react-redux';
-import { getProfile, getProfileViewOptions, getDisplayRange, getZeroAt } from '../reducers/profile-view';
-import { getVisibleThreadOrder, getHiddenThreads, getThreadOrder } from '../reducers/url-state';
+import { getProfile, getProfileViewOptions, getDisplayRange, getZeroAt } from '../../reducers/profile-view';
+import { getVisibleThreadOrder, getHiddenThreads, getThreadOrder } from '../../reducers/url-state';
 
 import {
   changeThreadOrder,
   updateProfileSelection,
   addRangeFilterAndUnsetSelection,
   changeSelectedThread,
-} from '../actions/profile-view';
+} from '../../actions/profile-view';
 
-import type { Profile, ThreadIndex } from '../../common/types/profile';
-import type { ProfileSelection } from '../actions/types';
-import type { State } from '../reducers/types';
-import type { Milliseconds, StartEndRange } from '../../common/types/units';
+import type { Profile, ThreadIndex } from '../../types/profile';
+import type { ProfileSelection } from '../../types/actions';
+import type { State } from '../../types/reducers';
+import type { Milliseconds, StartEndRange } from '../../types/units';
 
 type Props = {|
   profile: Profile,

@@ -3,6 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { SymbolStoreDB } from './symbol-store-db';
-import { provideWorkerSide } from './promise-worker';
+import { provideWorkerSide } from '../utils/promise-worker';
 
 provideWorkerSide(self, SymbolStoreDB);

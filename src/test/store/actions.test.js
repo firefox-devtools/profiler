@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { storeWithProfile } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../content/reducers/profile-view';
-import * as TimelineSelectors from '../../content/reducers/timeline-view';
-import * as UrlStateSelectors from '../../content/reducers/url-state';
+import * as ProfileViewSelectors from '../../reducers/profile-view';
+import * as TimelineSelectors from '../../reducers/timeline-view';
+import * as UrlStateSelectors from '../../reducers/url-state';
 import { getProfileWithMarkers } from './fixtures/profiles';
 
 import {
@@ -15,13 +15,13 @@ import {
   changeInvertCallstack,
   updateProfileSelection,
   changeImplementationFilter,
-} from '../../content/actions/profile-view';
+} from '../../actions/profile-view';
 import {
   changeFlameChartColorStrategy,
   changeTimelineMarkersExpandedThread,
   changeTimelineFlameChartExpandedThread,
-} from '../../content/actions/timeline';
-import { getCategoryByImplementation } from '../../content/color-categories';
+} from '../../actions/timeline';
+import { getCategoryByImplementation } from '../../profile-logic/color-categories';
 
 const { selectedThreadSelectors } = ProfileViewSelectors;
 

@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import {createStore, applyMiddleware} from 'redux';
-import threadDispatcher from '../common/thread-middleware';
-import handleMessages from '../common/message-handler';
-import messages from './messages';
+import threadDispatcher from '../../utils/thread-middleware';
+import handleMessages from '../../utils/message-handler';
+import messages from './messages-worker';
 import reducers from './reducers';
 import { createLogger } from 'redux-logger';
 import thunk from 'redux-thunk';

@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { IndexIntoStackTable, IndexIntoFrameTable, Thread, StackTable } from '../common/types/profile';
-import type { Milliseconds } from '../common/types/units';
-import type { FuncStackInfo } from '../common/types/profile-derived';
+import type { IndexIntoStackTable, IndexIntoFrameTable, Thread, StackTable } from '../types/profile';
+import type { Milliseconds } from '../types/units';
+import type { FuncStackInfo } from '../types/profile-derived';
 import type { GetCategory } from './color-categories';
 /**
  * The StackTimingByDepth data structure organizes stack frames by their depth, and start

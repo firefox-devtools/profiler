@@ -4,13 +4,13 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { getProfile } from '../reducers/profile-view';
-import { getProfileSummaries, getProfileExpandedSummaries } from '../reducers/summary-view';
-import SummarizeLineGraph from '../components/SummarizeLineGraph';
-import SummarizeProfileHeader from '../components/SummarizeProfileHeader';
-import SummarizeProfileExpand from '../components/SummarizeProfileExpand';
-import SummarizeProfileThread from '../components/SummarizeProfileThread';
-import actions from '../actions';
+import { getProfile } from '../../reducers/profile-view';
+import { getProfileSummaries, getProfileExpandedSummaries } from '../../reducers/summary-view';
+import SummarizeLineGraph from './SummarizeLineGraph';
+import SummarizeProfileHeader from './SummarizeProfileHeader';
+import SummarizeProfileExpand from './SummarizeProfileExpand';
+import SummarizeProfileThread from './SummarizeProfileThread';
+import actions from '../../actions';
 
 require('./ProfileSummaryView.css');
 

@@ -5,8 +5,8 @@
 // @flow
 import { combineReducers } from 'redux';
 
-import type { Action } from '../actions/types';
-import type { State, AppState, AppViewState, Reducer } from './types';
+import type { Action } from '../types/store';
+import type { State, AppState, AppViewState, Reducer } from '../types/reducers';
 
 function view(state: AppViewState = { phase: 'INITIALIZING' }, action: Action): AppViewState {
   if (state.phase === 'PROFILE') {

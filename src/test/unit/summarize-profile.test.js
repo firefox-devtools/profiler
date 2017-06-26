@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import 'babel-polyfill';
-import { summarizeProfile } from '../../common/summarize-profile';
+import { summarizeProfile } from '../../profile-logic/summarize-profile';
 
 const profile = require('../fixtures/profiles/profile-2d-canvas.json');
 

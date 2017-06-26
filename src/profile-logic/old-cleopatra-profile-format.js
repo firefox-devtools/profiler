@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { UniqueStringArray } from './unique-string-array';
+import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes } from './profile-data';
 import { CURRENT_VERSION } from './gecko-profile-versioning.js';
 import { getEmptyTaskTracerData } from './task-tracer';

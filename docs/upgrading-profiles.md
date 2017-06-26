@@ -25,7 +25,7 @@ The profile version number is stored in `profile.meta.version`, and is just an i
 
 When perf.html receives a profile, as a first step it will run it through an upgrade process: If the profile is in a format version that's older than the most recent version known to perf.html, a number of "upgrader" functions get applied to it, and at the end of that process the result can be treated as a profile of the most recent version. This way, most of perf.html's code can pretend that it only receives up-to-date profiles, and the compatibility concerns are constrained to a dedicated file.
 
-This dedicated file is [gecko-profile-versioning.js](../src/content/gecko-profile-versioning.js). It hosts the upgrader functions. These upgrader functions are also a great place to document format changes.
+This dedicated file is [gecko-profile-versioning.js](../src/profile-logic/gecko-profile-versioning.js). It hosts the upgrader functions. These upgrader functions are also a great place to document format changes.
 
 ### No forwards compatibility
 
@@ -51,7 +51,7 @@ We want to be able to display profiles that were saved at any point in the past.
 
 Consequently, the same versioning concerns as for the Gecko profile format also apply to the processed profile format.
 
-The processed profile version is stored in the field `profile.meta.preprocessedProfileVersion`, and the upgraders for processed profiles live in the file [processed-profile-versioning.js](../src/content/processed-profile-versioning.js).
+The processed profile version is stored in the field `profile.meta.preprocessedProfileVersion`, and the upgraders for processed profiles live in the file [processed-profile-versioning.js](../src/profile-logic/processed-profile-versioning.js).
 
 `processProfile` should output the latest version of the processed profile format at all times. Combined with the fact that it can treat its input as being a Gecko profile of the latest Gecko profile format version, this makes `processProfile` as simple as possible.
 
@@ -59,20 +59,20 @@ The processed profile version is stored in the field `profile.meta.preprocessedP
 
 The "old cleopatra format" is the profile format that was used by the cleopatra version before the big rewrite. Profiles of this format are still in the profile store, and there are links to those profiles strewn across bugzilla. We want to be able to display those profiles.
 
-We have one import path for profiles of this format, which is located in the file [old-cleopatra-profile-format.js](../src/content/old-cleopatra-profile-format.js). It outputs profiles in "processed profile format" version zero, and this output is then run through the processed profile format upgraders. This means that [old-cleopatra-profile-format.js](../src/content/old-cleopatra-profile-format.js) will not need to be touched when the processed profile format changes; the upgrader that gets added in the process will take care of things.
+We have one import path for profiles of this format, which is located in the file [old-cleopatra-profile-format.js](../src/profile-logic/old-cleopatra-profile-format.js). It outputs profiles in "processed profile format" version zero, and this output is then run through the processed profile format upgraders. This means that [old-cleopatra-profile-format.js](../src/profile-logic/old-cleopatra-profile-format.js) will not need to be touched when the processed profile format changes; the upgrader that gets added in the process will take care of things.
 
 ## Summary
 
 When the Gecko profile format changes (due to a change in Gecko):
 
  - The version number (`profile.meta.version`) needs to be incremented in Gecko.
- - In [gecko-profile-versioning.js](../src/content/gecko-profile-versioning.js), `CURRENT_VERSION` needs to be set to that new version number, and a conversion function from the old to the new version needs to be added to `_updaters`.
+ - In [gecko-profile-versioning.js](../src/profile-logic/gecko-profile-versioning.js), `CURRENT_VERSION` needs to be set to that new version number, and a conversion function from the old to the new version needs to be added to `_updaters`.
  - Profile processing may need to be adjusted to parse the new Gecko profile format version.
 
 When the processed profile format changes (e.g. because a different data format seems adequate, or because new data from the Gecko profile needs to be accommodated):
 
  - `processProfile` needs to be changed to output the new format.
- - In [processed-profile-versioning.js](../src/content/processed-profile-versioning.js), `CURRENT_VERSION` needs to be incremented and an update function needs to be added to `_updaters`.
+ - In [processed-profile-versioning.js](../src/profile-logic/processed-profile-versioning.js), `CURRENT_VERSION` needs to be incremented and an update function needs to be added to `_updaters`.
 
 At all times, `processProfile` only has code that converts the latest version
 of the Gecko profile format into the latest version of the processed profile

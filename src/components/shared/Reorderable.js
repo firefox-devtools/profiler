@@ -8,8 +8,8 @@ import React, { PureComponent } from 'react';
 import bisection from 'bisection';
 import clamp from 'clamp';
 import arrayMove from 'array-move';
-import { getContentRect, getMarginRect } from '../css-geometry-tools';
-import type { DOMRectLiteral } from '../dom-rect';
+import { getContentRect, getMarginRect } from '../../utils/css-geometry-tools';
+import type { DOMRectLiteral } from '../../utils/dom-rect';
 
 type Props = {|
   orient: 'horizontal' | 'vertical',

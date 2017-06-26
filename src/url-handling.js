@@ -4,10 +4,10 @@
 
 // @flow
 import queryString from 'query-string';
-import { stringifyRangeFilters, parseRangeFilters } from './range-filters';
-import { stringifyCallTreeFilters, parseCallTreeFilters } from './call-tree-filters';
-import type { URLState } from './reducers/types';
-import type { DataSource } from './actions/types';
+import { stringifyRangeFilters, parseRangeFilters } from './profile-logic/range-filters';
+import { stringifyCallTreeFilters, parseCallTreeFilters } from './profile-logic/call-tree-filters';
+import type { URLState } from './types/reducers';
+import type { DataSource } from './types/actions';
 
 // {
 //   // general:

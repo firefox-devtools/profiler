@@ -5,7 +5,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import ReactDOM from 'react-dom';
-import type { CssPixels } from '../../common/types/units';
+import type { CssPixels } from '../../types/units';
 
 require('./Tooltip.css');
 

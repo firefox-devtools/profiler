@@ -5,13 +5,13 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem, SubMenu } from 'react-contextmenu';
-import actions from '../actions';
+import actions from '../../actions';
 import { connect } from 'react-redux';
-import { selectedThreadSelectors } from '../reducers/profile-view';
+import { selectedThreadSelectors } from '../../reducers/profile-view';
 import copy from 'copy-to-clipboard';
 
-import type { IndexIntoFuncStackTable, FuncStackInfo } from '../../common/types/profile-derived';
-import type { Thread } from '../../common/types/profile';
+import type { IndexIntoFuncStackTable, FuncStackInfo } from '../../types/profile-derived';
+import type { Thread } from '../../types/profile';
 
 type Props = {
   thread: Thread,

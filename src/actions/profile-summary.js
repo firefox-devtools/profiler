@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Action } from './types';
-import type { Summary } from '../../common/summarize-profile';
-import type { ThreadIndex } from '../../common/types/profile';
+import type { Action } from '../types/store';
+import type { Summary } from '../profile-logic/summarize-profile';
+import type { ThreadIndex } from '../types/profile';
 
 export function profileSummaryProcessed(summary: Summary): Action {
   return {

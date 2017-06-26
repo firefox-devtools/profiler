@@ -17,15 +17,15 @@ import type {
   IndexIntoMarkersTable,
   IndexIntoStackTable,
   ThreadIndex,
-} from '../common/types/profile';
+} from '../types/profile';
 import type {
   FuncStackInfo,
   FuncStackTable,
   IndexIntoFuncStackTable,
   TracingMarker,
-} from '../common/types/profile-derived';
-import type { StartEndRange } from '../common/types/units';
-import { timeCode } from '../common/time-code';
+} from '../types/profile-derived';
+import type { StartEndRange } from '../types/units';
+import { timeCode } from '../utils/time-code';
 import { getEmptyTaskTracerData } from './task-tracer';
 
 /**
@@ -48,7 +48,7 @@ export const resourceTypes = {
  * a stackTable, and de-duplicates stacks that have frames that point to the same
  * function.
  *
- * See `src/common/types/profile-derived.js` for the type definitions.
+ * See `src/types/profile-derived.js` for the type definitions.
  * See `docs/func-stacks.md` for a detailed explanation of funcStacks.
  */
 export function getFuncStackInfo(

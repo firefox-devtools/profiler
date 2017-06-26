@@ -5,7 +5,7 @@
 // @flow
 
 import type { Milliseconds } from './units';
-import type { UniqueStringArray } from '../../content/unique-string-array';
+import type { UniqueStringArray } from '../utils/unique-string-array';
 export type IndexIntoStackTable = number;
 export type IndexIntoSamplesTable = number;
 export type IndexIntoMarkersTable = number;

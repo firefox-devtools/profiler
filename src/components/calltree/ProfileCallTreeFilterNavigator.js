@@ -3,10 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { connect } from 'react-redux';
-import actions from '../actions';
-import { selectedThreadSelectors } from '../reducers/profile-view';
-import { getSelectedThreadIndex } from '../reducers/url-state';
-import FilterNavigatorBar from '../components/FilterNavigatorBar';
+import actions from '../../actions';
+import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { getSelectedThreadIndex } from '../../reducers/url-state';
+import FilterNavigatorBar from './FilterNavigatorBar';
 
 import './ProfileCallTreeFilterNavigator.css';
 

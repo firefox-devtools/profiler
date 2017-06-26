@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Thread, IndexIntoStackTable } from '../common/types/profile';
+import type { Thread, IndexIntoStackTable } from '../types/profile';
 
 export type GetLabel = (Thread, IndexIntoStackTable) => string;
 

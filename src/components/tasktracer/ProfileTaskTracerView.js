@@ -4,9 +4,9 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import actions from '../actions';
-import { getTasksByThread, getProfileTaskTracerData } from '../reducers/profile-view';
-import { withSize } from '../with-size';
+import actions from '../../actions';
+import { getTasksByThread, getProfileTaskTracerData } from '../../reducers/profile-view';
+import { withSize } from '../shared/WithSize';
 
 class ThreadTaskTracerTracksImpl extends PureComponent {
   render() {

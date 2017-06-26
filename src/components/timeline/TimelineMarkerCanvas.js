@@ -2,11 +2,11 @@
 import React, { PureComponent } from 'react';
 import withTimelineViewport from './TimelineViewport';
 import TimelineCanvas from './TimelineCanvas';
-import TextMeasurement from '../../common/text-measurement';
+import TextMeasurement from '../../utils/text-measurement';
 
-import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../common/types/units';
-import type { TracingMarker, MarkerTimingRows, IndexIntoMarkerTiming } from '../../common/types/profile-derived';
-import type { Action, ProfileSelection } from '../actions/types';
+import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../types/units';
+import type { TracingMarker, MarkerTimingRows, IndexIntoMarkerTiming } from '../../types/profile-derived';
+import type { Action, ProfileSelection } from '../../types/actions';
 
 type Props = {
   interval: Milliseconds,

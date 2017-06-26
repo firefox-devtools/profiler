@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { TextEncoder } from 'text-encoding';
-import type { SymbolTableAsTuple } from '../../content/symbol-store-db';
+import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 
 const syms = {
   addresses: [0, 0xf00, 0x1a00, 0x2000],

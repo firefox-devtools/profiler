@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React from 'react';
-import ProfileTreeView from '../components/ProfileTreeView';
-import ProfileCallTreeSettings from '../components/ProfileCallTreeSettings';
+import ProfileTreeView from './ProfileTreeView';
+import ProfileCallTreeSettings from './ProfileCallTreeSettings';
 import ProfileCallTreeFilterNavigator from './ProfileCallTreeFilterNavigator';
 
 const ProfileCallTreeView = () => (

@@ -4,12 +4,12 @@
 // @flow
 
 import { combineReducers } from 'redux';
-import { getCategoryByImplementation } from '../color-categories';
-import { getFunctionName } from '../labeling-strategies';
-import type { State } from './types';
-import type { GetLabel } from '../labeling-strategies';
-import type { GetCategory } from '../color-categories';
-import type { Action } from '../actions/types';
+import { getCategoryByImplementation } from '../profile-logic/color-categories';
+import { getFunctionName } from '../profile-logic/labeling-strategies';
+import type { State } from '../types/reducers';
+import type { GetLabel } from '../profile-logic/labeling-strategies';
+import type { GetCategory } from '../profile-logic/color-categories';
+import type { Action } from '../types/actions';
 
 function categoryColorStrategy(
   state: GetCategory = getCategoryByImplementation,

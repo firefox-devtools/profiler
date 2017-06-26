@@ -5,7 +5,7 @@
 import type {
   // eslint-disable-next-line import/named
   IDBFactory,
-} from '../../src/common/types/indexeddb';
+} from '../../src/types/indexeddb';
 
 type Lib = { debugName: string };
 

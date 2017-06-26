@@ -3,10 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Action } from './types';
-import type { GetLabel } from '../labeling-strategies';
-import type { GetCategory } from '../color-categories';
-import type { ThreadIndex } from '../../common/types/profile';
+import type { Action } from '../types/store';
+import type { GetLabel } from '../profile-logic/labeling-strategies';
+import type { GetCategory } from '../profile-logic/color-categories';
+import type { ThreadIndex } from '../types/profile';
 
 export function changeFlameChartColorStrategy(getCategory: GetCategory): Action {
   return {

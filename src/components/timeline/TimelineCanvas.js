@@ -1,10 +1,10 @@
 // @flow
 import React, { PureComponent } from 'react';
-import { timeCode } from '../../common/time-code';
+import { timeCode } from '../../utils/time-code';
 import classNames from 'classnames';
-import Tooltip from './Tooltip';
+import Tooltip from '../shared/Tooltip';
 
-import type { CssPixels, DevicePixels } from '../../common/types/units';
+import type { CssPixels, DevicePixels } from '../../types/units';
 
 type Props<HoveredItem> = {
   containerWidth: CssPixels,

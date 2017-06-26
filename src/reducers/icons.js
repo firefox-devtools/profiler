@@ -4,9 +4,9 @@
 
 // @flow
 import { createSelector } from 'reselect';
-import type { Action } from '../actions/types';
-import type { IconWithClassName, State, Reducer } from './types';
-import type { Node } from '../../common/types/profile-derived';
+import type { Action } from '../types/actions';
+import type { IconWithClassName, State, Reducer } from '../types/reducers';
+import type { Node } from '../types/profile-derived';
 
 function classNameFromUrl(url) {
   return url.replace(/[/:.+>< ~()#,]/g, '_');
@@ -49,4 +49,3 @@ export const getIconsWithClassNames: (State => IconWithClassName[]) = createSele
   getIcons,
   icons => [...icons].map(icon => ({ icon, className: classNameFromUrl(icon) }))
 );
-

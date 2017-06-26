@@ -6,8 +6,8 @@ import React, { PureComponent, PropTypes } from 'react';
 import TimeRuler from './TimeRuler';
 import SelectionScrubberOverlay from './SelectionScrubberOverlay';
 import clamp from 'clamp';
-import { getContentRect } from '../css-geometry-tools';
-import { withSize } from '../with-size';
+import { getContentRect } from '../../utils/css-geometry-tools';
+import { withSize } from '../shared/WithSize';
 
 class TimeSelectionScrubberImpl extends PureComponent {
 

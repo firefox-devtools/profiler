@@ -6,9 +6,9 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import actions from '../actions';
-import { getImplementationFilter, getInvertCallstack, getSearchString } from '../reducers/url-state';
-import IdleSearchField from '../components/IdleSearchField';
+import actions from '../../actions';
+import { getImplementationFilter, getInvertCallstack, getSearchString } from '../../reducers/url-state';
+import IdleSearchField from '../shared/IdleSearchField';
 
 import './ProfileCallTreeSettings.css';
 
