@@ -191,7 +191,8 @@ export function getCallTree(
   thread: Thread,
   interval: Milliseconds,
   funcStackInfo: FuncStackInfo,
-  implementationFilter: string
+  implementationFilter: string,
+  invertCallstack: boolean
 ): ProfileTree {
   return timeCode('getCallTree', () => {
     const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
@@ -202,15 +203,48 @@ export function getCallTree(
 
     const funcStackSelfTime = new Float32Array(funcStackTable.length);
     const funcStackTotalTime = new Float32Array(funcStackTable.length);
+    let funcStackToRoot;
+    let funcStackLeafTime;
     const numChildren = new Uint32Array(funcStackTable.length);
-    for (
-      let sampleIndex = 0;
-      sampleIndex < sampleFuncStacks.length;
-      sampleIndex++
-    ) {
-      const funcStackIndex = sampleFuncStacks[sampleIndex];
-      if (funcStackIndex !== null) {
-        funcStackSelfTime[funcStackIndex] += interval;
+    if (invertCallstack) {
+      funcStackToRoot = new Int32Array(funcStackTable.length);
+      funcStackLeafTime = new Float32Array(funcStackTable.length);
+      for (
+        let funcStackIndex = 0;
+        funcStackIndex < funcStackToRoot.length;
+        funcStackIndex++
+      ) {
+        const prefixFuncStack = funcStackTable.prefix[funcStackIndex];
+        if (prefixFuncStack !== -1) {
+          funcStackToRoot[funcStackIndex] = funcStackToRoot[prefixFuncStack];
+        } else {
+          funcStackToRoot[funcStackIndex] = funcStackIndex;
+        }
+      }
+
+      for (
+        let sampleIndex = 0;
+        sampleIndex < sampleFuncStacks.length;
+        sampleIndex++
+      ) {
+        const funcStackIndex = sampleFuncStacks[sampleIndex];
+        if (funcStackIndex !== null) {
+          const rootIndex = funcStackToRoot[funcStackIndex];
+          funcStackSelfTime[rootIndex] += interval;
+          funcStackLeafTime[funcStackIndex] += interval;
+        }
+      }
+    } else {
+      funcStackLeafTime = funcStackSelfTime;
+      for (
+        let sampleIndex = 0;
+        sampleIndex < sampleFuncStacks.length;
+        sampleIndex++
+      ) {
+        const funcStackIndex = sampleFuncStacks[sampleIndex];
+        if (funcStackIndex !== null) {
+          funcStackSelfTime[funcStackIndex] += interval;
+        }
       }
     }
     let rootTotalTime = 0;
@@ -220,7 +254,7 @@ export function getCallTree(
       funcStackIndex >= 0;
       funcStackIndex--
     ) {
-      funcStackTotalTime[funcStackIndex] += funcStackSelfTime[funcStackIndex];
+      funcStackTotalTime[funcStackIndex] += funcStackLeafTime[funcStackIndex];
       if (funcStackTotalTime[funcStackIndex] === 0) {
         continue;
       }
