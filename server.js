@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const config = require('./webpack.config');
 const baseConfig = config[0];
+const port = process.env.PERFHTML_PORT || 4242;
 
 new WebpackDevServer(webpack(config), {
   contentBase: baseConfig.output.path,
@@ -13,10 +14,10 @@ new WebpackDevServer(webpack(config), {
   stats: {
     colors: true,
   },
-}).listen(process.env.PERFHTML_PORT || 4242, 'localhost', function (err) {
+}).listen(port, 'localhost', function (err) {
   if (err) {
     console.log(err);
   }
 
-  console.log(`Listening at localhost:${process.env.PERFHTML_PORT}`);
+  console.log(`Listening at localhost:${port}`);
 });
