@@ -18,4 +18,8 @@ when Jest's mocking capabilities are falling short. This should be used as a las
 
 ## The tests
 
-Right now there are [Redux store tests](./store) and [unit tests](./unit). React component tests are planned as well as eventually supporting full integration tests.
+| Test type                  | Description |
+| -------------------------- | ----------- |
+| [components](./components) | Snapshot tests for [React](https://facebook.github.io/react/) components (experimental). Full component testing is planned as well. |
+| [store](./store)           | Testing the [Redux](http://redux.js.org/) store using actions and selectors. |
+| [unit](./unit)             | Unit testing |
