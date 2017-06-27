@@ -20,16 +20,19 @@ This project is live on [https://perf-html.io/](https://perf-html.io/). You need
 
 > You'll find documentation for the project in the [docs folder](./docs).
 
+We use [Yarn](http://yarnpkg.com/) as our dependency manager so you'll need to
+go and install it before running the following commands.
+
 ```bash
 git clone git@github.com:devtools-html/perf.html.git
 
 cd perf.html
-npm install
+yarn install
 
-npm start
+yarn start
 ```
 
-> To run a faster production version use `npm run start-prod` instead of `npm start`
+> To run a faster production version use `yarn start-prod` instead of `yarn start`
 
 Assuming you've installed the add-on from [perf-html.io](https://perf-html.io/) you'll need to configure it to point to your local web development server.
 
