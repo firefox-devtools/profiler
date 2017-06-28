@@ -203,11 +203,10 @@ export function getCallTree(
 
     const funcStackSelfTime = new Float32Array(funcStackTable.length);
     const funcStackTotalTime = new Float32Array(funcStackTable.length);
-    let funcStackToRoot;
     let funcStackLeafTime;
     const numChildren = new Uint32Array(funcStackTable.length);
     if (invertCallstack) {
-      funcStackToRoot = new Int32Array(funcStackTable.length);
+      const funcStackToRoot = new Int32Array(funcStackTable.length);
       funcStackLeafTime = new Float32Array(funcStackTable.length);
       for (
         let funcStackIndex = 0;
@@ -247,6 +246,7 @@ export function getCallTree(
         }
       }
     }
+
     let rootTotalTime = 0;
     let numRoots = 0;
     for (
