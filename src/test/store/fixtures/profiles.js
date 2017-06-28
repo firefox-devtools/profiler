@@ -24,7 +24,7 @@ export function getProfileWithMarkers(markers: TestDefinedMarkers): Profile {
     data: [],
     length: 0,
   };
-  markers.map(([name, time, data]) => {
+  markers.forEach(([name, time, data]) => {
     markersTable.name.push(stringTable.indexForString(name));
     markersTable.time.push(time);
     markersTable.data.push(data);

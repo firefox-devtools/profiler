@@ -8,7 +8,7 @@
  */
 
 const encodingChars =
-  '0123456789abcdefghijklmnopqrstuv' + 'wxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._';
+  '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._';
 
 function uintToString(value) {
   let x = value;

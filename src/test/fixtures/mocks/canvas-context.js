@@ -17,7 +17,7 @@ export default function mockCanvasContext() {
     return jest.fn((...args) => {
       log.push([name, ...args]);
       if (fn) {
-        return fn.apply(null, args);
+        return fn(...args);
       }
       return undefined;
     });

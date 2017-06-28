@@ -59,6 +59,7 @@ function _archFromAbi(abi) {
 
 // _upgraders[i] converts from version i - 1 to version i.
 // Every "upgrader" takes the profile as its single argument and mutates it.
+/* eslint-disable no-useless-computed-key */
 const _upgraders = {
   [1]: () => {
     throw new Error(
@@ -184,3 +185,4 @@ const _upgraders = {
     convertToVersionSixRecursive(profile);
   },
 };
+/* eslint-enable no-useless-computed-key */

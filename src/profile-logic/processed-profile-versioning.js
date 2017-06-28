@@ -90,6 +90,7 @@ function _getRealScriptURI(url) {
 
 // _upgraders[i] converts from version i - 1 to version i.
 // Every "upgrader" takes the profile as its single argument and mutates it.
+/* eslint-disable no-useless-computed-key */
 const _upgraders = {
   [1]: profile => {
     // Starting with version 1, markers are sorted.
@@ -276,3 +277,4 @@ const _upgraders = {
     }
   },
 };
+/* eslint-enable no-useless-computed-key */
