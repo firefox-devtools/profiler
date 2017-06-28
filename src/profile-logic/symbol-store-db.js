@@ -4,14 +4,15 @@
 
 // @flow
 
+/* eslint-disable import/named */
 import type {
-  // eslint-disable-next-line import/named
   IDBFactory,
   IDBDatabase,
   IDBObjectStore,
   IDBIndex,
   IDBKeyRange,
 } from '../types/indexeddb';
+/* eslint-enable import/named */
 
 export type SymbolTableAsTuple = [
   Uint32Array, // addrs
