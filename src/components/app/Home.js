@@ -18,6 +18,8 @@ const ADDON_URL =
   'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
 const LEGACY_ADDON_URL =
   'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
+const GITHUB_URL =
+  'https://github.com/devtools-html/perf.html';
 
 const InstallButton = ({
   name,
@@ -318,7 +320,7 @@ class Home extends PureComponent {
         onDrop={this._handleProfileDrop}
       >
         <a
-          href="https://github.com/devtools-html/perf.html"
+          href={GITHUB_URL}
           className="homeGithubIcon"
         />
         <section className="homeSection">
@@ -351,6 +353,7 @@ class Home extends PureComponent {
           >
             <div className="homeDropMessage">Drop a saved profile here</div>
           </div>
+          <a href={GITHUB_URL} className='homeContributionUrl'>Contribute to the project</a>
         </section>
       </div>
     );
