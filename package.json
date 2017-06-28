@@ -11,11 +11,13 @@
     "build-prod-readable": "yarn run build:clean && NODE_ENV=production webpack --progress",
     "build-docs": "documentation build src/types/profile.js -f md > docs/processed-profile-format.md; cat docs/processed-profile-format.md",
     "eslint": "eslint index.js src",
-    "eslint-fix": "eslint --fix index.js src",
+    "eslint-fix": "yarn eslint -- --fix",
     "flow": "flow",
     "flow-coverage": "flow-coverage-report -i 'src/**/*.js' -t html -t text",
     "flow-generate-libdefs": "flow-typed install",
     "license-check": "devtools-license-check",
+    "precommit": "lint-staged",
+    "prepush": "run-p flow license-check eslint test",
     "publish": "rimraf public_html && cp -r dist public_html",
     "serve-static": "ws -d dist/ -s index.html -p 4242",
     "start": "mkdir -p dist && cp res/zee-worker.js dist/ && NODE_ENV=development node server.js",
@@ -111,11 +113,14 @@
     "flow-typed": "^2.0.0",
     "html-webpack-plugin": "^2.24.1",
     "http-server": "^0.9.0",
+    "husky": "^0.14.1",
     "jest": "^20.0.3",
     "json-loader": "^0.5.4",
+    "lint-staged": "^4.0.0",
     "local-web-server": "^1.2.6",
     "lodash.clonedeep": "^4.5.0",
     "mkdirp": "^0.5.1",
+    "npm-run-all": "^4.0.2",
     "prettier": "^1.5.1",
     "raw-loader": "^0.5.1",
     "react-test-renderer": "^15.6.1",
@@ -145,5 +150,11 @@
     },
     "setupTestFrameworkScriptFile": "./src/test/setup.js",
     "verbose": true
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }
