@@ -123,7 +123,7 @@
     "style-loader": "^0.18.2",
     "webpack": "^3.0.0",
     "webpack-dev-server": "^2.5.0",
-    "workerjs": "^0.1.1"
+    "workerjs": "github:jasonLaster/workerjs"
   },
   "jest": {
     "collectCoverageFrom": [
