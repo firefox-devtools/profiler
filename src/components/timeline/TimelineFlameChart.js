@@ -6,8 +6,16 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import FlameChartCanvas from './FlameChartCanvas';
-import { selectorsForThread, getDisplayRange, getProfileInterval, getProfileViewOptions } from '../../reducers/profile-view';
-import { getCategoryColorStrategy, getLabelingStrategy } from '../../reducers/flame-chart';
+import {
+  selectorsForThread,
+  getDisplayRange,
+  getProfileInterval,
+  getProfileViewOptions,
+} from '../../reducers/profile-view';
+import {
+  getCategoryColorStrategy,
+  getLabelingStrategy,
+} from '../../reducers/flame-chart';
 import { getIsFlameChartExpanded } from '../../reducers/timeline-view';
 import actions from '../../actions';
 import { getImplementationName } from '../../profile-logic/labeling-strategies';
@@ -15,7 +23,11 @@ import classNames from 'classnames';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 
 import type { Thread } from '../../types/profile';
-import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../types/units';
+import type {
+  Milliseconds,
+  CssPixels,
+  UnitIntervalOfProfileRange,
+} from '../../types/units';
 import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
 import type { GetCategory } from '../../profile-logic/color-categories';
 import type { GetLabel } from '../../profile-logic/labeling-strategies';
@@ -48,8 +60,7 @@ type Props = {
 };
 
 class TimelineFlameChart extends PureComponent {
-
-  props: Props
+  props: Props;
 
   constructor(props) {
     super(props);
@@ -57,7 +68,11 @@ class TimelineFlameChart extends PureComponent {
   }
 
   toggleThreadCollapse() {
-    const { changeTimelineFlameChartExpandedThread, threadIndex, isRowExpanded } = this.props;
+    const {
+      changeTimelineFlameChartExpandedThread,
+      threadIndex,
+      isRowExpanded,
+    } = this.props;
     changeTimelineFlameChartExpandedThread(threadIndex, !isRowExpanded);
   }
 
@@ -72,7 +87,9 @@ class TimelineFlameChart extends PureComponent {
    */
   getViewHeight(maxViewportHeight: number): number {
     const { viewHeight, isRowExpanded } = this.props;
-    const exactSize = isRowExpanded ? maxViewportHeight * 1.5 : maxViewportHeight;
+    const exactSize = isRowExpanded
+      ? maxViewportHeight * 1.5
+      : maxViewportHeight;
     const largeGraph = viewHeight - TIMELINE_ROW_HEIGHT * 2;
     const smallGraph = TIMELINE_ROW_HEIGHT;
     return Math.max(smallGraph, Math.min(exactSize, largeGraph));
@@ -82,18 +99,27 @@ class TimelineFlameChart extends PureComponent {
    * Determine
    */
   getMaximumZoom(): UnitIntervalOfProfileRange {
-    const {
-      timeRange: { start, end },
-      interval,
-    } = this.props;
+    const { timeRange: { start, end }, interval } = this.props;
     return interval / (end - start);
   }
 
   render() {
     const {
-      thread, isRowExpanded, maxStackDepth, stackTimingByDepth, isSelected, timeRange,
-      threadIndex, interval, getCategory, getLabel,
-      updateProfileSelection, selection, threadName, processDetails, getScrollElement,
+      thread,
+      isRowExpanded,
+      maxStackDepth,
+      stackTimingByDepth,
+      isSelected,
+      timeRange,
+      threadIndex,
+      interval,
+      getCategory,
+      getLabel,
+      updateProfileSelection,
+      selection,
+      threadName,
+      processDetails,
+      getScrollElement,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -106,39 +132,44 @@ class TimelineFlameChart extends PureComponent {
     });
 
     return (
-      <div className='timelineFlameChart' style={{ height }}>
+      <div className="timelineFlameChart" style={{ height }}>
         {/**
           * The timeline will eventually have its own context menu, but for now re-use
           * the one in the header for hiding threads.
           */}
-        <ContextMenuTrigger id={'ProfileThreadHeaderContextMenu'}
-                            title={processDetails}
-                            attributes={{ className: 'timelineFlameChartLabels grippy' }}>
-          <span>{threadName}</span>
+        <ContextMenuTrigger
+          id={'ProfileThreadHeaderContextMenu'}
+          title={processDetails}
+          attributes={{ className: 'timelineFlameChartLabels grippy' }}
+        >
+          <span>
+            {threadName}
+          </span>
           <button className={buttonClass} onClick={this.toggleThreadCollapse} />
         </ContextMenuTrigger>
-        <FlameChartCanvas key={threadIndex}
-                            // TimelineViewport props
-                            isRowExpanded={isRowExpanded}
-                            isSelected={isSelected}
-                            timeRange={timeRange}
-                            maxViewportHeight={maxViewportHeight}
-                            getScrollElement={getScrollElement}
-                            maximumZoom={this.getMaximumZoom()}
-                            selection={selection}
-                            updateProfileSelection={updateProfileSelection}
-                            viewportNeedsUpdate={viewportNeedsUpdate}
-
-                            // FlameChartCanvas props
-                            interval={interval}
-                            thread={thread}
-                            rangeStart={timeRange.start}
-                            rangeEnd={timeRange.end}
-                            stackTimingByDepth={stackTimingByDepth}
-                            getCategory={getCategory}
-                            getLabel={getLabel}
-                            maxStackDepth={maxStackDepth}
-                            stackFrameHeight={STACK_FRAME_HEIGHT} />
+        <FlameChartCanvas
+          key={threadIndex}
+          // TimelineViewport props
+          isRowExpanded={isRowExpanded}
+          isSelected={isSelected}
+          timeRange={timeRange}
+          maxViewportHeight={maxViewportHeight}
+          getScrollElement={getScrollElement}
+          maximumZoom={this.getMaximumZoom()}
+          selection={selection}
+          updateProfileSelection={updateProfileSelection}
+          viewportNeedsUpdate={viewportNeedsUpdate}
+          // FlameChartCanvas props
+          interval={interval}
+          thread={thread}
+          rangeStart={timeRange.start}
+          rangeEnd={timeRange.end}
+          stackTimingByDepth={stackTimingByDepth}
+          getCategory={getCategory}
+          getLabel={getLabel}
+          maxStackDepth={maxStackDepth}
+          stackFrameHeight={STACK_FRAME_HEIGHT}
+        />
       </div>
     );
   }
@@ -155,13 +186,17 @@ export default connect((state, ownProps) => {
   return {
     thread: threadSelectors.getFilteredThreadForFlameChart(state),
     isRowExpanded,
-    maxStackDepth: isRowExpanded ? threadSelectors.getFuncStackMaxDepthForFlameChart(state) : 1,
+    maxStackDepth: isRowExpanded
+      ? threadSelectors.getFuncStackMaxDepthForFlameChart(state)
+      : 1,
     stackTimingByDepth,
     isSelected: true,
     timeRange: getDisplayRange(state),
     interval: getProfileInterval(state),
     getCategory: getCategoryColorStrategy(state),
-    getLabel: isRowExpanded ? getLabelingStrategy(state) : getImplementationName,
+    getLabel: isRowExpanded
+      ? getLabelingStrategy(state)
+      : getImplementationName,
     threadIndex,
     selection: getProfileViewOptions(state).selection,
     threadName: threadSelectors.getFriendlyThreadName(state),

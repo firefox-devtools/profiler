@@ -8,7 +8,10 @@ import type { ThreadIndex } from '../types/profile';
 import type { Action } from '../types/actions';
 import type { IsThreadExpandedMap, TimelineViewState } from '../types/reducers';
 
-function isFlameChartExpanded(state: IsThreadExpandedMap = new Map(), action: Action) {
+function isFlameChartExpanded(
+  state: IsThreadExpandedMap = new Map(),
+  action: Action
+) {
   switch (action.type) {
     case 'CHANGE_TIMELINE_FLAME_CHART_EXPANDED_THREAD': {
       const newState = new Map(state);
@@ -28,7 +31,10 @@ function isFlameChartExpanded(state: IsThreadExpandedMap = new Map(), action: Ac
   return state;
 }
 
-function areMarkersExpanded(state: IsThreadExpandedMap = new Map(), action: Action) {
+function areMarkersExpanded(
+  state: IsThreadExpandedMap = new Map(),
+  action: Action
+) {
   switch (action.type) {
     case 'CHANGE_TIMELINE_MARKERS_EXPANDED_THREAD': {
       const newState = new Map(state);
@@ -48,13 +54,24 @@ function hasZoomedViaMousewheel(state: boolean = false, action: Action) {
   return state;
 }
 
-export default combineReducers({ isFlameChartExpanded, areMarkersExpanded, hasZoomedViaMousewheel });
+export default combineReducers({
+  isFlameChartExpanded,
+  areMarkersExpanded,
+  hasZoomedViaMousewheel,
+});
 
-export const getTimelineView = (state: Object): TimelineViewState => state.timelineView;
-export const getIsFlameChartExpanded = (state: Object, threadIndex: ThreadIndex) => {
+export const getTimelineView = (state: Object): TimelineViewState =>
+  state.timelineView;
+export const getIsFlameChartExpanded = (
+  state: Object,
+  threadIndex: ThreadIndex
+) => {
   return Boolean(getTimelineView(state).isFlameChartExpanded.get(threadIndex));
 };
-export const getAreMarkersExpanded = (state: Object, threadIndex: ThreadIndex) => {
+export const getAreMarkersExpanded = (
+  state: Object,
+  threadIndex: ThreadIndex
+) => {
   // Default to being expanded by checking if not equal to false.
   return getTimelineView(state).areMarkersExpanded.get(threadIndex) !== false;
 };

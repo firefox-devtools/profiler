@@ -7,18 +7,33 @@ import SummarizeLineGraph from './SummarizeLineGraph';
 
 class SummarizeProfileExpand extends PureComponent {
   render() {
-    const {summary, threadIndex, isExpanded, expand, collapse, expandLength} = this.props;
+    const {
+      summary,
+      threadIndex,
+      isExpanded,
+      expand,
+      collapse,
+      expandLength,
+    } = this.props;
     // Only show the expand/collapse button when it is warranted.
     if (summary.length > expandLength) {
       return (
-        <div className='summarize-profile-row'>
+        <div className="summarize-profile-row">
           <SummarizeLineGraph isBlank={true} />
-          <div className='summarize-profile-details'>
-            {
-              isExpanded
-                ? <a className='summarize-profile-collapse expanded' onClick={() => collapse(threadIndex) }>Collapse</a>
-                : <a className='summarize-profile-collapse' onClick={() => expand(threadIndex) }>Expand remaining categories...</a>
-            }
+          <div className="summarize-profile-details">
+            {isExpanded
+              ? <a
+                  className="summarize-profile-collapse expanded"
+                  onClick={() => collapse(threadIndex)}
+                >
+                  Collapse
+                </a>
+              : <a
+                  className="summarize-profile-collapse"
+                  onClick={() => expand(threadIndex)}
+                >
+                  Expand remaining categories...
+                </a>}
           </div>
         </div>
       );

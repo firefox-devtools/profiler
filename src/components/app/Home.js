@@ -14,16 +14,31 @@ import { CSSTransitionGroup } from 'react-transition-group';
 
 require('./Home.css');
 
-const ADDON_URL = 'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
-const LEGACY_ADDON_URL = 'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
+const ADDON_URL =
+  'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
+const LEGACY_ADDON_URL =
+  'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
 
-const InstallButton = ({ name, xpiURL, children, className }: InstallButtonProps) => {
-  return <a href={xpiURL} className={className} onClick={e => {
-    if (window.InstallTrigger) {
-      window.InstallTrigger.install({ [name]: xpiURL });
-    }
-    e.preventDefault();
-  }}>{children}</a>;
+const InstallButton = ({
+  name,
+  xpiURL,
+  children,
+  className,
+}: InstallButtonProps) => {
+  return (
+    <a
+      href={xpiURL}
+      className={className}
+      onClick={e => {
+        if (window.InstallTrigger) {
+          window.InstallTrigger.install({ [name]: xpiURL });
+        }
+        e.preventDefault();
+      }}
+    >
+      {children}
+    </a>
+  );
 };
 
 type InstallButtonProps = {
@@ -49,7 +64,13 @@ class UploadButton extends PureComponent {
   render() {
     return (
       <div>
-        <input type='file' ref={input => { this._input = input; }} onChange={this._upload}></input>
+        <input
+          type="file"
+          ref={input => {
+            this._input = input;
+          }}
+          onChange={this._upload}
+        />
       </div>
     );
   }
@@ -64,7 +85,7 @@ class UploadButton extends PureComponent {
  * been installed.
  */
 let homeInstance;
-window.geckoProfilerAddonInstalled = function () {
+window.geckoProfilerAddonInstalled = function() {
   if (homeInstance) {
     // Forces the Home component to re-evaluate window.isGeckoProfilerAddonInstalled.
     homeInstance.addonInstalled();
@@ -77,7 +98,6 @@ type HomeProps = {
 };
 
 class Home extends PureComponent {
-
   state: {
     isDragging: boolean,
     isAddonInstalled: boolean,
@@ -158,24 +178,31 @@ class Home extends PureComponent {
 
   _renderInstallInstructions() {
     return (
-      <div className='homeInstructions' key={0}>
-        <div className='homeInstructionsLeft'>
-          <div style={{textAlign: 'center'}}>
-            <img className='homeSectionScreenshot' src={PerfScreenshot} />
+      <div className="homeInstructions" key={0}>
+        <div className="homeInstructionsLeft">
+          <div style={{ textAlign: 'center' }}>
+            <img className="homeSectionScreenshot" src={PerfScreenshot} />
           </div>
         </div>
-        <div className='homeInstructionsRight'>
+        <div className="homeInstructionsRight">
           <h2>Getting started</h2>
           <p>
-            Install the Gecko Profiler Add-on to start recording a performance profile in
-            Firefox, then analyze it and share it with perf.html.
+            Install the Gecko Profiler Add-on to start recording a performance
+            profile in Firefox, then analyze it and share it with perf.html.
           </p>
-          <InstallButton name='Gecko Profiler' className='homeSectionInstallButton' xpiURL={ADDON_URL}>
-            <span className='homeSectionPlus'>+</span>
+          <InstallButton
+            name="Gecko Profiler"
+            className="homeSectionInstallButton"
+            xpiURL={ADDON_URL}
+          >
+            <span className="homeSectionPlus">+</span>
             Install add-on
           </InstallButton>
-          <p>You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.</p>
-          <UploadButton {...this.props}/>
+          <p>
+            You can also analyze a local profile by either dragging and dropping
+            it here or selecting it using the button below.
+          </p>
+          <UploadButton {...this.props} />
         </div>
       </div>
     );
@@ -183,22 +210,26 @@ class Home extends PureComponent {
 
   _renderRecordInstructions() {
     return (
-      <div className='homeInstructions' key={1}>
-        <div className='homeInstructionsLeft'>
+      <div className="homeInstructions" key={1}>
+        <div className="homeInstructionsLeft">
           <p>
-            <img className='homeSectionScreenshot' src={AddonScreenshot} />
+            <img className="homeSectionScreenshot" src={AddonScreenshot} />
           </p>
         </div>
-        <div className='homeInstructionsRight'>
+        <div className="homeInstructionsRight">
           <h2>Recording profiles</h2>
           <p>
-            To start profiling, click on the profiling button, or use the keyboard
-            shortcuts. The icon is blue when a profile is recording. Hit
+            To start profiling, click on the profiling button, or use the
+            keyboard shortcuts. The icon is blue when a profile is recording.
+            Hit
             <kbd>Capture Profile</kbd> to load the data into perf.html.
           </p>
           {this._renderShortcuts()}
-          <p>You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.</p>
-          <UploadButton {...this.props}/>
+          <p>
+            You can also analyze a local profile by either dragging and dropping
+            it here or selecting it using the button below.
+          </p>
+          <UploadButton {...this.props} />
         </div>
       </div>
     );
@@ -206,26 +237,30 @@ class Home extends PureComponent {
 
   _renderLegacyInstructions() {
     return (
-      <div className='homeInstructions' key={2}>
-        <div className='homeInstructionsLeft'>
-          <div style={{textAlign: 'center'}}>
-            <img className='homeSectionScreenshot' src={PerfScreenshot} />
+      <div className="homeInstructions" key={2}>
+        <div className="homeInstructionsLeft">
+          <div style={{ textAlign: 'center' }}>
+            <img className="homeSectionScreenshot" src={PerfScreenshot} />
           </div>
         </div>
-        <div className='homeInstructionsRight'>
+        <div className="homeInstructionsRight">
           <h2>Recording profiles</h2>
           <p>
-            To start recording a performance profile in Firefox, first install the{' '}
-            <InstallButton name='Gecko Profiler' xpiURL={LEGACY_ADDON_URL}>
+            To start recording a performance profile in Firefox, first install
+            the{' '}
+            <InstallButton name="Gecko Profiler" xpiURL={LEGACY_ADDON_URL}>
               Gecko Profiler Add-on
-            </InstallButton>.
-            Then use the button added to the browser, or use the following shortcuts
-            to record a profile. The button's icon is blue when a profile is recording.
-            Hit <kbd>Capture Profile</kbd> to load the data into perf.html.
+            </InstallButton>. Then use the button added to the browser, or use
+            the following shortcuts to record a profile. The button's icon is
+            blue when a profile is recording. Hit <kbd>Capture Profile</kbd> to
+            load the data into perf.html.
           </p>
           {this._renderShortcuts()}
-          <p>You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.</p>
-          <UploadButton {...this.props}/>
+          <p>
+            You can also analyze a local profile by either dragging and dropping
+            it here or selecting it using the button below.
+          </p>
+          <UploadButton {...this.props} />
         </div>
       </div>
     );
@@ -233,21 +268,23 @@ class Home extends PureComponent {
 
   _renderOtherBrowserInstructions() {
     return (
-      <div className='homeInstructions' key={0}>
-        <div className='homeInstructionsLeft'>
-          <div style={{textAlign: 'center'}}>
-            <img className='homeSectionScreenshot' src={PerfScreenshot} />
+      <div className="homeInstructions" key={0}>
+        <div className="homeInstructionsLeft">
+          <div style={{ textAlign: 'center' }}>
+            <img className="homeSectionScreenshot" src={PerfScreenshot} />
           </div>
         </div>
-        <div className='homeInstructionsRight'>
+        <div className="homeInstructionsRight">
           <h2>How to view and record profiles</h2>
           <p>
             Recording performance profiles requires{' '}
-            <a href='https://www.mozilla.org/en-US/firefox/new/'>Firefox</a>.
-            However, existing profiles can be viewed in any modern browser. To view a
-            profile, either follow a link to a public profile, drag a saved local profile
-            onto this screen or select it using the button below.</p>
-          <UploadButton {...this.props}/>
+            <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>.
+            However, existing profiles can be viewed in any modern browser. To
+            view a profile, either follow a link to a public profile, drag a
+            saved local profile onto this screen or select it using the button
+            below.
+          </p>
+          <UploadButton {...this.props} />
         </div>
       </div>
     );
@@ -258,12 +295,12 @@ class Home extends PureComponent {
       <p>
         <div>
           <p>
-            <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd>
-            {' '}Stop and start profiling
+            <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd> Stop and start
+            profiling
           </p>
           <p>
-            <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd>
-            {' '}Capture and load profile
+            <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd> Capture and load
+            profile
           </p>
         </div>
       </p>
@@ -274,33 +311,45 @@ class Home extends PureComponent {
     const { isDragging } = this.state;
     const { specialMessage } = this.props;
     return (
-      <div className='home'
-          onDragEnter={this._startDragging}
-          onDragExit={this._stopDragging}
-          onDrop={this._handleProfileDrop}>
-        <a href='https://github.com/devtools-html/perf.html' className='homeGithubIcon'></a>
-        <section className='homeSection'>
-          <h1 className='homeTitle'>
-            <span className='homeTitleText'>perf.html</span>
-            <span className='homeTitleSubtext'> &mdash; Web app for Firefox performance analysis</span>
+      <div
+        className="home"
+        onDragEnter={this._startDragging}
+        onDragExit={this._stopDragging}
+        onDrop={this._handleProfileDrop}
+      >
+        <a
+          href="https://github.com/devtools-html/perf.html"
+          className="homeGithubIcon"
+        />
+        <section className="homeSection">
+          <h1 className="homeTitle">
+            <span className="homeTitleText">perf.html</span>
+            <span className="homeTitleSubtext">
+              {' '}&mdash; Web app for Firefox performance analysis
+            </span>
           </h1>
-          {
-            specialMessage
-              ? <div className='homeSpecialMessage'>
-                  {specialMessage}
-                </div>
-              : null
-          }
-          <p>Capture a performance profile. Analyze it. Share it. Make the web faster.</p>
-          <CSSTransitionGroup transitionName='homeTransition'
-                                   transitionEnterTimeout={300}
-                                   transitionLeave={false}
-                                   component='div'
-                                   className='homeInstructionsTransitionGroup'>
+          {specialMessage
+            ? <div className="homeSpecialMessage">
+                {specialMessage}
+              </div>
+            : null}
+          <p>
+            Capture a performance profile. Analyze it. Share it. Make the web
+            faster.
+          </p>
+          <CSSTransitionGroup
+            transitionName="homeTransition"
+            transitionEnterTimeout={300}
+            transitionLeave={false}
+            component="div"
+            className="homeInstructionsTransitionGroup"
+          >
             {this._renderInstructions()}
           </CSSTransitionGroup>
-          <div className={classNames('homeDrop', isDragging ? 'dragging' : false)}>
-            <div className='homeDropMessage'>Drop a saved profile here</div>
+          <div
+            className={classNames('homeDrop', isDragging ? 'dragging' : false)}
+          >
+            <div className="homeDropMessage">Drop a saved profile here</div>
           </div>
         </section>
       </div>
@@ -315,9 +364,7 @@ function _preventDefault(event) {
 function _supportsWebExtensionAPI(): boolean {
   const matched = navigator.userAgent.match(/Firefox\/(\d+\.\d+)/);
   const minimumSupportedFirefox = 55;
-  return matched
-    ? parseFloat(matched[1]) >= minimumSupportedFirefox
-    : false;
+  return matched ? parseFloat(matched[1]) >= minimumSupportedFirefox : false;
 }
 
 function _isFirefox(): boolean {

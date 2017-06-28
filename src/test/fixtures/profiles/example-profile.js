@@ -22,8 +22,10 @@ const contentProcessBinary = {
   breakpadId: '9F950E2CE3CD3E1ABD06D80788B606E60',
   debugName: 'firefox-webcontent',
   name: 'firefox-webcontent',
-  path: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
-  debugPath: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
+  path:
+    '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
+  debugPath:
+    '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
   start: 0x100000000,
   end: 0x100000000 + 10000,
   arch: 'x86_64',
@@ -54,7 +56,15 @@ const extraBinaries = [
 
 const thread = {
   samples: {
-    schema: { stack: 0, time: 1, responsiveness: 2, rss: 3, uss: 4, frameNumber: 5, power: 6 },
+    schema: {
+      stack: 0,
+      time: 1,
+      responsiveness: 2,
+      rss: 3,
+      uss: 4,
+      frameNumber: 5,
+      power: 6,
+    },
     data: [
       [1, 0, 0], // (root), 0x100000f84
       [2, 1, 0], // (root), 0x100000f84, 0x100001a45
@@ -69,64 +79,104 @@ const thread = {
     schema: { prefix: 0, frame: 1 },
     data: [
       [null, 0], // (root)
-      [0, 1],    // (root), 0x100000f84
-      [1, 2],    // (root), 0x100000f84, 0x100001a45
-      [1, 3],    // (root), 0x100000f84, Startup::XRE_Main
-      [1, 4],    // (root), 0x100000f84, frobnicate
+      [0, 1], // (root), 0x100000f84
+      [1, 2], // (root), 0x100000f84, 0x100001a45
+      [1, 3], // (root), 0x100000f84, Startup::XRE_Main
+      [1, 4], // (root), 0x100000f84, frobnicate
     ],
   },
   frameTable: {
-    schema: { location: 0, implementation: 1, optimizations: 2, line: 3, category: 4 },
+    schema: {
+      location: 0,
+      implementation: 1,
+      optimizations: 2,
+      line: 3,
+      category: 4,
+    },
     data: [
-      [0],                       // (root)
-      [1],                       // 0x100000f84
-      [2],                       // 0x100001a45
+      [0], // (root)
+      [1], // 0x100000f84
+      [2], // 0x100001a45
       [3, null, null, 4391, 16], // Startup::XRE_Main, line 4391, category 16
-      [7, 6, null, 34],          // frobnicate, implementation 'baseline', line 34
+      [7, 6, null, 34], // frobnicate, implementation 'baseline', line 34
     ],
   },
   markers: {
     schema: { name: 0, time: 1, data: 2 },
     data: [
       [4, 0, { category: 'VsyncTimestamp', vsync: 0 }],
-      [5, 2, {
-        category: 'Paint',
-        interval: 'start',
-        stack: {
-          markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
-          name: 'SyncProfile',
-          samples: {
-            schema: { stack: 0, time: 1, responsiveness: 2, rss: 3, uss: 4, frameNumber: 5, power: 6 },
-            data: [[2, 1]], // (root), 0x100000f84, 0x100001a45
+      [
+        5,
+        2,
+        {
+          category: 'Paint',
+          interval: 'start',
+          stack: {
+            markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+            name: 'SyncProfile',
+            samples: {
+              schema: {
+                stack: 0,
+                time: 1,
+                responsiveness: 2,
+                rss: 3,
+                uss: 4,
+                frameNumber: 5,
+                power: 6,
+              },
+              data: [[2, 1]], // (root), 0x100000f84, 0x100001a45
+            },
           },
+          type: 'tracing',
         },
-        type: 'tracing',
-      }],
-      [10, 4, {
-        category: 'Paint',
-        interval: 'start',
-        type: 'tracing',
-      }],
-      [10, 5, {
-        category: 'Paint',
-        interval: 'end',
-        type: 'tracing',
-      }],
-      [5, 8, {
-        category: 'Paint',
-        interval: 'end',
-        type: 'tracing',
-      }],
-      [9, 11, { // MinorGC at time 7ms from 7ms to 8ms
-        startTime: 11,
-        endTime: 12,
-      }],
-      [8, 9, { // DOMEvent at time 5ms from 5ms to 6ms
-        startTime: 9,
-        endTime: 10,
-        type: 'mouseout',
-        phase: 3,
-      }],
+      ],
+      [
+        10,
+        4,
+        {
+          category: 'Paint',
+          interval: 'start',
+          type: 'tracing',
+        },
+      ],
+      [
+        10,
+        5,
+        {
+          category: 'Paint',
+          interval: 'end',
+          type: 'tracing',
+        },
+      ],
+      [
+        5,
+        8,
+        {
+          category: 'Paint',
+          interval: 'end',
+          type: 'tracing',
+        },
+      ],
+      [
+        9,
+        11,
+        {
+          // MinorGC at time 7ms from 7ms to 8ms
+          startTime: 11,
+          endTime: 12,
+        },
+      ],
+      [
+        8,
+        9,
+        {
+          // DOMEvent at time 5ms from 5ms to 6ms
+          startTime: 9,
+          endTime: 10,
+          type: 'mouseout',
+          phase: 3,
+        },
+      ],
     ],
   },
   stringTable: [
@@ -166,9 +216,7 @@ const contentProcessMeta = Object.assign({}, parentProcessMeta, {
 const contentProcessProfile = {
   meta: contentProcessMeta,
   libs: [contentProcessBinary].concat(extraBinaries), // libs are stringified in the Gecko profile
-  threads: [
-    Object.assign({ name: 'GeckoMain', processType: 'tab' }, thread),
-  ],
+  threads: [Object.assign({ name: 'GeckoMain', processType: 'tab' }, thread)],
   processes: [],
 };
 
@@ -179,9 +227,7 @@ const profile = {
     Object.assign({ name: 'GeckoMain', processType: 'default' }, thread),
     Object.assign({ name: 'Compositor', processType: 'default' }, thread),
   ],
-  processes: [
-    contentProcessProfile,
-  ],
+  processes: [contentProcessProfile],
 };
 
 export default profile;

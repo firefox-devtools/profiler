@@ -9,7 +9,7 @@ import classNames from 'classnames';
 import './IdleSearchField.css';
 
 type Props = {
-  onIdleAfterChange: (string) => void,
+  onIdleAfterChange: string => void,
   idlePeriod: number,
   defaultValue: ?string,
   className: ?string,
@@ -75,7 +75,9 @@ class IdleSearchField extends PureComponent {
     this._notifyIfChanged('');
   }
 
-  _onClearButtonFocus(e: Event & { relatedTarget: HTMLElement; currentTarget: HTMLElement }) {
+  _onClearButtonFocus(
+    e: Event & { relatedTarget: HTMLElement, currentTarget: HTMLElement }
+  ) {
     // prevent the focus on the clear button
     if (e.relatedTarget) {
       e.relatedTarget.focus();
@@ -96,18 +98,26 @@ class IdleSearchField extends PureComponent {
   render() {
     const { className, title } = this.props;
     return (
-      <form className={classNames('idleSearchField', className)} onSubmit={e => e.preventDefault()}>
-        <input type='search' name='search'
-               className='idleSearchFieldInput'
-               required='required'
-               title={title}
-               value={this.state.value}
-               onChange={this._onSearchFieldChange}
-               onFocus={this._onSearchFieldFocus}/>
-        <input type='reset'
-               className='idleSearchFieldButton'
-               onClick={this._onClearButtonClick}
-               onFocus={this._onClearButtonFocus}/>
+      <form
+        className={classNames('idleSearchField', className)}
+        onSubmit={e => e.preventDefault()}
+      >
+        <input
+          type="search"
+          name="search"
+          className="idleSearchFieldInput"
+          required="required"
+          title={title}
+          value={this.state.value}
+          onChange={this._onSearchFieldChange}
+          onFocus={this._onSearchFieldFocus}
+        />
+        <input
+          type="reset"
+          className="idleSearchFieldButton"
+          onClick={this._onClearButtonClick}
+          onFocus={this._onClearButtonFocus}
+        />
       </form>
     );
   }

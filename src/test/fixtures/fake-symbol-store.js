@@ -25,7 +25,9 @@ export class FakeSymbolStore {
   getSymbolsForAddressesInLib(requestedAddressesIndices, lib) {
     if (lib.debugName in this._symbolTables) {
       const syms = this._symbolTables[lib.debugName].syms;
-      return Promise.resolve(requestedAddressesIndices.map(index => syms[index]));
+      return Promise.resolve(
+        requestedAddressesIndices.map(index => syms[index])
+      );
     }
     return Promise.reject();
   }

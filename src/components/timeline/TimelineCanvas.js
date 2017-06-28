@@ -77,8 +77,8 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
 
   _prepCanvas() {
     const canvas = this._canvas;
-    const {containerWidth, containerHeight} = this.props;
-    const {devicePixelRatio} = window;
+    const { containerWidth, containerHeight } = this.props;
+    const { devicePixelRatio } = window;
     const pixelWidth: DevicePixels = containerWidth * devicePixelRatio;
     const pixelHeight: DevicePixels = containerHeight * devicePixelRatio;
     if (!canvas) {
@@ -99,7 +99,7 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
     if (this._devicePixelRatio !== devicePixelRatio) {
       // Make sure and multiply by the inverse of the previous ratio, as the scaling
       // operates off of the previous set scale.
-      const scale = (1 / this._devicePixelRatio) * devicePixelRatio;
+      const scale = 1 / this._devicePixelRatio * devicePixelRatio;
       ctx.scale(scale, scale);
       this._devicePixelRatio = devicePixelRatio;
     }
@@ -162,19 +162,18 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
 
     return (
       <div>
-        <canvas className={className}
-                ref={this._setCanvasRef}
-                onMouseMove={this._onMouseMove}
-                onMouseOut={this._onMouseOut}
-                onDoubleClick={this._onDoubleClick} />
-        {
-          !isDragging && tooltipContents
-            ? <Tooltip mouseX={mouseX}
-                       mouseY={mouseY}>
-                {tooltipContents}
-              </Tooltip>
-            : null
-        }
+        <canvas
+          className={className}
+          ref={this._setCanvasRef}
+          onMouseMove={this._onMouseMove}
+          onMouseOut={this._onMouseOut}
+          onDoubleClick={this._onDoubleClick}
+        />
+        {!isDragging && tooltipContents
+          ? <Tooltip mouseX={mouseX} mouseY={mouseY}>
+              {tooltipContents}
+            </Tooltip>
+          : null}
       </div>
     );
   }

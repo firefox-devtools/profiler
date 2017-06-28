@@ -17,8 +17,12 @@ class OverflowEdgeIndicator extends PureComponent {
       overflowsOnLeft: false,
     };
     this._onScroll = this._onScroll.bind(this);
-    this._containerCreated = elem => { this._container = elem; };
-    this._contentsWrapperCreated = elem => { this._contentsWrapper = elem; };
+    this._containerCreated = elem => {
+      this._container = elem;
+    };
+    this._contentsWrapperCreated = elem => {
+      this._contentsWrapper = elem;
+    };
   }
 
   _onScroll() {
@@ -36,9 +40,12 @@ class OverflowEdgeIndicator extends PureComponent {
       const oneDevicePixel = 1 / window.devicePixelRatio;
       this.setState({
         overflowsOnTop: contentsRect.top <= containerRect.top - oneDevicePixel,
-        overflowsOnRight: contentsRect.right >= containerRect.right + oneDevicePixel,
-        overflowsOnBottom: contentsRect.bottom >= containerRect.bottom + oneDevicePixel,
-        overflowsOnLeft: contentsRect.left <= containerRect.left - oneDevicePixel,
+        overflowsOnRight:
+          contentsRect.right >= containerRect.right + oneDevicePixel,
+        overflowsOnBottom:
+          contentsRect.bottom >= containerRect.bottom + oneDevicePixel,
+        overflowsOnLeft:
+          contentsRect.left <= containerRect.left - oneDevicePixel,
       });
     }
   }
@@ -46,17 +53,26 @@ class OverflowEdgeIndicator extends PureComponent {
   render() {
     const { className, children } = this.props;
     return (
-      <div className={classNames('overflowEdgeIndicator', className, this.state)}>
-        <div className='overflowEdgeIndicatorEdge topEdge'></div>
-        <div className='overflowEdgeIndicatorEdge rightEdge'></div>
-        <div className='overflowEdgeIndicatorEdge bottomEdge'></div>
-        <div className='overflowEdgeIndicatorEdge leftEdge'></div>
-        <div className={classNames('overflowEdgeIndicatorScrollbox', `${className}Scrollbox`)}
-             onScroll={this._onScroll}
-             ref={this._containerCreated}>
-          <div className='overflowEdgeIndicatorContentsWrapper'
-               ref={this._contentsWrapperCreated}>
-            { children }
+      <div
+        className={classNames('overflowEdgeIndicator', className, this.state)}
+      >
+        <div className="overflowEdgeIndicatorEdge topEdge" />
+        <div className="overflowEdgeIndicatorEdge rightEdge" />
+        <div className="overflowEdgeIndicatorEdge bottomEdge" />
+        <div className="overflowEdgeIndicatorEdge leftEdge" />
+        <div
+          className={classNames(
+            'overflowEdgeIndicatorScrollbox',
+            `${className}Scrollbox`
+          )}
+          onScroll={this._onScroll}
+          ref={this._containerCreated}
+        >
+          <div
+            className="overflowEdgeIndicatorContentsWrapper"
+            ref={this._contentsWrapperCreated}
+          >
+            {children}
           </div>
         </div>
       </div>

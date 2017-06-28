@@ -16,11 +16,13 @@ export function parseRangeFilters(stringValue = '') {
 }
 
 export function stringifyRangeFilters(arrayValue = []) {
-  return arrayValue.map(({ start, end }) => {
-    const startStr = (start / 1000).toFixed(4);
-    const endStr = (end / 1000).toFixed(4);
-    return `${startStr}_${endStr}`;
-  }).join('~');
+  return arrayValue
+    .map(({ start, end }) => {
+      const startStr = (start / 1000).toFixed(4);
+      const endStr = (end / 1000).toFixed(4);
+      return `${startStr}_${endStr}`;
+    })
+    .join('~');
 }
 
 export function getFormattedTimeLength(length: number) {
@@ -30,11 +32,13 @@ export function getFormattedTimeLength(length: number) {
   if (length >= 1000) {
     return `${(length / 1000).toFixed(1)} sec`;
   }
-  return `${(length).toFixed(0)} ms`;
+  return `${length.toFixed(0)} ms`;
 }
 
 export function getRangeFilterLabels(rangeFilters) {
-  const labels = rangeFilters.map(range => getFormattedTimeLength(range.end - range.start));
+  const labels = rangeFilters.map(range =>
+    getFormattedTimeLength(range.end - range.start)
+  );
   labels.unshift('Full Range');
   return labels;
 }

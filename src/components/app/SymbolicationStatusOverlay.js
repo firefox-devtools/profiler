@@ -38,24 +38,26 @@ class SymbolicationStatusOverlay extends PureComponent {
     const { symbolicationStatus, waitingForLibs } = this.props;
     if (symbolicationStatus === 'SYMBOLICATING') {
       if (waitingForLibs.size > 0) {
-        const libNames = Array.from(waitingForLibs.values()).map(lib => lib.debugName);
+        const libNames = Array.from(waitingForLibs.values()).map(
+          lib => lib.debugName
+        );
         return (
-          <div className='symbolicationStatusOverlay'>
-            <span className='symbolicationStatusOverlayThrobber'></span>
-            {`Waiting for symbol tables for ${englishSgPlLibrary(libNames.length)} ${englishListJoin(libNames)}...`}
+          <div className="symbolicationStatusOverlay">
+            <span className="symbolicationStatusOverlayThrobber" />
+            {`Waiting for symbol tables for ${englishSgPlLibrary(
+              libNames.length
+            )} ${englishListJoin(libNames)}...`}
           </div>
         );
       }
       return (
-        <div className='symbolicationStatusOverlay'>
-          <span className='symbolicationStatusOverlayThrobber'></span>
+        <div className="symbolicationStatusOverlay">
+          <span className="symbolicationStatusOverlayThrobber" />
           {'Symbolicating call stacks...'}
         </div>
       );
     }
-    return (
-      <div className='symbolicationStatusOverlay hidden'></div>
-    );
+    return <div className="symbolicationStatusOverlay hidden" />;
   }
 }
 

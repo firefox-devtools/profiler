@@ -12,16 +12,20 @@ class ProfileLogView extends PureComponent {
     const { thread } = this.props;
     const { markers, stringTable } = thread;
     return (
-      <div className='logViewWrapper'>
-        <pre className='logViewPre'>
-          {
-            markers.data.map((data, markerIndex) => markerIndex).filter(markerIndex => {
+      <div className="logViewWrapper">
+        <pre className="logViewPre">
+          {markers.data
+            .map((data, markerIndex) => markerIndex)
+            .filter(markerIndex => {
               const data = markers.data[markerIndex];
-              return data !== null && ('category' in data) && data.category === 'log';
-            }).map(markerIndex => {
+              return (
+                data !== null && 'category' in data && data.category === 'log'
+              );
+            })
+            .map(markerIndex => {
               return stringTable.getString(markers.name[markerIndex]);
-            }).join('')
-          }
+            })
+            .join('')}
         </pre>
       </div>
     );
@@ -32,6 +36,9 @@ ProfileLogView.propTypes = {
   thread: PropTypes.object.isRequired,
 };
 
-export default connect(state => ({
-  thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state),
-}), actions)(ProfileLogView);
+export default connect(
+  state => ({
+    thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state),
+  }),
+  actions
+)(ProfileLogView);

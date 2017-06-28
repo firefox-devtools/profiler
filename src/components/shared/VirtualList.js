@@ -7,7 +7,6 @@ import classNames from 'classnames';
 import range from 'array-range';
 
 class VirtualListRow extends PureComponent {
-
   render() {
     const { renderItem, item, index, columnIndex } = this.props;
     return renderItem(item, index, columnIndex);
@@ -24,24 +23,35 @@ VirtualListRow.propTypes = {
 
 class VirtualListInnerChunk extends PureComponent {
   render() {
-    const { className, renderItem, items, specialItems, visibleRangeStart, visibleRangeEnd, columnIndex } = this.props;
+    const {
+      className,
+      renderItem,
+      items,
+      specialItems,
+      visibleRangeStart,
+      visibleRangeEnd,
+      columnIndex,
+    } = this.props;
 
     return (
       <div className={className}>
-        {
-          range(visibleRangeStart, Math.max(visibleRangeStart, visibleRangeEnd)).map(i => {
-            const item = items[i];
-            return (
-              <VirtualListRow key={i}
-                              index={i}
-                              columnIndex={columnIndex}
-                              renderItem={renderItem}
-                              item={item}
-                              items={items}
-                              isSpecial={specialItems.includes(item)}/>
-            );
-          })
-        }
+        {range(
+          visibleRangeStart,
+          Math.max(visibleRangeStart, visibleRangeEnd)
+        ).map(i => {
+          const item = items[i];
+          return (
+            <VirtualListRow
+              key={i}
+              index={i}
+              columnIndex={columnIndex}
+              renderItem={renderItem}
+              item={item}
+              items={items}
+              isSpecial={specialItems.includes(item)}
+            />
+          );
+        })}
       </div>
     );
   }
@@ -60,7 +70,9 @@ VirtualListInnerChunk.propTypes = {
 class VirtualListInner extends PureComponent {
   constructor(props) {
     super(props);
-    this._containerCreated = e => { this._container = e; };
+    this._containerCreated = e => {
+      this._container = e;
+    };
   }
 
   getBoundingClientRect() {
@@ -71,37 +83,56 @@ class VirtualListInner extends PureComponent {
   }
 
   render() {
-    const { itemHeight, className, renderItem, items, specialItems, visibleRangeStart, visibleRangeEnd, columnIndex } = this.props;
+    const {
+      itemHeight,
+      className,
+      renderItem,
+      items,
+      specialItems,
+      visibleRangeStart,
+      visibleRangeEnd,
+      columnIndex,
+    } = this.props;
 
     const chunkSize = 16;
     const startChunkIndex = Math.floor(visibleRangeStart / chunkSize);
     const endChunkIndex = Math.ceil(visibleRangeEnd / chunkSize);
-    const chunks = range(startChunkIndex, Math.max(startChunkIndex, endChunkIndex)).map(c => c * chunkSize);
+    const chunks = range(
+      startChunkIndex,
+      Math.max(startChunkIndex, endChunkIndex)
+    ).map(c => c * chunkSize);
 
     return (
-      <div className={className}
-           ref={this._containerCreated}
-            style={{
-              height: `${items.length * itemHeight}px`,
-              width: columnIndex === 1 ? '3000px' : undefined,
-            }}>
-        <div className={`${className}TopSpacer`}
-             key={-1}
-             style={{height: Math.max(0, visibleRangeStart) * itemHeight + 'px'}} />
-        {
-          chunks.map(chunkStart => {
-            return (
-              <VirtualListInnerChunk className={`${className}InnerChunk`}
-                                     key={chunkStart}
-                                     visibleRangeStart={Math.max(chunkStart, visibleRangeStart)}
-                                     visibleRangeEnd={Math.min(chunkStart + chunkSize, visibleRangeEnd)}
-                                     columnIndex={columnIndex}
-                                     renderItem={renderItem}
-                                     items={items}
-                                     specialItems={specialItems}/>
-            );
-          })
-        }
+      <div
+        className={className}
+        ref={this._containerCreated}
+        style={{
+          height: `${items.length * itemHeight}px`,
+          width: columnIndex === 1 ? '3000px' : undefined,
+        }}
+      >
+        <div
+          className={`${className}TopSpacer`}
+          key={-1}
+          style={{ height: Math.max(0, visibleRangeStart) * itemHeight + 'px' }}
+        />
+        {chunks.map(chunkStart => {
+          return (
+            <VirtualListInnerChunk
+              className={`${className}InnerChunk`}
+              key={chunkStart}
+              visibleRangeStart={Math.max(chunkStart, visibleRangeStart)}
+              visibleRangeEnd={Math.min(
+                chunkStart + chunkSize,
+                visibleRangeEnd
+              )}
+              columnIndex={columnIndex}
+              renderItem={renderItem}
+              items={items}
+              specialItems={specialItems}
+            />
+          );
+        })}
       </div>
     );
   }
@@ -119,14 +150,17 @@ VirtualListInner.propTypes = {
 };
 
 class VirtualList extends PureComponent {
-
   constructor(props) {
     super(props);
     this._onScroll = this._onScroll.bind(this);
     this._onCopy = this._onCopy.bind(this);
     this._geometry = undefined;
-    this._containerCreated = elem => { this._container = elem; };
-    this._innerCreated = elem => { this._inner = elem; };
+    this._containerCreated = elem => {
+      this._container = elem;
+    };
+    this._innerCreated = elem => {
+      this._inner = elem;
+    };
   }
 
   componentDidMount() {
@@ -168,8 +202,10 @@ class VirtualList extends PureComponent {
     const { outerRect, innerRectY } = this._geometry;
     const overscan = disableOverscan ? 0 : 25;
     const chunkSize = 16;
-    let visibleRangeStart = Math.floor((outerRect.top - innerRectY) / itemHeight) - overscan;
-    let visibleRangeEnd = Math.ceil((outerRect.bottom - innerRectY) / itemHeight) + overscan;
+    let visibleRangeStart =
+      Math.floor((outerRect.top - innerRectY) / itemHeight) - overscan;
+    let visibleRangeEnd =
+      Math.ceil((outerRect.bottom - innerRectY) / itemHeight) + overscan;
     if (!disableOverscan) {
       visibleRangeStart = Math.floor(visibleRangeStart / chunkSize) * chunkSize;
       visibleRangeEnd = Math.ceil(visibleRangeEnd / chunkSize) * chunkSize;
@@ -188,7 +224,10 @@ class VirtualList extends PureComponent {
     if (container.scrollTop > itemTop) {
       container.scrollTop = itemTop;
     } else if (container.scrollTop + container.clientHeight < itemBottom) {
-      container.scrollTop = Math.min(itemTop, itemBottom - container.clientHeight);
+      container.scrollTop = Math.min(
+        itemTop,
+        itemBottom - container.clientHeight
+      );
     }
 
     const interestingWidth = 400;
@@ -198,7 +237,10 @@ class VirtualList extends PureComponent {
     if (container.scrollLeft > itemLeft) {
       container.scrollLeft = itemLeft;
     } else if (container.scrollLeft + container.clientWidth < itemRight) {
-      container.scrollLeft = Math.min(itemLeft, itemRight - container.clientWidth);
+      container.scrollLeft = Math.min(
+        itemLeft,
+        itemRight - container.clientWidth
+      );
     }
   }
 
@@ -207,31 +249,46 @@ class VirtualList extends PureComponent {
   }
 
   render() {
-    const { itemHeight, className, renderItem, items, focusable, specialItems, onKeyDown } = this.props;
+    const {
+      itemHeight,
+      className,
+      renderItem,
+      items,
+      focusable,
+      specialItems,
+      onKeyDown,
+    } = this.props;
     const columnCount = this.props.columnCount || 1;
     const { visibleRangeStart, visibleRangeEnd } = this.computeVisibleRange();
     return (
-      <div className={className} ref={this._containerCreated} tabIndex={ focusable ? 0 : -1 } onKeyDown={onKeyDown}>
+      <div
+        className={className}
+        ref={this._containerCreated}
+        tabIndex={focusable ? 0 : -1}
+        onKeyDown={onKeyDown}
+      >
         <div className={`${className}InnerWrapper`}>
-          {
-            range(columnCount).map(columnIndex => (
-              <VirtualListInner className={classNames(`${className}Inner`, `${className}Inner${columnIndex}`)}
-                                visibleRangeStart={Math.max(0, visibleRangeStart)}
-                                visibleRangeEnd={Math.min(items.length, visibleRangeEnd)}
-                                itemHeight={itemHeight}
-                                renderItem={renderItem}
-                                items={items}
-                                specialItems={specialItems}
-                                columnIndex={columnIndex}
-                                key={columnIndex}
-                                ref={columnIndex === 0 ? this._innerCreated : undefined} />
-            ))
-          }
+          {range(columnCount).map(columnIndex =>
+            <VirtualListInner
+              className={classNames(
+                `${className}Inner`,
+                `${className}Inner${columnIndex}`
+              )}
+              visibleRangeStart={Math.max(0, visibleRangeStart)}
+              visibleRangeEnd={Math.min(items.length, visibleRangeEnd)}
+              itemHeight={itemHeight}
+              renderItem={renderItem}
+              items={items}
+              specialItems={specialItems}
+              columnIndex={columnIndex}
+              key={columnIndex}
+              ref={columnIndex === 0 ? this._innerCreated : undefined}
+            />
+          )}
         </div>
       </div>
     );
   }
-
 }
 
 VirtualList.propTypes = {

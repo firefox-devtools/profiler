@@ -5,7 +5,10 @@
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import TreeView from '../shared/TreeView';
-import { getZeroAt, selectedThreadSelectors } from '../../reducers/profile-view';
+import {
+  getZeroAt,
+  selectedThreadSelectors,
+} from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import actions from '../../actions';
 
@@ -30,8 +33,9 @@ class MarkerTree {
 
   hasChildren(markerIndex) {
     const { markers } = this._thread;
-    return markers.data[markerIndex] !== null &&
-           ('stack' in markers.data[markerIndex]);
+    return (
+      markers.data[markerIndex] !== null && 'stack' in markers.data[markerIndex]
+    );
   }
 
   getParent() {
@@ -73,7 +77,8 @@ class MarkerTree {
         }
       }
       node = {
-        timestamp: `${((markers.time[markerIndex] - this._zeroAt) / 1000).toFixed(3)}s`,
+        timestamp: `${((markers.time[markerIndex] - this._zeroAt) /
+          1000).toFixed(3)}s`,
         name,
         category,
       };
@@ -113,15 +118,17 @@ class ProfileMarkersView extends PureComponent {
     const { thread, zeroAt, selectedMarker } = this.props;
     const tree = new MarkerTree(thread, zeroAt);
     return (
-      <div className='profileMarkersView'>
-        <TreeView tree={tree}
-                  fixedColumns={this._fixedColumns}
-                  mainColumn={this._mainColumn}
-                  onSelectionChange={this._onSelectionChange}
-                  onExpandedNodesChange={this._onExpandedNodeIdsChange}
-                  selectedNodeId={selectedMarker}
-                  expandedNodeIds={this._expandedNodeIds}
-                  ref='treeView'/>
+      <div className="profileMarkersView">
+        <TreeView
+          tree={tree}
+          fixedColumns={this._fixedColumns}
+          mainColumn={this._mainColumn}
+          onSelectionChange={this._onSelectionChange}
+          onExpandedNodesChange={this._onExpandedNodeIdsChange}
+          selectedNodeId={selectedMarker}
+          expandedNodeIds={this._expandedNodeIds}
+          ref="treeView"
+        />
       </div>
     );
   }
@@ -135,9 +142,13 @@ ProfileMarkersView.propTypes = {
   changeSelectedMarker: PropTypes.func.isRequired,
 };
 
-export default connect(state => ({
-  threadIndex: getSelectedThreadIndex(state),
-  thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state),
-  selectedMarker: selectedThreadSelectors.getViewOptions(state).selectedMarker,
-  zeroAt: getZeroAt(state),
-}), actions)(ProfileMarkersView);
+export default connect(
+  state => ({
+    threadIndex: getSelectedThreadIndex(state),
+    thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state),
+    selectedMarker: selectedThreadSelectors.getViewOptions(state)
+      .selectedMarker,
+    zeroAt: getZeroAt(state),
+  }),
+  actions
+)(ProfileMarkersView);

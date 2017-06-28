@@ -6,11 +6,20 @@
 
 import type { Summary } from '../profile-logic/summarize-profile';
 import type {
-  Action, ExpandedSet, CallTreeFiltersPerThread, DataSource, ProfileSelection,
+  Action,
+  ExpandedSet,
+  CallTreeFiltersPerThread,
+  DataSource,
+  ProfileSelection,
   ImplementationFilter,
 } from './actions';
 import type { Milliseconds, StartEndRange } from './units';
-import type { IndexIntoMarkersTable, IndexIntoFuncTable, Profile, ThreadIndex } from './profile';
+import type {
+  IndexIntoMarkersTable,
+  IndexIntoFuncTable,
+  Profile,
+  ThreadIndex,
+} from './profile';
 import type { Attempt } from '../utils/errors';
 import type { GetLabel } from '../profile-logic/labeling-strategies';
 import type { GetCategory } from '../profile-logic/color-categories';
@@ -39,12 +48,12 @@ export type ProfileViewState = {
 };
 
 export type AppViewState =
-  {| phase: string |} |
-  {
-    phase: 'INITIALIZING',
-    additionalData: { attempt: Attempt | null, message: string },
-  } |
-  { phase: 'FATAL_ERROR', error: Error };
+  | {| phase: string |}
+  | {
+      phase: 'INITIALIZING',
+      additionalData: { attempt: Attempt | null, message: string },
+    }
+  | { phase: 'FATAL_ERROR', error: Error };
 
 export type AppState = {
   view: AppViewState,
@@ -52,8 +61,8 @@ export type AppState = {
 };
 
 export type SummaryViewState = {
-  summary: null|Summary,
-  expanded: null|ExpandedSet,
+  summary: null | Summary,
+  expanded: null | ExpandedSet,
 };
 
 export type RangeFilterState = {
@@ -89,7 +98,7 @@ export type TimelineViewState = {
   isFlameChartExpanded: IsThreadExpandedMap,
   areMarkersExpanded: IsThreadExpandedMap,
   hasZoomedViaMousewheel: boolean,
-}
+};
 
 export type State = {
   app: AppState,

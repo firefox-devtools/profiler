@@ -11,7 +11,6 @@
 // needed with some simple logic than having a complex code to detect
 // duplication.
 
-
 import React, { PureComponent, PropTypes } from 'react';
 
 export class StyleDef extends PureComponent {
@@ -49,7 +48,7 @@ export class BackgroundImageStyleDef extends StyleDef {
         background-image: url(${this.props.url});
       }
     `;
-    return <StyleDef content={ content } />;
+    return <StyleDef content={content} />;
   }
 }
 

@@ -7,7 +7,11 @@
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import actions from '../../actions';
-import { getHidePlatformDetails, getInvertCallstack, getSearchString } from '../../reducers/url-state';
+import {
+  getHidePlatformDetails,
+  getInvertCallstack,
+  getSearchString,
+} from '../../reducers/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
 
 import './FlameChartSettings.css';
@@ -26,9 +30,15 @@ class FlameChartSettings extends PureComponent {
 
   constructor(props) {
     super(props);
-    (this: any)._onHidePlatformDetailsClick = this._onHidePlatformDetailsClick.bind(this);
-    (this: any)._onInvertCallstackClick = this._onInvertCallstackClick.bind(this);
-    (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(this);
+    (this: any)._onHidePlatformDetailsClick = this._onHidePlatformDetailsClick.bind(
+      this
+    );
+    (this: any)._onInvertCallstackClick = this._onInvertCallstackClick.bind(
+      this
+    );
+    (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(
+      this
+    );
   }
 
   _onHidePlatformDetailsClick(e: Event & { target: HTMLInputElement }) {
@@ -46,35 +56,41 @@ class FlameChartSettings extends PureComponent {
   render() {
     const { hidePlatformDetails, invertCallstack, searchString } = this.props;
     return (
-      <div className='flameChartSettings'>
-        <ul className='flameChartSettingsList'>
-          <li className='flameChartSettingsListItem'>
-            <label className='flameChartSettingsLabel'>
-              <input type='checkbox'
-                     className='flameChartSettingsCheckbox'
-                     onChange={this._onHidePlatformDetailsClick}
-                     checked={hidePlatformDetails}/>
-              { ' Hide platform details' }
+      <div className="flameChartSettings">
+        <ul className="flameChartSettingsList">
+          <li className="flameChartSettingsListItem">
+            <label className="flameChartSettingsLabel">
+              <input
+                type="checkbox"
+                className="flameChartSettingsCheckbox"
+                onChange={this._onHidePlatformDetailsClick}
+                checked={hidePlatformDetails}
+              />
+              {' Hide platform details'}
             </label>
           </li>
-          <li className='flameChartSettingsListItem'>
-            <label className='flameChartSettingsLabel'>
-              <input type='checkbox'
-                     className='flameChartSettingsCheckbox'
-                     onChange={this._onInvertCallstackClick}
-                     checked={invertCallstack}/>
-              { ' Invert call stack' }
+          <li className="flameChartSettingsListItem">
+            <label className="flameChartSettingsLabel">
+              <input
+                type="checkbox"
+                className="flameChartSettingsCheckbox"
+                onChange={this._onInvertCallstackClick}
+                checked={invertCallstack}
+              />
+              {' Invert call stack'}
             </label>
           </li>
         </ul>
-        <div className='flameChartSettingsSearchbar'>
-          <label className='flameChartSettingsSearchbarLabel'>
+        <div className="flameChartSettingsSearchbar">
+          <label className="flameChartSettingsSearchbarLabel">
             {'Filter stacks: '}
-            <IdleSearchField className='flameChartSettingsSearchField'
-                             title='Only display stacks which contain a function whose name matches this substring'
-                             idlePeriod={200}
-                             defaultValue={searchString}
-                             onIdleAfterChange={this._onSearchFieldIdleAfterChange}/>
+            <IdleSearchField
+              className="flameChartSettingsSearchField"
+              title="Only display stacks which contain a function whose name matches this substring"
+              idlePeriod={200}
+              defaultValue={searchString}
+              onIdleAfterChange={this._onSearchFieldIdleAfterChange}
+            />
           </label>
         </div>
       </div>
@@ -91,8 +107,11 @@ FlameChartSettings.propTypes = {
   searchString: PropTypes.string.isRequired,
 };
 
-export default connect(state => ({
-  invertCallstack: getInvertCallstack(state),
-  hidePlatformDetails: getHidePlatformDetails(state),
-  searchString: getSearchString(state),
-}), actions)(FlameChartSettings);
+export default connect(
+  state => ({
+    invertCallstack: getInvertCallstack(state),
+    hidePlatformDetails: getHidePlatformDetails(state),
+    searchString: getSearchString(state),
+  }),
+  actions
+)(FlameChartSettings);

@@ -61,7 +61,9 @@ class URLManager extends PureComponent {
 
   render() {
     const { isURLSetupDone } = this.props;
-    return isURLSetupDone ? this.props.children : <div className='processingURL'/>;
+    return isURLSetupDone
+      ? this.props.children
+      : <div className="processingURL" />;
   }
 }
 
@@ -76,11 +78,15 @@ URLManager.propTypes = {
   show404: PropTypes.func.isRequired,
 };
 
-export default connect(state => ({
-  urlState: state.urlState,
-  isURLSetupDone: getIsURLSetupDone(state),
-}), (dispatch: Dispatch) => ({
-  updateURLState: urlState => dispatch({ type: '@@urlenhancer/updateURLState', urlState }),
-  urlSetupDone: () => dispatch({ type: '@@urlenhancer/urlSetupDone' }),
-  show404: url => dispatch({ type: 'ROUTE_NOT_FOUND', url }),
-}))(URLManager);
+export default connect(
+  state => ({
+    urlState: state.urlState,
+    isURLSetupDone: getIsURLSetupDone(state),
+  }),
+  (dispatch: Dispatch) => ({
+    updateURLState: urlState =>
+      dispatch({ type: '@@urlenhancer/updateURLState', urlState }),
+    urlSetupDone: () => dispatch({ type: '@@urlenhancer/urlSetupDone' }),
+    show404: url => dispatch({ type: 'ROUTE_NOT_FOUND', url }),
+  })
+)(URLManager);

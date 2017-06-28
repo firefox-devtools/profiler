@@ -9,8 +9,16 @@ import withTimelineViewport from './TimelineViewport';
 import TimelineCanvas from './TimelineCanvas';
 
 import type { Thread } from '../../types/profile';
-import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../types/units';
-import type { StackTimingByDepth, StackTimingDepth, IndexIntoStackTiming } from '../../profile-logic/stack-timing';
+import type {
+  Milliseconds,
+  CssPixels,
+  UnitIntervalOfProfileRange,
+} from '../../types/units';
+import type {
+  StackTimingByDepth,
+  StackTimingDepth,
+  IndexIntoStackTiming,
+} from '../../profile-logic/stack-timing';
 import type { GetCategory } from '../../profile-logic/color-categories';
 import type { GetLabel } from '../../profile-logic/labeling-strategies';
 import type { Action, ProfileSelection } from '../../types/actions';
@@ -47,7 +55,6 @@ const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
 
 class FlameChartCanvas extends PureComponent {
-
   _textMeasurement: null | TextMeasurement;
 
   props: Props;
@@ -72,9 +79,21 @@ class FlameChartCanvas extends PureComponent {
     ctx: CanvasRenderingContext2D,
     hoveredItem: HoveredStackTiming | null
   ) {
-    const { thread, rangeStart, rangeEnd, containerWidth, getLabel,
-            containerHeight, stackTimingByDepth, stackFrameHeight, getCategory,
-            viewportLeft, viewportRight, viewportTop, viewportBottom } = this.props;
+    const {
+      thread,
+      rangeStart,
+      rangeEnd,
+      containerWidth,
+      getLabel,
+      containerHeight,
+      stackTimingByDepth,
+      stackFrameHeight,
+      getCategory,
+      viewportLeft,
+      viewportRight,
+      viewportTop,
+      viewportBottom,
+    } = this.props;
 
     // Ensure the text measurement tool is created, since this is the first time
     // this class has access to a ctx.
@@ -86,7 +105,8 @@ class FlameChartCanvas extends PureComponent {
     ctx.clearRect(0, 0, containerWidth, containerHeight);
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
-    const viewportLength: UnitIntervalOfProfileRange = viewportRight - viewportLeft;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
 
     // Convert CssPixels to Stack Depth
     const startDepth = Math.floor(viewportTop / stackFrameHeight);
@@ -109,18 +129,27 @@ class FlameChartCanvas extends PureComponent {
        */
 
       // Decide which samples to actually draw
-      const timeAtViewportLeft: Milliseconds = rangeStart + rangeLength * viewportLeft;
-      const timeAtViewportRight: Milliseconds = rangeStart + rangeLength * viewportRight;
+      const timeAtViewportLeft: Milliseconds =
+        rangeStart + rangeLength * viewportLeft;
+      const timeAtViewportRight: Milliseconds =
+        rangeStart + rangeLength * viewportRight;
 
       for (let i = 0; i < stackTiming.length; i++) {
         // Only draw samples that are in bounds.
-        if (stackTiming.end[i] > timeAtViewportLeft && stackTiming.start[i] < timeAtViewportRight) {
-          const startTime: UnitIntervalOfProfileRange = (stackTiming.start[i] - rangeStart) / rangeLength;
-          const endTime: UnitIntervalOfProfileRange = (stackTiming.end[i] - rangeStart) / rangeLength;
+        if (
+          stackTiming.end[i] > timeAtViewportLeft &&
+          stackTiming.start[i] < timeAtViewportRight
+        ) {
+          const startTime: UnitIntervalOfProfileRange =
+            (stackTiming.start[i] - rangeStart) / rangeLength;
+          const endTime: UnitIntervalOfProfileRange =
+            (stackTiming.end[i] - rangeStart) / rangeLength;
 
-          const x: CssPixels = ((startTime - viewportLeft) * containerWidth / viewportLength);
+          const x: CssPixels =
+            (startTime - viewportLeft) * containerWidth / viewportLength;
           const y: CssPixels = depth * ROW_HEIGHT - viewportTop;
-          const w: CssPixels = ((endTime - startTime) * containerWidth / viewportLength);
+          const w: CssPixels =
+            (endTime - startTime) * containerWidth / viewportLength;
           const h: CssPixels = ROW_HEIGHT - 1;
 
           if (w < 2) {
@@ -132,7 +161,10 @@ class FlameChartCanvas extends PureComponent {
           const frameIndex = thread.stackTable.frame[stackIndex];
           const text = getLabel(thread, stackIndex);
           const category = getCategory(thread, frameIndex);
-          const isHovered = hoveredItem && depth === hoveredItem.depth && i === hoveredItem.stackTableIndex;
+          const isHovered =
+            hoveredItem &&
+            depth === hoveredItem.depth &&
+            i === hoveredItem.stackTableIndex;
 
           ctx.fillStyle = isHovered ? 'Highlight' : category.color;
           ctx.fillRect(x, y, w, h);
@@ -156,16 +188,21 @@ class FlameChartCanvas extends PureComponent {
     }
   }
 
-  _getHoveredStackInfo(
-    {depth, stackTableIndex}: HoveredStackTiming
-  ): React$Element<*> {
+  _getHoveredStackInfo({
+    depth,
+    stackTableIndex,
+  }: HoveredStackTiming): React$Element<*> {
     const {
-      thread, getLabel, getCategory, stackTimingByDepth, isRowExpanded,
+      thread,
+      getLabel,
+      getCategory,
+      stackTimingByDepth,
+      isRowExpanded,
     } = this.props;
     const stackTiming = stackTimingByDepth[depth];
 
-    const duration = stackTiming.end[stackTableIndex] -
-      stackTiming.start[stackTableIndex];
+    const duration =
+      stackTiming.end[stackTableIndex] - stackTiming.start[stackTableIndex];
     let durationString;
     if (duration >= 10) {
       durationString = duration.toFixed(0);
@@ -191,8 +228,8 @@ class FlameChartCanvas extends PureComponent {
       const fileNameIndex = thread.funcTable.fileName[funcIndex];
       if (fileNameIndex !== null) {
         resourceOrFileName = (
-          <div className='tooltipOneLine tooltipDetails'>
-            <div className='tooltipLabel'>File:</div>
+          <div className="tooltipOneLine tooltipDetails">
+            <div className="tooltipLabel">File:</div>
             {thread.stringTable.getString(fileNameIndex)}
           </div>
         );
@@ -202,8 +239,8 @@ class FlameChartCanvas extends PureComponent {
           const resourceNameIndex = thread.resourceTable.name[resourceIndex];
           if (resourceNameIndex !== -1) {
             resourceOrFileName = (
-              <div className='tooltipOneLine tooltipDetails'>
-                <div className='tooltipLabel'>Resource:</div>
+              <div className="tooltipOneLine tooltipDetails">
+                <div className="tooltipLabel">Resource:</div>
                 {thread.stringTable.getString(resourceNameIndex)}
               </div>
             );
@@ -213,18 +250,21 @@ class FlameChartCanvas extends PureComponent {
     }
 
     return (
-      <div className='flameChartCanvasTooltip'>
-        <div className='tooltipOneLine tooltipHeader'>
-          <div className='tooltipTiming'>
+      <div className="flameChartCanvasTooltip">
+        <div className="tooltipOneLine tooltipHeader">
+          <div className="tooltipTiming">
             {durationString}ms
           </div>
-          <div className='tooltipName'>
+          <div className="tooltipName">
             {label}
           </div>
         </div>
-        <div className='tooltipOneLine tooltipDetails'>
-          <div className='tooltipLabel'>Category:</div>
-          <div className='tooltipSwatch' style={{backgroundColor: category.color}} />
+        <div className="tooltipOneLine tooltipDetails">
+          <div className="tooltipLabel">Category:</div>
+          <div
+            className="tooltipSwatch"
+            style={{ backgroundColor: category.color }}
+          />
           {category.name}
         </div>
         {resourceOrFileName}
@@ -236,7 +276,7 @@ class FlameChartCanvas extends PureComponent {
     if (hoveredItem === null) {
       return;
     }
-    const {depth, stackTableIndex} = hoveredItem;
+    const { depth, stackTableIndex } = hoveredItem;
     const { stackTimingByDepth, updateProfileSelection } = this.props;
     updateProfileSelection({
       hasSelection: true,
@@ -248,13 +288,20 @@ class FlameChartCanvas extends PureComponent {
 
   _hitTest(x: CssPixels, y: CssPixels): HoveredStackTiming | null {
     const {
-       rangeStart, rangeEnd, viewportLeft, viewportRight, viewportTop,
-       containerWidth, stackTimingByDepth,
-     } = this.props;
+      rangeStart,
+      rangeEnd,
+      viewportLeft,
+      viewportRight,
+      viewportTop,
+      containerWidth,
+      stackTimingByDepth,
+    } = this.props;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
-    const viewportLength: UnitIntervalOfProfileRange = viewportRight - viewportLeft;
-    const unitIntervalTime: UnitIntervalOfProfileRange = viewportLeft + viewportLength * (x / containerWidth);
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+    const unitIntervalTime: UnitIntervalOfProfileRange =
+      viewportLeft + viewportLength * (x / containerWidth);
     const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
     const depth = Math.floor((y + viewportTop) / ROW_HEIGHT);
     const stackTiming = stackTimingByDepth[depth];
@@ -274,18 +321,21 @@ class FlameChartCanvas extends PureComponent {
     return null;
   }
 
-
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props;
 
-    return <TimelineCanvas className='flameChartCanvas'
-                           containerWidth={containerWidth}
-                           containerHeight={containerHeight}
-                           isDragging={isDragging}
-                           onDoubleClickItem={this._onDoubleClickStack}
-                           getHoveredItemInfo={this._getHoveredStackInfo}
-                           drawCanvas={this._drawCanvas}
-                           hitTest={this._hitTest} />;
+    return (
+      <TimelineCanvas
+        className="flameChartCanvas"
+        containerWidth={containerWidth}
+        containerHeight={containerHeight}
+        isDragging={isDragging}
+        onDoubleClickItem={this._onDoubleClickStack}
+        getHoveredItemInfo={this._getHoveredStackInfo}
+        drawCanvas={this._drawCanvas}
+        hitTest={this._hitTest}
+      />
+    );
   }
 }
 

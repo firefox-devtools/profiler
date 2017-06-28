@@ -53,7 +53,7 @@ export type TracingMarker = {
   start: Milliseconds,
   dur: Milliseconds,
   name: string,
-  title: string|null,
+  title: string | null,
   data: MarkerPayload,
 };
 
@@ -81,4 +81,4 @@ export type MarkerTiming = {
   name: string,
   length: number,
 };
-export type MarkerTimingRows = Array<MarkerTiming>
+export type MarkerTimingRows = Array<MarkerTiming>;

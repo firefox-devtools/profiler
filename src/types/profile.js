@@ -26,7 +26,7 @@ export type ThreadIndex = number;
  */
 export type StackTable = {
   frame: IndexIntoFrameTable[],
-  prefix: Array<IndexIntoStackTable|null>,
+  prefix: Array<IndexIntoStackTable | null>,
   length: number,
 };
 
@@ -39,7 +39,7 @@ export type StackTable = {
  */
 export type SamplesTable = {
   responsiveness: number[],
-  stack: Array<IndexIntoStackTable|null>,
+  stack: Array<IndexIntoStackTable | null>,
   time: number[],
   rss: any[], // TODO
   uss: any[], // TODO
@@ -61,7 +61,7 @@ export type ProfilerMarkerPayload = {
  * Measurement for how long draw calls take for the compositor.
  */
 export type GPUMarkerPayload = {
-  type: "gpu_timer_query",
+  type: 'gpu_timer_query',
   startTime: Milliseconds, // Same as cpustart
   endTime: Milliseconds, // Same as cpuend
   cpustart: Milliseconds,
@@ -75,29 +75,30 @@ export type GPUMarkerPayload = {
  * These markers have a start and end time.
  */
 export type ProfilerMarkerTracing = {
-  type: "tracing",
+  type: 'tracing',
   startTime: Milliseconds, // Same as cpustart
   endTime: Milliseconds, // Same as cpuend
   stack?: Thread,
-  interval: "start" | "end",
-}
+  interval: 'start' | 'end',
+};
 
 export type PaintProfilerMarkerTracing = ProfilerMarkerTracing & {
-  category: "Paint",
-  name: "RefreshDriverTick" |
-    "FireScrollEvent" |
-    "Scripts" |
-    "Styles" |
-    "Reflow" |
-    "DispatchSynthMouseMove" |
-    "DisplayList" |
-    "LayerBuilding" |
-    "Rasterize" |
-    "ForwardTransaction" |
-    "NotifyDidPaint" |
-    "LayerTransaction" |
-    "Composite",
-}
+  category: 'Paint',
+  name:
+    | 'RefreshDriverTick'
+    | 'FireScrollEvent'
+    | 'Scripts'
+    | 'Styles'
+    | 'Reflow'
+    | 'DispatchSynthMouseMove'
+    | 'DisplayList'
+    | 'LayerBuilding'
+    | 'Rasterize'
+    | 'ForwardTransaction'
+    | 'NotifyDidPaint'
+    | 'LayerTransaction'
+    | 'Composite',
+};
 
 // TODO - Add more markers.
 
@@ -106,22 +107,22 @@ export type PaintProfilerMarkerTracing = ProfilerMarkerTracing & {
  * and performance.mark(). https://developer.mozilla.org/en-US/docs/Web/API/Performance
  */
 export type UserTimingMarkerPayload = {
-  type: "UserTiming",
+  type: 'UserTiming',
   startTime: Milliseconds,
   endTime: Milliseconds,
   name: string,
-  entryType: "measure" | "mark",
-}
+  entryType: 'measure' | 'mark',
+};
 
 /**
  * The union of all the different marker payloads that perf.html knows about, this is
  * not guaranteed to be all the payloads that we actually get from the profiler.
  */
 export type MarkerPayload =
-  GPUMarkerPayload |
-  UserTimingMarkerPayload |
-  PaintProfilerMarkerTracing |
-  null;
+  | GPUMarkerPayload
+  | UserTimingMarkerPayload
+  | PaintProfilerMarkerTracing
+  | null;
 
 /**
  * Markers represent arbitrary events that happen within the browser. They have a
@@ -163,10 +164,10 @@ export type FuncTable = {
   isJS: boolean[],
   length: number,
   name: IndexIntoStringTable[],
-  resource: Array<IndexIntoResourceTable|-1>,
-  fileName: Array<IndexIntoStringTable|null>,
-  lineNumber: Array<number|null>,
-}
+  resource: Array<IndexIntoResourceTable | -1>,
+  fileName: Array<IndexIntoStringTable | null>,
+  lineNumber: Array<number | null>,
+};
 
 /**
  * The ResourceTable holds additional information about functions. It tends to contain
@@ -176,11 +177,11 @@ export type ResourceTable = {
   addonId: any[], // TODO
   icon: any[], // TODO
   length: number,
-  lib: Array<IndexIntoLibs|null>,
-  name: Array<IndexIntoStringTable|-1>,
-  host: Array<IndexIntoStringTable|null>,
+  lib: Array<IndexIntoLibs | null>,
+  name: Array<IndexIntoStringTable | -1>,
+  host: Array<IndexIntoStringTable | null>,
   type: resourceTypeEnum[],
-}
+};
 
 /**
  * Gecko has one or more processes. There can be multiple threads per processes. Each

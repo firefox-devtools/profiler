@@ -3,7 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { IndexIntoStackTable, IndexIntoFrameTable, Thread, StackTable } from '../types/profile';
+import type {
+  IndexIntoStackTable,
+  IndexIntoFrameTable,
+  Thread,
+  StackTable,
+} from '../types/profile';
 import type { Milliseconds } from '../types/units';
 import type { FuncStackInfo } from '../types/profile-derived';
 import type { GetCategory } from './color-categories';
@@ -50,12 +55,12 @@ export type StackTimingByDepth = Array<{
   end: Milliseconds[],
   stack: IndexIntoStackTable[],
   length: number,
-}>
+}>;
 
 type LastSeen = {
   startTimeByDepth: number[],
   stackIndexByDepth: IndexIntoStackTable[],
-}
+};
 
 /**
  * Build a StackTimingByDepth table from a given thread.
@@ -67,17 +72,20 @@ type LastSeen = {
  * @return {array} stackTimingByDepth
  */
 export function getStackTimingByDepth(
-  thread: Thread, funcStackInfo: FuncStackInfo, maxDepth: number, interval: number
+  thread: Thread,
+  funcStackInfo: FuncStackInfo,
+  maxDepth: number,
+  interval: number
 ): StackTimingByDepth {
-  const {funcStackTable, stackIndexToFuncStackIndex} = funcStackInfo;
-  const stackTimingByDepth = Array.from({length: maxDepth + 1}, () => ({
+  const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
+  const stackTimingByDepth = Array.from({ length: maxDepth + 1 }, () => ({
     start: [],
     end: [],
     stack: [],
     length: 0,
   }));
 
-  const lastSeen:LastSeen = {
+  const lastSeen: LastSeen = {
     startTimeByDepth: [],
     stackIndexByDepth: [],
   };
@@ -99,22 +107,37 @@ export function getStackTimingByDepth(
       const depth = funcStackTable.depth[funcStackIndex];
 
       // Find the depth of the nearest shared stack.
-      const depthToPop = _findNearestSharedStackDepth(thread.stackTable, stackIndex, lastSeen, depth);
-      _popStacks(stackTimingByDepth, lastSeen, depthToPop, previousDepth, sampleTime);
+      const depthToPop = _findNearestSharedStackDepth(
+        thread.stackTable,
+        stackIndex,
+        lastSeen,
+        depth
+      );
+      _popStacks(
+        stackTimingByDepth,
+        lastSeen,
+        depthToPop,
+        previousDepth,
+        sampleTime
+      );
       _pushStacks(thread, lastSeen, depth, stackIndex, sampleTime);
       previousDepth = depth;
     }
   }
 
   // Pop the remaining stacks
-  const endingTime = thread.samples.time[thread.samples.time.length - 1] + interval;
+  const endingTime =
+    thread.samples.time[thread.samples.time.length - 1] + interval;
   _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, endingTime);
 
   return stackTimingByDepth;
 }
 
 function _findNearestSharedStackDepth(
-  stackTable: StackTable, stackIndex: IndexIntoStackTable, lastSeen: LastSeen, depthStart: number
+  stackTable: StackTable,
+  stackIndex: IndexIntoStackTable,
+  lastSeen: LastSeen,
+  depthStart: number
 ): number {
   let nextStackIndex = stackIndex;
   for (let depth = depthStart; depth >= 0; depth--) {
@@ -127,15 +150,22 @@ function _findNearestSharedStackDepth(
 }
 
 function _popStacks(
-  stackTimingByDepth: StackTimingByDepth, lastSeen: LastSeen, depth: number,
-  previousDepth: number, sampleTime: number
+  stackTimingByDepth: StackTimingByDepth,
+  lastSeen: LastSeen,
+  depth: number,
+  previousDepth: number,
+  sampleTime: number
 ) {
   // "Pop" off the stack, and commit the timing of the frames
   for (let stackDepth = depth + 1; stackDepth <= previousDepth; stackDepth++) {
     // Push on the new information.
-    stackTimingByDepth[stackDepth].start.push(lastSeen.startTimeByDepth[stackDepth]);
+    stackTimingByDepth[stackDepth].start.push(
+      lastSeen.startTimeByDepth[stackDepth]
+    );
     stackTimingByDepth[stackDepth].end.push(sampleTime);
-    stackTimingByDepth[stackDepth].stack.push(lastSeen.stackIndexByDepth[stackDepth]);
+    stackTimingByDepth[stackDepth].stack.push(
+      lastSeen.stackIndexByDepth[stackDepth]
+    );
     stackTimingByDepth[stackDepth].length++;
 
     // Delete that this stack frame has been seen.
@@ -145,13 +175,19 @@ function _popStacks(
 }
 
 function _pushStacks(
-  thread: Thread, lastSeen: LastSeen, depth: number, startingIndex: IndexIntoStackTable,
+  thread: Thread,
+  lastSeen: LastSeen,
+  depth: number,
+  startingIndex: IndexIntoStackTable,
   sampleTime: number
 ) {
   let stackIndex = startingIndex;
   // "Push" onto the stack with new frames
   for (let parentDepth = depth; parentDepth >= 0; parentDepth--) {
-    if (stackIndex === null || lastSeen.stackIndexByDepth[parentDepth] !== undefined) {
+    if (
+      stackIndex === null ||
+      lastSeen.stackIndexByDepth[parentDepth] !== undefined
+    ) {
       break;
     }
     lastSeen.stackIndexByDepth[parentDepth] = stackIndex;
@@ -160,10 +196,13 @@ function _pushStacks(
   }
 }
 
-export function computeFuncStackMaxDepth(rangedThread: Thread, funcStackInfo: FuncStackInfo): number {
+export function computeFuncStackMaxDepth(
+  rangedThread: Thread,
+  funcStackInfo: FuncStackInfo
+): number {
   let maxDepth = 0;
-  const {samples} = rangedThread;
-  const {funcStackTable, stackIndexToFuncStackIndex} = funcStackInfo;
+  const { samples } = rangedThread;
+  const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
   for (let i = 0; i < rangedThread.samples.length; i++) {
     const stackIndex = samples.stack[i];
     if (stackIndex !== null) {
@@ -180,7 +219,9 @@ export function computeFuncStackMaxDepth(rangedThread: Thread, funcStackInfo: Fu
 type GetRelevantFrame = (Thread, IndexIntoStackTable) => IndexIntoFrameTable;
 
 export function getLeafCategoryStackTiming(
-  thread: Thread, interval: number, getCategory: GetCategory,
+  thread: Thread,
+  interval: number,
+  getCategory: GetCategory,
   getRelevantLeafStack: GetRelevantFrame = getNearestJSFrame
 ) {
   const stackTiming = {
@@ -202,7 +243,7 @@ export function getLeafCategoryStackTiming(
     } else {
       const relevantStackIndex = getRelevantLeafStack(thread, stackIndex);
       const frameIndex = thread.stackTable.frame[relevantStackIndex];
-      const {name} = getCategory(thread, frameIndex);
+      const { name } = getCategory(thread, frameIndex);
 
       if (name !== previousName) {
         const sampleTime = thread.samples.time[i];
@@ -220,13 +261,18 @@ export function getLeafCategoryStackTiming(
 
   if (stackTiming.end.length !== stackTiming.start.length) {
     // Calculate the final end time.
-    stackTiming.end.push(thread.samples.time[thread.samples.length - 1] + interval);
+    stackTiming.end.push(
+      thread.samples.time[thread.samples.length - 1] + interval
+    );
   }
 
   return [stackTiming];
 }
 
-function getNearestJSFrame(thread: Thread, stackIndex: IndexIntoStackTable): IndexIntoStackTable {
+function getNearestJSFrame(
+  thread: Thread,
+  stackIndex: IndexIntoStackTable
+): IndexIntoStackTable {
   let nextStackIndex = stackIndex;
   while (nextStackIndex !== null) {
     const frameIndex = thread.stackTable.frame[nextStackIndex];

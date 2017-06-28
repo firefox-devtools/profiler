@@ -41,7 +41,6 @@ export function sortDataTable<KeyColumnElementType>(
   keyColumn: KeyColumnElementType[],
   comparator: compareFn<KeyColumnElementType>
 ): DataTable {
-
   function swap(i, j) {
     if (i !== j) {
       for (const columnName in table) {

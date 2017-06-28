@@ -10,7 +10,8 @@ const themeHighlightPurple = '#5b5fff';
 const themeHighlightOrange = '#f13c00';
 const themeHighlightRed = '#ed2655';
 const themeHighlightPink = '#b82ee5';
-const themeHighlightGray = '#b4babf'; /* except for this one, I made this one darker */
+const themeHighlightGray =
+  '#b4babf'; /* except for this one, I made this one darker */
 
 export const styles = {
   default: {

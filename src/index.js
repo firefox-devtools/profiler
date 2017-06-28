@@ -18,15 +18,12 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-window.geckoProfilerPromise = new Promise(function (resolve) {
+window.geckoProfilerPromise = new Promise(function(resolve) {
   window.connectToGeckoProfiler = resolve;
 });
 
 const store = createStore();
 
-render(
-  <Root store={store} />,
-  document.getElementById('root')
-);
+render(<Root store={store} />, document.getElementById('root'));
 
 window.Perf = Perf;

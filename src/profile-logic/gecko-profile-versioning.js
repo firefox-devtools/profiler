@@ -95,7 +95,9 @@ const _upgraders = {
           delete lib.pdbAge;
           delete lib.pdbSignature;
           lib.path = lib.name;
-          lib.name = lib.debugName.endsWith('.pdb') ? lib.debugName.substr(0, lib.debugName.length - 4) : lib.debugName;
+          lib.name = lib.debugName.endsWith('.pdb')
+            ? lib.debugName.substr(0, lib.debugName.length - 4)
+            : lib.debugName;
           lib.arch = _archFromAbi(p.meta.abi);
           lib.debugPath = '';
           return lib;
@@ -150,8 +152,12 @@ const _upgraders = {
           data: threadOrProcess,
         };
       });
-      p.processes = allThreadsAndProcesses.filter(x => x.type === 'process').map(p => p.data);
-      p.threads = allThreadsAndProcesses.filter(x => x.type === 'thread').map(t => t.data);
+      p.processes = allThreadsAndProcesses
+        .filter(x => x.type === 'process')
+        .map(p => p.data);
+      p.threads = allThreadsAndProcesses
+        .filter(x => x.type === 'thread')
+        .map(t => t.data);
       p.meta.version = 5;
     }
     convertToVersionFiveRecursive(profile);
@@ -161,7 +167,11 @@ const _upgraders = {
     function convertToVersionSixRecursive(p) {
       for (const thread of p.threads) {
         delete thread.samples.schema.frameNumber;
-        for (let sampleIndex = 0; sampleIndex < thread.samples.data.length; sampleIndex++) {
+        for (
+          let sampleIndex = 0;
+          sampleIndex < thread.samples.data.length;
+          sampleIndex++
+        ) {
           // Truncate the array to a maximum length of 5.
           // The frameNumber used to be the last item, at index 5.
           thread.samples.data[sampleIndex].splice(5);

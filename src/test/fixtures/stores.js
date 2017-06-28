@@ -14,7 +14,9 @@ export function blankStore() {
   return createStore();
 }
 
-export function storeWithProfile(profile: Profile = processProfile(exampleProfile)): Store {
+export function storeWithProfile(
+  profile: Profile = processProfile(exampleProfile)
+): Store {
   const store = createStore();
   store.dispatch(receiveProfileFromAddon(profile));
   return store;

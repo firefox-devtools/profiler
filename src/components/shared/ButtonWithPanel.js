@@ -24,7 +24,9 @@ class ButtonWithPanel extends PureComponent {
       }
     };
     this._onButtonClick = this._onButtonClick.bind(this);
-    this._panelCreated = panel => { this._panel = panel; };
+    this._panelCreated = panel => {
+      this._panel = panel;
+    };
   }
 
   openPanel() {
@@ -42,11 +44,16 @@ class ButtonWithPanel extends PureComponent {
     const { open } = this.state;
     return (
       <div className={classNames('buttonWithPanel', className, { open })}>
-        <div className='buttonWithPanelButtonWrapper'>
-          <input type='button'
-                 className={classNames('buttonWithPanelButton', `${className}Button`)}
-                 value={label}
-                 onClick={this._onButtonClick}/>
+        <div className="buttonWithPanelButtonWrapper">
+          <input
+            type="button"
+            className={classNames(
+              'buttonWithPanelButton',
+              `${className}Button`
+            )}
+            value={label}
+            onClick={this._onButtonClick}
+          />
         </div>
         {React.cloneElement(panel, {
           ref: this._panelCreated,

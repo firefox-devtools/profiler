@@ -6,13 +6,17 @@
 
 import type {
   // eslint-disable-next-line import/named
-  IDBFactory, IDBDatabase, IDBObjectStore, IDBIndex, IDBKeyRange,
+  IDBFactory,
+  IDBDatabase,
+  IDBObjectStore,
+  IDBIndex,
+  IDBKeyRange,
 } from '../types/indexeddb';
 
 export type SymbolTableAsTuple = [
   Uint32Array, // addrs
   Uint32Array, // index
-  Uint8Array,  // buffer
+  Uint8Array, // buffer
 ];
 
 type SymbolItem = {|
@@ -48,7 +52,11 @@ export class SymbolStoreDB {
    * @param {number} maxAge   The maximum age, in milliseconds, before stored
    *                          symbol tables should get evicted.
    */
-  constructor(dbName: string, maxCount: number = 200, maxAge: number = kTwoWeeksInMilliseconds) {
+  constructor(
+    dbName: string,
+    maxCount: number = 200,
+    maxAge: number = kTwoWeeksInMilliseconds
+  ) {
     this._dbPromise = this._setupDB(dbName);
     this._maxCount = maxCount;
     this._maxAge = maxAge;
@@ -98,10 +106,13 @@ export class SymbolStoreDB {
       };
 
       openReq.onblocked = () => {
-        reject(new Error(
-          'The symbol store database could not be upgraded because it is ' +
-          'open in another tab. Please close all your other perf-html.io ' +
-          'tabs and refresh.'));
+        reject(
+          new Error(
+            'The symbol store database could not be upgraded because it is ' +
+              'open in another tab. Please close all your other perf-html.io ' +
+              'tabs and refresh.'
+          )
+        );
       };
 
       openReq.onsuccess = () => {
@@ -110,7 +121,10 @@ export class SymbolStoreDB {
           db.close();
         };
         resolve(db);
-        this._deleteAllBeforeDate(db, new Date(+new Date - this._maxAge)).catch(e => {
+        this._deleteAllBeforeDate(
+          db,
+          new Date(+new Date() - this._maxAge)
+        ).catch(e => {
           console.error('Encountered error while cleaning out database:', e);
         });
       };
@@ -125,17 +139,32 @@ export class SymbolStoreDB {
    * @return              A promise that resolves (with nothing) once storage
    *                      has succeeded.
    */
-  storeSymbolTable(debugName: string, breakpadId: string, [addrs, index, buffer]: SymbolTableAsTuple): Promise<void> {
+  storeSymbolTable(
+    debugName: string,
+    breakpadId: string,
+    [addrs, index, buffer]: SymbolTableAsTuple
+  ): Promise<void> {
     return this._getDB().then(db => {
       return new Promise((resolve, reject) => {
         const transaction = db.transaction('symbol-tables', 'readwrite');
         transaction.onerror = () => reject(transaction.error);
         const store: SymbolStore = transaction.objectStore('symbol-tables');
-        this._deleteLeastRecentlyUsedUntilCountIsNoMoreThanN(store, this._maxCount - 1, () => {
-          const lastUsedDate = new Date();
-          const addReq = store.add({ debugName, breakpadId, addrs, index, buffer, lastUsedDate });
-          addReq.onsuccess = () => resolve();
-        });
+        this._deleteLeastRecentlyUsedUntilCountIsNoMoreThanN(
+          store,
+          this._maxCount - 1,
+          () => {
+            const lastUsedDate = new Date();
+            const addReq = store.add({
+              debugName,
+              breakpadId,
+              addrs,
+              index,
+              buffer,
+              lastUsedDate,
+            });
+            addReq.onsuccess = () => resolve();
+          }
+        );
       });
     });
   }
@@ -148,7 +177,10 @@ export class SymbolStoreDB {
    *                      SymbolTableAsTuple format), or fails if we couldn't
    *                      find a symbol table for the requested library.
    */
-  getSymbolTable(debugName: string, breakpadId: string): Promise<SymbolTableAsTuple> {
+  getSymbolTable(
+    debugName: string,
+    breakpadId: string
+  ): Promise<SymbolTableAsTuple> {
     return this._getDB().then(db => {
       return new Promise((resolve, reject) => {
         const transaction = db.transaction('symbol-tables', 'readwrite');
@@ -164,7 +196,9 @@ export class SymbolStoreDB {
             const { addrs, index, buffer } = value;
             updateDateReq.onsuccess = () => resolve([addrs, index, buffer]);
           } else {
-            reject(new Error('The requested library does not exist in the database.'));
+            reject(
+              new Error('The requested library does not exist in the database.')
+            );
           }
         };
       });
@@ -197,11 +231,19 @@ export class SymbolStoreDB {
     });
   }
 
-  _deleteRecordsLastUsedBeforeDate(store: SymbolStore, beforeDate: Date, callback: () => void): void {
+  _deleteRecordsLastUsedBeforeDate(
+    store: SymbolStore,
+    beforeDate: Date,
+    callback: () => void
+  ): void {
     const lastUsedDateIndex = store.index('lastUsedDate');
     // Get a cursor that walks all records whose lastUsedDate is less than beforeDate.
     const cursorReq = lastUsedDateIndex.openCursor(
-      (window.IDBKeyRange: IDBKeyRange<SymbolDateKey>).upperBound(beforeDate, true));
+      (window.IDBKeyRange: IDBKeyRange<SymbolDateKey>).upperBound(
+        beforeDate,
+        true
+      )
+    );
     // Iterate over all records in this cursor and delete them.
     cursorReq.onsuccess = () => {
       const cursor = cursorReq.result;
@@ -215,7 +257,11 @@ export class SymbolStoreDB {
     };
   }
 
-  _deleteNLeastRecentlyUsedRecords(store: SymbolStore, n: number, callback: () => void): void {
+  _deleteNLeastRecentlyUsedRecords(
+    store: SymbolStore,
+    n: number,
+    callback: () => void
+  ): void {
     // Get a cursor that walks the records from oldest to newest
     // lastUsedDate.
     const lastUsedDateIndex: IDBIndex<*, Date, *> = store.index('lastUsedDate');
@@ -239,17 +285,25 @@ export class SymbolStoreDB {
     };
   }
 
-  _count(store: SymbolStore, callback: (number) => void): void {
+  _count(store: SymbolStore, callback: number => void): void {
     const countReq = store.count();
     countReq.onsuccess = () => callback(countReq.result);
   }
 
-  _deleteLeastRecentlyUsedUntilCountIsNoMoreThanN(store: SymbolStore, n: number, callback: () => void): void {
+  _deleteLeastRecentlyUsedUntilCountIsNoMoreThanN(
+    store: SymbolStore,
+    n: number,
+    callback: () => void
+  ): void {
     this._count(store, symbolTableCount => {
       if (symbolTableCount > n) {
         // We'll need to remove at least one symbol table.
         const needToRemoveCount = symbolTableCount - n;
-        this._deleteNLeastRecentlyUsedRecords(store, needToRemoveCount, callback);
+        this._deleteNLeastRecentlyUsedRecords(
+          store,
+          needToRemoveCount,
+          callback
+        );
       } else {
         callback();
       }

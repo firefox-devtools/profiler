@@ -22,19 +22,17 @@ import Worker from './utils/worker-factory';
 export default function initializeStore(): Store {
   const worker = new Worker('worker');
 
-  const middlewares = [
-    thunk,
-    threadDispatcher(worker, 'toWorker'),
-  ];
+  const middlewares = [thunk, threadDispatcher(worker, 'toWorker')];
 
   if (process.env.NODE_ENV === 'development') {
-    middlewares.push(createLogger({titleFormatter: action => `content action ${action.type}`}));
+    middlewares.push(
+      createLogger({
+        titleFormatter: action => `content action ${action.type}`,
+      })
+    );
   }
 
-  const store = createStore(
-    reducers,
-    applyMiddleware(...middlewares)
-  );
+  const store = createStore(reducers, applyMiddleware(...middlewares));
 
   handleMessages(worker, store, messages);
 

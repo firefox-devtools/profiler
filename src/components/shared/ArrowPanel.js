@@ -12,7 +12,9 @@ class ArrowPanel extends PureComponent {
     super(props);
     this.state = { open: false };
     this._windowMouseDownListener = this._windowMouseDownListener.bind(this);
-    this._panelElementCreated = elem => { this._panelElement = elem; };
+    this._panelElementCreated = elem => {
+      this._panelElement = elem;
+    };
     this._onOkButtonClick = this._onOkButtonClick.bind(this);
     this._onCancelButtonClick = this._onCancelButtonClick.bind(this);
   }
@@ -38,16 +40,27 @@ class ArrowPanel extends PureComponent {
     if (this.props.onClose) {
       this.props.onClose();
     }
-    window.removeEventListener('mousedown', this._windowMouseDownListener, true);
+    window.removeEventListener(
+      'mousedown',
+      this._windowMouseDownListener,
+      true
+    );
   }
 
   componentWillUnmount() {
-    window.removeEventListener('mousedown', this._windowMouseDownListener, true);
+    window.removeEventListener(
+      'mousedown',
+      this._windowMouseDownListener,
+      true
+    );
   }
 
   _windowMouseDownListener(e) {
-    if (this.state.open && this._panelElement &&
-        !this._panelElement.contains(e.target)) {
+    if (
+      this.state.open &&
+      this._panelElement &&
+      !this._panelElement.contains(e.target)
+    ) {
       this.close();
     }
   }
@@ -67,31 +80,51 @@ class ArrowPanel extends PureComponent {
   }
 
   render() {
-    const { className, children, title, okButtonText, cancelButtonText } = this.props;
-    const hasTitle = (title !== undefined);
-    const hasButtons = (okButtonText || cancelButtonText);
+    const {
+      className,
+      children,
+      title,
+      okButtonText,
+      cancelButtonText,
+    } = this.props;
+    const hasTitle = title !== undefined;
+    const hasButtons = okButtonText || cancelButtonText;
     const { open } = this.state;
     return (
-      <div className='arrowPanelAnchor'>
-        <div className={classNames('arrowPanel', { open, hasTitle, hasButtons }, className)} ref={this._panelElementCreated}>
-          <div className='arrowPanelArrow'/>
-          { hasTitle ? <h1 className='arrowPanelTitle'>{title}</h1> : null }
-          <div className='arrowPanelContent'>
+      <div className="arrowPanelAnchor">
+        <div
+          className={classNames(
+            'arrowPanel',
+            { open, hasTitle, hasButtons },
+            className
+          )}
+          ref={this._panelElementCreated}
+        >
+          <div className="arrowPanelArrow" />
+          {hasTitle
+            ? <h1 className="arrowPanelTitle">
+                {title}
+              </h1>
+            : null}
+          <div className="arrowPanelContent">
             {children}
           </div>
-          {
-            hasButtons ? (
-              <div className='arrowPanelButtons'>
-                <input type='button'
-                       className='arrowPanelCancelButton'
-                       value={cancelButtonText}
-                       onClick={this._onCancelButtonClick}/>
-                <input type='button'
-                       className='arrowPanelOkButton'
-                       value={okButtonText}
-                       onClick={this._onOkButtonClick}/>
-              </div>) : null
-          }
+          {hasButtons
+            ? <div className="arrowPanelButtons">
+                <input
+                  type="button"
+                  className="arrowPanelCancelButton"
+                  value={cancelButtonText}
+                  onClick={this._onCancelButtonClick}
+                />
+                <input
+                  type="button"
+                  className="arrowPanelOkButton"
+                  value={okButtonText}
+                  onClick={this._onOkButtonClick}
+                />
+              </div>
+            : null}
         </div>
       </div>
     );

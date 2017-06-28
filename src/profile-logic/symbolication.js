@@ -20,7 +20,7 @@ export function getContainingLibrary(libs, address) {
   let left = 0;
   let right = libs.length - 1;
   while (left <= right) {
-    const mid = ((left + right) / 2)|0;
+    const mid = ((left + right) / 2) | 0;
     if (address >= libs[mid].end) {
       left = mid + 1;
     } else if (address < libs[mid].start) {
@@ -115,7 +115,11 @@ function gatherFuncsInThread(thread) {
  * @param  {Map}    oldFuncToNewFuncMap An out parameter that specifies how funcs should be merged.
  * @return {Object}                     A map that maps a func address index to a funcIndex, one entry for each func that needs to be symbolicated.
  */
-function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, funcTable) {
+function findFunctionsToMergeAndSymbolicationAddresses(
+  funcAddressTable,
+  funcsToSymbolicate,
+  funcTable
+) {
   const oldFuncToNewFuncMap = new Map();
   const funcAddrIndices = [];
   const funcIndices = [];
@@ -147,12 +151,16 @@ function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsTo
     // Now funcAddress >= nextFuncAddress.
     // Find the index in funcAddressTable of the function that funcAddress is
     // inside of.
-    const funcAddressIndex = bisection.right(funcAddressTable, funcAddress, nextFuncAddressIndex) - 1;
+    const funcAddressIndex =
+      bisection.right(funcAddressTable, funcAddress, nextFuncAddressIndex) - 1;
     if (funcAddressIndex >= 0) {
       // TODO: Take realFuncAddress and put it into the func table.
       // const realFuncAddress = funcAddressTable[funcAddressIndex];
       nextFuncAddressIndex = funcAddressIndex + 1;
-      nextFuncAddress = (nextFuncAddressIndex < funcAddressTable.length) ? funcAddressTable[nextFuncAddressIndex] : Infinity;
+      nextFuncAddress =
+        nextFuncAddressIndex < funcAddressTable.length
+          ? funcAddressTable[nextFuncAddressIndex]
+          : Infinity;
       lastFuncIndex = funcIndex;
       funcAddrIndices.push(funcAddressIndex);
       funcIndices.push(funcIndex);
@@ -171,7 +179,11 @@ function findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsTo
  * @param {Map}    addrToFuncIndexMap A Map that maps a func address to the funcIndex.
  * @return {Object}                   The new thread object.
  */
-export function setFuncNames(thread: Thread, funcIndices: IndexIntoFuncTable, funcNames: string[]): Thread {
+export function setFuncNames(
+  thread: Thread,
+  funcIndices: IndexIntoFuncTable,
+  funcNames: string[]
+): Thread {
   const funcTable = Object.assign({}, thread.funcTable);
   funcTable.name = funcTable.name.slice();
   const stringTable = thread.stringTable;
@@ -220,50 +232,76 @@ export function applyFunctionMerging(
  */
 function symbolicateThread(thread, threadIndex, symbolStore, cbo) {
   const foundFuncMap = gatherFuncsInThread(thread);
-  return Promise.all(Array.from(foundFuncMap).map(function ([lib, funcsToSymbolicate]) {
-    // lib is a lib object from thread.libs.
-    // funcsToSymbolicate is an array of funcIndex.
-    return symbolStore.getFuncAddressTableForLib(lib).then(funcAddressTable => {
-      // We now have the func address table for lib. This lets us merge funcs
-      // that are actually the same function.
-      // We don't have any symbols yet. We'll request those after we've merged
-      // the functions.
-      const { funcAddrIndices, funcIndices, oldFuncToNewFuncMap } =
-        findFunctionsToMergeAndSymbolicationAddresses(funcAddressTable, funcsToSymbolicate, thread.funcTable);
-      cbo.onMergeFunctions(threadIndex, oldFuncToNewFuncMap);
+  return Promise.all(
+    Array.from(foundFuncMap).map(function([lib, funcsToSymbolicate]) {
+      // lib is a lib object from thread.libs.
+      // funcsToSymbolicate is an array of funcIndex.
+      return symbolStore
+        .getFuncAddressTableForLib(lib)
+        .then(funcAddressTable => {
+          // We now have the func address table for lib. This lets us merge funcs
+          // that are actually the same function.
+          // We don't have any symbols yet. We'll request those after we've merged
+          // the functions.
+          const {
+            funcAddrIndices,
+            funcIndices,
+            oldFuncToNewFuncMap,
+          } = findFunctionsToMergeAndSymbolicationAddresses(
+            funcAddressTable,
+            funcsToSymbolicate,
+            thread.funcTable
+          );
+          cbo.onMergeFunctions(threadIndex, oldFuncToNewFuncMap);
 
-      // Now list the func addresses that we want symbols for, and request them.
-      return symbolStore.getSymbolsForAddressesInLib(funcAddrIndices, lib).then(funcNames => {
-        cbo.onGotFuncNames(threadIndex, funcIndices, funcNames);
-      });
-    }).catch(() => {
-      // We could not find symbols for this library.
-      // Don't throw, so that the resulting promise will be resolved, thereby
-      // indicating that we're done symbolicating with lib.
-    });
-  }));
+          // Now list the func addresses that we want symbols for, and request them.
+          return symbolStore
+            .getSymbolsForAddressesInLib(funcAddrIndices, lib)
+            .then(funcNames => {
+              cbo.onGotFuncNames(threadIndex, funcIndices, funcNames);
+            });
+        })
+        .catch(() => {
+          // We could not find symbols for this library.
+          // Don't throw, so that the resulting promise will be resolved, thereby
+          // indicating that we're done symbolicating with lib.
+        });
+    })
+  );
 }
 
 function symbolicateTaskTracer(tasktracer, symbolStore, cbo) {
   const { addressTable, addressIndicesByLib } = tasktracer;
-  return Promise.all(Array.from(addressIndicesByLib).map(([lib, addressIndices]) => {
-    return symbolStore.getFuncAddressTableForLib(lib).then(funcAddressTable => {
-      addressIndices.sort((a, b) => addressTable.address[a] - addressTable.address[b]);
-      const funcAddrIndices = [];
-      const addressIndicesToSymbolicate = [];
-      for (const addressIndex of addressIndices) {
-        const address = addressTable.address[addressIndex];
-        const funcAddressIndex = bisection.right(funcAddressTable, address, 0) - 1;
-        if (funcAddressIndex >= 0) {
-          funcAddrIndices.push(funcAddressIndex);
-          addressIndicesToSymbolicate.push(addressIndex);
-        }
-      }
-      return symbolStore.getSymbolsForAddressesInLib(funcAddrIndices, lib).then(symbolNames => {
-        cbo.onGotTaskTracerNames(addressIndicesToSymbolicate, symbolNames);
-      });
-    });
-  }));
+  return Promise.all(
+    Array.from(addressIndicesByLib).map(([lib, addressIndices]) => {
+      return symbolStore
+        .getFuncAddressTableForLib(lib)
+        .then(funcAddressTable => {
+          addressIndices.sort(
+            (a, b) => addressTable.address[a] - addressTable.address[b]
+          );
+          const funcAddrIndices = [];
+          const addressIndicesToSymbolicate = [];
+          for (const addressIndex of addressIndices) {
+            const address = addressTable.address[addressIndex];
+            const funcAddressIndex =
+              bisection.right(funcAddressTable, address, 0) - 1;
+            if (funcAddressIndex >= 0) {
+              funcAddrIndices.push(funcAddressIndex);
+              addressIndicesToSymbolicate.push(addressIndex);
+            }
+          }
+          return symbolStore
+            .getSymbolsForAddressesInLib(funcAddrIndices, lib)
+            .then(symbolNames => {
+              cbo.onGotTaskTracerNames(
+                addressIndicesToSymbolicate,
+                symbolNames
+              );
+            });
+        });
+    })
+  );
 }
 
 function classNameFromSymbolName(symbolName) {
@@ -274,15 +312,22 @@ function classNameFromSymbolName(symbolName) {
     className = className.substring(vtablePrefix.length);
   }
 
-  const sourceEventMarkerPos = className.indexOf('SourceEventType)::CreateSourceEvent');
+  const sourceEventMarkerPos = className.indexOf(
+    'SourceEventType)::CreateSourceEvent'
+  );
   if (sourceEventMarkerPos !== -1) {
-    return className.substring(sourceEventMarkerPos + 'SourceEventType)::Create'.length);
+    return className.substring(
+      sourceEventMarkerPos + 'SourceEventType)::Create'.length
+    );
   }
 
   const runnableFunctionMarker = 'mozilla::detail::RunnableFunction<';
   if (className.startsWith(runnableFunctionMarker)) {
     const parenPos = className.indexOf('(', runnableFunctionMarker.length + 1);
-    const functionName = className.substring(runnableFunctionMarker.length, parenPos);
+    const functionName = className.substring(
+      runnableFunctionMarker.length,
+      parenPos
+    );
     return `RunnableFunction(${functionName})`;
   }
 
@@ -322,7 +367,9 @@ export function symbolicateProfile(profile, symbolStore, cbo) {
     return symbolicateThread(thread, threadIndex, symbolStore, cbo);
   });
   if ('tasktracer' in profile) {
-    symbolicationPromises.push(symbolicateTaskTracer(profile.tasktracer, symbolStore, cbo));
+    symbolicationPromises.push(
+      symbolicateTaskTracer(profile.tasktracer, symbolStore, cbo)
+    );
   }
   return Promise.all(symbolicationPromises).then(() => undefined);
 }

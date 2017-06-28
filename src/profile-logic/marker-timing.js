@@ -1,6 +1,10 @@
 // @flow
 import type { UserTimingMarkerPayload, MarkerPayload } from '../types/profile';
-import type { TracingMarker, MarkerTiming, MarkerTimingRows } from '../types/profile-derived';
+import type {
+  TracingMarker,
+  MarkerTiming,
+  MarkerTimingRows,
+} from '../types/profile-derived';
 
 // Arbitrarily set an upper limit for adding marker depths, avoiding an infinite loop.
 const MAX_STACKING_DEPTH = 300;
@@ -59,7 +63,11 @@ export function getMarkerTiming(
   const markerTimingsMap: Map<string, MarkerTiming[]> = new Map();
 
   // Go through all of the markers.
-  for (let tracingMarkerIndex = 0; tracingMarkerIndex < tracingMarkers.length; tracingMarkerIndex++) {
+  for (
+    let tracingMarkerIndex = 0;
+    tracingMarkerIndex < tracingMarkers.length;
+    tracingMarkerIndex++
+  ) {
     const marker = tracingMarkers[tracingMarkerIndex];
     let markerTimingsByName = markerTimingsMap.get(marker.name);
     if (markerTimingsByName === undefined) {

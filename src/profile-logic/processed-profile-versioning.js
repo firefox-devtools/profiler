@@ -31,9 +31,11 @@ export function isProcessedProfile(profile: Object): boolean {
   }
 
   // This could also be a pre-version 1 profile.
-  return 'threads' in profile &&
+  return (
+    'threads' in profile &&
     profile.threads.length >= 1 &&
-    'stringArray' in profile.threads[0];
+    'stringArray' in profile.threads[0]
+  );
 }
 
 /**
@@ -43,8 +45,8 @@ export function isProcessedProfile(profile: Object): boolean {
  *                         i.e. stringArray instead of stringTable.
  */
 export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
-  const profileVersion = profile.meta.preprocessedProfileVersion ||
-    UNANNOTATED_VERSION;
+  const profileVersion =
+    profile.meta.preprocessedProfileVersion || UNANNOTATED_VERSION;
   if (profileVersion === CURRENT_VERSION) {
     return;
   }
@@ -118,7 +120,9 @@ const _upgraders = {
         if (!('debugName' in lib)) {
           lib.debugName = lib.pdbName;
           lib.path = lib.name;
-          lib.name = lib.debugName.endsWith('.pdb') ? lib.debugName.substr(0, lib.debugName.length - 4) : lib.debugName;
+          lib.name = lib.debugName.endsWith('.pdb')
+            ? lib.debugName.substr(0, lib.debugName.length - 4)
+            : lib.debugName;
           lib.arch = _archFromAbi(profile.meta.abi);
           delete lib.pdbName;
           delete lib.pdbAge;
@@ -178,12 +182,24 @@ const _upgraders = {
       }
       const oldResourceToNewResourceMap = new Map();
       const originToResourceIndex = new Map();
-      for (let resourceIndex = 0; resourceIndex < resourceTable.length; resourceIndex++) {
+      for (
+        let resourceIndex = 0;
+        resourceIndex < resourceTable.length;
+        resourceIndex++
+      ) {
         if (resourceTable.type[resourceIndex] === resourceTypes.library) {
-          oldResourceToNewResourceMap.set(resourceIndex, newResourceTable.length);
-          addLibResource(resourceTable.name[resourceIndex], resourceTable.lib[resourceIndex]);
+          oldResourceToNewResourceMap.set(
+            resourceIndex,
+            newResourceTable.length
+          );
+          addLibResource(
+            resourceTable.name[resourceIndex],
+            resourceTable.lib[resourceIndex]
+          );
         } else if (resourceTable.type[resourceIndex] === resourceTypes.url) {
-          const scriptURI = stringTable.getString(resourceTable.name[resourceIndex]);
+          const scriptURI = stringTable.getString(
+            resourceTable.name[resourceIndex]
+          );
           let newResourceIndex = null;
           let origin, host;
           try {
@@ -223,7 +239,9 @@ const _upgraders = {
       for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
         const oldResourceIndex = funcTable.resource[funcIndex];
         if (oldResourceToNewResourceMap.has(oldResourceIndex)) {
-          funcTable.resource[funcIndex] = oldResourceToNewResourceMap.get(oldResourceIndex);
+          funcTable.resource[funcIndex] = oldResourceToNewResourceMap.get(
+            oldResourceIndex
+          );
         }
         let fileName = null;
         let lineNumber = null;

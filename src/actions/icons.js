@@ -56,7 +56,7 @@ export function iconStartLoading(icon: string): ThunkAction<Promise<void>> {
           dispatch(iconIsInError(icon));
           break;
         case 'cached':
-          // nothing to do
+        // nothing to do
       }
     });
   };

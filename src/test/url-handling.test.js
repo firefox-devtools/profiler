@@ -14,7 +14,7 @@ import { processProfile } from '../profile-logic/process-profile';
 import { receiveProfileFromStore } from '../actions/receive-profile';
 import type { Profile } from '../types/profile';
 
-describe('selectedThread', function () {
+describe('selectedThread', function() {
   function storeWithThread(threadIndex) {
     const store = blankStore();
     const urlState = stateFromLocation({
@@ -27,7 +27,7 @@ describe('selectedThread', function () {
     return store;
   }
 
-  it('selects the right thread when receiving a profile from web', function () {
+  it('selects the right thread when receiving a profile from web', function() {
     const profile: Profile = processProfile(exampleProfile);
 
     const store = storeWithThread(1);
@@ -36,7 +36,7 @@ describe('selectedThread', function () {
     expect(urlStateReducers.getSelectedThreadIndex(store.getState())).toBe(1);
   });
 
-  it('selects a default thread when a wrong thread has been requested', function () {
+  it('selects a default thread when a wrong thread has been requested', function() {
     const profile: Profile = processProfile(exampleProfile);
 
     const store = storeWithThread(100);
@@ -47,7 +47,7 @@ describe('selectedThread', function () {
   });
 });
 
-describe('threadOrder and hiddenThreads', function () {
+describe('threadOrder and hiddenThreads', function() {
   const profile: Profile = processProfile(exampleProfile);
 
   function storeWithSearch(search: string) {
@@ -62,31 +62,31 @@ describe('threadOrder and hiddenThreads', function () {
     return store;
   }
 
-  it('decides the threadOrder and hiddenThreads without any set parameters', function () {
+  it('decides the threadOrder and hiddenThreads without any set parameters', function() {
     const { getState } = storeWithSearch('');
     expect(urlStateReducers.getThreadOrder(getState())).toEqual([0, 2, 1]);
     expect(urlStateReducers.getHiddenThreads(getState())).toEqual([]);
   });
 
-  it('can reorder the threads ', function () {
+  it('can reorder the threads ', function() {
     const { getState } = storeWithSearch('?threadOrder=1-2-0');
     expect(urlStateReducers.getThreadOrder(getState())).toEqual([1, 2, 0]);
     expect(urlStateReducers.getHiddenThreads(getState())).toEqual([]);
   });
 
-  it('can hide the threads', function () {
+  it('can hide the threads', function() {
     const { getState } = storeWithSearch('?hiddenThreads=1-2');
     expect(urlStateReducers.getThreadOrder(getState())).toEqual([0, 2, 1]);
     expect(urlStateReducers.getHiddenThreads(getState())).toEqual([1, 2]);
   });
 
-  it('will not accept invalid threads in the thread order', function () {
+  it('will not accept invalid threads in the thread order', function() {
     const { getState } = storeWithSearch('?threadOrder=0-8-2-a-1');
     expect(urlStateReducers.getThreadOrder(getState())).toEqual([0, 2, 1]);
     expect(urlStateReducers.getHiddenThreads(getState())).toEqual([]);
   });
 
-  it('will not accept invalid hidden threads', function () {
+  it('will not accept invalid hidden threads', function() {
     const { getState } = storeWithSearch('?hiddenThreads=0-8-2-a');
     expect(urlStateReducers.getThreadOrder(getState())).toEqual([0, 2, 1]);
     expect(urlStateReducers.getHiddenThreads(getState())).toEqual([0, 2]);

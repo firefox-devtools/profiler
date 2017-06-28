@@ -7,7 +7,6 @@ import React, { PureComponent, PropTypes } from 'react';
 import './ThreadMarkerOverlay.css';
 
 class ThreadMarkerOverlay extends PureComponent {
-
   constructor(props) {
     super(props);
     this._mouseDownListener = this._mouseDownListener.bind(this);
@@ -24,34 +23,32 @@ class ThreadMarkerOverlay extends PureComponent {
     const { thread, rangeStart, rangeEnd } = this.props;
     const { markers } = thread;
     return (
-      <ol className='threadMarkerOverlay'
-          onMouseDown={this._mouseDownListener}>
-        {
-          markers.name.map((markerName, markerIndex) => {
-            const time = markers.time[markerIndex];
-            if (time < rangeStart || time > rangeEnd) {
+      <ol className="threadMarkerOverlay" onMouseDown={this._mouseDownListener}>
+        {markers.name.map((markerName, markerIndex) => {
+          const time = markers.time[markerIndex];
+          if (time < rangeStart || time > rangeEnd) {
+            return null;
+          }
+          const data = markers.data[markerIndex];
+          if (data) {
+            if ('interval' in data) {
               return null;
             }
-            const data = markers.data[markerIndex];
-            if (data) {
-              if ('interval' in data) {
-                return null;
-              }
-            }
-            return (
-              <li className='threadMarkerOverlayMarkerItem'
-                  key={markerIndex}
-                  data-index={markerIndex}
-                  style={{
-                    left: (time - rangeStart) / (rangeEnd - rangeStart) * 100 + '%',
-                  }} />
-            );
-          })
-        }
+          }
+          return (
+            <li
+              className="threadMarkerOverlayMarkerItem"
+              key={markerIndex}
+              data-index={markerIndex}
+              style={{
+                left: (time - rangeStart) / (rangeEnd - rangeStart) * 100 + '%',
+              }}
+            />
+          );
+        })}
       </ol>
     );
   }
-
 }
 
 ThreadMarkerOverlay.propTypes = {

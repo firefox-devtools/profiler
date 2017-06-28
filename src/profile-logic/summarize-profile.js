@@ -8,19 +8,19 @@ import type { Profile, Thread, IndexIntoStackTable } from '../types/profile';
 
 export type Summary = { [id: string]: number };
 type MatchingFunction = (string, string) => boolean;
-type StacksInCategory = { [id: string]: { [id: string]: number } }
+type StacksInCategory = { [id: string]: { [id: string]: number } };
 type SummarySegment = {
-  percentage: {[id: string]: number},
-  samples: {[id: string]: number},
-}
+  percentage: { [id: string]: number },
+  samples: { [id: string]: number },
+};
 type RollingSummary = SummarySegment[];
-type Categories = Array<(string|null)>;
+type Categories = Array<string | null>;
 type ThreadCategories = Categories[];
 
 /**
  * A list of strategies for matching sample names to patterns.
  */
-const match: {[id: string]: MatchingFunction} = {
+const match: { [id: string]: MatchingFunction } = {
   exact: (symbol, pattern) => symbol === pattern,
   prefix: (symbol, pattern) => symbol.startsWith(pattern),
   substring: (symbol, pattern) => symbol.includes(pattern),
@@ -67,10 +67,18 @@ const categories = [
   [match.exact, 'nsJSUtil::EvaluateString', 'script'],
   [match.prefix, 'js::frontend::Parser', 'script.parse'],
   [match.prefix, 'js::jit::IonCompile', 'script.compile.ion'],
-  [match.prefix, 'js::jit::BaselineCompiler::compile', 'script.compile.baseline'],
+  [
+    match.prefix,
+    'js::jit::BaselineCompiler::compile',
+    'script.compile.baseline',
+  ],
 
   [match.prefix, 'CompositorBridgeParent::Composite', 'paint'],
-  [match.prefix, 'mozilla::layers::PLayerTransactionParent::Read(', 'messageread'],
+  [
+    match.prefix,
+    'mozilla::layers::PLayerTransactionParent::Read(',
+    'messageread',
+  ],
 
   [match.prefix, 'mozilla::dom::', 'dom'],
   [match.prefix, 'nsDOMCSSDeclaration::', 'restyle'],
@@ -91,7 +99,10 @@ const categories = [
 export function summarizeProfile(profile: Profile) {
   return timeCode('summarizeProfile', () => {
     const threadCategories: ThreadCategories = categorizeThreadSamples(profile);
-    const rollingSummaries:RollingSummary[] = calculateRollingSummaries(profile, threadCategories);
+    const rollingSummaries: RollingSummary[] = calculateRollingSummaries(
+      profile,
+      threadCategories
+    );
     const summaries = summarizeCategories(profile, threadCategories);
 
     return profile.threads.map((thread, i) => ({
@@ -131,7 +142,9 @@ function functionNameCategorizer() {
 /**
  * A function that categorizes a sample.
  */
-type SampleCategorizer = (stackIndex: (IndexIntoStackTable|null)) => (string|null);
+type SampleCategorizer = (stackIndex: IndexIntoStackTable | null) =>
+  | string
+  | null;
 
 /**
  * Given a profile, return a function that categorizes a sample.
@@ -141,7 +154,9 @@ type SampleCategorizer = (stackIndex: (IndexIntoStackTable|null)) => (string|nul
 function sampleCategorizer(thread: Thread): SampleCategorizer {
   const categorizeFuncName = functionNameCategorizer();
 
-  function computeCategory(stackIndex: (IndexIntoStackTable|null)): (string|null) {
+  function computeCategory(stackIndex: IndexIntoStackTable | null):
+    | string
+    | null {
     if (stackIndex === null) {
       return null;
     }
@@ -160,7 +175,9 @@ function sampleCategorizer(thread: Thread): SampleCategorizer {
       return category;
     }
 
-    const prefixCategory = categorizeSampleStack(thread.stackTable.prefix[stackIndex]);
+    const prefixCategory = categorizeSampleStack(
+      thread.stackTable.prefix[stackIndex]
+    );
     if (category === 'wait') {
       if (prefixCategory === null || prefixCategory === 'uncategorized') {
         return 'wait';
@@ -174,9 +191,11 @@ function sampleCategorizer(thread: Thread): SampleCategorizer {
     return prefixCategory;
   }
 
-  const stackCategoryCache: Map<IndexIntoStackTable, (string|null)> = new Map();
+  const stackCategoryCache: Map<IndexIntoStackTable, string | null> = new Map();
 
-  function categorizeSampleStack(stackIndex: (IndexIntoStackTable|null)): (string|null) {
+  function categorizeSampleStack(stackIndex: IndexIntoStackTable | null):
+    | string
+    | null {
     if (stackIndex === null) {
       return null;
     }
@@ -201,7 +220,10 @@ function sampleCategorizer(thread: Thread): SampleCategorizer {
  * @param {string} fullCategoryName - The name of the category.
  * @returns {object} summary
  */
-function summarizeSampleCategories(summary: Summary, fullCategoryName: (string|null)): Summary {
+function summarizeSampleCategories(
+  summary: Summary,
+  fullCategoryName: string | null
+): Summary {
   if (fullCategoryName !== null) {
     const categories = fullCategoryName.split('.');
 
@@ -222,30 +244,35 @@ function summarizeSampleCategories(summary: Summary, fullCategoryName: (string|n
 function calculateSummaryPercentages(summary: Summary) {
   const rows = objectEntries(summary);
 
-  const sampleCount = rows.reduce((sum: number, [name: string, count: number]) => {
-    // Only count the sample if it's not a sub-category. For instance "script.link"
-    // is a sub-category of "script".
-    return sum + (name.includes('.') ? 0 : count);
-  }, 0);
+  const sampleCount = rows.reduce(
+    (sum: number, [name: string, count: number]) => {
+      // Only count the sample if it's not a sub-category. For instance "script.link"
+      // is a sub-category of "script".
+      return sum + (name.includes('.') ? 0 : count);
+    },
+    0
+  );
 
-  return rows
-    .map(([category, samples]) => {
-      const percentage = samples / sampleCount;
-      return { category, samples, percentage };
-    })
-    // Sort by sample count, then by name so that the results are deterministic.
-    .sort((a, b) => {
-      if (a.samples === b.samples) {
-        return a.category.localeCompare(b.category);
-      }
-      return b.samples - a.samples;
-    });
+  return (
+    rows
+      .map(([category, samples]) => {
+        const percentage = samples / sampleCount;
+        return { category, samples, percentage };
+      })
+      // Sort by sample count, then by name so that the results are deterministic.
+      .sort((a, b) => {
+        if (a.samples === b.samples) {
+          return a.category.localeCompare(b.category);
+        }
+        return b.samples - a.samples;
+      })
+  );
 }
 
 function logStacks(stacksInCategory: StacksInCategory, maxLogLength = 10) {
   const entries = objectEntries(stacksInCategory);
   const data = entries
-    .sort(([, {total: a}], [, {total: b}]) => b - a)
+    .sort(([, { total: a }], [, { total: b }]) => b - a)
     .slice(0, Math.min(maxLogLength, entries.length));
 
   /* eslint-disable no-console */
@@ -254,7 +281,10 @@ function logStacks(stacksInCategory: StacksInCategory, maxLogLength = 10) {
   /* eslint-enable no-console */
 }
 
-function stackToString(stackIndex: IndexIntoStackTable, thread: Thread): string {
+function stackToString(
+  stackIndex: IndexIntoStackTable,
+  thread: Thread
+): string {
   const { stackTable, frameTable, funcTable, stringTable } = thread;
   const stack = [];
   let nextStackIndex = stackIndex;
@@ -268,7 +298,11 @@ function stackToString(stackIndex: IndexIntoStackTable, thread: Thread): string 
   return stack.join('\n');
 }
 
-function incrementPerThreadCount(container: StacksInCategory, key: string, threadName: string) {
+function incrementPerThreadCount(
+  container: StacksInCategory,
+  key: string,
+  threadName: string
+) {
   const count = container[key] || { total: 0, [threadName]: 0 };
   count.total++;
   count[threadName]++;
@@ -276,7 +310,9 @@ function incrementPerThreadCount(container: StacksInCategory, key: string, threa
 }
 
 function countStacksInCategory(
-  profile: Profile, threadCategories: ThreadCategories, category: string = 'uncategorized'
+  profile: Profile,
+  threadCategories: ThreadCategories,
+  category: string = 'uncategorized'
 ): StacksInCategory {
   const stacksInCategory = {};
   profile.threads.forEach((thread, i) => {
@@ -287,7 +323,11 @@ function countStacksInCategory(
         const stackIndex = samples.stack[sampleIndex];
         if (stackIndex !== null) {
           const stringCallStack: string = stackToString(stackIndex, thread);
-          incrementPerThreadCount(stacksInCategory, stringCallStack, thread.name);
+          incrementPerThreadCount(
+            stacksInCategory,
+            stringCallStack,
+            thread.name
+          );
         }
       }
     }
@@ -308,8 +348,14 @@ export function categorizeThreadSamples(profile: Profile): ThreadCategories {
     if (process.env.NODE_ENV === 'development') {
       // Change the constant to display the top stacks of a different category.
       const categoryToDump = 'uncategorized';
-      const stacks: StacksInCategory = countStacksInCategory(profile, threadCategories, categoryToDump);
-      console.log(`${Object.keys(stacks).length} stacks labeled '${categoryToDump}'`);
+      const stacks: StacksInCategory = countStacksInCategory(
+        profile,
+        threadCategories,
+        categoryToDump
+      );
+      console.log(
+        `${Object.keys(stacks).length} stacks labeled '${categoryToDump}'`
+      );
       logStacks(stacks);
     }
 
@@ -331,23 +377,29 @@ function mapProfileToThreadCategories(profile: Profile): ThreadCategories {
  * @param {object} threadCategories - Each thread's categories for the samples.
  * @returns {object} The summaries of each thread.
  */
-export function summarizeCategories(profile: Profile, threadCategories: ThreadCategories) {
-  return threadCategories.map(categories => (
-      categories.reduce(summarizeSampleCategories, {})
-    ))
+export function summarizeCategories(
+  profile: Profile,
+  threadCategories: ThreadCategories
+) {
+  return threadCategories
+    .map(categories => categories.reduce(summarizeSampleCategories, {}))
     .map(calculateSummaryPercentages);
 }
 
 export function calculateRollingSummaries(
-  profile: Profile, threadCategories: ThreadCategories, segmentCount: number = 40, rolling: number = 4
+  profile: Profile,
+  threadCategories: ThreadCategories,
+  segmentCount: number = 40,
+  rolling: number = 4
 ): RollingSummary[] {
-  const [minTime, maxTime] = profile.threads.map(thread => {
-    return [thread.samples.time[0], thread.samples.time[thread.samples.time.length - 1]];
-  })
-  .reduce((a, b) => ([
-    Math.min(a[0], b[0]),
-    Math.max(a[1], b[1]),
-  ]));
+  const [minTime, maxTime] = profile.threads
+    .map(thread => {
+      return [
+        thread.samples.time[0],
+        thread.samples.time[thread.samples.time.length - 1],
+      ];
+    })
+    .reduce((a, b) => [Math.min(a[0], b[0]), Math.max(a[1], b[1])]);
   const totalTime = maxTime - minTime;
   const segmentLength = totalTime / segmentCount;
   const segmentHalfLength = segmentLength / 2;
@@ -362,10 +414,15 @@ export function calculateRollingSummaries(
       let samplesInRange = 0;
       const samples: { [string]: number } = {};
 
-      const rollingMinTime = minTime + (i * segmentLength) + segmentHalfLength - rollingHalfLength;
+      const rollingMinTime =
+        minTime + i * segmentLength + segmentHalfLength - rollingHalfLength;
       const rollingMaxTime = rollingMinTime + rollingLength;
 
-      for (let sampleIndex = 0; sampleIndex < thread.samples.time.length; sampleIndex++) {
+      for (
+        let sampleIndex = 0;
+        sampleIndex < thread.samples.time.length;
+        sampleIndex++
+      ) {
         const time = thread.samples.time[sampleIndex];
         if (time > rollingMinTime) {
           if (time > rollingMaxTime) {

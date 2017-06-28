@@ -17,7 +17,11 @@ export function getTasksByThread(taskTable: Object, threadTable: Object) {
       }
     }
     const afterEnd = 1477254572877 * 2;
-    taskIndices.sort((a, b) => (taskTable.beginTime[a] || afterEnd) - (taskTable.beginTime[b] || afterEnd));
+    taskIndices.sort(
+      (a, b) =>
+        (taskTable.beginTime[a] || afterEnd) -
+        (taskTable.beginTime[b] || afterEnd)
+    );
     threadIndexToTaskIndicesMap.set(threadIndex, taskIndices);
   }
   return threadIndexToTaskIndicesMap;

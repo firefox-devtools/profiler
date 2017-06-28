@@ -4,8 +4,16 @@ import withTimelineViewport from './TimelineViewport';
 import TimelineCanvas from './TimelineCanvas';
 import TextMeasurement from '../../utils/text-measurement';
 
-import type { Milliseconds, CssPixels, UnitIntervalOfProfileRange } from '../../types/units';
-import type { TracingMarker, MarkerTimingRows, IndexIntoMarkerTiming } from '../../types/profile-derived';
+import type {
+  Milliseconds,
+  CssPixels,
+  UnitIntervalOfProfileRange,
+} from '../../types/units';
+import type {
+  TracingMarker,
+  MarkerTimingRows,
+  IndexIntoMarkerTiming,
+} from '../../types/profile-derived';
 import type { Action, ProfileSelection } from '../../types/actions';
 
 type Props = {
@@ -32,7 +40,6 @@ const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
 
 class TimelineMarkerCanvas extends PureComponent {
-
   _requestedAnimationFrame: boolean;
   _devicePixelRatio: number;
   _ctx: null | CanvasRenderingContext2D;
@@ -52,13 +59,24 @@ class TimelineMarkerCanvas extends PureComponent {
     (this: any).hitTest = this.hitTest.bind(this);
   }
 
-  drawCanvas(ctx: CanvasRenderingContext2D, hoveredItem: IndexIntoMarkerTiming | null) {
+  drawCanvas(
+    ctx: CanvasRenderingContext2D,
+    hoveredItem: IndexIntoMarkerTiming | null
+  ) {
     const {
-      viewportTop, viewportBottom, rowHeight, containerWidth, containerHeight, markerTimingRows,
+      viewportTop,
+      viewportBottom,
+      rowHeight,
+      containerWidth,
+      containerHeight,
+      markerTimingRows,
     } = this.props;
     // Convert CssPixels to Stack Depth
     const startRow = Math.floor(viewportTop / rowHeight);
-    const endRow = Math.min(Math.ceil(viewportBottom / rowHeight), markerTimingRows.length);
+    const endRow = Math.min(
+      Math.ceil(viewportBottom / rowHeight),
+      markerTimingRows.length
+    );
 
     ctx.clearRect(0, 0, containerWidth, containerHeight);
 
@@ -73,8 +91,13 @@ class TimelineMarkerCanvas extends PureComponent {
     endRow: number
   ) {
     const {
-      rangeStart, rangeEnd, containerWidth, markerTimingRows, viewportLeft,
-      viewportRight, viewportTop,
+      rangeStart,
+      rangeEnd,
+      containerWidth,
+      markerTimingRows,
+      viewportLeft,
+      viewportRight,
+      viewportTop,
     } = this.props;
 
     // Ensure the text measurement tool is created, since this is the first time
@@ -85,7 +108,8 @@ class TimelineMarkerCanvas extends PureComponent {
     const textMeasurement = this._textMeasurement;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
-    const viewportLength: UnitIntervalOfProfileRange = viewportRight - viewportLeft;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
 
     // Only draw the stack frames that are vertically within view.
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
@@ -97,19 +121,30 @@ class TimelineMarkerCanvas extends PureComponent {
       }
 
       // Decide which samples to actually draw
-      const timeAtViewportLeft: Milliseconds = rangeStart + rangeLength * viewportLeft;
-      const timeAtViewportRight: Milliseconds = rangeStart + rangeLength * viewportRight;
+      const timeAtViewportLeft: Milliseconds =
+        rangeStart + rangeLength * viewportLeft;
+      const timeAtViewportRight: Milliseconds =
+        rangeStart + rangeLength * viewportRight;
 
       ctx.lineWidth = 1;
       for (let i = 0; i < markerTiming.length; i++) {
         // Only draw samples that are in bounds.
-        if (markerTiming.end[i] > timeAtViewportLeft && markerTiming.start[i] < timeAtViewportRight) {
-          const startTime: UnitIntervalOfProfileRange = (markerTiming.start[i] - rangeStart) / rangeLength;
-          const endTime: UnitIntervalOfProfileRange = (markerTiming.end[i] - rangeStart) / rangeLength;
+        if (
+          markerTiming.end[i] > timeAtViewportLeft &&
+          markerTiming.start[i] < timeAtViewportRight
+        ) {
+          const startTime: UnitIntervalOfProfileRange =
+            (markerTiming.start[i] - rangeStart) / rangeLength;
+          const endTime: UnitIntervalOfProfileRange =
+            (markerTiming.end[i] - rangeStart) / rangeLength;
 
-          const x: CssPixels = ((startTime - viewportLeft) * containerWidth / viewportLength);
+          const x: CssPixels =
+            (startTime - viewportLeft) * containerWidth / viewportLength;
           const y: CssPixels = rowIndex * ROW_HEIGHT - viewportTop;
-          const w: CssPixels = Math.max(10, ((endTime - startTime) * containerWidth / viewportLength));
+          const w: CssPixels = Math.max(
+            10,
+            (endTime - startTime) * containerWidth / viewportLength
+          );
           const h: CssPixels = ROW_HEIGHT - 1;
 
           if (w < 2) {
@@ -154,8 +189,17 @@ class TimelineMarkerCanvas extends PureComponent {
     }
   }
 
-  drawSeparatorsAndLabels(ctx: CanvasRenderingContext2D, startRow: number, endRow: number) {
-    const { markerTimingRows, rowHeight, viewportTop, containerWidth } = this.props;
+  drawSeparatorsAndLabels(
+    ctx: CanvasRenderingContext2D,
+    startRow: number,
+    endRow: number
+  ) {
+    const {
+      markerTimingRows,
+      rowHeight,
+      viewportTop,
+      containerWidth,
+    } = this.props;
 
     // Draw separators
     ctx.fillStyle = '#eee';
@@ -190,16 +234,27 @@ class TimelineMarkerCanvas extends PureComponent {
 
   hitTest(x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null {
     const {
-       rangeStart, rangeEnd, markerTimingRows, viewportLeft, viewportRight, viewportTop,
-       containerWidth, rowHeight,
-     } = this.props;
+      rangeStart,
+      rangeEnd,
+      markerTimingRows,
+      viewportLeft,
+      viewportRight,
+      viewportTop,
+      containerWidth,
+      rowHeight,
+    } = this.props;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
-    const viewportLength: UnitIntervalOfProfileRange = viewportRight - viewportLeft;
-    const unitIntervalTime: UnitIntervalOfProfileRange = viewportLeft + viewportLength * (x / containerWidth);
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+    const unitIntervalTime: UnitIntervalOfProfileRange =
+      viewportLeft + viewportLength * (x / containerWidth);
     const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
     const rowIndex = Math.floor((y + viewportTop) / rowHeight);
-    const minDuration = rangeLength * viewportLength * (rowHeight * 2 * MARKER_DOT_RADIUS / containerWidth);
+    const minDuration =
+      rangeLength *
+      viewportLength *
+      (rowHeight * 2 * MARKER_DOT_RADIUS / containerWidth);
     const markerTiming = markerTimingRows[rowIndex];
 
     if (!markerTiming) {
@@ -270,11 +325,11 @@ class TimelineMarkerCanvas extends PureComponent {
     }
 
     return (
-      <div className='tooltipOneLine'>
-        <div className='tooltipTiming'>
+      <div className="tooltipOneLine">
+        <div className="tooltipTiming">
           {duration}ms
         </div>
-        <div className='tooltipName'>
+        <div className="tooltipName">
           {tooltipName}
         </div>
       </div>
@@ -284,14 +339,18 @@ class TimelineMarkerCanvas extends PureComponent {
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props;
 
-    return <TimelineCanvas className='timelineMarkerCanvas'
-                           containerWidth={containerWidth}
-                           containerHeight={containerHeight}
-                           isDragging={isDragging}
-                           onDoubleClickItem={this.onDoubleClickMarker}
-                           getHoveredItemInfo={this.getHoveredMarkerInfo}
-                           drawCanvas={this.drawCanvas}
-                           hitTest={this.hitTest} />;
+    return (
+      <TimelineCanvas
+        className="timelineMarkerCanvas"
+        containerWidth={containerWidth}
+        containerHeight={containerHeight}
+        isDragging={isDragging}
+        onDoubleClickItem={this.onDoubleClickMarker}
+        getHoveredItemInfo={this.getHoveredMarkerInfo}
+        drawCanvas={this.drawCanvas}
+        hitTest={this.hitTest}
+      />
+    );
   }
 }
 

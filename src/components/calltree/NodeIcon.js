@@ -33,7 +33,7 @@ class NodeIcon extends PureComponent {
   }
 
   render() {
-    return <div className={`treeRowIcon ${this.props.className || ''}`}></div>;
+    return <div className={`treeRowIcon ${this.props.className || ''}`} />;
   }
 }
 
@@ -43,7 +43,10 @@ NodeIcon.propTypes = {
   iconStartLoading: PropTypes.func.isRequired,
 };
 
-export default connect((state, { node }) => ({
-  className: getIconClassNameForNode(state, node),
-  icon: node.icon,
-}), actions)(NodeIcon);
+export default connect(
+  (state, { node }) => ({
+    className: getIconClassNameForNode(state, node),
+    icon: node.icon,
+  }),
+  actions
+)(NodeIcon);

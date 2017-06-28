@@ -6,9 +6,16 @@ import { getContainingLibrary, getClosestLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes } from './profile-data';
 import { provideHostSide } from '../utils/promise-worker';
-import { CURRENT_VERSION, upgradeProcessedProfileToCurrentVersion, isProcessedProfile } from './processed-profile-versioning';
+import {
+  CURRENT_VERSION,
+  upgradeProcessedProfileToCurrentVersion,
+  isProcessedProfile,
+} from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
-import { isOldCleopatraFormat, convertOldCleopatraProfile } from './old-cleopatra-profile-format';
+import {
+  isOldCleopatraFormat,
+  convertOldCleopatraProfile,
+} from './old-cleopatra-profile-format';
 import { getEmptyTaskTracerData } from './task-tracer';
 /**
  * Module for converting a Gecko profile into the 'processed' format.
@@ -28,7 +35,9 @@ function toStructOfArrays(geckoTable) {
   const result = { length: geckoTable.data.length };
   for (const fieldName in geckoTable.schema) {
     const fieldIndex = geckoTable.schema[fieldName];
-    result[fieldName] = geckoTable.data.map(entry => (fieldIndex in entry) ? entry[fieldIndex] : null);
+    result[fieldName] = geckoTable.data.map(
+      entry => (fieldIndex in entry ? entry[fieldIndex] : null)
+    );
   }
   return result;
 }
@@ -154,7 +163,9 @@ function processThread(thread, libs) {
         /^(.*) \(in ([^)]*)\) (\(.*:.*\))$/.exec(locationString) ||
         /^(.*) \(in ([^)]*)\)$/.exec(locationString);
       if (cppMatch) {
-        funcNameIndex = stringTable.indexForString(cleanFunctionName(cppMatch[1]));
+        funcNameIndex = stringTable.indexForString(
+          cleanFunctionName(cppMatch[1])
+        );
         const libraryNameStringIndex = stringTable.indexForString(cppMatch[2]);
         funcIndex = stringTableIndexToNewFuncIndex.get(funcNameIndex);
         if (funcIndex !== undefined) {
@@ -207,7 +218,9 @@ function processThread(thread, libs) {
             // initial evaluation of the whole JS file. In that case, use the
             // file name itself, prepended by '(root scope) ', as the function
             // name.
-            funcNameIndex = stringTable.indexForString(`(root scope) ${scriptURI}`);
+            funcNameIndex = stringTable.indexForString(
+              `(root scope) ${scriptURI}`
+            );
           }
           fileName = stringTable.indexForString(scriptURI);
           lineNumber = jsMatch[3] | 0;
@@ -215,11 +228,20 @@ function processThread(thread, libs) {
       }
     }
     funcIndex = funcTable.length;
-    addFunc(funcNameIndex, resourceIndex, addressRelativeToLib, isJS, fileName, lineNumber);
+    addFunc(
+      funcNameIndex,
+      resourceIndex,
+      addressRelativeToLib,
+      isJS,
+      fileName,
+      lineNumber
+    );
     stringTableIndexToNewFuncIndex.set(locationIndex, funcIndex);
     return funcIndex;
   });
-  frameTable.address = frameTable.func.map(funcIndex => funcTable.address[funcIndex]);
+  frameTable.address = frameTable.func.map(
+    funcIndex => funcTable.address[funcIndex]
+  );
   delete frameTable.location;
 
   return {
@@ -227,7 +249,14 @@ function processThread(thread, libs) {
     processType: thread.processType,
     tid: thread.tid,
     pid: thread.pid,
-    libs, frameTable, funcTable, resourceTable, stackTable, markers, stringTable, samples,
+    libs,
+    frameTable,
+    funcTable,
+    resourceTable,
+    stackTable,
+    markers,
+    stringTable,
+    samples,
   };
 }
 
@@ -235,9 +264,13 @@ function addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
   const { data, start, threads } = tasktracer;
 
   const {
-    taskTable, tasksIdToTaskIndexMap, stringTable,
-    addressIndicesByLib, addressTable,
-    threadTable, tidToThreadIndexMap,
+    taskTable,
+    tasksIdToTaskIndexMap,
+    stringTable,
+    addressIndicesByLib,
+    addressTable,
+    threadTable,
+    tidToThreadIndexMap,
   } = result;
 
   for (const thread of threads) {
@@ -272,9 +305,15 @@ function addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
           const thirdSpacePos = line.indexOf(' ', secondSpacePos + 1);
           const fourthSpacePos = line.indexOf(' ', thirdSpacePos + 1);
           const fifthSpacePos = line.indexOf(' ', fourthSpacePos + 1);
-          taskTable.dispatchTime[taskIndex] = Math.round(+line.substring(secondSpacePos + 1, thirdSpacePos) - startTime);
-          taskTable.sourceEventId[taskIndex] = line.substring(thirdSpacePos + 1, fourthSpacePos);
-          taskTable.sourceEventType[taskIndex] = line.substring(fourthSpacePos + 1, fifthSpacePos)|0;
+          taskTable.dispatchTime[taskIndex] = Math.round(
+            +line.substring(secondSpacePos + 1, thirdSpacePos) - startTime
+          );
+          taskTable.sourceEventId[taskIndex] = line.substring(
+            thirdSpacePos + 1,
+            fourthSpacePos
+          );
+          taskTable.sourceEventType[taskIndex] =
+            line.substring(fourthSpacePos + 1, fifthSpacePos) | 0;
           taskTable.parentTaskId[taskIndex] = line.substring(fifthSpacePos + 1);
         }
         break;
@@ -282,14 +321,21 @@ function addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
         {
           const thirdSpacePos = line.indexOf(' ', secondSpacePos + 1);
           const fourthSpacePos = line.indexOf(' ', thirdSpacePos + 1);
-          taskTable.beginTime[taskIndex] = Math.round(+line.substring(secondSpacePos + 1, thirdSpacePos) - startTime);
-          taskTable.processId[taskIndex] = line.substring(thirdSpacePos + 1, fourthSpacePos);
+          taskTable.beginTime[taskIndex] = Math.round(
+            +line.substring(secondSpacePos + 1, thirdSpacePos) - startTime
+          );
+          taskTable.processId[taskIndex] = line.substring(
+            thirdSpacePos + 1,
+            fourthSpacePos
+          );
           const tid = +line.substring(fourthSpacePos + 1);
           let threadIndex = tidToThreadIndexMap.get(tid);
           if (threadIndex === undefined) {
             threadIndex = threadTable.length++;
             threadTable.tid[threadIndex] = tid;
-            threadTable.name[threadIndex] = stringTable.indexForString(`Thread ${tid}`);
+            threadTable.name[threadIndex] = stringTable.indexForString(
+              `Thread ${tid}`
+            );
             threadTable.start[threadIndex] = start;
             tidToThreadIndexMap.set(tid, threadIndex);
           }
@@ -297,7 +343,9 @@ function addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
         }
         break;
       case '2': // END, '2 taskId endTime'
-        taskTable.endTime[taskIndex] = Math.round(+line.substring(secondSpacePos + 1) - startTime);
+        taskTable.endTime[taskIndex] = Math.round(
+          +line.substring(secondSpacePos + 1) - startTime
+        );
         break;
       case '3': // ADD_LABEL, '3 taskId labelTime "label"'
         {
@@ -324,7 +372,9 @@ function addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
             let addressRelativeToLib = -1;
             if (lib) {
               addressRelativeToLib = address - lib.start;
-              stringIndex = stringTable.indexForString(`<0x${addressRelativeToLib.toString(16)} in ${lib.debugName}>`);
+              stringIndex = stringTable.indexForString(
+                `<0x${addressRelativeToLib.toString(16)} in ${lib.debugName}>`
+              );
               let addressIndicesForThisLib = addressIndicesByLib.get(lib);
               if (addressIndicesForThisLib === undefined) {
                 addressIndicesForThisLib = [];
@@ -332,7 +382,9 @@ function addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
               }
               addressIndicesForThisLib.push(addressIndex);
             } else {
-              stringIndex = stringTable.indexForString(`<unknown 0x${hexAddress}>`);
+              stringIndex = stringTable.indexForString(
+                `<unknown 0x${hexAddress}>`
+              );
             }
             addressIndicesByAddress.set(address, addressIndex);
             addressTable.address[addressIndex] = addressRelativeToLib;
@@ -359,7 +411,9 @@ function addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
  */
 function adjustSampleTimestamps(samples, delta) {
   return Object.assign({}, samples, {
-    time: samples.time.map(time => time === undefined ? undefined : time + delta),
+    time: samples.time.map(
+      time => (time === undefined ? undefined : time + delta)
+    ),
   });
 }
 
@@ -374,7 +428,9 @@ function adjustSampleTimestamps(samples, delta) {
  */
 function adjustMarkerTimestamps(markers, delta) {
   return Object.assign({}, markers, {
-    time: markers.time.map(time => time === undefined ? undefined : time + delta),
+    time: markers.time.map(
+      time => (time === undefined ? undefined : time + delta)
+    ),
     data: markers.data.map(data => {
       if (!data) {
         return data;
@@ -408,8 +464,13 @@ export function processProfile(profile) {
   let threads = [];
   const tasktracer = getEmptyTaskTracerData();
 
-  if (('tasktracer' in profile) && ('threads' in profile.tasktracer)) {
-    addProcessedTaskTracerData(profile.tasktracer, tasktracer, libs, profile.meta.startTime);
+  if ('tasktracer' in profile && 'threads' in profile.tasktracer) {
+    addProcessedTaskTracerData(
+      profile.tasktracer,
+      tasktracer,
+      libs,
+      profile.meta.startTime
+    );
   }
 
   for (const thread of profile.threads) {
@@ -418,15 +479,32 @@ export function processProfile(profile) {
 
   for (const subprocessProfile of profile.processes) {
     const subprocessLibs = subprocessProfile.libs;
-    const adjustTimestampsBy = subprocessProfile.meta.startTime - profile.meta.startTime;
-    threads = threads.concat(subprocessProfile.threads.map(thread => {
-      const newThread = processThread(thread, subprocessLibs);
-      newThread.samples = adjustSampleTimestamps(newThread.samples, adjustTimestampsBy);
-      newThread.markers = adjustMarkerTimestamps(newThread.markers, adjustTimestampsBy);
-      return newThread;
-    }));
-    if (('tasktracer' in subprocessProfile) && ('threads' in subprocessProfile.tasktracer)) {
-      addProcessedTaskTracerData(subprocessProfile.tasktracer, tasktracer, subprocessLibs, profile.meta.startTime);
+    const adjustTimestampsBy =
+      subprocessProfile.meta.startTime - profile.meta.startTime;
+    threads = threads.concat(
+      subprocessProfile.threads.map(thread => {
+        const newThread = processThread(thread, subprocessLibs);
+        newThread.samples = adjustSampleTimestamps(
+          newThread.samples,
+          adjustTimestampsBy
+        );
+        newThread.markers = adjustMarkerTimestamps(
+          newThread.markers,
+          adjustTimestampsBy
+        );
+        return newThread;
+      })
+    );
+    if (
+      'tasktracer' in subprocessProfile &&
+      'threads' in subprocessProfile.tasktracer
+    ) {
+      addProcessedTaskTracerData(
+        subprocessProfile.tasktracer,
+        tasktracer,
+        subprocessLibs,
+        profile.meta.startTime
+      );
     }
   }
 
@@ -479,7 +557,8 @@ function unserializeProfile(profile) {
 
 export function unserializeProfileOfArbitraryFormat(jsonString) {
   try {
-    let profile = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+    let profile =
+      typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
     if (isOldCleopatraFormat(profile)) {
       profile = convertOldCleopatraProfile(profile); // outputs proprocessed profile
     }
@@ -502,4 +581,7 @@ export class ProfileProcessor {
   }
 }
 
-export const ProfileProcessorThreaded = provideHostSide('profile-processor-worker.js', ['processProfile']);
+export const ProfileProcessorThreaded = provideHostSide(
+  'profile-processor-worker.js',
+  ['processProfile']
+);

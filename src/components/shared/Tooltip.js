@@ -15,7 +15,7 @@ type Props = {
   mouseX: CssPixels,
   mouseY: CssPixels,
   children?: React$Element<*>,
-}
+};
 
 export default class Tooltip extends PureComponent {
   props: Props;
@@ -68,7 +68,7 @@ export default class Tooltip extends PureComponent {
   componentWillReceiveProps(nextProps: Props) {
     if (nextProps.children !== this.props.children) {
       // If the children are different, allow them to do an initial lay out on the DOM.
-      this.setState({isNewContentLaidOut: false });
+      this.setState({ isNewContentLaidOut: false });
       this._forceUpdateAfterRAF();
     }
   }
@@ -106,12 +106,15 @@ export default class Tooltip extends PureComponent {
     const { interiorElement } = this.state;
 
     const offsetX = interiorElement
-      ? Math.max(0, (mouseX + interiorElement.offsetWidth) - window.innerWidth)
+      ? Math.max(0, mouseX + interiorElement.offsetWidth - window.innerWidth)
       : 0;
 
     let offsetY = 0;
     if (interiorElement) {
-      if (mouseY + interiorElement.offsetHeight + MOUSE_OFFSET > window.innerHeight) {
+      if (
+        mouseY + interiorElement.offsetHeight + MOUSE_OFFSET >
+        window.innerHeight
+      ) {
         offsetY = interiorElement.offsetHeight + MOUSE_OFFSET;
       } else {
         offsetY = -MOUSE_OFFSET;
@@ -124,7 +127,7 @@ export default class Tooltip extends PureComponent {
     };
 
     ReactDOM.render(
-      <div className='tooltip' style={style} ref={this._setMountElement}>
+      <div className="tooltip" style={style} ref={this._setMountElement}>
         {children}
       </div>,
       this._mountElement

@@ -7,15 +7,13 @@ import ProfileTreeView from './ProfileTreeView';
 import ProfileCallTreeSettings from './ProfileCallTreeSettings';
 import ProfileCallTreeFilterNavigator from './ProfileCallTreeFilterNavigator';
 
-const ProfileCallTreeView = () => (
-  <div className='treeAndSidebarWrapper'>
+const ProfileCallTreeView = () =>
+  <div className="treeAndSidebarWrapper">
     <ProfileCallTreeFilterNavigator />
     <ProfileCallTreeSettings />
-    <ProfileTreeView/>
-  </div>
-);
+    <ProfileTreeView />
+  </div>;
 
-ProfileCallTreeView.propTypes = {
-};
+ProfileCallTreeView.propTypes = {};
 
 export default ProfileCallTreeView;
