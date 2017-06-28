@@ -20,4 +20,7 @@ new WebpackDevServer(webpack(config), {
   }
 
   console.log(`Listening at localhost:${port}`);
+  if (port === 4242) {
+    console.log('You can change this default port with the environment variable PERFHTML_PORT.');
+  }
 });
