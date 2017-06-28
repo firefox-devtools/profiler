@@ -23,9 +23,7 @@
     "start-prod": "yarn run build-prod && yarn run serve-static --",
     "start-prod-readable": "yarn run build-prod-readable && yarn run serve-static --",
     "start-examples": "ws -d examples/ -s index.html -p 4242",
-    "test": "yarn run build && yarn run test-all --",
-    "test:quiet": "yarn run build:quiet && yarn run test-all --",
-    "test-all": "NODE_ENV=test jest"
+    "test": "NODE_ENV=test jest"
   },
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MPL-2.0",
