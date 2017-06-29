@@ -1,6 +1,6 @@
 # Testing in perf.html
 
-To run the tests make sure that the node_modules are installed with `yarn install` and then run `yarn test`. To test an individual file `yarn test-all src/test/file-name.js`.
+To run the tests make sure that the node_modules are installed with `yarn install` and then run `yarn test`. To test an individual file `yarn test src/test/file-name.js`.
 
 Tests are run with [Jest](https://facebook.github.io/jest/) and use a behavior-driven testing style, with plain language descriptions.
 

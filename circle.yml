@@ -7,9 +7,10 @@ dependencies:
 test:
   pre:
     - yarn license-check
+  override:
     - yarn eslint
     - yarn flow -- --quiet
-  override:
-    - yarn test:quiet -- --coverage --runInBand
+    - yarn test -- --coverage --runInBand
+    - yarn build:quiet
   post:
     - bash <(curl -s https://codecov.io/bash)
