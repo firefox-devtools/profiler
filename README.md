@@ -18,7 +18,7 @@ This project is live on [https://perf-html.io/](https://perf-html.io/). You need
 
 ### Development
 
-> You'll find documentation for the project in the [docs folder](./docs).
+> You'll find documentation for the project in the [docs folder](./docs) as well as `README.md` files in most folders in [/src](./src).
 
 ```bash
 git clone git@github.com:devtools-html/perf.html.git

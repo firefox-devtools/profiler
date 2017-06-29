@@ -26,8 +26,8 @@ export default connect(
     profileURL: getProfileURL(state),
   }),
   // The second parameter is the list of action creators to be wrapped with dispatch.
-  // These should be explicitly listed out. (Many components did not do this and passed
-  // in the full actions object.)
+  // These should be explicitly listed out. (Many components still do not do this and
+  // passed in the full actions object. This is incrementally being addressed.)
   {
     retrieveProfileFromStore,
     retrieveProfileFromUrl,
@@ -42,8 +42,8 @@ export default connect(
 
 ### Shared components class names
 
-Class names can be long (ok very long). They should grow from the component name. In a shared component they should just take the component name, and then grow from their for different DOM nodes. For instance for an imaginary component called `SharedWidget`, the root `<div>` could have the class name "sharedWidget", while a button inside could be "sharedWidgetButton", and then inside of that "sharedWidgetButtonText".
+Class names can be long (ok very long). They should grow from the component name. In a shared component they should just take the component name, and then grow from their for different DOM nodes. For instance for an imaginary component called `SharedWidget`, the root `<div>` could have the class name `sharedWidget`, while a button inside could be `sharedWidgetButton`, and then inside of that `sharedWidgetButtonText`.
 
 ### Component groups class names
 
-For a group of components, the first word should be the name of the subdirectory, and then it should grow from there with the component names. For instance in an imaginary `src/components/widget` subdirectory, a `Panel` component would have the class "widgetComponent". Then a button element inside could have "widgetComponentButton".
+For a group of components, the first word should be the name of the subdirectory, and then it should grow from there with the component names. For instance in an imaginary `src/components/widget` subdirectory, a `Panel` component would have the class `widgetComponent`. Then a button element inside could have `widgetComponentButton`.

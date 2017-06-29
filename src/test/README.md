@@ -1,4 +1,4 @@
-# Testing in perf.html
+# Testing - `/src/test/`
 
 To run the tests make sure that the node_modules are installed with `npm install` and then run `npm test`. To test an individual file `npm run test-all src/test/file-name.js`.
 

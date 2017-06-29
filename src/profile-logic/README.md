@@ -1,4 +1,4 @@
-# Profile Logic - Manipulating and processing profiles
+# Manipulating and processing profiles - `/src/profile-logic`
 
 This folder is a catch-all for profile manipulating and processing operations. The [Redux](http://redux.js.org/) store, reducers, and selectors are not the proper place to do complicated work manipulating data structures, especially something as complicated as a performance profile. The functions in this folder operate completely independently from [Redux](http://redux.js.org/) and [React](https://facebook.github.io/react/) components. Typically they are wired into various selectors and different places within the overall app to perform the various pieces of work, or to compute derivative data structures.
 
