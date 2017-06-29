@@ -32,6 +32,8 @@ yarn install
 yarn start
 ```
 
+> To run on a different port, set the `PERFHTML_PORT` env variable to something else, eg `PERFHTML_PORT=1234 yarn start`
+
 > To run a faster production version use `yarn start-prod` instead of `yarn start`
 
 Assuming you've installed the add-on from [perf-html.io](https://perf-html.io/) you'll need to configure it to point to your local web development server.
