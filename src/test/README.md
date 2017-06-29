@@ -1,6 +1,6 @@
-# Testing in perf.html
+# Testing - `/src/test/`
 
-To run the tests make sure that the node_modules are installed with `yarn install` and then run `yarn test`. To test an individual file `yarn test-all src/test/file-name.js`.
+To run the tests make sure that the node_modules are installed with `yarn install` and then run `yarn test`. To test an individual file `yarn test src/test/file-name.js`.
 
 Tests are run with [Jest](https://facebook.github.io/jest/) and use a behavior-driven testing style, with plain language descriptions.
 
@@ -18,4 +18,8 @@ when Jest's mocking capabilities are falling short. This should be used as a las
 
 ## The tests
 
-Right now there are [Redux store tests](./store) and [unit tests](./unit). React component tests are planned as well as eventually supporting full integration tests.
+| Test type                  | Description |
+| -------------------------- | ----------- |
+| [components](./components) | Snapshot tests for [React](https://facebook.github.io/react/) components (experimental). Full component testing is planned as well. |
+| [store](./store)           | Testing the [Redux](http://redux.js.org/) store using actions and selectors. |
+| [unit](./unit)             | Unit testing |

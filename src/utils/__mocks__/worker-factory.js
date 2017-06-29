@@ -1,15 +1,16 @@
 import Worker from 'workerjs';
 
 const workerFiles = {
+  // Paths are relative to workerjs' requireworker.js file
   'zee-worker': '../../res/zee-worker.js',
-  'worker': '../../dist/worker.js',
+  'worker': '../../src/profile-logic/summary-worker/index.js',
 };
 
 const workerInstances = [];
 
 export default class {
   constructor(file) {
-    const worker = new Worker(workerFiles[file], true);
+    const worker = new Worker(workerFiles[file]);
     workerInstances.push(worker);
     return worker;
   }

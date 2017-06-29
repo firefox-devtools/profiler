@@ -1,6 +1,6 @@
 # Redux store testing
 
-The state management of perf.html happens in the Redux store, and is generally how the interactions within the UI are actually modeled. It is really important to have good test coverage here to cover possible regressions in how state is manipulated. These tests deal with pure state and do not get muddied with actual component presentation. These tests should not be brittle, they should run fast, and they should test off of the public facing interfaces.
+The state management of perf.html happens in the [Redux](http://redux.js.org/) store, and is generally how the interactions within the UI are actually modeled. It is really important to have good test coverage here to cover possible regressions in how state is manipulated. These tests deal with pure state and do not get muddied with actual component presentation. These tests should not be brittle, they should run fast, and they should test off of the public facing interfaces.
 
 ## Reducers / Actions / Selectors
 
