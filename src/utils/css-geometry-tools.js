@@ -6,7 +6,7 @@
 import DOMRect from './dom-rect';
 // Imported interfaces incorrectly throw an error in eslint:
 // https://github.com/benmosher/eslint-plugin-import/issues/726
-import type { DOMRectInterface } from './dom-rect'; // eslint-disable-line import/named
+import type { DOMRectInterface } from './dom-rect';
 
 /**
  * Return a float number for the number of CSS pixels from the computed style

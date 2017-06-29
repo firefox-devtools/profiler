@@ -8,7 +8,6 @@ import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { getIsURLSetupDone } from '../../reducers/app';
 
-// eslint-disable-next-line import/named
 import type { Dispatch } from '../../types/store';
 
 type Props = {
