@@ -18,7 +18,7 @@ This project is live on [https://perf-html.io/](https://perf-html.io/). You need
 
 ### Development
 
-> You'll find documentation for the project in the [docs folder](./docs).
+> You'll find documentation for the project in the [docs folder](./docs) as well as `README.md` files in most folders in [/src](./src).
 
 We use [Yarn](http://yarnpkg.com/) as our dependency manager so you'll need to
 go and install it before running the following commands.
