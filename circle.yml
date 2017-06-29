@@ -1,12 +1,16 @@
 machine:
   node:
     version: 7.8
+dependencies:
+  override:
+    - yarn install
 test:
   pre:
-    - npm run license-check
-    - npm run eslint
-    - npm run flow -- --quiet
+    - yarn license-check
   override:
-    - npm run test:quiet -- --coverage --runInBand
+    - yarn eslint
+    - yarn flow -- --quiet
+    - yarn test -- --coverage --runInBand
+    - yarn build:quiet
   post:
     - bash <(curl -s https://codecov.io/bash)

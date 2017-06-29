@@ -37,6 +37,7 @@ class FilterNavigatorBar extends PureComponent {
                     'filterNavigatorBarSelectedItem': i === selectedItem,
                     'filterNavigatorBarLeafItem': i === items.length - 1,
                   })}
+                title={item}
                 onClick={this._onLiClick}>
               <span className='filterNavigatorBarItemContent'>{item}</span>
             </li>
