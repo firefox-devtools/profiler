@@ -88,6 +88,10 @@
   font-weight: normal;
 }
 
+.homeTitleGithubIcon {
+  float: right;
+}
+
 .homeSectionItems {
   margin: 1em 0;
 }
