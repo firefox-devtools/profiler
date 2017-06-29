@@ -6,6 +6,8 @@ import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import clamp from 'clamp';
 import Draggable from '../shared/Draggable';
+import { getFormattedTimeLength } from '../../profile-logic/range-filters';
+
 
 export default class SelectionScubberOverlay extends PureComponent {
   constructor(props) {
@@ -98,6 +100,9 @@ export default class SelectionScubberOverlay extends PureComponent {
             />
           </div>
           <div className="selectionScrubberInner">
+            <span className={classNames('selectionScrubberRange', { hidden: !isModifying })}>
+              {getFormattedTimeLength(selectionEnd - selectionStart)}
+            </span>
             <button
               className={classNames('selectionScrubberZoomButton', {
                 hidden: isModifying,
