@@ -39,7 +39,7 @@ Assuming you've installed the add-on from [perf-html.io](https://perf-html.io/) 
  1. Go to `about:addons`
  2. Find the [Gecko Profiler add-on](https://cloud.githubusercontent.com/assets/2134/23817925/d02e5620-05ab-11e7-90dc-f28545d32dde.png)
  3. Click [Preferences button](https://cloud.githubusercontent.com/assets/2134/23817941/ea20d800-05ab-11e7-8e0f-aa4558fe2b1b.png)
- 4. Change the value of the [Reporter URL](https://cloud.githubusercontent.com/assets/2134/23817954/00ad2ba0-05ac-11e7-8814-1dda83a45d43.png) to `http://localhost:4242/from-addon/`
+ 4. Change the value of the [Reporter URL](https://user-images.githubusercontent.com/167767/27658883-70068388-5c06-11e7-831e-14ed1438e9a3.png) to `http://localhost:4242/`
 
 **add-on**
 
