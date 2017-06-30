@@ -13,6 +13,7 @@ import {
   getSearchString,
 } from '../../reducers/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
+import CallTreeFilters from './CallTreeFilters';
 
 import './ProfileCallTreeSettings.css';
 
@@ -81,6 +82,11 @@ class ProfileCallTreeSettings extends PureComponent {
                 checked={invertCallstack}
               />
               {' Invert call stack'}
+            </label>
+          </li>
+          <li className="profileCallTreeSettingsListItem">
+            <label className="profileCallTreeSettingsLabel">
+              <CallTreeFilters />
             </label>
           </li>
         </ul>

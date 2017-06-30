@@ -196,3 +196,47 @@ export function popCallTreeFilters(
     firstRemovedFilterIndex,
   };
 }
+
+export function mergeFunction(
+  funcIndex: IndexIntoFuncTable,
+  threadIndex: ThreadIndex
+) {
+  return {
+    type: 'MERGE_FUNCTION',
+    funcIndex,
+    threadIndex,
+  };
+}
+
+export function unmergeFunction(
+  funcIndex: IndexIntoFuncTable,
+  threadIndex: ThreadIndex
+) {
+  return {
+    type: 'UNMERGE_FUNCTION',
+    funcIndex,
+    threadIndex,
+  };
+}
+
+export function mergeSubtree(
+  funcIndex: IndexIntoFuncTable,
+  threadIndex: ThreadIndex
+) {
+  return {
+    type: 'MERGE_SUBTREE',
+    funcIndex,
+    threadIndex,
+  };
+}
+
+export function unmergeSubtree(
+  funcIndex: IndexIntoFuncTable,
+  threadIndex: ThreadIndex
+) {
+  return {
+    type: 'UNMERGE_SUBTREE',
+    funcIndex,
+    threadIndex,
+  };
+}

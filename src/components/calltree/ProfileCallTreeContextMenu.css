@@ -1,0 +1,10 @@
+.profileCallTreeContextMenuLabel {
+  display: inline-block;
+  border: 1px solid #ccc;
+  border-radius: .2em;
+  margin: 0 .2em;
+  padding: 0 .5em;
+  background-color: #f6f6f6;
+  font-size: 10px;
+  color: #000;
+}

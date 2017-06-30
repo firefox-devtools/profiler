@@ -5,28 +5,47 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem, SubMenu } from 'react-contextmenu';
-import actions from '../../actions';
+import { mergeFunction, mergeSubtree } from '../../actions/profile-view';
 import { connect } from 'react-redux';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { stripFunctionArguments } from '../../profile-logic/function-info';
+import { getSelectedThreadIndex } from '../../reducers/url-state';
 import copy from 'copy-to-clipboard';
 
 import type {
   IndexIntoFuncStackTable,
   FuncStackInfo,
 } from '../../types/profile-derived';
-import type { Thread } from '../../types/profile';
+import type {
+  Thread,
+  ThreadIndex,
+  IndexIntoFuncTable,
+} from '../../types/profile';
 
 type Props = {
   thread: Thread,
+  threadIndex: ThreadIndex,
   funcStackInfo: FuncStackInfo,
   selectedFuncStack: IndexIntoFuncStackTable,
+  mergeFunction: typeof mergeFunction,
+  mergeSubtree: typeof mergeSubtree,
 };
+
+require('./ProfileCallTreeContextMenu.css');
 
 class ProfileCallTreeContextMenu extends PureComponent {
   constructor(props: Props) {
     super(props);
-    (this: any).handleClick = this.handleClick.bind(this);
+    (this: any).copyFunctionName = this.copyFunctionName.bind(this);
+    (this: any).copyStack = this.copyStack.bind(this);
+    (this: any).mergeFunction = this.mergeFunction.bind(this);
+    (this: any).mergeSubtree = this.mergeSubtree.bind(this);
+  }
+
+  getSelectedFuncIndex(): IndexIntoFuncTable {
+    const { selectedFuncStack, funcStackInfo: { funcStackTable } } = this.props;
+
+    return funcStackTable.func[selectedFuncStack];
   }
 
   copyFunctionName(): void {
@@ -63,29 +82,35 @@ class ProfileCallTreeContextMenu extends PureComponent {
     copy(stack);
   }
 
-  handleClick(event: SyntheticEvent, data: { type: string }): void {
-    switch (data.type) {
-      case 'copyFunctionName':
-        this.copyFunctionName();
-        break;
-      case 'copyStack':
-        this.copyStack();
-        break;
-    }
+  mergeFunction(): void {
+    const { threadIndex } = this.props;
+    this.props.mergeFunction(this.getSelectedFuncIndex(), threadIndex);
+  }
+
+  mergeSubtree(): void {
+    const { threadIndex } = this.props;
+    this.props.mergeSubtree(this.getSelectedFuncIndex(), threadIndex);
   }
 
   render() {
     return (
       <ContextMenu id={'ProfileCallTreeContextMenu'}>
         <SubMenu title="Copy" hoverDelay={200}>
-          <MenuItem
-            onClick={this.handleClick}
-            data={{ type: 'copyFunctionName' }}
-          >
-            Function Name
+          <MenuItem onClick={this.copyFunctionName}>Function Name</MenuItem>
+          <MenuItem onClick={this.copyStack}>Stack</MenuItem>
+        </SubMenu>
+        <SubMenu title="Merge into caller" hoverDelay={200}>
+          <MenuItem onClick={this.mergeFunction}>
+            This function{' '}
+            <span className="profileCallTreeContextMenuLabel">
+              across entire thread
+            </span>
           </MenuItem>
-          <MenuItem onClick={this.handleClick} data={{ type: 'copyStack' }}>
-            Stack
+          <MenuItem onClick={this.mergeSubtree}>
+            This subtree{' '}
+            <span className="profileCallTreeContextMenuLabel">
+              across entire thread
+            </span>
           </MenuItem>
         </SubMenu>
       </ContextMenu>
@@ -94,10 +119,14 @@ class ProfileCallTreeContextMenu extends PureComponent {
 }
 
 export default connect(
-  state => ({
-    thread: selectedThreadSelectors.getFilteredThread(state),
-    funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state),
-    selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state),
-  }),
-  actions
+  state => {
+    const threadIndex = getSelectedThreadIndex(state);
+    return {
+      threadIndex,
+      thread: selectedThreadSelectors.getFilteredThread(state),
+      funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state),
+      selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state),
+    };
+  },
+  { mergeFunction, mergeSubtree }
 )(ProfileCallTreeContextMenu);
