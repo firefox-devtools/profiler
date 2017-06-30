@@ -24,6 +24,7 @@ type Props = {
 };
 
 class ProfileCallTreeContextMenu extends PureComponent {
+  props: Props;
   constructor(props: Props) {
     super(props);
     (this: any).handleClick = this.handleClick.bind(this);
