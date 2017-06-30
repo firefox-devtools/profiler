@@ -25,7 +25,7 @@ export function stringifyRangeFilters(arrayValue = []) {
     .join('~');
 }
 
-export function getFormattedTimeLength(length: number) {
+export function getFormattedTimeLength(length) {
   if (length >= 10000) {
     return `${(length / 1000).toFixed(0)} sec`;
   }

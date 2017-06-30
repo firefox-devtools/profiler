@@ -34,8 +34,6 @@ module.exports = {
     "import/named": "error",
     "prettier/prettier": ["error", { singleQuote: true, trailingComma: "es5" }],
 
-    "flowtype/no-types-missing-file-annotation": "off", // wait for https://github.com/gajus/eslint-plugin-flowtype/issues/248
-
     // overriding recommended rules
     "no-constant-condition": ["error", { checkLoops: false }],
     "no-console": [ "error", { allow: ["log", "warn", "error"] } ],

@@ -5,6 +5,8 @@
 // Fixed the interfaces, especially added some genericity,
 // and changed so that it can be simply `import`ed.
 
+// @flow
+
 // Implemented by window & worker
 export interface IDBEnvironment {
   indexedDB: IDBFactory,
