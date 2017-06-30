@@ -5,7 +5,6 @@
 import React, { PureComponent, PropTypes } from 'react';
 
 class TimeRuler extends PureComponent {
-
   _findNiceNumberGreaterOrEqualTo(uglyNumber) {
     // Write uglyNumber as a * 10^b, with 1 <= a < 10.
     // Return the lowest of 2 * 10^b, 5 * 10^b, 10 * 10^b that is greater or equal to uglyNumber.
@@ -27,12 +26,20 @@ class TimeRuler extends PureComponent {
     const { zeroAt, rangeStart, rangeEnd, width } = this.props;
     const pixelsPerMilliSecond = width / (rangeEnd - rangeStart);
     const minimumNotchWidth = 55; // pixels
-    const { number: notchTime, exponent } = this._findNiceNumberGreaterOrEqualTo(minimumNotchWidth / pixelsPerMilliSecond);
+    const {
+      number: notchTime,
+      exponent,
+    } = this._findNiceNumberGreaterOrEqualTo(
+      minimumNotchWidth / pixelsPerMilliSecond
+    );
     const firstNotchIndex = Math.ceil((rangeStart - zeroAt) / notchTime);
     const lastNotchIndex = Math.floor((rangeEnd - zeroAt) / notchTime);
     const notches = [];
     for (let i = firstNotchIndex; i <= lastNotchIndex; i++) {
-      notches.push({ time: i * notchTime / 1000, pos: (i * notchTime - (rangeStart - zeroAt)) * pixelsPerMilliSecond});
+      notches.push({
+        time: i * notchTime / 1000,
+        pos: (i * notchTime - (rangeStart - zeroAt)) * pixelsPerMilliSecond,
+      });
     }
     return { notches, decimalPlaces: Math.max(0, -(exponent - 3)) };
   }
@@ -40,19 +47,20 @@ class TimeRuler extends PureComponent {
   render() {
     const { className } = this.props;
     const { notches, decimalPlaces } = this._getNotches();
-    return (<div className={className}>
-      <ol className='timeRulerContainer'>
-        {
-          notches.map(({ time, pos }, i) => (
-            <li className='timeRulerNotch' key={i} style={{left: `${pos}px`}}>
-              <span className='timeRulerNotchText'>{`${time.toFixed(decimalPlaces)}s`}</span>
+    return (
+      <div className={className}>
+        <ol className="timeRulerContainer">
+          {notches.map(({ time, pos }, i) =>
+            <li className="timeRulerNotch" key={i} style={{ left: `${pos}px` }}>
+              <span className="timeRulerNotchText">{`${time.toFixed(
+                decimalPlaces
+              )}s`}</span>
             </li>
-          ))
-        }
-      </ol>
-    </div>);
+          )}
+        </ol>
+      </div>
+    );
   }
-
 }
 
 TimeRuler.propTypes = {

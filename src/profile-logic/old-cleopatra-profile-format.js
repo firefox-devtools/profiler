@@ -30,8 +30,10 @@ import { getEmptyTaskTracerData } from './task-tracer';
  */
 
 export function isOldCleopatraFormat(profile: Object): boolean {
-  return 'format' in profile &&
-    profile.format === 'profileJSONWithSymbolicationTable,1';
+  return (
+    'format' in profile &&
+    profile.format === 'profileJSONWithSymbolicationTable,1'
+  );
 }
 
 type OldCleopatraMarker = {
@@ -51,9 +53,11 @@ type OldCleopatraProfileThread = {
   name: string,
 };
 
-type OldCleopatraProfileJSON = {
-  threads: { [threadIndex: string]: OldCleopatraProfileThread },
-} | OldCleopatraSample[];
+type OldCleopatraProfileJSON =
+  | {
+      threads: { [threadIndex: string]: OldCleopatraProfileThread },
+    }
+  | OldCleopatraSample[];
 
 type OldCleopatraProfile = {
   format: 'profileJSONWithSymbolicationTable,1',
@@ -78,7 +82,11 @@ function _cleanFunctionName(functionName: string) {
   return functionName;
 }
 
-function _convertThread(thread: OldCleopatraProfileThread, interval: number, symbolicationTable) {
+function _convertThread(
+  thread: OldCleopatraProfileThread,
+  interval: number,
+  symbolicationTable
+) {
   const stringTable = new UniqueStringArray(symbolicationTable);
   const frameTable = {
     length: 0,
@@ -142,9 +150,8 @@ function _convertThread(thread: OldCleopatraProfileThread, interval: number, sym
         frameTable.optimizations[frameIndex] = null;
         frameMap.set(frameSymbolicationTableIndex, frameIndex);
       }
-      const stackMapKey = prefix !== null
-        ? `${prefix}:${frameIndex}`
-        : `:${frameIndex}`;
+      const stackMapKey =
+        prefix !== null ? `${prefix}:${frameIndex}` : `:${frameIndex}`;
       let stackIndex = stackMap.get(stackMapKey);
       if (stackIndex === undefined) {
         stackIndex = stackTable.length++;
@@ -156,19 +163,21 @@ function _convertThread(thread: OldCleopatraProfileThread, interval: number, sym
     }
     const sampleIndex = samples.length++;
     samples.stack[sampleIndex] = prefix;
-    const hasTime ='time' in sample.extraInfo && typeof sample.extraInfo.time === 'number';
-    const sampleTime = hasTime ? sample.extraInfo.time : lastSampleTime + interval;
+    const hasTime =
+      'time' in sample.extraInfo && typeof sample.extraInfo.time === 'number';
+    const sampleTime = hasTime
+      ? sample.extraInfo.time
+      : lastSampleTime + interval;
     samples.time[sampleIndex] = sampleTime;
     lastSampleTime = sampleTime;
-    samples.responsiveness[sampleIndex] = 'responsiveness' in sample.extraInfo
-      ? sample.extraInfo.responsiveness
-      : null;
-    samples.rss[sampleIndex] = 'rss' in sample.extraInfo
-      ? sample.extraInfo.rss
-      : null;
-    samples.uss[sampleIndex] = 'uss' in sample.extraInfo
-      ? sample.extraInfo.uss
-      : null;
+    samples.responsiveness[sampleIndex] =
+      'responsiveness' in sample.extraInfo
+        ? sample.extraInfo.responsiveness
+        : null;
+    samples.rss[sampleIndex] =
+      'rss' in sample.extraInfo ? sample.extraInfo.rss : null;
+    samples.uss[sampleIndex] =
+      'uss' in sample.extraInfo ? sample.extraInfo.uss : null;
   }
 
   for (let i = 0; i < thread.markers.length; i++) {
@@ -229,9 +238,8 @@ function _convertThread(thread: OldCleopatraProfileThread, interval: number, sym
     let isJS = false;
     const locationString = stringTable.getString(funcNameIndex);
     if (!locationString.startsWith('0x')) {
-      const cppMatch = /^(.*) \(in ([^)]*)\) (\+ [0-9]+)$/.exec(
-        locationString
-      ) ||
+      const cppMatch =
+        /^(.*) \(in ([^)]*)\) (\+ [0-9]+)$/.exec(locationString) ||
         /^(.*) \(in ([^)]*)\) (\(.*:.*\))$/.exec(locationString) ||
         /^(.*) \(in ([^)]*)\)$/.exec(locationString);
       if (cppMatch) {
@@ -251,7 +259,8 @@ function _convertThread(thread: OldCleopatraProfileThread, interval: number, sym
           addLibResource(libraryNameStringIndex, -1);
         }
       } else {
-        const jsMatch = /^(.*) \((.*):([0-9]+)\)$/.exec(locationString) ||
+        const jsMatch =
+          /^(.*) \((.*):([0-9]+)\)$/.exec(locationString) ||
           /^()(.*):([0-9]+)$/.exec(locationString);
         if (jsMatch) {
           isJS = true;
@@ -261,7 +270,9 @@ function _convertThread(thread: OldCleopatraProfileThread, interval: number, sym
           } else {
             resourceIndex = resourceTable.length;
             urlToResourceIndex.set(scriptURI, resourceIndex);
-            const urlStringIndex = scriptURI ? stringTable.indexForString(scriptURI) : null;
+            const urlStringIndex = scriptURI
+              ? stringTable.indexForString(scriptURI)
+              : null;
             addURLResource(urlStringIndex);
           }
         }
@@ -313,7 +324,9 @@ function arrayFromArrayLikeObject<T>(obj: { [index: string]: T }): T[] {
   return result;
 }
 
-function _extractThreadList(profileJSON: OldCleopatraProfileJSON): OldCleopatraProfileThread[] {
+function _extractThreadList(
+  profileJSON: OldCleopatraProfileJSON
+): OldCleopatraProfileThread[] {
   if (Array.isArray(profileJSON)) {
     // Ancient versions of the old cleopatra format did not have a threads list
     // or markers. Instead, profileJSON was just the list of samples.
@@ -348,7 +361,9 @@ export function convertOldCleopatraProfile(
 
   return {
     meta: Object.assign({}, meta, { version: CURRENT_VERSION }),
-    threads: threads.map(t => _convertThread(t, meta.interval, symbolicationTable)),
+    threads: threads.map(t =>
+      _convertThread(t, meta.interval, symbolicationTable)
+    ),
     tasktracer: getEmptyTaskTracerData(),
   };
 }

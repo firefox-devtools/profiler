@@ -32,20 +32,19 @@ export const getIconForNode = (state: State, node: Node) => {
   // node.icon type from `string | null` to `string`.
   // See https://github.com/facebook/flow/issues/3715
   const icons = getIcons(state);
-  return (node.icon !== null && icons.has(node.icon)
-    ? node.icon
-    : null);
+  return node.icon !== null && icons.has(node.icon) ? node.icon : null;
 };
 
 export const getIconClassNameForNode = createSelector(
-  getIcons, (state, node) => node,
+  getIcons,
+  (state, node) => node,
   (icons, node) =>
-    (node.icon !== null && icons.has(node.icon)
+    node.icon !== null && icons.has(node.icon)
       ? classNameFromUrl(node.icon)
-      : null)
+      : null
 );
 
-export const getIconsWithClassNames: (State => IconWithClassName[]) = createSelector(
+export const getIconsWithClassNames: State => IconWithClassName[] = createSelector(
   getIcons,
   icons => [...icons].map(icon => ({ icon, className: classNameFromUrl(icon) }))
 );

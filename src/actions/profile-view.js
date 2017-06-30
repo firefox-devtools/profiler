@@ -4,10 +4,16 @@
 
 // @flow
 import type {
-  ProfileSelection, CallTreeFilter, ImplementationFilter,
+  ProfileSelection,
+  CallTreeFilter,
+  ImplementationFilter,
 } from '../types/actions';
 import type { Action, ThunkAction } from '../types/store';
-import type { ThreadIndex, IndexIntoFuncTable, IndexIntoMarkersTable } from '../types/profile';
+import type {
+  ThreadIndex,
+  IndexIntoFuncTable,
+  IndexIntoMarkersTable,
+} from '../types/profile';
 
 /**
  * The actions that pertain to changing the view on the profile, including searching
@@ -20,7 +26,8 @@ export function changeSelectedFuncStack(
 ): Action {
   return {
     type: 'CHANGE_SELECTED_FUNC_STACK',
-    selectedFuncStack, threadIndex,
+    selectedFuncStack,
+    threadIndex,
   };
 }
 
@@ -49,12 +56,14 @@ export function hideThread(
       return;
     }
 
-    dispatch(({
-      type: 'HIDE_THREAD',
-      threadIndex,
-      threadOrder,
-      hiddenThreads,
-    }: Action));
+    dispatch(
+      ({
+        type: 'HIDE_THREAD',
+        threadIndex,
+        threadOrder,
+        hiddenThreads,
+      }: Action)
+    );
   };
 }
 
@@ -78,7 +87,8 @@ export function changeExpandedFuncStacks(
 ): Action {
   return {
     type: 'CHANGE_EXPANDED_FUNC_STACKS',
-    threadIndex, expandedFuncStacks,
+    threadIndex,
+    expandedFuncStacks,
   };
 }
 
@@ -88,11 +98,14 @@ export function changeSelectedMarker(
 ): Action {
   return {
     type: 'CHANGE_SELECTED_MARKER',
-    selectedMarker, threadIndex,
+    selectedMarker,
+    threadIndex,
   };
 }
 
-export function changeImplementationFilter(implementation: ImplementationFilter): Action {
+export function changeImplementationFilter(
+  implementation: ImplementationFilter
+): Action {
   return {
     type: 'CHANGE_IMPLEMENTATION_FILTER',
     implementation,
@@ -106,7 +119,9 @@ export function changeInvertCallstack(invertCallstack: boolean): Action {
   };
 }
 
-export function changeHidePlatformDetails(hidePlatformDetails: boolean): Action {
+export function changeHidePlatformDetails(
+  hidePlatformDetails: boolean
+): Action {
   return {
     type: 'CHANGE_HIDE_PLATFORM_DETAILS',
     hidePlatformDetails,
@@ -125,14 +140,20 @@ export function updateProfileSelection(selection: ProfileSelection): Action {
 export function addRangeFilter(start: number, end: number): Action {
   return {
     type: 'ADD_RANGE_FILTER',
-    start, end,
+    start,
+    end,
   };
 }
 
-export function addRangeFilterAndUnsetSelection(start: number, end: number): ThunkAction<void> {
+export function addRangeFilterAndUnsetSelection(
+  start: number,
+  end: number
+): ThunkAction<void> {
   return dispatch => {
     dispatch(addRangeFilter(start, end));
-    dispatch(updateProfileSelection({ hasSelection: false, isModifying: false }));
+    dispatch(
+      updateProfileSelection({ hasSelection: false, isModifying: false })
+    );
   };
 }
 
@@ -143,14 +164,21 @@ export function popRangeFilters(firstRemovedFilterIndex: number): Action {
   };
 }
 
-export function popRangeFiltersAndUnsetSelection(firstRemovedFilterIndex: number): ThunkAction<void> {
+export function popRangeFiltersAndUnsetSelection(
+  firstRemovedFilterIndex: number
+): ThunkAction<void> {
   return dispatch => {
     dispatch(popRangeFilters(firstRemovedFilterIndex));
-    dispatch(updateProfileSelection({ hasSelection: false, isModifying: false }));
+    dispatch(
+      updateProfileSelection({ hasSelection: false, isModifying: false })
+    );
   };
 }
 
-export function addCallTreeFilter(threadIndex: ThreadIndex, filter: CallTreeFilter): Action {
+export function addCallTreeFilter(
+  threadIndex: ThreadIndex,
+  filter: CallTreeFilter
+): Action {
   return {
     type: 'ADD_CALL_TREE_FILTER',
     threadIndex,
@@ -158,7 +186,10 @@ export function addCallTreeFilter(threadIndex: ThreadIndex, filter: CallTreeFilt
   };
 }
 
-export function popCallTreeFilters(threadIndex: ThreadIndex, firstRemovedFilterIndex: number): Action {
+export function popCallTreeFilters(
+  threadIndex: ThreadIndex,
+  firstRemovedFilterIndex: number
+): Action {
   return {
     type: 'POP_CALL_TREE_FILTERS',
     threadIndex,

@@ -6,7 +6,7 @@
 import DOMRect from './dom-rect';
 // Imported interfaces incorrectly throw an error in eslint:
 // https://github.com/benmosher/eslint-plugin-import/issues/726
-import type { DOMRectInterface } from './dom-rect'; // eslint-disable-line import/named
+import type { DOMRectInterface } from './dom-rect';
 
 /**
  * Return a float number for the number of CSS pixels from the computed style
@@ -15,41 +15,58 @@ import type { DOMRectInterface } from './dom-rect'; // eslint-disable-line impor
 function getFloatStyle(element: HTMLElement, cssProperty: string): number {
   // flow doesn't know about getComputedStyle.
   const getComputedStyle = window.getComputedStyle;
-  return parseFloat(getComputedStyle(element).getPropertyValue(cssProperty)) || 0;
+  return (
+    parseFloat(getComputedStyle(element).getPropertyValue(cssProperty)) || 0
+  );
 }
 
-function subtractBorder(element: HTMLElement, rect: DOMRectInterface | ClientRect): DOMRectInterface {
+function subtractBorder(
+  element: HTMLElement,
+  rect: DOMRectInterface | ClientRect
+): DOMRectInterface {
   const borderTop = getFloatStyle(element, 'border-top-width');
   const borderRight = getFloatStyle(element, 'border-right-width');
   const borderBottom = getFloatStyle(element, 'border-bottom-width');
   const borderLeft = getFloatStyle(element, 'border-left-width');
 
-  return new DOMRect(rect.left + borderLeft,
-                     rect.top + borderTop,
-                     rect.width - borderLeft - borderRight,
-                     rect.height - borderTop - borderBottom);
+  return new DOMRect(
+    rect.left + borderLeft,
+    rect.top + borderTop,
+    rect.width - borderLeft - borderRight,
+    rect.height - borderTop - borderBottom
+  );
 }
 
-function subtractPadding(element: HTMLElement, rect: DOMRectInterface | ClientRect): DOMRectInterface {
+function subtractPadding(
+  element: HTMLElement,
+  rect: DOMRectInterface | ClientRect
+): DOMRectInterface {
   const paddingTop = getFloatStyle(element, 'padding-top');
   const paddingRight = getFloatStyle(element, 'padding-right');
   const paddingBottom = getFloatStyle(element, 'padding-bottom');
   const paddingLeft = getFloatStyle(element, 'padding-left');
-  return new DOMRect(rect.left + paddingLeft,
-                     rect.top + paddingTop,
-                     rect.width - paddingLeft - paddingRight,
-                     rect.height - paddingTop - paddingBottom);
+  return new DOMRect(
+    rect.left + paddingLeft,
+    rect.top + paddingTop,
+    rect.width - paddingLeft - paddingRight,
+    rect.height - paddingTop - paddingBottom
+  );
 }
 
-function addMargin(element: HTMLElement, rect: DOMRectInterface | ClientRect): DOMRectInterface {
+function addMargin(
+  element: HTMLElement,
+  rect: DOMRectInterface | ClientRect
+): DOMRectInterface {
   const marginTop = getFloatStyle(element, 'margin-top');
   const marginRight = getFloatStyle(element, 'margin-right');
   const marginBottom = getFloatStyle(element, 'margin-bottom');
   const marginLeft = getFloatStyle(element, 'margin-left');
-  return new DOMRect(rect.left - marginLeft,
-                     rect.top - marginTop,
-                     rect.width + marginLeft + marginRight,
-                     rect.height + marginTop + marginBottom);
+  return new DOMRect(
+    rect.left - marginLeft,
+    rect.top - marginTop,
+    rect.width + marginLeft + marginRight,
+    rect.height + marginTop + marginBottom
+  );
 }
 
 /**

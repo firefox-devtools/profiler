@@ -12,4 +12,12 @@ import timelineView from './timeline-view';
 import icons from './icons';
 import { combineReducers } from 'redux';
 
-export default combineReducers({ app, profileView, summaryView, urlState, flameChart, timelineView, icons });
+export default combineReducers({
+  app,
+  profileView,
+  summaryView,
+  urlState,
+  flameChart,
+  timelineView,
+  icons,
+});

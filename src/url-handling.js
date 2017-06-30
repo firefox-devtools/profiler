@@ -4,8 +4,14 @@
 
 // @flow
 import queryString from 'query-string';
-import { stringifyRangeFilters, parseRangeFilters } from './profile-logic/range-filters';
-import { stringifyCallTreeFilters, parseCallTreeFilters } from './profile-logic/call-tree-filters';
+import {
+  stringifyRangeFilters,
+  parseRangeFilters,
+} from './profile-logic/range-filters';
+import {
+  stringifyCallTreeFilters,
+  parseCallTreeFilters,
+} from './profile-logic/call-tree-filters';
 import type { URLState } from './types/reducers';
 import type { DataSource } from './types/actions';
 
@@ -47,10 +53,8 @@ export function urlFromState(urlState: URLState) {
   if (dataSource === 'none') {
     return '/';
   }
-  const pathname = '/' + [
-    ...dataSourceDirs(urlState),
-    urlState.selectedTab,
-  ].join('/') + '/';
+  const pathname =
+    '/' + [...dataSourceDirs(urlState), urlState.selectedTab].join('/') + '/';
 
   // Start with the query parameters that are shown regardless of the active tab.
   const query: Object = {
@@ -71,15 +75,21 @@ export function urlFromState(urlState: URLState) {
     case 'calltree':
       query.search = urlState.callTreeSearchString || undefined;
       query.invertCallstack = urlState.invertCallstack ? null : undefined;
-      query.implementation = urlState.implementation === 'combined'
-        ? undefined
-        : urlState.implementation;
-      query.callTreeFilters = stringifyCallTreeFilters(urlState.callTreeFilters[urlState.selectedThread]) || undefined;
+      query.implementation =
+        urlState.implementation === 'combined'
+          ? undefined
+          : urlState.implementation;
+      query.callTreeFilters =
+        stringifyCallTreeFilters(
+          urlState.callTreeFilters[urlState.selectedThread]
+        ) || undefined;
       break;
     case 'timeline':
       query.search = urlState.callTreeSearchString || undefined;
       query.invertCallstack = urlState.invertCallstack ? null : undefined;
-      query.hidePlatformDetails = urlState.hidePlatformDetails ? null : undefined;
+      query.hidePlatformDetails = urlState.hidePlatformDetails
+        ? null
+        : undefined;
       break;
   }
   const qString = queryString.stringify(query);
@@ -130,8 +140,9 @@ export function stateFromLocation(location: Location): URLState {
         // So we stuff this information into a global here, and then later,
         // once we have the profile, we convert that information into URL params
         // again. This is not pretty.
-        window.legacyRangeFilters =
-          filters.filter(f => f.type === 'RangeSampleFilter').map(({ start, end }) => ({ start, end }));
+        window.legacyRangeFilters = filters
+          .filter(f => f.type === 'RangeSampleFilter')
+          .map(({ start, end }) => ({ start, end }));
       }
       return {
         dataSource: 'public',
@@ -170,12 +181,14 @@ export function stateFromLocation(location: Location): URLState {
     dataSource,
     hash: needHash ? dirs[1] : '',
     profileURL: needProfileURL ? decodeURIComponent(dirs[1]) : '',
-    selectedTab: ((needHash || needProfileURL) ? dirs[2] : dirs[1]) || 'calltree',
+    selectedTab: (needHash || needProfileURL ? dirs[2] : dirs[1]) || 'calltree',
     rangeFilters: query.range ? parseRangeFilters(query.range) : [],
     selectedThread: selectedThread,
     callTreeSearchString: query.search || '',
     callTreeFilters: {
-      [selectedThread]: query.callTreeFilters ? parseCallTreeFilters(query.callTreeFilters) : [],
+      [selectedThread]: query.callTreeFilters
+        ? parseCallTreeFilters(query.callTreeFilters)
+        : [],
     },
     implementation,
     invertCallstack: query.invertCallstack !== undefined,

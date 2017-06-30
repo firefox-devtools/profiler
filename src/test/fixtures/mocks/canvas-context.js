@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-type MaybeFn = (any => any) | void
+type MaybeFn = (any => any) | void;
 const identity = () => {};
 
 export default function mockCanvasContext() {
@@ -17,7 +17,7 @@ export default function mockCanvasContext() {
     return jest.fn((...args) => {
       log.push([name, ...args]);
       if (fn) {
-        return fn.apply(null, args);
+        return fn(...args);
       }
       return undefined;
     });
@@ -32,7 +32,7 @@ export default function mockCanvasContext() {
       beginPath: spyLog('beginPath'),
       closePath: spyLog('closePath'),
       arc: spyLog('arc'),
-      measureText: spyLog('measureText', text => ({width: text.length * 5})),
+      measureText: spyLog('measureText', text => ({ width: text.length * 5 })),
       createLinearGradient: spyLog('createLinearGradient', () => ({
         addColorStop: spyLog('addColorStop'),
       })),

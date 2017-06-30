@@ -5,7 +5,7 @@
 import { summarizeProfile } from '../../../profile-logic/summarize-profile';
 
 export function processProfileSummary() {
-  return function (dispatch, getState) {
+  return function(dispatch, getState) {
     dispatch({
       toContent: true,
       type: 'PROFILE_SUMMARY_PROCESSED',

@@ -17,9 +17,10 @@ import type {
 import type { UpdateProfileSelection } from '../../actions/profile-view';
 import type { ProfileSelection } from '../../types/actions';
 
-const { DOM_DELTA_PAGE, DOM_DELTA_LINE } = (typeof window === 'object' && window.WheelEvent)
-  ? new WheelEvent('mouse')
-  : { DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2 };
+const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
+  typeof window === 'object' && window.WheelEvent
+    ? new WheelEvent('mouse')
+    : { DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2 };
 
 type Props = {
   viewportNeedsUpdate: any,
@@ -67,9 +68,10 @@ const COLLAPSED_ROW_HEIGHT = 34;
  * viewportRight += mouseMoveDelta * unitPixel
  * viewportLeft += mouseMoveDelta * unitPixel
  **/
-export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>) {
+export default function withTimelineViewport<T>(
+  WrappedComponent: ReactClass<T>
+) {
   class TimelineViewport extends PureComponent {
-
     props: Props;
     shiftScrollId: number;
     zoomRangeSelectionScheduled: boolean;
@@ -88,7 +90,7 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
       dragY: CssPixels,
       isDragging: boolean,
       isShiftScrollHintVisible: boolean,
-    }
+    };
 
     constructor(props: Props) {
       super(props);
@@ -183,7 +185,10 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
     _setSize() {
       if (this._container) {
         const rect = this._container.getBoundingClientRect();
-        if (this.state.containerWidth !== rect.width || this.state.containerHeight !== rect.height) {
+        if (
+          this.state.containerWidth !== rect.width ||
+          this.state.containerHeight !== rect.height
+        ) {
           this.setState({
             containerWidth: rect.width,
             containerHeight: rect.height,
@@ -249,7 +254,10 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
 
         // Try to leave a gap of a collapsed row, if it's the top-most element then use
         // the offsetTop of the viewport from the inner scroll area.
-        const minimumGap = Math.min(COLLAPSED_ROW_HEIGHT, viewportRect.top - innerScrollRect.top);
+        const minimumGap = Math.min(
+          COLLAPSED_ROW_HEIGHT,
+          viewportRect.top - innerScrollRect.top
+        );
         return viewportRect.top < scrollRect.top + minimumGap;
       }
 
@@ -263,7 +271,10 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
 
       // Try to leave a gap of a collapsed row, if it's the bottom-most element then use the
       // offsetBottom of the viewport from the inner scroll area.
-      const minimumGap = Math.min(COLLAPSED_ROW_HEIGHT, innerScrollRect.bottom - viewportRect.bottom);
+      const minimumGap = Math.min(
+        COLLAPSED_ROW_HEIGHT,
+        innerScrollRect.bottom - viewportRect.bottom
+      );
       return viewportRect.bottom > scrollRect.bottom - minimumGap;
     }
 
@@ -283,7 +294,11 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
 
       // Accumulate the scroll delta here. Only apply it once per frame to avoid
       // spamming the Redux store with updates.
-      this.zoomRangeSelectionScrollDelta += getNormalizedScrollDelta(event, this.state.containerHeight, deltaKey);
+      this.zoomRangeSelectionScrollDelta += getNormalizedScrollDelta(
+        event,
+        this.state.containerHeight,
+        deltaKey
+      );
 
       // See if an update needs to be scheduled.
       if (!this.zoomRangeSelectionScheduled) {
@@ -307,8 +322,16 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
 
           const viewportLength: CssPixels = viewportRight - viewportLeft;
           const scale = viewportLength - viewportLength / (1 + deltaY * 0.001);
-          let newViewportLeft: UnitIntervalOfProfileRange = clamp(0, 1, viewportLeft - scale * mouseCenter);
-          let newViewportRight: UnitIntervalOfProfileRange = clamp(0, 1, viewportRight + scale * (1 - mouseCenter));
+          let newViewportLeft: UnitIntervalOfProfileRange = clamp(
+            0,
+            1,
+            viewportLeft - scale * mouseCenter
+          );
+          let newViewportRight: UnitIntervalOfProfileRange = clamp(
+            0,
+            1,
+            viewportRight + scale * (1 - mouseCenter)
+          );
 
           if (newViewportRight - newViewportLeft < maximumZoom) {
             const newViewportMiddle = (viewportLeft + viewportRight) * 0.5;
@@ -331,8 +354,10 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
             updateProfileSelection({
               hasSelection: true,
               isModifying: false,
-              selectionStart: timeRange.start + timeRangeLength * newViewportLeft,
-              selectionEnd: timeRange.start + timeRangeLength * newViewportRight,
+              selectionStart:
+                timeRange.start + timeRangeLength * newViewportLeft,
+              selectionEnd:
+                timeRange.start + timeRangeLength * newViewportRight,
             });
           }
         });
@@ -369,12 +394,23 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
     }
 
     moveViewport(offsetX: CssPixels, offsetY: CssPixels): boolean {
-      const { maxViewportHeight, timeRange, updateProfileSelection } = this.props;
-      const { containerWidth, containerHeight, viewportTop, viewportLeft, viewportRight } = this.state;
+      const {
+        maxViewportHeight,
+        timeRange,
+        updateProfileSelection,
+      } = this.props;
+      const {
+        containerWidth,
+        containerHeight,
+        viewportTop,
+        viewportLeft,
+        viewportRight,
+      } = this.state;
 
       // Calculate left and right in terms of the unit interval of the profile range.
       const viewportLength: CssPixels = viewportRight - viewportLeft;
-      const unitOffsetX: UnitIntervalOfProfileRange = viewportLength * offsetX / containerWidth;
+      const unitOffsetX: UnitIntervalOfProfileRange =
+        viewportLength * offsetX / containerWidth;
       let newViewportLeft: CssPixels = viewportLeft - unitOffsetX;
       let newViewportRight: CssPixels = viewportRight - unitOffsetX;
       if (newViewportLeft < 0) {
@@ -455,8 +491,14 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
       const { isRowExpanded, hasZoomedViaMousewheel } = this.props;
 
       const {
-        containerWidth, containerHeight, viewportTop, viewportBottom, viewportLeft,
-        viewportRight, isDragging, isShiftScrollHintVisible,
+        containerWidth,
+        containerHeight,
+        viewportTop,
+        viewportBottom,
+        viewportLeft,
+        viewportRight,
+        isDragging,
+        isShiftScrollHintVisible,
       } = this.state;
 
       const viewportClassName = classNames({
@@ -468,28 +510,34 @@ export default function withTimelineViewport<T>(WrappedComponent: ReactClass<T>)
 
       const shiftScrollClassName = classNames({
         timelineViewportShiftScroll: true,
-        hidden: hasZoomedViaMousewheel || !(isShiftScrollHintVisible && isRowExpanded),
+        hidden:
+          hasZoomedViaMousewheel ||
+          !(isShiftScrollHintVisible && isRowExpanded),
       });
 
       return (
-        <div className={viewportClassName}
-             onWheel={this._mouseWheelListener}
-             onMouseDown={this._mouseDownListener}
-             ref={container => {
-               this._container = container;
-             }}>
-          <WrappedComponent containerWidth={containerWidth}
-                            containerHeight={containerHeight}
-                            viewportLeft={viewportLeft}
-                            viewportRight={viewportRight}
-                            viewportTop={viewportTop}
-                            viewportBottom={viewportBottom}
-                            isDragging={isDragging}
-                            {...this.props} />
+        <div
+          className={viewportClassName}
+          onWheel={this._mouseWheelListener}
+          onMouseDown={this._mouseDownListener}
+          ref={container => {
+            this._container = container;
+          }}
+        >
+          <WrappedComponent
+            containerWidth={containerWidth}
+            containerHeight={containerHeight}
+            viewportLeft={viewportLeft}
+            viewportRight={viewportRight}
+            viewportTop={viewportTop}
+            viewportBottom={viewportBottom}
+            isDragging={isDragging}
+            {...this.props}
+          />
           <div className={shiftScrollClassName}>
             Zoom Timeline:
-            <kbd className='timelineViewportShiftScrollKbd'>Shift</kbd>
-            <kbd className='timelineViewportShiftScrollKbd'>Scroll</kbd>
+            <kbd className="timelineViewportShiftScrollKbd">Shift</kbd>
+            <kbd className="timelineViewportShiftScrollKbd">Scroll</kbd>
           </div>
         </div>
       );

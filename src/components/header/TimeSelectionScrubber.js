@@ -10,7 +10,6 @@ import { getContentRect } from '../../utils/css-geometry-tools';
 import { withSize } from '../shared/WithSize';
 
 class TimeSelectionScrubberImpl extends PureComponent {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -20,7 +19,9 @@ class TimeSelectionScrubberImpl extends PureComponent {
     this._onMouseMove = this._onMouseMove.bind(this);
     this.handlers = null;
     this._container = null;
-    this._containerCreated = c => { this._container = c; };
+    this._containerCreated = c => {
+      this._container = c;
+    };
   }
 
   _onMouseDown(e) {
@@ -29,8 +30,12 @@ class TimeSelectionScrubberImpl extends PureComponent {
     }
 
     const r = getContentRect(this._container);
-    if (e.pageX < r.left || e.pageX >= r.right ||
-        e.pageY < r.top || e.pageY >= r.bottom) {
+    if (
+      e.pageX < r.left ||
+      e.pageX >= r.right ||
+      e.pageY < r.top ||
+      e.pageY >= r.bottom
+    ) {
       return;
     }
 
@@ -40,19 +45,33 @@ class TimeSelectionScrubberImpl extends PureComponent {
     e.preventDefault();
 
     const { rangeStart, rangeEnd, minSelectionStartWidth } = this.props;
-    const mouseDownTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
+    const mouseDownTime =
+      (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
 
     let isRangeSelecting = false;
 
     const mouseMoveHandler = e => {
-      const mouseMoveTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
-      const selectionStart = clamp(Math.min(mouseDownTime, mouseMoveTime), rangeStart, rangeEnd);
-      const selectionEnd = clamp(Math.max(mouseDownTime, mouseMoveTime), rangeStart, rangeEnd);
-      if (isRangeSelecting || selectionEnd - selectionStart >= minSelectionStartWidth) {
+      const mouseMoveTime =
+        (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
+      const selectionStart = clamp(
+        Math.min(mouseDownTime, mouseMoveTime),
+        rangeStart,
+        rangeEnd
+      );
+      const selectionEnd = clamp(
+        Math.max(mouseDownTime, mouseMoveTime),
+        rangeStart,
+        rangeEnd
+      );
+      if (
+        isRangeSelecting ||
+        selectionEnd - selectionStart >= minSelectionStartWidth
+      ) {
         isRangeSelecting = true;
         this.props.onSelectionChange({
           hasSelection: true,
-          selectionStart, selectionEnd,
+          selectionStart,
+          selectionEnd,
           isModifying: true,
         });
       }
@@ -60,12 +79,22 @@ class TimeSelectionScrubberImpl extends PureComponent {
 
     const mouseUpHandler = e => {
       if (isRangeSelecting) {
-        const mouseMoveTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
-        const selectionStart = clamp(Math.min(mouseDownTime, mouseMoveTime), rangeStart, rangeEnd);
-        const selectionEnd = clamp(Math.max(mouseDownTime, mouseMoveTime), rangeStart, rangeEnd);
+        const mouseMoveTime =
+          (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
+        const selectionStart = clamp(
+          Math.min(mouseDownTime, mouseMoveTime),
+          rangeStart,
+          rangeEnd
+        );
+        const selectionEnd = clamp(
+          Math.max(mouseDownTime, mouseMoveTime),
+          rangeStart,
+          rangeEnd
+        );
         this.props.onSelectionChange({
           hasSelection: true,
-          selectionStart, selectionEnd,
+          selectionStart,
+          selectionEnd,
           isModifying: false,
         });
         e.stopPropagation();
@@ -75,10 +104,10 @@ class TimeSelectionScrubberImpl extends PureComponent {
 
       const { selection } = this.props;
       if (selection.hasSelection) {
-        const mouseUpTime = (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
+        const mouseUpTime =
+          (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
         const { selectionStart, selectionEnd } = selection;
-        if (mouseUpTime < selectionStart ||
-            mouseUpTime >= selectionEnd) {
+        if (mouseUpTime < selectionStart || mouseUpTime >= selectionEnd) {
           // Unset selection.
           this.props.onSelectionChange({
             hasSelection: false,
@@ -114,8 +143,12 @@ class TimeSelectionScrubberImpl extends PureComponent {
     }
 
     const r = getContentRect(this._container);
-    if (e.pageX < r.left || e.pageX >= r.right ||
-        e.pageY < r.top || e.pageY >= r.bottom) {
+    if (
+      e.pageX < r.left ||
+      e.pageX >= r.right ||
+      e.pageY < r.top ||
+      e.pageY >= r.bottom
+    ) {
       this.setState({ hoverLocation: null });
     } else {
       this.setState({ hoverLocation: e.pageX - r.left });
@@ -124,40 +157,56 @@ class TimeSelectionScrubberImpl extends PureComponent {
 
   render() {
     const {
-      className, zeroAt, rangeStart, rangeEnd, children,
+      className,
+      zeroAt,
+      rangeStart,
+      rangeEnd,
+      children,
       selection,
-      width, onSelectionChange, onZoomButtonClick,
+      width,
+      onSelectionChange,
+      onZoomButtonClick,
     } = this.props;
 
-    const {
-      hoverLocation,
-    } = this.state;
+    const { hoverLocation } = this.state;
 
     return (
-      <div className={className}
-           ref={this._containerCreated}
-           onMouseDown={this._onMouseDown}
-           onMouseMove={this._onMouseMove}>
-        <TimeRuler className={`${className}TimeRuler`}
-                  zeroAt={zeroAt}
-                  rangeStart={rangeStart}
-                  rangeEnd={rangeEnd}
-                  width={width}/>
-        { children }
-        { selection.hasSelection ? <SelectionScrubberOverlay rangeStart={rangeStart}
-                                                   rangeEnd={rangeEnd}
-                                                   selectionStart={selection.selectionStart}
-                                                   selectionEnd={selection.selectionEnd}
-                                                   isModifying={selection.isModifying}
-                                                   width={width}
-                                                   onSelectionChange={onSelectionChange}
-                                                   onZoomButtonClick={onZoomButtonClick}/>
-                       : null }
-        <div className='timeSelectionScrubberHoverIndicator'
-             style={{
-               visibility: selection.isModifying || (hoverLocation === null) ? 'hidden' : undefined,
-               left: (hoverLocation === null) ? '0' : `${hoverLocation}px`,
-             }}/>
+      <div
+        className={className}
+        ref={this._containerCreated}
+        onMouseDown={this._onMouseDown}
+        onMouseMove={this._onMouseMove}
+      >
+        <TimeRuler
+          className={`${className}TimeRuler`}
+          zeroAt={zeroAt}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          width={width}
+        />
+        {children}
+        {selection.hasSelection
+          ? <SelectionScrubberOverlay
+              rangeStart={rangeStart}
+              rangeEnd={rangeEnd}
+              selectionStart={selection.selectionStart}
+              selectionEnd={selection.selectionEnd}
+              isModifying={selection.isModifying}
+              width={width}
+              onSelectionChange={onSelectionChange}
+              onZoomButtonClick={onZoomButtonClick}
+            />
+          : null}
+        <div
+          className="timeSelectionScrubberHoverIndicator"
+          style={{
+            visibility:
+              selection.isModifying || hoverLocation === null
+                ? 'hidden'
+                : undefined,
+            left: hoverLocation === null ? '0' : `${hoverLocation}px`,
+          }}
+        />
       </div>
     );
   }

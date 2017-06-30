@@ -7,7 +7,11 @@
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import actions from '../../actions';
-import { getImplementationFilter, getInvertCallstack, getSearchString } from '../../reducers/url-state';
+import {
+  getImplementationFilter,
+  getInvertCallstack,
+  getSearchString,
+} from '../../reducers/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
 
 import './ProfileCallTreeSettings.css';
@@ -26,9 +30,15 @@ class ProfileCallTreeSettings extends PureComponent {
 
   constructor(props) {
     super(props);
-    (this: any)._onImplementationFilterChange = this._onImplementationFilterChange.bind(this);
-    (this: any)._onInvertCallstackClick = this._onInvertCallstackClick.bind(this);
-    (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(this);
+    (this: any)._onImplementationFilterChange = this._onImplementationFilterChange.bind(
+      this
+    );
+    (this: any)._onInvertCallstackClick = this._onInvertCallstackClick.bind(
+      this
+    );
+    (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(
+      this
+    );
   }
 
   _onImplementationFilterChange(e: Event & { target: HTMLSelectElement }) {
@@ -46,39 +56,44 @@ class ProfileCallTreeSettings extends PureComponent {
   render() {
     const { implementationFilter, invertCallstack, searchString } = this.props;
     return (
-      <div className='profileCallTreeSettings'>
-        <ul className='profileCallTreeSettingsList'>
-          <li className='profileCallTreeSettingsListItem'>
-            <label className='profileCallTreeSettingsLabel'>
+      <div className="profileCallTreeSettings">
+        <ul className="profileCallTreeSettingsList">
+          <li className="profileCallTreeSettingsListItem">
+            <label className="profileCallTreeSettingsLabel">
               Filter:
               <select
-                     className='profileCallTreeSettingsSelect'
-                     onChange={this._onImplementationFilterChange}
-                     value={implementationFilter}>
-                <option value='combined'>Combined stacks</option>
-                <option value='js'>JS only</option>
-                <option value='cpp'>C++ only</option>
+                className="profileCallTreeSettingsSelect"
+                onChange={this._onImplementationFilterChange}
+                value={implementationFilter}
+              >
+                <option value="combined">Combined stacks</option>
+                <option value="js">JS only</option>
+                <option value="cpp">C++ only</option>
               </select>
             </label>
           </li>
-          <li className='profileCallTreeSettingsListItem'>
-            <label className='profileCallTreeSettingsLabel'>
-              <input type='checkbox'
-                     className='profileCallTreeSettingsCheckbox'
-                     onChange={this._onInvertCallstackClick}
-                     checked={invertCallstack}/>
-              { ' Invert call stack' }
+          <li className="profileCallTreeSettingsListItem">
+            <label className="profileCallTreeSettingsLabel">
+              <input
+                type="checkbox"
+                className="profileCallTreeSettingsCheckbox"
+                onChange={this._onInvertCallstackClick}
+                checked={invertCallstack}
+              />
+              {' Invert call stack'}
             </label>
           </li>
         </ul>
-        <div className='profileCallTreeSettingsSearchbar'>
-          <label className='profileCallTreeSettingsSearchbarLabel'>
+        <div className="profileCallTreeSettingsSearchbar">
+          <label className="profileCallTreeSettingsSearchbarLabel">
             {'Filter stacks: '}
-            <IdleSearchField className='profileCallTreeSettingsSearchField'
-                             title='Only display stacks which contain a function whose name matches this substring'
-                             idlePeriod={200}
-                             defaultValue={searchString}
-                             onIdleAfterChange={this._onSearchFieldIdleAfterChange}/>
+            <IdleSearchField
+              className="profileCallTreeSettingsSearchField"
+              title="Only display stacks which contain a function whose name matches this substring"
+              idlePeriod={200}
+              defaultValue={searchString}
+              onIdleAfterChange={this._onSearchFieldIdleAfterChange}
+            />
           </label>
         </div>
       </div>
@@ -95,8 +110,11 @@ ProfileCallTreeSettings.propTypes = {
   searchString: PropTypes.string.isRequired,
 };
 
-export default connect(state => ({
-  invertCallstack: getInvertCallstack(state),
-  implementationFilter: getImplementationFilter(state),
-  searchString: getSearchString(state),
-}), actions)(ProfileCallTreeSettings);
+export default connect(
+  state => ({
+    invertCallstack: getInvertCallstack(state),
+    implementationFilter: getImplementationFilter(state),
+    searchString: getSearchString(state),
+  }),
+  actions
+)(ProfileCallTreeSettings);

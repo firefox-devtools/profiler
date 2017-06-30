@@ -11,7 +11,10 @@ import { BackgroundImageStyleDef } from './StyleDef';
 
 import ContextMenuTrigger from './ContextMenuTrigger';
 
-import type { IndexIntoFuncStackTable, Node } from '../../types/profile-derived';
+import type {
+  IndexIntoFuncStackTable,
+  Node,
+} from '../../types/profile-derived';
 import type { ProfileTreeClass } from '../../profile-logic/profile-tree';
 import type { IconWithClassName } from '../../types/reducers';
 
@@ -26,22 +29,28 @@ type TreeViewHeaderProps = {
   mainColumn: Column,
 };
 
-const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => (
-  <div className='treeViewHeader'>
-    {
-      fixedColumns.map(col =>
-        <span className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
-              key={col.propName}>
-          { col.title }
-        </span>)
-    }
-    <span className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}>
-      { mainColumn.title }
+const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) =>
+  <div className="treeViewHeader">
+    {fixedColumns.map(col =>
+      <span
+        className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
+        key={col.propName}
+      >
+        {col.title}
+      </span>
+    )}
+    <span
+      className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}
+    >
+      {mainColumn.title}
     </span>
-  </div>
-);
+  </div>;
 
-function reactStringWithHighlightedSubstrings(string: string, substring: string | null, className: string) {
+function reactStringWithHighlightedSubstrings(
+  string: string,
+  substring: string | null,
+  className: string
+) {
   if (!substring) {
     return string;
   }
@@ -49,10 +58,16 @@ function reactStringWithHighlightedSubstrings(string: string, substring: string 
   const result = [];
   let startAt = 0;
   let nextOccurrence = -1;
-  while ((nextOccurrence = lowercaseString.indexOf(substring, startAt)) !== -1) {
+  while (
+    (nextOccurrence = lowercaseString.indexOf(substring, startAt)) !== -1
+  ) {
     const afterNextOccurrence = nextOccurrence + substring.length;
     result.push(string.substring(startAt, nextOccurrence));
-    result.push(<span key={nextOccurrence} className={className}>{string.substring(nextOccurrence, afterNextOccurrence)}</span>);
+    result.push(
+      <span key={nextOccurrence} className={className}>
+        {string.substring(nextOccurrence, afterNextOccurrence)}
+      </span>
+    );
     startAt = afterNextOccurrence;
   }
   result.push(string.substring(startAt));
@@ -84,24 +99,33 @@ class TreeViewRowFixedColumns extends PureComponent {
 
   render() {
     const { node, columns, index, selected, highlightString } = this.props;
-    const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
+    const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     return (
-      <div className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${selected ? 'selected' : ''}`} style={{height: '16px'}} onMouseDown={this._onClick}>
-        {
-          columns.map(col => {
-            const RenderComponent = col.component;
+      <div
+        className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${selected
+          ? 'selected'
+          : ''}`}
+        style={{ height: '16px' }}
+        onMouseDown={this._onClick}
+      >
+        {columns.map(col => {
+          const RenderComponent = col.component;
 
-            return <span className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
-                    key={col.propName}>
-                    { RenderComponent
-                      ? <RenderComponent node={node} />
-                      : reactStringWithHighlightedSubstrings(
-                          node[col.propName], highlightString, 'treeViewHighlighting'
-                        )
-                    }
-                   </span>;
-          })
-        }
+          return (
+            <span
+              className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
+              key={col.propName}
+            >
+              {RenderComponent
+                ? <RenderComponent node={node} />
+                : reactStringWithHighlightedSubstrings(
+                    node[col.propName],
+                    highlightString,
+                    'treeViewHighlighting'
+                  )}
+            </span>
+          );
+        })}
       </div>
     );
   }
@@ -120,7 +144,9 @@ type TreeViewRowScrolledColumnsProps = {
   selected: boolean,
   onToggle: (IndexIntoFuncStackTable, boolean, boolean) => mixed,
   onClick: (IndexIntoFuncStackTable, MouseEvent) => mixed,
-  onAppendageButtonClick: ((IndexIntoFuncStackTable | null, string) => mixed) | null,
+  onAppendageButtonClick:
+    | ((IndexIntoFuncStackTable | null, string) => mixed)
+    | null,
   highlightString: string,
 };
 
@@ -134,13 +160,20 @@ class TreeViewRowScrolledColumns extends PureComponent {
 
   _onClick(event: MouseEvent & { target: Element }) {
     const {
-      nodeId, isExpanded, onToggle, onClick, onAppendageButtonClick,
+      nodeId,
+      isExpanded,
+      onToggle,
+      onClick,
+      onAppendageButtonClick,
     } = this.props;
     if (event.target.classList.contains('treeRowToggleButton')) {
       onToggle(nodeId, !isExpanded, event.altKey === true);
     } else if (event.target.classList.contains('treeViewRowAppendageButton')) {
       if (onAppendageButtonClick) {
-        onAppendageButtonClick(nodeId, event.target.getAttribute('data-appendage-button-name') || '');
+        onAppendageButtonClick(
+          nodeId,
+          event.target.getAttribute('data-appendage-button-name') || ''
+        );
       }
     } else {
       onClick(nodeId, event);
@@ -149,30 +182,67 @@ class TreeViewRowScrolledColumns extends PureComponent {
 
   render() {
     const {
-      node, depth, mainColumn, appendageColumn, index, canBeExpanded,
-      isExpanded, selected, highlightString, appendageButtons,
+      node,
+      depth,
+      mainColumn,
+      appendageColumn,
+      index,
+      canBeExpanded,
+      isExpanded,
+      selected,
+      highlightString,
+      appendageButtons,
     } = this.props;
-    const evenOddClassName = (index % 2) === 0 ? 'even' : 'odd';
+    const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
 
     return (
-      <div className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected ? 'selected' : ''} ${node.dim ? 'dim' : ''}`} style={{height: '16px'}} onMouseDown={this._onClick}>
-        <span className='treeRowIndentSpacer' style={{ width: `${depth * 10}px` }}/>
-        <span className={`treeRowToggleButton ${isExpanded ? 'expanded' : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`} />
-        <span className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}>
-          { reactStringWithHighlightedSubstrings(node[mainColumn.propName], highlightString, 'treeViewHighlighting') }
+      <div
+        className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected
+          ? 'selected'
+          : ''} ${node.dim ? 'dim' : ''}`}
+        style={{ height: '16px' }}
+        onMouseDown={this._onClick}
+      >
+        <span
+          className="treeRowIndentSpacer"
+          style={{ width: `${depth * 10}px` }}
+        />
+        <span
+          className={`treeRowToggleButton ${isExpanded
+            ? 'expanded'
+            : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`}
+        />
+        <span
+          className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}
+        >
+          {reactStringWithHighlightedSubstrings(
+            node[mainColumn.propName],
+            highlightString,
+            'treeViewHighlighting'
+          )}
         </span>
-        { appendageColumn ? (
-          <span className={`treeViewRowColumn treeViewAppendageColumn ${appendageColumn.propName}`}>
-            { reactStringWithHighlightedSubstrings(node[appendageColumn.propName], highlightString, 'treeViewHighlighting') }
-          </span>
-          ) : null}
-        { appendageButtons ? appendageButtons.map(buttonName => (
-            <input className={classNames('treeViewRowAppendageButton', buttonName)}
-                   type='button'
-                   key={buttonName}
-                   data-appendage-button-name={buttonName}
-                   value=''/>
-          )) : null }
+        {appendageColumn
+          ? <span
+              className={`treeViewRowColumn treeViewAppendageColumn ${appendageColumn.propName}`}
+            >
+              {reactStringWithHighlightedSubstrings(
+                node[appendageColumn.propName],
+                highlightString,
+                'treeViewHighlighting'
+              )}
+            </span>
+          : null}
+        {appendageButtons
+          ? appendageButtons.map(buttonName =>
+              <input
+                className={classNames('treeViewRowAppendageButton', buttonName)}
+                type="button"
+                key={buttonName}
+                data-appendage-button-name={buttonName}
+                value=""
+              />
+            )
+          : null}
       </div>
     );
   }
@@ -192,7 +262,9 @@ type TreeViewProps = {
   icons: IconWithClassName[],
   contextMenu?: React$Element<*>,
   contextMenuId?: string,
-  onAppendageButtonClick: ((IndexIntoFuncStackTable | null, string) => mixed) | null,
+  onAppendageButtonClick:
+    | ((IndexIntoFuncStackTable | null, string) => mixed)
+    | null,
   onSelectionChange: IndexIntoFuncStackTable => mixed,
 };
 
@@ -228,51 +300,72 @@ class TreeView extends PureComponent {
     if (nextProps.selectedNodeId !== this.props.selectedNodeId) {
       this._specialItems = [nextProps.selectedNodeId];
     }
-    if (nextProps.tree !== this.props.tree ||
-        nextProps.expandedNodeIds !== this.props.expandedNodeIds) {
+    if (
+      nextProps.tree !== this.props.tree ||
+      nextProps.expandedNodeIds !== this.props.expandedNodeIds
+    ) {
       this._visibleRows = this._getAllVisibleRows(nextProps);
     }
   }
 
-  _renderRow(nodeId: IndexIntoFuncStackTable, index: number, columnIndex: number) {
+  _renderRow(
+    nodeId: IndexIntoFuncStackTable,
+    index: number,
+    columnIndex: number
+  ) {
     const {
-      tree, expandedNodeIds, fixedColumns, mainColumn, appendageColumn,
-      selectedNodeId, highlightString, appendageButtons,
+      tree,
+      expandedNodeIds,
+      fixedColumns,
+      mainColumn,
+      appendageColumn,
+      selectedNodeId,
+      highlightString,
+      appendageButtons,
       onAppendageButtonClick,
     } = this.props;
     const node = tree.getNode(nodeId);
     if (columnIndex === 0) {
       return (
-        <TreeViewRowFixedColumns node={node}
-                                 columns={fixedColumns}
-                                 nodeId={nodeId}
-                                 index={index}
-                                 selected={nodeId === selectedNodeId}
-                                 onClick={this._onRowClicked}
-                                 highlightString={highlightString}/>
+        <TreeViewRowFixedColumns
+          node={node}
+          columns={fixedColumns}
+          nodeId={nodeId}
+          index={index}
+          selected={nodeId === selectedNodeId}
+          onClick={this._onRowClicked}
+          highlightString={highlightString}
+        />
       );
     }
     const canBeExpanded = tree.hasChildren(nodeId);
     const isExpanded = expandedNodeIds.includes(nodeId);
     return (
-      <TreeViewRowScrolledColumns node={node}
-                                  mainColumn={mainColumn}
-                                  appendageColumn={appendageColumn}
-                                  appendageButtons={appendageButtons}
-                                  depth={tree.getDepth(nodeId)}
-                                  nodeId={nodeId}
-                                  index={index}
-                                  canBeExpanded={canBeExpanded}
-                                  isExpanded={isExpanded}
-                                  onToggle={this._toggle}
-                                  selected={nodeId === selectedNodeId}
-                                  onClick={this._onRowClicked}
-                                  onAppendageButtonClick={onAppendageButtonClick}
-                                  highlightString={highlightString}/>
+      <TreeViewRowScrolledColumns
+        node={node}
+        mainColumn={mainColumn}
+        appendageColumn={appendageColumn}
+        appendageButtons={appendageButtons}
+        depth={tree.getDepth(nodeId)}
+        nodeId={nodeId}
+        index={index}
+        canBeExpanded={canBeExpanded}
+        isExpanded={isExpanded}
+        onToggle={this._toggle}
+        selected={nodeId === selectedNodeId}
+        onClick={this._onRowClicked}
+        onAppendageButtonClick={onAppendageButtonClick}
+        highlightString={highlightString}
+      />
     );
   }
 
-  _addVisibleRowsFromNode(props: TreeViewProps, arr: IndexIntoFuncStackTable[], nodeId: IndexIntoFuncStackTable, depth: number) {
+  _addVisibleRowsFromNode(
+    props: TreeViewProps,
+    arr: IndexIntoFuncStackTable[],
+    nodeId: IndexIntoFuncStackTable,
+    depth: number
+  ) {
     arr.push(nodeId);
     if (!props.expandedNodeIds.includes(nodeId)) {
       return;
@@ -296,14 +389,21 @@ class TreeView extends PureComponent {
     return !this.props.expandedNodeIds.includes(nodeId);
   }
 
-  _addAllDescendants(newSet: Set<IndexIntoFuncStackTable | null>, nodeId: IndexIntoFuncStackTable) {
+  _addAllDescendants(
+    newSet: Set<IndexIntoFuncStackTable | null>,
+    nodeId: IndexIntoFuncStackTable
+  ) {
     this.props.tree.getChildren(nodeId).forEach(childId => {
       newSet.add(childId);
       this._addAllDescendants(newSet, childId);
     });
   }
 
-  _toggle(nodeId: IndexIntoFuncStackTable, newExpanded: boolean = this._isCollapsed(nodeId), toggleAll: * = false) {
+  _toggle(
+    nodeId: IndexIntoFuncStackTable,
+    newExpanded: boolean = this._isCollapsed(nodeId),
+    toggleAll: * = false
+  ) {
     const newSet = new Set(this.props.expandedNodeIds);
     if (newExpanded) {
       newSet.add(nodeId);
@@ -316,7 +416,10 @@ class TreeView extends PureComponent {
     this.props.onExpandedNodesChange(Array.from(newSet.values()));
   }
 
-  _toggleAll(nodeId: IndexIntoFuncStackTable, newExpanded: boolean = this._isCollapsed(nodeId)) {
+  _toggleAll(
+    nodeId: IndexIntoFuncStackTable,
+    newExpanded: boolean = this._isCollapsed(nodeId)
+  ) {
     this._toggle(nodeId, newExpanded, true);
   }
 
@@ -326,7 +429,8 @@ class TreeView extends PureComponent {
 
   _onRowClicked(nodeId: IndexIntoFuncStackTable, event: MouseEvent) {
     this._select(nodeId);
-    if (event.detail === 2) { // double click
+    if (event.detail === 2) {
+      // double click
       this._toggle(nodeId);
     }
   }
@@ -346,8 +450,7 @@ class TreeView extends PureComponent {
     }
 
     if (event.keyCode < 37 || event.keyCode > 40) {
-      if (event.keyCode !== 0 ||
-          String.fromCharCode(event.charCode) !== '*') {
+      if (event.keyCode !== 0 || String.fromCharCode(event.charCode) !== '*') {
         return;
       }
     }
@@ -356,14 +459,18 @@ class TreeView extends PureComponent {
 
     const selected = this.props.selectedNodeId;
     const visibleRows = this._getAllVisibleRows(this.props);
-    const selectedRowIndex = visibleRows.findIndex(nodeId => nodeId === selected);
+    const selectedRowIndex = visibleRows.findIndex(
+      nodeId => nodeId === selected
+    );
 
-    if (selected === null || selectedRowIndex === -1) { // the first condition is redundant, but it makes flow happy
+    if (selected === null || selectedRowIndex === -1) {
+      // the first condition is redundant, but it makes flow happy
       this._select(visibleRows[0]);
       return;
     }
 
-    if (event.keyCode === 37) { // KEY_LEFT
+    if (event.keyCode === 37) {
+      // KEY_LEFT
       const isCollapsed = this._isCollapsed(selected);
       if (!isCollapsed) {
         this._toggle(selected);
@@ -373,11 +480,13 @@ class TreeView extends PureComponent {
           this._select(parent);
         }
       }
-    } else if (event.keyCode === 38) { // KEY_UP
+    } else if (event.keyCode === 38) {
+      // KEY_UP
       if (selectedRowIndex > 0) {
         this._select(visibleRows[selectedRowIndex - 1]);
       }
-    } else if (event.keyCode === 39) { // KEY_RIGHT
+    } else if (event.keyCode === 39) {
+      // KEY_RIGHT
       const isCollapsed = this._isCollapsed(selected);
       if (isCollapsed) {
         this._toggle(selected);
@@ -387,7 +496,8 @@ class TreeView extends PureComponent {
           this._select(this.props.tree.getChildren(selected)[0]);
         }
       }
-    } else if (event.keyCode === 40) { // KEY_DOWN
+    } else if (event.keyCode === 40) {
+      // KEY_DOWN
       if (selectedRowIndex < visibleRows.length - 1) {
         this._select(visibleRows[selectedRowIndex + 1]);
       }
@@ -403,41 +513,59 @@ class TreeView extends PureComponent {
   }
 
   render() {
-    const { fixedColumns, mainColumn, disableOverscan, contextMenu, contextMenuId, icons } = this.props;
+    const {
+      fixedColumns,
+      mainColumn,
+      disableOverscan,
+      contextMenu,
+      contextMenuId,
+      icons,
+    } = this.props;
     return (
-      <div className='treeView'>
-        { icons && icons.map(
-            ({ className, icon }) => <BackgroundImageStyleDef className={className} url={icon} key={className} />
-        ) }
-        <TreeViewHeader fixedColumns={fixedColumns}
-                         mainColumn={mainColumn}/>
-        <ContextMenuTrigger id={contextMenuId}
-                            attributes={{ className: 'treeViewContextMenu' }}>
-            <VirtualList className='treeViewBody'
-                         items={this._visibleRows}
-                         renderItem={this._renderRow}
-                         itemHeight={16}
-                         columnCount={2}
-                         focusable={true}
-                         onKeyDown={this._onKeyDown}
-                         specialItems={this._specialItems}
-                         disableOverscan={disableOverscan}
-                         onCopy={this._onCopy}
-                         ref={ ref => { this._list = ref; }}/>
+      <div className="treeView">
+        {icons &&
+          icons.map(({ className, icon }) =>
+            <BackgroundImageStyleDef
+              className={className}
+              url={icon}
+              key={className}
+            />
+          )}
+        <TreeViewHeader fixedColumns={fixedColumns} mainColumn={mainColumn} />
+        <ContextMenuTrigger
+          id={contextMenuId}
+          attributes={{ className: 'treeViewContextMenu' }}
+        >
+          <VirtualList
+            className="treeViewBody"
+            items={this._visibleRows}
+            renderItem={this._renderRow}
+            itemHeight={16}
+            columnCount={2}
+            focusable={true}
+            onKeyDown={this._onKeyDown}
+            specialItems={this._specialItems}
+            disableOverscan={disableOverscan}
+            onCopy={this._onCopy}
+            ref={ref => {
+              this._list = ref;
+            }}
+          />
         </ContextMenuTrigger>
         {contextMenu}
       </div>
     );
   }
-
 }
 
 TreeView.propTypes = {
-  fixedColumns: PropTypes.arrayOf(PropTypes.shape({
-    propName: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-    component: PropTypes.func,
-  })).isRequired,
+  fixedColumns: PropTypes.arrayOf(
+    PropTypes.shape({
+      propName: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      component: PropTypes.func,
+    })
+  ).isRequired,
   mainColumn: PropTypes.shape({
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,

@@ -82,14 +82,14 @@ function getAddonForScriptURI(url, host) {
 
 function resourceNameFromURI(url) {
   if (!url) {
-    return ensureResource('unknown', {type: 'unknown', name: '<unknown>'});
+    return ensureResource('unknown', { type: 'unknown', name: '<unknown>' });
   }
 
   const match = /^(.*):\/\/(.*?)\//.exec(url);
 
   if (!match) {
     // Can this happen? If so, we should change the regular expression above.
-    return ensureResource('url_' + url, {type: 'url', name: url});
+    return ensureResource('url_' + url, { type: 'url', name: url });
   }
 
   const [urlRoot, protocol, host] = match;
@@ -151,7 +151,6 @@ function getRealScriptURI(url) {
  *                           libraryName is a string index into the resources array at the top of this file.
  */
 export function getFunctionInfo(fullName) {
-
   function getCPPFunctionInfo(fullName) {
     const match =
       /^(.*) \(in ([^)]*)\) (\+ [0-9]+)$/.exec(fullName) ||
@@ -209,9 +208,11 @@ export function getFunctionInfo(fullName) {
     };
   }
 
-  return getCPPFunctionInfo(fullName) ||
-         getJSFunctionInfo(fullName) ||
-         getFallbackFunctionInfo(fullName);
+  return (
+    getCPPFunctionInfo(fullName) ||
+    getJSFunctionInfo(fullName) ||
+    getFallbackFunctionInfo(fullName)
+  );
 }
 
 /**

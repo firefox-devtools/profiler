@@ -33,5 +33,7 @@ function labelingStrategy(state: GetLabel = getFunctionName, action: Action) {
 export default combineReducers({ categoryColorStrategy, labelingStrategy });
 
 export const getFlameChart = (state: State) => state.flameChart;
-export const getCategoryColorStrategy = (state: State) => getFlameChart(state).categoryColorStrategy;
-export const getLabelingStrategy = (state: State) => getFlameChart(state).labelingStrategy;
+export const getCategoryColorStrategy = (state: State) =>
+  getFlameChart(state).categoryColorStrategy;
+export const getLabelingStrategy = (state: State) =>
+  getFlameChart(state).labelingStrategy;

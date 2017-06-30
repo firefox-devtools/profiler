@@ -3,49 +3,72 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Thread, IndexIntoFrameTable, IndexIntoStackTable } from '../types/profile';
+import type {
+  Thread,
+  IndexIntoFrameTable,
+  IndexIntoStackTable,
+} from '../types/profile';
 
 type CategoryName = string;
 type CssParseableColor = string;
 type IndexIntoCategory = number;
-type CategoriesMap = {[id: CategoryName]: CssParseableColor};
-type Category = {name: CategoryName, color: CssParseableColor};
-type CategoriesIndexMap = {[id: CategoryName]: number};
+type CategoriesMap = { [id: CategoryName]: CssParseableColor };
+type Category = { name: CategoryName, color: CssParseableColor };
+type CategoriesIndexMap = { [id: CategoryName]: number };
 
 export type GetCategory = (Thread, IndexIntoFrameTable) => Category;
 
 export const implementationCategoryMap: CategoriesMap = {
   'JS Baseline': '#B5ECA8',
-  'JIT': '#3CCF55',
+  JIT: '#3CCF55',
   'JS Interpreter': 'rgb(200, 200, 200)',
-  'Platform': 'rgb(240, 240, 240)',
+  Platform: 'rgb(240, 240, 240)',
 };
 
-export const implementationCategories: Category[] = _categoriesMapToList(implementationCategoryMap);
+export const implementationCategories: Category[] = _categoriesMapToList(
+  implementationCategoryMap
+);
 
-const _implementationCategoriesIndexMap: CategoriesIndexMap = _toIndexMap(implementationCategories);
+const _implementationCategoriesIndexMap: CategoriesIndexMap = _toIndexMap(
+  implementationCategories
+);
 
 // TODO - This function is not needed.
 
-export function getImplementationColor(thread: Thread, frameIndex: IndexIntoFrameTable): CssParseableColor {
+export function getImplementationColor(
+  thread: Thread,
+  frameIndex: IndexIntoFrameTable
+): CssParseableColor {
   return getCategoryByImplementation(thread, frameIndex).color;
 }
 
-export function getCategoryByImplementation(thread: Thread, frameIndex: IndexIntoFrameTable): Category {
-  return implementationCategories[getImplementationCategoryIndex(thread, frameIndex)];
+export function getCategoryByImplementation(
+  thread: Thread,
+  frameIndex: IndexIntoFrameTable
+): Category {
+  return implementationCategories[
+    getImplementationCategoryIndex(thread, frameIndex)
+  ];
 }
 
 // TODO - This function is not needed.
 
-export function getImplementationCategoryIndex(thread: Thread, frameIndex: IndexIntoFrameTable): IndexIntoCategory {
+export function getImplementationCategoryIndex(
+  thread: Thread,
+  frameIndex: IndexIntoFrameTable
+): IndexIntoCategory {
   const funcIndex = thread.frameTable.func[frameIndex];
   const implementationIndex = thread.frameTable.implementation[frameIndex];
-  const implementation = implementationIndex ? thread.stringTable.getString(implementationIndex) : null;
+  const implementation = implementationIndex
+    ? thread.stringTable.getString(implementationIndex)
+    : null;
   let categoryName;
   if (implementation) {
     categoryName = implementation === 'baseline' ? 'JS Baseline' : 'JIT';
   } else {
-    categoryName = thread.funcTable.isJS[funcIndex] ? 'JS Interpreter' : 'Platform';
+    categoryName = thread.funcTable.isJS[funcIndex]
+      ? 'JS Interpreter'
+      : 'Platform';
   }
   return _implementationCategoriesIndexMap[categoryName];
 }
@@ -68,7 +91,10 @@ function _categoriesMapToList(object) {
   return list;
 }
 
-export function getFunctionName(thread: Thread, stackIndex: IndexIntoStackTable) {
+export function getFunctionName(
+  thread: Thread,
+  stackIndex: IndexIntoStackTable
+) {
   const frameIndex = thread.stackTable.frame[stackIndex];
   const funcIndex = thread.frameTable.func[frameIndex];
   return thread.stringTable.getString(thread.funcTable.name[funcIndex]);

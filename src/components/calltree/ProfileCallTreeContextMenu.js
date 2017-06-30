@@ -11,17 +11,19 @@ import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { stripFunctionArguments } from '../../profile-logic/function-info';
 import copy from 'copy-to-clipboard';
 
-import type { IndexIntoFuncStackTable, FuncStackInfo } from '../../types/profile-derived';
+import type {
+  IndexIntoFuncStackTable,
+  FuncStackInfo,
+} from '../../types/profile-derived';
 import type { Thread } from '../../types/profile';
 
 type Props = {
   thread: Thread,
   funcStackInfo: FuncStackInfo,
   selectedFuncStack: IndexIntoFuncStackTable,
-}
+};
 
 class ProfileCallTreeContextMenu extends PureComponent {
-
   constructor(props: Props) {
     super(props);
     (this: any).handleClick = this.handleClick.bind(this);
@@ -75,17 +77,27 @@ class ProfileCallTreeContextMenu extends PureComponent {
   render() {
     return (
       <ContextMenu id={'ProfileCallTreeContextMenu'}>
-        <SubMenu title='Copy' hoverDelay={200}>
-          <MenuItem onClick={this.handleClick} data={{type: 'copyFunctionName'}}>Function Name</MenuItem>
-          <MenuItem onClick={this.handleClick} data={{type: 'copyStack'}}>Stack</MenuItem>
+        <SubMenu title="Copy" hoverDelay={200}>
+          <MenuItem
+            onClick={this.handleClick}
+            data={{ type: 'copyFunctionName' }}
+          >
+            Function Name
+          </MenuItem>
+          <MenuItem onClick={this.handleClick} data={{ type: 'copyStack' }}>
+            Stack
+          </MenuItem>
         </SubMenu>
       </ContextMenu>
     );
   }
 }
 
-export default connect(state => ({
-  thread: selectedThreadSelectors.getFilteredThread(state),
-  funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state),
-  selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state),
-}), actions)(ProfileCallTreeContextMenu);
+export default connect(
+  state => ({
+    thread: selectedThreadSelectors.getFilteredThread(state),
+    funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state),
+    selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state),
+  }),
+  actions
+)(ProfileCallTreeContextMenu);

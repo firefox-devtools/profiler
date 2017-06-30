@@ -14,13 +14,15 @@ new WebpackDevServer(webpack(config), {
   stats: {
     colors: true,
   },
-}).listen(port, 'localhost', function (err) {
+}).listen(port, 'localhost', function(err) {
   if (err) {
     console.log(err);
   }
 
   console.log(`Listening at localhost:${port}`);
   if (port === 4242) {
-    console.log('You can change this default port with the environment variable PERFHTML_PORT.');
+    console.log(
+      'You can change this default port with the environment variable PERFHTML_PORT.'
+    );
   }
 });

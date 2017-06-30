@@ -7,10 +7,10 @@ import { summarizeProfile } from '../../profile-logic/summarize-profile';
 
 const profile = require('../fixtures/profiles/profile-2d-canvas.json');
 
-describe('summarize-profile', function () {
+describe('summarize-profile', function() {
   const [geckoMain, compositor, content] = summarizeProfile(profile);
 
-  it('has the thread names', function () {
+  it('has the thread names', function() {
     expect(geckoMain.threadName).toEqual('GeckoMain');
     expect(compositor.threadName).toEqual('Compositor');
     expect(content.threadName).toEqual('Content');
@@ -22,7 +22,7 @@ describe('summarize-profile', function () {
   // Probably not the most brilliant test, but assert that the values are the same from
   // a previous run on a profile.
   it('categorizes samples', () => {
-    const {summary} = geckoMain;
+    const { summary } = geckoMain;
 
     const expectedSummary = [
       { category: 'wait', samples: 141 },
@@ -54,26 +54,27 @@ describe('summarize-profile', function () {
   });
 
   it('provides a rolling summary', () => {
-    const {rollingSummary} = geckoMain;
+    const { rollingSummary } = geckoMain;
     expect(Array.isArray(rollingSummary)).toBeTruthy();
 
-    const hasSamples = (memo, {samples}) => memo && typeof samples === 'object';
+    const hasSamples = (memo, { samples }) =>
+      memo && typeof samples === 'object';
 
     // Each summary has samples
     expect(rollingSummary.reduce(hasSamples, true)).toBeTruthy();
 
-
-    const hasPercentages = (memo, {percentage}) => memo && typeof percentage === 'object';
+    const hasPercentages = (memo, { percentage }) =>
+      memo && typeof percentage === 'object';
     expect(rollingSummary.reduce(hasPercentages, true)).toBeTruthy();
 
-    for (const {samples} of rollingSummary) {
+    for (const { samples } of rollingSummary) {
       for (const value of Object.values(samples)) {
         // This sample has a sample count greater than 0.
         expect(value).toBeGreaterThan(0);
       }
     }
 
-    for (const {percentage} of rollingSummary) {
+    for (const { percentage } of rollingSummary) {
       for (const value of Object.values(percentage)) {
         // This sample has a percentage count greater than 0.
         expect(value).toBeGreaterThan(0);
@@ -84,14 +85,16 @@ describe('summarize-profile', function () {
   });
 
   it('provides sane rolling summary values', () => {
-    const {samples, percentage} = geckoMain.rollingSummary[0];
+    const { samples, percentage } = geckoMain.rollingSummary[0];
     expect(samples['dom.wait']).toEqual(2);
     expect(samples['script.compile.baseline']).toEqual(2);
     expect(samples.script).toEqual(12);
     expect(samples.dom).toEqual(1);
 
     expect(percentage['CC.wait']).toBeCloseTo(0.05263157894736842);
-    expect(percentage['script.compile.baseline']).toBeCloseTo(0.10526315789473684);
+    expect(percentage['script.compile.baseline']).toBeCloseTo(
+      0.10526315789473684
+    );
     expect(percentage.script).toBeCloseTo(0.631578947368421);
     expect(percentage.dom).toBeCloseTo(0.05263157894736842);
   });

@@ -6,8 +6,18 @@
 import { timeCode } from '../utils/time-code';
 import { getSampleFuncStacks, resourceTypes } from './profile-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
-import type { Thread, FuncTable, ResourceTable, IndexIntoFuncTable } from '../types/profile';
-import type { FuncStackTable, IndexIntoFuncStackTable, FuncStackInfo, Node } from '../types/profile-derived';
+import type {
+  Thread,
+  FuncTable,
+  ResourceTable,
+  IndexIntoFuncTable,
+} from '../types/profile';
+import type {
+  FuncStackTable,
+  IndexIntoFuncStackTable,
+  FuncStackInfo,
+  Node,
+} from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
 
 type FuncStackChildren = IndexIntoFuncStackTable[];
@@ -22,7 +32,6 @@ function extractFaviconFromLibname(libname: string): string | null {
 }
 
 class ProfileTree {
-
   _funcStackTable: FuncStackTable;
   _funcStackTimes: FuncStackTimes;
   _funcStackChildCount: Uint32Array; // A table column matching the funcStackTable
@@ -71,17 +80,28 @@ class ProfileTree {
   getChildren(funcStackIndex: IndexIntoFuncStackTable): FuncStackChildren {
     let children = this._children.get(funcStackIndex);
     if (children === undefined) {
-      const childCount = funcStackIndex === -1 ? this._rootCount : this._funcStackChildCount[funcStackIndex];
+      const childCount =
+        funcStackIndex === -1
+          ? this._rootCount
+          : this._funcStackChildCount[funcStackIndex];
       children = [];
-      for (let childFuncStackIndex = funcStackIndex + 1;
-           childFuncStackIndex < this._funcStackTable.length && children.length < childCount;
-           childFuncStackIndex++) {
-        if (this._funcStackTable.prefix[childFuncStackIndex] === funcStackIndex &&
-            this._funcStackTimes.totalTime[childFuncStackIndex] !== 0) {
+      for (
+        let childFuncStackIndex = funcStackIndex + 1;
+        childFuncStackIndex < this._funcStackTable.length &&
+        children.length < childCount;
+        childFuncStackIndex++
+      ) {
+        if (
+          this._funcStackTable.prefix[childFuncStackIndex] === funcStackIndex &&
+          this._funcStackTimes.totalTime[childFuncStackIndex] !== 0
+        ) {
           children.push(childFuncStackIndex);
         }
       }
-      children.sort((a, b) => this._funcStackTimes.totalTime[b] - this._funcStackTimes.totalTime[a]);
+      children.sort(
+        (a, b) =>
+          this._funcStackTimes.totalTime[b] - this._funcStackTimes.totalTime[a]
+      );
       this._children.set(funcStackIndex, children);
     }
     return children;
@@ -112,21 +132,32 @@ class ProfileTree {
     let node = this._nodes.get(funcStackIndex);
     if (node === undefined) {
       const funcIndex = this._funcStackTable.func[funcStackIndex];
-      const funcName = this._stringTable.getString(this._funcTable.name[funcIndex]);
+      const funcName = this._stringTable.getString(
+        this._funcTable.name[funcIndex]
+      );
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
       const libName = this._getOriginAnnotation(funcIndex);
 
       node = {
-        totalTime: `${this._funcStackTimes.totalTime[funcStackIndex].toFixed(1)}ms`,
-        totalTimePercent: `${(100 * this._funcStackTimes.totalTime[funcStackIndex] / this._rootTotalTime).toFixed(1)}%`,
-        selfTime: `${this._funcStackTimes.selfTime[funcStackIndex].toFixed(1)}ms`,
+        totalTime: `${this._funcStackTimes.totalTime[funcStackIndex].toFixed(
+          1
+        )}ms`,
+        totalTimePercent: `${(100 *
+          this._funcStackTimes.totalTime[funcStackIndex] /
+          this._rootTotalTime).toFixed(1)}%`,
+        selfTime: `${this._funcStackTimes.selfTime[funcStackIndex].toFixed(
+          1
+        )}ms`,
         name: funcName,
         lib: libName,
         // Dim platform pseudo-stacks.
         dim: !isJS && this._jsOnly,
-        icon: resourceType === resourceTypes.webhost ? extractFaviconFromLibname(libName) : null,
+        icon:
+          resourceType === resourceTypes.webhost
+            ? extractFaviconFromLibname(libName)
+            : null,
       };
       this._nodes.set(funcStackIndex, node);
     }
@@ -157,17 +188,26 @@ class ProfileTree {
 export type ProfileTreeClass = ProfileTree;
 
 export function getCallTree(
-  thread: Thread, interval: Milliseconds, funcStackInfo: FuncStackInfo,
+  thread: Thread,
+  interval: Milliseconds,
+  funcStackInfo: FuncStackInfo,
   implementationFilter: string
 ): ProfileTree {
   return timeCode('getCallTree', () => {
     const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
-    const sampleFuncStacks = getSampleFuncStacks(thread.samples, stackIndexToFuncStackIndex);
+    const sampleFuncStacks = getSampleFuncStacks(
+      thread.samples,
+      stackIndexToFuncStackIndex
+    );
 
     const funcStackSelfTime = new Float32Array(funcStackTable.length);
     const funcStackTotalTime = new Float32Array(funcStackTable.length);
     const numChildren = new Uint32Array(funcStackTable.length);
-    for (let sampleIndex = 0; sampleIndex < sampleFuncStacks.length; sampleIndex++) {
+    for (
+      let sampleIndex = 0;
+      sampleIndex < sampleFuncStacks.length;
+      sampleIndex++
+    ) {
       const funcStackIndex = sampleFuncStacks[sampleIndex];
       if (funcStackIndex !== null) {
         funcStackSelfTime[funcStackIndex] += interval;
@@ -175,7 +215,11 @@ export function getCallTree(
     }
     let rootTotalTime = 0;
     let numRoots = 0;
-    for (let funcStackIndex = funcStackTotalTime.length - 1; funcStackIndex >= 0; funcStackIndex--) {
+    for (
+      let funcStackIndex = funcStackTotalTime.length - 1;
+      funcStackIndex >= 0;
+      funcStackIndex--
+    ) {
       funcStackTotalTime[funcStackIndex] += funcStackSelfTime[funcStackIndex];
       if (funcStackTotalTime[funcStackIndex] === 0) {
         continue;
@@ -185,15 +229,26 @@ export function getCallTree(
         rootTotalTime += funcStackTotalTime[funcStackIndex];
         numRoots++;
       } else {
-        funcStackTotalTime[prefixFuncStack] += funcStackTotalTime[funcStackIndex];
+        funcStackTotalTime[prefixFuncStack] +=
+          funcStackTotalTime[funcStackIndex];
         numChildren[prefixFuncStack]++;
       }
     }
-    const funcStackTimes = { selfTime: funcStackSelfTime, totalTime: funcStackTotalTime };
+    const funcStackTimes = {
+      selfTime: funcStackSelfTime,
+      totalTime: funcStackTotalTime,
+    };
     const jsOnly = implementationFilter === 'js';
     return new ProfileTree(
-      funcStackTable, funcStackTimes, numChildren, thread.funcTable,
-      thread.resourceTable, thread.stringTable, rootTotalTime, numRoots, jsOnly
+      funcStackTable,
+      funcStackTimes,
+      numChildren,
+      thread.funcTable,
+      thread.resourceTable,
+      thread.stringTable,
+      rootTotalTime,
+      numRoots,
+      jsOnly
     );
   });
 }

@@ -5,16 +5,27 @@
 // @flow
 import { oneLine } from 'common-tags';
 import { getProfile } from '../reducers/profile-view';
-import { processProfile, unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
+import {
+  processProfile,
+  unserializeProfileOfArbitraryFormat,
+} from '../profile-logic/process-profile';
 import { SymbolStore } from '../profile-logic/symbol-store';
 import { symbolicateProfile } from '../profile-logic/symbolication';
 import { decompress } from '../utils/gz';
 import { getTimeRangeIncludingAllThreads } from '../profile-logic/profile-data';
 import { TemporaryError } from '../utils/errors';
 
-import type { FunctionsUpdatePerThread, FuncToFuncMap, RequestedLib } from '../types/actions';
+import type {
+  FunctionsUpdatePerThread,
+  FuncToFuncMap,
+  RequestedLib,
+} from '../types/actions';
 import type { Action, ThunkAction, Dispatch } from '../types/store';
-import type { Profile, ThreadIndex, IndexIntoFuncTable } from '../types/profile';
+import type {
+  Profile,
+  ThreadIndex,
+  IndexIntoFuncTable,
+} from '../types/profile';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -55,24 +66,30 @@ export function startSymbolicating(): Action {
 }
 
 export function doneSymbolicating(): ThunkAction<void> {
-  return function (dispatch, getState) {
+  return function(dispatch, getState) {
     dispatch({ type: 'DONE_SYMBOLICATING' });
 
     // TODO - Do not use selectors here.
-    dispatch(({
-      toWorker: true,
-      type: 'PROFILE_PROCESSED',
-      profile: getProfile(getState()),
-    }: Action));
+    dispatch(
+      ({
+        toWorker: true,
+        type: 'PROFILE_PROCESSED',
+        profile: getProfile(getState()),
+      }: Action)
+    );
 
-    dispatch(({
-      toWorker: true,
-      type: 'SUMMARIZE_PROFILE',
-    }: Action));
+    dispatch(
+      ({
+        toWorker: true,
+        type: 'SUMMARIZE_PROFILE',
+      }: Action)
+    );
   };
 }
 
-export function coalescedFunctionsUpdate(functionsUpdatePerThread: FunctionsUpdatePerThread): Action {
+export function coalescedFunctionsUpdate(
+  functionsUpdatePerThread: FunctionsUpdatePerThread
+): Action {
   return {
     type: 'COALESCED_FUNCTIONS_UPDATE',
     functionsUpdatePerThread,
@@ -85,7 +102,6 @@ const requestIdleCallbackPolyfill: typeof requestIdleCallback =
     : callback => setTimeout(callback, 0);
 
 class ColascedFunctionsUpdateDispatcher {
-
   _updates: FunctionsUpdatePerThread;
   _requestedUpdate: boolean;
   _requestIdleTimeout: { timeout: number };
@@ -120,7 +136,11 @@ class ColascedFunctionsUpdateDispatcher {
     dispatch(coalescedFunctionsUpdate(updates));
   }
 
-  mergeFunctions(dispatch: Dispatch, threadIndex: ThreadIndex, oldFuncToNewFuncMap: FuncToFuncMap) {
+  mergeFunctions(
+    dispatch: Dispatch,
+    threadIndex: ThreadIndex,
+    oldFuncToNewFuncMap: FuncToFuncMap
+  ) {
     this._scheduleUpdate(dispatch);
     if (!this._updates[threadIndex]) {
       this._updates[threadIndex] = {
@@ -132,7 +152,9 @@ class ColascedFunctionsUpdateDispatcher {
       for (const oldFunc of oldFuncToNewFuncMap.keys()) {
         const funcIndex = oldFuncToNewFuncMap.get(oldFunc);
         if (funcIndex === undefined) {
-          throw new Error('Unable to merge functions together, an undefined funcIndex was returned.');
+          throw new Error(
+            'Unable to merge functions together, an undefined funcIndex was returned.'
+          );
         }
         this._updates[threadIndex].oldFuncToNewFuncMap.set(oldFunc, funcIndex);
       }
@@ -143,12 +165,17 @@ class ColascedFunctionsUpdateDispatcher {
     this._scheduleUpdate(dispatch);
     if (!this._updates[threadIndex]) {
       this._updates[threadIndex] = {
-        funcIndices, funcNames,
+        funcIndices,
+        funcNames,
         oldFuncToNewFuncMap: new Map(),
       };
     } else {
-      this._updates[threadIndex].funcIndices = this._updates[threadIndex].funcIndices.concat(funcIndices);
-      this._updates[threadIndex].funcNames = this._updates[threadIndex].funcNames.concat(funcNames);
+      this._updates[threadIndex].funcIndices = this._updates[
+        threadIndex
+      ].funcIndices.concat(funcIndices);
+      this._updates[threadIndex].funcNames = this._updates[
+        threadIndex
+      ].funcNames.concat(funcNames);
     }
   }
 }
@@ -160,7 +187,11 @@ export function mergeFunctions(
   oldFuncToNewFuncMap: FuncToFuncMap
 ): ThunkAction<void> {
   return dispatch => {
-    gCoalescedFunctionsUpdateDispatcher.mergeFunctions(dispatch, threadIndex, oldFuncToNewFuncMap);
+    gCoalescedFunctionsUpdateDispatcher.mergeFunctions(
+      dispatch,
+      threadIndex,
+      oldFuncToNewFuncMap
+    );
   };
 }
 
@@ -170,14 +201,23 @@ export function assignFunctionNames(
   funcNames: string[]
 ): ThunkAction<void> {
   return dispatch => {
-    gCoalescedFunctionsUpdateDispatcher.assignFunctionNames(dispatch, threadIndex, funcIndices, funcNames);
+    gCoalescedFunctionsUpdateDispatcher.assignFunctionNames(
+      dispatch,
+      threadIndex,
+      funcIndices,
+      funcNames
+    );
   };
 }
 
-export function assignTaskTracerNames(addressIndices: number[], symbolNames: string[]): Action {
+export function assignTaskTracerNames(
+  addressIndices: number[],
+  symbolNames: string[]
+): Action {
   return {
     type: 'ASSIGN_TASK_TRACER_NAMES',
-    addressIndices, symbolNames,
+    addressIndices,
+    symbolNames,
   };
 }
 
@@ -210,7 +250,10 @@ async function getSymbolStore(dispatch, geckoProfiler) {
       const requestedLib = { debugName, breakpadId };
       dispatch(requestingSymbolTable(requestedLib));
       try {
-        const symbolTable = await geckoProfiler.getSymbolTable(debugName, breakpadId);
+        const symbolTable = await geckoProfiler.getSymbolTable(
+          debugName,
+          breakpadId
+        );
         dispatch(receivedSymbolTableReply(requestedLib));
         return symbolTable;
       } catch (error) {
@@ -223,13 +266,24 @@ async function getSymbolStore(dispatch, geckoProfiler) {
   return symbolStore;
 }
 
-async function doSymbolicateProfile(dispatch: Dispatch, profile: Profile, symbolStore: SymbolStore) {
+async function doSymbolicateProfile(
+  dispatch: Dispatch,
+  profile: Profile,
+  symbolStore: SymbolStore
+) {
   dispatch(startSymbolicating());
   await symbolicateProfile(profile, symbolStore, {
-    onMergeFunctions: (threadIndex: ThreadIndex, oldFuncToNewFuncMap: FuncToFuncMap) => {
+    onMergeFunctions: (
+      threadIndex: ThreadIndex,
+      oldFuncToNewFuncMap: FuncToFuncMap
+    ) => {
       dispatch(mergeFunctions(threadIndex, oldFuncToNewFuncMap));
     },
-    onGotFuncNames: (threadIndex: ThreadIndex, funcIndices: IndexIntoFuncTable[], funcNames: string[]) => {
+    onGotFuncNames: (
+      threadIndex: ThreadIndex,
+      funcIndices: IndexIntoFuncTable[],
+      funcNames: string[]
+    ) => {
       dispatch(assignFunctionNames(threadIndex, funcIndices, funcNames));
     },
     onGotTaskTracerNames: (addressIndices, symbolNames) => {
@@ -256,18 +310,19 @@ export function fatalErrorReceivingProfileFromAddon(error: Error) {
   };
 }
 
-
 export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
   return async dispatch => {
     try {
       const timeoutId = setTimeout(() => {
-        dispatch(temporaryErrorReceivingProfileFromAddon(
-          new TemporaryError(oneLine`
+        dispatch(
+          temporaryErrorReceivingProfileFromAddon(
+            new TemporaryError(oneLine`
             We were unable to connect to the Gecko profiler add-on within thirty seconds.
             This might be because the profile is big or your machine is slower than usual.
             Still waiting...
           `)
-        ));
+          )
+        );
       }, 30000);
       const geckoProfiler = await window.geckoProfilerPromise;
       clearTimeout(timeoutId);
@@ -333,7 +388,9 @@ export function receiveProfileFromUrl(profile: Profile): ThunkAction<void> {
   };
 }
 
-export function temporaryErrorReceivingProfileFromStore(error: TemporaryError): Action {
+export function temporaryErrorReceivingProfileFromStore(
+  error: TemporaryError
+): Action {
   return {
     type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_STORE',
     error,
@@ -347,7 +404,9 @@ export function fatalErrorReceivingProfileFromStore(error: Error): Action {
   };
 }
 
-export function temporaryErrorReceivingProfileFromUrl(error: TemporaryError): Action {
+export function temporaryErrorReceivingProfileFromUrl(
+  error: TemporaryError
+): Action {
   return {
     type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_URL',
     error,
@@ -406,10 +465,12 @@ async function _fetchProfile({ url, onTemporaryError }: FetchProfileArgs) {
       break;
     }
 
-    onTemporaryError(new TemporaryError(
-      'Profile not found on remote server.',
-      { count: i, total: MAX_WAIT_SECONDS + 1 } // 11 tries during 10 seconds
-    ));
+    onTemporaryError(
+      new TemporaryError(
+        'Profile not found on remote server.',
+        { count: i, total: MAX_WAIT_SECONDS + 1 } // 11 tries during 10 seconds
+      )
+    );
 
     await _wait(1000);
   }
@@ -420,8 +481,10 @@ async function _fetchProfile({ url, onTemporaryError }: FetchProfileArgs) {
   `);
 }
 
-export function retrieveProfileFromStore(hash: string): ThunkAction<Promise<void>> {
-  return async function (dispatch) {
+export function retrieveProfileFromStore(
+  hash: string
+): ThunkAction<Promise<void>> {
+  return async function(dispatch) {
     dispatch(waitingForProfileFromStore());
 
     try {
@@ -439,8 +502,8 @@ export function retrieveProfileFromStore(hash: string): ThunkAction<Promise<void
 
       if (typeof window !== 'undefined' && window.legacyRangeFilters) {
         const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
-        window.legacyRangeFilters.forEach(
-          ({ start, end }) => dispatch({
+        window.legacyRangeFilters.forEach(({ start, end }) =>
+          dispatch({
             type: 'ADD_RANGE_FILTER',
             start: start - zeroAt,
             end: end - zeroAt,
@@ -455,8 +518,10 @@ export function retrieveProfileFromStore(hash: string): ThunkAction<Promise<void
   };
 }
 
-export function retrieveProfileFromUrl(profileURL: string): ThunkAction<Promise<void>> {
-  return async function (dispatch) {
+export function retrieveProfileFromUrl(
+  profileURL: string
+): ThunkAction<Promise<void>> {
+  return async function(dispatch) {
     dispatch(waitingForProfileFromUrl());
 
     try {
@@ -474,8 +539,8 @@ export function retrieveProfileFromUrl(profileURL: string): ThunkAction<Promise<
 
       if (typeof window !== 'undefined' && window.legacyRangeFilters) {
         const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
-        window.legacyRangeFilters.forEach(
-          ({ start, end }) => dispatch({
+        window.legacyRangeFilters.forEach(({ start, end }) =>
+          dispatch({
             type: 'ADD_RANGE_FILTER',
             start: start - zeroAt,
             end: end - zeroAt,
@@ -541,7 +606,9 @@ function _fileReader(input) {
   };
 }
 
-export function retrieveProfileFromFile(file: File): ThunkAction<Promise<void>> {
+export function retrieveProfileFromFile(
+  file: File
+): ThunkAction<Promise<void>> {
   return async dispatch => {
     dispatch(waitingForProfileFromFile());
 

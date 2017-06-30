@@ -15,10 +15,20 @@ export default class SelectionScubberOverlay extends PureComponent {
       const { rangeStart, rangeEnd, width } = this.props;
       const delta = dx / width * (rangeEnd - rangeStart);
       const selectionDeltas = fun(delta);
-      const selectionStart = Math.max(rangeStart, originalValue.selectionStart + selectionDeltas.startDelta);
-      const selectionEnd = clamp(originalValue.selectionEnd + selectionDeltas.endDelta, selectionStart, rangeEnd);
+      const selectionStart = Math.max(
+        rangeStart,
+        originalValue.selectionStart + selectionDeltas.startDelta
+      );
+      const selectionEnd = clamp(
+        originalValue.selectionEnd + selectionDeltas.endDelta,
+        selectionStart,
+        rangeEnd
+      );
       this.props.onSelectionChange({
-        hasSelection: true, isModifying, selectionStart, selectionEnd,
+        hasSelection: true,
+        isModifying,
+        selectionStart,
+        selectionEnd,
       });
     };
 
@@ -50,26 +60,54 @@ export default class SelectionScubberOverlay extends PureComponent {
   }
 
   render() {
-    const { rangeStart, rangeEnd, selectionStart, selectionEnd, isModifying, width } = this.props;
+    const {
+      rangeStart,
+      rangeEnd,
+      selectionStart,
+      selectionEnd,
+      isModifying,
+      width,
+    } = this.props;
     const selection = { selectionStart, selectionEnd };
-    const beforeWidth = (selectionStart - rangeStart) / (rangeEnd - rangeStart) * width;
-    const selectionWidth = (selectionEnd - selectionStart) / (rangeEnd - rangeStart) * width;
+    const beforeWidth =
+      (selectionStart - rangeStart) / (rangeEnd - rangeStart) * width;
+    const selectionWidth =
+      (selectionEnd - selectionStart) / (rangeEnd - rangeStart) * width;
     return (
-      <div className='overlay'>
-        <div className='dimmerBefore' style={{width: `${beforeWidth}px`}}></div>
-        <div className='selectionScrubberWrapper'>
-          <div className='selectionScrubberGrippy' style={{width: `${selectionWidth}px`}}>
-            <Draggable className='grippyRangeStart' value={selection} onMove={this._rangeStartOnMove}/>
-            <Draggable className='grippyMoveRange' value={selection} onMove={this._moveRangeOnMove}/>
-            <Draggable className='grippyRangeEnd' value={selection} onMove={this._rangeEndOnMove}/>
+      <div className="overlay">
+        <div className="dimmerBefore" style={{ width: `${beforeWidth}px` }} />
+        <div className="selectionScrubberWrapper">
+          <div
+            className="selectionScrubberGrippy"
+            style={{ width: `${selectionWidth}px` }}
+          >
+            <Draggable
+              className="grippyRangeStart"
+              value={selection}
+              onMove={this._rangeStartOnMove}
+            />
+            <Draggable
+              className="grippyMoveRange"
+              value={selection}
+              onMove={this._moveRangeOnMove}
+            />
+            <Draggable
+              className="grippyRangeEnd"
+              value={selection}
+              onMove={this._rangeEndOnMove}
+            />
           </div>
-          <div className='selectionScrubberInner'>
-            <button className={classNames('selectionScrubberZoomButton', { hidden: isModifying })}
-                    onMouseDown={this._zoomButtonOnMouseDown}
-                    onClick={this._zoomButtonOnClick}/>
+          <div className="selectionScrubberInner">
+            <button
+              className={classNames('selectionScrubberZoomButton', {
+                hidden: isModifying,
+              })}
+              onMouseDown={this._zoomButtonOnMouseDown}
+              onClick={this._zoomButtonOnClick}
+            />
           </div>
         </div>
-        <div className='dimmerAfter'></div>
+        <div className="dimmerAfter" />
       </div>
     );
   }

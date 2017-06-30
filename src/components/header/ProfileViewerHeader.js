@@ -12,8 +12,17 @@ import ProfileThreadJankOverview from './ProfileThreadJankOverview';
 import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOverview';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import { connect } from 'react-redux';
-import { getProfile, getProfileViewOptions, getDisplayRange, getZeroAt } from '../../reducers/profile-view';
-import { getVisibleThreadOrder, getHiddenThreads, getThreadOrder } from '../../reducers/url-state';
+import {
+  getProfile,
+  getProfileViewOptions,
+  getDisplayRange,
+  getZeroAt,
+} from '../../reducers/profile-view';
+import {
+  getVisibleThreadOrder,
+  getHiddenThreads,
+  getThreadOrder,
+} from '../../reducers/url-state';
 
 import {
   changeThreadOrder,
@@ -48,7 +57,9 @@ class ProfileViewerHeader extends PureComponent {
   constructor(props: Props) {
     super(props);
     (this: any)._onZoomButtonClick = this._onZoomButtonClick.bind(this);
-    (this: any)._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(this);
+    (this: any)._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(
+      this
+    );
   }
 
   _onZoomButtonClick(start: Milliseconds, end: Milliseconds) {
@@ -56,8 +67,16 @@ class ProfileViewerHeader extends PureComponent {
     addRangeFilterAndUnsetSelection(start - zeroAt, end - zeroAt);
   }
 
-  _onIntervalMarkerSelect(threadIndex: ThreadIndex, start: Milliseconds, end: Milliseconds) {
-    const { timeRange, updateProfileSelection, changeSelectedThread } = this.props;
+  _onIntervalMarkerSelect(
+    threadIndex: ThreadIndex,
+    start: Milliseconds,
+    end: Milliseconds
+  ) {
+    const {
+      timeRange,
+      updateProfileSelection,
+      changeSelectedThread,
+    } = this.props;
     updateProfileSelection({
       hasSelection: true,
       isModifying: false,
@@ -69,74 +88,97 @@ class ProfileViewerHeader extends PureComponent {
 
   render() {
     const {
-      profile, className, threadOrder, visibleThreadOrder, changeThreadOrder,
-      selection, updateProfileSelection, timeRange, zeroAt, hiddenThreads,
+      profile,
+      className,
+      threadOrder,
+      visibleThreadOrder,
+      changeThreadOrder,
+      selection,
+      updateProfileSelection,
+      timeRange,
+      zeroAt,
+      hiddenThreads,
     } = this.props;
     const threads = profile.threads;
 
-    return <TimeSelectionScrubber className={`${className}Header`}
-                           zeroAt={zeroAt}
-                           rangeStart={timeRange.start}
-                           rangeEnd={timeRange.end}
-                           minSelectionStartWidth={profile.meta.interval}
-                           selection={selection}
-                           onSelectionChange={updateProfileSelection}
-                           onZoomButtonClick={this._onZoomButtonClick}>
-      <div className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerJank`}>
-        {
-          visibleThreadOrder.map(threadIndex => {
+    return (
+      <TimeSelectionScrubber
+        className={`${className}Header`}
+        zeroAt={zeroAt}
+        rangeStart={timeRange.start}
+        rangeEnd={timeRange.end}
+        minSelectionStartWidth={profile.meta.interval}
+        selection={selection}
+        onSelectionChange={updateProfileSelection}
+        onZoomButtonClick={this._onZoomButtonClick}
+      >
+        <div
+          className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerJank`}
+        >
+          {visibleThreadOrder.map(threadIndex => {
             const threadName = threads[threadIndex].name;
             const processType = threads[threadIndex].processType;
-            return (
-              ((threadName === 'GeckoMain' && processType !== 'plugin') ?
-                <ProfileThreadJankOverview className={`${className}HeaderIntervalMarkerOverview ${className}HeaderIntervalMarkerOverviewJank`}
-                                           rangeStart={timeRange.start}
-                                           rangeEnd={timeRange.end}
-                                           threadIndex={threadIndex}
-                                           key={threadIndex}
-                                           onSelect={this._onIntervalMarkerSelect}
-                                           isModifyingSelection={selection.isModifying} /> : null)
-            );
-          })
-        }
-      </div>
-      <div className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerGfx`}>
-        {
-          visibleThreadOrder.map(threadIndex => {
+            return threadName === 'GeckoMain' && processType !== 'plugin'
+              ? <ProfileThreadJankOverview
+                  className={`${className}HeaderIntervalMarkerOverview ${className}HeaderIntervalMarkerOverviewJank`}
+                  rangeStart={timeRange.start}
+                  rangeEnd={timeRange.end}
+                  threadIndex={threadIndex}
+                  key={threadIndex}
+                  onSelect={this._onIntervalMarkerSelect}
+                  isModifyingSelection={selection.isModifying}
+                />
+              : null;
+          })}
+        </div>
+        <div
+          className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerGfx`}
+        >
+          {visibleThreadOrder.map(threadIndex => {
             const threadName = threads[threadIndex].name;
             const processType = threads[threadIndex].processType;
-            return (
-              (((threadName === 'GeckoMain' || threadName === 'Compositor' || threadName ==='Renderer') && processType !== 'plugin') ?
-                <ProfileThreadTracingMarkerOverview className={`${className}HeaderIntervalMarkerOverview ${className}HeaderIntervalMarkerOverviewGfx ${className}HeaderIntervalMarkerOverviewThread${threadName}`}
-                                                    rangeStart={timeRange.start}
-                                                    rangeEnd={timeRange.end}
-                                                    threadIndex={threadIndex}
-                                                    key={threadIndex}
-                                                    onSelect={this._onIntervalMarkerSelect}
-                                                    isModifyingSelection={selection.isModifying} /> : null)
-            );
-          })
-        }
-      </div>
-      <OverflowEdgeIndicator className={`${className}HeaderOverflowEdgeIndicator`}>
-        {<Reorderable tagName='ol'
-                     className={`${className}HeaderThreadList`}
-                     order={threadOrder}
-                     orient='vertical'
-                     onChangeOrder={changeThreadOrder}>
+            return (threadName === 'GeckoMain' ||
+              threadName === 'Compositor' ||
+              threadName === 'Renderer') &&
+            processType !== 'plugin'
+              ? <ProfileThreadTracingMarkerOverview
+                  className={`${className}HeaderIntervalMarkerOverview ${className}HeaderIntervalMarkerOverviewGfx ${className}HeaderIntervalMarkerOverviewThread${threadName}`}
+                  rangeStart={timeRange.start}
+                  rangeEnd={timeRange.end}
+                  threadIndex={threadIndex}
+                  key={threadIndex}
+                  onSelect={this._onIntervalMarkerSelect}
+                  isModifyingSelection={selection.isModifying}
+                />
+              : null;
+          })}
+        </div>
+        <OverflowEdgeIndicator
+          className={`${className}HeaderOverflowEdgeIndicator`}
+        >
           {
-            threads.map((thread, threadIndex) =>
-              <ProfileThreadHeaderBar key={threadIndex}
-                                      index={threadIndex}
-                                      interval={profile.meta.interval}
-                                      rangeStart={timeRange.start}
-                                      rangeEnd={timeRange.end}
-                                      isHidden={hiddenThreads.includes(threadIndex)}/>
-            )
+            <Reorderable
+              tagName="ol"
+              className={`${className}HeaderThreadList`}
+              order={threadOrder}
+              orient="vertical"
+              onChangeOrder={changeThreadOrder}
+            >
+              {threads.map((thread, threadIndex) =>
+                <ProfileThreadHeaderBar
+                  key={threadIndex}
+                  index={threadIndex}
+                  interval={profile.meta.interval}
+                  rangeStart={timeRange.start}
+                  rangeEnd={timeRange.end}
+                  isHidden={hiddenThreads.includes(threadIndex)}
+                />
+              )}
+            </Reorderable>
           }
-        </Reorderable>}
-      </OverflowEdgeIndicator>
-    </TimeSelectionScrubber>;
+        </OverflowEdgeIndicator>
+      </TimeSelectionScrubber>
+    );
   }
 }
 

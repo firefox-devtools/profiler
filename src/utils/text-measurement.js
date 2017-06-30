@@ -10,12 +10,11 @@
  * caching to make this process fast.
  */
 class TextMeasurement {
-
-  _ctx: CanvasRenderingContext2D
-  _cache: {[id: string]: number}
-  _averageCharWidth: number
-  overflowChar: string
-  minWidth: number
+  _ctx: CanvasRenderingContext2D;
+  _cache: { [id: string]: number };
+  _averageCharWidth: number;
+  overflowChar: string;
+  minWidth: number;
 
   constructor(ctx: CanvasRenderingContext2D) {
     this._ctx = ctx;
@@ -35,7 +34,8 @@ class TextMeasurement {
    * @return {number} The average letter width.
    */
   _calcAverageCharWidth(): number {
-    const string = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_';
+    const string =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_';
     return this.getTextWidth(string) / string.length;
   }
 

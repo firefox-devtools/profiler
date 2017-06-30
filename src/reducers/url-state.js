@@ -12,7 +12,11 @@ import * as RangeFilters from '../profile-logic/range-filters';
 import type { ThreadIndex } from '../types/profile';
 import type { StartEndRange } from '../types/units';
 import type {
-  Action, CallTreeFiltersPerThread, CallTreeFilter, DataSource, ImplementationFilter,
+  Action,
+  CallTreeFiltersPerThread,
+  CallTreeFilter,
+  DataSource,
+  ImplementationFilter,
 } from '../types/actions';
 import type { State, URLState, Reducer } from '../types/reducers';
 
@@ -70,7 +74,9 @@ function selectedThread(state: ThreadIndex = 0, action: Action) {
     const contentThreadId = threads.findIndex(
       thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
     );
-    return contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(threads)[0];
+    return contentThreadId !== -1
+      ? contentThreadId
+      : defaultThreadOrder(threads)[0];
   }
 
   switch (action.type) {
@@ -146,7 +152,10 @@ function callTreeFilters(state: CallTreeFiltersPerThread = {}, action: Action) {
  * Represents the current filter applied to the stack frames, where it will show
  * frames only by implementation.
  */
-function implementation(state: ImplementationFilter = 'combined', action: Action) {
+function implementation(
+  state: ImplementationFilter = 'combined',
+  action: Action
+) {
   switch (action.type) {
     case 'CHANGE_IMPLEMENTATION_FILTER':
       return action.implementation;
@@ -201,7 +210,9 @@ function hiddenThreads(state: ThreadIndex[] = [], action: Action) {
     case 'RECEIVE_PROFILE_FROM_FILE': {
       // When receiving a new profile, try to use the hidden threads specified in the URL,
       // but ensure that the IDs are correct.
-      const threads = action.profile.threads.map((_, threadIndex) => threadIndex);
+      const threads = action.profile.threads.map(
+        (_, threadIndex) => threadIndex
+      );
       return state.filter(index => threads.includes(index));
     }
     case 'HIDE_THREAD':
@@ -215,18 +226,33 @@ function hiddenThreads(state: ThreadIndex[] = [], action: Action) {
   }
 }
 
-const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (state: URLState, action: Action): URLState => {
+const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (
+  state: URLState,
+  action: Action
+): URLState => {
   switch (action.type) {
     case '@@urlenhancer/updateURLState':
       return action.urlState;
     default:
       return regularUrlStateReducer(state, action);
   }
-})(combineReducers({
-  dataSource, hash, profileURL, selectedTab, rangeFilters, selectedThread,
-  callTreeSearchString, callTreeFilters, implementation, invertCallstack,
-  hidePlatformDetails, threadOrder, hiddenThreads,
-}));
+})(
+  combineReducers({
+    dataSource,
+    hash,
+    profileURL,
+    selectedTab,
+    rangeFilters,
+    selectedThread,
+    callTreeSearchString,
+    callTreeFilters,
+    implementation,
+    invertCallstack,
+    hidePlatformDetails,
+    threadOrder,
+    hiddenThreads,
+  })
+);
 export default urlStateReducer;
 
 const getURLState = (state: State): URLState => state.urlState;
@@ -234,18 +260,28 @@ const getURLState = (state: State): URLState => state.urlState;
 export const getDataSource = (state: State) => getURLState(state).dataSource;
 export const getHash = (state: State) => getURLState(state).hash;
 export const getProfileURL = (state: State) => getURLState(state).profileURL;
-export const getRangeFilters = (state: State) => getURLState(state).rangeFilters;
-export const getImplementationFilter = (state: State) => getURLState(state).implementation;
-export const getHidePlatformDetails = (state: State) => getURLState(state).hidePlatformDetails;
-export const getInvertCallstack = (state: State) => getURLState(state).invertCallstack;
-export const getSearchString = (state: State) => getURLState(state).callTreeSearchString;
+export const getRangeFilters = (state: State) =>
+  getURLState(state).rangeFilters;
+export const getImplementationFilter = (state: State) =>
+  getURLState(state).implementation;
+export const getHidePlatformDetails = (state: State) =>
+  getURLState(state).hidePlatformDetails;
+export const getInvertCallstack = (state: State) =>
+  getURLState(state).invertCallstack;
+export const getSearchString = (state: State) =>
+  getURLState(state).callTreeSearchString;
 export const getSelectedTab = (state: State) => getURLState(state).selectedTab;
-export const getSelectedThreadIndex = (state: State) => getURLState(state).selectedThread;
-export const getCallTreeFilters = (state: State, threadIndex: ThreadIndex): CallTreeFilter[] => {
+export const getSelectedThreadIndex = (state: State) =>
+  getURLState(state).selectedThread;
+export const getCallTreeFilters = (
+  state: State,
+  threadIndex: ThreadIndex
+): CallTreeFilter[] => {
   return getURLState(state).callTreeFilters[threadIndex] || [];
 };
 export const getThreadOrder = (state: State) => getURLState(state).threadOrder;
-export const getHiddenThreads = (state: State) => getURLState(state).hiddenThreads;
+export const getHiddenThreads = (state: State) =>
+  getURLState(state).hiddenThreads;
 export const getVisibleThreadOrder = createSelector(
   getThreadOrder,
   getHiddenThreads,
@@ -256,7 +292,8 @@ export const getVisibleThreadOrder = createSelector(
 export const getURLPredictor = createSelector(
   getURLState,
   (oldURLState: URLState) => actionOrActionList => {
-    const actionList = ('type' in actionOrActionList) ? [actionOrActionList] : actionOrActionList;
+    const actionList =
+      'type' in actionOrActionList ? [actionOrActionList] : actionOrActionList;
     const newURLState = actionList.reduce(urlStateReducer, oldURLState);
     return urlFromState(newURLState);
   }

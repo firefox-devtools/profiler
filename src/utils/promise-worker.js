@@ -23,7 +23,7 @@ export function provideHostSide(workerFilename, methods) {
     };
 
     function makeMethod(method) {
-      return function (...paramArray) {
+      return function(...paramArray) {
         const msgID = nextMessageID++;
         worker.postMessage({ msgID, type: 'method', method, paramArray });
         return new Promise((resolve, reject) => {
@@ -47,11 +47,18 @@ export function provideWorkerSide(workerGlobal, theClass) {
       theObject = new theClass(...data.constructorArguments);
     } else if (data.type === 'method') {
       const { msgID, method, paramArray } = data;
-      theObject[method](...paramArray).then(result => {
-        workerGlobal.postMessage({ msgID, type: 'success', result });
-      }, error => {
-        workerGlobal.postMessage({ msgID, type: 'error', error: error.toString() });
-      });
+      theObject[method](...paramArray).then(
+        result => {
+          workerGlobal.postMessage({ msgID, type: 'success', result });
+        },
+        error => {
+          workerGlobal.postMessage({
+            msgID,
+            type: 'error',
+            error: error.toString(),
+          });
+        }
+      );
     }
   };
 }

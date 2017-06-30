@@ -9,10 +9,13 @@ import type { SymbolTableAsTuple } from './symbol-store-db';
 type Library = {
   debugName: string,
   breakpadId: string,
-}
+};
 
 interface SymbolProvider {
-  requestSymbolTable(debugName: string, breakpadId: string): Promise<SymbolTableAsTuple>;
+  requestSymbolTable(
+    debugName: string,
+    breakpadId: string
+  ): Promise<SymbolTableAsTuple>,
 }
 
 /**
@@ -54,7 +57,10 @@ export class SymbolStore {
 
     if (this._failedRequests.has(libid)) {
       return Promise.reject(
-        new Error('We\'ve tried to request a symbol table for this library before and failed, so we\'re not trying again.'));
+        new Error(
+          "We've tried to request a symbol table for this library before and failed, so we're not trying again."
+        )
+      );
     }
 
     const existingRequest = this._requestedSymbolTables.get(libid);
@@ -66,30 +72,40 @@ export class SymbolStore {
     }
 
     // Try to get the symbol table from the database
-    const symbolTablePromise = this._db.getSymbolTable(debugName, breakpadId).catch(() => {
-      // Request the symbol table from the symbol provider.
-      const symbolTablePromise = this._symbolProvider.requestSymbolTable(debugName, breakpadId).catch(error => {
-        console.error(`Failed to symbolicate library ${debugName}`, error);
-        this._failedRequests.add(libid);
-        this._requestedSymbolTables.delete(libid);
-        throw error;
-      });
+    const symbolTablePromise = this._db
+      .getSymbolTable(debugName, breakpadId)
+      .catch(() => {
+        // Request the symbol table from the symbol provider.
+        const symbolTablePromise = this._symbolProvider
+          .requestSymbolTable(debugName, breakpadId)
+          .catch(error => {
+            console.error(`Failed to symbolicate library ${debugName}`, error);
+            this._failedRequests.add(libid);
+            this._requestedSymbolTables.delete(libid);
+            throw error;
+          });
 
-      // Once the symbol table comes in, store it in the database, but don't
-      // let that block the promise that we return to our caller.
-      symbolTablePromise.then(symbolTable => {
-        this._db.storeSymbolTable(debugName, breakpadId, symbolTable).then(() => {
-          this._requestedSymbolTables.delete(libid);
-        }, error => {
-          console.error(`Failed to store the symbol table for ${debugName} ${breakpadId} in the database:`, error);
-          // We'll keep the symbolTablePromise in _requestedSymbolTables so
-          // that we'll the symbolTable around for future requests even though
-          // we failed to put it into the database.
+        // Once the symbol table comes in, store it in the database, but don't
+        // let that block the promise that we return to our caller.
+        symbolTablePromise.then(symbolTable => {
+          this._db.storeSymbolTable(debugName, breakpadId, symbolTable).then(
+            () => {
+              this._requestedSymbolTables.delete(libid);
+            },
+            error => {
+              console.error(
+                `Failed to store the symbol table for ${debugName} ${breakpadId} in the database:`,
+                error
+              );
+              // We'll keep the symbolTablePromise in _requestedSymbolTables so
+              // that we'll the symbolTable around for future requests even though
+              // we failed to put it into the database.
+            }
+          );
         });
-      });
 
-      return symbolTablePromise;
-    });
+        return symbolTablePromise;
+      });
     this._requestedSymbolTables.set(libid, symbolTablePromise);
     return symbolTablePromise;
   }
@@ -110,7 +126,10 @@ export class SymbolStore {
    * @param  {Library} lib A library object with the properties `debugName` and `breakpadId`.
    * @return {Promise<string[]>} An promise array of strings, in the order as requested.
    */
-  async getSymbolsForAddressesInLib(requestedAddressesIndices: number[], lib: Library): Promise<string[]> {
+  async getSymbolsForAddressesInLib(
+    requestedAddressesIndices: number[],
+    lib: Library
+  ): Promise<string[]> {
     const [, index, buffer] = await this._getSymbolTable(lib);
     const decoder = new TextDecoder();
     return requestedAddressesIndices.map(addrIndex => {

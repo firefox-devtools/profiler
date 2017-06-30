@@ -6,9 +6,8 @@
 import type { IndexIntoStringTable } from '../types/profile';
 
 export class UniqueStringArray {
-
-  _array: string[]
-  _stringToIndex: Map<string, IndexIntoStringTable>
+  _array: string[];
+  _stringToIndex: Map<string, IndexIntoStringTable>;
 
   constructor(originalArray: string[] = []) {
     this._array = originalArray.slice(0);

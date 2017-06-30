@@ -7,12 +7,15 @@ import type { Action } from '../types/actions';
 import type { State, SummaryViewState } from '../types/reducers';
 
 export default function summaryViewReducer(
-  state: SummaryViewState = {summary: null, expanded: null},
+  state: SummaryViewState = { summary: null, expanded: null },
   action: Action
 ): SummaryViewState {
   switch (action.type) {
     case 'PROFILE_SUMMARY_PROCESSED': {
-      return Object.assign({}, state, { summary: action.summary, expanded: new Set() });
+      return Object.assign({}, state, {
+        summary: action.summary,
+        expanded: new Set(),
+      });
     }
     case 'PROFILE_SUMMARY_EXPAND': {
       const expanded = new Set(state.expanded);
@@ -29,7 +32,8 @@ export default function summaryViewReducer(
   }
 }
 
-export const getSummaryView = (state: State): SummaryViewState => state.summaryView;
+export const getSummaryView = (state: State): SummaryViewState =>
+  state.summaryView;
 
 export const getProfileSummaries = (state: State) => {
   return getSummaryView(state).summary;

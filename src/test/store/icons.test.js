@@ -7,7 +7,7 @@ import { blankStore } from '../fixtures/stores';
 import * as iconsAccessors from '../../reducers/icons';
 import * as iconsActions from '../../actions/icons';
 
-describe('actions/icons', function () {
+describe('actions/icons', function() {
   const validIcons = [
     'https://valid.icon1.example.org/favicon.ico',
     'https://valid.icon2.example.org/favicon.ico',
@@ -33,48 +33,52 @@ describe('actions/icons', function () {
 
   let store;
 
-  beforeEach(function () {
+  beforeEach(function() {
     store = blankStore();
   });
 
-  afterEach(function () {
+  afterEach(function() {
     store = null;
   });
 
-  describe('With the initial state', function () {
+  describe('With the initial state', function() {
     let state;
-    beforeEach(function () {
+    beforeEach(function() {
       state = store.getState();
     });
 
-    afterEach(function () {
+    afterEach(function() {
       state = null;
     });
 
-    it('getIcons return an empty set', function () {
+    it('getIcons return an empty set', function() {
       const initialState = iconsAccessors.getIcons(state);
       expect(initialState).toBeInstanceOf(Set);
       expect(initialState.size).toEqual(0);
     });
 
-    it('getIconForNode returns null for any icon', function () {
-      const subject = iconsAccessors.getIconForNode(state, { icon: validIcons[0] });
+    it('getIconForNode returns null for any icon', function() {
+      const subject = iconsAccessors.getIconForNode(state, {
+        icon: validIcons[0],
+      });
       expect(subject).toBeNull();
     });
 
-    it('getIconClassNameForNode returns null for any icon', function () {
-      const subject = iconsAccessors.getIconClassNameForNode(state, { icon: validIcons[0] });
+    it('getIconClassNameForNode returns null for any icon', function() {
+      const subject = iconsAccessors.getIconClassNameForNode(state, {
+        icon: validIcons[0],
+      });
       expect(subject).toBeNull();
     });
 
-    it('getIconsWithClassNames returns an empty array', function () {
+    it('getIconsWithClassNames returns an empty array', function() {
       const subject = iconsAccessors.getIconsWithClassNames(state);
       expect(subject).toEqual([]);
     });
   });
 
-  describe('Requesting an existing icon', function () {
-    it('will populate the local cache', async function () {
+  describe('Requesting an existing icon', function() {
+    it('will populate the local cache', async function() {
       const promises = [
         store.dispatch(iconsActions.iconStartLoading(validIcons[0])),
         // Second request for the same icon shouldn't dspatch anything
@@ -97,7 +101,9 @@ describe('actions/icons', function () {
       expect([...subject]).toEqual(validIcons);
 
       subject = iconsAccessors.getIconsWithClassNames(state);
-      expect(subject).toEqual(validIcons.map((icon, i) => ({ icon, className: expectedClasses[i] })));
+      expect(subject).toEqual(
+        validIcons.map((icon, i) => ({ icon, className: expectedClasses[i] }))
+      );
 
       validIcons.forEach((icon, i) => {
         subject = iconsAccessors.getIconForNode(state, { icon });
@@ -109,9 +115,11 @@ describe('actions/icons', function () {
     });
   });
 
-  describe('Requesting a non-existing image', function () {
-    it('will not populate the local cache', async function () {
-      const actionPromise = store.dispatch(iconsActions.iconStartLoading(invalidIcon));
+  describe('Requesting a non-existing image', function() {
+    it('will not populate the local cache', async function() {
+      const actionPromise = store.dispatch(
+        iconsActions.iconStartLoading(invalidIcon)
+      );
       expect(instances.length).toBe(1);
       instances[0].onerror();
 
@@ -124,7 +132,9 @@ describe('actions/icons', function () {
       subject = iconsAccessors.getIconForNode(state, { icon: invalidIcon });
       expect(subject).toBeNull();
 
-      subject = iconsAccessors.getIconClassNameForNode(state, { icon: invalidIcon });
+      subject = iconsAccessors.getIconClassNameForNode(state, {
+        icon: invalidIcon,
+      });
       expect(subject).toBeNull();
 
       subject = iconsAccessors.getIconsWithClassNames(state);

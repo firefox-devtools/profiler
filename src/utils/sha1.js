@@ -23,6 +23,7 @@ function hex(buffer) {
 }
 
 export default function sha1(data) {
-  const arrayData = (typeof data === 'string') ? (new TextEncoder()).encode(data) : data;
+  const arrayData =
+    typeof data === 'string' ? new TextEncoder().encode(data) : data;
   return window.crypto.subtle.digest('SHA-1', arrayData).then(hex);
 }

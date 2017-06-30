@@ -13,14 +13,15 @@ import React, { PureComponent, PropTypes } from 'react';
  * During the drag, the additional className 'dragging' is set on the element.
  */
 export default class Draggable extends PureComponent {
-
   constructor(props) {
     super(props);
     this.state = { dragging: false };
     this._onMouseDown = this._onMouseDown.bind(this);
     this._handlers = null;
     this._container = null;
-    this._containerCreated = c => { this._container = c; };
+    this._containerCreated = c => {
+      this._container = c;
+    };
   }
 
   _onMouseDown(e) {
@@ -37,13 +38,23 @@ export default class Draggable extends PureComponent {
     const startValue = this.props.value;
 
     const mouseMoveHandler = e => {
-      this.props.onMove(startValue, e.pageX - mouseDownX, e.pageY - mouseDownY, true);
+      this.props.onMove(
+        startValue,
+        e.pageX - mouseDownX,
+        e.pageY - mouseDownY,
+        true
+      );
       e.stopPropagation();
       e.preventDefault();
     };
 
     const mouseUpHandler = e => {
-      this.props.onMove(startValue, e.pageX - mouseDownX, e.pageY - mouseDownY, false);
+      this.props.onMove(
+        startValue,
+        e.pageX - mouseDownX,
+        e.pageY - mouseDownY,
+        false
+      );
       e.stopPropagation();
       e.preventDefault();
       this._uninstallMoveAndUpHandlers();
@@ -80,7 +91,11 @@ export default class Draggable extends PureComponent {
     delete props.value;
     delete props.children;
     return (
-      <div {...props} onMouseDown={this._onMouseDown} ref={this._containerCreated}>
+      <div
+        {...props}
+        onMouseDown={this._onMouseDown}
+        ref={this._containerCreated}
+      >
         {this.props.children}
       </div>
     );

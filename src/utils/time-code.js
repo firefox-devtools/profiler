@@ -5,8 +5,10 @@
 // @flow
 
 export function timeCode<T>(label: string, codeAsACallback: () => T): T {
-  if (typeof performance !== 'undefined' &&
-      process.env.NODE_ENV === 'development') {
+  if (
+    typeof performance !== 'undefined' &&
+    process.env.NODE_ENV === 'development'
+  ) {
     const start = performance.now();
     const result = codeAsACallback();
     const elapsed = Math.round(performance.now() - start);

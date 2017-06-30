@@ -7,12 +7,20 @@ import React, { PureComponent } from 'react';
 import { connect, Provider } from 'react-redux';
 import { oneLine } from 'common-tags';
 
-import { retrieveProfileFromAddon, retrieveProfileFromStore, retrieveProfileFromUrl } from '../../actions/receive-profile';
+import {
+  retrieveProfileFromAddon,
+  retrieveProfileFromStore,
+  retrieveProfileFromUrl,
+} from '../../actions/receive-profile';
 import ProfileViewer from './ProfileViewer';
 import Home from './Home';
 import { urlFromState, stateFromLocation } from '../../url-handling';
 import { getView } from '../../reducers/app';
-import { getDataSource, getHash, getProfileURL } from '../../reducers/url-state';
+import {
+  getDataSource,
+  getHash,
+  getProfileURL,
+} from '../../reducers/url-state';
 import URLManager from './URLManager';
 
 import type { Store } from '../../types/store';
@@ -20,28 +28,31 @@ import type { AppViewState, State } from '../../types/reducers';
 
 require('./Root.css');
 
-const LOADING_MESSAGES: {[string]: string} = Object.freeze({
+const LOADING_MESSAGES: { [string]: string } = Object.freeze({
   'from-addon': 'Grabbing the profile from the Gecko Profiler Addon...',
   'from-file': 'Reading the file and processing the profile...',
-  'local': 'Not implemented yet.',
-  'public': 'Downloading and processing the profile...',
+  local: 'Not implemented yet.',
+  public: 'Downloading and processing the profile...',
   'from-url': 'Downloading and processing the profile...',
 });
 
-const ERROR_MESSAGES: {[string]: string} = Object.freeze({
+const ERROR_MESSAGES: { [string]: string } = Object.freeze({
   'from-addon': "Couldn't retrieve the profile from the Gecko Profiler Addon.",
   'from-file': "Couldn't read the file or parse the profile in it.",
-  'local': 'Not implemented yet.',
-  'public': 'Could not download the profile.',
+  local: 'Not implemented yet.',
+  public: 'Could not download the profile.',
   'from-url': 'Could not download the profile.',
 });
 
 // TODO Switch to a proper i18n library
 function fewTimes(count: number) {
   switch (count) {
-    case 1: return 'once';
-    case 2: return 'twice';
-    default: return `${count} times`;
+    case 1:
+      return 'once';
+    case 2:
+      return 'twice';
+    default:
+      return `${count} times`;
   }
 }
 
@@ -59,7 +70,14 @@ class ProfileViewWhenReadyImpl extends PureComponent {
   props: ProfileViewProps;
 
   componentDidMount() {
-    const { dataSource, hash, profileURL, retrieveProfileFromAddon, retrieveProfileFromStore, retrieveProfileFromUrl } = this.props;
+    const {
+      dataSource,
+      hash,
+      profileURL,
+      retrieveProfileFromAddon,
+      retrieveProfileFromStore,
+      retrieveProfileFromUrl,
+    } = this.props;
     switch (dataSource) {
       case 'from-addon':
         retrieveProfileFromAddon();
@@ -84,31 +102,31 @@ class ProfileViewWhenReadyImpl extends PureComponent {
     showLoader: boolean
   ) {
     return (
-      <div className='rootMessageContainer'>
-        <div className='rootMessage'>
-          <h1 className='rootMessageTitle'>perf.html</h1>
-          <div className='rootMessageText'>{ message }</div>
-          {
-            additionalMessage
-              ? <div className='rootMessageAdditional'>{ additionalMessage }</div>
-              : null
-          }
-          {
-            showLoader
-              ? <div className='loading'>
-                  <div className='loading-div loading-div-1 loading-row-1'></div>
-                  <div className='loading-div loading-div-2 loading-row-2'></div>
-                  <div className='loading-div loading-div-3 loading-row-3'></div>
-                  <div className='loading-div loading-div-4 loading-row-3'></div>
-                  <div className='loading-div loading-div-5 loading-row-4'></div>
-                  <div className='loading-div loading-div-6 loading-row-4'></div>
-                  <div className='loading-div loading-div-7 loading-row-4'></div>
-                  <div className='loading-div loading-div-8 loading-row-4'></div>
-                  <div className='loading-div loading-div-9 loading-row-4'></div>
-                  <div className='loading-div loading-div-10 loading-row-4'></div>
-                </div>
-              : null
-          }
+      <div className="rootMessageContainer">
+        <div className="rootMessage">
+          <h1 className="rootMessageTitle">perf.html</h1>
+          <div className="rootMessageText">
+            {message}
+          </div>
+          {additionalMessage
+            ? <div className="rootMessageAdditional">
+                {additionalMessage}
+              </div>
+            : null}
+          {showLoader
+            ? <div className="loading">
+                <div className="loading-div loading-div-1 loading-row-1" />
+                <div className="loading-div loading-div-2 loading-row-2" />
+                <div className="loading-div loading-div-3 loading-row-3" />
+                <div className="loading-div loading-div-4 loading-row-3" />
+                <div className="loading-div loading-div-5 loading-row-4" />
+                <div className="loading-div loading-div-6 loading-row-4" />
+                <div className="loading-div loading-div-7 loading-row-4" />
+                <div className="loading-div loading-div-8 loading-row-4" />
+                <div className="loading-div loading-div-9 loading-row-4" />
+                <div className="loading-div loading-div-10 loading-row-4" />
+              </div>
+            : null}
         </div>
       </div>
     );
@@ -134,14 +152,17 @@ class ProfileViewWhenReadyImpl extends PureComponent {
 
           if (view.additionalData.attempt) {
             const attempt = view.additionalData.attempt;
-            additionalMessage += `Tried ${fewTimes(attempt.count)} out of ${attempt.total}.`;
+            additionalMessage += `Tried ${fewTimes(
+              attempt.count
+            )} out of ${attempt.total}.`;
           }
         }
 
         return this.renderMessage(message, additionalMessage, showLoader);
       }
       case 'FATAL_ERROR': {
-        const message = ERROR_MESSAGES[dataSource] || "Couldn't retrieve the profile.";
+        const message =
+          ERROR_MESSAGES[dataSource] || "Couldn't retrieve the profile.";
         let additionalMessage = null;
         if (view.error) {
           console.error(view.error);
@@ -153,10 +174,12 @@ class ProfileViewWhenReadyImpl extends PureComponent {
         return this.renderMessage(message, additionalMessage, false);
       }
       case 'PROFILE':
-        return <ProfileViewer/>;
+        return <ProfileViewer />;
       case 'ROUTE_NOT_FOUND':
       default:
-        return <Home specialMessage='The URL you came in on was not recognized.' />;
+        return (
+          <Home specialMessage="The URL you came in on was not recognized." />
+        );
     }
   }
 }
@@ -182,8 +205,11 @@ export default class Root extends PureComponent {
     const { store } = this.props;
     return (
       <Provider store={store}>
-        <URLManager urlFromState={urlFromState} stateFromLocation={stateFromLocation}>
-          <ProfileViewWhenReady/>
+        <URLManager
+          urlFromState={urlFromState}
+          stateFromLocation={stateFromLocation}
+        >
+          <ProfileViewWhenReady />
         </URLManager>
       </Provider>
     );

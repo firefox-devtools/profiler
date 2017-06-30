@@ -18,7 +18,10 @@ import ProfileSharing from './ProfileSharing';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import TimelineView from '../timeline/TimelineView';
 import actions from '../../actions';
-import { getProfileViewOptions, getDisplayRange } from '../../reducers/profile-view';
+import {
+  getProfileViewOptions,
+  getDisplayRange,
+} from '../../reducers/profile-view';
 import { getSelectedTab } from '../../reducers/url-state';
 import ProfileViewerHeader from '../header/ProfileViewerHeader';
 import ProfileCallTreeContextMenu from '../calltree/ProfileCallTreeContextMenu';
@@ -32,7 +35,7 @@ type Props = {
   timeRange: StartEndRange,
   selectedTab: string,
   changeSelectedTab: string => void,
-  changeTabOrder: number[] => void,
+  changeTabOrder: (number[]) => void,
 };
 
 class ProfileViewer extends PureComponent {
@@ -86,30 +89,48 @@ class ProfileViewer extends PureComponent {
 
   render() {
     const {
-      className, tabOrder, timeRange, changeTabOrder, selectedTab,
+      className,
+      tabOrder,
+      timeRange,
+      changeTabOrder,
+      selectedTab,
     } = this.props;
     const { isMounted } = this.state;
 
     return (
-      <div className={classNames(className, isMounted ? `${className}IsMounted` : null)}>
+      <div
+        className={classNames(
+          className,
+          isMounted ? `${className}IsMounted` : null
+        )}
+      >
         <div className={`${className}TopBar`}>
           <ProfileFilterNavigator />
           <ProfileSharing />
         </div>
         <ProfileViewerHeader />
-        <TabBar tabs={this._tabs}
-                selectedTabName={selectedTab}
-                tabOrder={tabOrder}
-                onSelectTab={this._onSelectTab}
-                onChangeTabOrder={changeTabOrder} />
-        {{
-          summary: <ProfileSummaryView />,
-          calltree: <ProfileCallTreeView />,
-          markers: <ProfileMarkersView />,
-          tasktracer: <ProfileTaskTracerView rangeStart={timeRange.start} rangeEnd={timeRange.end} />,
-          timeline: <TimelineView />,
-          log: <ProfileLogView />,
-        }[selectedTab]}
+        <TabBar
+          tabs={this._tabs}
+          selectedTabName={selectedTab}
+          tabOrder={tabOrder}
+          onSelectTab={this._onSelectTab}
+          onChangeTabOrder={changeTabOrder}
+        />
+        {
+          {
+            summary: <ProfileSummaryView />,
+            calltree: <ProfileCallTreeView />,
+            markers: <ProfileMarkersView />,
+            tasktracer: (
+              <ProfileTaskTracerView
+                rangeStart={timeRange.start}
+                rangeEnd={timeRange.end}
+              />
+            ),
+            timeline: <TimelineView />,
+            log: <ProfileLogView />,
+          }[selectedTab]
+        }
         <SymbolicationStatusOverlay />
         <ProfileCallTreeContextMenu />
         <ProfileThreadHeaderContextMenu />
@@ -127,9 +148,12 @@ ProfileViewer.propTypes = {
   changeTabOrder: PropTypes.func.isRequired,
 };
 
-export default connect(state => ({
-  tabOrder: getProfileViewOptions(state).tabOrder,
-  selectedTab: getSelectedTab(state),
-  className: 'profileViewer',
-  timeRange: getDisplayRange(state),
-}), actions)(ProfileViewer);
+export default connect(
+  state => ({
+    tabOrder: getProfileViewOptions(state).tabOrder,
+    selectedTab: getSelectedTab(state),
+    className: 'profileViewer',
+    timeRange: getDisplayRange(state),
+  }),
+  actions
+)(ProfileViewer);

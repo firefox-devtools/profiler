@@ -10,6 +10,6 @@ import { profileSummaryProcessed } from '../../../actions/profile-summary';
 const messages = {};
 export default messages;
 
-messages.PROFILE_SUMMARY_PROCESSED = function (message, call) {
+messages.PROFILE_SUMMARY_PROCESSED = function(message, call) {
   call(profileSummaryProcessed, message.summary);
 };

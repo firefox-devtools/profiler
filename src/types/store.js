@@ -9,7 +9,7 @@ import type {
   ThunkAction as ReduxThunkAction,
   Dispatch as ReduxDispatch,
   GetState as ReduxGetState,
-} from 'redux'; // eslint-disable-line import/named
+} from 'redux';
 /* eslint-enable import/named */
 import type { Action as ActionsRef } from './actions';
 import type { State as StateRef } from './reducers';

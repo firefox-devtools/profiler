@@ -5,7 +5,10 @@
 import { connect } from 'react-redux';
 import IntervalMarkerOverview from './IntervalMarkerOverview';
 import { selectorsForThread } from '../../reducers/profile-view';
-import { styles, overlayFills } from '../../profile-logic/interval-marker-styles';
+import {
+  styles,
+  overlayFills,
+} from '../../profile-logic/interval-marker-styles';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 
 export default connect((state, props) => {

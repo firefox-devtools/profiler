@@ -9,18 +9,33 @@ import { connect } from 'react-redux';
 import TreeView from '../shared/TreeView';
 import NodeIcon from './NodeIcon';
 import { getStackAsFuncArray } from '../../profile-logic/profile-data';
-import { getInvertCallstack, getImplementationFilter, getSearchString, getSelectedThreadIndex } from '../../reducers/url-state';
 import {
-  getProfile, selectedThreadSelectors, getScrollToSelectionGeneration, getProfileViewOptions,
+  getInvertCallstack,
+  getImplementationFilter,
+  getSearchString,
+  getSelectedThreadIndex,
+} from '../../reducers/url-state';
+import {
+  getProfile,
+  selectedThreadSelectors,
+  getScrollToSelectionGeneration,
+  getProfileViewOptions,
 } from '../../reducers/profile-view';
 import { getIconsWithClassNames } from '../../reducers/icons';
 
-import { changeSelectedFuncStack, changeExpandedFuncStacks, addCallTreeFilter } from '../../actions/profile-view';
+import {
+  changeSelectedFuncStack,
+  changeExpandedFuncStacks,
+  addCallTreeFilter,
+} from '../../actions/profile-view';
 
 import type { IconWithClassName, State } from '../../types/reducers';
 import type { ProfileTreeClass } from '../../profile-logic/profile-tree';
 import type { Thread, ThreadIndex } from '../../types/profile';
-import type { FuncStackInfo, IndexIntoFuncStackTable } from '../../types/profile-derived';
+import type {
+  FuncStackInfo,
+  IndexIntoFuncStackTable,
+} from '../../types/profile-derived';
 import type { Column } from '../shared/TreeView';
 
 type Props = {
@@ -31,7 +46,7 @@ type Props = {
   tree: ProfileTreeClass,
   funcStackInfo: FuncStackInfo,
   selectedFuncStack: IndexIntoFuncStackTable | null,
-  expandedFuncStacks: Array<IndexIntoFuncStackTable | null>;
+  expandedFuncStacks: Array<IndexIntoFuncStackTable | null>,
   searchString: string,
   disableOverscan: boolean,
   implementationFilter: string,
@@ -62,9 +77,15 @@ class ProfileTreeView extends PureComponent {
     this._appendageColumn = { propName: 'lib', title: '' };
     this._appendageButtons = ['focusCallstackButton'];
     this._treeView = null;
-    (this: any)._onSelectedFuncStackChange = this._onSelectedFuncStackChange.bind(this);
-    (this: any)._onExpandedFuncStacksChange = this._onExpandedFuncStacksChange.bind(this);
-    (this: any)._onAppendageButtonClick = this._onAppendageButtonClick.bind(this);
+    (this: any)._onSelectedFuncStackChange = this._onSelectedFuncStackChange.bind(
+      this
+    );
+    (this: any)._onExpandedFuncStacksChange = this._onExpandedFuncStacksChange.bind(
+      this
+    );
+    (this: any)._onAppendageButtonClick = this._onAppendageButtonClick.bind(
+      this
+    );
   }
 
   componentDidMount() {
@@ -73,7 +94,10 @@ class ProfileTreeView extends PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.scrollToSelectionGeneration > prevProps.scrollToSelectionGeneration) {
+    if (
+      this.props.scrollToSelectionGeneration >
+      prevProps.scrollToSelectionGeneration
+    ) {
       if (this._treeView) {
         this._treeView.scrollSelectionIntoView();
       }
@@ -88,32 +112,49 @@ class ProfileTreeView extends PureComponent {
 
   _onSelectedFuncStackChange(newSelectedFuncStack: IndexIntoFuncStackTable) {
     const { funcStackInfo, threadIndex, changeSelectedFuncStack } = this.props;
-    changeSelectedFuncStack(threadIndex,
-      getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable));
+    changeSelectedFuncStack(
+      threadIndex,
+      getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable)
+    );
   }
 
-  _onExpandedFuncStacksChange(newExpandedFuncStacks: Array<IndexIntoFuncStackTable | null>) {
+  _onExpandedFuncStacksChange(
+    newExpandedFuncStacks: Array<IndexIntoFuncStackTable | null>
+  ) {
     const { funcStackInfo, threadIndex, changeExpandedFuncStacks } = this.props;
-    changeExpandedFuncStacks(threadIndex,
-      newExpandedFuncStacks.map(funcStackIndex => getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable)));
+    changeExpandedFuncStacks(
+      threadIndex,
+      newExpandedFuncStacks.map(funcStackIndex =>
+        getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable)
+      )
+    );
   }
 
   _onAppendageButtonClick(funcStackIndex: IndexIntoFuncStackTable | null) {
     const {
-      funcStackInfo, threadIndex, addCallTreeFilter, implementationFilter,
+      funcStackInfo,
+      threadIndex,
+      addCallTreeFilter,
+      implementationFilter,
       invertCallstack,
     } = this.props;
     const jsOnly = implementationFilter === 'js';
     if (invertCallstack) {
       addCallTreeFilter(threadIndex, {
         type: 'postfix',
-        postfixFuncs: getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable),
+        postfixFuncs: getStackAsFuncArray(
+          funcStackIndex,
+          funcStackInfo.funcStackTable
+        ),
         matchJSOnly: jsOnly,
       });
     } else {
       addCallTreeFilter(threadIndex, {
         type: 'prefix',
-        prefixFuncs: getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable),
+        prefixFuncs: getStackAsFuncArray(
+          funcStackIndex,
+          funcStackInfo.funcStackTable
+        ),
         matchJSOnly: jsOnly,
       });
     }
@@ -140,25 +181,34 @@ class ProfileTreeView extends PureComponent {
   }
 
   render() {
-    const { tree, selectedFuncStack, expandedFuncStacks, searchString, disableOverscan } = this.props;
+    const {
+      tree,
+      selectedFuncStack,
+      expandedFuncStacks,
+      searchString,
+      disableOverscan,
+    } = this.props;
     return (
-      <TreeView tree={tree}
-                fixedColumns={this._fixedColumns}
-                mainColumn={this._mainColumn}
-                appendageColumn={this._appendageColumn}
-                onSelectionChange={this._onSelectedFuncStackChange}
-                onExpandedNodesChange={this._onExpandedFuncStacksChange}
-                selectedNodeId={selectedFuncStack}
-                expandedNodeIds={expandedFuncStacks}
-                highlightString={searchString.toLowerCase()}
-                disableOverscan={disableOverscan}
-                appendageButtons={this._appendageButtons}
-                onAppendageButtonClick={this._onAppendageButtonClick}
-                ref={ ref => { this._treeView = ref; }}
-                contextMenuId={'ProfileCallTreeContextMenu'}
-                icons={this.props.icons} />
+      <TreeView
+        tree={tree}
+        fixedColumns={this._fixedColumns}
+        mainColumn={this._mainColumn}
+        appendageColumn={this._appendageColumn}
+        onSelectionChange={this._onSelectedFuncStackChange}
+        onExpandedNodesChange={this._onExpandedFuncStacksChange}
+        selectedNodeId={selectedFuncStack}
+        expandedNodeIds={expandedFuncStacks}
+        highlightString={searchString.toLowerCase()}
+        disableOverscan={disableOverscan}
+        appendageButtons={this._appendageButtons}
+        onAppendageButtonClick={this._onAppendageButtonClick}
+        ref={ref => {
+          this._treeView = ref;
+        }}
+        contextMenuId={'ProfileCallTreeContextMenu'}
+        icons={this.props.icons}
+      />
     );
-
   }
 }
 
@@ -179,5 +229,6 @@ export default connect(
     icons: getIconsWithClassNames(state),
   }),
   { changeSelectedFuncStack, changeExpandedFuncStacks, addCallTreeFilter },
-  null, { withRef: true }
+  null,
+  { withRef: true }
 )(ProfileTreeView);

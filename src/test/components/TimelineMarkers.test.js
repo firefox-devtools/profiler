@@ -41,16 +41,16 @@ it('renders TimelineMarkers correctly', () => {
   }
 
   const profile = getProfileWithMarkers([
-    ['Marker A', 0, {startTime: 0, endTime: 10}],
-    ['Marker B', 0, {startTime: 0, endTime: 10}],
-    ['Marker C', 0, {startTime: 5, endTime: 15}],
+    ['Marker A', 0, { startTime: 0, endTime: 10 }],
+    ['Marker B', 0, { startTime: 0, endTime: 10 }],
+    ['Marker C', 0, { startTime: 5, endTime: 15 }],
   ]);
 
   const timeline = renderer.create(
     <Provider store={storeWithProfile(profile)}>
       <TimelineMarkers threadIndex={0} viewHeight={1000} />
     </Provider>,
-    {createNodeMock}
+    { createNodeMock }
   );
 
   // Flush any requestAnimationFrames.

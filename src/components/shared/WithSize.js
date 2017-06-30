@@ -16,33 +16,36 @@ import { findDOMNode } from 'react-dom';
  * @param  {class} Wrapped The class that gets wrapped.
  * @return {class}         The resulting Component class.
  */
-export const withSize = Wrapped => class WithSizeWrapper extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = { width: 0, height: 0 };
-    this._observeSize = this._observeSize.bind(this);
-  }
-
-  _observeSize(wrappedComponent) {
-    if (!wrappedComponent) {
-      return;
+export const withSize = Wrapped =>
+  class WithSizeWrapper extends PureComponent {
+    constructor(props) {
+      super(props);
+      this.state = { width: 0, height: 0 };
+      this._observeSize = this._observeSize.bind(this);
     }
-    const container = findDOMNode(wrappedComponent);
-    this._resizeListener = () => this._updateWidth(container);
-    window.addEventListener('resize', this._resizeListener);
-    this._updateWidth(container);
-  }
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this._resizeListener);
-  }
+    _observeSize(wrappedComponent) {
+      if (!wrappedComponent) {
+        return;
+      }
+      const container = findDOMNode(wrappedComponent);
+      this._resizeListener = () => this._updateWidth(container);
+      window.addEventListener('resize', this._resizeListener);
+      this._updateWidth(container);
+    }
 
-  _updateWidth(container) {
-    const { width, height } = container.getBoundingClientRect();
-    this.setState({ width, height });
-  }
+    componentWillUnmount() {
+      window.removeEventListener('resize', this._resizeListener);
+    }
 
-  render() {
-    return <Wrapped ref={this._observeSize} {...this.props} {...this.state}/>;
-  }
-};
+    _updateWidth(container) {
+      const { width, height } = container.getBoundingClientRect();
+      this.setState({ width, height });
+    }
+
+    render() {
+      return (
+        <Wrapped ref={this._observeSize} {...this.props} {...this.state} />
+      );
+    }
+  };

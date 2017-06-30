@@ -25,7 +25,7 @@ import { getCategoryByImplementation } from '../../profile-logic/color-categorie
 
 const { selectedThreadSelectors } = ProfileViewSelectors;
 
-describe('selectors/getStackTimingByDepthForFlameChart', function () {
+describe('selectors/getStackTimingByDepthForFlameChart', function() {
   /**
    * This table shows off how a flame chart gets filtered to JS only, where the number is
    * the stack index, and P is platform code, and J javascript.
@@ -42,9 +42,11 @@ describe('selectors/getStackTimingByDepthForFlameChart', function () {
    *                          8J     |
    */
 
-  it('computes unfiltered stack timing by depth', function () {
+  it('computes unfiltered stack timing by depth', function() {
     const store = storeWithProfile();
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(store.getState());
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(
+      store.getState()
+    );
     expect(stackTimingByDepth).toEqual([
       { start: [0], end: [91], stack: [0], length: 1 },
       { start: [0, 50], end: [40, 91], stack: [1, 1], length: 2 },
@@ -56,10 +58,12 @@ describe('selectors/getStackTimingByDepthForFlameChart', function () {
     ]);
   });
 
-  it('computes "Hide platform details" stack timing by depth', function () {
+  it('computes "Hide platform details" stack timing by depth', function() {
     const store = storeWithProfile();
     store.dispatch(changeHidePlatformDetails(true));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(store.getState());
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(
+      store.getState()
+    );
 
     expect(stackTimingByDepth).toEqual([
       { start: [0], end: [91], stack: [0], length: 1 },
@@ -70,10 +74,12 @@ describe('selectors/getStackTimingByDepthForFlameChart', function () {
     ]);
   });
 
-  it('uses search strings', function () {
+  it('uses search strings', function() {
     const store = storeWithProfile();
     store.dispatch(changeCallTreeSearchString('javascript'));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(store.getState());
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(
+      store.getState()
+    );
     expect(stackTimingByDepth).toEqual([
       { start: [60], end: [91], stack: [0], length: 1 },
       { start: [60], end: [91], stack: [1], length: 1 },
@@ -101,10 +107,12 @@ describe('selectors/getStackTimingByDepthForFlameChart', function () {
    *                          8J     |                             0P
    */
 
-  it('can handle inverted stacks', function () {
+  it('can handle inverted stacks', function() {
     const store = storeWithProfile();
     store.dispatch(changeInvertCallstack(true));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(store.getState());
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(
+      store.getState()
+    );
     expect(stackTimingByDepth).toEqual([
       {
         start: [0, 10, 30, 40, 50, 60, 70, 80, 90],
@@ -137,28 +145,36 @@ describe('selectors/getStackTimingByDepthForFlameChart', function () {
   });
 });
 
-describe('selectors/getFuncStackMaxDepthForFlameChart', function () {
-  it('calculates the max func depth and observes of platform-detail filters', function () {
+describe('selectors/getFuncStackMaxDepthForFlameChart', function() {
+  it('calculates the max func depth and observes of platform-detail filters', function() {
     const store = storeWithProfile();
-    const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
+    const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(
+      store.getState()
+    );
     expect(allSamplesMaxDepth).toEqual(6);
     store.dispatch(changeHidePlatformDetails(true));
-    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
+    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(
+      store.getState()
+    );
     expect(jsOnlySamplesMaxDepth).toEqual(4);
   });
 
-  it('acts upon the current range', function () {
+  it('acts upon the current range', function() {
     const store = storeWithProfile();
     store.dispatch(addRangeFilter(0, 20));
-    const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
+    const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(
+      store.getState()
+    );
     expect(allSamplesMaxDepth).toEqual(2);
     store.dispatch(changeHidePlatformDetails(true));
-    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(store.getState());
+    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(
+      store.getState()
+    );
     expect(jsOnlySamplesMaxDepth).toEqual(0);
   });
 });
 
-describe('selectors/getLeafCategoryStackTimingForFlameChart', function () {
+describe('selectors/getLeafCategoryStackTimingForFlameChart', function() {
   /**
    * This table shows off how stack timings get filtered to a single row by concurrent
    * color categories. P is platform code, J javascript baseline, and I is javascript
@@ -175,10 +191,12 @@ describe('selectors/getLeafCategoryStackTimingForFlameChart', function () {
    *                          7P     |
    *                          8I     |
    */
-  it('gets the unfiltered leaf-stack timing by implementation', function () {
+  it('gets the unfiltered leaf-stack timing by implementation', function() {
     const store = storeWithProfile();
     store.dispatch(changeFlameChartColorStrategy(getCategoryByImplementation));
-    const leafStackTiming = selectedThreadSelectors.getLeafCategoryStackTimingForFlameChart(store.getState());
+    const leafStackTiming = selectedThreadSelectors.getLeafCategoryStackTimingForFlameChart(
+      store.getState()
+    );
 
     expect(leafStackTiming).toEqual([
       {
@@ -191,13 +209,16 @@ describe('selectors/getLeafCategoryStackTimingForFlameChart', function () {
   });
 });
 
-describe('actions/changeTimelineFlameChartExpandedThread', function () {
-  it('can set one timeline flame chart thread as expanded', function () {
+describe('actions/changeTimelineFlameChartExpandedThread', function() {
+  it('can set one timeline flame chart thread as expanded', function() {
     const store = storeWithProfile();
     const threads = ProfileViewSelectors.getThreads(store.getState());
 
     function isExpanded(thread, threadIndex) {
-      return TimelineSelectors.getIsFlameChartExpanded(store.getState(), threadIndex);
+      return TimelineSelectors.getIsFlameChartExpanded(
+        store.getState(),
+        threadIndex
+      );
     }
 
     expect(threads.map(isExpanded)).toEqual([false, false, false]);
@@ -213,13 +234,16 @@ describe('actions/changeTimelineFlameChartExpandedThread', function () {
   });
 });
 
-describe('actions/changeTimelineMarkersExpandedThread', function () {
-  it('can set one timeline markers thread as expanded', function () {
+describe('actions/changeTimelineMarkersExpandedThread', function() {
+  it('can set one timeline markers thread as expanded', function() {
     const store = storeWithProfile();
     const threads = ProfileViewSelectors.getThreads(store.getState());
 
     function isExpanded(thread, threadIndex) {
-      return TimelineSelectors.getAreMarkersExpanded(store.getState(), threadIndex);
+      return TimelineSelectors.getAreMarkersExpanded(
+        store.getState(),
+        threadIndex
+      );
     }
     // Timeline markers are open by default.
     expect(threads.map(isExpanded)).toEqual([true, true, true]);
@@ -235,39 +259,45 @@ describe('actions/changeTimelineMarkersExpandedThread', function () {
   });
 });
 
-describe('actions/changeImplementationFilter', function () {
+describe('actions/changeImplementationFilter', function() {
   const store = storeWithProfile();
 
-  it('is initially set to filter to all', function () {
+  it('is initially set to filter to all', function() {
     const filter = UrlStateSelectors.getImplementationFilter(store.getState());
     expect(filter).toEqual('combined');
   });
 
-  it('can be changed to cpp', function () {
+  it('can be changed to cpp', function() {
     store.dispatch(changeImplementationFilter('cpp'));
     const filter = UrlStateSelectors.getImplementationFilter(store.getState());
     expect(filter).toEqual('cpp');
   });
 });
 
-describe('actions/updateProfileSelection', function () {
-  it('can update the selection with new values', function () {
+describe('actions/updateProfileSelection', function() {
+  it('can update the selection with new values', function() {
     const store = storeWithProfile();
 
-    const initialSelection = ProfileViewSelectors.getProfileViewOptions(store.getState()).selection;
+    const initialSelection = ProfileViewSelectors.getProfileViewOptions(
+      store.getState()
+    ).selection;
     expect(initialSelection).toEqual({
       hasSelection: false,
       isModifying: false,
     });
 
-    store.dispatch(updateProfileSelection({
-      hasSelection: true,
-      isModifying: false,
-      selectionStart: 100,
-      selectionEnd: 200,
-    }));
+    store.dispatch(
+      updateProfileSelection({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 100,
+        selectionEnd: 200,
+      })
+    );
 
-    const secondSelection = ProfileViewSelectors.getProfileViewOptions(store.getState()).selection;
+    const secondSelection = ProfileViewSelectors.getProfileViewOptions(
+      store.getState()
+    ).selection;
     expect(secondSelection).toEqual({
       hasSelection: true,
       isModifying: false,
@@ -277,70 +307,70 @@ describe('actions/updateProfileSelection', function () {
   });
 });
 
-describe('selectors/getMarkerTiming', function () {
+describe('selectors/getMarkerTiming', function() {
   function getMarkerTiming(testMarkers) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
     return selectedThreadSelectors.getMarkerTiming(getState());
   }
 
-  it('has no marker timing if no markers are present', function () {
+  it('has no marker timing if no markers are present', function() {
     expect(getMarkerTiming([])).toEqual([]);
   });
 
-  describe('markers of the same name', function () {
-    it('puts markers of the same time in two rows', function () {
+  describe('markers of the same name', function() {
+    it('puts markers of the same time in two rows', function() {
       // The timing should look like this:
       // 'Marker Name': *------*
       //              : *------*
       const markerTiming = getMarkerTiming([
-        ['Marker Name', 0, {startTime: 0, endTime: 10}],
-        ['Marker Name', 0, {startTime: 0, endTime: 10}],
+        ['Marker Name', 0, { startTime: 0, endTime: 10 }],
+        ['Marker Name', 0, { startTime: 0, endTime: 10 }],
       ]);
       expect(markerTiming).toHaveLength(2);
     });
 
-    it('puts markers of disjoint times in one row', function () {
+    it('puts markers of disjoint times in one row', function() {
       // The timing should look like this:
       // 'Marker Name': *------*  *------*
       const markerTiming = getMarkerTiming([
-        ['Marker Name', 0, {startTime: 0, endTime: 10}],
-        ['Marker Name', 0, {startTime: 15, endTime: 25}],
+        ['Marker Name', 0, { startTime: 0, endTime: 10 }],
+        ['Marker Name', 0, { startTime: 15, endTime: 25 }],
       ]);
       expect(markerTiming).toHaveLength(1);
     });
 
-    it('puts markers of overlapping times in two rows', function () {
+    it('puts markers of overlapping times in two rows', function() {
       // The timing should look like this:
       // 'Marker Name': *------*
       //              :     *------*
       const markerTiming = getMarkerTiming([
-        ['Marker Name', 0, {startTime: 0, endTime: 10}],
-        ['Marker Name', 0, {startTime: 5, endTime: 15}],
+        ['Marker Name', 0, { startTime: 0, endTime: 10 }],
+        ['Marker Name', 0, { startTime: 5, endTime: 15 }],
       ]);
       expect(markerTiming).toHaveLength(2);
     });
 
-    it('puts markers of inclusive overlapping times in two rows', function () {
+    it('puts markers of inclusive overlapping times in two rows', function() {
       // The timing should look like this:
       // 'Marker Name': *--------*
       //              :   *---*
       const markerTiming = getMarkerTiming([
-        ['Marker Name', 0, {startTime: 0, endTime: 20}],
-        ['Marker Name', 0, {startTime: 5, endTime: 15}],
+        ['Marker Name', 0, { startTime: 0, endTime: 20 }],
+        ['Marker Name', 0, { startTime: 5, endTime: 15 }],
       ]);
       expect(markerTiming).toHaveLength(2);
     });
   });
 
-  describe('markers of the different names', function () {
-    it('puts them in different rows', function () {
+  describe('markers of the different names', function() {
+    it('puts them in different rows', function() {
       // The timing should look like this:
       // 'Marker Name A': *------*
       // 'Marker Name B':           *------*
       const markerTiming = getMarkerTiming([
-        ['Marker Name A', 0, {startTime: 0, endTime: 10}],
-        ['Marker Name B', 0, {startTime: 20, endTime: 30}],
+        ['Marker Name A', 0, { startTime: 0, endTime: 10 }],
+        ['Marker Name B', 0, { startTime: 20, endTime: 30 }],
       ]);
       expect(markerTiming).toHaveLength(2);
       expect(markerTiming[0].name).toBe('Marker Name A');

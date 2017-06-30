@@ -8,7 +8,10 @@ import { combineReducers } from 'redux';
 import type { Action } from '../types/store';
 import type { State, AppState, AppViewState, Reducer } from '../types/reducers';
 
-function view(state: AppViewState = { phase: 'INITIALIZING' }, action: Action): AppViewState {
+function view(
+  state: AppViewState = { phase: 'INITIALIZING' },
+  action: Action
+): AppViewState {
   if (state.phase === 'PROFILE') {
     // Let's not come back at another phase if we're already displaying a profile
     return state;
@@ -52,9 +55,13 @@ function isURLSetupDone(state: boolean = false, action: Action) {
       return state;
   }
 }
-const appStateReducer: Reducer<AppState> = combineReducers({ view, isURLSetupDone });
+const appStateReducer: Reducer<AppState> = combineReducers({
+  view,
+  isURLSetupDone,
+});
 export default appStateReducer;
 
 export const getApp = (state: State): AppState => state.app;
 export const getView = (state: State): AppViewState => getApp(state).view;
-export const getIsURLSetupDone = (state: State): boolean => getApp(state).isURLSetupDone;
+export const getIsURLSetupDone = (state: State): boolean =>
+  getApp(state).isURLSetupDone;

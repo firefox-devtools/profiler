@@ -24,7 +24,7 @@ export function getProfileWithMarkers(markers: TestDefinedMarkers): Profile {
     data: [],
     length: 0,
   };
-  markers.map(([name, time, data]) => {
+  markers.forEach(([name, time, data]) => {
     markersTable.name.push(stringTable.indexForString(name));
     markersTable.time.push(time);
     markersTable.data.push(data);
@@ -41,58 +41,61 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
 }
 
 export function getEmptyThread(overrides: ?Object): Thread {
-  return Object.assign({
-    processType: 'default',
-    name: 'Empty',
-    pid: 0,
-    tid: 0,
-    samples: {
-      frameNumber: [],
-      responsiveness: [],
-      stack: [],
-      time: [],
-      rss: [],
-      uss: [],
-      length: 0,
+  return Object.assign(
+    {
+      processType: 'default',
+      name: 'Empty',
+      pid: 0,
+      tid: 0,
+      samples: {
+        frameNumber: [],
+        responsiveness: [],
+        stack: [],
+        time: [],
+        rss: [],
+        uss: [],
+        length: 0,
+      },
+      markers: {
+        data: [],
+        name: [],
+        time: [],
+        length: 0,
+      },
+      stackTable: {
+        frame: [],
+        prefix: [],
+        length: 0,
+      },
+      frameTable: {
+        address: [],
+        category: [],
+        func: [],
+        implementation: [],
+        line: [],
+        optimizations: [],
+        length: 0,
+      },
+      stringTable: new UniqueStringArray(),
+      libs: [],
+      funcTable: {
+        address: [],
+        isJS: false,
+        name: [],
+        resource: [],
+        fileName: [],
+        lineNumber: [],
+        length: 0,
+      },
+      resourceTable: {
+        addonId: [],
+        icon: [],
+        length: 0,
+        lib: [],
+        name: [],
+        type: 0,
+      },
     },
-    markers: {
-      data: [],
-      name: [],
-      time: [],
-      length: 0,
-    },
-    stackTable: {
-      frame: [],
-      prefix: [],
-      length: 0,
-    },
-    frameTable: {
-      address: [],
-      category: [],
-      func: [],
-      implementation: [],
-      line: [],
-      optimizations: [],
-      length: 0,
-    },
-    stringTable: new UniqueStringArray(),
-    libs: [],
-    funcTable: {
-      address: [],
-      isJS: false,
-      name: [],
-      resource: [],
-      fileName: [],
-      lineNumber: [],
-      length: 0,
-    },
-    resourceTable: {
-      addonId: [],
-      icon: [],
-      length: 0,
-      lib: [],
-      name: [],
-      type: 0,
-    },
-  }, overrides);
+    overrides
+  );
 }

@@ -32,18 +32,17 @@ type Props = {
 };
 
 class IntervalMarkerOverview extends PureComponent {
-
-  props: Props
+  props: Props;
 
   state: {
-    hoveredItem: TracingMarker|null,
-    mouseDownItem: TracingMarker|null,
+    hoveredItem: TracingMarker | null,
+    mouseDownItem: TracingMarker | null,
     mouseX: CssPixels,
     mouseY: CssPixels,
-  }
+  };
 
-  _canvas: HTMLCanvasElement|null
-  _requestedAnimationFrame: bool|null
+  _canvas: HTMLCanvasElement | null;
+  _requestedAnimationFrame: boolean | null;
 
   constructor(props: Props) {
     super(props);
@@ -80,7 +79,7 @@ class IntervalMarkerOverview extends PureComponent {
     }
   }
 
-  _hitTest(e): TracingMarker|null {
+  _hitTest(e): TracingMarker | null {
     const c = this._canvas;
     if (c === null) {
       return null;
@@ -101,7 +100,7 @@ class IntervalMarkerOverview extends PureComponent {
       if (time < start || time >= start + dur) {
         continue;
       }
-      const style = (name in styles) ? styles[name] : styles.default;
+      const style = name in styles ? styles[name] : styles.default;
       if (y >= style.top && y < style.top + style.height) {
         return intervalMarkers[i];
       }
@@ -136,10 +135,17 @@ class IntervalMarkerOverview extends PureComponent {
     const { mouseDownItem } = this.state;
     if (mouseDownItem !== null) {
       const mouseUpItem = this._hitTest(e);
-      if (mouseDownItem === mouseUpItem &&
-          mouseUpItem !== null /* extra null check because flow doesn't realize it's unnecessary */) {
+      if (
+        mouseDownItem === mouseUpItem &&
+        mouseUpItem !==
+          null /* extra null check because flow doesn't realize it's unnecessary */
+      ) {
         const { onSelect, threadIndex } = this.props;
-        onSelect(threadIndex, mouseUpItem.start, mouseUpItem.start + mouseUpItem.dur);
+        onSelect(
+          threadIndex,
+          mouseUpItem.start,
+          mouseUpItem.start + mouseUpItem.dur
+        );
       }
       this.setState({
         hoveredItem: mouseUpItem,
@@ -158,36 +164,50 @@ class IntervalMarkerOverview extends PureComponent {
     this._scheduleDraw();
     const { className, isSelected, isModifyingSelection } = this.props;
     const { mouseDownItem, hoveredItem, mouseX, mouseY } = this.state;
-    const tooltipContents = !isModifyingSelection && !mouseDownItem && hoveredItem
-      ? hoveredItem.title
-      : null;
-    const canvasClassName = className.split(' ').map(name => `${name}Canvas`).join(' ');
+    const tooltipContents =
+      !isModifyingSelection && !mouseDownItem && hoveredItem
+        ? hoveredItem.title
+        : null;
+    const canvasClassName = className
+      .split(' ')
+      .map(name => `${name}Canvas`)
+      .join(' ');
 
     return (
       <div className={classNames(className, isSelected ? 'selected' : null)}>
-        <canvas className={classNames(canvasClassName, 'intervalMarkerTimelineCanvas')}
-                ref={this._takeCanvasRef}
-                onMouseDown={this._onMouseDown}
-                onMouseMove={this._onMouseMove}
-                onMouseUp={this._onMouseUp}
-                onMouseOut={this._onMouseOut}/>
-        {
-          tooltipContents
-            ? <Tooltip mouseX={mouseX}
-                       mouseY={mouseY}
-                       offsetParent={this._takeCanvasRef}
-                       boundedAtBottom={false}>
-                {tooltipContents}
-              </Tooltip>
-            : null
-        }
+        <canvas
+          className={classNames(
+            canvasClassName,
+            'intervalMarkerTimelineCanvas'
+          )}
+          ref={this._takeCanvasRef}
+          onMouseDown={this._onMouseDown}
+          onMouseMove={this._onMouseMove}
+          onMouseUp={this._onMouseUp}
+          onMouseOut={this._onMouseOut}
+        />
+        {tooltipContents
+          ? <Tooltip
+              mouseX={mouseX}
+              mouseY={mouseY}
+              offsetParent={this._takeCanvasRef}
+              boundedAtBottom={false}
+            >
+              {tooltipContents}
+            </Tooltip>
+          : null}
       </div>
     );
   }
 
-  _drawRoundedRect(ctx: CanvasRenderingContext2D,
-                   x: CssPixels, y: CssPixels, width: CssPixels, height: CssPixels,
-                   cornerSize: CssPixels) {
+  _drawRoundedRect(
+    ctx: CanvasRenderingContext2D,
+    x: CssPixels,
+    y: CssPixels,
+    width: CssPixels,
+    height: CssPixels,
+    cornerSize: CssPixels
+  ) {
     // Cut out c x c -sized squares in the corners.
     const c = Math.min(width / 2, Math.min(height / 2, cornerSize));
     const bottom = y + height;
@@ -197,9 +217,18 @@ class IntervalMarkerOverview extends PureComponent {
   }
 
   drawCanvas(c: HTMLCanvasElement) {
-    const { rangeStart, rangeEnd, width, intervalMarkers, styles, overlayFills } = this.props;
+    const {
+      rangeStart,
+      rangeEnd,
+      width,
+      intervalMarkers,
+      styles,
+      overlayFills,
+    } = this.props;
 
-    const devicePixelRatio = c.ownerDocument ? c.ownerDocument.defaultView.devicePixelRatio : 1;
+    const devicePixelRatio = c.ownerDocument
+      ? c.ownerDocument.defaultView.devicePixelRatio
+      : 1;
     const height = c.getBoundingClientRect().height;
     const pixelWidth = Math.round(width * devicePixelRatio);
     const pixelHeight = Math.round(height * devicePixelRatio);
@@ -220,12 +249,19 @@ class IntervalMarkerOverview extends PureComponent {
       const { start, dur, name } = marker;
       const pos = (start - rangeStart) / (rangeEnd - rangeStart) * width;
       const itemWidth = dur / (rangeEnd - rangeStart) * width;
-      const style = (name in styles) ? styles[name] : styles.default;
+      const style = name in styles ? styles[name] : styles.default;
       ctx.fillStyle = style.background;
       if (style.squareCorners) {
         ctx.fillRect(pos, style.top, itemWidth, style.height);
       } else {
-        this._drawRoundedRect(ctx, pos, style.top, itemWidth, style.height, 1 / devicePixelRatio);
+        this._drawRoundedRect(
+          ctx,
+          pos,
+          style.top,
+          itemWidth,
+          style.height,
+          1 / devicePixelRatio
+        );
       }
       if (style.borderLeft !== null) {
         ctx.fillStyle = style.borderLeft;
@@ -241,7 +277,14 @@ class IntervalMarkerOverview extends PureComponent {
         if (style.squareCorners) {
           ctx.fillRect(pos, style.top, itemWidth, style.height);
         } else {
-          this._drawRoundedRect(ctx, pos, style.top, itemWidth, style.height, 1 / devicePixelRatio);
+          this._drawRoundedRect(
+            ctx,
+            pos,
+            style.top,
+            itemWidth,
+            style.height,
+            1 / devicePixelRatio
+          );
         }
       }
     });
@@ -261,7 +304,6 @@ class IntervalMarkerOverview extends PureComponent {
     }
     return 'NONE';
   }
-
 }
 
 export default withSize(IntervalMarkerOverview);

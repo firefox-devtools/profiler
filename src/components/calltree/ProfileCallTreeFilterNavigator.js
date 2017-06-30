@@ -10,17 +10,21 @@ import FilterNavigatorBar from './FilterNavigatorBar';
 
 import './ProfileCallTreeFilterNavigator.css';
 
-export default connect(state => {
-  const items = selectedThreadSelectors.getCallTreeFilterLabels(state);
-  return {
-    className: 'profileCallTreeFilterNavigator',
-    items,
-    selectedItem: items.length - 1,
-    threadIndex: getSelectedThreadIndex(state),
-  };
-}, actions, (stateProps, dispatchProps) => ({
-  className: stateProps.className,
-  items: stateProps.items,
-  selectedItem: stateProps.selectedItem,
-  onPop: i => dispatchProps.popCallTreeFilters(stateProps.threadIndex, i),
-}))(FilterNavigatorBar);
+export default connect(
+  state => {
+    const items = selectedThreadSelectors.getCallTreeFilterLabels(state);
+    return {
+      className: 'profileCallTreeFilterNavigator',
+      items,
+      selectedItem: items.length - 1,
+      threadIndex: getSelectedThreadIndex(state),
+    };
+  },
+  actions,
+  (stateProps, dispatchProps) => ({
+    className: stateProps.className,
+    items: stateProps.items,
+    selectedItem: stateProps.selectedItem,
+    onPop: i => dispatchProps.popCallTreeFilters(stateProps.threadIndex, i),
+  })
+)(FilterNavigatorBar);

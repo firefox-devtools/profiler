@@ -16,7 +16,7 @@ type Props = {|
   tagName: string,
   className: string,
   order: number[],
-  onChangeOrder: number[] => {},
+  onChangeOrder: (number[]) => {},
   children?: React$Element<*>,
 |};
 
@@ -27,10 +27,9 @@ type XY = {|
   rightbottom: 'right' | 'bottom',
 |};
 
-type EventWithPageProperties = {pageX: number, pageY: number};
+type EventWithPageProperties = { pageX: number, pageY: number };
 
 class Reorderable extends PureComponent {
-
   props: Props;
 
   state: {|
@@ -98,7 +97,10 @@ class Reorderable extends PureComponent {
       return;
     }
 
-    while ((element instanceof HTMLElement) && element.parentNode !== this._container) {
+    while (
+      element instanceof HTMLElement &&
+      element.parentNode !== this._container
+    ) {
       element = element.parentNode;
     }
 
@@ -128,7 +130,8 @@ class Reorderable extends PureComponent {
     const elementRect: DOMRectLiteral = getMarginRect(element);
     const containerRect: DOMRectLiteral = getContentRect(container);
     const spaceBefore = elementRect[xy.lefttop] - containerRect[xy.lefttop];
-    const spaceAfter = containerRect[xy.rightbottom] - elementRect[xy.rightbottom];
+    const spaceAfter =
+      containerRect[xy.rightbottom] - elementRect[xy.rightbottom];
 
     const children = Array.from(container.children);
     if (children.length < 2) {
@@ -144,8 +147,9 @@ class Reorderable extends PureComponent {
         return 0;
       }
       const childRect: DOMRectLiteral = getMarginRect(child);
-      return isBefore ? childRect[xy.lefttop] - elementRect[xy.lefttop]
-                      : childRect[xy.rightbottom] - elementRect[xy.rightbottom];
+      return isBefore
+        ? childRect[xy.lefttop] - elementRect[xy.lefttop]
+        : childRect[xy.rightbottom] - elementRect[xy.rightbottom];
     });
 
     if (elementIndex === -1) {
@@ -161,21 +165,27 @@ class Reorderable extends PureComponent {
     });
     midPoints.pop();
 
-    const nextEdgeAfterElement = (elementIndex === children.length - 1)
-      ? containerRect[xy.rightbottom]
-      : (getMarginRect(children[elementIndex + 1]): DOMRectLiteral)[xy.lefttop];
+    const nextEdgeAfterElement =
+      elementIndex === children.length - 1
+        ? containerRect[xy.rightbottom]
+        : (getMarginRect(children[elementIndex + 1]): DOMRectLiteral)[
+            xy.lefttop
+          ];
 
-    const nextEdgeBeforeElement = (elementIndex === 0)
-      ? containerRect[xy.lefttop]
-      : (getMarginRect(children[elementIndex - 1]): DOMRectLiteral)[xy.rightbottom];
+    const nextEdgeBeforeElement =
+      elementIndex === 0
+        ? containerRect[xy.lefttop]
+        : (getMarginRect(children[elementIndex - 1]): DOMRectLiteral)[
+            xy.rightbottom
+          ];
 
     this.setState({
       phase: 'MANIPULATING',
       manipulatingIndex: elementIndex,
       manipulationDelta: 0,
       destinationIndex: elementIndex,
-      adjustPrecedingBy: (nextEdgeAfterElement - elementRect[xy.lefttop]),
-      adjustSucceedingBy: (nextEdgeBeforeElement - elementRect[xy.rightbottom]),
+      adjustPrecedingBy: nextEdgeAfterElement - elementRect[xy.lefttop],
+      adjustSucceedingBy: nextEdgeBeforeElement - elementRect[xy.rightbottom],
     });
 
     const mouseMoveListener = (event: EventWithPageProperties) => {
@@ -203,7 +213,11 @@ class Reorderable extends PureComponent {
           phase: 'RESTING',
         });
         if (elementIndex !== destinationIndex) {
-          const newOrder = arrayMove(this.props.order, elementIndex, destinationIndex);
+          const newOrder = arrayMove(
+            this.props.order,
+            elementIndex,
+            destinationIndex
+          );
           this.props.onChangeOrder(newOrder);
         }
       }, 200);
@@ -214,52 +228,70 @@ class Reorderable extends PureComponent {
 
   render() {
     const { className, order } = this.props;
-    const children: React$Element<*>[] = React.Children.toArray(this.props.children);
+    const children: React$Element<*>[] = React.Children.toArray(
+      this.props.children
+    );
     const orderedChildren = order.map(childIndex => children[childIndex]);
     const TagName = this.props.tagName;
     const xy = this._getXY();
 
     if (this.state.phase === 'RESTING') {
       return (
-        <TagName className={className} onMouseDown={this._onMouseDown} ref={this._setContainerRef}>
-          { orderedChildren }
+        <TagName
+          className={className}
+          onMouseDown={this._onMouseDown}
+          ref={this._setContainerRef}
+        >
+          {orderedChildren}
         </TagName>
       );
     }
 
-    const { phase, manipulatingIndex, destinationIndex, adjustPrecedingBy, adjustSucceedingBy } = this.state;
-    const adjustedClassName = (phase === 'MANIPULATING') ? className + ' beingReordered' : className;
+    const {
+      phase,
+      manipulatingIndex,
+      destinationIndex,
+      adjustPrecedingBy,
+      adjustSucceedingBy,
+    } = this.state;
+    const adjustedClassName =
+      phase === 'MANIPULATING' ? className + ' beingReordered' : className;
     return (
       <TagName className={adjustedClassName} ref={this._setContainerRef}>
-        {
-          orderedChildren.map((child, childIndex) => {
-            const style = {
-              transition: '200ms ease-in-out transform',
-              willChange: 'transform',
-              position: 'relative',
-              zIndex: '1',
-              transform: '',
-            };
-            if (childIndex === manipulatingIndex) {
-              style.zIndex = '2';
-              if (phase === 'MANIPULATING') {
-                delete style.transition;
-                style.transform = `${xy.translateXY}(${this.state.manipulationDelta}px)`;
-              } else {
-                style.transform = `${xy.translateXY}(${this.state.finalOffset}px)`;
-              }
-            } else if (childIndex < manipulatingIndex && childIndex >= destinationIndex) {
-              style.transform = `${xy.translateXY}(${adjustPrecedingBy}px)`;
-            } else if (childIndex > manipulatingIndex && childIndex <= destinationIndex) {
-              style.transform = `${xy.translateXY}(${adjustSucceedingBy}px)`;
+        {orderedChildren.map((child, childIndex) => {
+          const style = {
+            transition: '200ms ease-in-out transform',
+            willChange: 'transform',
+            position: 'relative',
+            zIndex: '1',
+            transform: '',
+          };
+          if (childIndex === manipulatingIndex) {
+            style.zIndex = '2';
+            if (phase === 'MANIPULATING') {
+              delete style.transition;
+              style.transform = `${xy.translateXY}(${this.state
+                .manipulationDelta}px)`;
+            } else {
+              style.transform = `${xy.translateXY}(${this.state
+                .finalOffset}px)`;
             }
-            return React.cloneElement(child, { style });
-          })
-        }
+          } else if (
+            childIndex < manipulatingIndex &&
+            childIndex >= destinationIndex
+          ) {
+            style.transform = `${xy.translateXY}(${adjustPrecedingBy}px)`;
+          } else if (
+            childIndex > manipulatingIndex &&
+            childIndex <= destinationIndex
+          ) {
+            style.transform = `${xy.translateXY}(${adjustSucceedingBy}px)`;
+          }
+          return React.cloneElement(child, { style });
+        })}
       </TagName>
     );
   }
-
 }
 
 export default Reorderable;

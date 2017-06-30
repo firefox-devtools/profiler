@@ -4,26 +4,26 @@
 // @flow
 
 export interface DOMRectInterface {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  left: number,
+  top: number,
+  right: number,
+  bottom: number,
 }
 
 export type DOMRectLiteral = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
-}
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  left: number,
+  top: number,
+  right: number,
+  bottom: number,
+};
 
 class DOMRectPolyfill implements DOMRectInterface {
   x: number;
@@ -34,12 +34,7 @@ class DOMRectPolyfill implements DOMRectInterface {
   top: number;
   right: number;
   bottom: number;
-  constructor(
-    x: number = 0,
-    y: number = 0,
-    w: number = 0,
-    h: number = 0
-  ) {
+  constructor(x: number = 0, y: number = 0, w: number = 0, h: number = 0) {
     this.x = x;
     this.y = y;
     this.width = w;
@@ -51,4 +46,4 @@ class DOMRectPolyfill implements DOMRectInterface {
   }
 }
 
-export default window.DOMRect ? window.DOMRect : DOMRectPolyfill;
+export default (window.DOMRect ? window.DOMRect : DOMRectPolyfill);
