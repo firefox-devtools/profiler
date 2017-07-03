@@ -546,7 +546,12 @@ body {
 }
 
 .selectionScrubberRange {
+  background-color: white;
+  border: 1px solid;
+  border-radius: 3px;
+  font-size: 1.2em;
   opacity: 0.5;
+  padding: 0.2em 1em;
 }
 
 .selectionScrubberRange.hidden {
