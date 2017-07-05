@@ -4,15 +4,21 @@ This section is a work-in-progress. Markers are events that happen within the br
 
 ## Implementing new markers
 
-Markers are implemented in [ProfilerMarkers.cpp] and [ProfilerMarkers.h]. There are C++ macros for adding instrumentation in different parts of the codebase. These are defined in [GeckoProfiler.h] and are [`PROFILER_MARKER`][PROFILER_MARKER] and [`PROFILER_MARKER_PAYLOAD`][PROFILER_MARKER_PAYLOAD]. Markers without a payload only have a single start time. Markers with a payload can have a start and end time, as well as additional information. The payloads are defined in [ProfilerMarkers.h] and [ProfilerMarkers.cpp].
+Markers are implemented in [ProfilerMarker.h], [ProfilerMarkerPayload.h] and
+[ProfilerMarkerPayload.cpp].
+Markers are added to a profile with the [profiler_add_marker] function.
+It is declared in [GeckoProfiler.h].
+Markers without a payload only have a single start time.
+Markers with a payload can have a start and end time, as well as additional
+information.
+The payloads are defined in [ProfilerMarkerPayload.h] and
+[ProfilerMarkerPayload.cpp].
 
-[ProfilerMarkers.cpp]: http://searchfox.org/mozilla-central/source/tools/profiler/core/ProfilerMarkers.cpp
-[ProfilerMarkers.h]: http://searchfox.org/mozilla-central/source/tools/profiler/public/ProfilerMarkers.h
+[ProfilerMarker.h]: http://searchfox.org/mozilla-central/source/tools/profiler/core/ProfilerMarker.h
+[ProfilerMarkerPayload.h]: http://searchfox.org/mozilla-central/source/tools/profiler/public/ProfilerMarkerPayload.h
+[ProfilerMarkerPayload.cpp]: http://searchfox.org/mozilla-central/source/tools/profiler/core/ProfilerMarkerPayload.cpp
 [GeckoProfiler.h]: http://searchfox.org/mozilla-central/source/tools/profiler/public/GeckoProfiler.h
-[PROFILER_MARKER]: http://searchfox.org/mozilla-central/search?q=PROFILER_MARKER&case=false&regexp=false&path=
-[PROFILER_MARKER_PAYLOAD]: http://searchfox.org/mozilla-central/search?q=PROFILER_MARKER_PAYLOAD&case=false&regexp=false&path=
-[ProfilerMarkers.h]: http://searchfox.org/mozilla-central/source/tools/profiler/public/ProfilerMarkers.h
-[ProfilerMarkers.cpp]: http://searchfox.org/mozilla-central/source/tools/profiler/core/ProfilerMarkers.cpp
+[profiler_add_marker]: http://searchfox.org/mozilla-central/rev/5e1e8d2f244bd8c210a578ff1f65c3b720efe34e/tools/profiler/public/GeckoProfiler.h#368-378
 
 ## Marker view in perf.html
 
