@@ -129,6 +129,7 @@ function computeMarkerLabel(data: MarkerPayload): string {
     switch (data.type) {
       case 'UserTiming':
         return (data: UserTimingMarkerPayload).name;
+      default:
     }
   }
 

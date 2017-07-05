@@ -91,6 +91,7 @@ export function urlFromState(urlState: URLState) {
         ? null
         : undefined;
       break;
+    default:
   }
   const qString = queryString.stringify(query);
   return pathname + (qString ? '?' + qString : '');
@@ -106,9 +107,9 @@ function toDataSourceEnum(str: string): DataSource {
     case 'public':
     case 'from-url':
       return str;
+    default:
+      throw new Error(`Unexpected data source ${str}`);
   }
-
-  throw new Error('unexpected data source');
 }
 
 /**
