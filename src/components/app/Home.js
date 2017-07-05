@@ -251,7 +251,7 @@ class Home extends PureComponent {
             <InstallButton name="Gecko Profiler" xpiURL={LEGACY_ADDON_URL}>
               Gecko Profiler Add-on
             </InstallButton>. Then use the button added to the browser, or use
-            the following shortcuts to record a profile. The button's icon is
+            the following shortcuts to record a profile. The button’s icon is
             blue when a profile is recording. Hit <kbd>Capture Profile</kbd> to
             load the data into perf.html.
           </p>
