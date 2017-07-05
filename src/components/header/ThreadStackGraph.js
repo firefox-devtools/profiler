@@ -1,20 +1,43 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
 
 import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import { timeCode } from '../../utils/time-code';
-import { getSampleFuncStacks } from '../../profile-logic/profile-data';
+
+import type {
+  Thread,
+  IndexIntoStackTable,
+  IndexIntoMarkersTable,
+} from '../../types/profile';
+import type { Milliseconds } from '../../types/units';
+
+type Props = {
+  thread: Thread,
+  interval: Milliseconds,
+  rangeStart: Milliseconds,
+  rangeEnd: Milliseconds,
+  selectedStack: IndexIntoStackTable | null,
+  className: string,
+  onClick: (Milliseconds | void) => void,
+  onMarkerSelect: IndexIntoMarkersTable => void,
+};
 
 class ThreadStackGraph extends PureComponent {
-  constructor(props) {
+  _resizeListener: () => void;
+  _requestedAnimationFrame: boolean;
+  _canvas: HTMLCanvasElement | null;
+  props: Props;
+
+  constructor(props: Props) {
     super(props);
     this._resizeListener = () => this.forceUpdate();
     this._requestedAnimationFrame = false;
-    this._onMouseUp = this._onMouseUp.bind(this);
-    this._onMarkerSelected = this._onMarkerSelected.bind(this);
     this._canvas = null;
+    (this: any)._onMouseUp = this._onMouseUp.bind(this);
+    (this: any)._onMarkerSelected = this._onMarkerSelected.bind(this);
   }
 
   _scheduleDraw() {
@@ -22,9 +45,10 @@ class ThreadStackGraph extends PureComponent {
       this._requestedAnimationFrame = true;
       window.requestAnimationFrame(() => {
         this._requestedAnimationFrame = false;
-        if (this._canvas) {
+        const canvas = this._canvas;
+        if (canvas) {
           timeCode('ThreadStackGraph render', () => {
-            this.drawCanvas(this._canvas);
+            this.drawCanvas(canvas);
           });
         }
       });
@@ -32,70 +56,78 @@ class ThreadStackGraph extends PureComponent {
   }
 
   componentDidMount() {
-    const win = this._canvas.ownerDocument.defaultView;
-    win.addEventListener('resize', this._resizeListener);
+    window.addEventListener('resize', this._resizeListener);
     this.forceUpdate(); // for initial size
   }
 
   componentWillUnmount() {
-    const win = this._canvas.ownerDocument.defaultView;
-    win.removeEventListener('resize', this._resizeListener);
+    window.removeEventListener('resize', this._resizeListener);
   }
 
-  drawCanvas(c) {
+  drawCanvas(canvas: HTMLCanvasElement) {
     const {
       thread,
       interval,
       rangeStart,
       rangeEnd,
-      funcStackInfo,
-      selectedFuncStack,
+      selectedStack,
     } = this.props;
 
-    const devicePixelRatio = c.ownerDocument
-      ? c.ownerDocument.defaultView.devicePixelRatio
-      : 1;
-    const r = c.getBoundingClientRect();
-    c.width = Math.round(r.width * devicePixelRatio);
-    c.height = Math.round(r.height * devicePixelRatio);
-    const ctx = c.getContext('2d');
+    const devicePixelRatio = window.devicePixelRatio;
+    const r = canvas.getBoundingClientRect();
+    canvas.width = Math.round(r.width * devicePixelRatio);
+    canvas.height = Math.round(r.height * devicePixelRatio);
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error(
+        'Could not get a 2d context for the ThreadStackGraph canvas'
+      );
+    }
     let maxDepth = 0;
-    const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
-    const sampleFuncStacks = getSampleFuncStacks(
-      thread.samples,
-      stackIndexToFuncStackIndex
-    );
-    for (let i = 0; i < funcStackTable.depth.length; i++) {
-      if (funcStackTable.depth[i] > maxDepth) {
-        maxDepth = funcStackTable.depth[i];
+    const { samples, stackTable } = thread;
+    const sampleStacks = samples.stack;
+    for (let i = 0; i < stackTable.length; i++) {
+      if (stackTable.depth[i] > maxDepth) {
+        maxDepth = stackTable.depth[i];
       }
     }
     const range = [rangeStart, rangeEnd];
     const rangeLength = range[1] - range[0];
-    const xPixelsPerMs = c.width / rangeLength;
-    const yPixelsPerDepth = c.height / maxDepth;
+    const xPixelsPerMs = canvas.width / rangeLength;
+    const yPixelsPerDepth = canvas.height / maxDepth;
     const trueIntervalPixelWidth = interval * xPixelsPerMs;
     const multiplier = trueIntervalPixelWidth < 2.0 ? 1.2 : 1.0;
     const drawnIntervalWidth = Math.max(
       0.8,
       trueIntervalPixelWidth * multiplier
     );
-    let selectedFuncStackDepth = 0;
-    if (selectedFuncStack !== -1 && selectedFuncStack !== null) {
-      selectedFuncStackDepth = funcStackTable.depth[selectedFuncStack];
+    let selectedStackDepth = 0;
+    if (selectedStack !== null) {
+      selectedStackDepth = stackTable.depth[selectedStack];
     }
-    function hasSelectedFuncStackPrefix(funcStackPrefix) {
-      let funcStack = funcStackPrefix;
+
+    function hasSelectedStackPrefix(stackPrefix) {
+      let stackIndex = stackPrefix;
+      if (stackIndex === null) {
+        return false;
+      }
+      // Find the stackIndex at the selectedStackDepth by starting at the leaf stack and
+      // walking toward the root.
       for (
-        let depth = funcStackTable.depth[funcStack];
-        depth > selectedFuncStackDepth;
+        let depth = stackTable.depth[stackIndex];
+        depth > selectedStackDepth;
         depth--
       ) {
-        funcStack = funcStackTable.prefix[funcStack];
+        if (stackIndex === null) {
+          return false;
+        }
+        stackIndex = stackTable.prefix[stackIndex];
       }
-      return funcStack === selectedFuncStack;
+      // Is the stack at the selectedStackDepth the selectedStack?
+      return stackIndex === selectedStack;
     }
-    for (let i = 0; i < sampleFuncStacks.length; i++) {
+
+    for (let i = 0; i < sampleStacks.length; i++) {
       const sampleTime = thread.samples.time[i];
       if (
         sampleTime + drawnIntervalWidth / xPixelsPerMs < range[0] ||
@@ -103,10 +135,14 @@ class ThreadStackGraph extends PureComponent {
       ) {
         continue;
       }
-      const funcStack = sampleFuncStacks[i];
-      const isHighlighted = hasSelectedFuncStackPrefix(funcStack);
-      const sampleHeight = funcStackTable.depth[funcStack] * yPixelsPerDepth;
-      const startY = c.height - sampleHeight;
+      const stackIndex = sampleStacks[i];
+      if (stackIndex === null) {
+        continue;
+      }
+      const isHighlighted = hasSelectedStackPrefix(stackIndex);
+
+      const sampleHeight = stackTable.depth[stackIndex] * yPixelsPerDepth;
+      const startY = canvas.height - sampleHeight;
       // const responsiveness = thread.samples.responsiveness[i];
       // const jankSeverity = Math.min(1, responsiveness / 100);
       ctx.fillStyle = isHighlighted ? '#38445f' : '#7990c8';
@@ -119,22 +155,21 @@ class ThreadStackGraph extends PureComponent {
     }
   }
 
-  _onMouseUp(e) {
-    if (this.props.onClick) {
+  _onMouseUp(e: SyntheticMouseEvent) {
+    const canvas = this._canvas;
+    const onClick = this.props.onClick;
+    if (onClick && canvas) {
       const { rangeStart, rangeEnd } = this.props;
-      const r = this._canvas.getBoundingClientRect();
+      const r = canvas.getBoundingClientRect();
 
       const x = e.pageX - r.left;
       const time = rangeStart + x / r.width * (rangeEnd - rangeStart);
-      this.props.onClick(time);
+      onClick(time);
     }
   }
 
-  _onMarkerSelected(markerIndex) {
-    if (this.props.onMarkerSelect) {
-      this.props.onMarkerSelect(markerIndex);
-    }
-    this.props.onClick();
+  _onMarkerSelected(markerIndex: IndexIntoMarkersTable) {
+    this.props.onMarkerSelect(markerIndex);
   }
 
   render() {
@@ -146,7 +181,7 @@ class ThreadStackGraph extends PureComponent {
             `${this.props.className}Canvas`,
             'threadStackGraphCanvas'
           )}
-          ref={ref => (this._canvas = ref)}
+          ref={(ref: HTMLCanvasElement) => (this._canvas = ref)}
           onMouseUp={this._onMouseUp}
         />
       </div>
@@ -161,14 +196,10 @@ ThreadStackGraph.propTypes = {
   interval: PropTypes.number.isRequired,
   rangeStart: PropTypes.number.isRequired,
   rangeEnd: PropTypes.number.isRequired,
-  funcStackInfo: PropTypes.shape({
-    funcStackTable: PropTypes.object.isRequired,
-    stackIndexToFuncStackIndex: PropTypes.any.isRequired,
-  }).isRequired,
-  selectedFuncStack: PropTypes.number,
+  selectedStack: PropTypes.number,
   className: PropTypes.string,
-  onClick: PropTypes.func,
-  onMarkerSelect: PropTypes.func,
+  onClick: PropTypes.func.isRequired,
+  onMarkerSelect: PropTypes.func.isRequired,
 };
 
 export default ThreadStackGraph;

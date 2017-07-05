@@ -8,6 +8,7 @@ import { render } from 'react-dom';
 import Root from './components/app/Root';
 import createStore from './create-store';
 import '../res/style.css';
+import debug from './debug';
 
 if (process.env.NODE_ENV === 'production') {
   const runtime = require('offline-plugin/runtime');
@@ -27,3 +28,4 @@ const store = createStore();
 render(<Root store={store} />, document.getElementById('root'));
 
 window.Perf = Perf;
+window.debug = debug;

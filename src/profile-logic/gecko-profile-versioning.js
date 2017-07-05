@@ -13,7 +13,7 @@
 
 import { UniqueStringArray } from '../utils/unique-string-array';
 
-export const CURRENT_VERSION = 7; // The current version of the 'raw profile' format.
+export const CURRENT_GECKO_VERSION = 7; // The current version of the 'gecko profile' format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -26,22 +26,22 @@ const UNANNOTATED_VERSION = 0;
  */
 export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
   const profileVersion = profile.meta.version || UNANNOTATED_VERSION;
-  if (profileVersion === CURRENT_VERSION) {
+  if (profileVersion === CURRENT_GECKO_VERSION) {
     return;
   }
 
-  if (profileVersion > CURRENT_VERSION) {
+  if (profileVersion > CURRENT_GECKO_VERSION) {
     throw new Error(
       `Unable to parse a Gecko profile of version ${profileVersion} - are you running an outdated version of perf.html? ` +
-        `The most recent version understood by this version of perf.html is version ${CURRENT_VERSION}.\n` +
+        `The most recent version understood by this version of perf.html is version ${CURRENT_GECKO_VERSION}.\n` +
         'You can try refreshing this page in case perf.html has updated in the meantime.'
     );
   }
 
-  // Convert to CURRENT_VERSION, one step at a time.
+  // Convert to CURRENT_GECKO_VERSION, one step at a time.
   for (
     let destVersion = profileVersion + 1;
-    destVersion <= CURRENT_VERSION;
+    destVersion <= CURRENT_GECKO_VERSION;
     destVersion++
   ) {
     if (destVersion in _upgraders) {
@@ -49,7 +49,7 @@ export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
     }
   }
 
-  profile.meta.version = CURRENT_VERSION;
+  profile.meta.version = CURRENT_GECKO_VERSION;
 }
 
 function _archFromAbi(abi) {
@@ -210,3 +210,11 @@ const _upgraders = {
   },
 };
 /* eslint-enable no-useless-computed-key */
+
+// Assert that there are the correct number of upgraders.
+if (Object.keys(_upgraders).length !== CURRENT_GECKO_VERSION) {
+  throw new Error(
+    'There is a mismatch in the number of Gecko profiler upgraders and the current ' +
+      'Gecko profile version.'
+  );
+}

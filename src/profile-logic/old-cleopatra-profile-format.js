@@ -5,7 +5,7 @@
 // @flow
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes } from './profile-data';
-import { CURRENT_VERSION } from './gecko-profile-versioning.js';
+import { CURRENT_GECKO_VERSION } from './gecko-profile-versioning.js';
 import { getEmptyTaskTracerData } from './task-tracer';
 
 /**
@@ -360,7 +360,7 @@ export function convertOldCleopatraProfile(
   );
 
   return {
-    meta: Object.assign({}, meta, { version: CURRENT_VERSION }),
+    meta: Object.assign({}, meta, { version: CURRENT_GECKO_VERSION }),
     threads: threads.map(t =>
       _convertThread(t, meta.interval, symbolicationTable)
     ),

@@ -17,7 +17,7 @@ import { resourceTypes } from './profile-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 6; // The current version of the 'preprocessed profile' format.
+export const CURRENT_PROCESSED_VERSION = 7; // The current version of the 'processed profile' format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -47,22 +47,22 @@ export function isProcessedProfile(profile: Object): boolean {
 export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
   const profileVersion =
     profile.meta.preprocessedProfileVersion || UNANNOTATED_VERSION;
-  if (profileVersion === CURRENT_VERSION) {
+  if (profileVersion === CURRENT_PROCESSED_VERSION) {
     return;
   }
 
-  if (profileVersion > CURRENT_VERSION) {
+  if (profileVersion > CURRENT_PROCESSED_VERSION) {
     throw new Error(
       `Unable to parse a processed profile of version ${profileVersion} - are you running an outdated version of perf.html? ` +
-        `The most recent version understood by this version of perf.html is version ${CURRENT_VERSION}.\n` +
+        `The most recent version understood by this version of perf.html is version ${CURRENT_PROCESSED_VERSION}.\n` +
         'You can try refreshing this page in case perf.html has updated in the meantime.'
     );
   }
 
-  // Convert to CURRENT_VERSION, one step at a time.
+  // Convert to CURRENT_PROCESSED_VERSION, one step at a time.
   for (
     let destVersion = profileVersion + 1;
-    destVersion <= CURRENT_VERSION;
+    destVersion <= CURRENT_PROCESSED_VERSION;
     destVersion++
   ) {
     if (destVersion in _upgraders) {
@@ -70,7 +70,7 @@ export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
     }
   }
 
-  profile.meta.preprocessedProfileVersion = CURRENT_VERSION;
+  profile.meta.preprocessedProfileVersion = CURRENT_PROCESSED_VERSION;
 }
 
 function _archFromAbi(abi) {
@@ -299,5 +299,29 @@ const _upgraders = {
       thread.markers.data = newDataArray;
     }
   },
+  [7]: profile => {
+    // A depth property was added to the stackTable in the process of removing
+    // funcStackInfo.
+    for (const thread of profile.threads) {
+      const { stackTable } = thread;
+      stackTable.depth = stackTable.prefix.map(prefix => {
+        let depth = 0;
+        let nextPrefix = prefix;
+        while (nextPrefix !== null) {
+          depth++;
+          nextPrefix = stackTable.prefix[nextPrefix];
+        }
+        return depth;
+      });
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */
+
+// Assert that there are the correct number of upgraders.
+if (Object.keys(_upgraders).length !== CURRENT_PROCESSED_VERSION) {
+  throw new Error(
+    'There is a mismatch in the number of processed profile upgraders and the current ' +
+      'processed profile version.'
+  );
+}

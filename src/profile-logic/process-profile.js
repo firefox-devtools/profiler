@@ -9,7 +9,7 @@ import { resourceTypes } from './profile-data';
 import { provideHostSide } from '../utils/promise-worker';
 import immutableUpdate from '../utils/immutable-update';
 import {
-  CURRENT_VERSION,
+  CURRENT_PROCESSED_VERSION,
   upgradeProcessedProfileToCurrentVersion,
   isProcessedProfile,
 } from './processed-profile-versioning';
@@ -307,6 +307,15 @@ function _processStackTable(geckoStackTable: GeckoStackStruct): StackTable {
     frame: geckoStackTable.frame,
     prefix: geckoStackTable.prefix,
     length: geckoStackTable.length,
+    depth: geckoStackTable.prefix.map(prefix => {
+      let depth = 0;
+      let nextPrefix = prefix;
+      while (nextPrefix !== null) {
+        depth++;
+        nextPrefix = geckoStackTable.prefix[nextPrefix];
+      }
+      return depth;
+    }),
   };
 }
 
@@ -628,7 +637,7 @@ export function processProfile(geckoProfile: GeckoProfile): Profile {
 
   const result = {
     meta: Object.assign({}, geckoProfile.meta, {
-      preprocessedProfileVersion: CURRENT_VERSION,
+      preprocessedProfileVersion: CURRENT_PROCESSED_VERSION,
     }),
     threads,
     tasktracer,

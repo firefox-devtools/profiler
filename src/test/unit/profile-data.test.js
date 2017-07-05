@@ -9,34 +9,17 @@ import {
   applyFunctionMerging,
   setFuncNames,
 } from '../../profile-logic/symbolication';
-import {
-  processProfile,
-  unserializeProfileOfArbitraryFormat,
-  serializeProfile,
-} from '../../profile-logic/process-profile';
+import { processProfile } from '../../profile-logic/process-profile';
 import {
   resourceTypes,
-  getFuncStackInfo,
-  getTracingMarkers,
   filterThreadByImplementation,
+  mergeStacksThatShareFunctions,
 } from '../../profile-logic/profile-data';
 import exampleProfile from '.././fixtures/profiles/example-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { sortDataTable } from '../../utils/data-table-utils';
-import {
-  isOldCleopatraFormat,
-  convertOldCleopatraProfile,
-} from '../../profile-logic/old-cleopatra-profile-format';
-import {
-  isProcessedProfile,
-  upgradeProcessedProfileToCurrentVersion,
-} from '../../profile-logic/processed-profile-versioning';
-import {
-  upgradeGeckoProfileToCurrentVersion,
-  CURRENT_VERSION,
-} from '../../profile-logic/gecko-profile-versioning';
 import {
   getCategoryByImplementation,
   implementationCategoryMap,
@@ -240,71 +223,6 @@ describe('process-profile', function() {
   });
 });
 
-describe('profile-data', function() {
-  describe('createFuncStackTableAndFixupSamples', function() {
-    const profile = processProfile(exampleProfile);
-    const thread = profile.threads[0];
-    const { funcStackTable } = getFuncStackInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
-      thread.samples
-    );
-    it('should create one funcStack per stack', function() {
-      expect(thread.stackTable.length).toEqual(5);
-      expect(funcStackTable.length).toEqual(5);
-      expect('prefix' in funcStackTable).toBeTruthy();
-      expect('func' in funcStackTable).toBeTruthy();
-      expect(funcStackTable.func[0]).toEqual(0);
-      expect(funcStackTable.func[1]).toEqual(1);
-      expect(funcStackTable.func[2]).toEqual(2);
-      expect(funcStackTable.func[3]).toEqual(3);
-    });
-  });
-  describe('getTracingMarkers', function() {
-    const profile = processProfile(exampleProfile);
-    const thread = profile.threads[0];
-    const tracingMarkers = getTracingMarkers(thread);
-    it('should fold the two reflow markers into one tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(5);
-      expect(tracingMarkers[0].start).toEqual(2);
-      expect(tracingMarkers[0].name).toEqual('Reflow');
-      expect(tracingMarkers[0].dur).toEqual(6);
-      expect(tracingMarkers[0].title).toBeNull();
-    });
-    it('should fold the two Rasterize markers into one tracing marker, after the reflow tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(5);
-      expect(tracingMarkers[1].start).toEqual(4);
-      expect(tracingMarkers[1].name).toEqual('Rasterize');
-      expect(tracingMarkers[1].dur).toEqual(1);
-      expect(tracingMarkers[1].title).toBeNull();
-    });
-    it('should create a tracing marker for the MinorGC startTime/endTime marker', function() {
-      expect(tracingMarkers.length).toEqual(5);
-      expect(tracingMarkers[3].start).toEqual(11);
-      expect(tracingMarkers[3].name).toEqual('MinorGC');
-      expect(tracingMarkers[3].dur).toEqual(1);
-      expect(tracingMarkers[3].title).toBeNull();
-    });
-    it('should create a tracing marker for the DOMEvent marker', function() {
-      expect(tracingMarkers[2]).toMatchObject({
-        dur: 1,
-        name: 'DOMEvent',
-        start: 9,
-        title: null,
-      });
-    });
-    it('should create a tracing marker for the marker UserTiming', function() {
-      expect(tracingMarkers[4]).toMatchObject({
-        dur: 1,
-        name: 'UserTiming',
-        start: 12,
-        title: null,
-      });
-    });
-  });
-});
-
 describe('symbolication', function() {
   describe('getContainingLibrary', function() {
     const libs = [
@@ -406,122 +324,6 @@ describe('symbolication', function() {
   // TODO: check that functions are collapsed correctly
 });
 
-describe('upgrades', function() {
-  describe('old-cleopatra-profile', function() {
-    const exampleOldCleopatraProfiles = [
-      require('../fixtures/upgrades/old-cleopatra-profile.sps.json'),
-      require('../fixtures/upgrades/ancient-cleopatra-profile.sps.json'),
-    ];
-    exampleOldCleopatraProfiles.forEach(exampleOldCleopatraProfile => {
-      it('should detect the profile as an old cleopatra profile', function() {
-        expect(isOldCleopatraFormat(exampleOldCleopatraProfile)).toBe(true);
-      });
-      it('should be able to convert the old cleopatra profile into a processed profile', function() {
-        const profile = convertOldCleopatraProfile(exampleOldCleopatraProfile);
-        expect(isProcessedProfile(profile)).toBe(true);
-        // For now, just test that upgrading doesn't throw any exceptions.
-        upgradeProcessedProfileToCurrentVersion(profile);
-        expect(profile.threads.length).toBeGreaterThanOrEqual(1);
-        expect(profile.threads[0].name).toBe('GeckoMain');
-      });
-    });
-  });
-  function compareProcessedProfiles(lhs, rhs) {
-    // Processed profiles contain a stringTable which isn't easily comparable.
-    // Instead, serialize the profiles first, so that the stringTable becomes a
-    // stringArray, and compare the serialized versions.
-    const serializedLhsAsObject = JSON.parse(serializeProfile(lhs));
-    const serializedRhsAsObject = JSON.parse(serializeProfile(rhs));
-
-    // Don't compare the version of the Gecko profile that these profiles originated from.
-    delete serializedLhsAsObject.meta.version;
-    delete serializedRhsAsObject.meta.version;
-
-    expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
-  }
-  const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-6.json')
-  );
-
-  // Uncomment this to output your next ./upgrades/processed-X.json
-  // console.log(serializeProfile(afterUpgradeReference));
-
-  it('should import an old profile and upgrade it to be the same as the reference processed profile', function() {
-    const serializedOldProcessedProfile0 = require('../fixtures/upgrades/processed-0.json');
-    const upgradedProfile0 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile0
-    );
-    compareProcessedProfiles(upgradedProfile0, afterUpgradeReference);
-
-    const serializedOldProcessedProfile1 = require('../fixtures/upgrades/processed-1.json');
-    const upgradedProfile1 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile1
-    );
-    compareProcessedProfiles(upgradedProfile1, afterUpgradeReference);
-
-    const serializedOldProcessedProfile2 = require('../fixtures/upgrades/processed-2.json');
-    const upgradedProfile2 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile2
-    );
-    compareProcessedProfiles(upgradedProfile2, afterUpgradeReference);
-
-    const serializedOldProcessedProfile3 = require('../fixtures/upgrades/processed-3.json');
-    const upgradedProfile3 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile3
-    );
-    compareProcessedProfiles(upgradedProfile3, afterUpgradeReference);
-
-    const serializedOldProcessedProfile4 = require('../fixtures/upgrades/processed-4.json');
-    const upgradedProfile4 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile4
-    );
-    compareProcessedProfiles(upgradedProfile4, afterUpgradeReference);
-
-    const serializedOldProcessedProfile5 = require('../fixtures/upgrades/processed-5.json');
-    const upgradedProfile5 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile5
-    );
-    compareProcessedProfiles(upgradedProfile5, afterUpgradeReference);
-
-    const geckoProfile3 = require('../fixtures/upgrades/gecko-3.json');
-    const upgradedGeckoProfile3 = unserializeProfileOfArbitraryFormat(
-      geckoProfile3
-    );
-    compareProcessedProfiles(upgradedGeckoProfile3, afterUpgradeReference);
-
-    // const serializedOldProcessedProfile2 = require('../fixtures/upgrades/processed-2.json');
-    // const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldProcessedProfile2);
-    // compareProcessedProfiles(upgradedProfile2, afterUpgradeReference);
-
-    // const geckoProfile4 = require('../fixtures/upgrades/gecko-4.json');
-    // const upgradedGeckoProfile4 = unserializeProfileOfArbitraryFormat(geckoProfile4);
-    // compareProcessedProfiles(upgradedGeckoProfile4, afterUpgradeReference);
-  });
-  it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function() {
-    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-7.json');
-    // Uncomment this to output your next ./upgrades/gecko-X.json
-    // upgradeGeckoProfileToCurrentVersion(afterUpgradeGeckoReference);
-    // console.log(JSON.stringify(afterUpgradeGeckoReference));
-    expect(afterUpgradeGeckoReference.meta.version).toEqual(CURRENT_VERSION);
-
-    const geckoProfile3 = require('../fixtures/upgrades/gecko-3.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile3);
-    expect(geckoProfile3).toEqual(afterUpgradeGeckoReference);
-
-    const geckoProfile4 = require('../fixtures/upgrades/gecko-4.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile4);
-    expect(geckoProfile4).toEqual(afterUpgradeGeckoReference);
-
-    const geckoProfile5 = require('../fixtures/upgrades/gecko-5.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile5);
-    expect(geckoProfile5).toEqual(afterUpgradeGeckoReference);
-
-    const geckoProfile6 = require('../fixtures/upgrades/gecko-6.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile6);
-    expect(geckoProfile5).toEqual(afterUpgradeGeckoReference);
-  });
-});
-
 describe('color-categories', function() {
   const profile = processProfile(exampleProfile);
   const [thread] = profile.threads;
@@ -545,7 +347,7 @@ describe('color-categories', function() {
 
 describe('filter-by-implementation', function() {
   const profile = processProfile(profileWithJS);
-  const thread = profile.threads[0];
+  const thread = mergeStacksThatShareFunctions(profile.threads[0]);
 
   function stackIsJS(filteredThread, stackIndex) {
     const frameIndex = filteredThread.stackTable.frame[stackIndex];
