@@ -307,6 +307,15 @@ function _processStackTable(geckoStackTable: GeckoStackStruct): StackTable {
     frame: geckoStackTable.frame,
     prefix: geckoStackTable.prefix,
     length: geckoStackTable.length,
+    depth: geckoStackTable.prefix.map(prefix => {
+      let depth = 0;
+      let nextPrefix = prefix;
+      while (nextPrefix !== null) {
+        depth++;
+        nextPrefix = geckoStackTable.prefix[nextPrefix];
+      }
+      return depth;
+    }),
   };
 }
 

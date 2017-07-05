@@ -16,8 +16,6 @@ import {
 } from '../../profile-logic/process-profile';
 import {
   resourceTypes,
-  getFuncStackInfo,
-  getTracingMarkers,
   filterThreadByImplementation,
 } from '../../profile-logic/profile-data';
 import exampleProfile from '.././fixtures/profiles/example-profile';
@@ -236,71 +234,6 @@ describe('process-profile', function() {
       const [name0, name1] = thread.resourceTable.name;
       expect(thread.stringTable.getString(name0)).toEqual('firefox');
       expect(thread.stringTable.getString(name1)).toEqual('chrome://blargh');
-    });
-  });
-});
-
-describe('profile-data', function() {
-  describe('createFuncStackTableAndFixupSamples', function() {
-    const profile = processProfile(exampleProfile);
-    const thread = profile.threads[0];
-    const { funcStackTable } = getFuncStackInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
-      thread.samples
-    );
-    it('should create one funcStack per stack', function() {
-      expect(thread.stackTable.length).toEqual(5);
-      expect(funcStackTable.length).toEqual(5);
-      expect('prefix' in funcStackTable).toBeTruthy();
-      expect('func' in funcStackTable).toBeTruthy();
-      expect(funcStackTable.func[0]).toEqual(0);
-      expect(funcStackTable.func[1]).toEqual(1);
-      expect(funcStackTable.func[2]).toEqual(2);
-      expect(funcStackTable.func[3]).toEqual(3);
-    });
-  });
-  describe('getTracingMarkers', function() {
-    const profile = processProfile(exampleProfile);
-    const thread = profile.threads[0];
-    const tracingMarkers = getTracingMarkers(thread);
-    it('should fold the two reflow markers into one tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(5);
-      expect(tracingMarkers[0].start).toEqual(2);
-      expect(tracingMarkers[0].name).toEqual('Reflow');
-      expect(tracingMarkers[0].dur).toEqual(6);
-      expect(tracingMarkers[0].title).toBeNull();
-    });
-    it('should fold the two Rasterize markers into one tracing marker, after the reflow tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(5);
-      expect(tracingMarkers[1].start).toEqual(4);
-      expect(tracingMarkers[1].name).toEqual('Rasterize');
-      expect(tracingMarkers[1].dur).toEqual(1);
-      expect(tracingMarkers[1].title).toBeNull();
-    });
-    it('should create a tracing marker for the MinorGC startTime/endTime marker', function() {
-      expect(tracingMarkers.length).toEqual(5);
-      expect(tracingMarkers[3].start).toEqual(11);
-      expect(tracingMarkers[3].name).toEqual('MinorGC');
-      expect(tracingMarkers[3].dur).toEqual(1);
-      expect(tracingMarkers[3].title).toBeNull();
-    });
-    it('should create a tracing marker for the DOMEvent marker', function() {
-      expect(tracingMarkers[2]).toMatchObject({
-        dur: 1,
-        name: 'DOMEvent',
-        start: 9,
-        title: null,
-      });
-    });
-    it('should create a tracing marker for the marker UserTiming', function() {
-      expect(tracingMarkers[4]).toMatchObject({
-        dur: 1,
-        name: 'UserTiming',
-        start: 12,
-        title: null,
-      });
     });
   });
 });

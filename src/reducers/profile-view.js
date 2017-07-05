@@ -428,8 +428,12 @@ export const selectorsForThread = (
       getCallTreeFilters,
       CallTreeFilters.getCallTreeFilterLabels
     );
-    const getRangeFilteredThread = createSelector(
+    const _getDeDuplicatedFunctionFramesThread = createSelector(
       getThread,
+      ProfileData.deDuplicateFunctionFrames
+    );
+    const getRangeFilteredThread = createSelector(
+      _getDeDuplicatedFunctionFramesThread,
       getDisplayRange,
       (thread, range): Thread => {
         const { start, end } = range;

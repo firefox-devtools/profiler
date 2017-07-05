@@ -20,6 +20,10 @@ export type categoryBitMask = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
 
+// Annotate the Index types for humans
+// type Original<T> = T;
+// type Transformed<T> = T;
+
 /**
  * The stack table is the minimal representation of a call stack. Each stack entry
  * consists of the frame at the top of the stack, and the prefix for the stack that
@@ -29,6 +33,13 @@ export type StackTable = {
   frame: IndexIntoFrameTable[],
   prefix: Array<IndexIntoStackTable | null>,
   length: number,
+  depth: number[],
+  // TransformedIndex => OriginalIndex | OriginalIndex[]
+  transformedToOriginalStack?: Array<
+    IndexIntoStackTable | IndexIntoStackTable[]
+  >,
+  // OriginalIndex => TransformedIndex
+  originalToTransformedStack?: Array<IndexIntoStackTable>,
 };
 
 /**
@@ -77,13 +88,19 @@ export type MarkersTable = {
  * time. The relationship between frames is defined by the StackTable.
  */
 export type FrameTable = {
-  address: IndexIntoStringTable[],
+  address: (MemoryOffset | -1)[],
   category: (categoryBitMask | null)[],
   func: IndexIntoFuncTable[],
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
   optimizations: ({} | null)[],
   length: number,
+  // TransformedIndex => OriginalIndex | OriginalIndex[]
+  transformedToOriginalFrame?: Array<
+    IndexIntoFrameTable | IndexIntoFrameTable[]
+  >,
+  // OriginalIndex => TransformedIndex
+  originalToTransformedFrame?: Array<IndexIntoFrameTable>,
 };
 
 /**
