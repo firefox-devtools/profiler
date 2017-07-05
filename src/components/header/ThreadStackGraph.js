@@ -14,6 +14,7 @@ class ThreadStackGraph extends PureComponent {
     this._requestedAnimationFrame = false;
     this._onMouseUp = this._onMouseUp.bind(this);
     this._onMarkerSelected = this._onMarkerSelected.bind(this);
+    this._canvas = null;
   }
 
   _scheduleDraw() {
@@ -21,9 +22,9 @@ class ThreadStackGraph extends PureComponent {
       this._requestedAnimationFrame = true;
       window.requestAnimationFrame(() => {
         this._requestedAnimationFrame = false;
-        if (this.refs.canvas) {
+        if (this._canvas) {
           timeCode('ThreadStackGraph render', () => {
-            this.drawCanvas(this.refs.canvas);
+            this.drawCanvas(this._canvas);
           });
         }
       });
@@ -31,13 +32,13 @@ class ThreadStackGraph extends PureComponent {
   }
 
   componentDidMount() {
-    const win = this.refs.canvas.ownerDocument.defaultView;
+    const win = this._canvas.ownerDocument.defaultView;
     win.addEventListener('resize', this._resizeListener);
     this.forceUpdate(); // for initial size
   }
 
   componentWillUnmount() {
-    const win = this.refs.canvas.ownerDocument.defaultView;
+    const win = this._canvas.ownerDocument.defaultView;
     win.removeEventListener('resize', this._resizeListener);
   }
 
@@ -121,7 +122,7 @@ class ThreadStackGraph extends PureComponent {
   _onMouseUp(e) {
     if (this.props.onClick) {
       const { rangeStart, rangeEnd } = this.props;
-      const r = this.refs.canvas.getBoundingClientRect();
+      const r = this._canvas.getBoundingClientRect();
 
       const x = e.pageX - r.left;
       const time = rangeStart + x / r.width * (rangeEnd - rangeStart);
@@ -145,7 +146,7 @@ class ThreadStackGraph extends PureComponent {
             `${this.props.className}Canvas`,
             'threadStackGraphCanvas'
           )}
-          ref="canvas"
+          ref={ref => (this._canvas = ref)}
           onMouseUp={this._onMouseUp}
         />
       </div>
