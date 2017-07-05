@@ -4,9 +4,7 @@
 import Worker from './worker-factory';
 
 export function provideHostSide(workerFilename, methods) {
-  return function HostClass() {
-    const constructorArguments = Array.from(arguments);
-
+  return function HostClass(...constructorArguments) {
     const worker = new Worker(workerFilename);
     const callbacks = new Map(); // msgID -> { resolve, reject }
     let nextMessageID = 0;
