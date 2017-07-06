@@ -140,12 +140,6 @@
   margin-bottom: -40px;
 }
 
-.homeContributionUrl {
-  bottom: 10px;
-  right: 10px;
-  position: absolute;
-}
-
 .homeInstructions {
   display: flex;
   margin-top: 30px;
