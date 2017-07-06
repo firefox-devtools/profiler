@@ -546,16 +546,20 @@ body {
 }
 
 .selectionScrubberRange {
-  background-color: white;
-  border: 1px solid;
-  border-radius: 3px;
-  font-size: 1.2em;
-  opacity: 0.5;
-  padding: 0.2em 1em;
+  top: 20px;
+  position: absolute;
+  padding: 4px 8px;
+  color: #fff;
+  background-color: #8095ca;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 200ms;
 }
 
 .selectionScrubberRange.hidden {
-  display: none;
+  opacity: 0;
 }
 
 .selectionScrubberZoomButton {
