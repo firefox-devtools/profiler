@@ -27,8 +27,9 @@ function isFlameChartExpanded(
       newState.set(action.threadIndex, action.isExpanded);
       return newState;
     }
+    default:
+      return state;
   }
-  return state;
 }
 
 function areMarkersExpanded(
@@ -41,8 +42,9 @@ function areMarkersExpanded(
       newState.set(action.threadIndex, action.isExpanded);
       return newState;
     }
+    default:
+      return state;
   }
-  return state;
 }
 
 function hasZoomedViaMousewheel(state: boolean = false, action: Action) {
@@ -50,8 +52,9 @@ function hasZoomedViaMousewheel(state: boolean = false, action: Action) {
     case 'HAS_ZOOMED_VIA_MOUSEWHEEL': {
       return true;
     }
+    default:
+      return state;
   }
-  return state;
 }
 
 export default combineReducers({

@@ -42,10 +42,10 @@ module.exports = {
     // possible errors
     "array-callback-return": "error",
     "consistent-return": "error",
-    // "default-case": "error", // to be enabled after fixing issues in our code
+    "default-case": "error",
     "dot-notation": "error",
     "eqeqeq": "error",
-    // "for-direction": "error", // to be enabled after we upgrade eslint
+    "for-direction": "error",
     "no-alert": "error",
     "no-caller": "error",
     "no-eval": "error",
@@ -58,8 +58,7 @@ module.exports = {
     "no-self-compare": "error",
     "no-throw-literal": "error",
     "no-unmodified-loop-condition": "error",
-    // "no-unused-expression": "error", // to be enabled after we upgrade eslint
-    // "no-use-before-define": "error", // to be enabled after fixing issues in our code
+    "no-unused-expressions": "error",
     "no-useless-call": "error",
     "no-useless-computed-key": "error",
     "no-useless-concat": "error",
@@ -70,8 +69,8 @@ module.exports = {
     "no-void": "error",
     "no-with": "error",
     "prefer-const": "error",
-    // "prefer-promise-reject-errors": "error", // to be enabled after fixing issues in our code
-    // "prefer-rest-params": "error", // to be enabled after fixing issues in our code
+    "prefer-promise-reject-errors": "error",
+    "prefer-rest-params": "error",
     "prefer-spread": "error",
   },
   "settings": {

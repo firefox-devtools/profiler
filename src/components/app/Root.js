@@ -93,6 +93,8 @@ class ProfileViewWhenReadyImpl extends PureComponent {
       case 'from-url':
         retrieveProfileFromUrl(profileURL);
         break;
+      default:
+        throw new Error(`Unknown datasource ${dataSource}`);
     }
   }
 

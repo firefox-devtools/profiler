@@ -320,7 +320,9 @@ class TimelineMarkerCanvas extends PureComponent {
       switch (data.type) {
         case 'UserTiming': {
           tooltipName = data.name;
+          break;
         }
+        default:
       }
     }
 

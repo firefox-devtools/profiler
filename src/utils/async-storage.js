@@ -87,7 +87,9 @@ export function getStore(dbName) {
           };
           req = store.get(key);
           req.onerror = function getItemOnError() {
-            reject('Error in asyncStorage.getItem(): ', req.error.name);
+            reject(
+              new Error(`Error in asyncStorage.getItem(): ${req.error.name}`)
+            );
           };
         },
         reject
@@ -103,7 +105,9 @@ export function getStore(dbName) {
           store.transaction.oncomplete = resolve;
           const req = store.put(value, key);
           req.onerror = function setItemOnError() {
-            reject('Error in asyncStorage.setItem(): ', req.error.name);
+            reject(
+              new Error(`Error in asyncStorage.setItem(): ${req.error.name}`)
+            );
           };
         },
         reject
@@ -119,7 +123,9 @@ export function getStore(dbName) {
           store.transaction.oncomplete = resolve;
           const req = store.delete(key);
           req.onerror = function removeItemOnError() {
-            reject('Error in asyncStorage.removeItem(): ', req.error.name);
+            reject(
+              new Error(`Error in asyncStorage.removeItem(): ${req.error.name}`)
+            );
           };
         },
         reject
@@ -135,7 +141,9 @@ export function getStore(dbName) {
           store.transaction.oncomplete = resolve;
           const req = store.clear();
           req.onerror = function clearOnError() {
-            reject('Error in asyncStorage.clear(): ', req.error.name);
+            reject(
+              new Error(`Error in asyncStorage.clear(): ${req.error.name}`)
+            );
           };
         },
         reject
@@ -154,7 +162,9 @@ export function getStore(dbName) {
           };
           req = store.count();
           req.onerror = function lengthOnError() {
-            reject('Error in asyncStorage.length(): ', req.error.name);
+            reject(
+              new Error(`Error in asyncStorage.length(): ${req.error.name}`)
+            );
           };
         },
         reject
@@ -196,7 +206,7 @@ export function getStore(dbName) {
             cursor.advance(n);
           };
           req.onerror = function keyOnError() {
-            reject('Error in asyncStorage.key(): ', req.error.name);
+            reject(new Error(`Error in asyncStorage.key(): ${req.error.name}`));
           };
         },
         reject

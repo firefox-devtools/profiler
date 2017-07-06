@@ -24,6 +24,7 @@ type Props = {
 };
 
 class ProfileCallTreeContextMenu extends PureComponent {
+  props: Props;
   constructor(props: Props) {
     super(props);
     (this: any).handleClick = this.handleClick.bind(this);
@@ -63,7 +64,10 @@ class ProfileCallTreeContextMenu extends PureComponent {
     copy(stack);
   }
 
-  handleClick(event: SyntheticEvent, data: { type: string }): void {
+  handleClick(
+    event: SyntheticEvent,
+    data: { type: 'copyFunctionName' | 'copyStack' }
+  ): void {
     switch (data.type) {
       case 'copyFunctionName':
         this.copyFunctionName();
@@ -71,6 +75,8 @@ class ProfileCallTreeContextMenu extends PureComponent {
       case 'copyStack':
         this.copyStack();
         break;
+      default:
+        throw new Error(`Unknown type ${data.type}`);
     }
   }
 
