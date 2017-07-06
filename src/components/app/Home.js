@@ -318,7 +318,6 @@ class Home extends PureComponent {
         onDragExit={this._stopDragging}
         onDrop={this._handleProfileDrop}
       >
-        <a href={GITHUB_URL} className="homeGithubIcon" />
         <section className="homeSection">
           <h1 className="homeTitle">
             <span className="homeTitleText">perf.html</span>

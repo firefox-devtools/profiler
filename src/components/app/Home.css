@@ -146,16 +146,6 @@
   position: absolute;
 }
 
-.homeGithubIcon {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-  top: 0;
-  right: 0;
-  display: block;
-  background: url(../../../res/github.svg) top right no-repeat;
-}
-
 .homeInstructions {
   display: flex;
   margin-top: 30px;
