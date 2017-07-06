@@ -90,8 +90,10 @@
 
 .homeTitleGithubIcon {
   float: right;
-  position: relative;
-  top: 3px;
+}
+
+.homeTitleGithubIcon svg {
+  vertical-align: middle;
 }
 
 .homeSectionItems {
