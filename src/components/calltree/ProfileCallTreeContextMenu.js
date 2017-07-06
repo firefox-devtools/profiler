@@ -43,6 +43,21 @@ class ProfileCallTreeContextMenu extends PureComponent {
     copy(name);
   }
 
+  copyUrl(): void {
+    const {
+      selectedFuncStack,
+      thread: { stringTable, funcTable },
+      funcStackInfo: { funcStackTable },
+    } = this.props;
+
+    const funcIndex = funcStackTable.func[selectedFuncStack];
+    const stringIndex = funcTable.fileName[funcIndex];
+    if (stringIndex !== null) {
+      const fileName = stringTable.getString(stringIndex);
+      copy(fileName);
+    }
+  }
+
   copyStack(): void {
     const {
       selectedFuncStack,
@@ -68,6 +83,9 @@ class ProfileCallTreeContextMenu extends PureComponent {
       case 'copyFunctionName':
         this.copyFunctionName();
         break;
+      case 'copyUrl':
+        this.copyUrl();
+        break;
       case 'copyStack':
         this.copyStack();
         break;
@@ -75,6 +93,16 @@ class ProfileCallTreeContextMenu extends PureComponent {
   }
 
   render() {
+    const isJS = () => {
+      const {
+        selectedFuncStack,
+        thread: { funcTable },
+        funcStackInfo: { funcStackTable },
+      } = this.props;
+      const funcIndex = funcStackTable.func[selectedFuncStack];
+      return funcTable.isJS[funcIndex];
+    };
+
     return (
       <ContextMenu id={'ProfileCallTreeContextMenu'}>
         <SubMenu title="Copy" hoverDelay={200}>
@@ -84,6 +112,11 @@ class ProfileCallTreeContextMenu extends PureComponent {
           >
             Function Name
           </MenuItem>
+          {isJS()
+            ? <MenuItem onClick={this.handleClick} data={{ type: 'copyUrl' }}>
+                Script URL
+              </MenuItem>
+            : null}
           <MenuItem onClick={this.handleClick} data={{ type: 'copyStack' }}>
             Stack
           </MenuItem>
