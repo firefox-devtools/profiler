@@ -18,7 +18,6 @@ const ADDON_URL =
   'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
 const LEGACY_ADDON_URL =
   'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
-const GITHUB_URL = 'https://github.com/devtools-html/perf.html';
 
 const InstallButton = ({
   name,
@@ -324,7 +323,10 @@ class Home extends PureComponent {
             <span className="homeTitleSubtext">
               {' '}&mdash; Web app for Firefox performance analysis
             </span>
-            <a className="homeTitleGithubIcon" href={GITHUB_URL}>
+            <a
+              className="homeTitleGithubIcon"
+              href="https://github.com/devtools-html/perf.html"
+            >
               <svg
                 width="22"
                 height="22"
