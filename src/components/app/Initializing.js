@@ -2,10 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+/* @flow */
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 
+type Props = {
+  className: string,
+  profilerUrl: string,
+};
+
 class Initializing extends PureComponent {
+  props: Props;
+
   render() {
     const { className, profilerUrl } = this.props;
 
