@@ -55,8 +55,10 @@ type RegExpResult = null | string[];
  * drastically reduces the number of JS objects the JS engine has to deal with,
  * resulting in fewer GC pauses and hopefully better performance.
  *
- * @param {object} geckoTable A data table of the form `{ schema, data }`.
- * @return {object} A data table of the form `{ length: number, field1: array, field2: array }`
+ * e.g Take geckoTable A data table of the form
+ *   `{ schema, data }`.
+ * And turn it into a data table of the form
+ *  `{ length: number, field1: array, field2: array }`
  */
 function _toStructOfArrays(geckoTable: Object): Object {
   const result = { length: geckoTable.data.length };
@@ -74,8 +76,10 @@ function _toStructOfArrays(geckoTable: Object): Object {
   return result;
 }
 
-// JS File information sometimes comes with multiple URIs which are chained
-// with " -> ". We only want the last URI in this list.
+/**
+ * JS File information sometimes comes with multiple URIs which are chained
+ * with " -> ". We only want the last URI in this list.
+ */
 function _getRealScriptURI(url: string): string {
   if (url) {
     const urls = url.split(' -> ');
@@ -329,9 +333,6 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
 /**
  * Convert the given thread into processed form. See docs/gecko-profile-format for more
  * information.
- * @param {object} thread The thread object, in the Gecko format.
- * @param {array} libs A libs array.
- * @return {object} A new thread object in the 'processed' format.
  */
 function _processThread(thread: GeckoThread, libs: Lib[]): Thread {
   const geckoFrameTable: GeckoFrameStruct = _toStructOfArrays(
@@ -521,11 +522,11 @@ function _addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
  * subprocess profiles into the parent process profile; each profile's process
  * has its own timebase, and we don't want to keep converting timestamps when
  * we deal with the integrated profile.
- * @param {object} samples The table of samples/markers.
- * @param {number} delta The time delta, in milliseconds, by which to adjust.
- * @return {object} A samples table with adjusted time values.
  */
-function _adjustSampleTimestamps(samples: SamplesTable, delta: Milliseconds) {
+function _adjustSampleTimestamps(
+  samples: SamplesTable,
+  delta: Milliseconds
+): SamplesTable {
   return Object.assign({}, samples, {
     time: samples.time.map(time => time + delta),
   });
@@ -536,11 +537,11 @@ function _adjustSampleTimestamps(samples: SamplesTable, delta: Milliseconds) {
  * integrating subprocess profiles into the parent process profile; each
  * profile's process has its own timebase, and we don't want to keep
  * converting timestamps when we deal with the integrated profile.
- * @param {object} samples The table of markers.
- * @param {number} delta The time delta, in milliseconds, by which to adjust.
- * @return {object} A markers table with adjusted time values.
  */
-function _adjustMarkerTimestamps(markers, delta) {
+function _adjustMarkerTimestamps(
+  markers: MarkersTable,
+  delta: Milliseconds
+): MarkersTable {
   return Object.assign({}, markers, {
     time: markers.time.map(time => time + delta),
     data: markers.data.map(data => {
@@ -562,12 +563,9 @@ function _adjustMarkerTimestamps(markers, delta) {
 /**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
- * For a description of the processed format, look at docs/gecko-profile-format or
- * alternately the tests for this function.
- * @param {object} profile A profile object, in the Gecko format.
- * @return {object} A new profile object, in the 'processed' format.
+ * For a description of the processed format, look at docs/gecko-profile-format.md
  */
-export function processProfile(geckoProfile: GeckoProfile) {
+export function processProfile(geckoProfile: GeckoProfile): Profile {
   // Handle profiles from older versions of Gecko. This call might throw an
   // exception.
   upgradeGeckoProfileToCurrentVersion(geckoProfile);
@@ -627,6 +625,10 @@ export function processProfile(geckoProfile: GeckoProfile) {
   return result;
 }
 
+/**
+ * Take a processed profile and remove any non-serializable classes such as the
+ * StringTable class.
+ */
 export function serializeProfile(profile: Profile) {
   // stringTable -> stringArray
   const newProfile = Object.assign({}, profile, {
@@ -648,6 +650,10 @@ export function serializeProfile(profile: Profile) {
   return JSON.stringify(newProfile);
 }
 
+/**
+ * Take a serialized processed profile from some saved source, and re-initialize
+ * any non-serializable classes.
+ */
 function _unserializeProfile(profile: Object): Profile {
   // stringArray -> stringTable
   profile.threads.forEach(thread => {
@@ -664,12 +670,18 @@ function _unserializeProfile(profile: Object): Profile {
   return profile;
 }
 
+/**
+ * Take some arbitrary profile file from some data source, and turn it into
+ * the processed profile format.
+ */
 export function unserializeProfileOfArbitraryFormat(
-  jsonString: string | Object
+  jsonStringOrObject: string | Object
 ): Profile {
   try {
     let profile =
-      typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+      typeof jsonStringOrObject === 'string'
+        ? JSON.parse(jsonStringOrObject)
+        : jsonStringOrObject;
     if (isOldCleopatraFormat(profile)) {
       profile = convertOldCleopatraProfile(profile); // outputs preprocessed profile
     }
