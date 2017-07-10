@@ -4,8 +4,9 @@
 
 // @flow
 
-import type { Milliseconds } from './units';
+import type { Milliseconds, MemoryOffset } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
+import type { MarkerPayload } from './markers';
 export type IndexIntoStackTable = number;
 export type IndexIntoSamplesTable = number;
 export type IndexIntoMarkersTable = number;
@@ -14,9 +15,9 @@ export type IndexIntoStringTable = number;
 export type IndexIntoFuncTable = number;
 export type IndexIntoResourceTable = number;
 export type IndexIntoLibs = number;
+export type IndexIntoTaskTracerAddresses = number;
 export type categoryBitMask = number;
 export type resourceTypeEnum = number;
-export type MemoryOffset = number;
 export type ThreadIndex = number;
 
 /**
@@ -56,73 +57,6 @@ export type ProfilerMarkerPayload = {
   endTime?: Milliseconds,
   stack?: Thread,
 };
-
-/**
- * Measurement for how long draw calls take for the compositor.
- */
-export type GPUMarkerPayload = {
-  type: 'gpu_timer_query',
-  startTime: Milliseconds, // Same as cpustart
-  endTime: Milliseconds, // Same as cpuend
-  cpustart: Milliseconds,
-  cpuend: Milliseconds,
-  gpustart: Milliseconds, // Always 0.
-  gpuend: Milliseconds, // The time the GPU took to execute the command.
-  stack?: Thread,
-};
-
-/**
- * These markers have a start and end time.
- */
-export type ProfilerMarkerTracing = {
-  type: 'tracing',
-  startTime: Milliseconds, // Same as cpustart
-  endTime: Milliseconds, // Same as cpuend
-  stack?: Thread,
-  interval: 'start' | 'end',
-};
-
-export type PaintProfilerMarkerTracing = ProfilerMarkerTracing & {
-  category: 'Paint',
-  name:
-    | 'RefreshDriverTick'
-    | 'FireScrollEvent'
-    | 'Scripts'
-    | 'Styles'
-    | 'Reflow'
-    | 'DispatchSynthMouseMove'
-    | 'DisplayList'
-    | 'LayerBuilding'
-    | 'Rasterize'
-    | 'ForwardTransaction'
-    | 'NotifyDidPaint'
-    | 'LayerTransaction'
-    | 'Composite',
-};
-
-// TODO - Add more markers.
-
-/**
- * The payload for the UserTimings API. These are added through performance.measure()
- * and performance.mark(). https://developer.mozilla.org/en-US/docs/Web/API/Performance
- */
-export type UserTimingMarkerPayload = {
-  type: 'UserTiming',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
-  name: string,
-  entryType: 'measure' | 'mark',
-};
-
-/**
- * The union of all the different marker payloads that perf.html knows about, this is
- * not guaranteed to be all the payloads that we actually get from the profiler.
- */
-export type MarkerPayload =
-  | GPUMarkerPayload
-  | UserTimingMarkerPayload
-  | PaintProfilerMarkerTracing
-  | null;
 
 /**
  * Markers represent arbitrary events that happen within the browser. They have a
@@ -184,6 +118,23 @@ export type ResourceTable = {
 };
 
 /**
+ * Information about libraries, for instance the Firefox executables, and its memory
+ * offsets. This information is used for symbolicating C++ memory addresses into
+ * actual function names. For instance turning 0x23459234 into "void myFuncName()".
+ */
+export type Lib = {
+  start: MemoryOffset,
+  end: MemoryOffset,
+  offset: MemoryOffset,
+  arch: string, // e.g. "x86_64"
+  name: string, // e.g. "firefox"
+  path: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
+  debugName: string, // e.g. "firefox"
+  debugPath: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
+  breakpadId: string, // e.g. "E54D3AF274383256B9F6144F83F3F7510"
+};
+
+/**
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
  */
@@ -199,7 +150,7 @@ export type Thread = {
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
   stringTable: UniqueStringArray,
-  libs: [],
+  libs: Lib[],
   funcTable: FuncTable,
   resourceTable: ResourceTable,
 };
@@ -214,10 +165,38 @@ export type ProfileMeta = {
 /**
  * TaskTracer data - TODO.
  */
-export type TaskTracer = {
-  taskTable: Object,
-  threadTable: Object,
-};
+export type TaskTracer = {|
+  taskTable: {|
+    length: number,
+    dispatchTime: any[],
+    sourceEventId: any[],
+    sourceEventType: any[],
+    parentTaskId: any[],
+    beginTime: any[],
+    processId: any[],
+    threadIndex: any[],
+    endTime: any[],
+    ipdlMsg: any[],
+    label: any[],
+    address: any[],
+  |},
+  addressTable: {|
+    length: number,
+    address: MemoryOffset[],
+    className: IndexIntoStringTable[],
+    lib: Array<null | Lib>,
+  |},
+  threadTable: {|
+    length: number,
+    tid: any[],
+    name: any[],
+    start: any[],
+  |},
+  tasksIdToTaskIndexMap: Map<any, any>,
+  addressIndicesByLib: Map<Lib, MemoryOffset[]>,
+  stringTable: UniqueStringArray,
+  tidToThreadIndexMap: Map<any, any>,
+|};
 
 /**
  * All of the data for a processed profile.

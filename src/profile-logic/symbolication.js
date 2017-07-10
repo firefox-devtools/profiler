@@ -1,12 +1,37 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-/* eslint-disable flowtype/no-types-missing-file-annotation */
+// @flow
 
 import bisection from 'bisection';
 import { resourceTypes } from './profile-data';
-import type { Thread, IndexIntoFuncTable } from '../types/profile';
+import immutableUpdate from '../utils/immutable-update';
+
+import type {
+  Profile,
+  Thread,
+  ThreadIndex,
+  FuncTable,
+  Lib,
+  TaskTracer,
+  IndexIntoFuncTable,
+  IndexIntoTaskTracerAddresses,
+} from '../types/profile';
+import type { MemoryOffset } from '../types/units';
+import type { SymbolStore } from './symbol-store';
+
+type SymbolicationHandlers = {
+  onMergeFunctions: (
+    threadIndex: ThreadIndex,
+    Map<IndexIntoFuncTable, IndexIntoFuncTable>
+  ) => void,
+  onGotFuncNames: (
+    threadIndex: ThreadIndex,
+    funcIndices: IndexIntoFuncTable[],
+    funcNames: string[]
+  ) => void,
+  onGotTaskTracerNames: (IndexIntoTaskTracerAddresses[], string[]) => void,
+};
 
 /**
  * Return the library object that contains address.
@@ -14,7 +39,10 @@ import type { Thread, IndexIntoFuncTable } from '../types/profile';
  * @param {Number} address The address to find
  * @return {Object} lib object       The lib object that contains address, rv.start <= address < rv.end, or null if no such lib object exists.
  */
-export function getContainingLibrary(libs, address) {
+export function getContainingLibrary(
+  libs: Lib[],
+  address: MemoryOffset
+): Lib | null {
   if (isNaN(address)) {
     return null;
   }
@@ -40,7 +68,10 @@ export function getContainingLibrary(libs, address) {
  * @param  {[type]} address [description]
  * @return {[type]}         [description]
  */
-export function getClosestLibrary(libs, address) {
+export function getClosestLibrary(
+  libs: Lib[],
+  address: MemoryOffset
+): null | Lib {
   if (isNaN(address)) {
     return null;
   }
@@ -63,9 +94,9 @@ export function getClosestLibrary(libs, address) {
  *                         Example:
  *                         map.get(lib): [0, 1, 2, 8, 34]
  */
-function gatherFuncsInThread(thread) {
+function gatherFuncsInThread(thread: Thread): Map<Lib, IndexIntoFuncTable[]> {
   const { libs, funcTable, stringTable, resourceTable } = thread;
-  const foundAddresses = new Map();
+  const foundAddresses: Map<Lib, IndexIntoFuncTable[]> = new Map();
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
     const resourceIndex = funcTable.resource[funcIndex];
     if (resourceIndex === -1) {
@@ -83,7 +114,13 @@ function gatherFuncsInThread(thread) {
     }
 
     const libIndex = resourceTable.lib[resourceIndex];
+    if (libIndex === null || libIndex === undefined) {
+      throw new Error('libIndex must be a valid index.');
+    }
     const lib = libs[libIndex];
+    if (lib === undefined) {
+      throw new Error('Did not find a lib.');
+    }
     let libFuncs = foundAddresses.get(lib);
     if (libFuncs === undefined) {
       libFuncs = [];
@@ -118,9 +155,9 @@ function gatherFuncsInThread(thread) {
  * @return {Object}                     A map that maps a func address index to a funcIndex, one entry for each func that needs to be symbolicated.
  */
 function findFunctionsToMergeAndSymbolicationAddresses(
-  funcAddressTable,
-  funcsToSymbolicate,
-  funcTable
+  funcAddressTable: Uint32Array,
+  funcsToSymbolicate: IndexIntoFuncTable[],
+  funcTable: FuncTable
 ) {
   const oldFuncToNewFuncMap = new Map();
   const funcAddrIndices = [];
@@ -183,7 +220,7 @@ function findFunctionsToMergeAndSymbolicationAddresses(
  */
 export function setFuncNames(
   thread: Thread,
-  funcIndices: IndexIntoFuncTable,
+  funcIndices: IndexIntoFuncTable[],
   funcNames: string[]
 ): Thread {
   const funcTable = Object.assign({}, thread.funcTable);
@@ -232,7 +269,12 @@ export function applyFunctionMerging(
  * @param  {Object}  cbo         An object containing callback functions 'onMergeFunctions'  and 'onGotFuncNames'.
  * @return {Promise}             A promise that resolves (with nothing) once symbolication of the thread has completed.
  */
-function symbolicateThread(thread, threadIndex, symbolStore, cbo) {
+function symbolicateThread(
+  thread: Thread,
+  threadIndex: ThreadIndex,
+  symbolStore: SymbolStore,
+  cbo: SymbolicationHandlers
+): Promise<void[]> {
   const foundFuncMap = gatherFuncsInThread(thread);
   return Promise.all(
     Array.from(foundFuncMap).map(function([lib, funcsToSymbolicate]) {
@@ -272,7 +314,11 @@ function symbolicateThread(thread, threadIndex, symbolStore, cbo) {
   );
 }
 
-function symbolicateTaskTracer(tasktracer, symbolStore, cbo) {
+function symbolicateTaskTracer(
+  tasktracer: TaskTracer,
+  symbolStore: SymbolStore,
+  cbo: SymbolicationHandlers
+): Promise<void[]> {
   const { addressTable, addressIndicesByLib } = tasktracer;
   return Promise.all(
     Array.from(addressIndicesByLib).map(([lib, addressIndices]) => {
@@ -306,7 +352,7 @@ function symbolicateTaskTracer(tasktracer, symbolStore, cbo) {
   );
 }
 
-function classNameFromSymbolName(symbolName) {
+function classNameFromSymbolName(symbolName: string): string {
   let className = symbolName;
 
   const vtablePrefix = 'vtable for ';
@@ -344,7 +390,11 @@ function classNameFromSymbolName(symbolName) {
   return className;
 }
 
-export function setTaskTracerNames(tasktracer, addressIndices, symbolNames) {
+export function setTaskTracerNames(
+  tasktracer: TaskTracer,
+  addressIndices: IndexIntoTaskTracerAddresses[],
+  symbolNames: string[]
+): TaskTracer {
   const { stringTable, addressTable } = tasktracer;
   const className = addressTable.className.slice();
   for (let i = 0; i < addressIndices.length; i++) {
@@ -352,8 +402,8 @@ export function setTaskTracerNames(tasktracer, addressIndices, symbolNames) {
     const classNameString = classNameFromSymbolName(symbolNames[i]);
     className[addressIndex] = stringTable.indexForString(classNameString);
   }
-  return Object.assign({}, tasktracer, {
-    addressTable: Object.assign({}, tasktracer.addressTable, { className }),
+  return immutableUpdate(tasktracer, {
+    addressTable: immutableUpdate(tasktracer.addressTable, { className }),
   });
 }
 
@@ -364,7 +414,11 @@ export function setTaskTracerNames(tasktracer, addressIndices, symbolNames) {
  * @param  {Object} cbo         An object containing callback functions 'onMergeFunctions', 'onGotFuncNames' and 'onGotTaskTracerNames'.
  * @return {Promise}            A promise that resolves (with nothing) once symbolication has completed.
  */
-export function symbolicateProfile(profile, symbolStore, cbo) {
+export function symbolicateProfile(
+  profile: Profile,
+  symbolStore: SymbolStore,
+  cbo: SymbolicationHandlers
+) {
   const symbolicationPromises = profile.threads.map((thread, threadIndex) => {
     return symbolicateThread(thread, threadIndex, symbolStore, cbo);
   });
