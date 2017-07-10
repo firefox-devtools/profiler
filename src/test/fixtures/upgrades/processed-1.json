@@ -291,15 +291,6 @@
           null,
           null,
           null
-        ],
-        "power": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
         ]
       },
       "stringArray": [
@@ -595,15 +586,6 @@
           null,
           null,
           null
-        ],
-        "power": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
         ]
       },
       "stringArray": [
@@ -892,15 +874,6 @@
           null
         ],
         "frameNumber": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
-        "power": [
           null,
           null,
           null,
