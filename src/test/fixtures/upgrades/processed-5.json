@@ -1,1 +1,1004 @@
-{"meta":{"abi":"x86_64-gcc3","interval":1,"misc":"rv:48.0","oscpu":"Intel Mac OS X 10.11","platform":"Macintosh","processType":0,"product":"Firefox","stackwalk":1,"startTime":1460221352723.438,"toolkit":"cocoa","version":4,"preprocessedProfileVersion":5},"threads":[{"name":"GeckoMain","processType":"default","libs":[{"breakpadId":"F1D957D30B413D55A539BBA06F90DD8F0","arch":"x86_64","debugPath":"","debugName":"firefox","name":"firefox","path":"/Applications/FirefoxNightly.app/Contents/MacOS/firefox","start":4294967296,"end":4294977296},{"breakpadId":"1000000000000000000000000000000A1","arch":"x86_64","debugPath":"","debugName":"examplebinary","name":"examplebinary","path":"/tmp/examplebinary","start":8589934592,"end":8589934612},{"breakpadId":"100000000000000000000000000000A27","arch":"x86_64","debugPath":"","debugName":"examplebinary2.pdb","name":"examplebinary2","path":"C:\\examplebinary2","start":8589934612,"end":8589934632}],"frameTable":{"length":5,"implementation":[null,null,null,null,6],"optimizations":[null,null,null,null,null],"line":[null,null,null,4391,34],"category":[null,null,null,16,null],"func":[0,1,2,3,4],"address":[-1,3972,6725,-1,-1]},"funcTable":{"length":5,"name":[0,1,2,3,13],"resource":[-1,0,0,-1,1],"address":[-1,3972,6725,-1,-1],"isJS":[false,false,false,false,true],"fileName":[null,null,null,null,12],"lineNumber":[null,null,null,null,34]},"resourceTable":{"length":2,"type":[1,5],"name":[11,12],"lib":[0],"icon":[],"addonId":[],"host":[]},"stackTable":{"length":5,"prefix":[null,0,1,1,1],"frame":[0,1,2,3,4]},"markers":{"length":7,"name":[4,5,10,10,5,8,9],"time":[0,2,4,5,8,9,11],"data":[{"category":"VsyncTimestamp","vsync":0},{"category":"Paint","interval":"start","stack":{"markers":{"schema":{"name":0,"time":1,"data":2},"data":[]},"name":"SyncProfile","samples":{"schema":{"stack":0,"time":1,"responsiveness":2,"rss":3,"uss":4,"frameNumber":5,"power":6},"data":[[2,1]]}},"type":"tracing"},{"category":"Paint","interval":"start","type":"tracing"},{"category":"Paint","interval":"end","type":"tracing"},{"category":"Paint","interval":"end","type":"tracing"},{"startTime":9,"endTime":10,"type":"mouseout","phase":3},{"startTime":11,"endTime":12}]},"samples":{"length":7,"stack":[1,2,2,3,0,1,4],"time":[0,1,2,3,4,5,6],"responsiveness":[0,0,0,0,0,0,0],"rss":[null,null,null,null,null,null,null],"uss":[null,null,null,null,null,null,null],"power":[null,null,null,null,null,null,null]},"stringArray":["(root)","0x100000f84","0x100001a45","Startup::XRE_Main","VsyncTimestamp","Reflow","baseline","frobnicate (chrome://blargh:34)","DOMEvent","MinorGC","Rasterize","firefox","chrome://blargh","frobnicate"]},{"name":"Compositor","processType":"default","libs":[{"breakpadId":"F1D957D30B413D55A539BBA06F90DD8F0","arch":"x86_64","debugPath":"","debugName":"firefox","name":"firefox","path":"/Applications/FirefoxNightly.app/Contents/MacOS/firefox","start":4294967296,"end":4294977296},{"breakpadId":"1000000000000000000000000000000A1","arch":"x86_64","debugPath":"","debugName":"examplebinary","name":"examplebinary","path":"/tmp/examplebinary","start":8589934592,"end":8589934612},{"breakpadId":"100000000000000000000000000000A27","arch":"x86_64","debugPath":"","debugName":"examplebinary2.pdb","name":"examplebinary2","path":"C:\\examplebinary2","start":8589934612,"end":8589934632}],"frameTable":{"length":5,"implementation":[null,null,null,null,6],"optimizations":[null,null,null,null,null],"line":[null,null,null,4391,34],"category":[null,null,null,16,null],"func":[0,1,2,3,4],"address":[-1,3972,6725,-1,-1]},"funcTable":{"length":5,"name":[0,1,2,3,13],"resource":[-1,0,0,-1,1],"address":[-1,3972,6725,-1,-1],"isJS":[false,false,false,false,true],"fileName":[null,null,null,null,12],"lineNumber":[null,null,null,null,34]},"resourceTable":{"length":2,"type":[1,5],"name":[11,12],"lib":[0],"icon":[],"addonId":[],"host":[]},"stackTable":{"length":5,"prefix":[null,0,1,1,1],"frame":[0,1,2,3,4]},"markers":{"length":7,"name":[4,5,10,10,5,8,9],"time":[0,2,4,5,8,9,11],"data":[{"category":"VsyncTimestamp","vsync":0},{"category":"Paint","interval":"start","stack":{"markers":{"schema":{"name":0,"time":1,"data":2},"data":[]},"name":"SyncProfile","samples":{"schema":{"stack":0,"time":1,"responsiveness":2,"rss":3,"uss":4,"frameNumber":5,"power":6},"data":[[2,1]]}},"type":"tracing"},{"category":"Paint","interval":"start","type":"tracing"},{"category":"Paint","interval":"end","type":"tracing"},{"category":"Paint","interval":"end","type":"tracing"},{"startTime":9,"endTime":10,"type":"mouseout","phase":3},{"startTime":11,"endTime":12}]},"samples":{"length":7,"stack":[1,2,2,3,0,1,4],"time":[0,1,2,3,4,5,6],"responsiveness":[0,0,0,0,0,0,0],"rss":[null,null,null,null,null,null,null],"uss":[null,null,null,null,null,null,null],"power":[null,null,null,null,null,null,null]},"stringArray":["(root)","0x100000f84","0x100001a45","Startup::XRE_Main","VsyncTimestamp","Reflow","baseline","frobnicate (chrome://blargh:34)","DOMEvent","MinorGC","Rasterize","firefox","chrome://blargh","frobnicate"]},{"name":"GeckoMain","processType":"tab","libs":[{"breakpadId":"9F950E2CE3CD3E1ABD06D80788B606E60","arch":"x86_64","debugPath":"","debugName":"firefox-webcontent","name":"firefox-webcontent","path":"/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent","start":4294967296,"end":4294977296},{"breakpadId":"1000000000000000000000000000000A1","arch":"x86_64","debugPath":"","debugName":"examplebinary","name":"examplebinary","path":"/tmp/examplebinary","start":8589934592,"end":8589934612},{"breakpadId":"100000000000000000000000000000A27","arch":"x86_64","debugPath":"","debugName":"examplebinary2.pdb","name":"examplebinary2","path":"C:\\examplebinary2","start":8589934612,"end":8589934632}],"frameTable":{"length":5,"implementation":[null,null,null,null,6],"optimizations":[null,null,null,null,null],"line":[null,null,null,4391,34],"category":[null,null,null,16,null],"func":[0,1,2,3,4],"address":[-1,3972,6725,-1,-1]},"funcTable":{"length":5,"name":[0,1,2,3,13],"resource":[-1,0,0,-1,1],"address":[-1,3972,6725,-1,-1],"isJS":[false,false,false,false,true],"fileName":[null,null,null,null,12],"lineNumber":[null,null,null,null,34]},"resourceTable":{"length":2,"type":[1,5],"name":[11,12],"lib":[0],"icon":[],"addonId":[],"host":[]},"stackTable":{"length":5,"prefix":[null,0,1,1,1],"frame":[0,1,2,3,4]},"markers":{"length":7,"name":[4,5,10,10,5,8,9],"time":[1000,1002,1004,1005,1008,1009,1011],"data":[{"category":"VsyncTimestamp","vsync":0},{"category":"Paint","interval":"start","stack":{"markers":{"schema":{"name":0,"time":1,"data":2},"data":[]},"name":"SyncProfile","samples":{"schema":{"stack":0,"time":1,"responsiveness":2,"rss":3,"uss":4,"frameNumber":5,"power":6},"data":[[2,1]]}},"type":"tracing"},{"category":"Paint","interval":"start","type":"tracing"},{"category":"Paint","interval":"end","type":"tracing"},{"category":"Paint","interval":"end","type":"tracing"},{"startTime":1009,"endTime":1010,"type":"mouseout","phase":3},{"startTime":1011,"endTime":1012}]},"samples":{"length":7,"stack":[1,2,2,3,0,1,4],"time":[1000,1001,1002,1003,1004,1005,1006],"responsiveness":[0,0,0,0,0,0,0],"rss":[null,null,null,null,null,null,null],"uss":[null,null,null,null,null,null,null],"power":[null,null,null,null,null,null,null]},"stringArray":["(root)","0x100000f84","0x100001a45","Startup::XRE_Main","VsyncTimestamp","Reflow","baseline","frobnicate (chrome://blargh:34)","DOMEvent","MinorGC","Rasterize","firefox-webcontent","chrome://blargh","frobnicate"]}],"tasktracer":{"taskTable":{"length":0,"dispatchTime":[],"sourceEventId":[],"sourceEventType":[],"parentTaskId":[],"beginTime":[],"processId":[],"threadIndex":[],"endTime":[],"ipdlMsg":[],"label":[],"address":[]},"tasksIdToTaskIndexMap":[],"addressTable":{"length":0,"address":[],"className":[],"lib":[]},"addressIndicesByLib":[],"threadTable":{"length":0,"tid":[],"name":[],"start":[]},"tidToThreadIndexMap":[],"stringArray":[]}}
+{
+  "meta": {
+    "abi": "x86_64-gcc3",
+    "interval": 1,
+    "misc": "rv:48.0",
+    "oscpu": "Intel Mac OS X 10.11",
+    "platform": "Macintosh",
+    "processType": 0,
+    "product": "Firefox",
+    "stackwalk": 1,
+    "startTime": 1460221352723.438,
+    "toolkit": "cocoa",
+    "version": 4,
+    "preprocessedProfileVersion": 5
+  },
+  "threads": [
+    {
+      "name": "GeckoMain",
+      "processType": "default",
+      "libs": [
+        {
+          "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "firefox",
+          "name": "firefox",
+          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
+          "start": 4294967296,
+          "end": 4294977296
+        },
+        {
+          "breakpadId": "1000000000000000000000000000000A1",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "examplebinary",
+          "name": "examplebinary",
+          "path": "/tmp/examplebinary",
+          "start": 8589934592,
+          "end": 8589934612
+        },
+        {
+          "breakpadId": "100000000000000000000000000000A27",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "examplebinary2.pdb",
+          "name": "examplebinary2",
+          "path": "C:\\examplebinary2",
+          "start": 8589934612,
+          "end": 8589934632
+        }
+      ],
+      "frameTable": {
+        "length": 5,
+        "implementation": [
+          null,
+          null,
+          null,
+          null,
+          6
+        ],
+        "optimizations": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "line": [
+          null,
+          null,
+          null,
+          4391,
+          34
+        ],
+        "category": [
+          null,
+          null,
+          null,
+          16,
+          null
+        ],
+        "func": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "address": [
+          -1,
+          3972,
+          6725,
+          -1,
+          -1
+        ]
+      },
+      "funcTable": {
+        "length": 5,
+        "name": [
+          0,
+          1,
+          2,
+          3,
+          13
+        ],
+        "resource": [
+          -1,
+          0,
+          0,
+          -1,
+          1
+        ],
+        "address": [
+          -1,
+          3972,
+          6725,
+          -1,
+          -1
+        ],
+        "isJS": [
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "fileName": [
+          null,
+          null,
+          null,
+          null,
+          12
+        ],
+        "lineNumber": [
+          null,
+          null,
+          null,
+          null,
+          34
+        ]
+      },
+      "resourceTable": {
+        "length": 2,
+        "type": [
+          1,
+          5
+        ],
+        "name": [
+          11,
+          12
+        ],
+        "lib": [
+          0
+        ],
+        "icon": [],
+        "addonId": [],
+        "host": []
+      },
+      "stackTable": {
+        "length": 5,
+        "prefix": [
+          null,
+          0,
+          1,
+          1,
+          1
+        ],
+        "frame": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "markers": {
+        "length": 7,
+        "name": [
+          4,
+          5,
+          10,
+          10,
+          5,
+          8,
+          9
+        ],
+        "time": [
+          0,
+          2,
+          4,
+          5,
+          8,
+          9,
+          11
+        ],
+        "data": [
+          {
+            "category": "VsyncTimestamp",
+            "vsync": 0
+          },
+          {
+            "category": "Paint",
+            "interval": "start",
+            "stack": {
+              "markers": {
+                "schema": {
+                  "name": 0,
+                  "time": 1,
+                  "data": 2
+                },
+                "data": []
+              },
+              "name": "SyncProfile",
+              "samples": {
+                "schema": {
+                  "stack": 0,
+                  "time": 1,
+                  "responsiveness": 2,
+                  "rss": 3,
+                  "uss": 4,
+                  "frameNumber": 5,
+                  "power": 6
+                },
+                "data": [
+                  [
+                    2,
+                    1
+                  ]
+                ]
+              }
+            },
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "start",
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "end",
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "end",
+            "type": "tracing"
+          },
+          {
+            "startTime": 9,
+            "endTime": 10,
+            "type": "mouseout",
+            "phase": 3
+          },
+          {
+            "startTime": 11,
+            "endTime": 12
+          }
+        ]
+      },
+      "samples": {
+        "length": 7,
+        "stack": [
+          1,
+          2,
+          2,
+          3,
+          0,
+          1,
+          4
+        ],
+        "time": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "responsiveness": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rss": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "uss": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "power": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "stringArray": [
+        "(root)",
+        "0x100000f84",
+        "0x100001a45",
+        "Startup::XRE_Main",
+        "VsyncTimestamp",
+        "Reflow",
+        "baseline",
+        "frobnicate (chrome://blargh:34)",
+        "DOMEvent",
+        "MinorGC",
+        "Rasterize",
+        "firefox",
+        "chrome://blargh",
+        "frobnicate"
+      ]
+    },
+    {
+      "name": "Compositor",
+      "processType": "default",
+      "libs": [
+        {
+          "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "firefox",
+          "name": "firefox",
+          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
+          "start": 4294967296,
+          "end": 4294977296
+        },
+        {
+          "breakpadId": "1000000000000000000000000000000A1",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "examplebinary",
+          "name": "examplebinary",
+          "path": "/tmp/examplebinary",
+          "start": 8589934592,
+          "end": 8589934612
+        },
+        {
+          "breakpadId": "100000000000000000000000000000A27",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "examplebinary2.pdb",
+          "name": "examplebinary2",
+          "path": "C:\\examplebinary2",
+          "start": 8589934612,
+          "end": 8589934632
+        }
+      ],
+      "frameTable": {
+        "length": 5,
+        "implementation": [
+          null,
+          null,
+          null,
+          null,
+          6
+        ],
+        "optimizations": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "line": [
+          null,
+          null,
+          null,
+          4391,
+          34
+        ],
+        "category": [
+          null,
+          null,
+          null,
+          16,
+          null
+        ],
+        "func": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "address": [
+          -1,
+          3972,
+          6725,
+          -1,
+          -1
+        ]
+      },
+      "funcTable": {
+        "length": 5,
+        "name": [
+          0,
+          1,
+          2,
+          3,
+          13
+        ],
+        "resource": [
+          -1,
+          0,
+          0,
+          -1,
+          1
+        ],
+        "address": [
+          -1,
+          3972,
+          6725,
+          -1,
+          -1
+        ],
+        "isJS": [
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "fileName": [
+          null,
+          null,
+          null,
+          null,
+          12
+        ],
+        "lineNumber": [
+          null,
+          null,
+          null,
+          null,
+          34
+        ]
+      },
+      "resourceTable": {
+        "length": 2,
+        "type": [
+          1,
+          5
+        ],
+        "name": [
+          11,
+          12
+        ],
+        "lib": [
+          0
+        ],
+        "icon": [],
+        "addonId": [],
+        "host": []
+      },
+      "stackTable": {
+        "length": 5,
+        "prefix": [
+          null,
+          0,
+          1,
+          1,
+          1
+        ],
+        "frame": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "markers": {
+        "length": 7,
+        "name": [
+          4,
+          5,
+          10,
+          10,
+          5,
+          8,
+          9
+        ],
+        "time": [
+          0,
+          2,
+          4,
+          5,
+          8,
+          9,
+          11
+        ],
+        "data": [
+          {
+            "category": "VsyncTimestamp",
+            "vsync": 0
+          },
+          {
+            "category": "Paint",
+            "interval": "start",
+            "stack": {
+              "markers": {
+                "schema": {
+                  "name": 0,
+                  "time": 1,
+                  "data": 2
+                },
+                "data": []
+              },
+              "name": "SyncProfile",
+              "samples": {
+                "schema": {
+                  "stack": 0,
+                  "time": 1,
+                  "responsiveness": 2,
+                  "rss": 3,
+                  "uss": 4,
+                  "frameNumber": 5,
+                  "power": 6
+                },
+                "data": [
+                  [
+                    2,
+                    1
+                  ]
+                ]
+              }
+            },
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "start",
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "end",
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "end",
+            "type": "tracing"
+          },
+          {
+            "startTime": 9,
+            "endTime": 10,
+            "type": "mouseout",
+            "phase": 3
+          },
+          {
+            "startTime": 11,
+            "endTime": 12
+          }
+        ]
+      },
+      "samples": {
+        "length": 7,
+        "stack": [
+          1,
+          2,
+          2,
+          3,
+          0,
+          1,
+          4
+        ],
+        "time": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "responsiveness": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rss": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "uss": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "power": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "stringArray": [
+        "(root)",
+        "0x100000f84",
+        "0x100001a45",
+        "Startup::XRE_Main",
+        "VsyncTimestamp",
+        "Reflow",
+        "baseline",
+        "frobnicate (chrome://blargh:34)",
+        "DOMEvent",
+        "MinorGC",
+        "Rasterize",
+        "firefox",
+        "chrome://blargh",
+        "frobnicate"
+      ]
+    },
+    {
+      "name": "GeckoMain",
+      "processType": "tab",
+      "libs": [
+        {
+          "breakpadId": "9F950E2CE3CD3E1ABD06D80788B606E60",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "firefox-webcontent",
+          "name": "firefox-webcontent",
+          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent",
+          "start": 4294967296,
+          "end": 4294977296
+        },
+        {
+          "breakpadId": "1000000000000000000000000000000A1",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "examplebinary",
+          "name": "examplebinary",
+          "path": "/tmp/examplebinary",
+          "start": 8589934592,
+          "end": 8589934612
+        },
+        {
+          "breakpadId": "100000000000000000000000000000A27",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "examplebinary2.pdb",
+          "name": "examplebinary2",
+          "path": "C:\\examplebinary2",
+          "start": 8589934612,
+          "end": 8589934632
+        }
+      ],
+      "frameTable": {
+        "length": 5,
+        "implementation": [
+          null,
+          null,
+          null,
+          null,
+          6
+        ],
+        "optimizations": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "line": [
+          null,
+          null,
+          null,
+          4391,
+          34
+        ],
+        "category": [
+          null,
+          null,
+          null,
+          16,
+          null
+        ],
+        "func": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "address": [
+          -1,
+          3972,
+          6725,
+          -1,
+          -1
+        ]
+      },
+      "funcTable": {
+        "length": 5,
+        "name": [
+          0,
+          1,
+          2,
+          3,
+          13
+        ],
+        "resource": [
+          -1,
+          0,
+          0,
+          -1,
+          1
+        ],
+        "address": [
+          -1,
+          3972,
+          6725,
+          -1,
+          -1
+        ],
+        "isJS": [
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "fileName": [
+          null,
+          null,
+          null,
+          null,
+          12
+        ],
+        "lineNumber": [
+          null,
+          null,
+          null,
+          null,
+          34
+        ]
+      },
+      "resourceTable": {
+        "length": 2,
+        "type": [
+          1,
+          5
+        ],
+        "name": [
+          11,
+          12
+        ],
+        "lib": [
+          0
+        ],
+        "icon": [],
+        "addonId": [],
+        "host": []
+      },
+      "stackTable": {
+        "length": 5,
+        "prefix": [
+          null,
+          0,
+          1,
+          1,
+          1
+        ],
+        "frame": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "markers": {
+        "length": 7,
+        "name": [
+          4,
+          5,
+          10,
+          10,
+          5,
+          8,
+          9
+        ],
+        "time": [
+          1000,
+          1002,
+          1004,
+          1005,
+          1008,
+          1009,
+          1011
+        ],
+        "data": [
+          {
+            "category": "VsyncTimestamp",
+            "vsync": 0
+          },
+          {
+            "category": "Paint",
+            "interval": "start",
+            "stack": {
+              "markers": {
+                "schema": {
+                  "name": 0,
+                  "time": 1,
+                  "data": 2
+                },
+                "data": []
+              },
+              "name": "SyncProfile",
+              "samples": {
+                "schema": {
+                  "stack": 0,
+                  "time": 1,
+                  "responsiveness": 2,
+                  "rss": 3,
+                  "uss": 4,
+                  "frameNumber": 5,
+                  "power": 6
+                },
+                "data": [
+                  [
+                    2,
+                    1
+                  ]
+                ]
+              }
+            },
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "start",
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "end",
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "end",
+            "type": "tracing"
+          },
+          {
+            "startTime": 1009,
+            "endTime": 1010,
+            "type": "mouseout",
+            "phase": 3
+          },
+          {
+            "startTime": 1011,
+            "endTime": 1012
+          }
+        ]
+      },
+      "samples": {
+        "length": 7,
+        "stack": [
+          1,
+          2,
+          2,
+          3,
+          0,
+          1,
+          4
+        ],
+        "time": [
+          1000,
+          1001,
+          1002,
+          1003,
+          1004,
+          1005,
+          1006
+        ],
+        "responsiveness": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rss": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "uss": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "power": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "stringArray": [
+        "(root)",
+        "0x100000f84",
+        "0x100001a45",
+        "Startup::XRE_Main",
+        "VsyncTimestamp",
+        "Reflow",
+        "baseline",
+        "frobnicate (chrome://blargh:34)",
+        "DOMEvent",
+        "MinorGC",
+        "Rasterize",
+        "firefox-webcontent",
+        "chrome://blargh",
+        "frobnicate"
+      ]
+    }
+  ],
+  "tasktracer": {
+    "taskTable": {
+      "length": 0,
+      "dispatchTime": [],
+      "sourceEventId": [],
+      "sourceEventType": [],
+      "parentTaskId": [],
+      "beginTime": [],
+      "processId": [],
+      "threadIndex": [],
+      "endTime": [],
+      "ipdlMsg": [],
+      "label": [],
+      "address": []
+    },
+    "tasksIdToTaskIndexMap": [],
+    "addressTable": {
+      "length": 0,
+      "address": [],
+      "className": [],
+      "lib": []
+    },
+    "addressIndicesByLib": [],
+    "threadTable": {
+      "length": 0,
+      "tid": [],
+      "name": [],
+      "start": []
+    },
+    "tidToThreadIndexMap": [],
+    "stringArray": []
+  }
+}
