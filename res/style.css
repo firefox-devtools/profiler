@@ -545,6 +545,23 @@ body {
   min-height: 0;
 }
 
+.selectionScrubberRange {
+  top: 20px;
+  position: absolute;
+  padding: 4px 8px;
+  color: #fff;
+  background-color: #8095ca;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 200ms;
+}
+
+.selectionScrubberRange.hidden {
+  opacity: 0;
+}
+
 .selectionScrubberZoomButton {
   width: 30px;
   height: 30px;
