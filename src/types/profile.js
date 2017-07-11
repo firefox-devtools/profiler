@@ -115,6 +115,19 @@ export type UserTimingMarkerPayload = {
 };
 
 /**
+ * A fairly generic payload that is typically implemented as an 
+ * Resource Acquisition Is Initialization (RAII) within the
+ * Gecko profiler.
+ */
+export type TracingMarkerPayload = {
+  type: 'tracing',
+  startTime?: Milliseconds,
+  endTime?: Milliseconds,
+  category?: string,
+  interval: 'start' | 'end',
+};
+
+/**
  * The union of all the different marker payloads that perf.html knows about, this is
  * not guaranteed to be all the payloads that we actually get from the profiler.
  */
@@ -122,6 +135,7 @@ export type MarkerPayload =
   | GPUMarkerPayload
   | UserTimingMarkerPayload
   | PaintProfilerMarkerTracing
+  | TracingMarkerPayload
   | null;
 
 /**

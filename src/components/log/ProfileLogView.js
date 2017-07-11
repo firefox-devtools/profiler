@@ -8,9 +8,11 @@ import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import actions from '../../actions';
+import type { Thread } from '../../types/profile';
+import type { State } from '../../types/reducers';
 
 type Props = {
-  thread: { [key: string]: any },
+  thread: Thread,
 };
 
 class ProfileLogView extends PureComponent {
@@ -27,7 +29,9 @@ class ProfileLogView extends PureComponent {
             .filter(markerIndex => {
               const data = markers.data[markerIndex];
               return (
-                data !== null && 'category' in data && data.category === 'log'
+                data !== null &&
+                data.type === 'tracing' &&
+                data.category === 'log'
               );
             })
             .map(markerIndex => {
@@ -45,7 +49,7 @@ ProfileLogView.propTypes = {
 };
 
 export default connect(
-  state => ({
+  (state: State) => ({
     thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state),
   }),
   actions
