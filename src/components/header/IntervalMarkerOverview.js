@@ -187,12 +187,7 @@ class IntervalMarkerOverview extends PureComponent {
           onMouseOut={this._onMouseOut}
         />
         {tooltipContents
-          ? <Tooltip
-              mouseX={mouseX}
-              mouseY={mouseY}
-              offsetParent={this._takeCanvasRef}
-              boundedAtBottom={false}
-            >
+          ? <Tooltip mouseX={mouseX} mouseY={mouseY}>
               {tooltipContents}
             </Tooltip>
           : null}

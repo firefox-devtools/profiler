@@ -24,13 +24,30 @@ export function getProfileWithMarkers(markers: TestDefinedMarkers): Profile {
     data: [],
     length: 0,
   };
+  const samples = {
+    time: [],
+    responsiveness: [],
+    stack: [],
+    rss: [],
+    uss: [],
+    length: 0,
+  };
+
   markers.forEach(([name, time, data]) => {
     markersTable.name.push(stringTable.indexForString(name));
     markersTable.time.push(time);
     markersTable.data.push(data);
     markersTable.length++;
+
+    // trying to get a consistent profile with a sample for each marker
+    samples.time.push(data.startTime, data.endTime);
+    samples.length++;
   });
-  profile.threads.push(Object.assign({}, thread, { markers: markersTable }));
+
+  samples.time.sort();
+  profile.threads.push(
+    Object.assign({}, thread, { markers: markersTable, samples })
+  );
   return profile;
 }
 

@@ -4,16 +4,20 @@
 
 // @flow
 import React from 'react';
-import TimelineMarkers from '../../components/timeline/TimelineMarkers';
+import ProfileThreadTrackingMarkerOverview from '../../components/header/ProfileThreadTracingMarkerOverview';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../store/fixtures/profiles';
+import ReactDOM from 'react-dom';
 
 jest.useFakeTimers();
+ReactDOM.findDOMNode = jest.fn(() => ({
+  getBoundingClientRect: () => _getBoundingBox(200, 300),
+}));
 
-it('renders TimelineMarkers correctly', () => {
+it('renders ProfileThreadTracingMarkerOverview correctly', () => {
   // Tie the requestAnimationFrame into jest's fake timers.
   window.requestAnimationFrame = fn => setTimeout(fn, 0);
   window.devicePixelRatio = 1;
@@ -23,7 +27,7 @@ it('renders TimelineMarkers correctly', () => {
    * Mock out any created refs for the components with relevant information.
    */
   function createNodeMock(element) {
-    // <TimelineCanvas><canvas /></TimelineCanvas>
+    // This is the canvas used to draw markers
     if (element.type === 'canvas') {
       return {
         getBoundingClientRect: () => _getBoundingBox(200, 300),
@@ -31,24 +35,26 @@ it('renders TimelineMarkers correctly', () => {
         style: {},
       };
     }
-    // <TimelineViewport />
-    if (element.props.className.split(' ').includes('timelineViewport')) {
-      return {
-        getBoundingClientRect: () => _getBoundingBox(200, 300),
-      };
-    }
     return null;
   }
 
   const profile = getProfileWithMarkers([
+    ['GCMajor', 2, { startTime: 2, endTime: 12 }],
     ['Marker A', 0, { startTime: 0, endTime: 10 }],
     ['Marker B', 0, { startTime: 0, endTime: 10 }],
     ['Marker C', 5, { startTime: 5, endTime: 15 }],
   ]);
 
-  const timeline = renderer.create(
+  const overview = renderer.create(
     <Provider store={storeWithProfile(profile)}>
-      <TimelineMarkers threadIndex={0} viewHeight={1000} />
+      <ProfileThreadTrackingMarkerOverview
+        className="profileThreadTrackingMarkerOverview"
+        rangeStart={0}
+        rangeEnd={15}
+        threadIndex={0}
+        onSelect={() => {}}
+        isModifyingSelection={false}
+      />
     </Provider>,
     { createNodeMock }
   );
@@ -56,7 +62,7 @@ it('renders TimelineMarkers correctly', () => {
   // Flush any requestAnimationFrames.
   jest.runAllTimers();
 
-  const tree = timeline.toJSON();
+  const tree = overview.toJSON();
   const drawCalls = ctx.__flushDrawLog();
 
   expect(tree).toMatchSnapshot();
