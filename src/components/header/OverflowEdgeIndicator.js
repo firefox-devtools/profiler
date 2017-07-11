@@ -17,10 +17,10 @@ type Props = {
 class OverflowEdgeIndicator extends PureComponent {
   props: Props;
   state: {
-    overflowsOnTop: ?boolean,
-    overflowsOnRight: ?boolean,
-    overflowsOnBottom: ?boolean,
-    overflowsOnLeft: ?boolean,
+    overflowsOnTop: boolean,
+    overflowsOnRight: boolean,
+    overflowsOnBottom: boolean,
+    overflowsOnLeft: boolean,
   };
   _containerCreated: (elem: HTMLDivElement) => void;
   _container: HTMLDivElement;
