@@ -28,6 +28,8 @@ import ProfileCallTreeContextMenu from '../calltree/ProfileCallTreeContextMenu';
 import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
 
 import type { StartEndRange } from '../../types/units';
+import type { Tab } from './TabBar';
+import type { Action } from '../../types/actions';
 
 type Props = {
   className: string,
@@ -35,7 +37,7 @@ type Props = {
   timeRange: StartEndRange,
   selectedTab: string,
   changeSelectedTab: string => void,
-  changeTabOrder: (number[]) => void,
+  changeTabOrder: (number[]) => Action,
 };
 
 class ProfileViewer extends PureComponent {
@@ -43,7 +45,7 @@ class ProfileViewer extends PureComponent {
   state: {
     isMounted: boolean,
   };
-  _tabs: { name: string, title: string }[];
+  _tabs: Tab[];
 
   constructor(props) {
     super(props);
