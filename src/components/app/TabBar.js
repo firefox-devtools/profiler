@@ -2,17 +2,35 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import Reorderable from '../shared/Reorderable';
 
+import type { Action } from '../../types/actions';
+
+export type Tab = {
+  name: string,
+  title: string,
+};
+
+type Props = {
+  className?: string,
+  tabs: Tab[],
+  selectedTabName: string,
+  tabOrder: number[],
+  onSelectTab: string => void,
+  onChangeTabOrder: (number[]) => Action,
+};
+
 class TabBar extends PureComponent {
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
-    this._mouseDownListener = this._mouseDownListener.bind(this);
+    (this: any)._mouseDownListener = this._mouseDownListener.bind(this);
   }
 
-  _mouseDownListener(e) {
+  _mouseDownListener(e: SyntheticMouseEvent & { target: HTMLElement }) {
     this.props.onSelectTab(e.target.dataset.name);
   }
 
