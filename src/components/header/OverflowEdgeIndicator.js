@@ -2,13 +2,32 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 
 import './OverflowEdgeIndicator.css';
 
+type Props = {
+  className: string,
+  children: number,
+};
+
 class OverflowEdgeIndicator extends PureComponent {
-  constructor(props) {
+  props: Props;
+  state: {
+    overflowsOnTop: ?boolean,
+    overflowsOnRight: ?boolean,
+    overflowsOnBottom: ?boolean,
+    overflowsOnLeft: ?boolean,
+  };
+  _containerCreated: (elem: HTMLDivElement) => void;
+  _container: HTMLDivElement;
+  _contentsWrapperCreated: (elem: HTMLDivElement) => void;
+  _contentsWrapper: HTMLDivElement;
+
+  constructor(props: Props) {
     super(props);
     this.state = {
       overflowsOnTop: false,
@@ -16,7 +35,7 @@ class OverflowEdgeIndicator extends PureComponent {
       overflowsOnBottom: false,
       overflowsOnLeft: false,
     };
-    this._onScroll = this._onScroll.bind(this);
+    (this: any)._onScroll = this._onScroll.bind(this);
     this._containerCreated = elem => {
       this._container = elem;
     };

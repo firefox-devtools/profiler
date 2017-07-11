@@ -99,6 +99,7 @@ class ProfileMarkersView extends PureComponent {
     this._expandedNodeIds = [];
     this._onExpandedNodeIdsChange = () => {};
     this._onSelectionChange = this._onSelectionChange.bind(this);
+    this._treeView = null;
   }
 
   componentDidMount() {
@@ -106,7 +107,7 @@ class ProfileMarkersView extends PureComponent {
   }
 
   focus() {
-    this.refs.treeView.focus();
+    this._treeView.focus();
   }
 
   _onSelectionChange(selectedMarker) {
@@ -127,7 +128,7 @@ class ProfileMarkersView extends PureComponent {
           onExpandedNodesChange={this._onExpandedNodeIdsChange}
           selectedNodeId={selectedMarker}
           expandedNodeIds={this._expandedNodeIds}
-          ref="treeView"
+          ref={ref => (this._treeView = ref)}
         />
       </div>
     );

@@ -18,16 +18,18 @@ function categoryColorStrategy(
   switch (action.type) {
     case 'CHANGE_FLAME_CHART_COLOR_STRATEGY':
       return action.getCategory;
+    default:
+      return state;
   }
-  return state;
 }
 
 function labelingStrategy(state: GetLabel = getFunctionName, action: Action) {
   switch (action.type) {
     case 'CHANGE_FLAME_CHART_LABELING_STRATEGY':
       return action.getLabel;
+    default:
+      return state;
   }
-  return state;
 }
 
 export default combineReducers({ categoryColorStrategy, labelingStrategy });

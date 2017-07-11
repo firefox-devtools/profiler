@@ -198,8 +198,9 @@ export function filterThreadByImplementation(
         thread,
         funcIndex => funcTable.isJS[funcIndex]
       );
+    default:
+      return thread;
   }
-  return thread;
 }
 
 function _filterThreadByFunc(
@@ -937,8 +938,11 @@ export function getFriendlyThreadName(
         case 'plugin':
           label = 'Plugin';
           break;
+        default:
+        // should we throw here ?
       }
       break;
+    default:
   }
 
   if (!label) {

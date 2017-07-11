@@ -574,6 +574,7 @@ function getNormalizedScrollDelta(
       return delta * pageHeight;
     case DOM_DELTA_LINE:
       return delta * SCROLL_LINE_SIZE;
+    default:
   }
   // Scroll by pixel.
   return delta;

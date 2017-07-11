@@ -14,13 +14,17 @@ export function uploadBinaryProfileData(
         resolve(xhr.responseText);
       } else {
         reject(
-          `xhr onload with status != 200, xhr.statusText: ${xhr.statusText}`
+          new Error(
+            `xhr onload with status != 200, xhr.statusText: ${xhr.statusText}`
+          )
         );
       }
     };
 
     xhr.onerror = () => {
-      reject(`xhr onerror was called, xhr.statusText: ${xhr.statusText}`);
+      reject(
+        new Error(`xhr onerror was called, xhr.statusText: ${xhr.statusText}`)
+      );
     };
 
     xhr.upload.onprogress = e => {

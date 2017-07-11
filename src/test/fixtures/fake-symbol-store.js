@@ -19,7 +19,7 @@ export class FakeSymbolStore {
     if (lib.debugName in this._symbolTables) {
       return Promise.resolve(this._symbolTables[lib.debugName].addrs);
     }
-    return Promise.reject();
+    return Promise.reject(new Error());
   }
 
   getSymbolsForAddressesInLib(requestedAddressesIndices, lib) {
@@ -29,6 +29,6 @@ export class FakeSymbolStore {
         requestedAddressesIndices.map(index => syms[index])
       );
     }
-    return Promise.reject();
+    return Promise.reject(new Error());
   }
 }

@@ -87,11 +87,13 @@ class SummarizeLineGraph extends PureComponent {
           x2="0%"
           y2="100%"
         >
-          <stop offset="10%" stopColor="#e11800" /> // Red
-          <stop offset="60%" stopColor="#56b300" /> // Dark Green
-          <stop offset="85%" stopColor="#c8f983" /> // Light Green
-          <stop offset="95%" stopColor="rgba(200, 249, 131, 0)" /> //
-          Transparent
+          <stop offset="10%" stopColor="#e11800" /* Red */ />
+          <stop offset="60%" stopColor="#56b300" /* Dark Green */ />
+          <stop offset="85%" stopColor="#c8f983" /* Light Green */ />
+          <stop
+            offset="95%"
+            stopColor="rgba(200, 249, 131, 0)" /* Transparent */
+          />
         </linearGradient>;
   }
 
