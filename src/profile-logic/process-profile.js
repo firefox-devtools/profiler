@@ -104,7 +104,7 @@ function _cleanFunctionName(functionName: string): string {
 }
 
 function _extractFuncsAndResourcesFromFrames(
-  geckoFrameTable: GeckoFrameStruct,
+  geckoFrameStruct: GeckoFrameStruct,
   stringTable: UniqueStringArray,
   libs: Lib[]
 ): [FuncTable, ResourceTable, IndexIntoFuncTable[]] {
@@ -147,12 +147,18 @@ function _extractFuncsAndResourcesFromFrames(
     resourceTable.name[index] = url;
   }
 
-  const libToResourceIndex = new Map();
-  const libNameToResourceIndex = new Map();
-  const originToResourceIndex = new Map();
-  const stringTableIndexToNewFuncIndex = new Map();
+  const libToResourceIndex: Map<Lib, IndexIntoResourceTable> = new Map();
+  const originToResourceIndex: Map<string, IndexIntoResourceTable> = new Map();
+  const libNameToResourceIndex: Map<
+    IndexIntoStringTable,
+    IndexIntoResourceTable
+  > = new Map();
+  const stringTableIndexToNewFuncIndex: Map<
+    IndexIntoStringTable,
+    IndexIntoFuncTable
+  > = new Map();
 
-  const frameFuncs = geckoFrameTable.location.map(locationIndex => {
+  const frameFuncs = geckoFrameStruct.location.map(locationIndex => {
     let funcIndex = stringTableIndexToNewFuncIndex.get(locationIndex);
     if (funcIndex !== undefined) {
       return funcIndex;
@@ -278,18 +284,18 @@ function _extractFuncsAndResourcesFromFrames(
  * Explicitly recreate the frame table here to help enforce our assumptions about types.
  */
 function _processFrameTable(
-  geckoFrameTable: GeckoFrameStruct,
+  geckoFrameStruct: GeckoFrameStruct,
   funcTable: FuncTable,
   frameFuncs: IndexIntoFuncTable[]
 ): FrameTable {
   return {
     address: frameFuncs.map(funcIndex => funcTable.address[funcIndex]),
-    category: geckoFrameTable.category,
+    category: geckoFrameStruct.category,
     func: frameFuncs,
-    implementation: geckoFrameTable.implementation,
-    line: geckoFrameTable.line,
-    optimizations: geckoFrameTable.optimizations,
-    length: geckoFrameTable.length,
+    implementation: geckoFrameStruct.implementation,
+    line: geckoFrameStruct.line,
+    optimizations: geckoFrameStruct.optimizations,
+    length: geckoFrameStruct.length,
   };
 }
 
@@ -335,7 +341,7 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
  * information.
  */
 function _processThread(thread: GeckoThread, libs: Lib[]): Thread {
-  const geckoFrameTable: GeckoFrameStruct = _toStructOfArrays(
+  const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
     thread.frameTable
   );
   const geckoStackTable: GeckoStackStruct = _toStructOfArrays(
@@ -351,9 +357,9 @@ function _processThread(thread: GeckoThread, libs: Lib[]): Thread {
     funcTable,
     resourceTable,
     frameFuncs,
-  ] = _extractFuncsAndResourcesFromFrames(geckoFrameTable, stringTable, libs);
+  ] = _extractFuncsAndResourcesFromFrames(geckoFrameStruct, stringTable, libs);
   const frameTable: FrameTable = _processFrameTable(
-    geckoFrameTable,
+    geckoFrameStruct,
     funcTable,
     frameFuncs
   );
@@ -377,6 +383,11 @@ function _processThread(thread: GeckoThread, libs: Lib[]): Thread {
   };
 }
 
+/**
+ * This function is currently un-typed, and should be handled with properly
+ * supporting TaskTracer with types and tests. See issue 438:
+ * https://github.com/devtools-html/perf.html/issues/438
+ */
 function _addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
   const { data, start, threads } = tasktracer;
 
@@ -629,7 +640,7 @@ export function processProfile(geckoProfile: GeckoProfile): Profile {
  * Take a processed profile and remove any non-serializable classes such as the
  * StringTable class.
  */
-export function serializeProfile(profile: Profile) {
+export function serializeProfile(profile: Profile): string {
   // stringTable -> stringArray
   const newProfile = Object.assign({}, profile, {
     threads: profile.threads.map(thread => {
