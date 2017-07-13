@@ -4,7 +4,7 @@
 
 [perf.html] visualizes performance data recorded from web browsers. It is a tool designed to consume performance profiles from the Gecko Profiler but can visualize data from any profiler able to output in JSON. The interface is a web application built using [React] and [Redux] and runs entirely client-side.
 
-[Mozilla] develops this tool for examining the performance of [Firefox] as well as examining web page performance in the Firefox Developer Tools.
+[Mozilla] develops this tool to help make [Firefox] silky smooth and fast for millions of its users, and to help make sites and apps faster across the the web.
 
 ![](./screenshot.png?raw=true)
 
@@ -14,38 +14,29 @@ _This project was previously called [Cleopatra]._
 
 > Visit [perf-html.io](https://perf-html.io/) :rocket:
 
-This project is live on [https://perf-html.io/](https://perf-html.io/). You need to install the add-on provided at that website to record profile data from Firefox.
+This project is live on [https://perf-html.io/](https://perf-html.io/). The website includes instructions on how to get going to start recording and viewing performance profiles.
 
 ### Development
 
-> You'll find documentation for the project in the [docs folder](./docs) as well as `README.md` files in most folders in [/src](./src).
-
-We use [Yarn](http://yarnpkg.com/) as our dependency manager so you'll need to
-go and install it before running the following commands.
+To quickly get going first make sure [Yarn](http://yarnpkg.com/) is installed, and then run:
 
 ```bash
 git clone git@github.com:devtools-html/perf.html.git
-
 cd perf.html
 yarn install
-
 yarn start
 ```
 
-> To run on a different port, set the `PERFHTML_PORT` env variable to something else, eg `PERFHTML_PORT=1234 yarn start`
+For more detailed information on getting started contributing. We have plenty of docs available to get you started.
 
-> To run a faster production version use `yarn start-prod` instead of `yarn start`
-
-Assuming you've installed the add-on from [perf-html.io](https://perf-html.io/) you'll need to configure it to point to your local web development server.
-
- 1. Go to `about:addons`
- 2. Find the [Gecko Profiler add-on](https://cloud.githubusercontent.com/assets/2134/23817925/d02e5620-05ab-11e7-90dc-f28545d32dde.png)
- 3. Click [Preferences button](https://cloud.githubusercontent.com/assets/2134/23817941/ea20d800-05ab-11e7-8e0f-aa4558fe2b1b.png)
- 4. Change the value of the [Reporter URL](https://user-images.githubusercontent.com/167767/27658883-70068388-5c06-11e7-831e-14ed1438e9a3.png) to `http://localhost:4242/`
-
-**add-on**
-
-If you'd like to develop the add-on perf.html uses see the [Gecko Profiler] repository.
+| | |
+| ---- | --- |
+|[Contributing](./CONTRIBUTING.md)| Find out in detail how to get started and get your local development environment configured. |
+|[Code of Conduct](./CODE_OF_CONDUCT.md)| We want to create an open and inclusive community, we have a few guidelines to help us out. |
+|[Documentation](./docs)| Want to know how this whole thing works? Get started here. |
+|[Roadmap](./ROADMAP.md)| Get more information about why we are building this tool, and what we have planned. |
+|[Source Files](./src)| Dive into the inner workings of the code. Most folders have a `README.md` providing more information.
+|[Gecko Profiler Addon][Gecko Profiler]| perf.html can record profiles directly in the browser using an add-on, development takes place in another repo. |
 
 ### Discussion
 
@@ -55,15 +46,12 @@ Say hello on [slack] in the #perf channel.
 
 [MPL v2](./LICENSE)
 
-### Optional Notices
-
 Some permissive software licenses request but do not require an acknowledgement of the use of their software. We are very grateful to the following people and projects for their contributions to this product:
 
 * The [zlib] compression library (Jean-loup Gailly, Mark Adler and team)
 
 [slack-badge]: https://devtools-html-slack.herokuapp.com/badge.svg
 [slack]: https://devtools-html-slack.herokuapp.com/
-
 [perf.html]:https://perf-html.io/
 [React]:https://facebook.github.io/react/
 [Redux]:http://redux.js.org/
