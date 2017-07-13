@@ -566,6 +566,7 @@ export const selectorsForThread = (
       getProfileInterval,
       getFuncStackInfo,
       URLState.getImplementationFilter,
+      URLState.getInvertCallstack,
       ProfileTree.getCallTree
     );
 
