@@ -5,21 +5,30 @@
 import { processProfile } from '../../profile-logic/process-profile';
 import exampleProfile from '.././fixtures/profiles/example-profile';
 import { getCallTree } from '../../profile-logic/profile-tree';
-import { getFuncStackInfo, invertCallstack } from '../../profile-logic/profile-data';
+import {
+  getFuncStackInfo,
+  invertCallstack,
+} from '../../profile-logic/profile-data';
 
-describe('profile-tree', function () {
+describe('profile-tree', function() {
   const profile = processProfile(exampleProfile);
   const thread = profile.threads[0];
 
-  describe('unfiltered call tree', function () {
+  describe('unfiltered call tree', function() {
     const funcStackInfo = getFuncStackInfo(
       thread.stackTable,
       thread.frameTable,
       thread.funcTable
     );
-    const callTree = getCallTree(thread, profile.meta.interval, funcStackInfo, 'combined', false);
+    const callTree = getCallTree(
+      thread,
+      profile.meta.interval,
+      funcStackInfo,
+      'combined',
+      false
+    );
     const [rootFuncStackIndex] = callTree.getRoots();
-    it('calculates the the root of a calltree', function () {
+    it('calculates the the root of a calltree', function() {
       const rootNode = callTree.getNode(rootFuncStackIndex);
       expect(rootNode).toEqual({
         dim: false,
@@ -31,7 +40,7 @@ describe('profile-tree', function () {
         totalTimePercent: '100.0%',
       });
     });
-    it('calculates the children of the root node', function () {
+    it('calculates the children of the root node', function() {
       const childIndices = callTree.getChildren(rootFuncStackIndex);
       const childNodes = childIndices.map(index => callTree.getNode(index));
       expect(childNodes).toEqual([
@@ -48,18 +57,24 @@ describe('profile-tree', function () {
     });
   });
 
-  describe('inverted call tree', function () {
+  describe('inverted call tree', function() {
     const inverted = invertCallstack(thread);
     const funcStackInfo = getFuncStackInfo(
       inverted.stackTable,
       inverted.frameTable,
       inverted.funcTable
     );
-    const callTree = getCallTree(inverted, profile.meta.interval, funcStackInfo, 'combined', true);
+    const callTree = getCallTree(
+      inverted,
+      profile.meta.interval,
+      funcStackInfo,
+      'combined',
+      true
+    );
     const rootIndices = callTree.getRoots();
     const [firstRoot] = rootIndices;
 
-    it('calculates the inverted roots of a calltree', function () {
+    it('calculates the inverted roots of a calltree', function() {
       const rootNodes = rootIndices.map(index => callTree.getNode(index));
       expect(rootNodes).toEqual([
         {
@@ -110,7 +125,7 @@ describe('profile-tree', function () {
       ]);
     });
 
-    it('calculates the children of the inverted root node', function () {
+    it('calculates the children of the inverted root node', function() {
       const childIndices = callTree.getChildren(firstRoot);
       const childNodes = childIndices.map(index => callTree.getNode(index));
       expect(childNodes).toEqual([
