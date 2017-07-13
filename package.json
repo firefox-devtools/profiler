@@ -19,7 +19,7 @@
     "postcheckout": "node bin/post-checkout.js",
     "postmerge": "node bin/post-merge.js",
     "precommit": "lint-staged",
-    "prepush": "run-p flow license-check lint test",
+    "prepush": "yarn run test-all",
     "postrewrite": "node bin/post-rewrite.js",
     "publish": "rimraf public_html && cp -r dist public_html",
     "serve-static": "ws -d dist/ -s index.html -p 4242",
@@ -28,7 +28,8 @@
     "start-prod": "yarn run build-prod && yarn run serve-static --",
     "start-prod-readable": "yarn run build-prod-readable && yarn run serve-static --",
     "start-examples": "ws -d examples/ -s index.html -p 4242",
-    "test": "NODE_ENV=test jest"
+    "test": "NODE_ENV=test jest",
+    "test-all": "run-p flow license-check lint test"
   },
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MPL-2.0",
