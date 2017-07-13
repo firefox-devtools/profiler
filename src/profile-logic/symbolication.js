@@ -250,14 +250,14 @@ export function applyFunctionMerging(
  * and `onGotFuncNames` after each bit of symbolication, and resolves the returned
  * promise once completely done.
  */
-function symbolicateThread(
+async function symbolicateThread(
   thread: Thread,
   threadIndex: ThreadIndex,
   symbolStore: SymbolStore,
   symbolicationHandlers: SymbolicationHandlers
-): Promise<void[]> {
+): Promise<void> {
   const foundFuncMap = gatherFuncsInThread(thread);
-  return Promise.all(
+  await Promise.all(
     Array.from(foundFuncMap).map(function([lib, funcsToSymbolicate]) {
       // lib is a lib object from thread.libs.
       // funcsToSymbolicate is an array of funcIndex.
@@ -302,13 +302,13 @@ function symbolicateThread(
   );
 }
 
-function symbolicateTaskTracer(
+async function symbolicateTaskTracer(
   tasktracer: TaskTracer,
   symbolStore: SymbolStore,
   symbolicationHandlers: SymbolicationHandlers
-): Promise<void[]> {
+): Promise<void> {
   const { addressTable, addressIndicesByLib } = tasktracer;
-  return Promise.all(
+  await Promise.all(
     Array.from(addressIndicesByLib).map(([lib, addressIndices]) => {
       return symbolStore
         .getFuncAddressTableForLib(lib)
@@ -411,7 +411,7 @@ export function symbolicateProfile(
   profile: Profile,
   symbolStore: SymbolStore,
   symbolicationHandlers: SymbolicationHandlers
-): Promise<void[] | void> {
+): Promise<void> {
   const symbolicationPromises = profile.threads.map((thread, threadIndex) => {
     return symbolicateThread(
       thread,
