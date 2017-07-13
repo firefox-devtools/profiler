@@ -62,20 +62,32 @@ class MarkerTree {
       let category = 'unknown';
       let name = stringTable.getString(markers.name[markerIndex]);
       if (markers.data[markerIndex]) {
-        if ('category' in markers.data[markerIndex]) {
-          category = markers.data[markerIndex].category;
+        const data = markers.data[markerIndex];
+
+        if ('category' in data) {
+          category = data.category;
         }
-        if (markers.data[markerIndex].type === 'tracing') {
-          if (category === 'log') {
-            // name is actually the whole message that was sent to fprintf_stderr. Would you consider that.
-            if (name.length > 100) {
-              name = name.substring(0, 100) + '...';
+
+        switch (data.type) {
+          case 'tracing':
+            if (category === 'log') {
+              // name is actually the whole message that was sent to fprintf_stderr. Would you consider that.
+              if (name.length > 100) {
+                name = name.substring(0, 100) + '...';
+              }
+            } else {
+              name = `[${data.interval}] ${name}`;
             }
-          } else {
-            name = `[${markers.data[markerIndex].interval}] ${name}`;
-          }
+            break;
+
+          case 'UserTiming':
+            name = `${name}(${data.name})`;
+            break;
+
+          default:
         }
       }
+
       node = {
         timestamp: `${((markers.time[markerIndex] - this._zeroAt) /
           1000).toFixed(3)}s`,

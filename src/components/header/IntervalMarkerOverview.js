@@ -8,6 +8,7 @@ import classNames from 'classnames';
 import { timeCode } from '../../utils/time-code';
 import { withSize } from '../shared/WithSize';
 import Tooltip from '../shared/Tooltip';
+import TooltipHeaderWithDuration from '../shared/TooltipHeaderWithDuration';
 import type { Milliseconds, CssPixels } from '../../types/units';
 import type { TracingMarker } from '../../types/profile-derived';
 
@@ -164,10 +165,7 @@ class IntervalMarkerOverview extends PureComponent {
     this._scheduleDraw();
     const { className, isSelected, isModifyingSelection } = this.props;
     const { mouseDownItem, hoveredItem, mouseX, mouseY } = this.state;
-    const tooltipContents =
-      !isModifyingSelection && !mouseDownItem && hoveredItem
-        ? hoveredItem.title
-        : null;
+    const shouldShowTooltip = !isModifyingSelection && !mouseDownItem;
     const canvasClassName = className
       .split(' ')
       .map(name => `${name}Canvas`)
@@ -186,9 +184,12 @@ class IntervalMarkerOverview extends PureComponent {
           onMouseUp={this._onMouseUp}
           onMouseOut={this._onMouseOut}
         />
-        {tooltipContents
+        {shouldShowTooltip && hoveredItem
           ? <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              {tooltipContents}
+              <TooltipHeaderWithDuration
+                title={hoveredItem.title}
+                duration={hoveredItem.dur}
+              />
             </Tooltip>
           : null}
       </div>

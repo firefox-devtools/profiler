@@ -33,7 +33,7 @@
   text-overflow: ellipsis;
 }
 
-.tooltipName {
+.tooltipTitle {
   flex: 1;
   text-overflow: ellipsis;
   overflow: hidden;

@@ -177,6 +177,17 @@ const thread = {
           phase: 3,
         },
       ],
+      [
+        11, // UserTiming
+        12,
+        {
+          startTime: 12,
+          endTime: 13,
+          type: 'UserTiming',
+          name: 'processing-thread',
+          entryType: 'measure',
+        },
+      ],
     ],
   },
   stringTable: [
@@ -191,6 +202,7 @@ const thread = {
     'DOMEvent',
     'MinorGC',
     'Rasterize',
+    'UserTiming',
   ],
 };
 

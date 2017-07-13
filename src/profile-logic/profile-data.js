@@ -18,6 +18,7 @@ import type {
   IndexIntoStackTable,
   ThreadIndex,
 } from '../types/profile';
+import type { MarkerPayload } from '../types/markers';
 import type {
   FuncStackInfo,
   FuncStackTable,
@@ -848,6 +849,20 @@ export function getJankInstances(
   return jankInstances;
 }
 
+function getMarkerTitle(name: string, data: MarkerPayload): string {
+  let title = name;
+  if (data) {
+    switch (data.type) {
+      case 'UserTiming': {
+        title = `${name}(${data.name})`;
+        break;
+      }
+      default:
+    }
+  }
+  return title;
+}
+
 export function getTracingMarkers(thread: Thread): TracingMarker[] {
   const { stringTable, markers } = thread;
   const tracingMarkers: TracingMarker[] = [];
@@ -861,12 +876,13 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
       const time = markers.time[i];
       const nameStringIndex = markers.name[i];
       if (data.interval === 'start') {
+        const name = stringTable.getString(nameStringIndex);
         openMarkers.set(nameStringIndex, {
           start: time,
-          name: stringTable.getString(nameStringIndex),
+          name,
           dur: 0,
-          title: null,
           data,
+          title: name,
         });
       } else if (data.interval === 'end') {
         const marker = openMarkers.get(nameStringIndex);
@@ -875,9 +891,6 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
         }
         if (marker.start !== undefined) {
           marker.dur = time - marker.start;
-        }
-        if (marker.name !== undefined && marker.dur !== undefined) {
-          marker.title = `${marker.name} for ${marker.dur.toFixed(2)}ms`;
         }
         tracingMarkers.push(marker);
       }
@@ -892,7 +905,7 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
             dur: duration,
             name,
             data,
-            title: `${name} for ${duration.toFixed(2)}ms`,
+            title: getMarkerTitle(name, data),
           });
         }
       }

@@ -5,6 +5,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import TextMeasurement from '../../utils/text-measurement';
+import TooltipHeaderWithDuration from '../shared/TooltipHeaderWithDuration';
 import withTimelineViewport from './TimelineViewport';
 import TimelineCanvas from './TimelineCanvas';
 
@@ -203,16 +204,6 @@ class FlameChartCanvas extends PureComponent {
 
     const duration =
       stackTiming.end[stackTableIndex] - stackTiming.start[stackTableIndex];
-    let durationString;
-    if (duration >= 10) {
-      durationString = duration.toFixed(0);
-    } else if (duration >= 1) {
-      durationString = duration.toFixed(1);
-    } else if (duration >= 0.1) {
-      durationString = duration.toFixed(2);
-    } else {
-      durationString = duration.toFixed(3);
-    }
 
     const stackIndex = stackTiming.stack[stackTableIndex];
     const frameIndex = thread.stackTable.frame[stackIndex];
@@ -251,14 +242,11 @@ class FlameChartCanvas extends PureComponent {
 
     return (
       <div className="flameChartCanvasTooltip">
-        <div className="tooltipOneLine tooltipHeader">
-          <div className="tooltipTiming">
-            {durationString}ms
-          </div>
-          <div className="tooltipName">
-            {label}
-          </div>
-        </div>
+        <TooltipHeaderWithDuration
+          className="tooltipHeader"
+          duration={duration}
+          title={label}
+        />
         <div className="tooltipOneLine tooltipDetails">
           <div className="tooltipLabel">Category:</div>
           <div
