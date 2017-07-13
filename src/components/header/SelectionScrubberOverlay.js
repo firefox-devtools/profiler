@@ -2,14 +2,41 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import clamp from 'clamp';
 import Draggable from '../shared/Draggable';
 import { getFormattedTimeLength } from '../../profile-logic/range-filters';
+import { updateProfileSelection } from '../../actions/profile-view';
+import type { Milliseconds } from '../../types/units';
 
-export default class SelectionScubberOverlay extends PureComponent {
-  constructor(props) {
+type Props = {
+  rangeStart: number,
+  rangeEnd: number,
+  selectionStart: number,
+  selectionEnd: number,
+  isModifying: boolean,
+  width: number,
+  onSelectionChange: typeof updateProfileSelection,
+  onZoomButtonClick: (start: Milliseconds, end: Milliseconds) => void,
+};
+
+type OnMove = (
+  originalValue: { selectionEnd: number, selectionStart: number },
+  dx: number,
+  dy: number,
+  isModifying: boolean
+) => void;
+
+export default class SelectionScrubberOverlay extends PureComponent {
+  props: Props;
+  _rangeStartOnMove: OnMove;
+  _moveRangeOnMove: OnMove;
+  _rangeEndOnMove: OnMove;
+
+  constructor(props: Props) {
     super(props);
 
     const makeOnMove = fun => (originalValue, dx, dy, isModifying) => {
@@ -46,15 +73,15 @@ export default class SelectionScubberOverlay extends PureComponent {
       endDelta: delta,
     }));
 
-    this._zoomButtonOnMouseDown = this._zoomButtonOnMouseDown.bind(this);
-    this._zoomButtonOnClick = this._zoomButtonOnClick.bind(this);
+    (this: any)._zoomButtonOnMouseDown = this._zoomButtonOnMouseDown.bind(this);
+    (this: any)._zoomButtonOnClick = this._zoomButtonOnClick.bind(this);
   }
 
-  _zoomButtonOnMouseDown(e) {
+  _zoomButtonOnMouseDown(e: MouseEvent) {
     e.stopPropagation();
   }
 
-  _zoomButtonOnClick(e) {
+  _zoomButtonOnClick(e: MouseEvent) {
     e.stopPropagation();
     const { selectionStart, selectionEnd } = this.props;
     this.props.onZoomButtonClick(selectionStart, selectionEnd);
@@ -121,7 +148,7 @@ export default class SelectionScubberOverlay extends PureComponent {
   }
 }
 
-SelectionScubberOverlay.propTypes = {
+SelectionScrubberOverlay.propTypes = {
   rangeStart: PropTypes.number.isRequired,
   rangeEnd: PropTypes.number.isRequired,
   selectionStart: PropTypes.number,
