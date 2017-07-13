@@ -2,17 +2,27 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { PureComponent, PropTypes } from 'react';
+// @flow
 
+import React, { PureComponent, PropTypes } from 'react';
+import type { Thread } from '../../types/profile';
 import './ThreadMarkerOverlay.css';
 
+type Props = {
+  rangeStart: number,
+  rangeEnd: number,
+  thread: Thread,
+  onSelectMarker: number => void,
+};
+
 class ThreadMarkerOverlay extends PureComponent {
-  constructor(props) {
+  props: Props;
+  constructor(props: Props) {
     super(props);
-    this._mouseDownListener = this._mouseDownListener.bind(this);
+    (this: any)._mouseDownListener = this._mouseDownListener.bind(this);
   }
 
-  _mouseDownListener(e) {
+  _mouseDownListener(e: MouseEvent & { target: HTMLElement }) {
     if (!('index' in e.target.dataset)) {
       return;
     }
