@@ -12,7 +12,7 @@ type Props = {
   rangeStart: number,
   rangeEnd: number,
   thread: Thread,
-  onSelectMarker: number => void,
+  onSelectMarker: number => *,
 };
 
 class ThreadMarkerOverlay extends PureComponent {
@@ -22,7 +22,7 @@ class ThreadMarkerOverlay extends PureComponent {
     (this: any)._mouseDownListener = this._mouseDownListener.bind(this);
   }
 
-  _mouseDownListener(e: MouseEvent & { target: HTMLElement }) {
+  _mouseDownListener(e: SyntheticMouseEvent & { target: HTMLElement }) {
     if (!('index' in e.target.dataset)) {
       return;
     }

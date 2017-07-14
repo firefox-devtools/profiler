@@ -9,22 +9,23 @@ import classNames from 'classnames';
 import clamp from 'clamp';
 import Draggable from '../shared/Draggable';
 import { getFormattedTimeLength } from '../../profile-logic/range-filters';
-import { updateProfileSelection } from '../../actions/profile-view';
+import type { ProfileSelection } from '../../types/actions';
+import type { Action } from '../../types/store';
 import type { Milliseconds } from '../../types/units';
 
 type Props = {
-  rangeStart: number,
-  rangeEnd: number,
-  selectionStart: number,
-  selectionEnd: number,
+  rangeStart: Milliseconds,
+  rangeEnd: Milliseconds,
+  selectionStart: Milliseconds,
+  selectionEnd: Milliseconds,
   isModifying: boolean,
   width: number,
-  onSelectionChange: typeof updateProfileSelection,
-  onZoomButtonClick: (start: Milliseconds, end: Milliseconds) => void,
+  onSelectionChange: (selection: ProfileSelection) => Action,
+  onZoomButtonClick: (start: Milliseconds, end: Milliseconds) => *,
 };
 
 type OnMove = (
-  originalValue: { selectionEnd: number, selectionStart: number },
+  originalValue: { selectionStart: Milliseconds, selectionEnd: Milliseconds },
   dx: number,
   dy: number,
   isModifying: boolean
@@ -77,11 +78,11 @@ export default class SelectionScrubberOverlay extends PureComponent {
     (this: any)._zoomButtonOnClick = this._zoomButtonOnClick.bind(this);
   }
 
-  _zoomButtonOnMouseDown(e: MouseEvent) {
+  _zoomButtonOnMouseDown(e: SyntheticMouseEvent) {
     e.stopPropagation();
   }
 
-  _zoomButtonOnClick(e: MouseEvent) {
+  _zoomButtonOnClick(e: SyntheticMouseEvent) {
     e.stopPropagation();
     const { selectionStart, selectionEnd } = this.props;
     this.props.onZoomButtonClick(selectionStart, selectionEnd);
