@@ -1,5 +1,5 @@
 // @flow
-import type { UserTimingMarkerPayload, MarkerPayload } from '../types/profile';
+import type { UserTimingMarkerPayload, MarkerPayload } from '../types/markers';
 import type {
   TracingMarker,
   MarkerTiming,

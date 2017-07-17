@@ -4,7 +4,7 @@
 
 // @flow
 import type { Milliseconds } from './units';
-import type { MarkerPayload } from './profile';
+import type { MarkerPayload } from './markers';
 
 export type IndexIntoFuncStackTable = number;
 
