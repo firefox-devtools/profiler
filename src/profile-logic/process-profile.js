@@ -1,11 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
 
 import { getContainingLibrary, getClosestLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes } from './profile-data';
 import { provideHostSide } from '../utils/promise-worker';
+import immutableUpdate from '../utils/immutable-update';
 import {
   CURRENT_VERSION,
   upgradeProcessedProfileToCurrentVersion,
@@ -17,6 +19,31 @@ import {
   convertOldCleopatraProfile,
 } from './old-cleopatra-profile-format';
 import { getEmptyTaskTracerData } from './task-tracer';
+import type {
+  Profile,
+  Thread,
+  FrameTable,
+  SamplesTable,
+  StackTable,
+  MarkersTable,
+  Lib,
+  FuncTable,
+  ResourceTable,
+  IndexIntoFuncTable,
+  IndexIntoStringTable,
+  IndexIntoResourceTable,
+} from '../types/profile';
+import type { Milliseconds } from '../types/units';
+import type {
+  GeckoProfile,
+  GeckoThread,
+  GeckoMarkerStruct,
+  GeckoFrameStruct,
+  GeckoSampleStruct,
+  GeckoStackStruct,
+} from '../types/gecko-profile';
+
+type RegExpResult = null | string[];
 /**
  * Module for converting a Gecko profile into the 'processed' format.
  * @module process-profile
@@ -28,13 +55,20 @@ import { getEmptyTaskTracerData } from './task-tracer';
  * drastically reduces the number of JS objects the JS engine has to deal with,
  * resulting in fewer GC pauses and hopefully better performance.
  *
- * @param {object} geckoTable A data table of the form `{ schema, data }`.
- * @return {object} A data table of the form `{ length: number, field1: array, field2: array }`
+ * e.g Take geckoTable A data table of the form
+ *   `{ schema, data }`.
+ * And turn it into a data table of the form
+ *  `{ length: number, field1: array, field2: array }`
  */
-function toStructOfArrays(geckoTable) {
+function _toStructOfArrays(geckoTable: Object): Object {
   const result = { length: geckoTable.data.length };
   for (const fieldName in geckoTable.schema) {
     const fieldIndex = geckoTable.schema[fieldName];
+    if (typeof fieldIndex !== 'number') {
+      throw new Error(
+        'fieldIndex must be a number in the Gecko profile table.'
+      );
+    }
     result[fieldName] = geckoTable.data.map(
       entry => (fieldIndex in entry ? entry[fieldIndex] : null)
     );
@@ -42,9 +76,11 @@ function toStructOfArrays(geckoTable) {
   return result;
 }
 
-// JS File information sometimes comes with multiple URIs which are chained
-// with " -> ". We only want the last URI in this list.
-function getRealScriptURI(url) {
+/**
+ * JS File information sometimes comes with multiple URIs which are chained
+ * with " -> ". We only want the last URI in this list.
+ */
+function _getRealScriptURI(url: string): string {
   if (url) {
     const urls = url.split(' -> ');
     return urls[urls.length - 1];
@@ -52,14 +88,14 @@ function getRealScriptURI(url) {
   return url;
 }
 
-function sortByField(fieldName, geckoTable) {
-  const fieldIndex = geckoTable.schema[fieldName];
-  const sortedData = geckoTable.data.slice(0);
+function _sortByField<T: Object>(fieldName: string, geckoTable: T): T {
+  const fieldIndex: number = geckoTable.schema[fieldName];
+  const sortedData: any[] = geckoTable.data.slice(0);
   sortedData.sort((a, b) => a[fieldIndex] - b[fieldIndex]);
   return Object.assign({}, geckoTable, { data: sortedData });
 }
 
-function cleanFunctionName(functionName) {
+function _cleanFunctionName(functionName: string): string {
   const ignoredPrefix = 'non-virtual thunk to ';
   if (functionName.startsWith && functionName.startsWith(ignoredPrefix)) {
     return functionName.substr(ignoredPrefix.length);
@@ -67,20 +103,12 @@ function cleanFunctionName(functionName) {
   return functionName;
 }
 
-/**
- * Convert the given thread into processed form. See docs/gecko-profile-format for more
- * information.
- * @param {object} thread The thread object, in the Gecko format.
- * @param {array} libs A libs array.
- * @return {object} A new thread object in the 'processed' format.
- */
-function processThread(thread, libs) {
-  const stringTable = new UniqueStringArray(thread.stringTable);
-  const frameTable = toStructOfArrays(thread.frameTable);
-  const stackTable = toStructOfArrays(thread.stackTable);
-  const samples = toStructOfArrays(thread.samples);
-  const markers = toStructOfArrays(sortByField('time', thread.markers));
-  const funcTable = {
+function _extractFuncsAndResourcesFromFrames(
+  geckoFrameStruct: GeckoFrameStruct,
+  stringTable: UniqueStringArray,
+  libs: Lib[]
+): [FuncTable, ResourceTable, IndexIntoFuncTable[]] {
+  const funcTable: FuncTable = {
     length: 0,
     name: [],
     resource: [],
@@ -89,16 +117,7 @@ function processThread(thread, libs) {
     fileName: [],
     lineNumber: [],
   };
-  function addFunc(name, resource, address, isJS, fileName, lineNumber) {
-    const index = funcTable.length++;
-    funcTable.name[index] = name;
-    funcTable.resource[index] = resource;
-    funcTable.address[index] = address;
-    funcTable.isJS[index] = isJS;
-    funcTable.fileName[index] = fileName;
-    funcTable.lineNumber[index] = lineNumber;
-  }
-  const resourceTable = {
+  const resourceTable: ResourceTable = {
     length: 0,
     type: [],
     name: [],
@@ -107,37 +126,46 @@ function processThread(thread, libs) {
     addonId: [],
     host: [],
   };
-  function addLibResource(name, lib) {
+  function addLibResource(name: IndexIntoStringTable, libIndex: number) {
     const index = resourceTable.length++;
     resourceTable.type[index] = resourceTypes.library;
     resourceTable.name[index] = name;
-    resourceTable.lib[index] = lib;
+    resourceTable.lib[index] = libIndex;
   }
-  function addWebhostResource(origin, host) {
+  function addWebhostResource(
+    origin: IndexIntoStringTable,
+    host: IndexIntoStringTable
+  ) {
     const index = resourceTable.length++;
     resourceTable.type[index] = resourceTypes.webhost;
     resourceTable.name[index] = origin;
     resourceTable.host[index] = host;
   }
-  function addURLResource(url) {
+  function addURLResource(url: IndexIntoStringTable) {
     const index = resourceTable.length++;
     resourceTable.type[index] = resourceTypes.url;
     resourceTable.name[index] = url;
   }
 
-  const libToResourceIndex = new Map();
-  const libNameToResourceIndex = new Map();
-  const originToResourceIndex = new Map();
-  const stringTableIndexToNewFuncIndex = new Map();
+  const libToResourceIndex: Map<Lib, IndexIntoResourceTable> = new Map();
+  const originToResourceIndex: Map<string, IndexIntoResourceTable> = new Map();
+  const libNameToResourceIndex: Map<
+    IndexIntoStringTable,
+    IndexIntoResourceTable
+  > = new Map();
+  const stringTableIndexToNewFuncIndex: Map<
+    IndexIntoStringTable,
+    IndexIntoFuncTable
+  > = new Map();
 
-  frameTable.func = frameTable.location.map(locationIndex => {
+  const frameFuncs = geckoFrameStruct.location.map(locationIndex => {
     let funcIndex = stringTableIndexToNewFuncIndex.get(locationIndex);
     if (funcIndex !== undefined) {
       return funcIndex;
     }
 
     let funcNameIndex = locationIndex;
-    let resourceIndex = -1;
+    let resourceIndex: IndexIntoResourceTable | -1 = -1;
     let addressRelativeToLib = -1;
     let isJS = false;
     let fileName = null;
@@ -148,43 +176,48 @@ function processThread(thread, libs) {
       const lib = getContainingLibrary(libs, address);
       if (lib) {
         addressRelativeToLib = address - lib.start;
-        if (libToResourceIndex.has(lib)) {
-          resourceIndex = libToResourceIndex.get(lib);
-        } else {
+        // Flow doesn't understand Map.prototype.has()
+        const maybeResourceIndex = libToResourceIndex.get(lib);
+        if (maybeResourceIndex === undefined) {
           resourceIndex = resourceTable.length;
           libToResourceIndex.set(lib, resourceIndex);
           const nameStringIndex = stringTable.indexForString(lib.debugName);
           addLibResource(nameStringIndex, libs.indexOf(lib));
+        } else {
+          resourceIndex = maybeResourceIndex;
         }
       }
     } else {
-      const cppMatch =
+      const cppMatch: RegExpResult =
         /^(.*) \(in ([^)]*)\) (\+ [0-9]+)$/.exec(locationString) ||
         /^(.*) \(in ([^)]*)\) (\(.*:.*\))$/.exec(locationString) ||
         /^(.*) \(in ([^)]*)\)$/.exec(locationString);
       if (cppMatch) {
         funcNameIndex = stringTable.indexForString(
-          cleanFunctionName(cppMatch[1])
+          _cleanFunctionName(cppMatch[1])
         );
         const libraryNameStringIndex = stringTable.indexForString(cppMatch[2]);
         funcIndex = stringTableIndexToNewFuncIndex.get(funcNameIndex);
         if (funcIndex !== undefined) {
           return funcIndex;
         }
-        if (libNameToResourceIndex.has(libraryNameStringIndex)) {
-          resourceIndex = libNameToResourceIndex.get(libraryNameStringIndex);
-        } else {
+        const maybeResourceIndex = libNameToResourceIndex.get(
+          libraryNameStringIndex
+        );
+        if (maybeResourceIndex === undefined) {
           resourceIndex = resourceTable.length;
           libNameToResourceIndex.set(libraryNameStringIndex, resourceIndex);
           addLibResource(libraryNameStringIndex, -1);
+        } else {
+          resourceIndex = maybeResourceIndex;
         }
       } else {
-        const jsMatch =
+        const jsMatch: RegExpResult =
           /^(.*) \((.*):([0-9]+)\)$/.exec(locationString) ||
           /^()(.*):([0-9]+)$/.exec(locationString);
         if (jsMatch) {
           isJS = true;
-          const scriptURI = getRealScriptURI(jsMatch[2]);
+          const scriptURI = _getRealScriptURI(jsMatch[2]);
           let origin, host;
           try {
             const url = new URL(scriptURI);
@@ -197,9 +230,8 @@ function processThread(thread, libs) {
             origin = scriptURI;
             host = null;
           }
-          if (originToResourceIndex.has(origin)) {
-            resourceIndex = originToResourceIndex.get(origin);
-          } else {
+          const maybeResourceIndex = originToResourceIndex.get(origin);
+          if (maybeResourceIndex === undefined) {
             resourceIndex = resourceTable.length;
             originToResourceIndex.set(origin, resourceIndex);
             const originStringIndex = stringTable.indexForString(origin);
@@ -210,7 +242,10 @@ function processThread(thread, libs) {
               const urlStringIndex = stringTable.indexForString(scriptURI);
               addURLResource(urlStringIndex);
             }
+          } else {
+            resourceIndex = maybeResourceIndex;
           }
+
           if (jsMatch[1]) {
             funcNameIndex = stringTable.indexForString(jsMatch[1]);
           } else {
@@ -223,26 +258,114 @@ function processThread(thread, libs) {
             );
           }
           fileName = stringTable.indexForString(scriptURI);
-          lineNumber = jsMatch[3] | 0;
+          lineNumber = parseInt(jsMatch[3], 10);
         }
       }
     }
     funcIndex = funcTable.length;
-    addFunc(
-      funcNameIndex,
-      resourceIndex,
-      addressRelativeToLib,
-      isJS,
-      fileName,
-      lineNumber
-    );
+    {
+      // Add the function to the funcTable.
+      const index = funcTable.length++;
+      funcTable.name[index] = funcNameIndex;
+      funcTable.resource[index] = resourceIndex;
+      funcTable.address[index] = addressRelativeToLib;
+      funcTable.isJS[index] = isJS;
+      funcTable.fileName[index] = fileName;
+      funcTable.lineNumber[index] = lineNumber;
+    }
     stringTableIndexToNewFuncIndex.set(locationIndex, funcIndex);
     return funcIndex;
   });
-  frameTable.address = frameTable.func.map(
-    funcIndex => funcTable.address[funcIndex]
+
+  return [funcTable, resourceTable, frameFuncs];
+}
+
+/**
+ * Explicitly recreate the frame table here to help enforce our assumptions about types.
+ */
+function _processFrameTable(
+  geckoFrameStruct: GeckoFrameStruct,
+  funcTable: FuncTable,
+  frameFuncs: IndexIntoFuncTable[]
+): FrameTable {
+  return {
+    address: frameFuncs.map(funcIndex => funcTable.address[funcIndex]),
+    category: geckoFrameStruct.category,
+    func: frameFuncs,
+    implementation: geckoFrameStruct.implementation,
+    line: geckoFrameStruct.line,
+    optimizations: geckoFrameStruct.optimizations,
+    length: geckoFrameStruct.length,
+  };
+}
+
+/**
+ * Explicitly recreate the stack table here to help enforce our assumptions about types.
+ */
+function _processStackTable(geckoStackTable: GeckoStackStruct): StackTable {
+  return {
+    frame: geckoStackTable.frame,
+    prefix: geckoStackTable.prefix,
+    length: geckoStackTable.length,
+  };
+}
+
+/**
+ * Explicitly recreate the markers here to help enforce our assumptions about types.
+ */
+function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
+  return {
+    data: geckoMarkers.data,
+    name: geckoMarkers.name,
+    time: geckoMarkers.time,
+    length: geckoMarkers.length,
+  };
+}
+
+/**
+ * Explicitly recreate the markers here to help enforce our assumptions about types.
+ */
+function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
+  return {
+    responsiveness: geckoSamples.responsiveness,
+    stack: geckoSamples.stack,
+    time: geckoSamples.time,
+    rss: geckoSamples.rss,
+    uss: geckoSamples.uss,
+    length: geckoSamples.length,
+  };
+}
+
+/**
+ * Convert the given thread into processed form. See docs/gecko-profile-format for more
+ * information.
+ */
+function _processThread(thread: GeckoThread, libs: Lib[]): Thread {
+  const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
+    thread.frameTable
   );
-  delete frameTable.location;
+  const geckoStackTable: GeckoStackStruct = _toStructOfArrays(
+    thread.stackTable
+  );
+  const geckoSamples: GeckoSampleStruct = _toStructOfArrays(thread.samples);
+  const geckoMarkers: GeckoMarkerStruct = _toStructOfArrays(
+    _sortByField('time', thread.markers)
+  );
+
+  const stringTable = new UniqueStringArray(thread.stringTable);
+  const [
+    funcTable,
+    resourceTable,
+    frameFuncs,
+  ] = _extractFuncsAndResourcesFromFrames(geckoFrameStruct, stringTable, libs);
+  const frameTable: FrameTable = _processFrameTable(
+    geckoFrameStruct,
+    funcTable,
+    frameFuncs
+  );
+  const stackTable = _processStackTable(geckoStackTable);
+  const markers = _processMarkers(geckoMarkers);
+  const samples = _processSamples(geckoSamples);
 
   return {
     name: thread.name,
@@ -260,7 +383,12 @@ function processThread(thread, libs) {
   };
 }
 
-function addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
+/**
+ * This function is currently un-typed, and should be handled with properly
+ * supporting TaskTracer with types and tests. See issue 438:
+ * https://github.com/devtools-html/perf.html/issues/438
+ */
+function _addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
   const { data, start, threads } = tasktracer;
 
   const {
@@ -405,15 +533,13 @@ function addProcessedTaskTracerData(tasktracer, result, libs, startTime) {
  * subprocess profiles into the parent process profile; each profile's process
  * has its own timebase, and we don't want to keep converting timestamps when
  * we deal with the integrated profile.
- * @param {object} samples The table of samples/markers.
- * @param {number} delta The time delta, in milliseconds, by which to adjust.
- * @return {object} A samples table with adjusted time values.
  */
-function adjustSampleTimestamps(samples, delta) {
+function _adjustSampleTimestamps(
+  samples: SamplesTable,
+  delta: Milliseconds
+): SamplesTable {
   return Object.assign({}, samples, {
-    time: samples.time.map(
-      time => (time === undefined ? undefined : time + delta)
-    ),
+    time: samples.time.map(time => time + delta),
   });
 }
 
@@ -422,20 +548,18 @@ function adjustSampleTimestamps(samples, delta) {
  * integrating subprocess profiles into the parent process profile; each
  * profile's process has its own timebase, and we don't want to keep
  * converting timestamps when we deal with the integrated profile.
- * @param {object} samples The table of markers.
- * @param {number} delta The time delta, in milliseconds, by which to adjust.
- * @return {object} A markers table with adjusted time values.
  */
-function adjustMarkerTimestamps(markers, delta) {
+function _adjustMarkerTimestamps(
+  markers: MarkersTable,
+  delta: Milliseconds
+): MarkersTable {
   return Object.assign({}, markers, {
-    time: markers.time.map(
-      time => (time === undefined ? undefined : time + delta)
-    ),
+    time: markers.time.map(time => time + delta),
     data: markers.data.map(data => {
       if (!data) {
         return data;
       }
-      const newData = Object.assign({}, data);
+      const newData = immutableUpdate(data);
       if ('startTime' in newData) {
         newData.startTime += delta;
       }
@@ -450,66 +574,60 @@ function adjustMarkerTimestamps(markers, delta) {
 /**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
- * For a description of the processed format, look at docs/gecko-profile-format or
- * alternately the tests for this function.
- * @param {object} profile A profile object, in the Gecko format.
- * @return {object} A new profile object, in the 'processed' format.
+ * For a description of the processed format, look at docs/gecko-profile-format.md
  */
-export function processProfile(profile) {
+export function processProfile(geckoProfile: GeckoProfile): Profile {
   // Handle profiles from older versions of Gecko. This call might throw an
   // exception.
-  upgradeGeckoProfileToCurrentVersion(profile);
+  upgradeGeckoProfileToCurrentVersion(geckoProfile);
 
-  const libs = profile.libs;
+  const libs = geckoProfile.libs;
   let threads = [];
   const tasktracer = getEmptyTaskTracerData();
 
-  if ('tasktracer' in profile && 'threads' in profile.tasktracer) {
-    addProcessedTaskTracerData(
-      profile.tasktracer,
+  if (geckoProfile.tasktracer && geckoProfile.tasktracer.threads) {
+    _addProcessedTaskTracerData(
+      geckoProfile.tasktracer,
       tasktracer,
       libs,
-      profile.meta.startTime
+      geckoProfile.meta.startTime
     );
   }
 
-  for (const thread of profile.threads) {
-    threads.push(processThread(thread, libs));
+  for (const thread of geckoProfile.threads) {
+    threads.push(_processThread(thread, libs));
   }
 
-  for (const subprocessProfile of profile.processes) {
+  for (const subprocessProfile of geckoProfile.processes) {
     const subprocessLibs = subprocessProfile.libs;
     const adjustTimestampsBy =
-      subprocessProfile.meta.startTime - profile.meta.startTime;
+      subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
     threads = threads.concat(
       subprocessProfile.threads.map(thread => {
-        const newThread = processThread(thread, subprocessLibs);
-        newThread.samples = adjustSampleTimestamps(
+        const newThread = _processThread(thread, subprocessLibs);
+        newThread.samples = _adjustSampleTimestamps(
           newThread.samples,
           adjustTimestampsBy
         );
-        newThread.markers = adjustMarkerTimestamps(
+        newThread.markers = _adjustMarkerTimestamps(
           newThread.markers,
           adjustTimestampsBy
         );
         return newThread;
       })
     );
-    if (
-      'tasktracer' in subprocessProfile &&
-      'threads' in subprocessProfile.tasktracer
-    ) {
-      addProcessedTaskTracerData(
+    if (subprocessProfile.tasktracer && subprocessProfile.tasktracer.threads) {
+      _addProcessedTaskTracerData(
         subprocessProfile.tasktracer,
         tasktracer,
         subprocessLibs,
-        profile.meta.startTime
+        geckoProfile.meta.startTime
       );
     }
   }
 
   const result = {
-    meta: Object.assign({}, profile.meta, {
+    meta: Object.assign({}, geckoProfile.meta, {
       preprocessedProfileVersion: CURRENT_VERSION,
     }),
     threads,
@@ -518,7 +636,11 @@ export function processProfile(profile) {
   return result;
 }
 
-export function serializeProfile(profile) {
+/**
+ * Take a processed profile and remove any non-serializable classes such as the
+ * StringTable class.
+ */
+export function serializeProfile(profile: Profile): string {
   // stringTable -> stringArray
   const newProfile = Object.assign({}, profile, {
     threads: profile.threads.map(thread => {
@@ -539,7 +661,14 @@ export function serializeProfile(profile) {
   return JSON.stringify(newProfile);
 }
 
-function unserializeProfile(profile) {
+/**
+ * Take a serialized processed profile from some saved source, and re-initialize
+ * any non-serializable classes.
+ *
+ * TODO - This mutates the profile, it would be better to return a new profile.
+ *        See issue #445
+ */
+function _unserializeProfile(profile: Object): Profile {
   // stringArray -> stringTable
   profile.threads.forEach(thread => {
     const stringArray = thread.stringArray;
@@ -555,16 +684,24 @@ function unserializeProfile(profile) {
   return profile;
 }
 
-export function unserializeProfileOfArbitraryFormat(jsonString) {
+/**
+ * Take some arbitrary profile file from some data source, and turn it into
+ * the processed profile format.
+ */
+export function unserializeProfileOfArbitraryFormat(
+  jsonStringOrObject: string | Object
+): Profile {
   try {
     let profile =
-      typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
+      typeof jsonStringOrObject === 'string'
+        ? JSON.parse(jsonStringOrObject)
+        : jsonStringOrObject;
     if (isOldCleopatraFormat(profile)) {
-      profile = convertOldCleopatraProfile(profile); // outputs proprocessed profile
+      profile = convertOldCleopatraProfile(profile); // outputs preprocessed profile
     }
     if (isProcessedProfile(profile)) {
       upgradeProcessedProfileToCurrentVersion(profile);
-      return unserializeProfile(profile);
+      return _unserializeProfile(profile);
     }
     // Else: Treat it as a Gecko profile and just attempt to process it.
     return processProfile(profile);
@@ -574,9 +711,9 @@ export function unserializeProfileOfArbitraryFormat(jsonString) {
 }
 
 export class ProfileProcessor {
-  processProfile(profile) {
+  processProfile(geckoProfile: GeckoProfile) {
     return new Promise(resolve => {
-      resolve(processProfile(profile));
+      resolve(processProfile(geckoProfile));
     });
   }
 }

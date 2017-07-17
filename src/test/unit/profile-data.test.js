@@ -436,34 +436,41 @@ describe('upgrades', function() {
       serializedOldProcessedProfile0
     );
     compareProcessedProfiles(upgradedProfile0, afterUpgradeReference);
+
     const serializedOldProcessedProfile1 = require('../fixtures/upgrades/processed-1.json');
     const upgradedProfile1 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile1
     );
     compareProcessedProfiles(upgradedProfile1, afterUpgradeReference);
+
     const serializedOldProcessedProfile2 = require('../fixtures/upgrades/processed-2.json');
     const upgradedProfile2 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile2
     );
     compareProcessedProfiles(upgradedProfile2, afterUpgradeReference);
+
     const serializedOldProcessedProfile3 = require('../fixtures/upgrades/processed-3.json');
     const upgradedProfile3 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile3
     );
     compareProcessedProfiles(upgradedProfile3, afterUpgradeReference);
+
     const serializedOldProcessedProfile4 = require('../fixtures/upgrades/processed-4.json');
     const upgradedProfile4 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile4
     );
     compareProcessedProfiles(upgradedProfile4, afterUpgradeReference);
+
     const geckoProfile3 = require('../fixtures/upgrades/gecko-3.json');
     const upgradedGeckoProfile3 = unserializeProfileOfArbitraryFormat(
       geckoProfile3
     );
     compareProcessedProfiles(upgradedGeckoProfile3, afterUpgradeReference);
+
     // const serializedOldProcessedProfile2 = require('../fixtures/upgrades/processed-2.json');
     // const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldProcessedProfile2);
     // compareProcessedProfiles(upgradedProfile2, afterUpgradeReference);
+
     // const geckoProfile4 = require('../fixtures/upgrades/gecko-4.json');
     // const upgradedGeckoProfile4 = unserializeProfileOfArbitraryFormat(geckoProfile4);
     // compareProcessedProfiles(upgradedGeckoProfile4, afterUpgradeReference);
