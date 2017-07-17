@@ -664,9 +664,6 @@ export function serializeProfile(profile: Profile): string {
 /**
  * Take a serialized processed profile from some saved source, and re-initialize
  * any non-serializable classes.
- *
- * TODO - This mutates the profile, it would be better to return a new profile.
- *        See issue #445
  */
 function _unserializeProfile(profile: Object): Profile {
   // stringArray -> stringTable
