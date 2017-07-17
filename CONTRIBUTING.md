@@ -1,6 +1,6 @@
 # Contributing to perf.html
 
-First off, thanks for taking the time to contribute to Mozilla and perf.html! Beyond making the web a faster and smoother experience for Firefox users and the entire open web, we want to build a community of contributors around performance. This guide is an introduction to joining our community. We would love to have you. As a first step to contributing we encourage you to check our our [Code of Conduct](./CODE_OF_CONDUCT.md) to see how we're building an open and inclusive community.
+First off, thanks for taking the time to contribute to Mozilla and perf.html! Beyond making the web a faster and smoother experience for Firefox users and the entire open web, we want to build a community of contributors around performance. This guide is an introduction to joining our community. We would love to have you. As a first step to contributing we encourage you to check out our [Code of Conduct](./CODE_OF_CONDUCT.md) to see how we're building an open and inclusive community.
 
 ## Who we are
 
@@ -29,7 +29,7 @@ perf.html is a web application that loads in performance profiles for analysis. 
 
 The web app doesn't include any performance profiles by default, so you'll need to load some in. Make sure the local Webpack web server is running perf.html, and then try one of the following:
 
- * Use an existing profile from the web: replace the `https://perf-html.io` with `http://localhost:4242`.
+ * Use an existing profile from the web: replace the `https://perf-html.io` with `http://localhost:4242` (be careful: the leading `https` changes to `http`!).
  * Drag in a saved profile to the loading screen (this makes refreshing hard).
  * Record a new profile.
    - Install the Gecko Profiler addon from the [perf-html.io](https://perf-html.io) loading screen.
@@ -43,12 +43,12 @@ The web app doesn't include any performance profiles by default, so you'll need 
 When working on a new feature and code changes, it's important that things work correctly. We have a suite of automated tests and various automated checks to test that things are working the way we expect. These checks are run frequently, and will block certain parts of the process if they do not pass. The tests run:
 
  * Locally when running
-   - `yarn run test-all` - Test all the things!
-   - `yarn run test` - Run the tests in [./src/test/].
-   - `yarn run lint` - Run prettier and and eslint to check for correct code formatting.
-   - `yarn run flow` - Check the [Flow types](https://flow.org/) for correctness.
-   - `yarn run license-check` - Check the dependencies' licenses.
- * `git prepush` and `git commit`
+   - `yarn test-all` - Test all the things!
+   - `yarn test` - Run the tests in [./src/test/].
+   - `yarn lint` - Run prettier and and eslint to check for correct code formatting.
+   - `yarn flow` - Check the [Flow types](https://flow.org/) for correctness.
+   - `yarn license-check` - Check the dependencies' licenses.
+ * `git push` and `git commit`
    - We have [husky](https://www.npmjs.com/package/husky) installed to run automated checks when committing and pushing.
    - Run git commands with `--no-verify` to skip this step. This is useful for submitting broken PRs for feedback.
  * Continuous integration for pull requests
