@@ -12,6 +12,7 @@ import { getFormattedTimeLength } from '../../profile-logic/range-filters';
 import type { ProfileSelection } from '../../types/actions';
 import type { Action } from '../../types/store';
 import type { Milliseconds } from '../../types/units';
+import type { OnMove } from '../shared/Draggable';
 
 type Props = {
   rangeStart: Milliseconds,
@@ -23,13 +24,6 @@ type Props = {
   onSelectionChange: (selection: ProfileSelection) => Action,
   onZoomButtonClick: (start: Milliseconds, end: Milliseconds) => *,
 };
-
-type OnMove = (
-  originalValue: { selectionStart: Milliseconds, selectionEnd: Milliseconds },
-  dx: number,
-  dy: number,
-  isModifying: boolean
-) => void;
 
 export default class SelectionScrubberOverlay extends PureComponent {
   props: Props;

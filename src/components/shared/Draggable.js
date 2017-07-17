@@ -4,15 +4,15 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
 import type { Milliseconds } from '../../types/units';
 
-type OnMove = (
+export type OnMove = (
   originalValue: { selectionEnd: Milliseconds, selectionStart: Milliseconds },
   dx: number,
   dy: number,
   isModifying: boolean
-) => void;
+) => *;
 
 type Props = {
   value: { selectionStart: Milliseconds, selectionEnd: Milliseconds },
@@ -34,12 +34,12 @@ export default class Draggable extends PureComponent {
   state: {
     dragging: boolean,
   };
-  _container: ?HTMLDivElement;
+  _container: HTMLDivElement | null;
   _containerCreated: HTMLDivElement => *;
-  _handlers: ?{
+  _handlers: {
     mouseMoveHandler: MouseEvent => *,
     mouseUpHandler: MouseEvent => *,
-  };
+  } | null;
 
   constructor(props: Props) {
     super(props);
@@ -132,9 +132,3 @@ export default class Draggable extends PureComponent {
     );
   }
 }
-
-Draggable.propTypes = {
-  value: PropTypes.any,
-  onMove: PropTypes.func.isRequired,
-  children: PropTypes.node,
-};

@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
 import type { Thread } from '../../types/profile';
 import './ThreadMarkerOverlay.css';
 
@@ -60,14 +60,5 @@ class ThreadMarkerOverlay extends PureComponent {
     );
   }
 }
-
-ThreadMarkerOverlay.propTypes = {
-  thread: PropTypes.shape({
-    samples: PropTypes.object.isRequired,
-  }).isRequired,
-  rangeStart: PropTypes.number.isRequired,
-  rangeEnd: PropTypes.number.isRequired,
-  onSelectMarker: PropTypes.func.isRequired,
-};
 
 export default ThreadMarkerOverlay;
