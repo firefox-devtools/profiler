@@ -670,18 +670,23 @@ export function serializeProfile(profile: Profile): string {
  */
 function _unserializeProfile(profile: Object): Profile {
   // stringArray -> stringTable
-  profile.threads.forEach(thread => {
-    const stringArray = thread.stringArray;
-    delete thread.stringArray;
-    thread.stringTable = new UniqueStringArray(stringArray);
+  const newProfile = Object.assign({}, profile, {
+    threads: profile.threads.map(thread => {
+      const stringArray = thread.stringArray;
+      const newThread = Object.assign({}, thread);
+      delete newThread.stringArray;
+      newThread.stringTable = new UniqueStringArray(stringArray);
+      return newThread;
+    }),
   });
-  if ('tasktracer' in profile) {
-    const tasktracer = profile.tasktracer;
-    const stringArray = tasktracer.stringArray;
-    delete tasktracer.stringArray;
-    tasktracer.stringTable = new UniqueStringArray(stringArray);
+  if ('tasktracer' in newProfile) {
+    const newTaskTracer = Object.assign({}, newProfile.tasktracer);
+    const stringArray = newTaskTracer.stringArray;
+    delete newTaskTracer.stringArray;
+    newTaskTracer.stringTable = new UniqueStringArray(stringArray);
+    newProfile.tasktracer = newTaskTracer;
   }
-  return profile;
+  return newProfile;
 }
 
 /**
