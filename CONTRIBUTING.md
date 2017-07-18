@@ -4,7 +4,7 @@ First off, thanks for taking the time to contribute to Mozilla and perf.html! Be
 
 ## Who we are
 
-This project is made up of a cross section of different parts of Mozilla, including people from Firefox DevTools and from Firefox's platform team who are working on the C++ and Rust internals of Firefox. Some core Mozillians on the team are.
+This project is made up of a cross section of different parts of Mozilla, including people from Firefox DevTools and from Firefox's platform team who are working on the C++ and Rust internals of Firefox. Some core Mozillians on the team are:
 
  * Bryan Clark [@clarkbw](https://github.com/clarkbw) - Firefox DevTools Product Manager
  * Markus Stange [@mstange](https://github.com/mstange) - Firefox Platform Engineer
