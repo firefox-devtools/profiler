@@ -4,10 +4,10 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import TextMeasurement from '../../utils/text-measurement';
-import TooltipHeaderWithDuration from '../shared/TooltipHeaderWithDuration';
 import withTimelineViewport from './TimelineViewport';
 import TimelineCanvas from './TimelineCanvas';
+import TextMeasurement from '../../utils/text-measurement';
+import formatTimeLength from '../../utils/format-time-length';
 
 import type { Thread } from '../../types/profile';
 import type {
@@ -242,11 +242,14 @@ class FlameChartCanvas extends PureComponent {
 
     return (
       <div className="flameChartCanvasTooltip">
-        <TooltipHeaderWithDuration
-          className="tooltipHeader"
-          duration={duration}
-          title={label}
-        />
+        <div className="tooltipOneLine tooltipHeader">
+          <div className="tooltipTiming">
+            {formatTimeLength(duration)}ms
+          </div>
+          <div className="tooltipTitle">
+            {label}
+          </div>
+        </div>
         <div className="tooltipOneLine tooltipDetails">
           <div className="tooltipLabel">Category:</div>
           <div

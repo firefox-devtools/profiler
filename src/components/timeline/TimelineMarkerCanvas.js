@@ -2,8 +2,8 @@
 import React, { PureComponent } from 'react';
 import withTimelineViewport from './TimelineViewport';
 import TimelineCanvas from './TimelineCanvas';
-import TooltipHeaderWithDuration from '../shared/TooltipHeaderWithDuration';
 import TextMeasurement from '../../utils/text-measurement';
+import formatTimeLength from '../../utils/format-time-length';
 
 import type {
   Milliseconds,
@@ -305,7 +305,16 @@ class TimelineMarkerCanvas extends PureComponent {
 
   getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React$Element<*> {
     const { title, dur } = this.props.markers[hoveredItem];
-    return <TooltipHeaderWithDuration duration={dur} title={title} />;
+    return (
+      <div className="tooltipOneLine">
+        <div className="tooltipTiming">
+          {formatTimeLength(dur)}ms
+        </div>
+        <div className="tooltipTitle">
+          {title}
+        </div>
+      </div>
+    );
   }
 
   render() {
