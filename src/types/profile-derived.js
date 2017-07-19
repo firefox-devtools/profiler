@@ -53,8 +53,8 @@ export type TracingMarker = {
   start: Milliseconds,
   dur: Milliseconds,
   name: string,
-  data: MarkerPayload,
   title: string | null,
+  data: MarkerPayload,
 };
 
 export type IndexIntoTracingMarkers = number;

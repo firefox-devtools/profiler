@@ -218,6 +218,9 @@ class FlameChartCanvas extends PureComponent {
       // Only JavaScript functions have a filename.
       const fileNameIndex = thread.funcTable.fileName[funcIndex];
       if (fileNameIndex !== null) {
+        // Because of our use of Grid Layout, all our elements need to be direct
+        // children of the grid parent. That's why we use arrays here, to add
+        // the elements as direct children.
         resourceOrFileName = [
           <div className="tooltipLabel" key="file">
             File:
@@ -229,6 +232,9 @@ class FlameChartCanvas extends PureComponent {
         if (resourceIndex !== -1) {
           const resourceNameIndex = thread.resourceTable.name[resourceIndex];
           if (resourceNameIndex !== -1) {
+            // Because of our use of Grid Layout, all our elements need to be direct
+            // children of the grid parent. That's why we use arrays here, to add
+            // the elements as direct children.
             resourceOrFileName = [
               <div className="tooltipLabel" key="resource">
                 Resource:

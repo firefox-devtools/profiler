@@ -861,13 +861,12 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
       const time = markers.time[i];
       const nameStringIndex = markers.name[i];
       if (data.interval === 'start') {
-        const name = stringTable.getString(nameStringIndex);
         openMarkers.set(nameStringIndex, {
           start: time,
-          name,
+          name: stringTable.getString(nameStringIndex),
           dur: 0,
-          data,
           title: null,
+          data,
         });
       } else if (data.interval === 'end') {
         const marker = openMarkers.get(nameStringIndex);

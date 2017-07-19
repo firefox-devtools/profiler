@@ -81,7 +81,7 @@ class MarkerTree {
             break;
 
           case 'UserTiming':
-            name = `${name}(${data.name})`;
+            name = `${name} [${data.name}]`;
             break;
 
           default:
