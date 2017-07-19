@@ -6,9 +6,10 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { timeCode } from '../../utils/time-code';
-import formatTimeLength from '../../utils/format-time-length';
 import { withSize } from '../shared/WithSize';
 import Tooltip from '../shared/Tooltip';
+import MarkerTooltipContents from '../shared/MarkerTooltipContents';
+
 import type { Milliseconds, CssPixels } from '../../types/units';
 import type { TracingMarker } from '../../types/profile-derived';
 
@@ -186,14 +187,7 @@ class IntervalMarkerOverview extends PureComponent {
         />
         {shouldShowTooltip && hoveredItem
           ? <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              <div className="tooltipOneLine">
-                <div className="tooltipTiming">
-                  {formatTimeLength(hoveredItem.dur)}ms
-                </div>
-                <div className="tooltipTitle">
-                  {hoveredItem.title}
-                </div>
-              </div>
+              <MarkerTooltipContents marker={hoveredItem} />
             </Tooltip>
           : null}
       </div>

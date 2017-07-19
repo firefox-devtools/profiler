@@ -18,7 +18,6 @@ import type {
   IndexIntoStackTable,
   ThreadIndex,
 } from '../types/profile';
-import type { MarkerPayload } from '../types/markers';
 import type {
   FuncStackInfo,
   FuncStackTable,
@@ -849,20 +848,6 @@ export function getJankInstances(
   return jankInstances;
 }
 
-function getMarkerTitle(name: string, data: MarkerPayload): string {
-  let title = name;
-  if (data) {
-    switch (data.type) {
-      case 'UserTiming': {
-        title = `${name}(${data.name})`;
-        break;
-      }
-      default:
-    }
-  }
-  return title;
-}
-
 export function getTracingMarkers(thread: Thread): TracingMarker[] {
   const { stringTable, markers } = thread;
   const tracingMarkers: TracingMarker[] = [];
@@ -882,7 +867,7 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
           name,
           dur: 0,
           data,
-          title: name,
+          title: null,
         });
       } else if (data.interval === 'end') {
         const marker = openMarkers.get(nameStringIndex);
@@ -905,7 +890,7 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
             dur: duration,
             name,
             data,
-            title: getMarkerTitle(name, data),
+            title: null,
           });
         }
       }

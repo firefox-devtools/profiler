@@ -1,9 +1,13 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 // @flow
 import React, { PureComponent } from 'react';
 import withTimelineViewport from './TimelineViewport';
 import TimelineCanvas from './TimelineCanvas';
+import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import TextMeasurement from '../../utils/text-measurement';
-import formatTimeLength from '../../utils/format-time-length';
 
 import type {
   Milliseconds,
@@ -304,17 +308,8 @@ class TimelineMarkerCanvas extends PureComponent {
   }
 
   getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React$Element<*> {
-    const { title, dur } = this.props.markers[hoveredItem];
-    return (
-      <div className="tooltipOneLine">
-        <div className="tooltipTiming">
-          {formatTimeLength(dur)}ms
-        </div>
-        <div className="tooltipTitle">
-          {title}
-        </div>
-      </div>
-    );
+    const marker = this.props.markers[hoveredItem];
+    return <MarkerTooltipContents marker={marker} />;
   }
 
   render() {
