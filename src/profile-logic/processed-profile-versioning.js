@@ -17,7 +17,7 @@ import { resourceTypes } from './profile-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 5; // The current version of the 'preprocessed profile' format.
+export const CURRENT_VERSION = 6; // The current version of the 'preprocessed profile' format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -274,6 +274,29 @@ const _upgraders = {
     // The "frameNumber" column was removed from the samples table.
     for (const thread of profile.threads) {
       delete thread.samples.frameNumber;
+    }
+  },
+  [6]: profile => {
+    for (const thread of profile.threads) {
+      const { stringArray, markers } = thread;
+      const stringTable = new UniqueStringArray(stringArray);
+      let newDataArray = [];
+      for (let i = 0; i < markers.length; i++) {
+        const name = stringTable.getString(markers.name[i]);
+        const data = markers.data[i];
+        if (name === 'DOMEvent') {
+          newDataArray[i] = {
+            type: 'DOMEvent',
+            startTime: data.startTime,
+            endTime: data.endTime,
+            eventType: data.type,
+            phase: data.phase
+          };
+        } else {
+          newDataArray[i] = data;
+        }
+      }
+      thread.markers.data = newDataArray;
     }
   },
 };

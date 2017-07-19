@@ -11,7 +11,9 @@
  * current format.
 */
 
-export const CURRENT_VERSION = 6; // The current version of the 'raw profile' format.
+import { UniqueStringArray } from '../utils/unique-string-array';
+
+export const CURRENT_VERSION = 7; // The current version of the 'raw profile' format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -183,6 +185,28 @@ const _upgraders = {
       }
     }
     convertToVersionSixRecursive(profile);
+  },
+  [7]: profile => {
+    // The type field for DOMEventMarkerPayload was renamed to eventType.
+    function convertToVersionSevenRecursive(p) {
+      for (const thread of p.threads) {
+        const stringTable = new UniqueStringArray(thread.stringTable);
+        const nameIndex = thread.markers.schema.name;
+        const dataIndex = thread.markers.schema.data;
+        for (let i = 0; i < thread.markers.data.length; i++) {
+          const name = stringTable.getString(thread.markers.data[i][nameIndex]);
+          if (name === 'DOMEvent') {
+            let data = thread.markers.data[i][dataIndex];
+            data.eventType = data.type;
+            data.type = 'DOMEvent';
+          }
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersionSevenRecursive(subprocessProfile);
+      }
+    }
+    convertToVersionSevenRecursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */
