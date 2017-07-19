@@ -2,7 +2,24 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { PureComponent, PropTypes } from 'react';
+// @flow
+
+import React, { PureComponent } from 'react';
+import type { Milliseconds } from '../../types/units';
+
+export type OnMove = (
+  originalValue: { selectionEnd: Milliseconds, selectionStart: Milliseconds },
+  dx: number,
+  dy: number,
+  isModifying: boolean
+) => *;
+
+type Props = {
+  value: { selectionStart: Milliseconds, selectionEnd: Milliseconds },
+  onMove: OnMove,
+  className: string,
+  children?: HTMLElement,
+};
 
 /**
  * A component that reports mouse dragging (left mouse button only) in its
@@ -13,10 +30,21 @@ import React, { PureComponent, PropTypes } from 'react';
  * During the drag, the additional className 'dragging' is set on the element.
  */
 export default class Draggable extends PureComponent {
-  constructor(props) {
+  props: Props;
+  state: {
+    dragging: boolean,
+  };
+  _container: HTMLDivElement | null;
+  _containerCreated: HTMLDivElement => *;
+  _handlers: {
+    mouseMoveHandler: MouseEvent => *,
+    mouseUpHandler: MouseEvent => *,
+  } | null;
+
+  constructor(props: Props) {
     super(props);
     this.state = { dragging: false };
-    this._onMouseDown = this._onMouseDown.bind(this);
+    (this: any)._onMouseDown = this._onMouseDown.bind(this);
     this._handlers = null;
     this._container = null;
     this._containerCreated = c => {
@@ -24,7 +52,7 @@ export default class Draggable extends PureComponent {
     };
   }
 
-  _onMouseDown(e) {
+  _onMouseDown(e: SyntheticMouseEvent) {
     if (!this._container || e.button !== 0) {
       return;
     }
@@ -64,7 +92,10 @@ export default class Draggable extends PureComponent {
     this._installMoveAndUpHandlers(mouseMoveHandler, mouseUpHandler);
   }
 
-  _installMoveAndUpHandlers(mouseMoveHandler, mouseUpHandler) {
+  _installMoveAndUpHandlers(
+    mouseMoveHandler: MouseEvent => *,
+    mouseUpHandler: MouseEvent => *
+  ) {
     this._handlers = { mouseMoveHandler, mouseUpHandler };
     window.addEventListener('mousemove', mouseMoveHandler, true);
     window.addEventListener('mouseup', mouseUpHandler, true);
@@ -101,9 +132,3 @@ export default class Draggable extends PureComponent {
     );
   }
 }
-
-Draggable.propTypes = {
-  value: PropTypes.any,
-  onMove: PropTypes.func.isRequired,
-  children: PropTypes.node,
-};
