@@ -218,23 +218,23 @@ class FlameChartCanvas extends PureComponent {
       // Only JavaScript functions have a filename.
       const fileNameIndex = thread.funcTable.fileName[funcIndex];
       if (fileNameIndex !== null) {
-        resourceOrFileName = (
-          <div className="tooltipOneLine tooltipDetails">
-            <div className="tooltipLabel">File:</div>
-            {thread.stringTable.getString(fileNameIndex)}
-          </div>
-        );
+        resourceOrFileName = [
+          <div className="tooltipLabel" key="file">
+            File:
+          </div>,
+          thread.stringTable.getString(fileNameIndex),
+        ];
       } else {
         const resourceIndex = thread.funcTable.resource[funcIndex];
         if (resourceIndex !== -1) {
           const resourceNameIndex = thread.resourceTable.name[resourceIndex];
           if (resourceNameIndex !== -1) {
-            resourceOrFileName = (
-              <div className="tooltipOneLine tooltipDetails">
-                <div className="tooltipLabel">Resource:</div>
-                {thread.stringTable.getString(resourceNameIndex)}
-              </div>
-            );
+            resourceOrFileName = [
+              <div className="tooltipLabel" key="resource">
+                Resource:
+              </div>,
+              thread.stringTable.getString(resourceNameIndex),
+            ];
           }
         }
       }
@@ -250,15 +250,17 @@ class FlameChartCanvas extends PureComponent {
             {label}
           </div>
         </div>
-        <div className="tooltipOneLine tooltipDetails">
+        <div className="tooltipDetails">
           <div className="tooltipLabel">Category:</div>
-          <div
-            className="tooltipSwatch"
-            style={{ backgroundColor: category.color }}
-          />
-          {category.name}
+          <div>
+            <div
+              className="tooltipSwatch"
+              style={{ backgroundColor: category.color }}
+            />
+            {category.name}
+          </div>
+          {resourceOrFileName}
         </div>
-        {resourceOrFileName}
       </div>
     );
   }

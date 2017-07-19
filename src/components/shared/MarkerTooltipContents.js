@@ -16,8 +16,10 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
     switch (data.type) {
       case 'UserTiming': {
         return (
-          <div className="tooltipOneLine tooltipDetails">
-            <div className="tooltipLabel">Name:</div>
+          <div className="tooltipDetails">
+            <div className="tooltipLabel" key="name">
+              Name:
+            </div>
             {data.name}
           </div>
         );
