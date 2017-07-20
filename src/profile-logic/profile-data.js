@@ -876,9 +876,6 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
         if (marker.start !== undefined) {
           marker.dur = time - marker.start;
         }
-        if (marker.name !== undefined && marker.dur !== undefined) {
-          marker.title = `${marker.name} for ${marker.dur.toFixed(2)}ms`;
-        }
         tracingMarkers.push(marker);
       }
     } else if ('startTime' in data && 'endTime' in data) {
@@ -892,7 +889,7 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
             dur: duration,
             name,
             data,
-            title: `${name} for ${duration.toFixed(2)}ms`,
+            title: null,
           });
         }
       }

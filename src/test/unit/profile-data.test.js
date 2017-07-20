@@ -266,25 +266,33 @@ describe('profile-data', function() {
     const thread = profile.threads[0];
     const tracingMarkers = getTracingMarkers(thread);
     it('should fold the two reflow markers into one tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(3);
+      expect(tracingMarkers.length).toEqual(4);
       expect(tracingMarkers[0].start).toEqual(2);
       expect(tracingMarkers[0].name).toEqual('Reflow');
       expect(tracingMarkers[0].dur).toEqual(6);
-      expect(tracingMarkers[0].title).toEqual('Reflow for 6.00ms');
+      expect(tracingMarkers[0].title).toBeNull();
     });
     it('should fold the two Rasterize markers into one tracing marker, after the reflow tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(3);
+      expect(tracingMarkers.length).toEqual(4);
       expect(tracingMarkers[1].start).toEqual(4);
       expect(tracingMarkers[1].name).toEqual('Rasterize');
       expect(tracingMarkers[1].dur).toEqual(1);
-      expect(tracingMarkers[1].title).toEqual('Rasterize for 1.00ms');
+      expect(tracingMarkers[1].title).toBeNull();
     });
     it('should create a tracing marker for the MinorGC startTime/endTime marker', function() {
-      expect(tracingMarkers.length).toEqual(3);
+      expect(tracingMarkers.length).toEqual(4);
       expect(tracingMarkers[2].start).toEqual(11);
       expect(tracingMarkers[2].name).toEqual('MinorGC');
       expect(tracingMarkers[2].dur).toEqual(1);
-      expect(tracingMarkers[2].title).toEqual('MinorGC for 1.00ms');
+      expect(tracingMarkers[2].title).toBeNull();
+    });
+    it('should create a tracing marker for the marker UserTiming', function() {
+      expect(tracingMarkers[3]).toMatchObject({
+        dur: 1,
+        name: 'UserTiming',
+        start: 12,
+        title: null,
+      });
     });
   });
 });
