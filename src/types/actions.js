@@ -75,14 +75,14 @@ type ProfileAction =
       symbolNames: string[],
     }
   | {
-      type: 'CHANGE_SELECTED_FUNC_STACK',
+      type: 'CHANGE_SELECTED_STACK',
       threadIndex: ThreadIndex,
-      selectedFuncStack: IndexIntoFuncTable[],
+      selectedStack: IndexIntoFuncTable[],
     }
   | {
-      type: 'CHANGE_EXPANDED_FUNC_STACKS',
+      type: 'CHANGE_EXPANDED_STACKS',
       threadIndex: ThreadIndex,
-      expandedFuncStacks: Array<IndexIntoFuncTable[]>,
+      expandedStacks: Array<IndexIntoFuncTable[]>,
     }
   | {
       type: 'CHANGE_SELECTED_MARKER',

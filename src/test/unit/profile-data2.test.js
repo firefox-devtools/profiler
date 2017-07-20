@@ -7,7 +7,6 @@ import getMergingStacksProfile from '../fixtures/profiles/merging-stacks';
 import { processProfile } from '../../profile-logic/process-profile';
 import exampleProfile from '.././fixtures/profiles/example-profile';
 import {
-  getFuncStackInfo,
   getTracingMarkers,
   deDuplicateFunctionFrames,
 } from '../../profile-logic/profile-data';
@@ -15,27 +14,6 @@ import {
 import type { Thread, IndexIntoStackTable } from '../../types/profile';
 
 describe('profile-data', function() {
-  describe('createFuncStackTableAndFixupSamples', function() {
-    const profile = processProfile(exampleProfile);
-
-    const thread = profile.threads[0];
-    const { funcStackTable } = getFuncStackInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable
-    );
-    it('should create one funcStack per stack', function() {
-      expect(thread.stackTable.length).toEqual(5);
-      expect(funcStackTable.length).toEqual(5);
-      expect('prefix' in funcStackTable).toBeTruthy();
-      expect('func' in funcStackTable).toBeTruthy();
-      expect(funcStackTable.func[0]).toEqual(0);
-      expect(funcStackTable.func[1]).toEqual(1);
-      expect(funcStackTable.func[2]).toEqual(2);
-      expect(funcStackTable.func[3]).toEqual(3);
-    });
-  });
-
   describe('getTracingMarkers', function() {
     const profile = processProfile(exampleProfile);
     const thread = profile.threads[0];

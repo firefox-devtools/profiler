@@ -145,15 +145,15 @@ describe('selectors/getStackTimingByDepthForFlameChart', function() {
   });
 });
 
-describe('selectors/getFuncStackMaxDepthForFlameChart', function() {
+describe('selectors/getMaxDepthForFlameChart', function() {
   it('calculates the max func depth and observes of platform-detail filters', function() {
     const store = storeWithProfile();
-    const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(
+    const allSamplesMaxDepth = selectedThreadSelectors.getMaxDepthForFlameChart(
       store.getState()
     );
     expect(allSamplesMaxDepth).toEqual(6);
     store.dispatch(changeHidePlatformDetails(true));
-    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(
+    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getMaxDepthForFlameChart(
       store.getState()
     );
     expect(jsOnlySamplesMaxDepth).toEqual(4);
@@ -162,12 +162,12 @@ describe('selectors/getFuncStackMaxDepthForFlameChart', function() {
   it('acts upon the current range', function() {
     const store = storeWithProfile();
     store.dispatch(addRangeFilter(0, 20));
-    const allSamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(
+    const allSamplesMaxDepth = selectedThreadSelectors.getMaxDepthForFlameChart(
       store.getState()
     );
     expect(allSamplesMaxDepth).toEqual(2);
     store.dispatch(changeHidePlatformDetails(true));
-    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getFuncStackMaxDepthForFlameChart(
+    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getMaxDepthForFlameChart(
       store.getState()
     );
     expect(jsOnlySamplesMaxDepth).toEqual(0);
