@@ -266,28 +266,36 @@ describe('profile-data', function() {
     const thread = profile.threads[0];
     const tracingMarkers = getTracingMarkers(thread);
     it('should fold the two reflow markers into one tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(4);
+      expect(tracingMarkers.length).toEqual(5);
       expect(tracingMarkers[0].start).toEqual(2);
       expect(tracingMarkers[0].name).toEqual('Reflow');
       expect(tracingMarkers[0].dur).toEqual(6);
       expect(tracingMarkers[0].title).toBeNull();
     });
     it('should fold the two Rasterize markers into one tracing marker, after the reflow tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(4);
+      expect(tracingMarkers.length).toEqual(5);
       expect(tracingMarkers[1].start).toEqual(4);
       expect(tracingMarkers[1].name).toEqual('Rasterize');
       expect(tracingMarkers[1].dur).toEqual(1);
       expect(tracingMarkers[1].title).toBeNull();
     });
     it('should create a tracing marker for the MinorGC startTime/endTime marker', function() {
-      expect(tracingMarkers.length).toEqual(4);
-      expect(tracingMarkers[2].start).toEqual(11);
-      expect(tracingMarkers[2].name).toEqual('MinorGC');
-      expect(tracingMarkers[2].dur).toEqual(1);
-      expect(tracingMarkers[2].title).toBeNull();
+      expect(tracingMarkers.length).toEqual(5);
+      expect(tracingMarkers[3].start).toEqual(11);
+      expect(tracingMarkers[3].name).toEqual('MinorGC');
+      expect(tracingMarkers[3].dur).toEqual(1);
+      expect(tracingMarkers[3].title).toBeNull();
+    });
+    it('should create a tracing marker for the DOMEvent marker', function() {
+      expect(tracingMarkers[2]).toMatchObject({
+        dur: 1,
+        name: 'DOMEvent',
+        start: 9,
+        title: null,
+      });
     });
     it('should create a tracing marker for the marker UserTiming', function() {
-      expect(tracingMarkers[3]).toMatchObject({
+      expect(tracingMarkers[4]).toMatchObject({
         dur: 1,
         name: 'UserTiming',
         start: 12,
@@ -432,7 +440,7 @@ describe('upgrades', function() {
     expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
   }
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-5.json')
+    require('../fixtures/upgrades/processed-6.json')
   );
 
   // Uncomment this to output your next ./upgrades/processed-X.json
@@ -469,6 +477,12 @@ describe('upgrades', function() {
     );
     compareProcessedProfiles(upgradedProfile4, afterUpgradeReference);
 
+    const serializedOldProcessedProfile5 = require('../fixtures/upgrades/processed-5.json');
+    const upgradedProfile5 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile5
+    );
+    compareProcessedProfiles(upgradedProfile5, afterUpgradeReference);
+
     const geckoProfile3 = require('../fixtures/upgrades/gecko-3.json');
     const upgradedGeckoProfile3 = unserializeProfileOfArbitraryFormat(
       geckoProfile3
@@ -484,7 +498,7 @@ describe('upgrades', function() {
     // compareProcessedProfiles(upgradedGeckoProfile4, afterUpgradeReference);
   });
   it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function() {
-    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-6.json');
+    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-7.json');
     // Uncomment this to output your next ./upgrades/gecko-X.json
     // upgradeGeckoProfileToCurrentVersion(afterUpgradeGeckoReference);
     // console.log(JSON.stringify(afterUpgradeGeckoReference));
@@ -500,6 +514,10 @@ describe('upgrades', function() {
 
     const geckoProfile5 = require('../fixtures/upgrades/gecko-5.json');
     upgradeGeckoProfileToCurrentVersion(geckoProfile5);
+    expect(geckoProfile5).toEqual(afterUpgradeGeckoReference);
+
+    const geckoProfile6 = require('../fixtures/upgrades/gecko-6.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile6);
     expect(geckoProfile5).toEqual(afterUpgradeGeckoReference);
   });
 });
