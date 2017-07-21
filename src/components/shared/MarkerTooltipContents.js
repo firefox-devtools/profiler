@@ -24,6 +24,16 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
           </div>
         );
       }
+      case 'DOMEvent': {
+        return (
+          <div className="tooltipDetails">
+            <div className="tooltipLabel" key="type">
+              Type:
+            </div>
+            {data.eventType}
+          </div>
+        );
+      }
       default:
     }
   }

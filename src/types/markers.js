@@ -62,6 +62,14 @@ export type UserTimingMarkerPayload = {
   entryType: 'measure' | 'mark',
 };
 
+export type DOMEventMarkerPayload = {
+  type: 'DOMEvent',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  eventType: string,
+  phase: number,
+};
+
 /**
  * The union of all the different marker payloads that perf.html knows about, this is
  * not guaranteed to be all the payloads that we actually get from the profiler.
@@ -70,4 +78,5 @@ export type MarkerPayload =
   | GPUMarkerPayload
   | UserTimingMarkerPayload
   | PaintProfilerMarkerTracing
+  | DOMEventMarkerPayload
   | null;

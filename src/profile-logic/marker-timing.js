@@ -1,5 +1,9 @@
 // @flow
-import type { UserTimingMarkerPayload, MarkerPayload } from '../types/markers';
+import type {
+  DOMEventMarkerPayload,
+  UserTimingMarkerPayload,
+  MarkerPayload,
+} from '../types/markers';
 import type {
   TracingMarker,
   MarkerTiming,
@@ -129,6 +133,8 @@ function computeMarkerLabel(data: MarkerPayload): string {
     switch (data.type) {
       case 'UserTiming':
         return (data: UserTimingMarkerPayload).name;
+      case 'DOMEvent':
+        return (data: DOMEventMarkerPayload).eventType;
       default:
     }
   }

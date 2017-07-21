@@ -882,16 +882,14 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
       const { startTime, endTime } = data;
       if (typeof startTime === 'number' && typeof endTime === 'number') {
         const name = stringTable.getString(markers.name[i]);
-        if (name !== 'DOMEvent') {
-          const duration = endTime - startTime;
-          tracingMarkers.push({
-            start: startTime,
-            dur: duration,
-            name,
-            data,
-            title: null,
-          });
-        }
+        const duration = endTime - startTime;
+        tracingMarkers.push({
+          start: startTime,
+          dur: duration,
+          name,
+          data,
+          title: null,
+        });
       }
     }
   }
