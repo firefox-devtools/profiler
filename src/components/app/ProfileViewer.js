@@ -12,7 +12,6 @@ import ProfileSummaryView from '../summary/ProfileSummaryView';
 import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
 import ProfileMarkersView from '../markers/ProfileMarkersView';
 import ProfileTaskTracerView from '../tasktracer/ProfileTaskTracerView';
-import ProfileLogView from '../log/ProfileLogView';
 import ProfileFilterNavigator from './ProfileFilterNavigator';
 import ProfileSharing from './ProfileSharing';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
@@ -68,10 +67,6 @@ class ProfileViewer extends PureComponent {
       {
         name: 'tasktracer',
         title: 'Task Tracer',
-      },
-      {
-        name: 'log',
-        title: 'Log',
       },
       {
         name: 'timeline',
@@ -130,7 +125,6 @@ class ProfileViewer extends PureComponent {
               />
             ),
             timeline: <TimelineView />,
-            log: <ProfileLogView />,
           }[selectedTab]
         }
         <SymbolicationStatusOverlay />
