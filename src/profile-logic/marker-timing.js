@@ -1,5 +1,9 @@
 // @flow
-import type { DOMEventMarkerPayload, UserTimingMarkerPayload, MarkerPayload } from '../types/markers';
+import type {
+  DOMEventMarkerPayload,
+  UserTimingMarkerPayload,
+  MarkerPayload,
+} from '../types/markers';
 import type {
   TracingMarker,
   MarkerTiming,

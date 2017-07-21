@@ -196,7 +196,7 @@ const _upgraders = {
         for (let i = 0; i < thread.markers.data.length; i++) {
           const name = stringTable.getString(thread.markers.data[i][nameIndex]);
           if (name === 'DOMEvent') {
-            let data = thread.markers.data[i][dataIndex];
+            const data = thread.markers.data[i][dataIndex];
             data.eventType = data.type;
             data.type = 'DOMEvent';
           }

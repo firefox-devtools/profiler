@@ -280,7 +280,7 @@ const _upgraders = {
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
       const stringTable = new UniqueStringArray(stringArray);
-      let newDataArray = [];
+      const newDataArray = [];
       for (let i = 0; i < markers.length; i++) {
         const name = stringTable.getString(markers.name[i]);
         const data = markers.data[i];
@@ -290,7 +290,7 @@ const _upgraders = {
             startTime: data.startTime,
             endTime: data.endTime,
             eventType: data.type,
-            phase: data.phase
+            phase: data.phase,
           };
         } else {
           newDataArray[i] = data;
