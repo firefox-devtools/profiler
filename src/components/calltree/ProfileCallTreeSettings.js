@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import actions from '../../actions';
 import {
@@ -28,7 +28,7 @@ type Props = {
 class ProfileCallTreeSettings extends PureComponent {
   props: Props;
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     (this: any)._onImplementationFilterChange = this._onImplementationFilterChange.bind(
       this
@@ -100,15 +100,6 @@ class ProfileCallTreeSettings extends PureComponent {
     );
   }
 }
-
-ProfileCallTreeSettings.propTypes = {
-  implementationFilter: PropTypes.string.isRequired,
-  changeImplementationFilter: PropTypes.func.isRequired,
-  invertCallstack: PropTypes.bool.isRequired,
-  changeInvertCallstack: PropTypes.func.isRequired,
-  changeCallTreeSearchString: PropTypes.func.isRequired,
-  searchString: PropTypes.string.isRequired,
-};
 
 export default connect(
   state => ({
