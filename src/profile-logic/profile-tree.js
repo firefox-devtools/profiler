@@ -15,8 +15,8 @@ import type { Milliseconds } from '../types/units';
 
 type StackChildren = IndexIntoStackTable[];
 type StackTimes = {
-  selfTime: Float32Array,
-  totalTime: Float32Array,
+  selfTime: Milliseconds[],
+  totalTime: Milliseconds[],
 };
 
 function extractFaviconFromLibname(libname: string): string | null {
@@ -27,17 +27,17 @@ function extractFaviconFromLibname(libname: string): string | null {
 class ProfileTree {
   thread: Thread;
   _stackTimes: StackTimes;
-  _stackChildCount: Uint32Array; // A table column matching the stackTable
+  _stackChildCount: number[]; // A table column matching the stackTable
   _rootTotalTime: number;
   _rootCount: number;
   _nodes: Map<IndexIntoStackTable, Node>;
-  _children: Map<IndexIntoStackTable, StackChildren>;
+  _children: Map<IndexIntoStackTable | null, StackChildren>;
   _jsOnly: boolean;
 
   constructor(
     thread: Thread,
     stackTimes: StackTimes,
-    stackChildCount: Uint32Array,
+    stackChildCount: number[],
     rootTotalTime: number,
     rootCount: number,
     jsOnly: boolean
@@ -53,21 +53,23 @@ class ProfileTree {
   }
 
   getRoots(): StackChildren {
-    return this.getChildren(-1);
+    return this.getChildren(null);
   }
 
   /**
    * Return an array of stackIndex for the children of the node with index stackIndex.
    */
-  getChildren(stackIndex: IndexIntoStackTable): StackChildren {
+  getChildren(stackIndex: IndexIntoStackTable | null): StackChildren {
     let children = this._children.get(stackIndex);
     if (children === undefined) {
       const { stackTable } = this.thread;
       const childCount =
-        stackIndex === -1 ? this._rootCount : this._stackChildCount[stackIndex];
+        stackIndex === null
+          ? this._rootCount
+          : this._stackChildCount[stackIndex];
       children = [];
       for (
-        let childStackIndex = stackIndex + 1;
+        let childStackIndex = stackIndex === null ? -1 : stackIndex + 1;
         childStackIndex < stackTable.length && children.length < childCount;
         childStackIndex++
       ) {
@@ -167,14 +169,18 @@ class ProfileTree {
 
 export type ProfileTreeClass = ProfileTree;
 
-function _getInvertedStackTimes(thread: Thread, interval: Milliseconds) {
+function _getInvertedStackSelfTimes(
+  thread: Thread,
+  interval: Milliseconds
+): {
+  stackSelfTime: Milliseconds[],
+  stackLeafTime: Milliseconds[],
+} {
   const { stackTable, samples } = thread;
-  const stackSelfTime = new Float32Array(stackTable.length);
-  const stackTotalTime = new Float32Array(stackTable.length);
-  const stackToRoot = new Int32Array(stackTable.length);
-  const stackLeafTime = new Float32Array(stackTable.length);
 
-  for (let stackIndex = 0; stackIndex < stackToRoot.length; stackIndex++) {
+  // Compute an array that maps the stackIndex to its root.
+  const stackToRoot = [];
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefixStack = stackTable.prefix[stackIndex];
     if (prefixStack !== null) {
       stackToRoot[stackIndex] = stackToRoot[prefixStack];
@@ -183,6 +189,9 @@ function _getInvertedStackTimes(thread: Thread, interval: Milliseconds) {
     }
   }
 
+  // Calculate the timing information by going through each sample.
+  const stackSelfTime = Array(stackTable.length).fill(0);
+  const stackLeafTime = Array(stackTable.length).fill(0);
   for (let sampleIndex = 0; sampleIndex < samples.stack.length; sampleIndex++) {
     const stackIndex = samples.stack[sampleIndex];
     if (stackIndex !== null) {
@@ -192,14 +201,21 @@ function _getInvertedStackTimes(thread: Thread, interval: Milliseconds) {
     }
   }
 
-  return { stackSelfTime, stackTotalTime, stackLeafTime };
+  return { stackSelfTime, stackLeafTime };
 }
 
-function _getStackTimes(thread: Thread, interval: Milliseconds) {
+/**
+ * This is a helper function to get the stack timings for un-inverted call trees.
+ */
+function _getStackSelfTimes(
+  thread: Thread,
+  interval: Milliseconds
+): {
+  stackSelfTime: Milliseconds[],
+  stackLeafTime: Milliseconds[],
+} {
   const { stackTable, samples } = thread;
-  const stackSelfTime = new Float32Array(stackTable.length);
-  const stackTotalTime = new Float32Array(stackTable.length);
-  const stackLeafTime = new Float32Array(stackTable.length);
+  const stackSelfTime = Array(stackTable.length).fill(0);
 
   for (let sampleIndex = 0; sampleIndex < samples.stack.length; sampleIndex++) {
     const stackIndex = samples.stack[sampleIndex];
@@ -208,9 +224,64 @@ function _getStackTimes(thread: Thread, interval: Milliseconds) {
     }
   }
 
-  return { stackSelfTime, stackTotalTime, stackLeafTime };
+  return { stackSelfTime, stackLeafTime: stackSelfTime };
 }
 
+/**
+ * This computes all of the count and timing information displayed in the calltree.
+ * It takes into account both the normal tree, and the inverted tree.
+ */
+export function computeCallTreeCountsAndTimings(
+  thread: Thread,
+  interval: Milliseconds,
+  invertCallstack: boolean
+) {
+  // Inverted trees need a different method for computing the timing.
+  const { stackSelfTime, stackLeafTime } = invertCallstack
+    ? _getInvertedStackSelfTimes(thread, interval)
+    : _getStackSelfTimes(thread, interval);
+
+  // Compute the following variables:
+  const stackTotalTime = Array(thread.stackTable.length).fill(0);
+  const stackChildCount = Array(thread.stackTable.length).fill(0);
+  let rootTotalTime = 0;
+  let rootCount = 0;
+
+  for (
+    let stackIndex = thread.stackTable.length - 1;
+    stackIndex >= 0;
+    stackIndex--
+  ) {
+    stackTotalTime[stackIndex] += stackLeafTime[stackIndex];
+    if (stackTotalTime[stackIndex] === 0) {
+      continue;
+    }
+    const prefixStack = thread.stackTable.prefix[stackIndex];
+    if (prefixStack === null) {
+      rootTotalTime += stackTotalTime[stackIndex];
+      rootCount++;
+    } else {
+      stackTotalTime[prefixStack] += stackTotalTime[stackIndex];
+      stackChildCount[prefixStack]++;
+    }
+  }
+
+  return {
+    stackTimes: {
+      selfTime: stackSelfTime,
+      totalTime: stackTotalTime,
+    },
+    stackChildCount,
+    rootTotalTime,
+    rootCount,
+  };
+}
+
+/**
+ * An exported interface to get an instance of the ProfileTree class.
+ * This handles computing timing information, and passing it all into
+ * the ProfileTree constructor.
+ */
 export function getCallTree(
   thread: Thread,
   interval: Milliseconds,
@@ -218,38 +289,12 @@ export function getCallTree(
   invertCallstack: boolean
 ): ProfileTree {
   return timeCode('getCallTree', () => {
-    const { stackTable } = thread;
-
-    const { stackSelfTime, stackTotalTime, stackLeafTime } = invertCallstack
-      ? _getInvertedStackTimes(thread, interval)
-      : _getStackTimes(thread, interval);
-
-    const stackChildCount = new Uint32Array(stackTable.length);
-    let rootTotalTime = 0;
-    let routCount = 0;
-    for (
-      let stackIndex = stackTable.length - 1;
-      stackIndex >= 0;
-      stackIndex--
-    ) {
-      stackTotalTime[stackIndex] += stackLeafTime[stackIndex];
-      if (stackTotalTime[stackIndex] === 0) {
-        continue;
-      }
-      const prefixStack = stackTable.prefix[stackIndex];
-      if (prefixStack === null) {
-        rootTotalTime += stackTotalTime[stackIndex];
-        routCount++;
-      } else {
-        stackTotalTime[prefixStack] += stackTotalTime[stackIndex];
-        stackChildCount[prefixStack]++;
-      }
-    }
-
-    const stackTimes = {
-      selfTime: stackSelfTime,
-      totalTime: stackTotalTime,
-    };
+    const {
+      stackTimes,
+      stackChildCount,
+      rootTotalTime,
+      rootCount,
+    } = computeCallTreeCountsAndTimings(thread, interval, invertCallstack);
 
     const jsOnly = implementationFilter === 'js';
 
@@ -258,7 +303,7 @@ export function getCallTree(
       stackTimes,
       stackChildCount,
       rootTotalTime,
-      routCount,
+      rootCount,
       jsOnly
     );
   });

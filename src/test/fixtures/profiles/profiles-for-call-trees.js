@@ -77,15 +77,15 @@ export function getProfileForUnfilteredCallTree(): Profile {
   );
   const { stackTable } = profile.threads[0];
 
-  _addToStackTable(stackTable, A, null); // 0
-  _addToStackTable(stackTable, B, A); // 1
-  _addToStackTable(stackTable, C, B); // 2
-  _addToStackTable(stackTable, D, C); // 3
-  _addToStackTable(stackTable, E, D); // 4
-  _addToStackTable(stackTable, F, C); // 5
-  _addToStackTable(stackTable, G, F); // 6
-  _addToStackTable(stackTable, H, B); // 7
-  _addToStackTable(stackTable, I, H); // 8
+  _addToStackTable(stackTable, A, null, 0); // 0
+  _addToStackTable(stackTable, B, A, 1); // 1
+  _addToStackTable(stackTable, C, B, 2); // 2
+  _addToStackTable(stackTable, D, C, 3); // 3
+  _addToStackTable(stackTable, E, D, 4); // 4
+  _addToStackTable(stackTable, F, C, 3); // 5
+  _addToStackTable(stackTable, G, F, 4); // 6
+  _addToStackTable(stackTable, H, B, 2); // 7
+  _addToStackTable(stackTable, I, H, 3); // 8
 
   return profile;
 }
@@ -93,19 +93,19 @@ export function getProfileForUnfilteredCallTree(): Profile {
 /**
  * Create the following sample structure:
  *
- *      A    A    A 
- *      |    |    | 
- *      v    v    v 
- *      B    B    B 
- *      |    |    | 
- *      v    v    v 
- *      C    X    C 
- *      |    |    | 
- *      v    v    v 
- *      D    Y    X 
- *      |    |    | 
- *      v    v    v 
- *      E    Z    Y 
+ *      A    A    A
+ *      |    |    |
+ *      v    v    v
+ *      B    B    B
+ *      |    |    |
+ *      v    v    v
+ *      C    X    C
+ *      |    |    |
+ *      v    v    v
+ *      D    Y    X
+ *      |    |    |
+ *      v    v    v
+ *      E    Z    Y
  *                |
  *                v
  *                Z
@@ -166,21 +166,21 @@ export function getProfileForInvertedCallTree(): Profile {
 
   const { stackTable } = profile.threads[0];
 
-  _addToStackTable(stackTable, A, null); // 0
-  _addToStackTable(stackTable, B, stackA); // 1
-  _addToStackTable(stackTable, C, stackB); // 2
-  _addToStackTable(stackTable, D, stackC); // 3
-  _addToStackTable(stackTable, E, stackD); // 4
+  _addToStackTable(stackTable, A, null, 0); // 0
+  _addToStackTable(stackTable, B, stackA, 1); // 1
+  _addToStackTable(stackTable, C, stackB, 2); // 2
+  _addToStackTable(stackTable, D, stackC, 3); // 3
+  _addToStackTable(stackTable, E, stackD, 4); // 4
 
   // X Y Z stacks for left branch
-  _addToStackTable(stackTable, X, stackB); // 5 prefix B
-  _addToStackTable(stackTable, Y, stackLeftX); // 6 prefix X
-  _addToStackTable(stackTable, Z, stackLeftY); // 7 prefix Y
+  _addToStackTable(stackTable, X, stackB, 2); // 5 prefix B
+  _addToStackTable(stackTable, Y, stackLeftX, 3); // 6 prefix X
+  _addToStackTable(stackTable, Z, stackLeftY, 4); // 7 prefix Y
 
   // X Y Z stacks for right branch
-  _addToStackTable(stackTable, X, stackC); // 8 prefix C
-  _addToStackTable(stackTable, Y, stackRightX); // 9 prefix X
-  _addToStackTable(stackTable, Z, stackRightY); // 10 prefix Y
+  _addToStackTable(stackTable, X, stackC, 3); // 8 prefix C
+  _addToStackTable(stackTable, Y, stackRightX, 4); // 9 prefix X
+  _addToStackTable(stackTable, Z, stackRightY, 5); // 10 prefix Y
 
   return profile;
 }
@@ -251,9 +251,11 @@ function _createProfileFromFuncsAndSampleStacks(
 function _addToStackTable(
   stackTable: StackTable,
   frame: IndexIntoFrameTable,
-  prefix: IndexIntoStackTable | null
+  prefix: IndexIntoStackTable | null,
+  depth: number
 ): void {
   stackTable.frame.push(frame);
   stackTable.prefix.push(prefix);
+  stackTable.depth.push(depth);
   stackTable.length++;
 }
