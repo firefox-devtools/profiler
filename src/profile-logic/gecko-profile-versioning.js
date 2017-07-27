@@ -13,7 +13,7 @@
 
 import { UniqueStringArray } from '../utils/unique-string-array';
 
-export const CURRENT_VERSION = 8; // The current version of the 'raw profile' format.
+export const CURRENT_VERSION = 8; // The current version of the Gecko profile format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
