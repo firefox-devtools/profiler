@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Lib, IndexIntoStringTable } from './profile';
+import type { Lib, IndexIntoStringTable, PausedRange } from './profile';
 import type { MarkerPayload } from './markers';
 import type { Milliseconds } from './units';
 
@@ -119,6 +119,8 @@ export type GeckoStackStruct = {
 export type GeckoThread = {
   name: string,
   processType: string,
+  registerTime: number,
+  unregisterTime: number | null,
   tid: number,
   pid: number,
   markers: GeckoMarkers,
@@ -132,9 +134,11 @@ export type GeckoProfile = {
   meta: {
     interval: Milliseconds,
     startTime: Milliseconds,
+    shutdownTime: Milliseconds | null,
   },
   libs: Lib[],
   threads: GeckoThread[],
+  pausedRanges: PausedRange[],
   tasktracer?: Object,
   processes: GeckoProfile[],
 };
