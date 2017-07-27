@@ -377,7 +377,7 @@ export const selectorsForThread = (
     );
     const _getDeDuplicatedFunctionFramesThread = createSelector(
       getThread,
-      thread => ProfileData.deDuplicateFunctionFrames(thread, threadIndex)
+      thread => ProfileData.deDuplicateFunctionFrames(thread)
     );
     const getRangeFilteredThread = createSelector(
       _getDeDuplicatedFunctionFramesThread,
@@ -495,7 +495,7 @@ export const selectorsForThread = (
         threadViewOptions.expandedStacks
     );
     const getExpandedStacks = createSelector(
-      getThread,
+      getFilteredThread,
       _getExpandedStacksAsFuncArrays,
       (thread, funcArrays): (IndexIntoStackTable | null)[] => {
         return funcArrays.map(funcArray =>
