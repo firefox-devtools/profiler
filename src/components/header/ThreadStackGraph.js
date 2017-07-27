@@ -102,14 +102,17 @@ class ThreadStackGraph extends PureComponent {
       trueIntervalPixelWidth * multiplier
     );
     let selectedStackDepth = 0;
-    if (selectedStack !== -1 && selectedStack !== null) {
+    if (selectedStack !== null) {
       selectedStackDepth = stackTable.depth[selectedStack];
     }
+
     function hasSelectedStackPrefix(stackPrefix) {
       let stackIndex = stackPrefix;
       if (stackIndex === null) {
         return false;
       }
+      // Find the stackIndex at the selectedStackDepth by starting at the leaf stack and
+      // walking toward the root.
       for (
         let depth = stackTable.depth[stackIndex];
         depth > selectedStackDepth;
@@ -120,8 +123,10 @@ class ThreadStackGraph extends PureComponent {
         }
         stackIndex = stackTable.prefix[stackIndex];
       }
+      // Is the stack at the selectedStackDepth the selectedStack?
       return stackIndex === selectedStack;
     }
+
     for (let i = 0; i < sampleStacks.length; i++) {
       const sampleTime = thread.samples.time[i];
       if (
@@ -135,6 +140,7 @@ class ThreadStackGraph extends PureComponent {
         return;
       }
       const isHighlighted = hasSelectedStackPrefix(stackIndex);
+
       const sampleHeight = stackTable.depth[stackIndex] * yPixelsPerDepth;
       const startY = canvas.height - sampleHeight;
       // const responsiveness = thread.samples.responsiveness[i];

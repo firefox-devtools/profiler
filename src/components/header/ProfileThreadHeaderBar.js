@@ -144,7 +144,7 @@ export default connect(
       thread: selectors.getFilteredThread(state),
       threadName: selectors.getFriendlyThreadName(state),
       processDetails: selectors.getThreadProcessDetails(state),
-      selectedStack: isSelected ? selectors.getSelectedStack(state) : -1,
+      selectedStack: isSelected ? selectors.getSelectedStack(state) : null,
       isSelected,
       threadIndex,
     };

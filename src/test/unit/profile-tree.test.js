@@ -10,7 +10,10 @@ import {
   getCallTree,
   computeCallTreeCountsAndTimings,
 } from '../../profile-logic/profile-tree';
-import { invertCallstack } from '../../profile-logic/profile-data';
+import {
+  invertCallstack,
+  getStackFromFuncArray,
+} from '../../profile-logic/profile-data';
 import type { ProfileTreeClass } from '../../profile-logic/profile-tree';
 import type { IndexIntoStackTable } from '../../types/profile';
 
@@ -242,6 +245,36 @@ describe('unfiltered call tree', function() {
           totalTimePercent: '100.0%',
         });
       });
+    });
+  });
+
+  /**
+   * While not specifically part of the call tree, this is a core function
+   * to help navigate stacks through a list of functions.
+   */
+  describe('getStackFromFuncArray', function() {
+    const profile = getProfileForUnfilteredCallTree();
+    const [thread] = profile.threads;
+    // Helper to make the assertions a little less verbose.
+    function checkStack(funcArray, index, name) {
+      it(`finds stack that ends in ${name}`, function() {
+        expect(getStackFromFuncArray(funcArray, thread)).toBe(index);
+      });
+    }
+    checkStack([A], A, 'A');
+    checkStack([A, B], B, 'B');
+    checkStack([A, B, C], C, 'C');
+    checkStack([A, B, C, D], D, 'D');
+    checkStack([A, B, C, D, E], E, 'E');
+
+    checkStack([A, B, C, F], F, 'F');
+    checkStack([A, B, C, F, G], G, 'G');
+
+    checkStack([A, B, H], H, 'H');
+    checkStack([A, B, H, I], I, 'I');
+
+    it(`doesn't find a non-existent stack`, function() {
+      expect(getStackFromFuncArray([A, B, C, D, E, F, G], thread)).toBe(null);
     });
   });
 });

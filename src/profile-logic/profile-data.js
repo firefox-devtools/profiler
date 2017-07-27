@@ -62,9 +62,9 @@ export function deDuplicateFunctionFrames(thread: Thread): Thread {
     const func: Array<IndexIntoFuncTable> = [];
     const funcCount = funcTable.length;
 
-    // Maps can't key off of two items, so combine the prefixTransformedStack and the funcIndex
-    // using the following formula: prefixTransformedStack * funcCount + funcIndex => stackIndex
-    const prefixTransformedStackAndFuncToFuncStackMap = new Map();
+    // Maps can't key off of two items, so combine the transformedPrefixStack and the funcIndex
+    // using the following formula: transformedPrefixStack * funcCount + funcIndex => stackIndex
+    const transformedPrefixStackAndFuncToTransformedStackMap = new Map();
 
     const prefix = [];
     const frame = [];
@@ -104,6 +104,7 @@ export function deDuplicateFunctionFrames(thread: Thread): Thread {
       frameIndex: IndexIntoFrameTable
     ) {
       const index = transformedStackTable.length++;
+
       prefix[index] = prefixIndex === -1 ? null : prefixIndex;
       func[index] = funcIndex;
 
@@ -123,7 +124,7 @@ export function deDuplicateFunctionFrames(thread: Thread): Thread {
       funcIndex: IndexIntoFuncTable
     ): IndexIntoFrameTable {
       const index = transformedFrameTable.length++;
-      // Null out the address as it's now a range of values
+      // Get the address of the function itself.
       transformedFrameTable.address[index] = funcTable.address[funcIndex];
 
       // Copy over the rest of the information, it should be the same across all
@@ -144,12 +145,13 @@ export function deDuplicateFunctionFrames(thread: Thread): Thread {
       const prefixStack = stackTable.prefix[stackIndex];
       const frameIndex = stackTable.frame[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
-      const prefixTransformedStack =
+
+      const transformedPrefixStack =
         prefixStack === null ? -1 : originalToTransformedStack[prefixStack];
-      const prefixTransformedStackAndFuncIndex =
-        prefixTransformedStack * funcCount + funcIndex;
-      let transformedStackIndex = prefixTransformedStackAndFuncToFuncStackMap.get(
-        prefixTransformedStackAndFuncIndex
+      const transformedPrefixStackAndFuncIndex =
+        transformedPrefixStack * funcCount + funcIndex;
+      let transformedStackIndex = transformedPrefixStackAndFuncToTransformedStackMap.get(
+        transformedPrefixStackAndFuncIndex
       );
 
       // No existing stack from that function was found, so create a new one.
@@ -160,13 +162,13 @@ export function deDuplicateFunctionFrames(thread: Thread): Thread {
           funcIndex
         );
         addTransformedStack(
-          prefixTransformedStack,
+          transformedPrefixStack,
           stackIndex,
           funcIndex,
           transformedFrameIndex
         );
-        prefixTransformedStackAndFuncToFuncStackMap.set(
-          prefixTransformedStackAndFuncIndex,
+        transformedPrefixStackAndFuncToTransformedStackMap.set(
+          transformedPrefixStackAndFuncIndex,
           transformedStackIndex
         );
       } else {
@@ -201,12 +203,26 @@ export function deDuplicateFunctionFrames(thread: Thread): Thread {
       ),
     });
 
-    return Object.assign({}, thread, {
+    if (process.env.NODE_ENV === 'development') {
+      _assertStacksOrderedCorrectly(stackTable);
+    }
+    const newThread = Object.assign({}, thread, {
       stackTable: transformedStackTable,
       samples: transformedSamples,
       frameTable: transformedFrameTable,
     });
+
+    return newThread;
   });
+}
+
+function _assertStacksOrderedCorrectly(stackTable: StackTable) {
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefixIndex = stackTable.prefix[stackIndex];
+    if (prefixIndex !== null && prefixIndex >= stackIndex) {
+      throw new Error('Stacks were not ordered correctly');
+    }
+  }
 }
 
 /**
@@ -305,12 +321,13 @@ function _filterThreadByFunc(
 ): Thread {
   return timeCode('filterThread', () => {
     const { stackTable, frameTable, samples } = thread;
-
     const newStackTable: StackTable = {
       length: 0,
       frame: [],
       prefix: [],
       depth: [],
+      transformedToOriginalStack: [],
+      originalToTransformedStack: [],
     };
 
     const oldStackToNewStack = new Map();
@@ -341,6 +358,12 @@ function _filterThreadByFunc(
             } else {
               newStackTable.depth[newStack] = 0;
             }
+            _updateTransformStacks(
+              stackTable,
+              newStackTable,
+              stackIndex,
+              newStack
+            );
           }
           oldStackToNewStack.set(stackIndex, newStack);
           prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
@@ -360,6 +383,88 @@ function _filterThreadByFunc(
       stackTable: newStackTable,
     });
   });
+}
+
+/**
+ * As frames get transformed, it's useful to be able to point back to the canonical
+ * indexes for those stacks. This a helper function to handle the logic of updating
+ * a StackTable to for newly transformed indexes.
+ *
+ * Warning! This function mutates the stackTable.
+ */
+function _updateTransformStacks(
+  stackTable: StackTable,
+  newStackTable: StackTable,
+  stackIndex: IndexIntoStackTable,
+  newStackIndex: IndexIntoStackTable
+): void {
+  if (
+    !stackTable.transformedToOriginalStack ||
+    !stackTable.originalToTransformedStack ||
+    !newStackTable.transformedToOriginalStack ||
+    !newStackTable.originalToTransformedStack
+  ) {
+    throw new Error('The StackTable did not have transformation tables');
+  }
+  const newStackTableTransformedToOriginalStack =
+    newStackTable.transformedToOriginalStack;
+  const canonicalStacks = stackTable.transformedToOriginalStack[stackIndex];
+  if (Array.isArray(canonicalStacks)) {
+    for (let i = 0; i < canonicalStacks.length; i++) {
+      const canonicalStack = canonicalStacks[i];
+      newStackTable.originalToTransformedStack[
+        canonicalStacks[i]
+      ] = newStackIndex;
+      _addMergedIndexToMap(
+        newStackTableTransformedToOriginalStack,
+        canonicalStack,
+        newStackIndex
+      );
+    }
+  } else if (canonicalStacks !== null) {
+    newStackTable.originalToTransformedStack[canonicalStacks] = newStackIndex;
+  }
+}
+
+/**
+ * As stacks get transformed, it's useful to be able to point back to the canonical
+ * indexes for those stacks. This a helper function to handle the logic of updating
+ * a StackTable to for newly transformed indexes.
+ *
+ * Warning! This function mutates the stackTable.
+ */
+function _updateTransformFrames(
+  frameTable: FrameTable,
+  newFrameTable: FrameTable,
+  frameIndex: IndexIntoStackTable,
+  newFrameIndex: IndexIntoFrameTable
+): void {
+  if (
+    !frameTable.transformedToOriginalFrame ||
+    !frameTable.originalToTransformedFrame ||
+    !newFrameTable.transformedToOriginalFrame ||
+    !newFrameTable.originalToTransformedFrame
+  ) {
+    throw new Error('The FrameTable did not have transformation tables');
+  }
+  const newFrameTableTransformedToOriginalFrame =
+    newFrameTable.transformedToOriginalFrame;
+  const canonicalFrames = frameTable.transformedToOriginalFrame[frameIndex];
+  if (Array.isArray(canonicalFrames)) {
+    for (let i = 0; i < canonicalFrames.length; i++) {
+      const canonicalFrame = canonicalFrames[i];
+      newFrameTable.originalToTransformedFrame[
+        canonicalFrames[i]
+      ] = newFrameIndex;
+      _addMergedIndexToMap(
+        newFrameTableTransformedToOriginalFrame,
+        canonicalFrame,
+        newFrameIndex
+      );
+    }
+  } else if (canonicalFrames !== null) {
+    newFrameTable.originalToTransformedFrame[canonicalFrames] = newFrameIndex;
+  }
 }
 
 /**
@@ -389,6 +494,8 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
       frame: [],
       prefix: [],
       depth: [],
+      transformedToOriginalStack: [],
+      originalToTransformedStack: [],
     };
     const newFrameTable: FrameTable = {
       length: frameTable.length,
@@ -398,6 +505,8 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
       category: frameTable.category.slice(),
       func: frameTable.func.slice(),
       address: frameTable.address.slice(),
+      transformedToOriginalFrame: [],
+      originalToTransformedFrame: [],
     };
     const newFuncTable: FuncTable = {
       length: funcTable.length,
@@ -472,17 +581,30 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
                 );
               }
 
+              const newFrameIndex = newFrameTable.length++;
               newFrameTable.implementation.push(null);
               newFrameTable.optimizations.push(null);
               newFrameTable.line.push(null);
               newFrameTable.category.push(null);
               newFrameTable.func.push(newFuncIndex);
               newFrameTable.address.push(-1);
+              _updateTransformFrames(
+                frameTable,
+                newFrameTable,
+                frameIndex,
+                newFrameIndex
+              );
 
-              newStackTable.frame[newStack] = newFrameTable.length++;
+              newStackTable.frame[newStack] = newFrameIndex;
             } else {
               newStackTable.frame[newStack] = frameIndex;
             }
+            _updateTransformStacks(
+              stackTable,
+              newStackTable,
+              oldStack,
+              newStack
+            );
           }
           oldStackToNewStack.set(oldStack, newStack);
           prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
@@ -620,6 +742,8 @@ export function filterThreadToPrefixStack(
       prefix: [],
       frame: [],
       depth: [],
+      transformedToOriginalStack: [],
+      originalToTransformedStack: [],
     };
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
@@ -650,6 +774,12 @@ export function filterThreadToPrefixStack(
             newStackTable.depth[newStackIndex] = 0;
           }
           oldStackToNewStack.set(stackIndex, newStackIndex);
+          _updateTransformStacks(
+            stackTable,
+            newStackTable,
+            stackIndex,
+            newStackIndex
+          );
         }
       }
       stackMatches[stackIndex] = stackMatchesUpTo;
@@ -816,12 +946,11 @@ export function getStackFromFuncArray(
   for (let i = 0; i < funcArray.length; i++) {
     const funcIndex = funcArray[i];
     let postfixStack = null;
-
     // Go through the entire StackTable and try to find a postfix stack.
     // This works because there is an invariant in the stackTable that a
     // stack's prefix is always less than its stack index.
     for (
-      let possiblyPostfixStack = stackToSearch === null ? 0 : stackToSearch;
+      let possiblyPostfixStack = stackToSearch === null ? 0 : stackToSearch + 1;
       possiblyPostfixStack < stackTable.length;
       possiblyPostfixStack++
     ) {
@@ -841,6 +970,7 @@ export function getStackFromFuncArray(
     }
     stackToSearch = postfixStack;
   }
+  // log(`@@@ getStackFromFuncArray -> ${stackToSearch}`);
   return stackToSearch;
 }
 
@@ -879,13 +1009,15 @@ export function invertCallstack(thread: Thread): Thread {
       frame: [],
       prefix: [],
       depth: [],
+      transformedToOriginalStack: [],
+      originalToTransformedStack: [],
     };
     // Create a Map that keys off of two values, both the prefix and frame combination
     // by using a bit of math: prefix * frameCount + frame => stackIndex
     const prefixAndFrameToStack = new Map();
     const frameCount = frameTable.length;
 
-    function stackFor(prefix, frame) {
+    function stackFor(oldStack, prefix, frame) {
       const prefixAndFrameIndex =
         (prefix === null ? -1 : prefix) * frameCount + frame;
       let stackIndex = prefixAndFrameToStack.get(prefixAndFrameIndex);
@@ -899,6 +1031,7 @@ export function invertCallstack(thread: Thread): Thread {
         } else {
           newStackTable.depth[stackIndex] = 0;
         }
+        _updateTransformStacks(stackTable, newStackTable, oldStack, stackIndex);
       }
       return stackIndex;
     }
@@ -917,7 +1050,11 @@ export function invertCallstack(thread: Thread): Thread {
           currentStack !== null;
           currentStack = stackTable.prefix[currentStack]
         ) {
-          newStack = stackFor(newStack, stackTable.frame[currentStack]);
+          newStack = stackFor(
+            currentStack,
+            newStack,
+            stackTable.frame[currentStack]
+          );
         }
         oldStackToNewStack.set(stackIndex, newStack);
       }

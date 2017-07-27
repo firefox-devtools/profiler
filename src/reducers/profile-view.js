@@ -145,9 +145,13 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
     }
     case 'CHANGE_SELECTED_STACK': {
       const { selectedStack, threadIndex } = action;
+      const expandedStacks = state[threadIndex].expandedStacks.slice();
+      for (let i = 1; i < selectedStack.length; i++) {
+        expandedStacks.push(selectedStack.slice(0, i));
+      }
       return [
         ...state.slice(0, threadIndex),
-        immutableUpdate(state[threadIndex], { selectedStack }),
+        immutableUpdate(state[threadIndex], { selectedStack, expandedStacks }),
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -373,14 +377,19 @@ export const selectorsForThread = (
     );
     const _getDeDuplicatedFunctionFramesThread = createSelector(
       getThread,
-      ProfileData.deDuplicateFunctionFrames
+      thread => ProfileData.deDuplicateFunctionFrames(thread, threadIndex)
     );
     const getRangeFilteredThread = createSelector(
       _getDeDuplicatedFunctionFramesThread,
       getDisplayRange,
       (thread, range): Thread => {
         const { start, end } = range;
-        return ProfileData.filterThreadToRange(thread, start, end);
+        const newThread = ProfileData.filterThreadToRange(thread, start, end);
+        if (!newThread.stackTable.transformedToOriginalStack) {
+          throw new Error('no transformedToOriginalStack');
+        }
+
+        return newThread;
       }
     );
     const _getRangeFilteredThreadSamples = createSelector(
@@ -476,11 +485,9 @@ export const selectorsForThread = (
         threadViewOptions.selectedStack
     );
     const getSelectedStack = createSelector(
-      getThread,
       _getSelectedStackAsFuncArray,
-      (thread, funcArray): IndexIntoStackTable | null => {
-        return ProfileData.getStackFromFuncArray(funcArray, thread);
-      }
+      getFilteredThread,
+      ProfileData.getStackFromFuncArray
     );
     const _getExpandedStacksAsFuncArrays = createSelector(
       getViewOptions,

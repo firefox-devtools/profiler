@@ -449,7 +449,7 @@ class TreeView extends PureComponent {
       nodeId => nodeId === selected
     );
 
-    if (selected === null || selectedRowIndex === -1) {
+    if (selected === null || selectedRowIndex === null) {
       // the first condition is redundant, but it makes flow happy
       this._select(visibleRows[0]);
       return;
