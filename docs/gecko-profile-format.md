@@ -53,6 +53,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
     interval: 0.4,
     stackwalk: 1,
     startTime: 1477063882018.4387,
+    shutdownTime: null,
     processType: 0,
     platform: "Macintosh",
     oscpu: "Intel Mac OS X 10.12",
@@ -78,6 +79,17 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
     ...
   ],
 
+  // Array describing periods of time during which no samples were collected.
+
+  pausedRanges: [
+    {
+      "startTime": 6547.127094,
+      "endTime": 6659.796075,
+      "reason": "collecting"
+    },
+    ...
+  ]
+
   // All of the threads that were profiled.
 
   threads: [
@@ -98,6 +110,12 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
 
       // The process's PID
       pid: 51580,
+
+      // The time when this thread was registered with the profiler
+      registerTime: 23.841461000000002,
+
+      // The time when this thread was unregistered from the profiler, or null
+      unregisterTime: null,
 
       //--------------------------------------------------------
       // Profile data
