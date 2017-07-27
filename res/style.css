@@ -580,6 +580,7 @@ body {
 .selectionScrubberZoomButton.hidden {
   opacity: 0.0 !important;
   pointer-events: none;
+  transition: unset;
 }
 
 .profileViewerHeader:hover .selectionScrubberZoomButton,
