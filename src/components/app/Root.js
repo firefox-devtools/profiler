@@ -5,7 +5,6 @@
 
 import React, { PureComponent } from 'react';
 import { connect, Provider } from 'react-redux';
-import { oneLine } from 'common-tags';
 
 import {
   retrieveProfileFromAddon,
@@ -56,6 +55,16 @@ function fewTimes(count: number) {
   }
 }
 
+function toParagraphs(str: string) {
+  return str.split('\n').map((s, i) => {
+    return (
+      <p key={i}>
+        {s}
+      </p>
+    );
+  });
+}
+
 type ProfileViewProps = {
   view: AppViewState,
   dataSource: string,
@@ -100,7 +109,7 @@ class ProfileViewWhenReadyImpl extends PureComponent {
 
   renderMessage(
     message: string,
-    additionalMessage: React$Component<*, *, *> | string | null,
+    additionalMessage: string | null,
     showLoader: boolean
   ) {
     return (
@@ -112,7 +121,7 @@ class ProfileViewWhenReadyImpl extends PureComponent {
           </div>
           {additionalMessage
             ? <div className="rootMessageAdditional">
-                {additionalMessage}
+                {toParagraphs(additionalMessage)}
               </div>
             : null}
           {showLoader
@@ -154,7 +163,7 @@ class ProfileViewWhenReadyImpl extends PureComponent {
 
           if (view.additionalData.attempt) {
             const attempt = view.additionalData.attempt;
-            additionalMessage += `Tried ${fewTimes(
+            additionalMessage += `\nTried ${fewTimes(
               attempt.count
             )} out of ${attempt.total}.`;
           }
@@ -168,9 +177,9 @@ class ProfileViewWhenReadyImpl extends PureComponent {
         let additionalMessage = null;
         if (view.error) {
           console.error(view.error);
-          additionalMessage = oneLine`
-            ${view.error.toString()} The full stack has been written to the Web Console.
-          `;
+          additionalMessage =
+            `${view.error.toString()}\n` +
+            'The full stack has been written to the Web Console.';
         }
 
         return this.renderMessage(message, additionalMessage, false);
