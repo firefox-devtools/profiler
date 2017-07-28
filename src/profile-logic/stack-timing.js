@@ -10,7 +10,6 @@ import type {
   StackTable,
 } from '../types/profile';
 import type { Milliseconds } from '../types/units';
-import type { FuncStackInfo } from '../types/profile-derived';
 import type { GetCategory } from './color-categories';
 /**
  * The StackTimingByDepth data structure organizes stack frames by their depth, and start
@@ -64,20 +63,12 @@ type LastSeen = {
 
 /**
  * Build a StackTimingByDepth table from a given thread.
- *
- * @param {object} thread - The profile thread.
- * @param {object} funcStackInfo - from the funcStackInfo selector.
- * @param {integer} maxDepth - The max depth of the all the stacks.
- * @param {number} interval - The sampling interval that the profile was recorded with.
- * @return {array} stackTimingByDepth
  */
 export function getStackTimingByDepth(
   thread: Thread,
-  funcStackInfo: FuncStackInfo,
   maxDepth: number,
-  interval: number
+  interval: Milliseconds
 ): StackTimingByDepth {
-  const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
   const stackTimingByDepth = Array.from({ length: maxDepth + 1 }, () => ({
     start: [],
     end: [],
@@ -103,8 +94,7 @@ export function getStackTimingByDepth(
       _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, sampleTime);
       previousDepth = -1;
     } else {
-      const funcStackIndex = stackIndexToFuncStackIndex[stackIndex];
-      const depth = funcStackTable.depth[funcStackIndex];
+      const depth = thread.stackTable.depth[stackIndex];
 
       // Find the depth of the nearest shared stack.
       const depthToPop = _findNearestSharedStackDepth(
@@ -196,18 +186,13 @@ function _pushStacks(
   }
 }
 
-export function computeFuncStackMaxDepth(
-  rangedThread: Thread,
-  funcStackInfo: FuncStackInfo
-): number {
+export function computeMaxStackDepth(thread: Thread): number {
   let maxDepth = 0;
-  const { samples } = rangedThread;
-  const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
-  for (let i = 0; i < rangedThread.samples.length; i++) {
+  const { samples, stackTable } = thread;
+  for (let i = 0; i < thread.samples.length; i++) {
     const stackIndex = samples.stack[i];
     if (stackIndex !== null) {
-      const funcStackIndex = stackIndexToFuncStackIndex[stackIndex];
-      const depth = funcStackTable.depth[funcStackIndex];
+      const depth = stackTable.depth[stackIndex];
       if (depth > maxDepth) {
         maxDepth = depth;
       }

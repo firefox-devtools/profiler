@@ -299,5 +299,21 @@ const _upgraders = {
       thread.markers.data = newDataArray;
     }
   },
+  [7]: profile => {
+    // A depth property was added to the stackTable in the process of removing
+    // funcStackInfo.
+    for (const thread of profile.threads) {
+      const { stackTable } = thread;
+      stackTable.depth = stackTable.prefix.map(prefix => {
+        let depth = 0;
+        let nextPrefix = prefix;
+        while (nextPrefix !== null) {
+          depth++;
+          nextPrefix = stackTable.prefix[nextPrefix];
+        }
+        return depth;
+      });
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */
