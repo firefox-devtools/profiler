@@ -43,19 +43,22 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
 type Props = {
   marker: TracingMarker,
   className?: string,
+  threadName?: string,
 };
 
 export default class MarkerTooltipContents extends PureComponent {
   props: Props;
 
   render() {
-    const { marker, className } = this.props;
+    const { marker, className, threadName } = this.props;
     const details = getMarkerDetails(marker.data);
 
     return (
       <div className={classNames('tooltipMarker', className)}>
         <div
-          className={classNames('tooltipOneLine', { tooltipHeader: details })}
+          className={classNames('tooltipOneLine', {
+            tooltipHeader: details || threadName,
+          })}
         >
           <div className="tooltipTiming">
             {formatTimeLength(marker.dur)}ms
@@ -64,6 +67,14 @@ export default class MarkerTooltipContents extends PureComponent {
             {marker.title || marker.name}
           </div>
         </div>
+        {threadName
+          ? <div className="tooltipDetails">
+              <div className="tooltipLabel" key="thread">
+                Thread:
+              </div>
+              {threadName}
+            </div>
+          : null}
         {details}
       </div>
     );

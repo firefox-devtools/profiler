@@ -442,9 +442,7 @@ export const selectorsForThread = (
     );
     const getJankInstances = createSelector(
       _getRangeFilteredThreadSamples,
-      getFriendlyThreadName,
-      (samples, threadName): TracingMarker[] =>
-        ProfileData.getJankInstances(samples, threadName, 50)
+      (samples): TracingMarker[] => ProfileData.getJankInstances(samples, 50)
     );
     const getTracingMarkers = createSelector(
       getThread,

@@ -16,7 +16,7 @@ import { getSelectedThreadIndex } from '../../reducers/url-state';
 export default connect((state, props) => {
   const { threadIndex } = props;
   const selectors = selectorsForThread(threadIndex);
-  const threadName = selectors.getThread(state).name;
+  const threadName = selectors.getFriendlyThreadName(state);
   const selectedThread = getSelectedThreadIndex(state);
   return {
     intervalMarkers: selectors.getJankInstances(state),
