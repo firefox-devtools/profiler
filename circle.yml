@@ -1,6 +1,10 @@
 machine:
   node:
     version: 7.8
+  post:
+    - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 0.28.4
+  environment:
+    PATH: "$HOME/.yarn/bin:$PATH"
 dependencies:
   override:
     - yarn install
