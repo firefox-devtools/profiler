@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
@@ -62,6 +64,16 @@ UploadingStatus.propTypes = {
 };
 
 class ProfileSharingCompositeButton extends PureComponent {
+  _attemptToShare: Function;
+  _onPermalinkPanelOpen: Function;
+  _onPermalinkPanelClose: Function;
+  _permalinkButtonCreated: Function;
+  _permalinkButton: Object;
+  _uploadErrorButtonCreated: Function;
+  _uploadErrorButton: Object;
+  _permalinkTextFieldCreated: Function;
+  _permalinkTextField: Object;
+
   constructor(props) {
     super(props);
     const { dataSource, hash } = props;
@@ -277,6 +289,8 @@ function filenameDateString(d) {
 }
 
 class ProfileDownloadButton extends PureComponent {
+  _onPanelOpen: Function;
+
   constructor(props) {
     super(props);
     this.state = {
