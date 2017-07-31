@@ -82,6 +82,11 @@ describe('SymbolStore', function() {
   });
 
   it('should persist in DB', async function() {
+    // This test outputs a console.error that muddies up test output. Temporarily
+    // disable the output.
+    const originalConsoleError = console.error;
+    console.error = () => {};
+
     // Using another symbol store simulates a page reload
     const symbolStore2 = new SymbolStore(
       'perf-html-async-storage',
@@ -94,5 +99,6 @@ describe('SymbolStore', function() {
 
     expect(symbolProvider.requestSymbolTable).toHaveBeenCalledTimes(1);
     expect(addrsForLib2).toEqual(addrsForLib1);
+    console.error = originalConsoleError;
   });
 });
