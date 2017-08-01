@@ -11,26 +11,37 @@ import formatTimeLength from '../../utils/format-time-length';
 import type { TracingMarker } from '../../types/profile-derived';
 import type { MarkerPayload } from '../../types/markers';
 
+function _markerDetail<T>(
+  key: string,
+  label: string,
+  value: string
+): Array<React$Element<*> | string> {
+  if (value) {
+    return [
+      <div className="tooltipLabel" key="{key}">
+        {label}:
+      </div>,
+      value,
+    ];
+  } else {
+    return [];
+  }
+}
+
 function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
   if (data) {
     switch (data.type) {
       case 'UserTiming': {
         return (
           <div className="tooltipDetails">
-            <div className="tooltipLabel" key="name">
-              Name:
-            </div>
-            {data.name}
+            {_markerDetail('name', 'Name', data.name)}
           </div>
         );
       }
       case 'DOMEvent': {
         return (
           <div className="tooltipDetails">
-            <div className="tooltipLabel" key="type">
-              Type:
-            </div>
-            {data.eventType}
+            {_markerDetail('type', 'Type', data.eventType)}
           </div>
         );
       }
