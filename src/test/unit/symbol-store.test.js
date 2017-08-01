@@ -82,14 +82,17 @@ describe('SymbolStore', function() {
   });
 
   it('should persist in DB', async function() {
+    const lib = { debugName: 'firefox', breakpadId: 'dont-care' };
+    const addrsForLib1 = await symbolStore.getFuncAddressTableForLib(lib);
+
     // Using another symbol store simulates a page reload
+    // Due to https://github.com/dumbmatter/fakeIndexedDB/issues/22 we need to
+    // take care to sequence the DB open requests.
     const symbolStore2 = new SymbolStore(
       'perf-html-async-storage',
       symbolProvider
     );
 
-    const lib = { debugName: 'firefox', breakpadId: 'dont-care' };
-    const addrsForLib1 = await symbolStore.getFuncAddressTableForLib(lib);
     const addrsForLib2 = await symbolStore2.getFuncAddressTableForLib(lib);
 
     expect(symbolProvider.requestSymbolTable).toHaveBeenCalledTimes(1);
