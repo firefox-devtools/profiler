@@ -45,6 +45,54 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
           </div>
         );
       }
+      case 'GCMinor': {
+        if (data.nursery && data.nursery.reason) {
+          return (
+            <div className="tooltipDetails">
+              {_markerDetail('gcreason', 'Reason', data.nursery.reason)}
+            </div>
+          );
+        } else {
+          return null;
+        }
+      }
+      case 'GCMajor':
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('gcreason', 'Reason', data.timings.reason)}
+            {data.timings.nonincremental_reason !== 'None' &&
+              _markerDetail(
+                'gcnonincrementalreason',
+                'Non-incremental reason',
+                data.timings.nonincremental_reason
+              )}
+            {_markerDetail('gcmaxpause', 'Max Pause', data.timings.max_pause)}
+            {_markerDetail(
+              'gcnumminors',
+              'Minor GCs Count',
+              data.timings.minor_gcs
+            )}
+            {_markerDetail('gcnumslices', 'Slices Count', data.timings.slices)}
+            {_markerDetail(
+              'gcnumzones',
+              'Zones Collected',
+              data.timings.zones_collected
+            )}
+          </div>
+        );
+      case 'GCSlice': {
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('gcreason', 'Reason', data.timings.reason)}
+            {_markerDetail('gcbudget', 'Budget', data.timings.budget)}
+            {_markerDetail(
+              'gcstate',
+              'States',
+              data.timings.initial_state + ' \u2013 ' + data.timings.final_state
+            )}
+          </div>
+        );
+      }
       default:
     }
   }
