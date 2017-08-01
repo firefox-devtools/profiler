@@ -14,14 +14,15 @@ import type { MarkerPayload } from '../../types/markers';
 function _markerDetail<T>(
   key: string,
   label: string,
-  value: string
+  value: T,
+  fn: T => string = String
 ): Array<React$Element<*> | string> {
   if (value) {
     return [
       <div className="tooltipLabel" key="{key}">
         {label}:
       </div>,
-      value,
+      fn(value),
     ];
   } else {
     return [];
@@ -56,7 +57,12 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
           return null;
         }
       }
-      case 'GCMajor':
+      case 'GCMajor': {
+        let zones_collected_total;
+        if (data.timings.zones_collected && data.timings.total_zones) {
+          zones_collected_total =
+            data.timings.zones_collected + ' / ' + data.timings.total_zones;
+        }
         return (
           <div className="tooltipDetails">
             {_markerDetail('gcreason', 'Reason', data.timings.reason)}
@@ -66,20 +72,18 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
                 'Non-incremental reason',
                 data.timings.nonincremental_reason
               )}
-            {_markerDetail('gcmaxpause', 'Max Pause', data.timings.max_pause)}
             {_markerDetail(
-              'gcnumminors',
-              'Minor GCs Count',
-              data.timings.minor_gcs
+              'gcmaxpause',
+              'Max Pause',
+              data.timings.max_pause,
+              x => x + 'ms'
             )}
-            {_markerDetail('gcnumslices', 'Slices Count', data.timings.slices)}
-            {_markerDetail(
-              'gcnumzones',
-              'Zones Collected',
-              data.timings.zones_collected
-            )}
+            {_markerDetail('gcnumminors', 'Minor GCs', data.timings.minor_gcs)}
+            {_markerDetail('gcnumslices', 'Slices', data.timings.slices)}
+            {_markerDetail('gcnumzones', 'Zones', zones_collected_total)}
           </div>
         );
+      }
       case 'GCSlice': {
         return (
           <div className="tooltipDetails">
