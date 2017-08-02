@@ -61,7 +61,7 @@ describe('actions/receive-profile', function() {
       clock = sinon.useFakeTimers();
 
       geckoProfiler = {
-        getProfile: () => Promise.resolve(exampleProfile),
+        getProfile: () => Promise.resolve(exampleProfile()),
         getSymbolTable: () => Promise.resolve(),
       };
       window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
@@ -129,7 +129,7 @@ describe('actions/receive-profile', function() {
     const fetch200Response = {
       ok: true,
       status: 200,
-      json: () => Promise.resolve(exampleProfile),
+      json: () => Promise.resolve(exampleProfile()),
     };
 
     beforeEach(function() {
@@ -243,7 +243,7 @@ describe('actions/receive-profile', function() {
     const fetch200Response = {
       ok: true,
       status: 200,
-      json: () => Promise.resolve(exampleProfile),
+      json: () => Promise.resolve(exampleProfile()),
     };
 
     beforeEach(function() {
