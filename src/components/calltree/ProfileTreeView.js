@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import TreeView from '../shared/TreeView';
 import NodeIcon from './NodeIcon';
-import { getStackAsFuncArray } from '../../profile-logic/profile-data';
+import { getFuncStackAsFuncArray } from '../../profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
@@ -114,7 +114,10 @@ class ProfileTreeView extends PureComponent {
     const { funcStackInfo, threadIndex, changeSelectedFuncStack } = this.props;
     changeSelectedFuncStack(
       threadIndex,
-      getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable)
+      getFuncStackAsFuncArray(
+        newSelectedFuncStack,
+        funcStackInfo.funcStackTable
+      )
     );
   }
 
@@ -125,7 +128,7 @@ class ProfileTreeView extends PureComponent {
     changeExpandedFuncStacks(
       threadIndex,
       newExpandedFuncStacks.map(funcStackIndex =>
-        getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable)
+        getFuncStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable)
       )
     );
   }
@@ -142,7 +145,7 @@ class ProfileTreeView extends PureComponent {
     if (invertCallstack) {
       addCallTreeFilter(threadIndex, {
         type: 'postfix',
-        postfixFuncs: getStackAsFuncArray(
+        postfixFuncs: getFuncStackAsFuncArray(
           funcStackIndex,
           funcStackInfo.funcStackTable
         ),
@@ -151,7 +154,7 @@ class ProfileTreeView extends PureComponent {
     } else {
       addCallTreeFilter(threadIndex, {
         type: 'prefix',
-        prefixFuncs: getStackAsFuncArray(
+        prefixFuncs: getFuncStackAsFuncArray(
           funcStackIndex,
           funcStackInfo.funcStackTable
         ),
