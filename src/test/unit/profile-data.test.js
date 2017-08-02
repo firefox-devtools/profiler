@@ -114,7 +114,7 @@ describe('data-table-utils', function() {
 
 describe('process-profile', function() {
   describe('processProfile', function() {
-    const profile = processProfile(exampleProfile);
+    const profile = processProfile(exampleProfile());
     it('should have three threads', function() {
       expect(profile.threads.length).toEqual(3);
     });
@@ -242,7 +242,7 @@ describe('process-profile', function() {
 
 describe('profile-data', function() {
   describe('createFuncStackTableAndFixupSamples', function() {
-    const profile = processProfile(exampleProfile);
+    const profile = processProfile(exampleProfile());
     const thread = profile.threads[0];
     const { funcStackTable } = getFuncStackInfo(
       thread.stackTable,
@@ -262,7 +262,7 @@ describe('profile-data', function() {
     });
   });
   describe('getTracingMarkers', function() {
-    const profile = processProfile(exampleProfile);
+    const profile = processProfile(exampleProfile());
     const thread = profile.threads[0];
     const tracingMarkers = getTracingMarkers(thread);
     it('should fold the two reflow markers into one tracing marker', function() {
@@ -347,7 +347,7 @@ describe('symbolication', function() {
     let symbolicatedProfile = null;
 
     beforeAll(function() {
-      unsymbolicatedProfile = processProfile(exampleProfile);
+      unsymbolicatedProfile = processProfile(exampleProfile());
       const symbolTable = {
         0: 'first symbol',
         0xf00: 'second symbol',
@@ -519,7 +519,7 @@ describe('upgrades', function() {
 });
 
 describe('color-categories', function() {
-  const profile = processProfile(exampleProfile);
+  const profile = processProfile(exampleProfile());
   const [thread] = profile.threads;
   it('calculates the category for each frame', function() {
     const categories = thread.samples.stack.map(stackIndex => {
@@ -540,7 +540,7 @@ describe('color-categories', function() {
 });
 
 describe('filter-by-implementation', function() {
-  const profile = processProfile(profileWithJS);
+  const profile = processProfile(profileWithJS());
   const thread = profile.threads[0];
 
   function stackIsJS(filteredThread, stackIndex) {
