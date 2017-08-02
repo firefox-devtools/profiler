@@ -11,6 +11,7 @@ import {
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import actions from '../../actions';
+import formatTimeLength from '../../utils/format-time-length';
 
 class MarkerTree {
   constructor(thread, zeroAt) {
@@ -83,6 +84,13 @@ class MarkerTree {
           case 'UserTiming':
             name = `${name} [${data.name}]`;
             break;
+
+          case 'DOMEvent': {
+            category = 'DOMEvent';
+            const duration = data.endTime - data.startTime;
+            name = `[${formatTimeLength(duration)}ms] ${data.eventType}`;
+            break;
+          }
 
           default:
         }
