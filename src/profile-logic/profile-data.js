@@ -89,6 +89,7 @@ function _mutateStackTransformMapToCanonicalIndexes(
         const canonicalStack = previousToCanonical[previousStack[i]];
         if (typeof canonicalStack === 'number') {
           canonicalStacks.push(canonicalStack);
+        } else if (!canonicalStack) {
         } else {
           for (let j = 0; j < canonicalStack.length; j++) {
             canonicalStacks.push(canonicalStack[j]);
@@ -493,8 +494,6 @@ function _updateTransformStacks(
   newStackIndex: IndexIntoStackTable
 ): void {
   if (
-    !stackTable.transformedToOriginalStack ||
-    !stackTable.originalToTransformedStack ||
     !newStackTable.transformedToOriginalStack ||
     !newStackTable.originalToTransformedStack
   ) {
@@ -502,7 +501,9 @@ function _updateTransformStacks(
   }
   const newStackTableTransformedToOriginalStack =
     newStackTable.transformedToOriginalStack;
-  const canonicalStacks = stackTable.transformedToOriginalStack[stackIndex];
+  const canonicalStacks = stackTable.transformedToOriginalStack
+    ? stackTable.transformedToOriginalStack[stackIndex]
+    : stackIndex;
   if (Array.isArray(canonicalStacks)) {
     for (let i = 0; i < canonicalStacks.length; i++) {
       const canonicalStack = canonicalStacks[i];
@@ -534,8 +535,6 @@ function _updateTransformFrames(
   newFrameIndex: IndexIntoFrameTable
 ): void {
   if (
-    !frameTable.transformedToOriginalFrame ||
-    !frameTable.originalToTransformedFrame ||
     !newFrameTable.transformedToOriginalFrame ||
     !newFrameTable.originalToTransformedFrame
   ) {
@@ -543,7 +542,9 @@ function _updateTransformFrames(
   }
   const newFrameTableTransformedToOriginalFrame =
     newFrameTable.transformedToOriginalFrame;
-  const canonicalFrames = frameTable.transformedToOriginalFrame[frameIndex];
+  const canonicalFrames = frameTable.transformedToOriginalFrame
+    ? frameTable.transformedToOriginalFrame[frameIndex]
+    : frameIndex;
   if (Array.isArray(canonicalFrames)) {
     for (let i = 0; i < canonicalFrames.length; i++) {
       const canonicalFrame = canonicalFrames[i];

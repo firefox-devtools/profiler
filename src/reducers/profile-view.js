@@ -375,21 +375,12 @@ export const selectorsForThread = (
       getCallTreeFilters,
       CallTreeFilters.getCallTreeFilterLabels
     );
-    const _getMergedStacksThatShareFunctionsThread = createSelector(
-      getThread,
-      thread => ProfileData.mergeStacksThatShareFunctions(thread)
-    );
     const getRangeFilteredThread = createSelector(
-      _getMergedStacksThatShareFunctionsThread,
+      getThread,
       getDisplayRange,
       (thread, range): Thread => {
         const { start, end } = range;
-        const newThread = ProfileData.filterThreadToRange(thread, start, end);
-        if (!newThread.stackTable.transformedToOriginalStack) {
-          throw new Error('no transformedToOriginalStack');
-        }
-
-        return newThread;
+        return ProfileData.filterThreadToRange(thread, start, end);
       }
     );
     const _getRangeFilteredThreadSamples = createSelector(
@@ -446,10 +437,7 @@ export const selectorsForThread = (
     const _getImplementationFilteredThread = createSelector(
       _getRangeAndCallTreeFilteredThread,
       URLState.getImplementationFilter,
-      (thread, filter) =>
-        ProfileData.mergeStacksThatShareFunctions(
-          ProfileData.filterThreadByImplementation(thread, filter)
-        )
+      ProfileData.filterThreadByImplementation
     );
     const _getImplementationAndSearchFilteredThread = createSelector(
       _getImplementationFilteredThread,
@@ -462,19 +450,9 @@ export const selectorsForThread = (
       _getImplementationAndSearchFilteredThread,
       URLState.getInvertCallstack,
       (thread, shouldInvertCallstack): Thread => {
-        const filteredThread = shouldInvertCallstack
-          ? ProfileData.invertCallstack(thread)
-          : thread;
-
-        if (
-          !filteredThread.stackTable.transformedToOriginalStack ||
-          !filteredThread.stackTable.originalToTransformedStack
-        ) {
-          throw new Error(
-            "The filtered thread's StackTable did not have transformation tables."
-          );
-        }
-        return filteredThread;
+        return ProfileData.mergeStacksThatShareFunctions(
+          shouldInvertCallstack ? ProfileData.invertCallstack(thread) : thread
+        );
       }
     );
     const getRangeSelectionFilteredThread = createSelector(
