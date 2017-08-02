@@ -114,7 +114,7 @@ describe('data-table-utils', function() {
 
 describe('process-profile', function() {
   describe('processProfile', function() {
-    const profile = processProfile(exampleProfile);
+    const profile = processProfile(exampleProfile());
     it('should have three threads', function() {
       expect(profile.threads.length).toEqual(3);
     });
@@ -242,7 +242,7 @@ describe('process-profile', function() {
 
 describe('profile-data', function() {
   describe('createFuncStackTableAndFixupSamples', function() {
-    const profile = processProfile(exampleProfile);
+    const profile = processProfile(exampleProfile());
     const thread = profile.threads[0];
     const { funcStackTable } = getFuncStackInfo(
       thread.stackTable,
@@ -262,7 +262,7 @@ describe('profile-data', function() {
     });
   });
   describe('getTracingMarkers', function() {
-    const profile = processProfile(exampleProfile);
+    const profile = processProfile(exampleProfile());
     const thread = profile.threads[0];
     const tracingMarkers = getTracingMarkers(thread);
     it('should fold the two reflow markers into one tracing marker', function() {
@@ -347,7 +347,7 @@ describe('symbolication', function() {
     let symbolicatedProfile = null;
 
     beforeAll(function() {
-      unsymbolicatedProfile = processProfile(exampleProfile);
+      unsymbolicatedProfile = processProfile(exampleProfile());
       const symbolTable = {
         0: 'first symbol',
         0xf00: 'second symbol',
@@ -440,7 +440,7 @@ describe('upgrades', function() {
     expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
   }
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-6.json')
+    require('../fixtures/upgrades/processed-7.json')
   );
 
   // Uncomment this to output your next ./upgrades/processed-X.json
@@ -483,22 +483,14 @@ describe('upgrades', function() {
     );
     compareProcessedProfiles(upgradedProfile5, afterUpgradeReference);
 
-    const geckoProfile3 = require('../fixtures/upgrades/gecko-3.json');
-    const upgradedGeckoProfile3 = unserializeProfileOfArbitraryFormat(
-      geckoProfile3
+    const serializedOldProcessedProfile6 = require('../fixtures/upgrades/processed-6.json');
+    const upgradedProfile6 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile6
     );
-    compareProcessedProfiles(upgradedGeckoProfile3, afterUpgradeReference);
-
-    // const serializedOldProcessedProfile2 = require('../fixtures/upgrades/processed-2.json');
-    // const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldProcessedProfile2);
-    // compareProcessedProfiles(upgradedProfile2, afterUpgradeReference);
-
-    // const geckoProfile4 = require('../fixtures/upgrades/gecko-4.json');
-    // const upgradedGeckoProfile4 = unserializeProfileOfArbitraryFormat(geckoProfile4);
-    // compareProcessedProfiles(upgradedGeckoProfile4, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile6, afterUpgradeReference);
   });
   it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function() {
-    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-7.json');
+    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-8.json');
     // Uncomment this to output your next ./upgrades/gecko-X.json
     // upgradeGeckoProfileToCurrentVersion(afterUpgradeGeckoReference);
     // console.log(JSON.stringify(afterUpgradeGeckoReference));
@@ -518,12 +510,16 @@ describe('upgrades', function() {
 
     const geckoProfile6 = require('../fixtures/upgrades/gecko-6.json');
     upgradeGeckoProfileToCurrentVersion(geckoProfile6);
-    expect(geckoProfile5).toEqual(afterUpgradeGeckoReference);
+    expect(geckoProfile6).toEqual(afterUpgradeGeckoReference);
+
+    const geckoProfile7 = require('../fixtures/upgrades/gecko-7.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile7);
+    expect(geckoProfile7).toEqual(afterUpgradeGeckoReference);
   });
 });
 
 describe('color-categories', function() {
-  const profile = processProfile(exampleProfile);
+  const profile = processProfile(exampleProfile());
   const [thread] = profile.threads;
   it('calculates the category for each frame', function() {
     const categories = thread.samples.stack.map(stackIndex => {
@@ -544,7 +540,7 @@ describe('color-categories', function() {
 });
 
 describe('filter-by-implementation', function() {
-  const profile = processProfile(profileWithJS);
+  const profile = processProfile(profileWithJS());
   const thread = profile.threads[0];
 
   function stackIsJS(filteredThread, stackIndex) {

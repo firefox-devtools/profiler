@@ -35,6 +35,7 @@ const baseConfig = {
     },
     extensions: ['.js'],
   },
+  devtool: 'source-map',
   module: {
     rules: [
       {
