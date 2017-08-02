@@ -47,7 +47,7 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
         );
       }
       case 'GCMinor': {
-        if (data.nursery && data.nursery.reason) {
+        if (data.nursery) {
           return (
             <div className="tooltipDetails">
               {_markerDetail('gcreason', 'Reason', data.nursery.reason)}
