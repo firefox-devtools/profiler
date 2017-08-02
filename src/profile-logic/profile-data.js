@@ -715,7 +715,7 @@ export function getFuncStackFromFuncArray(
   return fs;
 }
 
-export function getStackAsFuncArray(
+export function getFuncStackAsFuncArray(
   funcStackIndex: IndexIntoFuncStackTable | null,
   funcStackTable: FuncStackTable
 ): IndexIntoFuncTable[] {
@@ -723,7 +723,10 @@ export function getStackAsFuncArray(
     return [];
   }
   if (funcStackIndex * 1 !== funcStackIndex) {
-    console.log('bad funcStackIndex in getStackAsFuncArray:', funcStackIndex);
+    console.log(
+      'bad funcStackIndex in getFuncStackAsFuncArray:',
+      funcStackIndex
+    );
     return [];
   }
   const funcArray = [];
