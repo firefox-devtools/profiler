@@ -37,7 +37,7 @@ function extractFaviconFromLibname(libname: string): string | null {
   return url.href;
 }
 
-class ProfileTree {
+export class CallTree {
   _callNodeTable: CallNodeTable;
   _callNodeTimes: CallNodeTimes;
   _callNodeChildCount: Uint32Array; // A table column matching the callNodeTable
@@ -123,7 +123,7 @@ class ProfileTree {
     return this._callNodeTable.depth[callNodeIndex];
   }
 
-  hasSameNodeIds(tree: ProfileTree): boolean {
+  hasSameNodeIds(tree: CallTree): boolean {
     return this._callNodeTable === tree._callNodeTable;
   }
 
@@ -186,8 +186,6 @@ class ProfileTree {
     return '';
   }
 }
-
-export type ProfileTreeClass = ProfileTree;
 
 function _getInvertedStackSelfTimes(
   thread: Thread,
@@ -321,9 +319,9 @@ export function computeCallTreeCountsAndTimings(
 }
 
 /**
- * An exported interface to get an instance of the ProfileTree class.
+ * An exported interface to get an instance of the CallTree class.
  * This handles computing timing information, and passing it all into
- * the ProfileTree constructor.
+ * the CallTree constructor.
  */
 export function getCallTree(
   thread: Thread,
@@ -331,7 +329,7 @@ export function getCallTree(
   callNodeInfo: CallNodeInfo,
   implementationFilter: string,
   invertCallstack: boolean
-): ProfileTree {
+): CallTree {
   return timeCode('getCallTree', () => {
     const {
       callNodeTimes,
@@ -347,7 +345,7 @@ export function getCallTree(
 
     const jsOnly = implementationFilter === 'js';
 
-    return new ProfileTree(
+    return new CallTree(
       thread,
       callNodeInfo.callNodeTable,
       callNodeTimes,

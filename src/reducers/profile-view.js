@@ -15,7 +15,7 @@ import * as URLState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
 import * as StackTiming from '../profile-logic/stack-timing';
 import * as MarkerTiming from '../profile-logic/marker-timing';
-import * as ProfileTree from '../profile-logic/profile-tree';
+import * as CallTree from '../profile-logic/call-tree';
 import * as TaskTracerTools from '../profile-logic/task-tracer';
 import { getCategoryColorStrategy } from './flame-chart';
 
@@ -395,7 +395,7 @@ export type SelectorsForThread = {
   getCallNodeInfo: State => CallNodeInfo,
   getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
   getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
-  getCallTree: State => ProfileTree.ProfileTreeClass,
+  getCallTree: State => CallTree.CallTree,
   getFilteredThreadForFlameChart: State => Thread,
   getCallNodeInfoOfFilteredThreadForFlameChart: State => CallNodeInfo,
   getCallNodeMaxDepthForFlameChart: State => number,
@@ -571,7 +571,7 @@ export const selectorsForThread = (
       getCallNodeInfo,
       URLState.getImplementationFilter,
       URLState.getInvertCallstack,
-      ProfileTree.getCallTree
+      CallTree.getCallTree
     );
 
     // The selectors below diverge from the thread filtering that's done above;

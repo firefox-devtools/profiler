@@ -5,7 +5,7 @@
 // @flow
 
 import React from 'react';
-import ProfileTreeView from './ProfileTreeView';
+import CallTree from './CallTree';
 import ProfileCallTreeSettings from './ProfileCallTreeSettings';
 import ProfileCallTreeFilterNavigator from './ProfileCallTreeFilterNavigator';
 
@@ -13,7 +13,7 @@ const ProfileCallTreeView = () =>
   <div className="treeAndSidebarWrapper">
     <ProfileCallTreeFilterNavigator />
     <ProfileCallTreeSettings />
-    <ProfileTreeView />
+    <CallTree />
   </div>;
 
 ProfileCallTreeView.propTypes = {};

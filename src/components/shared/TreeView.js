@@ -12,7 +12,7 @@ import { BackgroundImageStyleDef } from './StyleDef';
 import ContextMenuTrigger from './ContextMenuTrigger';
 
 import type { IndexIntoCallNodeTable, Node } from '../../types/profile-derived';
-import type { ProfileTreeClass } from '../../profile-logic/profile-tree';
+import type { CallTree } from '../../profile-logic/call-tree';
 import type { IconWithClassName } from '../../types/reducers';
 
 export type Column = {
@@ -248,7 +248,7 @@ class TreeViewRowScrolledColumns extends PureComponent {
 type TreeViewProps = {
   fixedColumns: Column[],
   mainColumn: Column,
-  tree: ProfileTreeClass,
+  tree: CallTree,
   expandedNodeIds: Array<IndexIntoCallNodeTable | null>,
   selectedNodeId: IndexIntoCallNodeTable | null,
   onExpandedNodesChange: PropTypes.func.isRequired,

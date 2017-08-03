@@ -9,13 +9,13 @@ import {
 import {
   getCallTree,
   computeCallTreeCountsAndTimings,
-} from '../../profile-logic/profile-tree';
+  CallTree,
+} from '../../profile-logic/call-tree';
 import {
   getCallNodeInfo,
   invertCallstack,
   getCallNodeFromPath,
 } from '../../profile-logic/profile-data';
-import type { ProfileTreeClass } from '../../profile-logic/profile-tree';
 import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
 
 describe('unfiltered call tree', function() {
@@ -32,7 +32,7 @@ describe('unfiltered call tree', function() {
   const H = 7;
   const I = 8;
 
-  function getUnfilteredCallTree(): ProfileTreeClass {
+  function getUnfilteredCallTree(): CallTree {
     const profile = getProfileForUnfilteredCallTree();
     const [thread] = profile.threads;
     const { interval } = profile.meta;
@@ -45,7 +45,7 @@ describe('unfiltered call tree', function() {
   }
 
   /**
-   * Before creating a ProfileTree instance some timings are pre-computed.
+   * Before creating a CallTree instance some timings are pre-computed.
    * This test ensures that these generated values are correct.
    */
   describe('computed counts and timings', function() {
@@ -197,11 +197,11 @@ describe('unfiltered call tree', function() {
   });
 
   /**
-   * These tests provides coverage for every method of the ProfileTree. It's less about
+   * These tests provides coverage for every method of the CallTree. It's less about
    * correct tree structure, and more of simple assertions about how the interface
    * is supposed to behave. There is probably duplication of coverage with other tests.
    */
-  describe('ProfileTree methods', function() {
+  describe('CallTree methods', function() {
     const callTree = getUnfilteredCallTree();
 
     describe('getRoots()', function() {
@@ -322,7 +322,7 @@ describe('inverted call tree', function() {
   const stackD_branchL = 1;
   const stackE_branchL = 0;
 
-  function getInvertedCallTreeFromProfile(): ProfileTreeClass {
+  function getInvertedCallTreeFromProfile(): CallTree {
     const profile = getProfileForInvertedCallTree();
     const invertedThread = invertCallstack(profile.threads[0]);
     const { interval } = profile.meta;
@@ -495,7 +495,7 @@ describe('inverted call tree', function() {
  * node, so that the error messages are nice and helpful for when things fail.
  */
 function _assertNode(
-  callTree: ProfileTreeClass,
+  callTree: CallTree,
   callNodeIndex: IndexIntoCallNodeTable,
   expected: {
     children: IndexIntoCallNodeTable[],
@@ -504,7 +504,7 @@ function _assertNode(
     totalTime: number,
   }
 ) {
-  // Transform any CallNodeIndexes into ProfileTree nodes.
+  // Transform any CallNodeIndexes into CallTree nodes.
   const getNode = (callNodeIndex: IndexIntoCallNodeTable) =>
     callNodeIndex === -1 ? null : callTree.getNode(callNodeIndex);
 

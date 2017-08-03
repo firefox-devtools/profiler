@@ -30,7 +30,7 @@ import {
 } from '../../actions/profile-view';
 
 import type { IconWithClassName, State } from '../../types/reducers';
-import type { ProfileTreeClass } from '../../profile-logic/profile-tree';
+import type { CallTree } from '../../profile-logic/call-tree';
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type {
   CallNodeInfo,
@@ -43,7 +43,7 @@ type Props = {
   threadIndex: ThreadIndex,
   scrollToSelectionGeneration: number,
   interval: number,
-  tree: ProfileTreeClass,
+  tree: CallTree,
   callNodeInfo: CallNodeInfo,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
@@ -57,7 +57,7 @@ type Props = {
   addCallTreeFilter: typeof addCallTreeFilter,
 };
 
-class ProfileTreeView extends PureComponent {
+class CallTreeComponent extends PureComponent {
   props: Props;
   _fixedColumns: Column[];
   _mainColumn: Column;
@@ -232,4 +232,4 @@ export default connect(
   { changeSelectedCallNode, changeExpandedCallNodes, addCallTreeFilter },
   null,
   { withRef: true }
-)(ProfileTreeView);
+)(CallTreeComponent);
