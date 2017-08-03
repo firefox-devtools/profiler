@@ -32,14 +32,12 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
 > {
   props: Props<HoveredItem>;
   state: State<HoveredItem>;
-  _requestedAnimationFrame: boolean;
   _devicePixelRatio: number;
   _ctx: CanvasRenderingContext2D;
   _canvas: ?HTMLCanvasElement;
 
   constructor(props: Props<HoveredItem>) {
     super(props);
-    this._requestedAnimationFrame = false;
     this._devicePixelRatio = 1;
     this.state = {
       hoveredItem: null,
@@ -54,25 +52,16 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
     (this: any)._getHoveredItemInfo = this._getHoveredItemInfo.bind(this);
   }
 
-  shouldComponentUpdate() {
-    // If the parent updates, always re-render.
-    return true;
-  }
-
   _scheduleDraw() {
     const { className, drawCanvas } = this.props;
-    if (!this._requestedAnimationFrame) {
-      this._requestedAnimationFrame = true;
-      window.requestAnimationFrame(() => {
-        this._requestedAnimationFrame = false;
-        if (this._canvas) {
-          timeCode(`${className} render`, () => {
-            this._prepCanvas();
-            drawCanvas(this._ctx, this.state.hoveredItem);
-          });
-        }
-      });
-    }
+    window.requestAnimationFrame(() => {
+      if (this._canvas) {
+        timeCode(`${className} render`, () => {
+          this._prepCanvas();
+          drawCanvas(this._ctx, this.state.hoveredItem);
+        });
+      }
+    });
   }
 
   _prepCanvas() {
@@ -115,14 +104,18 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
     const y: CssPixels = event.pageY - rect.top;
 
     const maybeHoveredItem = this.props.hitTest(x, y);
-    if (!hoveredItemsAreEqual(maybeHoveredItem, this.state.hoveredItem)) {
-      this.setState({ hoveredItem: maybeHoveredItem });
-    }
 
-    this.setState({
-      mouseX: event.pageX,
-      mouseY: event.pageY,
-    });
+    if (maybeHoveredItem !== null) {
+      this.setState({
+        hoveredItem: maybeHoveredItem,
+        mouseX: event.pageX,
+        mouseY: event.pageY,
+      });
+    } else if (this.state.hoveredItem !== null) {
+      this.setState({
+        hoveredItem: null,
+      });
+    }
   }
 
   _onMouseOut() {
@@ -147,10 +140,26 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
     this._canvas = canvas;
   }
 
+  shouldComponentUpdate() {
+    // always try to update if the parent updates
+    return true;
+  }
+
+  componentDidUpdate(
+    prevProps: Props<HoveredItem>,
+    prevState: State<HoveredItem>
+  ) {
+    if (
+      prevProps !== this.props ||
+      prevState.hoveredItem !== this.state.hoveredItem
+    ) {
+      this._scheduleDraw();
+    }
+  }
+
   render() {
     const { isDragging } = this.props;
     const { hoveredItem, mouseX, mouseY } = this.state;
-    this._scheduleDraw();
 
     const className = classNames({
       timelineCanvas: true,
@@ -177,34 +186,4 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
       </div>
     );
   }
-}
-
-/**
- * Check for shallow equality for objects, and strict equality for everything else.
- */
-function hoveredItemsAreEqual(a: any, b: any) {
-  if (a && b && typeof a === 'object' && typeof b === 'object') {
-    if (a.length !== b.length) {
-      return false;
-    }
-    let hasAllKeys = true;
-    for (const aKey in a) {
-      let hasKey = false;
-      for (const bKey in b) {
-        if (aKey === bKey) {
-          if (a[aKey] !== b[bKey]) {
-            return false;
-          }
-          hasKey = true;
-          break;
-        }
-      }
-      hasAllKeys = hasAllKeys && hasKey;
-      if (!hasAllKeys) {
-        return false;
-      }
-    }
-    return true;
-  }
-  return a === b;
 }
