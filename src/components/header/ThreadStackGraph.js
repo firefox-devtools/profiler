@@ -5,7 +5,7 @@
 import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import { timeCode } from '../../utils/time-code';
-import { getSampleFuncStacks } from '../../profile-logic/profile-data';
+import { getSampleCallNodes } from '../../profile-logic/profile-data';
 
 class ThreadStackGraph extends PureComponent {
   constructor(props) {
@@ -48,8 +48,8 @@ class ThreadStackGraph extends PureComponent {
       interval,
       rangeStart,
       rangeEnd,
-      funcStackInfo,
-      selectedFuncStack,
+      callNodeInfo,
+      selectedCallNodeIndex,
     } = this.props;
 
     const devicePixelRatio = c.ownerDocument
@@ -60,14 +60,14 @@ class ThreadStackGraph extends PureComponent {
     c.height = Math.round(r.height * devicePixelRatio);
     const ctx = c.getContext('2d');
     let maxDepth = 0;
-    const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
-    const sampleFuncStacks = getSampleFuncStacks(
+    const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
+    const sampleCallNodes = getSampleCallNodes(
       thread.samples,
-      stackIndexToFuncStackIndex
+      stackIndexToCallNodeIndex
     );
-    for (let i = 0; i < funcStackTable.depth.length; i++) {
-      if (funcStackTable.depth[i] > maxDepth) {
-        maxDepth = funcStackTable.depth[i];
+    for (let i = 0; i < callNodeTable.depth.length; i++) {
+      if (callNodeTable.depth[i] > maxDepth) {
+        maxDepth = callNodeTable.depth[i];
       }
     }
     const range = [rangeStart, rangeEnd];
@@ -80,22 +80,22 @@ class ThreadStackGraph extends PureComponent {
       0.8,
       trueIntervalPixelWidth * multiplier
     );
-    let selectedFuncStackDepth = 0;
-    if (selectedFuncStack !== -1 && selectedFuncStack !== null) {
-      selectedFuncStackDepth = funcStackTable.depth[selectedFuncStack];
+    let selectedCallNodeDepth = 0;
+    if (selectedCallNodeIndex !== -1 && selectedCallNodeIndex !== null) {
+      selectedCallNodeDepth = callNodeTable.depth[selectedCallNodeIndex];
     }
-    function hasSelectedFuncStackPrefix(funcStackPrefix) {
-      let funcStack = funcStackPrefix;
+    function hasSelectedCallNodePrefix(callNodePrefix) {
+      let callNode = callNodePrefix;
       for (
-        let depth = funcStackTable.depth[funcStack];
-        depth > selectedFuncStackDepth;
+        let depth = callNodeTable.depth[callNode];
+        depth > selectedCallNodeDepth;
         depth--
       ) {
-        funcStack = funcStackTable.prefix[funcStack];
+        callNode = callNodeTable.prefix[callNode];
       }
-      return funcStack === selectedFuncStack;
+      return callNode === selectedCallNodeIndex;
     }
-    for (let i = 0; i < sampleFuncStacks.length; i++) {
+    for (let i = 0; i < sampleCallNodes.length; i++) {
       const sampleTime = thread.samples.time[i];
       if (
         sampleTime + drawnIntervalWidth / xPixelsPerMs < range[0] ||
@@ -103,9 +103,9 @@ class ThreadStackGraph extends PureComponent {
       ) {
         continue;
       }
-      const funcStack = sampleFuncStacks[i];
-      const isHighlighted = hasSelectedFuncStackPrefix(funcStack);
-      const sampleHeight = funcStackTable.depth[funcStack] * yPixelsPerDepth;
+      const callNode = sampleCallNodes[i];
+      const isHighlighted = hasSelectedCallNodePrefix(callNode);
+      const sampleHeight = callNodeTable.depth[callNode] * yPixelsPerDepth;
       const startY = c.height - sampleHeight;
       // const responsiveness = thread.samples.responsiveness[i];
       // const jankSeverity = Math.min(1, responsiveness / 100);
@@ -161,11 +161,11 @@ ThreadStackGraph.propTypes = {
   interval: PropTypes.number.isRequired,
   rangeStart: PropTypes.number.isRequired,
   rangeEnd: PropTypes.number.isRequired,
-  funcStackInfo: PropTypes.shape({
-    funcStackTable: PropTypes.object.isRequired,
-    stackIndexToFuncStackIndex: PropTypes.any.isRequired,
+  callNodeInfo: PropTypes.shape({
+    callNodeTable: PropTypes.object.isRequired,
+    stackIndexToCallNodeIndex: PropTypes.any.isRequired,
   }).isRequired,
-  selectedFuncStack: PropTypes.number,
+  selectedCallNodeIndex: PropTypes.number,
   className: PropTypes.string,
   onClick: PropTypes.func,
   onMarkerSelect: PropTypes.func,

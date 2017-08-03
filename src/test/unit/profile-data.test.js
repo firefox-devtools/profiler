@@ -16,10 +16,10 @@ import {
 } from '../../profile-logic/process-profile';
 import {
   resourceTypes,
-  getFuncStackInfo,
+  getCallNodeInfo,
   getTracingMarkers,
   filterThreadByImplementation,
-  getFuncStackAsFuncArray,
+  getCallNodePath,
 } from '../../profile-logic/profile-data';
 import exampleProfile from '.././fixtures/profiles/example-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
@@ -42,7 +42,7 @@ import {
   getCategoryByImplementation,
   implementationCategoryMap,
 } from '../../profile-logic/color-categories';
-import getFuncStackProfile from '../fixtures/profiles/func-stacks';
+import getCallNodeProfile from '../fixtures/profiles/call-nodes';
 
 import type { Thread, IndexIntoStackTable } from '../../types/profile';
 
@@ -265,23 +265,23 @@ describe('process-profile', function() {
 });
 
 describe('profile-data', function() {
-  describe('createFuncStackTableAndFixupSamples', function() {
+  describe('createCallNodeTableAndFixupSamples', function() {
     const profile = processProfile(exampleProfile());
     const thread = profile.threads[0];
-    const { funcStackTable } = getFuncStackInfo(
+    const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
       thread.funcTable
     );
-    it('should create one funcStack per stack', function() {
+    it('should create one callNode per stack', function() {
       expect(thread.stackTable.length).toEqual(5);
-      expect(funcStackTable.length).toEqual(5);
-      expect('prefix' in funcStackTable).toBeTruthy();
-      expect('func' in funcStackTable).toBeTruthy();
-      expect(funcStackTable.func[0]).toEqual(0);
-      expect(funcStackTable.func[1]).toEqual(1);
-      expect(funcStackTable.func[2]).toEqual(2);
-      expect(funcStackTable.func[3]).toEqual(3);
+      expect(callNodeTable.length).toEqual(5);
+      expect('prefix' in callNodeTable).toBeTruthy();
+      expect('func' in callNodeTable).toBeTruthy();
+      expect(callNodeTable.func[0]).toEqual(0);
+      expect(callNodeTable.func[1]).toEqual(1);
+      expect(callNodeTable.func[2]).toEqual(2);
+      expect(callNodeTable.func[3]).toEqual(3);
     });
   });
 
@@ -306,9 +306,9 @@ describe('profile-data', function() {
     return stackList;
   }
 
-  describe('getFuncStackInfo', function() {
-    const { threads: [thread] } = getFuncStackProfile();
-    const { funcStackTable, stackIndexToFuncStackIndex } = getFuncStackInfo(
+  describe('getCallNodeInfo', function() {
+    const { threads: [thread] } = getCallNodeProfile();
+    const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
       thread.funcTable
@@ -320,13 +320,13 @@ describe('profile-data', function() {
     }
     const originalStackListA = _getStackList(thread, stack0);
     const originalStackListB = _getStackList(thread, stack1);
-    const mergedFuncListA = getFuncStackAsFuncArray(
-      stackIndexToFuncStackIndex[stack0],
-      funcStackTable
+    const mergedFuncListA = getCallNodePath(
+      stackIndexToCallNodeIndex[stack0],
+      callNodeTable
     );
-    const mergedFuncListB = getFuncStackAsFuncArray(
-      stackIndexToFuncStackIndex[stack1],
-      funcStackTable
+    const mergedFuncListB = getCallNodePath(
+      stackIndexToCallNodeIndex[stack1],
+      callNodeTable
     );
 
     it('starts with a fully unduplicated set stack frames', function() {
@@ -355,29 +355,29 @@ describe('profile-data', function() {
       expect(originalStackListB).toEqual([0, 1, 2, 5, 6]);
     });
 
-    it('creates a funcStackTable with merged stacks that share functions', function() {
+    it('creates a callNodeTable with merged stacks that share functions', function() {
       /**
        * This structure represents the desired de-duplication.
        *
-       *            funcStack0 (funcA)
+       *            callNode0 (funcA)
        *                 |
        *                 v
-       *            funcStack1 (funcB)
+       *            callNode1 (funcB)
        *                 |
        *                 v
-       *            funcStack2 (funcC)
+       *            callNode2 (funcC)
        *                 |
        *                 v
-       *            funcStack3 (funcD)
+       *            callNode3 (funcD)
        *          /               \
        *         V                 V
-       * funcStack4 (funcE)       funcStack5 (funcF)
+       * callNode4 (funcE)       callNode5 (funcF)
        *
        *       ^sample 0          ^sample 1
        */
       expect(mergedFuncListA).toEqual([0, 1, 2, 3, 4]);
       expect(mergedFuncListB).toEqual([0, 1, 2, 3, 5]);
-      expect(funcStackTable.length).toEqual(6);
+      expect(callNodeTable.length).toEqual(6);
     });
   });
   describe('getTracingMarkers', function() {

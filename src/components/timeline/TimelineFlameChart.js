@@ -187,7 +187,7 @@ export default connect((state, ownProps) => {
     thread: threadSelectors.getFilteredThreadForFlameChart(state),
     isRowExpanded,
     maxStackDepth: isRowExpanded
-      ? threadSelectors.getFuncStackMaxDepthForFlameChart(state)
+      ? threadSelectors.getCallNodeMaxDepthForFlameChart(state)
       : 1,
     stackTimingByDepth,
     isSelected: true,
