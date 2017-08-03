@@ -78,6 +78,7 @@ export type URLState = {
   rangeFilters: RangeFilterState[],
   selectedThread: ThreadIndex,
   callTreeSearchString: string,
+  markersSearchString: string,
   callTreeFilters: CallTreeFiltersPerThread,
   implementation: ImplementationFilter,
   invertCallstack: boolean,

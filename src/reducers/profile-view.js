@@ -26,6 +26,7 @@ import type {
   IndexIntoFuncTable,
   SamplesTable,
   TaskTracer,
+  MarkersTable,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -399,6 +400,7 @@ export type SelectorsForThread = {
   getLeafCategoryStackTimingForFlameChart: State => StackTiming.StackTimingByDepth,
   getFriendlyThreadName: State => string,
   getThreadProcessDetails: State => string,
+  getSearchFilteredMarkers: State => MarkersTable,
 };
 
 const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
@@ -629,6 +631,11 @@ export const selectorsForThread = (
       getCategoryColorStrategy,
       StackTiming.getLeafCategoryStackTiming
     );
+    const getSearchFilteredMarkers = createSelector(
+      getRangeSelectionFilteredThread,
+      URLState.getMarkersSearchString,
+      ProfileData.getSearchFilteredMarkers
+    );
 
     selectorsForThreads[threadIndex] = {
       getThread,
@@ -653,6 +660,7 @@ export const selectorsForThread = (
       getLeafCategoryStackTimingForFlameChart,
       getFriendlyThreadName,
       getThreadProcessDetails,
+      getSearchFilteredMarkers,
     };
   }
   return selectorsForThreads[threadIndex];

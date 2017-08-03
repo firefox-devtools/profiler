@@ -84,6 +84,9 @@ export function urlFromState(urlState: URLState) {
           urlState.callTreeFilters[urlState.selectedThread]
         ) || undefined;
       break;
+    case 'markers':
+      query.markerSearch = urlState.markersSearchString;
+      break;
     case 'timeline':
       query.search = urlState.callTreeSearchString || undefined;
       query.invertCallstack = urlState.invertCallstack ? null : undefined;
@@ -153,6 +156,7 @@ export function stateFromLocation(location: Location): URLState {
         rangeFilters: [],
         selectedThread: 0,
         callTreeSearchString: '',
+        markersSearchString: '',
         callTreeFilters: {},
         implementation: 'combined',
         invertCallstack: false,
@@ -186,6 +190,7 @@ export function stateFromLocation(location: Location): URLState {
     rangeFilters: query.range ? parseRangeFilters(query.range) : [],
     selectedThread: selectedThread,
     callTreeSearchString: query.search || '',
+    markersSearchString: query.markerSearch || '',
     callTreeFilters: {
       [selectedThread]: query.callTreeFilters
         ? parseCallTreeFilters(query.callTreeFilters)

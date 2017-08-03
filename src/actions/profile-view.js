@@ -103,6 +103,13 @@ export function changeSelectedMarker(
   };
 }
 
+export function changeMarkersSearchString(searchString: string): Action {
+  return {
+    type: 'CHANGE_MARKER_SEARCH_STRING',
+    searchString,
+  };
+}
+
 export function changeImplementationFilter(
   implementation: ImplementationFilter
 ): Action {

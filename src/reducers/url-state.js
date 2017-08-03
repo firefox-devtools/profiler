@@ -127,6 +127,15 @@ function callTreeSearchString(state: string = '', action: Action) {
   }
 }
 
+function markersSearchString(state: string = '', action: Action) {
+  switch (action.type) {
+    case 'CHANGE_MARKER_SEARCH_STRING':
+      return action.searchString;
+    default:
+      return state;
+  }
+}
+
 function callTreeFilters(state: CallTreeFiltersPerThread = {}, action: Action) {
   switch (action.type) {
     case 'ADD_CALL_TREE_FILTER': {
@@ -251,6 +260,7 @@ const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (
     hidePlatformDetails,
     threadOrder,
     hiddenThreads,
+    markersSearchString,
   })
 );
 export default urlStateReducer;
@@ -270,6 +280,9 @@ export const getInvertCallstack = (state: State) =>
   getURLState(state).invertCallstack;
 export const getSearchString = (state: State) =>
   getURLState(state).callTreeSearchString;
+export const getMarkersSearchString = (state: State) =>
+  getURLState(state).markersSearchString;
+
 export const getSelectedTab = (state: State) => getURLState(state).selectedTab;
 export const getSelectedThreadIndex = (state: State) =>
   getURLState(state).selectedThread;

@@ -1,0 +1,35 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.markersSettings {
+  height: 25px;
+  padding: 0;
+  line-height: 25px;
+  border-top: 1px solid #D6D6D6;
+  background: #F9F9F9;
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.markersSettingsSpacer {
+  flex: 1;
+}
+
+.markersSettingsLabel {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  display: inline-flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  height: 25px;
+}
+
+.markersSettingsSearchbar {
+  padding: 0 10px;
+}
+
+.markersSettingsSearchField {
+  width: 250px;
+}
