@@ -20,13 +20,13 @@ import type {
  * and filtering. Currently the call tree's actions are in this file, but should be
  * split apart. These actions should most likely affect every panel.
  */
-export function changeSelectedFuncStack(
+export function changeSelectedCallNode(
   threadIndex: ThreadIndex,
-  selectedFuncStack: IndexIntoFuncTable[]
+  selectedCallNodePath: IndexIntoFuncTable[]
 ): Action {
   return {
-    type: 'CHANGE_SELECTED_FUNC_STACK',
-    selectedFuncStack,
+    type: 'CHANGE_SELECTED_CALL_NODE',
+    selectedCallNodePath,
     threadIndex,
   };
 }
@@ -81,14 +81,14 @@ export function changeCallTreeSearchString(searchString: string): Action {
   };
 }
 
-export function changeExpandedFuncStacks(
+export function changeExpandedCallNodes(
   threadIndex: ThreadIndex,
-  expandedFuncStacks: Array<IndexIntoFuncTable[]>
+  expandedCallNodePaths: Array<IndexIntoFuncTable[]>
 ): Action {
   return {
-    type: 'CHANGE_EXPANDED_FUNC_STACKS',
+    type: 'CHANGE_EXPANDED_CALL_NODES',
     threadIndex,
-    expandedFuncStacks,
+    expandedCallNodePaths,
   };
 }
 

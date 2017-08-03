@@ -4,7 +4,7 @@
 
 // @flow
 import { timeCode } from '../utils/time-code';
-import { getSampleFuncStacks, resourceTypes } from './profile-data';
+import { getSampleCallNodes, resourceTypes } from './profile-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import type {
   Thread,
@@ -13,21 +13,21 @@ import type {
   IndexIntoFuncTable,
 } from '../types/profile';
 import type {
-  FuncStackTable,
-  IndexIntoFuncStackTable,
-  FuncStackInfo,
+  CallNodeTable,
+  IndexIntoCallNodeTable,
+  CallNodeInfo,
   Node,
 } from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
 
-type FuncStackChildren = IndexIntoFuncStackTable[];
-type FuncStackTimes = {
+type CallNodeChildren = IndexIntoCallNodeTable[];
+type CallNodeTimes = {
   selfTime: Float32Array,
   totalTime: Float32Array,
 };
 type CallTreeCountsAndTimings = {
-  funcStackChildCount: Uint32Array,
-  funcStackTimes: FuncStackTimes,
+  callNodeChildCount: Uint32Array,
+  callNodeTimes: CallNodeTimes,
   rootCount: number,
   rootTotalTime: number,
 };
@@ -38,30 +38,30 @@ function extractFaviconFromLibname(libname: string): string | null {
 }
 
 class ProfileTree {
-  _funcStackTable: FuncStackTable;
-  _funcStackTimes: FuncStackTimes;
-  _funcStackChildCount: Uint32Array; // A table column matching the funcStackTable
+  _callNodeTable: CallNodeTable;
+  _callNodeTimes: CallNodeTimes;
+  _callNodeChildCount: Uint32Array; // A table column matching the callNodeTable
   _funcTable: FuncTable;
   _resourceTable: ResourceTable;
   _stringTable: UniqueStringArray;
   _rootTotalTime: number;
   _rootCount: number;
-  _nodes: Map<IndexIntoFuncStackTable, Node>;
-  _children: Map<IndexIntoFuncStackTable, FuncStackChildren>;
+  _nodes: Map<IndexIntoCallNodeTable, Node>;
+  _children: Map<IndexIntoCallNodeTable, CallNodeChildren>;
   _jsOnly: boolean;
 
   constructor(
     { funcTable, resourceTable, stringTable }: Thread,
-    funcStackTable: FuncStackTable,
-    funcStackTimes: FuncStackTimes,
-    funcStackChildCount: Uint32Array,
+    callNodeTable: CallNodeTable,
+    callNodeTimes: CallNodeTimes,
+    callNodeChildCount: Uint32Array,
     rootTotalTime: number,
     rootCount: number,
     jsOnly: boolean
   ) {
-    this._funcStackTable = funcStackTable;
-    this._funcStackTimes = funcStackTimes;
-    this._funcStackChildCount = funcStackChildCount;
+    this._callNodeTable = callNodeTable;
+    this._callNodeTimes = callNodeTimes;
+    this._callNodeChildCount = callNodeChildCount;
     this._funcTable = funcTable;
     this._resourceTable = resourceTable;
     this._stringTable = stringTable;
@@ -77,65 +77,65 @@ class ProfileTree {
   }
 
   /**
-   * Return an array of funcStackIndex for the children of the node with index funcStackIndex.
-   * @param  {[type]} funcStackIndex [description]
+   * Return an array of callNodeIndex for the children of the node with index callNodeIndex.
+   * @param  {[type]} callNodeIndex [description]
    * @return {[type]}                [description]
    */
-  getChildren(funcStackIndex: IndexIntoFuncStackTable): FuncStackChildren {
-    let children = this._children.get(funcStackIndex);
+  getChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
+    let children = this._children.get(callNodeIndex);
     if (children === undefined) {
       const childCount =
-        funcStackIndex === -1
+        callNodeIndex === -1
           ? this._rootCount
-          : this._funcStackChildCount[funcStackIndex];
+          : this._callNodeChildCount[callNodeIndex];
       children = [];
       for (
-        let childFuncStackIndex = funcStackIndex + 1;
-        childFuncStackIndex < this._funcStackTable.length &&
+        let childCallNodeIndex = callNodeIndex + 1;
+        childCallNodeIndex < this._callNodeTable.length &&
         children.length < childCount;
-        childFuncStackIndex++
+        childCallNodeIndex++
       ) {
         if (
-          this._funcStackTable.prefix[childFuncStackIndex] === funcStackIndex &&
-          this._funcStackTimes.totalTime[childFuncStackIndex] !== 0
+          this._callNodeTable.prefix[childCallNodeIndex] === callNodeIndex &&
+          this._callNodeTimes.totalTime[childCallNodeIndex] !== 0
         ) {
-          children.push(childFuncStackIndex);
+          children.push(childCallNodeIndex);
         }
       }
       children.sort(
         (a, b) =>
-          this._funcStackTimes.totalTime[b] - this._funcStackTimes.totalTime[a]
+          this._callNodeTimes.totalTime[b] - this._callNodeTimes.totalTime[a]
       );
-      this._children.set(funcStackIndex, children);
+      this._children.set(callNodeIndex, children);
     }
     return children;
   }
 
-  hasChildren(funcStackIndex: IndexIntoFuncStackTable): boolean {
-    return this.getChildren(funcStackIndex).length !== 0;
+  hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
+    return this.getChildren(callNodeIndex).length !== 0;
   }
 
-  getParent(funcStackIndex: IndexIntoFuncStackTable): IndexIntoFuncStackTable {
-    return this._funcStackTable.prefix[funcStackIndex];
+  getParent(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCallNodeTable {
+    return this._callNodeTable.prefix[callNodeIndex];
   }
 
-  getDepth(funcStackIndex: IndexIntoFuncStackTable): number {
-    return this._funcStackTable.depth[funcStackIndex];
+  getDepth(callNodeIndex: IndexIntoCallNodeTable): number {
+    return this._callNodeTable.depth[callNodeIndex];
   }
 
   hasSameNodeIds(tree: ProfileTree): boolean {
-    return this._funcStackTable === tree._funcStackTable;
+    return this._callNodeTable === tree._callNodeTable;
   }
 
   /**
-   * Return an object with information about the node with index funcStackIndex.
-   * @param  {[type]} funcStackIndex [description]
+   * Return an object with information about the node with index callNodeIndex.
+   * @param  {[type]} callNodeIndex [description]
    * @return {[type]}                [description]
    */
-  getNode(funcStackIndex: IndexIntoFuncStackTable): Node {
-    let node = this._nodes.get(funcStackIndex);
+  getNode(callNodeIndex: IndexIntoCallNodeTable): Node {
+    let node = this._nodes.get(callNodeIndex);
     if (node === undefined) {
-      const funcIndex = this._funcStackTable.func[funcStackIndex];
+      const funcIndex = this._callNodeTable.func[callNodeIndex];
       const funcName = this._stringTable.getString(
         this._funcTable.name[funcIndex]
       );
@@ -145,15 +145,13 @@ class ProfileTree {
       const libName = this._getOriginAnnotation(funcIndex);
 
       node = {
-        totalTime: `${this._funcStackTimes.totalTime[funcStackIndex].toFixed(
+        totalTime: `${this._callNodeTimes.totalTime[callNodeIndex].toFixed(
           1
         )}ms`,
         totalTimePercent: `${(100 *
-          this._funcStackTimes.totalTime[funcStackIndex] /
+          this._callNodeTimes.totalTime[callNodeIndex] /
           this._rootTotalTime).toFixed(1)}%`,
-        selfTime: `${this._funcStackTimes.selfTime[funcStackIndex].toFixed(
-          1
-        )}ms`,
+        selfTime: `${this._callNodeTimes.selfTime[callNodeIndex].toFixed(1)}ms`,
         name: funcName,
         lib: libName,
         // Dim platform pseudo-stacks.
@@ -163,7 +161,7 @@ class ProfileTree {
             ? extractFaviconFromLibname(libName)
             : null,
       };
-      this._nodes.set(funcStackIndex, node);
+      this._nodes.set(callNodeIndex, node);
     }
     return node;
   }
@@ -193,45 +191,45 @@ export type ProfileTreeClass = ProfileTree;
 
 function _getInvertedStackSelfTimes(
   thread: Thread,
-  funcStackTable: FuncStackTable,
-  sampleFuncStacks: Array<IndexIntoFuncStackTable | null>,
+  callNodeTable: CallNodeTable,
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   interval: Milliseconds
 ): {
-  funcStackSelfTime: Float32Array,
-  funcStackLeafTime: Float32Array,
+  callNodeSelfTime: Float32Array,
+  callNodeLeafTime: Float32Array,
 } {
-  // Compute an array that maps the funcStackIndex to its root.
-  const funcStackToRoot = new Int32Array(funcStackTable.length);
+  // Compute an array that maps the callNodeIndex to its root.
+  const callNodeToRoot = new Int32Array(callNodeTable.length);
   for (
-    let funcStackIndex = 0;
-    funcStackIndex < funcStackTable.length;
-    funcStackIndex++
+    let callNodeIndex = 0;
+    callNodeIndex < callNodeTable.length;
+    callNodeIndex++
   ) {
-    const prefixFuncStack = funcStackTable.prefix[funcStackIndex];
-    if (prefixFuncStack !== -1) {
-      funcStackToRoot[funcStackIndex] = funcStackToRoot[prefixFuncStack];
+    const prefixCallNode = callNodeTable.prefix[callNodeIndex];
+    if (prefixCallNode !== -1) {
+      callNodeToRoot[callNodeIndex] = callNodeToRoot[prefixCallNode];
     } else {
-      funcStackToRoot[funcStackIndex] = funcStackIndex;
+      callNodeToRoot[callNodeIndex] = callNodeIndex;
     }
   }
 
   // Calculate the timing information by going through each sample.
-  const funcStackSelfTime = new Float32Array(funcStackTable.length);
-  const funcStackLeafTime = new Float32Array(funcStackTable.length);
+  const callNodeSelfTime = new Float32Array(callNodeTable.length);
+  const callNodeLeafTime = new Float32Array(callNodeTable.length);
   for (
     let sampleIndex = 0;
-    sampleIndex < sampleFuncStacks.length;
+    sampleIndex < sampleCallNodes.length;
     sampleIndex++
   ) {
-    const funcStackIndex = sampleFuncStacks[sampleIndex];
-    if (funcStackIndex !== null) {
-      const rootIndex = funcStackToRoot[funcStackIndex];
-      funcStackSelfTime[rootIndex] += interval;
-      funcStackLeafTime[funcStackIndex] += interval;
+    const callNodeIndex = sampleCallNodes[sampleIndex];
+    if (callNodeIndex !== null) {
+      const rootIndex = callNodeToRoot[callNodeIndex];
+      callNodeSelfTime[rootIndex] += interval;
+      callNodeLeafTime[callNodeIndex] += interval;
     }
   }
 
-  return { funcStackSelfTime, funcStackLeafTime };
+  return { callNodeSelfTime, callNodeLeafTime };
 }
 
 /**
@@ -239,27 +237,27 @@ function _getInvertedStackSelfTimes(
  */
 function _getStackSelfTimes(
   thread: Thread,
-  funcStackTable: FuncStackTable,
-  sampleFuncStacks: Array<null | IndexIntoFuncStackTable>,
+  callNodeTable: CallNodeTable,
+  sampleCallNodes: Array<null | IndexIntoCallNodeTable>,
   interval: Milliseconds
 ): {
-  funcStackSelfTime: Float32Array, // Milliseconds[]
-  funcStackLeafTime: Float32Array, // Milliseconds[]
+  callNodeSelfTime: Float32Array, // Milliseconds[]
+  callNodeLeafTime: Float32Array, // Milliseconds[]
 } {
-  const funcStackSelfTime = new Float32Array(funcStackTable.length);
+  const callNodeSelfTime = new Float32Array(callNodeTable.length);
 
   for (
     let sampleIndex = 0;
-    sampleIndex < sampleFuncStacks.length;
+    sampleIndex < sampleCallNodes.length;
     sampleIndex++
   ) {
-    const funcStackIndex = sampleFuncStacks[sampleIndex];
-    if (funcStackIndex !== null) {
-      funcStackSelfTime[funcStackIndex] += interval;
+    const callNodeIndex = sampleCallNodes[sampleIndex];
+    if (callNodeIndex !== null) {
+      callNodeSelfTime[callNodeIndex] += interval;
     }
   }
 
-  return { funcStackSelfTime, funcStackLeafTime: funcStackSelfTime };
+  return { callNodeSelfTime, callNodeLeafTime: callNodeSelfTime };
 }
 
 /**
@@ -268,55 +266,55 @@ function _getStackSelfTimes(
  */
 export function computeCallTreeCountsAndTimings(
   thread: Thread,
-  { funcStackTable, stackIndexToFuncStackIndex }: FuncStackInfo,
+  { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
   interval: Milliseconds,
   invertCallstack: boolean
 ): CallTreeCountsAndTimings {
-  const sampleFuncStacks = getSampleFuncStacks(
+  const sampleCallNodes = getSampleCallNodes(
     thread.samples,
-    stackIndexToFuncStackIndex
+    stackIndexToCallNodeIndex
   );
   // Inverted trees need a different method for computing the timing.
-  const { funcStackSelfTime, funcStackLeafTime } = invertCallstack
+  const { callNodeSelfTime, callNodeLeafTime } = invertCallstack
     ? _getInvertedStackSelfTimes(
         thread,
-        funcStackTable,
-        sampleFuncStacks,
+        callNodeTable,
+        sampleCallNodes,
         interval
       )
-    : _getStackSelfTimes(thread, funcStackTable, sampleFuncStacks, interval);
+    : _getStackSelfTimes(thread, callNodeTable, sampleCallNodes, interval);
 
   // Compute the following variables:
-  const funcStackTotalTime = new Float32Array(funcStackTable.length);
-  const funcStackChildCount = new Uint32Array(funcStackTable.length);
+  const callNodeTotalTime = new Float32Array(callNodeTable.length);
+  const callNodeChildCount = new Uint32Array(callNodeTable.length);
   let rootTotalTime = 0;
   let rootCount = 0;
 
   for (
-    let funcStackIndex = funcStackTable.length - 1;
-    funcStackIndex >= 0;
-    funcStackIndex--
+    let callNodeIndex = callNodeTable.length - 1;
+    callNodeIndex >= 0;
+    callNodeIndex--
   ) {
-    funcStackTotalTime[funcStackIndex] += funcStackLeafTime[funcStackIndex];
-    if (funcStackTotalTime[funcStackIndex] === 0) {
+    callNodeTotalTime[callNodeIndex] += callNodeLeafTime[callNodeIndex];
+    if (callNodeTotalTime[callNodeIndex] === 0) {
       continue;
     }
-    const prefixFuncStack = funcStackTable.prefix[funcStackIndex];
-    if (prefixFuncStack === -1) {
-      rootTotalTime += funcStackTotalTime[funcStackIndex];
+    const prefixCallNode = callNodeTable.prefix[callNodeIndex];
+    if (prefixCallNode === -1) {
+      rootTotalTime += callNodeTotalTime[callNodeIndex];
       rootCount++;
     } else {
-      funcStackTotalTime[prefixFuncStack] += funcStackTotalTime[funcStackIndex];
-      funcStackChildCount[prefixFuncStack]++;
+      callNodeTotalTime[prefixCallNode] += callNodeTotalTime[callNodeIndex];
+      callNodeChildCount[prefixCallNode]++;
     }
   }
 
   return {
-    funcStackTimes: {
-      selfTime: funcStackSelfTime,
-      totalTime: funcStackTotalTime,
+    callNodeTimes: {
+      selfTime: callNodeSelfTime,
+      totalTime: callNodeTotalTime,
     },
-    funcStackChildCount,
+    callNodeChildCount,
     rootTotalTime,
     rootCount,
   };
@@ -330,19 +328,19 @@ export function computeCallTreeCountsAndTimings(
 export function getCallTree(
   thread: Thread,
   interval: Milliseconds,
-  funcStackInfo: FuncStackInfo,
+  callNodeInfo: CallNodeInfo,
   implementationFilter: string,
   invertCallstack: boolean
 ): ProfileTree {
   return timeCode('getCallTree', () => {
     const {
-      funcStackTimes,
-      funcStackChildCount,
+      callNodeTimes,
+      callNodeChildCount,
       rootTotalTime,
       rootCount,
     } = computeCallTreeCountsAndTimings(
       thread,
-      funcStackInfo,
+      callNodeInfo,
       interval,
       invertCallstack
     );
@@ -351,9 +349,9 @@ export function getCallTree(
 
     return new ProfileTree(
       thread,
-      funcStackInfo.funcStackTable,
-      funcStackTimes,
-      funcStackChildCount,
+      callNodeInfo.callNodeTable,
+      callNodeTimes,
+      callNodeChildCount,
       rootTotalTime,
       rootCount,
       jsOnly

@@ -15,19 +15,19 @@ import { getEmptyProfile } from '../../../profile-logic/profile-data';
 import { getEmptyThread } from '../../store/fixtures/profiles';
 
 /**
- *            stack0 (funcA)                               funcStack0 (funcA)
+ *            stack0 (funcA)                               callNode0 (funcA)
  *                 |                                            |
  *                 v                                            v
- *            stack1 (funcB)            merged             funcStack1 (funcB)
+ *            stack1 (funcB)            merged             callNode1 (funcB)
  *                 |                  stackTable                |
  *                 v                      ->                    v
- *            stack2 (funcC)                               funcStack2 (funcC)
+ *            stack2 (funcC)                               callNode2 (funcC)
  *            /            \                                    |
  *           V              V                                   v
- *    stack3 (funcD)     stack5 (funcD)                    funcStack3 (funcD)
+ *    stack3 (funcD)     stack5 (funcD)                    callNode3 (funcD)
  *         |                  |                          /               \
  *         v                  V                         V                 V
- *    stack4 (funcE)     stack6 (funcF)         funcStack4 (funcE)       funcStack5 (funcF)
+ *    stack4 (funcE)     stack6 (funcF)         callNode4 (funcE)       callNode5 (funcF)
  */
 export default function getProfile(): Profile {
   const profile = getEmptyProfile();

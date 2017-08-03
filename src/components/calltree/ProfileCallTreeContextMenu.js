@@ -12,15 +12,15 @@ import { stripFunctionArguments } from '../../profile-logic/function-info';
 import copy from 'copy-to-clipboard';
 
 import type {
-  IndexIntoFuncStackTable,
-  FuncStackInfo,
+  IndexIntoCallNodeTable,
+  CallNodeInfo,
 } from '../../types/profile-derived';
 import type { Thread } from '../../types/profile';
 
 type Props = {
   thread: Thread,
-  funcStackInfo: FuncStackInfo,
-  selectedFuncStack: IndexIntoFuncStackTable,
+  callNodeInfo: CallNodeInfo,
+  selectedCallNodeIndex: IndexIntoCallNodeTable,
 };
 
 class ProfileCallTreeContextMenu extends PureComponent {
@@ -32,12 +32,12 @@ class ProfileCallTreeContextMenu extends PureComponent {
 
   copyFunctionName(): void {
     const {
-      selectedFuncStack,
+      selectedCallNodeIndex,
       thread: { stringTable, funcTable },
-      funcStackInfo: { funcStackTable },
+      callNodeInfo: { callNodeTable },
     } = this.props;
 
-    const funcIndex = funcStackTable.func[selectedFuncStack];
+    const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const stringIndex = funcTable.name[funcIndex];
     const functionCall = stringTable.getString(stringIndex);
     const name = stripFunctionArguments(functionCall);
@@ -46,12 +46,12 @@ class ProfileCallTreeContextMenu extends PureComponent {
 
   copyUrl(): void {
     const {
-      selectedFuncStack,
+      selectedCallNodeIndex,
       thread: { stringTable, funcTable },
-      funcStackInfo: { funcStackTable },
+      callNodeInfo: { callNodeTable },
     } = this.props;
 
-    const funcIndex = funcStackTable.func[selectedFuncStack];
+    const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const stringIndex = funcTable.fileName[funcIndex];
     if (stringIndex !== null) {
       const fileName = stringTable.getString(stringIndex);
@@ -61,20 +61,20 @@ class ProfileCallTreeContextMenu extends PureComponent {
 
   copyStack(): void {
     const {
-      selectedFuncStack,
+      selectedCallNodeIndex,
       thread: { stringTable, funcTable },
-      funcStackInfo: { funcStackTable },
+      callNodeInfo: { callNodeTable },
     } = this.props;
 
     let stack = '';
-    let funcStackIndex = selectedFuncStack;
+    let callNodeIndex = selectedCallNodeIndex;
 
     do {
-      const funcIndex = funcStackTable.func[funcStackIndex];
+      const funcIndex = callNodeTable.func[callNodeIndex];
       const stringIndex = funcTable.name[funcIndex];
       stack += stringTable.getString(stringIndex) + '\n';
-      funcStackIndex = funcStackTable.prefix[funcStackIndex];
-    } while (funcStackIndex !== -1);
+      callNodeIndex = callNodeTable.prefix[callNodeIndex];
+    } while (callNodeIndex !== -1);
 
     copy(stack);
   }
@@ -100,11 +100,11 @@ class ProfileCallTreeContextMenu extends PureComponent {
 
   render() {
     const {
-      selectedFuncStack,
+      selectedCallNodeIndex,
       thread: { funcTable },
-      funcStackInfo: { funcStackTable },
+      callNodeInfo: { callNodeTable },
     } = this.props;
-    const funcIndex = funcStackTable.func[selectedFuncStack];
+    const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
 
     return (
@@ -133,8 +133,10 @@ class ProfileCallTreeContextMenu extends PureComponent {
 export default connect(
   state => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
-    funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state),
-    selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state),
+    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+    selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
+      state
+    ),
   }),
   actions
 )(ProfileCallTreeContextMenu);
