@@ -298,7 +298,7 @@ function zeroAt(state: Milliseconds = 0, action: Action) {
   }
 }
 
-function tabOrder(state: number[] = [0, 1, 2, 3, 4], action: Action) {
+function tabOrder(state: number[] = [0, 1, 2, 3], action: Action) {
   switch (action.type) {
     case 'CHANGE_TAB_ORDER':
       return action.tabOrder;

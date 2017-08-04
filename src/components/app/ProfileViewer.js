@@ -66,10 +66,6 @@ class ProfileViewer extends PureComponent {
         title: 'Markers',
       },
       {
-        name: 'tasktracer',
-        title: 'Task Tracer',
-      },
-      {
         name: 'timeline',
         title: 'Timeline',
       },
