@@ -11,22 +11,89 @@ import formatTimeLength from '../../utils/format-time-length';
 import type { TracingMarker } from '../../types/profile-derived';
 import type { MarkerPayload } from '../../types/markers';
 
+function _markerDetail<T>(
+  key: string,
+  label: string,
+  value: T,
+  fn: T => string = String
+): Array<React$Element<*> | string> {
+  if (value) {
+    return [
+      <div className="tooltipLabel" key="{key}">
+        {label}:
+      </div>,
+      fn(value),
+    ];
+  } else {
+    return [];
+  }
+}
+
 function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
   if (data) {
     switch (data.type) {
       case 'UserTiming': {
         return (
           <div className="tooltipDetails">
-            <div className="tooltipLabel">Name:</div>
-            {data.name}
+            {_markerDetail('name', 'Name', data.name)}
           </div>
         );
       }
       case 'DOMEvent': {
         return (
           <div className="tooltipDetails">
-            <div className="tooltipLabel">Type:</div>
-            {data.eventType}
+            {_markerDetail('type', 'Type', data.eventType)}
+          </div>
+        );
+      }
+      case 'GCMinor': {
+        if (data.nursery) {
+          return (
+            <div className="tooltipDetails">
+              {_markerDetail('gcreason', 'Reason', data.nursery.reason)}
+            </div>
+          );
+        } else {
+          return null;
+        }
+      }
+      case 'GCMajor': {
+        let zones_collected_total;
+        if (data.timings.zones_collected && data.timings.total_zones) {
+          zones_collected_total =
+            data.timings.zones_collected + ' / ' + data.timings.total_zones;
+        }
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('gcreason', 'Reason', data.timings.reason)}
+            {data.timings.nonincremental_reason !== 'None' &&
+              _markerDetail(
+                'gcnonincrementalreason',
+                'Non-incremental reason',
+                data.timings.nonincremental_reason
+              )}
+            {_markerDetail(
+              'gcmaxpause',
+              'Max Pause',
+              data.timings.max_pause,
+              x => x + 'ms'
+            )}
+            {_markerDetail('gcnumminors', 'Minor GCs', data.timings.minor_gcs)}
+            {_markerDetail('gcnumslices', 'Slices', data.timings.slices)}
+            {_markerDetail('gcnumzones', 'Zones', zones_collected_total)}
+          </div>
+        );
+      }
+      case 'GCSlice': {
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('gcreason', 'Reason', data.timings.reason)}
+            {_markerDetail('gcbudget', 'Budget', data.timings.budget)}
+            {_markerDetail(
+              'gcstate',
+              'States',
+              data.timings.initial_state + ' \u2013 ' + data.timings.final_state
+            )}
           </div>
         );
       }
