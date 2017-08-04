@@ -17,9 +17,7 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
       case 'UserTiming': {
         return (
           <div className="tooltipDetails">
-            <div className="tooltipLabel" key="name">
-              Name:
-            </div>
+            <div className="tooltipLabel">Name:</div>
             {data.name}
           </div>
         );
@@ -27,9 +25,7 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
       case 'DOMEvent': {
         return (
           <div className="tooltipDetails">
-            <div className="tooltipLabel" key="type">
-              Type:
-            </div>
+            <div className="tooltipLabel">Type:</div>
             {data.eventType}
           </div>
         );

@@ -168,7 +168,8 @@ type URLStateAction =
       implementation: ImplementationFilter,
     }
   | { type: 'CHANGE_INVERT_CALLSTACK', invertCallstack: boolean }
-  | { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean };
+  | { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean }
+  | { type: 'CHANGE_MARKER_SEARCH_STRING', searchString: string };
 
 type IconsAction =
   | { type: 'ICON_HAS_LOADED', icon: string }

@@ -6,10 +6,14 @@ import {
   getProfileForInvertedCallTree,
   getProfileForUnfilteredCallTree,
 } from '.././fixtures/profiles/profiles-for-call-trees';
-import { getCallTree } from '../../profile-logic/profile-tree';
+import {
+  getCallTree,
+  computeCallTreeCountsAndTimings,
+} from '../../profile-logic/profile-tree';
 import {
   getFuncStackInfo,
   invertCallstack,
+  getFuncStackFromFuncArray,
 } from '../../profile-logic/profile-data';
 import type { ProfileTreeClass } from '../../profile-logic/profile-tree';
 import type { IndexIntoFuncStackTable } from '../../types/profile-derived';
@@ -39,6 +43,39 @@ describe('unfiltered call tree', function() {
     );
     return getCallTree(thread, interval, funcStackInfo, 'combined', false);
   }
+
+  /**
+   * Before creating a ProfileTree instance some timings are pre-computed.
+   * This test ensures that these generated values are correct.
+   */
+  describe('computed counts and timings', function() {
+    const profile = getProfileForUnfilteredCallTree();
+    const [thread] = profile.threads;
+    const funcStackInfo = getFuncStackInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable
+    );
+
+    it('does', function() {
+      expect(
+        computeCallTreeCountsAndTimings(
+          thread,
+          funcStackInfo,
+          profile.meta.interval,
+          false
+        )
+      ).toEqual({
+        rootCount: 1,
+        rootTotalTime: 3,
+        funcStackChildCount: new Uint32Array([1, 2, 2, 1, 0, 1, 0, 1, 0]),
+        funcStackTimes: {
+          selfTime: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
+          totalTime: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
+        },
+      });
+    });
+  });
 
   /**
    * Explicitly test the structure of the unfiltered call tree.
@@ -223,6 +260,47 @@ describe('unfiltered call tree', function() {
           totalTimePercent: '100.0%',
         });
       });
+    });
+  });
+
+  /**
+   * While not specifically part of the call tree, this is a core function
+   * to help navigate stacks through a list of functions.
+   */
+  describe('getFuncStackFromFuncArray', function() {
+    const profile = getProfileForUnfilteredCallTree();
+    const [thread] = profile.threads;
+    const { funcStackTable } = getFuncStackInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable
+    );
+
+    // Helper to make the assertions a little less verbose.
+    function checkStack(funcArray, index, name) {
+      it(`finds stack that ends in ${name}`, function() {
+        expect(getFuncStackFromFuncArray(funcArray, funcStackTable)).toBe(
+          index
+        );
+      });
+    }
+
+    checkStack([A], A, 'A');
+    checkStack([A, B], B, 'B');
+    checkStack([A, B, C], C, 'C');
+    checkStack([A, B, C, D], D, 'D');
+    checkStack([A, B, C, D, E], E, 'E');
+
+    checkStack([A, B, C, F], F, 'F');
+    checkStack([A, B, C, F, G], G, 'G');
+
+    checkStack([A, B, H], H, 'H');
+    checkStack([A, B, H, I], I, 'I');
+
+    it(`doesn't find a non-existent stack`, function() {
+      expect(
+        getFuncStackFromFuncArray([A, B, C, D, E, F, G], funcStackTable)
+      ).toBe(null);
     });
   });
 });

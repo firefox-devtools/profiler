@@ -21,4 +21,5 @@ This project is a client for reading profiles from the Gecko Profiler and potent
  * [TraskTracer](./tasktracer.md) - TODO
  * [Upgrading profiles](./upgrading-profiles.md)
  * [Potential performance data sources in Gecko](./data-sources.md)
+ * [Call tree](./call-tree.md)
  * [Frames, funcs, stacks and funcStacks in C++](./func-stacks.md)
