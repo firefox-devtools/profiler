@@ -643,12 +643,6 @@ body {
   overflow-y: auto;
 }
 
-.profileMarkersView {
-  flex: 1;
-  display: flex;
-  flex-flow: column nowrap;
-}
-
 .treeViewFixedColumn.timestamp {
   left: 0px;
   width: 80px;

@@ -11,7 +11,7 @@ import { selectorsForThread } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
   getSampleIndexClosestToTime,
-  getStackAsFuncArray,
+  getFuncStackAsFuncArray,
 } from '../../profile-logic/profile-data';
 import actions from '../../actions';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
@@ -81,7 +81,10 @@ class ProfileThreadHeaderBar extends PureComponent {
           : funcStackInfo.stackIndexToFuncStackIndex[newSelectedStack];
       changeSelectedFuncStack(
         threadIndex,
-        getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable)
+        getFuncStackAsFuncArray(
+          newSelectedFuncStack,
+          funcStackInfo.funcStackTable
+        )
       );
     }
   }

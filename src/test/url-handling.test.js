@@ -28,7 +28,7 @@ describe('selectedThread', function() {
   }
 
   it('selects the right thread when receiving a profile from web', function() {
-    const profile: Profile = processProfile(exampleProfile);
+    const profile: Profile = processProfile(exampleProfile());
 
     const store = storeWithThread(1);
     store.dispatch(receiveProfileFromStore(profile));
@@ -37,7 +37,7 @@ describe('selectedThread', function() {
   });
 
   it('selects a default thread when a wrong thread has been requested', function() {
-    const profile: Profile = processProfile(exampleProfile);
+    const profile: Profile = processProfile(exampleProfile());
 
     const store = storeWithThread(100);
     store.dispatch(receiveProfileFromStore(profile));
@@ -48,7 +48,7 @@ describe('selectedThread', function() {
 });
 
 describe('threadOrder and hiddenThreads', function() {
-  const profile: Profile = processProfile(exampleProfile);
+  const profile: Profile = processProfile(exampleProfile());
 
   function storeWithSearch(search: string) {
     const urlState = stateFromLocation({

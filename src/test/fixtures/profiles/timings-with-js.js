@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import cloneDeep from 'lodash.clonedeep';
 import exampleProfile from './example-profile';
 
 const thread = {
@@ -75,15 +74,16 @@ const thread = {
   ],
 };
 
-const profile = {
-  meta: cloneDeep(exampleProfile.meta),
-  libs: cloneDeep(exampleProfile),
-  threads: [
-    Object.assign({ name: 'GeckoMain' }, thread),
-    Object.assign({ name: 'Compositor' }, thread),
-    Object.assign({ name: 'GeckoMain' }, thread),
-  ],
-  processes: [],
-};
-
-export default profile;
+export default function createProfile() {
+  const example = exampleProfile();
+  return {
+    meta: example.meta,
+    libs: example.libs,
+    threads: [
+      Object.assign({ name: 'GeckoMain' }, thread),
+      Object.assign({ name: 'Compositor' }, thread),
+      Object.assign({ name: 'GeckoMain' }, thread),
+    ],
+    processes: [],
+  };
+}
