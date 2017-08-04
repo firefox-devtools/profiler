@@ -1,13 +1,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
 
 import {
   uintArrayToString,
   stringToUintArray,
 } from '../utils/uintarray-encoding';
 
-export function parseCallTreeFilters(stringValue = '') {
+import type { Thread } from '../types/profile';
+import type { CallTreeFilter } from '../types/actions';
+
+export function parseCallTreeFilters(stringValue: string = '') {
   if (!stringValue) {
     return [];
   }
@@ -47,7 +51,7 @@ export function parseCallTreeFilters(stringValue = '') {
     .filter(f => f);
 }
 
-export function stringifyCallTreeFilters(arrayValue = []) {
+export function stringifyCallTreeFilters(arrayValue: CallTreeFilter[] = []) {
   return arrayValue
     .map(filter => {
       switch (filter.type) {
@@ -70,7 +74,11 @@ export function stringifyCallTreeFilters(arrayValue = []) {
     .join('~');
 }
 
-export function getCallTreeFilterLabels(thread, threadName, callTreeFilters) {
+export function getCallTreeFilterLabels(
+  thread: Thread,
+  threadName: string,
+  callTreeFilters: CallTreeFilter[]
+) {
   const { funcTable, stringTable } = thread;
   const labels = callTreeFilters.map(filter => {
     function lastFuncString(callNodePath) {

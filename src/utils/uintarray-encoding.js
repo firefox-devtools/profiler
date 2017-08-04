@@ -1,16 +1,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
 
 /**
  * Space-efficient url component compatible encoding for arrays of 32bit
  * unsigned integers. Smaller numbers take up fewer characters.
  */
 
-const encodingChars =
+const encodingChars: string =
   '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._';
 
-function uintToString(value) {
+function uintToString(value: number): string {
   let x = value;
   let r = encodingChars[x & 0b11111];
   x >>= 5;
@@ -21,11 +22,11 @@ function uintToString(value) {
   return r;
 }
 
-export function uintArrayToString(array) {
+export function uintArrayToString(array: number[]): string {
   return array.map(uintToString).join('');
 }
 
-function encodingCharToNumber(x) {
+function encodingCharToNumber(x: string): number {
   switch (x) {
     // encodingChars.split('').map((c, i) => `    case '${c}': return ${i};`).join('\n')
     case '0':
@@ -161,7 +162,7 @@ function encodingCharToNumber(x) {
   }
 }
 
-export function stringToUintArray(s) {
+export function stringToUintArray(s: string): number[] {
   const array = [];
   let val = 0;
   for (let i = 0; i < s.length; i++) {
