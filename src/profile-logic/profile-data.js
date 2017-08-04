@@ -847,6 +847,66 @@ export function getJankInstances(
   return jankInstances;
 }
 
+export function getSearchFilteredMarkers(
+  thread: Thread,
+  searchString: string
+): MarkersTable {
+  if (!searchString) {
+    return thread.markers;
+  }
+  const lowerCaseSearchString = searchString.toLowerCase();
+  const { stringTable, markers } = thread;
+  const newMarkersTable: MarkersTable = {
+    data: [],
+    name: [],
+    time: [],
+    length: 0,
+  };
+  function addMarker(markerIndex: IndexIntoMarkersTable) {
+    newMarkersTable.data.push(markers.data[markerIndex]);
+    newMarkersTable.time.push(markers.time[markerIndex]);
+    newMarkersTable.name.push(markers.name[markerIndex]);
+    newMarkersTable.length++;
+  }
+  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+    const stringIndex = markers.name[markerIndex];
+    const name = stringTable.getString(stringIndex);
+    const lowerCaseName = name.toLowerCase();
+    if (lowerCaseName.includes(lowerCaseSearchString)) {
+      addMarker(markerIndex);
+      continue;
+    }
+    const data = markers.data[markerIndex];
+    if (data && typeof data === 'object') {
+      if (
+        typeof data.eventType === 'string' &&
+        data.eventType.toLowerCase().includes(lowerCaseSearchString)
+      ) {
+        // Match DOMevents data.eventType
+        addMarker(markerIndex);
+        continue;
+      }
+      if (
+        typeof data.name === 'string' &&
+        data.name.toLowerCase().includes(lowerCaseSearchString)
+      ) {
+        // Match UserTiming's name.
+        addMarker(markerIndex);
+        continue;
+      }
+      if (
+        typeof data.category === 'string' &&
+        data.category.toLowerCase().includes(lowerCaseSearchString)
+      ) {
+        // Match UserTiming's name.
+        addMarker(markerIndex);
+        continue;
+      }
+    }
+  }
+  return newMarkersTable;
+}
+
 export function getTracingMarkers(thread: Thread): TracingMarker[] {
   const { stringTable, markers } = thread;
   const tracingMarkers: TracingMarker[] = [];

@@ -26,6 +26,7 @@ import type {
   IndexIntoFuncTable,
   SamplesTable,
   TaskTracer,
+  MarkersTable,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -301,7 +302,7 @@ function zeroAt(state: Milliseconds = 0, action: Action) {
   }
 }
 
-function tabOrder(state: number[] = [0, 1, 2, 3, 4], action: Action) {
+function tabOrder(state: number[] = [0, 1, 2, 3], action: Action) {
   switch (action.type) {
     case 'CHANGE_TAB_ORDER':
       return action.tabOrder;
@@ -403,6 +404,7 @@ export type SelectorsForThread = {
   getLeafCategoryStackTimingForFlameChart: State => StackTiming.StackTimingByDepth,
   getFriendlyThreadName: State => string,
   getThreadProcessDetails: State => string,
+  getSearchFilteredMarkers: State => MarkersTable,
 };
 
 const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
@@ -633,6 +635,11 @@ export const selectorsForThread = (
       getCategoryColorStrategy,
       StackTiming.getLeafCategoryStackTiming
     );
+    const getSearchFilteredMarkers = createSelector(
+      getRangeSelectionFilteredThread,
+      URLState.getMarkersSearchString,
+      ProfileData.getSearchFilteredMarkers
+    );
 
     selectorsForThreads[threadIndex] = {
       getThread,
@@ -657,6 +664,7 @@ export const selectorsForThread = (
       getLeafCategoryStackTimingForFlameChart,
       getFriendlyThreadName,
       getThreadProcessDetails,
+      getSearchFilteredMarkers,
     };
   }
   return selectorsForThreads[threadIndex];

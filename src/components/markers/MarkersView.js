@@ -12,9 +12,13 @@ import {
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import actions from '../../actions';
 import formatTimeLength from '../../utils/format-time-length';
+import Settings from './Settings';
+
+import './MarkersView.css';
 
 class MarkerTree {
-  constructor(thread, zeroAt) {
+  constructor(thread, markers, zeroAt) {
+    this._markers = markers;
     this._thread = thread;
     this._zeroAt = zeroAt;
     this._nodes = new Map();
@@ -22,7 +26,7 @@ class MarkerTree {
 
   getRoots() {
     const markerIndices = [];
-    for (let i = 0; i < this._thread.markers.length; i++) {
+    for (let i = 0; i < this._markers.length; i++) {
       markerIndices.push(i);
     }
     return markerIndices;
@@ -33,9 +37,9 @@ class MarkerTree {
   }
 
   hasChildren(markerIndex) {
-    const { markers } = this._thread;
     return (
-      markers.data[markerIndex] !== null && 'stack' in markers.data[markerIndex]
+      this._markers.data[markerIndex] !== null &&
+      'stack' in this._markers.data[markerIndex]
     );
   }
 
@@ -48,7 +52,7 @@ class MarkerTree {
   }
 
   hasSameNodeIds(tree) {
-    return this._thread.markers === tree._thread.markers;
+    return this._markers === tree._markers;
   }
 
   /**
@@ -59,7 +63,8 @@ class MarkerTree {
   getNode(markerIndex) {
     let node = this._nodes.get(markerIndex);
     if (node === undefined) {
-      const { markers, stringTable } = this._thread;
+      const markers = this._markers;
+      const { stringTable } = this._thread;
       let category = 'unknown';
       let name = stringTable.getString(markers.name[markerIndex]);
       if (markers.data[markerIndex]) {
@@ -108,7 +113,7 @@ class MarkerTree {
   }
 }
 
-class ProfileMarkersView extends PureComponent {
+class MarkersView extends PureComponent {
   constructor(props) {
     super(props);
     this._fixedColumns = [
@@ -136,10 +141,11 @@ class ProfileMarkersView extends PureComponent {
   }
 
   render() {
-    const { thread, zeroAt, selectedMarker } = this.props;
-    const tree = new MarkerTree(thread, zeroAt);
+    const { thread, markers, zeroAt, selectedMarker } = this.props;
+    const tree = new MarkerTree(thread, markers, zeroAt);
     return (
-      <div className="profileMarkersView">
+      <div className="markersView">
+        <Settings />
         <TreeView
           tree={tree}
           fixedColumns={this._fixedColumns}
@@ -149,14 +155,16 @@ class ProfileMarkersView extends PureComponent {
           selectedNodeId={selectedMarker}
           expandedNodeIds={this._expandedNodeIds}
           ref={ref => (this._treeView = ref)}
+          contextMenuId={'MarkersContextMenu'}
         />
       </div>
     );
   }
 }
 
-ProfileMarkersView.propTypes = {
+MarkersView.propTypes = {
   thread: PropTypes.object.isRequired,
+  markers: PropTypes.object.isRequired,
   threadIndex: PropTypes.number.isRequired,
   selectedMarker: PropTypes.number.isRequired,
   zeroAt: PropTypes.number.isRequired,
@@ -167,9 +175,10 @@ export default connect(
   state => ({
     threadIndex: getSelectedThreadIndex(state),
     thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state),
+    markers: selectedThreadSelectors.getSearchFilteredMarkers(state),
     selectedMarker: selectedThreadSelectors.getViewOptions(state)
       .selectedMarker,
     zeroAt: getZeroAt(state),
   }),
   actions
-)(ProfileMarkersView);
+)(MarkersView);
