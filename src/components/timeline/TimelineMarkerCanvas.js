@@ -152,11 +152,6 @@ class TimelineMarkerCanvas extends PureComponent {
           );
           const h: CssPixels = ROW_HEIGHT - 1;
 
-          if (w < 2) {
-            // Skip sending draw calls for sufficiently small boxes.
-            continue;
-          }
-
           const tracingMarkerIndex = markerTiming.index[i];
           const isHovered = hoveredItem === tracingMarkerIndex;
           ctx.fillStyle = isHovered ? 'Highlight' : '#8296cb';
