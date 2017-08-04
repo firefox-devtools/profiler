@@ -55,26 +55,17 @@ export default class MarkerTooltipContents extends PureComponent {
 
     return (
       <div className={classNames('tooltipMarker', className)}>
-        <div
-          className={classNames('tooltipOneLine', {
-            tooltipHeader: details || threadName,
-          })}
-        >
-          <div className="tooltipTiming">
-            {formatTimeLength(marker.dur)}ms
-          </div>
-          <div className="tooltipTitle">
-            {marker.title || marker.name}
-          </div>
-        </div>
-        {threadName
-          ? <div className="tooltipDetails">
-              <div className="tooltipLabel" key="thread">
-                Thread:
-              </div>
-              {threadName}
+        <div className={classNames({ tooltipHeader: details })}>
+          <div className="tooltipOneLine">
+            <div className="tooltipTiming">
+              {formatTimeLength(marker.dur)}ms
             </div>
-          : null}
+            <div className="tooltipTitle">
+              {marker.title || marker.name}
+            </div>
+          </div>
+          {threadName}
+        </div>
         {details}
       </div>
     );
