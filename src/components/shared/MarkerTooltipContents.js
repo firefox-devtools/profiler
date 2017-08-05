@@ -127,7 +127,10 @@ export default class MarkerTooltipContents extends PureComponent {
               {marker.title || marker.name}
             </div>
           </div>
-          {threadName}
+          <div className="tooltipDetails">
+            <div className="tooltipLabel">Thread:</div>
+            {threadName}
+          </div>
         </div>
         {details}
       </div>
