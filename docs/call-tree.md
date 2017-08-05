@@ -61,7 +61,7 @@ With the above graph, we know that the functions at the leaf of the graph were t
 
 # Functions are important not stacks and frames
 
-One key point of the aggregation done in the call tree is that it's focused on what *functions* are called, and the relationships between them. In the profiler we collect frames, that give details about that specific frame of execution. Those are then organized using stacks. Each stack points to a frame, and its prefix (parent) stack. In C++ code a single function can have multiple frames depending on which part of the function was being executed. In JavaScript a function may suddenly be optimized and JITed midway through a series of runs. When the JIT process happens there will be new frames generated for these different implementations of the same function. The stacks in the profile describe the relationship between these individual frames. However, naively using just the frames and stacks will often not produce a particularly useful tree. So when referring to anything in the tree, what we care about is the relationship of functions called, not the individual frames and stacks from the profile. For a detailed explanation of how C++ generates multiple frames for a single function, please read [Frames, funcs, stacks and funcStacks in C++](func-stacks.md).
+One key point of the aggregation done in the call tree is that it's focused on what *functions* are called, and the relationships between them. In the profiler we collect frames, that give details about that specific frame of execution. Those are then organized using stacks. Each stack points to a frame, and its prefix (parent) stack. In C++ code a single function can have multiple frames depending on which part of the function was being executed. In JavaScript a function may suddenly be optimized and JITed midway through a series of runs. When the JIT process happens there will be new frames generated for these different implementations of the same function. The stacks in the profile describe the relationship between these individual frames. However, naively using just the frames and stacks will often not produce a particularly useful tree. So when referring to anything in the tree, what we care about is the relationship of functions called, not the individual frames and stacks from the profile. For a detailed explanation of how C++ generates multiple frames for a single function, please read [Frames, funcs, stacks and CallNodes in C++](call-nodes-in-cpp.md).
 
 ## Frames and stacks in JavaScript
 
@@ -155,11 +155,11 @@ This would be a surprising result, and many other assumptions would shake out th
       b
 ```
 
-# Call trees as stacks of functions (FuncStacks), and referring to nodes with function paths
+# Call trees as stacks of functions (CallNodes), and referring to CallNodes with function paths
 
-What we really care about in the call tree is the execution time of a given function, and its relationship to other functions. Since there can be multiple frames and stacks per function in a call tree, the logical step is to combine all of these stacks and frames together in terms of what function they point to. This combined representation is known in perf.html as the funcStack.
+What we really care about in the call tree is the execution time of a given function, and its relationship to other functions. Since there can be multiple frames and stacks per function in a call tree, the logical step is to combine all of these stacks and frames together in terms of what function they point to. This combined representation is known in perf.html as CallNodes.
 
-However once this happens, it starts to become quite difficult to explain relationships and refer to specific nodes within this modified view. Whenever we apply any type of data transformation, these funcStacks need to be regenerated, and the indexes will be different. The only unique identifier that exists is the function, and where it exists in the tree. So in order refer to a specific funcStack, we need a different way to store a reference to the tree. This structure in perf.html is called the FuncPath.
+However once this happens, it starts to become quite difficult to explain relationships and refer to specific CallNodes within this modified view. Whenever we apply any type of data transformation, these CallNodes need to be regenerated, and the indexes into the CallNodesTable will be different. The only unique identifier that exists is the function, and where it exists in the call tree. So in order refer to a specific CallNode, we need a different way to store a reference to the tree. This structure in perf.html is called the CallNodePath.
 
 ```
               A
@@ -177,7 +177,7 @@ However once this happens, it starts to become quite difficult to explain relati
       E       G
 ```
 
-Given the above call tree, the IDs of the nodes are rather random, and will change as we further modify the structure of the call tree. So to refer to the node at function C it is useful to provide a path of functions that shows how to get there. In our case this would be the list of functions `A ➡ B ➡ C`. The `FuncPath` in perf.html would then be stored as an array of function indexes.
+Given the above call tree, the indexes of the CallNodes in the CallNodesTable are rather random, and will change as we further modify the structure of the call tree. So to refer to the CallNodes at function C it is useful to provide a path of functions that shows how to get there. In our case this would be the list of functions `A ➡ B ➡ C`. The `CallNodePath` in perf.html would then be stored as an array of function indexes.
 
 # Modifying the tree
 
@@ -221,7 +221,7 @@ Call trees are interesting for the information they provide, but they can be qui
 
 ## Merge (charge to caller)
 
-Merging involves removing a single FuncStack node from the call tree, and then assigning its self time to the parent FuncStack. In the call tree below, if the FuncStack C is removed, then the `D` and `F` FuncStacks are re-assigned to `B`. No self time in this case would change, as `C` was not a leaf node, but the structure of the tree was changed slightly.
+Merging involves removing a single CallNode from the call tree, and then assigning its self time to the parent CallNode. In the call tree below, if the CallNode C is removed, then the `D` and `F` CallNodes are re-assigned to `B`. No self time in this case would change, as `C` was not a leaf CallNode, but the structure of the tree was changed slightly.
 
 ```
                    A:3,0                              A:3,0
@@ -239,7 +239,7 @@ Merging involves removing a single FuncStack node from the call tree, and then a
         E:1,1       G:1,1
 ```
 
-When a leaf FuncStack is merged, the self time for that FuncStack is assigned to the parent FuncStack. Here the leaf FuncStack `E` is merged. `D` goes from having a self time of 0 to 1.
+When a leaf CallNode is merged, the self time for that CallNode is assigned to the parent CallNode. Here the leaf CallNode `E` is merged. `D` goes from having a self time of 0 to 1.
 
 ```
                   A:3,0                              A:3,0
@@ -259,7 +259,7 @@ When a leaf FuncStack is merged, the self time for that FuncStack is assigned to
 
 ## Merge subtree (prune subtree)
 
-The self time of an entire subtree is placed to the parent FuncStack node. In the case of merging FuncStack C's subtree, FuncStack B would go from having a self time of 0 seconds, to gaining 2 milliseconds of self time from the merged subtree.
+The self time of an entire subtree is placed to the parent CallNode. In the case of merging CallNode C's subtree, CallNode B would go from having a self time of 0 seconds, to gaining 2 milliseconds of self time from the merged subtree.
 
 ```
                   A:3,0                             A:3,0
@@ -279,7 +279,7 @@ The self time of an entire subtree is placed to the parent FuncStack node. In th
 
 ### Hide
 
-If FuncStack C is hidden, then 2 samples are removed because they contain that FuncStack. The overall time of the tree is reduced from 3 milliseconds to 1 milliseconds.
+If CallNode C is hidden, then 2 samples are removed because they contain that CallNode. The overall time of the tree is reduced from 3 milliseconds to 1 milliseconds.
 
 ```
                   A:3,0                             A:1,0
@@ -299,7 +299,7 @@ If FuncStack C is hidden, then 2 samples are removed because they contain that F
 
 ### Focus on subtree
 
-Only FuncStacks that contain FuncStack C are retained, and C is made as root.
+Only CallNodes that contain CallNode C are retained, and C is made as root.
 
 ```
                   A:3,0                         C:2,0
@@ -335,7 +335,7 @@ Only FuncStacks that contain FuncStack C are retained, and C is made as root.
       E       G
 ```
 
-Looking at the above call tree and imagine a function path describing the node that points to function E. This would look like `A ➡ B ➡ C ➡ D ➡ E`. Now what happens to our description of that node when applying a merging of the node that points to C.
+Looking at the above call tree and imagine a CallNodePath describing the node that points to function E. This would look like `A ➡ B ➡ C ➡ D ➡ E`. Now what happens to our description of that node when applying a merging of the CallNode that points to C.
 
 ```
               A
@@ -350,4 +350,4 @@ Looking at the above call tree and imagine a function path describing the node t
           E   G   F
 ```
 
-The function path is now `A ➡ B ➡ D ➡ E`. So in order to maintain stable function paths, we need to update our description of the function path for every modification that we apply to the call tree. This can be quite a difficult problem, especially if we allow for reordering filtering operations. Operations are not necessarily commutative, so our definition of the transformations that we are applying may need to be updated with every transformation. Essentially the history of modifications affect the representation of our next operations that need to be performed. One potential solution to cut through this complexity is to implement any data transformations as a stack that guarantees that the data being transformed deterministically has the same shape. This involves a restriction to the end user that in order to reverse any changes requires popping off every single transformation that has come before it.
+The CallNodePath is now `A ➡ B ➡ D ➡ E`. So in order to maintain stable CallNodePaths, we need to update our description of the CallNodePath for every modification that we apply to the call tree. This can be quite a difficult problem, especially if we allow for reordering filtering operations. Operations are not necessarily commutative, so our definition of the transformations that we are applying may need to be updated with every transformation. Essentially the history of modifications affect the representation of our next operations that need to be performed. One potential solution to cut through this complexity is to implement any data transformations as a stack that guarantees that the data being transformed deterministically has the same shape. This involves a restriction to the end user that in order to reverse any changes requires popping off every single transformation that has come before it.

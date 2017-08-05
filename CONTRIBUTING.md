@@ -6,10 +6,19 @@ First off, thanks for taking the time to contribute to Mozilla and perf.html! Be
 
 This project is made up of a cross section of different parts of Mozilla, including people from Firefox DevTools and from Firefox's platform team who are working on the C++ and Rust internals of Firefox. Some core Mozillians on the team are:
 
- * Bryan Clark [@clarkbw](https://github.com/clarkbw) - Firefox DevTools Product Manager
- * Markus Stange [@mstange](https://github.com/mstange) - Firefox Platform Engineer
- * Greg Tatum [@gregtatum](https://github.com/gregtatum) - Firefox DevTools Engineer
- * Julien Wajsberg [@julienw](https://github.com/julienw) - Firefox DevTools Engineer
+| - | Name | Github Handle | Position |
+| - | ---- | ------------- | -------- |
+| ![][clarkbw] | Bryan Clark | [@clarkbw](https://github.com/clarkbw) | Firefox DevTools Product Manager |
+| <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
+| ![][gregtatum] | Greg Tatum | [@gregtatum](https://github.com/gregtatum) | Firefox DevTools Engineer |
+| ![][julienw] | Julien Wajsberg | [@julienw](https://github.com/julienw) | Firefox DevTools Engineer |
+| ![][violasong] | Victoria Wang | [@violasong](https://github.com/violasong) | Firefox DevTools UX Designer |
+
+[clarkbw]:https://avatars.githubusercontent.com/clarkbw?size=56
+[mstange]:https://avatars.githubusercontent.com/mstange?size=56
+[gregtatum]:https://avatars.githubusercontent.com/gregtatum?size=56
+[julienw]:https://avatars.githubusercontent.com/julienw?size=56
+[violasong]:https://avatars.githubusercontent.com/violasong?size=56
 
 We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-slack.herokuapp.com/) in the #perf channel. Come chat with us if you have any questions about the project.
 

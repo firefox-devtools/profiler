@@ -48,6 +48,44 @@ export type PaintProfilerMarkerTracing = ProfilerMarkerTracing & {
     | 'Composite',
 };
 
+export type GCMinorMarkerPayload = {
+  type: 'GCMinor',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  // nursery is only present in newer profile format.
+  nursery?: {|
+    reason?: string,
+    status?: string,
+  |},
+};
+
+export type GCMajorMarkerPayload = {
+  type: 'GCMajor',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  timings: {|
+    zones_collected: number,
+    total_zones: number,
+    reason: string,
+    nonincremental_reason: string,
+    max_pause: Milliseconds,
+    minor_gcs: number,
+    slices: number,
+  |},
+};
+
+export type GCSliceMarkerPayload = {
+  type: 'GCSlice',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  timings: {|
+    reason: string,
+    budget: Milliseconds,
+    initial_state: string,
+    final_state: string,
+  |},
+};
+
 // TODO - Add more markers.
 
 /**
@@ -79,4 +117,7 @@ export type MarkerPayload =
   | UserTimingMarkerPayload
   | PaintProfilerMarkerTracing
   | DOMEventMarkerPayload
+  | GCMinorMarkerPayload
+  | GCMajorMarkerPayload
+  | GCSliceMarkerPayload
   | null;

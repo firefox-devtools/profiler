@@ -54,24 +54,20 @@ class ProfileViewer extends PureComponent {
     // If updating this list, make sure and update the tabOrder reducer with another index.
     this._tabs = [
       {
-        name: 'summary',
-        title: 'Summary',
-      },
-      {
         name: 'calltree',
         title: 'Call Tree',
+      },
+      {
+        name: 'timeline',
+        title: 'Timeline',
       },
       {
         name: 'markers',
         title: 'Markers',
       },
       {
-        name: 'tasktracer',
-        title: 'Task Tracer',
-      },
-      {
-        name: 'timeline',
-        title: 'Timeline',
+        name: 'summary',
+        title: 'Summary',
       },
     ];
   }

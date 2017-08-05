@@ -1,4 +1,4 @@
-# Frames, funcs, stacks and funcStacks in C++
+# Frames, funcs, stacks and CallNodes in C++
 
 This document pertains to how C++ samples are captured, and how they are processed for reporting in perf.html. Specifically the profiler samples capture memory addresses for frames in C++ functions, and there can be many different frame addresses per single function.
 
@@ -74,7 +74,7 @@ If the CPU is executing `doSomething()` from the second loop, the stack will be
 
 so we'll have a different leaf stack object whose prefix is a stack object with frame `0x09`.
 
-### FuncStacks
+### CallNodes
 
 If we just used stacks to create the call tree, with one tree node per stack, the tree would look like this:
 
@@ -99,19 +99,19 @@ This can be very confusing and is usually not what you want. What you want inste
 
 In other words, we want to combine many different `stack` object into the same tree node, reflecting which frames have been combined into the same func.
 
-We call the node of such a combined tree a `funcStack` - it's like a `stack`, but instead of being based on frames, it's based on funcs.
+We call the node of such a combined tree a `CallNode` - it's like a `stack`, but instead of being based on frames, it's based on funcs.
 
 ## FAQ
 
-### Why keep around stacks at all, instead of just destructively combining them into funcStacks?
+### Why keep around stacks at all, instead of just destructively combining them into CallNodes?
 
-We want to keep around enough information to be able to show per-line profiling information for a given funcStack. For example, for the funcStack for `main`, we want to be able to highlight the expensive lines / inside `main()`. So we need to know how many samples were executing a given line of code. With the information we have, we can do that by finding all samples whose stacks are in the selected funcStack, and then look at the leaf frames of those stacks.
+We want to keep around enough information to be able to show per-line profiling information for a given CallNode. For example, for the CallNode for `main`, we want to be able to highlight the expensive lines / inside `main()`. So we need to know how many samples were executing a given line of code. With the information we have, we can do that by finding all samples whose stacks are in the selected CallNode, and then look at the leaf frames of those stacks.
 
 ### How does symbolication affect this?
 
 Glad you asked.
 
-When we display a profile without any symbolication information, all we have is stacks and frames. At that point, we don't know which frames are from the same function. Only once the symbol information comes in we can actually start combining multiple frames into the same func, and multiple stacks into the same funcStack.
+When we display a profile without any symbolication information, all we have is stacks and frames. At that point, we don't know which frames are from the same function. Only once the symbol information comes in we can actually start combining multiple frames into the same func, and multiple stacks into the same CallNode.
 
 The takeaway here is: The symbolication process doesn't only give us strings, it can also completely change the shape of the call tree.
 
@@ -122,5 +122,5 @@ In perf.html, we want to be fully interactive before any symbol information has 
     1. Every address that has a symbol is treated as the start of a function.
     2. For each symbol, we pick one func object, and combine the func objects that we created for all frames in that address range into that one func.
     3. We have a map, `oldFuncToNewFuncMap`, that records these collapsed funcs and the func they were collapsed into.
-    4. We have a few things in the redux state which refer to funcs, most notably the set of expanded tree nodes (expandedFuncStacks) and the currently selected tree node (selectedFuncStack). If any of those points to a func that was collapsed away, we replace that pointer with the func that it was collapsed into.
+    4. We have a few things in the redux state which refer to funcs, most notably the set of expanded tree nodes (expandedCallNodePaths) and the currently selected tree node (selectedCallNodePath). If any of those points to a func that was collapsed away, we replace that pointer with the func that it was collapsed into.
     5. This means that selected row in the tree can jump around. But it won't jump to an unrelated function; it will still be selecting the stack of the functions that you were looking at.

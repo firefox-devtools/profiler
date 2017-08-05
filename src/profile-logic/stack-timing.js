@@ -10,7 +10,7 @@ import type {
   StackTable,
 } from '../types/profile';
 import type { Milliseconds } from '../types/units';
-import type { FuncStackInfo } from '../types/profile-derived';
+import type { CallNodeInfo } from '../types/profile-derived';
 import type { GetCategory } from './color-categories';
 /**
  * The StackTimingByDepth data structure organizes stack frames by their depth, and start
@@ -66,18 +66,18 @@ type LastSeen = {
  * Build a StackTimingByDepth table from a given thread.
  *
  * @param {object} thread - The profile thread.
- * @param {object} funcStackInfo - from the funcStackInfo selector.
+ * @param {object} callNodeInfo - from the callNodeInfo selector.
  * @param {integer} maxDepth - The max depth of the all the stacks.
  * @param {number} interval - The sampling interval that the profile was recorded with.
  * @return {array} stackTimingByDepth
  */
 export function getStackTimingByDepth(
   thread: Thread,
-  funcStackInfo: FuncStackInfo,
+  callNodeInfo: CallNodeInfo,
   maxDepth: number,
   interval: number
 ): StackTimingByDepth {
-  const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
+  const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
   const stackTimingByDepth = Array.from({ length: maxDepth + 1 }, () => ({
     start: [],
     end: [],
@@ -103,8 +103,8 @@ export function getStackTimingByDepth(
       _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, sampleTime);
       previousDepth = -1;
     } else {
-      const funcStackIndex = stackIndexToFuncStackIndex[stackIndex];
-      const depth = funcStackTable.depth[funcStackIndex];
+      const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+      const depth = callNodeTable.depth[callNodeIndex];
 
       // Find the depth of the nearest shared stack.
       const depthToPop = _findNearestSharedStackDepth(
@@ -196,18 +196,18 @@ function _pushStacks(
   }
 }
 
-export function computeFuncStackMaxDepth(
+export function computeCallNodeMaxDepth(
   rangedThread: Thread,
-  funcStackInfo: FuncStackInfo
+  callNodeInfo: CallNodeInfo
 ): number {
   let maxDepth = 0;
   const { samples } = rangedThread;
-  const { funcStackTable, stackIndexToFuncStackIndex } = funcStackInfo;
+  const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
   for (let i = 0; i < rangedThread.samples.length; i++) {
     const stackIndex = samples.stack[i];
     if (stackIndex !== null) {
-      const funcStackIndex = stackIndexToFuncStackIndex[stackIndex];
-      const depth = funcStackTable.depth[funcStackIndex];
+      const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+      const depth = callNodeTable.depth[callNodeIndex];
       if (depth > maxDepth) {
         maxDepth = depth;
       }

@@ -61,4 +61,6 @@
 
 .tooltipLabel {
   color: #666;
+  white-space: nowrap;
+  text-align: right;
 }

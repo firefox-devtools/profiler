@@ -11,11 +11,8 @@ import { BackgroundImageStyleDef } from './StyleDef';
 
 import ContextMenuTrigger from './ContextMenuTrigger';
 
-import type {
-  IndexIntoFuncStackTable,
-  Node,
-} from '../../types/profile-derived';
-import type { ProfileTreeClass } from '../../profile-logic/profile-tree';
+import type { IndexIntoCallNodeTable, Node } from '../../types/profile-derived';
+import type { CallTree } from '../../profile-logic/call-tree';
 import type { IconWithClassName } from '../../types/reducers';
 
 export type Column = {
@@ -76,11 +73,11 @@ function reactStringWithHighlightedSubstrings(
 
 type TreeViewRowFixedColumnsProps = {
   node: Node,
-  nodeId: IndexIntoFuncStackTable,
+  nodeId: IndexIntoCallNodeTable,
   columns: Column[],
   index: number,
   selected: boolean,
-  onClick: (IndexIntoFuncStackTable, MouseEvent) => mixed,
+  onClick: (IndexIntoCallNodeTable, MouseEvent) => mixed,
   highlightString: string,
 };
 
@@ -133,7 +130,7 @@ class TreeViewRowFixedColumns extends PureComponent {
 
 type TreeViewRowScrolledColumnsProps = {
   node: Node,
-  nodeId: IndexIntoFuncStackTable,
+  nodeId: IndexIntoCallNodeTable,
   depth: number,
   mainColumn: Column,
   appendageColumn: Column,
@@ -142,10 +139,10 @@ type TreeViewRowScrolledColumnsProps = {
   canBeExpanded: boolean,
   isExpanded: boolean,
   selected: boolean,
-  onToggle: (IndexIntoFuncStackTable, boolean, boolean) => mixed,
-  onClick: (IndexIntoFuncStackTable, MouseEvent) => mixed,
+  onToggle: (IndexIntoCallNodeTable, boolean, boolean) => mixed,
+  onClick: (IndexIntoCallNodeTable, MouseEvent) => mixed,
   onAppendageButtonClick:
-    | ((IndexIntoFuncStackTable | null, string) => mixed)
+    | ((IndexIntoCallNodeTable | null, string) => mixed)
     | null,
   highlightString: string,
 };
@@ -251,9 +248,9 @@ class TreeViewRowScrolledColumns extends PureComponent {
 type TreeViewProps = {
   fixedColumns: Column[],
   mainColumn: Column,
-  tree: ProfileTreeClass,
-  expandedNodeIds: Array<IndexIntoFuncStackTable | null>,
-  selectedNodeId: IndexIntoFuncStackTable | null,
+  tree: CallTree,
+  expandedNodeIds: Array<IndexIntoCallNodeTable | null>,
+  selectedNodeId: IndexIntoCallNodeTable | null,
   onExpandedNodesChange: PropTypes.func.isRequired,
   highlightString: string,
   appendageColumn: Column,
@@ -263,15 +260,15 @@ type TreeViewProps = {
   contextMenu?: React$Element<*>,
   contextMenuId?: string,
   onAppendageButtonClick:
-    | ((IndexIntoFuncStackTable | null, string) => mixed)
+    | ((IndexIntoCallNodeTable | null, string) => mixed)
     | null,
-  onSelectionChange: IndexIntoFuncStackTable => mixed,
+  onSelectionChange: IndexIntoCallNodeTable => mixed,
 };
 
 class TreeView extends PureComponent {
   props: TreeViewProps;
-  _specialItems: (IndexIntoFuncStackTable | null)[];
-  _visibleRows: IndexIntoFuncStackTable[];
+  _specialItems: (IndexIntoCallNodeTable | null)[];
+  _visibleRows: IndexIntoCallNodeTable[];
   _list: VirtualList | null;
 
   constructor(props: TreeViewProps) {
@@ -309,7 +306,7 @@ class TreeView extends PureComponent {
   }
 
   _renderRow(
-    nodeId: IndexIntoFuncStackTable,
+    nodeId: IndexIntoCallNodeTable,
     index: number,
     columnIndex: number
   ) {
@@ -362,8 +359,8 @@ class TreeView extends PureComponent {
 
   _addVisibleRowsFromNode(
     props: TreeViewProps,
-    arr: IndexIntoFuncStackTable[],
-    nodeId: IndexIntoFuncStackTable,
+    arr: IndexIntoCallNodeTable[],
+    nodeId: IndexIntoCallNodeTable,
     depth: number
   ) {
     arr.push(nodeId);
@@ -385,13 +382,13 @@ class TreeView extends PureComponent {
     return allRows;
   }
 
-  _isCollapsed(nodeId: IndexIntoFuncStackTable) {
+  _isCollapsed(nodeId: IndexIntoCallNodeTable) {
     return !this.props.expandedNodeIds.includes(nodeId);
   }
 
   _addAllDescendants(
-    newSet: Set<IndexIntoFuncStackTable | null>,
-    nodeId: IndexIntoFuncStackTable
+    newSet: Set<IndexIntoCallNodeTable | null>,
+    nodeId: IndexIntoCallNodeTable
   ) {
     this.props.tree.getChildren(nodeId).forEach(childId => {
       newSet.add(childId);
@@ -400,7 +397,7 @@ class TreeView extends PureComponent {
   }
 
   _toggle(
-    nodeId: IndexIntoFuncStackTable,
+    nodeId: IndexIntoCallNodeTable,
     newExpanded: boolean = this._isCollapsed(nodeId),
     toggleAll: * = false
   ) {
@@ -417,17 +414,17 @@ class TreeView extends PureComponent {
   }
 
   _toggleAll(
-    nodeId: IndexIntoFuncStackTable,
+    nodeId: IndexIntoCallNodeTable,
     newExpanded: boolean = this._isCollapsed(nodeId)
   ) {
     this._toggle(nodeId, newExpanded, true);
   }
 
-  _select(nodeId: IndexIntoFuncStackTable) {
+  _select(nodeId: IndexIntoCallNodeTable) {
     this.props.onSelectionChange(nodeId);
   }
 
-  _onRowClicked(nodeId: IndexIntoFuncStackTable, event: MouseEvent) {
+  _onRowClicked(nodeId: IndexIntoCallNodeTable, event: MouseEvent) {
     this._select(nodeId);
     if (event.detail === 2) {
       // double click
