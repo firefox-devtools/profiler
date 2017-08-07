@@ -3,17 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type {
-  ProfileSelection,
-  CallTreeFilter,
-  ImplementationFilter,
-} from '../types/actions';
+import type { ProfileSelection, ImplementationFilter } from '../types/actions';
 import type { Action, ThunkAction } from '../types/store';
 import type {
   ThreadIndex,
   IndexIntoFuncTable,
   IndexIntoMarkersTable,
 } from '../types/profile';
+import type { Transform } from '../types/transforms';
 
 /**
  * The actions that pertain to changing the view on the profile, including searching
@@ -182,23 +179,23 @@ export function popRangeFiltersAndUnsetSelection(
   };
 }
 
-export function addCallTreeFilter(
+export function addTransformToStack(
   threadIndex: ThreadIndex,
-  filter: CallTreeFilter
+  transform: Transform
 ): Action {
   return {
-    type: 'ADD_CALL_TREE_FILTER',
+    type: 'ADD_TRANSFORM_TO_STACK',
     threadIndex,
-    filter,
+    transform,
   };
 }
 
-export function popCallTreeFilters(
+export function popTransformsFromStack(
   threadIndex: ThreadIndex,
   firstRemovedFilterIndex: number
 ): Action {
   return {
-    type: 'POP_CALL_TREE_FILTERS',
+    type: 'POP_TRANSFORMS_FROM_STACK',
     threadIndex,
     firstRemovedFilterIndex,
   };

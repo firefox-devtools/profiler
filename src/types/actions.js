@@ -13,20 +13,9 @@ import type {
 import type { GetLabel } from '../profile-logic/labeling-strategies';
 import type { GetCategory } from '../profile-logic/color-categories';
 import type { TemporaryError } from '../utils/errors';
+import type { Transform } from './transforms';
 
 export type ExpandedSet = Set<ThreadIndex>;
-export type PrefixCallTreeFilter = {
-  type: 'prefix',
-  prefixFuncs: IndexIntoFuncTable[],
-  matchJSOnly: boolean,
-};
-export type PostfixCallTreeFilter = {
-  type: 'postfix',
-  postfixFuncs: IndexIntoFuncTable[],
-  matchJSOnly: boolean,
-};
-export type CallTreeFilter = PrefixCallTreeFilter | PostfixCallTreeFilter;
-export type CallTreeFiltersPerThread = { [id: ThreadIndex]: CallTreeFilter[] };
 export type DataSource =
   | 'none'
   | 'from-file'
@@ -154,12 +143,12 @@ type URLStateAction =
   | { type: 'CHANGE_SELECTED_THREAD', selectedThread: ThreadIndex }
   | { type: 'CHANGE_CALL_TREE_SEARCH_STRING', searchString: string }
   | {
-      type: 'ADD_CALL_TREE_FILTER',
+      type: 'ADD_TRANSFORM_TO_STACK',
       threadIndex: ThreadIndex,
-      filter: CallTreeFilter,
+      transform: Transform,
     }
   | {
-      type: 'POP_CALL_TREE_FILTERS',
+      type: 'POP_TRANSFORMS_FROM_STACK',
       threadIndex: ThreadIndex,
       firstRemovedFilterIndex: number,
     }
