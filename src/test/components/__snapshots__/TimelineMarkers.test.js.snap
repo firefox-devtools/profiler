@@ -5,7 +5,7 @@ exports[`renders TimelineMarkers correctly 1`] = `
   className="timelineMarkers"
   style={
     Object {
-      "height": 72,
+      "height": 120,
     }
   }
 >
@@ -90,21 +90,21 @@ Array [
     "fillRect",
     1,
     1,
-    179.8181818181818,
+    123,
     1,
   ],
   Array [
     "fillRect",
     0,
     2,
-    181.8181818181818,
+    125,
     12,
   ],
   Array [
     "fillRect",
     1,
     14,
-    179.8181818181818,
+    123,
     1,
   ],
   Array [
@@ -123,21 +123,21 @@ Array [
     "fillRect",
     1,
     17,
-    179.8181818181818,
+    123,
     1,
   ],
   Array [
     "fillRect",
     0,
     18,
-    181.8181818181818,
+    125,
     12,
   ],
   Array [
     "fillRect",
     1,
     30,
-    179.8181818181818,
+    123,
     1,
   ],
   Array [
@@ -153,24 +153,68 @@ Array [
     "#8296cb",
   ],
   Array [
+    "beginPath",
+  ],
+  Array [
+    "arc",
+    42.5,
+    39.5,
+    3.75,
+    0,
+    6.283185307179586,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#8296cb",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "arc",
+    55,
+    55.5,
+    3.75,
+    0,
+    6.283185307179586,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#8296cb",
+  ],
+  Array [
     "fillRect",
-    91.9090909090909,
-    33,
-    179.81818181818178,
+    63.5,
+    65,
+    123,
     1,
   ],
   Array [
     "fillRect",
-    90.9090909090909,
-    34,
-    181.81818181818178,
+    62.5,
+    66,
+    125,
     12,
   ],
   Array [
     "fillRect",
-    91.9090909090909,
-    46,
-    179.81818181818178,
+    63.5,
+    78,
+    123,
     1,
   ],
   Array [
@@ -199,6 +243,20 @@ Array [
     "fillRect",
     0,
     48,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    64,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    80,
     200,
     1,
   ],
@@ -247,6 +305,20 @@ Array [
     16,
   ],
   Array [
+    "fillRect",
+    0,
+    48,
+    150,
+    16,
+  ],
+  Array [
+    "fillRect",
+    0,
+    64,
+    150,
+    16,
+  ],
+  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -264,9 +336,21 @@ Array [
   ],
   Array [
     "fillText",
-    "Marker C",
+    "Marker E",
     5,
     43,
+  ],
+  Array [
+    "fillText",
+    "Marker D",
+    5,
+    59,
+  ],
+  Array [
+    "fillText",
+    "Marker C",
+    5,
+    75,
   ],
 ]
 `;
