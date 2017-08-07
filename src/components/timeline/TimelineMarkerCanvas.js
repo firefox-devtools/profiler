@@ -41,7 +41,8 @@ type Props = {
 const ROW_HEIGHT = 16;
 const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
-const MARKER_DOT_RADIUS = 0.25;
+const MARKER_MIN_DOT_RADIUS = 0.15;
+const MARKER_MAX_DOT_RADIUS = 0.45;
 const TEXT_OFFSET_START = 3;
 
 class TimelineMarkerCanvas extends PureComponent {
@@ -146,10 +147,8 @@ class TimelineMarkerCanvas extends PureComponent {
           const x: CssPixels =
             (startTime - viewportLeft) * containerWidth / viewportLength;
           const y: CssPixels = rowIndex * ROW_HEIGHT - viewportTop;
-          const w: CssPixels = Math.max(
-            10,
-            (endTime - startTime) * containerWidth / viewportLength
-          );
+          const w: CssPixels =
+            (endTime - startTime) * containerWidth / viewportLength;
           const h: CssPixels = ROW_HEIGHT - 1;
 
           const tracingMarkerIndex = markerTiming.index[i];
@@ -174,11 +173,16 @@ class TimelineMarkerCanvas extends PureComponent {
               }
             }
           } else {
+            const radiusRatio = w / h;
+            // TODO Should we use an exponential scale instead ?
+            const radius =
+              radiusRatio * (MARKER_MAX_DOT_RADIUS - MARKER_MIN_DOT_RADIUS) +
+              MARKER_MIN_DOT_RADIUS;
             ctx.beginPath();
             ctx.arc(
-              x + w / 2, // x
+              x, // x
               y + h / 2, // y
-              h * MARKER_DOT_RADIUS, // radius
+              radius * h, // radius
               0, // arc start
               TWO_PI // arc end
             );
@@ -254,7 +258,7 @@ class TimelineMarkerCanvas extends PureComponent {
     const minDuration =
       rangeLength *
       viewportLength *
-      (rowHeight * 2 * MARKER_DOT_RADIUS / containerWidth);
+      (rowHeight * 2 * MARKER_MIN_DOT_RADIUS / containerWidth);
     const markerTiming = markerTimingRows[rowIndex];
 
     if (!markerTiming) {
