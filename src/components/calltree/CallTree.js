@@ -26,11 +26,12 @@ import { getIconsWithClassNames } from '../../reducers/icons';
 import {
   changeSelectedCallNode,
   changeExpandedCallNodes,
-  addCallTreeFilter,
+  addTransformToStack,
 } from '../../actions/profile-view';
 
 import type { IconWithClassName, State } from '../../types/reducers';
 import type { CallTree } from '../../profile-logic/call-tree';
+import type { ImplementationFilter } from '../../types/actions';
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type {
   CallNodeInfo,
@@ -49,12 +50,12 @@ type Props = {
   expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
   searchString: string,
   disableOverscan: boolean,
-  implementationFilter: string,
+  implementationFilter: ImplementationFilter,
   invertCallstack: boolean,
   icons: IconWithClassName[],
   changeSelectedCallNode: typeof changeSelectedCallNode,
   changeExpandedCallNodes: typeof changeExpandedCallNodes,
-  addCallTreeFilter: typeof addCallTreeFilter,
+  addTransformToStack: typeof addTransformToStack,
 };
 
 class CallTreeComponent extends PureComponent {
@@ -134,27 +135,20 @@ class CallTreeComponent extends PureComponent {
     const {
       callNodeInfo,
       threadIndex,
-      addCallTreeFilter,
-      implementationFilter,
+      addTransformToStack,
+      implementationFilter: implementation,
       invertCallstack,
     } = this.props;
-    const jsOnly = implementationFilter === 'js';
-    if (invertCallstack) {
-      addCallTreeFilter(threadIndex, {
-        type: 'postfix',
-        postfixFuncs: getCallNodePath(
-          callNodeIndex,
-          callNodeInfo.callNodeTable
-        ),
-        matchJSOnly: jsOnly,
-      });
-    } else {
-      addCallTreeFilter(threadIndex, {
-        type: 'prefix',
-        prefixFuncs: getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable),
-        matchJSOnly: jsOnly,
-      });
-    }
+    const callNodePath = getCallNodePath(
+      callNodeIndex,
+      callNodeInfo.callNodeTable
+    );
+    addTransformToStack(threadIndex, {
+      type: 'focus-subtree',
+      callNodePath,
+      implementation,
+      inverted: invertCallstack,
+    });
   }
 
   procureInterestingInitialSelection() {
@@ -229,7 +223,11 @@ export default connect(
     implementationFilter: getImplementationFilter(state),
     icons: getIconsWithClassNames(state),
   }),
-  { changeSelectedCallNode, changeExpandedCallNodes, addCallTreeFilter },
+  {
+    changeSelectedCallNode,
+    changeExpandedCallNodes,
+    addTransformToStack,
+  },
   null,
   { withRef: true }
 )(CallTreeComponent);
