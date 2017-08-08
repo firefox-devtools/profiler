@@ -84,13 +84,13 @@ class ProfileSharingCompositeButton extends PureComponent {
     (this: any)._attemptToShare = this._attemptToShare.bind(this);
     (this: any)._onPermalinkPanelOpen = this._onPermalinkPanelOpen.bind(this);
     (this: any)._onPermalinkPanelClose = this._onPermalinkPanelClose.bind(this);
-    (this: any)._permalinkButtonCreated = elem => {
+    this._permalinkButtonCreated = elem => {
       this._permalinkButton = elem;
     };
-    (this: any)._uploadErrorButtonCreated = elem => {
+    this._uploadErrorButtonCreated = elem => {
       this._uploadErrorButton = elem;
     };
-    (this: any)._permalinkTextFieldCreated = elem => {
+    this._permalinkTextFieldCreated = elem => {
       this._permalinkTextField = elem;
     };
   }
