@@ -8,9 +8,10 @@ import { connect } from 'react-redux';
 import actions from '../../actions';
 import { getRangeFilterLabels } from '../../reducers/url-state';
 import FilterNavigatorBar from '../calltree/FilterNavigatorBar';
+import type { State } from '../../types/reducers';
 
 export default connect(
-  state => {
+  (state: State) => {
     const items = getRangeFilterLabels(state);
     return {
       className: 'profileFilterNavigator',

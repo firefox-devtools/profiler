@@ -223,3 +223,11 @@ export type Profile = {
   tasktracer: TaskTracer,
   threads: Thread[],
 };
+
+export type ProfileSharingCompositeButtonProps = {
+  profile: Object,
+  dataSource: string,
+  hash: string,
+  onProfilePublished: Function,
+  predictURL: Function,
+};
