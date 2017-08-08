@@ -19,9 +19,9 @@ import type {
   ThreadIndex,
 } from '../types/profile';
 import type {
-  FuncStackInfo,
-  FuncStackTable,
-  IndexIntoFuncStackTable,
+  CallNodeInfo,
+  CallNodeTable,
+  IndexIntoCallNodeTable,
   TracingMarker,
 } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
@@ -43,34 +43,34 @@ export const resourceTypes = {
 };
 
 /**
- * Generate the FuncStackInfo which contains the FuncStackTable, and a map to convert
- * an IndexIntoStackTable to a IndexIntoFuncStackTable. This function runs through
+ * Generate the CallNodeInfo which contains the CallNodeTable, and a map to convert
+ * an IndexIntoStackTable to a IndexIntoCallNodeTable. This function runs through
  * a stackTable, and de-duplicates stacks that have frames that point to the same
  * function.
  *
  * See `src/types/profile-derived.js` for the type definitions.
- * See `docs/func-stacks.md` for a detailed explanation of funcStacks.
+ * See `docs/call-trees.md` for a detailed explanation of CallNodes.
  */
-export function getFuncStackInfo(
+export function getCallNodeInfo(
   stackTable: StackTable,
   frameTable: FrameTable,
   funcTable: FuncTable
-): FuncStackInfo {
-  return timeCode('getFuncStackInfo', () => {
-    const stackIndexToFuncStackIndex = new Uint32Array(stackTable.length);
+): CallNodeInfo {
+  return timeCode('getCallNodeInfo', () => {
+    const stackIndexToCallNodeIndex = new Uint32Array(stackTable.length);
     const funcCount = funcTable.length;
-    // Maps can't key off of two items, so combine the prefixFuncStack and the funcIndex
-    // using the following formula: prefixFuncStack * funcCount + funcIndex => funcStack
-    const prefixFuncStackAndFuncToFuncStackMap = new Map();
+    // Maps can't key off of two items, so combine the prefixCallNode and the funcIndex
+    // using the following formula: prefixCallNode * funcCount + funcIndex => callNode
+    const prefixCallNodeAndFuncToCallNodeMap = new Map();
 
-    // The funcStackTable components.
-    const prefix: Array<IndexIntoFuncStackTable> = [];
+    // The callNodeTable components.
+    const prefix: Array<IndexIntoCallNodeTable> = [];
     const func: Array<IndexIntoFuncTable> = [];
     const depth: Array<number> = [];
     let length = 0;
 
-    function addFuncStack(
-      prefixIndex: IndexIntoFuncStackTable,
+    function addCallNode(
+      prefixIndex: IndexIntoCallNodeTable,
       funcIndex: IndexIntoFuncTable
     ) {
       const index = length++;
@@ -83,51 +83,50 @@ export function getFuncStackInfo(
       }
     }
 
-    // Go through each stack, and create a new funcStack table, which is based off of
+    // Go through each stack, and create a new callNode table, which is based off of
     // functions rather than frames.
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefixStack = stackTable.prefix[stackIndex];
       // We know that at this point the following condition holds:
       // assert(prefixStack === null || prefixStack < stackIndex);
-      const prefixFuncStack =
-        prefixStack === null ? -1 : stackIndexToFuncStackIndex[prefixStack];
+      const prefixCallNode =
+        prefixStack === null ? -1 : stackIndexToCallNodeIndex[prefixStack];
       const frameIndex = stackTable.frame[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
-      const prefixFuncStackAndFuncIndex =
-        prefixFuncStack * funcCount + funcIndex;
-      let funcStackIndex = prefixFuncStackAndFuncToFuncStackMap.get(
-        prefixFuncStackAndFuncIndex
+      const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
+      let callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
+        prefixCallNodeAndFuncIndex
       );
-      if (funcStackIndex === undefined) {
-        funcStackIndex = length;
-        addFuncStack(prefixFuncStack, funcIndex);
-        prefixFuncStackAndFuncToFuncStackMap.set(
-          prefixFuncStackAndFuncIndex,
-          funcStackIndex
+      if (callNodeIndex === undefined) {
+        callNodeIndex = length;
+        addCallNode(prefixCallNode, funcIndex);
+        prefixCallNodeAndFuncToCallNodeMap.set(
+          prefixCallNodeAndFuncIndex,
+          callNodeIndex
         );
       }
-      stackIndexToFuncStackIndex[stackIndex] = funcStackIndex;
+      stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
     }
 
-    const funcStackTable: FuncStackTable = {
+    const callNodeTable: CallNodeTable = {
       prefix: new Int32Array(prefix),
       func: new Int32Array(func),
       depth,
       length,
     };
 
-    return { funcStackTable, stackIndexToFuncStackIndex };
+    return { callNodeTable, stackIndexToCallNodeIndex };
   });
 }
 
-export function getSampleFuncStacks(
+export function getSampleCallNodes(
   samples: SamplesTable,
-  stackIndexToFuncStackIndex: {
-    [key: IndexIntoStackTable]: IndexIntoFuncStackTable,
+  stackIndexToCallNodeIndex: {
+    [key: IndexIntoStackTable]: IndexIntoCallNodeTable,
   }
-): Array<IndexIntoFuncStackTable | null> {
+): Array<IndexIntoCallNodeTable | null> {
   return samples.stack.map(stack => {
-    return stack === null ? null : stackIndexToFuncStackIndex[stack];
+    return stack === null ? null : stackIndexToCallNodeIndex[stack];
   });
 }
 
@@ -686,24 +685,24 @@ export function filterThreadToRange(
   });
 }
 
-export function getFuncStackFromFuncArray(
-  funcArray: IndexIntoFuncTable[],
-  funcStackTable: FuncStackTable
-): IndexIntoFuncStackTable | null {
+export function getCallNodeFromPath(
+  callNodePath: IndexIntoFuncTable[],
+  callNodeTable: CallNodeTable
+): IndexIntoCallNodeTable | null {
   let fs = -1;
-  for (let i = 0; i < funcArray.length; i++) {
-    const func = funcArray[i];
+  for (let i = 0; i < callNodePath.length; i++) {
+    const func = callNodePath[i];
     let nextFS = -1;
     for (
-      let funcStackIndex = fs + 1;
-      funcStackIndex < funcStackTable.length;
-      funcStackIndex++
+      let callNodeIndex = fs + 1;
+      callNodeIndex < callNodeTable.length;
+      callNodeIndex++
     ) {
       if (
-        funcStackTable.prefix[funcStackIndex] === fs &&
-        funcStackTable.func[funcStackIndex] === func
+        callNodeTable.prefix[callNodeIndex] === fs &&
+        callNodeTable.func[callNodeIndex] === func
       ) {
-        nextFS = funcStackIndex;
+        nextFS = callNodeIndex;
         break;
       }
     }
@@ -715,25 +714,25 @@ export function getFuncStackFromFuncArray(
   return fs;
 }
 
-export function getStackAsFuncArray(
-  funcStackIndex: IndexIntoFuncStackTable | null,
-  funcStackTable: FuncStackTable
+export function getCallNodePath(
+  callNodeIndex: IndexIntoCallNodeTable | null,
+  callNodeTable: CallNodeTable
 ): IndexIntoFuncTable[] {
-  if (funcStackIndex === null) {
+  if (callNodeIndex === null) {
     return [];
   }
-  if (funcStackIndex * 1 !== funcStackIndex) {
-    console.log('bad funcStackIndex in getStackAsFuncArray:', funcStackIndex);
+  if (callNodeIndex * 1 !== callNodeIndex) {
+    console.log('bad callNodeIndex in getCallNodePath:', callNodeIndex);
     return [];
   }
-  const funcArray = [];
-  let fs = funcStackIndex;
+  const callNodePath = [];
+  let fs = callNodeIndex;
   while (fs !== -1) {
-    funcArray.push(funcStackTable.func[fs]);
-    fs = funcStackTable.prefix[fs];
+    callNodePath.push(callNodeTable.func[fs]);
+    fs = callNodeTable.prefix[fs];
   }
-  funcArray.reverse();
-  return funcArray;
+  callNodePath.reverse();
+  return callNodePath;
 }
 
 export function invertCallstack(thread: Thread): Thread {
@@ -848,6 +847,66 @@ export function getJankInstances(
   return jankInstances;
 }
 
+export function getSearchFilteredMarkers(
+  thread: Thread,
+  searchString: string
+): MarkersTable {
+  if (!searchString) {
+    return thread.markers;
+  }
+  const lowerCaseSearchString = searchString.toLowerCase();
+  const { stringTable, markers } = thread;
+  const newMarkersTable: MarkersTable = {
+    data: [],
+    name: [],
+    time: [],
+    length: 0,
+  };
+  function addMarker(markerIndex: IndexIntoMarkersTable) {
+    newMarkersTable.data.push(markers.data[markerIndex]);
+    newMarkersTable.time.push(markers.time[markerIndex]);
+    newMarkersTable.name.push(markers.name[markerIndex]);
+    newMarkersTable.length++;
+  }
+  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+    const stringIndex = markers.name[markerIndex];
+    const name = stringTable.getString(stringIndex);
+    const lowerCaseName = name.toLowerCase();
+    if (lowerCaseName.includes(lowerCaseSearchString)) {
+      addMarker(markerIndex);
+      continue;
+    }
+    const data = markers.data[markerIndex];
+    if (data && typeof data === 'object') {
+      if (
+        typeof data.eventType === 'string' &&
+        data.eventType.toLowerCase().includes(lowerCaseSearchString)
+      ) {
+        // Match DOMevents data.eventType
+        addMarker(markerIndex);
+        continue;
+      }
+      if (
+        typeof data.name === 'string' &&
+        data.name.toLowerCase().includes(lowerCaseSearchString)
+      ) {
+        // Match UserTiming's name.
+        addMarker(markerIndex);
+        continue;
+      }
+      if (
+        typeof data.category === 'string' &&
+        data.category.toLowerCase().includes(lowerCaseSearchString)
+      ) {
+        // Match UserTiming's name.
+        addMarker(markerIndex);
+        continue;
+      }
+    }
+  }
+  return newMarkersTable;
+}
+
 export function getTracingMarkers(thread: Thread): TracingMarker[] {
   const { stringTable, markers } = thread;
   const tracingMarkers: TracingMarker[] = [];
@@ -876,25 +935,20 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
         if (marker.start !== undefined) {
           marker.dur = time - marker.start;
         }
-        if (marker.name !== undefined && marker.dur !== undefined) {
-          marker.title = `${marker.name} for ${marker.dur.toFixed(2)}ms`;
-        }
         tracingMarkers.push(marker);
       }
     } else if ('startTime' in data && 'endTime' in data) {
       const { startTime, endTime } = data;
       if (typeof startTime === 'number' && typeof endTime === 'number') {
         const name = stringTable.getString(markers.name[i]);
-        if (name !== 'DOMEvent') {
-          const duration = endTime - startTime;
-          tracingMarkers.push({
-            start: startTime,
-            dur: duration,
-            name,
-            data,
-            title: `${name} for ${duration.toFixed(2)}ms`,
-          });
-        }
+        const duration = endTime - startTime;
+        tracingMarkers.push({
+          start: startTime,
+          dur: duration,
+          name,
+          data,
+          title: null,
+        });
       }
     }
   }

@@ -75,14 +75,14 @@ type ProfileAction =
       symbolNames: string[],
     }
   | {
-      type: 'CHANGE_SELECTED_FUNC_STACK',
+      type: 'CHANGE_SELECTED_CALL_NODE',
       threadIndex: ThreadIndex,
-      selectedFuncStack: IndexIntoFuncTable[],
+      selectedCallNodePath: IndexIntoFuncTable[],
     }
   | {
-      type: 'CHANGE_EXPANDED_FUNC_STACKS',
+      type: 'CHANGE_EXPANDED_CALL_NODES',
       threadIndex: ThreadIndex,
-      expandedFuncStacks: Array<IndexIntoFuncTable[]>,
+      expandedCallNodePaths: Array<IndexIntoFuncTable[]>,
     }
   | {
       type: 'CHANGE_SELECTED_MARKER',
@@ -168,7 +168,8 @@ type URLStateAction =
       implementation: ImplementationFilter,
     }
   | { type: 'CHANGE_INVERT_CALLSTACK', invertCallstack: boolean }
-  | { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean };
+  | { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean }
+  | { type: 'CHANGE_MARKER_SEARCH_STRING', searchString: string };
 
 type IconsAction =
   | { type: 'ICON_HAS_LOADED', icon: string }

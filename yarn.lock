@@ -256,14 +256,6 @@ array.prototype.find@2.0.0:
     define-properties "^1.1.2"
     es-abstract "^1.5.0"
 
-array.prototype.find@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/array.prototype.find/-/array.prototype.find-1.0.0.tgz#52d81768eb1c5692577ee29d96ca603dc76eb3a6"
-
-array.prototype.findindex@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/array.prototype.findindex/-/array.prototype.findindex-1.0.0.tgz#1966efa59f7cd281114d37ef542f51201e72b8fd"
-
 arrify@^1.0.0, arrify@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/arrify/-/arrify-1.0.1.tgz#898508da2226f380df904728456849c1501a4b0d"
@@ -1603,7 +1595,7 @@ core-js@^1.0.0:
   version "1.2.7"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-1.2.7.tgz#652294c14651db28fa93bd2d5ff2983a4f08c636"
 
-core-js@^2.4.0:
+core-js@^2.4.0, core-js@^2.4.1:
   version "2.4.1"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.4.1.tgz#4de911e667b0eae9124e34254b53aea6fc618d3e"
 
@@ -2523,12 +2515,11 @@ extsprintf@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/extsprintf/-/extsprintf-1.0.2.tgz#e1080e0658e300b06294990cc70e1502235fd550"
 
-fake-indexeddb@^1.0.12:
-  version "1.0.12"
-  resolved "https://registry.yarnpkg.com/fake-indexeddb/-/fake-indexeddb-1.0.12.tgz#ede1c117670fb969237b398a4e85b5c89a40acb2"
+fake-indexeddb@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/fake-indexeddb/-/fake-indexeddb-2.0.3.tgz#6319b0cc16b1c6343f462d5cf95291cb11a4b58b"
   dependencies:
-    array.prototype.find "^1.0.0"
-    array.prototype.findindex "^1.0.0"
+    core-js "^2.4.1"
     realistic-structured-clone "^1.0.1"
     setimmediate "^1.0.5"
 

@@ -135,11 +135,28 @@ export type Lib = {
 };
 
 /**
+ * Information about a period of time during which no samples were collected.
+ */
+export type PausedRange = {
+  // null if the profiler was already paused at the beginning of the period of
+  // time that was present in the profile buffer
+  startTime: Milliseconds | null,
+  // null if the profiler was still paused when the profile was captured
+  endTime: Milliseconds | null,
+  reason: 'profiler-paused' | 'collecting',
+};
+
+/**
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
  */
 export type Thread = {
   processType: string,
+  processStartupTime: Milliseconds,
+  processShutdownTime: Milliseconds | null,
+  registerTime: Milliseconds,
+  unregisterTime: Milliseconds | null,
+  pausedRanges: PausedRange[],
   name: string,
   pid: number | void,
   tid: number | void,

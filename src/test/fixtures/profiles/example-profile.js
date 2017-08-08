@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import cloneDeep from 'lodash.clonedeep';
+
 /**
  * export defaults one object that is an example profile, in the Gecko format,
  * i.e. the format that nsIProfiler.getProfileDataAsync outputs.
@@ -177,6 +179,17 @@ const thread = {
           phase: 3,
         },
       ],
+      [
+        11, // UserTiming
+        12,
+        {
+          startTime: 12,
+          endTime: 13,
+          type: 'UserTiming',
+          name: 'processing-thread',
+          entryType: 'measure',
+        },
+      ],
     ],
   },
   stringTable: [
@@ -191,6 +204,7 @@ const thread = {
     'DOMEvent',
     'MinorGC',
     'Rasterize',
+    'UserTiming',
   ],
 };
 
@@ -230,4 +244,6 @@ const profile = {
   processes: [contentProcessProfile],
 };
 
-export default profile;
+export default function createProfile() {
+  return cloneDeep(profile);
+}

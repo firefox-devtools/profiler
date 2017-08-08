@@ -4,9 +4,10 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import TextMeasurement from '../../utils/text-measurement';
 import withTimelineViewport from './TimelineViewport';
 import TimelineCanvas from './TimelineCanvas';
+import TextMeasurement from '../../utils/text-measurement';
+import formatTimeLength from '../../utils/format-time-length';
 
 import type { Thread } from '../../types/profile';
 import type {
@@ -203,16 +204,6 @@ class FlameChartCanvas extends PureComponent {
 
     const duration =
       stackTiming.end[stackTableIndex] - stackTiming.start[stackTableIndex];
-    let durationString;
-    if (duration >= 10) {
-      durationString = duration.toFixed(0);
-    } else if (duration >= 1) {
-      durationString = duration.toFixed(1);
-    } else if (duration >= 0.1) {
-      durationString = duration.toFixed(2);
-    } else {
-      durationString = duration.toFixed(3);
-    }
 
     const stackIndex = stackTiming.stack[stackTableIndex];
     const frameIndex = thread.stackTable.frame[stackIndex];
@@ -227,23 +218,29 @@ class FlameChartCanvas extends PureComponent {
       // Only JavaScript functions have a filename.
       const fileNameIndex = thread.funcTable.fileName[funcIndex];
       if (fileNameIndex !== null) {
-        resourceOrFileName = (
-          <div className="tooltipOneLine tooltipDetails">
-            <div className="tooltipLabel">File:</div>
-            {thread.stringTable.getString(fileNameIndex)}
-          </div>
-        );
+        // Because of our use of Grid Layout, all our elements need to be direct
+        // children of the grid parent. That's why we use arrays here, to add
+        // the elements as direct children.
+        resourceOrFileName = [
+          <div className="tooltipLabel" key="file">
+            File:
+          </div>,
+          thread.stringTable.getString(fileNameIndex),
+        ];
       } else {
         const resourceIndex = thread.funcTable.resource[funcIndex];
         if (resourceIndex !== -1) {
           const resourceNameIndex = thread.resourceTable.name[resourceIndex];
           if (resourceNameIndex !== -1) {
-            resourceOrFileName = (
-              <div className="tooltipOneLine tooltipDetails">
-                <div className="tooltipLabel">Resource:</div>
-                {thread.stringTable.getString(resourceNameIndex)}
-              </div>
-            );
+            // Because of our use of Grid Layout, all our elements need to be direct
+            // children of the grid parent. That's why we use arrays here, to add
+            // the elements as direct children.
+            resourceOrFileName = [
+              <div className="tooltipLabel" key="resource">
+                Resource:
+              </div>,
+              thread.stringTable.getString(resourceNameIndex),
+            ];
           }
         }
       }
@@ -253,21 +250,23 @@ class FlameChartCanvas extends PureComponent {
       <div className="flameChartCanvasTooltip">
         <div className="tooltipOneLine tooltipHeader">
           <div className="tooltipTiming">
-            {durationString}ms
+            {formatTimeLength(duration)}ms
           </div>
-          <div className="tooltipName">
+          <div className="tooltipTitle">
             {label}
           </div>
         </div>
-        <div className="tooltipOneLine tooltipDetails">
+        <div className="tooltipDetails">
           <div className="tooltipLabel">Category:</div>
-          <div
-            className="tooltipSwatch"
-            style={{ backgroundColor: category.color }}
-          />
-          {category.name}
+          <div>
+            <div
+              className="tooltipSwatch"
+              style={{ backgroundColor: category.color }}
+            />
+            {category.name}
+          </div>
+          {resourceOrFileName}
         </div>
-        {resourceOrFileName}
       </div>
     );
   }

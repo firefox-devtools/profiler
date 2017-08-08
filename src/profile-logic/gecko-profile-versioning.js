@@ -11,7 +11,9 @@
  * current format.
 */
 
-export const CURRENT_VERSION = 6; // The current version of the 'raw profile' format.
+import { UniqueStringArray } from '../utils/unique-string-array';
+
+export const CURRENT_VERSION = 8; // The current version of the Gecko profile format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -183,6 +185,64 @@ const _upgraders = {
       }
     }
     convertToVersionSixRecursive(profile);
+  },
+  [7]: profile => {
+    // The type field for DOMEventMarkerPayload was renamed to eventType.
+    function convertToVersionSevenRecursive(p) {
+      for (const thread of p.threads) {
+        const stringTable = new UniqueStringArray(thread.stringTable);
+        const nameIndex = thread.markers.schema.name;
+        const dataIndex = thread.markers.schema.data;
+        for (let i = 0; i < thread.markers.data.length; i++) {
+          const name = stringTable.getString(thread.markers.data[i][nameIndex]);
+          if (name === 'DOMEvent') {
+            const data = thread.markers.data[i][dataIndex];
+            data.eventType = data.type;
+            data.type = 'DOMEvent';
+          }
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersionSevenRecursive(subprocessProfile);
+      }
+    }
+    convertToVersionSevenRecursive(profile);
+  },
+  [8]: profile => {
+    // Profiles have the following new attributes:
+    //  - meta.shutdownTime: null if the process is still running, otherwise
+    //    the shutdown time of the process in milliseconds relative to
+    //    meta.startTime
+    //  - pausedRanges: an array of
+    //    { startTime: number | null, endTime: number | null, reason: string }
+    // Each thread has the following new attributes:
+    //  - registerTime: The time this thread was registered with the profiler,
+    //    in milliseconds since meta.startTime
+    //  - unregisterTime: The time this thread was unregistered from the
+    //    profiler, in milliseconds since meta.startTime, or null
+    function convertToVersionEightRecursive(p) {
+      // We can't invent missing data, so just initialize everything with some
+      // kind of empty value.
+
+      // "The profiler was never paused during the recorded range, and we never
+      // collected a profile."
+      p.pausedRanges = [];
+
+      // "All processes were still alive by the time the profile was captured."
+      p.meta.shutdownTime = null;
+
+      for (const thread of p.threads) {
+        // "All threads were registered instantly at process startup."
+        thread.registerTime = 0;
+
+        // "All threads were still alive by the time the profile was captured."
+        thread.unregisterTime = null;
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersionEightRecursive(subprocessProfile);
+      }
+    }
+    convertToVersionEightRecursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */

@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import TreeView from '../shared/TreeView';
 import NodeIcon from './NodeIcon';
-import { getStackAsFuncArray } from '../../profile-logic/profile-data';
+import { getCallNodePath } from '../../profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
@@ -24,17 +24,17 @@ import {
 import { getIconsWithClassNames } from '../../reducers/icons';
 
 import {
-  changeSelectedFuncStack,
-  changeExpandedFuncStacks,
+  changeSelectedCallNode,
+  changeExpandedCallNodes,
   addCallTreeFilter,
 } from '../../actions/profile-view';
 
 import type { IconWithClassName, State } from '../../types/reducers';
-import type { ProfileTreeClass } from '../../profile-logic/profile-tree';
+import type { CallTree } from '../../profile-logic/call-tree';
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type {
-  FuncStackInfo,
-  IndexIntoFuncStackTable,
+  CallNodeInfo,
+  IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { Column } from '../shared/TreeView';
 
@@ -43,21 +43,21 @@ type Props = {
   threadIndex: ThreadIndex,
   scrollToSelectionGeneration: number,
   interval: number,
-  tree: ProfileTreeClass,
-  funcStackInfo: FuncStackInfo,
-  selectedFuncStack: IndexIntoFuncStackTable | null,
-  expandedFuncStacks: Array<IndexIntoFuncStackTable | null>,
+  tree: CallTree,
+  callNodeInfo: CallNodeInfo,
+  selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
   searchString: string,
   disableOverscan: boolean,
   implementationFilter: string,
   invertCallstack: boolean,
   icons: IconWithClassName[],
-  changeSelectedFuncStack: typeof changeSelectedFuncStack,
-  changeExpandedFuncStacks: typeof changeExpandedFuncStacks,
+  changeSelectedCallNode: typeof changeSelectedCallNode,
+  changeExpandedCallNodes: typeof changeExpandedCallNodes,
   addCallTreeFilter: typeof addCallTreeFilter,
 };
 
-class ProfileTreeView extends PureComponent {
+class CallTreeComponent extends PureComponent {
   props: Props;
   _fixedColumns: Column[];
   _mainColumn: Column;
@@ -77,10 +77,10 @@ class ProfileTreeView extends PureComponent {
     this._appendageColumn = { propName: 'lib', title: '' };
     this._appendageButtons = ['focusCallstackButton'];
     this._treeView = null;
-    (this: any)._onSelectedFuncStackChange = this._onSelectedFuncStackChange.bind(
+    (this: any)._onSelectedCallNodeChange = this._onSelectedCallNodeChange.bind(
       this
     );
-    (this: any)._onExpandedFuncStacksChange = this._onExpandedFuncStacksChange.bind(
+    (this: any)._onExpandedCallNodesChange = this._onExpandedCallNodesChange.bind(
       this
     );
     (this: any)._onAppendageButtonClick = this._onAppendageButtonClick.bind(
@@ -110,29 +110,29 @@ class ProfileTreeView extends PureComponent {
     }
   }
 
-  _onSelectedFuncStackChange(newSelectedFuncStack: IndexIntoFuncStackTable) {
-    const { funcStackInfo, threadIndex, changeSelectedFuncStack } = this.props;
-    changeSelectedFuncStack(
+  _onSelectedCallNodeChange(newSelectedCallNode: IndexIntoCallNodeTable) {
+    const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
+    changeSelectedCallNode(
       threadIndex,
-      getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable)
+      getCallNodePath(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
   }
 
-  _onExpandedFuncStacksChange(
-    newExpandedFuncStacks: Array<IndexIntoFuncStackTable | null>
+  _onExpandedCallNodesChange(
+    newExpandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>
   ) {
-    const { funcStackInfo, threadIndex, changeExpandedFuncStacks } = this.props;
-    changeExpandedFuncStacks(
+    const { callNodeInfo, threadIndex, changeExpandedCallNodes } = this.props;
+    changeExpandedCallNodes(
       threadIndex,
-      newExpandedFuncStacks.map(funcStackIndex =>
-        getStackAsFuncArray(funcStackIndex, funcStackInfo.funcStackTable)
+      newExpandedCallNodeIndexes.map(callNodeIndex =>
+        getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable)
       )
     );
   }
 
-  _onAppendageButtonClick(funcStackIndex: IndexIntoFuncStackTable | null) {
+  _onAppendageButtonClick(callNodeIndex: IndexIntoCallNodeTable | null) {
     const {
-      funcStackInfo,
+      callNodeInfo,
       threadIndex,
       addCallTreeFilter,
       implementationFilter,
@@ -142,19 +142,16 @@ class ProfileTreeView extends PureComponent {
     if (invertCallstack) {
       addCallTreeFilter(threadIndex, {
         type: 'postfix',
-        postfixFuncs: getStackAsFuncArray(
-          funcStackIndex,
-          funcStackInfo.funcStackTable
+        postfixFuncs: getCallNodePath(
+          callNodeIndex,
+          callNodeInfo.callNodeTable
         ),
         matchJSOnly: jsOnly,
       });
     } else {
       addCallTreeFilter(threadIndex, {
         type: 'prefix',
-        prefixFuncs: getStackAsFuncArray(
-          funcStackIndex,
-          funcStackInfo.funcStackTable
-        ),
+        prefixFuncs: getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable),
         matchJSOnly: jsOnly,
       });
     }
@@ -163,28 +160,28 @@ class ProfileTreeView extends PureComponent {
   procureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame
     // at that depth.
-    const { tree, expandedFuncStacks } = this.props;
-    const newExpandedFuncStacks = expandedFuncStacks.slice();
+    const { tree, expandedCallNodeIndexes } = this.props;
+    const newExpandedCallNodeIndexes = expandedCallNodeIndexes.slice();
     const maxInterestingDepth = 17; // scientifically determined
-    let currentFuncStack = tree.getRoots()[0];
-    newExpandedFuncStacks.push(currentFuncStack);
+    let currentCallNodeIndex = tree.getRoots()[0];
+    newExpandedCallNodeIndexes.push(currentCallNodeIndex);
     for (let i = 0; i < maxInterestingDepth; i++) {
-      const children = tree.getChildren(currentFuncStack);
+      const children = tree.getChildren(currentCallNodeIndex);
       if (children.length === 0) {
         break;
       }
-      currentFuncStack = children[0];
-      newExpandedFuncStacks.push(currentFuncStack);
+      currentCallNodeIndex = children[0];
+      newExpandedCallNodeIndexes.push(currentCallNodeIndex);
     }
-    this._onExpandedFuncStacksChange(newExpandedFuncStacks);
-    this._onSelectedFuncStackChange(currentFuncStack);
+    this._onExpandedCallNodesChange(newExpandedCallNodeIndexes);
+    this._onSelectedCallNodeChange(currentCallNodeIndex);
   }
 
   render() {
     const {
       tree,
-      selectedFuncStack,
-      expandedFuncStacks,
+      selectedCallNodeIndex,
+      expandedCallNodeIndexes,
       searchString,
       disableOverscan,
     } = this.props;
@@ -194,10 +191,10 @@ class ProfileTreeView extends PureComponent {
         fixedColumns={this._fixedColumns}
         mainColumn={this._mainColumn}
         appendageColumn={this._appendageColumn}
-        onSelectionChange={this._onSelectedFuncStackChange}
-        onExpandedNodesChange={this._onExpandedFuncStacksChange}
-        selectedNodeId={selectedFuncStack}
-        expandedNodeIds={expandedFuncStacks}
+        onSelectionChange={this._onSelectedCallNodeChange}
+        onExpandedNodesChange={this._onExpandedCallNodesChange}
+        selectedNodeId={selectedCallNodeIndex}
+        expandedNodeIds={expandedCallNodeIndexes}
         highlightString={searchString.toLowerCase()}
         disableOverscan={disableOverscan}
         appendageButtons={this._appendageButtons}
@@ -219,16 +216,20 @@ export default connect(
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     interval: getProfile(state).meta.interval,
     tree: selectedThreadSelectors.getCallTree(state),
-    funcStackInfo: selectedThreadSelectors.getFuncStackInfo(state),
-    selectedFuncStack: selectedThreadSelectors.getSelectedFuncStack(state),
-    expandedFuncStacks: selectedThreadSelectors.getExpandedFuncStacks(state),
+    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+    selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
+      state
+    ),
+    expandedCallNodeIndexes: selectedThreadSelectors.getExpandedCallNodeIndexes(
+      state
+    ),
     searchString: getSearchString(state),
     disableOverscan: getProfileViewOptions(state).selection.isModifying,
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
     icons: getIconsWithClassNames(state),
   }),
-  { changeSelectedFuncStack, changeExpandedFuncStacks, addCallTreeFilter },
+  { changeSelectedCallNode, changeExpandedCallNodes, addCallTreeFilter },
   null,
   { withRef: true }
-)(ProfileTreeView);
+)(CallTreeComponent);

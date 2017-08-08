@@ -2,8 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React from 'react';
-import ProfileTreeView from './ProfileTreeView';
+import CallTree from './CallTree';
 import ProfileCallTreeSettings from './ProfileCallTreeSettings';
 import ProfileCallTreeFilterNavigator from './ProfileCallTreeFilterNavigator';
 
@@ -11,7 +13,7 @@ const ProfileCallTreeView = () =>
   <div className="treeAndSidebarWrapper">
     <ProfileCallTreeFilterNavigator />
     <ProfileCallTreeSettings />
-    <ProfileTreeView />
+    <CallTree />
   </div>;
 
 ProfileCallTreeView.propTypes = {};

@@ -73,8 +73,8 @@ export function stringifyCallTreeFilters(arrayValue = []) {
 export function getCallTreeFilterLabels(thread, threadName, callTreeFilters) {
   const { funcTable, stringTable } = thread;
   const labels = callTreeFilters.map(filter => {
-    function lastFuncString(funcArray) {
-      const lastFunc = funcArray[funcArray.length - 1];
+    function lastFuncString(callNodePath) {
+      const lastFunc = callNodePath[callNodePath.length - 1];
       const nameIndex = funcTable.name[lastFunc];
       return stringTable.getString(nameIndex);
     }

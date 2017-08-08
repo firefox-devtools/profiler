@@ -11,7 +11,7 @@ import { selectorsForThread } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
   getSampleIndexClosestToTime,
-  getStackAsFuncArray,
+  getCallNodePath,
 } from '../../profile-logic/profile-data';
 import actions from '../../actions';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
@@ -23,27 +23,27 @@ import type {
 } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type {
-  FuncStackInfo,
-  IndexIntoFuncStackTable,
+  CallNodeInfo,
+  IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { State } from '../../types/reducers';
 
 type Props = {
   threadIndex: ThreadIndex,
   thread: Thread,
-  funcStackInfo: FuncStackInfo,
+  callNodeInfo: CallNodeInfo,
   interval: Milliseconds,
   rangeStart: Milliseconds,
   rangeEnd: Milliseconds,
-  selectedFuncStack: IndexIntoFuncStackTable,
+  selectedCallNodeIndex: IndexIntoCallNodeTable,
   isSelected: boolean,
   isHidden: boolean,
   style: Object,
   threadName: string,
   processDetails: string,
   changeSelectedThread: ThreadIndex => void,
-  changeSelectedFuncStack: (
-    IndexIntoFuncStackTable,
+  changeSelectedCallNode: (
+    IndexIntoCallNodeTable,
     IndexIntoFuncTable[]
   ) => void,
 };
@@ -72,16 +72,16 @@ class ProfileThreadHeaderBar extends PureComponent {
     const { threadIndex, changeSelectedThread } = this.props;
     changeSelectedThread(threadIndex);
     if (time !== undefined) {
-      const { thread, funcStackInfo, changeSelectedFuncStack } = this.props;
+      const { thread, callNodeInfo, changeSelectedCallNode } = this.props;
       const sampleIndex = getSampleIndexClosestToTime(thread.samples, time);
       const newSelectedStack = thread.samples.stack[sampleIndex];
-      const newSelectedFuncStack =
+      const newSelectedCallNode =
         newSelectedStack === null
           ? -1
-          : funcStackInfo.stackIndexToFuncStackIndex[newSelectedStack];
-      changeSelectedFuncStack(
+          : callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
+      changeSelectedCallNode(
         threadIndex,
-        getStackAsFuncArray(newSelectedFuncStack, funcStackInfo.funcStackTable)
+        getCallNodePath(newSelectedCallNode, callNodeInfo.callNodeTable)
       );
     }
   }
@@ -94,8 +94,8 @@ class ProfileThreadHeaderBar extends PureComponent {
       interval,
       rangeStart,
       rangeEnd,
-      funcStackInfo,
-      selectedFuncStack,
+      callNodeInfo,
+      selectedCallNodeIndex,
       isSelected,
       style,
       threadName,
@@ -129,8 +129,8 @@ class ProfileThreadHeaderBar extends PureComponent {
           className="threadStackGraph"
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
-          funcStackInfo={funcStackInfo}
-          selectedFuncStack={selectedFuncStack}
+          callNodeInfo={callNodeInfo}
+          selectedCallNodeIndex={selectedCallNodeIndex}
           onClick={this._onGraphClick}
           onMarkerSelect={this._onMarkerSelect}
         />
@@ -147,10 +147,10 @@ export default connect((state: State, props) => {
     thread: selectors.getFilteredThread(state),
     threadName: selectors.getFriendlyThreadName(state),
     processDetails: selectors.getThreadProcessDetails(state),
-    funcStackInfo: selectors.getFuncStackInfo(state),
-    selectedFuncStack:
+    callNodeInfo: selectors.getCallNodeInfo(state),
+    selectedCallNodeIndex:
       threadIndex === selectedThread
-        ? selectors.getSelectedFuncStack(state)
+        ? selectors.getSelectedCallNodeIndex(state)
         : -1,
     isSelected: threadIndex === selectedThread,
     threadIndex,

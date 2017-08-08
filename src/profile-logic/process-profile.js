@@ -340,7 +340,10 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
  * Convert the given thread into processed form. See docs/gecko-profile-format for more
  * information.
  */
-function _processThread(thread: GeckoThread, libs: Lib[]): Thread {
+function _processThread(
+  thread: GeckoThread,
+  processProfile: GeckoProfile
+): Thread {
   const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
     thread.frameTable
   );
@@ -351,6 +354,9 @@ function _processThread(thread: GeckoThread, libs: Lib[]): Thread {
   const geckoMarkers: GeckoMarkerStruct = _toStructOfArrays(
     _sortByField('time', thread.markers)
   );
+
+  const { libs, pausedRanges, meta } = processProfile;
+  const { shutdownTime } = meta;
 
   const stringTable = new UniqueStringArray(thread.stringTable);
   const [
@@ -370,9 +376,14 @@ function _processThread(thread: GeckoThread, libs: Lib[]): Thread {
   return {
     name: thread.name,
     processType: thread.processType,
+    processStartupTime: 0,
+    processShutdownTime: shutdownTime,
+    registerTime: thread.registerTime,
+    unregisterTime: thread.unregisterTime,
     tid: thread.tid,
     pid: thread.pid,
     libs,
+    pausedRanges,
     frameTable,
     funcTable,
     resourceTable,
@@ -595,7 +606,7 @@ export function processProfile(geckoProfile: GeckoProfile): Profile {
   }
 
   for (const thread of geckoProfile.threads) {
-    threads.push(_processThread(thread, libs));
+    threads.push(_processThread(thread, geckoProfile));
   }
 
   for (const subprocessProfile of geckoProfile.processes) {
@@ -604,7 +615,7 @@ export function processProfile(geckoProfile: GeckoProfile): Profile {
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
     threads = threads.concat(
       subprocessProfile.threads.map(thread => {
-        const newThread = _processThread(thread, subprocessLibs);
+        const newThread = _processThread(thread, subprocessProfile);
         newThread.samples = _adjustSampleTimestamps(
           newThread.samples,
           adjustTimestampsBy
@@ -613,6 +624,14 @@ export function processProfile(geckoProfile: GeckoProfile): Profile {
           newThread.markers,
           adjustTimestampsBy
         );
+        newThread.processStartupTime += adjustTimestampsBy;
+        if (newThread.processShutdownTime !== null) {
+          newThread.processShutdownTime += adjustTimestampsBy;
+        }
+        newThread.registerTime += adjustTimestampsBy;
+        if (newThread.unregisterTime !== null) {
+          newThread.unregisterTime += adjustTimestampsBy;
+        }
         return newThread;
       })
     );
@@ -626,10 +645,13 @@ export function processProfile(geckoProfile: GeckoProfile): Profile {
     }
   }
 
+  const meta = Object.assign({}, geckoProfile.meta, {
+    preprocessedProfileVersion: CURRENT_VERSION,
+  });
+  delete meta.shutdownTime;
+
   const result = {
-    meta: Object.assign({}, geckoProfile.meta, {
-      preprocessedProfileVersion: CURRENT_VERSION,
-    }),
+    meta,
     threads,
     tasktracer,
   };
@@ -664,24 +686,26 @@ export function serializeProfile(profile: Profile): string {
 /**
  * Take a serialized processed profile from some saved source, and re-initialize
  * any non-serializable classes.
- *
- * TODO - This mutates the profile, it would be better to return a new profile.
- *        See issue #445
  */
 function _unserializeProfile(profile: Object): Profile {
   // stringArray -> stringTable
-  profile.threads.forEach(thread => {
-    const stringArray = thread.stringArray;
-    delete thread.stringArray;
-    thread.stringTable = new UniqueStringArray(stringArray);
+  const newProfile = Object.assign({}, profile, {
+    threads: profile.threads.map(thread => {
+      const stringArray = thread.stringArray;
+      const newThread = Object.assign({}, thread);
+      delete newThread.stringArray;
+      newThread.stringTable = new UniqueStringArray(stringArray);
+      return newThread;
+    }),
   });
-  if ('tasktracer' in profile) {
-    const tasktracer = profile.tasktracer;
-    const stringArray = tasktracer.stringArray;
-    delete tasktracer.stringArray;
-    tasktracer.stringTable = new UniqueStringArray(stringArray);
+  if ('tasktracer' in newProfile) {
+    const newTaskTracer = Object.assign({}, newProfile.tasktracer);
+    const stringArray = newTaskTracer.stringArray;
+    delete newTaskTracer.stringArray;
+    newTaskTracer.stringTable = new UniqueStringArray(stringArray);
+    newProfile.tasktracer = newTaskTracer;
   }
-  return profile;
+  return newProfile;
 }
 
 /**

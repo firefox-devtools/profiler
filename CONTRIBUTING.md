@@ -1,15 +1,24 @@
 # Contributing to perf.html
 
-First off, thanks for taking the time to contribute to Mozilla and perf.html! Beyond making the web a faster and smoother experience for Firefox users and the entire open web, we want to build a community of contributors around performance. This guide is an introduction to joining our community. We would love to have you. As a first step to contributing we encourage you to check our our [Code of Conduct](./CODE_OF_CONDUCT.md) to see how we're building an open and inclusive community.
+First off, thanks for taking the time to contribute to Mozilla and perf.html! Beyond making the web a faster and smoother experience for Firefox users and the entire open web, we want to build a community of contributors around performance. This guide is an introduction to joining our community. We would love to have you. As a first step to contributing we encourage you to check out our [Code of Conduct](./CODE_OF_CONDUCT.md) to see how we're building an open and inclusive community.
 
 ## Who we are
 
-This project is made up of a cross section of different parts of Mozilla, including people from Firefox DevTools and from Firefox's platform team who are working on the C++ and Rust internals of Firefox. Some core Mozillians on the team are.
+This project is made up of a cross section of different parts of Mozilla, including people from Firefox DevTools and from Firefox's platform team who are working on the C++ and Rust internals of Firefox. Some core Mozillians on the team are:
 
- * Bryan Clark [@clarkbw](https://github.com/clarkbw) - Firefox DevTools Product Manager
- * Markus Stange [@mstange](https://github.com/mstange) - Firefox Platform Engineer
- * Greg Tatum [@gregtatum](https://github.com/gregtatum) - Firefox DevTools Engineer
- * Julien Wajsberg [@julienw](https://github.com/julienw) - Firefox DevTools Engineer
+| - | Name | Github Handle | Position |
+| - | ---- | ------------- | -------- |
+| ![][clarkbw] | Bryan Clark | [@clarkbw](https://github.com/clarkbw) | Firefox DevTools Product Manager |
+| <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
+| ![][gregtatum] | Greg Tatum | [@gregtatum](https://github.com/gregtatum) | Firefox DevTools Engineer |
+| ![][julienw] | Julien Wajsberg | [@julienw](https://github.com/julienw) | Firefox DevTools Engineer |
+| ![][violasong] | Victoria Wang | [@violasong](https://github.com/violasong) | Firefox DevTools UX Designer |
+
+[clarkbw]:https://avatars.githubusercontent.com/clarkbw?size=56
+[mstange]:https://avatars.githubusercontent.com/mstange?size=56
+[gregtatum]:https://avatars.githubusercontent.com/gregtatum?size=56
+[julienw]:https://avatars.githubusercontent.com/julienw?size=56
+[violasong]:https://avatars.githubusercontent.com/violasong?size=56
 
 We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-slack.herokuapp.com/) in the #perf channel. Come chat with us if you have any questions about the project.
 
@@ -29,7 +38,7 @@ perf.html is a web application that loads in performance profiles for analysis. 
 
 The web app doesn't include any performance profiles by default, so you'll need to load some in. Make sure the local Webpack web server is running perf.html, and then try one of the following:
 
- * Use an existing profile from the web: replace the `https://perf-html.io` with `http://localhost:4242`.
+ * Use an existing profile from the web: replace the `https://perf-html.io` with `http://localhost:4242` (be careful: the leading `https` changes to `http`!).
  * Drag in a saved profile to the loading screen (this makes refreshing hard).
  * Record a new profile.
    - Install the Gecko Profiler addon from the [perf-html.io](https://perf-html.io) loading screen.
@@ -43,12 +52,12 @@ The web app doesn't include any performance profiles by default, so you'll need 
 When working on a new feature and code changes, it's important that things work correctly. We have a suite of automated tests and various automated checks to test that things are working the way we expect. These checks are run frequently, and will block certain parts of the process if they do not pass. The tests run:
 
  * Locally when running
-   - `yarn run test-all` - Test all the things!
-   - `yarn run test` - Run the tests in [./src/test/].
-   - `yarn run lint` - Run prettier and and eslint to check for correct code formatting.
-   - `yarn run flow` - Check the [Flow types](https://flow.org/) for correctness.
-   - `yarn run license-check` - Check the dependencies' licenses.
- * `git prepush` and `git commit`
+   - `yarn test-all` - Test all the things!
+   - `yarn test` - Run the tests in [./src/test/].
+   - `yarn lint` - Run prettier and and eslint to check for correct code formatting.
+   - `yarn flow` - Check the [Flow types](https://flow.org/) for correctness.
+   - `yarn license-check` - Check the dependencies' licenses.
+ * `git push` and `git commit`
    - We have [husky](https://www.npmjs.com/package/husky) installed to run automated checks when committing and pushing.
    - Run git commands with `--no-verify` to skip this step. This is useful for submitting broken PRs for feedback.
  * Continuous integration for pull requests

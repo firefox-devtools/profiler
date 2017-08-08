@@ -15,7 +15,7 @@ import * as URLState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
 import * as StackTiming from '../profile-logic/stack-timing';
 import * as MarkerTiming from '../profile-logic/marker-timing';
-import * as ProfileTree from '../profile-logic/profile-tree';
+import * as CallTree from '../profile-logic/call-tree';
 import * as TaskTracerTools from '../profile-logic/task-tracer';
 import { getCategoryColorStrategy } from './flame-chart';
 
@@ -26,11 +26,12 @@ import type {
   IndexIntoFuncTable,
   SamplesTable,
   TaskTracer,
+  MarkersTable,
 } from '../types/profile';
 import type {
   TracingMarker,
-  FuncStackInfo,
-  IndexIntoFuncStackTable,
+  CallNodeInfo,
+  IndexIntoCallNodeTable,
   MarkerTimingRows,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
@@ -97,27 +98,27 @@ function profile(
   }
 }
 
-function funcStackAfterCallTreeFilter(
-  funcArray: IndexIntoFuncTable[],
+function callNodeAfterCallTreeFilter(
+  callNodePath: IndexIntoFuncTable[],
   filter: CallTreeFilter
 ) {
   if (filter.type === 'prefix' && !filter.matchJSOnly) {
-    return removePrefixFromFuncArray(filter.prefixFuncs, funcArray);
+    return removePrefixFromCallNodePath(filter.prefixFuncs, callNodePath);
   }
-  return funcArray;
+  return callNodePath;
 }
 
-function removePrefixFromFuncArray(
+function removePrefixFromCallNodePath(
   prefixFuncs: IndexIntoFuncTable[],
-  funcArray: IndexIntoFuncTable[]
+  callNodePath: IndexIntoFuncTable[]
 ) {
   if (
-    prefixFuncs.length > funcArray.length ||
-    prefixFuncs.some((prefixFunc, i) => prefixFunc !== funcArray[i])
+    prefixFuncs.length > callNodePath.length ||
+    prefixFuncs.some((prefixFunc, i) => prefixFunc !== callNodePath[i])
   ) {
     return [];
   }
-  return funcArray.slice(prefixFuncs.length - 1);
+  return callNodePath.slice(prefixFuncs.length - 1);
 }
 
 function symbolicationStatus(
@@ -141,29 +142,29 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
     case 'RECEIVE_PROFILE_FROM_URL':
     case 'RECEIVE_PROFILE_FROM_FILE':
       return action.profile.threads.map(() => ({
-        selectedFuncStack: [],
-        expandedFuncStacks: [],
+        selectedCallNodePath: [],
+        expandedCallNodePaths: [],
         selectedMarker: -1,
       }));
     case 'COALESCED_FUNCTIONS_UPDATE': {
       const { functionsUpdatePerThread } = action;
       // For each thread, apply oldFuncToNewFuncMap to that thread's
-      // selectedFuncStack and expandedFuncStacks.
+      // selectedCallNodePath and expandedCallNodePaths.
       return state.map((threadViewOptions, threadIndex) => {
         if (!functionsUpdatePerThread[threadIndex]) {
           return threadViewOptions;
         }
         const { oldFuncToNewFuncMap } = functionsUpdatePerThread[threadIndex];
         return {
-          selectedFuncStack: threadViewOptions.selectedFuncStack.map(
+          selectedCallNodePath: threadViewOptions.selectedCallNodePath.map(
             oldFunc => {
               const newFunc = oldFuncToNewFuncMap.get(oldFunc);
               return newFunc === undefined ? oldFunc : newFunc;
             }
           ),
-          expandedFuncStacks: threadViewOptions.expandedFuncStacks.map(
-            oldFuncArray => {
-              return oldFuncArray.map(oldFunc => {
+          expandedCallNodePaths: threadViewOptions.expandedCallNodePaths.map(
+            oldPath => {
+              return oldPath.map(oldFunc => {
                 const newFunc = oldFuncToNewFuncMap.get(oldFunc);
                 return newFunc === undefined ? oldFunc : newFunc;
               });
@@ -173,26 +174,28 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
         };
       });
     }
-    case 'CHANGE_SELECTED_FUNC_STACK': {
-      const { selectedFuncStack, threadIndex } = action;
-      const expandedFuncStacks = state[threadIndex].expandedFuncStacks.slice();
-      for (let i = 1; i < selectedFuncStack.length; i++) {
-        expandedFuncStacks.push(selectedFuncStack.slice(0, i));
+    case 'CHANGE_SELECTED_CALL_NODE': {
+      const { selectedCallNodePath, threadIndex } = action;
+      const expandedCallNodePaths = state[
+        threadIndex
+      ].expandedCallNodePaths.slice();
+      for (let i = 1; i < selectedCallNodePath.length; i++) {
+        expandedCallNodePaths.push(selectedCallNodePath.slice(0, i));
       }
       return [
         ...state.slice(0, threadIndex),
         Object.assign({}, state[threadIndex], {
-          selectedFuncStack,
-          expandedFuncStacks,
+          selectedCallNodePath,
+          expandedCallNodePaths,
         }),
         ...state.slice(threadIndex + 1),
       ];
     }
-    case 'CHANGE_EXPANDED_FUNC_STACKS': {
-      const { threadIndex, expandedFuncStacks } = action;
+    case 'CHANGE_EXPANDED_CALL_NODES': {
+      const { threadIndex, expandedCallNodePaths } = action;
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], { expandedFuncStacks }),
+        Object.assign({}, state[threadIndex], { expandedCallNodePaths }),
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -206,18 +209,20 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
     }
     case 'ADD_CALL_TREE_FILTER': {
       const { threadIndex, filter } = action;
-      const expandedFuncStacks = state[threadIndex].expandedFuncStacks.map(fs =>
-        funcStackAfterCallTreeFilter(fs, filter)
+      const expandedCallNodePaths = state[
+        threadIndex
+      ].expandedCallNodePaths.map(path =>
+        callNodeAfterCallTreeFilter(path, filter)
       );
-      const selectedFuncStack = funcStackAfterCallTreeFilter(
-        state[threadIndex].selectedFuncStack,
+      const selectedCallNodePath = callNodeAfterCallTreeFilter(
+        state[threadIndex].selectedCallNodePath,
         filter
       );
       return [
         ...state.slice(0, threadIndex),
         Object.assign({}, state[threadIndex], {
-          selectedFuncStack,
-          expandedFuncStacks,
+          selectedCallNodePath,
+          expandedCallNodePaths,
         }),
         ...state.slice(threadIndex + 1),
       ];
@@ -261,7 +266,7 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
     case 'CHANGE_JS_ONLY':
-    case 'CHANGE_SELECTED_FUNC_STACK':
+    case 'CHANGE_SELECTED_CALL_NODE':
     case 'CHANGE_SELECTED_THREAD':
     case 'HIDE_THREAD':
       return state + 1;
@@ -297,7 +302,7 @@ function zeroAt(state: Milliseconds = 0, action: Action) {
   }
 }
 
-function tabOrder(state: number[] = [0, 1, 2, 3, 4, 5], action: Action) {
+function tabOrder(state: number[] = [0, 1, 2, 3], action: Action) {
   switch (action.type) {
     case 'CHANGE_TAB_ORDER':
       return action.tabOrder;
@@ -388,17 +393,18 @@ export type SelectorsForThread = {
   getRangeSelectionFilteredTracingMarkers: State => TracingMarker[],
   getFilteredThread: State => Thread,
   getRangeSelectionFilteredThread: State => Thread,
-  getFuncStackInfo: State => FuncStackInfo,
-  getSelectedFuncStack: State => IndexIntoFuncStackTable | null,
-  getExpandedFuncStacks: State => Array<IndexIntoFuncStackTable | null>,
-  getCallTree: State => ProfileTree.ProfileTreeClass,
+  getCallNodeInfo: State => CallNodeInfo,
+  getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
+  getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
+  getCallTree: State => CallTree.CallTree,
   getFilteredThreadForFlameChart: State => Thread,
-  getFuncStackInfoOfFilteredThreadForFlameChart: State => FuncStackInfo,
-  getFuncStackMaxDepthForFlameChart: State => number,
+  getCallNodeInfoOfFilteredThreadForFlameChart: State => CallNodeInfo,
+  getCallNodeMaxDepthForFlameChart: State => number,
   getStackTimingByDepthForFlameChart: State => StackTiming.StackTimingByDepth,
   getLeafCategoryStackTimingForFlameChart: State => StackTiming.StackTimingByDepth,
   getFriendlyThreadName: State => string,
   getThreadProcessDetails: State => string,
+  getSearchFilteredMarkers: State => MarkersTable,
 };
 
 const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
@@ -523,40 +529,40 @@ export const selectorsForThread = (
         );
       }
     );
-    const getFuncStackInfo = createSelector(
+    const getCallNodeInfo = createSelector(
       getFilteredThread,
-      ({ stackTable, frameTable, funcTable }: Thread): FuncStackInfo => {
-        return ProfileData.getFuncStackInfo(stackTable, frameTable, funcTable);
+      ({ stackTable, frameTable, funcTable }: Thread): CallNodeInfo => {
+        return ProfileData.getCallNodeInfo(stackTable, frameTable, funcTable);
       }
     );
-    const _getSelectedFuncStackAsFuncArray = createSelector(
+    const _getSelectedCallNodeAsPath = createSelector(
       getViewOptions,
       (threadViewOptions): IndexIntoFuncTable[] =>
-        threadViewOptions.selectedFuncStack
+        threadViewOptions.selectedCallNodePath
     );
-    const getSelectedFuncStack = createSelector(
-      getFuncStackInfo,
-      _getSelectedFuncStackAsFuncArray,
-      (funcStackInfo, funcArray): IndexIntoFuncStackTable | null => {
-        return ProfileData.getFuncStackFromFuncArray(
-          funcArray,
-          funcStackInfo.funcStackTable
+    const getSelectedCallNodeIndex = createSelector(
+      getCallNodeInfo,
+      _getSelectedCallNodeAsPath,
+      (callNodeInfo, callNodePath): IndexIntoCallNodeTable | null => {
+        return ProfileData.getCallNodeFromPath(
+          callNodePath,
+          callNodeInfo.callNodeTable
         );
       }
     );
-    const _getExpandedFuncStacksAsFuncArrays = createSelector(
+    const _getExpandedCallNodePaths = createSelector(
       getViewOptions,
       (threadViewOptions): Array<IndexIntoFuncTable[]> =>
-        threadViewOptions.expandedFuncStacks
+        threadViewOptions.expandedCallNodePaths
     );
-    const getExpandedFuncStacks = createSelector(
-      getFuncStackInfo,
-      _getExpandedFuncStacksAsFuncArrays,
-      (funcStackInfo, funcArrays): (IndexIntoFuncStackTable | null)[] => {
-        return funcArrays.map(funcArray =>
-          ProfileData.getFuncStackFromFuncArray(
-            funcArray,
-            funcStackInfo.funcStackTable
+    const getExpandedCallNodeIndexes = createSelector(
+      getCallNodeInfo,
+      _getExpandedCallNodePaths,
+      (callNodeInfo, callNodePaths): (IndexIntoCallNodeTable | null)[] => {
+        return callNodePaths.map(callNodePath =>
+          ProfileData.getCallNodeFromPath(
+            callNodePath,
+            callNodeInfo.callNodeTable
           )
         );
       }
@@ -564,10 +570,10 @@ export const selectorsForThread = (
     const getCallTree = createSelector(
       getRangeSelectionFilteredThread,
       getProfileInterval,
-      getFuncStackInfo,
+      getCallNodeInfo,
       URLState.getImplementationFilter,
       URLState.getInvertCallstack,
-      ProfileTree.getCallTree
+      CallTree.getCallTree
     );
 
     // The selectors below diverge from the thread filtering that's done above;
@@ -605,21 +611,21 @@ export const selectorsForThread = (
         return filteredThread;
       }
     );
-    const getFuncStackInfoOfFilteredThreadForFlameChart = createSelector(
+    const getCallNodeInfoOfFilteredThreadForFlameChart = createSelector(
       getFilteredThreadForFlameChart,
-      ({ stackTable, frameTable, funcTable }): FuncStackInfo => {
-        return ProfileData.getFuncStackInfo(stackTable, frameTable, funcTable);
+      ({ stackTable, frameTable, funcTable }): CallNodeInfo => {
+        return ProfileData.getCallNodeInfo(stackTable, frameTable, funcTable);
       }
     );
-    const getFuncStackMaxDepthForFlameChart = createSelector(
+    const getCallNodeMaxDepthForFlameChart = createSelector(
       getFilteredThreadForFlameChart,
-      getFuncStackInfoOfFilteredThreadForFlameChart,
-      StackTiming.computeFuncStackMaxDepth
+      getCallNodeInfoOfFilteredThreadForFlameChart,
+      StackTiming.computeCallNodeMaxDepth
     );
     const getStackTimingByDepthForFlameChart = createSelector(
       getFilteredThreadForFlameChart,
-      getFuncStackInfoOfFilteredThreadForFlameChart,
-      getFuncStackMaxDepthForFlameChart,
+      getCallNodeInfoOfFilteredThreadForFlameChart,
+      getCallNodeMaxDepthForFlameChart,
       getProfileInterval,
       StackTiming.getStackTimingByDepth
     );
@@ -628,6 +634,11 @@ export const selectorsForThread = (
       getProfileInterval,
       getCategoryColorStrategy,
       StackTiming.getLeafCategoryStackTiming
+    );
+    const getSearchFilteredMarkers = createSelector(
+      getRangeSelectionFilteredThread,
+      URLState.getMarkersSearchString,
+      ProfileData.getSearchFilteredMarkers
     );
 
     selectorsForThreads[threadIndex] = {
@@ -642,17 +653,18 @@ export const selectorsForThread = (
       getRangeSelectionFilteredTracingMarkers,
       getFilteredThread,
       getRangeSelectionFilteredThread,
-      getFuncStackInfo,
-      getSelectedFuncStack,
-      getExpandedFuncStacks,
+      getCallNodeInfo,
+      getSelectedCallNodeIndex,
+      getExpandedCallNodeIndexes,
       getCallTree,
       getFilteredThreadForFlameChart,
-      getFuncStackInfoOfFilteredThreadForFlameChart,
-      getFuncStackMaxDepthForFlameChart,
+      getCallNodeInfoOfFilteredThreadForFlameChart,
+      getCallNodeMaxDepthForFlameChart,
       getStackTimingByDepthForFlameChart,
       getLeafCategoryStackTimingForFlameChart,
       getFriendlyThreadName,
       getThreadProcessDetails,
+      getSearchFilteredMarkers,
     };
   }
   return selectorsForThreads[threadIndex];

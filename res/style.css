@@ -580,6 +580,7 @@ body {
 .selectionScrubberZoomButton.hidden {
   opacity: 0.0 !important;
   pointer-events: none;
+  transition: unset;
 }
 
 .profileViewerHeader:hover .selectionScrubberZoomButton,
@@ -640,12 +641,6 @@ body {
   padding: 10px;
   flex: 1;
   overflow-y: auto;
-}
-
-.profileMarkersView {
-  flex: 1;
-  display: flex;
-  flex-flow: column nowrap;
 }
 
 .treeViewFixedColumn.timestamp {

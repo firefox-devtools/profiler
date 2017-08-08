@@ -17,7 +17,7 @@ import { resourceTypes } from './profile-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 5; // The current version of the 'preprocessed profile' format.
+export const CURRENT_VERSION = 7; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -274,6 +274,57 @@ const _upgraders = {
     // The "frameNumber" column was removed from the samples table.
     for (const thread of profile.threads) {
       delete thread.samples.frameNumber;
+    }
+  },
+  [6]: profile => {
+    // The type field for DOMEventMarkerPayload was renamed to eventType.
+    for (const thread of profile.threads) {
+      const { stringArray, markers } = thread;
+      const stringTable = new UniqueStringArray(stringArray);
+      const newDataArray = [];
+      for (let i = 0; i < markers.length; i++) {
+        const name = stringTable.getString(markers.name[i]);
+        const data = markers.data[i];
+        if (name === 'DOMEvent') {
+          newDataArray[i] = {
+            type: 'DOMEvent',
+            startTime: data.startTime,
+            endTime: data.endTime,
+            eventType: data.type,
+            phase: data.phase,
+          };
+        } else {
+          newDataArray[i] = data;
+        }
+      }
+      thread.markers.data = newDataArray;
+    }
+  },
+  [7]: profile => {
+    // Each thread has the following new attributes:
+    //  - processShutdownTime: null if the process is still running, otherwise
+    //    the shutdown time of the process in milliseconds relative to
+    //    meta.startTime
+    //  - pausedRanges: an array of
+    //    { startTime: number | null, endTime: number | null, reason: string }
+    //  - registerTime: The time this thread was registered with the profiler,
+    //    in milliseconds since meta.startTime
+    //  - unregisterTime: The time this thread was unregistered from the
+    //    profiler, in milliseconds since meta.startTime, or null
+    // We can't invent missing data, so just initialize everything with some
+    // kind of empty value.
+    for (const thread of profile.threads) {
+      // "The profiler was never paused during the recorded range, and we never
+      // collected a profile."
+      thread.pausedRanges = [];
+      // "All processes started at the same time."
+      thread.processStartupTime = 0;
+      // "All processes were still alive by the time the profile was captured."
+      thread.processShutdownTime = null;
+      // "All threads were registered instantly at process startup."
+      thread.registerTime = 0;
+      // "All threads were still alive by the time the profile was captured."
+      thread.unregisterTime = null;
     }
   },
 };

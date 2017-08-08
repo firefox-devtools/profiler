@@ -9,7 +9,7 @@
   max-width: 100%;
   box-sizing: border-box;
   display: inline-block;
-  padding: 2px 5px;
+  padding: 5px;
   border: 1px solid #ccc;
   background-color: #f9f9f9;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -33,7 +33,7 @@
   text-overflow: ellipsis;
 }
 
-.tooltipName {
+.tooltipTitle {
   flex: 1;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -48,17 +48,19 @@
 }
 
 .tooltipHeader {
-  padding-bottom: 10px;
-  margin-bottom: 10px;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
   border-bottom: 1px solid var(--theme-highlight-gray);
 }
 
 .tooltipDetails {
-  margin: 5px 0;
+  display: grid;
+  grid-template-columns: min-content auto;
+  grid-gap: 2px 5px;
 }
 
 .tooltipLabel {
-  display: block;
-  width: 60px;
   color: #666;
+  white-space: nowrap;
+  text-align: right;
 }

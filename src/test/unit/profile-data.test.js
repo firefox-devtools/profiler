@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
+// @flow
 import 'babel-polyfill';
 import {
   getContainingLibrary,
@@ -16,9 +16,10 @@ import {
 } from '../../profile-logic/process-profile';
 import {
   resourceTypes,
-  getFuncStackInfo,
+  getCallNodeInfo,
   getTracingMarkers,
   filterThreadByImplementation,
+  getCallNodePath,
 } from '../../profile-logic/profile-data';
 import exampleProfile from '.././fixtures/profiles/example-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
@@ -41,6 +42,9 @@ import {
   getCategoryByImplementation,
   implementationCategoryMap,
 } from '../../profile-logic/color-categories';
+import getCallNodeProfile from '../fixtures/profiles/call-nodes';
+
+import type { Thread, IndexIntoStackTable } from '../../types/profile';
 
 describe('unique-string-array', function() {
   const u = new UniqueStringArray(['foo', 'bar', 'baz']);
@@ -114,7 +118,7 @@ describe('data-table-utils', function() {
 
 describe('process-profile', function() {
   describe('processProfile', function() {
-    const profile = processProfile(exampleProfile);
+    const profile = processProfile(exampleProfile());
     it('should have three threads', function() {
       expect(profile.threads.length).toEqual(3);
     });
@@ -184,14 +188,30 @@ describe('process-profile', function() {
       expect(profile.threads[0].markers.time[1]).toEqual(2);
       expect(profile.threads[0].markers.time[2]).toEqual(4);
       expect(profile.threads[0].markers.time[3]).toEqual(5);
-      expect(profile.threads[0].markers.data[5].startTime).toEqual(9);
-      expect(profile.threads[0].markers.data[5].endTime).toEqual(10);
+      expect(
+        profile.threads[0].markers.data[5]
+          ? profile.threads[0].markers.data[5].startTime
+          : null
+      ).toEqual(9);
+      expect(
+        profile.threads[0].markers.data[5]
+          ? profile.threads[0].markers.data[5].endTime
+          : null
+      ).toEqual(10);
       expect(profile.threads[2].markers.time[0]).toEqual(1000);
       expect(profile.threads[2].markers.time[1]).toEqual(1002);
       expect(profile.threads[2].markers.time[2]).toEqual(1004);
       expect(profile.threads[2].markers.time[3]).toEqual(1005);
-      expect(profile.threads[2].markers.data[5].startTime).toEqual(1009);
-      expect(profile.threads[2].markers.data[5].endTime).toEqual(1010);
+      expect(
+        profile.threads[2].markers.data[5]
+          ? profile.threads[2].markers.data[5].startTime
+          : null
+      ).toEqual(1009);
+      expect(
+        profile.threads[2].markers.data[5]
+          ? profile.threads[2].markers.data[5].endTime
+          : null
+      ).toEqual(1010);
       // TODO: also shift the samples inside marker callstacks
     });
     it('should create one function per frame', function() {
@@ -218,9 +238,13 @@ describe('process-profile', function() {
       expect(thread.stringTable.getString(thread.funcTable.name[4])).toEqual(
         'frobnicate'
       );
-      expect(
-        thread.stringTable.getString(thread.funcTable.fileName[4])
-      ).toEqual('chrome://blargh');
+      const chromeStringIndex = thread.funcTable.fileName[4];
+      if (typeof chromeStringIndex !== 'number') {
+        throw new Error('chromeStringIndex must be a number');
+      }
+      expect(thread.stringTable.getString(chromeStringIndex)).toEqual(
+        'chrome://blargh'
+      );
       expect(thread.funcTable.lineNumber[4]).toEqual(34);
       expect(thread.funcTable.address[0]).toEqual(-1);
       expect(thread.funcTable.address[1]).toEqual(3972);
@@ -241,50 +265,161 @@ describe('process-profile', function() {
 });
 
 describe('profile-data', function() {
-  describe('createFuncStackTableAndFixupSamples', function() {
-    const profile = processProfile(exampleProfile);
+  describe('createCallNodeTableAndFixupSamples', function() {
+    const profile = processProfile(exampleProfile());
     const thread = profile.threads[0];
-    const { funcStackTable } = getFuncStackInfo(
+    const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable,
-      thread.samples
+      thread.funcTable
     );
-    it('should create one funcStack per stack', function() {
+    it('should create one callNode per stack', function() {
       expect(thread.stackTable.length).toEqual(5);
-      expect(funcStackTable.length).toEqual(5);
-      expect('prefix' in funcStackTable).toBeTruthy();
-      expect('func' in funcStackTable).toBeTruthy();
-      expect(funcStackTable.func[0]).toEqual(0);
-      expect(funcStackTable.func[1]).toEqual(1);
-      expect(funcStackTable.func[2]).toEqual(2);
-      expect(funcStackTable.func[3]).toEqual(3);
+      expect(callNodeTable.length).toEqual(5);
+      expect('prefix' in callNodeTable).toBeTruthy();
+      expect('func' in callNodeTable).toBeTruthy();
+      expect(callNodeTable.func[0]).toEqual(0);
+      expect(callNodeTable.func[1]).toEqual(1);
+      expect(callNodeTable.func[2]).toEqual(2);
+      expect(callNodeTable.func[3]).toEqual(3);
+    });
+  });
+
+  function _getStackList(
+    thread: Thread,
+    stackIndex: IndexIntoStackTable | null
+  ) {
+    if (typeof stackIndex !== 'number') {
+      throw new Error('stackIndex must be a number');
+    }
+    const { prefix } = thread.stackTable;
+    const stackList = [];
+    let nextStack = stackIndex;
+    while (nextStack !== null) {
+      if (typeof nextStack !== 'number') {
+        throw new Error('nextStack must be a number');
+      }
+
+      stackList.unshift(nextStack);
+      nextStack = prefix[nextStack];
+    }
+    return stackList;
+  }
+
+  describe('getCallNodeInfo', function() {
+    const { threads: [thread] } = getCallNodeProfile();
+    const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable
+    );
+    const stack0 = thread.samples.stack[0];
+    const stack1 = thread.samples.stack[1];
+    if (stack0 === null || stack1 === null) {
+      throw new Error('Stacks must not be null.');
+    }
+    const originalStackListA = _getStackList(thread, stack0);
+    const originalStackListB = _getStackList(thread, stack1);
+    const mergedFuncListA = getCallNodePath(
+      stackIndexToCallNodeIndex[stack0],
+      callNodeTable
+    );
+    const mergedFuncListB = getCallNodePath(
+      stackIndexToCallNodeIndex[stack1],
+      callNodeTable
+    );
+
+    it('starts with a fully unduplicated set stack frames', function() {
+      /**
+       * Assert this original structure:
+       *
+       *            stack0 (funcA)
+       *                 |
+       *                 v
+       *            stack1 (funcB)
+       *                 |
+       *                 v
+       *            stack2 (funcC)
+       *            /            \
+       *           V              V
+       *    stack3 (funcD)     stack5 (funcD)
+       *         |                  |
+       *         v                  V
+       *    stack4 (funcE)     stack6 (funcF)
+       *
+       *       ^sample 0          ^sample 1
+       */
+
+      expect(thread.stackTable.length).toEqual(7);
+      expect(originalStackListA).toEqual([0, 1, 2, 3, 4]);
+      expect(originalStackListB).toEqual([0, 1, 2, 5, 6]);
+    });
+
+    it('creates a callNodeTable with merged stacks that share functions', function() {
+      /**
+       * This structure represents the desired de-duplication.
+       *
+       *            callNode0 (funcA)
+       *                 |
+       *                 v
+       *            callNode1 (funcB)
+       *                 |
+       *                 v
+       *            callNode2 (funcC)
+       *                 |
+       *                 v
+       *            callNode3 (funcD)
+       *          /               \
+       *         V                 V
+       * callNode4 (funcE)       callNode5 (funcF)
+       *
+       *       ^sample 0          ^sample 1
+       */
+      expect(mergedFuncListA).toEqual([0, 1, 2, 3, 4]);
+      expect(mergedFuncListB).toEqual([0, 1, 2, 3, 5]);
+      expect(callNodeTable.length).toEqual(6);
     });
   });
   describe('getTracingMarkers', function() {
-    const profile = processProfile(exampleProfile);
+    const profile = processProfile(exampleProfile());
     const thread = profile.threads[0];
     const tracingMarkers = getTracingMarkers(thread);
     it('should fold the two reflow markers into one tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(3);
+      expect(tracingMarkers.length).toEqual(5);
       expect(tracingMarkers[0].start).toEqual(2);
       expect(tracingMarkers[0].name).toEqual('Reflow');
       expect(tracingMarkers[0].dur).toEqual(6);
-      expect(tracingMarkers[0].title).toEqual('Reflow for 6.00ms');
+      expect(tracingMarkers[0].title).toBeNull();
     });
     it('should fold the two Rasterize markers into one tracing marker, after the reflow tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(3);
+      expect(tracingMarkers.length).toEqual(5);
       expect(tracingMarkers[1].start).toEqual(4);
       expect(tracingMarkers[1].name).toEqual('Rasterize');
       expect(tracingMarkers[1].dur).toEqual(1);
-      expect(tracingMarkers[1].title).toEqual('Rasterize for 1.00ms');
+      expect(tracingMarkers[1].title).toBeNull();
     });
     it('should create a tracing marker for the MinorGC startTime/endTime marker', function() {
-      expect(tracingMarkers.length).toEqual(3);
-      expect(tracingMarkers[2].start).toEqual(11);
-      expect(tracingMarkers[2].name).toEqual('MinorGC');
-      expect(tracingMarkers[2].dur).toEqual(1);
-      expect(tracingMarkers[2].title).toEqual('MinorGC for 1.00ms');
+      expect(tracingMarkers.length).toEqual(5);
+      expect(tracingMarkers[3].start).toEqual(11);
+      expect(tracingMarkers[3].name).toEqual('MinorGC');
+      expect(tracingMarkers[3].dur).toEqual(1);
+      expect(tracingMarkers[3].title).toBeNull();
+    });
+    it('should create a tracing marker for the DOMEvent marker', function() {
+      expect(tracingMarkers[2]).toMatchObject({
+        dur: 1,
+        name: 'DOMEvent',
+        start: 9,
+        title: null,
+      });
+    });
+    it('should create a tracing marker for the marker UserTiming', function() {
+      expect(tracingMarkers[4]).toMatchObject({
+        dur: 1,
+        name: 'UserTiming',
+        start: 12,
+        title: null,
+      });
     });
   });
 });
@@ -297,23 +432,41 @@ describe('symbolication', function() {
       { start: 40, end: 50, name: 'third' },
       { start: 60, end: 80, name: 'fourth' },
       { start: 80, end: 100, name: 'fifth' },
-    ];
+    ].map(lib => {
+      // Make sure our fixtures are correctly typed.
+      return Object.assign({}, lib, {
+        offset: 0,
+        arch: '',
+        path: '',
+        debugName: '',
+        debugPath: '',
+        breakpadId: '',
+      });
+    });
+
+    // Help flow out here.
+    function getLibName(lib) {
+      if (lib) {
+        return lib.name;
+      }
+      return null;
+    }
     it('should return the first library for addresses inside the first library', function() {
-      expect(getContainingLibrary(libs, 0).name).toEqual('first');
-      expect(getContainingLibrary(libs, 10).name).toEqual('first');
-      expect(getContainingLibrary(libs, 19).name).toEqual('first');
+      expect(getLibName(getContainingLibrary(libs, 0))).toEqual('first');
+      expect(getLibName(getContainingLibrary(libs, 10))).toEqual('first');
+      expect(getLibName(getContainingLibrary(libs, 19))).toEqual('first');
     });
     it('should return the second library for addresses inside the second library', function() {
-      expect(getContainingLibrary(libs, 20).name).toEqual('second');
-      expect(getContainingLibrary(libs, 21).name).toEqual('second');
-      expect(getContainingLibrary(libs, 27).name).toEqual('second');
-      expect(getContainingLibrary(libs, 39).name).toEqual('second');
+      expect(getLibName(getContainingLibrary(libs, 20))).toEqual('second');
+      expect(getLibName(getContainingLibrary(libs, 21))).toEqual('second');
+      expect(getLibName(getContainingLibrary(libs, 27))).toEqual('second');
+      expect(getLibName(getContainingLibrary(libs, 39))).toEqual('second');
     });
     it('should return the third library for addresses inside the third library', function() {
-      expect(getContainingLibrary(libs, 40).name).toEqual('third');
-      expect(getContainingLibrary(libs, 41).name).toEqual('third');
-      expect(getContainingLibrary(libs, 47).name).toEqual('third');
-      expect(getContainingLibrary(libs, 49).name).toEqual('third');
+      expect(getLibName(getContainingLibrary(libs, 40))).toEqual('third');
+      expect(getLibName(getContainingLibrary(libs, 41))).toEqual('third');
+      expect(getLibName(getContainingLibrary(libs, 47))).toEqual('third');
+      expect(getLibName(getContainingLibrary(libs, 49))).toEqual('third');
     });
     it('should return no library when outside or in holes', function() {
       expect(getContainingLibrary(libs, -1)).toEqual(null);
@@ -331,13 +484,12 @@ describe('symbolication', function() {
     let symbolicatedProfile = null;
 
     beforeAll(function() {
-      unsymbolicatedProfile = processProfile(exampleProfile);
-      const symbolTable = {
-        0: 'first symbol',
-        0xf00: 'second symbol',
-        0x1a00: 'third symbol',
-        0x2000: 'last symbol',
-      };
+      unsymbolicatedProfile = processProfile(exampleProfile());
+      const symbolTable = {};
+      symbolTable[0] = 'first symbol';
+      symbolTable[0xf00] = 'second symbol';
+      symbolTable[0x1a00] = 'third symbol';
+      symbolTable[0x2000] = 'last symbol';
       const symbolProvider = new FakeSymbolStore({
         firefox: symbolTable,
         'firefox-webcontent': symbolTable,
@@ -350,18 +502,25 @@ describe('symbolication', function() {
         symbolProvider,
         {
           onMergeFunctions: (threadIndex, oldFuncToNewFuncMap) => {
+            if (!symbolicatedProfile) {
+              throw new Error('symbolicatedProfile cannot be null');
+            }
             symbolicatedProfile.threads[threadIndex] = applyFunctionMerging(
               symbolicatedProfile.threads[threadIndex],
               oldFuncToNewFuncMap
             );
           },
           onGotFuncNames: (threadIndex, funcIndices, funcNames) => {
+            if (!symbolicatedProfile) {
+              throw new Error('symbolicatedProfile cannot be null');
+            }
             symbolicatedProfile.threads[threadIndex] = setFuncNames(
               symbolicatedProfile.threads[threadIndex],
               funcIndices,
               funcNames
             );
           },
+          onGotTaskTracerNames: () => {},
         }
       );
       return symbolicationPromise;
@@ -373,18 +532,24 @@ describe('symbolication', function() {
         const funcNameStringIndex = thread.funcTable.name[funcIndex];
         return thread.stringTable.getString(funcNameStringIndex);
       }
-      expect(
-        functionNameForFrameInThread(unsymbolicatedProfile.threads[0], 1)
-      ).toEqual('0x100000f84');
-      expect(
-        functionNameForFrameInThread(symbolicatedProfile.threads[0], 1)
-      ).toEqual('second symbol');
-      expect(
-        functionNameForFrameInThread(unsymbolicatedProfile.threads[0], 2)
-      ).toEqual('0x100001a45');
-      expect(
-        functionNameForFrameInThread(symbolicatedProfile.threads[0], 2)
-      ).toEqual('third symbol');
+      if (!unsymbolicatedProfile || !symbolicatedProfile) {
+        throw new Error('Profiles cannot be null');
+      }
+      const symbolicatedThread = symbolicatedProfile.threads[0];
+      const unsymbolicatedThread = unsymbolicatedProfile.threads[0];
+
+      expect(functionNameForFrameInThread(unsymbolicatedThread, 1)).toEqual(
+        '0x100000f84'
+      );
+      expect(functionNameForFrameInThread(symbolicatedThread, 1)).toEqual(
+        'second symbol'
+      );
+      expect(functionNameForFrameInThread(unsymbolicatedThread, 2)).toEqual(
+        '0x100001a45'
+      );
+      expect(functionNameForFrameInThread(symbolicatedThread, 2)).toEqual(
+        'third symbol'
+      );
     });
   });
   // TODO: check that functions are collapsed correctly
@@ -424,7 +589,7 @@ describe('upgrades', function() {
     expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
   }
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-5.json')
+    require('../fixtures/upgrades/processed-7.json')
   );
 
   // Uncomment this to output your next ./upgrades/processed-X.json
@@ -461,22 +626,20 @@ describe('upgrades', function() {
     );
     compareProcessedProfiles(upgradedProfile4, afterUpgradeReference);
 
-    const geckoProfile3 = require('../fixtures/upgrades/gecko-3.json');
-    const upgradedGeckoProfile3 = unserializeProfileOfArbitraryFormat(
-      geckoProfile3
+    const serializedOldProcessedProfile5 = require('../fixtures/upgrades/processed-5.json');
+    const upgradedProfile5 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile5
     );
-    compareProcessedProfiles(upgradedGeckoProfile3, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile5, afterUpgradeReference);
 
-    // const serializedOldProcessedProfile2 = require('../fixtures/upgrades/processed-2.json');
-    // const upgradedProfile2 = unserializeProfileOfArbitraryFormat(serializedOldProcessedProfile2);
-    // compareProcessedProfiles(upgradedProfile2, afterUpgradeReference);
-
-    // const geckoProfile4 = require('../fixtures/upgrades/gecko-4.json');
-    // const upgradedGeckoProfile4 = unserializeProfileOfArbitraryFormat(geckoProfile4);
-    // compareProcessedProfiles(upgradedGeckoProfile4, afterUpgradeReference);
+    const serializedOldProcessedProfile6 = require('../fixtures/upgrades/processed-6.json');
+    const upgradedProfile6 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile6
+    );
+    compareProcessedProfiles(upgradedProfile6, afterUpgradeReference);
   });
   it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function() {
-    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-6.json');
+    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-8.json');
     // Uncomment this to output your next ./upgrades/gecko-X.json
     // upgradeGeckoProfileToCurrentVersion(afterUpgradeGeckoReference);
     // console.log(JSON.stringify(afterUpgradeGeckoReference));
@@ -493,18 +656,28 @@ describe('upgrades', function() {
     const geckoProfile5 = require('../fixtures/upgrades/gecko-5.json');
     upgradeGeckoProfileToCurrentVersion(geckoProfile5);
     expect(geckoProfile5).toEqual(afterUpgradeGeckoReference);
+
+    const geckoProfile6 = require('../fixtures/upgrades/gecko-6.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile6);
+    expect(geckoProfile6).toEqual(afterUpgradeGeckoReference);
+
+    const geckoProfile7 = require('../fixtures/upgrades/gecko-7.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile7);
+    expect(geckoProfile7).toEqual(afterUpgradeGeckoReference);
   });
 });
 
 describe('color-categories', function() {
-  const profile = processProfile(exampleProfile);
+  const profile = processProfile(exampleProfile());
   const [thread] = profile.threads;
   it('calculates the category for each frame', function() {
     const categories = thread.samples.stack.map(stackIndex => {
-      return getCategoryByImplementation(
-        thread,
-        thread.stackTable.frame[stackIndex]
-      );
+      const frameIndex =
+        stackIndex === null ? null : thread.stackTable.frame[stackIndex];
+      if (frameIndex === null) {
+        throw new Error('frameIndex cannot be null');
+      }
+      return getCategoryByImplementation(thread, frameIndex);
     });
     for (let i = 0; i < 6; i++) {
       expect(categories[i].name).toEqual('Platform');
@@ -518,10 +691,13 @@ describe('color-categories', function() {
 });
 
 describe('filter-by-implementation', function() {
-  const profile = processProfile(profileWithJS);
+  const profile = processProfile(profileWithJS());
   const thread = profile.threads[0];
 
   function stackIsJS(filteredThread, stackIndex) {
+    if (stackIndex === null) {
+      throw new Error('stackIndex cannot be null');
+    }
     const frameIndex = filteredThread.stackTable.frame[stackIndex];
     const funcIndex = filteredThread.frameTable.func[frameIndex];
     return filteredThread.funcTable.isJS[funcIndex];
