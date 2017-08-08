@@ -589,17 +589,21 @@ export function errorReceivingProfileFromFile(error: Error): Action {
 function _fileReader(input) {
   const reader = new FileReader();
   const promise = new Promise((resolve, reject) => {
-    reader.onload = () => resolve(reader.result);
+    // Flow's definition for FileReader doesn't handle the polymorphic nature of
+    // reader.result very well, as its definition is <string | ArrayBuffer>.
+    // Here we ensure type safety by returning the proper Promise type from the
+    // methods below.
+    reader.onload = () => resolve((reader.result: any));
     reader.onerror = () => reject(reader.error);
   });
 
   return {
-    asText() {
+    asText(): Promise<string> {
       reader.readAsText(input);
       return promise;
     },
 
-    asArrayBuffer() {
+    asArrayBuffer(): Promise<ArrayBuffer> {
       reader.readAsArrayBuffer(input);
       return promise;
     },
