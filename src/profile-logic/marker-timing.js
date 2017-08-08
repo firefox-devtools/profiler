@@ -104,7 +104,8 @@ export function getMarkerTiming(
         if (otherStart > marker.start + marker.dur) {
           break;
         }
-        if (otherEnd > marker.start) {
+        // We use + 1 to account for possible radius
+        if (otherEnd + 1 > marker.start) {
           continueSearching = true;
           break;
         }

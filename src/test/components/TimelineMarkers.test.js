@@ -44,6 +44,8 @@ it('renders TimelineMarkers correctly', () => {
     ['Marker A', 0, { startTime: 0, endTime: 10 }],
     ['Marker B', 0, { startTime: 0, endTime: 10 }],
     ['Marker C', 5, { startTime: 5, endTime: 15 }],
+    ['Marker D', 4, { startTime: 4, endTime: 4 }], // a dot marker
+    ['Marker E', 3, { startTime: 3, endTime: 3.5 }], // a bigger dot marker
   ]);
 
   const timeline = renderer.create(
