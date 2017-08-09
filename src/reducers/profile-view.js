@@ -384,6 +384,7 @@ export const getProfileTaskTracerData = (state: State): TaskTracer =>
 export type SelectorsForThread = {
   getThread: State => Thread,
   getViewOptions: State => ThreadViewOptions,
+  getTransformStack: State => TransformStack,
   getTransformLabels: State => string[],
   getRangeFilteredThread: State => Thread,
   getJankInstances: State => TracingMarker[],
@@ -643,6 +644,7 @@ export const selectorsForThread = (
     selectorsForThreads[threadIndex] = {
       getThread,
       getViewOptions,
+      getTransformStack,
       getTransformLabels,
       getRangeFilteredThread,
       getJankInstances,
