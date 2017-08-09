@@ -5,7 +5,7 @@ exports[`renders TimelineMarkers correctly 1`] = `
   className="timelineMarkers"
   style={
     Object {
-      "height": 144,
+      "height": 168,
     }
   }
 >
@@ -276,6 +276,28 @@ Array [
     91,
   ],
   Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#8296cb",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "arc",
+    92.5,
+    103.5,
+    3.75,
+    0,
+    6.283185307179586,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
     "set fillStyle",
     "#eee",
   ],
@@ -318,6 +340,13 @@ Array [
     "fillRect",
     0,
     96,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    112,
     200,
     1,
   ],
@@ -387,6 +416,13 @@ Array [
     16,
   ],
   Array [
+    "fillRect",
+    0,
+    96,
+    150,
+    16,
+  ],
+  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -416,7 +452,7 @@ Array [
   ],
   Array [
     "fillText",
-    "Very very very very very very long Marker D",
+    "Very very very very very very …",
     5,
     75,
   ],
@@ -425,6 +461,12 @@ Array [
     "Marker G type DOMEvent",
     5,
     91,
+  ],
+  Array [
+    "fillText",
+    "Non-interval marker F without …",
+    5,
+    107,
   ],
 ]
 `;
