@@ -267,7 +267,7 @@ const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (
 );
 export default urlStateReducer;
 
-const getURLState = (state: State): URLState => state.urlState;
+export const getURLState = (state: State): URLState => state.urlState;
 
 export const getDataSource = (state: State) => getURLState(state).dataSource;
 export const getHash = (state: State) => getURLState(state).hash;

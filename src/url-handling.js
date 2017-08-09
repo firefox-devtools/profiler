@@ -36,27 +36,28 @@ function dataSourceDirs(urlState: URLState) {
 // "null | void" in the query objects are flags which map to true for null, and false
 // for void. False flags do not show up the URL.
 type BaseQuery = {
-  range: string, //
-  thread: string, // "3"
-  threadOrder: string, // "3-2-0-1"
-  hiddenThreads: string, // "0-1"
-  react_perf: null | void, // Flag to activate react's UserTimings profiler.
+  range?: string, //
+  thread?: string, // "3"
+  threadOrder?: string, // "3-2-0-1"
+  hiddenThreads?: string | void, // "0-1"
+  react_perf?: null, // Flag to activate react's UserTimings profiler.
+  transforms?: string,
 };
 
 type CallTreeQuery = BaseQuery & {
-  search: string, // "js::RunScript"
-  invertCallstack: null | void,
-  implementation: string,
+  search?: string, // "js::RunScript"
+  invertCallstack?: null | void,
+  implementation?: string,
 };
 
 type MarkersQuery = BaseQuery & {
-  markerSearch: string, // "DOMEvent"
+  markerSearch?: string, // "DOMEvent"
 };
 
 type TimelineQuery = BaseQuery & {
-  search: string, // "js::RunScript"
-  invertCallstack: null | void,
-  hidePlatformDetails: null | void,
+  search?: string, // "js::RunScript"
+  invertCallstack?: null | void,
+  hidePlatformDetails?: null | void,
 };
 
 type URLObject = {
@@ -64,7 +65,7 @@ type URLObject = {
   query: Query,
 };
 
-type Query = null | BaseQuery | CallTreeQuery | MarkersQuery | TimelineQuery;
+type Query = BaseQuery | CallTreeQuery | MarkersQuery | TimelineQuery;
 
 /**
  * Take the URLState and map it into a serializable URLObject, that represents the
@@ -75,7 +76,7 @@ export function urlStateToURLObject(urlState: URLState): URLObject {
   if (dataSource === 'none') {
     return {
       pathParts: [],
-      query: null,
+      query: {},
     };
   }
   const pathParts = [...dataSourceDirs(urlState), urlState.selectedTab];
