@@ -21,6 +21,14 @@ import type {
 } from '../../types/profile-derived';
 import type { Action, ProfileSelection } from '../../types/actions';
 
+type MarkerDrawingInformation = {
+  x: CssPixels,
+  y: CssPixels,
+  w: CssPixels,
+  h: CssPixels,
+  text: string,
+};
+
 type Props = {
   interval: Milliseconds,
   rangeStart: Milliseconds,
@@ -91,6 +99,56 @@ class TimelineMarkerCanvas extends PureComponent {
     this.drawSeparatorsAndLabels(ctx, startRow, endRow);
   }
 
+  _drawOneMarker(
+    ctx: CanvasRenderingContext2D,
+    { x, y, w, h, text }: MarkerDrawingInformation,
+    colors?: { background: string, foreground: string } = {
+      background: '#9698C0',
+      foreground: 'black',
+    }
+  ) {
+    ctx.fillStyle = colors.background;
+
+    if (w >= h) {
+      // Ensure the text measurement tool is created, since this is the first time
+      // this class has access to a ctx.
+      if (!this._textMeasurement) {
+        this._textMeasurement = new TextMeasurement(ctx);
+      }
+      const textMeasurement = this._textMeasurement;
+
+      this.drawRoundedRect(ctx, x, y + 1, w, h - 1, 1);
+
+      // Draw the text label
+      // TODO - L10N RTL.
+      // Constrain the x coordinate to the leftmost area.
+      const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
+      const w2: CssPixels = Math.max(0, w - (x2 - x));
+
+      if (w2 > textMeasurement.minWidth) {
+        const fittedText = textMeasurement.getFittedText(text, w2);
+        if (fittedText) {
+          ctx.fillStyle = colors.foreground;
+          ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
+        }
+      }
+    } else {
+      const radiusRatio = w / h;
+      const radius =
+        radiusRatio * (MARKER_MAX_DOT_RADIUS - MARKER_MIN_DOT_RADIUS) +
+        MARKER_MIN_DOT_RADIUS;
+      ctx.beginPath();
+      ctx.arc(
+        x, // x
+        y + h / 2, // y
+        radius * h, // radius
+        0, // arc start
+        TWO_PI // arc end
+      );
+      ctx.fill();
+    }
+  }
+
   drawMarkers(
     ctx: CanvasRenderingContext2D,
     hoveredItem: IndexIntoMarkerTiming | null,
@@ -107,16 +165,11 @@ class TimelineMarkerCanvas extends PureComponent {
       viewportTop,
     } = this.props;
 
-    // Ensure the text measurement tool is created, since this is the first time
-    // this class has access to a ctx.
-    if (!this._textMeasurement) {
-      this._textMeasurement = new TextMeasurement(ctx);
-    }
-    const textMeasurement = this._textMeasurement;
-
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
+
+    ctx.lineWidth = 1;
 
     // Only draw the stack frames that are vertically within view.
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
@@ -133,7 +186,7 @@ class TimelineMarkerCanvas extends PureComponent {
       const timeAtViewportRight: Milliseconds =
         rangeStart + rangeLength * viewportRight;
 
-      ctx.lineWidth = 1;
+      let hoveredElement: MarkerDrawingInformation | null = null;
       for (let i = 0; i < markerTiming.length; i++) {
         // Only draw samples that are in bounds.
         if (
@@ -151,45 +204,22 @@ class TimelineMarkerCanvas extends PureComponent {
           const w: CssPixels =
             (endTime - startTime) * containerWidth / viewportLength;
           const h: CssPixels = ROW_HEIGHT - 1;
+          const text = markerTiming.label[i];
 
           const tracingMarkerIndex = markerTiming.index[i];
           const isHovered = hoveredItem === tracingMarkerIndex;
-          ctx.fillStyle = isHovered ? 'Highlight' : '#8296cb';
-
-          if (w >= h) {
-            this.drawRoundedRect(ctx, x, y + 1, w, h - 1, 1);
-
-            const text = markerTiming.label[i];
-            // Draw the text label
-            // TODO - L10N RTL.
-            // Constrain the x coordinate to the leftmost area.
-            const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
-            const w2: CssPixels = Math.max(0, w - (x2 - x));
-
-            if (w2 > textMeasurement.minWidth) {
-              const fittedText = textMeasurement.getFittedText(text, w2);
-              if (fittedText) {
-                ctx.fillStyle = isHovered ? 'HighlightText' : '#ffffff';
-                ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
-              }
-            }
+          if (isHovered) {
+            hoveredElement = { x, y, w, h, text };
           } else {
-            const radiusRatio = w / h;
-            // TODO Should we use an exponential scale instead ?
-            const radius =
-              radiusRatio * (MARKER_MAX_DOT_RADIUS - MARKER_MIN_DOT_RADIUS) +
-              MARKER_MIN_DOT_RADIUS;
-            ctx.beginPath();
-            ctx.arc(
-              x, // x
-              y + h / 2, // y
-              radius * h, // radius
-              0, // arc start
-              TWO_PI // arc end
-            );
-            ctx.fill();
+            this._drawOneMarker(ctx, { x, y, w, h, text });
           }
         }
+      }
+      if (hoveredElement) {
+        this._drawOneMarker(ctx, hoveredElement, {
+          background: '#333378',
+          foreground: 'white',
+        });
       }
     }
   }
