@@ -6,12 +6,15 @@
 import { getEmptyProfile } from '../../../profile-logic/profile-data';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
 import type { Profile, Thread, MarkersTable } from '../../../types/profile';
+import type { MarkerPayload } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
 
 // Array<[MarkerName, Milliseconds, Data]>
 type MarkerName = string;
 type MarkerTime = Milliseconds;
-type DataPayload = Object;
+type DataPayload =
+  | MarkerPayload
+  | {| startTime: Milliseconds, endTime: Milliseconds |};
 type TestDefinedMarkers = Array<[MarkerName, MarkerTime, DataPayload]>;
 
 export function getProfileWithMarkers(markers: TestDefinedMarkers): Profile {
@@ -34,13 +37,23 @@ export function getProfileWithMarkers(markers: TestDefinedMarkers): Profile {
   };
 
   markers.forEach(([name, time, data]) => {
+    if (data && !data.type) {
+      data = {
+        type: 'DummyForTests',
+        startTime: data.startTime,
+        endTime: data.endTime,
+      };
+    }
     markersTable.name.push(stringTable.indexForString(name));
     markersTable.time.push(time);
     markersTable.data.push(data);
     markersTable.length++;
 
     // trying to get a consistent profile with a sample for each marker
-    samples.time.push(data.startTime, data.endTime);
+    const startTime = time;
+    // If we have no data, endTime is the same as startTime
+    const endTime = data ? data.endTime : time;
+    samples.time.push(startTime, endTime);
     samples.length++;
   });
 
