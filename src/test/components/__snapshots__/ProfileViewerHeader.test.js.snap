@@ -1,0 +1,183 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`calltree/ProfileCallTreeView renders the header 1`] = `
+<div
+  className="profileViewerHeader"
+  onMouseDown={[Function]}
+  onMouseMove={[Function]}
+>
+  <div
+    className="profileViewerHeaderTimeRuler"
+  >
+    <ol
+      className="timeRulerContainer"
+    >
+      <li
+        className="timeRulerNotch"
+        style={
+          Object {
+            "left": "0px",
+          }
+        }
+      >
+        <span
+          className="timeRulerNotchText"
+        >
+          0.000s
+        </span>
+      </li>
+      <li
+        className="timeRulerNotch"
+        style={
+          Object {
+            "left": "100px",
+          }
+        }
+      >
+        <span
+          className="timeRulerNotchText"
+        >
+          0.001s
+        </span>
+      </li>
+      <li
+        className="timeRulerNotch"
+        style={
+          Object {
+            "left": "200px",
+          }
+        }
+      >
+        <span
+          className="timeRulerNotchText"
+        >
+          0.002s
+        </span>
+      </li>
+      <li
+        className="timeRulerNotch"
+        style={
+          Object {
+            "left": "300px",
+          }
+        }
+      >
+        <span
+          className="timeRulerNotchText"
+        >
+          0.003s
+        </span>
+      </li>
+    </ol>
+  </div>
+  <div
+    className="profileViewerHeaderIntervalMarkerOverviewContainer profileViewerHeaderIntervalMarkerOverviewContainerJank"
+  />
+  <div
+    className="profileViewerHeaderIntervalMarkerOverviewContainer profileViewerHeaderIntervalMarkerOverviewContainerGfx"
+  />
+  <div
+    className="overflowEdgeIndicator profileViewerHeaderOverflowEdgeIndicator"
+  >
+    <div
+      className="overflowEdgeIndicatorEdge topEdge"
+    />
+    <div
+      className="overflowEdgeIndicatorEdge rightEdge"
+    />
+    <div
+      className="overflowEdgeIndicatorEdge bottomEdge"
+    />
+    <div
+      className="overflowEdgeIndicatorEdge leftEdge"
+    />
+    <div
+      className="overflowEdgeIndicatorScrollbox profileViewerHeaderOverflowEdgeIndicatorScrollbox"
+      onScroll={[Function]}
+    >
+      <div
+        className="overflowEdgeIndicatorContentsWrapper"
+      >
+        <ol
+          className="profileViewerHeaderThreadList"
+          onMouseDown={[Function]}
+        >
+          <li
+            className="profileThreadHeaderBar selected"
+            style={undefined}
+          >
+            <h1
+              className="react-contextmenu-wrapper grippy"
+              onContextMenu={[Function]}
+              onMouseDown={[Function]}
+              onMouseOut={[Function]}
+              onMouseUp={[Function]}
+              onTouchEnd={[Function]}
+              onTouchStart={[Function]}
+              title="thread: \\"Empty\\" (0)
+            process: \\"default\\" (0)"
+            >
+              Empty
+            </h1>
+            <div
+              className="threadStackGraph"
+            >
+              <canvas
+                className="threadStackGraphCanvas threadStackGraphCanvas"
+                onMouseUp={[Function]}
+              />
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div
+    className="timeSelectionScrubberHoverIndicator"
+    style={
+      Object {
+        "left": "0",
+        "visibility": "hidden",
+      }
+    }
+  />
+</div>
+`;
+
+exports[`calltree/ProfileCallTreeView renders the header 2`] = `
+Array [
+  Array [
+    "set fillStyle",
+    "#7990c8",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    66.66666666666667,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#7990c8",
+  ],
+  Array [
+    "fillRect",
+    66.66666666666667,
+    0,
+    66.66666666666667,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#7990c8",
+  ],
+  Array [
+    "fillRect",
+    133.33333333333334,
+    75,
+    66.66666666666667,
+    225,
+  ],
+]
+`;
