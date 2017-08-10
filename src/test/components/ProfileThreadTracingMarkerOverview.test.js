@@ -11,10 +11,11 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../store/fixtures/profiles';
 import ReactDOM from 'react-dom';
+import { getBoundingBox } from '../fixtures/utils';
 
 jest.useFakeTimers();
 ReactDOM.findDOMNode = jest.fn(() => ({
-  getBoundingClientRect: () => _getBoundingBox(200, 300),
+  getBoundingClientRect: () => getBoundingBox(200, 300),
 }));
 
 it('renders ProfileThreadTracingMarkerOverview correctly', () => {
@@ -30,7 +31,7 @@ it('renders ProfileThreadTracingMarkerOverview correctly', () => {
     // This is the canvas used to draw markers
     if (element.type === 'canvas') {
       return {
-        getBoundingClientRect: () => _getBoundingBox(200, 300),
+        getBoundingClientRect: () => getBoundingBox(200, 300),
         getContext: () => ctx,
         style: {},
       };
@@ -71,16 +72,3 @@ it('renders ProfileThreadTracingMarkerOverview correctly', () => {
   delete window.requestAnimationFrame;
   delete window.devicePixelRatio;
 });
-
-function _getBoundingBox(width, height) {
-  return {
-    width,
-    height,
-    left: 0,
-    x: 0,
-    top: 0,
-    y: 0,
-    right: width,
-    bottom: height,
-  };
-}

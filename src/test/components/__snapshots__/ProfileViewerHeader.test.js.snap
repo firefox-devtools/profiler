@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`calltree/ProfileCallTreeView renders the header 1`] = `
+exports[`calltree/ProfileViewerHeader renders the header 1`] = `
 <div
   className="profileViewerHeader"
   onMouseDown={[Function]}
@@ -144,7 +144,7 @@ exports[`calltree/ProfileCallTreeView renders the header 1`] = `
 </div>
 `;
 
-exports[`calltree/ProfileCallTreeView renders the header 2`] = `
+exports[`calltree/ProfileViewerHeader renders the header 2`] = `
 Array [
   Array [
     "set fillStyle",
