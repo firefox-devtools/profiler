@@ -10,18 +10,19 @@ import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileForUnfilteredCallTree } from '../fixtures/profiles/profiles-for-call-trees';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { getBoundingBox } from '../fixtures/utils';
 import MockedReactDOM from 'react-dom';
 
 jest.useFakeTimers();
 
-describe('calltree/ProfileCallTreeView', function() {
+describe('calltree/ProfileViewerHeader', function() {
   (MockedReactDOM: any).__findDOMNode = function(component) {
     // Mock out the findDOMNode call for WithSize.
     if (
       component.props &&
       component.props.className === 'profileViewerHeader'
     ) {
-      return { getBoundingClientRect: () => _getBoundingBox(300, 300) };
+      return { getBoundingClientRect: () => getBoundingBox(300, 300) };
     } else {
       throw new Error(
         'Another findDOMNode call needs to be mocked out for this test.'
@@ -40,7 +41,7 @@ describe('calltree/ProfileCallTreeView', function() {
       // <TimelineCanvas><canvas /></TimelineCanvas>
       if (element.type === 'canvas') {
         return {
-          getBoundingClientRect: () => _getBoundingBox(200, 300),
+          getBoundingClientRect: () => getBoundingBox(200, 300),
           getContext: () => ctx,
           style: {},
         };
@@ -67,16 +68,3 @@ describe('calltree/ProfileCallTreeView', function() {
     delete window.devicePixelRatio;
   });
 });
-
-function _getBoundingBox(width, height) {
-  return {
-    width,
-    height,
-    left: 0,
-    x: 0,
-    top: 0,
-    y: 0,
-    right: width,
-    bottom: height,
-  };
-}

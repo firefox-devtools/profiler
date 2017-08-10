@@ -13,6 +13,7 @@ import {
   getProfileForUnfilteredCallTree,
 } from '../fixtures/profiles/profiles-for-call-trees';
 import { changeCallTreeSearchString } from '../../actions/profile-view';
+import { getBoundingBox } from '../fixtures/utils';
 
 describe('calltree/ProfileCallTreeView', function() {
   it('renders an unfiltered call tree', () => {
@@ -65,22 +66,9 @@ function createNodeMock(element) {
     return {
       addEventListener: () => {},
       // Set an arbitrary size that will not kick in any virtualization behavior.
-      getBoundingClientRect: () => _getBoundingBox(2000, 1000),
+      getBoundingClientRect: () => getBoundingBox(2000, 1000),
       focus: () => {},
     };
   }
   return null;
-}
-
-function _getBoundingBox(width, height) {
-  return {
-    width,
-    height,
-    left: 0,
-    x: 0,
-    top: 0,
-    y: 0,
-    right: width,
-    bottom: height,
-  };
 }
