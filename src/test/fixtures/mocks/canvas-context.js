@@ -26,6 +26,9 @@ export default function mockCanvasContext() {
   return new Proxy(
     {
       scale: spyLog('scale'),
+      translate: spyLog('translate'),
+      save: spyLog('save'),
+      restore: spyLog('restore'),
       fill: spyLog('fill'),
       fillRect: spyLog('fillRect'),
       fillText: spyLog('fillText'),
@@ -33,6 +36,9 @@ export default function mockCanvasContext() {
       beginPath: spyLog('beginPath'),
       closePath: spyLog('closePath'),
       arc: spyLog('arc'),
+      arcTo: spyLog('arcTo'),
+      lineTo: spyLog('lineTo'),
+      moveTo: spyLog('moveTo'),
       measureText: spyLog('measureText', text => ({ width: text.length * 5 })),
       createLinearGradient: spyLog('createLinearGradient', () => ({
         addColorStop: spyLog('addColorStop'),
