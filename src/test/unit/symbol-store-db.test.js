@@ -75,7 +75,11 @@ describe('SymbolStoreDB', function() {
   });
 
   it('should still evict all tables when opening with the age limit set to 0ms', async function() {
-    const symbolStoreDB = new SymbolStoreDB('testing-symbol-tables', 10, 0); // maximum count 10, maximum age 0
+    // maximum count 10, maximum age -1
+    // Note we use -1 to force an eviction. With 0 in some platforms (cough cough
+    // Windows) we don't get an eviction because Date.now() isn't updated often
+    // enough.
+    const symbolStoreDB = new SymbolStoreDB('testing-symbol-tables', 10, -1);
 
     for (let i = 0; i < 10; i++) {
       await expect(
