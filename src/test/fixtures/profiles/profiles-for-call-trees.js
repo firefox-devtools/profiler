@@ -93,19 +93,19 @@ export function getProfileForUnfilteredCallTree(): Profile {
 /**
  * Create the following sample structure:
  *
- *      A    A    A 
- *      |    |    | 
- *      v    v    v 
- *      B    B    B 
- *      |    |    | 
- *      v    v    v 
- *      C    X    C 
- *      |    |    | 
- *      v    v    v 
- *      D    Y    X 
- *      |    |    | 
- *      v    v    v 
- *      E    Z    Y 
+ *      A    A    A
+ *      |    |    |
+ *      v    v    v
+ *      B    B    B
+ *      |    |    |
+ *      v    v    v
+ *      C    X    C
+ *      |    |    |
+ *      v    v    v
+ *      D    Y    X
+ *      |    |    |
+ *      v    v    v
+ *      E    Z    Y
  *                |
  *                v
  *                Z
