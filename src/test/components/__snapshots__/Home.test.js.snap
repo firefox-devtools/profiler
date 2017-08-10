@@ -1,0 +1,520 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app/Home renders the information screen for other browsers 1`] = `
+<div
+  className="home"
+  onDragEnter={[Function]}
+  onDragExit={[Function]}
+  onDrop={[Function]}
+>
+  <section
+    className="homeSection"
+  >
+    <h1
+      className="homeTitle"
+    >
+      <span
+        className="homeTitleText"
+      >
+        perf.html
+      </span>
+      <span
+        className="homeTitleSubtext"
+      >
+         
+        — Web app for Firefox performance analysis
+      </span>
+      <a
+        className="homeTitleGithubIcon"
+        href="https://github.com/devtools-html/perf.html"
+      >
+        <svg
+          aria-hidden="true"
+          className="octicon octicon-mark-github"
+          height="22"
+          version="1.1"
+          viewBox="0 0 16 16"
+          width="22"
+        >
+          <path
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+            fillRule="evenodd"
+          />
+        </svg>
+      </a>
+    </h1>
+    <div
+      className="homeSpecialMessage"
+    >
+      This is a special message
+    </div>
+    <p>
+      Capture a performance profile. Analyze it. Share it. Make the web faster.
+    </p>
+    <div
+      className="homeInstructionsTransitionGroup"
+    >
+      <div
+        className="homeInstructions"
+      >
+        <div
+          className="homeInstructionsLeft"
+        >
+          <div
+            style={
+              Object {
+                "textAlign": "center",
+              }
+            }
+          >
+            <img
+              className="homeSectionScreenshot"
+              src="test-file-stub"
+            />
+          </div>
+        </div>
+        <div
+          className="homeInstructionsRight"
+        >
+          <h2>
+            How to view and record profiles
+          </h2>
+          <p>
+            Recording performance profiles requires
+             
+            <a
+              href="https://www.mozilla.org/en-US/firefox/new/"
+            >
+              Firefox
+            </a>
+            . However, existing profiles can be viewed in any modern browser. To view a profile, either follow a link to a public profile, drag a saved local profile onto this screen or select it using the button below.
+          </p>
+          <div>
+            <input
+              onChange={[Function]}
+              type="file"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="homeDrop"
+    >
+      <div
+        className="homeDropMessage"
+      >
+        Drop a saved profile here
+      </div>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`app/Home renders the install screen for the extension 1`] = `
+<div
+  className="home"
+  onDragEnter={[Function]}
+  onDragExit={[Function]}
+  onDrop={[Function]}
+>
+  <section
+    className="homeSection"
+  >
+    <h1
+      className="homeTitle"
+    >
+      <span
+        className="homeTitleText"
+      >
+        perf.html
+      </span>
+      <span
+        className="homeTitleSubtext"
+      >
+         
+        — Web app for Firefox performance analysis
+      </span>
+      <a
+        className="homeTitleGithubIcon"
+        href="https://github.com/devtools-html/perf.html"
+      >
+        <svg
+          aria-hidden="true"
+          className="octicon octicon-mark-github"
+          height="22"
+          version="1.1"
+          viewBox="0 0 16 16"
+          width="22"
+        >
+          <path
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+            fillRule="evenodd"
+          />
+        </svg>
+      </a>
+    </h1>
+    <div
+      className="homeSpecialMessage"
+    >
+      This is a special message
+    </div>
+    <p>
+      Capture a performance profile. Analyze it. Share it. Make the web faster.
+    </p>
+    <div
+      className="homeInstructionsTransitionGroup"
+    >
+      <div
+        className="homeInstructions"
+      >
+        <div
+          className="homeInstructionsLeft"
+        >
+          <div
+            style={
+              Object {
+                "textAlign": "center",
+              }
+            }
+          >
+            <img
+              className="homeSectionScreenshot"
+              src="test-file-stub"
+            />
+          </div>
+        </div>
+        <div
+          className="homeInstructionsRight"
+        >
+          <h2>
+            Getting started
+          </h2>
+          <p>
+            Install the Gecko Profiler Add-on to start recording a performance profile in Firefox, then analyze it and share it with perf.html.
+          </p>
+          <a
+            className="homeSectionInstallButton"
+            href="https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi"
+            onClick={[Function]}
+          >
+            <span
+              className="homeSectionPlus"
+            >
+              +
+            </span>
+            Install add-on
+          </a>
+          <p>
+            You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
+          </p>
+          <div>
+            <input
+              onChange={[Function]}
+              type="file"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="homeDrop"
+    >
+      <div
+        className="homeDropMessage"
+      >
+        Drop a saved profile here
+      </div>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`app/Home renders the install screen for the legacy add-on 1`] = `
+<div
+  className="home"
+  onDragEnter={[Function]}
+  onDragExit={[Function]}
+  onDrop={[Function]}
+>
+  <section
+    className="homeSection"
+  >
+    <h1
+      className="homeTitle"
+    >
+      <span
+        className="homeTitleText"
+      >
+        perf.html
+      </span>
+      <span
+        className="homeTitleSubtext"
+      >
+         
+        — Web app for Firefox performance analysis
+      </span>
+      <a
+        className="homeTitleGithubIcon"
+        href="https://github.com/devtools-html/perf.html"
+      >
+        <svg
+          aria-hidden="true"
+          className="octicon octicon-mark-github"
+          height="22"
+          version="1.1"
+          viewBox="0 0 16 16"
+          width="22"
+        >
+          <path
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+            fillRule="evenodd"
+          />
+        </svg>
+      </a>
+    </h1>
+    <div
+      className="homeSpecialMessage"
+    >
+      This is a special message
+    </div>
+    <p>
+      Capture a performance profile. Analyze it. Share it. Make the web faster.
+    </p>
+    <div
+      className="homeInstructionsTransitionGroup"
+    >
+      <div
+        className="homeInstructions"
+      >
+        <div
+          className="homeInstructionsLeft"
+        >
+          <div
+            style={
+              Object {
+                "textAlign": "center",
+              }
+            }
+          >
+            <img
+              className="homeSectionScreenshot"
+              src="test-file-stub"
+            />
+          </div>
+        </div>
+        <div
+          className="homeInstructionsRight"
+        >
+          <h2>
+            Recording profiles
+          </h2>
+          <p>
+            To start recording a performance profile in Firefox, first install the
+             
+            <a
+              className={undefined}
+              href="https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi"
+              onClick={[Function]}
+            >
+              Gecko Profiler Add-on
+            </a>
+            . Then use the button added to the browser, or use the following shortcuts to record a profile. The button’s icon is blue when a profile is recording. Hit 
+            <kbd>
+              Capture Profile
+            </kbd>
+             to load the data into perf.html.
+          </p>
+          <p>
+            <div>
+              <p>
+                <kbd>
+                  Ctrl
+                </kbd>
+                +
+                <kbd>
+                  Shift
+                </kbd>
+                +
+                <kbd>
+                  1
+                </kbd>
+                 Stop and start profiling
+              </p>
+              <p>
+                <kbd>
+                  Ctrl
+                </kbd>
+                +
+                <kbd>
+                  Shift
+                </kbd>
+                +
+                <kbd>
+                  2
+                </kbd>
+                 Capture and load profile
+              </p>
+            </div>
+          </p>
+          <p>
+            You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
+          </p>
+          <div>
+            <input
+              onChange={[Function]}
+              type="file"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="homeDrop"
+    >
+      <div
+        className="homeDropMessage"
+      >
+        Drop a saved profile here
+      </div>
+    </div>
+  </section>
+</div>
+`;
+
+exports[`app/Home renders the usage instructions for pages with the extension installed 1`] = `
+<div
+  className="home"
+  onDragEnter={[Function]}
+  onDragExit={[Function]}
+  onDrop={[Function]}
+>
+  <section
+    className="homeSection"
+  >
+    <h1
+      className="homeTitle"
+    >
+      <span
+        className="homeTitleText"
+      >
+        perf.html
+      </span>
+      <span
+        className="homeTitleSubtext"
+      >
+         
+        — Web app for Firefox performance analysis
+      </span>
+      <a
+        className="homeTitleGithubIcon"
+        href="https://github.com/devtools-html/perf.html"
+      >
+        <svg
+          aria-hidden="true"
+          className="octicon octicon-mark-github"
+          height="22"
+          version="1.1"
+          viewBox="0 0 16 16"
+          width="22"
+        >
+          <path
+            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
+            fillRule="evenodd"
+          />
+        </svg>
+      </a>
+    </h1>
+    <div
+      className="homeSpecialMessage"
+    >
+      This is a special message
+    </div>
+    <p>
+      Capture a performance profile. Analyze it. Share it. Make the web faster.
+    </p>
+    <div
+      className="homeInstructionsTransitionGroup"
+    >
+      <div
+        className="homeInstructions"
+      >
+        <div
+          className="homeInstructionsLeft"
+        >
+          <p>
+            <img
+              className="homeSectionScreenshot"
+              src="test-file-stub"
+            />
+          </p>
+        </div>
+        <div
+          className="homeInstructionsRight"
+        >
+          <h2>
+            Recording profiles
+          </h2>
+          <p>
+            To start profiling, click on the profiling button, or use the keyboard shortcuts. The icon is blue when a profile is recording. Hit
+            <kbd>
+              Capture Profile
+            </kbd>
+             to load the data into perf.html.
+          </p>
+          <p>
+            <div>
+              <p>
+                <kbd>
+                  Ctrl
+                </kbd>
+                +
+                <kbd>
+                  Shift
+                </kbd>
+                +
+                <kbd>
+                  1
+                </kbd>
+                 Stop and start profiling
+              </p>
+              <p>
+                <kbd>
+                  Ctrl
+                </kbd>
+                +
+                <kbd>
+                  Shift
+                </kbd>
+                +
+                <kbd>
+                  2
+                </kbd>
+                 Capture and load profile
+              </p>
+            </div>
+          </p>
+          <p>
+            You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
+          </p>
+          <div>
+            <input
+              onChange={[Function]}
+              type="file"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="homeDrop"
+    >
+      <div
+        className="homeDropMessage"
+      >
+        Drop a saved profile here
+      </div>
+    </div>
+  </section>
+</div>
+`;
