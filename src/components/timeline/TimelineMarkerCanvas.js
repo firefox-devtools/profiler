@@ -43,6 +43,7 @@ const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
+const MARKER_LABEL_MAX_LENGTH = 30;
 
 class TimelineMarkerCanvas extends PureComponent {
   _requestedAnimationFrame: boolean;
@@ -152,11 +153,6 @@ class TimelineMarkerCanvas extends PureComponent {
           );
           const h: CssPixels = ROW_HEIGHT - 1;
 
-          if (w < 2) {
-            // Skip sending draw calls for sufficiently small boxes.
-            continue;
-          }
-
           const tracingMarkerIndex = markerTiming.index[i];
           const isHovered = hoveredItem === tracingMarkerIndex;
           ctx.fillStyle = isHovered ? 'Highlight' : '#8296cb';
@@ -232,8 +228,12 @@ class TimelineMarkerCanvas extends PureComponent {
       if (rowIndex > 0 && name === markerTimingRows[rowIndex - 1].name) {
         continue;
       }
+      const displayedName =
+        name.length < MARKER_LABEL_MAX_LENGTH
+          ? name
+          : name.slice(0, MARKER_LABEL_MAX_LENGTH) + '…';
       const y = rowIndex * rowHeight - viewportTop;
-      ctx.fillText(name, 5, y + TEXT_OFFSET_TOP);
+      ctx.fillText(displayedName, 5, y + TEXT_OFFSET_TOP);
     }
   }
 

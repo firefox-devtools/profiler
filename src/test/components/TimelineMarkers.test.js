@@ -44,6 +44,24 @@ it('renders TimelineMarkers correctly', () => {
     ['Marker A', 0, { startTime: 0, endTime: 10 }],
     ['Marker B', 0, { startTime: 0, endTime: 10 }],
     ['Marker C', 5, { startTime: 5, endTime: 15 }],
+    [
+      'Very very very very very very long Marker D',
+      6,
+      { startTime: 5, endTime: 15 },
+    ],
+    ['Dot marker E', 4, { startTime: 4, endTime: 4 }],
+    ['Non-interval marker F without data', 7, null],
+    [
+      'Marker G type DOMEvent',
+      5,
+      {
+        startTime: 5,
+        endTime: 10,
+        type: 'DOMEvent',
+        eventType: 'click',
+        phase: 2,
+      },
+    ],
   ]);
 
   const timeline = renderer.create(

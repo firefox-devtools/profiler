@@ -914,9 +914,16 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
   for (let i = 0; i < markers.length; i++) {
     const data = markers.data[i];
     if (!data) {
-      continue;
-    }
-    if (data.type === 'tracing') {
+      // Add a marker with a zero duration
+      const marker = {
+        start: markers.time[i],
+        dur: 0,
+        name: stringTable.getString(markers.name[i]),
+        title: null,
+        data: null,
+      };
+      tracingMarkers.push(marker);
+    } else if (data.type === 'tracing') {
       const time = markers.time[i];
       const nameStringIndex = markers.name[i];
       if (data.interval === 'start') {

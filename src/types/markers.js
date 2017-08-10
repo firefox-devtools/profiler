@@ -105,7 +105,13 @@ export type DOMEventMarkerPayload = {
   startTime: Milliseconds,
   endTime: Milliseconds,
   eventType: string,
-  phase: number,
+  phase: 0 | 1 | 2 | 3,
+};
+
+export type DummyForTestsMarkerPayload = {
+  type: 'DummyForTests',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
 };
 
 /**
@@ -120,4 +126,5 @@ export type MarkerPayload =
   | GCMinorMarkerPayload
   | GCMajorMarkerPayload
   | GCSliceMarkerPayload
+  | DummyForTestsMarkerPayload
   | null;
