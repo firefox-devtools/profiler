@@ -46,7 +46,6 @@ type Props = {
   isDragging: boolean,
 };
 
-const ROW_HEIGHT = 16;
 const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
 const MARKER_MIN_DOT_RADIUS = 0.15;
@@ -117,7 +116,7 @@ class TimelineMarkerCanvas extends PureComponent {
       }
       const textMeasurement = this._textMeasurement;
 
-      this.drawRoundedRect(ctx, x, y + 1, w, h - 1, 1);
+      this.drawRoundedRect(ctx, x, y + 1, w, h - 1, 2);
 
       // Draw the text label
       // TODO - L10N RTL.
@@ -158,6 +157,7 @@ class TimelineMarkerCanvas extends PureComponent {
     const {
       rangeStart,
       rangeEnd,
+      rowHeight,
       containerWidth,
       markerTimingRows,
       viewportLeft,
@@ -200,10 +200,10 @@ class TimelineMarkerCanvas extends PureComponent {
 
           const x: CssPixels =
             (startTime - viewportLeft) * containerWidth / viewportLength;
-          const y: CssPixels = rowIndex * ROW_HEIGHT - viewportTop;
+          const y: CssPixels = rowIndex * rowHeight - viewportTop;
           const w: CssPixels =
             (endTime - startTime) * containerWidth / viewportLength;
-          const h: CssPixels = ROW_HEIGHT - 1;
+          const h: CssPixels = rowHeight - 1;
           const text = markerTiming.label[i];
 
           const tracingMarkerIndex = markerTiming.index[i];
@@ -239,7 +239,7 @@ class TimelineMarkerCanvas extends PureComponent {
     // Draw separators
     ctx.fillStyle = '#eee';
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-      const y = (rowIndex + 1) * rowHeight - viewportTop;
+      const y = (rowIndex + 1) * rowHeight - viewportTop - 1;
       ctx.fillRect(0, y, containerWidth, 1);
     }
 
@@ -249,9 +249,8 @@ class TimelineMarkerCanvas extends PureComponent {
     gradient.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
     ctx.fillStyle = gradient;
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-      // Get the timing information for a row of stack frames.
       const y = rowIndex * rowHeight - viewportTop;
-      ctx.fillRect(0, y, 150, rowHeight);
+      ctx.fillRect(0, y, 150, rowHeight - 1);
     }
 
     // Draw the text
@@ -331,14 +330,36 @@ class TimelineMarkerCanvas extends PureComponent {
     y: CssPixels,
     width: CssPixels,
     height: CssPixels,
-    cornerSize: CssPixels
+    radius: CssPixels
   ) {
-    // Cut out c x c -sized squares in the corners.
-    const c = Math.min(width / 2, Math.min(height / 2, cornerSize));
-    const bottom = y + height;
-    ctx.fillRect(x + c, y, width - 2 * c, c);
-    ctx.fillRect(x, y + c, width, height - 2 * c);
-    ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
+    // stolen from https://www.rgraph.net/canvas/reference/arcto.html
+
+    const r = Math.min(radius, height / 2, width / 2);
+    const x2 = width - 1;
+    const y2 = height - 1;
+
+    // Save the existing state of the canvas so that it can be restored later
+    ctx.save();
+
+    // Translate to the given X/Y coordinates
+    ctx.translate(x, y);
+
+    ctx.beginPath();
+
+    // Move to the center of the top horizontal line
+    ctx.moveTo(x2 / 2, 0);
+
+    // Draw the rounded corners. The connecting lines in between them are drawn automatically
+    ctx.arcTo(x2, 0, x2, y2, Math.min(y2 / 2, r));
+    ctx.arcTo(x2, y2, 0, y2, Math.min(x2 / 2, r));
+    ctx.arcTo(0, y2, 0, 0, Math.min(y2 / 2, r));
+    ctx.arcTo(0, 0, radius, 0, Math.min(x2 / 2, r));
+
+    // Draw a line back to the start coordinates
+    ctx.lineTo(x2 / 2, 0);
+    ctx.fill();
+
+    ctx.restore();
   }
 
   getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React$Element<*> {
