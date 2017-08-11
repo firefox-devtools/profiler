@@ -108,7 +108,7 @@ class TimelineMarkerCanvas extends PureComponent {
   ) {
     ctx.fillStyle = colors.background;
 
-    if (w >= h) {
+    if (2 * w >= h) {
       // Ensure the text measurement tool is created, since this is the first time
       // this class has access to a ctx.
       if (!this._textMeasurement) {
@@ -132,9 +132,9 @@ class TimelineMarkerCanvas extends PureComponent {
         }
       }
     } else {
-      const radiusRatio = w / h;
+      const radiusRatio = w / h; // Guaranteed to be between 0 and 0.5
       const radius =
-        radiusRatio * (MARKER_MAX_DOT_RADIUS - MARKER_MIN_DOT_RADIUS) +
+        2 * radiusRatio * (MARKER_MAX_DOT_RADIUS - MARKER_MIN_DOT_RADIUS) +
         MARKER_MIN_DOT_RADIUS;
       ctx.beginPath();
       ctx.arc(
