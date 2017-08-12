@@ -12,9 +12,11 @@ import * as RangeFilters from '../profile-logic/range-filters';
 import type { ThreadIndex } from '../types/profile';
 import type { StartEndRange } from '../types/units';
 import type {
+  TransformStacksPerThread,
+  TransformStack,
+} from '../types/transforms';
+import type {
   Action,
-  CallTreeFiltersPerThread,
-  CallTreeFilter,
   DataSource,
   ImplementationFilter,
 } from '../types/actions';
@@ -136,20 +138,20 @@ function markersSearchString(state: string = '', action: Action) {
   }
 }
 
-function callTreeFilters(state: CallTreeFiltersPerThread = {}, action: Action) {
+function transforms(state: TransformStacksPerThread = {}, action: Action) {
   switch (action.type) {
-    case 'ADD_CALL_TREE_FILTER': {
-      const { threadIndex, filter } = action;
-      const oldFilters = state[threadIndex] || [];
+    case 'ADD_TRANSFORM_TO_STACK': {
+      const { threadIndex, transform } = action;
+      const transforms = state[threadIndex] || [];
       return Object.assign({}, state, {
-        [threadIndex]: [...oldFilters, filter],
+        [threadIndex]: [...transforms, transform],
       });
     }
-    case 'POP_CALL_TREE_FILTERS': {
+    case 'POP_TRANSFORMS_FROM_STACK': {
       const { threadIndex, firstRemovedFilterIndex } = action;
-      const oldFilters = state[threadIndex] || [];
+      const transforms = state[threadIndex] || [];
       return Object.assign({}, state, {
-        [threadIndex]: oldFilters.slice(0, firstRemovedFilterIndex),
+        [threadIndex]: transforms.slice(0, firstRemovedFilterIndex),
       });
     }
     default:
@@ -254,18 +256,18 @@ const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (
     rangeFilters,
     selectedThread,
     callTreeSearchString,
-    callTreeFilters,
     implementation,
     invertCallstack,
     hidePlatformDetails,
     threadOrder,
     hiddenThreads,
     markersSearchString,
+    transforms,
   })
 );
 export default urlStateReducer;
 
-const getURLState = (state: State): URLState => state.urlState;
+export const getURLState = (state: State): URLState => state.urlState;
 
 export const getDataSource = (state: State) => getURLState(state).dataSource;
 export const getHash = (state: State) => getURLState(state).hash;
@@ -286,11 +288,11 @@ export const getMarkersSearchString = (state: State) =>
 export const getSelectedTab = (state: State) => getURLState(state).selectedTab;
 export const getSelectedThreadIndex = (state: State) =>
   getURLState(state).selectedThread;
-export const getCallTreeFilters = (
+export const getTransformStack = (
   state: State,
   threadIndex: ThreadIndex
-): CallTreeFilter[] => {
-  return getURLState(state).callTreeFilters[threadIndex] || [];
+): TransformStack => {
+  return getURLState(state).transforms[threadIndex] || [];
 };
 export const getThreadOrder = (state: State) => getURLState(state).threadOrder;
 export const getHiddenThreads = (state: State) =>

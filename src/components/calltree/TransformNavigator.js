@@ -5,29 +5,29 @@
 // @flow
 
 import { connect } from 'react-redux';
-import actions from '../../actions';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import FilterNavigatorBar from './FilterNavigatorBar';
 import type { State } from '../../types/reducers';
+import { popTransformsFromStack } from '../../actions/profile-view';
 
-import './ProfileCallTreeFilterNavigator.css';
+import './TransformNavigator.css';
 
 export default connect(
   (state: State) => {
-    const items = selectedThreadSelectors.getCallTreeFilterLabels(state);
+    const items = selectedThreadSelectors.getTransformLabels(state);
     return {
-      className: 'profileCallTreeFilterNavigator',
+      className: 'calltreeTransformNavigator',
       items,
       selectedItem: items.length - 1,
       threadIndex: getSelectedThreadIndex(state),
     };
   },
-  actions,
+  { popTransformsFromStack },
   (stateProps, dispatchProps) => ({
     className: stateProps.className,
     items: stateProps.items,
     selectedItem: stateProps.selectedItem,
-    onPop: i => dispatchProps.popCallTreeFilters(stateProps.threadIndex, i),
+    onPop: i => dispatchProps.popTransformsFromStack(stateProps.threadIndex, i),
   })
 )(FilterNavigatorBar);

@@ -10,7 +10,7 @@ import {
 } from '../profile-logic/symbolication';
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
-import * as CallTreeFilters from '../profile-logic/call-tree-filters';
+import * as FocusSubtree from '../profile-logic/transforms';
 import * as URLState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
 import * as StackTiming from '../profile-logic/stack-timing';
@@ -35,11 +35,7 @@ import type {
   MarkerTimingRows,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
-import type {
-  Action,
-  CallTreeFilter,
-  ProfileSelection,
-} from '../types/actions';
+import type { Action, ProfileSelection } from '../types/actions';
 import type {
   State,
   Reducer,
@@ -48,6 +44,10 @@ import type {
   SymbolicationStatus,
   ThreadViewOptions,
 } from '../types/reducers';
+import type {
+  TransformStack,
+  FocusSubtreeTransform,
+} from '../types/transforms';
 
 function profile(
   state: Profile = ProfileData.getEmptyProfile(),
@@ -98,27 +98,27 @@ function profile(
   }
 }
 
-function callNodeAfterCallTreeFilter(
+function callNodePathAfterNewTransform(
   callNodePath: IndexIntoFuncTable[],
-  filter: CallTreeFilter
-) {
-  if (filter.type === 'prefix' && !filter.matchJSOnly) {
-    return removePrefixFromCallNodePath(filter.prefixFuncs, callNodePath);
+  transform: FocusSubtreeTransform
+): IndexIntoFuncTable[] {
+  if (!transform.inverted && transform.implementation !== 'js') {
+    return removePrefixFromCallNodePath(transform.callNodePath, callNodePath);
   }
   return callNodePath;
 }
 
 function removePrefixFromCallNodePath(
-  prefixFuncs: IndexIntoFuncTable[],
+  prefixFuncsPath: IndexIntoFuncTable[],
   callNodePath: IndexIntoFuncTable[]
 ) {
   if (
-    prefixFuncs.length > callNodePath.length ||
-    prefixFuncs.some((prefixFunc, i) => prefixFunc !== callNodePath[i])
+    prefixFuncsPath.length > callNodePath.length ||
+    prefixFuncsPath.some((prefixFunc, i) => prefixFunc !== callNodePath[i])
   ) {
     return [];
   }
-  return callNodePath.slice(prefixFuncs.length - 1);
+  return callNodePath.slice(prefixFuncsPath.length - 1);
 }
 
 function symbolicationStatus(
@@ -207,16 +207,16 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
         ...state.slice(threadIndex + 1),
       ];
     }
-    case 'ADD_CALL_TREE_FILTER': {
-      const { threadIndex, filter } = action;
+    case 'ADD_TRANSFORM_TO_STACK': {
+      const { threadIndex, transform } = action;
       const expandedCallNodePaths = state[
         threadIndex
       ].expandedCallNodePaths.map(path =>
-        callNodeAfterCallTreeFilter(path, filter)
+        callNodePathAfterNewTransform(path, transform)
       );
-      const selectedCallNodePath = callNodeAfterCallTreeFilter(
+      const selectedCallNodePath = callNodePathAfterNewTransform(
         state[threadIndex].selectedCallNodePath,
-        filter
+        transform
       );
       return [
         ...state.slice(0, threadIndex),
@@ -384,8 +384,8 @@ export const getProfileTaskTracerData = (state: State): TaskTracer =>
 export type SelectorsForThread = {
   getThread: State => Thread,
   getViewOptions: State => ThreadViewOptions,
-  getCallTreeFilters: State => CallTreeFilter[],
-  getCallTreeFilterLabels: State => string[],
+  getTransformStack: State => TransformStack,
+  getTransformLabels: State => string[],
   getRangeFilteredThread: State => Thread,
   getJankInstances: State => TracingMarker[],
   getTracingMarkers: State => TracingMarker[],
@@ -417,8 +417,8 @@ export const selectorsForThread = (
       getProfile(state).threads[threadIndex];
     const getViewOptions = (state: State): ThreadViewOptions =>
       getProfileViewOptions(state).perThread[threadIndex];
-    const getCallTreeFilters = (state: State): CallTreeFilter[] =>
-      URLState.getCallTreeFilters(state, threadIndex);
+    const getTransformStack = (state: State): TransformStack =>
+      URLState.getTransformStack(state, threadIndex);
     const getFriendlyThreadName = createSelector(
       getThreads,
       getThread,
@@ -428,11 +428,11 @@ export const selectorsForThread = (
       getThread,
       ProfileData.getThreadProcessDetails
     );
-    const getCallTreeFilterLabels: (state: State) => string[] = createSelector(
+    const getTransformLabels: (state: State) => string[] = createSelector(
       getThread,
       getFriendlyThreadName,
-      getCallTreeFilters,
-      CallTreeFilters.getCallTreeFilterLabels
+      getTransformStack,
+      FocusSubtree.getTransformLabels
     );
     const getRangeFilteredThread = createSelector(
       getThread,
@@ -466,33 +466,33 @@ export const selectorsForThread = (
         return ProfileData.filterTracingMarkersToRange(markers, start, end);
       }
     );
-    const _getRangeAndCallTreeFilteredThread = createSelector(
+    const _getRangeAndTransformFilteredThread = createSelector(
       getRangeFilteredThread,
-      getCallTreeFilters,
-      (thread, callTreeFilters): Thread => {
-        const result = callTreeFilters.reduce((t, filter) => {
-          switch (filter.type) {
-            case 'prefix':
-              return ProfileData.filterThreadToPrefixStack(
-                t,
-                filter.prefixFuncs,
-                filter.matchJSOnly
-              );
-            case 'postfix':
-              return ProfileData.filterThreadToPostfixStack(
-                t,
-                filter.postfixFuncs,
-                filter.matchJSOnly
-              );
+      getTransformStack,
+      (thread, transforms): Thread => {
+        const result = transforms.reduce((t, transform) => {
+          switch (transform.type) {
+            case 'focus-subtree':
+              return transform.inverted
+                ? ProfileData.filterThreadToPostfixCallNodePath(
+                    t,
+                    transform.callNodePath,
+                    transform.implementation
+                  )
+                : ProfileData.filterThreadToPrefixCallNodePath(
+                    t,
+                    transform.callNodePath,
+                    transform.implementation
+                  );
             default:
-              throw new Error('unhandled call tree filter');
+              throw new Error('Unhandled transform.');
           }
         }, thread);
         return result;
       }
     );
     const _getImplementationFilteredThread = createSelector(
-      _getRangeAndCallTreeFilteredThread,
+      _getRangeAndTransformFilteredThread,
       URLState.getImplementationFilter,
       ProfileData.filterThreadByImplementation
     );
@@ -642,8 +642,8 @@ export const selectorsForThread = (
     selectorsForThreads[threadIndex] = {
       getThread,
       getViewOptions,
-      getCallTreeFilters,
-      getCallTreeFilterLabels,
+      getTransformStack,
+      getTransformLabels,
       getRangeFilteredThread,
       getJankInstances,
       getTracingMarkers,

@@ -8,7 +8,6 @@ import type { Summary } from '../profile-logic/summarize-profile';
 import type {
   Action,
   ExpandedSet,
-  CallTreeFiltersPerThread,
   DataSource,
   ProfileSelection,
   ImplementationFilter,
@@ -23,6 +22,7 @@ import type {
 import type { Attempt } from '../utils/errors';
 import type { GetLabel } from '../profile-logic/labeling-strategies';
 import type { GetCategory } from '../profile-logic/color-categories';
+import type { TransformStacksPerThread } from './transforms';
 
 export type Reducer<T> = (T, Action) => T;
 
@@ -79,12 +79,12 @@ export type URLState = {
   selectedThread: ThreadIndex,
   callTreeSearchString: string,
   markersSearchString: string,
-  callTreeFilters: CallTreeFiltersPerThread,
   implementation: ImplementationFilter,
   invertCallstack: boolean,
   hidePlatformDetails: boolean,
   threadOrder: ThreadIndex[],
   hiddenThreads: ThreadIndex[],
+  transforms: TransformStacksPerThread,
 };
 
 export type IconState = Set<string>;

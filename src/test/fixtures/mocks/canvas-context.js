@@ -26,6 +26,7 @@ export default function mockCanvasContext() {
   return new Proxy(
     {
       scale: spyLog('scale'),
+      fill: spyLog('fill'),
       fillRect: spyLog('fillRect'),
       fillText: spyLog('fillText'),
       clearRect: spyLog('clearRect'),

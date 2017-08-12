@@ -27,6 +27,7 @@ import type {
 import type { StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
 import { getEmptyTaskTracerData } from './task-tracer';
+import type { ImplementationFilter } from '../types/actions';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -167,6 +168,18 @@ export function defaultThreadOrder(threads: Thread[]): ThreadIndex[] {
     return nameA === 'Compositor' || nameA === 'Renderer' ? 1 : -1;
   });
   return threadOrder;
+}
+
+export function toValidImplementationFilter(
+  implementation: string
+): ImplementationFilter {
+  switch (implementation) {
+    case 'cpp':
+    case 'js':
+      return implementation;
+    default:
+      return 'combined';
+  }
 }
 
 export function filterThreadByImplementation(
@@ -482,23 +495,21 @@ export function filterThreadToSearchString(
 }
 
 /**
- * Filter thread to only contain stacks which start with |prefixFuncs|, and
- * only samples witth those stacks. The new stacks' roots will be frames whose
- * func is the last element of the prefix func array.
- * @param  {object} thread      The thread.
- * @param  {array} prefixFuncs  The prefix stack, as an array of funcs.
- * @param  {bool} matchJSOnly   Ignore non-JS frames during matching.
- * @return {object}             The filtered thread.
+ * Filter thread to only contain stacks which start with |prefixCallNodePath|, and
+ * only samples with those stacks. The new stacks' roots will be frames whose
+ * func is the last element of the prefix CallNodePath.
  */
-export function filterThreadToPrefixStack(
+export function filterThreadToPrefixCallNodePath(
   thread: Thread,
-  prefixFuncs: IndexIntoFuncTable[],
-  matchJSOnly: boolean
+  prefixCallNodePath: IndexIntoFuncTable[],
+  implementation: ImplementationFilter
 ): Thread {
-  return timeCode('filterThreadToPrefixStack', () => {
+  return timeCode('filterThreadToPrefixCallNodePath', () => {
     const { stackTable, frameTable, funcTable, samples } = thread;
-    const prefixDepth = prefixFuncs.length;
+    const prefixDepth = prefixCallNodePath.length;
     const stackMatches = new Int32Array(stackTable.length);
+    // TODO - Handle any implementation here.
+    const matchJSOnly = implementation === 'js';
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
       IndexIntoStackTable | null
@@ -519,7 +530,7 @@ export function filterThreadToPrefixStack(
           stackMatchesUpTo = prefixDepth;
         } else {
           const func = frameTable.func[frame];
-          if (func === prefixFuncs[prefixMatchesUpTo]) {
+          if (func === prefixCallNodePath[prefixMatchesUpTo]) {
             stackMatchesUpTo = prefixMatchesUpTo + 1;
           } else if (matchJSOnly && !funcTable.isJS[func]) {
             stackMatchesUpTo = prefixMatchesUpTo;
@@ -558,30 +569,26 @@ export function filterThreadToPrefixStack(
 }
 
 /**
- * Filter thread to only contain stacks which end with |postfixFuncs|, and
+ * Filter thread to only contain stacks which end with |postfixCallNodePath|, and
  * only samples witth those stacks. The new stacks' leaf frames will be
  * frames whose func is the last element of the postfix func array.
- * @param  {object} thread      The thread.
- * @param  {array} postfixFuncs The postfix stack, as an array of funcs,
- *                              starting from the leaf func.
- * @param  {bool} matchJSOnly   Ignore non-JS frames during matching.
- * @return {object}             The filtered thread.
  */
-export function filterThreadToPostfixStack(
+export function filterThreadToPostfixCallNodePath(
   thread: Thread,
-  postfixFuncs: IndexIntoFuncTable[],
-  matchJSOnly: boolean
+  postfixCallNodePath: IndexIntoFuncTable[],
+  implementation: ImplementationFilter
 ): Thread {
-  return timeCode('filterThreadToPostfixStack', () => {
-    const postfixDepth = postfixFuncs.length;
+  return timeCode('filterThreadToPostfixCallNodePath', () => {
+    const postfixDepth = postfixCallNodePath.length;
     const { stackTable, frameTable, funcTable, samples } = thread;
-
+    // TODO - Match any implementation.
+    const matchJSOnly = implementation === 'js';
     function convertStack(leaf) {
       let matchesUpToDepth = 0; // counted from the leaf
       for (let stack = leaf; stack !== null; stack = stackTable.prefix[stack]) {
         const frame = stackTable.frame[stack];
         const func = frameTable.func[frame];
-        if (func === postfixFuncs[matchesUpToDepth]) {
+        if (func === postfixCallNodePath[matchesUpToDepth]) {
           matchesUpToDepth++;
           if (matchesUpToDepth === postfixDepth) {
             return stack;
@@ -911,9 +918,16 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
   for (let i = 0; i < markers.length; i++) {
     const data = markers.data[i];
     if (!data) {
-      continue;
-    }
-    if (data.type === 'tracing') {
+      // Add a marker with a zero duration
+      const marker = {
+        start: markers.time[i],
+        dur: 0,
+        name: stringTable.getString(markers.name[i]),
+        title: null,
+        data: null,
+      };
+      tracingMarkers.push(marker);
+    } else if (data.type === 'tracing') {
       const time = markers.time[i];
       const nameStringIndex = markers.name[i];
       if (data.interval === 'start') {
