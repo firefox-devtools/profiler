@@ -151,7 +151,7 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
   ) {
     if (
       prevProps !== this.props ||
-      prevState.hoveredItem !== this.state.hoveredItem
+      !hoveredItemsAreEqual(prevState.hoveredItem, this.state.hoveredItem)
     ) {
       this._scheduleDraw();
     }
@@ -186,4 +186,34 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
       </div>
     );
   }
+}
+
+/**
+ * Check for shallow equality for objects, and strict equality for everything else.
+ */
+function hoveredItemsAreEqual(a: any, b: any) {
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
+    if (a.length !== b.length) {
+      return false;
+    }
+    let hasAllKeys = true;
+    for (const aKey in a) {
+      let hasKey = false;
+      for (const bKey in b) {
+        if (aKey === bKey) {
+          if (a[aKey] !== b[bKey]) {
+            return false;
+          }
+          hasKey = true;
+          break;
+        }
+      }
+      hasAllKeys = hasAllKeys && hasKey;
+      if (!hasAllKeys) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return a === b;
 }
