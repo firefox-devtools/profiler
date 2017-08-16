@@ -15,6 +15,7 @@ import type { GetLabel } from '../profile-logic/labeling-strategies';
 import type { GetCategory } from '../profile-logic/color-categories';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform } from './transforms';
+import type { UrlState } from './reducers';
 
 export type ExpandedSet = Set<ThreadIndex>;
 export type DataSource =
@@ -133,11 +134,10 @@ type TimelineAction =
 
 type UrlEnhancerAction =
   | { type: '@@urlenhancer/urlSetupDone' }
-  | { type: '@@urlenhancer/updateUrlState', urlState: any };
+  | { type: '@@urlenhancer/updateUrlState', urlState: UrlState };
 
 type UrlStateAction =
   | { type: 'WAITING_FOR_PROFILE_FROM_FILE' }
-  | { type: 'PROFILE_PUBLISHED', hash: string }
   | { type: 'CHANGE_SELECTED_TAB', selectedTab: string }
   | { type: 'ADD_RANGE_FILTER', start: number, end: number }
   | { type: 'POP_RANGE_FILTERS', firstRemovedFilterIndex: number }
@@ -159,11 +159,20 @@ type UrlStateAction =
     }
   | { type: 'CHANGE_INVERT_CALLSTACK', invertCallstack: boolean }
   | { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean }
-  | { type: 'CHANGE_MARKER_SEARCH_STRING', searchString: string };
+  | { type: 'CHANGE_MARKER_SEARCH_STRING', searchString: string }
+  | { type: 'URL_STATE_HAS_CHANGED' };
 
 type IconsAction =
   | { type: 'ICON_HAS_LOADED', icon: string }
   | { type: 'ICON_IN_ERROR', icon: string };
+
+type ProfileUploadAction =
+  | { type: 'PROFILE_UPLOAD_SUCCESS', hash: string }
+  | { type: 'PROFILE_UPLOAD_START' }
+  | { type: 'PROFILE_UPLOAD_ERROR', error: Error }
+  | { type: 'PROFILE_UPLOAD_PROGRESS', progress: number }
+  | { type: 'SHORTENING_URL', url: string }
+  | { type: 'SHORTENED_URL', longUrl: string, shortUrl: string };
 
 export type Action =
   | ProfileSummaryAction
@@ -172,4 +181,5 @@ export type Action =
   | TimelineAction
   | UrlEnhancerAction
   | UrlStateAction
-  | IconsAction;
+  | IconsAction
+  | ProfileUploadAction;

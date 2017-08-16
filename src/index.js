@@ -7,6 +7,7 @@ import Perf from 'react-addons-perf';
 import { render } from 'react-dom';
 import Root from './components/app/Root';
 import createStore from './create-store';
+import urlStateWatcher from './actors/url-state';
 import '../res/style.css';
 
 if (process.env.NODE_ENV === 'production') {
@@ -23,6 +24,9 @@ window.geckoProfilerPromise = new Promise(function(resolve) {
 });
 
 const store = createStore();
+const watchUrlState = () => urlStateWatcher(store.getState(), store.dispatch);
+store.subscribe(watchUrlState);
+watchUrlState(); // Doing it now as well will kick off the application
 
 render(<Root store={store} />, document.getElementById('root'));
 

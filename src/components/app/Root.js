@@ -13,14 +13,12 @@ import {
 } from '../../actions/receive-profile';
 import ProfileViewer from './ProfileViewer';
 import Home from './Home';
-import { urlFromState, stateFromLocation } from '../../url-handling';
 import { getView } from '../../reducers/app';
 import {
   getDataSource,
   getHash,
   getProfileUrl,
 } from '../../reducers/url-state';
-import UrlManager from './UrlManager';
 
 import type { Store } from '../../types/store';
 import type { AppViewState, State } from '../../types/reducers';
@@ -216,12 +214,7 @@ export default class Root extends PureComponent {
     const { store } = this.props;
     return (
       <Provider store={store}>
-        <UrlManager
-          urlFromState={urlFromState}
-          stateFromLocation={stateFromLocation}
-        >
-          <ProfileViewWhenReady />
-        </UrlManager>
+        <ProfileViewWhenReady />
       </Provider>
     );
   }
