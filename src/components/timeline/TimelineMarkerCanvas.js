@@ -47,9 +47,7 @@ type Props = {
 };
 
 const TEXT_OFFSET_TOP = 11;
-const TWO_PI = Math.PI * 2;
-const MARKER_MIN_DOT_RADIUS = 0.15;
-const MARKER_MAX_DOT_RADIUS = 0.45;
+const HOVER_MIN_DURATION_RATIO = 0.4;
 const TEXT_OFFSET_START = 3;
 const MARKER_LABEL_MAX_LENGTH = 30;
 
@@ -108,43 +106,43 @@ class TimelineMarkerCanvas extends PureComponent {
   ) {
     ctx.fillStyle = colors.background;
 
-    if (2 * w >= h) {
-      // Ensure the text measurement tool is created, since this is the first time
-      // this class has access to a ctx.
-      if (!this._textMeasurement) {
-        this._textMeasurement = new TextMeasurement(ctx);
-      }
-      const textMeasurement = this._textMeasurement;
+    // Ensure the text measurement tool is created, since this is the first time
+    // this class has access to a ctx.
+    if (!this._textMeasurement) {
+      this._textMeasurement = new TextMeasurement(ctx);
+    }
+    const textMeasurement = this._textMeasurement;
 
-      this.drawRoundedRect(ctx, x, y + 1, w, h - 1, 2);
-
-      // Draw the text label
-      // TODO - L10N RTL.
-      // Constrain the x coordinate to the leftmost area.
-      const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
-      const w2: CssPixels = Math.max(0, w - (x2 - x));
-
-      if (w2 > textMeasurement.minWidth) {
-        const fittedText = textMeasurement.getFittedText(text, w2);
-        if (fittedText) {
-          ctx.fillStyle = colors.foreground;
-          ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
-        }
-      }
+    let displayWidth;
+    let displayHeight = h - 1;
+    let displayY = y + 1;
+    if (w > 2.5) {
+      // 2.5 is a magic value that happens to look good
+      displayWidth = w;
     } else {
-      const radiusRatio = w / h; // Guaranteed to be between 0 and 0.5
-      const radius =
-        2 * radiusRatio * (MARKER_MAX_DOT_RADIUS - MARKER_MIN_DOT_RADIUS) +
-        MARKER_MIN_DOT_RADIUS;
-      ctx.beginPath();
-      ctx.arc(
-        x, // x
-        y + h / 2, // y
-        radius * h, // radius
-        0, // arc start
-        TWO_PI // arc end
-      );
-      ctx.fill();
+      displayWidth = 2.5;
+      // We want the vertical marker's height to be at least 2/3 of the total
+      // height. Then the height depends on the duration.
+      displayHeight =
+        0.666 * displayHeight + 0.333 * displayHeight * w / displayWidth;
+      displayY = displayY + (h - 1 - displayHeight) / 2;
+    }
+    // We want the rectangle to have a clear margin, that's why we increment y
+    // and decrement h (above).
+    this.drawRoundedRect(ctx, x, displayY, displayWidth, displayHeight - 1, 2);
+
+    // Draw the text label
+    // TODO - L10N RTL.
+    // Constrain the x coordinate to the leftmost area.
+    const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
+    const w2: CssPixels = Math.max(0, w - (x2 - x));
+
+    if (w2 > textMeasurement.minWidth) {
+      const fittedText = textMeasurement.getFittedText(text, w2);
+      if (fittedText) {
+        ctx.fillStyle = colors.foreground;
+        ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
+      }
     }
   }
 
@@ -203,7 +201,7 @@ class TimelineMarkerCanvas extends PureComponent {
           const y: CssPixels = rowIndex * rowHeight - viewportTop;
           const w: CssPixels =
             (endTime - startTime) * containerWidth / viewportLength;
-          const h: CssPixels = rowHeight - 1;
+          const h: CssPixels = rowHeight - 1; // -1 because of the row separation lines
           const text = markerTiming.label[i];
 
           const tracingMarkerIndex = markerTiming.index[i];
@@ -292,7 +290,7 @@ class TimelineMarkerCanvas extends PureComponent {
     const minDuration =
       rangeLength *
       viewportLength *
-      (rowHeight * 2 * MARKER_MIN_DOT_RADIUS / containerWidth);
+      (rowHeight * HOVER_MIN_DURATION_RATIO / containerWidth);
     const markerTiming = markerTimingRows[rowIndex];
 
     if (!markerTiming) {
