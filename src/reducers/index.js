@@ -10,10 +10,12 @@ import urlState from './url-state';
 import flameChart from './flame-chart';
 import timelineView from './timeline-view';
 import icons from './icons';
+import profileUpload from './profile-upload';
 import { combineReducers } from 'redux';
 
 export default combineReducers({
   app,
+  profileUpload,
   profileView,
   summaryView,
   urlState,

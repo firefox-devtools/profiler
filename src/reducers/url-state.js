@@ -26,7 +26,7 @@ function dataSource(state: DataSource = 'none', action: Action) {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_FILE':
       return 'from-file';
-    case 'PROFILE_PUBLISHED':
+    case 'PROFILE_UPLOAD_SUCCESS':
       return 'public';
     default:
       return state;
@@ -35,7 +35,7 @@ function dataSource(state: DataSource = 'none', action: Action) {
 
 function hash(state: string = '', action: Action) {
   switch (action.type) {
-    case 'PROFILE_PUBLISHED':
+    case 'PROFILE_UPLOAD_SUCCESS':
       return action.hash;
     default:
       return state;

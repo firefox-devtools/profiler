@@ -97,8 +97,13 @@ export type TimelineViewState = {
   hasZoomedViaMousewheel: boolean,
 };
 
+export type ProfileUploadState = {
+  progress: number,
+};
+
 export type State = {
   app: AppState,
+  profileUpload: ProfileUploadState,
   profileView: ProfileViewState,
   summaryView: SummaryViewState,
   urlState: URLState,

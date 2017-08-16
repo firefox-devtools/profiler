@@ -147,7 +147,7 @@ class ProfileSharingCompositeButton extends PureComponent {
       .then(([gzipData, hash]) => {
         const predictedURL = url.resolve(
           window.location.href,
-          predictURL(actions.profilePublished(hash))
+          predictURL(actions.uploadSuccess(hash))
         );
         this.setState({
           hash,

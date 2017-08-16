@@ -12,13 +12,6 @@ export function changeSelectedTab(selectedTab: string): Action {
   };
 }
 
-export function profilePublished(hash: string): Action {
-  return {
-    type: 'PROFILE_PUBLISHED',
-    hash,
-  };
-}
-
 export function changeTabOrder(tabOrder: number[]): Action {
   return {
     type: 'CHANGE_TAB_ORDER',

@@ -137,7 +137,6 @@ type URLEnhancerAction =
 
 type URLStateAction =
   | { type: 'WAITING_FOR_PROFILE_FROM_FILE' }
-  | { type: 'PROFILE_PUBLISHED', hash: string }
   | { type: 'CHANGE_SELECTED_TAB', selectedTab: string }
   | { type: 'ADD_RANGE_FILTER', start: number, end: number }
   | { type: 'POP_RANGE_FILTERS', firstRemovedFilterIndex: number }
@@ -165,6 +164,12 @@ type IconsAction =
   | { type: 'ICON_HAS_LOADED', icon: string }
   | { type: 'ICON_IN_ERROR', icon: string };
 
+type ProfileUploadAction =
+  | { type: 'PROFILE_UPLOAD_SUCCESS', hash: string }
+  | { type: 'PROFILE_UPLOAD_START' }
+  | { type: 'PROFILE_UPLOAD_ERROR', error: Error }
+  | { type: 'PROFILE_UPLOAD_PROGRESS', progress: number };
+
 export type Action =
   | ProfileSummaryAction
   | ProfileAction
@@ -172,4 +177,5 @@ export type Action =
   | TimelineAction
   | URLEnhancerAction
   | URLStateAction
-  | IconsAction;
+  | IconsAction
+  | ProfileUploadAction;
