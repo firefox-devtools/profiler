@@ -577,6 +577,9 @@ function _adjustMarkerTimestamps(
       if ('endTime' in newData) {
         newData.endTime += delta;
       }
+      if (newData.type === 'DOMEvent' && 'timeStamp' in newData) {
+        newData.timeStamp += delta;
+      }
       return newData;
     }),
   });

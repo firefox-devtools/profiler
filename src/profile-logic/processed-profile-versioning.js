@@ -17,7 +17,7 @@ import { resourceTypes } from './profile-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 7; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 8; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -325,6 +325,37 @@ const _upgraders = {
       thread.registerTime = 0;
       // "All threads were still alive by the time the profile was captured."
       thread.unregisterTime = null;
+    }
+  },
+  [8]: profile => {
+    // DOMEventMarkerPayload.timeStamp in content process should be in
+    // milliseconds relative to meta.startTime.  Adjust it by adding
+    // the thread.processStartupTime which is the delta to
+    // meta.startTime.
+    for (const thread of profile.threads) {
+      if (thread.processType === 'default') {
+        continue;
+      }
+      const { stringArray, markers } = thread;
+      const stringTable = new UniqueStringArray(stringArray);
+      const newDataArray = [];
+      for (let i = 0; i < markers.length; i++) {
+        const name = stringTable.getString(markers.name[i]);
+        const data = markers.data[i];
+        if (name === 'DOMEvent' && data.timeStamp) {
+          newDataArray[i] = {
+            type: 'DOMEvent',
+            startTime: data.startTime,
+            endTime: data.endTime,
+            timeStamp: data.timeStamp + thread.processStartupTime,
+            eventType: data.eventType,
+            phase: data.phase,
+          };
+        } else {
+          newDataArray[i] = data;
+        }
+      }
+      thread.markers.data = newDataArray;
     }
   },
 };

@@ -589,7 +589,7 @@ describe('upgrades', function() {
     expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
   }
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-7.json')
+    require('../fixtures/upgrades/processed-8.json')
   );
 
   // Uncomment this to output your next ./upgrades/processed-X.json
@@ -637,6 +637,12 @@ describe('upgrades', function() {
       serializedOldProcessedProfile6
     );
     compareProcessedProfiles(upgradedProfile6, afterUpgradeReference);
+
+    const serializedOldProcessedProfile7 = require('../fixtures/upgrades/processed-7.json');
+    const upgradedProfile7 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile7
+    );
+    compareProcessedProfiles(upgradedProfile7, afterUpgradeReference);
   });
   it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function() {
     const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-8.json');
