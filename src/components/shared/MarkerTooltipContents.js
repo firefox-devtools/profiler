@@ -53,41 +53,72 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
       }
       case 'GCMinor': {
         if (data.nursery) {
-          return (
-            <div className="tooltipDetails">
-              {_markerDetail('gcreason', 'Reason', data.nursery.reason)}
-            </div>
-          );
+          const nursery = data.nursery;
+          switch (nursery.status) {
+            case 'complete':
+              return (
+                <div className="tooltipDetails">
+                  {_markerDetail('gcreason', 'Reason', nursery.reason)}
+                </div>
+              );
+            case 'nursery disabled':
+              return (
+                <div className="tooltipDetails">
+                  {_markerDetail('gcstatus', 'Status', 'Nursery disabled')}
+                </div>
+              );
+            case 'nursery empty':
+              return (
+                <div className="tooltipDetails">
+                  {_markerDetail('gcstatus', 'Status', 'Nursery empty')}
+                </div>
+              );
+            default:
+              return null;
+          }
         } else {
           return null;
         }
       }
       case 'GCMajor': {
-        let zones_collected_total;
-        if (data.timings.zones_collected && data.timings.total_zones) {
-          zones_collected_total =
-            data.timings.zones_collected + ' / ' + data.timings.total_zones;
+        const timings = data.timings;
+        switch (timings.status) {
+          case 'aborted':
+            return (
+              <div className="tooltipDetails">
+                {_markerDetail('status', 'Status', 'Aborted (OOM)')}
+              </div>
+            );
+          case 'completed': {
+            let zones_collected_total;
+            if (timings.zones_collected && timings.total_zones) {
+              zones_collected_total =
+                timings.zones_collected + ' / ' + timings.total_zones;
+            }
+            return (
+              <div className="tooltipDetails">
+                {_markerDetail('gcreason', 'Reason', timings.reason)}
+                {timings.nonincremental_reason !== 'None' &&
+                  _markerDetail(
+                    'gcnonincrementalreason',
+                    'Non-incremental reason',
+                    timings.nonincremental_reason
+                  )}
+                {_markerDetail(
+                  'gcmaxpause',
+                  'Max Pause',
+                  timings.max_pause,
+                  x => x + 'ms'
+                )}
+                {_markerDetail('gcnumminors', 'Minor GCs', timings.minor_gcs)}
+                {_markerDetail('gcnumslices', 'Slices', timings.slices)}
+                {_markerDetail('gcnumzones', 'Zones', zones_collected_total)}
+              </div>
+            );
+          }
+          default:
+            return null;
         }
-        return (
-          <div className="tooltipDetails">
-            {_markerDetail('gcreason', 'Reason', data.timings.reason)}
-            {data.timings.nonincremental_reason !== 'None' &&
-              _markerDetail(
-                'gcnonincrementalreason',
-                'Non-incremental reason',
-                data.timings.nonincremental_reason
-              )}
-            {_markerDetail(
-              'gcmaxpause',
-              'Max Pause',
-              data.timings.max_pause,
-              x => x + 'ms'
-            )}
-            {_markerDetail('gcnumminors', 'Minor GCs', data.timings.minor_gcs)}
-            {_markerDetail('gcnumslices', 'Slices', data.timings.slices)}
-            {_markerDetail('gcnumzones', 'Zones', zones_collected_total)}
-          </div>
-        );
       }
       case 'GCSlice': {
         return (
