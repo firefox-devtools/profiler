@@ -22,7 +22,7 @@ export default connect((state, props) => {
     .filter(tm => tm.name !== 'GCMajor');
   return {
     intervalMarkers,
-    threadName: selectors.getThread(state).name,
+    threadName: selectors.getFriendlyThreadName(state),
     isSelected: threadIndex === selectedThread,
     styles,
     overlayFills,

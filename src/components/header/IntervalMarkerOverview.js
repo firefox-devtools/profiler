@@ -172,7 +172,13 @@ class IntervalMarkerOverview extends PureComponent {
   }
 
   render() {
-    const { className, isSelected, isModifyingSelection } = this.props;
+    const {
+      className,
+      isSelected,
+      isModifyingSelection,
+      threadName,
+    } = this.props;
+
     const { mouseDownItem, hoveredItem, mouseX, mouseY } = this.state;
     const shouldShowTooltip = !isModifyingSelection && !mouseDownItem;
     const canvasClassName = className
@@ -195,7 +201,10 @@ class IntervalMarkerOverview extends PureComponent {
         />
         {shouldShowTooltip && hoveredItem
           ? <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              <MarkerTooltipContents marker={hoveredItem} />
+              <MarkerTooltipContents
+                marker={hoveredItem}
+                threadName={threadName}
+              />
             </Tooltip>
           : null}
       </div>
