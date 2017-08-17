@@ -2,7 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { PureComponent, PropTypes } from 'react';
+// @flow
+
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import { getProfile, getProfileRootRange } from '../../reducers/profile-view';
@@ -30,6 +32,11 @@ import prettyBytes from 'pretty-bytes';
 import sha1 from '../../utils/sha1';
 import url from 'url';
 
+import type { StartEndRange } from '../../types/units';
+import type { Profile } from '../../types/profile';
+import type { ProfileUploadStatus } from '../../types/reducers';
+import type { Action, DataSource } from '../../types/actions';
+
 require('./ProfileSharing.css');
 
 const PrivacyNotice = () =>
@@ -53,7 +60,7 @@ const PrivacyNotice = () =>
       json structure with a text editor.`}</p>
   </section>;
 
-const UploadingStatus = ({ progress }) =>
+const UploadingStatus = ({ progress }: { progress: number }) =>
   <div className="profileSharingUploadingButton">
     <div className="profileSharingUploadingButtonInner">
       <progress
@@ -64,24 +71,42 @@ const UploadingStatus = ({ progress }) =>
     </div>
   </div>;
 
-UploadingStatus.propTypes = {
-  progress: PropTypes.number.isRequired,
+type ProfileSharingCompositeButtonProps = {
+  profile: Profile,
+  dataSource: DataSource,
+  progress: number,
+  hash: string,
+  status: ProfileUploadStatus,
+  error: Error,
+  predictURL: (Action | Action[]) => string,
+  uploadBinaryProfileData: typeof uploadBinaryProfileData,
+  uploadError: typeof uploadError,
 };
 
 class ProfileSharingCompositeButton extends PureComponent {
-  constructor(props) {
+  props: ProfileSharingCompositeButtonProps;
+  state: {|
+    fullURL: string,
+    shortURL: string,
+  |};
+  _permalinkButton: ButtonWithPanel;
+  _permalinkTextField: HTMLInputElement;
+  _permalinkButtonCreated: ButtonWithPanel => void;
+  _permalinkTextFieldCreated: HTMLInputElement => void;
+
+  constructor(props: ProfileSharingCompositeButtonProps) {
     super(props);
     this.state = {
       fullURL: window.location.href,
       shortURL: window.location.href,
     };
-    this._attemptToShare = this._attemptToShare.bind(this);
-    this._onPermalinkPanelOpen = this._onPermalinkPanelOpen.bind(this);
-    this._onPermalinkPanelClose = this._onPermalinkPanelClose.bind(this);
-    this._permalinkButtonCreated = elem => {
+    (this: any)._attemptToShare = this._attemptToShare.bind(this);
+    (this: any)._onPermalinkPanelOpen = this._onPermalinkPanelOpen.bind(this);
+    (this: any)._onPermalinkPanelClose = this._onPermalinkPanelClose.bind(this);
+    this._permalinkButtonCreated = (elem: ButtonWithPanel) => {
       this._permalinkButton = elem;
     };
-    this._permalinkTextFieldCreated = elem => {
+    this._permalinkTextFieldCreated = (elem: HTMLInputElement) => {
       this._permalinkTextField = elem;
     };
   }
@@ -99,7 +124,7 @@ class ProfileSharingCompositeButton extends PureComponent {
     this._shortenURLAndFocusTextFieldOnCompletion();
   }
 
-  _shortenURLAndFocusTextFieldOnCompletion() {
+  _shortenURLAndFocusTextFieldOnCompletion(): Promise<void> {
     return shortenURL(this.state.fullURL)
       .then(shortURL => {
         this.setState({ shortURL });
@@ -232,7 +257,7 @@ class ProfileSharingCompositeButton extends PureComponent {
               onOkButtonClick={this._attemptToShare}
             >
               <p>An error occurred during upload:</p>
-              <pre>{`${error}`}</pre>
+              <pre>{`${error.toString()}`}</pre>
             </ArrowPanel>
           }
         />
@@ -241,27 +266,29 @@ class ProfileSharingCompositeButton extends PureComponent {
   }
 }
 
-ProfileSharingCompositeButton.propTypes = {
-  profile: PropTypes.object,
-  dataSource: PropTypes.string.isRequired,
-  hash: PropTypes.string,
-  status: PropTypes.string.isRequired,
-  progress: PropTypes.number,
-  error: PropTypes.error,
-  uploadBinaryProfileData: PropTypes.func.isRequired,
-  uploadError: PropTypes.func.isRequired,
-  predictURL: PropTypes.func.isRequired,
-};
-
-function filenameDateString(d) {
+function filenameDateString(d: Date): string {
   const pad = x => (x < 10 ? `0${x}` : `${x}`);
   return `${pad(d.getFullYear())}-${pad(d.getMonth() + 1)}-${pad(
     d.getDate()
   )} ${pad(d.getHours())}.${pad(d.getMinutes())}`;
 }
 
+type ProfileDownloadButtonProps = {
+  profile: Profile,
+  rootRange: StartEndRange,
+};
+
 class ProfileDownloadButton extends PureComponent {
-  constructor(props) {
+  props: ProfileDownloadButtonProps;
+  state: {|
+    uncompressedBlobUrl: string,
+    compressedBlobUrl: string,
+    uncompressedSize: number,
+    compressedSize: number,
+    filename: string,
+  |};
+
+  constructor(props: ProfileDownloadButtonProps) {
     super(props);
     this.state = {
       uncompressedBlobUrl: '',
@@ -270,7 +297,7 @@ class ProfileDownloadButton extends PureComponent {
       compressedSize: 0,
       filename: '',
     };
-    this._onPanelOpen = this._onPanelOpen.bind(this);
+    (this: any)._onPanelOpen = this._onPanelOpen.bind(this);
   }
 
   _onPanelOpen() {
@@ -347,9 +374,17 @@ class ProfileDownloadButton extends PureComponent {
   }
 }
 
-ProfileDownloadButton.propTypes = {
-  profile: PropTypes.object,
-  rootRange: PropTypes.object,
+type ProfileSharingProps = {
+  profile: Profile,
+  rootRange: StartEndRange,
+  dataSource: DataSource,
+  progress: number,
+  hash: string,
+  status: ProfileUploadStatus,
+  error: Error,
+  predictURL: (Action | Action[]) => string,
+  uploadBinaryProfileData: typeof uploadBinaryProfileData,
+  uploadError: typeof uploadError,
 };
 
 const ProfileSharing = ({
@@ -363,7 +398,7 @@ const ProfileSharing = ({
   predictURL,
   uploadBinaryProfileData,
   uploadError,
-}) =>
+}: ProfileSharingProps) =>
   <div className="profileSharing">
     <ProfileSharingCompositeButton
       profile={profile}
@@ -378,19 +413,6 @@ const ProfileSharing = ({
     />
     <ProfileDownloadButton profile={profile} rootRange={rootRange} />
   </div>;
-
-ProfileSharing.propTypes = {
-  profile: PropTypes.object,
-  rootRange: PropTypes.object,
-  dataSource: PropTypes.string.isRequired,
-  hash: PropTypes.string,
-  progress: PropTypes.number.isRequired,
-  error: PropTypes.error,
-  status: PropTypes.string.isRequired,
-  predictURL: PropTypes.func.isRequired,
-  uploadBinaryProfileData: PropTypes.func.isRequired,
-  uploadError: PropTypes.func.isRequired,
-};
 
 export default connect(
   state => ({

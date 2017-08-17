@@ -25,6 +25,9 @@ import type {
   IndexIntoCallNodeTable,
   TracingMarker,
 } from '../types/profile-derived';
+import { CURRENT_VERSION as GECKO_PROFILE_VERSION } from './gecko-profile-versioning';
+import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profile-versioning';
+
 import type { StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
 import { getEmptyTaskTracerData } from './task-tracer';
@@ -911,7 +914,21 @@ export function getThreadProcessDetails(thread: Thread): string {
 
 export function getEmptyProfile(): Profile {
   return {
-    meta: { interval: 1 },
+    meta: {
+      interval: 1,
+      startTime: 0,
+      shutdownTime: 1000,
+      abi: '',
+      misc: '',
+      oscpu: '',
+      platform: '',
+      processType: 0,
+      product: 'Firefox',
+      stackwalk: 0,
+      toolkit: '',
+      version: GECKO_PROFILE_VERSION,
+      preprocessedProfileVersion: PROCESSED_PROFILE_VERSION,
+    },
     threads: [],
     tasktracer: getEmptyTaskTracerData(),
   };

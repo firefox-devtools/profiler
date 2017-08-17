@@ -131,11 +131,20 @@ export type GeckoThread = {
 };
 
 export type GeckoProfile = {
-  meta: {
+  meta: {|
     interval: Milliseconds,
     startTime: Milliseconds,
     shutdownTime: Milliseconds | null,
-  },
+    abi: string,
+    misc: string,
+    oscpu: string,
+    platform: string,
+    processType: number,
+    product: string,
+    stackwalk: number,
+    toolkit: string,
+    version: number,
+  |},
   libs: Lib[],
   threads: GeckoThread[],
   pausedRanges: PausedRange[],

@@ -306,9 +306,10 @@ export const getVisibleThreadOrder = createSelector(
 );
 export const getURLPredictor = createSelector(
   getURLState,
-  (oldURLState: URLState) => actionOrActionList => {
-    const actionList =
-      'type' in actionOrActionList ? [actionOrActionList] : actionOrActionList;
+  (oldURLState: URLState) => (actionOrActionList: Action | Action[]) => {
+    const actionList: Action[] = Array.isArray(actionOrActionList)
+      ? actionOrActionList
+      : [actionOrActionList];
     const newURLState = actionList.reduce(urlStateReducer, oldURLState);
     return urlFromState(newURLState);
   }
