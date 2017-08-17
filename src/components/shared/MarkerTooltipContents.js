@@ -40,14 +40,14 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
         );
       }
       case 'DOMEvent': {
-        let latency;
+        let latency = 0;
         if (data.timeStamp) {
           latency = `${formatTimeLength(data.startTime - data.timeStamp)}ms`;
         }
         return (
           <div className="tooltipDetails">
             {_markerDetail('type', 'Type', data.eventType)}
-            {data.timeStamp && _markerDetail('latency', 'Latency', latency)}
+            {latency && _markerDetail('latency', 'Latency', latency)}
           </div>
         );
       }

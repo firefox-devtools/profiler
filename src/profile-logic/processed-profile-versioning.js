@@ -332,6 +332,9 @@ const _upgraders = {
     // milliseconds relative to meta.startTime.  Adjust it by adding
     // the thread.processStartupTime which is the delta to
     // meta.startTime.
+    // Only the timeStamp property is updated because it's new and
+    // perf.html wasn't updated to handle it when it appeared in
+    // Firefox.
     for (const thread of profile.threads) {
       if (thread.processType === 'default') {
         continue;
