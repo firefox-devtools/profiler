@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`focus subtree transform on a call tree can be filtered to a subtree 1`] = `
+exports[`"focus-subtree" transform on a call tree can be filtered to a subtree 1`] = `
 "
 - C (total: 2, self:—)
  - D (total: 1, self:—)
@@ -9,7 +9,7 @@ exports[`focus subtree transform on a call tree can be filtered to a subtree 1`]
    - G (total: 1, self:1)"
 `;
 
-exports[`focus subtree transform on a call tree can remove the transform 1`] = `
+exports[`"focus-subtree" transform on a call tree can remove the transform 1`] = `
 "
 - A (total: 3, self:—)
  - B (total: 3, self:—)
@@ -22,7 +22,7 @@ exports[`focus subtree transform on a call tree can remove the transform 1`] = `
      - I (total: 1, self:1)"
 `;
 
-exports[`focus subtree transform on a call tree starts as an unfiltered call tree 1`] = `
+exports[`"focus-subtree" transform on a call tree starts as an unfiltered call tree 1`] = `
 "
 - A (total: 3, self:—)
  - B (total: 3, self:—)
@@ -35,7 +35,7 @@ exports[`focus subtree transform on a call tree starts as an unfiltered call tre
      - I (total: 1, self:1)"
 `;
 
-exports[`focus subtree transform on an inverted call tree can be filtered to a subtree 1`] = `
+exports[`"focus-subtree" transform on an inverted call tree can be filtered to a subtree 1`] = `
 "
 - X (total: 2, self:2)
  - B (total: 1, self:—)
@@ -45,7 +45,7 @@ exports[`focus subtree transform on an inverted call tree can be filtered to a s
      - A (total: 1, self:—)"
 `;
 
-exports[`focus subtree transform on an inverted call tree can be un-inverted and keep the transform 1`] = `
+exports[`"focus-subtree" transform on an inverted call tree can be un-inverted and keep the transform 1`] = `
 "
 - A (total: 2, self:—)
  - B (total: 2, self:—)
@@ -54,7 +54,7 @@ exports[`focus subtree transform on an inverted call tree can be un-inverted and
    - X (total: 1, self:1)"
 `;
 
-exports[`focus subtree transform on an inverted call tree starts as an inverted call tree 1`] = `
+exports[`"focus-subtree" transform on an inverted call tree starts as an inverted call tree 1`] = `
 "
 - Z (total: 2, self:2)
  - Y (total: 2, self:—)
@@ -69,4 +69,98 @@ exports[`focus subtree transform on an inverted call tree starts as an inverted 
    - C (total: 1, self:—)
      - B (total: 1, self:—)
        - A (total: 1, self:—)"
+`;
+
+exports[`"merge-call-node" transform on a JS call tree can merge a combined CallNodePath, and display a correct JS call tree 1`] = `
+"
+- onLoad (total: 3.0ms, self:0.0ms)
+ - a (total: 2.0ms, self:0.0ms)
+   - b (total: 2.0ms, self:2.0ms)
+ - b (total: 1.0ms, self:1.0ms)"
+`;
+
+exports[`"merge-call-node" transform on a JS call tree can merge path [b, a, js::jit::IonCannon] on an inverted call tree 1`] = `
+"
+- b (total: 3.0ms, self:3.0ms)
+ - a (total: 3.0ms, self:0.0ms)
+   - onLoad (total: 3.0ms, self:0.0ms)
+     - JS::RunScript (total: 3.0ms, self:0.0ms)"
+`;
+
+exports[`"merge-call-node" transform on a JS call tree can merge path [b, a, onLoad] on an inverted JS call tree 1`] = `
+"
+- b (total: 3.0ms, self:3.0ms)
+ - a (total: 3.0ms, self:0.0ms)
+   - js::jit::IonCannon (total: 2.0ms, self:0.0ms)
+     - JS::RunScript (total: 2.0ms, self:0.0ms)
+   - JS::RunScript (total: 1.0ms, self:0.0ms)"
+`;
+
+exports[`"merge-call-node" transform on a JS call tree can merge the node at JS path "onLoad" -> "A" 1`] = `
+"
+- onLoad (total: 3.0ms, self:0.0ms)
+ - b (total: 3.0ms, self:3.0ms)"
+`;
+
+exports[`"merge-call-node" transform on a JS call tree can merge the node at JS path "onLoad" -> "A" on an combined call tree 1`] = `
+"
+- JS::RunScript (total: 3.0ms, self:0.0ms)
+ - onLoad (total: 3.0ms, self:0.0ms)
+   - js::jit::IonCannon (total: 2.0ms, self:0.0ms)
+     - b (total: 2.0ms, self:2.0ms)
+   - b (total: 1.0ms, self:1.0ms)"
+`;
+
+exports[`"merge-call-node" transform on a JS call tree has an untransformed JS only view 1`] = `
+"
+- onLoad (total: 3.0ms, self:0.0ms)
+ - a (total: 3.0ms, self:0.0ms)
+   - b (total: 3.0ms, self:3.0ms)"
+`;
+
+exports[`"merge-call-node" transform on a JS call tree starts as an inverted call tree 1`] = `
+"
+- b (total: 3.0ms, self:3.0ms)
+ - a (total: 3.0ms, self:0.0ms)
+   - js::jit::IonCannon (total: 2.0ms, self:0.0ms)
+     - onLoad (total: 2.0ms, self:0.0ms)
+       - JS::RunScript (total: 2.0ms, self:0.0ms)
+   - onLoad (total: 1.0ms, self:0.0ms)
+     - JS::RunScript (total: 1.0ms, self:0.0ms)"
+`;
+
+exports[`"merge-call-node" transform on a JS call tree starts as an untransformed call tree 1`] = `
+"
+- JS::RunScript (total: 3.0ms, self:0.0ms)
+ - onLoad (total: 3.0ms, self:0.0ms)
+   - js::jit::IonCannon (total: 2.0ms, self:0.0ms)
+     - a (total: 2.0ms, self:0.0ms)
+       - b (total: 2.0ms, self:2.0ms)
+   - a (total: 1.0ms, self:0.0ms)
+     - b (total: 1.0ms, self:1.0ms)"
+`;
+
+exports[`"merge-call-node" transform on a call tree call node [A, B, C] can be merged into [A, B] 1`] = `
+"
+- A (total: 3.0ms, self:0.0ms)
+ - B (total: 3.0ms, self:0.0ms)
+   - D (total: 1.0ms, self:0.0ms)
+     - E (total: 1.0ms, self:1.0ms)
+   - F (total: 1.0ms, self:0.0ms)
+     - G (total: 1.0ms, self:1.0ms)
+   - H (total: 1.0ms, self:0.0ms)
+     - I (total: 1.0ms, self:1.0ms)"
+`;
+
+exports[`"merge-call-node" transform on a call tree starts as an unfiltered call tree 1`] = `
+"
+- A (total: 3.0ms, self:0.0ms)
+ - B (total: 3.0ms, self:0.0ms)
+   - C (total: 2.0ms, self:0.0ms)
+     - D (total: 1.0ms, self:0.0ms)
+       - E (total: 1.0ms, self:1.0ms)
+     - F (total: 1.0ms, self:0.0ms)
+       - G (total: 1.0ms, self:1.0ms)
+   - H (total: 1.0ms, self:0.0ms)
+     - I (total: 1.0ms, self:1.0ms)"
 `;
