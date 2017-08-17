@@ -175,6 +175,7 @@ const thread = {
           // DOMEvent at time 5ms from 5ms to 6ms
           startTime: 9,
           endTime: 10,
+          timeStamp: 1,
           type: 'mouseout',
           phase: 3,
         },

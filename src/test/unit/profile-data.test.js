@@ -212,6 +212,12 @@ describe('process-profile', function() {
           ? profile.threads[2].markers.data[5].endTime
           : null
       ).toEqual(1010);
+      expect(
+        profile.threads[2].markers.data[5] &&
+        profile.threads[2].markers.data[5].type === 'DOMEvent'
+          ? profile.threads[2].markers.data[5].timeStamp
+          : null
+      ).toEqual(1001);
       // TODO: also shift the samples inside marker callstacks
     });
     it('should create one function per frame', function() {
@@ -643,6 +649,21 @@ describe('upgrades', function() {
       serializedOldProcessedProfile7
     );
     compareProcessedProfiles(upgradedProfile7, afterUpgradeReference);
+
+    const serializedOldProcessedProfile7a = require('../fixtures/upgrades/processed-7a.json');
+    const afterUpgradeReference8a = unserializeProfileOfArbitraryFormat(
+      require('../fixtures/upgrades/processed-8a.json')
+    );
+    const upgradedProfile7a = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile7a
+    );
+    compareProcessedProfiles(upgradedProfile7a, afterUpgradeReference8a);
+
+    const serializedOldProcessedProfile8 = require('../fixtures/upgrades/processed-8.json');
+    const upgradedProfile8 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile8
+    );
+    compareProcessedProfiles(upgradedProfile8, afterUpgradeReference);
   });
   it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function() {
     const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-8.json');
