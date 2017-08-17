@@ -10,7 +10,7 @@ require('./ButtonWithPanel.css');
 class ButtonWithPanel extends PureComponent {
   constructor(props) {
     super(props);
-    this.state = { open: false };
+    this.state = { open: !!props.open };
     this._onPanelOpen = () => {
       this.setState({ open: true });
       if (this.props.panel.props.onOpen) {
@@ -27,6 +27,12 @@ class ButtonWithPanel extends PureComponent {
     this._panelCreated = panel => {
       this._panel = panel;
     };
+  }
+
+  componentWillReceiveProps(props) {
+    if (props.open !== this.props.open) {
+      this.setState({ open: !!props.open });
+    }
   }
 
   openPanel() {
@@ -69,6 +75,7 @@ ButtonWithPanel.propTypes = {
   className: PropTypes.string,
   label: PropTypes.string.isRequired,
   panel: PropTypes.object.isRequired,
+  open: PropTypes.boolean,
 };
 
 export default ButtonWithPanel;

@@ -97,8 +97,11 @@ export type TimelineViewState = {
   hasZoomedViaMousewheel: boolean,
 };
 
+export type ProfileUploadStatus = 'uploading' | 'error' | 'none';
 export type ProfileUploadState = {
   progress: number,
+  status: ProfileUploadStatus,
+  error: Error | null,
 };
 
 export type State = {
