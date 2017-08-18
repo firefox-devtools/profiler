@@ -47,7 +47,7 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
         return (
           <div className="tooltipDetails">
             {_markerDetail('type', 'Type', data.eventType)}
-            {latency && _markerDetail('latency', 'Latency', latency)}
+            {latency ? _markerDetail('latency', 'Latency', latency) : null}
           </div>
         );
       }
