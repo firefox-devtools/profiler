@@ -77,9 +77,9 @@ type ProfileSharingCompositeButtonProps = {
   progress: number,
   hash: string,
   status: ProfileUploadStatus,
-  error: Error,
+  error: Error | null,
   predictURL: (Action | Action[]) => string,
-  uploadBinaryProfileData: typeof uploadBinaryProfileData,
+  uploadBinaryProfileData: string => Promise<void>,
   uploadError: typeof uploadError,
 };
 
@@ -143,11 +143,16 @@ class ProfileSharingCompositeButton extends PureComponent {
   }
 
   _attemptToShare() {
-    if (this.props.status !== 'local' && this.props.status !== 'error') {
+    if (this.props.dataSource === 'public' && this.props.status !== 'error') {
       return;
     }
 
-    const { profile, predictURL, uploadError } = this.props;
+    const {
+      profile,
+      predictURL,
+      uploadError,
+      uploadBinaryProfileData,
+    } = this.props;
 
     new Promise(resolve => {
       if (!profile) {
@@ -257,7 +262,9 @@ class ProfileSharingCompositeButton extends PureComponent {
               onOkButtonClick={this._attemptToShare}
             >
               <p>An error occurred during upload:</p>
-              <pre>{`${error.toString()}`}</pre>
+              <pre>
+                {error ? error.toString() : ''}
+              </pre>
             </ArrowPanel>
           }
         />
@@ -381,9 +388,9 @@ type ProfileSharingProps = {
   progress: number,
   hash: string,
   status: ProfileUploadStatus,
-  error: Error,
+  error: Error | null,
   predictURL: (Action | Action[]) => string,
-  uploadBinaryProfileData: typeof uploadBinaryProfileData,
+  uploadBinaryProfileData: string => Promise<void>,
   uploadError: typeof uploadError,
 };
 
