@@ -650,6 +650,8 @@ describe('upgrades', function() {
     );
     compareProcessedProfiles(upgradedProfile7, afterUpgradeReference);
 
+    // processed-7a to processed-8a is testing that we properly
+    // upgrade the DOMEventMarkerPayload.timeStamp field.
     const serializedOldProcessedProfile7a = require('../fixtures/upgrades/processed-7a.json');
     const afterUpgradeReference8a = unserializeProfileOfArbitraryFormat(
       require('../fixtures/upgrades/processed-8a.json')
@@ -659,6 +661,8 @@ describe('upgrades', function() {
     );
     compareProcessedProfiles(upgradedProfile7a, afterUpgradeReference8a);
 
+    // This last test is to make sure we properly upgrade the json
+    // file to same version
     const serializedOldProcessedProfile8 = require('../fixtures/upgrades/processed-8.json');
     const upgradedProfile8 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile8
@@ -691,6 +695,12 @@ describe('upgrades', function() {
     const geckoProfile7 = require('../fixtures/upgrades/gecko-7.json');
     upgradeGeckoProfileToCurrentVersion(geckoProfile7);
     expect(geckoProfile7).toEqual(afterUpgradeGeckoReference);
+
+    // This last test is to make sure we properly upgrade the json
+    // file to same version
+    const geckoProfile8 = require('../fixtures/upgrades/gecko-8.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile8);
+    expect(geckoProfile8).toEqual(afterUpgradeGeckoReference);
   });
 });
 
