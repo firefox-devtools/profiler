@@ -821,16 +821,13 @@ export function getSampleIndexClosestToTime(
 
 export function getJankInstances(
   samples: SamplesTable,
-  threadName: string,
   thresholdInMs: number
 ): TracingMarker[] {
   const addTracingMarker = () =>
     jankInstances.push({
       start: lastTimestamp - lastResponsiveness,
       dur: lastResponsiveness,
-      title: `${lastResponsiveness.toFixed(
-        2
-      )}ms event processing delay on ${threadName}`,
+      title: `${lastResponsiveness.toFixed(2)}ms event processing delay`,
       name: 'Jank',
       data: null,
     });

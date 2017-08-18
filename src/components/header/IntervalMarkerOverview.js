@@ -33,15 +33,16 @@ type Props = {
   },
 };
 
+type State = {
+  hoveredItem: TracingMarker | null,
+  mouseDownItem: TracingMarker | null,
+  mouseX: CssPixels,
+  mouseY: CssPixels,
+};
+
 class IntervalMarkerOverview extends PureComponent {
   props: Props;
-
-  state: {
-    hoveredItem: TracingMarker | null,
-    mouseDownItem: TracingMarker | null,
-    mouseX: CssPixels,
-    mouseY: CssPixels,
-  };
+  state: State;
 
   _canvas: HTMLCanvasElement | null;
   _requestedAnimationFrame: boolean | null;
@@ -67,18 +68,14 @@ class IntervalMarkerOverview extends PureComponent {
   }
 
   _scheduleDraw() {
-    if (!this._requestedAnimationFrame) {
-      this._requestedAnimationFrame = true;
-      window.requestAnimationFrame(() => {
-        this._requestedAnimationFrame = false;
-        const c = this._canvas;
-        if (c) {
-          timeCode('IntervalMarkerTimeline render', () => {
-            this.drawCanvas(c);
-          });
-        }
-      });
-    }
+    window.requestAnimationFrame(() => {
+      const c = this._canvas;
+      if (c) {
+        timeCode('IntervalMarkerTimeline render', () => {
+          this.drawCanvas(c);
+        });
+      }
+    });
   }
 
   _hitTest(e): TracingMarker | null {
@@ -112,14 +109,17 @@ class IntervalMarkerOverview extends PureComponent {
 
   _onMouseMove(event: SyntheticMouseEvent) {
     const hoveredItem = this._hitTest(event);
-    if (this.state.hoveredItem !== hoveredItem) {
-      this.setState({ hoveredItem });
+    if (hoveredItem !== null) {
+      this.setState({
+        hoveredItem,
+        mouseX: event.pageX,
+        mouseY: event.pageY,
+      });
+    } else if (this.state.hoveredItem !== null) {
+      this.setState({
+        hoveredItem: null,
+      });
     }
-
-    this.setState({
-      mouseX: event.pageX,
-      mouseY: event.pageY,
-    });
   }
 
   _onMouseDown(e) {
@@ -162,9 +162,23 @@ class IntervalMarkerOverview extends PureComponent {
     });
   }
 
+  componentDidUpdate(prevProps: Props, prevState: State) {
+    if (
+      prevProps !== this.props ||
+      prevState.hoveredItem !== this.state.hoveredItem
+    ) {
+      this._scheduleDraw();
+    }
+  }
+
   render() {
-    this._scheduleDraw();
-    const { className, isSelected, isModifyingSelection } = this.props;
+    const {
+      className,
+      isSelected,
+      isModifyingSelection,
+      threadName,
+    } = this.props;
+
     const { mouseDownItem, hoveredItem, mouseX, mouseY } = this.state;
     const shouldShowTooltip = !isModifyingSelection && !mouseDownItem;
     const canvasClassName = className
@@ -187,7 +201,10 @@ class IntervalMarkerOverview extends PureComponent {
         />
         {shouldShowTooltip && hoveredItem
           ? <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              <MarkerTooltipContents marker={hoveredItem} />
+              <MarkerTooltipContents
+                marker={hoveredItem}
+                threadName={threadName}
+              />
             </Tooltip>
           : null}
       </div>
