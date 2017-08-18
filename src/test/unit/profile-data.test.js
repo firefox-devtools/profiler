@@ -212,6 +212,12 @@ describe('process-profile', function() {
           ? profile.threads[2].markers.data[5].endTime
           : null
       ).toEqual(1010);
+      expect(
+        profile.threads[2].markers.data[5] &&
+        profile.threads[2].markers.data[5].type === 'DOMEvent'
+          ? profile.threads[2].markers.data[5].timeStamp
+          : null
+      ).toEqual(1001);
       // TODO: also shift the samples inside marker callstacks
     });
     it('should create one function per frame', function() {
@@ -589,7 +595,7 @@ describe('upgrades', function() {
     expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
   }
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-7.json')
+    require('../fixtures/upgrades/processed-8.json')
   );
 
   // Uncomment this to output your next ./upgrades/processed-X.json
@@ -637,6 +643,31 @@ describe('upgrades', function() {
       serializedOldProcessedProfile6
     );
     compareProcessedProfiles(upgradedProfile6, afterUpgradeReference);
+
+    const serializedOldProcessedProfile7 = require('../fixtures/upgrades/processed-7.json');
+    const upgradedProfile7 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile7
+    );
+    compareProcessedProfiles(upgradedProfile7, afterUpgradeReference);
+
+    // processed-7a to processed-8a is testing that we properly
+    // upgrade the DOMEventMarkerPayload.timeStamp field.
+    const serializedOldProcessedProfile7a = require('../fixtures/upgrades/processed-7a.json');
+    const afterUpgradeReference8a = unserializeProfileOfArbitraryFormat(
+      require('../fixtures/upgrades/processed-8a.json')
+    );
+    const upgradedProfile7a = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile7a
+    );
+    compareProcessedProfiles(upgradedProfile7a, afterUpgradeReference8a);
+
+    // This last test is to make sure we properly upgrade the json
+    // file to same version
+    const serializedOldProcessedProfile8 = require('../fixtures/upgrades/processed-8.json');
+    const upgradedProfile8 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile8
+    );
+    compareProcessedProfiles(upgradedProfile8, afterUpgradeReference);
   });
   it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function() {
     const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-8.json');
@@ -664,6 +695,12 @@ describe('upgrades', function() {
     const geckoProfile7 = require('../fixtures/upgrades/gecko-7.json');
     upgradeGeckoProfileToCurrentVersion(geckoProfile7);
     expect(geckoProfile7).toEqual(afterUpgradeGeckoReference);
+
+    // This last test is to make sure we properly upgrade the json
+    // file to same version
+    const geckoProfile8 = require('../fixtures/upgrades/gecko-8.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile8);
+    expect(geckoProfile8).toEqual(afterUpgradeGeckoReference);
   });
 });
 

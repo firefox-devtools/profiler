@@ -102,6 +102,7 @@ export type UserTimingMarkerPayload = {
 
 export type DOMEventMarkerPayload = {
   type: 'DOMEvent',
+  timeStamp?: Milliseconds,
   startTime: Milliseconds,
   endTime: Milliseconds,
   eventType: string,

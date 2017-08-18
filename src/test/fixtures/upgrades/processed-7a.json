@@ -648,9 +648,9 @@
       "name": "GeckoMain",
       "processType": "tab",
       "pausedRanges": [],
-      "processStartupTime": 0,
+      "processStartupTime": 1000,
       "processShutdownTime": null,
-      "registerTime": 0,
+      "registerTime": 1000,
       "unregisterTime": null,
       "libs": [
         {
@@ -885,6 +885,7 @@
             "type": "DOMEvent",
             "startTime": 1009,
             "endTime": 1010,
+            "timeStamp": 1,
             "eventType": "mouseout",
             "phase": 3
           },
