@@ -2,71 +2,71 @@
 
 exports[`focus subtree transform on a call tree can be filtered to a subtree 1`] = `
 "
-- C (total: 2.0ms, self:0.0ms)
- - D (total: 1.0ms, self:0.0ms)
-   - E (total: 1.0ms, self:1.0ms)
- - F (total: 1.0ms, self:0.0ms)
-   - G (total: 1.0ms, self:1.0ms)"
+- C (total: 2, self:—)
+ - D (total: 1, self:—)
+   - E (total: 1, self:1)
+ - F (total: 1, self:—)
+   - G (total: 1, self:1)"
 `;
 
 exports[`focus subtree transform on a call tree can remove the transform 1`] = `
 "
-- A (total: 3.0ms, self:0.0ms)
- - B (total: 3.0ms, self:0.0ms)
-   - C (total: 2.0ms, self:0.0ms)
-     - D (total: 1.0ms, self:0.0ms)
-       - E (total: 1.0ms, self:1.0ms)
-     - F (total: 1.0ms, self:0.0ms)
-       - G (total: 1.0ms, self:1.0ms)
-   - H (total: 1.0ms, self:0.0ms)
-     - I (total: 1.0ms, self:1.0ms)"
+- A (total: 3, self:—)
+ - B (total: 3, self:—)
+   - C (total: 2, self:—)
+     - D (total: 1, self:—)
+       - E (total: 1, self:1)
+     - F (total: 1, self:—)
+       - G (total: 1, self:1)
+   - H (total: 1, self:—)
+     - I (total: 1, self:1)"
 `;
 
 exports[`focus subtree transform on a call tree starts as an unfiltered call tree 1`] = `
 "
-- A (total: 3.0ms, self:0.0ms)
- - B (total: 3.0ms, self:0.0ms)
-   - C (total: 2.0ms, self:0.0ms)
-     - D (total: 1.0ms, self:0.0ms)
-       - E (total: 1.0ms, self:1.0ms)
-     - F (total: 1.0ms, self:0.0ms)
-       - G (total: 1.0ms, self:1.0ms)
-   - H (total: 1.0ms, self:0.0ms)
-     - I (total: 1.0ms, self:1.0ms)"
+- A (total: 3, self:—)
+ - B (total: 3, self:—)
+   - C (total: 2, self:—)
+     - D (total: 1, self:—)
+       - E (total: 1, self:1)
+     - F (total: 1, self:—)
+       - G (total: 1, self:1)
+   - H (total: 1, self:—)
+     - I (total: 1, self:1)"
 `;
 
 exports[`focus subtree transform on an inverted call tree can be filtered to a subtree 1`] = `
 "
-- X (total: 2.0ms, self:2.0ms)
- - B (total: 1.0ms, self:0.0ms)
-   - A (total: 1.0ms, self:0.0ms)
- - C (total: 1.0ms, self:0.0ms)
-   - B (total: 1.0ms, self:0.0ms)
-     - A (total: 1.0ms, self:0.0ms)"
+- X (total: 2, self:2)
+ - B (total: 1, self:—)
+   - A (total: 1, self:—)
+ - C (total: 1, self:—)
+   - B (total: 1, self:—)
+     - A (total: 1, self:—)"
 `;
 
 exports[`focus subtree transform on an inverted call tree can be un-inverted and keep the transform 1`] = `
 "
-- A (total: 2.0ms, self:0.0ms)
- - B (total: 2.0ms, self:0.0ms)
-   - C (total: 1.0ms, self:0.0ms)
-     - X (total: 1.0ms, self:1.0ms)
-   - X (total: 1.0ms, self:1.0ms)"
+- A (total: 2, self:—)
+ - B (total: 2, self:—)
+   - C (total: 1, self:—)
+     - X (total: 1, self:1)
+   - X (total: 1, self:1)"
 `;
 
 exports[`focus subtree transform on an inverted call tree starts as an inverted call tree 1`] = `
 "
-- Z (total: 2.0ms, self:2.0ms)
- - Y (total: 2.0ms, self:0.0ms)
-   - X (total: 2.0ms, self:0.0ms)
-     - B (total: 1.0ms, self:0.0ms)
-       - A (total: 1.0ms, self:0.0ms)
-     - C (total: 1.0ms, self:0.0ms)
-       - B (total: 1.0ms, self:0.0ms)
-         - A (total: 1.0ms, self:0.0ms)
-- E (total: 1.0ms, self:1.0ms)
- - D (total: 1.0ms, self:0.0ms)
-   - C (total: 1.0ms, self:0.0ms)
-     - B (total: 1.0ms, self:0.0ms)
-       - A (total: 1.0ms, self:0.0ms)"
+- Z (total: 2, self:2)
+ - Y (total: 2, self:—)
+   - X (total: 2, self:—)
+     - B (total: 1, self:—)
+       - A (total: 1, self:—)
+     - C (total: 1, self:—)
+       - B (total: 1, self:—)
+         - A (total: 1, self:—)
+- E (total: 1, self:1)
+ - D (total: 1, self:—)
+   - C (total: 1, self:—)
+     - B (total: 1, self:—)
+       - A (total: 1, self:—)"
 `;

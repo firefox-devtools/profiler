@@ -110,19 +110,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
       className="treeViewHeader"
     >
       <span
-        className="treeViewHeaderColumn treeViewFixedColumn totalTime"
-      >
-        Running Time
-      </span>
-      <span
         className="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
       >
         
       </span>
       <span
+        className="treeViewHeaderColumn treeViewFixedColumn totalTime"
+      >
+        Running Time (ms)
+      </span>
+      <span
         className="treeViewHeaderColumn treeViewFixedColumn selfTime"
       >
-        Self
+        Self (ms)
       </span>
       <span
         className="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -182,19 +182,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  3.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  100.0%
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  3
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -214,19 +214,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  3.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  100.0%
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  3
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -246,19 +246,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  2.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  66.7%
+                  67%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -278,19 +278,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  1.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  33.3%
+                  33%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -310,19 +310,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  1.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  33.3%
+                  33%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  1.0ms
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -342,19 +342,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  1.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  33.3%
+                  33%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -374,19 +374,19 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  1.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  33.3%
+                  33%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -796,19 +796,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       className="treeViewHeader"
     >
       <span
-        className="treeViewHeaderColumn treeViewFixedColumn totalTime"
-      >
-        Running Time
-      </span>
-      <span
         className="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
       >
         
       </span>
       <span
+        className="treeViewHeaderColumn treeViewFixedColumn totalTime"
+      >
+        Running Time (ms)
+      </span>
+      <span
         className="treeViewHeaderColumn treeViewFixedColumn selfTime"
       >
-        Self
+        Self (ms)
       </span>
       <span
         className="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -868,19 +868,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  3.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  100.0%
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  3
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -900,19 +900,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  3.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  100.0%
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  3
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -932,19 +932,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  2.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  66.7%
+                  67%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -964,19 +964,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  1.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  33.3%
+                  33%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -996,19 +996,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  1.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  33.3%
+                  33%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  1.0ms
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -1028,19 +1028,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  1.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  33.3%
+                  33%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -1060,19 +1060,19 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  1.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  33.3%
+                  33%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -1482,19 +1482,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with a search string 1`]
       className="treeViewHeader"
     >
       <span
-        className="treeViewHeaderColumn treeViewFixedColumn totalTime"
-      >
-        Running Time
-      </span>
-      <span
         className="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
       >
         
       </span>
       <span
+        className="treeViewHeaderColumn treeViewFixedColumn totalTime"
+      >
+        Running Time (ms)
+      </span>
+      <span
         className="treeViewHeaderColumn treeViewFixedColumn selfTime"
       >
-        Self
+        Self (ms)
       </span>
       <span
         className="treeViewHeaderColumn treeViewFixedColumn icon"
@@ -1554,19 +1554,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with a search string 1`]
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  1.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  100.0%
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -1586,19 +1586,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with a search string 1`]
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  1.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  100.0%
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -1618,19 +1618,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with a search string 1`]
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  1.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  100.0%
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  0.0ms
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -1650,19 +1650,19 @@ exports[`calltree/ProfileCallTreeView renders call tree with a search string 1`]
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn totalTime"
-                >
-                  1.0ms
-                </span>
-                <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  100.0%
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                >
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  1.0ms
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"

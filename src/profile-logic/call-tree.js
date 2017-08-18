@@ -49,6 +49,7 @@ export class CallTree {
   _nodes: Map<IndexIntoCallNodeTable, Node>;
   _children: Map<IndexIntoCallNodeTable, CallNodeChildren>;
   _jsOnly: boolean;
+  _isIntegerInterval: boolean;
 
   constructor(
     { funcTable, resourceTable, stringTable }: Thread,
@@ -57,7 +58,8 @@ export class CallTree {
     callNodeChildCount: Uint32Array,
     rootTotalTime: number,
     rootCount: number,
-    jsOnly: boolean
+    jsOnly: boolean,
+    isIntegerInterval: boolean
   ) {
     this._callNodeTable = callNodeTable;
     this._callNodeTimes = callNodeTimes;
@@ -70,6 +72,7 @@ export class CallTree {
     this._nodes = new Map();
     this._children = new Map();
     this._jsOnly = jsOnly;
+    this._isIntegerInterval = isIntegerInterval;
   }
 
   getRoots() {
@@ -143,15 +146,20 @@ export class CallTree {
       const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
       const libName = this._getOriginAnnotation(funcIndex);
+      const precision = this._isIntegerInterval ? 0 : 1;
+      const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
+      const formatNumber = this._isIntegerInterval
+        ? _formatIntegerNumber
+        : _formatDecimalNumber;
 
       node = {
-        totalTime: `${this._callNodeTimes.totalTime[callNodeIndex].toFixed(
-          1
-        )}ms`,
+        totalTime: `${formatNumber(
+          this._callNodeTimes.totalTime[callNodeIndex]
+        )}`,
         totalTimePercent: `${(100 *
           this._callNodeTimes.totalTime[callNodeIndex] /
-          this._rootTotalTime).toFixed(1)}%`,
-        selfTime: `${this._callNodeTimes.selfTime[callNodeIndex].toFixed(1)}ms`,
+          this._rootTotalTime).toFixed(precision)}%`,
+        selfTime: selfTime === 0 ? '—' : `${formatNumber(selfTime)}`,
         name: funcName,
         lib: libName,
         // Dim platform pseudo-stacks.
@@ -344,6 +352,7 @@ export function getCallTree(
     );
 
     const jsOnly = implementationFilter === 'js';
+    const isIntegerInterval = Math.floor(interval) === interval;
 
     return new CallTree(
       thread,
@@ -352,7 +361,20 @@ export function getCallTree(
       callNodeChildCount,
       rootTotalTime,
       rootCount,
-      jsOnly
+      jsOnly,
+      isIntegerInterval
     );
   });
+}
+
+const LOCALE_WITH_DECIMAL_POINT = {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+};
+function _formatDecimalNumber(number: number): string {
+  return number.toLocaleString(undefined, LOCALE_WITH_DECIMAL_POINT);
+}
+
+function _formatIntegerNumber(number: number): string {
+  return number.toLocaleString();
 }
