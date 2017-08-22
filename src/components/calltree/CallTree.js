@@ -22,7 +22,6 @@ import {
   getProfileViewOptions,
 } from '../../reducers/profile-view';
 import { getIconsWithClassNames } from '../../reducers/icons';
-
 import {
   changeSelectedCallNode,
   changeExpandedCallNodes,
@@ -69,9 +68,9 @@ class CallTreeComponent extends PureComponent {
   constructor(props: Props) {
     super(props);
     this._fixedColumns = [
-      { propName: 'totalTime', title: 'Running Time' },
       { propName: 'totalTimePercent', title: '' },
-      { propName: 'selfTime', title: 'Self' },
+      { propName: 'totalTime', title: 'Running Time (ms)' },
+      { propName: 'selfTime', title: 'Self (ms)' },
       { propName: 'icon', title: '', component: NodeIcon },
     ];
     this._mainColumn = { propName: 'name', title: '' };
