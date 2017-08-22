@@ -11,7 +11,7 @@ import {
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import actions from '../../actions';
-import formatNumber from '../../utils/format-numbers';
+import { formatNumber } from '../../utils/format-numbers';
 import Settings from './Settings';
 
 import './MarkersView.css';

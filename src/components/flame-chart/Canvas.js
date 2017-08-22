@@ -7,7 +7,7 @@ import React, { PureComponent } from 'react';
 import withTimelineViewport from '../shared/timeline/Viewport';
 import TimelineCanvas from '../shared/timeline/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
-import formatNumber from '../../utils/format-numbers';
+import { formatNumber } from '../../utils/format-numbers';
 
 import type { Thread } from '../../types/profile';
 import type {

@@ -19,7 +19,7 @@
  * formatNumber(1.23,  ) =   "1.2"
  * formatNumber(0.01234) =   "0.012"
  */
-export default function formatNumber(value: number): string {
+export function formatNumber(value: number): string {
   let result: string;
   if (value >= 10) {
     result = value.toFixed(0);
@@ -32,4 +32,8 @@ export default function formatNumber(value: number): string {
   }
 
   return result;
+}
+
+export function formatPercent(value: number): string {
+  return formatNumber(value * 100) + '%';
 }
