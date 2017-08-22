@@ -483,6 +483,7 @@ export const selectorsForThread = (
                     transform.implementation
                   );
             case 'merge-subtree':
+              // TODO - Implement this transform.
               return thread;
             case 'merge-call-node':
               return transform.inverted

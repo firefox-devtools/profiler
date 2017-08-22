@@ -79,10 +79,10 @@ export function stringifyTransforms(transforms: TransformStack = []): string {
 export function getTransformLabels(
   thread: Thread,
   threadName: string,
-  tranforms: Transform[]
+  transforms: Transform[]
 ) {
   const { funcTable, stringTable } = thread;
-  const labels = tranforms.map(transform => {
+  const labels = transforms.map(transform => {
     function lastFuncString(callNodePath) {
       const lastFunc = callNodePath[callNodePath.length - 1];
       const nameIndex = funcTable.name[lastFunc];

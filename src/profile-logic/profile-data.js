@@ -592,6 +592,8 @@ export function mergeCallNode(
       prefix: [],
       frame: [],
     };
+    // Provide two arrays to efficiently cache values for the algorithm. This probably
+    // could be refactored to use only one array here.
     const stackDepths = [];
     const stackMatches = [];
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
