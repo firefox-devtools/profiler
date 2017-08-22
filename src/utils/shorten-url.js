@@ -2,11 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import fetchJsonP from 'fetch-jsonp';
 import queryString from 'query-string';
 import url from 'url';
 
-export default function shortenURL(urlToShorten) {
+export default function shortenURL(urlToShorten: string): Promise<string> {
   let longURL = urlToShorten;
   if (!longURL.startsWith('https://perf-html.io/')) {
     const parsedURL = url.parse(longURL);

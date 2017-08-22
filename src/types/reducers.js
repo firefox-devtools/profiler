@@ -102,6 +102,7 @@ export type ProfileUploadState = {
   progress: number,
   status: ProfileUploadStatus,
   error: Error | null,
+  shortURL: string,
 };
 
 export type State = {

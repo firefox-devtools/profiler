@@ -168,7 +168,9 @@ type ProfileUploadAction =
   | { type: 'PROFILE_UPLOAD_SUCCESS', hash: string }
   | { type: 'PROFILE_UPLOAD_START' }
   | { type: 'PROFILE_UPLOAD_ERROR', error: Error }
-  | { type: 'PROFILE_UPLOAD_PROGRESS', progress: number };
+  | { type: 'PROFILE_UPLOAD_PROGRESS', progress: number }
+  | { type: 'SHORTENING_URL', url: string }
+  | { type: 'SHORTENED_URL', longURL: string, shortURL: string };
 
 export type Action =
   | ProfileSummaryAction
