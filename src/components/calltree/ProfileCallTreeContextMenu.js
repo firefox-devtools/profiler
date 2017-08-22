@@ -135,6 +135,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
 
     // Flow just isn't working for me here. I resorted to a switch statement. This really
     // shouldn't be necessary.
+    // Tracking issue: https://github.com/facebook/flow/issues/4683
     switch (type) {
       case 'focus-subtree':
         addTransformToStack(threadIndex, {
