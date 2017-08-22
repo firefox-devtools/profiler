@@ -426,7 +426,7 @@ class TreeView extends PureComponent {
 
   _onRowClicked(nodeId: IndexIntoCallNodeTable, event: MouseEvent) {
     this._select(nodeId);
-    if (event.detail === 2) {
+    if (event.detail === 2 && event.button === 0) {
       // double click
       this._toggle(nodeId);
     }
