@@ -10,7 +10,7 @@ import {
 } from '../profile-logic/symbolication';
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
-import * as FocusSubtree from '../profile-logic/transforms';
+import * as Transforms from '../profile-logic/transforms';
 import * as URLState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
 import * as StackTiming from '../profile-logic/stack-timing';
@@ -18,6 +18,7 @@ import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import * as TaskTracerTools from '../profile-logic/task-tracer';
 import { getCategoryColorStrategy } from './flame-chart';
+import uniqWith from 'lodash.uniqwith';
 
 import type {
   Profile,
@@ -44,7 +45,7 @@ import type {
   SymbolicationStatus,
   ThreadViewOptions,
 } from '../types/reducers';
-import type { TransformStack, Transform } from '../types/transforms';
+import type { TransformStack } from '../types/transforms';
 
 function profile(
   state: Profile = ProfileData.getEmptyProfile(),
@@ -93,29 +94,6 @@ function profile(
     default:
       return state;
   }
-}
-
-function callNodePathAfterNewTransform(
-  callNodePath: CallNodePath,
-  transform: Transform
-): CallNodePath {
-  if (!transform.inverted && transform.implementation !== 'js') {
-    return removePrefixFromCallNodePath(transform.callNodePath, callNodePath);
-  }
-  return callNodePath;
-}
-
-function removePrefixFromCallNodePath(
-  prefixFuncsPath: CallNodePath,
-  callNodePath: CallNodePath
-) {
-  if (
-    prefixFuncsPath.length > callNodePath.length ||
-    prefixFuncsPath.some((prefixFunc, i) => prefixFunc !== callNodePath[i])
-  ) {
-    return [];
-  }
-  return callNodePath.slice(prefixFuncsPath.length - 1);
 }
 
 function symbolicationStatus(
@@ -206,15 +184,18 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
     }
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadIndex, transform } = action;
-      const expandedCallNodePaths = state[
-        threadIndex
-      ].expandedCallNodePaths.map(path =>
-        callNodePathAfterNewTransform(path, transform)
+      const expandedCallNodePaths = uniqWith(
+        state[threadIndex].expandedCallNodePaths
+          .map(path => Transforms.applyTransformToCallNodePath(path, transform))
+          .filter(path => path.length > 0),
+        Transforms.pathsAreEqual
       );
-      const selectedCallNodePath = callNodePathAfterNewTransform(
+
+      const selectedCallNodePath = Transforms.applyTransformToCallNodePath(
         state[threadIndex].selectedCallNodePath,
         transform
       );
+
       return [
         ...state.slice(0, threadIndex),
         Object.assign({}, state[threadIndex], {
@@ -393,6 +374,7 @@ export type SelectorsForThread = {
   getCallNodeInfo: State => CallNodeInfo,
   getSelectedCallNodePath: State => CallNodePath,
   getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
+  getExpandedCallNodePaths: State => CallNodePath[],
   getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
   getCallTree: State => CallTree.CallTree,
   getFilteredThreadForFlameChart: State => Thread,
@@ -430,7 +412,7 @@ export const selectorsForThread = (
       getThread,
       getFriendlyThreadName,
       getTransformStack,
-      FocusSubtree.getTransformLabels
+      Transforms.getTransformLabels
     );
     const getRangeFilteredThread = createSelector(
       getThread,
@@ -561,14 +543,14 @@ export const selectorsForThread = (
         );
       }
     );
-    const _getExpandedCallNodePaths = createSelector(
+    const getExpandedCallNodePaths = createSelector(
       getViewOptions,
       (threadViewOptions): Array<CallNodePath> =>
         threadViewOptions.expandedCallNodePaths
     );
     const getExpandedCallNodeIndexes = createSelector(
       getCallNodeInfo,
-      _getExpandedCallNodePaths,
+      getExpandedCallNodePaths,
       (callNodeInfo, callNodePaths): (IndexIntoCallNodeTable | null)[] => {
         return callNodePaths.map(callNodePath =>
           ProfileData.getCallNodeFromPath(
@@ -667,6 +649,7 @@ export const selectorsForThread = (
       getCallNodeInfo,
       getSelectedCallNodePath,
       getSelectedCallNodeIndex,
+      getExpandedCallNodePaths,
       getExpandedCallNodeIndexes,
       getCallTree,
       getFilteredThreadForFlameChart,
