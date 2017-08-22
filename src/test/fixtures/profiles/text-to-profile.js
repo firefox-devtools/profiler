@@ -1,0 +1,147 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+// @flow
+import { getEmptyProfile } from '../../../profile-logic/profile-data';
+import { getEmptyThread } from '../../store/fixtures/profiles';
+import type { Profile } from '../../../types/profile';
+
+/**
+ * Create a profile from text representation of samples. Each column in the text provided
+ * represents a sample. Each sample is made up of a list of functions.
+ */
+export default function getProfileFromTextSamples(
+  text: string
+): { profile: Profile, funcNames: string[] } {
+  const nonEmpty = t => t;
+  const lines = text.split('\n').filter(nonEmpty);
+
+  // Compute the index of where the columns start in the string
+  const columnIndexes = [];
+  {
+    const firstLine = lines[0];
+    if (!firstLine) {
+      throw new Error('Empty text data was sent');
+    }
+    let searchWhitespace = true;
+    for (let i = 0; i < firstLine.length; i++) {
+      const isSpace = firstLine[i] === ' ';
+      if (searchWhitespace) {
+        if (!isSpace) {
+          columnIndexes.push(i);
+          searchWhitespace = false;
+        }
+      } else {
+        if (isSpace) {
+          searchWhitespace = true;
+        }
+      }
+    }
+  }
+
+  // Split up each line into rows of characters
+  const rows = lines.map(line => {
+    return columnIndexes.map(columnIndex => {
+      let funcName = '';
+      for (let i = columnIndex; i < line.length; i++) {
+        const char = line[i];
+        if (char === ' ') {
+          break;
+        } else {
+          funcName += char;
+        }
+      }
+      return funcName;
+    });
+  });
+
+  const firstRow = rows[0];
+  if (!firstRow) {
+    throw new Error('No valid data.');
+  }
+
+  // Go from rows to columns
+  const columns = firstRow.map((_, columnIndex) => {
+    const column = [];
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+      const value = rows[rowIndex][columnIndex];
+      if (!value) {
+        break;
+      }
+      column.push(value);
+    }
+    return column;
+  });
+
+  const profile = getEmptyProfile();
+  const thread = getEmptyThread();
+  profile.threads.push(thread);
+  const { funcTable, stringTable, frameTable, stackTable, samples } = thread;
+
+  const funcNames = columns
+    // Flatten the arrays.
+    .reduce((memo, row) => [...memo, ...row], [])
+    // Make the list unique.
+    .filter((item, index, array) => array.indexOf(item) === index);
+
+  // Create the FuncTable.
+  funcNames.forEach(funcName => {
+    funcTable.name.push(stringTable.indexForString(funcName));
+    funcTable.address.push(0);
+    funcTable.fileName.push(null);
+    funcTable.isJS.push(funcName.endsWith('js'));
+    funcTable.lineNumber.push(null);
+    funcTable.resource.push(-1);
+    funcTable.length++;
+  });
+
+  // Create the samples, stacks, and frames.
+  columns.forEach((column, columnIndex) => {
+    let prefix = null;
+    column.forEach(funcName => {
+      // There is a one-to-one relationship between strings and funcIndexes here, so
+      // the indexes can double as both string indexes and func indexes.
+      const funcIndex = stringTable.indexForString(funcName);
+
+      // Attempt to find a stack that satisfies the given funcIndex and prefix.
+      let stackIndex;
+      for (let i = 0; i < stackTable.length; i++) {
+        if (stackTable.prefix[i] === prefix) {
+          const frameIndex = stackTable.frame[i];
+          if (funcIndex === frameTable.func[frameIndex]) {
+            stackIndex = i;
+            break;
+          }
+        }
+      }
+
+      // If we couldn't find a stack, go ahead and create a stack and frame.
+      if (stackIndex === undefined) {
+        const frameIndex = frameTable.length++;
+        frameTable.func.push(funcIndex);
+        frameTable.address.push(0);
+        frameTable.category.push(null);
+        frameTable.implementation.push(null);
+        frameTable.line.push(null);
+        frameTable.optimizations.push(null);
+
+        stackTable.frame.push(frameIndex);
+        stackTable.prefix.push(prefix);
+        stackIndex = stackTable.length++;
+      }
+
+      prefix = stackIndex;
+    });
+
+    // Add a single sample for each column.
+    samples.length++;
+    samples.responsiveness.push(0);
+    samples.rss.push(null);
+    samples.uss.push(null);
+    samples.stack.push(prefix);
+    samples.time.push(columnIndex);
+  });
+
+  return { profile, funcNames };
+}

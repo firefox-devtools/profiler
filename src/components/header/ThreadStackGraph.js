@@ -32,14 +32,12 @@ class ThreadStackGraph extends PureComponent {
   }
 
   componentDidMount() {
-    const win = this._canvas.ownerDocument.defaultView;
-    win.addEventListener('resize', this._resizeListener);
+    window.addEventListener('resize', this._resizeListener);
     this.forceUpdate(); // for initial size
   }
 
   componentWillUnmount() {
-    const win = this._canvas.ownerDocument.defaultView;
-    win.removeEventListener('resize', this._resizeListener);
+    window.removeEventListener('resize', this._resizeListener);
   }
 
   drawCanvas(c) {

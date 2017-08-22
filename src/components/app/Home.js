@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import classNames from 'classnames';
 import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2016-12-06.png';
 import PerfScreenshot from '../../../res/perf-screenshot-2017-05-11.jpg';
-import actions from '../../actions';
+import { retrieveProfileFromFile } from '../../actions/receive-profile';
 import { CSSTransitionGroup } from 'react-transition-group';
 
 require('./Home.css');
@@ -385,4 +385,4 @@ function _isFirefox(): boolean {
   return Boolean(navigator.userAgent.match(/Firefox\/\d+\.\d+/));
 }
 
-export default connect(state => state, actions)(Home);
+export default connect(state => state, { retrieveProfileFromFile })(Home);

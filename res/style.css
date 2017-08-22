@@ -135,7 +135,10 @@ body {
   width: 1px;
   background: #E5E5E5;
 }
-
+.treeViewHeaderColumn.totalTime,
+.treeViewHeaderColumn.selfTime {
+  text-align: right;
+}
 .treeViewRowColumn.treeViewFixedColumn {
   box-sizing: border-box;
   border-right: 1px solid #D6D6D6;
@@ -143,11 +146,11 @@ body {
 .treeViewFixedColumn.totalTime {
   left: 0px;
   width: 70px;
-  border-right: none;
 }
 .treeViewFixedColumn.totalTimePercent {
   left: 70px;
   width: 50px;
+  border-right: none;
 }
 .treeViewFixedColumn.selfTime {
   left: 120px;
@@ -831,7 +834,7 @@ body {
 
 .react-contextmenu {
   min-width: 160px;
-  padding: 3px 0;
+  padding: 5px 0;
   margin: 2px 0 0;
   font-size: 12px;
   color: #000;
@@ -845,13 +848,17 @@ body {
   -moz-user-select: none;
   user-select: none;
 }
+.react-contextmenu-separator {
+  border-bottom: 1px solid #ddd;
+  margin: 6px 0;
+}
 
 .react-contextmenu.react-contextmenu--visible {
   display: block;
 }
 
 .react-contextmenu-item {
-  padding: 2px 8px;
+  padding: 2px 12px;
   line-height: 1.5;
   white-space: nowrap;
   cursor: default;

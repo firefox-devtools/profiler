@@ -255,9 +255,9 @@ describe('unfiltered call tree', function() {
           icon: null,
           lib: '',
           name: 'A',
-          selfTime: '0.0ms',
-          totalTime: '3.0ms',
-          totalTimePercent: '100.0%',
+          selfTime: '—',
+          totalTime: '3',
+          totalTimePercent: '100%',
         });
       });
     });
@@ -528,9 +528,11 @@ function _assertNode(
     expect(parent).toBe(expectedParent);
   });
   it('has the expected self time', function() {
-    expect(selfTime).toBe(`${expected.selfTime.toFixed(1)}ms`);
+    expect(selfTime).toBe(
+      expected.selfTime === 0 ? '—' : `${expected.selfTime}`
+    );
   });
   it('has the expected total time', function() {
-    expect(totalTime).toBe(`${expected.totalTime.toFixed(1)}ms`);
+    expect(totalTime).toBe(`${expected.totalTime}`);
   });
 }

@@ -12,6 +12,22 @@ import type { ThreadIndex, IndexIntoFuncTable } from './profile';
 import type { ImplementationFilter } from './actions';
 
 /**
+ * When working with a call tree, nodes in the graph are not stable across various
+ * transformations of the stacks. It doesn't make sense to generate a single ID for
+ * a node, as the definition of what a node is can change depending on the current
+ * context. In order to get around this, we use the concept of a CallNodeReference.
+ * This reference remains stable across stack inversions, and filtering stacks
+ * by their implementation. The combination of the path of called functions to the call
+ * node, the implementation filter, and whether the stacks were inverted will
+ * provide a stable reference to a call node for a given view into a call tree.
+ */
+export type CallNodeReference = {
+  callNodePath: IndexIntoFuncTable[],
+  implementation: ImplementationFilter,
+  inverted: boolean,
+};
+
+/**
  * FocusSubtreeTransform represents the operation of focusing on a subtree in a call tree.
  * The subtree is referenced by a callNodePath (a list of functions to a particular node),
  * and an implementation filter to filter out certain stacks and nodes that we don't care
@@ -65,13 +81,58 @@ import type { ImplementationFilter } from './actions';
  *                        ↓                               ↓
  *                      A:1,0                           X:1,1
  */
-export type FocusSubtreeTransform = {|
-  type: 'focus-subtree',
-  callNodePath: IndexIntoFuncTable[],
-  implementation: ImplementationFilter,
-  inverted: boolean,
-|};
+export type MergeSubtree = { type: 'merge-subtree' } & CallNodeReference;
 
-export type Transform = FocusSubtreeTransform;
+/**
+ * The MergeSubtree transform represents merging a CallNode into the parent CallNode. The
+ * CallNode must match the given CallNodePath. In the call tree below, if the CallNode
+ * at path [A, B, C] is removed, then the `D` and `F` CallNodes are re-assigned to `B`.
+ * No self time in this case would change, as `C` was not a leaf CallNode, but the
+ * structure of the tree was changed slightly. The merging work is done by transforming
+ * an existing thread's stackTable.
+ *
+ *                 A:3,0                              A:3,0
+ *                   |                                  |
+ *                   v                                  v
+ *                 B:3,0                              B:3,0
+ *                 /    \          Merge C         /    |    \
+ *                v      v           -->          v     v     v
+ *            C:2,0     H:1,0                 D:1,0   F:1,0    H:1,0
+ *           /      \         \                 |       |        |
+ *          v        v         v                v       v        v
+ *        D:1,0     F:1,0     F:1,1          E:1,1    G:1,1    F:1,1
+ *        |           |
+ *        v           v
+ *      E:1,1       G:1,1
+ *
+ *
+ * When a leaf CallNode is merged, the self time for that CallNode is assigned to the
+ * parent CallNode. Here the leaf CallNode `E` is merged. `D` goes from having a self
+ * time of 0 to 1.
+ *                A:3,0                              A:3,0
+ *                  |                                  |
+ *                  v                                  v
+ *                B:3,0                              B:3,0
+ *                /    \          Merge E            /    \
+ *               v      v           -->             v      v
+ *           C:2,0     H:1,0                    C:2,0     H:1,0
+ *          /      \         \                 /      \         \
+ *         v        v         v               v        v         v
+ *       D:1,0     F:1,0     F:1,1          D:1,1     F:1,0     F:1,1
+ *       |           |                                  |
+ *       v           v                                  v
+ *     E:1,1       G:1,1                              G:1,1
+ *
+ * This same operation can be done on an inverted call tree as well. The CallNodePath
+ * would then be reversed, going from the top of the stack, towards the bottom.
+ */
+export type MergeCallNode = { type: 'merge-call-node' } & CallNodeReference;
+
+/**
+ * TODO - Once implemented.
+ */
+export type FocusSubtree = { type: 'focus-subtree' } & CallNodeReference;
+
+export type Transform = FocusSubtree | MergeSubtree | MergeCallNode;
 export type TransformStack = Transform[];
 export type TransformStacksPerThread = { [id: ThreadIndex]: TransformStack };

@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../store/fixtures/profiles';
+import { getBoundingBox } from '../fixtures/utils';
 
 jest.useFakeTimers();
 
@@ -26,7 +27,7 @@ it('renders TimelineMarkers correctly', () => {
     // <TimelineCanvas><canvas /></TimelineCanvas>
     if (element.type === 'canvas') {
       return {
-        getBoundingClientRect: () => _getBoundingBox(200, 300),
+        getBoundingClientRect: () => getBoundingBox(200, 300),
         getContext: () => ctx,
         style: {},
       };
@@ -34,7 +35,7 @@ it('renders TimelineMarkers correctly', () => {
     // <TimelineViewport />
     if (element.props.className.split(' ').includes('timelineViewport')) {
       return {
-        getBoundingClientRect: () => _getBoundingBox(200, 300),
+        getBoundingClientRect: () => getBoundingBox(200, 300),
       };
     }
     return null;
@@ -83,16 +84,3 @@ it('renders TimelineMarkers correctly', () => {
   delete window.requestAnimationFrame;
   delete window.devicePixelRatio;
 });
-
-function _getBoundingBox(width, height) {
-  return {
-    width,
-    height,
-    left: 0,
-    x: 0,
-    top: 0,
-    y: 0,
-    right: width,
-    bottom: height,
-  };
-}
