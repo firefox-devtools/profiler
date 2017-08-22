@@ -10,6 +10,7 @@ import {
 import { toValidImplementationFilter } from './profile-data';
 
 import type { Thread } from '../types/profile';
+import type { CallNodePath } from '../types/profile-derived';
 import type { Transform, TransformStack } from '../types/transforms';
 
 /**
@@ -104,4 +105,55 @@ export function getTransformLabels(
   });
   labels.unshift(`Complete "${threadName}"`);
   return labels;
+}
+
+export function applyTransformToCallNodePath(
+  callNodePath: CallNodePath,
+  transform: Transform
+): CallNodePath {
+  switch (transform.type) {
+    case 'focus-subtree':
+      return _removePrefixPathFromCallNodePath(
+        transform.callNodePath,
+        callNodePath
+      );
+    case 'merge-call-node':
+      return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
+    default:
+      throw new Error(
+        'Cannot apply an unknown transform to update the CallNodePath'
+      );
+  }
+}
+
+function _removePrefixPathFromCallNodePath(
+  prefixPath: CallNodePath,
+  callNodePath: CallNodePath
+): CallNodePath {
+  return _callNodePathHasPrefixPath(prefixPath, callNodePath)
+    ? callNodePath.slice(prefixPath.length - 1)
+    : [];
+}
+
+function _mergeNodeInCallNodePath(
+  prefixPath: CallNodePath,
+  callNodePath: CallNodePath
+): CallNodePath {
+  return _callNodePathHasPrefixPath(prefixPath, callNodePath)
+    ? callNodePath.filter((_, i) => i !== prefixPath.length - 1)
+    : callNodePath;
+}
+
+function _callNodePathHasPrefixPath(
+  prefixPath: CallNodePath,
+  callNodePath: CallNodePath
+): boolean {
+  return (
+    prefixPath.length <= callNodePath.length &&
+    prefixPath.every((prefixFunc, i) => prefixFunc === callNodePath[i])
+  );
+}
+
+export function pathsAreEqual(a: CallNodePath, b: CallNodePath): boolean {
+  return a.length === b.length && a.every((func, i) => func === b[i]);
 }
