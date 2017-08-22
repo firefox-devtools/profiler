@@ -44,10 +44,7 @@ import type {
   SymbolicationStatus,
   ThreadViewOptions,
 } from '../types/reducers';
-import type {
-  TransformStack,
-  FocusSubtreeTransform,
-} from '../types/transforms';
+import type { TransformStack, Transform } from '../types/transforms';
 
 function profile(
   state: Profile = ProfileData.getEmptyProfile(),
@@ -100,7 +97,7 @@ function profile(
 
 function callNodePathAfterNewTransform(
   callNodePath: IndexIntoFuncTable[],
-  transform: FocusSubtreeTransform
+  transform: Transform
 ): IndexIntoFuncTable[] {
   if (!transform.inverted && transform.implementation !== 'js') {
     return removePrefixFromCallNodePath(transform.callNodePath, callNodePath);
@@ -394,6 +391,7 @@ export type SelectorsForThread = {
   getFilteredThread: State => Thread,
   getRangeSelectionFilteredThread: State => Thread,
   getCallNodeInfo: State => CallNodeInfo,
+  getSelectedCallNodePath: State => IndexIntoFuncTable[],
   getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
   getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
   getCallTree: State => CallTree.CallTree,
@@ -469,25 +467,40 @@ export const selectorsForThread = (
     const _getRangeAndTransformFilteredThread = createSelector(
       getRangeFilteredThread,
       getTransformStack,
-      (thread, transforms): Thread => {
-        const result = transforms.reduce((t, transform) => {
+      (startingThread, transforms): Thread => {
+        const result = transforms.reduce((thread, transform) => {
           switch (transform.type) {
             case 'focus-subtree':
               return transform.inverted
                 ? ProfileData.filterThreadToPostfixCallNodePath(
-                    t,
+                    thread,
                     transform.callNodePath,
                     transform.implementation
                   )
                 : ProfileData.filterThreadToPrefixCallNodePath(
-                    t,
+                    thread,
+                    transform.callNodePath,
+                    transform.implementation
+                  );
+            case 'merge-subtree':
+              // TODO - Implement this transform.
+              return thread;
+            case 'merge-call-node':
+              return transform.inverted
+                ? ProfileData.mergeInvertedCallNode(
+                    thread,
+                    transform.callNodePath,
+                    transform.implementation
+                  )
+                : ProfileData.mergeCallNode(
+                    thread,
                     transform.callNodePath,
                     transform.implementation
                   );
             default:
               throw new Error('Unhandled transform.');
           }
-        }, thread);
+        }, startingThread);
         return result;
       }
     );
@@ -533,14 +546,14 @@ export const selectorsForThread = (
         return ProfileData.getCallNodeInfo(stackTable, frameTable, funcTable);
       }
     );
-    const _getSelectedCallNodeAsPath = createSelector(
+    const getSelectedCallNodePath = createSelector(
       getViewOptions,
       (threadViewOptions): IndexIntoFuncTable[] =>
         threadViewOptions.selectedCallNodePath
     );
     const getSelectedCallNodeIndex = createSelector(
       getCallNodeInfo,
-      _getSelectedCallNodeAsPath,
+      getSelectedCallNodePath,
       (callNodeInfo, callNodePath): IndexIntoCallNodeTable | null => {
         return ProfileData.getCallNodeFromPath(
           callNodePath,
@@ -652,6 +665,7 @@ export const selectorsForThread = (
       getFilteredThread,
       getRangeSelectionFilteredThread,
       getCallNodeInfo,
+      getSelectedCallNodePath,
       getSelectedCallNodeIndex,
       getExpandedCallNodeIndexes,
       getCallTree,
