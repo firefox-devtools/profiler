@@ -16,14 +16,11 @@ import {
 import actions from '../../actions';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 
-import type {
-  IndexIntoFuncTable,
-  Thread,
-  ThreadIndex,
-} from '../../types/profile';
+import type { Thread, ThreadIndex } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type {
   CallNodeInfo,
+  CallNodePath,
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { State } from '../../types/reducers';
@@ -42,10 +39,7 @@ type Props = {
   threadName: string,
   processDetails: string,
   changeSelectedThread: ThreadIndex => void,
-  changeSelectedCallNode: (
-    IndexIntoCallNodeTable,
-    IndexIntoFuncTable[]
-  ) => void,
+  changeSelectedCallNode: (IndexIntoCallNodeTable, CallNodePath) => void,
 };
 
 class ProfileThreadHeaderBar extends PureComponent {

@@ -23,7 +23,6 @@ import type {
   Profile,
   Thread,
   ThreadIndex,
-  IndexIntoFuncTable,
   SamplesTable,
   TaskTracer,
   MarkersTable,
@@ -31,6 +30,7 @@ import type {
 import type {
   TracingMarker,
   CallNodeInfo,
+  CallNodePath,
   IndexIntoCallNodeTable,
   MarkerTimingRows,
 } from '../types/profile-derived';
@@ -96,9 +96,9 @@ function profile(
 }
 
 function callNodePathAfterNewTransform(
-  callNodePath: IndexIntoFuncTable[],
+  callNodePath: CallNodePath,
   transform: Transform
-): IndexIntoFuncTable[] {
+): CallNodePath {
   if (!transform.inverted && transform.implementation !== 'js') {
     return removePrefixFromCallNodePath(transform.callNodePath, callNodePath);
   }
@@ -106,8 +106,8 @@ function callNodePathAfterNewTransform(
 }
 
 function removePrefixFromCallNodePath(
-  prefixFuncsPath: IndexIntoFuncTable[],
-  callNodePath: IndexIntoFuncTable[]
+  prefixFuncsPath: CallNodePath,
+  callNodePath: CallNodePath
 ) {
   if (
     prefixFuncsPath.length > callNodePath.length ||
@@ -391,7 +391,7 @@ export type SelectorsForThread = {
   getFilteredThread: State => Thread,
   getRangeSelectionFilteredThread: State => Thread,
   getCallNodeInfo: State => CallNodeInfo,
-  getSelectedCallNodePath: State => IndexIntoFuncTable[],
+  getSelectedCallNodePath: State => CallNodePath,
   getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
   getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
   getCallTree: State => CallTree.CallTree,
@@ -548,7 +548,7 @@ export const selectorsForThread = (
     );
     const getSelectedCallNodePath = createSelector(
       getViewOptions,
-      (threadViewOptions): IndexIntoFuncTable[] =>
+      (threadViewOptions): CallNodePath =>
         threadViewOptions.selectedCallNodePath
     );
     const getSelectedCallNodeIndex = createSelector(
@@ -563,7 +563,7 @@ export const selectorsForThread = (
     );
     const _getExpandedCallNodePaths = createSelector(
       getViewOptions,
-      (threadViewOptions): Array<IndexIntoFuncTable[]> =>
+      (threadViewOptions): Array<CallNodePath> =>
         threadViewOptions.expandedCallNodePaths
     );
     const getExpandedCallNodeIndexes = createSelector(

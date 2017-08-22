@@ -5,11 +5,8 @@
 // @flow
 import type { ProfileSelection, ImplementationFilter } from '../types/actions';
 import type { Action, ThunkAction } from '../types/store';
-import type {
-  ThreadIndex,
-  IndexIntoFuncTable,
-  IndexIntoMarkersTable,
-} from '../types/profile';
+import type { ThreadIndex, IndexIntoMarkersTable } from '../types/profile';
+import type { CallNodePath } from '../types/profile-derived';
 import type { Transform } from '../types/transforms';
 
 /**
@@ -19,7 +16,7 @@ import type { Transform } from '../types/transforms';
  */
 export function changeSelectedCallNode(
   threadIndex: ThreadIndex,
-  selectedCallNodePath: IndexIntoFuncTable[]
+  selectedCallNodePath: CallNodePath
 ): Action {
   return {
     type: 'CHANGE_SELECTED_CALL_NODE',
@@ -80,7 +77,7 @@ export function changeCallTreeSearchString(searchString: string): Action {
 
 export function changeExpandedCallNodes(
   threadIndex: ThreadIndex,
-  expandedCallNodePaths: Array<IndexIntoFuncTable[]>
+  expandedCallNodePaths: Array<CallNodePath>
 ): Action {
   return {
     type: 'CHANGE_EXPANDED_CALL_NODES',
