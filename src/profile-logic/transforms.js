@@ -410,11 +410,11 @@ export function focusSubtree(
   implementation: ImplementationFilter
 ): Thread {
   return timeCode('focusSubtree', () => {
-    const { stackTable, frameTable, funcTable, samples } = thread;
+    const { stackTable, frameTable, samples } = thread;
     const prefixDepth = callNodePath.length;
     const stackMatches = new Int32Array(stackTable.length);
     // TODO - Handle any implementation here.
-    const matchJSOnly = implementation === 'js';
+    const funcMatchesImplementation = FUNC_MATCHES[implementation];
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
       IndexIntoStackTable | null
@@ -434,10 +434,10 @@ export function focusSubtree(
         if (prefixMatchesUpTo === prefixDepth) {
           stackMatchesUpTo = prefixDepth;
         } else {
-          const func = frameTable.func[frame];
-          if (func === callNodePath[prefixMatchesUpTo]) {
+          const funcIndex = frameTable.func[frame];
+          if (funcIndex === callNodePath[prefixMatchesUpTo]) {
             stackMatchesUpTo = prefixMatchesUpTo + 1;
-          } else if (matchJSOnly && !funcTable.isJS[func]) {
+          } else if (!funcMatchesImplementation(thread, funcIndex)) {
             stackMatchesUpTo = prefixMatchesUpTo;
           }
         }
@@ -485,20 +485,20 @@ export function focusInvertedSubtree(
 ): Thread {
   return timeCode('focusInvertedSubtree', () => {
     const postfixDepth = postfixCallNodePath.length;
-    const { stackTable, frameTable, funcTable, samples } = thread;
+    const { stackTable, frameTable, samples } = thread;
     // TODO - Match any implementation.
-    const matchJSOnly = implementation === 'js';
+    const funcMatchesImplementation = FUNC_MATCHES[implementation];
     function convertStack(leaf) {
       let matchesUpToDepth = 0; // counted from the leaf
       for (let stack = leaf; stack !== null; stack = stackTable.prefix[stack]) {
         const frame = stackTable.frame[stack];
-        const func = frameTable.func[frame];
-        if (func === postfixCallNodePath[matchesUpToDepth]) {
+        const funcIndex = frameTable.func[frame];
+        if (funcIndex === postfixCallNodePath[matchesUpToDepth]) {
           matchesUpToDepth++;
           if (matchesUpToDepth === postfixDepth) {
             return stack;
           }
-        } else if (!matchJSOnly || funcTable.isJS[func]) {
+        } else if (funcMatchesImplementation(thread, funcIndex)) {
           return null;
         }
       }
