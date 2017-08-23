@@ -46,39 +46,10 @@ function error(state: Error | null = null, action: Action): Error | null {
   }
 }
 
-function shortURL(
-  state: string = window.location.href,
-  action: Action
-): string {
-  switch (action.type) {
-    case 'SHORTENING_URL':
-      return action.url;
-    case 'SHORTENED_URL':
-      return action.shortURL;
-    case 'RESET_SHORT_URL':
-      return window.location.href;
-    default:
-      return state;
-  }
-}
-
-function lastShortenedURL(state: string = '', action: Action): string {
-  switch (action.type) {
-    case 'SHORTENED_URL':
-      return action.longURL;
-    case 'RESET_SHORT_URL':
-      return '';
-    default:
-      return state;
-  }
-}
-
 const profileUploadStateReducer: Reducer<ProfileUploadState> = combineReducers({
   progress,
   status,
   error,
-  shortURL,
-  lastShortenedURL,
 });
 
 export default profileUploadStateReducer;
@@ -91,7 +62,3 @@ export const getStatus = (state: State): ProfileUploadStatus =>
   getProfileUpload(state).status;
 export const getError = (state: State): Error | null =>
   getProfileUpload(state).error;
-export const getShortURL = (state: State): string =>
-  getProfileUpload(state).shortURL;
-export const getLastShortenedURL = (state: State): string =>
-  getProfileUpload(state).lastShortenedURL;

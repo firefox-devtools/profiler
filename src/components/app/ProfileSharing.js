@@ -18,16 +18,17 @@ import {
   getProgress,
   getStatus,
   getError,
-  getShortURL,
-  getLastShortenedURL,
 } from '../../reducers/profile-upload';
+import {
+  getValue as getShortUrl,
+  getOriginalUrl,
+} from '../../reducers/short-url';
 import {
   uploadBinaryProfileData,
   uploadSuccess,
   uploadError,
-  shortenURL,
-  resetShortURL,
 } from '../../actions/profile-upload';
+import { shortenURL, resetShortURL } from '../../actions/short-url';
 import ArrowPanel from '../shared/ArrowPanel';
 import ButtonWithPanel from '../shared/ButtonWithPanel';
 import { serializeProfile } from '../../profile-logic/process-profile';
@@ -78,7 +79,7 @@ type ProfileSharingCompositeButtonProps = {
   profile: Profile,
   dataSource: DataSource,
   progress: number,
-  shortURL: string,
+  shortUrl: string,
   lastShortenedURL: string,
   hash: string,
   status: ProfileUploadStatus,
@@ -175,7 +176,7 @@ class ProfileSharingCompositeButton extends PureComponent {
   }
 
   render() {
-    const { shortURL, dataSource, status, progress, error } = this.props;
+    const { shortUrl, dataSource, status, progress, error } = this.props;
     return (
       <div
         className={classNames('profileSharingCompositeButtonContainer', {
@@ -214,7 +215,7 @@ class ProfileSharingCompositeButton extends PureComponent {
               <input
                 type="text"
                 className="profileSharingPermalinkTextField"
-                value={shortURL}
+                value={shortUrl}
                 readOnly="readOnly"
                 ref={this._permalinkTextFieldCreated}
               />
@@ -359,7 +360,7 @@ type ProfileSharingProps = {
   dataSource: DataSource,
   progress: number,
   hash: string,
-  shortURL: string,
+  shortUrl: string,
   lastShortenedURL: string,
   status: ProfileUploadStatus,
   error: Error | null,
@@ -376,7 +377,7 @@ const ProfileSharing = ({
   dataSource,
   progress,
   hash,
-  shortURL,
+  shortUrl,
   lastShortenedURL,
   status,
   error,
@@ -392,7 +393,7 @@ const ProfileSharing = ({
       dataSource={dataSource}
       progress={progress}
       hash={hash}
-      shortURL={shortURL}
+      shortUrl={shortUrl}
       lastShortenedURL={lastShortenedURL}
       error={error}
       status={status}
@@ -411,8 +412,8 @@ export default connect(
     rootRange: getProfileRootRange(state),
     dataSource: getDataSource(state),
     hash: getHash(state),
-    shortURL: getShortURL(state),
-    lastShortenedURL: getLastShortenedURL(state),
+    shortUrl: getShortUrl(state),
+    lastShortenedURL: getOriginalUrl(state),
     predictURL: getURLPredictor(state),
     error: getError(state),
     status: getStatus(state),

@@ -102,14 +102,18 @@ export type ProfileUploadState = {
   progress: number,
   status: ProfileUploadStatus,
   error: Error | null,
-  shortURL: string,
-  lastShortenedURL: string,
+};
+
+export type ShortUrlState = {
+  value: string,
+  originalUrl: string,
 };
 
 export type State = {
   app: AppState,
   profileUpload: ProfileUploadState,
   profileView: ProfileViewState,
+  shortUrl: ShortUrlState,
   summaryView: SummaryViewState,
   urlState: URLState,
   flameChart: FlameChartState,

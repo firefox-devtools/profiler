@@ -7,7 +7,7 @@ import Perf from 'react-addons-perf';
 import { render } from 'react-dom';
 import Root from './components/app/Root';
 import createStore from './create-store';
-import { stateWatcher as shortenerStateWatcher } from './actions/profile-upload';
+import { stateWatcher as shortenerStateWatcher } from './actions/short-url';
 import '../res/style.css';
 
 if (process.env.NODE_ENV === 'production') {
