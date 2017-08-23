@@ -5,7 +5,7 @@
 // @flow
 import type { Milliseconds } from './units';
 import type { MarkerPayload } from './markers';
-
+import type { IndexIntoFuncTable } from './profile';
 export type IndexIntoCallNodeTable = number;
 
 /**
@@ -49,6 +49,16 @@ export type CallNodeInfo = {
   // IndexIntoStackTable -> IndexIntoCallNodeTable
   stackIndexToCallNodeIndex: Uint32Array,
 };
+
+/**
+ * When working with call trees, individual nodes in the tree are not stable across
+ * different types of transformations and filtering operations. In order to refer
+ * to some place in the call tree we use a list of functions that either go from
+ * root to tip for normal call trees, or from tip to root for inverted call trees.
+ * These paths are then stored along with the implementation filter, and the whether
+ * or not the tree is inverted for a stable reference into a call tree.
+ */
+export type CallNodePath = IndexIntoFuncTable[];
 
 export type TracingMarker = {
   start: Milliseconds,

@@ -20,19 +20,16 @@ import type { ImplementationFilter } from '../../types/actions';
 import type {
   IndexIntoCallNodeTable,
   CallNodeInfo,
+  CallNodePath,
 } from '../../types/profile-derived';
-import type {
-  Thread,
-  IndexIntoFuncTable,
-  ThreadIndex,
-} from '../../types/profile';
+import type { Thread, ThreadIndex } from '../../types/profile';
 
 type Props = {
   thread: Thread,
   threadIndex: ThreadIndex,
   callNodeInfo: CallNodeInfo,
   implementation: ImplementationFilter,
-  selectedCallNodePath: IndexIntoFuncTable[],
+  selectedCallNodePath: CallNodePath,
   selectedCallNodeIndex: IndexIntoCallNodeTable,
   inverted: boolean,
   addTransformToStack: typeof addTransformToStack,

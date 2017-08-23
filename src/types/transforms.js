@@ -8,7 +8,8 @@
  * that is used to transform the sample and stack information of a profile. They are
  * applied in a stack.
  */
-import type { ThreadIndex, IndexIntoFuncTable } from './profile';
+import type { ThreadIndex } from './profile';
+import type { CallNodePath } from './profile-derived';
 import type { ImplementationFilter } from './actions';
 
 /**
@@ -22,7 +23,7 @@ import type { ImplementationFilter } from './actions';
  * provide a stable reference to a call node for a given view into a call tree.
  */
 export type CallNodeReference = {
-  callNodePath: IndexIntoFuncTable[],
+  callNodePath: CallNodePath,
   implementation: ImplementationFilter,
   inverted: boolean,
 };

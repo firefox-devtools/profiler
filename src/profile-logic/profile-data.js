@@ -21,6 +21,7 @@ import type {
 import type {
   CallNodeInfo,
   CallNodeTable,
+  CallNodePath,
   IndexIntoCallNodeTable,
   TracingMarker,
 } from '../types/profile-derived';
@@ -501,7 +502,7 @@ export function filterThreadToSearchString(
  */
 export function filterThreadToPrefixCallNodePath(
   thread: Thread,
-  prefixCallNodePath: IndexIntoFuncTable[],
+  prefixCallNodePath: CallNodePath,
   implementation: ImplementationFilter
 ): Thread {
   return timeCode('filterThreadToPrefixCallNodePath', () => {
@@ -575,7 +576,7 @@ export function filterThreadToPrefixCallNodePath(
  */
 export function mergeCallNode(
   thread: Thread,
-  prefixCallNodePath: IndexIntoFuncTable[],
+  prefixCallNodePath: CallNodePath,
   implementation: ImplementationFilter
 ): Thread {
   return timeCode('mergeCallNode', () => {
@@ -678,7 +679,7 @@ export function mergeCallNode(
  */
 export function mergeInvertedCallNode(
   thread: Thread,
-  postfixCallNodePath: IndexIntoFuncTable[],
+  postfixCallNodePath: CallNodePath,
   implementation: ImplementationFilter
 ): Thread {
   return timeCode('mergeCallNode', () => {
@@ -805,7 +806,7 @@ const FUNC_MATCHES = {
  */
 export function filterThreadToPostfixCallNodePath(
   thread: Thread,
-  postfixCallNodePath: IndexIntoFuncTable[],
+  postfixCallNodePath: CallNodePath,
   implementation: ImplementationFilter
 ): Thread {
   return timeCode('filterThreadToPostfixCallNodePath', () => {
@@ -923,7 +924,7 @@ export function filterThreadToRange(
 }
 
 export function getCallNodeFromPath(
-  callNodePath: IndexIntoFuncTable[],
+  callNodePath: CallNodePath,
   callNodeTable: CallNodeTable
 ): IndexIntoCallNodeTable | null {
   let fs = -1;
@@ -954,7 +955,7 @@ export function getCallNodeFromPath(
 export function getCallNodePath(
   callNodeIndex: IndexIntoCallNodeTable | null,
   callNodeTable: CallNodeTable
-): IndexIntoFuncTable[] {
+): CallNodePath {
   if (callNodeIndex === null) {
     return [];
   }
