@@ -454,12 +454,12 @@ export const selectorsForThread = (
           switch (transform.type) {
             case 'focus-subtree':
               return transform.inverted
-                ? ProfileData.filterThreadToPostfixCallNodePath(
+                ? Transforms.focusInvertedSubtree(
                     thread,
                     transform.callNodePath,
                     transform.implementation
                   )
-                : ProfileData.filterThreadToPrefixCallNodePath(
+                : Transforms.focusSubtree(
                     thread,
                     transform.callNodePath,
                     transform.implementation
@@ -469,12 +469,12 @@ export const selectorsForThread = (
               return thread;
             case 'merge-call-node':
               return transform.inverted
-                ? ProfileData.mergeInvertedCallNode(
+                ? Transforms.mergeInvertedCallNode(
                     thread,
                     transform.callNodePath,
                     transform.implementation
                   )
-                : ProfileData.mergeCallNode(
+                : Transforms.mergeCallNode(
                     thread,
                     transform.callNodePath,
                     transform.implementation
