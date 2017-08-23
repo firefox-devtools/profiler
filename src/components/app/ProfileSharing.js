@@ -142,19 +142,14 @@ class ProfileSharingCompositeButton extends PureComponent {
     }
   }
 
-  _attemptToShare() {
+  async _attemptToShare() {
     if (this.props.dataSource === 'public' && this.props.status !== 'error') {
       return;
     }
 
-    const {
-      profile,
-      predictURL,
-      uploadError,
-      uploadBinaryProfileData,
-    } = this.props;
+    try {
+      const { profile, predictURL, uploadBinaryProfileData } = this.props;
 
-    new Promise(resolve => {
       if (!profile) {
         throw new Error('profile is null');
       }
@@ -163,32 +158,30 @@ class ProfileSharingCompositeButton extends PureComponent {
         throw new Error('profile serialization failed');
       }
 
-      resolve(jsonString);
-    })
-      .then(s => new TextEncoder().encode(s))
-      .then(typedArray => {
-        return Promise.all([compress(typedArray.slice(0)), sha1(typedArray)]);
-      })
-      .then(([gzipData, hash]) => {
-        const predictedURL = url.resolve(
-          window.location.href,
-          predictURL(uploadSuccess(hash)) // uploadSuccess is used directly, so it doesn't dispatch an action
-        );
-        this.setState({
-          fullURL: predictedURL,
-        });
-        const uploadPromise = uploadBinaryProfileData(gzipData);
-        const shortenURLPromise = this._shortenURLAndFocusTextFieldOnCompletion();
-        Promise.race([uploadPromise, shortenURLPromise]).then(() => {
-          if (this._permalinkButton) {
-            this._permalinkButton.openPanel();
-          }
-        });
-        return Promise.all([uploadPromise, shortenURLPromise]);
-      })
-      .catch(error => {
-        uploadError(error);
+      const typedArray = await new TextEncoder().encode(jsonString);
+      const [gzipData, hash] = await Promise.all([
+        compress(typedArray.slice(0)),
+        sha1(typedArray),
+      ]);
+      const predictedURL = url.resolve(
+        window.location.href,
+        predictURL(uploadSuccess(hash)) // uploadSuccess is used directly, so it doesn't dispatch an action
+      );
+      this.setState({
+        fullURL: predictedURL,
       });
+      const uploadPromise = uploadBinaryProfileData(gzipData);
+      const shortenURLPromise = this._shortenURLAndFocusTextFieldOnCompletion();
+      await Promise.race([uploadPromise, shortenURLPromise]);
+      if (this._permalinkButton) {
+        this._permalinkButton.openPanel();
+      }
+      await uploadPromise;
+      await shortenURLPromise;
+    } catch (error) {
+      const { uploadError } = this.props;
+      uploadError(error);
+    }
   }
 
   render() {
