@@ -7,6 +7,7 @@ import Perf from 'react-addons-perf';
 import { render } from 'react-dom';
 import Root from './components/app/Root';
 import createStore from './create-store';
+import { stateWatcher as shortenerStateWatcher } from './actions/profile-upload';
 import '../res/style.css';
 
 if (process.env.NODE_ENV === 'production') {
@@ -23,6 +24,7 @@ window.geckoProfilerPromise = new Promise(function(resolve) {
 });
 
 const store = createStore();
+store.subscribe(() => shortenerStateWatcher(store.getState(), store.dispatch));
 
 render(<Root store={store} />, document.getElementById('root'));
 

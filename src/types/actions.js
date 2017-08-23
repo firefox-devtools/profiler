@@ -170,7 +170,8 @@ type ProfileUploadAction =
   | { type: 'PROFILE_UPLOAD_ERROR', error: Error }
   | { type: 'PROFILE_UPLOAD_PROGRESS', progress: number }
   | { type: 'SHORTENING_URL', url: string }
-  | { type: 'SHORTENED_URL', longURL: string, shortURL: string };
+  | { type: 'SHORTENED_URL', longURL: string, shortURL: string }
+  | { type: 'RESET_SHORT_URL' };
 
 export type Action =
   | ProfileSummaryAction

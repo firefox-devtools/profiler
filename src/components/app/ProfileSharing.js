@@ -19,12 +19,14 @@ import {
   getStatus,
   getError,
   getShortURL,
+  getLastShortenedURL,
 } from '../../reducers/profile-upload';
 import {
   uploadBinaryProfileData,
   uploadSuccess,
   uploadError,
   shortenURL,
+  resetShortURL,
 } from '../../actions/profile-upload';
 import ArrowPanel from '../shared/ArrowPanel';
 import ButtonWithPanel from '../shared/ButtonWithPanel';
@@ -77,6 +79,7 @@ type ProfileSharingCompositeButtonProps = {
   dataSource: DataSource,
   progress: number,
   shortURL: string,
+  lastShortenedURL: string,
   hash: string,
   status: ProfileUploadStatus,
   error: Error | null,
@@ -84,13 +87,11 @@ type ProfileSharingCompositeButtonProps = {
   uploadBinaryProfileData: string => Promise<void>,
   shortenURL: string => Promise<string>,
   uploadError: typeof uploadError,
+  resetShortURL: typeof resetShortURL,
 };
 
 class ProfileSharingCompositeButton extends PureComponent {
   props: ProfileSharingCompositeButtonProps;
-  state: {|
-    fullURL: string,
-  |};
   _permalinkButton: ButtonWithPanel;
   _permalinkTextField: HTMLInputElement;
   _permalinkButtonCreated: ButtonWithPanel => void;
@@ -98,9 +99,6 @@ class ProfileSharingCompositeButton extends PureComponent {
 
   constructor(props: ProfileSharingCompositeButtonProps) {
     super(props);
-    this.state = {
-      fullURL: window.location.href,
-    };
     (this: any)._attemptToShare = this._attemptToShare.bind(this);
     (this: any)._onPermalinkPanelOpen = this._onPermalinkPanelOpen.bind(this);
     (this: any)._onPermalinkPanelClose = this._onPermalinkPanelClose.bind(this);
@@ -112,21 +110,14 @@ class ProfileSharingCompositeButton extends PureComponent {
     };
   }
 
-  componentWillReceiveProps() {
-    if (window.location.href !== this.state.fullURL) {
-      this.setState({
-        fullURL: window.location.href,
-      });
-    }
-  }
-
   _onPermalinkPanelOpen() {
     this._shortenURLAndFocusTextFieldOnCompletion();
   }
 
-  _shortenURLAndFocusTextFieldOnCompletion(): Promise<void> {
-    const { shortenURL } = this.props;
-    return shortenURL(this.state.fullURL)
+  _shortenURLAndFocusTextFieldOnCompletion(url?: string): Promise<void> {
+    const { shortenURL, lastShortenedURL } = this.props;
+    const fullURL = url || lastShortenedURL || window.location.href;
+    return shortenURL(fullURL)
       .then(() => {
         if (this._permalinkTextField) {
           this._permalinkTextField.focus();
@@ -167,11 +158,10 @@ class ProfileSharingCompositeButton extends PureComponent {
         window.location.href,
         predictURL(uploadSuccess(hash)) // uploadSuccess is used directly, so it doesn't dispatch an action
       );
-      this.setState({
-        fullURL: predictedURL,
-      });
       const uploadPromise = uploadBinaryProfileData(gzipData);
-      const shortenURLPromise = this._shortenURLAndFocusTextFieldOnCompletion();
+      const shortenURLPromise = this._shortenURLAndFocusTextFieldOnCompletion(
+        predictedURL
+      );
       await Promise.race([uploadPromise, shortenURLPromise]);
       if (this._permalinkButton) {
         this._permalinkButton.openPanel();
@@ -370,10 +360,12 @@ type ProfileSharingProps = {
   progress: number,
   hash: string,
   shortURL: string,
+  lastShortenedURL: string,
   status: ProfileUploadStatus,
   error: Error | null,
   predictURL: (Action | Action[]) => string,
   shortenURL: string => Promise<string>,
+  resetShortURL: typeof resetShortURL,
   uploadBinaryProfileData: string => Promise<void>,
   uploadError: typeof uploadError,
 };
@@ -385,10 +377,12 @@ const ProfileSharing = ({
   progress,
   hash,
   shortURL,
+  lastShortenedURL,
   status,
   error,
   predictURL,
   shortenURL,
+  resetShortURL,
   uploadBinaryProfileData,
   uploadError,
 }: ProfileSharingProps) =>
@@ -399,12 +393,14 @@ const ProfileSharing = ({
       progress={progress}
       hash={hash}
       shortURL={shortURL}
+      lastShortenedURL={lastShortenedURL}
       error={error}
       status={status}
       uploadBinaryProfileData={uploadBinaryProfileData}
       uploadError={uploadError}
       predictURL={predictURL}
       shortenURL={shortenURL}
+      resetShortURL={resetShortURL}
     />
     <ProfileDownloadButton profile={profile} rootRange={rootRange} />
   </div>;
@@ -416,10 +412,11 @@ export default connect(
     dataSource: getDataSource(state),
     hash: getHash(state),
     shortURL: getShortURL(state),
+    lastShortenedURL: getLastShortenedURL(state),
     predictURL: getURLPredictor(state),
     error: getError(state),
     status: getStatus(state),
     progress: getProgress(state),
   }),
-  { uploadBinaryProfileData, uploadError, shortenURL }
+  { uploadBinaryProfileData, uploadError, shortenURL, resetShortURL }
 )(ProfileSharing);

@@ -103,6 +103,7 @@ export type ProfileUploadState = {
   status: ProfileUploadStatus,
   error: Error | null,
   shortURL: string,
+  lastShortenedURL: string,
 };
 
 export type State = {
