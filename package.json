@@ -47,6 +47,7 @@
     "common-tags": "^1.4.0",
     "copy-to-clipboard": "^3.0.5",
     "fetch-jsonp": "^1.0.2",
+    "lodash.uniqwith": "^4.5.0",
     "offline-plugin": "^4.5.2",
     "pretty-bytes": "^4.0.2",
     "prop-types": "^15.5.10",
