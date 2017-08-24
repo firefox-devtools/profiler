@@ -108,6 +108,9 @@ class ProfileCallTreeContextMenu extends PureComponent {
       case 'mergeCallNode':
         this.addTransformToStack('merge-call-node');
         break;
+      case 'mergeFunction':
+        this.addTransformToStack('merge-function');
+        break;
       case 'mergeSubtree':
         this.addTransformToStack('merge-subtree');
         break;
@@ -120,7 +123,11 @@ class ProfileCallTreeContextMenu extends PureComponent {
   }
 
   addTransformToStack(
-    type: 'focus-subtree' | 'merge-subtree' | 'merge-call-node'
+    type:
+      | 'focus-subtree'
+      | 'merge-subtree'
+      | 'merge-call-node'
+      | 'merge-function'
   ): void {
     const {
       addTransformToStack,
@@ -158,6 +165,12 @@ class ProfileCallTreeContextMenu extends PureComponent {
           inverted,
         });
         break;
+      case 'merge-function':
+        addTransformToStack(threadIndex, {
+          type: 'merge-function',
+          funcIndex: selectedCallNodePath[selectedCallNodePath.length - 1],
+        });
+        break;
       default:
         throw new Error('Type not found.');
     }
@@ -176,6 +189,9 @@ class ProfileCallTreeContextMenu extends PureComponent {
       <ContextMenu id={'ProfileCallTreeContextMenu'}>
         <MenuItem onClick={this.handleClick} data={{ type: 'mergeCallNode' }}>
           Merge node into calling function
+        </MenuItem>
+        <MenuItem onClick={this.handleClick} data={{ type: 'mergeFunction' }}>
+          Merge function into caller across the entire tree
         </MenuItem>
         {/* <MenuItem onClick={this.handleClick} data={{ type: 'mergeSubtree' }}>
           Merge subtree into calling function

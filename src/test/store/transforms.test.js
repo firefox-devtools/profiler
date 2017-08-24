@@ -382,6 +382,53 @@ describe('"merge-call-node" transform', function() {
   });
 });
 
+describe('"merge-function" transform', function() {
+  describe('on a call tree', function() {
+    /**
+     * Assert this transformation:
+     *
+     *                     A:3,0                              A:3,0
+     *                       |                                  |
+     *                       v              merge C             v
+     *                     B:3,0           -->                B:3,0
+     *                     /    \                           /   |   \
+     *                    v      v                         v    v    v
+     *                C:2,0     H:1,0                 D:1,0   F:1,0   H:1,1
+     *               /      \         \                 |       |
+     *              v        v         v                v       v
+     *            D:1,0     F:1,0     C:1,1           E:1,1   G:1,1
+     *            |           |
+     *            v           v
+     *          E:1,1       G:1,1
+     */
+    const profile = getProfileForUnfilteredCallTree();
+    const threadIndex = 0;
+    const C_FUNC = 2;
+    const C_DUPLICATE_FRAME = 8;
+    // Rewrite the stack at function I to point to function C instead so that we
+    // can test duplicate instances of functions in a call tree.
+    profile.threads[threadIndex].frameTable.func[C_DUPLICATE_FRAME] = C_FUNC;
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+
+    it('starts as an unfiltered call tree', function() {
+      expect(formatTree(originalCallTree)).toMatchSnapshot();
+    });
+
+    it('function C can be merged into callers', function() {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'merge-function',
+          funcIndex: C_FUNC,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toMatchSnapshot();
+    });
+  });
+});
+
 describe('expanded and selected CallNodePaths', function() {
   const profile = getProfileForUnfilteredCallTree();
   const threadIndex = 0;

@@ -164,3 +164,27 @@ exports[`"merge-call-node" transform on a call tree starts as an unfiltered call
    - H (total: 1, self:—)
      - I (total: 1, self:1)"
 `;
+
+exports[`"merge-function" transform on a call tree function C can be merged into callers 1`] = `
+"
+- A (total: 3, self:—)
+ - B (total: 3, self:—)
+   - D (total: 1, self:—)
+     - E (total: 1, self:1)
+   - F (total: 1, self:—)
+     - G (total: 1, self:1)
+   - H (total: 1, self:1)"
+`;
+
+exports[`"merge-function" transform on a call tree starts as an unfiltered call tree 1`] = `
+"
+- A (total: 3, self:—)
+ - B (total: 3, self:—)
+   - C (total: 2, self:—)
+     - D (total: 1, self:—)
+       - E (total: 1, self:1)
+     - F (total: 1, self:—)
+       - G (total: 1, self:1)
+   - H (total: 1, self:—)
+     - C (total: 1, self:1)"
+`;

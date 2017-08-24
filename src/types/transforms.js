@@ -8,7 +8,7 @@
  * that is used to transform the sample and stack information of a profile. They are
  * applied in a stack.
  */
-import type { ThreadIndex } from './profile';
+import type { ThreadIndex, IndexIntoFuncTable } from './profile';
 import type { CallNodePath } from './profile-derived';
 import type { ImplementationFilter } from './actions';
 
@@ -95,9 +95,9 @@ export type MergeSubtree = { type: 'merge-subtree' } & CallNodeReference;
  *                 A:3,0                              A:3,0
  *                   |                                  |
  *                   v                                  v
- *                 B:3,0                              B:3,0
- *                 /    \          Merge C         /    |    \
- *                v      v           -->          v     v     v
+ *                 B:3,0        Merge CallNode        B:3,0
+ *                 /    \        [A, B, C]         /    |    \
+ *                v      v          -->           v     v     v
  *            C:2,0     H:1,0                 D:1,0   F:1,0    H:1,0
  *           /      \         \                 |       |        |
  *          v        v         v                v       v        v
@@ -113,8 +113,8 @@ export type MergeSubtree = { type: 'merge-subtree' } & CallNodeReference;
  *                A:3,0                              A:3,0
  *                  |                                  |
  *                  v                                  v
- *                B:3,0                              B:3,0
- *                /    \          Merge E            /    \
+ *                B:3,0        Merge CallNode         B:3,0
+ *                /    \      [A, B, C, D, E]        /    \
  *               v      v           -->             v      v
  *           C:2,0     H:1,0                    C:2,0     H:1,0
  *          /      \         \                 /      \         \
@@ -130,10 +130,38 @@ export type MergeSubtree = { type: 'merge-subtree' } & CallNodeReference;
 export type MergeCallNode = { type: 'merge-call-node' } & CallNodeReference;
 
 /**
+ * The MergeFunctions transform is similar to the MergeCallNode, except it merges a single
+ * function across the entire call tree, regardless of its location in the tree. It is not
+ * depended on any particular CallNodePath.
+ *
+ *                 A:3,0                              A:3,0
+ *                   |                                  |
+ *                   v                                  v
+ *                 B:3,0                              B:3,0
+ *                 /    \       Merge Func C       /    |    \
+ *                v      v           -->          v     v     v
+ *            C:2,0     H:1,0                 D:1,0   F:1,0    H:1,1
+ *           /      \         \                 |       |
+ *          v        v         v                v       v
+ *        D:1,0     F:1,0     C:1,1          E:1,1    G:1,1
+ *        |           |
+ *        v           v
+ *      E:1,1       G:1,1
+ */
+export type MergeFunction = {
+  type: 'merge-function',
+  funcIndex: IndexIntoFuncTable,
+};
+
+/**
  * TODO - Once implemented.
  */
 export type FocusSubtree = { type: 'focus-subtree' } & CallNodeReference;
 
-export type Transform = FocusSubtree | MergeSubtree | MergeCallNode;
+export type Transform =
+  | FocusSubtree
+  | MergeSubtree
+  | MergeCallNode
+  | MergeFunction;
 export type TransformStack = Transform[];
 export type TransformStacksPerThread = { [id: ThreadIndex]: TransformStack };
