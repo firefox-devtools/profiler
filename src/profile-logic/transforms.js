@@ -31,12 +31,14 @@ const TRANSFORM_TO_SHORT_KEY = {
   'focus-subtree': 'f',
   'merge-subtree': 'ms',
   'merge-call-node': 'mcn',
+  'merge-function': 'mf',
 };
 
 const SHORT_KEY_TO_TRANSFORM = {
   f: 'focus-subtree',
   ms: 'merge-subtree',
   mcn: 'merge-call-node',
+  mf: 'merge-function',
 };
 
 /**
@@ -54,20 +56,36 @@ export function parseTransforms(stringValue: string = '') {
       const shortKey = tuple[0];
       const type = SHORT_KEY_TO_TRANSFORM[shortKey];
 
-      if (!type) {
-        console.error('Unrecognized transform was passed to the URL.');
-        return undefined;
+      switch (type) {
+        case 'merge-function': {
+          // e.g. "mf-325"
+          const [, funcIndexRaw] = tuple;
+          const funcIndex = parseInt(funcIndexRaw, 10);
+          // Validate that the funcIndex makes sense.
+          return !isNaN(funcIndex) && funcIndex > 0
+            ? {
+                type,
+                funcIndex,
+              }
+            : null;
+        }
+        case 'focus-subtree':
+        case 'merge-call-node':
+        case 'merge-subtree': {
+          // e.g. "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
+          const [, implementation, serializedCallNodePath, inverted] = tuple;
+          return {
+            type,
+            implementation: toValidImplementationFilter(implementation),
+            callNodePath: stringToUintArray(serializedCallNodePath),
+            inverted: Boolean(inverted),
+          };
+        }
+        default:
+          // Do not throw an error, as we don't trust the data coming from a user.
+          console.error('Unrecognized transform was passed to the URL.', type);
+          return null;
       }
-
-      // e.g. "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
-      const [, implementation, serializedCallNodePath, inverted] = tuple;
-      const transform = {
-        type,
-        implementation: toValidImplementationFilter(implementation),
-        callNodePath: stringToUintArray(serializedCallNodePath),
-        inverted: Boolean(inverted),
-      };
-      return transform;
     })
     .filter(f => f);
 }
@@ -75,15 +93,26 @@ export function parseTransforms(stringValue: string = '') {
 export function stringifyTransforms(transforms: TransformStack = []): string {
   return transforms
     .map(transform => {
-      let string = [
-        TRANSFORM_TO_SHORT_KEY[transform.type],
-        transform.implementation,
-        uintArrayToString(transform.callNodePath),
-      ].join('-');
-      if (transform.inverted) {
-        string += '-i';
+      const shortKey = TRANSFORM_TO_SHORT_KEY[transform.type];
+      switch (transform.type) {
+        case 'merge-function':
+          return `${shortKey}-${transform.funcIndex}`;
+        case 'focus-subtree':
+        case 'merge-call-node':
+        case 'merge-subtree': {
+          let string = [
+            shortKey,
+            transform.implementation,
+            uintArrayToString(transform.callNodePath),
+          ].join('-');
+          if (transform.inverted) {
+            string += '-i';
+          }
+          return string;
+        }
+        default:
+          throw new Error('An unknown transform was found when stringifying.');
       }
-      return string;
     })
     .join('~');
 }
@@ -95,13 +124,21 @@ export function getTransformLabels(
 ) {
   const { funcTable, stringTable } = thread;
   const labels = transforms.map(transform => {
-    function lastFuncString(callNodePath) {
-      const lastFunc = callNodePath[callNodePath.length - 1];
-      const nameIndex = funcTable.name[lastFunc];
-      return stringTable.getString(nameIndex);
+    let funcIndex;
+    switch (transform.type) {
+      case 'focus-subtree':
+      case 'merge-subtree':
+      case 'merge-call-node':
+        funcIndex = transform.callNodePath[transform.callNodePath.length - 1];
+        break;
+      case 'merge-function':
+        funcIndex = transform.funcIndex;
+        break;
+      default:
+        throw new Error('Unexpected transform type');
     }
-
-    const funcName = lastFuncString(transform.callNodePath);
+    const nameIndex = funcTable.name[funcIndex];
+    const funcName = stringTable.getString(nameIndex);
 
     switch (transform.type) {
       case 'focus-subtree':
@@ -109,6 +146,8 @@ export function getTransformLabels(
       case 'merge-subtree':
         return `Merge Subtree: ${funcName}`;
       case 'merge-call-node':
+        return `Merge Node: ${funcName}`;
+      case 'merge-function':
         return `Merge: ${funcName}`;
       default:
         throw new Error('Unexpected transform type');
@@ -130,6 +169,8 @@ export function applyTransformToCallNodePath(
       );
     case 'merge-call-node':
       return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
+    case 'merge-function':
+      return _mergeFunctionInCallNodePath(transform.funcIndex, callNodePath);
     default:
       throw new Error(
         'Cannot apply an unknown transform to update the CallNodePath'
@@ -153,6 +194,13 @@ function _mergeNodeInCallNodePath(
   return _callNodePathHasPrefixPath(prefixPath, callNodePath)
     ? callNodePath.filter((_, i) => i !== prefixPath.length - 1)
     : callNodePath;
+}
+
+function _mergeFunctionInCallNodePath(
+  funcIndex: IndexIntoFuncTable,
+  callNodePath: CallNodePath
+): CallNodePath {
+  return callNodePath.filter(nodeFunc => nodeFunc !== funcIndex);
 }
 
 function _callNodePathHasPrefixPath(
@@ -269,6 +317,62 @@ export function mergeCallNode(
       stackTable: newStackTable,
       samples: newSamples,
     });
+  });
+}
+
+/**
+ * Go through the StackTable and remove any stacks that are part of the given function.
+ * This operation effectively merges the timing of the stacks into their callers.
+ */
+export function mergeFunction(
+  thread: Thread,
+  funcIndexToMerge: IndexIntoFuncTable
+) {
+  const { stackTable, frameTable, samples } = thread;
+  const oldStackToNewStack: Map<
+    IndexIntoStackTable | null,
+    IndexIntoStackTable | null
+  > = new Map();
+  oldStackToNewStack.set(null, null);
+  const newStackTable = {
+    length: 0,
+    prefix: [],
+    frame: [],
+  };
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefix = stackTable.prefix[stackIndex];
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+
+    if (funcIndex === funcIndexToMerge) {
+      const newStackPrefix = oldStackToNewStack.get(prefix);
+      oldStackToNewStack.set(
+        stackIndex,
+        newStackPrefix === undefined ? null : newStackPrefix
+      );
+    } else {
+      const newStackIndex = newStackTable.length++;
+      const newStackPrefix = oldStackToNewStack.get(prefix);
+      newStackTable.prefix[newStackIndex] =
+        newStackPrefix === undefined ? null : newStackPrefix;
+      newStackTable.frame[newStackIndex] = frameIndex;
+      oldStackToNewStack.set(stackIndex, newStackIndex);
+    }
+  }
+  const newSamples = Object.assign({}, samples, {
+    stack: samples.stack.map(oldStack => {
+      const newStack = oldStackToNewStack.get(oldStack);
+      if (newStack === undefined) {
+        throw new Error(
+          'Converting from the old stack to a new stack cannot be undefined'
+        );
+      }
+      return newStack;
+    }),
+  });
+  return Object.assign({}, thread, {
+    stackTable: newStackTable,
+    samples: newSamples,
   });
 }
 

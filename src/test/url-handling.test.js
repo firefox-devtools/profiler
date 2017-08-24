@@ -149,12 +149,9 @@ describe('legacy URL serialized call tree filters', function() {
   });
 });
 
-/**
- * Originally, transform stacks were called call tree filters. This test asserts that
- * the upgrade process works correctly.
- */
-describe('URL serialized transform stack', function() {
-  const transformString = 'f-combined-012~f-js-123~f-combined-234-i~f-js-345-i';
+describe('URL serialization of the transform stack', function() {
+  const transformString =
+    'f-combined-012~ms-js-123~mcn-combined-234-i~f-js-345-i~mf-6';
   const { getState } = _getStoreFromSearchString(
     '?v=1&transforms=' + transformString
   );
@@ -171,14 +168,14 @@ describe('URL serialized transform stack', function() {
         inverted: false,
       },
       {
-        type: 'focus-subtree',
+        type: 'merge-subtree',
         // JS CallNodePaths are wrong here because it doesn't match the example profile.
         callNodePath: [1, 2, 3],
         implementation: 'js',
         inverted: false,
       },
       {
-        type: 'focus-subtree',
+        type: 'merge-call-node',
         callNodePath: [2, 3, 4],
         implementation: 'combined',
         inverted: true,
@@ -189,6 +186,11 @@ describe('URL serialized transform stack', function() {
         callNodePath: [3, 4, 5],
         implementation: 'js',
         inverted: true,
+      },
+      {
+        type: 'merge-function',
+        // JS CallNodePaths are wrong here because it doesn't match the example profile.
+        funcIndex: 6,
       },
     ]);
   });

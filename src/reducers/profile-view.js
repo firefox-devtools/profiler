@@ -479,6 +479,8 @@ export const selectorsForThread = (
                     transform.callNodePath,
                     transform.implementation
                   );
+            case 'merge-function':
+              return Transforms.mergeFunction(thread, transform.funcIndex);
             default:
               throw new Error('Unhandled transform.');
           }
