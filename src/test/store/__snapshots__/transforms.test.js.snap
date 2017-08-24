@@ -79,23 +79,6 @@ exports[`"merge-call-node" transform on a JS call tree can merge a combined Call
  - b (total: 1, self:1)"
 `;
 
-exports[`"merge-call-node" transform on a JS call tree can merge path [b, a, js::jit::IonCannon] on an inverted call tree 1`] = `
-"
-- b (total: 3, self:3)
- - a (total: 3, self:—)
-   - onLoad (total: 3, self:—)
-     - JS::RunScript (total: 3, self:—)"
-`;
-
-exports[`"merge-call-node" transform on a JS call tree can merge path [b, a, onLoad] on an inverted JS call tree 1`] = `
-"
-- b (total: 3, self:3)
- - a (total: 3, self:—)
-   - js::jit::IonCannon (total: 2, self:—)
-     - JS::RunScript (total: 2, self:—)
-   - JS::RunScript (total: 1, self:—)"
-`;
-
 exports[`"merge-call-node" transform on a JS call tree can merge the node at JS path "onLoad" -> "A" 1`] = `
 "
 - onLoad (total: 3, self:—)
@@ -116,17 +99,6 @@ exports[`"merge-call-node" transform on a JS call tree has an untransformed JS o
 - onLoad (total: 3, self:—)
  - a (total: 3, self:—)
    - b (total: 3, self:3)"
-`;
-
-exports[`"merge-call-node" transform on a JS call tree starts as an inverted call tree 1`] = `
-"
-- b (total: 3, self:3)
- - a (total: 3, self:—)
-   - js::jit::IonCannon (total: 2, self:—)
-     - onLoad (total: 2, self:—)
-       - JS::RunScript (total: 2, self:—)
-   - onLoad (total: 1, self:—)
-     - JS::RunScript (total: 1, self:—)"
 `;
 
 exports[`"merge-call-node" transform on a JS call tree starts as an untransformed call tree 1`] = `

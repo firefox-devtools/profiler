@@ -468,17 +468,11 @@ export const selectorsForThread = (
               // TODO - Implement this transform.
               return thread;
             case 'merge-call-node':
-              return transform.inverted
-                ? Transforms.mergeInvertedCallNode(
-                    thread,
-                    transform.callNodePath,
-                    transform.implementation
-                  )
-                : Transforms.mergeCallNode(
-                    thread,
-                    transform.callNodePath,
-                    transform.implementation
-                  );
+              return Transforms.mergeCallNode(
+                thread,
+                transform.callNodePath,
+                transform.implementation
+              );
             case 'merge-function':
               return Transforms.mergeFunction(thread, transform.funcIndex);
             default:
