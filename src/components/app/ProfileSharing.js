@@ -28,7 +28,7 @@ import {
   uploadSuccess,
   uploadError,
 } from '../../actions/profile-upload';
-import { shortenURL, resetShortURL } from '../../actions/short-url';
+import { shortenURL } from '../../actions/short-url';
 import ArrowPanel from '../shared/ArrowPanel';
 import ButtonWithPanel from '../shared/ButtonWithPanel';
 import { serializeProfile } from '../../profile-logic/process-profile';
@@ -88,7 +88,6 @@ type ProfileSharingCompositeButtonProps = {
   uploadBinaryProfileData: string => Promise<void>,
   shortenURL: string => Promise<string>,
   uploadError: typeof uploadError,
-  resetShortURL: typeof resetShortURL,
 };
 
 class ProfileSharingCompositeButton extends PureComponent {
@@ -366,7 +365,6 @@ type ProfileSharingProps = {
   error: Error | null,
   predictURL: (Action | Action[]) => string,
   shortenURL: string => Promise<string>,
-  resetShortURL: typeof resetShortURL,
   uploadBinaryProfileData: string => Promise<void>,
   uploadError: typeof uploadError,
 };
@@ -383,7 +381,6 @@ const ProfileSharing = ({
   error,
   predictURL,
   shortenURL,
-  resetShortURL,
   uploadBinaryProfileData,
   uploadError,
 }: ProfileSharingProps) =>
@@ -401,7 +398,6 @@ const ProfileSharing = ({
       uploadError={uploadError}
       predictURL={predictURL}
       shortenURL={shortenURL}
-      resetShortURL={resetShortURL}
     />
     <ProfileDownloadButton profile={profile} rootRange={rootRange} />
   </div>;
@@ -419,5 +415,5 @@ export default connect(
     status: getStatus(state),
     progress: getProgress(state),
   }),
-  { uploadBinaryProfileData, uploadError, shortenURL, resetShortURL }
+  { uploadBinaryProfileData, uploadError, shortenURL }
 )(ProfileSharing);

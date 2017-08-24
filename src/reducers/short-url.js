@@ -22,10 +22,13 @@ const shortUrlStateReducer: Reducer<ShortUrlState> = (
         originalUrl: action.longURL,
       };
     case 'URL_STATE_HAS_CHANGED':
-      return {
-        value: window.location.href,
-        originalUrl: '',
-      };
+      if (state.originalUrl !== window.location.href) {
+        return {
+          value: window.location.href,
+          originalUrl: '',
+        };
+      }
+      return state;
     default:
       return state;
   }
