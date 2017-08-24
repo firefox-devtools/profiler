@@ -11,25 +11,14 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getProfileForUnfilteredCallTree } from '../fixtures/profiles/profiles-for-call-trees';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getBoundingBox } from '../fixtures/utils';
-import MockedReactDOM from 'react-dom';
+import ReactDOM from 'react-dom';
 
 jest.useFakeTimers();
+ReactDOM.findDOMNode = jest.fn(() => ({
+  getBoundingClientRect: () => getBoundingBox(300, 300),
+}));
 
 describe('calltree/ProfileViewerHeader', function() {
-  (MockedReactDOM: any).__findDOMNode = function(component) {
-    // Mock out the findDOMNode call for WithSize.
-    if (
-      component.props &&
-      component.props.className === 'profileViewerHeader'
-    ) {
-      return { getBoundingClientRect: () => getBoundingBox(300, 300) };
-    } else {
-      throw new Error(
-        'Another findDOMNode call needs to be mocked out for this test.'
-      );
-    }
-  };
-
   it('renders the header', () => {
     window.requestAnimationFrame = fn => setTimeout(fn, 0);
     window.devicePixelRatio = 1;
