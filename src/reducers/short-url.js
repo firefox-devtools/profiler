@@ -3,38 +3,33 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { combineReducers } from 'redux';
 import type { Action } from '../types/actions';
 import type { ShortUrlState, State, Reducer } from '../types/reducers';
 
-function value(state: string = window.location.href, action: Action): string {
+const shortUrlStateReducer: Reducer<ShortUrlState> = (
+  state: ShortUrlState = { value: window.location.href, originalUrl: '' },
+  action: Action
+): ShortUrlState => {
   switch (action.type) {
     case 'SHORTENING_URL':
-      return action.url;
+      return {
+        value: action.url,
+        originalUrl: '',
+      };
     case 'SHORTENED_URL':
-      return action.shortURL;
-    case 'RESET_SHORT_URL':
-      return window.location.href;
+      return {
+        value: action.shortURL,
+        originalUrl: action.longURL,
+      };
+    case 'URL_STATE_HAS_CHANGED':
+      return {
+        value: window.location.href,
+        originalUrl: '',
+      };
     default:
       return state;
   }
-}
-
-function originalUrl(state: string = '', action: Action): string {
-  switch (action.type) {
-    case 'SHORTENED_URL':
-      return action.longURL;
-    case 'RESET_SHORT_URL':
-      return '';
-    default:
-      return state;
-  }
-}
-
-const shortUrlStateReducer: Reducer<ShortUrlState> = combineReducers({
-  value,
-  originalUrl,
-});
+};
 
 export default shortUrlStateReducer;
 

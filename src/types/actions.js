@@ -158,7 +158,8 @@ type URLStateAction =
     }
   | { type: 'CHANGE_INVERT_CALLSTACK', invertCallstack: boolean }
   | { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean }
-  | { type: 'CHANGE_MARKER_SEARCH_STRING', searchString: string };
+  | { type: 'CHANGE_MARKER_SEARCH_STRING', searchString: string }
+  | { type: 'URL_STATE_HAS_CHANGED' };
 
 type IconsAction =
   | { type: 'ICON_HAS_LOADED', icon: string }
@@ -170,8 +171,7 @@ type ProfileUploadAction =
   | { type: 'PROFILE_UPLOAD_ERROR', error: Error }
   | { type: 'PROFILE_UPLOAD_PROGRESS', progress: number }
   | { type: 'SHORTENING_URL', url: string }
-  | { type: 'SHORTENED_URL', longURL: string, shortURL: string }
-  | { type: 'RESET_SHORT_URL' };
+  | { type: 'SHORTENED_URL', longURL: string, shortURL: string };
 
 export type Action =
   | ProfileSummaryAction
