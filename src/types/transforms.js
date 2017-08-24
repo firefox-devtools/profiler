@@ -7,26 +7,18 @@
  * Transforms are the minimal representation some kind of transformation to the data
  * that is used to transform the sample and stack information of a profile. They are
  * applied in a stack.
+ *
+ * When working with a call tree, nodes in the graph are not stable across various
+ * transformations of the stacks. It doesn't make sense to generate a single ID for
+ * a node, as the definition of what a node is can change depending on the current
+ * context. In order to get around this, we use a combination of the CallNodePath,
+ * implementation, and if the current stacks are inverted to refer to a node in the tree.
+ * This combination of information will provide a stable reference to a call node for a
+ * given view into a call tree.
  */
 import type { ThreadIndex, IndexIntoFuncTable } from './profile';
 import type { CallNodePath } from './profile-derived';
 import type { ImplementationFilter } from './actions';
-
-/**
- * When working with a call tree, nodes in the graph are not stable across various
- * transformations of the stacks. It doesn't make sense to generate a single ID for
- * a node, as the definition of what a node is can change depending on the current
- * context. In order to get around this, we use the concept of a CallNodeReference.
- * This reference remains stable across stack inversions, and filtering stacks
- * by their implementation. The combination of the path of called functions to the call
- * node, the implementation filter, and whether the stacks were inverted will
- * provide a stable reference to a call node for a given view into a call tree.
- */
-export type CallNodeReference = {
-  callNodePath: CallNodePath,
-  implementation: ImplementationFilter,
-  inverted: boolean,
-};
 
 /**
  * FocusSubtreeTransform represents the operation of focusing on a subtree in a call tree.
@@ -82,7 +74,12 @@ export type CallNodeReference = {
  *                        ↓                               ↓
  *                      A:1,0                           X:1,1
  */
-export type MergeSubtree = { type: 'merge-subtree' } & CallNodeReference;
+export type MergeSubtree = {|
+  type: 'merge-subtree',
+  callNodePath: CallNodePath,
+  implementation: ImplementationFilter,
+  inverted: boolean,
+|};
 
 /**
  * The MergeSubtree transform represents merging a CallNode into the parent CallNode. The
@@ -124,10 +121,14 @@ export type MergeSubtree = { type: 'merge-subtree' } & CallNodeReference;
  *       v           v                                  v
  *     E:1,1       G:1,1                              G:1,1
  *
- * This same operation can be done on an inverted call tree as well. The CallNodePath
- * would then be reversed, going from the top of the stack, towards the bottom.
+ * This same operation is not applied to an inverted call stack as it has been deemed
+ * not particularly useful, and prone to not give the expected results.
  */
-export type MergeCallNode = { type: 'merge-call-node' } & CallNodeReference;
+export type MergeCallNode = {|
+  type: 'merge-call-node',
+  callNodePath: CallNodePath,
+  implementation: ImplementationFilter,
+|};
 
 /**
  * The MergeFunctions transform is similar to the MergeCallNode, except it merges a single
@@ -148,15 +149,20 @@ export type MergeCallNode = { type: 'merge-call-node' } & CallNodeReference;
  *        v           v
  *      E:1,1       G:1,1
  */
-export type MergeFunction = {
+export type MergeFunction = {|
   type: 'merge-function',
   funcIndex: IndexIntoFuncTable,
-};
+|};
 
 /**
  * TODO - Once implemented.
  */
-export type FocusSubtree = { type: 'focus-subtree' } & CallNodeReference;
+export type FocusSubtree = {|
+  type: 'focus-subtree',
+  callNodePath: CallNodePath,
+  implementation: ImplementationFilter,
+  inverted: boolean,
+|};
 
 export type Transform =
   | FocusSubtree

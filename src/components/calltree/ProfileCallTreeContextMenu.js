@@ -91,31 +91,23 @@ class ProfileCallTreeContextMenu extends PureComponent {
     copy(stack);
   }
 
-  handleClick(
-    event: SyntheticEvent,
-    data: { type: 'copyFunctionName' | 'copyStack' }
-  ): void {
-    switch (data.type) {
-      case 'copyFunctionName':
+  handleClick(event: SyntheticEvent, data: { type: string }): void {
+    const { type } = data;
+    switch (type) {
+      case 'copy-function-name':
         this.copyFunctionName();
         break;
-      case 'copyUrl':
+      case 'copy-url':
         this.copyUrl();
         break;
-      case 'copyStack':
+      case 'copy-stack':
         this.copyStack();
         break;
-      case 'mergeCallNode':
-        this.addTransformToStack('merge-call-node');
-        break;
-      case 'mergeFunction':
-        this.addTransformToStack('merge-function');
-        break;
-      case 'mergeSubtree':
-        this.addTransformToStack('merge-subtree');
-        break;
-      case 'focusSubtree':
-        this.addTransformToStack('focus-subtree');
+      case 'merge-call-node':
+      case 'merge-function':
+      case 'merge-subtree':
+      case 'focus-subtree':
+        this.addTransformToStack(type);
         break;
       default:
         throw new Error(`Unknown type ${data.type}`);
@@ -137,8 +129,9 @@ class ProfileCallTreeContextMenu extends PureComponent {
       inverted,
     } = this.props;
 
-    // Flow just isn't working for me here. I resorted to a switch statement. This really
-    // shouldn't be necessary.
+    // This switch statement could be simplified, but Flow can't figure out what's going
+    // on with the unions of Transforms.
+    //
     // Tracking issue: https://github.com/facebook/flow/issues/4683
     switch (type) {
       case 'focus-subtree':
@@ -162,7 +155,6 @@ class ProfileCallTreeContextMenu extends PureComponent {
           type: 'merge-call-node',
           callNodePath: selectedCallNodePath,
           implementation,
-          inverted,
         });
         break;
       case 'merge-function':
@@ -179,6 +171,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
   render() {
     const {
       selectedCallNodeIndex,
+      inverted,
       thread: { funcTable },
       callNodeInfo: { callNodeTable },
     } = this.props;
@@ -187,31 +180,36 @@ class ProfileCallTreeContextMenu extends PureComponent {
 
     return (
       <ContextMenu id={'ProfileCallTreeContextMenu'}>
-        <MenuItem onClick={this.handleClick} data={{ type: 'mergeCallNode' }}>
-          Merge node into calling function
-        </MenuItem>
-        <MenuItem onClick={this.handleClick} data={{ type: 'mergeFunction' }}>
+        {inverted
+          ? null
+          : <MenuItem
+              onClick={this.handleClick}
+              data={{ type: 'merge-call-node' }}
+            >
+              Merge node into calling function
+            </MenuItem>}
+        <MenuItem onClick={this.handleClick} data={{ type: 'merge-function' }}>
           Merge function into caller across the entire tree
         </MenuItem>
         {/* <MenuItem onClick={this.handleClick} data={{ type: 'mergeSubtree' }}>
           Merge subtree into calling function
         </MenuItem> */}
-        <MenuItem onClick={this.handleClick} data={{ type: 'focusSubtree' }}>
+        <MenuItem onClick={this.handleClick} data={{ type: 'focus-subtree' }}>
           Focus on subtree
         </MenuItem>
         <div className="react-contextmenu-separator" />
         <MenuItem
           onClick={this.handleClick}
-          data={{ type: 'copyFunctionName' }}
+          data={{ type: 'copy-function-name' }}
         >
           Copy function name
         </MenuItem>
         {isJS
-          ? <MenuItem onClick={this.handleClick} data={{ type: 'copyUrl' }}>
+          ? <MenuItem onClick={this.handleClick} data={{ type: 'copy-url' }}>
               Copy script URL
             </MenuItem>
           : null}
-        <MenuItem onClick={this.handleClick} data={{ type: 'copyStack' }}>
+        <MenuItem onClick={this.handleClick} data={{ type: 'copy-stack' }}>
           Copy stack
         </MenuItem>
       </ContextMenu>

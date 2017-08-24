@@ -194,7 +194,6 @@ describe('"merge-call-node" transform', function() {
           type: 'merge-call-node',
           callNodePath: [A, B, C],
           implementation: 'combined',
-          inverted: false,
         })
       );
       const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -219,14 +218,12 @@ describe('"merge-call-node" transform', function() {
       type: 'merge-call-node',
       callNodePath: [ON_LOAD, A],
       implementation: 'js',
-      inverted: false,
     };
 
     const mergeCombinedPathToA = {
       type: 'merge-call-node',
       callNodePath: [RUN_SCRIPT, ON_LOAD, A],
       implementation: 'combined',
-      inverted: false,
     };
 
     it('starts as an untransformed call tree', function() {
@@ -304,77 +301,6 @@ describe('"merge-call-node" transform', function() {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(changeImplementationFilter('js'));
       dispatch(addTransformToStack(threadIndex, mergeCombinedPathToA));
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toMatchSnapshot();
-    });
-
-    it('starts as an inverted call tree', function() {
-      /**
-       *                       b
-       *                       ↓
-       *                       a
-       *                   ↙       ↘
-       *  js::jit::IonCannon      onLoad
-       *          ↓                 ↓
-       *       onLoad          JS::RunScript
-       *          ↓
-       *    JS::RunScript
-       */
-      const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(changeInvertCallstack(true));
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toMatchSnapshot();
-    });
-
-    it('can merge path [b, a, js::jit::IonCannon] on an inverted call tree', function() {
-      /**
-       *          b
-       *          ↓
-       *          a
-       *          ↓
-       *        onLoad
-       *          ↓
-       *    JS::RunScript
-       */
-      const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(changeInvertCallstack(true));
-      dispatch(
-        addTransformToStack(threadIndex, {
-          type: 'merge-call-node',
-          callNodePath: [B, A, ION_CANNON],
-          implementation: 'combined',
-          inverted: true,
-        })
-      );
-
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toMatchSnapshot();
-    });
-
-    it('can merge path [b, a, onLoad] on an inverted JS call tree', function() {
-      /**
-       *                       b
-       *                       ↓
-       *                       a
-       *                   ↙       ↘
-       *  js::jit::IonCannon       JS::RunScript
-       *           ↓
-       *    JS::RunScript
-       */
-      const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(changeInvertCallstack(true));
-      dispatch(
-        addTransformToStack(threadIndex, {
-          type: 'merge-call-node',
-          callNodePath: [B, A, ON_LOAD],
-          implementation: 'js',
-          inverted: true,
-        })
-      );
-
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toMatchSnapshot();
@@ -490,7 +416,6 @@ describe('expanded and selected CallNodePaths', function() {
         type: 'merge-call-node',
         callNodePath: [A, B],
         implementation: 'combined',
-        inverted: false,
       })
     );
 
@@ -572,7 +497,6 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
         type: 'merge-call-node',
         callNodePath: [Z, Y],
         implementation: 'combined',
-        inverted: false,
       })
     );
 
