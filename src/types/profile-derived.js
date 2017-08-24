@@ -57,6 +57,10 @@ export type CallNodeInfo = {
  * root to tip for normal call trees, or from tip to root for inverted call trees.
  * These paths are then stored along with the implementation filter, and the whether
  * or not the tree is inverted for a stable reference into a call tree.
+ *
+ * In some parts of the code the term prefix path is used to refer to a CallNodePath that
+ * goes from root to tip, and the term postfix path is used to refer to a CallNodePath
+ * that goes from tip to root.
  */
 export type CallNodePath = IndexIntoFuncTable[];
 
