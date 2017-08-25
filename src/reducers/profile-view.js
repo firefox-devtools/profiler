@@ -445,6 +445,8 @@ export const selectorsForThread = (
               );
             case 'merge-function':
               return Transforms.mergeFunction(thread, transform.funcIndex);
+            case 'focus-function':
+              return Transforms.focusFunction(thread, transform.funcIndex);
             default:
               throw new Error('Unhandled transform.');
           }

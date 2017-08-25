@@ -21,7 +21,7 @@ import type { CallNodePath } from './profile-derived';
 import type { ImplementationFilter } from './actions';
 
 /**
- * FocusSubtreeTransform represents the operation of focusing on a subtree in a call tree.
+ * FocusSubtree transform represents the operation of focusing on a subtree in a call tree.
  * The subtree is referenced by a callNodePath (a list of functions to a particular node),
  * and an implementation filter to filter out certain stacks and nodes that we don't care
  * about. For more details read `docs/call-tree.md`.
@@ -74,11 +74,40 @@ import type { ImplementationFilter } from './actions';
  *                        ↓                               ↓
  *                      A:1,0                           X:1,1
  */
-export type MergeSubtree = {|
-  type: 'merge-subtree',
+export type FocusSubtree = {|
+  type: 'focus-subtree',
   callNodePath: CallNodePath,
   implementation: ImplementationFilter,
   inverted: boolean,
+|};
+
+/**
+ * This is the same operation as the FocusSubtree, but it is performed on each usage
+ * of the function across the tree, node just the one usage in a call tree.
+ *
+ *            A:3,0                        X:3,0
+ *            /    \                         |
+ *           v      v        Focus X         v
+ *      X:1,0      B:2,0       ->          Y:3,0
+ *        |          |                    /     \
+ *        v          v                   v       v
+ *      Y:1,0      X:2,0              C:1,1      X:2,0
+ *        |          |                             |
+ *        v          v                             v
+ *      C:1,1      Y:2,0                         Y:2,0
+ *                   |                             |
+ *                   v                             v
+ *                 X:2,0                         D:2,2
+ *                   |
+ *                   v
+ *                 Y:2,0
+ *                   |
+ *                   v
+ *                 D:2,2
+ */
+export type FocusFunctionSubtree = {|
+  type: 'focus-function',
+  funcIndex: IndexIntoFuncTable,
 |};
 
 /**
@@ -157,8 +186,8 @@ export type MergeFunction = {|
 /**
  * TODO - Once implemented.
  */
-export type FocusSubtree = {|
-  type: 'focus-subtree',
+export type MergeSubtree = {|
+  type: 'merge-subtree',
   callNodePath: CallNodePath,
   implementation: ImplementationFilter,
   inverted: boolean,
@@ -166,8 +195,10 @@ export type FocusSubtree = {|
 
 export type Transform =
   | FocusSubtree
+  | FocusFunctionSubtree
   | MergeSubtree
   | MergeCallNode
   | MergeFunction;
+
 export type TransformStack = Transform[];
 export type TransformStacksPerThread = { [id: ThreadIndex]: TransformStack };

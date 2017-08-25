@@ -107,6 +107,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
       case 'merge-function':
       case 'merge-subtree':
       case 'focus-subtree':
+      case 'focus-function':
         this.addTransformToStack(type);
         break;
       default:
@@ -117,6 +118,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
   addTransformToStack(
     type:
       | 'focus-subtree'
+      | 'focus-function'
       | 'merge-subtree'
       | 'merge-call-node'
       | 'merge-function'
@@ -129,10 +131,6 @@ class ProfileCallTreeContextMenu extends PureComponent {
       inverted,
     } = this.props;
 
-    // This switch statement could be simplified, but Flow can't figure out what's going
-    // on with the unions of Transforms.
-    //
-    // Tracking issue: https://github.com/facebook/flow/issues/4683
     switch (type) {
       case 'focus-subtree':
         addTransformToStack(threadIndex, {
@@ -140,6 +138,12 @@ class ProfileCallTreeContextMenu extends PureComponent {
           callNodePath: selectedCallNodePath,
           implementation,
           inverted,
+        });
+        break;
+      case 'focus-function':
+        addTransformToStack(threadIndex, {
+          type: 'focus-function',
+          funcIndex: selectedCallNodePath[selectedCallNodePath.length - 1],
         });
         break;
       case 'merge-subtree':
@@ -197,6 +201,14 @@ class ProfileCallTreeContextMenu extends PureComponent {
         <MenuItem onClick={this.handleClick} data={{ type: 'focus-subtree' }}>
           Focus on subtree
         </MenuItem>
+        {inverted
+          ? null
+          : <MenuItem
+              onClick={this.handleClick}
+              data={{ type: 'focus-function' }}
+            >
+              Focus on function
+            </MenuItem>}
         <div className="react-contextmenu-separator" />
         <MenuItem
           onClick={this.handleClick}

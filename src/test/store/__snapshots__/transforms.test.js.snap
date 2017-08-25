@@ -1,5 +1,29 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`"focus-function" transform on a call tree can be focused on a function 1`] = `
+"
+- X (total: 3, self:—)
+ - Y (total: 3, self:—)
+   - X (total: 2, self:—)
+     - Y (total: 2, self:—)
+       - D (total: 2, self:2)
+   - C (total: 1, self:1)"
+`;
+
+exports[`"focus-function" transform on a call tree starts as an unfiltered call tree 1`] = `
+"
+- A (total: 3, self:—)
+ - B (total: 2, self:—)
+   - X (total: 2, self:—)
+     - Y (total: 2, self:—)
+       - X (total: 2, self:—)
+         - Y (total: 2, self:—)
+           - D (total: 2, self:2)
+ - X (total: 1, self:—)
+   - Y (total: 1, self:—)
+     - C (total: 1, self:1)"
+`;
+
 exports[`"focus-subtree" transform on a call tree can be filtered to a subtree 1`] = `
 "
 - C (total: 2, self:—)
