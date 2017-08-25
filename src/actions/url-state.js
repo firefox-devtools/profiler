@@ -5,16 +5,8 @@
 // @flow
 import type { Action } from '../types/store';
 
-export function changeSelectedTab(selectedTab: string): Action {
+export function urlStateHasChanged(): Action {
   return {
-    type: 'CHANGE_SELECTED_TAB',
-    selectedTab,
-  };
-}
-
-export function changeTabOrder(tabOrder: number[]): Action {
-  return {
-    type: 'CHANGE_TAB_ORDER',
-    tabOrder,
+    type: 'URL_STATE_HAS_CHANGED',
   };
 }

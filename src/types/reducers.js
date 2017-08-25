@@ -97,9 +97,23 @@ export type TimelineViewState = {
   hasZoomedViaMousewheel: boolean,
 };
 
+export type ProfileUploadStatus = 'uploading' | 'error' | 'none';
+export type ProfileUploadState = {
+  progress: number,
+  status: ProfileUploadStatus,
+  error: Error | null,
+};
+
+export type ShortUrlState = {
+  value: string,
+  originalUrl: string,
+};
+
 export type State = {
   app: AppState,
+  profileUpload: ProfileUploadState,
   profileView: ProfileViewState,
+  shortUrl: ShortUrlState,
   summaryView: SummaryViewState,
   urlState: URLState,
   flameChart: FlameChartState,

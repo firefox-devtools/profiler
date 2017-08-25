@@ -2,21 +2,44 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { PureComponent, PropTypes } from 'react';
+// @flow
+
+import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 
 require('./ArrowPanel.css');
 
+type Props = {
+  onOpen?: () => mixed,
+  onClose?: () => mixed,
+  onOkButtonClick?: () => mixed,
+  onCancelButtonClick?: () => mixed,
+  className: string,
+  children: React$Element<*>,
+  title?: string,
+  okButtonText?: string,
+  cancelButtonText?: string,
+};
+
 class ArrowPanel extends PureComponent {
-  constructor(props) {
+  props: Props;
+  state: {
+    open: boolean,
+  };
+  _panelElementCreated: HTMLElement => void;
+  _panelElement: HTMLElement;
+
+  constructor(props: Props) {
     super(props);
     this.state = { open: false };
-    this._windowMouseDownListener = this._windowMouseDownListener.bind(this);
-    this._panelElementCreated = elem => {
+    (this: any)._windowMouseDownListener = this._windowMouseDownListener.bind(
+      this
+    );
+    this._panelElementCreated = (elem: HTMLElement) => {
       this._panelElement = elem;
     };
-    this._onOkButtonClick = this._onOkButtonClick.bind(this);
-    this._onCancelButtonClick = this._onCancelButtonClick.bind(this);
+    (this: any)._onOkButtonClick = this._onOkButtonClick.bind(this);
+    (this: any)._onCancelButtonClick = this._onCancelButtonClick.bind(this);
   }
 
   open() {
@@ -55,11 +78,12 @@ class ArrowPanel extends PureComponent {
     );
   }
 
-  _windowMouseDownListener(e) {
+  _windowMouseDownListener(e: MouseEvent) {
+    const target: Node = (e.target: any); // make flow happy
     if (
       this.state.open &&
       this._panelElement &&
-      !this._panelElement.contains(e.target)
+      !this._panelElement.contains(target)
     ) {
       this.close();
     }
@@ -130,17 +154,5 @@ class ArrowPanel extends PureComponent {
     );
   }
 }
-
-ArrowPanel.propTypes = {
-  onOpen: PropTypes.func,
-  onClose: PropTypes.func,
-  onOkButtonClick: PropTypes.func,
-  onCancelButtonClick: PropTypes.func,
-  className: PropTypes.string,
-  children: PropTypes.any,
-  title: PropTypes.string,
-  okButtonText: PropTypes.string,
-  cancelButtonText: PropTypes.string,
-};
 
 export default ArrowPanel;
