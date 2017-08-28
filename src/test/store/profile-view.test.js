@@ -112,7 +112,6 @@ describe('call node paths on implementation filter change', function() {
     ).toEqual([
       // Paths
       [A],
-      [A, C],
     ]);
   });
 });

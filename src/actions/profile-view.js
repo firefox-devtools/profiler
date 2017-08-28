@@ -5,11 +5,7 @@
 // @flow
 import type { ProfileSelection, ImplementationFilter } from '../types/actions';
 import type { Action, ThunkAction } from '../types/store';
-import type {
-  Thread,
-  ThreadIndex,
-  IndexIntoMarkersTable,
-} from '../types/profile';
+import type { ThreadIndex, IndexIntoMarkersTable } from '../types/profile';
 import type { CallNodePath } from '../types/profile-derived';
 import type { Transform } from '../types/transforms';
 import * as ProfileViewSelectors from '../reducers/profile-view';
@@ -109,6 +105,14 @@ export function changeMarkersSearchString(searchString: string): Action {
   };
 }
 
+/**
+ * This action is breaking the rules and using the getState function in the action
+ * creator. This is done because any stored CallNodePaths must be updated with the
+ * newly implementation filtered thread. Having this outside of the action creator
+ * and in components and tests makes it difficult to ensure that the CallNodePaths
+ * get properly updated, and would involve complex state management with hooks
+ * into the connected component's lifecycle.
+ */
 export function changeImplementationFilter(
   nextImplementationFilter: ImplementationFilter
 ): ThunkAction<void> {
@@ -117,35 +121,57 @@ export function changeImplementationFilter(
       getState()
     );
     const threadIndex = URLStateSelectors.getSelectedThreadIndex(getState());
-    const { getThread } = ProfileViewSelectors.selectedThreadSelectors;
+    const { getFilteredThread } = ProfileViewSelectors.selectedThreadSelectors;
 
-    dispatch({
-      type: 'CHANGE_IMPLEMENTATION_FILTER',
-      implementation: nextImplementationFilter,
-    });
+    if (
+      previousImplementationFilter !== 'combined' &&
+      nextImplementationFilter !== 'combined'
+    ) {
+      // Going from 'cpp' to 'js' filtering means we need a fully reconstructed
+      // CallNodePath from an unfiltered thread, THEN go and filter to the other
+      // implementation.
 
-    dispatch({
-      type: 'UPDATE_CALL_NODE_PATHS_FROM_IMPLEMENTATION_CHANGE',
-      thread: getThread(getState()),
-      threadIndex: threadIndex,
-      previousImplementationFilter,
-      nextImplementationFilter,
-    });
-  };
-}
+      dispatch({
+        type: 'CHANGE_IMPLEMENTATION_FILTER',
+        implementation: 'combined',
+      });
 
-export function updateCallNodePathsFromImplementationChange(
-  thread: Thread,
-  threadIndex: ThreadIndex,
-  previousImplementationFilter: ImplementationFilter,
-  nextImplementationFilter: ImplementationFilter
-): Action {
-  return {
-    type: 'UPDATE_CALL_NODE_PATHS_FROM_IMPLEMENTATION_CHANGE',
-    thread,
-    threadIndex,
-    previousImplementationFilter,
-    nextImplementationFilter,
+      dispatch({
+        type: 'UPDATE_CALL_NODE_PATHS_FROM_IMPLEMENTATION_CHANGE',
+        thread: getFilteredThread(getState()),
+        threadIndex: threadIndex,
+        previousImplementationFilter,
+        nextImplementationFilter: 'combined',
+      });
+
+      dispatch({
+        type: 'CHANGE_IMPLEMENTATION_FILTER',
+        implementation: nextImplementationFilter,
+      });
+
+      dispatch({
+        type: 'UPDATE_CALL_NODE_PATHS_FROM_IMPLEMENTATION_CHANGE',
+        thread: getFilteredThread(getState()),
+        threadIndex: threadIndex,
+        previousImplementationFilter: 'combined',
+        nextImplementationFilter,
+      });
+    } else {
+      // The previous or next implementation filter is 'combined', so it can be done
+      // in one pass.
+      dispatch({
+        type: 'CHANGE_IMPLEMENTATION_FILTER',
+        implementation: nextImplementationFilter,
+      });
+
+      dispatch({
+        type: 'UPDATE_CALL_NODE_PATHS_FROM_IMPLEMENTATION_CHANGE',
+        thread: getFilteredThread(getState()),
+        threadIndex: threadIndex,
+        previousImplementationFilter,
+        nextImplementationFilter,
+      });
+    }
   };
 }
 

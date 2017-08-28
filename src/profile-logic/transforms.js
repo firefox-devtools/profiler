@@ -654,23 +654,6 @@ export function restoreAllFunctionsInCallNodePath(
   return newCallNodePath.reverse();
 }
 
-export function ensureCallNodePathsFullyExpanded(
-  callNodePaths: CallNodePath[]
-) {
-  const expandedPaths = [...callNodePaths];
-
-  for (let pathIndex = 0; pathIndex < callNodePaths.length; pathIndex++) {
-    const path = callNodePaths[pathIndex];
-    for (let i = 1; i < path.length; i++) {
-      const expandedPath = path.slice(0, i);
-      if (expandedPaths.findIndex(p => pathsAreEqual(p, expandedPath)) === -1) {
-        expandedPaths.push(expandedPath);
-      }
-    }
-  }
-  return expandedPaths;
-}
-
 export function filterCallNodePathByImplementation(
   thread: Thread,
   implementationFilter: ImplementationFilter,

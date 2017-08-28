@@ -217,58 +217,29 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
       if (previousImplementationFilter === nextImplementationFilter) {
         return state;
       }
-      let selectedCallNodePath = state[threadIndex].selectedCallNodePath;
-      let expandedCallNodePaths = state[threadIndex].expandedCallNodePaths;
-
+      let selectedCallNodePath;
       if (
         // Going from a filtered view, to unfiltered.
-        nextImplementationFilter === 'combined' ||
-        // If going from a filtered view to a different filtered view, first restore all
-        // of the CallNodePaths.
-        (previousImplementationFilter !== 'combined' &&
-          nextImplementationFilter !== 'combined')
+        nextImplementationFilter === 'combined'
       ) {
         // Restore the full CallNodePaths
         selectedCallNodePath = Transforms.restoreAllFunctionsInCallNodePath(
           thread,
           previousImplementationFilter,
-          selectedCallNodePath
+          state[threadIndex].selectedCallNodePath
         );
-        expandedCallNodePaths = Transforms.ensureCallNodePathsFullyExpanded(
-          uniqWith(
-            expandedCallNodePaths
-              .map(path =>
-                Transforms.restoreAllFunctionsInCallNodePath(
-                  thread,
-                  previousImplementationFilter,
-                  path
-                )
-              )
-              .filter(path => path.length > 0),
-            Transforms.pathsAreEqual
-          )
-        );
-      }
-
-      if (nextImplementationFilter !== 'combined') {
+      } else {
         // Restore the full CallNodePaths
         selectedCallNodePath = Transforms.filterCallNodePathByImplementation(
           thread,
           nextImplementationFilter,
-          selectedCallNodePath
+          state[threadIndex].selectedCallNodePath
         );
-        expandedCallNodePaths = uniqWith(
-          expandedCallNodePaths
-            .map(path =>
-              Transforms.filterCallNodePathByImplementation(
-                thread,
-                nextImplementationFilter,
-                path
-              )
-            )
-            .filter(path => path.length > 0),
-          Transforms.pathsAreEqual
-        );
+      }
+
+      const expandedCallNodePaths = [];
+      for (let i = 1; i < selectedCallNodePath.length; i++) {
+        expandedCallNodePaths.push(selectedCallNodePath.slice(0, i));
       }
 
       return [
