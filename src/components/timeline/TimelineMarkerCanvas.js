@@ -46,7 +46,6 @@ type Props = {
   isDragging: boolean,
 };
 
-const ROW_HEIGHT = 16;
 const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
@@ -155,6 +154,7 @@ class TimelineMarkerCanvas extends PureComponent {
       rangeEnd,
       containerWidth,
       markerTimingRows,
+      rowHeight,
       viewportLeft,
       viewportRight,
       viewportTop,
@@ -195,12 +195,12 @@ class TimelineMarkerCanvas extends PureComponent {
 
           const x: CssPixels =
             (startTime - viewportLeft) * containerWidth / viewportLength;
-          const y: CssPixels = rowIndex * ROW_HEIGHT - viewportTop;
+          const y: CssPixels = rowIndex * rowHeight - viewportTop;
           const w: CssPixels = Math.max(
             10,
             (endTime - startTime) * containerWidth / viewportLength
           );
-          const h: CssPixels = ROW_HEIGHT - 1;
+          const h: CssPixels = rowHeight - 1;
 
           const tracingMarkerIndex = markerTiming.index[i];
           const isHovered = hoveredItem === tracingMarkerIndex;
