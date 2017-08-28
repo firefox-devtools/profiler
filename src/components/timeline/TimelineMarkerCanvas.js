@@ -115,7 +115,9 @@ class TimelineMarkerCanvas extends PureComponent {
     const textMeasurement = this._textMeasurement;
 
     if (w >= h) {
-      this.drawRoundedRect(ctx, x, y + 1, w, h - 1, 1);
+      // We want the rectangle to have a clear margin, that's why we increment y
+      // and decrement h (twice, for both margins).
+      this.drawRoundedRect(ctx, x, y + 1, w, h - 2, 1);
 
       // Draw the text label
       // TODO - L10N RTL.
@@ -236,7 +238,9 @@ class TimelineMarkerCanvas extends PureComponent {
     // Draw separators
     ctx.fillStyle = '#eee';
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-      const y = (rowIndex + 1) * rowHeight - viewportTop;
+      // `- 1` at the end, because the top separator is not drawn in the canvas,
+      // it's drawn using CSS' border property. And canvas positioning is 0-based.
+      const y = (rowIndex + 1) * rowHeight - viewportTop - 1;
       ctx.fillRect(0, y, containerWidth, 1);
     }
 
@@ -248,7 +252,8 @@ class TimelineMarkerCanvas extends PureComponent {
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       // Get the timing information for a row of stack frames.
       const y = rowIndex * rowHeight - viewportTop;
-      ctx.fillRect(0, y, 150, rowHeight);
+      // `-1` because we only want to cover the row's inner surface.
+      ctx.fillRect(0, y, 150, rowHeight - 1);
     }
 
     // Draw the text
@@ -331,7 +336,7 @@ class TimelineMarkerCanvas extends PureComponent {
     cornerSize: CssPixels
   ) {
     // Cut out c x c -sized squares in the corners.
-    const c = Math.min(width / 2, Math.min(height / 2, cornerSize));
+    const c = Math.min(width / 2, height / 2, cornerSize);
     const bottom = y + height;
     ctx.fillRect(x + c, y, width - 2 * c, c);
     ctx.fillRect(x, y + c, width, height - 2 * c);
