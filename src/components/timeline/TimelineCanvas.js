@@ -11,7 +11,7 @@ type Props<HoveredItem> = {
   containerHeight: CssPixels,
   className: string,
   onDoubleClickItem: (HoveredItem | null) => void,
-  getHoveredItemInfo: HoveredItem => React$Element<*>,
+  getHoveredItemInfo: HoveredItem => React$Element<*> | null,
   drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
   isDragging: boolean,
   hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,

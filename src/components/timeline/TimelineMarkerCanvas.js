@@ -46,6 +46,11 @@ type Props = {
   isDragging: boolean,
 };
 
+type HoveredItem = {
+  rowIndex: number,
+  markerIndex: IndexIntoMarkerTiming | null,
+};
+
 const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
@@ -60,10 +65,6 @@ class TimelineMarkerCanvas extends PureComponent {
 
   props: Props;
 
-  state: {
-    hoveredItem: null | number,
-  };
-
   constructor(props: Props) {
     super(props);
     (this: any).onDoubleClickMarker = this.onDoubleClickMarker.bind(this);
@@ -72,10 +73,7 @@ class TimelineMarkerCanvas extends PureComponent {
     (this: any).hitTest = this.hitTest.bind(this);
   }
 
-  drawCanvas(
-    ctx: CanvasRenderingContext2D,
-    hoveredItem: IndexIntoMarkerTiming | null
-  ) {
+  drawCanvas(ctx: CanvasRenderingContext2D, hoveredItem: HoveredItem | null) {
     const {
       viewportTop,
       viewportBottom,
@@ -93,8 +91,18 @@ class TimelineMarkerCanvas extends PureComponent {
 
     ctx.clearRect(0, 0, containerWidth, containerHeight);
 
-    this.drawMarkers(ctx, hoveredItem, startRow, endRow);
-    this.drawSeparatorsAndLabels(ctx, startRow, endRow);
+    this.drawMarkers(
+      ctx,
+      hoveredItem && hoveredItem.markerIndex,
+      startRow,
+      endRow
+    );
+    this.drawSeparatorsAndLabels(
+      ctx,
+      hoveredItem && hoveredItem.rowIndex,
+      startRow,
+      endRow
+    );
   }
 
   drawOneMarker(
@@ -225,6 +233,7 @@ class TimelineMarkerCanvas extends PureComponent {
 
   drawSeparatorsAndLabels(
     ctx: CanvasRenderingContext2D,
+    hoveredRow: number | null,
     startRow: number,
     endRow: number
   ) {
@@ -235,30 +244,34 @@ class TimelineMarkerCanvas extends PureComponent {
       containerWidth,
     } = this.props;
 
-    // Draw separators
-    ctx.fillStyle = '#eee';
+    const separatorColor = '#eee';
+    const textColor = 'black';
+    const backgroundGradient = ctx.createLinearGradient(0, 0, 150, 0);
+    backgroundGradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+    backgroundGradient.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
+
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
+      // 1. Draw separators
+      ctx.fillStyle = separatorColor;
       // `- 1` at the end, because the top separator is not drawn in the canvas,
       // it's drawn using CSS' border property. And canvas positioning is 0-based.
-      const y = (rowIndex + 1) * rowHeight - viewportTop - 1;
-      ctx.fillRect(0, y, containerWidth, 1);
-    }
+      const separatorY = (rowIndex + 1) * rowHeight - viewportTop - 1;
+      ctx.fillRect(0, separatorY, containerWidth, 1);
 
-    // Fill in behind text
-    const gradient = ctx.createLinearGradient(0, 0, 150, 0);
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
-    ctx.fillStyle = gradient;
-    for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
+      // 2. Do not display labels if the row is currently hovered.
+      if (rowIndex === hoveredRow) {
+        continue;
+      }
+
+      // 3. Draw background gradient to be able to read the label
+      ctx.fillStyle = backgroundGradient;
       // Get the timing information for a row of stack frames.
-      const y = rowIndex * rowHeight - viewportTop;
+      const rowTopY = rowIndex * rowHeight - viewportTop;
       // `-1` because we only want to cover the row's inner surface.
-      ctx.fillRect(0, y, 150, rowHeight - 1);
-    }
+      ctx.fillRect(0, rowTopY, 150, rowHeight - 1);
 
-    // Draw the text
-    ctx.fillStyle = '#000000';
-    for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
+      // 4. Draw the row's label
+      ctx.fillStyle = textColor;
       // Get the timing information for a row of stack frames.
       const { name } = markerTimingRows[rowIndex];
       if (rowIndex > 0 && name === markerTimingRows[rowIndex - 1].name) {
@@ -273,7 +286,7 @@ class TimelineMarkerCanvas extends PureComponent {
     }
   }
 
-  hitTest(x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null {
+  hitTest(x: CssPixels, y: CssPixels): HoveredItem | null {
     const {
       rangeStart,
       rangeEnd,
@@ -307,18 +320,24 @@ class TimelineMarkerCanvas extends PureComponent {
       // Ensure that really small markers are hoverable with a minDuration.
       const end = Math.max(start + minDuration, markerTiming.end[i]);
       if (start < time && end > time) {
-        return markerTiming.index[i];
+        return {
+          rowIndex,
+          markerIndex: markerTiming.index[i],
+        };
       }
     }
-    return null;
+    return {
+      rowIndex,
+      markerIndex: null,
+    };
   }
 
-  onDoubleClickMarker(markerIndex: IndexIntoMarkerTiming | null) {
-    if (markerIndex === null) {
+  onDoubleClickMarker(hoveredItem: HoveredItem | null) {
+    if (hoveredItem === null || hoveredItem.markerIndex === null) {
       return;
     }
     const { markers, updateProfileSelection } = this.props;
-    const marker = markers[markerIndex];
+    const marker = markers[hoveredItem.markerIndex];
     updateProfileSelection({
       hasSelection: true,
       isModifying: false,
@@ -343,8 +362,11 @@ class TimelineMarkerCanvas extends PureComponent {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React$Element<*> {
-    const marker = this.props.markers[hoveredItem];
+  getHoveredMarkerInfo(hoveredItem: HoveredItem): React$Element<*> | null {
+    if (hoveredItem.markerIndex === null) {
+      return null;
+    }
+    const marker = this.props.markers[hoveredItem.markerIndex];
     return <MarkerTooltipContents marker={marker} />;
   }
 
