@@ -71,20 +71,20 @@ Array [
     300,
   ],
   Array [
-    "measureText",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
-  ],
-  Array [
-    "measureText",
-    "…",
-  ],
-  Array [
     "set lineWidth",
     1,
   ],
   Array [
     "set fillStyle",
     "#8296cb",
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
   ],
   Array [
     "fillRect",
@@ -110,10 +110,6 @@ Array [
   Array [
     "measureText",
     "",
-  ],
-  Array [
-    "set lineWidth",
-    1,
   ],
   Array [
     "set fillStyle",
@@ -145,10 +141,6 @@ Array [
     "",
   ],
   Array [
-    "set lineWidth",
-    1,
-  ],
-  Array [
     "set fillStyle",
     "#8296cb",
   ],
@@ -165,10 +157,6 @@ Array [
   ],
   Array [
     "fill",
-  ],
-  Array [
-    "set lineWidth",
-    1,
   ],
   Array [
     "set fillStyle",
@@ -200,10 +188,6 @@ Array [
     "",
   ],
   Array [
-    "set lineWidth",
-    1,
-  ],
-  Array [
     "set fillStyle",
     "#8296cb",
   ],
@@ -231,10 +215,6 @@ Array [
   Array [
     "measureText",
     "",
-  ],
-  Array [
-    "set lineWidth",
-    1,
   ],
   Array [
     "set fillStyle",
@@ -267,17 +247,13 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ffffff",
+    "white",
   ],
   Array [
     "fillText",
     "click",
     65.5,
     91,
-  ],
-  Array [
-    "set lineWidth",
-    1,
   ],
   Array [
     "set fillStyle",
