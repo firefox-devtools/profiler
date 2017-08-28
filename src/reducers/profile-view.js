@@ -207,6 +207,79 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
         ...state.slice(threadIndex + 1),
       ];
     }
+    case 'UPDATE_CALL_NODE_PATHS_FROM_IMPLEMENTATION_CHANGE': {
+      const {
+        thread,
+        threadIndex,
+        previousImplementationFilter,
+        nextImplementationFilter,
+      } = action;
+      if (previousImplementationFilter === nextImplementationFilter) {
+        return state;
+      }
+      let selectedCallNodePath = state[threadIndex].selectedCallNodePath;
+      let expandedCallNodePaths = state[threadIndex].expandedCallNodePaths;
+
+      if (
+        // Going from a filtered view, to unfiltered.
+        nextImplementationFilter === 'combined' ||
+        // If going from a filtered view to a different filtered view, first restore all
+        // of the CallNodePaths.
+        (previousImplementationFilter !== 'combined' &&
+          nextImplementationFilter !== 'combined')
+      ) {
+        // Restore the full CallNodePaths
+        selectedCallNodePath = Transforms.restoreAllFunctionsInCallNodePath(
+          thread,
+          previousImplementationFilter,
+          selectedCallNodePath
+        );
+        expandedCallNodePaths = Transforms.ensureCallNodePathsFullyExpanded(
+          uniqWith(
+            expandedCallNodePaths
+              .map(path =>
+                Transforms.restoreAllFunctionsInCallNodePath(
+                  thread,
+                  previousImplementationFilter,
+                  path
+                )
+              )
+              .filter(path => path.length > 0),
+            Transforms.pathsAreEqual
+          )
+        );
+      }
+
+      if (nextImplementationFilter !== 'combined') {
+        // Restore the full CallNodePaths
+        selectedCallNodePath = Transforms.filterCallNodePathByImplementation(
+          thread,
+          nextImplementationFilter,
+          selectedCallNodePath
+        );
+        expandedCallNodePaths = uniqWith(
+          expandedCallNodePaths
+            .map(path =>
+              Transforms.filterCallNodePathByImplementation(
+                thread,
+                nextImplementationFilter,
+                path
+              )
+            )
+            .filter(path => path.length > 0),
+          Transforms.pathsAreEqual
+        );
+      }
+
+      return [
+        ...state.slice(0, threadIndex),
+        Object.assign({}, state[threadIndex], {
+          selectedCallNodePath,
+          expandedCallNodePaths,
+        }),
+        ...state.slice(threadIndex + 1),
+      ];
+    }
     default:
       return state;
   }

@@ -5,10 +5,15 @@
 // @flow
 import type { ProfileSelection, ImplementationFilter } from '../types/actions';
 import type { Action, ThunkAction } from '../types/store';
-import type { ThreadIndex, IndexIntoMarkersTable } from '../types/profile';
+import type {
+  Thread,
+  ThreadIndex,
+  IndexIntoMarkersTable,
+} from '../types/profile';
 import type { CallNodePath } from '../types/profile-derived';
 import type { Transform } from '../types/transforms';
-
+import * as ProfileViewSelectors from '../reducers/profile-view';
+import * as URLStateSelectors from '../reducers/url-state';
 /**
  * The actions that pertain to changing the view on the profile, including searching
  * and filtering. Currently the call tree's actions are in this file, but should be
@@ -105,11 +110,42 @@ export function changeMarkersSearchString(searchString: string): Action {
 }
 
 export function changeImplementationFilter(
-  implementation: ImplementationFilter
+  nextImplementationFilter: ImplementationFilter
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const previousImplementationFilter = URLStateSelectors.getImplementationFilter(
+      getState()
+    );
+    const threadIndex = URLStateSelectors.getSelectedThreadIndex(getState());
+    const { getThread } = ProfileViewSelectors.selectedThreadSelectors;
+
+    dispatch({
+      type: 'CHANGE_IMPLEMENTATION_FILTER',
+      implementation: nextImplementationFilter,
+    });
+
+    dispatch({
+      type: 'UPDATE_CALL_NODE_PATHS_FROM_IMPLEMENTATION_CHANGE',
+      thread: getThread(getState()),
+      threadIndex: threadIndex,
+      previousImplementationFilter,
+      nextImplementationFilter,
+    });
+  };
+}
+
+export function updateCallNodePathsFromImplementationChange(
+  thread: Thread,
+  threadIndex: ThreadIndex,
+  previousImplementationFilter: ImplementationFilter,
+  nextImplementationFilter: ImplementationFilter
 ): Action {
   return {
-    type: 'CHANGE_IMPLEMENTATION_FILTER',
-    implementation,
+    type: 'UPDATE_CALL_NODE_PATHS_FROM_IMPLEMENTATION_CHANGE',
+    thread,
+    threadIndex,
+    previousImplementationFilter,
+    nextImplementationFilter,
   };
 }
 
