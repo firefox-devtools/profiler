@@ -1,0 +1,372 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders TimelineFlameChart correctly 1`] = `
+<div
+  className="timelineFlameChart"
+  style={
+    Object {
+      "height": 96,
+    }
+  }
+>
+  <div
+    className="react-contextmenu-wrapper timelineFlameChartLabels grippy"
+    onContextMenu={[Function]}
+    onMouseDown={[Function]}
+    onMouseOut={[Function]}
+    onMouseUp={[Function]}
+    onTouchEnd={[Function]}
+    onTouchStart={[Function]}
+  >
+    <span>
+      Empty
+    </span>
+    <button
+      className="timelineFlameChartCollapseButton expanded"
+      onClick={[Function]}
+    />
+  </div>
+  <div
+    className="timelineViewport expanded"
+    onMouseDown={[Function]}
+    onWheel={[Function]}
+  >
+    <div>
+      <canvas
+        className="timelineCanvas flameChartCanvas"
+        onDoubleClick={[Function]}
+        onMouseMove={[Function]}
+        onMouseOut={[Function]}
+      />
+    </div>
+    <div
+      className="timelineViewportShiftScroll hidden"
+    >
+      Zoom Timeline:
+      <kbd
+        className="timelineViewportShiftScrollKbd"
+      >
+        Shift
+      </kbd>
+      <kbd
+        className="timelineViewportShiftScrollKbd"
+      >
+        Scroll
+      </kbd>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders TimelineFlameChart correctly 2`] = `
+Array [
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "rgb(240, 240, 240)",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    200,
+    15,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "A",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "A",
+    3,
+    11,
+  ],
+  Array [
+    "set fillStyle",
+    "rgb(240, 240, 240)",
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    200,
+    15,
+  ],
+  Array [
+    "clearRect",
+    0,
+    16,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "B",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "B",
+    3,
+    27,
+  ],
+  Array [
+    "set fillStyle",
+    "rgb(240, 240, 240)",
+  ],
+  Array [
+    "fillRect",
+    0,
+    32,
+    133.33333333333331,
+    15,
+  ],
+  Array [
+    "clearRect",
+    0,
+    32,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "C",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "C",
+    3,
+    43,
+  ],
+  Array [
+    "set fillStyle",
+    "rgb(240, 240, 240)",
+  ],
+  Array [
+    "fillRect",
+    133.33333333333331,
+    32,
+    66.66666666666667,
+    15,
+  ],
+  Array [
+    "clearRect",
+    133.33333333333331,
+    32,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "H",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "H",
+    136.33333333333331,
+    43,
+  ],
+  Array [
+    "set fillStyle",
+    "rgb(240, 240, 240)",
+  ],
+  Array [
+    "fillRect",
+    0,
+    48,
+    66.66666666666666,
+    15,
+  ],
+  Array [
+    "clearRect",
+    0,
+    48,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "D",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "D",
+    3,
+    59,
+  ],
+  Array [
+    "set fillStyle",
+    "rgb(240, 240, 240)",
+  ],
+  Array [
+    "fillRect",
+    66.66666666666666,
+    48,
+    66.66666666666666,
+    15,
+  ],
+  Array [
+    "clearRect",
+    66.66666666666666,
+    48,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "F",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "F",
+    69.66666666666666,
+    59,
+  ],
+  Array [
+    "set fillStyle",
+    "rgb(240, 240, 240)",
+  ],
+  Array [
+    "fillRect",
+    133.33333333333331,
+    48,
+    66.66666666666667,
+    15,
+  ],
+  Array [
+    "clearRect",
+    133.33333333333331,
+    48,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "I",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "I",
+    136.33333333333331,
+    59,
+  ],
+  Array [
+    "set fillStyle",
+    "rgb(240, 240, 240)",
+  ],
+  Array [
+    "fillRect",
+    0,
+    64,
+    66.66666666666666,
+    15,
+  ],
+  Array [
+    "clearRect",
+    0,
+    64,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "E",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "E",
+    3,
+    75,
+  ],
+  Array [
+    "set fillStyle",
+    "rgb(240, 240, 240)",
+  ],
+  Array [
+    "fillRect",
+    66.66666666666666,
+    64,
+    66.66666666666666,
+    15,
+  ],
+  Array [
+    "clearRect",
+    66.66666666666666,
+    64,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "G",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "G",
+    69.66666666666666,
+    75,
+  ],
+]
+`;
