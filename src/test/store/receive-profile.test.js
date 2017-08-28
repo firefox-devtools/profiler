@@ -124,7 +124,7 @@ describe('actions/receive-profile', function() {
   });
 
   describe('retrieveProfileFromStore', function() {
-    const fetch404Response = { ok: false, status: 404 };
+    const fetch403Response = { ok: false, status: 403 };
     const fetch500Response = { ok: false, status: 500 };
     const fetch200Response = {
       ok: true,
@@ -137,7 +137,7 @@ describe('actions/receive-profile', function() {
       // arguments. Here we define the default return value because there is no
       // argument specified.
       window.fetch = sinon.stub();
-      window.fetch.resolves(fetch404Response);
+      window.fetch.resolves(fetch403Response);
 
       sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
     });
@@ -165,10 +165,10 @@ describe('actions/receive-profile', function() {
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
-    it('requests several times in case of 404', async function() {
+    it('requests several times in case of 403', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://profile-store.commondatastorage.googleapis.com/${hash}`;
-      // The first call will still be a 404 -- remember, it's the default return value.
+      // The first call will still be a 403 -- remember, it's the default return value.
       window.fetch
         .withArgs(expectedUrl)
         .onSecondCall()
@@ -238,7 +238,7 @@ describe('actions/receive-profile', function() {
   });
 
   describe('retrieveProfileFromUrl', function() {
-    const fetch404Response = { ok: false, status: 404 };
+    const fetch403Response = { ok: false, status: 403 };
     const fetch500Response = { ok: false, status: 500 };
     const fetch200Response = {
       ok: true,
@@ -251,7 +251,7 @@ describe('actions/receive-profile', function() {
       // arguments. Here we define the default return value because there is no
       // argument specified.
       window.fetch = sinon.stub();
-      window.fetch.resolves(fetch404Response);
+      window.fetch.resolves(fetch403Response);
 
       sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
     });
@@ -278,9 +278,9 @@ describe('actions/receive-profile', function() {
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
-    it('requests several times in case of 404', async function() {
+    it('requests several times in case of 403', async function() {
       const expectedUrl = 'https://profiles.club/shared.json';
-      // The first call will still be a 404 -- remember, it's the default return value.
+      // The first call will still be a 403 -- remember, it's the default return value.
       window.fetch
         .withArgs(expectedUrl)
         .onSecondCall()

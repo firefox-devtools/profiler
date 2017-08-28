@@ -450,14 +450,14 @@ async function _fetchProfile({ url, onTemporaryError }: FetchProfileArgs) {
     }
 
     // case 2: unrecoverable error.
-    if (response.status !== 404) {
+    if (response.status !== 403) {
       throw new Error(oneLine`
         Could not fetch the profile on remote server.
         Response was: ${response.status} ${response.statusText}.
       `);
     }
 
-    // case 3: 404 errors can be transient while a profile is uploaded.
+    // case 3: 403 errors can be transient while a profile is uploaded.
 
     if (i++ === MAX_WAIT_SECONDS) {
       // In the last iteration we don't send a temporary error because we'll
