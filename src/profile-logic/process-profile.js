@@ -651,7 +651,6 @@ export function processProfile(geckoProfile: GeckoProfile): Profile {
   const meta = Object.assign({}, geckoProfile.meta, {
     preprocessedProfileVersion: CURRENT_VERSION,
   });
-  delete meta.shutdownTime;
 
   const result = {
     meta,

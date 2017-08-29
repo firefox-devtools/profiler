@@ -175,9 +175,21 @@ export type Thread = {
 /**
  * Meta information associated for the entire profile.
  */
-export type ProfileMeta = {
+export type ProfileMeta = {|
   interval: number,
-};
+  startTime: Milliseconds,
+  shutdownTime: Milliseconds | null,
+  abi: string,
+  misc: string,
+  oscpu: string,
+  platform: string,
+  processType: number, // TODO find the possible values
+  product: string,
+  stackwalk: number,
+  toolkit: string,
+  version: number,
+  preprocessedProfileVersion: number,
+|};
 
 /**
  * TaskTracer data - TODO.
