@@ -22,6 +22,12 @@ import type {
 } from '../types/actions';
 import type { State, URLState, Reducer } from '../types/reducers';
 
+// Pre-allocate arrays to help with strict equality tests in memoized functions. Flow
+// will coerce these into types, so have one array per type.
+const EMPTY_TRANSFORM_STACK = [];
+const EMPTY_THREAD_LIST = [];
+const EMPTY_START_END_RANGES = [];
+
 function dataSource(state: DataSource = 'none', action: Action) {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_FILE':
@@ -58,7 +64,10 @@ function selectedTab(state: string = 'calltree', action: Action) {
   }
 }
 
-function rangeFilters(state: StartEndRange[] = [], action: Action) {
+function rangeFilters(
+  state: StartEndRange[] = EMPTY_START_END_RANGES,
+  action: Action
+) {
   switch (action.type) {
     case 'ADD_RANGE_FILTER': {
       const { start, end } = action;
@@ -142,14 +151,14 @@ function transforms(state: TransformStacksPerThread = {}, action: Action) {
   switch (action.type) {
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadIndex, transform } = action;
-      const transforms = state[threadIndex] || [];
+      const transforms = state[threadIndex] || EMPTY_TRANSFORM_STACK;
       return Object.assign({}, state, {
         [threadIndex]: [...transforms, transform],
       });
     }
     case 'POP_TRANSFORMS_FROM_STACK': {
       const { threadIndex, firstRemovedFilterIndex } = action;
-      const transforms = state[threadIndex] || [];
+      const transforms = state[threadIndex] || EMPTY_TRANSFORM_STACK;
       return Object.assign({}, state, {
         [threadIndex]: transforms.slice(0, firstRemovedFilterIndex),
       });
@@ -193,7 +202,7 @@ function hidePlatformDetails(state: boolean = false, action: Action) {
   }
 }
 
-function threadOrder(state: ThreadIndex[] = [], action: Action) {
+function threadOrder(state: ThreadIndex[] = EMPTY_THREAD_LIST, action: Action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_STORE':
@@ -213,7 +222,10 @@ function threadOrder(state: ThreadIndex[] = [], action: Action) {
   }
 }
 
-function hiddenThreads(state: ThreadIndex[] = [], action: Action) {
+function hiddenThreads(
+  state: ThreadIndex[] = EMPTY_THREAD_LIST,
+  action: Action
+) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_STORE':
@@ -292,7 +304,7 @@ export const getTransformStack = (
   state: State,
   threadIndex: ThreadIndex
 ): TransformStack => {
-  return getURLState(state).transforms[threadIndex] || [];
+  return getURLState(state).transforms[threadIndex] || EMPTY_TRANSFORM_STACK;
 };
 export const getThreadOrder = (state: State) => getURLState(state).threadOrder;
 export const getHiddenThreads = (state: State) =>
