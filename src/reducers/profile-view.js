@@ -393,27 +393,19 @@ export const selectorsForThread = (
   threadIndex: ThreadIndex
 ): SelectorsForThread => {
   if (!(threadIndex in selectorsForThreads)) {
+    /**
+     * The first per-thread selectors filter out and transform a thread based on user's
+     * interactions. The transforms are order dependendent.
+     *
+     * 1. Unfiltered - The first selector gets the unmodified original thread.
+     * 2. Range - New samples table with only samples in range.
+     * 3. Transform - Apply the transform stack that modifies the stacks and samples.
+     * 4. Implementation - Modify stacks and samples to only show a single implementation.
+     * 5. Search - Exclude samples that don't include some text in the stack.
+     * 6. Range selection - Only include sampels that are within a user's sub-selection.
+     */
     const getThread = (state: State): Thread =>
       getProfile(state).threads[threadIndex];
-    const getViewOptions = (state: State): ThreadViewOptions =>
-      getProfileViewOptions(state).perThread[threadIndex];
-    const getTransformStack = (state: State): TransformStack =>
-      URLState.getTransformStack(state, threadIndex);
-    const getFriendlyThreadName = createSelector(
-      getThreads,
-      getThread,
-      ProfileData.getFriendlyThreadName
-    );
-    const getThreadProcessDetails = createSelector(
-      getThread,
-      ProfileData.getThreadProcessDetails
-    );
-    const getTransformLabels: (state: State) => string[] = createSelector(
-      getThread,
-      getFriendlyThreadName,
-      getTransformStack,
-      Transforms.getTransformLabels
-    );
     const getRangeFilteredThread = createSelector(
       getThread,
       getDisplayRange,
@@ -422,30 +414,8 @@ export const selectorsForThread = (
         return ProfileData.filterThreadToRange(thread, start, end);
       }
     );
-    const _getRangeFilteredThreadSamples = createSelector(
-      getRangeFilteredThread,
-      (thread): SamplesTable => thread.samples
-    );
-    const getJankInstances = createSelector(
-      _getRangeFilteredThreadSamples,
-      (samples): TracingMarker[] => ProfileData.getJankInstances(samples, 50)
-    );
-    const getTracingMarkers = createSelector(
-      getThread,
-      ProfileData.getTracingMarkers
-    );
-    const getMarkerTiming = createSelector(
-      getTracingMarkers,
-      MarkerTiming.getMarkerTiming
-    );
-    const getRangeSelectionFilteredTracingMarkers = createSelector(
-      getTracingMarkers,
-      getDisplayRange,
-      (markers, range): TracingMarker[] => {
-        const { start, end } = range;
-        return ProfileData.filterTracingMarkersToRange(markers, start, end);
-      }
-    );
+    const getTransformStack = (state: State): TransformStack =>
+      URLState.getTransformStack(state, threadIndex);
     const _getRangeAndTransformFilteredThread = createSelector(
       getRangeFilteredThread,
       getTransformStack,
@@ -516,6 +486,48 @@ export const selectorsForThread = (
           selectionStart,
           selectionEnd
         );
+      }
+    );
+
+    const getViewOptions = (state: State): ThreadViewOptions =>
+      getProfileViewOptions(state).perThread[threadIndex];
+    const getFriendlyThreadName = createSelector(
+      getThreads,
+      getThread,
+      ProfileData.getFriendlyThreadName
+    );
+    const getThreadProcessDetails = createSelector(
+      getThread,
+      ProfileData.getThreadProcessDetails
+    );
+    const getTransformLabels: (state: State) => string[] = createSelector(
+      getThread,
+      getFriendlyThreadName,
+      getTransformStack,
+      Transforms.getTransformLabels
+    );
+    const _getRangeFilteredThreadSamples = createSelector(
+      getRangeFilteredThread,
+      (thread): SamplesTable => thread.samples
+    );
+    const getJankInstances = createSelector(
+      _getRangeFilteredThreadSamples,
+      (samples): TracingMarker[] => ProfileData.getJankInstances(samples, 50)
+    );
+    const getTracingMarkers = createSelector(
+      getThread,
+      ProfileData.getTracingMarkers
+    );
+    const getMarkerTiming = createSelector(
+      getTracingMarkers,
+      MarkerTiming.getMarkerTiming
+    );
+    const getRangeSelectionFilteredTracingMarkers = createSelector(
+      getTracingMarkers,
+      getDisplayRange,
+      (markers, range): TracingMarker[] => {
+        const { start, end } = range;
+        return ProfileData.filterTracingMarkersToRange(markers, start, end);
       }
     );
     const getCallNodeInfo = createSelector(
