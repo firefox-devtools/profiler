@@ -1,0 +1,106 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`shared/ButtonWithPanel renders a closed panel and opens it when asked 1`] = `
+<div
+  className="buttonWithPanel button"
+>
+  <div
+    className="buttonWithPanelButtonWrapper"
+  >
+    <input
+      className="buttonWithPanelButton buttonButton"
+      onClick={[Function]}
+      type="button"
+      value="My Button"
+    />
+  </div>
+  <div
+    className="arrowPanelAnchor"
+  >
+    <div
+      className="arrowPanel panel"
+    >
+      <div
+        className="arrowPanelArrow"
+      />
+      <div
+        className="arrowPanelContent"
+      >
+        <div>
+          Panel content
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/ButtonWithPanel renders a closed panel and opens it when asked 2`] = `
+<div
+  className="buttonWithPanel button open"
+>
+  <div
+    className="buttonWithPanelButtonWrapper"
+  >
+    <input
+      className="buttonWithPanelButton buttonButton"
+      onClick={[Function]}
+      type="button"
+      value="My Button"
+    />
+  </div>
+  <div
+    className="arrowPanelAnchor"
+  >
+    <div
+      className="arrowPanel panel"
+    >
+      <div
+        className="arrowPanelArrow"
+      />
+      <div
+        className="arrowPanelContent"
+      >
+        <div>
+          Panel content
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/ButtonWithPanel renders an opened panel 1`] = `
+<div
+  className="buttonWithPanel button open"
+>
+  <div
+    className="buttonWithPanelButtonWrapper"
+  >
+    <input
+      className="buttonWithPanelButton buttonButton"
+      onClick={[Function]}
+      type="button"
+      value="My Button"
+    />
+  </div>
+  <div
+    className="arrowPanelAnchor"
+  >
+    <div
+      className="arrowPanel panel"
+    >
+      <div
+        className="arrowPanelArrow"
+      />
+      <div
+        className="arrowPanelContent"
+      >
+        <div>
+          Panel content
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

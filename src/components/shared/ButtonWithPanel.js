@@ -2,15 +2,43 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { PureComponent, PropTypes } from 'react';
+// @flow
+
+import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 
 require('./ButtonWithPanel.css');
 
+interface Panel {
+  props: {
+    onOpen: () => mixed,
+    onClose: () => mixed,
+  },
+  open(): mixed,
+}
+
+type Props = {
+  className: string,
+  label: string,
+  panel: React$Element<*>, // Ideally we'd like to say that panel implements Panel, but I can't express it with Flow
+  open?: boolean,
+};
+
 class ButtonWithPanel extends PureComponent {
-  constructor(props) {
+  props: Props;
+  state: {|
+    open: boolean,
+  |};
+
+  _panel: Panel | null;
+
+  _onPanelOpen: () => void;
+  _onPanelClose: () => void;
+  _panelCreated: Panel => void;
+
+  constructor(props: Props) {
     super(props);
-    this.state = { open: false };
+    this.state = { open: !!props.open };
     this._onPanelOpen = () => {
       this.setState({ open: true });
       if (this.props.panel.props.onOpen) {
@@ -23,10 +51,16 @@ class ButtonWithPanel extends PureComponent {
         this.props.panel.props.onClose();
       }
     };
-    this._onButtonClick = this._onButtonClick.bind(this);
-    this._panelCreated = panel => {
+    (this: any)._onButtonClick = this._onButtonClick.bind(this);
+    this._panelCreated = (panel: Panel) => {
       this._panel = panel;
     };
+  }
+
+  componentWillReceiveProps(props: Props) {
+    if (props.open !== this.props.open) {
+      this.setState({ open: !!props.open });
+    }
   }
 
   openPanel() {
@@ -64,11 +98,5 @@ class ButtonWithPanel extends PureComponent {
     );
   }
 }
-
-ButtonWithPanel.propTypes = {
-  className: PropTypes.string,
-  label: PropTypes.string.isRequired,
-  panel: PropTypes.object.isRequired,
-};
 
 export default ButtonWithPanel;
