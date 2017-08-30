@@ -47,12 +47,6 @@ import type {
 } from '../types/reducers';
 import type { TransformStack } from '../types/transforms';
 
-// Pre-allocate arrays to help with strict equality tests in memoized functions. Flow
-// will coerce these into types, so have one array per type.
-const EMPTY_THREAD_VIEW_OPTIONS = [];
-const EMPTY_CALL_NODE_PATH = [];
-const EMPTY_CALL_NODE_PATH_LIST = [];
-
 function profile(
   state: Profile = ProfileData.getEmptyProfile(),
   action: Action
@@ -116,18 +110,15 @@ function symbolicationStatus(
   }
 }
 
-function viewOptionsPerThread(
-  state: ThreadViewOptions[] = EMPTY_THREAD_VIEW_OPTIONS,
-  action: Action
-) {
+function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
     case 'RECEIVE_PROFILE_FROM_STORE':
     case 'RECEIVE_PROFILE_FROM_URL':
     case 'RECEIVE_PROFILE_FROM_FILE':
       return action.profile.threads.map(() => ({
-        selectedCallNodePath: EMPTY_CALL_NODE_PATH,
-        expandedCallNodePaths: EMPTY_CALL_NODE_PATH_LIST,
+        selectedCallNodePath: [],
+        expandedCallNodePaths: [],
         selectedMarker: -1,
       }));
     case 'COALESCED_FUNCTIONS_UPDATE': {
