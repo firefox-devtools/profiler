@@ -24,15 +24,27 @@ We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-s
 
 ## Getting started with development
 
-perf.html is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including from the [Gecko Profiler Addon](https://github.com/devtools-html/Gecko-Profiler-Addon), online storage, and from local files. To get started clone the repo and get the web application started.
+perf.html is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including from the [Gecko Profiler Addon](https://github.com/devtools-html/Gecko-Profiler-Addon), online storage, and from local files.
 
- 1. Install [Yarn](http://yarnpkg.com/), we use this for our dependency management.
- 2. Run `git clone git@github.com:devtools-html/perf.html.git`
- 3. Run `cd perf.html`
- 4. Run `yarn install`, this will install all of the dependencies.
- 5. Run `yarn start`, this will start up the webpack server.
- 6. Point your browser to [http://localhost:4242](http://localhost:4242).
- 7. If port `4242` is taken, then you can run the web app on a different port: `PERFHTML_PORT=1234 yarn start`
+You will need a pre-release version of [Yarn](http://yarnpkg.com/),
+version 0.28.4 is known to work correctly.
+You can install it into your home directory on Linux and probably OS X with:
+
+```bash
+cd /tmp
+wget https://yarnpkg.com/install.sh
+chmod a+x install.sh
+./install.sh  --version 0.28.4
+```
+
+To get started clone the repo and get the web application started.
+
+ 1. Run `git clone git@github.com:devtools-html/perf.html.git`
+ 2. Run `cd perf.html`
+ 3. Run `yarn install`, this will install all of the dependencies.
+ 4. Run `yarn start`, this will start up the webpack server.
+ 5. Point your browser to [http://localhost:4242](http://localhost:4242).
+ 6. If port `4242` is taken, then you can run the web app on a different port: `PERFHTML_PORT=1234 yarn start`
 
 ## Loading in profiles for development
 
