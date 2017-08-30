@@ -11,14 +11,14 @@ import { getProfile, getProfileRootRange } from '../../reducers/profile-view';
 import {
   getDataSource,
   getHash,
-  getURLPredictor,
+  getUrlPredictor,
 } from '../../reducers/url-state';
 import actions from '../../actions';
 import { compress } from '../../utils/gz';
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
 import ArrowPanel from '../shared/ArrowPanel';
 import ButtonWithPanel from '../shared/ButtonWithPanel';
-import shortenURL from '../../utils/shorten-url';
+import shortenUrl from '../../utils/shorten-url';
 import { serializeProfile } from '../../profile-logic/process-profile';
 import prettyBytes from 'pretty-bytes';
 import sha1 from '../../utils/sha1';
@@ -66,7 +66,7 @@ type ProfileSharingCompositeButtonProps = {
   profile: Profile,
   dataSource: DataSource,
   hash: string,
-  predictURL: (Action | Action[]) => string,
+  predictUrl: (Action | Action[]) => string,
   onProfilePublished: typeof actions.profilePublished,
 };
 
@@ -83,8 +83,8 @@ class ProfileSharingCompositeButton extends PureComponent {
     uploadProgress: number,
     hash: string,
     error: Error | null,
-    fullURL: string,
-    shortURL: string,
+    fullUrl: string,
+    shortUrl: string,
   };
 
   constructor(props: ProfileSharingCompositeButtonProps) {
@@ -95,8 +95,8 @@ class ProfileSharingCompositeButton extends PureComponent {
       uploadProgress: 0,
       hash,
       error: null,
-      fullURL: window.location.href,
-      shortURL: window.location.href,
+      fullUrl: window.location.href,
+      shortUrl: window.location.href,
     };
 
     (this: any)._attemptToShare = this._attemptToShare.bind(this);
@@ -120,22 +120,22 @@ class ProfileSharingCompositeButton extends PureComponent {
     if (dataSource === 'public' && this.state.state !== 'public') {
       this.setState({ state: 'public', hash });
     }
-    if (window.location.href !== this.state.fullURL) {
+    if (window.location.href !== this.state.fullUrl) {
       this.setState({
-        fullURL: window.location.href,
-        shortURL: window.location.href,
+        fullUrl: window.location.href,
+        shortUrl: window.location.href,
       });
     }
   }
 
   _onPermalinkPanelOpen() {
-    this._shortenURLAndFocusTextFieldOnCompletion();
+    this._shortenUrlAndFocusTextFieldOnCompletion();
   }
 
-  _shortenURLAndFocusTextFieldOnCompletion(): Promise<void> {
-    return shortenURL(this.state.fullURL)
-      .then(shortURL => {
-        this.setState({ shortURL });
+  _shortenUrlAndFocusTextFieldOnCompletion(): Promise<void> {
+    return shortenUrl(this.state.fullUrl)
+      .then(shortUrl => {
+        this.setState({ shortUrl });
         if (this._permalinkTextField) {
           this._permalinkTextField.focus();
           this._permalinkTextField.select();
@@ -155,7 +155,7 @@ class ProfileSharingCompositeButton extends PureComponent {
       return;
     }
 
-    const { profile, predictURL } = this.props;
+    const { profile, predictUrl } = this.props;
 
     new Promise(resolve => {
       if (!profile) {
@@ -174,14 +174,14 @@ class ProfileSharingCompositeButton extends PureComponent {
         return Promise.all([compress(typedArray.slice(0)), sha1(typedArray)]);
       })
       .then(([gzipData, hash]: [string, string]) => {
-        const predictedURL = url.resolve(
+        const predictedUrl = url.resolve(
           window.location.href,
-          predictURL(actions.profilePublished(hash))
+          predictUrl(actions.profilePublished(hash))
         );
         this.setState({
           hash,
-          fullURL: predictedURL,
-          shortURL: predictedURL,
+          fullUrl: predictedUrl,
+          shortUrl: predictedUrl,
         });
         const uploadPromise = uploadBinaryProfileData(
           gzipData,
@@ -191,24 +191,24 @@ class ProfileSharingCompositeButton extends PureComponent {
         ).then((hash: string) => {
           const { onProfilePublished } = this.props;
           onProfilePublished(hash);
-          const newShortURL =
-            this.state.fullURL === window.location.href
-              ? this.state.shortURL
+          const newShortUrl =
+            this.state.fullUrl === window.location.href
+              ? this.state.shortUrl
               : window.location.href;
           this.setState({
             state: 'public',
             hash,
-            fullURL: window.location.href,
-            shortURL: newShortURL,
+            fullUrl: window.location.href,
+            shortUrl: newShortUrl,
           });
         });
-        const shortenURLPromise = this._shortenURLAndFocusTextFieldOnCompletion();
-        Promise.race([uploadPromise, shortenURLPromise]).then(() => {
+        const shortenUrlPromise = this._shortenUrlAndFocusTextFieldOnCompletion();
+        Promise.race([uploadPromise, shortenUrlPromise]).then(() => {
           if (this._permalinkButton) {
             this._permalinkButton.openPanel();
           }
         });
-        return Promise.all([uploadPromise, shortenURLPromise]);
+        return Promise.all([uploadPromise, shortenUrlPromise]);
       })
       .catch((error: Error) => {
         this.setState({
@@ -222,7 +222,7 @@ class ProfileSharingCompositeButton extends PureComponent {
   }
 
   render() {
-    const { state, uploadProgress, error, shortURL } = this.state;
+    const { state, uploadProgress, error, shortUrl } = this.state;
     return (
       <div
         className={classNames('profileSharingCompositeButtonContainer', {
@@ -261,7 +261,7 @@ class ProfileSharingCompositeButton extends PureComponent {
               <input
                 type="text"
                 className="profileSharingPermalinkTextField"
-                value={shortURL}
+                value={shortUrl}
                 readOnly="readOnly"
                 ref={this._permalinkTextFieldCreated}
               />
@@ -332,19 +332,19 @@ class ProfileDownloadButton extends PureComponent {
     const blob = new Blob([serializedProfile], {
       type: 'application/octet-binary',
     });
-    const blobURL = URL.createObjectURL(blob);
+    const blobUrl = URL.createObjectURL(blob);
     this.setState({
       filename: `${profile.meta.product} ${filenameDateString(
         profileDate
       )} profile.sps.json`,
-      uncompressedBlobUrl: blobURL,
+      uncompressedBlobUrl: blobUrl,
       uncompressedSize: blob.size,
     });
     compress(serializedProfile).then(data => {
       const blob = new Blob([data], { type: 'application/octet-binary' });
-      const blobURL = URL.createObjectURL(blob);
+      const blobUrl = URL.createObjectURL(blob);
       this.setState({
-        compressedBlobUrl: blobURL,
+        compressedBlobUrl: blobUrl,
         compressedSize: blob.size,
       });
     });
@@ -405,7 +405,7 @@ type ProfileSharingProps = {
   dataSource: DataSource,
   hash: string,
   profilePublished: typeof actions.profilePublished,
-  predictURL: (Action | Action[]) => string,
+  predictUrl: (Action | Action[]) => string,
 };
 
 const ProfileSharing = ({
@@ -414,7 +414,7 @@ const ProfileSharing = ({
   dataSource,
   hash,
   profilePublished,
-  predictURL,
+  predictUrl,
 }: ProfileSharingProps) =>
   <div className="profileSharing">
     <ProfileSharingCompositeButton
@@ -422,7 +422,7 @@ const ProfileSharing = ({
       dataSource={dataSource}
       hash={hash}
       onProfilePublished={profilePublished}
-      predictURL={predictURL}
+      predictUrl={predictUrl}
     />
     <ProfileDownloadButton profile={profile} rootRange={rootRange} />
   </div>;
@@ -433,7 +433,7 @@ export default connect(
     rootRange: getProfileRootRange(state),
     dataSource: getDataSource(state),
     hash: getHash(state),
-    predictURL: getURLPredictor(state),
+    predictUrl: getUrlPredictor(state),
   }),
   { profilePublished: actions.profilePublished }
 )(ProfileSharing);

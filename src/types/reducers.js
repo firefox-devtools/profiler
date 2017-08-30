@@ -53,7 +53,7 @@ export type AppViewState =
 
 export type AppState = {
   view: AppViewState,
-  isURLSetupDone: boolean,
+  isUrlSetupDone: boolean,
 };
 
 export type SummaryViewState = {
@@ -66,10 +66,10 @@ export type RangeFilterState = {
   end: number,
 };
 
-export type URLState = {
+export type UrlState = {
   dataSource: DataSource,
   hash: string,
-  profileURL: string,
+  profileUrl: string,
   selectedTab: string,
   rangeFilters: RangeFilterState[],
   selectedThread: ThreadIndex,
@@ -101,7 +101,7 @@ export type State = {
   app: AppState,
   profileView: ProfileViewState,
   summaryView: SummaryViewState,
-  urlState: URLState,
+  urlState: UrlState,
   flameChart: FlameChartState,
   timelineView: TimelineViewState,
   icons: IconState,

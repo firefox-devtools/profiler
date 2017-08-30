@@ -20,7 +20,7 @@ import type {
   DataSource,
   ImplementationFilter,
 } from '../types/actions';
-import type { State, URLState, Reducer } from '../types/reducers';
+import type { State, UrlState, Reducer } from '../types/reducers';
 
 // Pre-allocate an array to help with strict equality tests in the selectors.
 const EMPTY_TRANSFORM_STACK = [];
@@ -45,7 +45,7 @@ function hash(state: string = '', action: Action) {
   }
 }
 
-function profileURL(state: string = '', action: Action) {
+function profileUrl(state: string = '', action: Action) {
   switch (action.type) {
     default:
       return state;
@@ -205,9 +205,9 @@ function threadOrder(state: ThreadIndex[] = [], action: Action) {
       // When receiving a new profile, try to use the thread order specified in the URL,
       // but ensure that the IDs are correct.
       const threads = defaultThreadOrder(action.profile.threads);
-      const validURLThreads = state.filter(index => threads.includes(index));
+      const validUrlThreads = state.filter(index => threads.includes(index));
       const missingThreads = threads.filter(index => !state.includes(index));
-      return validURLThreads.concat(missingThreads);
+      return validUrlThreads.concat(missingThreads);
     }
     case 'CHANGE_THREAD_ORDER':
       return action.threadOrder;
@@ -240,12 +240,12 @@ function hiddenThreads(state: ThreadIndex[] = [], action: Action) {
   }
 }
 
-const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (
-  state: URLState,
+const urlStateReducer: Reducer<UrlState> = (regularUrlStateReducer => (
+  state: UrlState,
   action: Action
-): URLState => {
+): UrlState => {
   switch (action.type) {
-    case '@@urlenhancer/updateURLState':
+    case '@@urlenhancer/updateUrlState':
       return action.urlState;
     default:
       return regularUrlStateReducer(state, action);
@@ -254,7 +254,7 @@ const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (
   combineReducers({
     dataSource,
     hash,
-    profileURL,
+    profileUrl,
     selectedTab,
     rangeFilters,
     selectedThread,
@@ -270,36 +270,36 @@ const urlStateReducer: Reducer<URLState> = (regularUrlStateReducer => (
 );
 export default urlStateReducer;
 
-export const getURLState = (state: State): URLState => state.urlState;
+export const getUrlState = (state: State): UrlState => state.urlState;
 
-export const getDataSource = (state: State) => getURLState(state).dataSource;
-export const getHash = (state: State) => getURLState(state).hash;
-export const getProfileURL = (state: State) => getURLState(state).profileURL;
+export const getDataSource = (state: State) => getUrlState(state).dataSource;
+export const getHash = (state: State) => getUrlState(state).hash;
+export const getProfileUrl = (state: State) => getUrlState(state).profileUrl;
 export const getRangeFilters = (state: State) =>
-  getURLState(state).rangeFilters;
+  getUrlState(state).rangeFilters;
 export const getImplementationFilter = (state: State) =>
-  getURLState(state).implementation;
+  getUrlState(state).implementation;
 export const getHidePlatformDetails = (state: State) =>
-  getURLState(state).hidePlatformDetails;
+  getUrlState(state).hidePlatformDetails;
 export const getInvertCallstack = (state: State) =>
-  getURLState(state).invertCallstack;
+  getUrlState(state).invertCallstack;
 export const getSearchString = (state: State) =>
-  getURLState(state).callTreeSearchString;
+  getUrlState(state).callTreeSearchString;
 export const getMarkersSearchString = (state: State) =>
-  getURLState(state).markersSearchString;
+  getUrlState(state).markersSearchString;
 
-export const getSelectedTab = (state: State) => getURLState(state).selectedTab;
+export const getSelectedTab = (state: State) => getUrlState(state).selectedTab;
 export const getSelectedThreadIndex = (state: State) =>
-  getURLState(state).selectedThread;
+  getUrlState(state).selectedThread;
 export const getTransformStack = (
   state: State,
   threadIndex: ThreadIndex
 ): TransformStack => {
-  return getURLState(state).transforms[threadIndex] || EMPTY_TRANSFORM_STACK;
+  return getUrlState(state).transforms[threadIndex] || EMPTY_TRANSFORM_STACK;
 };
-export const getThreadOrder = (state: State) => getURLState(state).threadOrder;
+export const getThreadOrder = (state: State) => getUrlState(state).threadOrder;
 export const getHiddenThreads = (state: State) =>
-  getURLState(state).hiddenThreads;
+  getUrlState(state).hiddenThreads;
 export const getVisibleThreadOrder = createSelector(
   getThreadOrder,
   getHiddenThreads,
@@ -307,14 +307,14 @@ export const getVisibleThreadOrder = createSelector(
     return threadOrder.filter(index => !hiddenThreads.includes(index));
   }
 );
-export const getURLPredictor = createSelector(
-  getURLState,
-  (oldURLState: URLState) => (actionOrActionList: Action | Action[]) => {
+export const getUrlPredictor = createSelector(
+  getUrlState,
+  (oldUrlState: UrlState) => (actionOrActionList: Action | Action[]) => {
     const actionList: Action[] = Array.isArray(actionOrActionList)
       ? actionOrActionList
       : [actionOrActionList];
-    const newURLState = actionList.reduce(urlStateReducer, oldURLState);
-    return urlFromState(newURLState);
+    const newUrlState = actionList.reduce(urlStateReducer, oldUrlState);
+    return urlFromState(newUrlState);
   }
 );
 

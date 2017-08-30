@@ -11,7 +11,7 @@ import {
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import * as Transforms from '../profile-logic/transforms';
-import * as URLState from './url-state';
+import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
 import * as StackTiming from '../profile-logic/stack-timing';
 import * as MarkerTiming from '../profile-logic/marker-timing';
@@ -328,7 +328,7 @@ export const getZeroAt = createSelector(
 export const getDisplayRange = createSelector(
   (state: State) => getProfileViewOptions(state).rootRange,
   (state: State) => getProfileViewOptions(state).zeroAt,
-  URLState.getRangeFilters,
+  UrlState.getRangeFilters,
   (rootRange, zeroAt, rangeFilters): StartEndRange => {
     if (rangeFilters.length > 0) {
       let { start, end } = rangeFilters[rangeFilters.length - 1];
@@ -415,7 +415,7 @@ export const selectorsForThread = (
       }
     );
     const getTransformStack = (state: State): TransformStack =>
-      URLState.getTransformStack(state, threadIndex);
+      UrlState.getTransformStack(state, threadIndex);
     const _getRangeAndTransformFilteredThread = createSelector(
       getRangeFilteredThread,
       getTransformStack,
@@ -454,19 +454,19 @@ export const selectorsForThread = (
     );
     const _getImplementationFilteredThread = createSelector(
       _getRangeAndTransformFilteredThread,
-      URLState.getImplementationFilter,
+      UrlState.getImplementationFilter,
       ProfileData.filterThreadByImplementation
     );
     const _getImplementationAndSearchFilteredThread = createSelector(
       _getImplementationFilteredThread,
-      URLState.getSearchString,
+      UrlState.getSearchString,
       (thread, searchString): Thread => {
         return ProfileData.filterThreadToSearchString(thread, searchString);
       }
     );
     const getFilteredThread = createSelector(
       _getImplementationAndSearchFilteredThread,
-      URLState.getInvertCallstack,
+      UrlState.getInvertCallstack,
       (thread, shouldInvertCallstack): Thread => {
         return shouldInvertCallstack
           ? ProfileData.invertCallstack(thread)
@@ -572,8 +572,8 @@ export const selectorsForThread = (
       getRangeSelectionFilteredThread,
       getProfileInterval,
       getCallNodeInfo,
-      URLState.getImplementationFilter,
-      URLState.getInvertCallstack,
+      UrlState.getImplementationFilter,
+      UrlState.getInvertCallstack,
       CallTree.getCallTree
     );
 
@@ -585,9 +585,9 @@ export const selectorsForThread = (
     // chart and the call tree.
     const getFilteredThreadForFlameChart = createSelector(
       getRangeFilteredThread,
-      URLState.getHidePlatformDetails,
-      URLState.getInvertCallstack,
-      URLState.getSearchString,
+      UrlState.getHidePlatformDetails,
+      UrlState.getInvertCallstack,
+      UrlState.getSearchString,
       (
         thread: Thread,
         shouldHidePlatformDetails: boolean,
@@ -638,7 +638,7 @@ export const selectorsForThread = (
     );
     const getSearchFilteredMarkers = createSelector(
       getRangeSelectionFilteredThread,
-      URLState.getMarkersSearchString,
+      UrlState.getMarkersSearchString,
       ProfileData.getSearchFilteredMarkers
     );
 
@@ -678,7 +678,7 @@ export const selectedThreadSelectors: SelectorsForThread = (() => {
   const result: { [key: string]: (State) => any } = {};
   for (const key in anyThreadSelectors) {
     result[key] = (state: State) =>
-      selectorsForThread(URLState.getSelectedThreadIndex(state))[key](state);
+      selectorsForThread(UrlState.getSelectedThreadIndex(state))[key](state);
   }
   const result2: SelectorsForThread = result;
   return result2;

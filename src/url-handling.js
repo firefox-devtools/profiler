@@ -12,10 +12,10 @@ import {
   stringifyTransforms,
   parseTransforms,
 } from './profile-logic/transforms';
-import type { URLState } from './types/reducers';
+import type { UrlState } from './types/reducers';
 import type { DataSource } from './types/actions';
 
-function dataSourceDirs(urlState: URLState) {
+function dataSourceDirs(urlState: UrlState) {
   const { dataSource } = urlState;
   switch (dataSource) {
     case 'from-addon':
@@ -27,7 +27,7 @@ function dataSourceDirs(urlState: URLState) {
     case 'public':
       return ['public', urlState.hash];
     case 'from-url':
-      return ['from-url', encodeURIComponent(urlState.profileURL)];
+      return ['from-url', encodeURIComponent(urlState.profileUrl)];
     default:
       return [];
   }
@@ -60,7 +60,7 @@ type TimelineQuery = BaseQuery & {
   hidePlatformDetails?: null | void,
 };
 
-type URLObject = {
+type UrlObject = {
   pathParts: string[],
   query: Query,
 };
@@ -68,10 +68,10 @@ type URLObject = {
 type Query = BaseQuery | CallTreeQuery | MarkersQuery | TimelineQuery;
 
 /**
- * Take the URLState and map it into a serializable URLObject, that represents the
+ * Take the UrlState and map it into a serializable UrlObject, that represents the
  * target URL.
  */
-export function urlStateToURLObject(urlState: URLState): URLObject {
+export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   const { dataSource } = urlState;
   if (dataSource === 'none') {
     return {
@@ -123,8 +123,8 @@ export function urlStateToURLObject(urlState: URLState): URLObject {
   return { query, pathParts };
 }
 
-export function urlFromState(urlState: URLState): string {
-  const { pathParts, query } = urlStateToURLObject(urlState);
+export function urlFromState(urlState: UrlState): string {
+  const { pathParts, query } = urlStateToUrlObject(urlState);
   const { dataSource } = urlState;
   if (dataSource === 'none') {
     return '/';
@@ -162,7 +162,7 @@ type Location = {
   hash: string,
 };
 
-export function stateFromLocation(location: Location): URLState {
+export function stateFromLocation(location: Location): UrlState {
   const { pathname, query } = upgradeLocationToCurrentVersion({
     pathname: location.pathname,
     hash: location.hash,
@@ -177,10 +177,10 @@ export function stateFromLocation(location: Location): URLState {
   const hasProfileHash = ['local', 'public'].includes(dataSource);
 
   // https://perf-html.io/from-url/{url}/calltree/
-  const hasProfileURL = ['from-url'].includes(dataSource);
+  const hasProfileUrl = ['from-url'].includes(dataSource);
 
   // The selected tab is the last path part in the URL.
-  const selectedTabPathPart = hasProfileHash || hasProfileURL ? 2 : 1;
+  const selectedTabPathPart = hasProfileHash || hasProfileUrl ? 2 : 1;
 
   let implementation = 'combined';
   // Don't trust the implementation values from the user. Make sure it conforms
@@ -192,7 +192,7 @@ export function stateFromLocation(location: Location): URLState {
   return {
     dataSource,
     hash: hasProfileHash ? pathParts[1] : '',
-    profileURL: hasProfileURL ? decodeURIComponent(pathParts[1]) : '',
+    profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
     selectedTab: pathParts[selectedTabPathPart] || 'calltree',
     rangeFilters: query.range ? parseRangeFilters(query.range) : [],
     selectedThread: selectedThread,

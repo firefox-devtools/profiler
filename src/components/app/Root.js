@@ -18,9 +18,9 @@ import { getView } from '../../reducers/app';
 import {
   getDataSource,
   getHash,
-  getProfileURL,
+  getProfileUrl,
 } from '../../reducers/url-state';
-import URLManager from './URLManager';
+import UrlManager from './UrlManager';
 
 import type { Store } from '../../types/store';
 import type { AppViewState, State } from '../../types/reducers';
@@ -69,7 +69,7 @@ type ProfileViewProps = {
   view: AppViewState,
   dataSource: string,
   hash: string,
-  profileURL: string,
+  profileUrl: string,
   retrieveProfileFromAddon: typeof retrieveProfileFromAddon,
   retrieveProfileFromStore: typeof retrieveProfileFromStore,
   retrieveProfileFromUrl: typeof retrieveProfileFromUrl,
@@ -82,7 +82,7 @@ class ProfileViewWhenReadyImpl extends PureComponent {
     const {
       dataSource,
       hash,
-      profileURL,
+      profileUrl,
       retrieveProfileFromAddon,
       retrieveProfileFromStore,
       retrieveProfileFromUrl,
@@ -100,7 +100,7 @@ class ProfileViewWhenReadyImpl extends PureComponent {
         retrieveProfileFromStore(hash);
         break;
       case 'from-url':
-        retrieveProfileFromUrl(profileURL);
+        retrieveProfileFromUrl(profileUrl);
         break;
       default:
         throw new Error(`Unknown datasource ${dataSource}`);
@@ -200,7 +200,7 @@ const ProfileViewWhenReady = connect(
     view: getView(state),
     dataSource: getDataSource(state),
     hash: getHash(state),
-    profileURL: getProfileURL(state),
+    profileUrl: getProfileUrl(state),
   }),
   { retrieveProfileFromStore, retrieveProfileFromUrl, retrieveProfileFromAddon }
 )(ProfileViewWhenReadyImpl);
@@ -216,12 +216,12 @@ export default class Root extends PureComponent {
     const { store } = this.props;
     return (
       <Provider store={store}>
-        <URLManager
+        <UrlManager
           urlFromState={urlFromState}
           stateFromLocation={stateFromLocation}
         >
           <ProfileViewWhenReady />
-        </URLManager>
+        </UrlManager>
       </Provider>
     );
   }

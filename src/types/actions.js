@@ -131,11 +131,11 @@ type TimelineAction =
       isExpanded: boolean,
     };
 
-type URLEnhancerAction =
+type UrlEnhancerAction =
   | { type: '@@urlenhancer/urlSetupDone' }
-  | { type: '@@urlenhancer/updateURLState', urlState: any };
+  | { type: '@@urlenhancer/updateUrlState', urlState: any };
 
-type URLStateAction =
+type UrlStateAction =
   | { type: 'WAITING_FOR_PROFILE_FROM_FILE' }
   | { type: 'PROFILE_PUBLISHED', hash: string }
   | { type: 'CHANGE_SELECTED_TAB', selectedTab: string }
@@ -170,6 +170,6 @@ export type Action =
   | ProfileAction
   | ReceiveProfileAction
   | TimelineAction
-  | URLEnhancerAction
-  | URLStateAction
+  | UrlEnhancerAction
+  | UrlStateAction
   | IconsAction;
