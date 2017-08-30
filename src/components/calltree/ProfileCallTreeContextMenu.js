@@ -50,9 +50,10 @@ class ProfileCallTreeContextMenu extends PureComponent {
     } = this.props;
 
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+    const isJS = funcTable.isJS[funcIndex];
     const stringIndex = funcTable.name[funcIndex];
     const functionCall = stringTable.getString(stringIndex);
-    const name = getFunctionName(functionCall);
+    const name = isJS ? functionCall : getFunctionName(functionCall);
     copy(name);
   }
 

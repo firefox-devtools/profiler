@@ -254,6 +254,9 @@ export function removeTemplateInformation(functionName) {
       if (depth === 0) {
         // Template information begins, save segment
         result += functionName.substr(start, i - start);
+        // Start a new segment here to not lose the rest of the string
+        // should we find no matching '>'
+        start = i;
       }
       depth++;
     } else if (functionName[i] === '>') {
