@@ -402,7 +402,7 @@ export const selectorsForThread = (
      * 3. Transform - Apply the transform stack that modifies the stacks and samples.
      * 4. Implementation - Modify stacks and samples to only show a single implementation.
      * 5. Search - Exclude samples that don't include some text in the stack.
-     * 6. Range selection - Only include sampels that are within a user's sub-selection.
+     * 6. Range selection - Only include samples that are within a user's sub-selection.
      */
     const getThread = (state: State): Thread =>
       getProfile(state).threads[threadIndex];
