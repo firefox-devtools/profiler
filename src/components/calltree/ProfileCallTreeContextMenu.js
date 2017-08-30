@@ -7,7 +7,7 @@ import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
 import { connect } from 'react-redux';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
-import { stripFunctionArguments } from '../../profile-logic/function-info';
+import { getFunctionName } from '../../profile-logic/function-info';
 import copy from 'copy-to-clipboard';
 import { addTransformToStack } from '../../actions/profile-view';
 import {
@@ -52,7 +52,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const stringIndex = funcTable.name[funcIndex];
     const functionCall = stringTable.getString(stringIndex);
-    const name = stripFunctionArguments(functionCall);
+    const name = getFunctionName(functionCall);
     copy(name);
   }
 

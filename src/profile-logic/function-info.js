@@ -244,3 +244,30 @@ export function stripFunctionArguments(functionCall) {
   }
   return functionCall;
 }
+
+export function removeTemplateInformation(functionName) {
+  let result = '';
+  let depth = 0;
+  let start = 0; // Start of a segment we'd like to keep
+  for (let i = 0; i < functionName.length; i++) {
+    if (functionName[i] === '<') {
+      if (depth === 0) {
+        // Template information begins, save segment
+        result += functionName.substr(start, i - start);
+      }
+      depth++;
+    } else if (functionName[i] === '>') {
+      depth--;
+      if (depth === 0) {
+        // Template information ends, start of new segment
+        start = i + 1;
+      }
+    }
+  }
+  result += functionName.substr(start);
+  return result;
+}
+
+export function getFunctionName(functionCall) {
+  return removeTemplateInformation(stripFunctionArguments(functionCall));
+}
