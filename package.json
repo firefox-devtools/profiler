@@ -19,6 +19,7 @@
     "postcheckout": "node bin/post-checkout.js",
     "postmerge": "node bin/post-merge.js",
     "precommit": "lint-staged",
+    "preinstall": "node bin/pre-install.js",
     "prepush": "yarn run test-all",
     "postrewrite": "node bin/post-rewrite.js",
     "publish": "rimraf public_html && cp -r dist public_html",
