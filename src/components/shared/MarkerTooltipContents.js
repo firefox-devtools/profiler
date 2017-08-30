@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
-import formatTimeLength from '../../utils/format-time-length';
+import formatNumber from '../../utils/format-numbers';
 
 import type { TracingMarker } from '../../types/profile-derived';
 import type { MarkerPayload } from '../../types/markers';
@@ -42,7 +42,7 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
       case 'DOMEvent': {
         let latency = 0;
         if (data.timeStamp) {
-          latency = `${formatTimeLength(data.startTime - data.timeStamp)}ms`;
+          latency = `${formatNumber(data.startTime - data.timeStamp)}ms`;
         }
         return (
           <div className="tooltipDetails">
@@ -126,7 +126,7 @@ export default class MarkerTooltipContents extends PureComponent {
         <div className={classNames({ tooltipHeader: details })}>
           <div className="tooltipOneLine">
             <div className="tooltipTiming">
-              {formatTimeLength(marker.dur)}ms
+              {formatNumber(marker.dur)}ms
             </div>
             <div className="tooltipTitle">
               {marker.title || marker.name}
