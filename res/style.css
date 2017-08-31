@@ -336,6 +336,7 @@ body {
   font-size: 9px;
   color: #888;
   cursor: default;
+  z-index: 1; /* between .profileThreadHeaderBar background and .profileThreadHeaderBarThreadDetails */
 }
 
 .timeRulerNotch {
@@ -359,20 +360,15 @@ body {
 .profileViewerHeaderOverflowEdgeIndicatorScrollbox {
   margin: 0 0 0 -150px;
   padding-left: 150px;
-  max-height: 180px;
+  max-height: 250px;
   overflow: auto;
 }
 
-.profileViewerHeaderIntervalMarkerOverviewContainerJank {
-  padding: 6px 0;
+.profileThreadHeaderBarIntervalMarkerOverviewContainerJank {
   border-bottom: 1px solid #D6D6D6;
 }
 
-.profileViewerHeaderIntervalMarkerOverviewJank {
-  padding: 2px 0;
-}
-
-.profileViewerHeaderIntervalMarkerOverview {
+.profileThreadHeaderBarIntervalMarkerOverview {
   list-style: none;
   display: block;
   margin: 0;
@@ -380,18 +376,15 @@ body {
   position: relative;
   overflow: hidden;
   opacity: 0.75;
-  background-color: transparent;
-  transition: background-color 500ms;
 }
 
-.profileViewerHeaderIntervalMarkerOverview.selected {
+.profileThreadHeaderBarIntervalMarkerOverview.selected {
   opacity: 1;
-  background-color: #e4eaf6;
 }
 
-.profileViewerHeaderIntervalMarkerOverviewThreadGeckoMain {
+.profileThreadHeaderBarIntervalMarkerOverviewThreadGeckoMain {
   height: 18px;
-  border-bottom: 1px solid #D6D6D6;
+  /*border-bottom: 1px solid #D6D6D6;*/
 }
 
 .intervalMarkerTimelineCanvas {
@@ -415,45 +408,55 @@ body {
 .profileThreadHeaderBar {
   margin: 0;
   padding: 0;
-  height: 30px;
   display: flex;
   flex-flow: row nowrap;
   border-top: 1px solid #D6D6D6;
   box-shadow: 0 1px #D6D6D6;
-  background-color: white;
 }
 
 .profileThreadHeaderBar.selected {
   background-color: hsl(220, 50%, 93%);
 }
 
-.profileThreadHeaderBar > h1 {
-  width: 135px;
+.profileThreadHeaderBarThreadLabel {
+  box-sizing: border-box;
+  width: 150px;
+  border-right: 1px solid #D6D6D6;
+  padding-left: 14px;
+  cursor: default;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+.profileThreadHeaderBarThreadName {
   font-weight: normal;
   font: message-box;
   font-size: 100%;
-  line-height: 30px;
-  border-right: 1px solid #D6D6D6;
   margin: 0;
-  margin-left: 14px;
-  cursor: default;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.profileThreadHeaderBarThreadDetails {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-flow: column nowrap;
 }
 
 .threadStackGraph {
-  height: 30px;
-  width: calc(100% - 150px);
-  position: relative;
+  height: 25px;
 }
 
 .threadStackGraphCanvas {
   display: block;
-  height: 30px;
+  height: 25px;
   width: 100%;
 }
 

@@ -10,7 +10,7 @@
   position: absolute;
   pointer-events: none;
   visibility: hidden;
-  z-index: 2;
+  z-index: 3;
   opacity: 0;
   transition: 150ms ease-in-out;
   transition-property: opacity, visibility;
