@@ -22,6 +22,9 @@ import type {
 } from '../types/actions';
 import type { State, URLState, Reducer } from '../types/reducers';
 
+// Pre-allocate an array to help with strict equality tests in the selectors.
+const EMPTY_TRANSFORM_STACK = [];
+
 function dataSource(state: DataSource = 'none', action: Action) {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_FILE':
@@ -292,7 +295,7 @@ export const getTransformStack = (
   state: State,
   threadIndex: ThreadIndex
 ): TransformStack => {
-  return getURLState(state).transforms[threadIndex] || [];
+  return getURLState(state).transforms[threadIndex] || EMPTY_TRANSFORM_STACK;
 };
 export const getThreadOrder = (state: State) => getURLState(state).threadOrder;
 export const getHiddenThreads = (state: State) =>
