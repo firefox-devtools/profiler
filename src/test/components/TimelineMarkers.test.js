@@ -9,7 +9,7 @@ import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithMarkers } from '../store/fixtures/profiles';
+import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 import { getBoundingBox } from '../fixtures/utils';
 
 jest.useFakeTimers();

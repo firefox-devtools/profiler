@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import getProfileFromTextSamples from '../fixtures/profiles/text-to-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
 import {

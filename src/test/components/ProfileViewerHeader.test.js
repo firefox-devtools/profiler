@@ -8,7 +8,7 @@ import ProfileViewerHeader from '../../components/header/ProfileViewerHeader';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
-import getProfileFromTextSamples from '../fixtures/profiles/text-to-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getBoundingBox } from '../fixtures/utils';
 import ReactDOM from 'react-dom';

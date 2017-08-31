@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import getProfileFromTextSamples from '../fixtures/profiles/text-to-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import {
   getCallTree,
   computeCallTreeCountsAndTimings,

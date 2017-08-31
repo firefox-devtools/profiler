@@ -8,7 +8,7 @@ import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
-import getProfileFromTextSamples from '../fixtures/profiles/text-to-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { changeCallTreeSearchString } from '../../actions/profile-view';
 import { getBoundingBox } from '../fixtures/utils';
 

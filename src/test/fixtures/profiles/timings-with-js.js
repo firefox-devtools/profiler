@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import exampleProfile from './example-profile';
+import getGeckoProfile from './gecko-profile';
 
 const thread = {
   samples: {
@@ -75,10 +75,10 @@ const thread = {
 };
 
 export default function createProfile() {
-  const example = exampleProfile();
+  const geckoProfile = getGeckoProfile();
   return {
-    meta: example.meta,
-    libs: example.libs,
+    meta: geckoProfile.meta,
+    libs: geckoProfile.libs,
     threads: [
       Object.assign({ name: 'GeckoMain' }, thread),
       Object.assign({ name: 'Compositor' }, thread),

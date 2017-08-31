@@ -9,7 +9,7 @@
 import * as urlStateReducers from '../reducers/url-state';
 import { stateFromLocation, urlStateToUrlObject } from '../url-handling';
 import { blankStore } from './fixtures/stores';
-import exampleProfile from './fixtures/profiles/example-profile';
+import getGeckoProfile from './fixtures/profiles/gecko-profile';
 import { processProfile } from '../profile-logic/process-profile';
 import { receiveProfileFromStore } from '../actions/receive-profile';
 import { selectedThreadSelectors } from '../reducers/profile-view';
@@ -45,7 +45,7 @@ describe('selectedThread', function() {
   }
 
   it('selects the right thread when receiving a profile from web', function() {
-    const profile: Profile = processProfile(exampleProfile());
+    const profile: Profile = processProfile(getGeckoProfile());
 
     const store = storeWithThread(1);
     store.dispatch(receiveProfileFromStore(profile));
@@ -54,7 +54,7 @@ describe('selectedThread', function() {
   });
 
   it('selects a default thread when a wrong thread has been requested', function() {
-    const profile: Profile = processProfile(exampleProfile());
+    const profile: Profile = processProfile(getGeckoProfile());
 
     const store = storeWithThread(100);
     store.dispatch(receiveProfileFromStore(profile));
@@ -65,7 +65,7 @@ describe('selectedThread', function() {
 });
 
 describe('threadOrder and hiddenThreads', function() {
-  const profileWithThreads: Profile = processProfile(exampleProfile());
+  const profileWithThreads: Profile = processProfile(getGeckoProfile());
 
   it('decides the threadOrder and hiddenThreads without any set parameters', function() {
     const { getState } = _getStoreFromSearchString('', profileWithThreads);
