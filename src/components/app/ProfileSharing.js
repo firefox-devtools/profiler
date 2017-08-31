@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
@@ -22,6 +24,8 @@ import { serializeProfile } from '../../profile-logic/process-profile';
 import prettyBytes from 'pretty-bytes';
 import sha1 from '../../utils/sha1';
 import url from 'url';
+import type { ProfileSharingCompositeButtonProps } from '../../types/profile';
+import type { State } from '../../types/reducers';
 
 require('./ProfileSharing.css');
 
@@ -58,11 +62,15 @@ const UploadingStatus = ({ progress }) =>
   </div>;
 
 UploadingStatus.propTypes = {
-  progress: PropTypes.number.isRequired,
+  progress: Number,
 };
 
 class ProfileSharingCompositeButton extends PureComponent {
-  constructor(props) {
+  _permalinkButton: Object;
+  _uploadErrorButton: Object;
+  _permalinkTextField: Object;
+
+  constructor(props: ProfileSharingCompositeButtonProps) {
     super(props);
     const { dataSource, hash } = props;
     this.state = {
@@ -73,9 +81,9 @@ class ProfileSharingCompositeButton extends PureComponent {
       fullURL: window.location.href,
       shortURL: window.location.href,
     };
-    this._attemptToShare = this._attemptToShare.bind(this);
-    this._onPermalinkPanelOpen = this._onPermalinkPanelOpen.bind(this);
-    this._onPermalinkPanelClose = this._onPermalinkPanelClose.bind(this);
+    (this: any)._attemptToShare = this._attemptToShare.bind(this);
+    (this: any)._onPermalinkPanelOpen = this._onPermalinkPanelOpen.bind(this);
+    (this: any)._onPermalinkPanelClose = this._onPermalinkPanelClose.bind(this);
     this._permalinkButtonCreated = elem => {
       this._permalinkButton = elem;
     };
@@ -277,6 +285,16 @@ function filenameDateString(d) {
 }
 
 class ProfileDownloadButton extends PureComponent {
+  _onPanelOpen: Function;
+
+  state: {
+    uncompressedBlobUrl: string,
+    compressedBlobUrl: string,
+    uncompressedSize: number,
+    compressedSize: number,
+    filename: string,
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -364,8 +382,8 @@ class ProfileDownloadButton extends PureComponent {
 }
 
 ProfileDownloadButton.propTypes = {
-  profile: PropTypes.object,
-  rootRange: PropTypes.object,
+  profile: Object,
+  rootRange: Object,
 };
 
 const ProfileSharing = ({
@@ -388,16 +406,16 @@ const ProfileSharing = ({
   </div>;
 
 ProfileSharing.propTypes = {
-  profile: PropTypes.object,
-  rootRange: PropTypes.object,
-  dataSource: PropTypes.string.isRequired,
-  hash: PropTypes.string,
-  profilePublished: PropTypes.func.isRequired,
-  predictURL: PropTypes.func.isRequired,
+  profile: Object,
+  rootRange: Object,
+  dataSource: String,
+  hash: String,
+  profilePublished: Function,
+  predictURL: Function,
 };
 
 export default connect(
-  state => ({
+  (state: State) => ({
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     dataSource: getDataSource(state),
