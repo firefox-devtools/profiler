@@ -157,13 +157,10 @@ type UrlStateAction =
   | {
       type: 'CHANGE_IMPLEMENTATION_FILTER',
       implementation: ImplementationFilter,
-    }
-  | {
-      type: 'UPDATE_CALL_NODE_PATHS_FROM_IMPLEMENTATION_CHANGE',
-      thread: Thread,
       threadIndex: ThreadIndex,
-      previousImplementationFilter: ImplementationFilter,
-      nextImplementationFilter: ImplementationFilter,
+      transformedThread: Thread,
+      previousImplementation: ImplementationFilter,
+      implementation: ImplementationFilter,
     }
   | { type: 'CHANGE_INVERT_CALLSTACK', invertCallstack: boolean }
   | { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean }

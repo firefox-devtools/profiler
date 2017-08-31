@@ -15,18 +15,25 @@ import {
   getImplementationFilter,
   getInvertCallstack,
   getSearchString,
+  getSelectedThreadIndex,
 } from '../../reducers/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
 import { toValidImplementationFilter } from '../../profile-logic/profile-data';
 import './ProfileCallTreeSettings.css';
+import { selectedThreadSelectors } from '../../reducers/profile-view';
+
+import type { ImplementationFilter } from '../../types/actions';
+import type { Thread, ThreadIndex } from '../../types/profile';
 
 type Props = {
-  implementationFilter: string,
+  implementationFilter: ImplementationFilter,
   invertCallstack: boolean,
   searchString: string,
   changeImplementationFilter: typeof changeImplementationFilter,
   changeInvertCallstack: typeof changeInvertCallstack,
   changeCallTreeSearchString: typeof changeCallTreeSearchString,
+  transformedThread: Thread,
+  threadIndex: ThreadIndex,
 };
 
 class ProfileCallTreeSettings extends PureComponent {
@@ -46,10 +53,15 @@ class ProfileCallTreeSettings extends PureComponent {
   }
 
   _onImplementationFilterChange(e: Event & { target: HTMLSelectElement }) {
+    // This function is here to satisfy Flow that we are getting a valid
+    // implementation filter.
+    const nextImplementation = toValidImplementationFilter(e.target.value);
+    const { implementationFilter, transformedThread, threadIndex } = this.props;
     this.props.changeImplementationFilter(
-      // This function is here to satisfy Flow that we are getting a valid
-      // implementation filter.
-      toValidImplementationFilter(e.target.value)
+      nextImplementation,
+      implementationFilter,
+      transformedThread,
+      threadIndex
     );
   }
 
@@ -114,6 +126,10 @@ export default connect(
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
     searchString: getSearchString(state),
+    transformedThread: selectedThreadSelectors.getRangeAndTransformFilteredThread(
+      state
+    ),
+    threadIndex: getSelectedThreadIndex(state),
   }),
   {
     changeImplementationFilter,

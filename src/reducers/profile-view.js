@@ -207,33 +207,47 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
         ...state.slice(threadIndex + 1),
       ];
     }
-    case 'UPDATE_CALL_NODE_PATHS_FROM_IMPLEMENTATION_CHANGE': {
+    case 'CHANGE_IMPLEMENTATION_FILTER': {
       const {
-        thread,
+        transformedThread,
         threadIndex,
-        previousImplementationFilter,
-        nextImplementationFilter,
+        previousImplementation,
+        implementation,
       } = action;
-      if (previousImplementationFilter === nextImplementationFilter) {
+
+      if (previousImplementation === implementation) {
         return state;
       }
-      let selectedCallNodePath;
+
+      // This CallNodePath may need to be updated twice.
+      let selectedCallNodePath = state[threadIndex].selectedCallNodePath;
+
       if (
-        // Going from a filtered view, to unfiltered.
-        nextImplementationFilter === 'combined'
+        implementation !== 'combined' &&
+        previousImplementation !== 'combined'
       ) {
+        // Restore the CallNodePath back to an unfiltered state before re-filtering
+        // it on the next implementation.
+        selectedCallNodePath = Transforms.restoreAllFunctionsInCallNodePath(
+          transformedThread,
+          previousImplementation,
+          selectedCallNodePath
+        );
+      }
+
+      if (implementation === 'combined') {
         // Restore the full CallNodePaths
         selectedCallNodePath = Transforms.restoreAllFunctionsInCallNodePath(
-          thread,
-          previousImplementationFilter,
-          state[threadIndex].selectedCallNodePath
+          transformedThread,
+          previousImplementation,
+          selectedCallNodePath
         );
       } else {
-        // Restore the full CallNodePaths
+        // Take the full CallNodePath, and strip out anything not in this implementation.
         selectedCallNodePath = Transforms.filterCallNodePathByImplementation(
-          thread,
-          nextImplementationFilter,
-          state[threadIndex].selectedCallNodePath
+          transformedThread,
+          implementation,
+          selectedCallNodePath
         );
       }
 
@@ -411,6 +425,7 @@ export type SelectorsForThread = {
   getTransformStack: State => TransformStack,
   getTransformLabels: State => string[],
   getRangeFilteredThread: State => Thread,
+  getRangeAndTransformFilteredThread: State => Thread,
   getJankInstances: State => TracingMarker[],
   getTracingMarkers: State => TracingMarker[],
   getMarkerTiming: State => MarkerTimingRows,
@@ -501,7 +516,7 @@ export const selectorsForThread = (
     });
     const getTransformStack = (state: State): TransformStack =>
       UrlState.getTransformStack(state, threadIndex);
-    const _getRangeAndTransformFilteredThread = createSelector(
+    const getRangeAndTransformFilteredThread = createSelector(
       getRangeFilteredThread,
       getTransformStack,
       (startingThread, transforms): Thread =>
@@ -512,7 +527,7 @@ export const selectorsForThread = (
         )
     );
     const _getImplementationFilteredThread = createSelector(
-      _getRangeAndTransformFilteredThread,
+      getRangeAndTransformFilteredThread,
       UrlState.getImplementationFilter,
       ProfileData.filterThreadByImplementation
     );
@@ -707,6 +722,7 @@ export const selectorsForThread = (
       getTransformStack,
       getTransformLabels,
       getRangeFilteredThread,
+      getRangeAndTransformFilteredThread,
       getJankInstances,
       getTracingMarkers,
       getMarkerTiming,

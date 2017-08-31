@@ -5,11 +5,12 @@
 // @flow
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { storeWithProfile } from '../fixtures/stores';
-import {
-  changeImplementationFilter,
-  changeSelectedCallNode,
-} from '../../actions/profile-view';
+import * as ProfileView from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
+import {
+  getImplementationFilter,
+  getSelectedThreadIndex,
+} from '../../reducers/url-state';
 
 describe('call node paths on implementation filter change', function() {
   const { profile, funcNames } = getProfileFromTextSamples(`
@@ -27,9 +28,26 @@ describe('call node paths on implementation filter change', function() {
   const D = funcNames.indexOf('D.js');
   const E = funcNames.indexOf('E.js');
 
-  it('starts with combined CallNodePaths', function() {
+  function setupStore() {
+    // Create a store with a profile
     const { dispatch, getState } = storeWithProfile(profile);
-    dispatch(changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
+
+    // Provide an easy interface to correctly change the implementation filter.
+    function changeImplementationFilter(implementation) {
+      return ProfileView.changeImplementationFilter(
+        implementation,
+        getImplementationFilter(getState()),
+        selectedThreadSelectors.getRangeAndTransformFilteredThread(getState()),
+        getSelectedThreadIndex(getState())
+      );
+    }
+
+    return { dispatch, getState, changeImplementationFilter };
+  }
+
+  it('starts with combined CallNodePaths', function() {
+    const { dispatch, getState } = setupStore();
+    dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
     expect(
       selectedThreadSelectors.getSelectedCallNodePath(getState())
     ).toEqual([A, B, C, D, E]);
@@ -45,9 +63,9 @@ describe('call node paths on implementation filter change', function() {
   });
 
   it('starts with js CallNodePaths', function() {
-    const { dispatch, getState } = storeWithProfile(profile);
+    const { dispatch, getState, changeImplementationFilter } = setupStore();
     dispatch(changeImplementationFilter('js'));
-    dispatch(changeSelectedCallNode(threadIndex, [B, D, E]));
+    dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     expect(
       selectedThreadSelectors.getSelectedCallNodePath(getState())
     ).toEqual([B, D, E]);
@@ -61,8 +79,8 @@ describe('call node paths on implementation filter change', function() {
   });
 
   it('strips away the C++ functions when going from combined to JS', function() {
-    const { dispatch, getState } = storeWithProfile(profile);
-    dispatch(changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
+    const { dispatch, getState, changeImplementationFilter } = setupStore();
+    dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
     dispatch(changeImplementationFilter('js'));
     expect(
       selectedThreadSelectors.getSelectedCallNodePath(getState())
@@ -77,9 +95,9 @@ describe('call node paths on implementation filter change', function() {
   });
 
   it('re-adds the C++ functions when going from JS to combined', function() {
-    const { dispatch, getState } = storeWithProfile(profile);
+    const { dispatch, getState, changeImplementationFilter } = setupStore();
     dispatch(changeImplementationFilter('js'));
-    dispatch(changeSelectedCallNode(threadIndex, [B, D, E]));
+    dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     dispatch(changeImplementationFilter('combined'));
     expect(
       selectedThreadSelectors.getSelectedCallNodePath(getState())
@@ -100,9 +118,9 @@ describe('call node paths on implementation filter change', function() {
   });
 
   it('can go from JS to C++ views', function() {
-    const { dispatch, getState } = storeWithProfile(profile);
+    const { dispatch, getState, changeImplementationFilter } = setupStore();
     dispatch(changeImplementationFilter('js'));
-    dispatch(changeSelectedCallNode(threadIndex, [B, D, E]));
+    dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     dispatch(changeImplementationFilter('cpp'));
     expect(
       selectedThreadSelectors.getSelectedCallNodePath(getState())
