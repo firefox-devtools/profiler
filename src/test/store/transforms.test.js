@@ -4,6 +4,7 @@
 
 // @flow
 import getProfileFromTextSamples from '../fixtures/profiles/text-to-profile';
+import { formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   addTransformToStack,
@@ -13,30 +14,6 @@ import {
   changeSelectedCallNode,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
-import { CallTree } from '../../profile-logic/call-tree';
-import getProfileFromTextSamples from '../fixtures/profiles/text-to-profile';
-
-import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
-
-export function formatTree(
-  callTree: CallTree,
-  children: IndexIntoCallNodeTable[] = callTree.getRoots(),
-  depth: number = 0,
-  previousString: string = ''
-) {
-  const whitespace = Array(depth * 2).join(' ');
-
-  return children.reduce((string, callNodeIndex) => {
-    const { name, totalTime, selfTime } = callTree.getNode(callNodeIndex);
-    const text = `\n${whitespace}- ${name} (total: ${totalTime}, self:${selfTime})`;
-    return formatTree(
-      callTree,
-      callTree.getChildren(callNodeIndex),
-      depth + 1,
-      string + text
-    );
-  }, previousString);
-}
 
 describe('"focus-subtree" transform', function() {
   describe('on a call tree', function() {
