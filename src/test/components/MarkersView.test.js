@@ -8,7 +8,7 @@ import MarkersView from '../../components/markers/MarkersView';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithMarkers } from '../store/fixtures/profiles';
+import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 import { getBoundingBox } from '../fixtures/utils';
 
 describe('calltree/ProfileCallTreeView', function() {

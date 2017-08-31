@@ -21,7 +21,7 @@ import {
   filterThreadByImplementation,
   getCallNodePath,
 } from '../../profile-logic/profile-data';
-import exampleProfile from '.././fixtures/profiles/example-profile';
+import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
@@ -118,7 +118,7 @@ describe('data-table-utils', function() {
 
 describe('process-profile', function() {
   describe('processProfile', function() {
-    const profile = processProfile(exampleProfile());
+    const profile = processProfile(getGeckoProfile());
     it('should have three threads', function() {
       expect(profile.threads.length).toEqual(3);
     });
@@ -272,7 +272,7 @@ describe('process-profile', function() {
 
 describe('profile-data', function() {
   describe('createCallNodeTableAndFixupSamples', function() {
-    const profile = processProfile(exampleProfile());
+    const profile = processProfile(getGeckoProfile());
     const thread = profile.threads[0];
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
@@ -387,7 +387,7 @@ describe('profile-data', function() {
     });
   });
   describe('getTracingMarkers', function() {
-    const profile = processProfile(exampleProfile());
+    const profile = processProfile(getGeckoProfile());
     const thread = profile.threads[0];
     const tracingMarkers = getTracingMarkers(thread);
     it('should fold the two reflow markers into one tracing marker', function() {
@@ -490,7 +490,7 @@ describe('symbolication', function() {
     let symbolicatedProfile = null;
 
     beforeAll(function() {
-      unsymbolicatedProfile = processProfile(exampleProfile());
+      unsymbolicatedProfile = processProfile(getGeckoProfile());
       const symbolTable = {};
       symbolTable[0] = 'first symbol';
       symbolTable[0xf00] = 'second symbol';
@@ -705,7 +705,7 @@ describe('upgrades', function() {
 });
 
 describe('color-categories', function() {
-  const profile = processProfile(exampleProfile());
+  const profile = processProfile(getGeckoProfile());
   const [thread] = profile.threads;
   it('calculates the category for each frame', function() {
     const categories = thread.samples.stack.map(stackIndex => {

@@ -11,8 +11,7 @@ import type {
   Profile,
 } from '../../../types/profile';
 
-import { getEmptyProfile } from '../../../profile-logic/profile-data';
-import { getEmptyThread } from '../../store/fixtures/profiles';
+import { getEmptyThread, getEmptyProfile } from './make-profile';
 
 /**
  * Note that this fixture doesn't use the `getProfileFromTextSamples()` function to
