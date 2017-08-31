@@ -2,10 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import {
-  getProfileForInvertedCallTree,
-  getProfileForUnfilteredCallTree,
-} from '.././fixtures/profiles/profiles-for-call-trees';
+import getProfileFromTextSamples from '../fixtures/profiles/text-to-profile';
 import {
   getCallTree,
   computeCallTreeCountsAndTimings,
@@ -32,8 +29,19 @@ describe('unfiltered call tree', function() {
   const H = 7;
   const I = 8;
 
+  function getProfile() {
+    return getProfileFromTextSamples(`
+      A A A
+      B B B
+      C C H
+      D F I
+      E G
+    `).profile;
+  }
+
   function getUnfilteredCallTree(): CallTree {
-    const profile = getProfileForUnfilteredCallTree();
+    const profile = getProfile();
+
     const [thread] = profile.threads;
     const { interval } = profile.meta;
     const callNodeInfo = getCallNodeInfo(
@@ -49,7 +57,7 @@ describe('unfiltered call tree', function() {
    * This test ensures that these generated values are correct.
    */
   describe('computed counts and timings', function() {
-    const profile = getProfileForUnfilteredCallTree();
+    const profile = getProfile();
     const [thread] = profile.threads;
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
@@ -268,7 +276,7 @@ describe('unfiltered call tree', function() {
    * to help navigate stacks through a list of functions.
    */
   describe('getCallNodeFromPath', function() {
-    const profile = getProfileForUnfilteredCallTree();
+    const profile = getProfile();
     const [thread] = profile.threads;
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
@@ -323,7 +331,14 @@ describe('inverted call tree', function() {
   const stackE_branchL = 0;
 
   function getInvertedCallTreeFromProfile(): CallTree {
-    const profile = getProfileForInvertedCallTree();
+    const profile = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C X C
+      D Y X
+      E Z Y
+          Z
+    `).profile;
     const invertedThread = invertCallstack(profile.threads[0]);
     const { interval } = profile.meta;
     const callNodeInfo = getCallNodeInfo(

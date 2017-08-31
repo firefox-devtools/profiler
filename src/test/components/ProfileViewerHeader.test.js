@@ -8,7 +8,7 @@ import ProfileViewerHeader from '../../components/header/ProfileViewerHeader';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileForUnfilteredCallTree } from '../fixtures/profiles/profiles-for-call-trees';
+import getProfileFromTextSamples from '../fixtures/profiles/text-to-profile';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getBoundingBox } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
@@ -38,8 +38,16 @@ describe('calltree/ProfileViewerHeader', function() {
       return null;
     }
 
+    const { profile } = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C C H
+      D F I
+      E G
+    `);
+
     const header = renderer.create(
-      <Provider store={storeWithProfile(getProfileForUnfilteredCallTree())}>
+      <Provider store={storeWithProfile(profile)}>
         <ProfileViewerHeader />
       </Provider>,
       { createNodeMock }

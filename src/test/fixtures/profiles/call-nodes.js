@@ -15,6 +15,10 @@ import { getEmptyProfile } from '../../../profile-logic/profile-data';
 import { getEmptyThread } from '../../store/fixtures/profiles';
 
 /**
+ * Note that this fixture doesn't use the `getProfileFromTextSamples()` function to
+ * generate the profile, as it's testing the relationships between frames, and thus
+ * cannot be generated from a list of functions.
+ *
  *            stack0 (funcA)                               callNode0 (funcA)
  *                 |                                            |
  *                 v                                            v

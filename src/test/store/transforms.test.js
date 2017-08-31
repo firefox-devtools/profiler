@@ -3,12 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import {
-  getProfileForUnfilteredCallTree,
-  getProfileForInvertedCallTree,
-  getProfileWithMixedJSImplementation,
-} from '../fixtures/profiles/profiles-for-call-trees';
-
+import getProfileFromTextSamples from '../fixtures/profiles/text-to-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   addTransformToStack,
@@ -62,13 +57,19 @@ describe('"focus-subtree" transform', function() {
      *            v           v
      *          E:1,1       G:1,1
      */
-    const profile = getProfileForUnfilteredCallTree();
+    const { profile, funcNames } = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C C H
+      D F I
+      E G
+    `);
     const { dispatch, getState } = storeWithProfile(profile);
     const originalCallTree = selectedThreadSelectors.getCallTree(getState());
     const threadIndex = 0;
-    const A = 0;
-    const B = 1;
-    const C = 2;
+    const A = funcNames.indexOf('A');
+    const B = funcNames.indexOf('B');
+    const C = funcNames.indexOf('C');
 
     it('starts as an unfiltered call tree', function() {
       expect(formatTree(originalCallTree)).toMatchSnapshot();
@@ -124,7 +125,14 @@ describe('"focus-subtree" transform', function() {
      *                        ↓                               ↓
      *                      A:1,0                           X:1,1
      */
-    const profile = getProfileForInvertedCallTree();
+    const { profile, funcNames } = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C X C
+      D Y X
+      E Z Y
+          Z
+    `);
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeInvertCallstack(true));
 
@@ -135,9 +143,9 @@ describe('"focus-subtree" transform', function() {
 
     it('can be filtered to a subtree', function() {
       const threadIndex = 0;
-      const X = 5;
-      const Y = 6;
-      const Z = 7;
+      const X = funcNames.indexOf('X');
+      const Y = funcNames.indexOf('Y');
+      const Z = funcNames.indexOf('Z');
 
       dispatch(
         addTransformToStack(threadIndex, {
@@ -178,13 +186,19 @@ describe('"merge-call-node" transform', function() {
      *            v           v
      *          E:1,1       G:1,1
      */
-    const profile = getProfileForUnfilteredCallTree();
+    const { profile, funcNames } = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C C H
+      D F I
+      E G
+    `);
     const { dispatch, getState } = storeWithProfile(profile);
     const originalCallTree = selectedThreadSelectors.getCallTree(getState());
     const threadIndex = 0;
-    const A = 0;
-    const B = 1;
-    const C = 2;
+    const A = funcNames.indexOf('A');
+    const B = funcNames.indexOf('B');
+    const C = funcNames.indexOf('C');
 
     it('starts as an unfiltered call tree', function() {
       expect(formatTree(originalCallTree)).toMatchSnapshot();
@@ -204,17 +218,19 @@ describe('"merge-call-node" transform', function() {
   });
 
   describe('on a JS call tree', function() {
-    const profile = getProfileWithMixedJSImplementation();
+    const { profile, funcNames } = getProfileFromTextSamples(`
+      JS::RunScript.cpp  JS::RunScript.cpp       JS::RunScript.cpp
+      onLoad.js          onLoad.js               onLoad.js
+      a.js               js::jit::IonCannon.cpp  js::jit::IonCannon.cpp
+      b.js               a.js                    a.js
+                         b.js                    b.js
+    `);
     const threadIndex = 0;
 
     // funcIndexes in the profile fixture.
-    /* eslint-disable no-unused-vars */
-    const RUN_SCRIPT = 0;
-    const ON_LOAD = 1;
-    const A = 2;
-    const B = 3;
-    const ION_CANNON = 4;
-    /* eslint-enable no-unused-vars */
+    const RUN_SCRIPT = funcNames.indexOf('JS::RunScript.cpp');
+    const ON_LOAD = funcNames.indexOf('onLoad.js');
+    const A = funcNames.indexOf('a.js');
 
     const mergeJSPathAB = {
       type: 'merge-call-node',
@@ -329,13 +345,15 @@ describe('"merge-function" transform', function() {
      *            v           v
      *          E:1,1       G:1,1
      */
-    const profile = getProfileForUnfilteredCallTree();
+    const { profile, funcNames } = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C C H
+      D F C
+      E G
+    `);
     const threadIndex = 0;
-    const C_FUNC = 2;
-    const C_DUPLICATE_FRAME = 8;
-    // Rewrite the stack at function I to point to function C instead so that we
-    // can test duplicate instances of functions in a call tree.
-    profile.threads[threadIndex].frameTable.func[C_DUPLICATE_FRAME] = C_FUNC;
+    const C = funcNames.indexOf('C');
 
     const { dispatch, getState } = storeWithProfile(profile);
     const originalCallTree = selectedThreadSelectors.getCallTree(getState());
@@ -348,7 +366,7 @@ describe('"merge-function" transform', function() {
       dispatch(
         addTransformToStack(threadIndex, {
           type: 'merge-function',
-          funcIndex: C_FUNC,
+          funcIndex: C,
         })
       );
       const callTree = selectedThreadSelectors.getCallTree(getState());
@@ -418,12 +436,19 @@ describe('"focus-function" transform', function() {
 });
 
 describe('expanded and selected CallNodePaths', function() {
-  const profile = getProfileForUnfilteredCallTree();
+  const { profile, funcNames } = getProfileFromTextSamples(`
+    A
+    B
+    C
+    D
+    E
+  `);
+
   const threadIndex = 0;
-  const A = 0;
-  const B = 1;
-  const C = 2;
-  const D = 3;
+  const A = funcNames.indexOf('A');
+  const B = funcNames.indexOf('B');
+  const C = funcNames.indexOf('C');
+  const D = funcNames.indexOf('D');
   const selectedCallNodePath = [A, B, C, D];
 
   it('can select a path and expand the nodes to that path', function() {
@@ -495,12 +520,19 @@ describe('expanded and selected CallNodePaths', function() {
 });
 
 describe('expanded and selected CallNodePaths on inverted trees', function() {
-  const profile = getProfileForUnfilteredCallTree();
+  const { profile, funcNames } = getProfileFromTextSamples(`
+    A
+    B
+    X
+    Y
+    Z
+  `);
+
   const threadIndex = 0;
-  const B = 1;
-  const X = 5;
-  const Y = 6;
-  const Z = 7;
+  const B = funcNames.indexOf('B');
+  const X = funcNames.indexOf('X');
+  const Y = funcNames.indexOf('Y');
+  const Z = funcNames.indexOf('Z');
 
   const selectedCallNodePath = [Z, Y, X, B];
 

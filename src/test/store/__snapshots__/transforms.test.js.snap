@@ -97,43 +97,43 @@ exports[`"focus-subtree" transform on an inverted call tree starts as an inverte
 
 exports[`"merge-call-node" transform on a JS call tree can merge a combined CallNodePath, and display a correct JS call tree 1`] = `
 "
-- onLoad (total: 3, self:—)
- - a (total: 2, self:—)
-   - b (total: 2, self:2)
- - b (total: 1, self:1)"
+- onLoad.js (total: 3, self:—)
+ - a.js (total: 2, self:—)
+   - b.js (total: 2, self:2)
+ - b.js (total: 1, self:1)"
 `;
 
 exports[`"merge-call-node" transform on a JS call tree can merge the node at JS path "onLoad" -> "A" 1`] = `
 "
-- onLoad (total: 3, self:—)
- - b (total: 3, self:3)"
+- onLoad.js (total: 3, self:—)
+ - b.js (total: 3, self:3)"
 `;
 
 exports[`"merge-call-node" transform on a JS call tree can merge the node at JS path "onLoad" -> "A" on an combined call tree 1`] = `
 "
-- JS::RunScript (total: 3, self:—)
- - onLoad (total: 3, self:—)
-   - js::jit::IonCannon (total: 2, self:—)
-     - b (total: 2, self:2)
-   - b (total: 1, self:1)"
+- JS::RunScript.cpp (total: 3, self:—)
+ - onLoad.js (total: 3, self:—)
+   - js::jit::IonCannon.cpp (total: 2, self:—)
+     - b.js (total: 2, self:2)
+   - b.js (total: 1, self:1)"
 `;
 
 exports[`"merge-call-node" transform on a JS call tree has an untransformed JS only view 1`] = `
 "
-- onLoad (total: 3, self:—)
- - a (total: 3, self:—)
-   - b (total: 3, self:3)"
+- onLoad.js (total: 3, self:—)
+ - a.js (total: 3, self:—)
+   - b.js (total: 3, self:3)"
 `;
 
 exports[`"merge-call-node" transform on a JS call tree starts as an untransformed call tree 1`] = `
 "
-- JS::RunScript (total: 3, self:—)
- - onLoad (total: 3, self:—)
-   - js::jit::IonCannon (total: 2, self:—)
-     - a (total: 2, self:—)
-       - b (total: 2, self:2)
-   - a (total: 1, self:—)
-     - b (total: 1, self:1)"
+- JS::RunScript.cpp (total: 3, self:—)
+ - onLoad.js (total: 3, self:—)
+   - js::jit::IonCannon.cpp (total: 2, self:—)
+     - a.js (total: 2, self:—)
+       - b.js (total: 2, self:2)
+   - a.js (total: 1, self:—)
+     - b.js (total: 1, self:1)"
 `;
 
 exports[`"merge-call-node" transform on a call tree call node [A, B, C] can be merged into [A, B] 1`] = `
