@@ -1,3 +1,12 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ *  * License, v. 2.0. If a copy of the MPL was not distributed with this
+ *   * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/*
+ * This file is run when a user runs `yarn install`, before doing anything else.
+ * We check that various tools we need have the correct version. For now we
+ * check Node and Yarn. */
+
 // The "userAgent" is something like 'yarn/0.28.1 npm/? node/v8.4.0 linux x64'
 // when ran with yarn. With npm it's similar, without the `yarn` part of course.
 const userAgent = process.env.npm_config_user_agent;
@@ -23,20 +32,25 @@ if (successful) {
 }
 process.exit(-1);
 
+// This function compares two string versions. This compares only major.minor
+// and disrespect any textual prevision (like pre or beta).
+function versionCompare(a, b) {
+  return a.localeCompare(b, undefined, { numeric: true });
+}
+
 function checkNode() {
   // Node versions usually have a starting `v`.
-  const strNodeVersion = agents.node.replace(/^v/, '');
-  // parseFloat will get us major.minor and ignore the possible patch version, which is
-  // enough for our needs because node versions very rarely (or never ?) have
-  // patch versions.
-  const nodeVersion = parseFloat(strNodeVersion);
+  const nodeVersion = agents.node.replace(/^v/, '');
   const expectedNodeVersion = parseExpectedNodeVersion();
-  if (nodeVersion < expectedNodeVersion) {
+  if (versionCompare(nodeVersion, expectedNodeVersion) < 0) {
     console.error(
       `This project expects at least Node version ${expectedNodeVersion}.`
     );
     console.error(
-      'You can use a tool like `nvm` to install and manage installed node versions.\n'
+      'You can use a tool like `nvm` to install and manage installed node versions.'
+    );
+    console.error(
+      'You can look at https://github.com/creationix/nvm to install this tool.\n'
     );
     return false;
   }
@@ -71,12 +85,15 @@ function parseExpectedNodeVersion() {
   const fs = require('fs');
   const circleConfig = fs.readFileSync('circle.yml', { encoding: 'utf8' });
   const expectedNodeVersion = /version:\s+([\d.]+)/.exec(circleConfig)[1];
-  return parseFloat(expectedNodeVersion);
+  if (!expectedNodeVersion) {
+    throw new Error(`Couldn't extract the node version from circle.yml.`);
+  }
+  return expectedNodeVersion;
 }
 
 function displayYarnVersionExplanation(prefix = '') {
   console.error(
-    `${prefix}Yarn versions 0.26 and 0.27 have a bug that makes them unfit with this project.`
+    `${prefix}Yarn versions 0.26 and 0.27 have a bug that make them unfit with this project.`
   );
   console.error(
     'Please use either an earlier version like 0.25 or a newer version.'
