@@ -97,15 +97,19 @@ class TimelineMarkerCanvas extends PureComponent {
     this.drawSeparatorsAndLabels(ctx, startRow, endRow);
   }
 
+  // Note: we used a long argument list instead of an object parameter on
+  // purpose, to reduce GC pressure while drawing.
   drawOneMarker(
     ctx: CanvasRenderingContext2D,
-    { x, y, w, h, text }: MarkerDrawingInformation,
-    colors?: { background: string, foreground: string } = {
-      background: '#8296cb',
-      foreground: 'white',
-    }
+    x: CssPixels,
+    y: CssPixels,
+    w: CssPixels,
+    h: CssPixels,
+    text: string,
+    backgroundColor: string = '#8296cb',
+    foregroundColor: string = 'white'
   ) {
-    ctx.fillStyle = colors.background;
+    ctx.fillStyle = backgroundColor;
 
     // Ensure the text measurement tool is created, since this is the first time
     // this class has access to a ctx.
@@ -128,7 +132,7 @@ class TimelineMarkerCanvas extends PureComponent {
       if (w2 > textMeasurement.minWidth) {
         const fittedText = textMeasurement.getFittedText(text, w2);
         if (fittedText) {
-          ctx.fillStyle = colors.foreground;
+          ctx.fillStyle = foregroundColor;
           ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
         }
       }
@@ -210,14 +214,20 @@ class TimelineMarkerCanvas extends PureComponent {
           if (isHovered) {
             hoveredElement = { x, y, w, h, text };
           } else {
-            this.drawOneMarker(ctx, { x, y, w, h, text });
+            this.drawOneMarker(ctx, x, y, w, h, text);
           }
         }
         if (hoveredElement) {
-          this.drawOneMarker(ctx, hoveredElement, {
-            background: 'Highlight',
-            foreground: 'HighlightText',
-          });
+          this.drawOneMarker(
+            ctx,
+            hoveredElement.x,
+            hoveredElement.y,
+            hoveredElement.w,
+            hoveredElement.h,
+            hoveredElement.text,
+            'Highlight', //    background color
+            'HighlightText' // foreground color
+          );
         }
       }
     }
