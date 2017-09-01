@@ -9,13 +9,19 @@ import * as profileSummary from './profile-summary';
 import * as profileView from './profile-view';
 import * as receiveProfile from './receive-profile';
 import * as timeline from './timeline';
+import * as profileUpload from './profile-upload';
+import * as shortUrl from './short-url';
+import * as urlState from './url-state';
 
 export default Object.assign(
   {},
   app,
   icons,
   profileSummary,
+  profileUpload,
   profileView,
   receiveProfile,
-  timeline
+  shortUrl,
+  timeline,
+  urlState
 );
