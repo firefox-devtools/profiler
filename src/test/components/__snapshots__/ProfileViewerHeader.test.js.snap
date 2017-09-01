@@ -98,6 +98,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
         >
           <li
             className="profileThreadHeaderBar selected"
+            onClick={[Function]}
             style={undefined}
           >
             <div

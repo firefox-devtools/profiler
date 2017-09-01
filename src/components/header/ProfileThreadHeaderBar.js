@@ -55,6 +55,7 @@ class ProfileThreadHeaderBar extends PureComponent {
     super(props);
     (this: any)._onLabelMouseDown = this._onLabelMouseDown.bind(this);
     (this: any)._onGraphClick = this._onGraphClick.bind(this);
+    (this: any)._onLineClick = this._onLineClick.bind(this);
     (this: any)._onMarkerSelect = this._onMarkerSelect.bind(this);
     (this: any)._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(
       this
@@ -71,9 +72,13 @@ class ProfileThreadHeaderBar extends PureComponent {
     }
   }
 
-  _onGraphClick(time: number) {
+  _onLineClick() {
     const { threadIndex, changeSelectedThread } = this.props;
     changeSelectedThread(threadIndex);
+  }
+
+  _onGraphClick(time: number) {
+    const { threadIndex } = this.props;
     if (time !== undefined) {
       const { thread, callNodeInfo, changeSelectedCallNode } = this.props;
       const sampleIndex = getSampleIndexClosestToTime(thread.samples, time);
@@ -146,6 +151,7 @@ class ProfileThreadHeaderBar extends PureComponent {
     return (
       <li
         className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')}
+        onClick={this._onLineClick}
         style={style}
       >
         <ContextMenuTrigger
