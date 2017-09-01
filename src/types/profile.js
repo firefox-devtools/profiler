@@ -178,7 +178,6 @@ export type Thread = {
 export type ProfileMeta = {|
   interval: number,
   startTime: Milliseconds,
-  shutdownTime: Milliseconds | null,
   abi: string,
   misc: string,
   oscpu: string,

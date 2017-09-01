@@ -648,9 +648,20 @@ export function processProfile(geckoProfile: GeckoProfile): Profile {
     }
   }
 
-  const meta = Object.assign({}, geckoProfile.meta, {
+  const meta = {
+    interval: geckoProfile.meta.interval,
+    startTime: geckoProfile.meta.startTime,
+    abi: geckoProfile.meta.abi,
+    misc: geckoProfile.meta.misc,
+    oscpu: geckoProfile.meta.oscpu,
+    platform: geckoProfile.meta.platform,
+    processType: geckoProfile.meta.processType,
+    product: geckoProfile.meta.product,
+    stackwalk: geckoProfile.meta.stackwalk,
+    toolkit: geckoProfile.meta.toolkit,
+    version: geckoProfile.meta.version,
     preprocessedProfileVersion: CURRENT_VERSION,
-  });
+  };
 
   const result = {
     meta,

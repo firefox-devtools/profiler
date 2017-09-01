@@ -917,7 +917,6 @@ export function getEmptyProfile(): Profile {
     meta: {
       interval: 1,
       startTime: 0,
-      shutdownTime: 1000,
       abi: '',
       misc: '',
       oscpu: '',
