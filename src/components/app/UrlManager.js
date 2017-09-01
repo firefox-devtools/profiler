@@ -6,7 +6,7 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import { connect } from 'react-redux';
-import { getIsURLSetupDone } from '../../reducers/app';
+import { getIsUrlSetupDone } from '../../reducers/app';
 
 import type { Dispatch } from '../../types/store';
 
@@ -15,23 +15,23 @@ type Props = {
   urlFromState: any => string,
   children: any,
   urlState: any,
-  isURLSetupDone: boolean,
-  updateURLState: string => void,
+  isUrlSetupDone: boolean,
+  updateUrlState: string => void,
   urlSetupDone: void => void,
   show404: string => void,
 };
 
-class URLManager extends PureComponent {
+class UrlManager extends PureComponent {
   props: Props;
 
   _updateState() {
-    const { updateURLState, stateFromLocation, show404 } = this.props;
+    const { updateUrlState, stateFromLocation, show404 } = this.props;
     if (window.history.state) {
-      updateURLState(window.history.state);
+      updateUrlState(window.history.state);
     } else {
       try {
         const urlState = stateFromLocation(window.location);
-        updateURLState(urlState);
+        updateUrlState(urlState);
       } catch (e) {
         console.error(e);
         show404(window.location.pathname + window.location.search);
@@ -47,32 +47,32 @@ class URLManager extends PureComponent {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    const { urlFromState, isURLSetupDone } = this.props;
-    const newURL = urlFromState(nextProps.urlState);
-    if (newURL !== window.location.pathname + window.location.search) {
-      if (isURLSetupDone) {
-        window.history.pushState(nextProps.urlState, document.title, newURL);
+    const { urlFromState, isUrlSetupDone } = this.props;
+    const newUrl = urlFromState(nextProps.urlState);
+    if (newUrl !== window.location.pathname + window.location.search) {
+      if (isUrlSetupDone) {
+        window.history.pushState(nextProps.urlState, document.title, newUrl);
       } else {
-        window.history.replaceState(nextProps.urlState, document.title, newURL);
+        window.history.replaceState(nextProps.urlState, document.title, newUrl);
       }
     }
   }
 
   render() {
-    const { isURLSetupDone } = this.props;
-    return isURLSetupDone
+    const { isUrlSetupDone } = this.props;
+    return isUrlSetupDone
       ? this.props.children
-      : <div className="processingURL" />;
+      : <div className="processingUrl" />;
   }
 }
 
-URLManager.propTypes = {
+UrlManager.propTypes = {
   stateFromLocation: PropTypes.func.isRequired,
   urlFromState: PropTypes.func.isRequired,
   children: PropTypes.any.isRequired,
   urlState: PropTypes.object.isRequired,
-  isURLSetupDone: PropTypes.bool.isRequired,
-  updateURLState: PropTypes.func.isRequired,
+  isUrlSetupDone: PropTypes.bool.isRequired,
+  updateUrlState: PropTypes.func.isRequired,
   urlSetupDone: PropTypes.func.isRequired,
   show404: PropTypes.func.isRequired,
 };
@@ -80,12 +80,12 @@ URLManager.propTypes = {
 export default connect(
   state => ({
     urlState: state.urlState,
-    isURLSetupDone: getIsURLSetupDone(state),
+    isUrlSetupDone: getIsUrlSetupDone(state),
   }),
   (dispatch: Dispatch) => ({
-    updateURLState: urlState =>
-      dispatch({ type: '@@urlenhancer/updateURLState', urlState }),
+    updateUrlState: urlState =>
+      dispatch({ type: '@@urlenhancer/updateUrlState', urlState }),
     urlSetupDone: () => dispatch({ type: '@@urlenhancer/urlSetupDone' }),
     show404: url => dispatch({ type: 'ROUTE_NOT_FOUND', url }),
   })
-)(URLManager);
+)(UrlManager);

@@ -216,7 +216,7 @@ function _convertThread(
     resourceTable.name[index] = name;
     resourceTable.lib[index] = lib;
   }
-  function addURLResource(urlStringIndex) {
+  function addUrlResource(urlStringIndex) {
     const index = resourceTable.length++;
     resourceTable.type[index] = resourceTypes.url;
     resourceTable.name[index] = urlStringIndex;
@@ -273,7 +273,7 @@ function _convertThread(
             const urlStringIndex = scriptURI
               ? stringTable.indexForString(scriptURI)
               : null;
-            addURLResource(urlStringIndex);
+            addUrlResource(urlStringIndex);
           }
         }
       }

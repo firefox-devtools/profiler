@@ -23,7 +23,7 @@ export default connect(
     profile: getProfile(state),
     dataSource: getDataSource(state),
     hash: getHash(state),
-    profileURL: getProfileURL(state),
+    profileUrl: getProfileUrl(state),
   }),
   // The second parameter is the list of action creators to be wrapped with dispatch.
   // These should be explicitly listed out. (Many components still do not do this and

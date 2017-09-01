@@ -519,14 +519,14 @@ export function retrieveProfileFromStore(
 }
 
 export function retrieveProfileFromUrl(
-  profileURL: string
+  profileUrl: string
 ): ThunkAction<Promise<void>> {
   return async function(dispatch) {
     dispatch(waitingForProfileFromUrl());
 
     try {
       const serializedProfile = await _fetchProfile({
-        url: profileURL,
+        url: profileUrl,
         onTemporaryError: (e: TemporaryError) => {
           dispatch(temporaryErrorReceivingProfileFromUrl(e));
         },
