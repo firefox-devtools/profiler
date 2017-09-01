@@ -201,14 +201,11 @@ class ProfileCallTreeContextMenu extends PureComponent {
         <MenuItem onClick={this.handleClick} data={{ type: 'focus-subtree' }}>
           Focus on subtree
         </MenuItem>
-        {inverted
-          ? null
-          : <MenuItem
-              onClick={this.handleClick}
-              data={{ type: 'focus-function' }}
-            >
-              Focus on function
-            </MenuItem>}
+        <MenuItem onClick={this.handleClick} data={{ type: 'focus-function' }}>
+          {inverted
+            ? 'Focus on calls made by this function'
+            : 'Focus on function'}
+        </MenuItem>
         <div className="react-contextmenu-separator" />
         <MenuItem
           onClick={this.handleClick}
