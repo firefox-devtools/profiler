@@ -125,7 +125,8 @@ export function getEmptyThread(overrides: ?Object): Thread {
         length: 0,
         lib: [],
         name: [],
-        type: 0,
+        host: [],
+        type: [],
       },
     },
     overrides
@@ -219,13 +220,23 @@ export function getProfileFromTextSamples(
   const profile = getEmptyProfile();
   const thread = getEmptyThread();
   profile.threads.push(thread);
-  const { funcTable, stringTable, frameTable, stackTable, samples } = thread;
+  const {
+    funcTable,
+    stringTable,
+    frameTable,
+    stackTable,
+    samples,
+    resourceTable,
+    libs,
+  } = thread;
 
   const funcNames = columns
     // Flatten the arrays.
     .reduce((memo, row) => [...memo, ...row], [])
     // Make the list unique.
     .filter((item, index, array) => array.indexOf(item) === index);
+
+  const resourceIndexCache = {};
 
   // Create the FuncTable.
   funcNames.forEach(funcName => {
@@ -234,8 +245,41 @@ export function getProfileFromTextSamples(
     funcTable.fileName.push(null);
     funcTable.isJS.push(funcName.endsWith('js'));
     funcTable.lineNumber.push(null);
-    funcTable.resource.push(-1);
+    // Ignore resources for now, this way funcNames have really nice string indexes.
     funcTable.length++;
+  });
+
+  // Go back through and create resources as needed.
+  funcNames.forEach(funcName => {
+    // See if this sample has a resource like "funcName:libraryName".
+    const [, libraryName] = funcName.match(/\w+:(\w+)/) || [];
+    let resourceIndex = resourceIndexCache[libraryName];
+    if (resourceIndex === undefined) {
+      const libIndex = libs.length;
+      if (libraryName) {
+        libs.push({
+          start: 0,
+          end: 0,
+          offset: 0,
+          arch: '',
+          name: libraryName,
+          path: '/path/to/' + libraryName,
+          debugName: libraryName,
+          debugPath: '/path/to/' + libraryName,
+          breakpadId: '',
+        });
+        resourceIndex = resourceTable.length++;
+        resourceTable.lib.push(libIndex);
+        resourceTable.name.push(stringTable.indexForString(libraryName));
+        resourceTable.type.push(0);
+        resourceTable.host.push(undefined);
+      } else {
+        resourceIndex = -1;
+      }
+      resourceIndexCache[libraryName] = resourceIndex;
+    }
+
+    funcTable.resource.push(resourceIndex);
   });
 
   // Create the samples, stacks, and frames.

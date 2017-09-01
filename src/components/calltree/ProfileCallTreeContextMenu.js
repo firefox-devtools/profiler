@@ -111,6 +111,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
       case 'merge-subtree':
       case 'focus-subtree':
       case 'focus-function':
+      case 'collapse-resource':
         this.addTransformToStack(type);
         break;
       default:
@@ -118,21 +119,16 @@ class ProfileCallTreeContextMenu extends PureComponent {
     }
   }
 
-  addTransformToStack(
-    type:
-      | 'focus-subtree'
-      | 'focus-function'
-      | 'merge-subtree'
-      | 'merge-call-node'
-      | 'merge-function'
-  ): void {
+  addTransformToStack(type: string): void {
     const {
       addTransformToStack,
       threadIndex,
       implementation,
       selectedCallNodePath,
       inverted,
+      thread,
     } = this.props;
+    const selectedFunc = selectedCallNodePath[selectedCallNodePath.length - 1];
 
     switch (type) {
       case 'focus-subtree':
@@ -146,7 +142,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
       case 'focus-function':
         addTransformToStack(threadIndex, {
           type: 'focus-function',
-          funcIndex: selectedCallNodePath[selectedCallNodePath.length - 1],
+          funcIndex: selectedFunc,
         });
         break;
       case 'merge-subtree':
@@ -167,12 +163,55 @@ class ProfileCallTreeContextMenu extends PureComponent {
       case 'merge-function':
         addTransformToStack(threadIndex, {
           type: 'merge-function',
-          funcIndex: selectedCallNodePath[selectedCallNodePath.length - 1],
+          funcIndex: selectedFunc,
         });
         break;
+      case 'collapse-resource': {
+        const { funcTable } = thread;
+        const resourceIndex = funcTable.resource[selectedFunc];
+        // A new collapsed func will be inserted into the table at the end. Deduce
+        // the index here.
+        const collapsedFuncIndex = funcTable.length;
+        addTransformToStack(threadIndex, {
+          type: 'collapse-resource',
+          resourceIndex,
+          collapsedFuncIndex,
+          implementation,
+        });
+        break;
+      }
       default:
         throw new Error('Type not found.');
     }
+  }
+
+  getNameForSelectedResource(): string | null {
+    const {
+      selectedCallNodePath,
+      thread: { funcTable, stringTable, resourceTable, libs },
+    } = this.props;
+
+    const funcIndex = selectedCallNodePath[selectedCallNodePath.length - 1];
+    if (funcIndex === undefined) {
+      return null;
+    }
+    const isJS = funcTable.isJS[funcIndex];
+
+    if (isJS) {
+      const fileNameIndex = funcTable.fileName[funcIndex];
+      return fileNameIndex === null
+        ? null
+        : stringTable.getString(fileNameIndex);
+    }
+    const resourceIndex = funcTable.resource[funcIndex];
+    if (resourceIndex === -1) {
+      return null;
+    }
+    const libIndex = resourceTable.lib[resourceIndex];
+    if (libIndex === undefined || libIndex === null) {
+      return null;
+    }
+    return libs[libIndex].name;
   }
 
   render() {
@@ -184,6 +223,8 @@ class ProfileCallTreeContextMenu extends PureComponent {
     } = this.props;
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
+    // This could be the C++ library, or the JS filename.
+    const nameForResource = this.getNameForSelectedResource();
 
     return (
       <ContextMenu id={'ProfileCallTreeContextMenu'}>
@@ -213,6 +254,18 @@ class ProfileCallTreeContextMenu extends PureComponent {
             ? 'Focus on calls made by this function'
             : 'Focus on function'}
         </MenuItem>
+        {nameForResource
+          ? <MenuItem
+              onClick={this.handleClick}
+              data={{ type: 'collapse-resource' }}
+            >
+              <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+              Collapse functions in{' '}
+              <span className="profileCallTreeContextMenuLabel">
+                {nameForResource}
+              </span>
+            </MenuItem>
+          : null}
         <div className="react-contextmenu-separator" />
         <MenuItem
           onClick={this.handleClick}

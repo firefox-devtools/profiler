@@ -22,3 +22,12 @@
 .profileCallTreeContextMenuIconFocus {
   background: url(../../../res/focus-icon.svg) center center no-repeat;
 }
+
+.profileCallTreeContextMenuLabel {
+  color: #555;
+  font-weight: bold;
+}
+
+.react-contextmenu-item--selected > .profileCallTreeContextMenuLabel {
+  color: #fff;
+}
