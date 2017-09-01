@@ -10,6 +10,7 @@ import {
 } from '../profile-logic/symbolication';
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
+import memoize from 'memoize-immutable';
 import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
@@ -414,44 +415,45 @@ export const selectorsForThread = (
         return ProfileData.filterThreadToRange(thread, start, end);
       }
     );
+    const applyTransform = (thread, transform) => {
+      switch (transform.type) {
+        case 'focus-subtree':
+          return transform.inverted
+            ? Transforms.focusInvertedSubtree(
+                thread,
+                transform.callNodePath,
+                transform.implementation
+              )
+            : Transforms.focusSubtree(
+                thread,
+                transform.callNodePath,
+                transform.implementation
+              );
+        case 'merge-subtree':
+          // TODO - Implement this transform.
+          return thread;
+        case 'merge-call-node':
+          return Transforms.mergeCallNode(
+            thread,
+            transform.callNodePath,
+            transform.implementation
+          );
+        case 'merge-function':
+          return Transforms.mergeFunction(thread, transform.funcIndex);
+        case 'focus-function':
+          return Transforms.focusFunction(thread, transform.funcIndex);
+        default:
+          throw new Error('Unhandled transform.');
+      }
+    };
+    const applyTransformMemoized = memoize(applyTransform, { limit: 10 });
     const getTransformStack = (state: State): TransformStack =>
       UrlState.getTransformStack(state, threadIndex);
     const _getRangeAndTransformFilteredThread = createSelector(
       getRangeFilteredThread,
       getTransformStack,
       (startingThread, transforms): Thread => {
-        const result = transforms.reduce((thread, transform) => {
-          switch (transform.type) {
-            case 'focus-subtree':
-              return transform.inverted
-                ? Transforms.focusInvertedSubtree(
-                    thread,
-                    transform.callNodePath,
-                    transform.implementation
-                  )
-                : Transforms.focusSubtree(
-                    thread,
-                    transform.callNodePath,
-                    transform.implementation
-                  );
-            case 'merge-subtree':
-              // TODO - Implement this transform.
-              return thread;
-            case 'merge-call-node':
-              return Transforms.mergeCallNode(
-                thread,
-                transform.callNodePath,
-                transform.implementation
-              );
-            case 'merge-function':
-              return Transforms.mergeFunction(thread, transform.funcIndex);
-            case 'focus-function':
-              return Transforms.focusFunction(thread, transform.funcIndex);
-            default:
-              throw new Error('Unhandled transform.');
-          }
-        }, startingThread);
-        return result;
+        return transforms.reduce(applyTransformMemoized, startingThread);
       }
     );
     const _getImplementationFilteredThread = createSelector(
