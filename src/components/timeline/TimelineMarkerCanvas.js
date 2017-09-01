@@ -21,6 +21,14 @@ import type {
 } from '../../types/profile-derived';
 import type { Action, ProfileSelection } from '../../types/actions';
 
+type MarkerDrawingInformation = {
+  x: CssPixels,
+  y: CssPixels,
+  w: CssPixels,
+  h: CssPixels,
+  text: string,
+};
+
 type Props = {
   interval: Milliseconds,
   rangeStart: Milliseconds,
@@ -38,10 +46,8 @@ type Props = {
   isDragging: boolean,
 };
 
-const ROW_HEIGHT = 16;
 const TEXT_OFFSET_TOP = 11;
-const TWO_PI = Math.PI * 2;
-const MARKER_DOT_RADIUS = 0.25;
+const HOVER_MIN_DURATION_RATIO = 0.4;
 const TEXT_OFFSET_START = 3;
 const MARKER_LABEL_MAX_LENGTH = 30;
 
@@ -90,6 +96,56 @@ class TimelineMarkerCanvas extends PureComponent {
     this.drawSeparatorsAndLabels(ctx, startRow, endRow);
   }
 
+  _drawOneMarker(
+    ctx: CanvasRenderingContext2D,
+    { x, y, w, h, text }: MarkerDrawingInformation,
+    colors?: { background: string, foreground: string } = {
+      background: '#9698C0',
+      foreground: 'black',
+    }
+  ) {
+    ctx.fillStyle = colors.background;
+
+    // Ensure the text measurement tool is created, since this is the first time
+    // this class has access to a ctx.
+    if (!this._textMeasurement) {
+      this._textMeasurement = new TextMeasurement(ctx);
+    }
+    const textMeasurement = this._textMeasurement;
+
+    let displayWidth;
+    let displayHeight = h - 1;
+    let displayY = y + 1;
+    if (w > 2.5) {
+      // 2.5 is a magic value that happens to look good
+      displayWidth = w;
+    } else {
+      displayWidth = 2.5;
+      // We want the vertical marker's height to be at least 2/3 of the total
+      // height. Then the height depends on the duration.
+      displayHeight =
+        0.666 * displayHeight + 0.333 * displayHeight * w / displayWidth;
+      displayY = displayY + (h - 1 - displayHeight) / 2;
+    }
+    // We want the rectangle to have a clear margin, that's why we increment y
+    // and decrement h (above).
+    this.drawRoundedRect(ctx, x, displayY, displayWidth, displayHeight - 1, 2);
+
+    // Draw the text label
+    // TODO - L10N RTL.
+    // Constrain the x coordinate to the leftmost area.
+    const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
+    const w2: CssPixels = Math.max(0, w - (x2 - x));
+
+    if (w2 > textMeasurement.minWidth) {
+      const fittedText = textMeasurement.getFittedText(text, w2);
+      if (fittedText) {
+        ctx.fillStyle = colors.foreground;
+        ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
+      }
+    }
+  }
+
   drawMarkers(
     ctx: CanvasRenderingContext2D,
     hoveredItem: IndexIntoMarkerTiming | null,
@@ -99,6 +155,7 @@ class TimelineMarkerCanvas extends PureComponent {
     const {
       rangeStart,
       rangeEnd,
+      rowHeight,
       containerWidth,
       markerTimingRows,
       viewportLeft,
@@ -106,16 +163,11 @@ class TimelineMarkerCanvas extends PureComponent {
       viewportTop,
     } = this.props;
 
-    // Ensure the text measurement tool is created, since this is the first time
-    // this class has access to a ctx.
-    if (!this._textMeasurement) {
-      this._textMeasurement = new TextMeasurement(ctx);
-    }
-    const textMeasurement = this._textMeasurement;
-
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
+
+    ctx.lineWidth = 1;
 
     // Only draw the stack frames that are vertically within view.
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
@@ -132,7 +184,7 @@ class TimelineMarkerCanvas extends PureComponent {
       const timeAtViewportRight: Milliseconds =
         rangeStart + rangeLength * viewportRight;
 
-      ctx.lineWidth = 1;
+      let hoveredElement: MarkerDrawingInformation | null = null;
       for (let i = 0; i < markerTiming.length; i++) {
         // Only draw samples that are in bounds.
         if (
@@ -146,46 +198,26 @@ class TimelineMarkerCanvas extends PureComponent {
 
           const x: CssPixels =
             (startTime - viewportLeft) * containerWidth / viewportLength;
-          const y: CssPixels = rowIndex * ROW_HEIGHT - viewportTop;
-          const w: CssPixels = Math.max(
-            10,
-            (endTime - startTime) * containerWidth / viewportLength
-          );
-          const h: CssPixels = ROW_HEIGHT - 1;
+          const y: CssPixels = rowIndex * rowHeight - viewportTop;
+          const w: CssPixels =
+            (endTime - startTime) * containerWidth / viewportLength;
+          const h: CssPixels = rowHeight - 1; // -1 because of the row separation lines
+          const text = markerTiming.label[i];
 
           const tracingMarkerIndex = markerTiming.index[i];
           const isHovered = hoveredItem === tracingMarkerIndex;
-          ctx.fillStyle = isHovered ? 'Highlight' : '#8296cb';
-
-          if (w >= h) {
-            this.drawRoundedRect(ctx, x, y + 1, w, h - 1, 1);
-
-            const text = markerTiming.label[i];
-            // Draw the text label
-            // TODO - L10N RTL.
-            // Constrain the x coordinate to the leftmost area.
-            const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
-            const w2: CssPixels = Math.max(0, w - (x2 - x));
-
-            if (w2 > textMeasurement.minWidth) {
-              const fittedText = textMeasurement.getFittedText(text, w2);
-              if (fittedText) {
-                ctx.fillStyle = isHovered ? 'HighlightText' : '#ffffff';
-                ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
-              }
-            }
+          if (isHovered) {
+            hoveredElement = { x, y, w, h, text };
           } else {
-            ctx.beginPath();
-            ctx.arc(
-              x + w / 2, // x
-              y + h / 2, // y
-              h * MARKER_DOT_RADIUS, // radius
-              0, // arc start
-              TWO_PI // arc end
-            );
-            ctx.fill();
+            this._drawOneMarker(ctx, { x, y, w, h, text });
           }
         }
+      }
+      if (hoveredElement) {
+        this._drawOneMarker(ctx, hoveredElement, {
+          background: '#333378',
+          foreground: 'white',
+        });
       }
     }
   }
@@ -205,7 +237,7 @@ class TimelineMarkerCanvas extends PureComponent {
     // Draw separators
     ctx.fillStyle = '#eee';
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-      const y = (rowIndex + 1) * rowHeight - viewportTop;
+      const y = (rowIndex + 1) * rowHeight - viewportTop - 1;
       ctx.fillRect(0, y, containerWidth, 1);
     }
 
@@ -215,9 +247,8 @@ class TimelineMarkerCanvas extends PureComponent {
     gradient.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
     ctx.fillStyle = gradient;
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-      // Get the timing information for a row of stack frames.
       const y = rowIndex * rowHeight - viewportTop;
-      ctx.fillRect(0, y, 150, rowHeight);
+      ctx.fillRect(0, y, 150, rowHeight - 1);
     }
 
     // Draw the text
@@ -259,7 +290,7 @@ class TimelineMarkerCanvas extends PureComponent {
     const minDuration =
       rangeLength *
       viewportLength *
-      (rowHeight * 2 * MARKER_DOT_RADIUS / containerWidth);
+      (rowHeight * HOVER_MIN_DURATION_RATIO / containerWidth);
     const markerTiming = markerTimingRows[rowIndex];
 
     if (!markerTiming) {
@@ -297,14 +328,36 @@ class TimelineMarkerCanvas extends PureComponent {
     y: CssPixels,
     width: CssPixels,
     height: CssPixels,
-    cornerSize: CssPixels
+    radius: CssPixels
   ) {
-    // Cut out c x c -sized squares in the corners.
-    const c = Math.min(width / 2, Math.min(height / 2, cornerSize));
-    const bottom = y + height;
-    ctx.fillRect(x + c, y, width - 2 * c, c);
-    ctx.fillRect(x, y + c, width, height - 2 * c);
-    ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
+    // stolen from https://www.rgraph.net/canvas/reference/arcto.html
+
+    const r = Math.min(radius, height / 2, width / 2);
+    const x2 = width - 1;
+    const y2 = height - 1;
+
+    // Save the existing state of the canvas so that it can be restored later
+    ctx.save();
+
+    // Translate to the given X/Y coordinates
+    ctx.translate(x, y);
+
+    ctx.beginPath();
+
+    // Move to the center of the top horizontal line
+    ctx.moveTo(x2 / 2, 0);
+
+    // Draw the rounded corners. The connecting lines in between them are drawn automatically
+    ctx.arcTo(x2, 0, x2, y2, Math.min(y2 / 2, r));
+    ctx.arcTo(x2, y2, 0, y2, Math.min(x2 / 2, r));
+    ctx.arcTo(0, y2, 0, 0, Math.min(y2 / 2, r));
+    ctx.arcTo(0, 0, radius, 0, Math.min(x2 / 2, r));
+
+    // Draw a line back to the start coordinates
+    ctx.lineTo(x2 / 2, 0);
+    ctx.fill();
+
+    ctx.restore();
   }
 
   getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React$Element<*> {
