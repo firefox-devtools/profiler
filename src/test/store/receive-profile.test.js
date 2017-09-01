@@ -5,7 +5,7 @@
 import sinon from 'sinon';
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
-import * as URLStateSelectors from '../../reducers/url-state';
+import * as UrlStateSelectors from '../../reducers/url-state';
 import { getView } from '../../reducers/app';
 import {
   receiveProfileFromAddon,
@@ -84,7 +84,7 @@ describe('actions/receive-profile', function() {
         start: 0,
         end: 1007,
       });
-      expect(URLStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(UrlStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
 
@@ -118,7 +118,7 @@ describe('actions/receive-profile', function() {
         start: 0,
         end: 1007,
       });
-      expect(URLStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(UrlStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
   });
@@ -161,7 +161,7 @@ describe('actions/receive-profile', function() {
         start: 0,
         end: 1007,
       });
-      expect(URLStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(UrlStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
@@ -197,7 +197,7 @@ describe('actions/receive-profile', function() {
         start: 0,
         end: 1007,
       });
-      expect(URLStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(UrlStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
@@ -274,7 +274,7 @@ describe('actions/receive-profile', function() {
         start: 0,
         end: 1007,
       });
-      expect(URLStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(UrlStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
@@ -309,7 +309,7 @@ describe('actions/receive-profile', function() {
         start: 0,
         end: 1007,
       });
-      expect(URLStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
+      expect(UrlStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 

@@ -7,7 +7,7 @@
  * @jest-environment jsdom
  */
 import * as urlStateReducers from '../reducers/url-state';
-import { stateFromLocation, urlStateToURLObject } from '../url-handling';
+import { stateFromLocation, urlStateToUrlObject } from '../url-handling';
 import { blankStore } from './fixtures/stores';
 import exampleProfile from './fixtures/profiles/example-profile';
 import { processProfile } from '../profile-logic/process-profile';
@@ -26,7 +26,7 @@ function _getStoreFromSearchString(
     hash: '',
   });
   const store = blankStore();
-  store.dispatch({ type: '@@urlenhancer/updateURLState', urlState });
+  store.dispatch({ type: '@@urlenhancer/updateUrlState', urlState });
   store.dispatch(receiveProfileFromStore(profile));
   return store;
 }
@@ -39,7 +39,7 @@ describe('selectedThread', function() {
       search: `?thread=${threadIndex}`,
       hash: '',
     });
-    store.dispatch({ type: '@@urlenhancer/updateURLState', urlState });
+    store.dispatch({ type: '@@urlenhancer/updateUrlState', urlState });
 
     return store;
   }
@@ -196,8 +196,8 @@ describe('URL serialization of the transform stack', function() {
   });
 
   it('re-serializes the focus subtree transforms', function() {
-    const { query } = urlStateToURLObject(
-      urlStateReducers.getURLState(getState())
+    const { query } = urlStateToUrlObject(
+      urlStateReducers.getUrlState(getState())
     );
     expect(query.transforms).toBe(transformString);
   });

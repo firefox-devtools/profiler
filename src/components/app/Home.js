@@ -21,17 +21,17 @@ const LEGACY_ADDON_URL =
 
 const InstallButton = ({
   name,
-  xpiURL,
+  xpiUrl,
   children,
   className,
 }: InstallButtonProps) => {
   return (
     <a
-      href={xpiURL}
+      href={xpiUrl}
       className={className}
       onClick={e => {
         if (window.InstallTrigger) {
-          window.InstallTrigger.install({ [name]: xpiURL });
+          window.InstallTrigger.install({ [name]: xpiUrl });
         }
         e.preventDefault();
       }}
@@ -43,7 +43,7 @@ const InstallButton = ({
 
 type InstallButtonProps = {
   name: string,
-  xpiURL: string,
+  xpiUrl: string,
   children?: React.Element<*>,
   className?: string,
 };
@@ -193,7 +193,7 @@ class Home extends PureComponent {
           <InstallButton
             name="Gecko Profiler"
             className="homeSectionInstallButton"
-            xpiURL={ADDON_URL}
+            xpiUrl={ADDON_URL}
           >
             <span className="homeSectionPlus">+</span>
             Install add-on
@@ -248,7 +248,7 @@ class Home extends PureComponent {
           <p>
             To start recording a performance profile in Firefox, first install
             the{' '}
-            <InstallButton name="Gecko Profiler" xpiURL={LEGACY_ADDON_URL}>
+            <InstallButton name="Gecko Profiler" xpiUrl={LEGACY_ADDON_URL}>
               Gecko Profiler Add-on
             </InstallButton>. Then use the button added to the browser, or use
             the following shortcuts to record a profile. The button’s icon is
