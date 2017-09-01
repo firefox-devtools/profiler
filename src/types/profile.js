@@ -109,7 +109,9 @@ export type FuncTable = {
  */
 export type ResourceTable = {
   length: number,
-  lib: Array<IndexIntoLibs | void>,
+  // lib SHOULD be void in this case, but some profiles in the store seem to have
+  // null here. We should probably investigate and provide an upgrader.
+  lib: Array<IndexIntoLibs | void | null>,
   name: Array<IndexIntoStringTable | -1>,
   host: Array<IndexIntoStringTable | void>,
   type: resourceTypeEnum[],

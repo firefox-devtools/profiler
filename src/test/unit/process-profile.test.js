@@ -85,7 +85,10 @@ describe('extract functions and resource from location strings', function() {
               : stringTable.getString(hostStringIndex);
           resourceType = resourceTable.type[resourceIndex];
         }
-        const lib = libIndex === undefined ? undefined : libs[libIndex];
+        const lib =
+          libIndex === undefined || libIndex === null
+            ? undefined
+            : libs[libIndex];
 
         return [
           locationName,
