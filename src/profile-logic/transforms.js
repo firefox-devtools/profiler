@@ -522,3 +522,53 @@ export function focusInvertedSubtree(
     });
   });
 }
+
+/**
+ * Applying transforms over and over can be slow, so memoize the previous results to
+ * make this faster. This only memoizes adding on new transforms, not removing them.
+ */
+export function memoizeTransformedThread(
+  applyTransforms: (Thread, TransformStack) => Thread
+) {
+  let lastSeenTransforms = [];
+  let memoizedThread;
+  return function(startingThread: Thread, newTransforms: TransformStack) {
+    if (newTransforms.length === 0) {
+      return startingThread;
+    }
+
+    let threadToTransform;
+    let transformsToApply;
+
+    if (
+      // Check if a transform was popped off. If this is the case, memoization needs
+      // to be completely recomputed.
+      newTransforms.length < lastSeenTransforms.length ||
+      // Or the threads don't match.
+      startingThread !== memoizedThread
+    ) {
+      threadToTransform = startingThread;
+      transformsToApply = newTransforms;
+    } else {
+      const firstDifferentTransform = newTransforms.findIndex(
+        (transform, i) => transform !== lastSeenTransforms[i]
+      );
+
+      if (firstDifferentTransform === -1) {
+        // These transform stacks are equal.
+        threadToTransform = startingThread;
+        transformsToApply = newTransforms;
+      } else {
+        // Apply the new transforms on the stack.
+        threadToTransform = memoizedThread || startingThread;
+        transformsToApply = newTransforms.slice(
+          firstDifferentTransform,
+          newTransforms.length
+        );
+      }
+    }
+    memoizedThread = applyTransforms(threadToTransform, transformsToApply);
+    lastSeenTransforms = newTransforms;
+    return memoizedThread;
+  };
+}
