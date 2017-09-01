@@ -19,6 +19,8 @@ import {
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { CallTree } from '../../profile-logic/call-tree';
+import getProfileFromTextSamples from '../fixtures/profiles/text-to-profile';
+
 import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
 
 export function formatTree(
@@ -351,6 +353,66 @@ describe('"merge-function" transform', function() {
       );
       const callTree = selectedThreadSelectors.getCallTree(getState());
       expect(formatTree(callTree)).toMatchSnapshot();
+    });
+  });
+});
+
+describe('"focus-function" transform', function() {
+  describe('on a call tree', function() {
+    /**
+     * Assert this transformation:
+     *
+     *            A:3,0                        X:3,0
+     *            /    \                         |
+     *           v      v        Focus X         v
+     *      X:1,0      B:2,0       ->          Y:3,0
+     *        |          |                    /     \
+     *        v          v                   v       v
+     *      Y:1,0      X:2,0              C:1,1      X:2,0
+     *        |          |                             |
+     *        v          v                             v
+     *      C:1,1      Y:2,0                         Y:2,0
+     *                   |                             |
+     *                   v                             v
+     *                 X:2,0                         D:2,2
+     *                   |
+     *                   v
+     *                 Y:2,0
+     *                   |
+     *                   v
+     *                 D:2,2
+     */
+    const { profile, funcNames } = getProfileFromTextSamples(`
+      A A A
+      X B B
+      Y X X
+      C Y Y
+        X X
+        Y Y
+        D D
+    `);
+
+    const threadIndex = 0;
+    const X = funcNames.indexOf('X');
+
+    it('starts as an unfiltered call tree', function() {
+      const { getState } = storeWithProfile(profile);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toMatchSnapshot();
+    });
+
+    it('can be focused on a function', function() {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'focus-function',
+          funcIndex: X,
+        })
+      );
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toMatchSnapshot();
     });
   });
 });
