@@ -2,13 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 // Imported from the original cleopatra, needs to be double-checked.
 
 const resources = {};
 const meta = { addons: [] };
 
 // If the function name starts with "non-virtual thunk to ", remove that part.
-function cleanFunctionName(functionName) {
+function cleanFunctionName(functionName: string): string {
   const ignoredPrefix = 'non-virtual thunk to ';
   if (functionName.startsWith(ignoredPrefix)) {
     return functionName.substr(ignoredPrefix.length);
@@ -16,7 +18,7 @@ function cleanFunctionName(functionName) {
   return functionName;
 }
 
-function addonWithID(addonID) {
+function addonWithID(addonID: string) {
   return meta.addons.find(function addonHasID(addon) {
     return addon.id.toLowerCase() === addonID.toLowerCase();
   });
@@ -28,21 +30,21 @@ function findAddonForChromeURIHost(host) {
   });
 }
 
-function ensureResource(name, resourceDescription) {
+function ensureResource(name: string, resourceDescription): string {
   if (!(name in resources)) {
     resources[name] = resourceDescription;
   }
   return name;
 }
 
-function resourceNameFromLibrary(library) {
+function resourceNameFromLibrary(library: string): string {
   return ensureResource('lib_' + library, {
     type: 'library',
     name: library,
   });
 }
 
-function getAddonForScriptURI(url, host) {
+function getAddonForScriptURI(url: string, host: string) {
   if (!meta || !meta.addons) {
     return null;
   }
@@ -54,7 +56,9 @@ function getAddonForScriptURI(url, host) {
   }
 
   if (url.startsWith('file:///') && url.indexOf('/extensions/') !== -1) {
-    const unpackedAddonNameMatch = /\/extensions\/(.*?)\//.exec(url);
+    const unpackedAddonNameMatch: Array<string> = /\/extensions\/(.*?)\//.exec(
+      url
+    );
     if (unpackedAddonNameMatch) {
       return addonWithID(decodeURIComponent(unpackedAddonNameMatch[1]));
     }
@@ -62,7 +66,9 @@ function getAddonForScriptURI(url, host) {
   }
 
   if (url.startsWith('jar:file:///') && url.indexOf('/extensions/') !== -1) {
-    const packedAddonNameMatch = /\/extensions\/(.*?).xpi/.exec(url);
+    const packedAddonNameMatch: Array<string> = /\/extensions\/(.*?).xpi/.exec(
+      url
+    );
     if (packedAddonNameMatch) {
       return addonWithID(decodeURIComponent(packedAddonNameMatch[1]));
     }
@@ -70,7 +76,7 @@ function getAddonForScriptURI(url, host) {
   }
 
   if (url.startsWith('chrome://')) {
-    const chromeURIMatch = /chrome:\/\/(.*?)\//.exec(url);
+    const chromeURIMatch: Array<string> = /chrome:\/\/(.*?)\//.exec(url);
     if (chromeURIMatch) {
       return findAddonForChromeURIHost(chromeURIMatch[1]);
     }
@@ -80,12 +86,12 @@ function getAddonForScriptURI(url, host) {
   return null;
 }
 
-function resourceNameFromURI(url) {
+function resourceNameFromURI(url: string): string {
   if (!url) {
     return ensureResource('unknown', { type: 'unknown', name: '<unknown>' });
   }
 
-  const match = /^(.*):\/\/(.*?)\//.exec(url);
+  const match: Array<string> = /^(.*):\/\/(.*?)\//.exec(url);
 
   if (!match) {
     // Can this happen? If so, we should change the regular expression above.
@@ -122,14 +128,14 @@ function resourceNameFromURI(url) {
 // foo/bar/ -> bar/
 // foo/ -> foo/
 // foo -> foo
-function getFilename(url) {
+function getFilename(url: string): string {
   const lastSlashPos = url.lastIndexOf('/', url.length - 2);
   return url.substr(lastSlashPos + 1);
 }
 
 // JS File information sometimes comes with multiple URIs which are chained
 // with " -> ". We only want the last URI in this list.
-function getRealScriptURI(url) {
+function getRealScriptURI(url: string): string {
   if (url) {
     const urls = url.split(' -> ');
     return urls[urls.length - 1];
@@ -150,9 +156,9 @@ function getRealScriptURI(url) {
  *                           }
  *                           libraryName is a string index into the resources array at the top of this file.
  */
-export function getFunctionInfo(fullName) {
+export function getFunctionInfo(fullName: string) {
   function getCPPFunctionInfo(fullName) {
-    const match =
+    const match: Array<string> =
       /^(.*) \(in ([^)]*)\) (\+ [0-9]+)$/.exec(fullName) ||
       /^(.*) \(in ([^)]*)\) (\(.*:.*\))$/.exec(fullName) ||
       /^(.*) \(in ([^)]*)\)$/.exec(fullName);
@@ -170,8 +176,8 @@ export function getFunctionInfo(fullName) {
     };
   }
 
-  function getJSFunctionInfo(fullName) {
-    const jsMatch =
+  function getJSFunctionInfo(fullName: string) {
+    const jsMatch: Array<string> =
       /^(.*) \((.*):([0-9]+)\)$/.exec(fullName) ||
       /^()(.*):([0-9]+)$/.exec(fullName);
 
@@ -198,7 +204,7 @@ export function getFunctionInfo(fullName) {
     };
   }
 
-  function getFallbackFunctionInfo(fullName) {
+  function getFallbackFunctionInfo(fullName: string) {
     return {
       functionName: cleanFunctionName(fullName),
       libraryName: '',
@@ -221,7 +227,7 @@ export function getFunctionInfo(fullName) {
  * If the function fails to determine that there are any parentheses to strip
  * it will return the original string.
  */
-export function stripFunctionArguments(functionCall) {
+export function stripFunctionArguments(functionCall: string): string {
   // Remove known data that can appear at the end of the string
   const s = functionCall.replace(/ \[clone [^]+\]$/, '').replace(/ const$/, '');
   if (s[s.length - 1] !== ')') {
