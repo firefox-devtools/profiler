@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { getProfileViewOptions } from '../../reducers/profile-view';
 import type { RequestedLib } from '../../types/reducers';
@@ -60,11 +60,6 @@ class SymbolicationStatusOverlay extends PureComponent {
     return <div className="symbolicationStatusOverlay hidden" />;
   }
 }
-
-SymbolicationStatusOverlay.propTypes = {
-  symbolicationStatus: PropTypes.string.isRequired,
-  waitingForLibs: PropTypes.object.isRequired,
-};
 
 export default connect(state => ({
   symbolicationStatus: getProfileViewOptions(state).symbolicationStatus,

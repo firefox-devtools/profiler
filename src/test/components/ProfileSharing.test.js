@@ -8,6 +8,10 @@ import ProfileSharing from '../../components/app/ProfileSharing';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
+import {
+  startSymbolicating,
+  doneSymbolicating,
+} from '../../actions/receive-profile';
 
 describe('app/ProfileSharing', function() {
   it('renders the ProfileSharing buttons', () => {
@@ -25,13 +29,19 @@ describe('app/ProfileSharing', function() {
       return null;
     }
 
+    const store = storeWithProfile();
+    store.dispatch(startSymbolicating());
+
     const profileSharing = renderer.create(
-      <Provider store={storeWithProfile()}>
+      <Provider store={store}>
         <ProfileSharing />
       </Provider>,
       { createNodeMock }
     );
 
+    expect(profileSharing).toMatchSnapshot();
+
+    store.dispatch(doneSymbolicating());
     expect(profileSharing).toMatchSnapshot();
   });
 });
