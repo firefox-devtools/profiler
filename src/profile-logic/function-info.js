@@ -6,6 +6,8 @@
 
 // Imported from the original cleopatra, needs to be double-checked.
 
+type RegExpResult = null | string[];
+
 const resources = {};
 const meta = { addons: [] };
 
@@ -56,7 +58,7 @@ function getAddonForScriptURI(url: string, host: string) {
   }
 
   if (url.startsWith('file:///') && url.indexOf('/extensions/') !== -1) {
-    const unpackedAddonNameMatch: Array<string> = /\/extensions\/(.*?)\//.exec(
+    const unpackedAddonNameMatch: RegExpResult = /\/extensions\/(.*?)\//.exec(
       url
     );
     if (unpackedAddonNameMatch) {
@@ -66,7 +68,7 @@ function getAddonForScriptURI(url: string, host: string) {
   }
 
   if (url.startsWith('jar:file:///') && url.indexOf('/extensions/') !== -1) {
-    const packedAddonNameMatch: Array<string> = /\/extensions\/(.*?).xpi/.exec(
+    const packedAddonNameMatch: RegExpResult = /\/extensions\/(.*?).xpi/.exec(
       url
     );
     if (packedAddonNameMatch) {
@@ -76,7 +78,7 @@ function getAddonForScriptURI(url: string, host: string) {
   }
 
   if (url.startsWith('chrome://')) {
-    const chromeURIMatch: Array<string> = /chrome:\/\/(.*?)\//.exec(url);
+    const chromeURIMatch: RegExpResult = /chrome:\/\/(.*?)\//.exec(url);
     if (chromeURIMatch) {
       return findAddonForChromeURIHost(chromeURIMatch[1]);
     }
@@ -91,7 +93,7 @@ function resourceNameFromURI(url: string): string {
     return ensureResource('unknown', { type: 'unknown', name: '<unknown>' });
   }
 
-  const match: Array<string> = /^(.*):\/\/(.*?)\//.exec(url);
+  const match: RegExpResult = /^(.*):\/\/(.*?)\//.exec(url);
 
   if (!match) {
     // Can this happen? If so, we should change the regular expression above.
@@ -158,7 +160,7 @@ function getRealScriptURI(url: string): string {
  */
 export function getFunctionInfo(fullName: string) {
   function getCPPFunctionInfo(fullName) {
-    const match: Array<string> =
+    const match: RegExpResult =
       /^(.*) \(in ([^)]*)\) (\+ [0-9]+)$/.exec(fullName) ||
       /^(.*) \(in ([^)]*)\) (\(.*:.*\))$/.exec(fullName) ||
       /^(.*) \(in ([^)]*)\)$/.exec(fullName);
@@ -177,7 +179,7 @@ export function getFunctionInfo(fullName: string) {
   }
 
   function getJSFunctionInfo(fullName: string) {
-    const jsMatch: Array<string> =
+    const jsMatch: RegExpResult =
       /^(.*) \((.*):([0-9]+)\)$/.exec(fullName) ||
       /^()(.*):([0-9]+)$/.exec(fullName);
 
