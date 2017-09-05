@@ -91,15 +91,16 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
                       _formatBytes
                     )
                   )}
-                  {_markerDetail(
-                    'gcnurseryusage',
-                    'Bytes used',
-                    _formatValueTotal(
-                      nursery.bytes_used,
-                      nursery.cur_capacity,
-                      _formatBytes
-                    )
-                  )}
+                  {nursery.cur_capacity &&
+                    _markerDetail(
+                      'gcnurseryusage',
+                      'Bytes used',
+                      _formatValueTotal(
+                        nursery.bytes_used,
+                        nursery.cur_capacity,
+                        _formatBytes
+                      )
+                    )}
                   {_markerDetail(
                     'gcnewnurserysize',
                     'New nursery size',

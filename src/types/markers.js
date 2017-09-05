@@ -132,7 +132,9 @@ export type GCMajorCompleted = {
   // The number for the start of this GC event.
   major_gc_number: number,
   minor_gc_number: number,
-  slice_number: number,
+
+  // Slice number isn't in older profiles.
+  slice_number?: number,
 
   // This usually isn't present with the gecko profiler, but it's the same
   // as all of the slice markers themselves.
@@ -163,7 +165,8 @@ export type GCMinorCompletedData = {
 
   // The total capacity of the nursery before and after this GC.
   // Capacity may change as the nursery size is tuned after each collection.
-  cur_capacity: number,
+  // cur_capacity isn't in older profiles.
+  cur_capacity?: number,
   new_capacity: number,
 
   phase_times: PhaseTimes,

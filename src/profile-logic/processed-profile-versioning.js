@@ -14,10 +14,15 @@
 
 import { sortDataTable } from '../utils/data-table-utils';
 import { resourceTypes } from './profile-data';
+import {
+  upgradeGCMinorMarker,
+  upgradeGCSliceMarker,
+  upgradeGCMajorMarker,
+} from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 8; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 9; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -359,6 +364,29 @@ const _upgraders = {
         }
       }
       thread.markers.data = newDataArray;
+    }
+  },
+  [9]: profile => {
+    // Upgrade the GC markers
+    for (const thread of profile.threads) {
+      for (let i = 0; i < thread.markers.length; i++) {
+        const marker = thread.markers.data[i];
+        if (marker) {
+          switch (marker.type) {
+            case 'GCMinor':
+              upgradeGCMinorMarker(marker);
+              break;
+            case 'GCSlice':
+              upgradeGCSliceMarker(marker);
+              break;
+            case 'GCMajor':
+              upgradeGCMajorMarker(marker);
+              break;
+            default:
+              break;
+          }
+        }
+      }
     }
   },
 };

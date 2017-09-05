@@ -11,9 +11,14 @@
  * current format.
 */
 
+import {
+  upgradeGCMinorMarker,
+  upgradeGCSliceMarker,
+  upgradeGCMajorMarker,
+} from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 
-export const CURRENT_VERSION = 8; // The current version of the Gecko profile format.
+export const CURRENT_VERSION = 9; // The current version of the Gecko profile format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -243,6 +248,37 @@ const _upgraders = {
       }
     }
     convertToVersionEightRecursive(profile);
+  },
+  [9]: profile => {
+    function convertToVersionNineRecursive(p) {
+      for (const thread of p.threads) {
+        //const stringTable = new UniqueStringArray(thread.stringTable);
+        //const nameIndex = thread.markers.schema.name;
+        const dataIndex = thread.markers.schema.data;
+        for (let i = 0; i < thread.markers.data.length; i++) {
+          const marker = thread.markers.data[i][dataIndex];
+          if (marker) {
+            switch (marker.type) {
+              case 'GCMinor':
+                upgradeGCMinorMarker(marker);
+                break;
+              case 'GCSlice':
+                upgradeGCSliceMarker(marker);
+                break;
+              case 'GCMajor':
+                upgradeGCMajorMarker(marker);
+                break;
+              default:
+                break;
+            }
+          }
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersionNineRecursive(subprocessProfile);
+      }
+    }
+    convertToVersionNineRecursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */
