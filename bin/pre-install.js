@@ -1,36 +1,46 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
- *  * License, v. 2.0. If a copy of the MPL was not distributed with this
- *   * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
+
+/*:: type AgentsVersion = { [agentName: string]: string }; */
 
 /*
  * This file is run when a user runs `yarn install`, before doing anything else.
  * We check that various tools we need have the correct version. For now we
- * check Node and Yarn. */
+ * check Node and Yarn.
+ */
+checkVersions();
 
-// The "userAgent" is something like 'yarn/0.28.1 npm/? node/v8.4.0 linux x64'
-// when ran with yarn. With npm it's similar, without the `yarn` part of course.
-const userAgent = process.env.npm_config_user_agent;
-if (!userAgent) {
-  console.error('Error: this script cannot be run directly.');
+function checkVersions() {
+  // The "userAgent" is something like 'yarn/0.28.1 npm/? node/v8.4.0 linux x64'
+  // when ran with yarn. With npm it's similar, without the `yarn` part of course.
+  const userAgent = process.env.npm_config_user_agent;
+  if (!userAgent) {
+    console.error('Error: this script cannot be run directly.');
+    process.exit(-1);
+    return;
+  }
+
+  const agents /*: AgentsVersion */ = userAgent
+    .split(' ')
+    .reduce((agents, agent) => {
+      const [key, value] = agent.split('/');
+      agents[key] = value;
+      return agents;
+    }, {});
+
+  const checks = [checkNode(agents), checkYarn(agents)];
+
+  const successful = checks.every(returnValue => returnValue);
+  if (successful) {
+    console.log(
+      'All project requirements are satisfied, moving forward with the installation.'
+    );
+    process.exit(0);
+  }
   process.exit(-1);
 }
-
-const agents = userAgent.split(' ').reduce((agents, agent) => {
-  const [key, value] = agent.split('/');
-  agents[key] = value;
-  return agents;
-}, {});
-
-const checks = [checkNode(), checkYarn()];
-
-const successful = checks.every(returnValue => returnValue);
-if (successful) {
-  console.log(
-    'All project requirements are satisfied, moving forward with the installation.'
-  );
-  process.exit(0);
-}
-process.exit(-1);
 
 // This function compares two string versions. This compares only major.minor
 // and disrespect any textual prevision (like pre or beta).
@@ -38,7 +48,7 @@ function versionCompare(a, b) {
   return a.localeCompare(b, undefined, { numeric: true });
 }
 
-function checkNode() {
+function checkNode(agents /*: AgentsVersion */) {
   // Node versions usually have a starting `v`.
   const nodeVersion = agents.node.replace(/^v/, '');
   const expectedNodeVersion = parseExpectedNodeVersion();
@@ -57,7 +67,7 @@ function checkNode() {
   return true;
 }
 
-function checkYarn() {
+function checkYarn(agents /*: AgentsVersion */) {
   if (!('yarn' in agents)) {
     console.error(
       'This project uses Yarn instead of npm, please run `yarn install` instead of `npm install`.\n'
