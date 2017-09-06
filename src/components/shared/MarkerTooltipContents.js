@@ -6,7 +6,12 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
-import { formatNumber, formatPercent } from '../../utils/format-numbers';
+import {
+  formatNumber,
+  formatPercent,
+  formatBytes,
+  formatValueTotal,
+} from '../../utils/format-numbers';
 
 import type { TracingMarker } from '../../types/profile-derived';
 import type { MarkerPayload } from '../../types/markers';
@@ -23,33 +28,6 @@ function _markerDetail<T>(
     </div>,
     fn(value),
   ];
-}
-
-function _formatBytes(bytes: number): string {
-  if (bytes < 4 * 1024) {
-    return formatNumber(bytes) + 'B';
-  } else if (bytes < 4 * 1024 * 1024) {
-    return formatNumber(bytes / 1024) + 'KB';
-  } else if (bytes < 4 * 1024 * 1024 * 1024) {
-    return formatNumber(bytes / (1024 * 1024)) + 'MB';
-  } else {
-    return formatNumber(bytes / (1024 * 1024 * 1024)) + 'GB';
-  }
-}
-
-function _formatValueTotal(
-  a: number,
-  b: number,
-  formatNum: number => string,
-  includePercent: boolean = true
-) {
-  const value_total = formatNum(a) + ' / ' + formatNum(b);
-  let percent = '';
-  if (includePercent) {
-    percent = ' (' + formatPercent(a / b) + ')';
-  }
-
-  return value_total + percent;
 }
 
 function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
@@ -85,27 +63,27 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
                   {_markerDetail(
                     'gcpromotion',
                     'Bytes tenured',
-                    _formatValueTotal(
+                    formatValueTotal(
                       nursery.bytes_tenured,
                       nursery.bytes_used,
-                      _formatBytes
+                      formatBytes
                     )
                   )}
                   {nursery.cur_capacity &&
                     _markerDetail(
                       'gcnurseryusage',
                       'Bytes used',
-                      _formatValueTotal(
+                      formatValueTotal(
                         nursery.bytes_used,
                         nursery.cur_capacity,
-                        _formatBytes
+                        formatBytes
                       )
                     )}
                   {_markerDetail(
                     'gcnewnurserysize',
                     'New nursery size',
                     nursery.new_capacity,
-                    _formatBytes
+                    formatBytes
                   )}
                 </div>
               );
@@ -163,7 +141,7 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
                 {_markerDetail(
                   'gcusage',
                   'Heap usage',
-                  _formatBytes(timings.allocated)
+                  formatBytes(timings.allocated)
                 )}
                 {_markerDetail(
                   'gcmmu20ms',
@@ -182,7 +160,7 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
                 {_markerDetail(
                   'gcnumzones',
                   'Zones',
-                  _formatValueTotal(
+                  formatValueTotal(
                     timings.zones_collected,
                     timings.total_zones,
                     String
@@ -207,10 +185,10 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
           triggers = _markerDetail(
             'gctrigger',
             'Trigger (amt/trig)',
-            _formatValueTotal(
+            formatValueTotal(
               timings.trigger_amount,
               timings.trigger_threshold,
-              _formatBytes,
+              formatBytes,
               false
             )
           );

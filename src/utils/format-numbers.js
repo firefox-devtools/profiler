@@ -37,3 +37,36 @@ export function formatNumber(value: number): string {
 export function formatPercent(value: number): string {
   return formatNumber(value * 100) + '%';
 }
+
+export function formatBytes(bytes: number): string {
+  if (bytes < 4 * 1024) {
+    return formatNumber(bytes) + 'B';
+  } else if (bytes < 4 * 1024 * 1024) {
+    return formatNumber(bytes / 1024) + 'KB';
+  } else if (bytes < 4 * 1024 * 1024 * 1024) {
+    return formatNumber(bytes / (1024 * 1024)) + 'MB';
+  } else {
+    return formatNumber(bytes / (1024 * 1024 * 1024)) + 'GB';
+  }
+}
+
+/*
+ * Format a value and a total to the form "v/t (p%)".  For example this can
+ * be used to print "7MB/10MB (70%)"  fornatNum is a function to format the
+ * individual numbers and includePercent may be set to false if you do not
+ * wish to print the percentage.
+ */
+export function formatValueTotal(
+  a: number,
+  b: number,
+  formatNum: number => string = String,
+  includePercent: boolean = true
+) {
+  const value_total = formatNum(a) + ' / ' + formatNum(b);
+  let percent = '';
+  if (includePercent) {
+    percent = ' (' + formatPercent(a / b) + ')';
+  }
+
+  return value_total + percent;
+}
