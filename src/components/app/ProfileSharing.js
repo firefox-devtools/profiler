@@ -7,7 +7,11 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import { getProfile, getProfileRootRange } from '../../reducers/profile-view';
+import {
+  getProfile,
+  getProfileRootRange,
+  getProfileViewOptions,
+} from '../../reducers/profile-view';
 import {
   getDataSource,
   getHash,
@@ -27,6 +31,7 @@ import url from 'url';
 import type { StartEndRange } from '../../types/units';
 import type { Profile } from '../../types/profile';
 import type { Action, DataSource } from '../../types/actions';
+import type { SymbolicationStatus } from '../../types/reducers';
 
 require('./ProfileSharing.css');
 
@@ -66,6 +71,7 @@ type ProfileSharingCompositeButtonProps = {
   profile: Profile,
   dataSource: DataSource,
   hash: string,
+  symbolicationStatus: SymbolicationStatus,
   predictUrl: (Action | Action[]) => string,
   onProfilePublished: typeof actions.profilePublished,
 };
@@ -223,6 +229,11 @@ class ProfileSharingCompositeButton extends PureComponent {
 
   render() {
     const { state, uploadProgress, error, shortUrl } = this.state;
+    const { symbolicationStatus } = this.props;
+    const shareLabel =
+      symbolicationStatus === 'DONE'
+        ? 'Share...'
+        : 'Sharing will be enabled once symbolication is complete';
     return (
       <div
         className={classNames('profileSharingCompositeButtonContainer', {
@@ -234,7 +245,8 @@ class ProfileSharingCompositeButton extends PureComponent {
       >
         <ButtonWithPanel
           className="profileSharingShareButton"
-          label="Share..."
+          label={shareLabel}
+          disabled={symbolicationStatus !== 'DONE'}
           panel={
             <ArrowPanel
               className="profileSharingPrivacyPanel"
@@ -404,6 +416,7 @@ type ProfileSharingProps = {
   rootRange: StartEndRange,
   dataSource: DataSource,
   hash: string,
+  symbolicationStatus: SymbolicationStatus,
   profilePublished: typeof actions.profilePublished,
   predictUrl: (Action | Action[]) => string,
 };
@@ -413,6 +426,7 @@ const ProfileSharing = ({
   rootRange,
   dataSource,
   hash,
+  symbolicationStatus,
   profilePublished,
   predictUrl,
 }: ProfileSharingProps) =>
@@ -421,6 +435,7 @@ const ProfileSharing = ({
       profile={profile}
       dataSource={dataSource}
       hash={hash}
+      symbolicationStatus={symbolicationStatus}
       onProfilePublished={profilePublished}
       predictUrl={predictUrl}
     />
@@ -433,6 +448,7 @@ export default connect(
     rootRange: getProfileRootRange(state),
     dataSource: getDataSource(state),
     hash: getHash(state),
+    symbolicationStatus: getProfileViewOptions(state).symbolicationStatus,
     predictUrl: getUrlPredictor(state),
   }),
   { profilePublished: actions.profilePublished }

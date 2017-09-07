@@ -61,7 +61,7 @@
   background: var(--internal-uploading-progress-fill-color);
 }
 
-.profileSharingShareButtonButton {
+.profileSharingShareButtonButton:not([disabled]) {
   background-color: var(--internal-share-button-background-color);
   color: white;
 }
