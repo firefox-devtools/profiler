@@ -11,7 +11,7 @@ import {
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import * as Transforms from '../profile-logic/transforms';
-import * as URLState from './url-state';
+import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
 import * as StackTiming from '../profile-logic/stack-timing';
 import * as MarkerTiming from '../profile-logic/marker-timing';
@@ -328,7 +328,7 @@ export const getZeroAt = createSelector(
 export const getDisplayRange = createSelector(
   (state: State) => getProfileViewOptions(state).rootRange,
   (state: State) => getProfileViewOptions(state).zeroAt,
-  URLState.getRangeFilters,
+  UrlState.getRangeFilters,
   (rootRange, zeroAt, rangeFilters): StartEndRange => {
     if (rangeFilters.length > 0) {
       let { start, end } = rangeFilters[rangeFilters.length - 1];
@@ -393,27 +393,19 @@ export const selectorsForThread = (
   threadIndex: ThreadIndex
 ): SelectorsForThread => {
   if (!(threadIndex in selectorsForThreads)) {
+    /**
+     * The first per-thread selectors filter out and transform a thread based on user's
+     * interactions. The transforms are order dependendent.
+     *
+     * 1. Unfiltered - The first selector gets the unmodified original thread.
+     * 2. Range - New samples table with only samples in range.
+     * 3. Transform - Apply the transform stack that modifies the stacks and samples.
+     * 4. Implementation - Modify stacks and samples to only show a single implementation.
+     * 5. Search - Exclude samples that don't include some text in the stack.
+     * 6. Range selection - Only include samples that are within a user's sub-selection.
+     */
     const getThread = (state: State): Thread =>
       getProfile(state).threads[threadIndex];
-    const getViewOptions = (state: State): ThreadViewOptions =>
-      getProfileViewOptions(state).perThread[threadIndex];
-    const getTransformStack = (state: State): TransformStack =>
-      URLState.getTransformStack(state, threadIndex);
-    const getFriendlyThreadName = createSelector(
-      getThreads,
-      getThread,
-      ProfileData.getFriendlyThreadName
-    );
-    const getThreadProcessDetails = createSelector(
-      getThread,
-      ProfileData.getThreadProcessDetails
-    );
-    const getTransformLabels: (state: State) => string[] = createSelector(
-      getThread,
-      getFriendlyThreadName,
-      getTransformStack,
-      Transforms.getTransformLabels
-    );
     const getRangeFilteredThread = createSelector(
       getThread,
       getDisplayRange,
@@ -422,30 +414,8 @@ export const selectorsForThread = (
         return ProfileData.filterThreadToRange(thread, start, end);
       }
     );
-    const _getRangeFilteredThreadSamples = createSelector(
-      getRangeFilteredThread,
-      (thread): SamplesTable => thread.samples
-    );
-    const getJankInstances = createSelector(
-      _getRangeFilteredThreadSamples,
-      (samples): TracingMarker[] => ProfileData.getJankInstances(samples, 50)
-    );
-    const getTracingMarkers = createSelector(
-      getThread,
-      ProfileData.getTracingMarkers
-    );
-    const getMarkerTiming = createSelector(
-      getTracingMarkers,
-      MarkerTiming.getMarkerTiming
-    );
-    const getRangeSelectionFilteredTracingMarkers = createSelector(
-      getTracingMarkers,
-      getDisplayRange,
-      (markers, range): TracingMarker[] => {
-        const { start, end } = range;
-        return ProfileData.filterTracingMarkersToRange(markers, start, end);
-      }
-    );
+    const getTransformStack = (state: State): TransformStack =>
+      UrlState.getTransformStack(state, threadIndex);
     const _getRangeAndTransformFilteredThread = createSelector(
       getRangeFilteredThread,
       getTransformStack,
@@ -475,6 +445,8 @@ export const selectorsForThread = (
               );
             case 'merge-function':
               return Transforms.mergeFunction(thread, transform.funcIndex);
+            case 'focus-function':
+              return Transforms.focusFunction(thread, transform.funcIndex);
             default:
               throw new Error('Unhandled transform.');
           }
@@ -484,19 +456,19 @@ export const selectorsForThread = (
     );
     const _getImplementationFilteredThread = createSelector(
       _getRangeAndTransformFilteredThread,
-      URLState.getImplementationFilter,
+      UrlState.getImplementationFilter,
       ProfileData.filterThreadByImplementation
     );
     const _getImplementationAndSearchFilteredThread = createSelector(
       _getImplementationFilteredThread,
-      URLState.getSearchString,
+      UrlState.getSearchString,
       (thread, searchString): Thread => {
         return ProfileData.filterThreadToSearchString(thread, searchString);
       }
     );
     const getFilteredThread = createSelector(
       _getImplementationAndSearchFilteredThread,
-      URLState.getInvertCallstack,
+      UrlState.getInvertCallstack,
       (thread, shouldInvertCallstack): Thread => {
         return shouldInvertCallstack
           ? ProfileData.invertCallstack(thread)
@@ -516,6 +488,48 @@ export const selectorsForThread = (
           selectionStart,
           selectionEnd
         );
+      }
+    );
+
+    const getViewOptions = (state: State): ThreadViewOptions =>
+      getProfileViewOptions(state).perThread[threadIndex];
+    const getFriendlyThreadName = createSelector(
+      getThreads,
+      getThread,
+      ProfileData.getFriendlyThreadName
+    );
+    const getThreadProcessDetails = createSelector(
+      getThread,
+      ProfileData.getThreadProcessDetails
+    );
+    const getTransformLabels: (state: State) => string[] = createSelector(
+      getThread,
+      getFriendlyThreadName,
+      getTransformStack,
+      Transforms.getTransformLabels
+    );
+    const _getRangeFilteredThreadSamples = createSelector(
+      getRangeFilteredThread,
+      (thread): SamplesTable => thread.samples
+    );
+    const getJankInstances = createSelector(
+      _getRangeFilteredThreadSamples,
+      (samples): TracingMarker[] => ProfileData.getJankInstances(samples, 50)
+    );
+    const getTracingMarkers = createSelector(
+      getThread,
+      ProfileData.getTracingMarkers
+    );
+    const getMarkerTiming = createSelector(
+      getTracingMarkers,
+      MarkerTiming.getMarkerTiming
+    );
+    const getRangeSelectionFilteredTracingMarkers = createSelector(
+      getTracingMarkers,
+      getDisplayRange,
+      (markers, range): TracingMarker[] => {
+        const { start, end } = range;
+        return ProfileData.filterTracingMarkersToRange(markers, start, end);
       }
     );
     const getCallNodeInfo = createSelector(
@@ -560,8 +574,8 @@ export const selectorsForThread = (
       getRangeSelectionFilteredThread,
       getProfileInterval,
       getCallNodeInfo,
-      URLState.getImplementationFilter,
-      URLState.getInvertCallstack,
+      UrlState.getImplementationFilter,
+      UrlState.getInvertCallstack,
       CallTree.getCallTree
     );
 
@@ -573,9 +587,9 @@ export const selectorsForThread = (
     // chart and the call tree.
     const getFilteredThreadForFlameChart = createSelector(
       getRangeFilteredThread,
-      URLState.getHidePlatformDetails,
-      URLState.getInvertCallstack,
-      URLState.getSearchString,
+      UrlState.getHidePlatformDetails,
+      UrlState.getInvertCallstack,
+      UrlState.getSearchString,
       (
         thread: Thread,
         shouldHidePlatformDetails: boolean,
@@ -626,7 +640,7 @@ export const selectorsForThread = (
     );
     const getSearchFilteredMarkers = createSelector(
       getRangeSelectionFilteredThread,
-      URLState.getMarkersSearchString,
+      UrlState.getMarkersSearchString,
       ProfileData.getSearchFilteredMarkers
     );
 
@@ -666,7 +680,7 @@ export const selectedThreadSelectors: SelectorsForThread = (() => {
   const result: { [key: string]: (State) => any } = {};
   for (const key in anyThreadSelectors) {
     result[key] = (state: State) =>
-      selectorsForThread(URLState.getSelectedThreadIndex(state))[key](state);
+      selectorsForThread(UrlState.getSelectedThreadIndex(state))[key](state);
   }
   const result2: SelectorsForThread = result;
   return result2;

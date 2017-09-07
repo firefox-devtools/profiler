@@ -1,0 +1,226 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
+<div
+  className="profileSharing"
+>
+  <div
+    className="profileSharingCompositeButtonContainer currentButtonIsShareButton"
+  >
+    <div
+      className="buttonWithPanel profileSharingShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton profileSharingShareButtonButton"
+          onClick={[Function]}
+          type="button"
+          value="Share..."
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+                      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs and scripts of the tabs that were executing.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+                      json structure with a text editor.
+              </p>
+            </section>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="profileSharingUploadingButton"
+    >
+      <div
+        className="profileSharingUploadingButtonInner"
+      >
+        <progress
+          className="profileSharingUploadingButtonProgress"
+          value={0}
+        />
+        <div
+          className="profileSharingUploadingButtonLabel"
+        >
+          Uploading...
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel profileSharingPermalinkButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton profileSharingPermalinkButtonButton"
+          onClick={[Function]}
+          type="button"
+          value="Permalink"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel profileSharingPermalinkPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <div
+            className="arrowPanelContent"
+          >
+            <input
+              className="profileSharingPermalinkTextField"
+              readOnly="readOnly"
+              type="text"
+              value="about:blank"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel profileSharingUploadErrorButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton profileSharingUploadErrorButtonButton"
+          onClick={[Function]}
+          type="button"
+          value="Upload Error"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons profileSharingUploadErrorPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Error
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <p>
+              An error occurred during upload:
+            </p>
+            <pre />
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Try Again"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="buttonWithPanel profileSharingProfileDownloadButton"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton profileSharingProfileDownloadButtonButton"
+        onClick={[Function]}
+        type="button"
+        value="Save as file..."
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel hasTitle profileSharingProfileDownloadPanel"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <h1
+          className="arrowPanelTitle"
+        >
+          Save Profile to a Local File
+        </h1>
+        <div
+          className="arrowPanelContent"
+        >
+          <section />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

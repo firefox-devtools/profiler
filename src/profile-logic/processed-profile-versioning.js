@@ -176,7 +176,7 @@ const _upgraders = {
         newResourceTable.name[index] = origin;
         newResourceTable.host[index] = host;
       }
-      function addURLResource(url) {
+      function addUrlResource(url) {
         const index = newResourceTable.length++;
         newResourceTable.type[index] = resourceTypes.url;
         newResourceTable.name[index] = url;
@@ -225,7 +225,7 @@ const _upgraders = {
               addWebhostResource(originStringIndex, hostIndex);
             } else {
               const urlStringIndex = stringTable.indexForString(scriptURI);
-              addURLResource(urlStringIndex);
+              addUrlResource(urlStringIndex);
             }
           }
           oldResourceToNewResourceMap.set(resourceIndex, newResourceIndex);

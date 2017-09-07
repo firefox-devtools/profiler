@@ -15,6 +15,8 @@ import {
 } from '../../profile-logic/profile-data';
 import actions from '../../actions';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+import ProfileThreadJankOverview from './ProfileThreadJankOverview';
+import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOverview';
 
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
@@ -24,6 +26,8 @@ import type {
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { State } from '../../types/reducers';
+
+import { updateProfileSelection } from '../../actions/profile-view';
 
 type Props = {
   threadIndex: ThreadIndex,
@@ -35,10 +39,12 @@ type Props = {
   selectedCallNodeIndex: IndexIntoCallNodeTable,
   isSelected: boolean,
   isHidden: boolean,
+  isModifyingSelection: boolean,
   style: Object,
   threadName: string,
   processDetails: string,
   changeSelectedThread: ThreadIndex => void,
+  updateProfileSelection: typeof updateProfileSelection,
   changeSelectedCallNode: (IndexIntoCallNodeTable, CallNodePath) => void,
 };
 
@@ -49,7 +55,11 @@ class ProfileThreadHeaderBar extends PureComponent {
     super(props);
     (this: any)._onLabelMouseDown = this._onLabelMouseDown.bind(this);
     (this: any)._onGraphClick = this._onGraphClick.bind(this);
+    (this: any)._onLineClick = this._onLineClick.bind(this);
     (this: any)._onMarkerSelect = this._onMarkerSelect.bind(this);
+    (this: any)._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(
+      this
+    );
   }
 
   _onLabelMouseDown(event: MouseEvent) {
@@ -62,9 +72,13 @@ class ProfileThreadHeaderBar extends PureComponent {
     }
   }
 
-  _onGraphClick(time: number) {
+  _onLineClick() {
     const { threadIndex, changeSelectedThread } = this.props;
     changeSelectedThread(threadIndex);
+  }
+
+  _onGraphClick(time: number) {
+    const { threadIndex } = this.props;
     if (time !== undefined) {
       const { thread, callNodeInfo, changeSelectedCallNode } = this.props;
       const sampleIndex = getSampleIndexClosestToTime(thread.samples, time);
@@ -80,11 +94,32 @@ class ProfileThreadHeaderBar extends PureComponent {
     }
   }
 
+  _onIntervalMarkerSelect(
+    threadIndex: ThreadIndex,
+    start: Milliseconds,
+    end: Milliseconds
+  ) {
+    const {
+      rangeStart,
+      rangeEnd,
+      updateProfileSelection,
+      changeSelectedThread,
+    } = this.props;
+    updateProfileSelection({
+      hasSelection: true,
+      isModifying: false,
+      selectionStart: Math.max(rangeStart, start),
+      selectionEnd: Math.min(rangeEnd, end),
+    });
+    changeSelectedThread(threadIndex);
+  }
+
   _onMarkerSelect(/* markerIndex */) {}
 
   render() {
     const {
       thread,
+      threadIndex,
       interval,
       rangeStart,
       rangeEnd,
@@ -95,39 +130,76 @@ class ProfileThreadHeaderBar extends PureComponent {
       threadName,
       processDetails,
       isHidden,
+      isModifyingSelection,
     } = this.props;
+
     if (isHidden) {
       // If this thread is hidden, render out a stub element so that the Reorderable
       // Component still works across all the threads.
       return <li className="profileThreadHeaderBarHidden" />;
     }
+
+    const processType = thread.processType;
+    const displayJank = thread.name === 'GeckoMain' && processType !== 'plugin';
+    const displayTracingMarkers =
+      (thread.name === 'GeckoMain' ||
+        thread.name === 'Compositor' ||
+        thread.name === 'Renderer') &&
+      processType !== 'plugin';
+    const className = 'profileThreadHeaderBar';
+
     return (
       <li
         className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')}
+        onClick={this._onLineClick}
         style={style}
       >
         <ContextMenuTrigger
           id={'ProfileThreadHeaderContextMenu'}
-          renderTag="h1"
+          renderTag="div"
           attributes={{
             title: processDetails,
-            className: 'grippy',
+            className: 'grippy profileThreadHeaderBarThreadLabel',
             onMouseDown: this._onLabelMouseDown,
           }}
         >
-          {threadName}
+          <h1 className="profileThreadHeaderBarThreadName">
+            {threadName}
+          </h1>
         </ContextMenuTrigger>
-        <ThreadStackGraph
-          interval={interval}
-          thread={thread}
-          className="threadStackGraph"
-          rangeStart={rangeStart}
-          rangeEnd={rangeEnd}
-          callNodeInfo={callNodeInfo}
-          selectedCallNodeIndex={selectedCallNodeIndex}
-          onClick={this._onGraphClick}
-          onMarkerSelect={this._onMarkerSelect}
-        />
+        <div className="profileThreadHeaderBarThreadDetails">
+          {displayJank
+            ? <ProfileThreadJankOverview
+                className={`${className}IntervalMarkerOverview ${className}IntervalMarkerOverviewJank`}
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                threadIndex={threadIndex}
+                onSelect={this._onIntervalMarkerSelect}
+                isModifyingSelection={isModifyingSelection}
+              />
+            : null}
+          {displayTracingMarkers
+            ? <ProfileThreadTracingMarkerOverview
+                className={`${className}IntervalMarkerOverview ${className}IntervalMarkerOverviewGfx ${className}IntervalMarkerOverviewThread${thread.name}`}
+                rangeStart={rangeStart}
+                rangeEnd={rangeEnd}
+                threadIndex={threadIndex}
+                onSelect={this._onIntervalMarkerSelect}
+                isModifyingSelection={isModifyingSelection}
+              />
+            : null}
+          <ThreadStackGraph
+            interval={interval}
+            thread={thread}
+            className="threadStackGraph"
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            callNodeInfo={callNodeInfo}
+            selectedCallNodeIndex={selectedCallNodeIndex}
+            onClick={this._onGraphClick}
+            onMarkerSelect={this._onMarkerSelect}
+          />
+        </div>
       </li>
     );
   }

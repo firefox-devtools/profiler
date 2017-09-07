@@ -71,12 +71,6 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
     </ol>
   </div>
   <div
-    className="profileViewerHeaderIntervalMarkerOverviewContainer profileViewerHeaderIntervalMarkerOverviewContainerJank"
-  />
-  <div
-    className="profileViewerHeaderIntervalMarkerOverviewContainer profileViewerHeaderIntervalMarkerOverviewContainerGfx"
-  />
-  <div
     className="overflowEdgeIndicator profileViewerHeaderOverflowEdgeIndicator"
   >
     <div
@@ -104,10 +98,11 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
         >
           <li
             className="profileThreadHeaderBar selected"
+            onClick={[Function]}
             style={undefined}
           >
-            <h1
-              className="react-contextmenu-wrapper grippy"
+            <div
+              className="react-contextmenu-wrapper grippy profileThreadHeaderBarThreadLabel"
               onContextMenu={[Function]}
               onMouseDown={[Function]}
               onMouseOut={[Function]}
@@ -117,15 +112,23 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
               title="thread: \\"Empty\\" (0)
             process: \\"default\\" (0)"
             >
-              Empty
-            </h1>
+              <h1
+                className="profileThreadHeaderBarThreadName"
+              >
+                Empty
+              </h1>
+            </div>
             <div
-              className="threadStackGraph"
+              className="profileThreadHeaderBarThreadDetails"
             >
-              <canvas
-                className="threadStackGraphCanvas threadStackGraphCanvas"
-                onMouseUp={[Function]}
-              />
+              <div
+                className="threadStackGraph"
+              >
+                <canvas
+                  className="threadStackGraphCanvas threadStackGraphCanvas"
+                  onMouseUp={[Function]}
+                />
+              </div>
             </div>
           </li>
         </ol>

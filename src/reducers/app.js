@@ -47,7 +47,7 @@ function view(
   }
 }
 
-function isURLSetupDone(state: boolean = false, action: Action) {
+function isUrlSetupDone(state: boolean = false, action: Action) {
   switch (action.type) {
     case '@@urlenhancer/urlSetupDone':
       return true;
@@ -57,11 +57,11 @@ function isURLSetupDone(state: boolean = false, action: Action) {
 }
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
-  isURLSetupDone,
+  isUrlSetupDone,
 });
 export default appStateReducer;
 
 export const getApp = (state: State): AppState => state.app;
 export const getView = (state: State): AppViewState => getApp(state).view;
-export const getIsURLSetupDone = (state: State): boolean =>
-  getApp(state).isURLSetupDone;
+export const getIsUrlSetupDone = (state: State): boolean =>
+  getApp(state).isUrlSetupDone;

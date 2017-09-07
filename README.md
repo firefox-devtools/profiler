@@ -18,7 +18,18 @@ This project is live on [https://perf-html.io/](https://perf-html.io/). The webs
 
 ### Development
 
-To quickly get going first make sure [Yarn](http://yarnpkg.com/) is installed, and then run:
+You will need a pre-release version of [Yarn](http://yarnpkg.com/),
+version 0.28.4 is known to work correctly.
+You can install it into your home directory on Linux and probably OS X with:
+
+```bash
+cd /tmp
+wget https://yarnpkg.com/install.sh
+chmod a+x install.sh
+./install.sh  --version 0.28.4
+```
+
+To download and build perf.html run:
 
 ```bash
 git clone git@github.com:devtools-html/perf.html.git
