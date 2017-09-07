@@ -18,7 +18,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
           disabled={true}
           onClick={[Function]}
           type="button"
-          value="Share..."
+          value="Sharing will be enabled once symbolication is complete"
         />
       </div>
       <div

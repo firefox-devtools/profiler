@@ -230,6 +230,10 @@ class ProfileSharingCompositeButton extends PureComponent {
   render() {
     const { state, uploadProgress, error, shortUrl } = this.state;
     const { symbolicationStatus } = this.props;
+    const shareLabel =
+      symbolicationStatus === 'DONE'
+        ? 'Share...'
+        : 'Sharing will be enabled once symbolication is complete';
     return (
       <div
         className={classNames('profileSharingCompositeButtonContainer', {
@@ -241,7 +245,7 @@ class ProfileSharingCompositeButton extends PureComponent {
       >
         <ButtonWithPanel
           className="profileSharingShareButton"
-          label="Share..."
+          label={shareLabel}
           disabled={symbolicationStatus !== 'DONE'}
           panel={
             <ArrowPanel
