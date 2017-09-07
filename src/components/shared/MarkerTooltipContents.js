@@ -15,8 +15,9 @@ import {
 
 import type { TracingMarker } from '../../types/profile-derived';
 import type { MarkerPayload } from '../../types/markers';
+import type { NotVoidOrNull } from '../../types/utils';
 
-function _markerDetail<T>(
+function _markerDetail<T: NotVoidOrNull>(
   key: string,
   label: string,
   value: T,
