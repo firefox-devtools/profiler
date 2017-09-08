@@ -28,7 +28,7 @@ export const withSize = Wrapped =>
       if (!wrappedComponent) {
         return;
       }
-      const container = findDOMNode(wrappedComponent);
+      const container = findDOMNode(wrappedComponent); // eslint-disable-line react/no-find-dom-node
       this._resizeListener = () => this._updateWidth(container);
       window.addEventListener('resize', this._resizeListener);
       this._updateWidth(container);
