@@ -8,6 +8,7 @@ import withTimelineViewport from './TimelineViewport';
 import TimelineCanvas from './TimelineCanvas';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import TextMeasurement from '../../utils/text-measurement';
+import { BLUE_40 } from '../../utils/colors';
 
 import type {
   Milliseconds,
@@ -106,7 +107,7 @@ class TimelineMarkerCanvas extends PureComponent {
     w: CssPixels,
     h: CssPixels,
     text: string,
-    backgroundColor: string = '#8296cb',
+    backgroundColor: string = BLUE_40,
     foregroundColor: string = 'white'
   ) {
     ctx.fillStyle = backgroundColor;

@@ -112,8 +112,8 @@
 .homeSectionInstallButton {
   display: inline-block;
   padding: 0.7em;
-  border: 2px solid #557de0;
-  color: #557de0;
+  border: 2px solid var(--blue-50);
+  color: var(--blue-50);
   text-decoration: none;
   transition: background-color 300ms;
   font-weight: bold;
@@ -122,7 +122,7 @@
 
 .homeSectionInstallButton:hover {
   color: #fff;
-  background-color: #557de0;
+  background-color: var(--blue-50);
 }
 
 .homeSectionPlus {

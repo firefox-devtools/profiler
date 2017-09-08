@@ -18,7 +18,73 @@ body, #root, .profileViewer {
   max-height: 100%;
 }
 
-body {
+:root {
+  /* Photon colors v1.0.3: https://www.npmjs.com/package/photon-colors */
+  --magenta-50: #ff1ad9;
+  --magenta-60: #ed00b5;
+  --magenta-70: #b5007f;
+  --magenta-80: #7d004f;
+  --magenta-90: #440027;
+
+  --purple-50: #9400ff;
+  --purple-60: #8000d7;
+  --purple-70: #6200a4;
+  --purple-80: #440071;
+  --purple-90: #25003e;
+
+  --blue-40: #45a1ff;
+  --blue-50: #0a84ff;
+  --blue-60: #0060df;
+  --blue-70: #003eaa;
+  --blue-80: #002275;
+  --blue-90: #000f40;
+
+  --teal-50: #00feff;
+  --teal-60: #00c8d7;
+  --teal-70: #008ea4;
+  --teal-80: #005a71;
+  --teal-90: #002d3e;
+
+  --green-50: #30e60b;
+  --green-60: #12bc00;
+  --green-70: #058b00;
+  --green-80: #006504;
+  --green-90: #003706;
+
+  --yellow-50: #ffe900;
+  --yellow-60: #d7b600;
+  --yellow-70: #a47f00;
+  --yellow-80: #715100;
+  --yellow-90: #3e2800;
+
+  --red-50: #ff0039;
+  --red-60: #d70022;
+  --red-70: #a4000f;
+  --red-80: #5a0002;
+  --red-90: #3e0200;
+
+  --orange-50: #ff9400;
+  --orange-60: #d76e00;
+  --orange-70: #a44900;
+  --orange-80: #712b00;
+  --orange-90: #3e1300;
+
+  --grey-10: #f9f9fa;
+  --grey-20: #ededf0;
+  --grey-30: #d7d7db;
+  --grey-40: #b1b1b3;
+  --grey-50: #737373;
+  --grey-60: #4a4a4f;
+  --grey-70: #38383d;
+  --grey-80: #2a2a2e;
+  --grey-90: #0c0c0d;
+
+  --ink-70: #363959;
+  --ink-80: #202340;
+  --ink-90: #0f1126;
+
+  --animation-curve: cubic-bezier(.07,.95,0,1);
+
   /* Stolen from the light theme at devtools/client/themes/variables.css */
   --theme-highlight-green: #2cbb0f;
   --theme-highlight-blue: #0088cc;
@@ -29,6 +95,7 @@ body {
   --theme-highlight-red: #ed2655;
   --theme-highlight-pink: #b82ee5;
   --theme-highlight-gray: #b4babf;/* except for this one, I made this one darker */
+  color: var(--grey-90);
 }
 
 #root {
@@ -53,12 +120,12 @@ body {
   -moz-user-select: none;
   user-select: none;
   cursor: default;
-  border-top: 1px solid #D6D6D6;
+  border-top: 1px solid var(--grey-30);
 }
 
 .treeViewHeader {
   padding: 1px 0;
-  border-bottom: 1px solid #D6D6D6;
+  border-bottom: 1px solid var(--grey-30);
   position: relative;
   height: 16px;
   background: white;
@@ -141,7 +208,7 @@ body {
 }
 .treeViewRowColumn.treeViewFixedColumn {
   box-sizing: border-box;
-  border-right: 1px solid #D6D6D6;
+  border-right: 1px solid var(--grey-30);
 }
 .treeViewFixedColumn.totalTime {
   left: 0px;
@@ -287,8 +354,8 @@ body {
   padding: 0;
   display: flex;
   flex-flow: row nowrap;
-  background: #EEE;
-  border-bottom: 1px solid #D6D6D6;
+  background: var(--gray-10);
+  border-bottom: 1px solid var(--grey-30);
 }
 
 .profileFilterNavigator {
@@ -299,7 +366,7 @@ body {
 .profileViewerHeader {
   position: relative;
   margin-left: 149px;
-  border-left: 1px solid #D6D6D6;
+  border-left: 1px solid var(--grey-30);
   -moz-user-focus: ignore;
 }
 
@@ -315,7 +382,7 @@ body {
   left: -150px;
   right: 0;
   height: 1px;
-  background: #D6D6D6;
+  background: var(--grey-30);
   z-index: 3;
 }
 
@@ -348,7 +415,7 @@ body {
   margin-left: -1px;
   white-space: nowrap;
   text-align: right;
-  background: linear-gradient(transparent, #D6D6D6 19px, #D6D6D6 20px, #D6D6D666 0);
+  background: linear-gradient(transparent, var(--grey-30) 19px, var(--grey-30) 20px, var(--grey-30)66 0);
 }
 
 .timeRulerNotchText {
@@ -365,7 +432,7 @@ body {
 }
 
 .profileThreadHeaderBarIntervalMarkerOverviewContainerJank {
-  border-bottom: 1px solid #D6D6D6;
+  border-bottom: 1px solid var(--grey-30);
 }
 
 .profileThreadHeaderBarIntervalMarkerOverview {
@@ -384,7 +451,7 @@ body {
 
 .profileThreadHeaderBarIntervalMarkerOverviewThreadGeckoMain {
   height: 18px;
-  /*border-bottom: 1px solid #D6D6D6;*/
+  /*border-bottom: 1px solid var(--grey-30);*/
 }
 
 .intervalMarkerTimelineCanvas {
@@ -397,7 +464,7 @@ body {
   list-style: none;
   margin: 0 0 0 -150px;
   padding: 0;
-  box-shadow: inset 0 1px #D6D6D6;
+  box-shadow: inset 0 1px var(--grey-30);
 }
 
 .profileThreadHeaderBarHidden {
@@ -410,18 +477,18 @@ body {
   padding: 0;
   display: flex;
   flex-flow: row nowrap;
-  border-top: 1px solid #D6D6D6;
-  box-shadow: 0 1px #D6D6D6;
+  border-top: 1px solid var(--grey-30);
+  box-shadow: 0 1px var(--grey-30);
 }
 
 .profileThreadHeaderBar.selected {
-  background-color: hsl(220, 50%, 93%);
+  background-color: #edf6ff;
 }
 
 .profileThreadHeaderBarThreadLabel {
   box-sizing: border-box;
   width: 150px;
-  border-right: 1px solid #D6D6D6;
+  border-right: 1px solid var(--grey-30);
   padding-left: 14px;
   cursor: default;
   display: flex;
@@ -491,7 +558,7 @@ body {
 
 .dimmerBefore,
 .dimmerAfter {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(12, 12, 13, .1);
   flex-shrink: 0;
 }
 
@@ -556,7 +623,7 @@ body {
   position: absolute;
   padding: 4px 8px;
   color: #fff;
-  background-color: #8095ca;
+  background-color: var(--blue-50);
   border-radius: 0 0 4px 4px;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
   pointer-events: none;
@@ -605,9 +672,10 @@ body {
 .tabBarContainer {
   display: flex;
   flex-flow: row nowrap;
-  background: #EEE;
-  border-top: 1px solid #D6D6D6;
+  background: var(--grey-10);
   position: relative;
+  border: solid var(--grey-30);
+  border-width: 1px 0 1px;
 }
 
 .tabBarTabWrapper {
@@ -621,29 +689,58 @@ body {
 }
 
 .tabBarTab {
+  font-size: 12px;
   width: 8em;
   text-align: center;
   cursor: default;
   -moz-user-select: none;
   text-align: center;
-  padding: 4px;
-  border: solid #D6D6D6;
-  border-width: 0 1px;
-  margin: 0 -0.5px;
+  padding: 6px 4px;
   white-space: nowrap;
   background-clip: padding-box;
+  transition: background-color 200ms, border-color 200ms;
+  transition-timing-function: var(--animation-timing);
+  position: relative;
+  border: solid transparent;
+  border-width: 0 1px 0 1px;
 }
-
 .tabBarTab.selected {
-  background: white;
+  background: #fff;
+  color: var(--blue-50);
+  border-color: var(--grey-30);
+  /* Cut off the bottom of the border for the tab line. */
+  top: 1px;
+  padding-top: 5px;
 }
 
+/* Place the top tab bar in a separate element to avoid tapered corners. */
+.tabBarTab::before {
+  content: "";
+  position:absolute;
+  width: calc(100% + 2px);
+  height: 2px;
+  left: -1px;
+  background-color: transparent;
+  transition: background-color 200ms, border-color 200ms;
+  transition-timing-function: var(--animation-timing);
+  top: 0;
+}
+
+.tabBarTab.selected::before {
+  /* The selected tab is shifted down a bit, so shift this bar back up a bit */
+  top: -1px;
+  background-color: var(--blue-50);
+}
 .tabBarTabWrapper:not(.beingReordered) > .tabBarTab:not(.selected):hover {
-  background-color: #DDD;
+  background-color: var(--grey-20);
+  border-color: var(--grey-20);
+}
+.tabBarTabWrapper:not(.beingReordered) > .tabBarTab:not(.selected):hover::before {
+  background-color: var(--grey-40);
 }
 
 .profileSummaryView {
-  border-top: 1px solid #D6D6D6;
+  border-top: 1px solid var(--grey-30);
   padding: 10px;
   flex: 1;
   overflow-y: auto;
@@ -667,7 +764,7 @@ body {
 
 .taskTracerViewWrapper,
 .logViewWrapper {
-  border-top: 1px solid #D6D6D6;
+  border-top: 1px solid var(--grey-30);
   flex: 1;
   overflow: auto;
   position: relative;
@@ -706,8 +803,8 @@ body {
 .taskTracerThreadViewThreadName {
   width: 150px;
   margin: 0;
-  border-right: 1px solid #D6D6D6;
-  border-bottom: 1px solid #D6D6D6;
+  border-right: 1px solid var(--grey-30);
+  border-bottom: 1px solid var(--grey-30);
   font-size: 1em;
   font-weight: normal;
   box-sizing: border-box;

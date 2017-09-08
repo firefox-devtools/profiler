@@ -4,7 +4,6 @@
 
 .summarize-profile {
   flex: 1;
-  border-top: 1px solid #D6D6D6;
   overflow: auto;
   position: relative;
 }

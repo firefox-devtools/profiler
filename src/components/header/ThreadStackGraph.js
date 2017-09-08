@@ -107,7 +107,8 @@ class ThreadStackGraph extends PureComponent {
       const startY = c.height - sampleHeight;
       // const responsiveness = thread.samples.responsiveness[i];
       // const jankSeverity = Math.min(1, responsiveness / 100);
-      ctx.fillStyle = isHighlighted ? '#38445f' : '#7990c8';
+      ctx.fillStyle = isHighlighted ? '#003eaa' : '#45a1ff';
+      //                              --blue-70 : --blue-40
       ctx.fillRect(
         (sampleTime - range[0]) * xPixelsPerMs,
         startY,

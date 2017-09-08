@@ -20,7 +20,7 @@
   flex-flow: column;
   overflow: hidden;
   position: relative;
-  border-top: 1px solid #d6d6d6;
+  border-top: 1px solid var(--grey-30);
 }
 
 .timelineViewTimelinesScroller {
@@ -52,12 +52,12 @@
   height: 100%;
   left: 149px;
   width: 1px;
-  background-color:#d6d6d6;
+  background-color:var(--grey-30);
 }
 
 .timelineViewDivider {
   background-color: #f9f9f9;
-  border: solid #d6d6d6;
+  border: solid var(--grey-30);
   border-width: 1px 0;
   height: 25px;
   line-height: 25px;

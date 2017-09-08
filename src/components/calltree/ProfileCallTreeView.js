@@ -11,8 +11,8 @@ import TransformNavigator from './TransformNavigator';
 
 const ProfileCallTreeView = () =>
   <div className="treeAndSidebarWrapper">
-    <TransformNavigator />
     <ProfileCallTreeSettings />
+    <TransformNavigator />
     <CallTree />
   </div>;
 
