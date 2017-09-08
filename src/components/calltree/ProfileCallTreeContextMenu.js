@@ -35,6 +35,8 @@ type Props = {
   addTransformToStack: typeof addTransformToStack,
 };
 
+require('./ProfileCallTreeContextMenu.css');
+
 class ProfileCallTreeContextMenu extends PureComponent {
   props: Props;
   constructor(props: Props) {
@@ -190,18 +192,22 @@ class ProfileCallTreeContextMenu extends PureComponent {
               onClick={this.handleClick}
               data={{ type: 'merge-call-node' }}
             >
+              <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
               Merge node into calling function
             </MenuItem>}
         <MenuItem onClick={this.handleClick} data={{ type: 'merge-function' }}>
+          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
           Merge function into caller across the entire tree
         </MenuItem>
         {/* <MenuItem onClick={this.handleClick} data={{ type: 'mergeSubtree' }}>
           Merge subtree into calling function
         </MenuItem> */}
         <MenuItem onClick={this.handleClick} data={{ type: 'focus-subtree' }}>
+          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus" />
           Focus on subtree
         </MenuItem>
         <MenuItem onClick={this.handleClick} data={{ type: 'focus-function' }}>
+          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus" />
           {inverted
             ? 'Focus on calls made by this function'
             : 'Focus on function'}

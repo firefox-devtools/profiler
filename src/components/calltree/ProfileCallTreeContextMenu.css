@@ -1,0 +1,24 @@
+.profileCallTreeContextMenuIcon {
+  width: 16px;
+  height: 16px;
+  pointer-events: auto;
+  position: relative;
+  display: inline-block;
+  margin-inline-end: 8px;
+  top: 2px;
+}
+.react-contextmenu-item--selected > .profileCallTreeContextMenuIcon {
+  filter: invert(1);
+}
+
+.profileCallTreeContextMenuIconMerge {
+  background: url(../../../res/merge-icon.svg) center center no-repeat;
+}
+
+.profileCallTreeContextMenuIconCollapse {
+  background: url(../../../res/collapse-icon.svg) center center no-repeat;
+}
+
+.profileCallTreeContextMenuIconFocus {
+  background: url(../../../res/focus-icon.svg) center center no-repeat;
+}
