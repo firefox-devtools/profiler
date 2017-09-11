@@ -42,14 +42,6 @@ describe('extract functions and resource from location strings', function() {
   const locationIndexes = locations.map(location =>
     stringTable.indexForString(location)
   );
-  const geckoFrameStruct = {
-    location: locationIndexes,
-    implementation: Array(locationIndexes.length).fill(null),
-    optimizations: Array(locationIndexes.length).fill(null),
-    line: Array(locationIndexes.length).fill(null),
-    category: Array(locationIndexes.length).fill(null),
-    length: locationIndexes.length,
-  };
 
   it('extracts the information for all different types of locations', function() {
     const [
@@ -57,7 +49,7 @@ describe('extract functions and resource from location strings', function() {
       resourceTable,
       frameFuncs,
     ] = extractFuncsAndResourcesFromFrameLocations(
-      geckoFrameStruct,
+      locationIndexes,
       stringTable,
       libs
     );

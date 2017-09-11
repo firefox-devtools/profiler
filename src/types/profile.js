@@ -108,8 +108,6 @@ export type FuncTable = {
  * sparse arrays. Multiple functions can point to the same resource.
  */
 export type ResourceTable = {
-  addonId: any[], // TODO
-  icon: any[], // TODO
   length: number,
   lib: Array<IndexIntoLibs | void>,
   name: Array<IndexIntoStringTable | -1>,
