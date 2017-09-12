@@ -42,6 +42,8 @@ describe('remove-template-information', function() {
     expect(removeTemplateInformation('fn<ns::foo<ns::bar<a::b> > >')).toEqual(
       'fn'
     );
+  });
+  it('should not remove information we want to keep', function() {
     expect(removeTemplateInformation('foo/<bar')).toEqual('foo/<bar');
   });
 });

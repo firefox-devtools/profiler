@@ -34,7 +34,7 @@ export function stripFunctionArguments(functionCall: string): string {
   return functionCall;
 }
 
-export function removeTemplateInformation(functionName) {
+export function removeTemplateInformation(functionName: string) {
   let result = '';
   let depth = 0;
   let start = 0; // Start of a segment we'd like to keep
@@ -60,6 +60,6 @@ export function removeTemplateInformation(functionName) {
   return result;
 }
 
-export function getFunctionName(functionCall) {
+export function getFunctionName(functionCall: string) {
   return removeTemplateInformation(stripFunctionArguments(functionCall));
 }
