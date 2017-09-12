@@ -7,9 +7,9 @@
  * @jest-environment jsdom
  */
 import * as urlStateReducers from '../reducers/url-state';
-import { stateFromLocation, urlStateToURLObject } from '../url-handling';
+import { stateFromLocation, urlStateToUrlObject } from '../url-handling';
 import { blankStore } from './fixtures/stores';
-import exampleProfile from './fixtures/profiles/example-profile';
+import getGeckoProfile from './fixtures/profiles/gecko-profile';
 import { processProfile } from '../profile-logic/process-profile';
 import { receiveProfileFromStore } from '../actions/receive-profile';
 import { selectedThreadSelectors } from '../reducers/profile-view';
@@ -26,7 +26,7 @@ function _getStoreFromSearchString(
     hash: '',
   });
   const store = blankStore();
-  store.dispatch({ type: '@@urlenhancer/updateURLState', urlState });
+  store.dispatch({ type: '@@urlenhancer/updateUrlState', urlState });
   store.dispatch(receiveProfileFromStore(profile));
   return store;
 }
@@ -39,13 +39,13 @@ describe('selectedThread', function() {
       search: `?thread=${threadIndex}`,
       hash: '',
     });
-    store.dispatch({ type: '@@urlenhancer/updateURLState', urlState });
+    store.dispatch({ type: '@@urlenhancer/updateUrlState', urlState });
 
     return store;
   }
 
   it('selects the right thread when receiving a profile from web', function() {
-    const profile: Profile = processProfile(exampleProfile());
+    const profile: Profile = processProfile(getGeckoProfile());
 
     const store = storeWithThread(1);
     store.dispatch(receiveProfileFromStore(profile));
@@ -54,7 +54,7 @@ describe('selectedThread', function() {
   });
 
   it('selects a default thread when a wrong thread has been requested', function() {
-    const profile: Profile = processProfile(exampleProfile());
+    const profile: Profile = processProfile(getGeckoProfile());
 
     const store = storeWithThread(100);
     store.dispatch(receiveProfileFromStore(profile));
@@ -65,7 +65,7 @@ describe('selectedThread', function() {
 });
 
 describe('threadOrder and hiddenThreads', function() {
-  const profileWithThreads: Profile = processProfile(exampleProfile());
+  const profileWithThreads: Profile = processProfile(getGeckoProfile());
 
   it('decides the threadOrder and hiddenThreads without any set parameters', function() {
     const { getState } = _getStoreFromSearchString('', profileWithThreads);
@@ -151,7 +151,7 @@ describe('legacy URL serialized call tree filters', function() {
 
 describe('URL serialization of the transform stack', function() {
   const transformString =
-    'f-combined-012~ms-js-123~mcn-combined-234-i~f-js-345-i~mf-6';
+    'f-combined-012~ms-js-123~mcn-combined-234-i~f-js-345-i~mf-6~ff-7';
   const { getState } = _getStoreFromSearchString(
     '?v=1&transforms=' + transformString
   );
@@ -160,6 +160,7 @@ describe('URL serialization of the transform stack', function() {
     const transformStack = selectedThreadSelectors.getTransformStack(
       getState()
     );
+    // The indexes don't necessarily map to anything logical in the profile fixture.
     expect(transformStack).toEqual([
       {
         type: 'focus-subtree',
@@ -169,7 +170,6 @@ describe('URL serialization of the transform stack', function() {
       },
       {
         type: 'merge-subtree',
-        // JS CallNodePaths are wrong here because it doesn't match the example profile.
         callNodePath: [1, 2, 3],
         implementation: 'js',
         inverted: false,
@@ -182,22 +182,24 @@ describe('URL serialization of the transform stack', function() {
       },
       {
         type: 'focus-subtree',
-        // JS CallNodePaths are wrong here because it doesn't match the example profile.
         callNodePath: [3, 4, 5],
         implementation: 'js',
         inverted: true,
       },
       {
         type: 'merge-function',
-        // JS CallNodePaths are wrong here because it doesn't match the example profile.
         funcIndex: 6,
+      },
+      {
+        type: 'focus-function',
+        funcIndex: 7,
       },
     ]);
   });
 
   it('re-serializes the focus subtree transforms', function() {
-    const { query } = urlStateToURLObject(
-      urlStateReducers.getURLState(getState())
+    const { query } = urlStateToUrlObject(
+      urlStateReducers.getUrlState(getState())
     );
     expect(query.transforms).toBe(transformString);
   });

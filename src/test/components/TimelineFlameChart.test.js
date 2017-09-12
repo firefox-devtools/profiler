@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
-import { getProfileForUnfilteredCallTree } from '../fixtures/profiles/profiles-for-call-trees';
+import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { changeTimelineFlameChartExpandedThread } from '../../actions/timeline';
 
 jest.useFakeTimers();
@@ -42,7 +42,15 @@ it('renders TimelineFlameChart correctly', () => {
     return null;
   }
 
-  const store = storeWithProfile(getProfileForUnfilteredCallTree());
+  const { profile } = getProfileFromTextSamples(`
+    A A A
+    B B B
+    C C H
+    D F I
+    E G
+  `);
+
+  const store = storeWithProfile(profile);
   store.dispatch(changeTimelineFlameChartExpandedThread(0, true));
 
   const timeline = renderer.create(

@@ -15,3 +15,35 @@ RewriteRule ^ - [L]
 
 # If the requested resource doesn't exist, use index.html
 RewriteRule ^ /index.html
+
+# Security Headers
+# IMPORTANT NOTE: KEEP THEM SYNCED WITH THE DEV SERVER (see server.js)
+
+# Do not try to guess the content-type for JS and CSS files served with a wrong mime-type.
+Header set X-Content-Type-Options nosniff
+# This is specific to Safari, Chrome and Internet Explorer, to provide some XSS
+# Protection for versions that do not support CSP yet.
+Header set X-XSS-Protection "1; mode=block"
+# Do not allow being embedded in a frame.
+Header set X-Frame-Options SAMEORIGIN
+# Do not give the referrer for external navigations.
+Header set Referrer-Policy same-origin
+
+# 1. script-src
+#   a. The first hash is for the addon's content.js file being injected
+#      with WebExt's tabs.executeScript API.
+#   b. The second hash is for the addon's content-home.js being injected from
+#      the addon's manifest.json.
+#   You can generate these hashes using the website
+#   https://report-uri.io/home/hash after grabbing the script from the Inspector.
+#   NOTE: you can't use the script file directly as the API modifies it before injecting.
+#   c. When shortening URLs witn JSONP, we insert a script from bitly.
+# 2. `unsafe-inline` in `style-src` is necessary to support favicons.
+# 3. Same for `*` in `img-src`.
+# 4. `object-src` is for plugins, we don't need them.
+# 5. `connect-src` is `*` to support `from-url`
+# 6. `frame-ancestors` is the same purpose as `X-Frame-Options` above.
+# 7. `form-action`prevents forms, we don't need this.`
+# 8. `upgrade-insecure-requests` instructs the browser to upgrade all insecure
+#     requests to HTTPS, but only the ones to the same hostname.
+Header always add Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw=' 'sha256-AdiT28wTL5FNaRVHWQVFC0ic3E20Gu4/PiC9xukS9+E=' https://api-ssl.bitly.com; style-src 'self' 'unsafe-inline'; img-src *; object-src 'none'; connect-src *; frame-ancestors 'self'; form-action 'none'; upgrade-insecure-requests"

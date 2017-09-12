@@ -55,4 +55,21 @@ describe('shared/ButtonWithPanel', function() {
 
     expect(button).toMatchSnapshot();
   });
+
+  it('renders a disabled button', () => {
+    const button = renderer.create(
+      <ButtonWithPanel
+        className="button"
+        label="My Button"
+        disabled={true}
+        panel={
+          <ArrowPanel className="panel">
+            <div>Panel content</div>
+          </ArrowPanel>
+        }
+      />
+    );
+
+    expect(button).toMatchSnapshot();
+  });
 });

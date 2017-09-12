@@ -35,6 +35,8 @@ type Props = {
   addTransformToStack: typeof addTransformToStack,
 };
 
+require('./ProfileCallTreeContextMenu.css');
+
 class ProfileCallTreeContextMenu extends PureComponent {
   props: Props;
   constructor(props: Props) {
@@ -108,6 +110,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
       case 'merge-function':
       case 'merge-subtree':
       case 'focus-subtree':
+      case 'focus-function':
         this.addTransformToStack(type);
         break;
       default:
@@ -118,6 +121,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
   addTransformToStack(
     type:
       | 'focus-subtree'
+      | 'focus-function'
       | 'merge-subtree'
       | 'merge-call-node'
       | 'merge-function'
@@ -130,10 +134,6 @@ class ProfileCallTreeContextMenu extends PureComponent {
       inverted,
     } = this.props;
 
-    // This switch statement could be simplified, but Flow can't figure out what's going
-    // on with the unions of Transforms.
-    //
-    // Tracking issue: https://github.com/facebook/flow/issues/4683
     switch (type) {
       case 'focus-subtree':
         addTransformToStack(threadIndex, {
@@ -141,6 +141,12 @@ class ProfileCallTreeContextMenu extends PureComponent {
           callNodePath: selectedCallNodePath,
           implementation,
           inverted,
+        });
+        break;
+      case 'focus-function':
+        addTransformToStack(threadIndex, {
+          type: 'focus-function',
+          funcIndex: selectedCallNodePath[selectedCallNodePath.length - 1],
         });
         break;
       case 'merge-subtree':
@@ -187,16 +193,25 @@ class ProfileCallTreeContextMenu extends PureComponent {
               onClick={this.handleClick}
               data={{ type: 'merge-call-node' }}
             >
+              <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
               Merge node into calling function
             </MenuItem>}
         <MenuItem onClick={this.handleClick} data={{ type: 'merge-function' }}>
+          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
           Merge function into caller across the entire tree
         </MenuItem>
         {/* <MenuItem onClick={this.handleClick} data={{ type: 'mergeSubtree' }}>
           Merge subtree into calling function
         </MenuItem> */}
         <MenuItem onClick={this.handleClick} data={{ type: 'focus-subtree' }}>
+          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus" />
           Focus on subtree
+        </MenuItem>
+        <MenuItem onClick={this.handleClick} data={{ type: 'focus-function' }}>
+          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus" />
+          {inverted
+            ? 'Focus on calls made by this function'
+            : 'Focus on function'}
         </MenuItem>
         <div className="react-contextmenu-separator" />
         <MenuItem

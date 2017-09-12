@@ -2,10 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import {
-  getProfileForInvertedCallTree,
-  getProfileForUnfilteredCallTree,
-} from '.././fixtures/profiles/profiles-for-call-trees';
+import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import {
   getCallTree,
   computeCallTreeCountsAndTimings,
@@ -16,7 +13,9 @@ import {
   invertCallstack,
   getCallNodeFromPath,
 } from '../../profile-logic/profile-data';
-import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
+import { formatTree } from '../fixtures/utils';
+
+import type { Profile } from '../../types/profile';
 
 describe('unfiltered call tree', function() {
   // These values are hoisted at the top for the ease of access. In the profile fixture
@@ -32,8 +31,17 @@ describe('unfiltered call tree', function() {
   const H = 7;
   const I = 8;
 
-  function getUnfilteredCallTree(): CallTree {
-    const profile = getProfileForUnfilteredCallTree();
+  function getProfile() {
+    return getProfileFromTextSamples(`
+      A A A
+      B B B
+      C C H
+      D F I
+      E G
+    `).profile;
+  }
+
+  function callTreeFromProfile(profile: Profile): CallTree {
     const [thread] = profile.threads;
     const { interval } = profile.meta;
     const callNodeInfo = getCallNodeInfo(
@@ -49,7 +57,7 @@ describe('unfiltered call tree', function() {
    * This test ensures that these generated values are correct.
    */
   describe('computed counts and timings', function() {
-    const profile = getProfileForUnfilteredCallTree();
+    const profile = getProfile();
     const [thread] = profile.threads;
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
@@ -81,7 +89,6 @@ describe('unfiltered call tree', function() {
    * Explicitly test the structure of the unfiltered call tree.
    */
   describe('computed structure', function() {
-    const callTree = getUnfilteredCallTree();
     /**
      * The profile samples have the following structure:
      *
@@ -115,84 +122,16 @@ describe('unfiltered call tree', function() {
      *    v           v
      *  E:1,1       G:1,1
      */
-
-    describe('root node A', function() {
-      const roots = callTree.getRoots();
-      const rootCallNodeIndex = roots[0];
-      it('is the root of the call tree', function() {
-        expect(roots.length).toBe(1);
-        expect(rootCallNodeIndex).toBe(A);
-      });
-      _assertNode(callTree, rootCallNodeIndex, {
-        children: [B],
-        parent: -1,
-        selfTime: 0,
-        totalTime: 3,
-      });
-    });
-    describe('intermediate node B', function() {
-      _assertNode(callTree, B, {
-        children: [C, H],
-        parent: A,
-        selfTime: 0,
-        totalTime: 3,
-      });
-    });
-    describe('intermediate node C', function() {
-      _assertNode(callTree, C, {
-        children: [D, F],
-        parent: B,
-        selfTime: 0,
-        totalTime: 2,
-      });
-    });
-    describe('intermediate node D', function() {
-      _assertNode(callTree, D, {
-        children: [E],
-        parent: C,
-        selfTime: 0,
-        totalTime: 1,
-      });
-    });
-    describe('leaf node E', function() {
-      _assertNode(callTree, E, {
-        children: [],
-        parent: D,
-        selfTime: 1,
-        totalTime: 1,
-      });
-    });
-    describe('intermediate node F', function() {
-      _assertNode(callTree, F, {
-        children: [G],
-        parent: C,
-        selfTime: 0,
-        totalTime: 1,
-      });
-    });
-    describe('leaf node G', function() {
-      _assertNode(callTree, G, {
-        children: [],
-        parent: F,
-        selfTime: 1,
-        totalTime: 1,
-      });
-    });
-    describe('intermediate node H', function() {
-      _assertNode(callTree, H, {
-        children: [I],
-        parent: B,
-        selfTime: 0,
-        totalTime: 1,
-      });
-    });
-    describe('leaf node I', function() {
-      _assertNode(callTree, I, {
-        children: [],
-        parent: H,
-        selfTime: 1,
-        totalTime: 1,
-      });
+    const { profile } = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C C H
+      D F I
+      E G
+    `);
+    const callTree = callTreeFromProfile(profile);
+    it('computes an unfiltered call tree', function() {
+      expect(formatTree(callTree)).toMatchSnapshot();
     });
   });
 
@@ -202,7 +141,14 @@ describe('unfiltered call tree', function() {
    * is supposed to behave. There is probably duplication of coverage with other tests.
    */
   describe('CallTree methods', function() {
-    const callTree = getUnfilteredCallTree();
+    const { profile } = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C C H
+      D F I
+      E G
+    `);
+    const callTree = callTreeFromProfile(profile);
 
     describe('getRoots()', function() {
       it('returns an array with the root indexes', function() {
@@ -242,7 +188,9 @@ describe('unfiltered call tree', function() {
       it('determines if the node IDs are the same between two trees', function() {
         // This is tested through strict equality, so re-generating callNodes is
         // the only thing this method expects.
-        const otherTree = getUnfilteredCallTree();
+        const otherTree = callTreeFromProfile(
+          getProfileFromTextSamples('A').profile
+        );
         expect(callTree.hasSameNodeIds(callTree)).toBe(true);
         expect(callTree.hasSameNodeIds(otherTree)).toBe(false);
       });
@@ -268,7 +216,7 @@ describe('unfiltered call tree', function() {
    * to help navigate stacks through a list of functions.
    */
   describe('getCallNodeFromPath', function() {
-    const profile = getProfileForUnfilteredCallTree();
+    const profile = getProfile();
     const [thread] = profile.threads;
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
@@ -304,26 +252,18 @@ describe('unfiltered call tree', function() {
 });
 
 describe('inverted call tree', function() {
-  // These indexes were saved by observing the generated inverted callNodeTable.
-  const stackA_branchR = 12;
-  const stackB_branchR = 11;
-  const stackC_branchR = 10;
-
-  const stackA_branchM = 9;
-  const stackB_branchM = 8;
-
-  const stackX_branchRM = 7;
-  const stackY_branchRM = 6;
-  const stackZ_branchRM = 5;
-
-  const stackA_branchL = 4;
-  const stackB_branchL = 3;
-  const stackC_branchL = 2;
-  const stackD_branchL = 1;
-  const stackE_branchL = 0;
-
-  function getInvertedCallTreeFromProfile(): CallTree {
-    const profile = getProfileForInvertedCallTree();
+  /**
+   * Explicitly test the structure of the inverted call tree.
+   */
+  describe('computed structure', function() {
+    const profile = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C X C
+      D Y X
+      E Z Y
+          Z
+    `).profile;
     const invertedThread = invertCallstack(profile.threads[0]);
     const { interval } = profile.meta;
     const callNodeInfo = getCallNodeInfo(
@@ -332,20 +272,13 @@ describe('inverted call tree', function() {
       invertedThread.funcTable
     );
 
-    return getCallTree(
+    const callTree = getCallTree(
       invertedThread,
       interval,
       callNodeInfo,
       'combined',
       true
     );
-  }
-
-  /**
-   * Explicitly test the structure of the inverted call tree.
-   */
-  describe('computed structure', function() {
-    const callTree = getInvertedCallTreeFromProfile();
 
     /**
      * Assert this tree form for each node.
@@ -371,168 +304,8 @@ describe('inverted call tree', function() {
      *      |         |         |
      *      L         M         R   <- Label the branches. (left, middle, right)
      */
-
-    describe('roots', function() {
-      it('has the roots Z and E', function() {
-        expect(callTree.getRoots()).toEqual([stackZ_branchRM, stackE_branchL]);
-      });
-    });
-
-    // Go from root to tip of branch L
-    describe('branch L - intermediate node E', function() {
-      _assertNode(callTree, stackE_branchL, {
-        children: [stackD_branchL],
-        parent: -1,
-        selfTime: 1,
-        totalTime: 1,
-      });
-    });
-    describe('branch L - intermediate node D', function() {
-      _assertNode(callTree, stackD_branchL, {
-        children: [stackC_branchL],
-        parent: stackE_branchL,
-        selfTime: 0,
-        totalTime: 1,
-      });
-    });
-    describe('branch L - intermediate node C', function() {
-      _assertNode(callTree, stackC_branchL, {
-        children: [stackB_branchL],
-        parent: stackD_branchL,
-        selfTime: 0,
-        totalTime: 1,
-      });
-    });
-    describe('branch L - intermediate node B', function() {
-      _assertNode(callTree, stackB_branchL, {
-        children: [stackA_branchL],
-        parent: stackC_branchL,
-        selfTime: 0,
-        totalTime: 1,
-      });
-    });
-    describe('branch L - intermediate node B', function() {
-      _assertNode(callTree, stackB_branchL, {
-        children: [stackA_branchL],
-        parent: stackC_branchL,
-        selfTime: 0,
-        totalTime: 1,
-      });
-    });
-
-    // Go from root to tip of branch M
-    describe('branch RM - root node Z', function() {
-      _assertNode(callTree, stackZ_branchRM, {
-        children: [stackY_branchRM],
-        parent: -1,
-        selfTime: 2,
-        totalTime: 2,
-      });
-    });
-    describe('branch RM - intermediate node Y', function() {
-      _assertNode(callTree, stackY_branchRM, {
-        children: [stackX_branchRM],
-        parent: stackZ_branchRM,
-        selfTime: 0,
-        totalTime: 2,
-      });
-    });
-    describe('branch RM - branching node X', function() {
-      _assertNode(callTree, stackX_branchRM, {
-        children: [stackB_branchR, stackC_branchR],
-        parent: stackY_branchRM,
-        selfTime: 0,
-        totalTime: 2,
-      });
-    });
-    describe('branch M - intermediate node B', function() {
-      _assertNode(callTree, stackB_branchM, {
-        children: [stackA_branchM],
-        parent: stackX_branchRM,
-        selfTime: 0,
-        totalTime: 1,
-      });
-    });
-    describe('branch M - intermediate node A', function() {
-      _assertNode(callTree, stackA_branchM, {
-        children: [],
-        parent: stackB_branchM,
-        selfTime: 0,
-        totalTime: 1,
-      });
-    });
-
-    // Go back down to branch R branching point
-    describe('branch R - intermediate node C', function() {
-      _assertNode(callTree, stackC_branchR, {
-        children: [stackB_branchR],
-        parent: stackX_branchRM,
-        selfTime: 0,
-        totalTime: 1,
-      });
-    });
-    describe('branch R - intermediate node B', function() {
-      _assertNode(callTree, stackB_branchR, {
-        children: [stackA_branchR],
-        parent: stackC_branchR,
-        selfTime: 0,
-        totalTime: 1,
-      });
-    });
-    describe('branch R - intermediate node A', function() {
-      _assertNode(callTree, stackA_branchR, {
-        children: [],
-        parent: stackB_branchR,
-        selfTime: 0,
-        totalTime: 1,
-      });
+    it('computes an inverted call tree', function() {
+      expect(formatTree(callTree)).toMatchSnapshot();
     });
   });
 });
-
-/**
- * This is a simpler interface to make verbose assertions against a call tree
- * node, so that the error messages are nice and helpful for when things fail.
- */
-function _assertNode(
-  callTree: CallTree,
-  callNodeIndex: IndexIntoCallNodeTable,
-  expected: {
-    children: IndexIntoCallNodeTable[],
-    parent: IndexIntoCallNodeTable,
-    selfTime: number,
-    totalTime: number,
-  }
-) {
-  // Transform any CallNodeIndexes into CallTree nodes.
-  const getNode = (callNodeIndex: IndexIntoCallNodeTable) =>
-    callNodeIndex === -1 ? null : callTree.getNode(callNodeIndex);
-
-  const children = callTree.getChildren(callNodeIndex).map(getNode);
-  const parent = getNode(callTree.getParent(callNodeIndex));
-  const node = getNode(callNodeIndex);
-  const expectedParent = getNode(expected.parent);
-  const expectedChildren = expected.children.map(getNode);
-  if (!node) {
-    throw new Error('Could not find a node');
-  }
-  const { selfTime, totalTime } = node;
-
-  it('has the correct number of children', function() {
-    expect(children.length).toBe(expectedChildren.length);
-  });
-  it('has the expected children', function() {
-    expect(children).toEqual(expectedChildren);
-  });
-  it('has the expected parent', function() {
-    expect(parent).toBe(expectedParent);
-  });
-  it('has the expected self time', function() {
-    expect(selfTime).toBe(
-      expected.selfTime === 0 ? '—' : `${expected.selfTime}`
-    );
-  });
-  it('has the expected total time', function() {
-    expect(totalTime).toBe(`${expected.totalTime}`);
-  });
-}

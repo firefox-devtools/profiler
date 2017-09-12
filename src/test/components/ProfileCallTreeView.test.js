@@ -8,17 +8,22 @@ import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
-import {
-  getProfileForInvertedCallTree,
-  getProfileForUnfilteredCallTree,
-} from '../fixtures/profiles/profiles-for-call-trees';
+import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { changeCallTreeSearchString } from '../../actions/profile-view';
 import { getBoundingBox } from '../fixtures/utils';
 
 describe('calltree/ProfileCallTreeView', function() {
+  const { profile } = getProfileFromTextSamples(`
+    A A A
+    B B B
+    C C H
+    D F I
+    E G
+  `);
+
   it('renders an unfiltered call tree', () => {
     const calltree = renderer.create(
-      <Provider store={storeWithProfile(getProfileForUnfilteredCallTree())}>
+      <Provider store={storeWithProfile(profile)}>
         <ProfileCallTreeView />
       </Provider>,
       { createNodeMock }
@@ -28,8 +33,17 @@ describe('calltree/ProfileCallTreeView', function() {
   });
 
   it('renders an inverted call tree', () => {
+    const profileForInvertedTree = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C X C
+      D Y X
+      E Z Y
+          Z
+    `).profile;
+
     const calltree = renderer.create(
-      <Provider store={storeWithProfile(getProfileForInvertedCallTree())}>
+      <Provider store={storeWithProfile(profileForInvertedTree)}>
         <ProfileCallTreeView />
       </Provider>,
       { createNodeMock }
@@ -39,7 +53,7 @@ describe('calltree/ProfileCallTreeView', function() {
   });
 
   it('renders call tree with a search string', () => {
-    const store = storeWithProfile(getProfileForUnfilteredCallTree());
+    const store = storeWithProfile(profile);
     store.dispatch(changeCallTreeSearchString('H'));
     const calltree = renderer.create(
       <Provider store={store}>

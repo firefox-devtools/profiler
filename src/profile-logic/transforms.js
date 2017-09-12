@@ -29,6 +29,7 @@ import type { Transform, TransformStack } from '../types/transforms';
  */
 const TRANSFORM_TO_SHORT_KEY = {
   'focus-subtree': 'f',
+  'focus-function': 'ff',
   'merge-subtree': 'ms',
   'merge-call-node': 'mcn',
   'merge-function': 'mf',
@@ -36,6 +37,7 @@ const TRANSFORM_TO_SHORT_KEY = {
 
 const SHORT_KEY_TO_TRANSFORM = {
   f: 'focus-subtree',
+  ff: 'focus-function',
   ms: 'merge-subtree',
   mcn: 'merge-call-node',
   mf: 'merge-function',
@@ -57,7 +59,8 @@ export function parseTransforms(stringValue: string = '') {
       const type = SHORT_KEY_TO_TRANSFORM[shortKey];
 
       switch (type) {
-        case 'merge-function': {
+        case 'merge-function':
+        case 'focus-function': {
           // e.g. "mf-325"
           const [, funcIndexRaw] = tuple;
           const funcIndex = parseInt(funcIndexRaw, 10);
@@ -97,6 +100,13 @@ export function stringifyTransforms(transforms: TransformStack = []): string {
       switch (transform.type) {
         case 'merge-function':
           return `${shortKey}-${transform.funcIndex}`;
+        case 'focus-function': {
+          let string = `${shortKey}-${transform.funcIndex}`;
+          if (transform.inverted) {
+            string += '-i';
+          }
+          return string;
+        }
         case 'focus-subtree':
         case 'merge-call-node':
         case 'merge-subtree': {
@@ -131,6 +141,7 @@ export function getTransformLabels(
       case 'merge-call-node':
         funcIndex = transform.callNodePath[transform.callNodePath.length - 1];
         break;
+      case 'focus-function':
       case 'merge-function':
         funcIndex = transform.funcIndex;
         break;
@@ -142,6 +153,8 @@ export function getTransformLabels(
 
     switch (transform.type) {
       case 'focus-subtree':
+        return `Focus Node: ${funcName}`;
+      case 'focus-function':
         return `Focus: ${funcName}`;
       case 'merge-subtree':
         return `Merge Subtree: ${funcName}`;
@@ -167,6 +180,8 @@ export function applyTransformToCallNodePath(
         transform.callNodePath,
         callNodePath
       );
+    case 'focus-function':
+      return _startCallNodePathWithFunction(transform.funcIndex, callNodePath);
     case 'merge-call-node':
       return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
     case 'merge-function':
@@ -185,6 +200,14 @@ function _removePrefixPathFromCallNodePath(
   return _callNodePathHasPrefixPath(prefixPath, callNodePath)
     ? callNodePath.slice(prefixPath.length - 1)
     : [];
+}
+
+function _startCallNodePathWithFunction(
+  funcIndex: IndexIntoFuncTable,
+  callNodePath: CallNodePath
+): CallNodePath {
+  const startIndex = callNodePath.indexOf(funcIndex);
+  return startIndex === -1 ? [] : callNodePath.slice(startIndex);
 }
 
 function _mergeNodeInCallNodePath(
@@ -413,7 +436,6 @@ export function focusSubtree(
     const { stackTable, frameTable, samples } = thread;
     const prefixDepth = callNodePath.length;
     const stackMatches = new Int32Array(stackTable.length);
-    // TODO - Handle any implementation here.
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
@@ -486,7 +508,6 @@ export function focusInvertedSubtree(
   return timeCode('focusInvertedSubtree', () => {
     const postfixDepth = postfixCallNodePath.length;
     const { stackTable, frameTable, samples } = thread;
-    // TODO - Match any implementation.
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
     function convertStack(leaf) {
       let matchesUpToDepth = 0; // counted from the leaf
@@ -518,6 +539,63 @@ export function focusInvertedSubtree(
       }),
     });
     return Object.assign({}, thread, {
+      samples: newSamples,
+    });
+  });
+}
+
+export function focusFunction(
+  thread: Thread,
+  funcIndexToFocus: IndexIntoFuncTable
+): Thread {
+  return timeCode('focusSubtree', () => {
+    const { stackTable, frameTable, samples } = thread;
+    const oldStackToNewStack: Map<
+      IndexIntoStackTable | null,
+      IndexIntoStackTable | null
+    > = new Map();
+    oldStackToNewStack.set(null, null);
+    const newStackTable = {
+      length: 0,
+      prefix: [],
+      frame: [],
+    };
+    for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+      const prefix = stackTable.prefix[stackIndex];
+      const frameIndex = stackTable.frame[stackIndex];
+      const funcIndex = frameTable.func[frameIndex];
+      const matchesFocusFunc = funcIndex === funcIndexToFocus;
+
+      const newPrefix = oldStackToNewStack.get(prefix);
+      if (newPrefix === undefined) {
+        throw new Error('The prefix should not map to an undefined value');
+      }
+
+      if (newPrefix !== null || matchesFocusFunc) {
+        const newStackIndex = newStackTable.length++;
+        newStackTable.prefix[newStackIndex] = newPrefix;
+        newStackTable.frame[newStackIndex] = frameIndex;
+        oldStackToNewStack.set(stackIndex, newStackIndex);
+      } else {
+        oldStackToNewStack.set(stackIndex, null);
+      }
+    }
+    const newSamples = Object.assign({}, samples, {
+      stack: samples.stack.map(oldStack => {
+        if (oldStack === null) {
+          return null;
+        }
+        const newStack = oldStackToNewStack.get(oldStack);
+        if (newStack === undefined) {
+          throw new Error(
+            'Converting from the old stack to a new stack cannot be undefined'
+          );
+        }
+        return newStack;
+      }),
+    });
+    return Object.assign({}, thread, {
+      stackTable: newStackTable,
       samples: newSamples,
     });
   });

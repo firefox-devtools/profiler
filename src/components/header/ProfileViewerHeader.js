@@ -8,8 +8,6 @@ import React, { PureComponent } from 'react';
 import ProfileThreadHeaderBar from './ProfileThreadHeaderBar';
 import Reorderable from '../shared/Reorderable';
 import TimeSelectionScrubber from './TimeSelectionScrubber';
-import ProfileThreadJankOverview from './ProfileThreadJankOverview';
-import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOverview';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import { connect } from 'react-redux';
 import {
@@ -46,9 +44,9 @@ type Props = {|
   timeRange: StartEndRange,
   zeroAt: Milliseconds,
   changeThreadOrder: typeof changeThreadOrder,
-  updateProfileSelection: typeof updateProfileSelection,
   addRangeFilterAndUnsetSelection: typeof addRangeFilterAndUnsetSelection,
   changeSelectedThread: typeof changeSelectedThread,
+  updateProfileSelection: typeof updateProfileSelection,
 |};
 
 class ProfileViewerHeader extends PureComponent {
@@ -57,9 +55,6 @@ class ProfileViewerHeader extends PureComponent {
   constructor(props: Props) {
     super(props);
     (this: any)._onZoomButtonClick = this._onZoomButtonClick.bind(this);
-    (this: any)._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(
-      this
-    );
   }
 
   _onZoomButtonClick(start: Milliseconds, end: Milliseconds) {
@@ -67,37 +62,17 @@ class ProfileViewerHeader extends PureComponent {
     addRangeFilterAndUnsetSelection(start - zeroAt, end - zeroAt);
   }
 
-  _onIntervalMarkerSelect(
-    threadIndex: ThreadIndex,
-    start: Milliseconds,
-    end: Milliseconds
-  ) {
-    const {
-      timeRange,
-      updateProfileSelection,
-      changeSelectedThread,
-    } = this.props;
-    updateProfileSelection({
-      hasSelection: true,
-      isModifying: false,
-      selectionStart: Math.max(timeRange.start, start),
-      selectionEnd: Math.min(timeRange.end, end),
-    });
-    changeSelectedThread(threadIndex);
-  }
-
   render() {
     const {
       profile,
       className,
       threadOrder,
-      visibleThreadOrder,
       changeThreadOrder,
       selection,
-      updateProfileSelection,
       timeRange,
       zeroAt,
       hiddenThreads,
+      updateProfileSelection,
     } = this.props;
     const threads = profile.threads;
 
@@ -112,47 +87,6 @@ class ProfileViewerHeader extends PureComponent {
         onSelectionChange={updateProfileSelection}
         onZoomButtonClick={this._onZoomButtonClick}
       >
-        <div
-          className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerJank`}
-        >
-          {visibleThreadOrder.map(threadIndex => {
-            const threadName = threads[threadIndex].name;
-            const processType = threads[threadIndex].processType;
-            return threadName === 'GeckoMain' && processType !== 'plugin'
-              ? <ProfileThreadJankOverview
-                  className={`${className}HeaderIntervalMarkerOverview ${className}HeaderIntervalMarkerOverviewJank`}
-                  rangeStart={timeRange.start}
-                  rangeEnd={timeRange.end}
-                  threadIndex={threadIndex}
-                  key={threadIndex}
-                  onSelect={this._onIntervalMarkerSelect}
-                  isModifyingSelection={selection.isModifying}
-                />
-              : null;
-          })}
-        </div>
-        <div
-          className={`${className}HeaderIntervalMarkerOverviewContainer ${className}HeaderIntervalMarkerOverviewContainerGfx`}
-        >
-          {visibleThreadOrder.map(threadIndex => {
-            const threadName = threads[threadIndex].name;
-            const processType = threads[threadIndex].processType;
-            return (threadName === 'GeckoMain' ||
-              threadName === 'Compositor' ||
-              threadName === 'Renderer') &&
-            processType !== 'plugin'
-              ? <ProfileThreadTracingMarkerOverview
-                  className={`${className}HeaderIntervalMarkerOverview ${className}HeaderIntervalMarkerOverviewGfx ${className}HeaderIntervalMarkerOverviewThread${threadName}`}
-                  rangeStart={timeRange.start}
-                  rangeEnd={timeRange.end}
-                  threadIndex={threadIndex}
-                  key={threadIndex}
-                  onSelect={this._onIntervalMarkerSelect}
-                  isModifyingSelection={selection.isModifying}
-                />
-              : null;
-          })}
-        </div>
         <OverflowEdgeIndicator
           className={`${className}HeaderOverflowEdgeIndicator`}
         >
@@ -172,6 +106,7 @@ class ProfileViewerHeader extends PureComponent {
                   rangeStart={timeRange.start}
                   rangeEnd={timeRange.end}
                   isHidden={hiddenThreads.includes(threadIndex)}
+                  isModifyingSelection={selection.isModifying}
                 />
               )}
             </Reorderable>

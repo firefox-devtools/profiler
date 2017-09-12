@@ -5,7 +5,7 @@
 import { storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
-import { getProfileWithNamedThreads } from './fixtures/profiles';
+import { getProfileWithNamedThreads } from '../fixtures/profiles/make-profile';
 
 import * as ProfileViewActions from '../../actions/profile-view';
 

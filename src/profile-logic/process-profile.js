@@ -141,7 +141,7 @@ function _extractFuncsAndResourcesFromFrames(
     resourceTable.name[index] = origin;
     resourceTable.host[index] = host;
   }
-  function addURLResource(url: IndexIntoStringTable) {
+  function addUrlResource(url: IndexIntoStringTable) {
     const index = resourceTable.length++;
     resourceTable.type[index] = resourceTypes.url;
     resourceTable.name[index] = url;
@@ -240,7 +240,7 @@ function _extractFuncsAndResourcesFromFrames(
               addWebhostResource(originStringIndex, hostIndex);
             } else {
               const urlStringIndex = stringTable.indexForString(scriptURI);
-              addURLResource(urlStringIndex);
+              addUrlResource(urlStringIndex);
             }
           } else {
             resourceIndex = maybeResourceIndex;
@@ -648,10 +648,20 @@ export function processProfile(geckoProfile: GeckoProfile): Profile {
     }
   }
 
-  const meta = Object.assign({}, geckoProfile.meta, {
+  const meta = {
+    interval: geckoProfile.meta.interval,
+    startTime: geckoProfile.meta.startTime,
+    abi: geckoProfile.meta.abi,
+    misc: geckoProfile.meta.misc,
+    oscpu: geckoProfile.meta.oscpu,
+    platform: geckoProfile.meta.platform,
+    processType: geckoProfile.meta.processType,
+    product: geckoProfile.meta.product,
+    stackwalk: geckoProfile.meta.stackwalk,
+    toolkit: geckoProfile.meta.toolkit,
+    version: geckoProfile.meta.version,
     preprocessedProfileVersion: CURRENT_VERSION,
-  });
-  delete meta.shutdownTime;
+  };
 
   const result = {
     meta,
