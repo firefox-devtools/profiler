@@ -11,6 +11,7 @@ import {
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import memoize from 'memoize-immutable';
+import WeakTupleMap from 'weaktuplemap';
 import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
@@ -446,15 +447,25 @@ export const selectorsForThread = (
           throw new Error('Unhandled transform.');
       }
     };
-    const applyTransformMemoized = memoize(applyTransform, { limit: 10 });
+    // It becomes very expensive to apply each transform over and over again as they
+    // typically take around 100ms to run per transform on a fast machine. Memoize
+    // memoize each step individually so that they transform stack can be pushed and
+    // popped frequently and easily.
+    const applyTransformMemoized = memoize(applyTransform, {
+      limit: 15,
+      cache: new WeakTupleMap(),
+    });
     const getTransformStack = (state: State): TransformStack =>
       UrlState.getTransformStack(state, threadIndex);
     const _getRangeAndTransformFilteredThread = createSelector(
       getRangeFilteredThread,
       getTransformStack,
-      (startingThread, transforms): Thread => {
-        return transforms.reduce(applyTransformMemoized, startingThread);
-      }
+      (startingThread, transforms): Thread =>
+        transforms.reduce(
+          // Apply the reducer using an arrow function to ensure correct memoization.
+          (thread, transform) => applyTransformMemoized(thread, transform),
+          startingThread
+        )
     );
     const _getImplementationFilteredThread = createSelector(
       _getRangeAndTransformFilteredThread,
