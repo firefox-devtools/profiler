@@ -17,8 +17,8 @@ test:
     - yarn license-check
   override:
     - yarn lint
-    - yarn flow -- --quiet
-    - yarn test -- --coverage --runInBand
+    - yarn flow --quiet
+    - yarn test --coverage --runInBand
     - yarn build:quiet
   post:
     - bash <(curl -s https://codecov.io/bash)

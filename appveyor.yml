@@ -18,8 +18,8 @@ test_script:
   - yarn license-check
   - yarn lint
   # Flow support for Windows isn't very stable, let's disable it for now
-  #- yarn flow -- --quiet
-  #- yarn flow -- stop
+  # - yarn flow --quiet
+  # - yarn flow stop
   - yarn test
   - yarn build:quiet
 
