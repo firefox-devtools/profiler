@@ -29,11 +29,15 @@ Header set X-Frame-Options SAMEORIGIN
 # Do not give the referrer for external navigations.
 Header set Referrer-Policy same-origin
 
-# 1. The hash in script-src is for the addon's content.js file being injected
-#    with WebExt's tabs.executeScript API. You can generate it using
-#    https://report-uri.io/home/hash after grabbing it from the Inspector.
-#    NOTE: you can't use the script itself as the API modifies it before injecting.
-#    Shortening URLs inserts a script from bitly.
+# 1. script-src
+#   a. The first hash is for the addon's content.js file being injected
+#      with WebExt's tabs.executeScript API.
+#   b. The second hash is for the addon's content-home.js being injected from
+#      the addon's manifest.json.
+#   You can generate these hashes using the website
+#   https://report-uri.io/home/hash after grabbing the script from the Inspector.
+#   NOTE: you can't use the script file directly as the API modifies it before injecting.
+#   c. When shortening URLs witn JSONP, we insert a script from bitly.
 # 2. `unsafe-inline` in `style-src` is necessary to support favicons.
 # 3. Same for `*` in `img-src`.
 # 4. `object-src` is for plugins, we don't need them.
@@ -42,4 +46,4 @@ Header set Referrer-Policy same-origin
 # 7. `form-action`prevents forms, we don't need this.`
 # 8. `upgrade-insecure-requests` instructs the browser to upgrade all insecure
 #     requests to HTTPS, but only the ones to the same hostname.
-Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw=' https://api-ssl.bitly.com; style-src 'self' 'unsafe-inline'; img-src *; object-src 'none'; connect-src *; frame-ancestors 'self'; form-action 'none'; upgrade-insecure-requests"
+Header set Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw=' 'sha256-AdiT28wTL5FNaRVHWQVFC0ic3E20Gu4/PiC9xukS9+E=' https://api-ssl.bitly.com; style-src 'self' 'unsafe-inline'; img-src *; object-src 'none'; connect-src *; frame-ancestors 'self'; form-action 'none'; upgrade-insecure-requests"

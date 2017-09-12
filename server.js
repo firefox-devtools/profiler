@@ -21,7 +21,11 @@ new WebpackDevServer(webpack(config), {
     'Referrer-Policy': 'same-origin',
     'Content-Security-Policy': oneLine`
       default-src 'self';
-      script-src 'self' 'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw=' https://api-ssl.bitly.com;
+      script-src
+        'self'
+        'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw='
+        'sha256-AdiT28wTL5FNaRVHWQVFC0ic3E20Gu4/PiC9xukS9+E='
+        https://api-ssl.bitly.com;
       style-src 'self' 'unsafe-inline';
       img-src *;
       object-src 'none';
