@@ -111,9 +111,9 @@ export type ResourceTable = {
   addonId: any[], // TODO
   icon: any[], // TODO
   length: number,
-  lib: Array<IndexIntoLibs | null>,
+  lib: Array<IndexIntoLibs | void>,
   name: Array<IndexIntoStringTable | -1>,
-  host: Array<IndexIntoStringTable | null>,
+  host: Array<IndexIntoStringTable | void>,
   type: resourceTypeEnum[],
 };
 
