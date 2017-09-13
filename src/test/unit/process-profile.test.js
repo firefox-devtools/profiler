@@ -1,0 +1,117 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
+
+import { extractFuncsAndResourcesFromFrameLocations } from '../../profile-logic/process-profile';
+import { UniqueStringArray } from '../../utils/unique-string-array';
+
+describe('extract functions and resource from location strings', function() {
+  // These location strings are turned into the proper funcs.
+  const locations = [
+    // Extract unsymbolicated memory and match them to libraries.
+    '0xc0ff33',
+
+    // Extract C++ function names and resources
+    'cppFunction1 (in c++ resource name1) + 123',
+    'cppFunction2 (in c++ resource name2) (234:345)',
+    'cppFunction3 (in c++ resource name2)',
+
+    // Extract JS functions URL information
+    'jsFunction1 (http://script.com/one.js:456)',
+    'http://script.com/one.js:456',
+
+    // Something unknown
+    'mysterious location',
+  ];
+  const libs = [
+    // This library will match the '0xc0ff33' location.
+    {
+      start: 0xc00000,
+      end: 0xd00000,
+      offset: 0,
+      arch: '',
+      name: 'No symbols library',
+      path: '',
+      debugName: '',
+      debugPath: '',
+      breakpadId: '',
+    },
+  ];
+  const stringTable = new UniqueStringArray();
+  const locationIndexes = locations.map(location =>
+    stringTable.indexForString(location)
+  );
+  const geckoFrameStruct = {
+    location: locationIndexes,
+    implementation: Array(locationIndexes.length).fill(null),
+    optimizations: Array(locationIndexes.length).fill(null),
+    line: Array(locationIndexes.length).fill(null),
+    category: Array(locationIndexes.length).fill(null),
+    length: locationIndexes.length,
+  };
+
+  it('extracts the information for all different types of locations', function() {
+    const [
+      funcTable,
+      resourceTable,
+      frameFuncs,
+    ] = extractFuncsAndResourcesFromFrameLocations(
+      geckoFrameStruct,
+      stringTable,
+      libs
+    );
+
+    expect(
+      frameFuncs.map((funcIndex, locationIndex) => {
+        // Map all the results into a human readable object for easy snapshotting.
+        const locationName = locations[locationIndex];
+
+        const funcName = stringTable.getString(funcTable.name[funcIndex]);
+        const resourceIndex = funcTable.resource[funcIndex];
+        const address = funcTable.address[funcIndex];
+        const isJS = funcTable.isJS[funcIndex];
+        const fileNameIndex = funcTable.fileName[funcIndex];
+        const fileName =
+          fileNameIndex === null ? null : stringTable.getString(fileNameIndex);
+        const lineNumber = funcTable.lineNumber[funcIndex];
+
+        let libIndex, resourceName, host, resourceType;
+        if (resourceIndex === -1) {
+          resourceName = null;
+          host = null;
+          resourceType = null;
+        } else {
+          const hostStringIndex = resourceTable.host[resourceIndex];
+          libIndex = resourceTable.lib[resourceIndex];
+          resourceName = stringTable.getString(
+            resourceTable.name[resourceIndex]
+          );
+          host =
+            hostStringIndex === undefined
+              ? null
+              : stringTable.getString(hostStringIndex);
+          resourceType = resourceTable.type[resourceIndex];
+        }
+        const lib = libIndex === undefined ? undefined : libs[libIndex];
+
+        return [
+          locationName,
+          {
+            funcName,
+            isJS,
+            resourceIndex,
+            address,
+            fileName,
+            lineNumber,
+            libIndex,
+            resourceName,
+            host,
+            resourceType,
+            lib,
+          },
+        ];
+      })
+    ).toMatchSnapshot();
+  });
+});
