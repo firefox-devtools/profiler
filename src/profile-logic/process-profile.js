@@ -103,7 +103,7 @@ function _cleanFunctionName(functionName: string): string {
   return functionName;
 }
 
-function _extractFuncsAndResourcesFromFrames(
+export function extractFuncsAndResourcesFromFrameLocations(
   geckoFrameStruct: GeckoFrameStruct,
   stringTable: UniqueStringArray,
   libs: Lib[]
@@ -363,7 +363,11 @@ function _processThread(
     funcTable,
     resourceTable,
     frameFuncs,
-  ] = _extractFuncsAndResourcesFromFrames(geckoFrameStruct, stringTable, libs);
+  ] = extractFuncsAndResourcesFromFrameLocations(
+    geckoFrameStruct,
+    stringTable,
+    libs
+  );
   const frameTable: FrameTable = _processFrameTable(
     geckoFrameStruct,
     funcTable,
