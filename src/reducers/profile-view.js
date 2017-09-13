@@ -10,6 +10,8 @@ import {
 } from '../profile-logic/symbolication';
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
+import memoize from 'memoize-immutable';
+import WeakTupleMap from 'weaktuplemap';
 import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
@@ -414,45 +416,56 @@ export const selectorsForThread = (
         return ProfileData.filterThreadToRange(thread, start, end);
       }
     );
+    const applyTransform = (thread, transform) => {
+      switch (transform.type) {
+        case 'focus-subtree':
+          return transform.inverted
+            ? Transforms.focusInvertedSubtree(
+                thread,
+                transform.callNodePath,
+                transform.implementation
+              )
+            : Transforms.focusSubtree(
+                thread,
+                transform.callNodePath,
+                transform.implementation
+              );
+        case 'merge-subtree':
+          // TODO - Implement this transform.
+          return thread;
+        case 'merge-call-node':
+          return Transforms.mergeCallNode(
+            thread,
+            transform.callNodePath,
+            transform.implementation
+          );
+        case 'merge-function':
+          return Transforms.mergeFunction(thread, transform.funcIndex);
+        case 'focus-function':
+          return Transforms.focusFunction(thread, transform.funcIndex);
+        default:
+          throw new Error('Unhandled transform.');
+      }
+    };
+    // It becomes very expensive to apply each transform over and over again as they
+    // typically take around 100ms to run per transform on a fast machine. Memoize
+    // memoize each step individually so that they transform stack can be pushed and
+    // popped frequently and easily.
+    const applyTransformMemoized = memoize(applyTransform, {
+      limit: 15,
+      cache: new WeakTupleMap(),
+    });
     const getTransformStack = (state: State): TransformStack =>
       UrlState.getTransformStack(state, threadIndex);
     const _getRangeAndTransformFilteredThread = createSelector(
       getRangeFilteredThread,
       getTransformStack,
-      (startingThread, transforms): Thread => {
-        const result = transforms.reduce((thread, transform) => {
-          switch (transform.type) {
-            case 'focus-subtree':
-              return transform.inverted
-                ? Transforms.focusInvertedSubtree(
-                    thread,
-                    transform.callNodePath,
-                    transform.implementation
-                  )
-                : Transforms.focusSubtree(
-                    thread,
-                    transform.callNodePath,
-                    transform.implementation
-                  );
-            case 'merge-subtree':
-              // TODO - Implement this transform.
-              return thread;
-            case 'merge-call-node':
-              return Transforms.mergeCallNode(
-                thread,
-                transform.callNodePath,
-                transform.implementation
-              );
-            case 'merge-function':
-              return Transforms.mergeFunction(thread, transform.funcIndex);
-            case 'focus-function':
-              return Transforms.focusFunction(thread, transform.funcIndex);
-            default:
-              throw new Error('Unhandled transform.');
-          }
-        }, startingThread);
-        return result;
-      }
+      (startingThread, transforms): Thread =>
+        transforms.reduce(
+          // Apply the reducer using an arrow function to ensure correct memoization.
+          (thread, transform) => applyTransformMemoized(thread, transform),
+          startingThread
+        )
     );
     const _getImplementationFilteredThread = createSelector(
       _getRangeAndTransformFilteredThread,
