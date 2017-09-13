@@ -6,6 +6,7 @@ import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import { timeCode } from '../../utils/time-code';
 import { getSampleCallNodes } from '../../profile-logic/profile-data';
+import { BLUE_70, BLUE_40 } from 'photon-colors';
 
 class ThreadStackGraph extends PureComponent {
   constructor(props) {
@@ -107,8 +108,7 @@ class ThreadStackGraph extends PureComponent {
       const startY = c.height - sampleHeight;
       // const responsiveness = thread.samples.responsiveness[i];
       // const jankSeverity = Math.min(1, responsiveness / 100);
-      ctx.fillStyle = isHighlighted ? '#003eaa' : '#45a1ff';
-      //                              --blue-70 : --blue-40
+      ctx.fillStyle = isHighlighted ? BLUE_70 : BLUE_40;
       ctx.fillRect(
         (sampleTime - range[0]) * xPixelsPerMs,
         startY,

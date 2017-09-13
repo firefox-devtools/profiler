@@ -71,13 +71,13 @@
 
 .loading-div-1 {
   animation-delay: -900ms;
-  background-color: var(--theme-highlight-purple);
+  background-color: var(--red-50);
   width: 100%;
 }
 
 .loading-div-2 {
   animation-delay: -800ms;
-  background-color: var(--theme-highlight-pink);
+  background-color: var(--blue-50);
   left: 1%;
   width: 97%;
 }
@@ -86,56 +86,56 @@
   animation-delay: -700ms;
   width: 30%;
   left: 5%;
-  background-color: var(--theme-highlight-orange);
+  background-color: var(--orange-50);
 }
 
 .loading-div-4 {
   animation-delay: -600ms;
   width: 53%;
   left: 43%;
-  background-color: var(--theme-highlight-lightorange);
+  background-color: var(--purple-50);
 }
 
 .loading-div-5 {
   animation-delay: -500ms;
   width: 14%;
   left: 8%;
-  background-color: var(--theme-highlight-purple);
+  background-color: var(--purple-50);
 }
 
 .loading-div-6 {
   animation-delay: -400ms;
   width: 11%;
   left: 23%;
-  background-color: var(--theme-highlight-green);
+  background-color: var(--green-50);
 }
 
 .loading-div-7 {
   animation-delay: -300ms;
   width: 15%;
   left: 44%;
-  background-color: var(--theme-highlight-red);
+  background-color: var(--orange-50);
 }
 
 .loading-div-8 {
   animation-delay: -200ms;
   width: 17%;
   left: 60%;
-  background-color: var(--theme-highlight-red);
+  background-color: var(--orange-50);
 }
 
 .loading-div-9 {
   animation-delay: -100ms;
   width: 2%;
   left: 78%;
-  background-color: var(--theme-highlight-blue);
+  background-color: var(--blue-50);
 }
 
 .loading-div-10 {
   animation-delay: 0ms;
   width: 11%;
   left: 81%;
-  background-color: var(--theme-highlight-red);
+  background-color: var(--green-60);
 }
 
 @keyframes loadingdiv {

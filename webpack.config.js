@@ -51,7 +51,9 @@ const baseConfig = {
       {
         test: /\.css?$/,
         loaders: ['style-loader', 'css-loader?minimize'],
-        include: includes,
+        include: includes.concat(
+          path.join(__dirname, 'node_modules', 'photon-colors')
+        ),
       },
       {
         test: /\.jpg$/,

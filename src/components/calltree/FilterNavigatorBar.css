@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .filterNavigatorBar {
-  --internal-selected-color: var(--selected-color, var(--blue-50));
+  --internal-selected-color: var(--selected-color, var(--blue-60));
   height: 24px;
   margin: 0;
   padding: 0;
@@ -82,23 +82,23 @@
   color: var(--internal-selected-color);
 }
 
-.filterNavigatorBarItem:hover {
+.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
-.filterNavigatorBarItem:not(.filterNavigatorBarRootItem):hover::before,
+.filterNavigatorBarItem:not(.filterNavigatorBarRootItem):not(.filterNavigatorBarLeafItem):hover::before,
 .filterNavigatorBarItem.filterNavigatorBarRootItem:hover,
-.filterNavigatorBarItem:hover::after {
+.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover::after {
   border-color: rgba(0, 0, 0, 0.1);
 }
 
-.filterNavigatorBarItem:active:hover {
+.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):active:hover {
   background-color: rgba(0, 0, 0, 0.2);
 }
 
-.filterNavigatorBarItem:not(.filterNavigatorBarRootItem):active:hover::before,
+.filterNavigatorBarItem:not(.filterNavigatorBarRootItem):not(.filterNavigatorBarLeafItem):active:hover::before,
 .filterNavigatorBarItem.filterNavigatorBarRootItem:active:hover,
-.filterNavigatorBarItem:active:hover::after {
+.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):active:hover::after {
   border-color: rgba(0, 0, 0, 0.2);
 }
 

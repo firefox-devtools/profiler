@@ -3,8 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-// https://github.com/FirefoxUX/design-tokens/tree/master/colors
-// Firefox Colors v1.0.3
+/**
+ * These are the colors from Photon. They are inlined to provide easy access. If updating
+ * please change the CSS variables as well.
+ *
+ * Firefox Colors v1.0.3
+ * https://github.com/FirefoxUX/design-tokens/tree/master/colors
+ */
 
 export const MAGENTA_50 = '#ff1ad9';
 export const MAGENTA_60 = '#ed00b5';
