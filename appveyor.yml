@@ -4,15 +4,10 @@ environment:
 platform: x64 # flow needs 64b platforms
 # Install scripts. (runs after repo cloning)
 install:
-  # When Yarn 0.28 will be on Chocolatey, we'll be able to do the following to
-  # install latest version:
-  # install yarn and node using Chocolatey
-  #  - choco install yarn
-  # But until then we need to install manually
-  # 1. Node
-  - ps: Install-Product node $env:nodejs_version $env:platform
-  # 2. Yarn is already at version 0.24.6, so let's keep it
-  # 3. Finally setup the project
+  # 1. Install yarn and node using Chocolatey. 
+  # Node version for yarn 1.0.1 is v8.4.
+  - choco install yarn --version 1.0.1
+  # 2. Setup the project
   - yarn install
 
 # Post-install test scripts.
@@ -23,8 +18,8 @@ test_script:
   - yarn license-check
   - yarn lint
   # Flow support for Windows isn't very stable, let's disable it for now
-  #- yarn flow -- --quiet
-  #- yarn flow -- stop
+  # - yarn flow --quiet
+  # - yarn flow stop
   - yarn test
   - yarn build:quiet
 
