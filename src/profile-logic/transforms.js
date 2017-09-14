@@ -543,7 +543,6 @@ export function focusInvertedSubtree(
     });
   });
 }
-
 export function focusFunction(
   thread: Thread,
   funcIndexToFocus: IndexIntoFuncTable
@@ -599,4 +598,82 @@ export function focusFunction(
       samples: newSamples,
     });
   });
+}
+
+/**
+ * When restoring function in a CallNodePath there can be multiple correct CallNodePaths
+ * that could be restored. The best approach would probably be to restore to the
+ * "heaviest" callstack in the call tree (i.e. the one that is displayed first in the
+ * calltree because it has the most samples under it.) This function only finds the first
+ * match and returns it.
+ */
+export function restoreAllFunctionsInCallNodePath(
+  thread: Thread,
+  previousImplementationFilter: ImplementationFilter,
+  callNodePath: CallNodePath
+): CallNodePath {
+  const { stackTable, frameTable } = thread;
+  const funcMatchesImplementation = FUNC_MATCHES[previousImplementationFilter];
+  // For every stackIndex, matchesUpToDepth[stackIndex] will be:
+  //  - null if stackIndex does not match the callNodePath
+  //  - <depth> if stackIndex matches callNodePath up to (and including) callNodePath[<depth>]
+  const matchesUpToDepth = [];
+  let tipStackIndex = null;
+  // Try to find the tip most stackIndex in the CallNodePath, but skip anything
+  // that doesn't match the previous implementation filter.
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefix = stackTable.prefix[stackIndex];
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    const prefixPathDepth = prefix === null ? -1 : matchesUpToDepth[prefix];
+
+    if (prefixPathDepth === null) {
+      continue;
+    }
+
+    const pathDepth = prefixPathDepth + 1;
+    const nextPathFuncIndex = callNodePath[pathDepth];
+    if (nextPathFuncIndex === funcIndex) {
+      // This function is a match.
+      matchesUpToDepth[stackIndex] = pathDepth;
+      if (pathDepth === callNodePath.length - 1) {
+        // The tip of the CallNodePath has been found.
+        tipStackIndex = stackIndex;
+        break;
+      }
+    } else if (!funcMatchesImplementation(thread, funcIndex)) {
+      // This function didn't match, but it also wasn't in the previous implementation.
+      // Keep on searching for a match.
+      matchesUpToDepth[stackIndex] = prefixPathDepth;
+    } else {
+      matchesUpToDepth[stackIndex] = null;
+    }
+  }
+
+  // Turn the stack index into a CallNodePath
+  if (tipStackIndex === null) {
+    return [];
+  }
+  const newCallNodePath = [];
+  for (
+    let stackIndex = tipStackIndex;
+    stackIndex !== null;
+    stackIndex = stackTable.prefix[stackIndex]
+  ) {
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    newCallNodePath.push(funcIndex);
+  }
+  return newCallNodePath.reverse();
+}
+
+export function filterCallNodePathByImplementation(
+  thread: Thread,
+  implementationFilter: ImplementationFilter,
+  callNodePath: CallNodePath
+): CallNodePath {
+  const funcMatchesImplementation = FUNC_MATCHES[implementationFilter];
+  return callNodePath.filter(funcIndex =>
+    funcMatchesImplementation(thread, funcIndex)
+  );
 }
