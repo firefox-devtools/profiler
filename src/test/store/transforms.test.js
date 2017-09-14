@@ -14,10 +14,6 @@ import {
   changeSelectedCallNode,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
-import {
-  getImplementationFilter,
-  getSelectedThreadIndex,
-} from '../../reducers/url-state';
 
 describe('"focus-subtree" transform', function() {
   describe('on a call tree', function() {
@@ -252,16 +248,7 @@ describe('"merge-call-node" transform', function() {
        *      b
        */
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(
-        changeImplementationFilter(
-          'js',
-          getImplementationFilter(getState()),
-          selectedThreadSelectors.getRangeAndTransformFilteredThread(
-            getState()
-          ),
-          getSelectedThreadIndex(getState())
-        )
-      );
+      dispatch(changeImplementationFilter('js'));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toMatchSnapshot();
@@ -274,16 +261,7 @@ describe('"merge-call-node" transform', function() {
        *      b
        */
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(
-        changeImplementationFilter(
-          'js',
-          getImplementationFilter(getState()),
-          selectedThreadSelectors.getRangeAndTransformFilteredThread(
-            getState()
-          ),
-          getSelectedThreadIndex(getState())
-        )
-      );
+      dispatch(changeImplementationFilter('js'));
       dispatch(addTransformToStack(threadIndex, mergeJSPathAB));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
@@ -316,16 +294,7 @@ describe('"merge-call-node" transform', function() {
        *           b
        */
       const { dispatch, getState } = storeWithProfile(profile);
-      dispatch(
-        changeImplementationFilter(
-          'js',
-          getImplementationFilter(getState()),
-          selectedThreadSelectors.getRangeAndTransformFilteredThread(
-            getState()
-          ),
-          getSelectedThreadIndex(getState())
-        )
-      );
+      dispatch(changeImplementationFilter('js'));
       dispatch(addTransformToStack(threadIndex, mergeCombinedPathToA));
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))

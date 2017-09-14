@@ -269,16 +269,7 @@ describe('actions/changeImplementationFilter', function() {
   });
 
   it('can be changed to cpp', function() {
-    store.dispatch(
-      changeImplementationFilter(
-        'cpp',
-        UrlStateSelectors.getImplementationFilter(store.getState()),
-        selectedThreadSelectors.getRangeAndTransformFilteredThread(
-          store.getState()
-        ),
-        UrlStateSelectors.getSelectedThreadIndex(store.getState())
-      )
-    );
+    store.dispatch(changeImplementationFilter('cpp'));
     const filter = UrlStateSelectors.getImplementationFilter(store.getState());
     expect(filter).toEqual('cpp');
   });
