@@ -222,19 +222,6 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
       // This CallNodePath may need to be updated twice.
       let selectedCallNodePath = state[threadIndex].selectedCallNodePath;
 
-      if (
-        implementation !== 'combined' &&
-        previousImplementation !== 'combined'
-      ) {
-        // Restore the CallNodePath back to an unfiltered state before re-filtering
-        // it on the next implementation.
-        selectedCallNodePath = Transforms.restoreAllFunctionsInCallNodePath(
-          transformedThread,
-          previousImplementation,
-          selectedCallNodePath
-        );
-      }
-
       if (implementation === 'combined') {
         // Restore the full CallNodePaths
         selectedCallNodePath = Transforms.restoreAllFunctionsInCallNodePath(
@@ -243,6 +230,15 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
           selectedCallNodePath
         );
       } else {
+        if (previousImplementation !== 'combined') {
+          // Restore the CallNodePath back to an unfiltered state before re-filtering
+          // it on the next implementation.
+          selectedCallNodePath = Transforms.restoreAllFunctionsInCallNodePath(
+            transformedThread,
+            previousImplementation,
+            selectedCallNodePath
+          );
+        }
         // Take the full CallNodePath, and strip out anything not in this implementation.
         selectedCallNodePath = Transforms.filterCallNodePathByImplementation(
           transformedThread,
