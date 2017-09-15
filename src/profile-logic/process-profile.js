@@ -111,7 +111,7 @@ type ExtractionInfo = {
   libToResourceIndex: Map<Lib, IndexIntoResourceTable>,
   originToResourceIndex: Map<string, IndexIntoResourceTable>,
   libNameToResourceIndex: Map<IndexIntoStringTable, IndexIntoResourceTable>,
-  stringTableIndexToNewFuncIndex: Map<IndexIntoStringTable, IndexIntoFuncTable>,
+  stringToNewFuncIndex: Map<string, IndexIntoFuncTable>,
 };
 
 /**
@@ -158,21 +158,18 @@ export function extractFuncsAndResourcesFromFrameLocations(
     libToResourceIndex: new Map(),
     originToResourceIndex: new Map(),
     libNameToResourceIndex: new Map(),
-    stringTableIndexToNewFuncIndex: new Map(),
+    stringToNewFuncIndex: new Map(),
   };
 
   // Go through every frame location string, and deduce the function and resource
   // information by applying various string matching heuristics.
   const locationFuncs = locationStringIndexes.map(locationIndex => {
-    let funcIndex = extractionInfo.stringTableIndexToNewFuncIndex.get(
-      locationIndex
-    );
+    const locationString = stringTable.getString(locationIndex);
+    let funcIndex = extractionInfo.stringToNewFuncIndex.get(locationString);
     if (funcIndex !== undefined) {
       // The location string was already processed.
       return funcIndex;
     }
-
-    const locationString = stringTable.getString(locationIndex);
 
     // These nested `if` branches check for 3 cases for constructing function and
     // resource information.
@@ -195,7 +192,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
     }
 
     // Cache the above results.
-    extractionInfo.stringTableIndexToNewFuncIndex.set(locationIndex, funcIndex);
+    extractionInfo.stringToNewFuncIndex.set(locationString, funcIndex);
     return funcIndex;
   });
 
@@ -291,17 +288,16 @@ function _extractCppFunction(
   const {
     funcTable,
     stringTable,
-    stringTableIndexToNewFuncIndex,
+    stringToNewFuncIndex,
     libNameToResourceIndex,
     resourceTable,
   } = extractionInfo;
 
-  const [, funcName, libraryNameString] = cppMatch;
-  const funcNameIndex = stringTable.indexForString(
-    _cleanFunctionName(funcName)
-  );
+  const [, funcNameRaw, libraryNameString] = cppMatch;
+  const funcName = _cleanFunctionName(funcNameRaw);
+  const funcNameIndex = stringTable.indexForString(funcName);
   const libraryNameStringIndex = stringTable.indexForString(libraryNameString);
-  const funcIndex = stringTableIndexToNewFuncIndex.get(funcNameIndex);
+  const funcIndex = stringToNewFuncIndex.get(funcName);
   if (funcIndex !== undefined) {
     // Do not insert a new function.
     return funcIndex;
