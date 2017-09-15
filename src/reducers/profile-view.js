@@ -207,6 +207,60 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
         ...state.slice(threadIndex + 1),
       ];
     }
+    case 'CHANGE_IMPLEMENTATION_FILTER': {
+      const {
+        transformedThread,
+        threadIndex,
+        previousImplementation,
+        implementation,
+      } = action;
+
+      if (previousImplementation === implementation) {
+        return state;
+      }
+
+      // This CallNodePath may need to be updated twice.
+      let selectedCallNodePath = state[threadIndex].selectedCallNodePath;
+
+      if (implementation === 'combined') {
+        // Restore the full CallNodePaths
+        selectedCallNodePath = Transforms.restoreAllFunctionsInCallNodePath(
+          transformedThread,
+          previousImplementation,
+          selectedCallNodePath
+        );
+      } else {
+        if (previousImplementation !== 'combined') {
+          // Restore the CallNodePath back to an unfiltered state before re-filtering
+          // it on the next implementation.
+          selectedCallNodePath = Transforms.restoreAllFunctionsInCallNodePath(
+            transformedThread,
+            previousImplementation,
+            selectedCallNodePath
+          );
+        }
+        // Take the full CallNodePath, and strip out anything not in this implementation.
+        selectedCallNodePath = Transforms.filterCallNodePathByImplementation(
+          transformedThread,
+          implementation,
+          selectedCallNodePath
+        );
+      }
+
+      const expandedCallNodePaths = [];
+      for (let i = 1; i < selectedCallNodePath.length; i++) {
+        expandedCallNodePaths.push(selectedCallNodePath.slice(0, i));
+      }
+
+      return [
+        ...state.slice(0, threadIndex),
+        Object.assign({}, state[threadIndex], {
+          selectedCallNodePath,
+          expandedCallNodePaths,
+        }),
+        ...state.slice(threadIndex + 1),
+      ];
+    }
     default:
       return state;
   }
@@ -367,6 +421,7 @@ export type SelectorsForThread = {
   getTransformStack: State => TransformStack,
   getTransformLabels: State => string[],
   getRangeFilteredThread: State => Thread,
+  getRangeAndTransformFilteredThread: State => Thread,
   getJankInstances: State => TracingMarker[],
   getTracingMarkers: State => TracingMarker[],
   getMarkerTiming: State => MarkerTimingRows,
@@ -457,7 +512,7 @@ export const selectorsForThread = (
     });
     const getTransformStack = (state: State): TransformStack =>
       UrlState.getTransformStack(state, threadIndex);
-    const _getRangeAndTransformFilteredThread = createSelector(
+    const getRangeAndTransformFilteredThread = createSelector(
       getRangeFilteredThread,
       getTransformStack,
       (startingThread, transforms): Thread =>
@@ -468,7 +523,7 @@ export const selectorsForThread = (
         )
     );
     const _getImplementationFilteredThread = createSelector(
-      _getRangeAndTransformFilteredThread,
+      getRangeAndTransformFilteredThread,
       UrlState.getImplementationFilter,
       ProfileData.filterThreadByImplementation
     );
@@ -663,6 +718,7 @@ export const selectorsForThread = (
       getTransformStack,
       getTransformLabels,
       getRangeFilteredThread,
+      getRangeAndTransformFilteredThread,
       getJankInstances,
       getTracingMarkers,
       getMarkerTiming,
