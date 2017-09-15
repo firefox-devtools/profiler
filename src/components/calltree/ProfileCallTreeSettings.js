@@ -6,23 +6,29 @@
 
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import actions from '../../actions';
+import {
+  changeImplementationFilter,
+  changeInvertCallstack,
+  changeCallTreeSearchString,
+} from '../../actions/profile-view';
 import {
   getImplementationFilter,
   getInvertCallstack,
   getSearchString,
 } from '../../reducers/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
-
+import { toValidImplementationFilter } from '../../profile-logic/profile-data';
 import './ProfileCallTreeSettings.css';
 
+import type { ImplementationFilter } from '../../types/actions';
+
 type Props = {
-  implementationFilter: string,
+  implementationFilter: ImplementationFilter,
   invertCallstack: boolean,
   searchString: string,
-  changeImplementationFilter: string => void,
-  changeInvertCallstack: boolean => void,
-  changeCallTreeSearchString: string => void,
+  changeImplementationFilter: typeof changeImplementationFilter,
+  changeInvertCallstack: typeof changeInvertCallstack,
+  changeCallTreeSearchString: typeof changeCallTreeSearchString,
 };
 
 class ProfileCallTreeSettings extends PureComponent {
@@ -42,7 +48,11 @@ class ProfileCallTreeSettings extends PureComponent {
   }
 
   _onImplementationFilterChange(e: Event & { target: HTMLSelectElement }) {
-    this.props.changeImplementationFilter(e.target.value);
+    this.props.changeImplementationFilter(
+      // This function is here to satisfy Flow that we are getting a valid
+      // implementation filter.
+      toValidImplementationFilter(e.target.value)
+    );
   }
 
   _onInvertCallstackClick(e: Event & { target: HTMLInputElement }) {
@@ -107,5 +117,9 @@ export default connect(
     implementationFilter: getImplementationFilter(state),
     searchString: getSearchString(state),
   }),
-  actions
+  {
+    changeImplementationFilter,
+    changeInvertCallstack,
+    changeCallTreeSearchString,
+  }
 )(ProfileCallTreeSettings);

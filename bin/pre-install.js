@@ -72,15 +72,14 @@ function checkYarn(agents /*: AgentsVersion */) {
     console.error(
       'This project uses Yarn instead of npm, please run `yarn install` instead of `npm install`.\n'
     );
-    displayYarnVersionExplanation('Additionally ');
+    displayYarnVersionExplanation();
     displayInstallationInformation();
     return false;
   }
 
   if (agents.yarn) {
     const version = agents.yarn;
-    // Poor man's check, but effective enough :)
-    if (version.startsWith('0.26.') || version.startsWith('0.27.')) {
+    if (versionCompare(version, '1.0') < 0) {
       displayYarnVersionExplanation();
       displayInstallationInformation();
       return false;
@@ -101,25 +100,15 @@ function parseExpectedNodeVersion() {
   return expectedNodeVersion;
 }
 
-function displayYarnVersionExplanation(prefix = '') {
-  console.error(
-    `${prefix}Yarn versions 0.26 and 0.27 have a bug that make them unfit with this project.`
-  );
-  console.error(
-    'Please use either an earlier version like 0.25 or a newer version.'
-  );
-  console.error(
-    'See https://github.com/devtools-html/perf.html/issues/439 for more information.\n'
-  );
+function displayYarnVersionExplanation() {
+  console.error(`This project supports only Yarn version 1.0 or newer.`);
 }
 
 function displayInstallationInformation() {
   console.error(
-    'To install a specific version of Yarn, you can use the following command:'
+    'To install the latest version of Yarn, you can use the following command:'
   );
-  console.error(
-    '\n    curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 0.28.4\n'
-  );
+  console.error('\n    curl -o- -L https://yarnpkg.com/install.sh | bash -s\n');
   console.error(
     'Please look at https://yarnpkg.com/docs/install for more alternatives.\n'
   );

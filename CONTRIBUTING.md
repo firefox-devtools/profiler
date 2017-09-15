@@ -26,15 +26,15 @@ We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-s
 
 perf.html is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including from the [Gecko Profiler Addon](https://github.com/devtools-html/Gecko-Profiler-Addon), online storage, and from local files.
 
-You will need a pre-release version of [Yarn](http://yarnpkg.com/),
-version 0.28.4 is known to work correctly.
+You will need a recent enough version of [Yarn](http://yarnpkg.com/),
+version 1.0.1 is known to work correctly.
 You can install it into your home directory on Linux and probably OS X with:
 
 ```bash
 cd /tmp
 wget https://yarnpkg.com/install.sh
 chmod a+x install.sh
-./install.sh  --version 0.28.4
+./install.sh
 ```
 
 To get started clone the repo and get the web application started.

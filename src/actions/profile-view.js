@@ -3,6 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { selectedThreadSelectors } from '../reducers/profile-view';
+import {
+  getImplementationFilter,
+  getSelectedThreadIndex,
+} from '../reducers/url-state';
+
 import type { ProfileSelection, ImplementationFilter } from '../types/actions';
 import type { Action, ThunkAction } from '../types/store';
 import type { ThreadIndex, IndexIntoMarkersTable } from '../types/profile';
@@ -106,10 +112,21 @@ export function changeMarkersSearchString(searchString: string): Action {
 
 export function changeImplementationFilter(
   implementation: ImplementationFilter
-): Action {
-  return {
-    type: 'CHANGE_IMPLEMENTATION_FILTER',
-    implementation,
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const previousImplementation = getImplementationFilter(getState());
+    const threadIndex = getSelectedThreadIndex(getState());
+    const transformedThread = selectedThreadSelectors.getRangeAndTransformFilteredThread(
+      getState()
+    );
+
+    dispatch({
+      type: 'CHANGE_IMPLEMENTATION_FILTER',
+      implementation,
+      threadIndex,
+      transformedThread,
+      previousImplementation,
+    });
   };
 }
 

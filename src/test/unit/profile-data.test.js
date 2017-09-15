@@ -20,6 +20,7 @@ import {
   getTracingMarkers,
   filterThreadByImplementation,
   getCallNodePath,
+  getSampleIndexClosestToTime,
 } from '../../profile-logic/profile-data';
 import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
@@ -43,6 +44,7 @@ import {
   implementationCategoryMap,
 } from '../../profile-logic/color-categories';
 import getCallNodeProfile from '../fixtures/profiles/call-nodes';
+import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 
 import type { Thread, IndexIntoStackTable } from '../../types/profile';
 
@@ -768,5 +770,26 @@ describe('filter-by-implementation', function() {
 
     expect(samplesAreAllJS).toBe(true);
     expect(nonNullSampleStacks.length).toBe(10);
+  });
+});
+
+describe('get-sample-index-closest-to-time', function() {
+  it('returns the correct sample index for a provided time', function() {
+    const { profile } = getProfileFromTextSamples(
+      Array(10).fill('A').join(' ')
+    );
+    const thread = profile.threads[0];
+    const { samples } = filterThreadByImplementation(thread, 'js');
+
+    // getProfileFromTextSamples will generate a profile with samples
+    // with 1ms of interval
+    const interval = 1;
+
+    expect(getSampleIndexClosestToTime(samples, 0, interval)).toBe(0);
+    expect(getSampleIndexClosestToTime(samples, 0.9, interval)).toBe(0);
+    expect(getSampleIndexClosestToTime(samples, 1.1, interval)).toBe(1);
+    expect(getSampleIndexClosestToTime(samples, 1.5, interval)).toBe(1);
+    expect(getSampleIndexClosestToTime(samples, 9.9, interval)).toBe(9);
+    expect(getSampleIndexClosestToTime(samples, 100, interval)).toBe(9);
   });
 });

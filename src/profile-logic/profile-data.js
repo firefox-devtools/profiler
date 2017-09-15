@@ -32,6 +32,7 @@ import type { StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
 import { getEmptyTaskTracerData } from './task-tracer';
 import type { ImplementationFilter } from '../types/actions';
+import bisection from 'bisection';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -683,20 +684,25 @@ export function invertCallstack(thread: Thread): Thread {
 
 export function getSampleIndexClosestToTime(
   samples: SamplesTable,
-  time: number
+  time: number,
+  interval: number
 ): IndexIntoSamplesTable {
-  // TODO: This should really use bisect. samples.time is sorted.
-  for (let i: number = 0; i < samples.length; i++) {
-    if (samples.time[i] >= time) {
-      if (i === 0) {
-        return 0;
-      }
-      const distanceToThis = samples.time[i] - time;
-      const distanceToLast = time - samples.time[i - 1];
-      return distanceToThis < distanceToLast ? i : i - 1;
-    }
+  // Bisect to find the index of the first sample after the provided time.
+  const index = bisection.right(samples.time, time);
+
+  if (index === 0) {
+    return 0;
   }
-  return samples.length - 1;
+
+  if (index === samples.length) {
+    return samples.length - 1;
+  }
+
+  // Check the distance between the provided time and the center of the bisected sample
+  // and its predecessor.
+  const distanceToThis = samples.time[index] + interval / 2 - time;
+  const distanceToLast = time - (samples.time[index - 1] + interval / 2);
+  return distanceToThis < distanceToLast ? index : index - 1;
 }
 
 export function getJankInstances(
