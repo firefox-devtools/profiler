@@ -24,6 +24,7 @@ import UrlManager from './UrlManager';
 
 import type { Store } from '../../types/store';
 import type { AppViewState, State } from '../../types/reducers';
+import type { DataSource } from '../../types/actions';
 
 require('./Root.css');
 
@@ -67,7 +68,7 @@ function toParagraphs(str: string) {
 
 type ProfileViewProps = {
   view: AppViewState,
-  dataSource: string,
+  dataSource: DataSource,
   hash: string,
   profileUrl: string,
   retrieveProfileFromAddon: typeof retrieveProfileFromAddon,
@@ -101,6 +102,9 @@ class ProfileViewWhenReadyImpl extends PureComponent {
         break;
       case 'from-url':
         retrieveProfileFromUrl(profileUrl);
+        break;
+      case 'none':
+        // nothing to do
         break;
       default:
         throw new Error(`Unknown datasource ${dataSource}`);
