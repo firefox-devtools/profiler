@@ -1,5 +1,50 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`"collapse-direct-recursion" transform combined implementation can collapse the B function 1`] = `
+"
+- A (total: 4, self:—)
+ - B (total: 3, self:—)
+   - C (total: 1, self:1)
+   - D (total: 1, self:1)
+   - E (total: 1, self:1)
+ - F (total: 1, self:1)"
+`;
+
+exports[`"collapse-direct-recursion" transform combined implementation starts as an unfiltered call tree 1`] = `
+"
+- A (total: 4, self:—)
+ - B (total: 3, self:—)
+   - B (total: 2, self:—)
+     - B (total: 1, self:—)
+       - C (total: 1, self:1)
+     - D (total: 1, self:1)
+   - E (total: 1, self:1)
+ - F (total: 1, self:1)"
+`;
+
+exports[`"collapse-direct-recursion" transform filtered implementation can collapse the B function 1`] = `
+"
+- A.js (total: 5, self:—)
+ - B.js (total: 4, self:1)
+   - D.js (total: 1, self:1)
+   - E.js (total: 1, self:1)
+   - F.js (total: 1, self:1)
+ - G.js (total: 1, self:1)"
+`;
+
+exports[`"collapse-direct-recursion" transform filtered implementation starts as an unfiltered call tree 1`] = `
+"
+- A.js (total: 5, self:—)
+ - B.js (total: 4, self:—)
+   - B.js (total: 3, self:—)
+     - C.cpp (total: 3, self:1)
+       - B.js (total: 1, self:—)
+         - D.js (total: 1, self:1)
+       - E.js (total: 1, self:1)
+   - F.js (total: 1, self:1)
+ - G.js (total: 1, self:1)"
+`;
+
 exports[`"collapse-resource" transform combined implementation can collapse the "firefox" library 1`] = `
 "
 - A (total: 2, self:—)

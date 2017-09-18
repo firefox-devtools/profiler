@@ -513,6 +513,12 @@ export const selectorsForThread = (
             transform.resourceIndex,
             transform.implementation
           );
+        case 'collapse-direct-recursion':
+          return Transforms.collapseDirectRecursion(
+            thread,
+            transform.funcIndex,
+            transform.implementation
+          );
         default:
           throw new Error('Unhandled transform.');
       }
