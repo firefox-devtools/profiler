@@ -16,8 +16,8 @@ import { sortDataTable } from '../utils/data-table-utils';
 import { resourceTypes } from './profile-data';
 import {
   upgradeGCMinorMarker,
-  upgradeGCSliceMarker,
   upgradeGCMajorMarker,
+  convertPhaseTimes,
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
@@ -377,10 +377,15 @@ const _upgraders = {
               upgradeGCMinorMarker(marker);
               break;
             case 'GCSlice':
-              upgradeGCSliceMarker(marker);
+              if (marker.timings && marker.timings.times) {
+                marker.timings.phase_times = convertPhaseTimes(
+                  marker.timings.times
+                );
+                delete marker.timings.times;
+              }
               break;
             case 'GCMajor':
-              upgradeGCMajorMarker(marker);
+              upgradeGCMajorMarker(marker, true);
               break;
             default:
               break;

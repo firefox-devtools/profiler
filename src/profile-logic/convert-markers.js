@@ -38,7 +38,7 @@ export function upgradeGCMinorMarker(marker: Object) {
 /*
  * Fix the units for GCMajor and GCSlice phase times.
  */
-function _upgradePhaseTimes(old_phases: Object): Object {
+export function convertPhaseTimes(old_phases: Object): Object {
   const phases = {};
   for (const phase in old_phases) {
     phases[phase] = old_phases[phase] * 1000;
@@ -46,39 +46,51 @@ function _upgradePhaseTimes(old_phases: Object): Object {
   return phases;
 }
 
-export function upgradeGCSliceMarker(marker: Object) {
-  if (marker.timings && marker.timings.times && !marker.timings.phase_times) {
-    marker.timings.phase_times = _upgradePhaseTimes(marker.timings.times);
-    delete marker.timings.times;
-  }
-}
-
-export function upgradeGCMajorMarker(marker: Object) {
+/*
+ * Upgrade a GCMajor marker.  Set processed_profile to true for a processed
+ * profile, or false for a gecko profile.
+ */
+export function upgradeGCMajorMarker(
+  marker: Object,
+  processed_profile: boolean
+) {
   if ('timings' in marker) {
     if (!('status' in marker.timings)) {
-      const timings = marker.timings;
       /*
        * This is the old version of the GCMajor marker.
        */
+
+      const timings = marker.timings;
+
       timings.status = 'completed';
 
       /*
-       * The old version had a bug where slices could be
-       * duplicated, so we attempt to read it as either
-       * the number of slices or a list of slices, depending on
-       * what the JSON parser gave us.
+       * The old version had a bug where the slices field could be included
+       * twice with different meanings.  So we attempt to read it as either
+       * the number of slices or a list of slices.
        */
       if (Array.isArray(timings.sices)) {
         timings.slices_list = timings.slices;
         timings.slices = timings.slices.length;
       }
 
-      timings.phase_times = _upgradePhaseTimes(timings.totals);
-      delete timings.totals;
+      timings.allocated_bytes = timings.allocated * 1024 * 1024;
 
-      timings.mmu_20ms /= 100;
-      timings.mmu_50ms /= 100;
-      timings.allocated *= 1024 * 1024;
+      /*
+       * Processed profiles - convert these fields to have more sensible
+       * units and sometimes names.
+       *
+       * Gecko profiles - these fields were not changed to preserve
+       * compatibility with telemetry.  They will be updated in
+       * process-profile.js.
+       */
+      if (processed_profile) {
+        timings.phase_times = convertPhaseTimes(timings.totals);
+        delete timings.totals;
+
+        timings.mmu_20ms /= 100;
+        timings.mmu_50ms /= 100;
+      }
     }
   }
 }

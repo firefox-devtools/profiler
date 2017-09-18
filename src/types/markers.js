@@ -123,8 +123,8 @@ export type GCMajorCompleted = {
   // The reason (if not 'None') why this GC ran non-incrementally.
   nonincremental_reason: string,
 
-  // The allocated space for the whole heap before the GC started (MB).
-  allocated: number,
+  // The allocated space for the whole heap before the GC started.
+  allocated_bytes: number,
 
   added_chunks: number,
   removed_chunks: number,

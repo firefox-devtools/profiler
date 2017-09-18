@@ -142,7 +142,7 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
                 {_markerDetail(
                   'gcusage',
                   'Heap usage',
-                  formatBytes(timings.allocated)
+                  formatBytes(timings.allocated_bytes)
                 )}
                 {_markerDetail(
                   'gcmmu20ms',

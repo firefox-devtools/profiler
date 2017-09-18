@@ -19,6 +19,7 @@ import {
   convertOldCleopatraProfile,
 } from './old-cleopatra-profile-format';
 import { getEmptyTaskTracerData } from './task-tracer';
+import { convertPhaseTimes } from './convert-markers';
 import type {
   Profile,
   Thread,
@@ -42,6 +43,7 @@ import type {
   GeckoSampleStruct,
   GeckoStackStruct,
 } from '../types/gecko-profile';
+import type { MarkerPayload } from '../types/markers';
 
 type RegExpResult = null | string[];
 /**
@@ -470,7 +472,39 @@ function _processStackTable(geckoStackTable: GeckoStackStruct): StackTable {
  */
 function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
   return {
-    data: geckoMarkers.data,
+    data: geckoMarkers.data.map(function(m: Object): MarkerPayload {
+      if (m) {
+        switch (m.type) {
+          /*
+           * We want to improve the format of these markers to make them
+           * easier to understand and work with, but we can't do that by
+           * upgrading the gecko profile since that would break
+           * compatibility with telemetery, however we can make some
+           * improvments while we process a gecko profile.
+           */
+          case 'GCSlice':
+            if (m.timings && m.timings.times) {
+              m.timings.phase_times = convertPhaseTimes(m.timings.times);
+              delete m.timings.times;
+            } else {
+              m.timings.phase_times = [];
+            }
+            break;
+          case 'GCMajor':
+            if (m.timings.status === 'completed') {
+              const timings = m.timings;
+              timings.phase_times = convertPhaseTimes(timings.totals);
+              delete timings.totals;
+              timings.mmu_20ms /= 100;
+              timings.mmu_50ms /= 100;
+            }
+            break;
+          default:
+            break;
+        }
+      }
+      return m;
+    }),
     name: geckoMarkers.name,
     time: geckoMarkers.time,
     length: geckoMarkers.length,
