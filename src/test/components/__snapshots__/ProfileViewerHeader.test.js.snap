@@ -151,7 +151,7 @@ exports[`calltree/ProfileViewerHeader renders the header 2`] = `
 Array [
   Array [
     "set fillStyle",
-    "#7990c8",
+    "#45a1ff",
   ],
   Array [
     "fillRect",
@@ -162,7 +162,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#7990c8",
+    "#45a1ff",
   ],
   Array [
     "fillRect",
@@ -173,7 +173,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#7990c8",
+    "#45a1ff",
   ],
   Array [
     "fillRect",

@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .calltreeTransformNavigator {
-  border-top: 1px solid #D6D6D6;
-  background: #EEE;
+  border-top: 1px solid var(--grey-30);
+  background: var(--grey-10);
+  color: var(--ink-70);
 }

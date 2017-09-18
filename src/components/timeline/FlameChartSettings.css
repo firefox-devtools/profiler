@@ -6,8 +6,6 @@
   height: 25px;
   padding: 0;
   line-height: 25px;
-  border-top: 1px solid #D6D6D6;
-  background: #F9F9F9;
   display: flex;
   flex-flow: row nowrap;
 }

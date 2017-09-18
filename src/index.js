@@ -7,6 +7,7 @@ import Perf from 'react-addons-perf';
 import { render } from 'react-dom';
 import Root from './components/app/Root';
 import createStore from './create-store';
+import 'photon-colors/colors.css';
 import '../res/style.css';
 
 if (process.env.NODE_ENV === 'production') {

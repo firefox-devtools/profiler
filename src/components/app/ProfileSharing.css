@@ -14,8 +14,8 @@
 .profileSharingCompositeButtonContainer {
   display: flex;
   flex-flow: column nowrap;
-  border-left: 1px solid #D6D6D6;
-  border-right: 1px solid #D6D6D6;
+  border-left: 1px solid var(--grey-30);
+  border-right: 1px solid var(--grey-30);
 }
 
 .profileSharingShareButton,

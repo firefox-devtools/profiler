@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import * as colors from 'photon-colors';
 import type {
   Thread,
   IndexIntoFrameTable,
@@ -19,10 +20,10 @@ type CategoriesIndexMap = { [id: CategoryName]: number };
 export type GetCategory = (Thread, IndexIntoFrameTable) => Category;
 
 export const implementationCategoryMap: CategoriesMap = {
-  'JS Baseline': '#B5ECA8',
-  JIT: '#3CCF55',
-  'JS Interpreter': 'rgb(200, 200, 200)',
-  Platform: 'rgb(240, 240, 240)',
+  'JS Baseline': colors.GREY_30,
+  JIT: '#86EC71', // A lighter version of GREEN_50
+  'JS Interpreter': colors.GREY_40,
+  Platform: colors.GREY_20,
 };
 
 export const implementationCategories: Category[] = _categoriesMapToList(
