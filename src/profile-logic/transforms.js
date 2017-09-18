@@ -38,6 +38,7 @@ const TRANSFORM_TO_SHORT_KEY = {
   'merge-call-node': 'mcn',
   'merge-function': 'mf',
   'collapse-resource': 'cr',
+  'collapse-direct-recursion': 'rec',
 };
 
 const SHORT_KEY_TO_TRANSFORM = {
@@ -47,6 +48,7 @@ const SHORT_KEY_TO_TRANSFORM = {
   mcn: 'merge-call-node',
   mf: 'merge-function',
   cr: 'collapse-resource',
+  rec: 'collapse-direct-recursion',
 };
 
 /**
@@ -89,6 +91,20 @@ export function parseTransforms(stringValue: string = ''): TransformStack {
           });
         }
 
+        break;
+      }
+      case 'collapse-direct-recursion': {
+        // e.g. "rec-js-325"
+        const [, implementation, funcIndexRaw] = tuple;
+        const funcIndex = parseInt(funcIndexRaw, 10);
+        if (isNaN(funcIndex) || funcIndex < 0) {
+          break;
+        }
+        transforms.push({
+          type,
+          funcIndex,
+          implementation: toValidImplementationFilter(implementation),
+        });
         break;
       }
       case 'merge-function':
@@ -187,6 +203,8 @@ export function stringifyTransforms(transforms: TransformStack = []): string {
         }
         case 'collapse-resource':
           return `${shortKey}-${transform.implementation}-${transform.resourceIndex}-${transform.collapsedFuncIndex}`;
+        case 'collapse-direct-recursion':
+          return `${shortKey}-${transform.implementation}-${transform.funcIndex}`;
         case 'focus-subtree':
         case 'merge-call-node':
         case 'merge-subtree': {
@@ -240,6 +258,7 @@ export function getTransformLabels(
         break;
       case 'focus-function':
       case 'merge-function':
+      case 'collapse-direct-recursion':
         funcIndex = transform.funcIndex;
         break;
       default:
@@ -259,6 +278,8 @@ export function getTransformLabels(
         return `Merge Node: ${funcName}`;
       case 'merge-function':
         return `Merge: ${funcName}`;
+      case 'collapse-direct-recursion':
+        return `Collapse recursion: ${funcName}`;
       default:
         throw new Error('Unexpected transform type');
     }
@@ -289,6 +310,11 @@ export function applyTransformToCallNodePath(
         transform.resourceIndex,
         transform.collapsedFuncIndex,
         transformedThread.funcTable,
+        callNodePath
+      );
+    case 'collapse-direct-recursion':
+      return _collapseDirectRecursionInCallNodePath(
+        transform.funcIndex,
         callNodePath
       );
     default:
@@ -355,6 +381,22 @@ function _collapseResourceInCallNodePath(
           pathFuncIndex !== collapsedFuncIndex
       )
   );
+}
+
+function _collapseDirectRecursionInCallNodePath(
+  funcIndex: IndexIntoFuncTable,
+  callNodePath: CallNodePath
+) {
+  const newPath = [];
+  let previousFunc;
+  for (let i = 0; i < callNodePath.length; i++) {
+    const pathFunc = callNodePath[i];
+    if (pathFunc !== funcIndex || pathFunc !== previousFunc) {
+      newPath.push(pathFunc);
+    }
+    previousFunc = pathFunc;
+  }
+  return newPath;
 }
 
 function _callNodePathHasPrefixPath(
@@ -688,6 +730,83 @@ export function collapseResource(
   });
 }
 
+export function collapseDirectRecursion(
+  thread: Thread,
+  funcToCollapse: IndexIntoFuncTable,
+  implementation: ImplementationFilter
+): Thread {
+  const { stackTable, frameTable, samples } = thread;
+  const oldStackToNewStack: Map<
+    IndexIntoStackTable | null,
+    IndexIntoStackTable | null
+  > = new Map();
+  oldStackToNewStack.set(null, null);
+  const recursiveStacks = new Set();
+  const newStackTable = {
+    length: 0,
+    prefix: [],
+    frame: [],
+  };
+  const funcMatchesImplementation = FUNC_MATCHES[implementation];
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefix = stackTable.prefix[stackIndex];
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+
+    if (
+      // The previous stacks were collapsed or matched the funcToCollapse, check to see
+      // if this is a candidate for collapsing as well.
+      recursiveStacks.has(prefix) &&
+      // Either the function must match, or the implementation must be different.
+      (funcToCollapse === funcIndex ||
+        !funcMatchesImplementation(thread, funcIndex))
+    ) {
+      // Out of N consecutive stacks that match the function to collapse, only remove
+      // stacks that are N > 1.
+      const newPrefixStackIndex = oldStackToNewStack.get(prefix);
+      if (newPrefixStackIndex === undefined) {
+        throw new Error('newPrefixStackIndex cannot be undefined');
+      }
+      oldStackToNewStack.set(stackIndex, newPrefixStackIndex);
+      recursiveStacks.add(stackIndex);
+    } else {
+      // Add a stack in two cases:
+      //   1. It doesn't match the collapse requirements.
+      //   2. It is the first instance of a stack to collapse, re-use the stack and frame
+      //      information for the collapsed stack.
+      const newStackIndex = newStackTable.length++;
+      const newStackPrefix = oldStackToNewStack.get(prefix);
+      if (newStackPrefix === undefined) {
+        throw new Error(
+          'The newStackPrefix must exist because prefix < stackIndex as the StackTable is ordered.'
+        );
+      }
+      newStackTable.prefix[newStackIndex] = newStackPrefix;
+      newStackTable.frame[newStackIndex] = frameIndex;
+      oldStackToNewStack.set(stackIndex, newStackIndex);
+
+      if (funcToCollapse === funcIndex) {
+        recursiveStacks.add(stackIndex);
+      }
+    }
+  }
+  const newSamples = Object.assign({}, samples, {
+    stack: samples.stack.map(oldStack => {
+      const newStack = oldStackToNewStack.get(oldStack);
+      if (newStack === undefined) {
+        throw new Error(
+          'Converting from the old stack to a new stack cannot be undefined'
+        );
+      }
+      return newStack;
+    }),
+  });
+  return Object.assign({}, thread, {
+    stackTable: newStackTable,
+    samples: newSamples,
+  });
+}
 const FUNC_MATCHES = {
   combined: (_thread: Thread, _funcIndex: IndexIntoFuncTable) => true,
   cpp: (thread: Thread, funcIndex: IndexIntoFuncTable): boolean => {
@@ -965,4 +1084,38 @@ export function filterCallNodePathByImplementation(
   return callNodePath.filter(funcIndex =>
     funcMatchesImplementation(thread, funcIndex)
   );
+}
+
+/**
+ * Search through the entire call stack and see if there are any examples of
+ * recursion.
+ */
+export function funcHasRecursiveCall(
+  thread: Thread,
+  implementation: ImplementationFilter,
+  funcToCheck: IndexIntoFuncTable
+) {
+  const { stackTable, frameTable } = thread;
+  const recursiveStacks = new Set();
+  const funcMatchesImplementation = FUNC_MATCHES[implementation];
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const frameIndex = stackTable.frame[stackIndex];
+    const prefix = stackTable.prefix[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    const recursivePrefix = recursiveStacks.has(prefix);
+
+    if (funcToCheck === funcIndex) {
+      if (recursivePrefix) {
+        // This function matches and so did its prefix of the same implementation.
+        return true;
+      }
+      recursiveStacks.add(stackIndex);
+    } else {
+      if (recursivePrefix && !funcMatchesImplementation(thread, funcIndex)) {
+        recursiveStacks.add(stackIndex);
+      }
+    }
+  }
+  return false;
 }

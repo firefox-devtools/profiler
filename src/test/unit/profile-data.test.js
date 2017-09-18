@@ -46,6 +46,7 @@ import {
 } from '../../profile-logic/color-categories';
 import getCallNodeProfile from '../fixtures/profiles/call-nodes';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 
 import type { Thread, IndexIntoStackTable } from '../../types/profile';
 
@@ -807,5 +808,24 @@ describe('get-sample-index-closest-to-time', function() {
     expect(getSampleIndexClosestToTime(samples, 1.5, interval)).toBe(1);
     expect(getSampleIndexClosestToTime(samples, 9.9, interval)).toBe(9);
     expect(getSampleIndexClosestToTime(samples, 100, interval)).toBe(9);
+  });
+});
+
+describe('funcHasRecursiveCall', function() {
+  const { profile, funcNames } = getProfileFromTextSamples(`
+    A.js
+    B.js
+    C.cpp
+    B.js
+    D.js
+  `);
+  const [thread] = profile.threads;
+
+  it('correctly identifies recursive functions based taking into account implementation', function() {
+    expect([
+      funcHasRecursiveCall(thread, 'combined', funcNames.indexOf('A.js')),
+      funcHasRecursiveCall(thread, 'combined', funcNames.indexOf('B.js')),
+      funcHasRecursiveCall(thread, 'js', funcNames.indexOf('B.js')),
+    ]).toEqual([false, false, true]);
   });
 });

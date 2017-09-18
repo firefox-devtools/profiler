@@ -577,6 +577,115 @@ describe('"collapse-resource" transform', function() {
   });
 });
 
+describe('"collapse-direct-recursion" transform', function() {
+  describe('combined implementation', function() {
+    /**
+     *              A    Collapse direct recursion     A
+     *            ↙   ↘            Func B            ↙   ↘
+     *          B       F            ->             B     F
+     *        ↙   ↘                              ↙  ↓  ↘
+     *       B     E                            C   D   E
+     *     ↙   ↘
+     *    B     D
+     *    ↓
+     *    C
+     */
+    const { profile, funcNames } = getProfileFromTextSamples(`
+      A A A A
+      B B B F
+      B B E
+      B D
+      C
+    `);
+    const B = funcNames.indexOf('B');
+    const threadIndex = 0;
+    const collapseDirectRecursion = {
+      type: 'collapse-direct-recursion',
+      funcIndex: B,
+      implementation: 'combined',
+    };
+
+    it('starts as an unfiltered call tree', function() {
+      const { getState } = storeWithProfile(profile);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toMatchSnapshot();
+    });
+
+    it('can collapse the B function', function() {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(addTransformToStack(threadIndex, collapseDirectRecursion));
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toMatchSnapshot();
+    });
+
+    it('can update apply the transform to the selected CallNodePaths', function() {
+      // This transform requires a valid thread, unlike many of the others.
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(
+        changeSelectedCallNode(
+          threadIndex,
+          ['A', 'B', 'B', 'B', 'C'].map(name => funcNames.indexOf(name))
+        )
+      );
+      dispatch(addTransformToStack(threadIndex, collapseDirectRecursion));
+      expect(
+        selectedThreadSelectors.getSelectedCallNodePath(getState())
+      ).toEqual(['A', 'B', 'C'].map(name => funcNames.indexOf(name)));
+    });
+  });
+
+  describe('filtered implementation', function() {
+    /**
+     *                   A.js      Collapse direct recursion        A.js
+     *                 ↙     ↘             Func B.js              ↙     ↘
+     *               B.js     G.js            ->               B.js      G.js
+     *             ↙    ↘                                    ↙   ↓   ↘
+     *         B.js      F.js                            D.js   E.js   F.js
+     *          ↓
+     *        C.cpp
+     *        ↙     ↘
+     *    B.js       E.js
+     *     ↓
+     *    D.js
+     */
+    const { profile, funcNames } = getProfileFromTextSamples(`
+      A.js   A.js   A.js   A.js   A.js
+      B.js   B.js   B.js   B.js   G.js
+      B.js   B.js   B.js   F.js
+      C.cpp  C.cpp  C.cpp
+      B.js   E.js
+      D.js
+    `);
+    // Notice in the above fixture how `C.cpp` is actually a leaf stack for the third
+    // sample. This stack still gets collapsed, along with any stack that follows
+    // a recursion collapse.
+    const B = funcNames.indexOf('B.js');
+    const threadIndex = 0;
+    const collapseDirectRecursion = {
+      type: 'collapse-direct-recursion',
+      funcIndex: B,
+      implementation: 'js',
+    };
+
+    it('starts as an unfiltered call tree', function() {
+      const { getState } = storeWithProfile(profile);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toMatchSnapshot();
+    });
+
+    it('can collapse the B function', function() {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(addTransformToStack(threadIndex, collapseDirectRecursion));
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toMatchSnapshot();
+    });
+  });
+});
+
 describe('expanded and selected CallNodePaths', function() {
   const { profile, funcNames } = getProfileFromTextSamples(`
     A
