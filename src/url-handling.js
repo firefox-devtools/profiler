@@ -215,7 +215,7 @@ export function stateFromLocation(location: Location): UrlState {
   };
 }
 
-export const CURRENT_URL_VERSION = 1;
+export const CURRENT_URL_VERSION = 2;
 
 type ProcessedLocation = { pathname: string, hash: string, query: Object };
 
@@ -320,6 +320,28 @@ const _upgraders = {
         .filter(f => f)
         .join('~');
       delete processedLocation.query.callTreeFilters;
+    }
+  },
+  [2]: (processedLocation: ProcessedLocation) => {
+    // Map the tab "timeline" to "flame-chart".
+    // Map the tab "markers" to "markers-table".
+    let result;
+    if (
+      (result = processedLocation.pathname.match(
+        /^(\/[\w-]+\/[\w-]+\/)timeline(.*)/
+      ))
+      // Given:    /public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/
+      // Matches:  1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        2
+    ) {
+      const [, pathStart, pathEnd] = result;
+      processedLocation.pathname = pathStart + 'flame-chart' + pathEnd;
+    } else if (
+      (result = processedLocation.pathname.match(/^(\/\w+\/\w+\/)markers(.*)/))
+      // Given:    /public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/
+      // Matches:  1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       2
+    ) {
+      const [, pathStart, pathEnd] = result;
+      processedLocation.pathname = pathStart + 'markers-table' + pathEnd;
     }
   },
 };
