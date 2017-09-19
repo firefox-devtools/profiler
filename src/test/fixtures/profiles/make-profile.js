@@ -135,6 +135,20 @@ export function getEmptyThread(overrides: ?Object): Thread {
 /**
  * Create a profile from text representation of samples. Each column in the text provided
  * represents a sample. Each sample is made up of a list of functions.
+ *
+ * Example usage:
+ *
+ * const profile = getProfileFromTextSamples(`
+ *   A       A        A     A
+ *   B.js    B.js     F     F
+ *   C.js    C.js     G     G
+ *   D       D              H
+ *   E       E
+ * `);
+ *
+ * The function names are aligned vertically on the left. This would produce 4 samples
+ * with the stacks based off of those functions listed, with A being the root. Whitespace
+ * is trimmed.
  */
 export function getProfileFromTextSamples(
   text: string
@@ -142,7 +156,10 @@ export function getProfileFromTextSamples(
   const nonEmpty = t => t;
   const lines = text.split('\n').filter(nonEmpty);
 
-  // Compute the index of where the columns start in the string
+  // Compute the index of where the columns start in the string. String.prototype.split
+  // can't be used here because it would put functions on the wrong sample. In the example
+  // usage from the function comment above, the third sample would have the stack
+  // [A, F, G, H] if splitting was used, misaligning the function H.
   const columnIndexes = [];
   {
     const firstLine = lines[0];

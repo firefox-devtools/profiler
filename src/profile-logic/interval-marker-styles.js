@@ -1,17 +1,8 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
-/* stolen from the light theme at devtools/client/themes/variables.css */
-const themeHighlightGreen = '#2cbb0f';
-const themeHighlightBlue = '#0088cc';
-const themeHighlightBluegrey = '#0072ab';
-const themeHighlightPurple = '#5b5fff';
-const themeHighlightOrange = '#f13c00';
-const themeHighlightRed = '#ed2655';
-const themeHighlightPink = '#b82ee5';
-const themeHighlightGray =
-  '#b4babf'; /* except for this one, I made this one darker */
+// @flow
+import * as colors from 'photon-colors';
 
 export const styles = {
   default: {
@@ -33,50 +24,50 @@ export const styles = {
     squareCorners: true,
   },
   Scripts: {
-    background: themeHighlightOrange,
+    background: colors.ORANGE_70,
     top: 6,
   },
   Styles: {
-    background: themeHighlightBluegrey,
+    background: colors.TEAL_50,
     top: 7,
   },
   FireScrollEvent: {
-    background: themeHighlightOrange,
+    background: colors.ORANGE_70,
     top: 7,
   },
   Reflow: {
-    background: themeHighlightBlue,
+    background: colors.BLUE_50,
     top: 7,
   },
   DispatchSynthMouseMove: {
-    background: themeHighlightOrange,
+    background: colors.ORANGE_70,
     top: 8,
   },
   DisplayList: {
-    background: themeHighlightPurple,
+    background: colors.PURPLE_50,
     top: 9,
   },
   LayerBuilding: {
-    background: themeHighlightPink,
+    background: colors.ORANGE_50,
     top: 9,
   },
   Rasterize: {
-    background: themeHighlightGreen,
+    background: colors.GREEN_50,
     top: 10,
   },
   ForwardTransaction: {
-    background: themeHighlightRed,
+    background: colors.RED_70,
     top: 11,
   },
   NotifyDidPaint: {
-    background: themeHighlightGray,
+    background: colors.GREY_40,
     top: 12,
   },
   LayerTransaction: {
-    background: themeHighlightRed,
+    background: colors.RED_70,
   },
   Composite: {
-    background: themeHighlightBlue,
+    background: colors.BLUE_50,
   },
   Vsync: {
     background: 'rgb(255, 128, 0)',
@@ -91,9 +82,9 @@ export const styles = {
     background: 'rgb(200,0,0)',
   },
   Jank: {
-    background: 'hsl(0,90%,70%)',
-    borderLeft: 'hsl(0,90%,50%)',
-    borderRight: 'hsl(0,90%,50%)',
+    background: 'hsl(347, 100%, 60%)',
+    borderLeft: colors.RED_50,
+    borderRight: colors.RED_50,
     squareCorners: true,
   },
 };

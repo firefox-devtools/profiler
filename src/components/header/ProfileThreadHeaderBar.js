@@ -78,10 +78,14 @@ class ProfileThreadHeaderBar extends PureComponent {
   }
 
   _onGraphClick(time: number) {
-    const { threadIndex } = this.props;
+    const { threadIndex, interval } = this.props;
     if (time !== undefined) {
       const { thread, callNodeInfo, changeSelectedCallNode } = this.props;
-      const sampleIndex = getSampleIndexClosestToTime(thread.samples, time);
+      const sampleIndex = getSampleIndexClosestToTime(
+        thread.samples,
+        time,
+        interval
+      );
       const newSelectedStack = thread.samples.stack[sampleIndex];
       const newSelectedCallNode =
         newSelectedStack === null

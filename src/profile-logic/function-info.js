@@ -33,3 +33,33 @@ export function stripFunctionArguments(functionCall: string): string {
   }
   return functionCall;
 }
+
+export function removeTemplateInformation(functionName: string) {
+  let result = '';
+  let depth = 0;
+  let start = 0; // Start of a segment we'd like to keep
+  for (let i = 0; i < functionName.length; i++) {
+    if (functionName[i] === '<') {
+      if (depth === 0) {
+        // Template information begins, save segment
+        result += functionName.substr(start, i - start);
+        // Start a new segment here to not lose the rest of the string
+        // should we find no matching '>'
+        start = i;
+      }
+      depth++;
+    } else if (functionName[i] === '>') {
+      depth--;
+      if (depth === 0) {
+        // Template information ends, start of new segment
+        start = i + 1;
+      }
+    }
+  }
+  result += functionName.substr(start);
+  return result;
+}
+
+export function getFunctionName(functionCall: string) {
+  return removeTemplateInformation(stripFunctionArguments(functionCall));
+}

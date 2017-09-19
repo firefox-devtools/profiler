@@ -6,6 +6,7 @@
 import type { Summary } from '../profile-logic/summarize-profile';
 import type {
   Profile,
+  Thread,
   ThreadIndex,
   IndexIntoMarkersTable,
   IndexIntoFuncTable,
@@ -155,6 +156,10 @@ type UrlStateAction =
     }
   | {
       type: 'CHANGE_IMPLEMENTATION_FILTER',
+      implementation: ImplementationFilter,
+      threadIndex: ThreadIndex,
+      transformedThread: Thread,
+      previousImplementation: ImplementationFilter,
       implementation: ImplementationFilter,
     }
   | { type: 'CHANGE_INVERT_CALLSTACK', invertCallstack: boolean }

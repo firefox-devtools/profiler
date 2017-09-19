@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2016-12-06.png';
-import PerfScreenshot from '../../../res/perf-screenshot-2017-05-11.jpg';
+import PerfScreenshot from '../../../res/perf-screenshot-2017-09-08.jpg';
 import { retrieveProfileFromFile } from '../../actions/receive-profile';
 import { CSSTransitionGroup } from 'react-transition-group';
 

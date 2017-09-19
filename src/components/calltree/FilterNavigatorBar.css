@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .filterNavigatorBar {
-  --internal-selected-color: var(--selected-color, #7990c8);
+  --internal-selected-color: var(--selected-color, var(--blue-60));
   height: 24px;
   margin: 0;
   padding: 0;
@@ -71,7 +71,7 @@
   border-bottom-color: transparent !important;
 }
 
-.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):not(.filterNavigatorBarBeforeSelectedItem):not(.filterNavigatorBarSelectedItem)::after {
+.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem)::after {
   background-image: url(../../../res/scope-bar-separator.svg);
   background-repeat: no-repeat;
   background-position: -18px -12px;
@@ -79,38 +79,27 @@
 }
 
 .filterNavigatorBarSelectedItem {
-  background-color: var(--internal-selected-color);
-  color: white;
+  color: var(--internal-selected-color);
 }
 
-.filterNavigatorBarSelectedItem:not(.filterNavigatorBarRootItem)::before,
-.filterNavigatorBarSelectedItem.filterNavigatorBarRootItem,
-.filterNavigatorBarSelectedItem:not(.filterNavigatorBarLeafItem)::after {
-  border-color: var(--internal-selected-color);
-}
-
-.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):hover {
+.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
-.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):not(.filterNavigatorBarRootItem):hover::before,
-.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem).filterNavigatorBarRootItem:hover,
-.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):not(.filterNavigatorBarLeafItem):hover::after {
+.filterNavigatorBarItem:not(.filterNavigatorBarRootItem):not(.filterNavigatorBarLeafItem):hover::before,
+.filterNavigatorBarItem.filterNavigatorBarRootItem:hover,
+.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover::after {
   border-color: rgba(0, 0, 0, 0.1);
 }
 
-.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):active:hover {
+.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):active:hover {
   background-color: rgba(0, 0, 0, 0.2);
 }
 
-.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):not(.filterNavigatorBarRootItem):active:hover::before,
-.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem).filterNavigatorBarRootItem:active:hover,
-.filterNavigatorBarItem:not(.filterNavigatorBarSelectedItem):not(.filterNavigatorBarLeafItem):active:hover::after {
+.filterNavigatorBarItem:not(.filterNavigatorBarRootItem):not(.filterNavigatorBarLeafItem):active:hover::before,
+.filterNavigatorBarItem.filterNavigatorBarRootItem:active:hover,
+.filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):active:hover::after {
   border-color: rgba(0, 0, 0, 0.2);
-}
-
-.filterNavigatorBarLeafItem::after {
-  border-left-color: #7990c8;
 }
 
 /* Animation */

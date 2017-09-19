@@ -2,9 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { stripFunctionArguments } from '../../profile-logic/function-info';
+import {
+  stripFunctionArguments,
+  removeTemplateInformation,
+} from '../../profile-logic/function-info';
 
-describe('get-function-name', function() {
+describe('strip-function-arguments', function() {
   it('should strip the function arguments', function() {
     expect(stripFunctionArguments('ns::fn()')).toEqual('ns::fn');
     expect(
@@ -28,5 +31,19 @@ describe('get-function-name', function() {
   });
   it('should do nothing if not a function call', function() {
     expect(stripFunctionArguments('(root)')).toEqual('(root)');
+  });
+});
+
+describe('remove-template-information', function() {
+  it('should remove template information', function() {
+    expect(
+      removeTemplateInformation('ns::Impl<void (ns::foo::*)(), (ns::bar)0>::fn')
+    ).toEqual('ns::Impl::fn');
+    expect(removeTemplateInformation('fn<ns::foo<ns::bar<a::b> > >')).toEqual(
+      'fn'
+    );
+  });
+  it('should not remove information we want to keep', function() {
+    expect(removeTemplateInformation('foo/<bar')).toEqual('foo/<bar');
   });
 });
