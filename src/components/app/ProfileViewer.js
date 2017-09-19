@@ -10,12 +10,13 @@ import TabBar from './TabBar';
 import classNames from 'classnames';
 import ProfileSummaryView from '../summary/ProfileSummaryView';
 import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
-import MarkersView from '../markers/MarkersView';
+import MarkersTable from '../markers-table';
 import ProfileTaskTracerView from '../tasktracer/ProfileTaskTracerView';
 import ProfileFilterNavigator from './ProfileFilterNavigator';
 import ProfileSharing from './ProfileSharing';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
-import TimelineView from '../timeline/TimelineView';
+import FlameChart from '../flame-chart/';
+import MarkersTimeline from '../markers-timeline/';
 import actions from '../../actions';
 import {
   getProfileViewOptions,
@@ -24,7 +25,7 @@ import {
 import { getSelectedTab } from '../../reducers/url-state';
 import ProfileViewerHeader from '../header/ProfileViewerHeader';
 import ProfileCallTreeContextMenu from '../calltree/ProfileCallTreeContextMenu';
-import MarkersContextMenu from '../markers/ContextMenu';
+import MarkersTableContextMenu from '../markers-table/ContextMenu';
 import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
 
 import type { StartEndRange } from '../../types/units';
@@ -58,12 +59,16 @@ class ProfileViewer extends PureComponent {
         title: 'Call Tree',
       },
       {
-        name: 'timeline',
-        title: 'Timeline',
+        name: 'flame-chart',
+        title: 'Flame Chart',
       },
       {
-        name: 'markers',
-        title: 'Markers',
+        name: 'markers-timeline',
+        title: 'Markers Timeline',
+      },
+      {
+        name: 'markers-table',
+        title: 'Markers Table',
       },
       {
         name: 'summary',
@@ -114,19 +119,20 @@ class ProfileViewer extends PureComponent {
           {
             summary: <ProfileSummaryView />,
             calltree: <ProfileCallTreeView />,
-            markers: <MarkersView />,
+            'markers-table': <MarkersTable />,
             tasktracer: (
               <ProfileTaskTracerView
                 rangeStart={timeRange.start}
                 rangeEnd={timeRange.end}
               />
             ),
-            timeline: <TimelineView />,
+            'flame-chart': <FlameChart />,
+            'markers-timeline': <MarkersTimeline />,
           }[selectedTab]
         }
         <SymbolicationStatusOverlay />
         <ProfileCallTreeContextMenu />
-        <MarkersContextMenu />
+        <MarkersTableContextMenu />
         <ProfileThreadHeaderContextMenu />
       </div>
     );

@@ -4,7 +4,7 @@
 
 // @flow
 import React from 'react';
-import TimelineFlameChart from '../../components/timeline/TimelineFlameChart';
+import FlameChartGraph from '../../components/flame-chart';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -15,7 +15,7 @@ import { changeTimelineFlameChartExpandedThread } from '../../actions/timeline';
 
 jest.useFakeTimers();
 
-it('renders TimelineFlameChart correctly', () => {
+it('renders FlameChartGraph correctly', () => {
   // Tie the requestAnimationFrame into jest's fake timers.
   window.requestAnimationFrame = fn => setTimeout(fn, 0);
   window.devicePixelRatio = 1;
@@ -55,7 +55,7 @@ it('renders TimelineFlameChart correctly', () => {
 
   const timeline = renderer.create(
     <Provider store={store}>
-      <TimelineFlameChart threadIndex={0} viewHeight={1000} />
+      <FlameChartGraph threadIndex={0} viewHeight={1000} />
     </Provider>,
     { createNodeMock }
   );

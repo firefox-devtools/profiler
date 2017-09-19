@@ -616,7 +616,7 @@ body, #root, .profileViewer {
 
 .tabBarTab {
   font-size: 12px;
-  width: 8em;
+  width: 9em;
   text-align: center;
   cursor: default;
   -moz-user-select: none;

@@ -146,8 +146,6 @@ export function changeHidePlatformDetails(
   };
 }
 
-export type UpdateProfileSelection = (selection: ProfileSelection) => Action;
-
 export function updateProfileSelection(selection: ProfileSelection): Action {
   return {
     type: 'UPDATE_PROFILE_SELECTION',

@@ -6,16 +6,16 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
-import { getHasZoomedViaMousewheel } from '../../reducers/timeline-view';
-import actions from '../../actions';
+import { getHasZoomedViaMousewheel } from '../../../reducers/timeline-view';
+import actions from '../../../actions';
 
 import type {
   CssPixels,
   UnitIntervalOfProfileRange,
   StartEndRange,
-} from '../../types/units';
-import type { UpdateProfileSelection } from '../../actions/profile-view';
-import type { ProfileSelection } from '../../types/actions';
+} from '../../../types/units';
+import typeof { updateProfileSelection as UpdateProfileSelection } from '../../../actions/profile-view';
+import type { ProfileSelection } from '../../../types/actions';
 
 const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
   typeof window === 'object' && window.WheelEvent
@@ -26,20 +26,15 @@ type Props = {
   viewportNeedsUpdate: any,
   timeRange: StartEndRange,
   maxViewportHeight: number,
-  isRowExpanded: boolean,
   maximumZoom: UnitIntervalOfProfileRange,
   updateProfileSelection: UpdateProfileSelection,
   selection: ProfileSelection,
-  getScrollElement: () => ?HTMLElement,
   hasZoomedViaMousewheel: () => void,
   setHasZoomedViaMousewheel: () => void,
   hasZoomedViaMousewheel: boolean,
 };
 
-require('./TimelineViewport.css');
-
-// This is a little hacky, but saves from having to dynamically look up some properties.
-const COLLAPSED_ROW_HEIGHT = 34;
+require('./Viewport.css');
 
 /**
  * Viewport terminology:
@@ -169,11 +164,6 @@ export default function withTimelineViewport<T>(
     }
 
     componentWillReceiveProps(newProps: Props) {
-      if (this.props.isRowExpanded !== newProps.isRowExpanded) {
-        this.setState(this.getDefaultState(newProps));
-        this._setSizeNextFrame();
-        return;
-      }
       if (
         this.props.selection !== newProps.selection ||
         this.props.timeRange !== newProps.timeRange
@@ -209,80 +199,18 @@ export default function withTimelineViewport<T>(
         return;
       }
 
-      if (!this.props.isRowExpanded) {
-        return;
-      }
-
-      // Only move the viewport if the entire canvas is in frame, otherwise let the
-      // TimelineView scrolling element scroll.
-      if (this.isViewportOccluded(event)) {
-        return;
-      }
-
       this.showShiftScrollingHint();
 
       // Do the work to move the viewport.
       const { containerHeight } = this.state;
-      const didMove = this.moveViewport(
+
+      this.moveViewport(
         -getNormalizedScrollDelta(event, containerHeight, 'deltaX'),
         -getNormalizedScrollDelta(event, containerHeight, 'deltaY')
       );
-      if (didMove) {
-        event.preventDefault();
-      }
-    }
-
-    isViewportOccluded(event: SyntheticWheelEvent): boolean {
-      const scrollElement = this.props.getScrollElement();
-      const container = this._container;
-      if (!scrollElement || !container) {
-        return false;
-      }
-      // Calculate using getBoundingClientRect to get non-rounded CssPixels.
-      const innerScrollRect = scrollElement.children[0].getBoundingClientRect();
-      const scrollRect = scrollElement.getBoundingClientRect();
-      const viewportRect = container.getBoundingClientRect();
-
-      if (event.deltaY < 0) {
-        //    ______________ viewportRect
-        //  _|______________|_
-        // | |              | |
-        // | |              | |                  ^
-        // | |______________| |     scrolling up |
-        // |__________________|
-        //                    ^ scrollRect
-
-        // Try to leave a gap of a collapsed row, if it's the top-most element then use
-        // the offsetTop of the viewport from the inner scroll area.
-        const minimumGap = Math.min(
-          COLLAPSED_ROW_HEIGHT,
-          viewportRect.top - innerScrollRect.top
-        );
-        return viewportRect.top < scrollRect.top + minimumGap;
-      }
-
-      //  __________________ scrollRect
-      // |  ______________  |
-      // | |              | |                    |
-      // | |              | |     scrolling down v
-      // |_|______________|_|
-      //   |______________|
-      //                  ^ viewportRect
-
-      // Try to leave a gap of a collapsed row, if it's the bottom-most element then use the
-      // offsetBottom of the viewport from the inner scroll area.
-      const minimumGap = Math.min(
-        COLLAPSED_ROW_HEIGHT,
-        innerScrollRect.bottom - viewportRect.bottom
-      );
-      return viewportRect.bottom > scrollRect.bottom - minimumGap;
     }
 
     zoomRangeSelection(event: SyntheticWheelEvent) {
-      if (!this.props.isRowExpanded) {
-        // Maybe this should only be listening when expanded.
-        return;
-      }
       if (!this.props.hasZoomedViaMousewheel) {
         this.props.setHasZoomedViaMousewheel();
       }
@@ -488,7 +416,7 @@ export default function withTimelineViewport<T>(
     }
 
     render() {
-      const { isRowExpanded, hasZoomedViaMousewheel } = this.props;
+      const { hasZoomedViaMousewheel } = this.props;
 
       const {
         containerWidth,
@@ -503,16 +431,12 @@ export default function withTimelineViewport<T>(
 
       const viewportClassName = classNames({
         timelineViewport: true,
-        expanded: isRowExpanded,
-        collapsed: !isRowExpanded,
         dragging: isDragging,
       });
 
       const shiftScrollClassName = classNames({
         timelineViewportShiftScroll: true,
-        hidden:
-          hasZoomedViaMousewheel ||
-          !(isShiftScrollHintVisible && isRowExpanded),
+        hidden: hasZoomedViaMousewheel || !isShiftScrollHintVisible,
       });
 
       return (

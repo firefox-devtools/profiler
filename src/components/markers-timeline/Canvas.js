@@ -4,8 +4,8 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import withTimelineViewport from './TimelineViewport';
-import TimelineCanvas from './TimelineCanvas';
+import withTimelineViewport from '../shared/timeline/Viewport';
+import TimelineCanvas from '../shared/timeline/Canvas';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import TextMeasurement from '../../utils/text-measurement';
 import { BLUE_40 } from '../../utils/colors';
@@ -53,10 +53,7 @@ const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
 const MARKER_LABEL_MAX_LENGTH = 30;
 
-class TimelineMarkerCanvas extends PureComponent {
-  _requestedAnimationFrame: boolean;
-  _devicePixelRatio: number;
-  _ctx: null | CanvasRenderingContext2D;
+class MarkersTimelineCanvas extends PureComponent {
   _textMeasurement: null | TextMeasurement;
 
   props: Props;
@@ -377,4 +374,4 @@ class TimelineMarkerCanvas extends PureComponent {
   }
 }
 
-export default withTimelineViewport(TimelineMarkerCanvas);
+export default withTimelineViewport(MarkersTimelineCanvas);

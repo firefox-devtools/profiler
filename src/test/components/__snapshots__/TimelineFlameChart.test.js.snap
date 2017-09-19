@@ -10,7 +10,7 @@ exports[`renders TimelineFlameChart correctly 1`] = `
   }
 >
   <div
-    className="react-contextmenu-wrapper timelineFlameChartLabels grippy"
+    className="react-contextmenu-wrapper flameChartGraphLabels grippy"
     onContextMenu={[Function]}
     onMouseDown={[Function]}
     onMouseOut={[Function]}

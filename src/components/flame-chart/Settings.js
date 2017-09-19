@@ -14,7 +14,7 @@ import {
 } from '../../reducers/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
 
-import './FlameChartSettings.css';
+import './Settings.css';
 
 type Props = {
   hidePlatformDetails: boolean,
