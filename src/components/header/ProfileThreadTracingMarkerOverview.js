@@ -17,9 +17,9 @@ export default connect((state, props) => {
   const { threadIndex } = props;
   const selectors = selectorsForThread(threadIndex);
   const selectedThread = getSelectedThreadIndex(state);
-  const intervalMarkers = selectors
-    .getRangeSelectionFilteredTracingMarkers(state)
-    .filter(tm => tm.name !== 'GCMajor');
+  const intervalMarkers = selectors.getRangeSelectionFilteredTracingMarkersForHeader(
+    state
+  );
   return {
     intervalMarkers,
     threadName: selectors.getFriendlyThreadName(state),
