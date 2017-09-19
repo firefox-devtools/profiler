@@ -426,6 +426,7 @@ export type SelectorsForThread = {
   getTracingMarkers: State => TracingMarker[],
   getMarkerTiming: State => MarkerTimingRows,
   getRangeSelectionFilteredTracingMarkers: State => TracingMarker[],
+  getRangeSelectionFilteredTracingMarkersForHeader: State => TracingMarker[],
   getFilteredThread: State => Thread,
   getRangeSelectionFilteredThread: State => Thread,
   getCallNodeInfo: State => CallNodeInfo,
@@ -600,6 +601,10 @@ export const selectorsForThread = (
         return ProfileData.filterTracingMarkersToRange(markers, start, end);
       }
     );
+    const getRangeSelectionFilteredTracingMarkersForHeader = createSelector(
+      getRangeSelectionFilteredTracingMarkers,
+      (markers): TracingMarker[] => markers.filter(tm => tm.name !== 'GCMajor')
+    );
     const getCallNodeInfo = createSelector(
       getFilteredThread,
       ({ stackTable, frameTable, funcTable }: Thread): CallNodeInfo => {
@@ -723,6 +728,7 @@ export const selectorsForThread = (
       getTracingMarkers,
       getMarkerTiming,
       getRangeSelectionFilteredTracingMarkers,
+      getRangeSelectionFilteredTracingMarkersForHeader,
       getFilteredThread,
       getRangeSelectionFilteredThread,
       getCallNodeInfo,
