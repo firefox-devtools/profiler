@@ -1,31 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders TimelineMarkers correctly 1`] = `
+exports[`renders MarkersTimeline correctly 1`] = `
 <div
-  className="timelineMarkers"
-  style={
-    Object {
-      "height": 168,
-    }
-  }
+  className="markersTimeline"
 >
   <div
-    className="timelineMarkersLabels grippy"
+    className="markersTimelineLabels grippy"
     title="thread: \\"Empty\\" (0)
   process: \\"default\\" (0)"
   >
     <span
-      className="timelineMarkersLabelsName"
+      className="markersTimelineLabelsName"
     >
       Empty
     </span>
-    <button
-      className="timelineMarkersCollapseButton expanded"
-      onClick={[Function]}
-    />
   </div>
   <div
-    className="timelineViewport expanded"
+    className="timelineViewport"
     onMouseDown={[Function]}
     onWheel={[Function]}
   >
@@ -56,7 +47,7 @@ exports[`renders TimelineMarkers correctly 1`] = `
 </div>
 `;
 
-exports[`renders TimelineMarkers correctly 2`] = `
+exports[`renders MarkersTimeline correctly 2`] = `
 Array [
   Array [
     "scale",
