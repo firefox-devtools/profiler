@@ -4,7 +4,7 @@
 
 // @flow
 import React from 'react';
-import TimelineMarkers from '../../components/timeline/TimelineMarkers';
+import MarkersTimeline from '../../components/markers-timeline';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -14,7 +14,7 @@ import { getBoundingBox } from '../fixtures/utils';
 
 jest.useFakeTimers();
 
-it('renders TimelineMarkers correctly', () => {
+it('renders MarkersTimeline correctly', () => {
   // Tie the requestAnimationFrame into jest's fake timers.
   window.requestAnimationFrame = fn => setTimeout(fn, 0);
   window.devicePixelRatio = 1;
@@ -67,7 +67,7 @@ it('renders TimelineMarkers correctly', () => {
 
   const timeline = renderer.create(
     <Provider store={storeWithProfile(profile)}>
-      <TimelineMarkers threadIndex={0} viewHeight={1000} />
+      <MarkersTimeline threadIndex={0} viewHeight={1000} />
     </Provider>,
     { createNodeMock }
   );

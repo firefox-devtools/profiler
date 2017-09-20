@@ -1,10 +1,10 @@
 // @flow
 import React, { PureComponent } from 'react';
-import { timeCode } from '../../utils/time-code';
+import { timeCode } from '../../../utils/time-code';
 import classNames from 'classnames';
-import Tooltip from '../shared/Tooltip';
+import Tooltip from '../Tooltip';
 
-import type { CssPixels, DevicePixels } from '../../types/units';
+import type { CssPixels, DevicePixels } from '../../../types/units';
 
 type Props<HoveredItem> = {
   containerWidth: CssPixels,
@@ -23,7 +23,7 @@ type State<HoveredItem> = {
   mouseY: CssPixels,
 };
 
-require('./TimelineCanvas.css');
+require('./Canvas.css');
 
 export default class TimelineCanvas<HoveredItem> extends PureComponent<
   void,

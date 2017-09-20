@@ -1,64 +1,123 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders TimelineFlameChart correctly 1`] = `
+exports[`renders FlameChartGraph correctly 1`] = `
 <div
-  className="timelineFlameChart"
-  style={
-    Object {
-      "height": 96,
-    }
-  }
+  className="flameChart"
 >
   <div
-    className="react-contextmenu-wrapper timelineFlameChartLabels grippy"
-    onContextMenu={[Function]}
-    onMouseDown={[Function]}
-    onMouseOut={[Function]}
-    onMouseUp={[Function]}
-    onTouchEnd={[Function]}
-    onTouchStart={[Function]}
+    className="flameChartSettings"
   >
-    <span>
-      Empty
-    </span>
-    <button
-      className="timelineFlameChartCollapseButton expanded"
-      onClick={[Function]}
-    />
+    <ul
+      className="flameChartSettingsList"
+    >
+      <li
+        className="flameChartSettingsListItem"
+      >
+        <label
+          className="flameChartSettingsLabel"
+        >
+          <input
+            checked={false}
+            className="flameChartSettingsCheckbox"
+            onChange={[Function]}
+            type="checkbox"
+          />
+           Hide platform details
+        </label>
+      </li>
+      <li
+        className="flameChartSettingsListItem"
+      >
+        <label
+          className="flameChartSettingsLabel"
+        >
+          <input
+            checked={false}
+            className="flameChartSettingsCheckbox"
+            onChange={[Function]}
+            type="checkbox"
+          />
+           Invert call stack
+        </label>
+      </li>
+    </ul>
+    <div
+      className="flameChartSettingsSearchbar"
+    >
+      <label
+        className="flameChartSettingsSearchbarLabel"
+      >
+        Filter stacks: 
+        <form
+          className="idleSearchField flameChartSettingsSearchField"
+          onSubmit={[Function]}
+        >
+          <input
+            className="idleSearchFieldInput"
+            name="search"
+            onChange={[Function]}
+            onFocus={[Function]}
+            required="required"
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            className="idleSearchFieldButton"
+            onClick={[Function]}
+            onFocus={[Function]}
+            type="reset"
+          />
+        </form>
+      </label>
+    </div>
   </div>
   <div
-    className="timelineViewport expanded"
-    onMouseDown={[Function]}
-    onWheel={[Function]}
+    className="flameChartGraph"
   >
-    <div>
-      <canvas
-        className="timelineCanvas flameChartCanvas"
-        onDoubleClick={[Function]}
-        onMouseMove={[Function]}
-        onMouseOut={[Function]}
-      />
+    <div
+      className="flameChartLabels grippy"
+      title="thread: \\"Empty\\" (0)
+    process: \\"default\\" (0)"
+    >
+      <span>
+        Empty
+      </span>
     </div>
     <div
-      className="timelineViewportShiftScroll hidden"
+      className="timelineViewport"
+      onMouseDown={[Function]}
+      onWheel={[Function]}
     >
-      Zoom Timeline:
-      <kbd
-        className="timelineViewportShiftScrollKbd"
+      <div>
+        <canvas
+          className="timelineCanvas flameChartCanvas"
+          onDoubleClick={[Function]}
+          onMouseMove={[Function]}
+          onMouseOut={[Function]}
+        />
+      </div>
+      <div
+        className="timelineViewportShiftScroll hidden"
       >
-        Shift
-      </kbd>
-      <kbd
-        className="timelineViewportShiftScrollKbd"
-      >
-        Scroll
-      </kbd>
+        Zoom Timeline:
+        <kbd
+          className="timelineViewportShiftScrollKbd"
+        >
+          Shift
+        </kbd>
+        <kbd
+          className="timelineViewportShiftScrollKbd"
+        >
+          Scroll
+        </kbd>
+      </div>
     </div>
   </div>
 </div>
 `;
 
-exports[`renders TimelineFlameChart correctly 2`] = `
+exports[`renders FlameChartGraph correctly 2`] = `
 Array [
   Array [
     "scale",

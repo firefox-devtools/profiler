@@ -215,7 +215,7 @@ export function stateFromLocation(location: Location): UrlState {
   };
 }
 
-export const CURRENT_URL_VERSION = 1;
+export const CURRENT_URL_VERSION = 2;
 
 type ProcessedLocation = { pathname: string, hash: string, query: Object };
 
@@ -321,5 +321,16 @@ const _upgraders = {
         .join('~');
       delete processedLocation.query.callTreeFilters;
     }
+  },
+  [2]: (processedLocation: ProcessedLocation) => {
+    // Map the tab "timeline" to "flame-chart".
+    // Map the tab "markers" to "markers-table".
+    processedLocation.pathname = processedLocation.pathname
+      // Given:    /public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/
+      // Matches:  $1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      .replace(/^(\/[^/]+\/[^/]+)\/timeline\/?/, '$1/flame-chart/')
+      // Given:    /public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/
+      // Matches:  $1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      .replace(/^(\/[^/]+\/[^/]+)\/markers\/?/, '$1/markers-table/');
   },
 };

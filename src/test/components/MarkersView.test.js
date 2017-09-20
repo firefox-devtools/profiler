@@ -4,7 +4,7 @@
 
 // @flow
 import React from 'react';
-import MarkersView from '../../components/markers/MarkersView';
+import Markers from '../../components/markers-table';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
@@ -57,7 +57,7 @@ describe('calltree/ProfileCallTreeView', function() {
 
     const markers = renderer.create(
       <Provider store={storeWithProfile(profile)}>
-        <MarkersView />
+        <Markers />
       </Provider>,
       { createNodeMock }
     );

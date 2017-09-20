@@ -5,7 +5,6 @@
 
 import { storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
-import * as TimelineSelectors from '../../reducers/timeline-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 
@@ -17,11 +16,7 @@ import {
   updateProfileSelection,
   changeImplementationFilter,
 } from '../../actions/profile-view';
-import {
-  changeFlameChartColorStrategy,
-  changeTimelineMarkersExpandedThread,
-  changeTimelineFlameChartExpandedThread,
-} from '../../actions/timeline';
+import { changeFlameChartColorStrategy } from '../../actions/timeline';
 import { getCategoryByImplementation } from '../../profile-logic/color-categories';
 
 const { selectedThreadSelectors } = ProfileViewSelectors;
@@ -207,56 +202,6 @@ describe('selectors/getLeafCategoryStackTimingForFlameChart', function() {
         length: 4,
       },
     ]);
-  });
-});
-
-describe('actions/changeTimelineFlameChartExpandedThread', function() {
-  it('can set one timeline flame chart thread as expanded', function() {
-    const store = storeWithProfile();
-    const threads = ProfileViewSelectors.getThreads(store.getState());
-
-    function isExpanded(thread, threadIndex) {
-      return TimelineSelectors.getIsFlameChartExpanded(
-        store.getState(),
-        threadIndex
-      );
-    }
-
-    expect(threads.map(isExpanded)).toEqual([false, false, false]);
-
-    store.dispatch(changeTimelineFlameChartExpandedThread(1, true));
-    expect(threads.map(isExpanded)).toEqual([false, true, false]);
-
-    store.dispatch(changeTimelineFlameChartExpandedThread(2, true));
-    expect(threads.map(isExpanded)).toEqual([false, false, true]);
-
-    store.dispatch(changeTimelineFlameChartExpandedThread(2, false));
-    expect(threads.map(isExpanded)).toEqual([false, false, false]);
-  });
-});
-
-describe('actions/changeTimelineMarkersExpandedThread', function() {
-  it('can set one timeline markers thread as expanded', function() {
-    const store = storeWithProfile();
-    const threads = ProfileViewSelectors.getThreads(store.getState());
-
-    function isExpanded(thread, threadIndex) {
-      return TimelineSelectors.getAreMarkersExpanded(
-        store.getState(),
-        threadIndex
-      );
-    }
-    // Timeline markers are open by default.
-    expect(threads.map(isExpanded)).toEqual([true, true, true]);
-
-    store.dispatch(changeTimelineMarkersExpandedThread(1, false));
-    expect(threads.map(isExpanded)).toEqual([true, false, true]);
-
-    store.dispatch(changeTimelineMarkersExpandedThread(2, false));
-    expect(threads.map(isExpanded)).toEqual([true, false, false]);
-
-    store.dispatch(changeTimelineMarkersExpandedThread(2, true));
-    expect(threads.map(isExpanded)).toEqual([true, false, true]);
   });
 });
 

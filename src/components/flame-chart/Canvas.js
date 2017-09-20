@@ -4,8 +4,8 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import withTimelineViewport from './TimelineViewport';
-import TimelineCanvas from './TimelineCanvas';
+import withTimelineViewport from '../shared/timeline/Viewport';
+import TimelineCanvas from '../shared/timeline/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import formatTimeLength from '../../utils/format-time-length';
 
@@ -49,7 +49,7 @@ type HoveredStackTiming = {
   stackTableIndex: IndexIntoStackTiming,
 };
 
-require('./FlameChartCanvas.css');
+require('./Canvas.css');
 
 const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;

@@ -1,0 +1,27 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.markersTimeline {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+}
+
+.markersTimelineLabels {
+  width: 135px;
+  display: flex;
+  padding: 9px 0 9px 14px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.markersTimelineLabelsName {
+  flex: 1;
+  cursor: default;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
