@@ -325,23 +325,12 @@ const _upgraders = {
   [2]: (processedLocation: ProcessedLocation) => {
     // Map the tab "timeline" to "flame-chart".
     // Map the tab "markers" to "markers-table".
-    let result;
-    if (
-      (result = processedLocation.pathname.match(
-        /^(\/[\w-]+\/[\w-]+\/)timeline(.*)/
-      ))
+    processedLocation.pathname = processedLocation.pathname
       // Given:    /public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/
-      // Matches:  1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^        2
-    ) {
-      const [, pathStart, pathEnd] = result;
-      processedLocation.pathname = pathStart + 'flame-chart' + pathEnd;
-    } else if (
-      (result = processedLocation.pathname.match(/^(\/\w+\/\w+\/)markers(.*)/))
+      // Matches:  $1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      .replace(/^(\/[^/]+\/[^/]+)\/timeline\/?/, '$1/flame-chart/')
       // Given:    /public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/
-      // Matches:  1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^       2
-    ) {
-      const [, pathStart, pathEnd] = result;
-      processedLocation.pathname = pathStart + 'markers-table' + pathEnd;
-    }
+      // Matches:  $1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      .replace(/^(\/[^/]+\/[^/]+)\/markers\/?/, '$1/markers-table/');
   },
 };

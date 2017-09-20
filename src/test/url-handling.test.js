@@ -24,12 +24,14 @@ function _getStoreWithURL(
   },
   profile: Profile = getProfile()
 ) {
-  const pathname =
-    settings.pathname === undefined
-      ? '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/'
-      : settings.pathname;
-  const hash = settings.hash === undefined ? '' : settings.hash;
-  const search = settings.search === undefined ? '' : settings.search;
+  const { pathname, hash, search } = Object.assign(
+    {
+      pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
+      hash: '',
+      search: '',
+    },
+    settings
+  );
   const urlState = stateFromLocation({
     pathname,
     search,
