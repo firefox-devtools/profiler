@@ -118,7 +118,7 @@
     "file-loader": "^0.11.2",
     "flow-bin": "^0.52.0",
     "flow-coverage-report": "^0.3.0",
-    "flow-typed": "^2.0.0",
+    "flow-typed": "^2.1.5",
     "html-webpack-plugin": "^2.30.1",
     "http-server": "^0.10.0",
     "husky": "^0.14.3",
