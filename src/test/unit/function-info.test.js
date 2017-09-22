@@ -5,6 +5,7 @@
 import {
   stripFunctionArguments,
   removeTemplateInformation,
+  getFunctionName,
 } from '../../profile-logic/function-info';
 
 describe('strip-function-arguments', function() {
@@ -45,5 +46,13 @@ describe('remove-template-information', function() {
   });
   it('should not remove information we want to keep', function() {
     expect(removeTemplateInformation('foo/<bar')).toEqual('foo/<bar');
+  });
+});
+
+describe('get-function-name', function() {
+  it('should get the function name', function() {
+    expect(
+      getFunctionName('ns::Foo<0>::fn(bool (*)(JS::Handle<JSObject*>)) const')
+    ).toEqual('ns::Foo::fn');
   });
 });
