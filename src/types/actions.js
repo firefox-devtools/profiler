@@ -118,19 +118,9 @@ type ReceiveProfileAction =
   | { type: 'WAITING_FOR_PROFILE_FROM_STORE' }
   | { type: 'WAITING_FOR_PROFILE_FROM_URL' };
 
-type TimelineAction =
-  | { type: 'CHANGE_FLAME_CHART_COLOR_STRATEGY', getCategory: GetCategory }
-  | { type: 'CHANGE_FLAME_CHART_LABELING_STRATEGY', getLabel: GetLabel }
-  | {
-      type: 'CHANGE_TIMELINE_FLAME_CHART_EXPANDED_THREAD',
-      threadIndex: ThreadIndex,
-      isExpanded: boolean,
-    }
-  | {
-      type: 'CHANGE_TIMELINE_MARKERS_EXPANDED_THREAD',
-      threadIndex: ThreadIndex,
-      isExpanded: boolean,
-    };
+type StackChartAction =
+  | { type: 'CHANGE_STACK_CHART_COLOR_STRATEGY', getCategory: GetCategory }
+  | { type: 'CHANGE_STACK_CHART_LABELING_STRATEGY', getLabel: GetLabel };
 
 type UrlEnhancerAction =
   | { type: '@@urlenhancer/urlSetupDone' }
@@ -175,7 +165,7 @@ export type Action =
   | ProfileSummaryAction
   | ProfileAction
   | ReceiveProfileAction
-  | TimelineAction
+  | StackChartAction
   | UrlEnhancerAction
   | UrlStateAction
   | IconsAction;

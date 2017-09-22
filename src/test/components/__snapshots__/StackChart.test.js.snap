@@ -1,24 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders FlameChartGraph correctly 1`] = `
+exports[`renders StackChartGraph correctly 1`] = `
 <div
-  className="flameChart"
+  className="stackChart"
 >
   <div
-    className="flameChartSettings"
+    className="stackChartSettings"
   >
     <ul
-      className="flameChartSettingsList"
+      className="stackChartSettingsList"
     >
       <li
-        className="flameChartSettingsListItem"
+        className="stackChartSettingsListItem"
       >
         <label
-          className="flameChartSettingsLabel"
+          className="stackChartSettingsLabel"
         >
           <input
             checked={false}
-            className="flameChartSettingsCheckbox"
+            className="stackChartSettingsCheckbox"
             onChange={[Function]}
             type="checkbox"
           />
@@ -26,14 +26,14 @@ exports[`renders FlameChartGraph correctly 1`] = `
         </label>
       </li>
       <li
-        className="flameChartSettingsListItem"
+        className="stackChartSettingsListItem"
       >
         <label
-          className="flameChartSettingsLabel"
+          className="stackChartSettingsLabel"
         >
           <input
             checked={false}
-            className="flameChartSettingsCheckbox"
+            className="stackChartSettingsCheckbox"
             onChange={[Function]}
             type="checkbox"
           />
@@ -42,14 +42,14 @@ exports[`renders FlameChartGraph correctly 1`] = `
       </li>
     </ul>
     <div
-      className="flameChartSettingsSearchbar"
+      className="stackChartSettingsSearchbar"
     >
       <label
-        className="flameChartSettingsSearchbarLabel"
+        className="stackChartSettingsSearchbarLabel"
       >
         Filter stacks: 
         <form
-          className="idleSearchField flameChartSettingsSearchField"
+          className="idleSearchField stackChartSettingsSearchField"
           onSubmit={[Function]}
         >
           <input
@@ -73,10 +73,10 @@ exports[`renders FlameChartGraph correctly 1`] = `
     </div>
   </div>
   <div
-    className="flameChartGraph"
+    className="stackChartGraph"
   >
     <div
-      className="flameChartLabels grippy"
+      className="stackChartLabels grippy"
       title="thread: \\"Empty\\" (0)
     process: \\"default\\" (0)"
     >
@@ -91,7 +91,7 @@ exports[`renders FlameChartGraph correctly 1`] = `
     >
       <div>
         <canvas
-          className="timelineCanvas flameChartCanvas"
+          className="timelineCanvas stackChartCanvas"
           onDoubleClick={[Function]}
           onMouseMove={[Function]}
           onMouseOut={[Function]}
@@ -117,7 +117,7 @@ exports[`renders FlameChartGraph correctly 1`] = `
 </div>
 `;
 
-exports[`renders FlameChartGraph correctly 2`] = `
+exports[`renders StackChartGraph correctly 2`] = `
 Array [
   Array [
     "scale",

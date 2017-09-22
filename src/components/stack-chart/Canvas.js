@@ -55,7 +55,7 @@ const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
 
-class FlameChartCanvas extends PureComponent {
+class StackChartCanvas extends PureComponent {
   _textMeasurement: null | TextMeasurement;
 
   props: Props;
@@ -247,7 +247,7 @@ class FlameChartCanvas extends PureComponent {
     }
 
     return (
-      <div className="flameChartCanvasTooltip">
+      <div className="stackChartCanvasTooltip">
         <div className="tooltipOneLine tooltipHeader">
           <div className="tooltipTiming">
             {formatTimeLength(duration)}ms
@@ -325,7 +325,7 @@ class FlameChartCanvas extends PureComponent {
 
     return (
       <TimelineCanvas
-        className="flameChartCanvas"
+        className="stackChartCanvas"
         containerWidth={containerWidth}
         containerHeight={containerHeight}
         isDragging={isDragging}
@@ -338,4 +338,4 @@ class FlameChartCanvas extends PureComponent {
   }
 }
 
-export default withTimelineViewport(FlameChartCanvas);
+export default withTimelineViewport(StackChartCanvas);

@@ -1,7 +1,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import MarkersTimelineCanvas from './Canvas';
+import MarkerChartCanvas from './Canvas';
 import {
   selectedThreadSelectors,
   getDisplayRange,
@@ -10,7 +10,6 @@ import {
 } from '../../reducers/profile-view';
 import { updateProfileSelection } from '../../actions/profile-view';
 
-import type { Thread } from '../../types/profile';
 import type {
   TracingMarker,
   MarkerTimingRows,
@@ -21,12 +20,11 @@ import type {
 } from '../../types/units';
 import type { ProfileSelection } from '../../types/actions';
 
-require('./style.css');
+require('./index.css');
 
 const ROW_HEIGHT = 16;
 
 type Props = {
-  thread: Thread,
   isRowExpanded: boolean,
   maxMarkerRows: number,
   isSelected: boolean,
@@ -41,7 +39,7 @@ type Props = {
   markers: TracingMarker[],
 };
 
-class TimelineMarkers extends PureComponent {
+class MarkerChart extends PureComponent {
   props: Props;
 
   /**
@@ -73,13 +71,13 @@ class TimelineMarkers extends PureComponent {
     const maxViewportHeight = maxMarkerRows * ROW_HEIGHT;
 
     return (
-      <div className="markersTimeline">
-        <div className="markersTimelineLabels grippy" title={processDetails}>
-          <span className="markersTimelineLabelsName">
+      <div className="markerChart">
+        <div className="markerChartLabels grippy" title={processDetails}>
+          <span className="markerChartLabelsName">
             {threadName}
           </span>
         </div>
-        <MarkersTimelineCanvas
+        <MarkerChartCanvas
           key={threadIndex}
           // TimelineViewport props
           isRowExpanded={isRowExpanded}
@@ -90,7 +88,7 @@ class TimelineMarkers extends PureComponent {
           selection={selection}
           updateProfileSelection={updateProfileSelection}
           viewportNeedsUpdate={viewportNeedsUpdate}
-          // MarkersTimelineCanvas props
+          // MarkerChartCanvas props
           interval={interval}
           rangeStart={timeRange.start}
           rangeEnd={timeRange.end}
@@ -115,7 +113,6 @@ export default connect(
     const markerTimingRows = selectedThreadSelectors.getMarkerTiming(state);
 
     return {
-      thread: selectedThreadSelectors.getFilteredThreadForFlameChart(state),
       markers,
       markerTimingRows,
       maxMarkerRows: markerTimingRows.length,
@@ -128,4 +125,4 @@ export default connect(
     };
   },
   { updateProfileSelection }
-)(TimelineMarkers);
+)(MarkerChart);

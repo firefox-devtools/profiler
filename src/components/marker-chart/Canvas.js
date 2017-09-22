@@ -53,7 +53,7 @@ const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
 const MARKER_LABEL_MAX_LENGTH = 30;
 
-class MarkersTimelineCanvas extends PureComponent {
+class MarkerChartCanvas extends PureComponent {
   _textMeasurement: null | TextMeasurement;
 
   props: Props;
@@ -361,7 +361,7 @@ class MarkersTimelineCanvas extends PureComponent {
 
     return (
       <TimelineCanvas
-        className="timelineMarkerCanvas"
+        className="markerChartCanvas"
         containerWidth={containerWidth}
         containerHeight={containerHeight}
         isDragging={isDragging}
@@ -374,4 +374,4 @@ class MarkersTimelineCanvas extends PureComponent {
   }
 }
 
-export default withTimelineViewport(MarkersTimelineCanvas);
+export default withTimelineViewport(MarkerChartCanvas);

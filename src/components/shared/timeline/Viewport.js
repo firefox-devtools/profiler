@@ -6,7 +6,7 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
-import { getHasZoomedViaMousewheel } from '../../../reducers/timeline-view';
+import { getHasZoomedViaMousewheel } from '../../../reducers/app';
 import actions from '../../../actions';
 
 import type {

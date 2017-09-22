@@ -4,18 +4,17 @@
 
 // @flow
 import React from 'react';
-import FlameChartGraph from '../../components/flame-chart';
+import MarkerChart from '../../components/marker-chart';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
+import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 import { getBoundingBox } from '../fixtures/utils';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
-import { changeTimelineFlameChartExpandedThread } from '../../actions/timeline';
 
 jest.useFakeTimers();
 
-it('renders FlameChartGraph correctly', () => {
+it('renders MarkerChart correctly', () => {
   // Tie the requestAnimationFrame into jest's fake timers.
   window.requestAnimationFrame = fn => setTimeout(fn, 0);
   window.devicePixelRatio = 1;
@@ -42,20 +41,33 @@ it('renders FlameChartGraph correctly', () => {
     return null;
   }
 
-  const { profile } = getProfileFromTextSamples(`
-    A A A
-    B B B
-    C C H
-    D F I
-    E G
-  `);
-
-  const store = storeWithProfile(profile);
-  store.dispatch(changeTimelineFlameChartExpandedThread(0, true));
+  const profile = getProfileWithMarkers([
+    ['Marker A', 0, { startTime: 0, endTime: 10 }],
+    ['Marker B', 0, { startTime: 0, endTime: 10 }],
+    ['Marker C', 5, { startTime: 5, endTime: 15 }],
+    [
+      'Very very very very very very long Marker D',
+      6,
+      { startTime: 5, endTime: 15 },
+    ],
+    ['Dot marker E', 4, { startTime: 4, endTime: 4 }],
+    ['Non-interval marker F without data', 7, null],
+    [
+      'Marker G type DOMEvent',
+      5,
+      {
+        startTime: 5,
+        endTime: 10,
+        type: 'DOMEvent',
+        eventType: 'click',
+        phase: 2,
+      },
+    ],
+  ]);
 
   const timeline = renderer.create(
-    <Provider store={store}>
-      <FlameChartGraph threadIndex={0} viewHeight={1000} />
+    <Provider store={storeWithProfile(profile)}>
+      <MarkerChart threadIndex={0} viewHeight={1000} />
     </Provider>,
     { createNodeMock }
   );

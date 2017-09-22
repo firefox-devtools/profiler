@@ -323,14 +323,14 @@ const _upgraders = {
     }
   },
   [2]: (processedLocation: ProcessedLocation) => {
-    // Map the tab "timeline" to "flame-chart".
-    // Map the tab "markers" to "markers-table".
+    // Map the tab "timeline" to "stack-chart".
+    // Map the tab "markers" to "marker-table".
     processedLocation.pathname = processedLocation.pathname
       // Given:    /public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/
       // Matches:  $1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      .replace(/^(\/[^/]+\/[^/]+)\/timeline\/?/, '$1/flame-chart/')
+      .replace(/^(\/[^/]+\/[^/]+)\/timeline\/?/, '$1/stack-chart/')
       // Given:    /public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/
       // Matches:  $1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-      .replace(/^(\/[^/]+\/[^/]+)\/markers\/?/, '$1/markers-table/');
+      .replace(/^(\/[^/]+\/[^/]+)\/markers\/?/, '$1/marker-table/');
   },
 };

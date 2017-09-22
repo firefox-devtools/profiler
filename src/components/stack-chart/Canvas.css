@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.flameChartCanvas {
+.stackChartCanvas {
   position: absolute;
   top: 0;
   left: 0;
@@ -12,6 +12,6 @@
  * This tooltip is multi-line and more intense, so add additional whitespace to make it
  * more readable.
  */
-.flameChartCanvasTooltip {
+.stackChartCanvasTooltip {
   padding: 5px;
 }

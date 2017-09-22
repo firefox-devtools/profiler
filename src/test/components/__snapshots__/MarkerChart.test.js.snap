@@ -1,16 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders MarkersTimeline correctly 1`] = `
+exports[`renders MarkerChart correctly 1`] = `
 <div
-  className="markersTimeline"
+  className="markerChart"
 >
   <div
-    className="markersTimelineLabels grippy"
+    className="markerChartLabels grippy"
     title="thread: \\"Empty\\" (0)
   process: \\"default\\" (0)"
   >
     <span
-      className="markersTimelineLabelsName"
+      className="markerChartLabelsName"
     >
       Empty
     </span>
@@ -22,7 +22,7 @@ exports[`renders MarkersTimeline correctly 1`] = `
   >
     <div>
       <canvas
-        className="timelineCanvas timelineMarkerCanvas"
+        className="timelineCanvas markerChartCanvas"
         onDoubleClick={[Function]}
         onMouseMove={[Function]}
         onMouseOut={[Function]}
@@ -47,7 +47,7 @@ exports[`renders MarkersTimeline correctly 1`] = `
 </div>
 `;
 
-exports[`renders MarkersTimeline correctly 2`] = `
+exports[`renders MarkerChart correctly 2`] = `
 Array [
   Array [
     "scale",

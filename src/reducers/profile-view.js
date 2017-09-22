@@ -19,7 +19,7 @@ import * as StackTiming from '../profile-logic/stack-timing';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import * as TaskTracerTools from '../profile-logic/task-tracer';
-import { getCategoryColorStrategy } from './flame-chart';
+import { getCategoryColorStrategy } from './stack-chart';
 import uniqWith from 'lodash.uniqwith';
 
 import type {
@@ -442,11 +442,11 @@ export type SelectorsForThread = {
   getExpandedCallNodePaths: State => CallNodePath[],
   getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
   getCallTree: State => CallTree.CallTree,
-  getFilteredThreadForFlameChart: State => Thread,
-  getCallNodeInfoOfFilteredThreadForFlameChart: State => CallNodeInfo,
-  getCallNodeMaxDepthForFlameChart: State => number,
-  getStackTimingByDepthForFlameChart: State => StackTiming.StackTimingByDepth,
-  getLeafCategoryStackTimingForFlameChart: State => StackTiming.StackTimingByDepth,
+  getFilteredThreadForStackChart: State => Thread,
+  getCallNodeInfoOfFilteredThreadForStackChart: State => CallNodeInfo,
+  getCallNodeMaxDepthForStackChart: State => number,
+  getStackTimingByDepthForStackChart: State => StackTiming.StackTimingByDepth,
+  getLeafCategoryStackTimingForStackChart: State => StackTiming.StackTimingByDepth,
   getFriendlyThreadName: State => string,
   getThreadProcessDetails: State => string,
   getSearchFilteredMarkers: State => MarkersTable,
@@ -667,11 +667,11 @@ export const selectorsForThread = (
 
     // The selectors below diverge from the thread filtering that's done above;
     // they respect the "hidePlatformDetails" setting instead of the "jsOnly"
-    // setting. This type of filtering is needed for the flame chart.
+    // setting. This type of filtering is needed for the stack chart.
     // This divergence is hopefully temporary, as we figure out how to filter
-    // out unneeded detail from stacks in a way that satisfy both the flame
+    // out unneeded detail from stacks in a way that satisfy both the stack
     // chart and the call tree.
-    const getFilteredThreadForFlameChart = createSelector(
+    const getFilteredThreadForStackChart = createSelector(
       getRangeFilteredThread,
       UrlState.getHidePlatformDetails,
       UrlState.getInvertCallstack,
@@ -700,26 +700,26 @@ export const selectorsForThread = (
         return filteredThread;
       }
     );
-    const getCallNodeInfoOfFilteredThreadForFlameChart = createSelector(
-      getFilteredThreadForFlameChart,
+    const getCallNodeInfoOfFilteredThreadForStackChart = createSelector(
+      getFilteredThreadForStackChart,
       ({ stackTable, frameTable, funcTable }): CallNodeInfo => {
         return ProfileData.getCallNodeInfo(stackTable, frameTable, funcTable);
       }
     );
-    const getCallNodeMaxDepthForFlameChart = createSelector(
-      getFilteredThreadForFlameChart,
-      getCallNodeInfoOfFilteredThreadForFlameChart,
+    const getCallNodeMaxDepthForStackChart = createSelector(
+      getFilteredThreadForStackChart,
+      getCallNodeInfoOfFilteredThreadForStackChart,
       StackTiming.computeCallNodeMaxDepth
     );
-    const getStackTimingByDepthForFlameChart = createSelector(
-      getFilteredThreadForFlameChart,
-      getCallNodeInfoOfFilteredThreadForFlameChart,
-      getCallNodeMaxDepthForFlameChart,
+    const getStackTimingByDepthForStackChart = createSelector(
+      getFilteredThreadForStackChart,
+      getCallNodeInfoOfFilteredThreadForStackChart,
+      getCallNodeMaxDepthForStackChart,
       getProfileInterval,
       StackTiming.getStackTimingByDepth
     );
-    const getLeafCategoryStackTimingForFlameChart = createSelector(
-      getFilteredThreadForFlameChart,
+    const getLeafCategoryStackTimingForStackChart = createSelector(
+      getFilteredThreadForStackChart,
       getProfileInterval,
       getCategoryColorStrategy,
       StackTiming.getLeafCategoryStackTiming
@@ -750,11 +750,11 @@ export const selectorsForThread = (
       getExpandedCallNodePaths,
       getExpandedCallNodeIndexes,
       getCallTree,
-      getFilteredThreadForFlameChart,
-      getCallNodeInfoOfFilteredThreadForFlameChart,
-      getCallNodeMaxDepthForFlameChart,
-      getStackTimingByDepthForFlameChart,
-      getLeafCategoryStackTimingForFlameChart,
+      getFilteredThreadForStackChart,
+      getCallNodeInfoOfFilteredThreadForStackChart,
+      getCallNodeMaxDepthForStackChart,
+      getStackTimingByDepthForStackChart,
+      getLeafCategoryStackTimingForStackChart,
       getFriendlyThreadName,
       getThreadProcessDetails,
       getSearchFilteredMarkers,

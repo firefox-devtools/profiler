@@ -14,7 +14,7 @@ import type { CallNodeInfo } from '../types/profile-derived';
 import type { GetCategory } from './color-categories';
 /**
  * The StackTimingByDepth data structure organizes stack frames by their depth, and start
- * and end times. This optimizes sample data for Flame Chart timeline views. It
+ * and end times. This optimizes sample data for Stack Chart views. It
  * makes it really easy to draw a large amount of boxes at once based on where the
  * viewport is in the stack frame data. Plus the end timings for frames need to be
  * reconstructed from the sample data, as the samples only contain start timings.
