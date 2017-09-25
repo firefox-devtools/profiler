@@ -3,14 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-/* eslint-disable import/named */
-import type {
-  Store as ReduxStore,
-  ThunkAction as ReduxThunkAction,
-  Dispatch as ReduxDispatch,
-  GetState as ReduxGetState,
-} from 'redux';
-/* eslint-enable import/named */
+import type { Store as ReduxStore } from 'redux'; // eslint-disable-line import/named
 import type { Action as ActionsRef } from './actions';
 import type { State as StateRef } from './reducers';
 
@@ -19,7 +12,13 @@ import type { State as StateRef } from './reducers';
 export type Action = ActionsRef;
 export type State = StateRef;
 
-export type GetState = ReduxGetState<State>;
-export type ThunkAction<Result> = ReduxThunkAction<State, Action, Result>;
-export type Store = ReduxStore<State, Action>;
-export type Dispatch = ReduxDispatch<State, Action>;
+// R = Result of a thunk action
+type ThunkDispatch = <R>(action: ThunkAction<R>) => R;
+type PlainDispatch = (action: Action) => Action;
+export type GetState = () => State;
+export type ThunkAction<R> = (dispatch: Dispatch, GetState) => R;
+// The `dispatch` function can accept either a plain action or a thunk action.
+// This is similar to a type `(action: Action | ThunkAction) => any` except this
+// allows to type the return value as well.
+export type Dispatch = PlainDispatch & ThunkDispatch;
+export type Store = ReduxStore<State, Action, Dispatch>;
