@@ -12,9 +12,13 @@ import type { State as StateRef } from './reducers';
 export type Action = ActionsRef;
 export type State = StateRef;
 
+// R = Result of a thunk action
 type ThunkDispatch = <R>(action: ThunkAction<R>) => R;
 type PlainDispatch = (action: Action) => Action;
 export type GetState = () => State;
 export type ThunkAction<R> = (dispatch: Dispatch, GetState) => R;
+// The `dispatch` function can accept either a plain action or a thunk action.
+// This is similar to a type `(action: Action | ThunkAction) => any` except this
+// allows to type the return value as well.
 export type Dispatch = PlainDispatch & ThunkDispatch;
 export type Store = ReduxStore<State, Action, Dispatch>;
