@@ -44,6 +44,12 @@ export type FunctionsUpdatePerThread = {
 
 export type RequestedLib = { debugName: string, breakpadId: string };
 export type ImplementationFilter = 'combined' | 'js' | 'cpp';
+export type TabSlug =
+  | 'calltree'
+  | 'stack-chart'
+  | 'marker-chart'
+  | 'marker-table'
+  | 'summary';
 
 type ProfileSummaryAction =
   | { type: 'PROFILE_SUMMARY_PROCESSED', summary: Summary }
@@ -129,7 +135,7 @@ type UrlEnhancerAction =
 type UrlStateAction =
   | { type: 'WAITING_FOR_PROFILE_FROM_FILE' }
   | { type: 'PROFILE_PUBLISHED', hash: string }
-  | { type: 'CHANGE_SELECTED_TAB', selectedTab: string }
+  | { type: 'CHANGE_SELECTED_TAB', selectedTab: TabSlug }
   | { type: 'ADD_RANGE_FILTER', start: number, end: number }
   | { type: 'POP_RANGE_FILTERS', firstRemovedFilterIndex: number }
   | { type: 'CHANGE_SELECTED_THREAD', selectedThread: ThreadIndex }

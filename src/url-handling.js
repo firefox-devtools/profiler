@@ -12,8 +12,9 @@ import {
   stringifyTransforms,
   parseTransforms,
 } from './profile-logic/transforms';
+import { unexpectedCase } from './utils/flow';
 import type { UrlState } from './types/reducers';
-import type { DataSource } from './types/actions';
+import type { DataSource, TabSlug } from './types/actions';
 
 function dataSourceDirs(urlState: UrlState) {
   const { dataSource } = urlState;
@@ -96,7 +97,8 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   }
 
   // Depending on which tab is active, also show tab-specific query parameters.
-  switch (urlState.selectedTab) {
+  const selectedTab = urlState.selectedTab;
+  switch (selectedTab) {
     case 'calltree':
       query.search = urlState.callTreeSearchString || undefined;
       query.invertCallstack = urlState.invertCallstack ? null : undefined;
@@ -108,17 +110,22 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
         stringifyTransforms(urlState.transforms[urlState.selectedThread]) ||
         undefined;
       break;
-    case 'markers':
+    case 'marker-table':
       query.markerSearch = urlState.markersSearchString;
       break;
-    case 'timeline':
+    case 'stack-chart':
       query.search = urlState.callTreeSearchString || undefined;
       query.invertCallstack = urlState.invertCallstack ? null : undefined;
       query.hidePlatformDetails = urlState.hidePlatformDetails
         ? null
         : undefined;
       break;
+    case 'marker-chart':
+    case 'summary':
+      // No additional query params required.
+      break;
     default:
+      unexpectedCase(selectedTab);
   }
   return { query, pathParts };
 }
@@ -193,7 +200,7 @@ export function stateFromLocation(location: Location): UrlState {
     dataSource,
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
-    selectedTab: pathParts[selectedTabPathPart] || 'calltree',
+    selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]),
     rangeFilters: query.range ? parseRangeFilters(query.range) : [],
     selectedThread: selectedThread,
     callTreeSearchString: query.search || '',
@@ -213,6 +220,23 @@ export function stateFromLocation(location: Location): UrlState {
         : [],
     },
   };
+}
+
+function toValidTabSlug(slug: ?string): TabSlug {
+  switch (slug) {
+    case 'calltree':
+    case 'stack-chart':
+    case 'marker-chart':
+    case 'marker-table':
+    case 'summary':
+      return slug;
+    default:
+      console.error(
+        'Unknown tab found, maybe a URL upgrader needs to be written.',
+        slug
+      );
+      return 'calltree';
+  }
 }
 
 export const CURRENT_URL_VERSION = 2;

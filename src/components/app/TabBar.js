@@ -8,10 +8,10 @@ import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
 import Reorderable from '../shared/Reorderable';
 
-import type { Action } from '../../types/actions';
+import type { Action, TabSlug } from '../../types/actions';
 
 export type Tab = {
-  name: string,
+  name: TabSlug,
   title: string,
 };
 

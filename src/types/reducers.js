@@ -11,6 +11,7 @@ import type {
   DataSource,
   ProfileSelection,
   ImplementationFilter,
+  TabSlug,
 } from './actions';
 import type { Milliseconds, StartEndRange } from './units';
 import type { IndexIntoMarkersTable, Profile, ThreadIndex } from './profile';
@@ -71,7 +72,7 @@ export type UrlState = {
   dataSource: DataSource,
   hash: string,
   profileUrl: string,
-  selectedTab: string,
+  selectedTab: TabSlug,
   rangeFilters: RangeFilterState[],
   selectedThread: ThreadIndex,
   callTreeSearchString: string,

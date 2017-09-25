@@ -10,7 +10,7 @@ import TabBar from './TabBar';
 import classNames from 'classnames';
 import ProfileSummaryView from '../summary/ProfileSummaryView';
 import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
-import MarkersTable from '../marker-table';
+import MarkerTable from '../marker-table';
 import ProfileTaskTracerView from '../tasktracer/ProfileTaskTracerView';
 import ProfileFilterNavigator from './ProfileFilterNavigator';
 import ProfileSharing from './ProfileSharing';
@@ -25,7 +25,7 @@ import {
 import { getSelectedTab } from '../../reducers/url-state';
 import ProfileViewerHeader from '../header/ProfileViewerHeader';
 import ProfileCallTreeContextMenu from '../calltree/ProfileCallTreeContextMenu';
-import MarkersTableContextMenu from '../marker-table/ContextMenu';
+import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
 
 import type { StartEndRange } from '../../types/units';
@@ -119,7 +119,7 @@ class ProfileViewer extends PureComponent {
           {
             summary: <ProfileSummaryView />,
             calltree: <ProfileCallTreeView />,
-            'marker-table': <MarkersTable />,
+            'marker-table': <MarkerTable />,
             tasktracer: (
               <ProfileTaskTracerView
                 rangeStart={timeRange.start}
@@ -132,7 +132,7 @@ class ProfileViewer extends PureComponent {
         }
         <SymbolicationStatusOverlay />
         <ProfileCallTreeContextMenu />
-        <MarkersTableContextMenu />
+        <MarkerTableContextMenu />
         <ProfileThreadHeaderContextMenu />
       </div>
     );
