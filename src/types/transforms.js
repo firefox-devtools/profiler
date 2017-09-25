@@ -16,7 +16,11 @@
  * This combination of information will provide a stable reference to a call node for a
  * given view into a call tree.
  */
-import type { ThreadIndex, IndexIntoFuncTable } from './profile';
+import type {
+  ThreadIndex,
+  IndexIntoFuncTable,
+  IndexIntoResourceTable,
+} from './profile';
 import type { CallNodePath } from './profile-derived';
 import type { ImplementationFilter } from './actions';
 
@@ -184,6 +188,30 @@ export type MergeFunction = {|
 |};
 
 /**
+ * Collapse resource takes CallNodes that are of a consecutive library, and collapses
+ * them into a new collapsed pseudo-stack. Given a call tree like below, where each node
+ * is defined by either "function_name" or "function_name:library_name":
+ *
+ *               A                                   A
+ *             /   \                                 |
+ *            v     v        Collapse firefox        v
+ *    B:firefox    E:firefox       ->             firefox
+ *        |            |                         /       \
+ *        v            v                        D        F
+ *    C:firefox        F
+ *        |
+ *        v
+ *        D
+ */
+export type CollapseResource = {|
+  type: 'collapse-resource',
+  resourceIndex: IndexIntoResourceTable,
+  // This is the index of the newly created function that represents the collapsed stack.
+  collapsedFuncIndex: IndexIntoFuncTable,
+  implementation: ImplementationFilter,
+|};
+
+/**
  * TODO - Once implemented.
  */
 export type MergeSubtree = {|
@@ -198,7 +226,8 @@ export type Transform =
   | FocusFunctionSubtree
   | MergeSubtree
   | MergeCallNode
-  | MergeFunction;
+  | MergeFunction
+  | CollapseResource;
 
 export type TransformStack = Transform[];
 export type TransformStacksPerThread = { [id: ThreadIndex]: TransformStack };

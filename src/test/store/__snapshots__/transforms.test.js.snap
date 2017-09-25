@@ -1,5 +1,44 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`"collapse-resource" transform combined implementation can collapse the "firefox" library 1`] = `
+"
+- A (total: 2, self:—)
+ - firefox (total: 2, self:—)
+   - D (total: 1, self:1)
+   - F (total: 1, self:1)"
+`;
+
+exports[`"collapse-resource" transform combined implementation starts as an unfiltered call tree 1`] = `
+"
+- A (total: 2, self:—)
+ - B:firefox (total: 1, self:—)
+   - C:firefox (total: 1, self:—)
+     - D (total: 1, self:1)
+ - E:firefox (total: 1, self:—)
+   - F (total: 1, self:1)"
+`;
+
+exports[`"collapse-resource" transform specific implementation can collapse the "firefox" library as well as the C.js intermediate function 1`] = `
+"
+- A.js (total: 2, self:—)
+ - firefox (total: 2, self:1)
+   - F.cpp (total: 1, self:—)
+     - G.js (total: 1, self:1)"
+`;
+
+exports[`"collapse-resource" transform specific implementation starts as an unfiltered call tree 1`] = `
+"
+- A.js (total: 2, self:—)
+ - B.cpp:firefox (total: 1, self:—)
+   - C.js (total: 1, self:—)
+     - D.cpp:firefox (total: 1, self:—)
+       - E.js (total: 1, self:—)
+         - F.cpp (total: 1, self:—)
+           - G.js (total: 1, self:1)
+ - H.cpp:firefox (total: 1, self:—)
+   - I.js (total: 1, self:1)"
+`;
+
 exports[`"focus-function" transform on a call tree can be focused on a function 1`] = `
 "
 - X (total: 3, self:—)

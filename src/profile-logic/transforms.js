@@ -12,8 +12,12 @@ import { timeCode } from '../utils/time-code';
 
 import type {
   Thread,
+  FrameTable,
+  StackTable,
+  FuncTable,
   IndexIntoFuncTable,
   IndexIntoStackTable,
+  IndexIntoResourceTable,
 } from '../types/profile';
 import type { CallNodePath } from '../types/profile-derived';
 import type { ImplementationFilter } from '../types/actions';
@@ -33,6 +37,7 @@ const TRANSFORM_TO_SHORT_KEY = {
   'merge-subtree': 'ms',
   'merge-call-node': 'mcn',
   'merge-function': 'mf',
+  'collapse-resource': 'cr',
 };
 
 const SHORT_KEY_TO_TRANSFORM = {
@@ -41,6 +46,7 @@ const SHORT_KEY_TO_TRANSFORM = {
   ms: 'merge-subtree',
   mcn: 'merge-call-node',
   mf: 'merge-function',
+  cr: 'collapse-resource',
 };
 
 /**
@@ -50,47 +56,119 @@ const SHORT_KEY_TO_TRANSFORM = {
  *
  * e.g "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
  */
-export function parseTransforms(stringValue: string = '') {
-  return stringValue
-    .split('~')
-    .map(s => {
-      const tuple = s.split('-');
-      const shortKey = tuple[0];
-      const type = SHORT_KEY_TO_TRANSFORM[shortKey];
+export function parseTransforms(stringValue: string = ''): TransformStack {
+  // Flow had some trouble with the `Transform | null` type, so use a forEach
+  // rather than a map.
+  const transforms = [];
 
-      switch (type) {
-        case 'merge-function':
-        case 'focus-function': {
-          // e.g. "mf-325"
-          const [, funcIndexRaw] = tuple;
-          const funcIndex = parseInt(funcIndexRaw, 10);
-          // Validate that the funcIndex makes sense.
-          return !isNaN(funcIndex) && funcIndex > 0
-            ? {
-                type,
-                funcIndex,
-              }
-            : null;
+  stringValue.split('~').forEach(s => {
+    const tuple = s.split('-');
+    const shortKey = tuple[0];
+    const type = SHORT_KEY_TO_TRANSFORM[shortKey];
+
+    switch (type) {
+      case 'collapse-resource': {
+        // e.g. "cr-js-325-8"
+        const [
+          ,
+          implementation,
+          resourceIndexRaw,
+          collapsedFuncIndexRaw,
+        ] = tuple;
+        const resourceIndex = parseInt(resourceIndexRaw, 10);
+        const collapsedFuncIndex = parseInt(collapsedFuncIndexRaw, 10);
+        if (isNaN(resourceIndex) || isNaN(collapsedFuncIndex)) {
+          break;
         }
-        case 'focus-subtree':
-        case 'merge-call-node':
-        case 'merge-subtree': {
-          // e.g. "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
-          const [, implementation, serializedCallNodePath, inverted] = tuple;
-          return {
+        if (resourceIndex >= 0) {
+          transforms.push({
             type,
+            resourceIndex,
+            collapsedFuncIndex,
             implementation: toValidImplementationFilter(implementation),
-            callNodePath: stringToUintArray(serializedCallNodePath),
-            inverted: Boolean(inverted),
-          };
+          });
         }
-        default:
-          // Do not throw an error, as we don't trust the data coming from a user.
-          console.error('Unrecognized transform was passed to the URL.', type);
-          return null;
+
+        break;
       }
-    })
-    .filter(f => f);
+      case 'merge-function':
+      case 'focus-function': {
+        // e.g. "mf-325"
+        const [, funcIndexRaw] = tuple;
+        const funcIndex = parseInt(funcIndexRaw, 10);
+        // Validate that the funcIndex makes sense.
+        if (!isNaN(funcIndex) && funcIndex >= 0) {
+          switch (type) {
+            case 'merge-function':
+              transforms.push({
+                type: 'merge-function',
+                funcIndex,
+              });
+              break;
+            case 'focus-function':
+              transforms.push({
+                type: 'focus-function',
+                funcIndex,
+              });
+              break;
+            default:
+              throw new Error('Unmatched transform.');
+          }
+        }
+        break;
+      }
+      case 'focus-subtree':
+      case 'merge-call-node':
+      case 'merge-subtree': {
+        // e.g. "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
+        const [
+          ,
+          implementationRaw,
+          serializedCallNodePath,
+          invertedRaw,
+        ] = tuple;
+        const implementation = toValidImplementationFilter(implementationRaw);
+        const callNodePath = stringToUintArray(serializedCallNodePath);
+        const inverted = Boolean(invertedRaw);
+        // Flow requires a switch because it can't deduce the type string correctly.
+        switch (type) {
+          case 'focus-subtree':
+            transforms.push({
+              type: 'focus-subtree',
+              implementation,
+              callNodePath,
+              inverted,
+            });
+            break;
+          case 'merge-call-node':
+            transforms.push({
+              type: 'merge-call-node',
+              implementation,
+              callNodePath,
+            });
+            break;
+          case 'merge-subtree':
+            transforms.push({
+              type: 'merge-subtree',
+              implementation,
+              callNodePath,
+              inverted,
+            });
+            break;
+          default:
+            throw new Error('Unmatched transform.');
+        }
+
+        break;
+      }
+      default:
+        // Do not throw an error, as we don't trust the data coming from a user.
+        console.error('Unrecognized transform was passed to the URL.', type);
+        break;
+    }
+  });
+
+  return transforms;
 }
 
 export function stringifyTransforms(transforms: TransformStack = []): string {
@@ -107,6 +185,8 @@ export function stringifyTransforms(transforms: TransformStack = []): string {
           }
           return string;
         }
+        case 'collapse-resource':
+          return `${shortKey}-${transform.implementation}-${transform.resourceIndex}-${transform.collapsedFuncIndex}`;
         case 'focus-subtree':
         case 'merge-call-node':
         case 'merge-subtree': {
@@ -132,8 +212,25 @@ export function getTransformLabels(
   threadName: string,
   transforms: Transform[]
 ) {
-  const { funcTable, stringTable } = thread;
+  const { funcTable, libs, stringTable, resourceTable } = thread;
   const labels = transforms.map(transform => {
+    // Lookup library information.
+    if (transform.type === 'collapse-resource') {
+      const libIndex = resourceTable.lib[transform.resourceIndex];
+      let resourceName;
+      if (libIndex === undefined || libIndex === null) {
+        const nameIndex = resourceTable.name[transform.resourceIndex];
+        if (nameIndex === -1) {
+          throw new Error('Attempting to collapse a resource without a name');
+        }
+        resourceName = stringTable.getString(nameIndex);
+      } else {
+        resourceName = libs[libIndex].name;
+      }
+      return `Collapse: ${resourceName}`;
+    }
+
+    // Lookup function name.
     let funcIndex;
     switch (transform.type) {
       case 'focus-subtree':
@@ -172,7 +269,8 @@ export function getTransformLabels(
 
 export function applyTransformToCallNodePath(
   callNodePath: CallNodePath,
-  transform: Transform
+  transform: Transform,
+  transformedThread: Thread
 ): CallNodePath {
   switch (transform.type) {
     case 'focus-subtree':
@@ -186,6 +284,13 @@ export function applyTransformToCallNodePath(
       return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
     case 'merge-function':
       return _mergeFunctionInCallNodePath(transform.funcIndex, callNodePath);
+    case 'collapse-resource':
+      return _collapseResourceInCallNodePath(
+        transform.resourceIndex,
+        transform.collapsedFuncIndex,
+        transformedThread.funcTable,
+        callNodePath
+      );
     default:
       throw new Error(
         'Cannot apply an unknown transform to update the CallNodePath'
@@ -224,6 +329,32 @@ function _mergeFunctionInCallNodePath(
   callNodePath: CallNodePath
 ): CallNodePath {
   return callNodePath.filter(nodeFunc => nodeFunc !== funcIndex);
+}
+
+function _collapseResourceInCallNodePath(
+  resourceIndex: IndexIntoResourceTable,
+  collapsedFuncIndex: IndexIntoFuncTable,
+  funcTable: FuncTable,
+  callNodePath: CallNodePath
+) {
+  return (
+    callNodePath
+      // Map any collapsed functions into the collapsedFuncIndex
+      .map(pathFuncIndex => {
+        return funcTable.resource[pathFuncIndex] === resourceIndex
+          ? collapsedFuncIndex
+          : pathFuncIndex;
+      })
+      // De-duplicate contiguous collapsed funcs
+      .filter(
+        (pathFuncIndex, pathIndex, path) =>
+          // This function doesn't match the previous one, so keep it.
+          pathFuncIndex !== path[pathIndex - 1] ||
+          // This function matched the previous, only keep it if doesn't match the
+          // collapsed func.
+          pathFuncIndex !== collapsedFuncIndex
+      )
+  );
 }
 
 function _callNodePathHasPrefixPath(
@@ -395,6 +526,164 @@ export function mergeFunction(
   });
   return Object.assign({}, thread, {
     stackTable: newStackTable,
+    samples: newSamples,
+  });
+}
+
+export function collapseResource(
+  thread: Thread,
+  resourceIndexToCollapse: IndexIntoResourceTable,
+  implementation: ImplementationFilter
+): Thread {
+  const { stackTable, funcTable, frameTable, resourceTable, samples } = thread;
+  const resourceNameIndex = resourceTable.name[resourceIndexToCollapse];
+  const newFrameTable: FrameTable = {
+    address: frameTable.address.slice(),
+    category: frameTable.category.slice(),
+    func: frameTable.func.slice(),
+    implementation: frameTable.implementation.slice(),
+    line: frameTable.line.slice(),
+    optimizations: frameTable.optimizations.slice(),
+    length: frameTable.length,
+  };
+  const newFuncTable: FuncTable = {
+    address: funcTable.address.slice(),
+    isJS: funcTable.isJS.slice(),
+    name: funcTable.name.slice(),
+    resource: funcTable.resource.slice(),
+    fileName: funcTable.fileName.slice(),
+    lineNumber: funcTable.lineNumber.slice(),
+    length: funcTable.length,
+  };
+  const newStackTable: StackTable = {
+    length: 0,
+    prefix: [],
+    frame: [],
+  };
+  const oldStackToNewStack: Map<
+    IndexIntoStackTable | null,
+    IndexIntoStackTable | null
+  > = new Map();
+  const prefixStackToCollapsedStack: Map<
+    IndexIntoStackTable | null, // prefix stack index
+    IndexIntoStackTable | null // collapsed stack index
+  > = new Map();
+  const collapsedStacks: Set<IndexIntoStackTable | null> = new Set();
+  const funcMatchesImplementation = FUNC_MATCHES[implementation];
+
+  oldStackToNewStack.set(null, null);
+  // A new func and frame will be created on the first stack that is found that includes
+  // the given resource.
+  let collapsedFrameIndex;
+  let collapsedFuncIndex;
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefix = stackTable.prefix[stackIndex];
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    const resourceIndex = funcTable.resource[funcIndex];
+    const newStackPrefix = oldStackToNewStack.get(prefix);
+
+    if (newStackPrefix === undefined) {
+      throw new Error('newStackPrefix must not be undefined');
+    }
+    if (resourceIndex === resourceIndexToCollapse) {
+      // The stack matches this resource.
+      if (!collapsedStacks.has(newStackPrefix)) {
+        // The prefix is not a collapsed stack. So this stack will not collapse into its
+        // prefix stack. But it might collapse into a sibling stack, if there exists a
+        // sibling with the same resource. Check if a collapsed stack with the same
+        // prefix (i.e. a collapsed sibling) exists.
+
+        const existingCollapsedStack = prefixStackToCollapsedStack.get(prefix);
+        if (existingCollapsedStack === undefined) {
+          // Create a new collapsed frame.
+
+          // Compute the next indexes
+          const newStackIndex = newStackTable.length++;
+          collapsedStacks.add(newStackIndex);
+          oldStackToNewStack.set(stackIndex, newStackIndex);
+          prefixStackToCollapsedStack.set(prefix, newStackIndex);
+
+          if (collapsedFrameIndex === undefined) {
+            collapsedFrameIndex = newFrameTable.length++;
+            collapsedFuncIndex = newFuncTable.length++;
+            // Add the collapsed frame
+            newFrameTable.address.push(frameTable.address[frameIndex]);
+            newFrameTable.category.push(frameTable.category[frameIndex]);
+            newFrameTable.func.push(collapsedFuncIndex);
+            newFrameTable.line.push(frameTable.line[frameIndex]);
+            newFrameTable.implementation.push(
+              frameTable.implementation[frameIndex]
+            );
+            newFrameTable.optimizations.push(
+              frameTable.optimizations[frameIndex]
+            );
+
+            // Add the psuedo-func
+            newFuncTable.address.push(funcTable.address[funcIndex]);
+            newFuncTable.isJS.push(funcTable.isJS[funcIndex]);
+            newFuncTable.name.push(resourceNameIndex);
+            newFuncTable.resource.push(funcTable.resource[funcIndex]);
+            newFuncTable.fileName.push(funcTable.fileName[funcIndex]);
+            newFuncTable.lineNumber.push(null);
+          }
+
+          // Add the new stack.
+          newStackTable.prefix.push(newStackPrefix);
+          newStackTable.frame.push(collapsedFrameIndex);
+        } else {
+          // A collapsed stack at this level already exists, use that one.
+          if (existingCollapsedStack === null) {
+            throw new Error('existingCollapsedStack cannot be null');
+          }
+          oldStackToNewStack.set(stackIndex, existingCollapsedStack);
+        }
+      } else {
+        // The prefix was already collapsed, use that one.
+        oldStackToNewStack.set(stackIndex, newStackPrefix);
+      }
+    } else {
+      if (
+        !funcMatchesImplementation(thread, funcIndex) &&
+        newStackPrefix !== null
+      ) {
+        // This function doesn't match the implementation filter.
+        const prefixFrame = newStackTable.frame[newStackPrefix];
+        const prefixFunc = newFrameTable.func[prefixFrame];
+        const prefixResource = newFuncTable.resource[prefixFunc];
+
+        if (prefixResource === resourceIndexToCollapse) {
+          // This stack's prefix did match the collapsed resource, map the stack
+          // to the already collapsed stack and move on.
+          oldStackToNewStack.set(stackIndex, newStackPrefix);
+          continue;
+        }
+      }
+      // This stack isn't part of the collapsed resource. Copy over the previous stack.
+      const newStackIndex = newStackTable.length++;
+      newStackTable.prefix.push(newStackPrefix);
+      newStackTable.frame.push(frameIndex);
+      oldStackToNewStack.set(stackIndex, newStackIndex);
+    }
+  }
+
+  const newSamples = Object.assign({}, samples, {
+    stack: samples.stack.map(oldStack => {
+      const newStack = oldStackToNewStack.get(oldStack);
+      if (newStack === undefined) {
+        throw new Error(
+          'Converting from the old stack to a new stack cannot be undefined'
+        );
+      }
+      return newStack;
+    }),
+  });
+
+  return Object.assign({}, thread, {
+    stackTable: newStackTable,
+    frameTable: newFrameTable,
+    funcTable: newFuncTable,
     samples: newSamples,
   });
 }

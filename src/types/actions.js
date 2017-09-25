@@ -148,6 +148,7 @@ type UrlStateAction =
       type: 'ADD_TRANSFORM_TO_STACK',
       threadIndex: ThreadIndex,
       transform: Transform,
+      transformedThread: Thread,
     }
   | {
       type: 'POP_TRANSFORMS_FROM_STACK',

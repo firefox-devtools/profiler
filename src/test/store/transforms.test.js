@@ -412,6 +412,171 @@ describe('"focus-function" transform', function() {
   });
 });
 
+describe('"collapse-resource" transform', function() {
+  describe('combined implementation', function() {
+    /**
+     *               A                                   A
+     *             /   \                                 |
+     *            v     v        Collapse firefox        v
+     *    B:firefox    E:firefox       ->             firefox
+     *        |            |                         /       \
+     *        v            v                        D        F
+     *    C:firefox        F
+     *        |
+     *        v
+     *        D
+     */
+    const { profile, funcNames } = getProfileFromTextSamples(`
+      A          A
+      B:firefox  E:firefox
+      C:firefox  F
+      D
+    `);
+    const collapsedFuncNames = [...funcNames, 'firefox'];
+    const threadIndex = 0;
+    const thread = profile.threads[threadIndex];
+    const firefoxNameIndex = thread.stringTable.indexForString('firefox');
+    const firefoxResourceIndex = thread.resourceTable.name.findIndex(
+      stringIndex => stringIndex === firefoxNameIndex
+    );
+    if (firefoxResourceIndex === -1) {
+      throw new Error('Unable to find the firefox resource');
+    }
+    const collapseTransform = {
+      type: 'collapse-resource',
+      resourceIndex: firefoxResourceIndex,
+      collapsedFuncIndex: thread.funcTable.length,
+      implementation: 'combined',
+    };
+
+    it('starts as an unfiltered call tree', function() {
+      const { getState } = storeWithProfile(profile);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toMatchSnapshot();
+    });
+
+    it('can collapse the "firefox" library', function() {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(addTransformToStack(threadIndex, collapseTransform));
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toMatchSnapshot();
+    });
+
+    it('can update apply the transform to the selected CallNodePaths', function() {
+      // This transform requires a valid thread, unlike many of the others.
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(
+        changeSelectedCallNode(
+          threadIndex,
+          ['A', 'B:firefox', 'C:firefox', 'D'].map(name =>
+            collapsedFuncNames.indexOf(name)
+          )
+        )
+      );
+      dispatch(addTransformToStack(threadIndex, collapseTransform));
+      expect(
+        selectedThreadSelectors.getSelectedCallNodePath(getState())
+      ).toEqual(
+        ['A', 'firefox', 'D'].map(name => collapsedFuncNames.indexOf(name))
+      );
+    });
+  });
+
+  describe('specific implementation', function() {
+    /**
+     *                A.js                                       A.js
+     *              /     \                                        |
+     *             v       v               Collapse firefox        v
+     *   B.cpp:firefox    H.cpp:firefox         ->              firefox
+     *        |                 |                                  |
+     *        v                 v                                  v
+     *       C.js              I.js                              F.cpp
+     *        |                                                    |
+     *        v                                                    v
+     *   D.cpp:firefox                                           G.js
+     *        |
+     *        v
+     *       E.js
+     *        |
+     *        v
+     *      F.cpp
+     *        |
+     *        v
+     *      G.js
+     *
+     * This behavior may seem a bit surprising, but any stack that doesn't match the
+     * current implementation AND has a callee that is collapsed, will itself be collapsed.
+     * It may be obvious to collapse C.js in this case, as it's between two different
+     * firefox library stacks, but E.js and I.js will be collapsed as well. The only
+     * retained leaf "js" stack is G.js, because it follows a non-collapsed "cpp" stack.
+     */
+    const { profile, funcNames } = getProfileFromTextSamples(`
+      A.js           A.js
+      B.cpp:firefox  H.cpp:firefox
+      C.js           I.js
+      D.cpp:firefox
+      E.js
+      F.cpp
+      G.js
+    `);
+    const collapsedFuncNames = [...funcNames, 'firefox'];
+    const threadIndex = 0;
+    const thread = profile.threads[threadIndex];
+    const firefoxNameIndex = thread.stringTable.indexForString('firefox');
+    const firefoxResourceIndex = thread.resourceTable.name.findIndex(
+      stringIndex => stringIndex === firefoxNameIndex
+    );
+    if (firefoxResourceIndex === -1) {
+      throw new Error('Unable to find the firefox resource');
+    }
+    const collapseTransform = {
+      type: 'collapse-resource',
+      resourceIndex: firefoxResourceIndex,
+      collapsedFuncIndex: thread.funcTable.length,
+      implementation: 'cpp',
+    };
+
+    it('starts as an unfiltered call tree', function() {
+      const { getState } = storeWithProfile(profile);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toMatchSnapshot();
+    });
+
+    it('can collapse the "firefox" library as well as the C.js intermediate function', function() {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(
+        // Note the 'cpp' implementation filter.
+        addTransformToStack(threadIndex, collapseTransform)
+      );
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toMatchSnapshot();
+    });
+
+    it('can update apply the transform to the selected CallNodePaths', function() {
+      // This transform requires a valid thread, unlike many of the others.
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      dispatch(
+        changeSelectedCallNode(
+          threadIndex,
+          ['B.cpp:firefox', 'D.cpp:firefox'].map(name =>
+            collapsedFuncNames.indexOf(name)
+          )
+        )
+      );
+      dispatch(changeImplementationFilter('cpp'));
+      dispatch(addTransformToStack(threadIndex, collapseTransform));
+      expect(
+        selectedThreadSelectors.getSelectedCallNodePath(getState())
+      ).toEqual(['firefox'].map(name => collapsedFuncNames.indexOf(name)));
+    });
+  });
+});
+
 describe('expanded and selected CallNodePaths', function() {
   const { profile, funcNames } = getProfileFromTextSamples(`
     A
