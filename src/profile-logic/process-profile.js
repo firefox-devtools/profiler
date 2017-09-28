@@ -479,8 +479,8 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
            * We want to improve the format of these markers to make them
            * easier to understand and work with, but we can't do that by
            * upgrading the gecko profile since that would break
-           * compatibility with telemetery, however we can make some
-           * improvments while we process a gecko profile.
+           * compatibility with telemetry, however we can make some
+           * improvements while we process a gecko profile.
            */
           case 'GCSlice':
             if (m.timings && m.timings.times) {
