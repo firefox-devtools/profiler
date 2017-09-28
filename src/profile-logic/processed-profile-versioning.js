@@ -16,7 +16,7 @@ import { sortDataTable } from '../utils/data-table-utils';
 import { resourceTypes } from './profile-data';
 import {
   upgradeGCMinorMarker,
-  upgradeGCMajorMarker,
+  upgradeGCMajorMarker_Processed8to9,
   convertPhaseTimes,
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
@@ -385,7 +385,7 @@ const _upgraders = {
               }
               break;
             case 'GCMajor':
-              upgradeGCMajorMarker(marker, true);
+              upgradeGCMajorMarker_Processed8to9(marker);
               break;
             default:
               break;

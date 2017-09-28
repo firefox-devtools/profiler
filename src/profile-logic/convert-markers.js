@@ -47,13 +47,9 @@ export function convertPhaseTimes(old_phases: Object): Object {
 }
 
 /*
- * Upgrade a GCMajor marker.  Set processed_profile to true for a processed
- * profile, or false for a gecko profile.
+ * Upgrade a GCMajor marker in the Gecko profile format.
  */
-export function upgradeGCMajorMarker(
-  marker: Object,
-  processed_profile: boolean
-) {
+export function upgradeGCMajorMarker_Gecko8To9(marker: Object) {
   if ('timings' in marker) {
     if (!('status' in marker.timings)) {
       /*
@@ -75,22 +71,24 @@ export function upgradeGCMajorMarker(
       }
 
       timings.allocated_bytes = timings.allocated * 1024 * 1024;
+    }
+  }
+}
 
+export function upgradeGCMajorMarker_Processed8to9(marker: Object) {
+  upgradeGCMajorMarker_Gecko8To9(marker);
+  if ('timings' in marker) {
+    const timings = marker.timings;
+    if (timings.status === 'completed') {
       /*
        * Processed profiles - convert these fields to have more sensible
        * units and sometimes names.
-       *
-       * Gecko profiles - these fields were not changed to preserve
-       * compatibility with telemetry.  They will be updated in
-       * process-profile.js.
        */
-      if (processed_profile) {
-        timings.phase_times = convertPhaseTimes(timings.totals);
-        delete timings.totals;
+      timings.phase_times = convertPhaseTimes(timings.totals);
+      delete timings.totals;
 
-        timings.mmu_20ms /= 100;
-        timings.mmu_50ms /= 100;
-      }
+      timings.mmu_20ms /= 100;
+      timings.mmu_50ms /= 100;
     }
   }
 }

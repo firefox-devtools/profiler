@@ -11,7 +11,10 @@
  * current format.
 */
 
-import { upgradeGCMinorMarker, upgradeGCMajorMarker } from './convert-markers';
+import {
+  upgradeGCMinorMarker,
+  upgradeGCMajorMarker_Gecko8To9,
+} from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 
 export const CURRENT_VERSION = 9; // The current version of the Gecko profile format.
@@ -259,7 +262,7 @@ const _upgraders = {
                 upgradeGCMinorMarker(marker);
                 break;
               case 'GCMajor':
-                upgradeGCMajorMarker(marker, false);
+                upgradeGCMajorMarker_Gecko8To9(marker);
                 break;
               default:
                 break;
