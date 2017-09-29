@@ -7,7 +7,12 @@
  * @jest-environment jsdom
  */
 import * as urlStateReducers from '../reducers/url-state';
-import { stateFromLocation, urlStateToUrlObject } from '../url-handling';
+import {
+  stateFromLocation,
+  urlStateToUrlObject,
+  urlFromState,
+  CURRENT_URL_VERSION,
+} from '../url-handling';
 import { blankStore } from './fixtures/stores';
 import getGeckoProfile from './fixtures/profiles/gecko-profile';
 import { processProfile } from '../profile-logic/process-profile';
@@ -178,6 +183,20 @@ describe('url upgrading', function() {
       expect(urlStateReducers.getSelectedTab(getState())).toBe('marker-table');
     });
   });
+
+  describe('general checks', function() {
+    it("won't run if the version is specified", function() {
+      const { getState } = _getStoreWithURL({
+        pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
+        search: `?v=${CURRENT_URL_VERSION}`,
+      });
+
+      // The conversion process shouldn't run
+      expect(urlStateReducers.getSelectedTab(getState())).not.toBe(
+        'markers-table'
+      );
+    });
+  });
 });
 
 describe('URL serialization of the transform stack', function() {
@@ -239,5 +258,16 @@ describe('URL serialization of the transform stack', function() {
       urlStateReducers.getUrlState(getState())
     );
     expect(query.transforms).toBe(transformString);
+  });
+});
+
+describe('urlFromState', function() {
+  it('outputs the current URL version', function() {
+    const urlState = stateFromLocation({
+      pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
+      search: '',
+      hash: '',
+    });
+    expect(urlFromState(urlState)).toMatch(`v=${CURRENT_URL_VERSION}`);
   });
 });
