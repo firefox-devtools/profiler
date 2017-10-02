@@ -17,9 +17,7 @@
  * readable errors. Flow will only generate an error if it's possible to get there
  * within the type system.
  */
-export function unexpectedCase(
-  notValid: 'Error: non exhaustive switch found.'
-): void {
+export function unexpectedCase(notValid: empty): void {
   throw new Error(`Unexpected case ${notValid}`);
 }
 

@@ -223,6 +223,7 @@ export function stateFromLocation(location: Location): UrlState {
 }
 
 function toValidTabSlug(slug: ?string): TabSlug {
+  const defaultTab = 'calltree';
   switch (slug) {
     case 'calltree':
     case 'stack-chart':
@@ -230,12 +231,14 @@ function toValidTabSlug(slug: ?string): TabSlug {
     case 'marker-table':
     case 'summary':
       return slug;
+    case undefined:
+      return defaultTab;
     default:
       console.error(
         'Unknown tab found, maybe a URL upgrader needs to be written.',
         slug
       );
-      return 'calltree';
+      return defaultTab;
   }
 }
 
