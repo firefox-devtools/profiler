@@ -86,7 +86,7 @@ class StackChartGraph extends PureComponent {
             </span>
           </div>
           <StackChartCanvas
-            // TimelineViewport props
+            // ChartViewport props
             timeRange={timeRange}
             maxViewportHeight={maxViewportHeight}
             maximumZoom={this.getMaximumZoom()}

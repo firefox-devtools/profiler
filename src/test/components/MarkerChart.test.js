@@ -24,7 +24,7 @@ it('renders MarkerChart correctly', () => {
    * Mock out any created refs for the components with relevant information.
    */
   function createNodeMock(element) {
-    // <TimelineCanvas><canvas /></TimelineCanvas>
+    // <ChartCanvas><canvas /></ChartCanvas>
     if (element.type === 'canvas') {
       return {
         getBoundingClientRect: () => getBoundingBox(200, 300),
@@ -32,8 +32,8 @@ it('renders MarkerChart correctly', () => {
         style: {},
       };
     }
-    // <TimelineViewport />
-    if (element.props.className.split(' ').includes('timelineViewport')) {
+    // <ChartViewport />
+    if (element.props.className.split(' ').includes('chartViewport')) {
       return {
         getBoundingClientRect: () => getBoundingBox(200, 300),
       };
@@ -65,7 +65,7 @@ it('renders MarkerChart correctly', () => {
     ],
   ]);
 
-  const timeline = renderer.create(
+  const markerChart = renderer.create(
     <Provider store={storeWithProfile(profile)}>
       <MarkerChart threadIndex={0} viewHeight={1000} />
     </Provider>,
@@ -75,7 +75,7 @@ it('renders MarkerChart correctly', () => {
   // Flush any requestAnimationFrames.
   jest.runAllTimers();
 
-  const tree = timeline.toJSON();
+  const tree = markerChart.toJSON();
   const drawCalls = ctx.__flushDrawLog();
 
   expect(tree).toMatchSnapshot();

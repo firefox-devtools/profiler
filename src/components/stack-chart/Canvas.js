@@ -4,8 +4,8 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import withTimelineViewport from '../shared/timeline/Viewport';
-import TimelineCanvas from '../shared/timeline/Canvas';
+import withChartViewport from '../shared/chart/Viewport';
+import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import formatTimeLength from '../../utils/format-time-length';
 
@@ -73,8 +73,9 @@ class StackChartCanvas extends PureComponent {
    *
    * Note that most of the units are not absolute values, but unit intervals ranged from
    * 0 - 1. This was done to make the calculations easier for computing various zoomed
-   * and translated views independent of any particular scale. See TimelineViewport.js
-   * for a diagram detailing the various components of this set-up.
+   * and translated views independent of any particular scale. See
+   * src/components/shared/chart/Viewport.js for a diagram detailing the various
+   * components of this set-up.
    */
   _drawCanvas(
     ctx: CanvasRenderingContext2D,
@@ -324,7 +325,7 @@ class StackChartCanvas extends PureComponent {
     const { containerWidth, containerHeight, isDragging } = this.props;
 
     return (
-      <TimelineCanvas
+      <ChartCanvas
         className="stackChartCanvas"
         containerWidth={containerWidth}
         containerHeight={containerHeight}
@@ -338,4 +339,4 @@ class StackChartCanvas extends PureComponent {
   }
 }
 
-export default withTimelineViewport(StackChartCanvas);
+export default withChartViewport(StackChartCanvas);

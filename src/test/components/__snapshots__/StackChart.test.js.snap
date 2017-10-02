@@ -85,29 +85,29 @@ exports[`renders StackChartGraph correctly 1`] = `
       </span>
     </div>
     <div
-      className="timelineViewport"
+      className="chartViewport"
       onMouseDown={[Function]}
       onWheel={[Function]}
     >
       <div>
         <canvas
-          className="timelineCanvas stackChartCanvas"
+          className="chartCanvas stackChartCanvas"
           onDoubleClick={[Function]}
           onMouseMove={[Function]}
           onMouseOut={[Function]}
         />
       </div>
       <div
-        className="timelineViewportShiftScroll hidden"
+        className="chartViewportShiftScroll hidden"
       >
-        Zoom Timeline:
+        Zoom Chart:
         <kbd
-          className="timelineViewportShiftScrollKbd"
+          className="chartViewportShiftScrollKbd"
         >
           Shift
         </kbd>
         <kbd
-          className="timelineViewportShiftScrollKbd"
+          className="chartViewportShiftScrollKbd"
         >
           Scroll
         </kbd>

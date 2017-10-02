@@ -33,7 +33,7 @@ it('renders StackChartGraph correctly', () => {
       };
     }
     // <TimelineViewport />
-    if (element.props.className.split(' ').includes('timelineViewport')) {
+    if (element.props.className.split(' ').includes('chartViewport')) {
       return {
         getBoundingClientRect: () => getBoundingBox(200, 300),
       };
@@ -51,7 +51,7 @@ it('renders StackChartGraph correctly', () => {
 
   const store = storeWithProfile(profile);
 
-  const timeline = renderer.create(
+  const stackChart = renderer.create(
     <Provider store={store}>
       <StackChartGraph threadIndex={0} viewHeight={1000} />
     </Provider>,
@@ -61,7 +61,7 @@ it('renders StackChartGraph correctly', () => {
   // Flush any requestAnimationFrames.
   jest.runAllTimers();
 
-  const tree = timeline.toJSON();
+  const tree = stackChart.toJSON();
   const drawCalls = ctx.__flushDrawLog();
 
   expect(tree).toMatchSnapshot();

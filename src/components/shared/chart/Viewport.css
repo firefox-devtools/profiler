@@ -2,14 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.timelineViewport {
+.chartViewport {
   flex: 1;
   position: relative;
   margin-top: 0;
   overflow: hidden;
 }
 
-.timelineViewport.expanded {
+.chartViewport.expanded {
   cursor: -webkit-grab;
   cursor: grab;
   border-top: 1px solid var(--grey-30);
@@ -17,7 +17,7 @@
   margin-bottom: 5px;
 }
 
-.timelineViewport.expanded::after {
+.chartViewport.expanded::after {
   content: "";
   pointer-events: none;
   position: absolute;
@@ -30,12 +30,12 @@
   z-index:1;
 }
 
-.timelineViewport.dragging {
+.chartViewport.dragging {
   cursor: -webkit-grabbing;
   cursor: grabbing;
 }
 
-.timelineViewportShiftScroll {
+.chartViewportShiftScroll {
   position: absolute;
   pointer-events: none;
   white-space: nowrap;
@@ -53,12 +53,12 @@
   box-shadow: 0 0 0 0.5px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.timelineViewportShiftScroll.hidden {
+.chartViewportShiftScroll.hidden {
   opacity: 0;
   transform: translateY(30px);
 }
 
-.timelineViewportShiftScrollKbd {
+.chartViewportShiftScrollKbd {
   background-color: #f6f6f6;
   border: 1px solid #ccc;
   border-radius: .2em;

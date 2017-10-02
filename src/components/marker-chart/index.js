@@ -79,7 +79,7 @@ class MarkerChart extends PureComponent {
         </div>
         <MarkerChartCanvas
           key={threadIndex}
-          // TimelineViewport props
+          // ChartViewport props
           isRowExpanded={isRowExpanded}
           isSelected={isSelected}
           timeRange={timeRange}

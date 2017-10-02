@@ -55,7 +55,7 @@ type MarkersQuery = BaseQuery & {
   markerSearch?: string, // "DOMEvent"
 };
 
-type TimelineQuery = BaseQuery & {
+type StackChartQuery = BaseQuery & {
   search?: string, // "js::RunScript"
   invertCallstack?: null | void,
   hidePlatformDetails?: null | void,
@@ -66,7 +66,7 @@ type UrlObject = {
   query: Query,
 };
 
-type Query = BaseQuery | CallTreeQuery | MarkersQuery | TimelineQuery;
+type Query = BaseQuery | CallTreeQuery | MarkersQuery | StackChartQuery;
 
 /**
  * Take the UrlState and map it into a serializable UrlObject, that represents the
