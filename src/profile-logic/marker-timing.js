@@ -15,7 +15,7 @@ const MAX_STACKING_DEPTH = 300;
 
 /**
  * This function computes the timing information for laying out the markers in the
- * TimelineMarkers component. Each marker is put into a single row based on its name.
+ * MarkerChart component. Each marker is put into a single row based on its name.
  *
  * e.g. An array of 15 markers named either "A", "B", or "C" would be translated into
  *      something that looks like:

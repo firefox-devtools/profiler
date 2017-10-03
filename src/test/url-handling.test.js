@@ -164,18 +164,18 @@ describe('url upgrading', function() {
   });
 
   describe('version 2: split apart timeline tab', function() {
-    it('switches to the flame chart when given a timeline tab', function() {
+    it('switches to the stack chart when given a timeline tab', function() {
       const { getState } = _getStoreWithURL({
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/',
       });
-      expect(urlStateReducers.getSelectedTab(getState())).toBe('flame-chart');
+      expect(urlStateReducers.getSelectedTab(getState())).toBe('stack-chart');
     });
 
-    it('switches to the markers-table when given a markers tab', function() {
+    it('switches to the marker-table when given a markers tab', function() {
       const { getState } = _getStoreWithURL({
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
       });
-      expect(urlStateReducers.getSelectedTab(getState())).toBe('markers-table');
+      expect(urlStateReducers.getSelectedTab(getState())).toBe('marker-table');
     });
   });
 });

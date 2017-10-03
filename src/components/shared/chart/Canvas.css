@@ -1,9 +1,9 @@
-.timelineCanvas {
+.chartCanvas {
   position: absolute;
   top: 0;
   left: 0;
 }
 
-.timelineCanvas.hover {
+.chartCanvas.hover {
   cursor: default;
 }

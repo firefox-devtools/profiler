@@ -16,7 +16,7 @@ function categoryColorStrategy(
   action: Action
 ) {
   switch (action.type) {
-    case 'CHANGE_FLAME_CHART_COLOR_STRATEGY':
+    case 'CHANGE_STACK_CHART_COLOR_STRATEGY':
       return action.getCategory;
     default:
       return state;
@@ -25,7 +25,7 @@ function categoryColorStrategy(
 
 function labelingStrategy(state: GetLabel = getFunctionName, action: Action) {
   switch (action.type) {
-    case 'CHANGE_FLAME_CHART_LABELING_STRATEGY':
+    case 'CHANGE_STACK_CHART_LABELING_STRATEGY':
       return action.getLabel;
     default:
       return state;
@@ -34,8 +34,8 @@ function labelingStrategy(state: GetLabel = getFunctionName, action: Action) {
 
 export default combineReducers({ categoryColorStrategy, labelingStrategy });
 
-export const getFlameChart = (state: State) => state.flameChart;
+export const getStackChart = (state: State) => state.stackChart;
 export const getCategoryColorStrategy = (state: State) =>
-  getFlameChart(state).categoryColorStrategy;
+  getStackChart(state).categoryColorStrategy;
 export const getLabelingStrategy = (state: State) =>
-  getFlameChart(state).labelingStrategy;
+  getStackChart(state).labelingStrategy;

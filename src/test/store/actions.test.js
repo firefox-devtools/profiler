@@ -16,14 +16,14 @@ import {
   updateProfileSelection,
   changeImplementationFilter,
 } from '../../actions/profile-view';
-import { changeFlameChartColorStrategy } from '../../actions/timeline';
+import { changeStackChartColorStrategy } from '../../actions/stack-chart';
 import { getCategoryByImplementation } from '../../profile-logic/color-categories';
 
 const { selectedThreadSelectors } = ProfileViewSelectors;
 
-describe('selectors/getStackTimingByDepthForFlameChart', function() {
+describe('selectors/getStackTimingByDepthForStackChart', function() {
   /**
-   * This table shows off how a flame chart gets filtered to JS only, where the number is
+   * This table shows off how a stack chart gets filtered to JS only, where the number is
    * the stack index, and P is platform code, and J javascript.
    *
    *            Unfiltered             ->             JS Only
@@ -40,7 +40,7 @@ describe('selectors/getStackTimingByDepthForFlameChart', function() {
 
   it('computes unfiltered stack timing by depth', function() {
     const store = storeWithProfile();
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForStackChart(
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
@@ -57,7 +57,7 @@ describe('selectors/getStackTimingByDepthForFlameChart', function() {
   it('computes "Hide platform details" stack timing by depth', function() {
     const store = storeWithProfile();
     store.dispatch(changeHidePlatformDetails(true));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForStackChart(
       store.getState()
     );
 
@@ -73,7 +73,7 @@ describe('selectors/getStackTimingByDepthForFlameChart', function() {
   it('uses search strings', function() {
     const store = storeWithProfile();
     store.dispatch(changeCallTreeSearchString('javascript'));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForStackChart(
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
@@ -106,7 +106,7 @@ describe('selectors/getStackTimingByDepthForFlameChart', function() {
   it('can handle inverted stacks', function() {
     const store = storeWithProfile();
     store.dispatch(changeInvertCallstack(true));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForStackChart(
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
@@ -141,15 +141,15 @@ describe('selectors/getStackTimingByDepthForFlameChart', function() {
   });
 });
 
-describe('selectors/getCallNodeMaxDepthForFlameChart', function() {
+describe('selectors/getCallNodeMaxDepthForStackChart', function() {
   it('calculates the max func depth and observes of platform-detail filters', function() {
     const store = storeWithProfile();
-    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameChart(
+    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
       store.getState()
     );
     expect(allSamplesMaxDepth).toEqual(6);
     store.dispatch(changeHidePlatformDetails(true));
-    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameChart(
+    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
       store.getState()
     );
     expect(jsOnlySamplesMaxDepth).toEqual(4);
@@ -158,19 +158,19 @@ describe('selectors/getCallNodeMaxDepthForFlameChart', function() {
   it('acts upon the current range', function() {
     const store = storeWithProfile();
     store.dispatch(addRangeFilter(0, 20));
-    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameChart(
+    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
       store.getState()
     );
     expect(allSamplesMaxDepth).toEqual(2);
     store.dispatch(changeHidePlatformDetails(true));
-    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameChart(
+    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
       store.getState()
     );
     expect(jsOnlySamplesMaxDepth).toEqual(0);
   });
 });
 
-describe('selectors/getLeafCategoryStackTimingForFlameChart', function() {
+describe('selectors/getLeafCategoryStackTimingForStackChart', function() {
   /**
    * This table shows off how stack timings get filtered to a single row by concurrent
    * color categories. P is platform code, J javascript baseline, and I is javascript
@@ -189,8 +189,8 @@ describe('selectors/getLeafCategoryStackTimingForFlameChart', function() {
    */
   it('gets the unfiltered leaf-stack timing by implementation', function() {
     const store = storeWithProfile();
-    store.dispatch(changeFlameChartColorStrategy(getCategoryByImplementation));
-    const leafStackTiming = selectedThreadSelectors.getLeafCategoryStackTimingForFlameChart(
+    store.dispatch(changeStackChartColorStrategy(getCategoryByImplementation));
+    const leafStackTiming = selectedThreadSelectors.getLeafCategoryStackTimingForStackChart(
       store.getState()
     );
 

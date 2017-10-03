@@ -5,7 +5,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import FlameChartCanvas from './Canvas';
+import StackChartCanvas from './Canvas';
 import {
   selectedThreadSelectors,
   getDisplayRange,
@@ -15,9 +15,9 @@ import {
 import {
   getCategoryColorStrategy,
   getLabelingStrategy,
-} from '../../reducers/flame-chart';
+} from '../../reducers/stack-chart';
 import { updateProfileSelection } from '../../actions/profile-view';
-import FlameChartSettings from './Settings';
+import StackChartSettings from './Settings';
 
 import type { Thread } from '../../types/profile';
 import type {
@@ -29,7 +29,7 @@ import type { GetCategory } from '../../profile-logic/color-categories';
 import type { GetLabel } from '../../profile-logic/labeling-strategies';
 import type { ProfileSelection } from '../../types/actions';
 
-require('./style.css');
+require('./index.css');
 
 const STACK_FRAME_HEIGHT = 16;
 
@@ -48,7 +48,7 @@ type Props = {
   processDetails: string,
 };
 
-class FlameChartGraph extends PureComponent {
+class StackChartGraph extends PureComponent {
   props: Props;
 
   /**
@@ -77,23 +77,23 @@ class FlameChartGraph extends PureComponent {
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
-      <div className="flameChart">
-        <FlameChartSettings />
-        <div className="flameChartGraph">
-          <div title={processDetails} className="flameChartLabels grippy">
+      <div className="stackChart">
+        <StackChartSettings />
+        <div className="stackChartGraph">
+          <div title={processDetails} className="stackChartLabels grippy">
             <span>
               {threadName}
             </span>
           </div>
-          <FlameChartCanvas
-            // TimelineViewport props
+          <StackChartCanvas
+            // ChartViewport props
             timeRange={timeRange}
             maxViewportHeight={maxViewportHeight}
             maximumZoom={this.getMaximumZoom()}
             selection={selection}
             updateProfileSelection={updateProfileSelection}
             viewportNeedsUpdate={viewportNeedsUpdate}
-            // FlameChartCanvas props
+            // StackChartCanvas props
             interval={interval}
             thread={thread}
             rangeStart={timeRange.start}
@@ -112,13 +112,13 @@ class FlameChartGraph extends PureComponent {
 
 export default connect(
   state => {
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForFlameChart(
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForStackChart(
       state
     );
 
     return {
-      thread: selectedThreadSelectors.getFilteredThreadForFlameChart(state),
-      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameChart(
+      thread: selectedThreadSelectors.getFilteredThreadForStackChart(state),
+      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
         state
       ),
       stackTimingByDepth,
@@ -132,7 +132,7 @@ export default connect(
     };
   },
   { updateProfileSelection }
-)(FlameChartGraph);
+)(StackChartGraph);
 
 function viewportNeedsUpdate(prevProps, newProps) {
   return prevProps.stackTimingByDepth !== newProps.stackTimingByDepth;

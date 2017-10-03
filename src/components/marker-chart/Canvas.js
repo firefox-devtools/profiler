@@ -4,8 +4,8 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import withTimelineViewport from '../shared/timeline/Viewport';
-import TimelineCanvas from '../shared/timeline/Canvas';
+import withChartViewport from '../shared/chart/Viewport';
+import ChartCanvas from '../shared/chart/Canvas';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import TextMeasurement from '../../utils/text-measurement';
 import { BLUE_40 } from '../../utils/colors';
@@ -53,7 +53,7 @@ const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
 const MARKER_LABEL_MAX_LENGTH = 30;
 
-class MarkersTimelineCanvas extends PureComponent {
+class MarkerChartCanvas extends PureComponent {
   _textMeasurement: null | TextMeasurement;
 
   props: Props;
@@ -360,8 +360,8 @@ class MarkersTimelineCanvas extends PureComponent {
     const { containerWidth, containerHeight, isDragging } = this.props;
 
     return (
-      <TimelineCanvas
-        className="timelineMarkerCanvas"
+      <ChartCanvas
+        className="markerChartCanvas"
         containerWidth={containerWidth}
         containerHeight={containerHeight}
         isDragging={isDragging}
@@ -374,4 +374,4 @@ class MarkersTimelineCanvas extends PureComponent {
   }
 }
 
-export default withTimelineViewport(MarkersTimelineCanvas);
+export default withChartViewport(MarkerChartCanvas);

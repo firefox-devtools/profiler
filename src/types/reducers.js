@@ -11,6 +11,7 @@ import type {
   DataSource,
   ProfileSelection,
   ImplementationFilter,
+  TabSlug,
 } from './actions';
 import type { Milliseconds, StartEndRange } from './units';
 import type { IndexIntoMarkersTable, Profile, ThreadIndex } from './profile';
@@ -54,6 +55,7 @@ export type AppViewState =
 export type AppState = {
   view: AppViewState,
   isUrlSetupDone: boolean,
+  hasZoomedViaMousewheel: boolean,
 };
 
 export type SummaryViewState = {
@@ -70,7 +72,7 @@ export type UrlState = {
   dataSource: DataSource,
   hash: string,
   profileUrl: string,
-  selectedTab: string,
+  selectedTab: TabSlug,
   rangeFilters: RangeFilterState[],
   selectedThread: ThreadIndex,
   callTreeSearchString: string,
@@ -85,13 +87,9 @@ export type UrlState = {
 
 export type IconState = Set<string>;
 
-export type FlameChartState = {
+export type StackChartState = {
   categoryColorStrategy: GetCategory,
   labelingStrategy: GetLabel,
-};
-
-export type TimelineViewState = {
-  hasZoomedViaMousewheel: boolean,
 };
 
 export type State = {
@@ -99,8 +97,7 @@ export type State = {
   profileView: ProfileViewState,
   summaryView: SummaryViewState,
   urlState: UrlState,
-  flameChart: FlameChartState,
-  timelineView: TimelineViewState,
+  stackChart: StackChartState,
   icons: IconState,
 };
 

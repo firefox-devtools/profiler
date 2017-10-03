@@ -19,6 +19,7 @@ import type {
   Action,
   DataSource,
   ImplementationFilter,
+  TabSlug,
 } from '../types/actions';
 import type { State, UrlState, Reducer } from '../types/reducers';
 
@@ -52,7 +53,7 @@ function profileUrl(state: string = '', action: Action) {
   }
 }
 
-function selectedTab(state: string = 'calltree', action: Action) {
+function selectedTab(state: TabSlug = 'calltree', action: Action) {
   switch (action.type) {
     case 'CHANGE_SELECTED_TAB':
       return action.selectedTab;

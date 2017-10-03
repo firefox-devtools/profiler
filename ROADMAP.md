@@ -20,7 +20,7 @@ The benefits of a custom Firefox-specific profiler over existing more generalize
  * UserTiming information
  * Network requests
 
-There are 3 places markers are currently surfaced. The header, the Markers tab, and the Timeline Markers view. There is a lot of opportunity to improve this area to provide greater insights into what is going on.
+There are 3 places markers are currently surfaced. The header, the Marker Table, and the Marker Chart. There is a lot of opportunity to improve this area to provide greater insights into what is going on.
 
 ## Support web developers
 

@@ -4,8 +4,9 @@
 
 // @flow
 import type { Action } from '../types/store';
+import type { TabSlug } from '../types/actions';
 
-export function changeSelectedTab(selectedTab: string): Action {
+export function changeSelectedTab(selectedTab: TabSlug): Action {
   return {
     type: 'CHANGE_SELECTED_TAB',
     selectedTab,

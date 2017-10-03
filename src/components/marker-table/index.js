@@ -14,7 +14,7 @@ import actions from '../../actions';
 import formatTimeLength from '../../utils/format-time-length';
 import Settings from './Settings';
 
-import './MarkersView.css';
+import './index.css';
 
 class MarkerTree {
   constructor(thread, markers, zeroAt) {
@@ -113,7 +113,7 @@ class MarkerTree {
   }
 }
 
-class MarkersView extends PureComponent {
+class MarkerTable extends PureComponent {
   constructor(props) {
     super(props);
     this._fixedColumns = [
@@ -144,7 +144,7 @@ class MarkersView extends PureComponent {
     const { thread, markers, zeroAt, selectedMarker } = this.props;
     const tree = new MarkerTree(thread, markers, zeroAt);
     return (
-      <div className="markersView">
+      <div className="markerTable">
         <Settings />
         <TreeView
           tree={tree}
@@ -162,7 +162,7 @@ class MarkersView extends PureComponent {
   }
 }
 
-MarkersView.propTypes = {
+MarkerTable.propTypes = {
   thread: PropTypes.object.isRequired,
   markers: PropTypes.object.isRequired,
   threadIndex: PropTypes.number.isRequired,
@@ -181,4 +181,4 @@ export default connect(
     zeroAt: getZeroAt(state),
   }),
   actions
-)(MarkersView);
+)(MarkerTable);
