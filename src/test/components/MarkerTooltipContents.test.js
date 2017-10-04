@@ -1,0 +1,122 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+// @flow
+import React from 'react';
+import MarkersTooltipContents from '../../components/shared/MarkerTooltipContents';
+import renderer from 'react-test-renderer';
+import { storeWithProfile } from '../fixtures/stores';
+import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
+import { selectedThreadSelectors } from '../../reducers/profile-view';
+
+describe('MarkerTooltipContents', function() {
+  it('renders tooltips for various markers', () => {
+    // Enumerate through all of the switch arms of the tooltip for coverage.
+    const profile = getProfileWithMarkers([
+      [
+        'DOMEvent',
+        10.5,
+        {
+          type: 'DOMEvent',
+          startTime: 10.5,
+          endTime: 11.3,
+          eventType: 'commandupdate',
+          phase: 2,
+        },
+      ],
+      [
+        'UserTiming',
+        12.5,
+        {
+          type: 'UserTiming',
+          startTime: 12.5,
+          endTime: 12.5,
+          name: 'foobar',
+          entryType: 'mark',
+        },
+      ],
+      [
+        'NotifyDidPaint',
+        14.5,
+        {
+          type: 'tracing',
+          startTime: 14.5,
+          endTime: 14.5,
+          category: 'Paint',
+          interval: 'start',
+          name: 'NotifyDidPaint',
+        },
+      ],
+      [
+        'GCMinor',
+        15.5,
+        {
+          type: 'GCMinor',
+          startTime: 15.5,
+          endTime: 15.5,
+          // nursery is only present in newer profile format.
+          nursery: {
+            reason: 'Reason',
+            status: 'Status',
+          },
+        },
+      ],
+      [
+        'GCMajor',
+        16.5,
+        {
+          type: 'GCMajor',
+          startTime: 16.5,
+          endTime: 16.5,
+          timings: {
+            zones_collected: 3,
+            total_zones: 5,
+            reason: 'Reason',
+            nonincremental_reason: 'Non incremental reason',
+            max_pause: 7,
+            minor_gcs: 11,
+            slices: 13,
+          },
+        },
+      ],
+      [
+        'GCSlice',
+        17.5,
+        {
+          type: 'GCSlice',
+          startTime: 17.5,
+          endTime: 17.5,
+          timings: {
+            reason: 'Reason',
+            budget: 3,
+            initial_state: 'Initial',
+            final_state: 'Final',
+          },
+        },
+      ],
+      [
+        'Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662',
+        10,
+        null,
+      ],
+      ['Invalidate http://mozilla.com/script.js:1234', 10, null],
+    ]);
+    const { getState } = storeWithProfile(profile);
+    const tracingMarkers = selectedThreadSelectors.getTracingMarkers(
+      getState()
+    );
+
+    tracingMarkers.forEach(marker => {
+      expect(
+        renderer.create(
+          <MarkersTooltipContents
+            marker={marker}
+            className="propClass"
+            threadName="Main Thread"
+          />
+        )
+      ).toMatchSnapshot();
+    });
+  });
+});
