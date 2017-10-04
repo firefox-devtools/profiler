@@ -370,7 +370,7 @@ const _upgraders = {
     // Upgrade the GC markers
     for (const thread of profile.threads) {
       for (let i = 0; i < thread.markers.length; i++) {
-        const marker = thread.markers.data[i];
+        let marker = thread.markers.data[i];
         if (marker) {
           switch (marker.type) {
             case 'GCMinor':
@@ -385,11 +385,12 @@ const _upgraders = {
               }
               break;
             case 'GCMajor':
-              upgradeGCMajorMarker_Processed8to9(marker);
+              marker = upgradeGCMajorMarker_Processed8to9(marker);
               break;
             default:
               break;
           }
+          thread.markers.data[i] = marker;
         }
       }
     }

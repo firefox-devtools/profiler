@@ -255,18 +255,19 @@ const _upgraders = {
         //const nameIndex = thread.markers.schema.name;
         const dataIndex = thread.markers.schema.data;
         for (let i = 0; i < thread.markers.data.length; i++) {
-          const marker = thread.markers.data[i][dataIndex];
+          let marker = thread.markers.data[i][dataIndex];
           if (marker) {
             switch (marker.type) {
               case 'GCMinor':
                 upgradeGCMinorMarker(marker);
                 break;
               case 'GCMajor':
-                upgradeGCMajorMarker_Gecko8To9(marker);
+                marker = upgradeGCMajorMarker_Gecko8To9(marker);
                 break;
               default:
                 break;
             }
+            thread.markers.data[i][dataIndex] = marker;
           }
         }
       }

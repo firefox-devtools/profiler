@@ -50,7 +50,7 @@ export type PaintProfilerMarkerTracing = ProfilerMarkerTracing & {
 
 export type PhaseTimes = { [phase: string]: Milliseconds };
 
-export type GCSliceData = {
+type GCSliceData_Shared = {
   // Slice number within the GCMajor collection.
   slice: number,
 
@@ -80,7 +80,11 @@ export type GCSliceData = {
 
   start_timestamp: Seconds,
   end_timestamp: Seconds,
-
+};
+export type GCSliceData_Gecko = GCSliceData_Shared & {
+  times: PhaseTimes,
+};
+export type GCSliceData = GCSliceData_Shared & {
   phase_times: PhaseTimes,
 };
 
@@ -88,7 +92,7 @@ export type GCMajorAborted = {
   status: 'aborted',
 };
 
-export type GCMajorCompleted = {
+type GCMajorCompleted_Shared = {
   status: 'completed',
   // timestamp is present but is usually 0
   // timestamp: number,
@@ -107,14 +111,6 @@ export type GCMajorCompleted = {
   minor_gcs: number,
   store_buffer_overflows: number,
   slices: number,
-
-  // MMU (Minimum mutator utilisation) A measure of GC's affect on
-  // responsiveness  See Statistics::computeMMU(), these percentages in the
-  // rage of 0-100.
-  // Percentage of time the mutator ran in a 20ms window.
-  mmu_20ms: number,
-  // Percentage of time the mutator ran in a 50ms window.
-  mmu_50ms: number,
 
   // Timing for the SCC sweep phase.
   scc_sweep_total: Milliseconds,
@@ -139,9 +135,25 @@ export type GCMajorCompleted = {
   // This usually isn't present with the gecko profiler, but it's the same
   // as all of the slice markers themselves.
   slices_list?: GCSliceData[],
+};
+
+export type GCMajorCompleted = GCMajorCompleted_Shared & {
+  // MMU (Minimum mutator utilisation) A measure of GC's affect on
+  // responsiveness  See Statistics::computeMMU(), these percentages in the
+  // rage of 0-100.
+  // Percentage of time the mutator ran in a 20ms window.
+  mmu_20ms: number,
+  // Percentage of time the mutator ran in a 50ms window.
+  mmu_50ms: number,
 
   // The duration of each phase.
   phase_times: PhaseTimes,
+};
+export type GCMajorCompleted_Gecko = GCMajorCompleted_Shared & {
+  // As above except in parts of 100.
+  mmu_20ms: number,
+  mmu_50ms: number,
+  totals: PhaseTimes,
 };
 
 export type GCMajorMarkerPayload = {
@@ -149,6 +161,13 @@ export type GCMajorMarkerPayload = {
   startTime: Milliseconds,
   endTime: Milliseconds,
   timings: GCMajorAborted | GCMajorCompleted,
+};
+
+export type GCMajorMarkerPayload_Gecko = {
+  type: 'GCMajor',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  timings: GCMajorAborted | GCMajorCompleted_Gecko,
 };
 
 export type GCMinorCompletedData = {
@@ -194,6 +213,13 @@ export type GCSliceMarkerPayload = {
   timings: GCSliceData,
 };
 
+export type GCSliceMarkerPayload_Gecko = {
+  type: 'GCSlice',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  timings: GCSliceData_Gecko,
+};
+
 // TODO - Add more markers.
 
 /**
@@ -235,5 +261,16 @@ export type MarkerPayload =
   | GCMinorMarkerPayload
   | GCMajorMarkerPayload
   | GCSliceMarkerPayload
+  | DummyForTestsMarkerPayload
+  | null;
+
+export type MarkerPayload_Gecko =
+  | GPUMarkerPayload
+  | UserTimingMarkerPayload
+  | PaintProfilerMarkerTracing
+  | DOMEventMarkerPayload
+  | GCMinorMarkerPayload
+  | GCMajorMarkerPayload_Gecko
+  | GCSliceMarkerPayload_Gecko
   | DummyForTestsMarkerPayload
   | null;

@@ -3,6 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import type {
+  GCMajorMarkerPayload,
+  GCMajorMarkerPayload_Gecko,
+  GCMajorCompleted,
+} from '../types/markers';
 
 export function upgradeGCMinorMarker(marker: Object) {
   if ('nursery' in marker) {
@@ -49,7 +54,9 @@ export function convertPhaseTimes(old_phases: Object): Object {
 /*
  * Upgrade a GCMajor marker in the Gecko profile format.
  */
-export function upgradeGCMajorMarker_Gecko8To9(marker: Object) {
+export function upgradeGCMajorMarker_Gecko8To9(
+  marker: Object
+): GCMajorMarkerPayload_Gecko {
   if ('timings' in marker) {
     if (!('status' in marker.timings)) {
       /*
@@ -73,22 +80,40 @@ export function upgradeGCMajorMarker_Gecko8To9(marker: Object) {
       timings.allocated_bytes = timings.allocated * 1024 * 1024;
     }
   }
+
+  return marker;
 }
 
-export function upgradeGCMajorMarker_Processed8to9(marker: Object) {
-  upgradeGCMajorMarker_Gecko8To9(marker);
-  if ('timings' in marker) {
-    const timings = marker.timings;
-    if (timings.status === 'completed') {
-      /*
-       * Processed profiles - convert these fields to have more sensible
-       * units and sometimes names.
-       */
-      timings.phase_times = convertPhaseTimes(timings.totals);
-      delete timings.totals;
-
-      timings.mmu_20ms /= 100;
-      timings.mmu_50ms /= 100;
+export function upgradeGCMajorMarker_Processed8to9(
+  marker8: Object
+): GCMajorMarkerPayload {
+  // The Processed 8-to-9 upgrade is a superset of the gecko 8-to-9 upgrade.
+  const marker9 = upgradeGCMajorMarker_Gecko8To9(marker8);
+  const mt = marker9.timings;
+  switch (mt.status) {
+    case 'completed': {
+      const timings: GCMajorCompleted = Object.assign({}, mt, {
+        phase_times: convertPhaseTimes(mt.totals),
+        mmu_20ms: mt.mmu_20ms / 100,
+        mmu_50ms: mt.mmu_50ms / 100,
+      });
+      return {
+        type: 'GCMajor',
+        startTime: marker9.startTime,
+        endTime: marker9.endTime,
+        timings: timings,
+      };
     }
+    case 'aborted': {
+      return {
+        type: 'GCMajor',
+        startTime: marker9.startTime,
+        endTime: marker9.endTime,
+        timings: { status: 'aborted' },
+      };
+    }
+    default:
+      console.log('Unknown GCMajor status');
+      throw new Error('Unknown GCMajor status');
   }
 }
