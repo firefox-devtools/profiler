@@ -259,7 +259,7 @@ const _upgraders = {
           if (marker) {
             switch (marker.type) {
               case 'GCMinor':
-                upgradeGCMinorMarker(marker);
+                marker = upgradeGCMinorMarker(marker);
                 break;
               case 'GCMajor':
                 marker = upgradeGCMajorMarker_Gecko8To9(marker);

@@ -4,17 +4,19 @@
 
 // @flow
 import type {
+  GCMinorMarkerPayload,
   GCMajorMarkerPayload,
   GCMajorMarkerPayload_Gecko,
   GCMajorCompleted,
 } from '../types/markers';
 
-export function upgradeGCMinorMarker(marker: Object) {
-  if ('nursery' in marker) {
-    if ('status' in marker.nursery) {
-      if (marker.nursery.status === 'no collection') {
-        marker.nursery.status = 'nursery empty';
+export function upgradeGCMinorMarker(marker8: Object): GCMinorMarkerPayload {
+  if ('nursery' in marker8) {
+    if ('status' in marker8.nursery) {
+      if (marker8.nursery.status === 'no collection') {
+        marker8.nursery.status = 'nursery empty';
       }
+      return Object.assign(marker8);
     } else {
       /*
        * This is the old format for GCMinor, rename some
@@ -25,18 +27,22 @@ export function upgradeGCMinorMarker(marker: Object) {
        * promotion_rate, leave them so that anyone opening the
        * raw json data can still see them in converted profiles.
        */
-      marker.nursery.status = 'complete';
-
-      marker.nursery.bytes_used = marker.nursery.nursery_bytes;
+      const marker = Object.assign(marker8, {
+        nursery: Object.assign(marker8.nursery, {
+          status: 'complete',
+          bytes_used: marker8.nursery.nursery_bytes,
+          // cur_capacity cannot be filled in.
+          new_capacity: marker8.nursery.new_nursery_bytes,
+          phase_times: marker8.nursery.timings,
+        }),
+      });
       delete marker.nursery.nursery_bytes;
-
-      // cur_capacity cannot be filled in.
-      marker.nursery.new_capacity = marker.nursery.new_nursery_bytes;
       delete marker.nursery.new_nursery_bytes;
-
-      marker.nursery.phase_times = marker.nursery.timings;
       delete marker.nursery.timings;
+      return marker;
     }
+  } else {
+    return marker8;
   }
 }
 

@@ -374,7 +374,7 @@ const _upgraders = {
         if (marker) {
           switch (marker.type) {
             case 'GCMinor':
-              upgradeGCMinorMarker(marker);
+              marker = upgradeGCMinorMarker(marker);
               break;
             case 'GCSlice':
               if (marker.timings && marker.timings.times) {
