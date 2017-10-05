@@ -8,6 +8,7 @@ import type {
   GCMajorMarkerPayload,
   GCMajorMarkerPayload_Gecko,
   GCMajorCompleted,
+  PhaseTimes,
 } from '../types/markers';
 
 export function upgradeGCMinorMarker(marker8: Object): GCMinorMarkerPayload {
@@ -49,7 +50,7 @@ export function upgradeGCMinorMarker(marker8: Object): GCMinorMarkerPayload {
 /*
  * Fix the units for GCMajor and GCSlice phase times.
  */
-export function convertPhaseTimes(old_phases: Object): Object {
+export function convertPhaseTimes(old_phases: PhaseTimes): PhaseTimes {
   const phases = {};
   for (const phase in old_phases) {
     phases[phase] = old_phases[phase] * 1000;
