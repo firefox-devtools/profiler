@@ -4,7 +4,7 @@
 
 // @flow
 
-import type { Summary } from '../profile-logic/summarize-profile';
+import type { ProfileSummary } from '../profile-logic/summarize-profile';
 import type {
   Action,
   ExpandedSet,
@@ -59,7 +59,7 @@ export type AppState = {
 };
 
 export type SummaryViewState = {
-  summary: null | Summary,
+  summary: null | ProfileSummary,
   expanded: null | ExpandedSet,
 };
 
