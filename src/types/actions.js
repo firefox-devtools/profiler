@@ -44,6 +44,12 @@ export type FunctionsUpdatePerThread = {
 
 export type RequestedLib = { debugName: string, breakpadId: string };
 export type ImplementationFilter = 'combined' | 'js' | 'cpp';
+export type TabSlug =
+  | 'calltree'
+  | 'stack-chart'
+  | 'marker-chart'
+  | 'marker-table'
+  | 'summary';
 
 type ProfileSummaryAction =
   | { type: 'PROFILE_SUMMARY_PROCESSED', summary: Summary }
@@ -118,19 +124,9 @@ type ReceiveProfileAction =
   | { type: 'WAITING_FOR_PROFILE_FROM_STORE' }
   | { type: 'WAITING_FOR_PROFILE_FROM_URL' };
 
-type TimelineAction =
-  | { type: 'CHANGE_FLAME_CHART_COLOR_STRATEGY', getCategory: GetCategory }
-  | { type: 'CHANGE_FLAME_CHART_LABELING_STRATEGY', getLabel: GetLabel }
-  | {
-      type: 'CHANGE_TIMELINE_FLAME_CHART_EXPANDED_THREAD',
-      threadIndex: ThreadIndex,
-      isExpanded: boolean,
-    }
-  | {
-      type: 'CHANGE_TIMELINE_MARKERS_EXPANDED_THREAD',
-      threadIndex: ThreadIndex,
-      isExpanded: boolean,
-    };
+type StackChartAction =
+  | { type: 'CHANGE_STACK_CHART_COLOR_STRATEGY', getCategory: GetCategory }
+  | { type: 'CHANGE_STACK_CHART_LABELING_STRATEGY', getLabel: GetLabel };
 
 type UrlEnhancerAction =
   | { type: '@@urlenhancer/urlSetupDone' }
@@ -139,7 +135,7 @@ type UrlEnhancerAction =
 type UrlStateAction =
   | { type: 'WAITING_FOR_PROFILE_FROM_FILE' }
   | { type: 'PROFILE_PUBLISHED', hash: string }
-  | { type: 'CHANGE_SELECTED_TAB', selectedTab: string }
+  | { type: 'CHANGE_SELECTED_TAB', selectedTab: TabSlug }
   | { type: 'ADD_RANGE_FILTER', start: number, end: number }
   | { type: 'POP_RANGE_FILTERS', firstRemovedFilterIndex: number }
   | { type: 'CHANGE_SELECTED_THREAD', selectedThread: ThreadIndex }
@@ -175,7 +171,7 @@ export type Action =
   | ProfileSummaryAction
   | ProfileAction
   | ReceiveProfileAction
-  | TimelineAction
+  | StackChartAction
   | UrlEnhancerAction
   | UrlStateAction
   | IconsAction;

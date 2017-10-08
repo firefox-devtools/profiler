@@ -4,7 +4,7 @@
 
 // @flow
 import React from 'react';
-import Markers from '../../components/markers-table';
+import Markers from '../../components/marker-table';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';

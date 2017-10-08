@@ -5,7 +5,7 @@
 
 import bisection from 'bisection';
 import { resourceTypes } from './profile-data';
-import immutableUpdate from '../utils/immutable-update';
+import { immutableUpdate } from '../utils/flow';
 
 import type {
   Profile,

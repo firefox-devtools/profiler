@@ -55,9 +55,21 @@ function isUrlSetupDone(state: boolean = false, action: Action) {
       return state;
   }
 }
+
+function hasZoomedViaMousewheel(state: boolean = false, action: Action) {
+  switch (action.type) {
+    case 'HAS_ZOOMED_VIA_MOUSEWHEEL': {
+      return true;
+    }
+    default:
+      return state;
+  }
+}
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   isUrlSetupDone,
+  hasZoomedViaMousewheel,
 });
 export default appStateReducer;
 
@@ -65,3 +77,6 @@ export const getApp = (state: State): AppState => state.app;
 export const getView = (state: State): AppViewState => getApp(state).view;
 export const getIsUrlSetupDone = (state: State): boolean =>
   getApp(state).isUrlSetupDone;
+export const getHasZoomedViaMousewheel = (state: Object): boolean => {
+  return getApp(state).hasZoomedViaMousewheel;
+};

@@ -25,7 +25,7 @@ type State<HoveredItem> = {
 
 require('./Canvas.css');
 
-export default class TimelineCanvas<HoveredItem> extends PureComponent<
+export default class ChartCanvas<HoveredItem> extends PureComponent<
   void,
   Props<HoveredItem>,
   State<HoveredItem>
@@ -162,7 +162,7 @@ export default class TimelineCanvas<HoveredItem> extends PureComponent<
     const { hoveredItem, mouseX, mouseY } = this.state;
 
     const className = classNames({
-      timelineCanvas: true,
+      chartCanvas: true,
       [this.props.className]: true,
       hover: hoveredItem !== null,
     });

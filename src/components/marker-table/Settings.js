@@ -33,13 +33,13 @@ class Settings extends PureComponent {
   render() {
     const { searchString } = this.props;
     return (
-      <div className="markersSettings">
-        <div className="markersSettingsSpacer" />
-        <div className="markersSettingsSearchbar">
-          <label className="markersSettingsSearchbarLabel">
+      <div className="markerTableSettings">
+        <div className="markerTableSettingsSpacer" />
+        <div className="markerTableSettingsSearchbar">
+          <label className="markerTableSettingsSearchbarLabel">
             {'Filter Markers: '}
             <IdleSearchField
-              className="markersSettingsSearchField"
+              className="markerTableSettingsSearchField"
               title="Only display markers that match a certain name"
               idlePeriod={200}
               defaultValue={searchString}

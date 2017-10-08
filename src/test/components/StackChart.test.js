@@ -4,17 +4,17 @@
 
 // @flow
 import React from 'react';
-import MarkersTimeline from '../../components/markers-timeline';
+import StackChartGraph from '../../components/stack-chart';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 import { getBoundingBox } from '../fixtures/utils';
+import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 
 jest.useFakeTimers();
 
-it('renders MarkersTimeline correctly', () => {
+it('renders StackChartGraph correctly', () => {
   // Tie the requestAnimationFrame into jest's fake timers.
   window.requestAnimationFrame = fn => setTimeout(fn, 0);
   window.devicePixelRatio = 1;
@@ -33,7 +33,7 @@ it('renders MarkersTimeline correctly', () => {
       };
     }
     // <TimelineViewport />
-    if (element.props.className.split(' ').includes('timelineViewport')) {
+    if (element.props.className.split(' ').includes('chartViewport')) {
       return {
         getBoundingClientRect: () => getBoundingBox(200, 300),
       };
@@ -41,33 +41,19 @@ it('renders MarkersTimeline correctly', () => {
     return null;
   }
 
-  const profile = getProfileWithMarkers([
-    ['Marker A', 0, { startTime: 0, endTime: 10 }],
-    ['Marker B', 0, { startTime: 0, endTime: 10 }],
-    ['Marker C', 5, { startTime: 5, endTime: 15 }],
-    [
-      'Very very very very very very long Marker D',
-      6,
-      { startTime: 5, endTime: 15 },
-    ],
-    ['Dot marker E', 4, { startTime: 4, endTime: 4 }],
-    ['Non-interval marker F without data', 7, null],
-    [
-      'Marker G type DOMEvent',
-      5,
-      {
-        startTime: 5,
-        endTime: 10,
-        type: 'DOMEvent',
-        eventType: 'click',
-        phase: 2,
-      },
-    ],
-  ]);
+  const { profile } = getProfileFromTextSamples(`
+    A A A
+    B B B
+    C C H
+    D F I
+    E G
+  `);
 
-  const timeline = renderer.create(
-    <Provider store={storeWithProfile(profile)}>
-      <MarkersTimeline threadIndex={0} viewHeight={1000} />
+  const store = storeWithProfile(profile);
+
+  const stackChart = renderer.create(
+    <Provider store={store}>
+      <StackChartGraph threadIndex={0} viewHeight={1000} />
     </Provider>,
     { createNodeMock }
   );
@@ -75,7 +61,7 @@ it('renders MarkersTimeline correctly', () => {
   // Flush any requestAnimationFrames.
   jest.runAllTimers();
 
-  const tree = timeline.toJSON();
+  const tree = stackChart.toJSON();
   const drawCalls = ctx.__flushDrawLog();
 
   expect(tree).toMatchSnapshot();

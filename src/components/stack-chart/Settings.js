@@ -25,7 +25,7 @@ type Props = {
   changeCallTreeSearchString: string => void,
 };
 
-class FlameChartSettings extends PureComponent {
+class StackChartSettings extends PureComponent {
   props: Props;
 
   constructor(props) {
@@ -56,24 +56,24 @@ class FlameChartSettings extends PureComponent {
   render() {
     const { hidePlatformDetails, invertCallstack, searchString } = this.props;
     return (
-      <div className="flameChartSettings">
-        <ul className="flameChartSettingsList">
-          <li className="flameChartSettingsListItem">
-            <label className="flameChartSettingsLabel">
+      <div className="stackChartSettings">
+        <ul className="stackChartSettingsList">
+          <li className="stackChartSettingsListItem">
+            <label className="stackChartSettingsLabel">
               <input
                 type="checkbox"
-                className="flameChartSettingsCheckbox"
+                className="stackChartSettingsCheckbox"
                 onChange={this._onHidePlatformDetailsClick}
                 checked={hidePlatformDetails}
               />
               {' Hide platform details'}
             </label>
           </li>
-          <li className="flameChartSettingsListItem">
-            <label className="flameChartSettingsLabel">
+          <li className="stackChartSettingsListItem">
+            <label className="stackChartSettingsLabel">
               <input
                 type="checkbox"
-                className="flameChartSettingsCheckbox"
+                className="stackChartSettingsCheckbox"
                 onChange={this._onInvertCallstackClick}
                 checked={invertCallstack}
               />
@@ -81,11 +81,11 @@ class FlameChartSettings extends PureComponent {
             </label>
           </li>
         </ul>
-        <div className="flameChartSettingsSearchbar">
-          <label className="flameChartSettingsSearchbarLabel">
+        <div className="stackChartSettingsSearchbar">
+          <label className="stackChartSettingsSearchbarLabel">
             {'Filter stacks: '}
             <IdleSearchField
-              className="flameChartSettingsSearchField"
+              className="stackChartSettingsSearchField"
               title="Only display stacks which contain a function whose name matches this substring"
               idlePeriod={200}
               defaultValue={searchString}
@@ -98,7 +98,7 @@ class FlameChartSettings extends PureComponent {
   }
 }
 
-FlameChartSettings.propTypes = {
+StackChartSettings.propTypes = {
   hidePlatformDetails: PropTypes.bool.isRequired,
   changeHidePlatformDetails: PropTypes.func.isRequired,
   invertCallstack: PropTypes.bool.isRequired,
@@ -114,4 +114,4 @@ export default connect(
     searchString: getSearchString(state),
   }),
   actions
-)(FlameChartSettings);
+)(StackChartSettings);

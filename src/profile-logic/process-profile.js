@@ -7,7 +7,7 @@ import { getContainingLibrary, getClosestLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes } from './profile-data';
 import { provideHostSide } from '../utils/promise-worker';
-import immutableUpdate from '../utils/immutable-update';
+import { immutableUpdate } from '../utils/flow';
 import {
   CURRENT_VERSION,
   upgradeProcessedProfileToCurrentVersion,

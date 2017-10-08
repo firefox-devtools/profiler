@@ -1,44 +1,44 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders MarkersTimeline correctly 1`] = `
+exports[`renders MarkerChart correctly 1`] = `
 <div
-  className="markersTimeline"
+  className="markerChart"
 >
   <div
-    className="markersTimelineLabels grippy"
+    className="markerChartLabels grippy"
     title="thread: \\"Empty\\" (0)
   process: \\"default\\" (0)"
   >
     <span
-      className="markersTimelineLabelsName"
+      className="markerChartLabelsName"
     >
       Empty
     </span>
   </div>
   <div
-    className="timelineViewport"
+    className="chartViewport"
     onMouseDown={[Function]}
     onWheel={[Function]}
   >
     <div>
       <canvas
-        className="timelineCanvas timelineMarkerCanvas"
+        className="chartCanvas markerChartCanvas"
         onDoubleClick={[Function]}
         onMouseMove={[Function]}
         onMouseOut={[Function]}
       />
     </div>
     <div
-      className="timelineViewportShiftScroll hidden"
+      className="chartViewportShiftScroll hidden"
     >
-      Zoom Timeline:
+      Zoom Chart:
       <kbd
-        className="timelineViewportShiftScrollKbd"
+        className="chartViewportShiftScrollKbd"
       >
         Shift
       </kbd>
       <kbd
-        className="timelineViewportShiftScrollKbd"
+        className="chartViewportShiftScrollKbd"
       >
         Scroll
       </kbd>
@@ -47,7 +47,7 @@ exports[`renders MarkersTimeline correctly 1`] = `
 </div>
 `;
 
-exports[`renders MarkersTimeline correctly 2`] = `
+exports[`renders MarkerChart correctly 2`] = `
 Array [
   Array [
     "scale",

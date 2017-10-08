@@ -6,7 +6,7 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
-import { getHasZoomedViaMousewheel } from '../../../reducers/timeline-view';
+import { getHasZoomedViaMousewheel } from '../../../reducers/app';
 import actions from '../../../actions';
 
 import type {
@@ -54,8 +54,8 @@ require('./Viewport.css');
  *        0.0    0.1                          0.6                              1.0
  *                 ^ viewportLeft               ^ viewportRight
  *
- * viewportLeft = 0.1 <- shared across timelines
- * viewportRight = 0.6 <- shared across timelines
+ * viewportLeft = 0.1
+ * viewportRight = 0.6
  * viewportLength = viewportRight - viewportLeft
  * viewportTop = 30 (in pixels)
  * screenWidth = 1000
@@ -63,10 +63,8 @@ require('./Viewport.css');
  * viewportRight += mouseMoveDelta * unitPixel
  * viewportLeft += mouseMoveDelta * unitPixel
  **/
-export default function withTimelineViewport<T>(
-  WrappedComponent: ReactClass<T>
-) {
-  class TimelineViewport extends PureComponent {
+export default function withChartViewport<T>(WrappedComponent: ReactClass<T>) {
+  class ChartViewport extends PureComponent {
     props: Props;
     shiftScrollId: number;
     zoomRangeSelectionScheduled: boolean;
@@ -430,12 +428,12 @@ export default function withTimelineViewport<T>(
       } = this.state;
 
       const viewportClassName = classNames({
-        timelineViewport: true,
+        chartViewport: true,
         dragging: isDragging,
       });
 
       const shiftScrollClassName = classNames({
-        timelineViewportShiftScroll: true,
+        chartViewportShiftScroll: true,
         hidden: hasZoomedViaMousewheel || !isShiftScrollHintVisible,
       });
 
@@ -459,9 +457,9 @@ export default function withTimelineViewport<T>(
             {...this.props}
           />
           <div className={shiftScrollClassName}>
-            Zoom Timeline:
-            <kbd className="timelineViewportShiftScrollKbd">Shift</kbd>
-            <kbd className="timelineViewportShiftScrollKbd">Scroll</kbd>
+            Zoom Chart:
+            <kbd className="chartViewportShiftScrollKbd">Shift</kbd>
+            <kbd className="chartViewportShiftScrollKbd">Scroll</kbd>
           </div>
         </div>
       );
@@ -474,7 +472,7 @@ export default function withTimelineViewport<T>(
     return {
       hasZoomedViaMousewheel: getHasZoomedViaMousewheel(state),
     };
-  }, (actions: Object))(TimelineViewport);
+  }, (actions: Object))(ChartViewport);
 }
 
 function clamp(min, max, value) {

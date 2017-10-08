@@ -2,23 +2,23 @@
 
 exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
 <div
-  className="markersView"
+  className="markerTable"
 >
   <div
-    className="markersSettings"
+    className="markerTableSettings"
   >
     <div
-      className="markersSettingsSpacer"
+      className="markerTableSettingsSpacer"
     />
     <div
-      className="markersSettingsSearchbar"
+      className="markerTableSettingsSearchbar"
     >
       <label
-        className="markersSettingsSearchbarLabel"
+        className="markerTableSettingsSearchbarLabel"
       >
         Filter Markers: 
         <form
-          className="idleSearchField markersSettingsSearchField"
+          className="idleSearchField markerTableSettingsSearchField"
           onSubmit={[Function]}
         >
           <input
