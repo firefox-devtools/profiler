@@ -13,25 +13,7 @@ import { summarizeProfile } from '../../profile-logic/summarize-profile';
 import { profileSummaryProcessed } from '../../actions/profile-summary';
 
 it('renders ProfileSummaryView correctly', () => {
-  /**
-   * Mock out any created refs for the components with relevant information.
-   */
-  function createNodeMock(element) {
-    if (element.type === 'div') {
-      return {
-        offsetWidth: 400,
-      };
-    }
-    return null;
-  }
-
-  /* Here we're only interested in the leaf nodes and thus put all
-   * samples on the first line.  The samples chosen belong to known
-   * categories. */
-  const { profile } = getProfileFromTextSamples(`
-    pthread_mutex_lock js::RunScript pthread_mutex_lock nsHTMLDNS mozilla::dom::
-  `);
-
+  const profile = getProfile();
   const store = storeWithProfile(profile);
   store.dispatch(profileSummaryProcessed(summarizeProfile(profile)));
 
@@ -41,6 +23,40 @@ it('renders ProfileSummaryView correctly', () => {
     </Provider>,
     { createNodeMock }
   );
-
   expect(profileSummary.toJSON()).toMatchSnapshot();
 });
+
+it('renders ProfileSummaryView with fillers when summary is not available', () => {
+  const profile = getProfile();
+  const store = storeWithProfile(profile);
+
+  const profileSummary = renderer.create(
+    <Provider store={store}>
+      <ProfileSummaryView />
+    </Provider>,
+    { createNodeMock }
+  );
+  expect(profileSummary.toJSON()).toMatchSnapshot();
+});
+
+/**
+ * Mock out any created refs for the components with relevant information.
+ */
+function createNodeMock(element) {
+  if (element.type === 'div') {
+    return {
+      offsetWidth: 400,
+    };
+  }
+  return null;
+}
+
+function getProfile() {
+  /* Here we're only interested in the leaf nodes and thus put all
+   * samples on the first line.  The samples chosen belong to known
+   * categories. */
+  const { profile } = getProfileFromTextSamples(`
+    pthread_mutex_lock js::RunScript pthread_mutex_lock nsHTMLDNS mozilla::dom::
+  `);
+  return profile;
+}
