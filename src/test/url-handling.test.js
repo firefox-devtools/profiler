@@ -184,18 +184,23 @@ describe('url upgrading', function() {
     });
   });
 
-  describe('general checks', function() {
-    it("won't run if the version is specified", function() {
-      const { getState } = _getStoreWithURL({
-        pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
-        search: `?v=${CURRENT_URL_VERSION}`,
-      });
-
-      // The conversion process shouldn't run
-      expect(urlStateReducers.getSelectedTab(getState())).not.toBe(
-        'markers-table'
-      );
+  // More general checks
+  it("won't run if the version is specified", function() {
+    const { getState } = _getStoreWithURL({
+      pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
+      search: `?v=${CURRENT_URL_VERSION}`,
     });
+
+    // The conversion process shouldn't run.
+    // This is somewhat hacky: because we specified the last version, we expect
+    // the v2 converter to not run, and so the selected tab shouldn't be
+    // 'marker-table'. Note also that a 'markers' tab is invalid for the current
+    // state of the application, so we won't have 'markers' as result.
+    // We should change this to something more meaningful when we have eg
+    // converters that reuse query names.
+    expect(urlStateReducers.getSelectedTab(getState())).not.toBe(
+      'marker-table'
+    );
   });
 });
 
