@@ -16,6 +16,8 @@ import { unexpectedCase } from './utils/flow';
 import type { UrlState } from './types/reducers';
 import type { DataSource, TabSlug } from './types/actions';
 
+export const CURRENT_URL_VERSION = 2;
+
 function dataSourceDirs(urlState: UrlState) {
   const { dataSource } = urlState;
   switch (dataSource) {
@@ -88,6 +90,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     thread: `${urlState.selectedThread}`,
     threadOrder: urlState.threadOrder.join('-'),
     hiddenThreads: urlState.hiddenThreads.join('-'),
+    v: CURRENT_URL_VERSION,
   };
 
   if (process.env.NODE_ENV === 'development') {
@@ -242,14 +245,12 @@ function toValidTabSlug(slug: ?string): TabSlug {
   }
 }
 
-export const CURRENT_URL_VERSION = 2;
-
 type ProcessedLocation = { pathname: string, hash: string, query: Object };
 
 export function upgradeLocationToCurrentVersion(
   processedLocation: ProcessedLocation
 ): ProcessedLocation {
-  const urlVersion = processedLocation.query.v || 0;
+  const urlVersion = +processedLocation.query.v || 0;
   if (urlVersion === CURRENT_URL_VERSION) {
     return processedLocation;
   }
