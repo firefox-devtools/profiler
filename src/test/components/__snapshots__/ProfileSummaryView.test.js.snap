@@ -60,6 +60,189 @@ exports[`renders ProfileSummaryView correctly 1`] = `
           <div
             className="summarize-line-graph"
           >
+            <div
+              className="filler summarize-line-graph-filler"
+              style={
+                Object {
+                  "height": "30px",
+                }
+              }
+            />
+          </div>
+          <div
+            className="summarize-profile-details"
+          >
+            <div
+              className="summarize-profile-text"
+            >
+              <div
+                className="filler summarize-profile-filler"
+              />
+            </div>
+            <div
+              className="summarize-profile-numeric"
+            >
+              <div
+                className="filler summarize-profile-filler"
+              />
+            </div>
+            <div
+              className="summarize-profile-numeric"
+            >
+              <div
+                className="filler summarize-profile-filler"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          className="summarize-profile-row"
+        >
+          <div
+            className="summarize-line-graph"
+          >
+            <div
+              className="filler summarize-line-graph-filler"
+              style={
+                Object {
+                  "height": "30px",
+                }
+              }
+            />
+          </div>
+          <div
+            className="summarize-profile-details"
+          >
+            <div
+              className="summarize-profile-text"
+            >
+              <div
+                className="filler summarize-profile-filler"
+              />
+            </div>
+            <div
+              className="summarize-profile-numeric"
+            >
+              <div
+                className="filler summarize-profile-filler"
+              />
+            </div>
+            <div
+              className="summarize-profile-numeric"
+            >
+              <div
+                className="filler summarize-profile-filler"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          className="summarize-profile-row"
+        >
+          <div
+            className="summarize-line-graph"
+          >
+            <div
+              className="filler summarize-line-graph-filler"
+              style={
+                Object {
+                  "height": "30px",
+                }
+              }
+            />
+          </div>
+          <div
+            className="summarize-profile-details"
+          >
+            <div
+              className="summarize-profile-text"
+            >
+              <div
+                className="filler summarize-profile-filler"
+              />
+            </div>
+            <div
+              className="summarize-profile-numeric"
+            >
+              <div
+                className="filler summarize-profile-filler"
+              />
+            </div>
+            <div
+              className="summarize-profile-numeric"
+            >
+              <div
+                className="filler summarize-profile-filler"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders ProfileSummaryView correctly 2`] = `
+<div
+  className="summarize-profile"
+>
+  <div
+    className="summarize-profile-inner"
+  >
+    <div>
+      <div
+        className="summarize-profile-table"
+      >
+        <div>
+          <div
+            className="summarize-profile-thread"
+            colSpan="3"
+          >
+            Empty
+             Thread, 
+            default
+             process
+          </div>
+          <div
+            className="summarize-profile-header"
+          >
+            <div
+              className="summarize-line-graph"
+              title="The line graph represents the number of samples that were in a given category over time. In order to present a high-level summary, the samples are smoothed with a rolling average."
+            >
+              Rolling Average of Samples
+            </div>
+            <div
+              className="summarize-profile-details"
+            >
+              <div
+                className="summarize-profile-text"
+                title="Each sample's call stack is used to place it in an appropriate category."
+              >
+                Category
+              </div>
+              <div
+                className="summarize-profile-numeric"
+                title="The profiler samples the call stack at a fixed rate. Each of these samples is categorized and then summed over the course of the recording."
+              >
+                Samples
+              </div>
+              <div
+                className="summarize-profile-numeric"
+                title="The percentage of time represents the percentage of how many samples of a given category were observed over the entire course of the recording."
+              >
+                % Time
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="summarize-profile-row"
+        >
+          <div
+            className="summarize-line-graph"
+          >
             <svg
               height={30}
               style={
@@ -331,189 +514,6 @@ exports[`renders ProfileSummaryView correctly 1`] = `
               className="summarize-profile-numeric"
             >
               20.0
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-`;
-
-exports[`renders ProfileSummaryView with fillers when summary is not available 1`] = `
-<div
-  className="summarize-profile"
->
-  <div
-    className="summarize-profile-inner"
-  >
-    <div>
-      <div
-        className="summarize-profile-table"
-      >
-        <div>
-          <div
-            className="summarize-profile-thread"
-            colSpan="3"
-          >
-            Empty
-             Thread, 
-            default
-             process
-          </div>
-          <div
-            className="summarize-profile-header"
-          >
-            <div
-              className="summarize-line-graph"
-              title="The line graph represents the number of samples that were in a given category over time. In order to present a high-level summary, the samples are smoothed with a rolling average."
-            >
-              Rolling Average of Samples
-            </div>
-            <div
-              className="summarize-profile-details"
-            >
-              <div
-                className="summarize-profile-text"
-                title="Each sample's call stack is used to place it in an appropriate category."
-              >
-                Category
-              </div>
-              <div
-                className="summarize-profile-numeric"
-                title="The profiler samples the call stack at a fixed rate. Each of these samples is categorized and then summed over the course of the recording."
-              >
-                Samples
-              </div>
-              <div
-                className="summarize-profile-numeric"
-                title="The percentage of time represents the percentage of how many samples of a given category were observed over the entire course of the recording."
-              >
-                % Time
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          className="summarize-profile-row"
-        >
-          <div
-            className="summarize-line-graph"
-          >
-            <div
-              className="filler summarize-line-graph-filler"
-              style={
-                Object {
-                  "height": "30px",
-                }
-              }
-            />
-          </div>
-          <div
-            className="summarize-profile-details"
-          >
-            <div
-              className="summarize-profile-text"
-            >
-              <div
-                className="filler summarize-profile-filler"
-              />
-            </div>
-            <div
-              className="summarize-profile-numeric"
-            >
-              <div
-                className="filler summarize-profile-filler"
-              />
-            </div>
-            <div
-              className="summarize-profile-numeric"
-            >
-              <div
-                className="filler summarize-profile-filler"
-              />
-            </div>
-          </div>
-        </div>
-        <div
-          className="summarize-profile-row"
-        >
-          <div
-            className="summarize-line-graph"
-          >
-            <div
-              className="filler summarize-line-graph-filler"
-              style={
-                Object {
-                  "height": "30px",
-                }
-              }
-            />
-          </div>
-          <div
-            className="summarize-profile-details"
-          >
-            <div
-              className="summarize-profile-text"
-            >
-              <div
-                className="filler summarize-profile-filler"
-              />
-            </div>
-            <div
-              className="summarize-profile-numeric"
-            >
-              <div
-                className="filler summarize-profile-filler"
-              />
-            </div>
-            <div
-              className="summarize-profile-numeric"
-            >
-              <div
-                className="filler summarize-profile-filler"
-              />
-            </div>
-          </div>
-        </div>
-        <div
-          className="summarize-profile-row"
-        >
-          <div
-            className="summarize-line-graph"
-          >
-            <div
-              className="filler summarize-line-graph-filler"
-              style={
-                Object {
-                  "height": "30px",
-                }
-              }
-            />
-          </div>
-          <div
-            className="summarize-profile-details"
-          >
-            <div
-              className="summarize-profile-text"
-            >
-              <div
-                className="filler summarize-profile-filler"
-              />
-            </div>
-            <div
-              className="summarize-profile-numeric"
-            >
-              <div
-                className="filler summarize-profile-filler"
-              />
-            </div>
-            <div
-              className="summarize-profile-numeric"
-            >
-              <div
-                className="filler summarize-profile-filler"
-              />
             </div>
           </div>
         </div>
