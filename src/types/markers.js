@@ -94,7 +94,6 @@ export type GCSliceMarkerPayload = {
 export type BailoutPayload = {
   type: 'Bailout',
   bailoutType: string,
-  afterAt: string,
   where: string,
   script: string,
   bailoutLine: number,

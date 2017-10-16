@@ -106,7 +106,7 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
         return (
           <div className="tooltipDetails">
             {_markerDetail('bailoutType', 'Type', data.bailoutType)}
-            {_markerDetail('where', 'Where', `${data.afterAt} ${data.where}`)}
+            {_markerDetail('where', 'Where', data.where)}
             {_markerDetail('script', 'Script', data.script)}
             {_markerDetail('functionLine', 'Function Line', data.functionLine)}
             {_markerDetail('bailoutLine', 'Bailout Line', data.bailoutLine)}

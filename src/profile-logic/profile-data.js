@@ -815,9 +815,9 @@ export function extractMarkerDataFromName(thread: Thread): Thread {
   // Match: "Bailout_TypeBarrierO at jumptarget on line 1490 of resource://devtools/shared/base-loader.js -> resource://devtools/client/shared/vendor/immutable.js:1484"
   const bailoutRegex =
     // Capture groups:
-    //       type   afterAt    where   bailoutLine  script functionLine
-    //        ↓     ↓          ↓             ↓        ↓    ↓
-    /^Bailout_(\w+) (after|at) ([\w ]+) on line (\d+) of (.*):(\d)+$/;
+    //       type   afterAt    where        bailoutLine  script functionLine
+    //        ↓     ↓          ↓                  ↓        ↓    ↓
+    /^Bailout_(\w+) (after|at) ([\w _-]+) on line (\d+) of (.*):(\d+)$/;
 
   // Match: "Invalidate resource://devtools/shared/base-loader.js -> resource://devtools/client/shared/vendor/immutable.js:3662"
   // Match: "Invalidate self-hosted:4032"
@@ -825,7 +825,7 @@ export function extractMarkerDataFromName(thread: Thread): Thread {
     // Capture groups:
     //         url    line
     //           ↓    ↓
-    /^Invalidate (.*):(\d)+$/;
+    /^Invalidate (.*):(\d+)$/;
 
   const bailoutStringIndex = stringTable.indexForString('Bailout');
   const invalidationStringIndex = stringTable.indexForString('Invalidate');
@@ -853,8 +853,7 @@ export function extractMarkerDataFromName(thread: Thread): Thread {
         newMarkers.data[markerIndex] = ({
           type: 'Bailout',
           bailoutType: type,
-          afterAt: afterAt,
-          where: where,
+          where: afterAt + ' ' + where,
           script: script,
           bailoutLine: +bailoutLine,
           functionLine: +functionLine,
@@ -881,8 +880,9 @@ export function extractMarkerDataFromName(thread: Thread): Thread {
     }
     if (matchFound && markers.data[markerIndex]) {
       console.error(
-        "A marker's payload was rewritten from its text, and it was assumed that " +
-          'the payload would be empty:',
+        "A marker's payload was rewritten based off the text content of the marker. " +
+          "perf.html assumed that the payload was empty, but it turns out it wasn't. " +
+          'This is most likely an error and should be fixed. The marker name is:',
         name
       );
     }
@@ -928,9 +928,8 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
         }
         tracingMarkers.push(marker);
       }
-    } else {
-      const startTime = (data: Object).startTime;
-      const endTime = (data: Object).endTime;
+    } else if ('startTime' in data && 'endTime' in data) {
+      const { startTime, endTime } = data;
       if (typeof startTime === 'number' && typeof endTime === 'number') {
         const name = stringTable.getString(markers.name[i]);
         const duration = endTime - startTime;

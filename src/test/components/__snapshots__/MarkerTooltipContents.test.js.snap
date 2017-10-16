@@ -63,7 +63,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers 1`] = `
       Function Line
       :
     </div>
-    2
+    3662
     <div
       className="tooltipLabel"
     >
@@ -138,7 +138,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers 2`] = `
       Line
       :
     </div>
-    4
+    1234
   </div>
 </div>
 `;
