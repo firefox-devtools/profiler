@@ -1,0 +1,28 @@
+.appFooterLinks {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  border-top: 1px solid var(--grey-40);
+  border-left: 1px solid var(--grey-40);
+  padding: 0px 3px;
+  background-color: var(--grey-20);
+}
+
+.appFooterLinksLink,
+.appFooterLinksClose {
+  display: inline-block;
+  padding: 3px 5px;
+  color: var(--blue-60);
+  text-decoration: none;
+}
+
+.appFooterLinksLink:hover {
+  text-decoration: underline;
+}
+
+.appFooterLinksClose {
+  border: none;
+  margin: 0;
+  background: none;
+  cursor: pointer;
+}
