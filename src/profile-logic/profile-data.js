@@ -25,6 +25,7 @@ import type {
   IndexIntoCallNodeTable,
   TracingMarker,
 } from '../types/profile-derived';
+import type { BailoutPayload } from '../types/markers';
 import { CURRENT_VERSION as GECKO_PROFILE_VERSION } from './gecko-profile-versioning';
 import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profile-versioning';
 
@@ -795,6 +796,99 @@ export function getSearchFilteredMarkers(
     }
   }
   return newMarkersTable;
+}
+
+/**
+ * This function takes a marker that packs in a marker payload into the string of the
+ * name. This extracts that and turns it into a payload.
+ */
+export function extractMarkerDataFromName(thread: Thread): Thread {
+  const { stringTable, markers } = thread;
+  const newMarkers: MarkersTable = {
+    data: markers.data.slice(),
+    name: markers.name.slice(),
+    time: markers.time.slice(),
+    length: markers.length,
+  };
+
+  // Match: "Bailout_MonitorTypes after add on line 1013 of self-hosted:1008"
+  // Match: "Bailout_TypeBarrierO at jumptarget on line 1490 of resource://devtools/shared/base-loader.js -> resource://devtools/client/shared/vendor/immutable.js:1484"
+  const bailoutRegex =
+    // Capture groups:
+    //       type   afterAt    where        bailoutLine  script functionLine
+    //        ↓     ↓          ↓                  ↓        ↓    ↓
+    /^Bailout_(\w+) (after|at) ([\w _-]+) on line (\d+) of (.*):(\d+)$/;
+
+  // Match: "Invalidate resource://devtools/shared/base-loader.js -> resource://devtools/client/shared/vendor/immutable.js:3662"
+  // Match: "Invalidate self-hosted:4032"
+  const invalidateRegex =
+    // Capture groups:
+    //         url    line
+    //           ↓    ↓
+    /^Invalidate (.*):(\d+)$/;
+
+  const bailoutStringIndex = stringTable.indexForString('Bailout');
+  const invalidationStringIndex = stringTable.indexForString('Invalidate');
+  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+    const nameIndex = markers.name[markerIndex];
+    const time = markers.time[markerIndex];
+    const name = stringTable.getString(nameIndex);
+    let matchFound = false;
+    if (name.startsWith('Bailout_')) {
+      matchFound = true;
+      const match = name.match(bailoutRegex);
+      if (!match) {
+        console.error(`Could not match regex for bailout: "${name}"`);
+      } else {
+        const [
+          ,
+          type,
+          afterAt,
+          where,
+          bailoutLine,
+          script,
+          functionLine,
+        ] = match;
+        newMarkers.name[markerIndex] = bailoutStringIndex;
+        newMarkers.data[markerIndex] = ({
+          type: 'Bailout',
+          bailoutType: type,
+          where: afterAt + ' ' + where,
+          script: script,
+          bailoutLine: +bailoutLine,
+          functionLine: +functionLine,
+          startTime: time,
+          endTime: time,
+        }: BailoutPayload);
+      }
+    } else if (name.startsWith('Invalidate ')) {
+      matchFound = true;
+      const match = name.match(invalidateRegex);
+      if (!match) {
+        console.error(`Could not match regex for bailout: "${name}"`);
+      } else {
+        const [, url, line] = match;
+        newMarkers.name[markerIndex] = invalidationStringIndex;
+        newMarkers.data[markerIndex] = {
+          type: 'Invalidation',
+          url,
+          line,
+          startTime: time,
+          endTime: time,
+        };
+      }
+    }
+    if (matchFound && markers.data[markerIndex]) {
+      console.error(
+        "A marker's payload was rewritten based off the text content of the marker. " +
+          "perf.html assumed that the payload was empty, but it turns out it wasn't. " +
+          'This is most likely an error and should be fixed. The marker name is:',
+        name
+      );
+    }
+  }
+
+  return Object.assign({}, thread, { markers: newMarkers });
 }
 
 export function getTracingMarkers(thread: Thread): TracingMarker[] {
