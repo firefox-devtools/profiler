@@ -164,6 +164,14 @@ class ProfileSharingCompositeButton extends PureComponent<
     if (this.state.state !== 'local' && this.state.state !== 'error') {
       return;
     }
+    const { ga } = window;
+    if (ga) {
+      ga('send', {
+        hitType: 'event',
+        eventCategory: 'profile upload',
+        eventAction: 'start',
+      });
+    }
 
     const { profile, predictUrl } = this.props;
 
@@ -211,6 +219,15 @@ class ProfileSharingCompositeButton extends PureComponent<
             fullUrl: window.location.href,
             shortUrl: newShortUrl,
           });
+
+          const { ga } = window;
+          if (ga) {
+            ga('send', {
+              hitType: 'event',
+              eventCategory: 'profile upload',
+              eventAction: 'succeeded',
+            });
+          }
         });
         const shortenUrlPromise = this._shortenUrlAndFocusTextFieldOnCompletion();
         Promise.race([uploadPromise, shortenUrlPromise]).then(() => {
@@ -227,6 +244,14 @@ class ProfileSharingCompositeButton extends PureComponent<
         });
         if (this._uploadErrorButton) {
           this._uploadErrorButton.openPanel();
+        }
+        const { ga } = window;
+        if (ga) {
+          ga('send', {
+            hitType: 'event',
+            eventCategory: 'profile upload',
+            eventAction: 'failed',
+          });
         }
       });
   }
@@ -367,6 +392,14 @@ class ProfileDownloadButton extends PureComponent<
         compressedSize: blob.size,
       });
     });
+    const { ga } = window;
+    if (ga) {
+      ga('send', {
+        hitType: 'event',
+        eventCategory: 'profile save locally',
+        eventAction: 'save',
+      });
+    }
   }
 
   render() {

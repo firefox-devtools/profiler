@@ -41,6 +41,14 @@ export function changeSelectedThread(selectedThread: ThreadIndex): Action {
 }
 
 export function changeThreadOrder(threadOrder: ThreadIndex[]): Action {
+  const { ga } = window;
+  if (ga) {
+    ga('send', {
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'change thread order',
+    });
+  }
   return {
     type: 'CHANGE_THREAD_ORDER',
     threadOrder,
@@ -57,6 +65,15 @@ export function hideThread(
     if (hiddenThreads.length + 1 === threadOrder.length) {
       return;
     }
+    const { ga } = window;
+    if (ga) {
+      ga('send', {
+        hitType: 'event',
+        eventCategory: 'profile',
+        eventAction: 'toggle thread',
+        eventLabel: 'hide',
+      });
+    }
 
     dispatch(
       ({
@@ -70,13 +87,35 @@ export function hideThread(
 }
 
 export function showThread(threadIndex: ThreadIndex): Action {
+  const { ga } = window;
+  if (ga) {
+    ga('send', {
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'toggle thread',
+      eventLabel: 'show',
+    });
+  }
+
   return {
     type: 'SHOW_THREAD',
     threadIndex,
   };
 }
 
+let _callTreeSearchAnalyticsSent = false;
+
 export function changeCallTreeSearchString(searchString: string): Action {
+  const { ga } = window;
+  if (ga && !_callTreeSearchAnalyticsSent) {
+    // Only send this event once, since it could be fired frequently with typing.
+    _callTreeSearchAnalyticsSent = true;
+    ga('send', {
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'call tree search string',
+    });
+  }
   return {
     type: 'CHANGE_CALL_TREE_SEARCH_STRING',
     searchString,
@@ -122,6 +161,16 @@ export function changeImplementationFilter(
       getState()
     );
 
+    const { ga } = window;
+    if (ga) {
+      ga('send', {
+        hitType: 'event',
+        eventCategory: 'profile',
+        eventAction: 'change hide platform details',
+        eventLabel: implementation,
+      });
+    }
+
     dispatch({
       type: 'CHANGE_IMPLEMENTATION_FILTER',
       implementation,
@@ -133,6 +182,14 @@ export function changeImplementationFilter(
 }
 
 export function changeInvertCallstack(invertCallstack: boolean): Action {
+  const { ga } = window;
+  if (ga) {
+    ga('send', {
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'change invert callstack',
+    });
+  }
   return {
     type: 'CHANGE_INVERT_CALLSTACK',
     invertCallstack,
@@ -142,6 +199,14 @@ export function changeInvertCallstack(invertCallstack: boolean): Action {
 export function changeHidePlatformDetails(
   hidePlatformDetails: boolean
 ): Action {
+  const { ga } = window;
+  if (ga) {
+    ga('send', {
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'change hide platform details',
+    });
+  }
   return {
     type: 'CHANGE_HIDE_PLATFORM_DETAILS',
     hidePlatformDetails,
@@ -208,6 +273,15 @@ export function addTransformToStack(
       transform,
       transformedThread,
     });
+    const { ga } = window;
+    if (ga) {
+      ga('send', {
+        hitType: 'event',
+        eventCategory: 'profile',
+        eventAction: 'add transform',
+        eventLabel: transform.type,
+      });
+    }
   };
 }
 
