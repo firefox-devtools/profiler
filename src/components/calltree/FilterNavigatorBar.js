@@ -6,7 +6,7 @@
 
 import React, { PureComponent, PropTypes } from 'react';
 import classNames from 'classnames';
-import { CSSTransitionGroup } from 'react-transition-group';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './FilterNavigatorBar.css';
 
 type Props = {
@@ -35,32 +35,34 @@ class FilterNavigatorBar extends PureComponent {
   render() {
     const { className, items, selectedItem } = this.props;
     return (
-      <CSSTransitionGroup
-        transitionName="filterNavigatorBarTransition"
-        transitionEnterTimeout={300}
-        transitionLeaveTimeout={300}
+      <TransitionGroup
         component="ol"
         className={classNames('filterNavigatorBar', className)}
       >
         {items.map((item, i) =>
-          <li
+          <CSSTransition
             key={i}
-            data-index={i}
-            className={classNames('filterNavigatorBarItem', {
-              filterNavigatorBarRootItem: i === 0,
-              filterNavigatorBarBeforeSelectedItem: i === selectedItem - 1,
-              filterNavigatorBarSelectedItem: i === selectedItem,
-              filterNavigatorBarLeafItem: i === items.length - 1,
-            })}
-            title={item}
-            onClick={this._onLiClick}
+            classNames="filterNavigatorBarTransition"
+            timeout={300}
           >
-            <span className="filterNavigatorBarItemContent">
-              {item}
-            </span>
-          </li>
+            <li
+              data-index={i}
+              className={classNames('filterNavigatorBarItem', {
+                filterNavigatorBarRootItem: i === 0,
+                filterNavigatorBarBeforeSelectedItem: i === selectedItem - 1,
+                filterNavigatorBarSelectedItem: i === selectedItem,
+                filterNavigatorBarLeafItem: i === items.length - 1,
+              })}
+              title={item}
+              onClick={this._onLiClick}
+            >
+              <span className="filterNavigatorBarItemContent">
+                {item}
+              </span>
+            </li>
+          </CSSTransition>
         )}
-      </CSSTransitionGroup>
+      </TransitionGroup>
     );
   }
 }

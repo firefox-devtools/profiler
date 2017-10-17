@@ -323,7 +323,8 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
             <kbd>
               Capture Profile
             </kbd>
-             to load the data into perf.html.
+             
+            to load the data into perf.html.
           </p>
           <p>
             <div>
