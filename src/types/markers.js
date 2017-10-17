@@ -86,7 +86,32 @@ export type GCSliceMarkerPayload = {
   |},
 };
 
-// TODO - Add more markers.
+/**
+ * The bailout payload describes a bailout from JIT code where some assumption in
+ * the optimization was broken, and the code had to fall back to Baseline. Currently
+ * this information is encoded as a string and extracted as a selector.
+ */
+export type BailoutPayload = {
+  type: 'Bailout',
+  bailoutType: string,
+  where: string,
+  script: string,
+  bailoutLine: number,
+  functionLine: number,
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+};
+
+/**
+ * TODO - Please describe an invalidation.
+ */
+export type InvalidationPayload = {
+  type: 'Invalidation',
+  url: string,
+  line: string,
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+};
 
 /**
  * The payload for the UserTimings API. These are added through performance.measure()
@@ -121,6 +146,8 @@ export type DummyForTestsMarkerPayload = {
  */
 export type MarkerPayload =
   | GPUMarkerPayload
+  | BailoutPayload
+  | InvalidationPayload
   | UserTimingMarkerPayload
   | PaintProfilerMarkerTracing
   | DOMEventMarkerPayload

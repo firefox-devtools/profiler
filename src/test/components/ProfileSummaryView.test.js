@@ -33,7 +33,6 @@ it('renders ProfileSummaryView correctly', () => {
   `);
 
   const store = storeWithProfile(profile);
-  store.dispatch(profileSummaryProcessed(summarizeProfile(profile)));
 
   const profileSummary = renderer.create(
     <Provider store={store}>
@@ -41,6 +40,8 @@ it('renders ProfileSummaryView correctly', () => {
     </Provider>,
     { createNodeMock }
   );
+  expect(profileSummary).toMatchSnapshot();
 
-  expect(profileSummary.toJSON()).toMatchSnapshot();
+  store.dispatch(profileSummaryProcessed(summarizeProfile(profile)));
+  expect(profileSummary).toMatchSnapshot();
 });
