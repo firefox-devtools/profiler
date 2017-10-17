@@ -14,7 +14,35 @@ declare class GeckoProfiler {
   ) => Promise<SymbolTableAsTuple>,
 }
 
+// Document Google Analytics API
+// https://developers.google.com/analytics/devguides/collection/analyticsjs/pages
+type GAEvent = {|
+  hitType: 'event',
+  // Specifies the event category. Must not be empty
+  eventCategory: string,
+  eventAction: string,
+  eventLabel?: string,
+  eventValue?: number,
+|};
+
+type GAPageView = {|
+  hitType: 'pageview',
+  page: location.pathname,
+|};
+
+type GATiming = {|
+  hitType: 'timing',
+  timingCategory: string,
+  timingVar: string,
+  timingValue: number,
+  timingLabel?: string,
+|};
+
+type GoogleAnalytics = ('send', GAEvent | GAPageView | GATiming) => {};
+
 declare class Window extends EventTarget {
+  // Google Analytics
+  ga?: GoogleAnalytics,
   // perf.html and Gecko Profiler Addon
   geckoProfilerPromise: Promise<GeckoProfiler>,
   geckoProfilerAddonInstalled?: () => void,
