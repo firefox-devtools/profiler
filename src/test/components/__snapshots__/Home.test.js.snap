@@ -112,11 +112,12 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
     className="appFooterLinks"
   >
     <button
+      aria-label="Hide links to legal information"
       className="appFooterLinksClose"
       onClick={[Function]}
-      title="Hide Links"
+      title="Hide links to legal information"
     >
-      x
+      ✕
     </button>
     <a
       className="appFooterLinksLink"
@@ -266,11 +267,12 @@ exports[`app/Home renders the install screen for the extension 1`] = `
     className="appFooterLinks"
   >
     <button
+      aria-label="Hide links to legal information"
       className="appFooterLinksClose"
       onClick={[Function]}
-      title="Hide Links"
+      title="Hide links to legal information"
     >
-      x
+      ✕
     </button>
     <a
       className="appFooterLinksLink"
@@ -453,11 +455,12 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
     className="appFooterLinks"
   >
     <button
+      aria-label="Hide links to legal information"
       className="appFooterLinksClose"
       onClick={[Function]}
-      title="Hide Links"
+      title="Hide links to legal information"
     >
-      x
+      ✕
     </button>
     <a
       className="appFooterLinksLink"
@@ -625,11 +628,12 @@ exports[`app/Home renders the usage instructions for pages with the extension in
     className="appFooterLinks"
   >
     <button
+      aria-label="Hide links to legal information"
       className="appFooterLinksClose"
       onClick={[Function]}
-      title="Hide Links"
+      title="Hide links to legal information"
     >
-      x
+      ✕
     </button>
     <a
       className="appFooterLinksLink"

@@ -2,9 +2,11 @@
   position: absolute;
   bottom: 0;
   right: 0;
+
   border-top: 1px solid var(--grey-40);
   border-left: 1px solid var(--grey-40);
   padding: 0px 3px;
+
   background-color: var(--grey-20);
 }
 
@@ -16,13 +18,15 @@
   text-decoration: none;
 }
 
-.appFooterLinksLink:hover {
+.appFooterLinksLink:hover,
+.appFooterLinksClose:hover {
   text-decoration: underline;
 }
 
 .appFooterLinksClose {
   border: none;
   margin: 0;
+  font: inherit;
   background: none;
   cursor: pointer;
 }

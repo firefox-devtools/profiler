@@ -25,11 +25,12 @@ class FooterLinks extends PureComponent {
     return (
       <div className="appFooterLinks">
         <button
-          title="Hide Links"
+          aria-label="Hide links to legal information"
+          title="Hide links to legal information"
           className="appFooterLinksClose"
           onClick={() => this.setState({ hide: true })}
         >
-          x
+          ✕
         </button>
         <a
           className="appFooterLinksLink"
