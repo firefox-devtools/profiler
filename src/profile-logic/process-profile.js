@@ -19,6 +19,7 @@ import {
   convertOldCleopatraProfile,
 } from './old-cleopatra-profile-format';
 import { getEmptyTaskTracerData } from './task-tracer';
+import { convertPhaseTimes } from './convert-markers';
 import type {
   Profile,
   Thread,
@@ -42,6 +43,14 @@ import type {
   GeckoSampleStruct,
   GeckoStackStruct,
 } from '../types/gecko-profile';
+import type {
+  MarkerPayload,
+  MarkerPayload_Gecko,
+  GCSliceData_Gecko,
+  GCMajorCompleted,
+  GCMajorCompleted_Gecko,
+  GCMajorAborted,
+} from '../types/markers';
 
 type RegExpResult = null | string[];
 /**
@@ -470,7 +479,67 @@ function _processStackTable(geckoStackTable: GeckoStackStruct): StackTable {
  */
 function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
   return {
-    data: geckoMarkers.data,
+    data: geckoMarkers.data.map(function(
+      m: MarkerPayload_Gecko
+    ): MarkerPayload {
+      if (m) {
+        switch (m.type) {
+          /*
+           * We want to improve the format of these markers to make them
+           * easier to understand and work with, but we can't do that by
+           * upgrading the gecko profile since that would break
+           * compatibility with telemetry, however we can make some
+           * improvements while we process a gecko profile.
+           */
+          case 'GCSlice': {
+            const mt: GCSliceData_Gecko = m.timings;
+            const timings = Object.assign({}, mt, {
+              phase_times: mt.times ? convertPhaseTimes(mt.times) : {},
+            });
+            delete timings.times;
+            return {
+              type: 'GCSlice',
+              startTime: m.startTime,
+              endTime: m.endTime,
+              timings: timings,
+            };
+          }
+          case 'GCMajor': {
+            const mt: GCMajorAborted | GCMajorCompleted_Gecko = m.timings;
+            switch (mt.status) {
+              case 'completed': {
+                const timings: GCMajorCompleted = Object.assign({}, mt, {
+                  phase_times: convertPhaseTimes(mt.totals),
+                  mmu_20ms: mt.mmu_20ms / 100,
+                  mmu_50ms: mt.mmu_50ms / 100,
+                });
+                return {
+                  type: 'GCMajor',
+                  startTime: m.startTime,
+                  endTime: m.endTime,
+                  timings: timings,
+                };
+              }
+              case 'aborted':
+                return {
+                  type: 'GCMajor',
+                  startTime: m.startTime,
+                  endTime: m.endTime,
+                  timings: { status: 'aborted' },
+                };
+              default:
+                // Flow cannot detect that this switch is complete.
+                console.log('Unknown GCMajor status');
+                throw new Error('Unknown GCMajor status');
+            }
+          }
+          default:
+            return m;
+        }
+      } else {
+        return null;
+      }
+    }),
     name: geckoMarkers.name,
     time: geckoMarkers.time,
     length: geckoMarkers.length,

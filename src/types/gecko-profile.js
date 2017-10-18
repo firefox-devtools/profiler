@@ -4,7 +4,7 @@
 // @flow
 
 import type { Lib, IndexIntoStringTable, PausedRange } from './profile';
-import type { MarkerPayload } from './markers';
+import type { MarkerPayload_Gecko } from './markers';
 import type { Milliseconds } from './units';
 
 export type IndexIntoGeckoFrameTable = number;
@@ -12,7 +12,7 @@ export type IndexIntoGeckoStackTable = number;
 
 export type GeckoMarkers = {
   schema: { name: 0, time: 1, data: 2 },
-  data: Array<[IndexIntoStringTable, Milliseconds, MarkerPayload]>,
+  data: Array<[IndexIntoStringTable, Milliseconds, MarkerPayload_Gecko]>,
 };
 
 /**
@@ -23,7 +23,7 @@ export type GeckoMarkers = {
 export type GeckoMarkerStruct = {
   name: IndexIntoStringTable[],
   time: Milliseconds[],
-  data: MarkerPayload[],
+  data: MarkerPayload_Gecko[],
   length: number,
 };
 
