@@ -6,27 +6,29 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
-import formatTimeLength from '../../utils/format-time-length';
+import {
+  formatNumber,
+  formatPercent,
+  formatBytes,
+  formatValueTotal,
+} from '../../utils/format-numbers';
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 import type { TracingMarker } from '../../types/profile-derived';
 import type { MarkerPayload } from '../../types/markers';
+import type { NotVoidOrNull } from '../../types/utils';
 
-function _markerDetail<T>(
+function _markerDetail<T: NotVoidOrNull>(
   key: string,
   label: string,
   value: T,
   fn: T => string = String
 ): Array<React$Element<*> | string> {
-  if (value) {
-    return [
-      <div className="tooltipLabel" key="{key}">
-        {label}:
-      </div>,
-      fn(value),
-    ];
-  } else {
-    return [];
-  }
+  return [
+    <div className="tooltipLabel" key="{key}">
+      {label}:
+    </div>,
+    fn(value),
+  ];
 }
 
 function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
@@ -42,7 +44,7 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
       case 'DOMEvent': {
         let latency = 0;
         if (data.timeStamp) {
-          latency = `${formatTimeLength(data.startTime - data.timeStamp)}ms`;
+          latency = `${formatNumber(data.startTime - data.timeStamp)}ms`;
         }
         return (
           <div className="tooltipDetails">
@@ -53,52 +55,157 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
       }
       case 'GCMinor': {
         if (data.nursery) {
-          return (
-            <div className="tooltipDetails">
-              {_markerDetail('gcreason', 'Reason', data.nursery.reason)}
-            </div>
-          );
+          const nursery = data.nursery;
+          switch (nursery.status) {
+            case 'complete': {
+              return (
+                <div className="tooltipDetails">
+                  {_markerDetail('gcreason', 'Reason', nursery.reason)}
+                  {_markerDetail(
+                    'gcpromotion',
+                    'Bytes tenured',
+                    formatValueTotal(
+                      nursery.bytes_tenured,
+                      nursery.bytes_used,
+                      formatBytes
+                    )
+                  )}
+                  {nursery.cur_capacity &&
+                    _markerDetail(
+                      'gcnurseryusage',
+                      'Bytes used',
+                      formatValueTotal(
+                        nursery.bytes_used,
+                        nursery.cur_capacity,
+                        formatBytes
+                      )
+                    )}
+                  {_markerDetail(
+                    'gcnewnurserysize',
+                    'New nursery size',
+                    nursery.new_capacity,
+                    formatBytes
+                  )}
+                </div>
+              );
+            }
+            case 'nursery disabled':
+              return (
+                <div className="tooltipDetails">
+                  {_markerDetail('gcstatus', 'Status', 'Nursery disabled')}
+                </div>
+              );
+            case 'nursery empty':
+              return (
+                <div className="tooltipDetails">
+                  {_markerDetail('gcstatus', 'Status', 'Nursery empty')}
+                </div>
+              );
+            default:
+              return null;
+          }
         } else {
           return null;
         }
       }
       case 'GCMajor': {
-        let zones_collected_total;
-        if (data.timings.zones_collected && data.timings.total_zones) {
-          zones_collected_total =
-            data.timings.zones_collected + ' / ' + data.timings.total_zones;
+        const timings = data.timings;
+        switch (timings.status) {
+          case 'aborted':
+            return (
+              <div className="tooltipDetails">
+                {_markerDetail('status', 'Status', 'Aborted (OOM)')}
+              </div>
+            );
+          case 'completed': {
+            return (
+              <div className="tooltipDetails">
+                {_markerDetail('gcreason', 'Reason', timings.reason)}
+                {timings.nonincremental_reason !== 'None' &&
+                  _markerDetail(
+                    'gcnonincrementalreason',
+                    'Non-incremental reason',
+                    timings.nonincremental_reason
+                  )}
+                {_markerDetail(
+                  'gctime',
+                  'Total slice times',
+                  timings.total_time,
+                  x => x + 'ms'
+                )}
+                {_markerDetail(
+                  'gcmaxpause',
+                  'Max Pause',
+                  timings.max_pause,
+                  x => x + 'ms'
+                )}
+                {_markerDetail(
+                  'gcusage',
+                  'Heap usage',
+                  timings.allocated_bytes,
+                  formatBytes
+                )}
+                {_markerDetail(
+                  'gcmmu20ms',
+                  'MMU 20ms',
+                  timings.mmu_20ms,
+                  formatPercent
+                )}
+                {_markerDetail(
+                  'gcmmu50ms',
+                  'MMU 50ms',
+                  timings.mmu_50ms,
+                  formatPercent
+                )}
+                {_markerDetail('gcnumminors', 'Minor GCs', timings.minor_gcs)}
+                {_markerDetail('gcnumslices', 'Slices', timings.slices)}
+                {_markerDetail(
+                  'gcnumzones',
+                  'Zones',
+                  formatValueTotal(
+                    timings.zones_collected,
+                    timings.total_zones,
+                    String
+                  )
+                )}
+                {_markerDetail(
+                  'gcnumcompartments',
+                  'Compartments',
+                  timings.total_compartments
+                )}
+              </div>
+            );
+          }
+          default:
+            return null;
+        }
+      }
+      case 'GCSlice': {
+        const timings = data.timings;
+        let triggers;
+        if (timings.trigger_amount && timings.trigger_threshold) {
+          triggers = _markerDetail(
+            'gctrigger',
+            'Trigger (amt/trig)',
+            formatValueTotal(
+              timings.trigger_amount,
+              timings.trigger_threshold,
+              formatBytes,
+              false
+            )
+          );
         }
         return (
           <div className="tooltipDetails">
-            {_markerDetail('gcreason', 'Reason', data.timings.reason)}
-            {data.timings.nonincremental_reason !== 'None' &&
-              _markerDetail(
-                'gcnonincrementalreason',
-                'Non-incremental reason',
-                data.timings.nonincremental_reason
-              )}
-            {_markerDetail(
-              'gcmaxpause',
-              'Max Pause',
-              data.timings.max_pause,
-              x => x + 'ms'
-            )}
-            {_markerDetail('gcnumminors', 'Minor GCs', data.timings.minor_gcs)}
-            {_markerDetail('gcnumslices', 'Slices', data.timings.slices)}
-            {_markerDetail('gcnumzones', 'Zones', zones_collected_total)}
-          </div>
-        );
-      }
-      case 'GCSlice': {
-        return (
-          <div className="tooltipDetails">
-            {_markerDetail('gcreason', 'Reason', data.timings.reason)}
-            {_markerDetail('gcbudget', 'Budget', data.timings.budget)}
+            {_markerDetail('gcreason', 'Reason', timings.reason)}
+            {_markerDetail('gcbudget', 'Budget', timings.budget)}
             {_markerDetail(
               'gcstate',
               'States',
-              data.timings.initial_state + ' \u2013 ' + data.timings.final_state
+              timings.initial_state + ' – ' + timings.final_state
             )}
+            {triggers}
+            {_markerDetail('gcfaults', 'Page faults', timings.page_faults)}
           </div>
         );
       }
@@ -149,7 +256,7 @@ export default class MarkerTooltipContents extends PureComponent {
         <div className={classNames({ tooltipHeader: details })}>
           <div className="tooltipOneLine">
             <div className="tooltipTiming">
-              {formatTimeLength(marker.dur)}ms
+              {formatNumber(marker.dur)}ms
             </div>
             <div className="tooltipTitle">
               {marker.title || marker.name}

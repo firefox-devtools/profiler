@@ -279,7 +279,21 @@ exports[`MarkerTooltipContents renders tooltips for various markers 5`] = `
       Reason
       :
     </div>
-    Reason
+    CC_WAITING
+    <div
+      className="tooltipLabel"
+    >
+      Bytes tenured
+      :
+    </div>
+    4.0MB / 8.0MB (50%)
+    <div
+      className="tooltipLabel"
+    >
+      New nursery size
+      :
+    </div>
+    16MB
   </div>
 </div>
 `;
@@ -326,7 +340,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers 6`] = `
       Reason
       :
     </div>
-    Reason
+    CC_WAITING
     <div
       className="tooltipLabel"
     >
@@ -337,17 +351,45 @@ exports[`MarkerTooltipContents renders tooltips for various markers 6`] = `
     <div
       className="tooltipLabel"
     >
+      Total slice times
+      :
+    </div>
+    157.215ms
+    <div
+      className="tooltipLabel"
+    >
       Max Pause
       :
     </div>
-    7ms
+    103.65ms
+    <div
+      className="tooltipLabel"
+    >
+      Heap usage
+      :
+    </div>
+    16MB
+    <div
+      className="tooltipLabel"
+    >
+      MMU 20ms
+      :
+    </div>
+    0.000%
+    <div
+      className="tooltipLabel"
+    >
+      MMU 50ms
+      :
+    </div>
+    0.000%
     <div
       className="tooltipLabel"
     >
       Minor GCs
       :
     </div>
-    11
+    9
     <div
       className="tooltipLabel"
     >
@@ -361,7 +403,14 @@ exports[`MarkerTooltipContents renders tooltips for various markers 6`] = `
       Zones
       :
     </div>
-    3 / 5
+    3 / 5 (60%)
+    <div
+      className="tooltipLabel"
+    >
+      Compartments
+      :
+    </div>
+    79
   </div>
 </div>
 `;
@@ -408,14 +457,14 @@ exports[`MarkerTooltipContents renders tooltips for various markers 7`] = `
       Reason
       :
     </div>
-    Reason
+    CC_WAITING
     <div
       className="tooltipLabel"
     >
       Budget
       :
     </div>
-    3
+    11
     <div
       className="tooltipLabel"
     >
@@ -423,6 +472,13 @@ exports[`MarkerTooltipContents renders tooltips for various markers 7`] = `
       :
     </div>
     Initial – Final
+    <div
+      className="tooltipLabel"
+    >
+      Page faults
+      :
+    </div>
+    0
   </div>
 </div>
 `;

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Milliseconds } from './units';
+import type { Milliseconds, Seconds } from './units';
 
 /**
  * Measurement for how long draw calls take for the compositor.
@@ -48,42 +48,176 @@ export type PaintProfilerMarkerTracing = ProfilerMarkerTracing & {
     | 'Composite',
 };
 
-export type GCMinorMarkerPayload = {
-  type: 'GCMinor',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
-  // nursery is only present in newer profile format.
-  nursery?: {|
-    reason?: string,
-    status?: string,
-  |},
+export type PhaseTimes = { [phase: string]: Milliseconds };
+
+type GCSliceData_Shared = {
+  // Slice number within the GCMajor collection.
+  slice: number,
+
+  pause: Milliseconds,
+  when: Milliseconds,
+
+  // The reason for this slice.
+  reason: string,
+
+  // The GC state at the start and end of this slice.
+  initial_state: string,
+  final_state: string,
+
+  // The incremental GC budget for this slice (see pause above).
+  budget: Milliseconds,
+
+  // The number of the GCMajor that this slice belongs to.
+  major_gc_number: number,
+
+  // These are present if the collection was triggered by exceeding some
+  // threshold.  The reason field says how they should be interpreted.
+  trigger_amount?: number,
+  trigger_threshold?: number,
+
+  // The number of page faults that occured during the slice.
+  page_faults: number,
+
+  start_timestamp: Seconds,
+  end_timestamp: Seconds,
+};
+export type GCSliceData_Gecko = GCSliceData_Shared & {
+  times: PhaseTimes,
+};
+export type GCSliceData = GCSliceData_Shared & {
+  phase_times: PhaseTimes,
+};
+
+export type GCMajorAborted = {
+  status: 'aborted',
+};
+
+type GCMajorCompleted_Shared = {
+  status: 'completed',
+  // timestamp is present but is usually 0
+  // timestamp: number,
+  max_pause: Milliseconds,
+
+  // The sum of all the slice durations
+  total_time: Milliseconds,
+
+  // The reason from the first slice. see JS::gcreason::Reason
+  reason: string,
+
+  // Counts.
+  zones_collected: number,
+  total_zones: number,
+  total_compartments: number,
+  minor_gcs: number,
+  store_buffer_overflows: number,
+  slices: number,
+
+  // Timing for the SCC sweep phase.
+  scc_sweep_total: Milliseconds,
+  scc_sweep_max_pause: Milliseconds,
+
+  // The reason (if not 'None') why this GC ran non-incrementally.
+  nonincremental_reason: string,
+
+  // The allocated space for the whole heap before the GC started.
+  allocated_bytes: number,
+
+  added_chunks: number,
+  removed_chunks: number,
+
+  // The number for the start of this GC event.
+  major_gc_number: number,
+  minor_gc_number: number,
+
+  // Slice number isn't in older profiles.
+  slice_number?: number,
+
+  // This usually isn't present with the gecko profiler, but it's the same
+  // as all of the slice markers themselves.
+  slices_list?: GCSliceData[],
+};
+
+export type GCMajorCompleted = GCMajorCompleted_Shared & {
+  // MMU (Minimum mutator utilisation) A measure of GC's affect on
+  // responsiveness  See Statistics::computeMMU(), these percentages in the
+  // rage of 0-100.
+  // Percentage of time the mutator ran in a 20ms window.
+  mmu_20ms: number,
+  // Percentage of time the mutator ran in a 50ms window.
+  mmu_50ms: number,
+
+  // The duration of each phase.
+  phase_times: PhaseTimes,
+};
+export type GCMajorCompleted_Gecko = GCMajorCompleted_Shared & {
+  // As above except in parts of 100.
+  mmu_20ms: number,
+  mmu_50ms: number,
+  totals: PhaseTimes,
 };
 
 export type GCMajorMarkerPayload = {
   type: 'GCMajor',
   startTime: Milliseconds,
   endTime: Milliseconds,
-  timings: {|
-    zones_collected: number,
-    total_zones: number,
-    reason: string,
-    nonincremental_reason: string,
-    max_pause: Milliseconds,
-    minor_gcs: number,
-    slices: number,
-  |},
+  timings: GCMajorAborted | GCMajorCompleted,
+};
+
+export type GCMajorMarkerPayload_Gecko = {
+  type: 'GCMajor',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  timings: GCMajorAborted | GCMajorCompleted_Gecko,
+};
+
+export type GCMinorCompletedData = {
+  status: 'complete',
+
+  // The reason for initiating the GC.
+  reason: string,
+
+  // The size of the data moved into the tenured heap.
+  bytes_tenured: number,
+
+  // The total amount of data that was allocated in the nursery.
+  bytes_used: number,
+
+  // The total capacity of the nursery before and after this GC.
+  // Capacity may change as the nursery size is tuned after each collection.
+  // cur_capacity isn't in older profiles.
+  cur_capacity?: number,
+  new_capacity: number,
+
+  phase_times: PhaseTimes,
+};
+
+export type GCMinorDisabledData = {|
+  status: 'nursery disabled',
+|};
+export type GCMinorEmptyData = {|
+  status: 'nursery empty',
+|};
+
+export type GCMinorMarkerPayload = {
+  type: 'GCMinor',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  // nursery is only present in newer profile format.
+  nursery?: GCMinorCompletedData | GCMinorDisabledData | GCMinorEmptyData,
 };
 
 export type GCSliceMarkerPayload = {
   type: 'GCSlice',
   startTime: Milliseconds,
   endTime: Milliseconds,
-  timings: {|
-    reason: string,
-    budget: Milliseconds,
-    initial_state: string,
-    final_state: string,
-  |},
+  timings: GCSliceData,
+};
+
+export type GCSliceMarkerPayload_Gecko = {
+  type: 'GCSlice',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  timings: GCSliceData_Gecko,
 };
 
 /**
@@ -154,5 +288,16 @@ export type MarkerPayload =
   | GCMinorMarkerPayload
   | GCMajorMarkerPayload
   | GCSliceMarkerPayload
+  | DummyForTestsMarkerPayload
+  | null;
+
+export type MarkerPayload_Gecko =
+  | GPUMarkerPayload
+  | UserTimingMarkerPayload
+  | PaintProfilerMarkerTracing
+  | DOMEventMarkerPayload
+  | GCMinorMarkerPayload
+  | GCMajorMarkerPayload_Gecko
+  | GCSliceMarkerPayload_Gecko
   | DummyForTestsMarkerPayload
   | null;
