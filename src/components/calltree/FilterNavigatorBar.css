@@ -116,12 +116,12 @@
   transition: opacity 300ms ease-out, transform 300ms ease-out;
 }
 
-.filterNavigatorBarTransition-leave {
+.filterNavigatorBarTransition-exit {
   opacity: 1;
   transform: translateX(0);
 }
 
-.filterNavigatorBarTransition-leave.filterNavigatorBarTransition-leave-active {
+.filterNavigatorBarTransition-exit.filterNavigatorBarTransition-exit-active {
   opacity: 0.01;
   transform: translateX(100%);
   transition: opacity 300ms, transform 300ms;

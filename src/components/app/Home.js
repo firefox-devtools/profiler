@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2016-12-06.png';
 import PerfScreenshot from '../../../res/perf-screenshot-2017-09-08.jpg';
 import { retrieveProfileFromFile } from '../../actions/receive-profile';
-import { CSSTransitionGroup } from 'react-transition-group';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import FooterLinks from './FooterLinks';
 require('./Home.css');
 
@@ -78,6 +78,17 @@ class UploadButton extends PureComponent {
   _upload() {
     this.props.retrieveProfileFromFile(this._input.files[0]);
   }
+}
+
+function InstructionTransition(props: {}) {
+  return (
+    <CSSTransition
+      {...props}
+      classNames="homeTransition"
+      timeout={300}
+      exit={false}
+    />
+  );
 }
 
 /**
@@ -178,115 +189,123 @@ class Home extends PureComponent {
 
   _renderInstallInstructions() {
     return (
-      <div className="homeInstructions" key={0}>
-        <div className="homeInstructionsLeft">
-          <div style={{ textAlign: 'center' }}>
-            <img className="homeSectionScreenshot" src={PerfScreenshot} />
+      <InstructionTransition key={0}>
+        <div className="homeInstructions">
+          <div className="homeInstructionsLeft">
+            <div style={{ textAlign: 'center' }}>
+              <img className="homeSectionScreenshot" src={PerfScreenshot} />
+            </div>
+          </div>
+          <div className="homeInstructionsRight">
+            <h2>Getting started</h2>
+            <p>
+              Install the Gecko Profiler Add-on to start recording a performance
+              profile in Firefox, then analyze it and share it with perf.html.
+            </p>
+            <InstallButton
+              name="Gecko Profiler"
+              className="homeSectionInstallButton"
+              xpiUrl={ADDON_URL}
+            >
+              <span className="homeSectionPlus">+</span>
+              Install add-on
+            </InstallButton>
+            <p>
+              You can also analyze a local profile by either dragging and
+              dropping it here or selecting it using the button below.
+            </p>
+            <UploadButton {...this.props} />
           </div>
         </div>
-        <div className="homeInstructionsRight">
-          <h2>Getting started</h2>
-          <p>
-            Install the Gecko Profiler Add-on to start recording a performance
-            profile in Firefox, then analyze it and share it with perf.html.
-          </p>
-          <InstallButton
-            name="Gecko Profiler"
-            className="homeSectionInstallButton"
-            xpiUrl={ADDON_URL}
-          >
-            <span className="homeSectionPlus">+</span>
-            Install add-on
-          </InstallButton>
-          <p>
-            You can also analyze a local profile by either dragging and dropping
-            it here or selecting it using the button below.
-          </p>
-          <UploadButton {...this.props} />
-        </div>
-      </div>
+      </InstructionTransition>
     );
   }
 
   _renderRecordInstructions() {
     return (
-      <div className="homeInstructions" key={1}>
-        <div className="homeInstructionsLeft">
-          <p>
-            <img className="homeSectionScreenshot" src={AddonScreenshot} />
-          </p>
+      <InstructionTransition key={1}>
+        <div className="homeInstructions">
+          <div className="homeInstructionsLeft">
+            <p>
+              <img className="homeSectionScreenshot" src={AddonScreenshot} />
+            </p>
+          </div>
+          <div className="homeInstructionsRight">
+            <h2>Recording profiles</h2>
+            <p>
+              To start profiling, click on the profiling button, or use the
+              keyboard shortcuts. The icon is blue when a profile is recording.
+              Hit
+              <kbd>Capture Profile</kbd> to load the data into perf.html.
+            </p>
+            {this._renderShortcuts()}
+            <p>
+              You can also analyze a local profile by either dragging and
+              dropping it here or selecting it using the button below.
+            </p>
+            <UploadButton {...this.props} />
+          </div>
         </div>
-        <div className="homeInstructionsRight">
-          <h2>Recording profiles</h2>
-          <p>
-            To start profiling, click on the profiling button, or use the
-            keyboard shortcuts. The icon is blue when a profile is recording.
-            Hit
-            <kbd>Capture Profile</kbd> to load the data into perf.html.
-          </p>
-          {this._renderShortcuts()}
-          <p>
-            You can also analyze a local profile by either dragging and dropping
-            it here or selecting it using the button below.
-          </p>
-          <UploadButton {...this.props} />
-        </div>
-      </div>
+      </InstructionTransition>
     );
   }
 
   _renderLegacyInstructions() {
     return (
-      <div className="homeInstructions" key={2}>
-        <div className="homeInstructionsLeft">
-          <div style={{ textAlign: 'center' }}>
-            <img className="homeSectionScreenshot" src={PerfScreenshot} />
+      <InstructionTransition key={2}>
+        <div className="homeInstructions">
+          <div className="homeInstructionsLeft">
+            <div style={{ textAlign: 'center' }}>
+              <img className="homeSectionScreenshot" src={PerfScreenshot} />
+            </div>
+          </div>
+          <div className="homeInstructionsRight">
+            <h2>Recording profiles</h2>
+            <p>
+              To start recording a performance profile in Firefox, first install
+              the{' '}
+              <InstallButton name="Gecko Profiler" xpiUrl={LEGACY_ADDON_URL}>
+                Gecko Profiler Add-on
+              </InstallButton>. Then use the button added to the browser, or use
+              the following shortcuts to record a profile. The button’s icon is
+              blue when a profile is recording. Hit <kbd>Capture Profile</kbd>{' '}
+              to load the data into perf.html.
+            </p>
+            {this._renderShortcuts()}
+            <p>
+              You can also analyze a local profile by either dragging and
+              dropping it here or selecting it using the button below.
+            </p>
+            <UploadButton {...this.props} />
           </div>
         </div>
-        <div className="homeInstructionsRight">
-          <h2>Recording profiles</h2>
-          <p>
-            To start recording a performance profile in Firefox, first install
-            the{' '}
-            <InstallButton name="Gecko Profiler" xpiUrl={LEGACY_ADDON_URL}>
-              Gecko Profiler Add-on
-            </InstallButton>. Then use the button added to the browser, or use
-            the following shortcuts to record a profile. The button’s icon is
-            blue when a profile is recording. Hit <kbd>Capture Profile</kbd> to
-            load the data into perf.html.
-          </p>
-          {this._renderShortcuts()}
-          <p>
-            You can also analyze a local profile by either dragging and dropping
-            it here or selecting it using the button below.
-          </p>
-          <UploadButton {...this.props} />
-        </div>
-      </div>
+      </InstructionTransition>
     );
   }
 
   _renderOtherBrowserInstructions() {
     return (
-      <div className="homeInstructions" key={0}>
-        <div className="homeInstructionsLeft">
-          <div style={{ textAlign: 'center' }}>
-            <img className="homeSectionScreenshot" src={PerfScreenshot} />
+      <InstructionTransition key={0}>
+        <div className="homeInstructions" key={0}>
+          <div className="homeInstructionsLeft">
+            <div style={{ textAlign: 'center' }}>
+              <img className="homeSectionScreenshot" src={PerfScreenshot} />
+            </div>
+          </div>
+          <div className="homeInstructionsRight">
+            <h2>How to view and record profiles</h2>
+            <p>
+              Recording performance profiles requires{' '}
+              <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>.
+              However, existing profiles can be viewed in any modern browser. To
+              view a profile, either follow a link to a public profile, drag a
+              saved local profile onto this screen or select it using the button
+              below.
+            </p>
+            <UploadButton {...this.props} />
           </div>
         </div>
-        <div className="homeInstructionsRight">
-          <h2>How to view and record profiles</h2>
-          <p>
-            Recording performance profiles requires{' '}
-            <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>.
-            However, existing profiles can be viewed in any modern browser. To
-            view a profile, either follow a link to a public profile, drag a
-            saved local profile onto this screen or select it using the button
-            below.
-          </p>
-          <UploadButton {...this.props} />
-        </div>
-      </div>
+      </InstructionTransition>
     );
   }
 
@@ -351,15 +370,9 @@ class Home extends PureComponent {
             Capture a performance profile. Analyze it. Share it. Make the web
             faster.
           </p>
-          <CSSTransitionGroup
-            transitionName="homeTransition"
-            transitionEnterTimeout={300}
-            transitionLeave={false}
-            component="div"
-            className="homeInstructionsTransitionGroup"
-          >
+          <TransitionGroup className="homeInstructionsTransitionGroup">
             {this._renderInstructions()}
-          </CSSTransitionGroup>
+          </TransitionGroup>
           <div
             className={classNames('homeDrop', isDragging ? 'dragging' : false)}
           >
