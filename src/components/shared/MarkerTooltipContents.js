@@ -12,7 +12,7 @@ import {
   formatBytes,
   formatValueTotal,
 } from '../../utils/format-numbers';
-
+import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 import type { TracingMarker } from '../../types/profile-derived';
 import type { MarkerPayload } from '../../types/markers';
 import type { NotVoidOrNull } from '../../types/utils';
@@ -206,6 +206,29 @@ function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
             )}
             {triggers}
             {_markerDetail('gcfaults', 'Page faults', timings.page_faults)}
+          </div>
+        );
+      }
+      case 'Bailout': {
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('bailoutType', 'Type', data.bailoutType)}
+            {_markerDetail('where', 'Where', data.where)}
+            {_markerDetail('script', 'Script', data.script)}
+            {_markerDetail('functionLine', 'Function Line', data.functionLine)}
+            {_markerDetail('bailoutLine', 'Bailout Line', data.bailoutLine)}
+            <div className="tooltipLabel">Description:</div>
+            <div style={{ maxWidth: '300px' }}>
+              {bailoutTypeInformation['Bailout_' + data.bailoutType]}
+            </div>
+          </div>
+        );
+      }
+      case 'Invalidation': {
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('url', 'URL', data.url)}
+            {_markerDetail('line', 'Line', data.line)}
           </div>
         );
       }

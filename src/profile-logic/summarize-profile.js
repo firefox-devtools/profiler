@@ -6,7 +6,7 @@
 import { timeCode } from '../utils/time-code';
 import type { Profile, Thread, IndexIntoStackTable } from '../types/profile';
 
-export type Summary = { [id: string]: number };
+type Summary = { [id: string]: number };
 type MatchingFunction = (string, string) => boolean;
 type StacksInCategory = { [id: string]: { [id: string]: number } };
 type SummarySegment = {
@@ -16,6 +16,19 @@ type SummarySegment = {
 type RollingSummary = SummarySegment[];
 type Categories = Array<string | null>;
 type ThreadCategories = Categories[];
+type CategorySummary = {
+  category: string,
+  percentage: number,
+  samples: number,
+};
+type PercentagesSummary = CategorySummary[];
+type ThreadSummary = {
+  threadIndex: number,
+  threadName: string,
+  rollingSummary: RollingSummary,
+  summary: PercentagesSummary,
+};
+export type ProfileSummary = ThreadSummary[];
 
 /**
  * A list of strategies for matching sample names to patterns.
@@ -96,7 +109,7 @@ const categories = [
   [match.prefix, 'Interpret(', 'script.execute.interpreter'],
 ];
 
-export function summarizeProfile(profile: Profile) {
+export function summarizeProfile(profile: Profile): ProfileSummary {
   return timeCode('summarizeProfile', () => {
     const threadCategories: ThreadCategories = categorizeThreadSamples(profile);
     const rollingSummaries: RollingSummary[] = calculateRollingSummaries(
@@ -241,7 +254,7 @@ function summarizeSampleCategories(
  * @param {object} summary - The object that summarizes the times of the samples.
  * @return {array} The summary with percentages.
  */
-function calculateSummaryPercentages(summary: Summary) {
+function calculateSummaryPercentages(summary: Summary): PercentagesSummary {
   const rows = objectEntries(summary);
 
   const sampleCount = rows.reduce(
@@ -380,7 +393,7 @@ function mapProfileToThreadCategories(profile: Profile): ThreadCategories {
 export function summarizeCategories(
   profile: Profile,
   threadCategories: ThreadCategories
-) {
+): PercentagesSummary[] {
   return threadCategories
     .map(categories => categories.reduce(summarizeSampleCategories, {}))
     .map(calculateSummaryPercentages);

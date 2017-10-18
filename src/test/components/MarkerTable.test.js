@@ -11,8 +11,8 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 import { getBoundingBox } from '../fixtures/utils';
 
-describe('calltree/ProfileCallTreeView', function() {
-  it('renders an unfiltered call tree', () => {
+describe('MarkerTable', function() {
+  it('renders some basic markers', () => {
     // These were all taken from real-world values.
     const profile = getProfileWithMarkers(
       [

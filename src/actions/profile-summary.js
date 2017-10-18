@@ -4,10 +4,10 @@
 
 // @flow
 import type { Action } from '../types/store';
-import type { Summary } from '../profile-logic/summarize-profile';
+import type { ProfileSummary } from '../profile-logic/summarize-profile';
 import type { ThreadIndex } from '../types/profile';
 
-export function profileSummaryProcessed(summary: Summary): Action {
+export function profileSummaryProcessed(summary: ProfileSummary): Action {
   return {
     type: 'PROFILE_SUMMARY_PROCESSED',
     summary,

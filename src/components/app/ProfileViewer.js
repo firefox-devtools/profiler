@@ -27,6 +27,7 @@ import ProfileViewerHeader from '../header/ProfileViewerHeader';
 import ProfileCallTreeContextMenu from '../calltree/ProfileCallTreeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
+import FooterLinks from './FooterLinks';
 
 import type { StartEndRange } from '../../types/units';
 import type { Tab } from './TabBar';
@@ -134,6 +135,7 @@ class ProfileViewer extends PureComponent {
         <ProfileCallTreeContextMenu />
         <MarkerTableContextMenu />
         <ProfileThreadHeaderContextMenu />
+        <FooterLinks />
       </div>
     );
   }

@@ -11,7 +11,7 @@ import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2016-12-06.p
 import PerfScreenshot from '../../../res/perf-screenshot-2017-09-08.jpg';
 import { retrieveProfileFromFile } from '../../actions/receive-profile';
 import { CSSTransitionGroup } from 'react-transition-group';
-
+import FooterLinks from './FooterLinks';
 require('./Home.css');
 
 const ADDON_URL =
@@ -366,6 +366,7 @@ class Home extends PureComponent {
             <div className="homeDropMessage">Drop a saved profile here</div>
           </div>
         </section>
+        <FooterLinks />
       </div>
     );
   }

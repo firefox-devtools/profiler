@@ -430,6 +430,7 @@ export type SelectorsForThread = {
   getRangeFilteredThread: State => Thread,
   getRangeAndTransformFilteredThread: State => Thread,
   getJankInstances: State => TracingMarker[],
+  getProcessedMarkersThread: State => Thread,
   getTracingMarkers: State => TracingMarker[],
   getMarkerTiming: State => MarkerTimingRows,
   getRangeSelectionFilteredTracingMarkers: State => TracingMarker[],
@@ -598,8 +599,12 @@ export const selectorsForThread = (
       _getRangeFilteredThreadSamples,
       (samples): TracingMarker[] => ProfileData.getJankInstances(samples, 50)
     );
-    const getTracingMarkers = createSelector(
+    const getProcessedMarkersThread = createSelector(
       getThread,
+      ProfileData.extractMarkerDataFromName
+    );
+    const getTracingMarkers = createSelector(
+      getProcessedMarkersThread,
       ProfileData.getTracingMarkers
     );
     const getMarkerTiming = createSelector(
@@ -738,6 +743,7 @@ export const selectorsForThread = (
       getRangeFilteredThread,
       getRangeAndTransformFilteredThread,
       getJankInstances,
+      getProcessedMarkersThread,
       getTracingMarkers,
       getMarkerTiming,
       getRangeSelectionFilteredTracingMarkers,

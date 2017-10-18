@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Summary } from '../profile-logic/summarize-profile';
+import type { ProfileSummary } from '../profile-logic/summarize-profile';
 import type {
   Profile,
   Thread,
@@ -52,7 +52,7 @@ export type TabSlug =
   | 'summary';
 
 type ProfileSummaryAction =
-  | { type: 'PROFILE_SUMMARY_PROCESSED', summary: Summary }
+  | { type: 'PROFILE_SUMMARY_PROCESSED', summary: ProfileSummary }
   | { type: 'PROFILE_SUMMARY_EXPAND', threadIndex: ThreadIndex }
   | { type: 'PROFILE_SUMMARY_COLLAPSE', threadIndex: ThreadIndex };
 

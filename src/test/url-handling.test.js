@@ -7,7 +7,12 @@
  * @jest-environment jsdom
  */
 import * as urlStateReducers from '../reducers/url-state';
-import { stateFromLocation, urlStateToUrlObject } from '../url-handling';
+import {
+  stateFromLocation,
+  urlStateToUrlObject,
+  urlFromState,
+  CURRENT_URL_VERSION,
+} from '../url-handling';
 import { blankStore } from './fixtures/stores';
 import getGeckoProfile from './fixtures/profiles/gecko-profile';
 import { processProfile } from '../profile-logic/process-profile';
@@ -178,6 +183,25 @@ describe('url upgrading', function() {
       expect(urlStateReducers.getSelectedTab(getState())).toBe('marker-table');
     });
   });
+
+  // More general checks
+  it("won't run if the version is specified", function() {
+    const { getState } = _getStoreWithURL({
+      pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
+      search: `?v=${CURRENT_URL_VERSION}`,
+    });
+
+    // The conversion process shouldn't run.
+    // This is somewhat hacky: because we specified the last version, we expect
+    // the v2 converter to not run, and so the selected tab shouldn't be
+    // 'marker-table'. Note also that a 'markers' tab is invalid for the current
+    // state of the application, so we won't have 'markers' as result.
+    // We should change this to something more meaningful when we have eg
+    // converters that reuse query names.
+    expect(urlStateReducers.getSelectedTab(getState())).not.toBe(
+      'marker-table'
+    );
+  });
 });
 
 describe('URL serialization of the transform stack', function() {
@@ -239,5 +263,16 @@ describe('URL serialization of the transform stack', function() {
       urlStateReducers.getUrlState(getState())
     );
     expect(query.transforms).toBe(transformString);
+  });
+});
+
+describe('urlFromState', function() {
+  it('outputs the current URL version', function() {
+    const urlState = stateFromLocation({
+      pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
+      search: '',
+      hash: '',
+    });
+    expect(urlFromState(urlState)).toMatch(`v=${CURRENT_URL_VERSION}`);
   });
 });
