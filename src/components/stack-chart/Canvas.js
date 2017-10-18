@@ -7,7 +7,7 @@ import React, { PureComponent } from 'react';
 import withChartViewport from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
-import formatTimeLength from '../../utils/format-time-length';
+import { formatNumber } from '../../utils/format-numbers';
 
 import type { Thread } from '../../types/profile';
 import type {
@@ -251,7 +251,7 @@ class StackChartCanvas extends PureComponent {
       <div className="stackChartCanvasTooltip">
         <div className="tooltipOneLine tooltipHeader">
           <div className="tooltipTiming">
-            {formatTimeLength(duration)}ms
+            {formatNumber(duration)}ms
           </div>
           <div className="tooltipTitle">
             {label}

@@ -21,6 +21,7 @@ import {
   getProfileUrl,
 } from '../../reducers/url-state';
 import UrlManager from './UrlManager';
+import FooterLinks from './FooterLinks';
 
 import type { Store } from '../../types/store';
 import type { AppViewState, State } from '../../types/reducers';
@@ -143,6 +144,7 @@ class ProfileViewWhenReadyImpl extends PureComponent {
               </div>
             : null}
         </div>
+        <FooterLinks />
       </div>
     );
   }
