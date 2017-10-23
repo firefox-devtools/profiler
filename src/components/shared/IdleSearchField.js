@@ -8,14 +8,16 @@ import classNames from 'classnames';
 
 import './IdleSearchField.css';
 
-type Props = {
-  onIdleAfterChange: string => void,
-  onSubmit?: () => void,
-  idlePeriod: number,
-  defaultValue: ?string,
-  className: ?string,
-  title: ?string,
-};
+type Props = {|
+  +onIdleAfterChange: string => void,
+  +onSubmit?: () => void,
+  +onFocus?: () => void,
+  +onBlur?: () => void,
+  +idlePeriod: number,
+  +defaultValue: ?string,
+  +className: ?string,
+  +title: ?string,
+|};
 
 class IdleSearchField extends PureComponent {
   _timeout: number;
@@ -31,6 +33,7 @@ class IdleSearchField extends PureComponent {
     super(props);
     (this: any)._onSearchFieldChange = this._onSearchFieldChange.bind(this);
     (this: any)._onSearchFieldFocus = this._onSearchFieldFocus.bind(this);
+    (this: any)._onSearchFieldBlur = this._onSearchFieldBlur.bind(this);
     (this: any)._onClearButtonClick = this._onClearButtonClick.bind(this);
     (this: any)._onFormSubmit = this._onFormSubmit.bind(this);
     (this: any)._onTimeout = this._onTimeout.bind(this);
@@ -41,11 +44,23 @@ class IdleSearchField extends PureComponent {
     this._previouslyNotifiedValue = this.state.value;
   }
 
-  _onSearchFieldFocus(e: Event & { currentTarget: HTMLInputElement }) {
+  _onSearchFieldFocus(e: SyntheticEvent & { currentTarget: HTMLInputElement }) {
     e.currentTarget.select();
+
+    if (this.props.onFocus) {
+      this.props.onFocus();
+    }
   }
 
-  _onSearchFieldChange(e: Event & { currentTarget: HTMLInputElement }) {
+  _onSearchFieldBlur() {
+    if (this.props.onBlur) {
+      this.props.onBlur();
+    }
+  }
+
+  _onSearchFieldChange(
+    e: SyntheticEvent & { currentTarget: HTMLInputElement }
+  ) {
     this.setState({
       value: e.currentTarget.value,
     });
@@ -77,7 +92,10 @@ class IdleSearchField extends PureComponent {
   }
 
   _onClearButtonFocus(
-    e: Event & { relatedTarget: HTMLElement, currentTarget: HTMLElement }
+    e: SyntheticEvent & {
+      relatedTarget: HTMLElement,
+      currentTarget: HTMLElement,
+    }
   ) {
     // prevent the focus on the clear button
     if (e.relatedTarget) {
@@ -131,6 +149,7 @@ class IdleSearchField extends PureComponent {
           value={this.state.value}
           onChange={this._onSearchFieldChange}
           onFocus={this._onSearchFieldFocus}
+          onBlur={this._onSearchFieldBlur}
         />
         <input
           type="reset"

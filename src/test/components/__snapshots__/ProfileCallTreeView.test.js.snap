@@ -70,6 +70,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           <input
             className="idleSearchFieldInput"
             name="search"
+            onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
             required="required"
@@ -84,6 +85,13 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
             type="reset"
           />
         </form>
+        <div
+          className="listWithRemoveButton listWithRemoveButton_isCompact"
+        >
+          <div
+            className="listWithRemoveButton_full"
+          />
+        </div>
       </label>
     </div>
   </div>
@@ -756,6 +764,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           <input
             className="idleSearchFieldInput"
             name="search"
+            onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
             required="required"
@@ -770,6 +779,13 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
             type="reset"
           />
         </form>
+        <div
+          className="listWithRemoveButton listWithRemoveButton_isCompact"
+        >
+          <div
+            className="listWithRemoveButton_full"
+          />
+        </div>
       </label>
     </div>
   </div>
@@ -1442,6 +1458,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with a search string 1`]
           <input
             className="idleSearchFieldInput"
             name="search"
+            onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
             required="required"
@@ -1456,6 +1473,15 @@ exports[`calltree/ProfileCallTreeView renders call tree with a search string 1`]
             type="reset"
           />
         </form>
+        <div
+          className="listWithRemoveButton listWithRemoveButton_isCompact"
+        >
+          <div
+            className="listWithRemoveButton_introduction"
+          >
+            You can press enter to persist this search term.
+          </div>
+        </div>
       </label>
     </div>
   </div>

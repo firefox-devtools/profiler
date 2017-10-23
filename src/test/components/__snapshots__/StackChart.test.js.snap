@@ -55,6 +55,7 @@ exports[`renders StackChartGraph correctly 1`] = `
           <input
             className="idleSearchFieldInput"
             name="search"
+            onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
             required="required"
