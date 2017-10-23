@@ -4,12 +4,17 @@
 
 // @flow
 import React from 'react';
+import ReactDOM from 'react-dom';
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
-import { changeCurrentCallTreeSearchString } from '../../actions/profile-view';
+import {
+  changeCurrentCallTreeSearchString,
+  commitCallTreeSearchString,
+  popCallTreeSearchString,
+} from '../../actions/profile-view';
 import { getBoundingBox } from '../fixtures/utils';
 
 describe('calltree/ProfileCallTreeView', function() {
@@ -18,7 +23,7 @@ describe('calltree/ProfileCallTreeView', function() {
     B B B
     C C H
     D F I
-    E G
+    E E
   `);
 
   it('renders an unfiltered call tree', () => {
@@ -52,9 +57,11 @@ describe('calltree/ProfileCallTreeView', function() {
     expect(calltree.toJSON()).toMatchSnapshot();
   });
 
-  it('renders call tree with a search string', () => {
+  it('renders call tree with some search strings', () => {
+    // For the react-transition-group component
+    ReactDOM.findDOMNode = jest.fn(() => ({ className: '' }));
+
     const store = storeWithProfile(profile);
-    store.dispatch(changeCurrentCallTreeSearchString('H'));
     const calltree = renderer.create(
       <Provider store={store}>
         <ProfileCallTreeView />
@@ -62,7 +69,25 @@ describe('calltree/ProfileCallTreeView', function() {
       { createNodeMock }
     );
 
-    expect(calltree.toJSON()).toMatchSnapshot();
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCurrentCallTreeSearchString('C'));
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(commitCallTreeSearchString());
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCurrentCallTreeSearchString('F'));
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(commitCallTreeSearchString());
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCurrentCallTreeSearchString('E'));
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(popCallTreeSearchString('F'));
+    expect(calltree).toMatchSnapshot();
   });
 });
 
