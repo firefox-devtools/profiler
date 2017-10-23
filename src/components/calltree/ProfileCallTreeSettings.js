@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
 import {
   changeImplementationFilter,
   changeInvertCallstack,
+  commitCallTreeSearchString,
   changeCurrentCallTreeSearchString,
 } from '../../actions/profile-view';
 import {
@@ -30,6 +31,7 @@ type Props = {
   searchStrings: string[],
   changeImplementationFilter: typeof changeImplementationFilter,
   changeInvertCallstack: typeof changeInvertCallstack,
+  commitCallTreeSearchString: typeof commitCallTreeSearchString,
   changeCurrentCallTreeSearchString: typeof changeCurrentCallTreeSearchString,
 };
 
@@ -47,6 +49,7 @@ class ProfileCallTreeSettings extends PureComponent {
     (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(
       this
     );
+    (this: any)._onSearchFieldSubmit = this._onSearchFieldSubmit.bind(this);
   }
 
   _onImplementationFilterChange(e: Event & { target: HTMLSelectElement }) {
@@ -63,6 +66,10 @@ class ProfileCallTreeSettings extends PureComponent {
 
   _onSearchFieldIdleAfterChange(value: string) {
     this.props.changeCurrentCallTreeSearchString(value);
+  }
+
+  _onSearchFieldSubmit() {
+    this.props.commitCallTreeSearchString();
   }
 
   render() {
@@ -110,6 +117,7 @@ class ProfileCallTreeSettings extends PureComponent {
               idlePeriod={200}
               defaultValue={currentSearchString}
               onIdleAfterChange={this._onSearchFieldIdleAfterChange}
+              onSubmit={this._onSearchFieldSubmit}
             />
           </label>
         </div>
@@ -129,5 +137,6 @@ export default connect(
     changeImplementationFilter,
     changeInvertCallstack,
     changeCurrentCallTreeSearchString,
+    commitCallTreeSearchString,
   }
 )(ProfileCallTreeSettings);

@@ -10,6 +10,7 @@ import {
   changeHidePlatformDetails,
   changeInvertCallstack,
   changeCurrentCallTreeSearchString,
+  commitCallTreeSearchString,
 } from '../../actions/profile-view';
 import {
   getHidePlatformDetails,
@@ -27,6 +28,7 @@ type Props = {
   changeHidePlatformDetails: boolean => void,
   changeInvertCallstack: boolean => void,
   changeCurrentCallTreeSearchString: string => void,
+  commitCallTreeSearchString: () => void,
 };
 
 class StackChartSettings extends PureComponent {
@@ -43,6 +45,7 @@ class StackChartSettings extends PureComponent {
     (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(
       this
     );
+    (this: any)._onSearchFieldSubmit = this._onSearchFieldSubmit.bind(this);
   }
 
   _onHidePlatformDetailsClick(e: Event & { target: HTMLInputElement }) {
@@ -55,6 +58,9 @@ class StackChartSettings extends PureComponent {
 
   _onSearchFieldIdleAfterChange(value: string) {
     this.props.changeCurrentCallTreeSearchString(value);
+  }
+  _onSearchFieldSubmit() {
+    this.props.commitCallTreeSearchString();
   }
 
   render() {
@@ -98,6 +104,7 @@ class StackChartSettings extends PureComponent {
               idlePeriod={200}
               defaultValue={currentSearchString}
               onIdleAfterChange={this._onSearchFieldIdleAfterChange}
+              onSubmit={this._onSearchFieldSubmit}
             />
           </label>
         </div>
@@ -116,5 +123,6 @@ export default connect(
     changeHidePlatformDetails,
     changeInvertCallstack,
     changeCurrentCallTreeSearchString,
+    commitCallTreeSearchString,
   }
 )(StackChartSettings);
