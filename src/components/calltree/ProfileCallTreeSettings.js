@@ -27,17 +27,17 @@ import './ProfileCallTreeSettings.css';
 
 import type { ImplementationFilter } from '../../types/actions';
 
-type Props = {
-  implementationFilter: ImplementationFilter,
-  invertCallstack: boolean,
-  currentSearchString: string,
-  searchStrings: string[],
-  changeImplementationFilter: typeof changeImplementationFilter,
-  changeInvertCallstack: typeof changeInvertCallstack,
-  commitCallTreeSearchString: typeof commitCallTreeSearchString,
-  changeCurrentCallTreeSearchString: typeof changeCurrentCallTreeSearchString,
-  popCallTreeSearchString: typeof popCallTreeSearchString,
-};
+type Props = {|
+  +implementationFilter: ImplementationFilter,
+  +invertCallstack: boolean,
+  +currentSearchString: string,
+  +searchStrings: string[],
+  +changeImplementationFilter: typeof changeImplementationFilter,
+  +changeInvertCallstack: typeof changeInvertCallstack,
+  +commitCallTreeSearchString: typeof commitCallTreeSearchString,
+  +changeCurrentCallTreeSearchString: typeof changeCurrentCallTreeSearchString,
+  +popCallTreeSearchString: typeof popCallTreeSearchString,
+|};
 
 class ProfileCallTreeSettings extends PureComponent {
   props: Props;
