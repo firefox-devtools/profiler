@@ -9,12 +9,13 @@ import { connect } from 'react-redux';
 import {
   changeImplementationFilter,
   changeInvertCallstack,
-  changeCallTreeSearchString,
+  changeCurrentCallTreeSearchString,
 } from '../../actions/profile-view';
 import {
   getImplementationFilter,
   getInvertCallstack,
-  getSearchString,
+  getCurrentSearchString,
+  getSearchStrings,
 } from '../../reducers/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
 import { toValidImplementationFilter } from '../../profile-logic/profile-data';
@@ -25,10 +26,11 @@ import type { ImplementationFilter } from '../../types/actions';
 type Props = {
   implementationFilter: ImplementationFilter,
   invertCallstack: boolean,
-  searchString: string,
+  currentSearchString: string,
+  searchStrings: string[],
   changeImplementationFilter: typeof changeImplementationFilter,
   changeInvertCallstack: typeof changeInvertCallstack,
-  changeCallTreeSearchString: typeof changeCallTreeSearchString,
+  changeCurrentCallTreeSearchString: typeof changeCurrentCallTreeSearchString,
 };
 
 class ProfileCallTreeSettings extends PureComponent {
@@ -60,11 +62,16 @@ class ProfileCallTreeSettings extends PureComponent {
   }
 
   _onSearchFieldIdleAfterChange(value: string) {
-    this.props.changeCallTreeSearchString(value);
+    this.props.changeCurrentCallTreeSearchString(value);
   }
 
   render() {
-    const { implementationFilter, invertCallstack, searchString } = this.props;
+    const {
+      implementationFilter,
+      invertCallstack,
+      currentSearchString,
+    } = this.props;
+
     return (
       <div className="profileCallTreeSettings">
         <ul className="profileCallTreeSettingsList">
@@ -101,7 +108,7 @@ class ProfileCallTreeSettings extends PureComponent {
               className="profileCallTreeSettingsSearchField"
               title="Only display stacks which contain a function whose name matches this substring"
               idlePeriod={200}
-              defaultValue={searchString}
+              defaultValue={currentSearchString}
               onIdleAfterChange={this._onSearchFieldIdleAfterChange}
             />
           </label>
@@ -115,11 +122,12 @@ export default connect(
   state => ({
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
-    searchString: getSearchString(state),
+    currentSearchString: getCurrentSearchString(state),
+    searchStrings: getSearchStrings(state),
   }),
   {
     changeImplementationFilter,
     changeInvertCallstack,
-    changeCallTreeSearchString,
+    changeCurrentCallTreeSearchString,
   }
 )(ProfileCallTreeSettings);

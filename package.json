@@ -47,6 +47,7 @@
     "classnames": "^2.2.5",
     "common-tags": "^1.4.0",
     "copy-to-clipboard": "^3.0.8",
+    "escape-string-regexp": "^1.0.5",
     "fetch-jsonp": "^1.1.3",
     "lodash.uniqwith": "^4.5.0",
     "memoize-immutable": "^3.0.0",

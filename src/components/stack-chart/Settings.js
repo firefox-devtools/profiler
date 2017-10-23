@@ -4,13 +4,17 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
-import actions from '../../actions';
+import {
+  changeHidePlatformDetails,
+  changeInvertCallstack,
+  changeCurrentCallTreeSearchString,
+} from '../../actions/profile-view';
 import {
   getHidePlatformDetails,
   getInvertCallstack,
-  getSearchString,
+  getCurrentSearchString,
 } from '../../reducers/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
 
@@ -19,10 +23,10 @@ import './Settings.css';
 type Props = {
   hidePlatformDetails: boolean,
   invertCallstack: boolean,
-  searchString: string,
+  currentSearchString: string,
   changeHidePlatformDetails: boolean => void,
   changeInvertCallstack: boolean => void,
-  changeCallTreeSearchString: string => void,
+  changeCurrentCallTreeSearchString: string => void,
 };
 
 class StackChartSettings extends PureComponent {
@@ -50,11 +54,15 @@ class StackChartSettings extends PureComponent {
   }
 
   _onSearchFieldIdleAfterChange(value: string) {
-    this.props.changeCallTreeSearchString(value);
+    this.props.changeCurrentCallTreeSearchString(value);
   }
 
   render() {
-    const { hidePlatformDetails, invertCallstack, searchString } = this.props;
+    const {
+      hidePlatformDetails,
+      invertCallstack,
+      currentSearchString,
+    } = this.props;
     return (
       <div className="stackChartSettings">
         <ul className="stackChartSettingsList">
@@ -88,7 +96,7 @@ class StackChartSettings extends PureComponent {
               className="stackChartSettingsSearchField"
               title="Only display stacks which contain a function whose name matches this substring"
               idlePeriod={200}
-              defaultValue={searchString}
+              defaultValue={currentSearchString}
               onIdleAfterChange={this._onSearchFieldIdleAfterChange}
             />
           </label>
@@ -98,20 +106,15 @@ class StackChartSettings extends PureComponent {
   }
 }
 
-StackChartSettings.propTypes = {
-  hidePlatformDetails: PropTypes.bool.isRequired,
-  changeHidePlatformDetails: PropTypes.func.isRequired,
-  invertCallstack: PropTypes.bool.isRequired,
-  changeInvertCallstack: PropTypes.func.isRequired,
-  changeCallTreeSearchString: PropTypes.func.isRequired,
-  searchString: PropTypes.string.isRequired,
-};
-
 export default connect(
   state => ({
     invertCallstack: getInvertCallstack(state),
     hidePlatformDetails: getHidePlatformDetails(state),
-    searchString: getSearchString(state),
+    currentSearchString: getCurrentSearchString(state),
   }),
-  actions
+  {
+    changeHidePlatformDetails,
+    changeInvertCallstack,
+    changeCurrentCallTreeSearchString,
+  }
 )(StackChartSettings);

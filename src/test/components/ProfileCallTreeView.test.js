@@ -9,7 +9,7 @@ import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
-import { changeCallTreeSearchString } from '../../actions/profile-view';
+import { changeCurrentCallTreeSearchString } from '../../actions/profile-view';
 import { getBoundingBox } from '../fixtures/utils';
 
 describe('calltree/ProfileCallTreeView', function() {
@@ -54,7 +54,7 @@ describe('calltree/ProfileCallTreeView', function() {
 
   it('renders call tree with a search string', () => {
     const store = storeWithProfile(profile);
-    store.dispatch(changeCallTreeSearchString('H'));
+    store.dispatch(changeCurrentCallTreeSearchString('H'));
     const calltree = renderer.create(
       <Provider store={store}>
         <ProfileCallTreeView />

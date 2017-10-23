@@ -132,6 +132,44 @@ describe('threadOrder and hiddenThreads', function() {
   });
 });
 
+describe('search strings', function() {
+  it('properly handles the current search string', function() {
+    const { getState } = _getStoreWithURL({ search: '?currentSearch=string' });
+    expect(urlStateReducers.getCurrentSearchString(getState())).toBe('string');
+    expect(urlStateReducers.getSearchStrings(getState())).toEqual([]);
+  });
+
+  it('properly handles the search string stacks with 1 item', function() {
+    const { getState } = _getStoreWithURL({ search: '?search=string' });
+    expect(urlStateReducers.getCurrentSearchString(getState())).toBe('');
+    expect(urlStateReducers.getSearchStrings(getState())).toEqual(['string']);
+  });
+
+  it('properly handles the search string stacks with several items', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?search=string&search=foo&search=bar',
+    });
+    expect(urlStateReducers.getCurrentSearchString(getState())).toBe('');
+    expect(urlStateReducers.getSearchStrings(getState())).toEqual([
+      'string',
+      'foo',
+      'bar',
+    ]);
+  });
+
+  it('properly handles both current search string and the search string stacks', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?search=string&search=foo&search=bar&currentSearch=hello',
+    });
+    expect(urlStateReducers.getCurrentSearchString(getState())).toBe('hello');
+    expect(urlStateReducers.getSearchStrings(getState())).toEqual([
+      'string',
+      'foo',
+      'bar',
+    ]);
+  });
+});
+
 describe('url upgrading', function() {
   /**
    * Originally transform stacks were called call tree filters. This test asserts that
@@ -192,23 +230,32 @@ describe('url upgrading', function() {
     });
   });
 
+  describe('version 3: upgrade search strings', function() {
+    it('correctly handles the search string', function() {
+      const { getState } = _getStoreWithURL({
+        pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
+        search: `?search=string`,
+        v: 2,
+      });
+
+      const state = getState();
+      expect(urlStateReducers.getSearchStrings(state)).toEqual([]);
+      expect(urlStateReducers.getCurrentSearchString(state)).toBe('string');
+    });
+  });
+
   // More general checks
   it("won't run if the version is specified", function() {
     const { getState } = _getStoreWithURL({
-      pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
+      pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
+      search: `?search=string`,
       v: CURRENT_URL_VERSION, // This is the default, but still using it here to make it explicit
     });
 
     // The conversion process shouldn't run.
-    // This is somewhat hacky: because we specified the last version, we expect
-    // the v2 converter to not run, and so the selected tab shouldn't be
-    // 'marker-table'. Note also that a 'markers' tab is invalid for the current
-    // state of the application, so we won't have 'markers' as result.
-    // We should change this to something more meaningful when we have eg
-    // converters that reuse query names.
-    expect(urlStateReducers.getSelectedTab(getState())).not.toBe(
-      'marker-table'
-    );
+    // If the conversion process for URL v3 runs, then we'd have an empty array
+    // for this, and `string` would be the "current search"
+    expect(urlStateReducers.getSearchStrings(getState())).toEqual(['string']);
   });
 });
 

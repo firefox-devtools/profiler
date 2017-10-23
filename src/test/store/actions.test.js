@@ -8,7 +8,7 @@ import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
 
 import {
-  changeCallTreeSearchString,
+  changeCurrentCallTreeSearchString,
   changeHidePlatformDetails,
   addRangeFilter,
   changeInvertCallstack,
@@ -71,7 +71,7 @@ describe('selectors/getStackTimingByDepthForStackChart', function() {
 
   it('uses search strings', function() {
     const store = storeWithProfile();
-    store.dispatch(changeCallTreeSearchString('javascript'));
+    store.dispatch(changeCurrentCallTreeSearchString('javascript'));
     const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForStackChart(
       store.getState()
     );
