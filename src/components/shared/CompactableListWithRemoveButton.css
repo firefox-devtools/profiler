@@ -1,0 +1,88 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.listWithRemoveButton {
+  z-index: 100;
+  position: relative; /* To create a stacking context for z-index to work */
+
+  line-height: 24px;
+}
+
+.listWithRemoveButton_full {
+  display: flex;
+  flex-direction: column;
+}
+
+.listWithRemoveButton_full-itemBox {
+  display: flex;
+
+  background: white;
+  border: 1px solid var(--grey-40);
+  margin-bottom: -1px;
+
+  /* See the "transitions" part at the bottom of this file */
+  transition: opacity 250ms ease-out, transform 250ms var(--animation-curve);
+}
+
+.listWithRemoveButton_full-item {
+  flex: auto;
+  padding: 0 5px;
+}
+
+.listWithRemoveButton_full-button {
+  font: initial;
+  border: none;
+  background: initial;
+  text-align: initial;
+  padding: initial;
+  margin: initial;
+
+  flex: none;
+  padding: 0 5px;
+}
+
+.listWithRemoveButton_compact {
+  padding: 0 5px;
+  margin-bottom: -1px;
+
+  display: flex;
+  background: white;
+  border: 1px solid var(--grey-40);
+}
+
+.listWithRemoveButton_compact-itemList {
+  flex: auto;
+}
+
+.listWithRemoveButton_compact-itemList > span {
+  font-style: italic;
+}
+
+.listWithRemoveButton_introduction {
+  /*box-shadow: 0 1px 2px 1px rgba(12, 12, 13, .10); /* This is grey-90 with 10% opacity, according to the photon design document */
+  border: 1px solid var(--grey-40);
+  padding: 0 5px;
+
+  background-color: white;
+  color: var(--grey-50);
+}
+
+/* Are the boxes displayed ? */
+:not(.listWithRemoveButton_isFull) > .listWithRemoveButton_introduction,
+:not(.listWithRemoveButton_isCompact) > .listWithRemoveButton_compact,
+:not(.listWithRemoveButton_isFull) > .listWithRemoveButton_full {
+  display: none;
+}
+
+/* Transitions */
+.listWithRemoveButton_full_transition-enter {
+  z-index: -1;
+  opacity: 0.01;
+  transform: translateY(-100%);
+}
+
+.listWithRemoveButton_full_transition-exit-active {
+  opacity: 0.01;
+  transform: translateX(100%);
+}
