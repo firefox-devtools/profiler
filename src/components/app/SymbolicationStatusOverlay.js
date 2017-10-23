@@ -13,7 +13,7 @@ function englishSgPlLibrary(count) {
   return count === 1 ? 'library' : 'libraries';
 }
 
-function englishListJoin(list) {
+function englishListJoin(list: string[]): string {
   switch (list.length) {
     case 0:
       return '';
