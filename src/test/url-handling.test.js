@@ -26,20 +26,25 @@ function _getStoreWithURL(
     pathname?: string,
     search?: string,
     hash?: string,
+    v?: number | false, // If v is false, do not add a v parameter to the search string.
   },
   profile: Profile = getProfile()
 ) {
-  const { pathname, hash, search } = Object.assign(
+  const { pathname, hash, search, v } = Object.assign(
     {
       pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
       hash: '',
       search: '',
+      v: CURRENT_URL_VERSION,
     },
     settings
   );
+
+  const searchWithVersion =
+    v === false ? search : `${search ? search + '&' : '?'}v=${v}`;
   const urlState = stateFromLocation({
     pathname,
-    search,
+    search: searchWithVersion,
     hash,
   });
   const store = blankStore();
@@ -137,6 +142,7 @@ describe('url upgrading', function() {
       const { getState } = _getStoreWithURL({
         search:
           '?callTreeFilters=prefix-012~prefixjs-123~postfix-234~postfixjs-345',
+        v: false,
       });
       const transforms = selectedThreadSelectors.getTransformStack(getState());
       expect(transforms).toEqual([
@@ -172,6 +178,7 @@ describe('url upgrading', function() {
     it('switches to the stack chart when given a timeline tab', function() {
       const { getState } = _getStoreWithURL({
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/',
+        v: 1,
       });
       expect(urlStateReducers.getSelectedTab(getState())).toBe('stack-chart');
     });
@@ -179,6 +186,7 @@ describe('url upgrading', function() {
     it('switches to the marker-table when given a markers tab', function() {
       const { getState } = _getStoreWithURL({
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
+        v: false,
       });
       expect(urlStateReducers.getSelectedTab(getState())).toBe('marker-table');
     });
@@ -188,7 +196,7 @@ describe('url upgrading', function() {
   it("won't run if the version is specified", function() {
     const { getState } = _getStoreWithURL({
       pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
-      search: `?v=${CURRENT_URL_VERSION}`,
+      v: CURRENT_URL_VERSION, // This is the default, but still using it here to make it explicit
     });
 
     // The conversion process shouldn't run.
@@ -208,7 +216,7 @@ describe('URL serialization of the transform stack', function() {
   const transformString =
     'f-combined-012~ms-js-123~mcn-combined-234~f-js-345-i~mf-6~ff-7~cr-combined-8-9';
   const { getState } = _getStoreWithURL({
-    search: '?v=1&transforms=' + transformString,
+    search: '?transforms=' + transformString,
   });
 
   it('deserializes focus subtree transforms', function() {
