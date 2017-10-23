@@ -4,9 +4,10 @@ environment:
 platform: x64 # flow needs 64b platforms
 # Install scripts. (runs after repo cloning)
 install:
-  # 1. Install yarn and node using Chocolatey. 
-  # Node version for yarn 1.0.1 is v8.4.
-  - choco install yarn --version 1.0.1
+  # 1. Yarn 1.2.1 is already preinstalled, so no need to install yarn.
+  #- choco install yarn
+  # But we need to select the right node
+  - ps: Install-Product node $env:nodejs_version $env:platform
   # 2. Setup the project
   - yarn install
 
