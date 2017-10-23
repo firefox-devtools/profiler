@@ -11,28 +11,34 @@ import {
   changeInvertCallstack,
   changeCurrentCallTreeSearchString,
   commitCallTreeSearchString,
+  popCallTreeSearchString,
 } from '../../actions/profile-view';
 import {
   getHidePlatformDetails,
   getInvertCallstack,
   getCurrentSearchString,
+  getSearchStrings,
 } from '../../reducers/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
+import CompactableListWithRemoveButton from '../shared/CompactableListWithRemoveButton';
 
 import './Settings.css';
 
-type Props = {
-  hidePlatformDetails: boolean,
-  invertCallstack: boolean,
-  currentSearchString: string,
-  changeHidePlatformDetails: boolean => void,
-  changeInvertCallstack: boolean => void,
-  changeCurrentCallTreeSearchString: string => void,
-  commitCallTreeSearchString: () => void,
-};
+type Props = {|
+  +hidePlatformDetails: boolean,
+  +invertCallstack: boolean,
+  +currentSearchString: string,
+  +searchStrings: string[],
+  +changeHidePlatformDetails: boolean => void,
+  +changeInvertCallstack: boolean => void,
+  +changeCurrentCallTreeSearchString: string => void,
+  +commitCallTreeSearchString: () => void,
+  +popCallTreeSearchString: string => void,
+|};
 
 class StackChartSettings extends PureComponent {
   props: Props;
+  state: {| focused: boolean |};
 
   constructor(props) {
     super(props);
@@ -46,6 +52,11 @@ class StackChartSettings extends PureComponent {
       this
     );
     (this: any)._onSearchFieldSubmit = this._onSearchFieldSubmit.bind(this);
+    (this: any)._onSearchStringRemove = this._onSearchStringRemove.bind(this);
+    (this: any)._onSearchFieldFocus = this._onSearchFieldFocus.bind(this);
+    (this: any)._onSearchFieldBlur = this._onSearchFieldBlur.bind(this);
+
+    this.state = { focused: false };
   }
 
   _onHidePlatformDetailsClick(e: Event & { target: HTMLInputElement }) {
@@ -59,8 +70,22 @@ class StackChartSettings extends PureComponent {
   _onSearchFieldIdleAfterChange(value: string) {
     this.props.changeCurrentCallTreeSearchString(value);
   }
+
+  _onSearchFieldFocus() {
+    this.setState({ focused: true });
+  }
+
+  _onSearchFieldBlur() {
+    this.setState(() => ({ focused: false }));
+  }
+
   _onSearchFieldSubmit() {
     this.props.commitCallTreeSearchString();
+  }
+
+  _onSearchStringRemove(searchStringIdx: number) {
+    const searchString = this.props.searchStrings[searchStringIdx];
+    this.props.popCallTreeSearchString(searchString);
   }
 
   render() {
@@ -68,7 +93,9 @@ class StackChartSettings extends PureComponent {
       hidePlatformDetails,
       invertCallstack,
       currentSearchString,
+      searchStrings,
     } = this.props;
+    const { focused } = this.state;
     return (
       <div className="stackChartSettings">
         <ul className="stackChartSettingsList">
@@ -105,6 +132,19 @@ class StackChartSettings extends PureComponent {
               defaultValue={currentSearchString}
               onIdleAfterChange={this._onSearchFieldIdleAfterChange}
               onSubmit={this._onSearchFieldSubmit}
+              onBlur={this._onSearchFieldBlur}
+              onFocus={this._onSearchFieldFocus}
+            />
+            <CompactableListWithRemoveButton
+              items={searchStrings}
+              compact={!focused}
+              showIntroduction={
+                currentSearchString.length > 0
+                  ? 'You can press enter to persist this search term.'
+                  : ''
+              }
+              buttonTitle="Remove"
+              onItemRemove={this._onSearchStringRemove}
             />
           </label>
         </div>
@@ -118,11 +158,13 @@ export default connect(
     invertCallstack: getInvertCallstack(state),
     hidePlatformDetails: getHidePlatformDetails(state),
     currentSearchString: getCurrentSearchString(state),
+    searchStrings: getSearchStrings(state),
   }),
   {
     changeHidePlatformDetails,
     changeInvertCallstack,
     changeCurrentCallTreeSearchString,
     commitCallTreeSearchString,
+    popCallTreeSearchString,
   }
 )(StackChartSettings);
