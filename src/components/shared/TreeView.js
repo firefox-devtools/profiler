@@ -4,8 +4,10 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import escapeStringRegexp from 'escape-string-regexp';
 import VirtualList from './VirtualList';
 import { BackgroundImageStyleDef } from './StyleDef';
 
@@ -14,6 +16,8 @@ import ContextMenuTrigger from './ContextMenuTrigger';
 import type { IndexIntoCallNodeTable, Node } from '../../types/profile-derived';
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { IconWithClassName } from '../../types/reducers';
+
+type RegExpResult = null | ({ index: number, input: string } & string[]);
 
 export type Column = {
   propName: string,
@@ -45,30 +49,34 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) =>
 
 function reactStringWithHighlightedSubstrings(
   string: string,
-  substring: string | null,
+  substrings: ?(string[]),
   className: string
 ) {
-  if (!substring) {
+  if (!substrings || !substrings.length) {
     return string;
   }
-  const lowercaseString = string.toLowerCase();
-  const result = [];
-  let startAt = 0;
-  let nextOccurrence = -1;
-  while (
-    (nextOccurrence = lowercaseString.indexOf(substring, startAt)) !== -1
-  ) {
-    const afterNextOccurrence = nextOccurrence + substring.length;
-    result.push(string.substring(startAt, nextOccurrence));
-    result.push(
-      <span key={nextOccurrence} className={className}>
-        {string.substring(nextOccurrence, afterNextOccurrence)}
+
+  const regexpStr = substrings.map(escapeStringRegexp).join('|');
+  const re = new RegExp(regexpStr, 'gi');
+
+  const highlighted = [];
+  let lastOccurrence = 0;
+  let result;
+  while ((result = re.exec(string))) {
+    const typedResult: RegExpResult = result;
+    if (typedResult === null) {
+      break;
+    }
+    highlighted.push(string.substring(lastOccurrence, typedResult.index));
+    lastOccurrence = re.lastIndex;
+    highlighted.push(
+      <span key={typedResult.index} className={className}>
+        {typedResult[0]}
       </span>
     );
-    startAt = afterNextOccurrence;
   }
-  result.push(string.substring(startAt));
-  return result;
+  highlighted.push(string.substring(lastOccurrence));
+  return highlighted;
 }
 
 type TreeViewRowFixedColumnsProps = {
@@ -78,7 +86,7 @@ type TreeViewRowFixedColumnsProps = {
   index: number,
   selected: boolean,
   onClick: (IndexIntoCallNodeTable, MouseEvent) => mixed,
-  highlightString: string,
+  highlightStrings?: string[],
 };
 
 class TreeViewRowFixedColumns extends PureComponent {
@@ -95,7 +103,7 @@ class TreeViewRowFixedColumns extends PureComponent {
   }
 
   render() {
-    const { node, columns, index, selected, highlightString } = this.props;
+    const { node, columns, index, selected, highlightStrings } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     return (
       <div
@@ -117,7 +125,7 @@ class TreeViewRowFixedColumns extends PureComponent {
                 ? <RenderComponent node={node} />
                 : reactStringWithHighlightedSubstrings(
                     node[col.propName],
-                    highlightString,
+                    highlightStrings,
                     'treeViewHighlighting'
                   )}
             </span>
@@ -144,7 +152,7 @@ type TreeViewRowScrolledColumnsProps = {
   onAppendageButtonClick:
     | ((IndexIntoCallNodeTable | null, string) => mixed)
     | null,
-  highlightString: string,
+  highlightStrings?: string[],
 };
 
 class TreeViewRowScrolledColumns extends PureComponent {
@@ -187,7 +195,7 @@ class TreeViewRowScrolledColumns extends PureComponent {
       canBeExpanded,
       isExpanded,
       selected,
-      highlightString,
+      highlightStrings,
       appendageButtons,
     } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
@@ -214,7 +222,7 @@ class TreeViewRowScrolledColumns extends PureComponent {
         >
           {reactStringWithHighlightedSubstrings(
             node[mainColumn.propName],
-            highlightString,
+            highlightStrings,
             'treeViewHighlighting'
           )}
         </span>
@@ -224,7 +232,7 @@ class TreeViewRowScrolledColumns extends PureComponent {
             >
               {reactStringWithHighlightedSubstrings(
                 node[appendageColumn.propName],
-                highlightString,
+                highlightStrings,
                 'treeViewHighlighting'
               )}
             </span>
@@ -245,14 +253,14 @@ class TreeViewRowScrolledColumns extends PureComponent {
   }
 }
 
-type TreeViewProps = {
+type TreeViewProps = {|
   fixedColumns: Column[],
   mainColumn: Column,
   tree: CallTree,
   expandedNodeIds: Array<IndexIntoCallNodeTable | null>,
   selectedNodeId: IndexIntoCallNodeTable | null,
   onExpandedNodesChange: PropTypes.func.isRequired,
-  highlightString: string,
+  highlightStrings?: string[],
   appendageColumn: Column,
   appendageButtons: string[],
   disableOverscan: boolean,
@@ -263,7 +271,7 @@ type TreeViewProps = {
     | ((IndexIntoCallNodeTable | null, string) => mixed)
     | null,
   onSelectionChange: IndexIntoCallNodeTable => mixed,
-};
+|};
 
 class TreeView extends PureComponent {
   props: TreeViewProps;
@@ -317,7 +325,7 @@ class TreeView extends PureComponent {
       mainColumn,
       appendageColumn,
       selectedNodeId,
-      highlightString,
+      highlightStrings,
       appendageButtons,
       onAppendageButtonClick,
     } = this.props;
@@ -331,7 +339,7 @@ class TreeView extends PureComponent {
           index={index}
           selected={nodeId === selectedNodeId}
           onClick={this._onRowClicked}
-          highlightString={highlightString}
+          highlightStrings={highlightStrings}
         />
       );
     }
@@ -352,7 +360,7 @@ class TreeView extends PureComponent {
         selected={nodeId === selectedNodeId}
         onClick={this._onRowClicked}
         onAppendageButtonClick={onAppendageButtonClick}
-        highlightString={highlightString}
+        highlightStrings={highlightStrings}
       />
     );
   }
@@ -572,7 +580,7 @@ TreeView.propTypes = {
   selectedNodeId: PropTypes.number,
   onExpandedNodesChange: PropTypes.func.isRequired,
   onSelectionChange: PropTypes.func.isRequired,
-  highlightString: PropTypes.string,
+  highlightStrings: PropTypes.arrayOf(PropTypes.string),
   appendageColumn: PropTypes.shape({
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,

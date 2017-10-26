@@ -1,0 +1,633 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`shared/CompactableListWithRemoveButton with showIntroduction set to '' renders compact and full lists with various elements 1`] = `
+<div
+  className="listWithRemoveButton some-class listWithRemoveButton_isCompact"
+>
+  <div
+    className="listWithRemoveButton_compact"
+  >
+    <div
+      className="listWithRemoveButton_compact-itemList"
+    >
+      <span>
+        foo
+      </span>
+       and 
+      <span>
+        bar
+      </span>
+    </div>
+    <div
+      className="listWithRemoveButton_compact-itemCount"
+    >
+      (
+      2
+      )
+    </div>
+  </div>
+  <div
+    className="listWithRemoveButton_full"
+  >
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        foo
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={0}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        bar
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={1}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/CompactableListWithRemoveButton with showIntroduction set to '' renders compact and full lists with various elements 2`] = `
+<div
+  className="listWithRemoveButton some-class listWithRemoveButton_isFull"
+>
+  <div
+    className="listWithRemoveButton_compact"
+  >
+    <div
+      className="listWithRemoveButton_compact-itemList"
+    >
+      <span>
+        foo
+      </span>
+       and 
+      <span>
+        bar
+      </span>
+    </div>
+    <div
+      className="listWithRemoveButton_compact-itemCount"
+    >
+      (
+      2
+      )
+    </div>
+  </div>
+  <div
+    className="listWithRemoveButton_full"
+  >
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        foo
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={0}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        bar
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={1}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/CompactableListWithRemoveButton with showIntroduction set to '' renders compact and full lists with various elements 3`] = `
+<div
+  className="listWithRemoveButton some-class listWithRemoveButton_isFull"
+>
+  <div
+    className="listWithRemoveButton_compact"
+  >
+    <div
+      className="listWithRemoveButton_compact-itemList"
+    >
+      <span>
+        foo
+      </span>
+      , 
+      <span>
+        bar
+      </span>
+       and 
+      <span>
+        hello
+      </span>
+    </div>
+    <div
+      className="listWithRemoveButton_compact-itemCount"
+    >
+      (
+      3
+      )
+    </div>
+  </div>
+  <div
+    className="listWithRemoveButton_full"
+  >
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        foo
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={0}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        bar
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={1}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        hello
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={2}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/CompactableListWithRemoveButton with showIntroduction set to '' renders compact and full lists with various elements 4`] = `
+<div
+  className="listWithRemoveButton some-class listWithRemoveButton_isFull"
+>
+  <div
+    className="listWithRemoveButton_full"
+  >
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        foo
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={0}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        bar
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={1}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        hello
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={2}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/CompactableListWithRemoveButton with showIntroduction set to '' renders compact and full lists with various elements 5`] = `
+<div
+  className="listWithRemoveButton some-class listWithRemoveButton_isFull"
+>
+  <div
+    className="listWithRemoveButton_full"
+  >
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        foo
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={0}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        bar
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={1}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        hello
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={2}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/CompactableListWithRemoveButton with showIntroduction set to 'Some introduction' renders compact and full lists with various elements 1`] = `
+<div
+  className="listWithRemoveButton some-class listWithRemoveButton_isCompact"
+>
+  <div
+    className="listWithRemoveButton_compact"
+  >
+    <div
+      className="listWithRemoveButton_compact-itemList"
+    >
+      <span>
+        foo
+      </span>
+       and 
+      <span>
+        bar
+      </span>
+    </div>
+    <div
+      className="listWithRemoveButton_compact-itemCount"
+    >
+      (
+      2
+      )
+    </div>
+  </div>
+  <div
+    className="listWithRemoveButton_full"
+  >
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        foo
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={0}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        bar
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={1}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/CompactableListWithRemoveButton with showIntroduction set to 'Some introduction' renders compact and full lists with various elements 2`] = `
+<div
+  className="listWithRemoveButton some-class listWithRemoveButton_isFull"
+>
+  <div
+    className="listWithRemoveButton_compact"
+  >
+    <div
+      className="listWithRemoveButton_compact-itemList"
+    >
+      <span>
+        foo
+      </span>
+       and 
+      <span>
+        bar
+      </span>
+    </div>
+    <div
+      className="listWithRemoveButton_compact-itemCount"
+    >
+      (
+      2
+      )
+    </div>
+  </div>
+  <div
+    className="listWithRemoveButton_full"
+  >
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        foo
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={0}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        bar
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={1}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/CompactableListWithRemoveButton with showIntroduction set to 'Some introduction' renders compact and full lists with various elements 3`] = `
+<div
+  className="listWithRemoveButton some-class listWithRemoveButton_isFull"
+>
+  <div
+    className="listWithRemoveButton_compact"
+  >
+    <div
+      className="listWithRemoveButton_compact-itemList"
+    >
+      <span>
+        foo
+      </span>
+      , 
+      <span>
+        bar
+      </span>
+       and 
+      <span>
+        hello
+      </span>
+    </div>
+    <div
+      className="listWithRemoveButton_compact-itemCount"
+    >
+      (
+      3
+      )
+    </div>
+  </div>
+  <div
+    className="listWithRemoveButton_full"
+  >
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        foo
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={0}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        bar
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={1}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+    <div
+      className="listWithRemoveButton_full-itemBox"
+    >
+      <div
+        className="listWithRemoveButton_full-item"
+      >
+        hello
+      </div>
+      <button
+        aria-label="button title"
+        className="listWithRemoveButton_full-button"
+        data-index={2}
+        onMouseDown={[Function]}
+        title="button title"
+        type="button"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/CompactableListWithRemoveButton with showIntroduction set to 'Some introduction' renders compact and full lists with various elements 4`] = `
+<div
+  className="listWithRemoveButton some-class listWithRemoveButton_isFull"
+>
+  <div
+    className="listWithRemoveButton_introduction"
+  >
+    Some introduction
+  </div>
+</div>
+`;
+
+exports[`shared/CompactableListWithRemoveButton with showIntroduction set to 'Some introduction' renders compact and full lists with various elements 5`] = `
+<div
+  className="listWithRemoveButton some-class listWithRemoveButton_isFull"
+>
+  <div
+    className="listWithRemoveButton_introduction"
+  >
+    Some introduction
+  </div>
+</div>
+`;

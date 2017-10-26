@@ -21,7 +21,12 @@ import type {
   ImplementationFilter,
   TabSlug,
 } from '../types/actions';
-import type { State, UrlState, Reducer } from '../types/reducers';
+import type {
+  State,
+  SearchStringState,
+  UrlState,
+  Reducer,
+} from '../types/reducers';
 
 // Pre-allocate an array to help with strict equality tests in the selectors.
 const EMPTY_TRANSFORM_STACK = [];
@@ -124,10 +129,43 @@ function selectedThread(state: ThreadIndex = 0, action: Action) {
   }
 }
 
-function callTreeSearchString(state: string = '', action: Action) {
+function calltreeSearchString(
+  state: SearchStringState = { current: '', stack: [] },
+  action: Action
+) {
   switch (action.type) {
-    case 'CHANGE_CALL_TREE_SEARCH_STRING':
-      return action.searchString;
+    case 'COMMIT_CALL_TREE_SEARCH_STRING': {
+      if (!state.current) {
+        return state;
+      }
+
+      // Case-insensitive deduplication
+      const searchString = state.current.toLowerCase();
+      let stack = state.stack;
+      if (stack.findIndex(item => item.toLowerCase() === searchString) < 0) {
+        stack = [...stack, state.current];
+      }
+
+      return {
+        current: '',
+        stack,
+      };
+    }
+    case 'CHANGE_CURRENT_CALL_TREE_SEARCH_STRING':
+      return {
+        stack: state.stack,
+        current: action.searchString,
+      };
+    case 'POP_CALL_TREE_SEARCH_STRING': {
+      const searchString = action.searchString;
+      return {
+        current: state.current,
+        // This filter will always return a new object even if it doesn't match
+        // anything. But this is OK but we should always dispatch this action
+        // with an existing string.
+        stack: state.stack.filter(item => item !== searchString),
+      };
+    }
     default:
       return state;
   }
@@ -259,7 +297,7 @@ const urlStateReducer: Reducer<UrlState> = (regularUrlStateReducer => (
     selectedTab,
     rangeFilters,
     selectedThread,
-    callTreeSearchString,
+    calltreeSearchString,
     implementation,
     invertCallstack,
     hidePlatformDetails,
@@ -284,8 +322,16 @@ export const getHidePlatformDetails = (state: State) =>
   getUrlState(state).hidePlatformDetails;
 export const getInvertCallstack = (state: State) =>
   getUrlState(state).invertCallstack;
-export const getSearchString = (state: State) =>
-  getUrlState(state).callTreeSearchString;
+export const getSearchStrings = (state: State) =>
+  getUrlState(state).calltreeSearchString.stack;
+export const getCurrentSearchString = (state: State) =>
+  getUrlState(state).calltreeSearchString.current;
+export const getSearchStringsForFiltering = createSelector(
+  getSearchStrings,
+  getCurrentSearchString,
+  (stack, current) => (current ? [...stack, current] : stack)
+);
+
 export const getMarkersSearchString = (state: State) =>
   getUrlState(state).markersSearchString;
 

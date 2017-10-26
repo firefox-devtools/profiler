@@ -68,14 +68,19 @@ export type RangeFilterState = {
   end: number,
 };
 
-export type UrlState = {
+export type SearchStringState = {|
+  +current: string,
+  +stack: string[],
+|};
+
+export type UrlState = {|
   dataSource: DataSource,
   hash: string,
   profileUrl: string,
   selectedTab: TabSlug,
   rangeFilters: RangeFilterState[],
   selectedThread: ThreadIndex,
-  callTreeSearchString: string,
+  calltreeSearchString: SearchStringState,
   markersSearchString: string,
   implementation: ImplementationFilter,
   invertCallstack: boolean,
@@ -83,7 +88,7 @@ export type UrlState = {
   threadOrder: ThreadIndex[],
   hiddenThreads: ThreadIndex[],
   transforms: TransformStacksPerThread,
-};
+|};
 
 export type IconState = Set<string>;
 

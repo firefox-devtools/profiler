@@ -9,30 +9,39 @@ import { connect } from 'react-redux';
 import {
   changeImplementationFilter,
   changeInvertCallstack,
-  changeCallTreeSearchString,
+  commitCallTreeSearchString,
+  changeCurrentCallTreeSearchString,
+  popCallTreeSearchString,
 } from '../../actions/profile-view';
 import {
   getImplementationFilter,
   getInvertCallstack,
-  getSearchString,
+  getCurrentSearchString,
+  getSearchStrings,
 } from '../../reducers/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
+import CompactableListWithRemoveButton from '../shared/CompactableListWithRemoveButton';
 import { toValidImplementationFilter } from '../../profile-logic/profile-data';
+
 import './ProfileCallTreeSettings.css';
 
 import type { ImplementationFilter } from '../../types/actions';
 
-type Props = {
-  implementationFilter: ImplementationFilter,
-  invertCallstack: boolean,
-  searchString: string,
-  changeImplementationFilter: typeof changeImplementationFilter,
-  changeInvertCallstack: typeof changeInvertCallstack,
-  changeCallTreeSearchString: typeof changeCallTreeSearchString,
-};
+type Props = {|
+  +implementationFilter: ImplementationFilter,
+  +invertCallstack: boolean,
+  +currentSearchString: string,
+  +searchStrings: string[],
+  +changeImplementationFilter: typeof changeImplementationFilter,
+  +changeInvertCallstack: typeof changeInvertCallstack,
+  +commitCallTreeSearchString: typeof commitCallTreeSearchString,
+  +changeCurrentCallTreeSearchString: typeof changeCurrentCallTreeSearchString,
+  +popCallTreeSearchString: typeof popCallTreeSearchString,
+|};
 
 class ProfileCallTreeSettings extends PureComponent {
   props: Props;
+  state: {| focused: boolean |};
 
   constructor(props: Props) {
     super(props);
@@ -45,6 +54,12 @@ class ProfileCallTreeSettings extends PureComponent {
     (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(
       this
     );
+    (this: any)._onSearchFieldSubmit = this._onSearchFieldSubmit.bind(this);
+    (this: any)._onSearchStringRemove = this._onSearchStringRemove.bind(this);
+    (this: any)._onSearchFieldFocus = this._onSearchFieldFocus.bind(this);
+    (this: any)._onSearchFieldBlur = this._onSearchFieldBlur.bind(this);
+
+    this.state = { focused: false };
   }
 
   _onImplementationFilterChange(e: Event & { target: HTMLSelectElement }) {
@@ -60,11 +75,35 @@ class ProfileCallTreeSettings extends PureComponent {
   }
 
   _onSearchFieldIdleAfterChange(value: string) {
-    this.props.changeCallTreeSearchString(value);
+    this.props.changeCurrentCallTreeSearchString(value);
+  }
+
+  _onSearchFieldFocus() {
+    this.setState({ focused: true });
+  }
+
+  _onSearchFieldBlur() {
+    this.setState(() => ({ focused: false }));
+  }
+
+  _onSearchFieldSubmit() {
+    this.props.commitCallTreeSearchString();
+  }
+
+  _onSearchStringRemove(searchStringIdx: number) {
+    const searchString = this.props.searchStrings[searchStringIdx];
+    this.props.popCallTreeSearchString(searchString);
   }
 
   render() {
-    const { implementationFilter, invertCallstack, searchString } = this.props;
+    const {
+      implementationFilter,
+      invertCallstack,
+      currentSearchString,
+      searchStrings,
+    } = this.props;
+    const { focused } = this.state;
+
     return (
       <div className="profileCallTreeSettings">
         <ul className="profileCallTreeSettingsList">
@@ -101,8 +140,22 @@ class ProfileCallTreeSettings extends PureComponent {
               className="profileCallTreeSettingsSearchField"
               title="Only display stacks which contain a function whose name matches this substring"
               idlePeriod={200}
-              defaultValue={searchString}
+              defaultValue={currentSearchString}
               onIdleAfterChange={this._onSearchFieldIdleAfterChange}
+              onSubmit={this._onSearchFieldSubmit}
+              onBlur={this._onSearchFieldBlur}
+              onFocus={this._onSearchFieldFocus}
+            />
+            <CompactableListWithRemoveButton
+              items={searchStrings}
+              compact={!focused}
+              showIntroduction={
+                currentSearchString.length > 0
+                  ? 'You can press enter to persist this search term.'
+                  : ''
+              }
+              buttonTitle="Remove"
+              onItemRemove={this._onSearchStringRemove}
             />
           </label>
         </div>
@@ -115,11 +168,14 @@ export default connect(
   state => ({
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
-    searchString: getSearchString(state),
+    currentSearchString: getCurrentSearchString(state),
+    searchStrings: getSearchStrings(state),
   }),
   {
     changeImplementationFilter,
     changeInvertCallstack,
-    changeCallTreeSearchString,
+    changeCurrentCallTreeSearchString,
+    commitCallTreeSearchString,
+    popCallTreeSearchString,
   }
 )(ProfileCallTreeSettings);

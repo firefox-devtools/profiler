@@ -417,86 +417,97 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
   });
 }
 
+export function filterThreadToSearchStrings(
+  thread: Thread,
+  searchStrings: string[]
+): Thread {
+  return timeCode('filterThreadToSearchStrings', () => {
+    if (!searchStrings.length) {
+      return thread;
+    }
+
+    return searchStrings.reduce(filterThreadToSearchString, thread);
+  });
+}
+
 export function filterThreadToSearchString(
   thread: Thread,
   searchString: string
 ): Thread {
-  return timeCode('filterThreadToSearchString', () => {
-    if (searchString === '') {
-      return thread;
-    }
-    const lowercaseSearchString = searchString.toLowerCase();
-    const {
-      samples,
-      funcTable,
-      frameTable,
-      stackTable,
-      stringTable,
-      resourceTable,
-    } = thread;
+  if (!searchString) {
+    return thread;
+  }
+  const lowercaseSearchString = searchString.toLowerCase();
+  const {
+    samples,
+    funcTable,
+    frameTable,
+    stackTable,
+    stringTable,
+    resourceTable,
+  } = thread;
 
-    function computeFuncMatchesFilter(func) {
-      const nameIndex = funcTable.name[func];
-      const nameString = stringTable.getString(nameIndex);
-      if (nameString.toLowerCase().includes(lowercaseSearchString)) {
+  function computeFuncMatchesFilter(func) {
+    const nameIndex = funcTable.name[func];
+    const nameString = stringTable.getString(nameIndex);
+    if (nameString.toLowerCase().includes(lowercaseSearchString)) {
+      return true;
+    }
+
+    const fileNameIndex = funcTable.fileName[func];
+    if (fileNameIndex !== null) {
+      const fileNameString = stringTable.getString(fileNameIndex);
+      if (fileNameString.toLowerCase().includes(lowercaseSearchString)) {
         return true;
       }
+    }
 
-      const fileNameIndex = funcTable.fileName[func];
-      if (fileNameIndex !== null) {
-        const fileNameString = stringTable.getString(fileNameIndex);
-        if (fileNameString.toLowerCase().includes(lowercaseSearchString)) {
-          return true;
-        }
+    const resourceIndex = funcTable.resource[func];
+    const resourceNameIndex = resourceTable.name[resourceIndex];
+    if (resourceNameIndex !== undefined) {
+      const resourceNameString = stringTable.getString(resourceNameIndex);
+      if (resourceNameString.toLowerCase().includes(lowercaseSearchString)) {
+        return true;
       }
+    }
 
-      const resourceIndex = funcTable.resource[func];
-      const resourceNameIndex = resourceTable.name[resourceIndex];
-      if (resourceNameIndex !== undefined) {
-        const resourceNameString = stringTable.getString(resourceNameIndex);
-        if (resourceNameString.toLowerCase().includes(lowercaseSearchString)) {
-          return true;
-        }
-      }
+    return false;
+  }
 
+  const funcMatchesFilterCache = new Map();
+  function funcMatchesFilter(func) {
+    let result = funcMatchesFilterCache.get(func);
+    if (result === undefined) {
+      result = computeFuncMatchesFilter(func);
+      funcMatchesFilterCache.set(func, result);
+    }
+    return result;
+  }
+
+  const stackMatchesFilterCache = new Map();
+  function stackMatchesFilter(stackIndex) {
+    if (stackIndex === null) {
       return false;
     }
-
-    const funcMatchesFilterCache = new Map();
-    function funcMatchesFilter(func) {
-      let result = funcMatchesFilterCache.get(func);
-      if (result === undefined) {
-        result = computeFuncMatchesFilter(func);
-        funcMatchesFilterCache.set(func, result);
+    let result = stackMatchesFilterCache.get(stackIndex);
+    if (result === undefined) {
+      const prefix = stackTable.prefix[stackIndex];
+      if (stackMatchesFilter(prefix)) {
+        result = true;
+      } else {
+        const frame = stackTable.frame[stackIndex];
+        const func = frameTable.func[frame];
+        result = funcMatchesFilter(func);
       }
-      return result;
+      stackMatchesFilterCache.set(stackIndex, result);
     }
+    return result;
+  }
 
-    const stackMatchesFilterCache = new Map();
-    function stackMatchesFilter(stackIndex) {
-      if (stackIndex === null) {
-        return false;
-      }
-      let result = stackMatchesFilterCache.get(stackIndex);
-      if (result === undefined) {
-        const prefix = stackTable.prefix[stackIndex];
-        if (stackMatchesFilter(prefix)) {
-          result = true;
-        } else {
-          const frame = stackTable.frame[stackIndex];
-          const func = frameTable.func[frame];
-          result = funcMatchesFilter(func);
-        }
-        stackMatchesFilterCache.set(stackIndex, result);
-      }
-      return result;
-    }
-
-    return Object.assign({}, thread, {
-      samples: Object.assign({}, samples, {
-        stack: samples.stack.map(s => (stackMatchesFilter(s) ? s : null)),
-      }),
-    });
+  return Object.assign({}, thread, {
+    samples: Object.assign({}, samples, {
+      stack: samples.stack.map(s => (stackMatchesFilter(s) ? s : null)),
+    }),
   });
 }
 

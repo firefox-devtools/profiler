@@ -55,6 +55,7 @@ exports[`renders StackChartGraph correctly 1`] = `
           <input
             className="idleSearchFieldInput"
             name="search"
+            onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
             required="required"
@@ -69,6 +70,13 @@ exports[`renders StackChartGraph correctly 1`] = `
             type="reset"
           />
         </form>
+        <div
+          className="listWithRemoveButton listWithRemoveButton_isCompact"
+        >
+          <div
+            className="listWithRemoveButton_full"
+          />
+        </div>
       </label>
     </div>
   </div>

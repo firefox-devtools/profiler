@@ -29,8 +29,11 @@
 }
 
 .idleSearchFieldButton {
+  position: absolute;
+  right: 16px;
   width: 11px;
   height: 11px;
+
   overflow: hidden;
   background: url(../../../res/searchfield-cancel.svg) top left no-repeat;
   background-size: contain;
@@ -38,8 +41,6 @@
   padding: 0;
   vertical-align: middle;
   color: transparent;
-  position: relative;
-  margin-left: -16px;
   -moz-user-focus: ignore;
 }
 

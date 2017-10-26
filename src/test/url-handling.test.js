@@ -26,20 +26,25 @@ function _getStoreWithURL(
     pathname?: string,
     search?: string,
     hash?: string,
+    v?: number | false, // If v is false, do not add a v parameter to the search string.
   },
   profile: Profile = getProfile()
 ) {
-  const { pathname, hash, search } = Object.assign(
+  const { pathname, hash, search, v } = Object.assign(
     {
       pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
       hash: '',
       search: '',
+      v: CURRENT_URL_VERSION,
     },
     settings
   );
+
+  const searchWithVersion =
+    v === false ? search : `${search ? search + '&' : '?'}v=${v}`;
   const urlState = stateFromLocation({
     pathname,
-    search,
+    search: searchWithVersion,
     hash,
   });
   const store = blankStore();
@@ -127,6 +132,44 @@ describe('threadOrder and hiddenThreads', function() {
   });
 });
 
+describe('search strings', function() {
+  it('properly handles the current search string', function() {
+    const { getState } = _getStoreWithURL({ search: '?currentSearch=string' });
+    expect(urlStateReducers.getCurrentSearchString(getState())).toBe('string');
+    expect(urlStateReducers.getSearchStrings(getState())).toEqual([]);
+  });
+
+  it('properly handles the search string stacks with 1 item', function() {
+    const { getState } = _getStoreWithURL({ search: '?search=string' });
+    expect(urlStateReducers.getCurrentSearchString(getState())).toBe('');
+    expect(urlStateReducers.getSearchStrings(getState())).toEqual(['string']);
+  });
+
+  it('properly handles the search string stacks with several items', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?search=string&search=foo&search=bar',
+    });
+    expect(urlStateReducers.getCurrentSearchString(getState())).toBe('');
+    expect(urlStateReducers.getSearchStrings(getState())).toEqual([
+      'string',
+      'foo',
+      'bar',
+    ]);
+  });
+
+  it('properly handles both current search string and the search string stacks', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?search=string&search=foo&search=bar&currentSearch=hello',
+    });
+    expect(urlStateReducers.getCurrentSearchString(getState())).toBe('hello');
+    expect(urlStateReducers.getSearchStrings(getState())).toEqual([
+      'string',
+      'foo',
+      'bar',
+    ]);
+  });
+});
+
 describe('url upgrading', function() {
   /**
    * Originally transform stacks were called call tree filters. This test asserts that
@@ -137,6 +180,7 @@ describe('url upgrading', function() {
       const { getState } = _getStoreWithURL({
         search:
           '?callTreeFilters=prefix-012~prefixjs-123~postfix-234~postfixjs-345',
+        v: false,
       });
       const transforms = selectedThreadSelectors.getTransformStack(getState());
       expect(transforms).toEqual([
@@ -172,6 +216,7 @@ describe('url upgrading', function() {
     it('switches to the stack chart when given a timeline tab', function() {
       const { getState } = _getStoreWithURL({
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/',
+        v: 1,
       });
       expect(urlStateReducers.getSelectedTab(getState())).toBe('stack-chart');
     });
@@ -179,28 +224,38 @@ describe('url upgrading', function() {
     it('switches to the marker-table when given a markers tab', function() {
       const { getState } = _getStoreWithURL({
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
+        v: false,
       });
       expect(urlStateReducers.getSelectedTab(getState())).toBe('marker-table');
+    });
+  });
+
+  describe('version 3: upgrade search strings', function() {
+    it('correctly handles the search string', function() {
+      const { getState } = _getStoreWithURL({
+        pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
+        search: `?search=string`,
+        v: 2,
+      });
+
+      const state = getState();
+      expect(urlStateReducers.getSearchStrings(state)).toEqual([]);
+      expect(urlStateReducers.getCurrentSearchString(state)).toBe('string');
     });
   });
 
   // More general checks
   it("won't run if the version is specified", function() {
     const { getState } = _getStoreWithURL({
-      pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
-      search: `?v=${CURRENT_URL_VERSION}`,
+      pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
+      search: `?search=string`,
+      v: CURRENT_URL_VERSION, // This is the default, but still using it here to make it explicit
     });
 
     // The conversion process shouldn't run.
-    // This is somewhat hacky: because we specified the last version, we expect
-    // the v2 converter to not run, and so the selected tab shouldn't be
-    // 'marker-table'. Note also that a 'markers' tab is invalid for the current
-    // state of the application, so we won't have 'markers' as result.
-    // We should change this to something more meaningful when we have eg
-    // converters that reuse query names.
-    expect(urlStateReducers.getSelectedTab(getState())).not.toBe(
-      'marker-table'
-    );
+    // If the conversion process for URL v3 runs, then we'd have an empty array
+    // for this, and `string` would be the "current search"
+    expect(urlStateReducers.getSearchStrings(getState())).toEqual(['string']);
   });
 });
 
@@ -208,7 +263,7 @@ describe('URL serialization of the transform stack', function() {
   const transformString =
     'f-combined-012~ms-js-123~mcn-combined-234~f-js-345-i~mf-6~ff-7~cr-combined-8-9~rec-combined-10';
   const { getState } = _getStoreWithURL({
-    search: '?v=1&transforms=' + transformString,
+    search: '?transforms=' + transformString,
   });
 
   it('deserializes focus subtree transforms', function() {

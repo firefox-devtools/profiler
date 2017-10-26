@@ -76,9 +76,24 @@ export function showThread(threadIndex: ThreadIndex): Action {
   };
 }
 
-export function changeCallTreeSearchString(searchString: string): Action {
+export function changeCurrentCallTreeSearchString(
+  searchString: string
+): Action {
   return {
-    type: 'CHANGE_CALL_TREE_SEARCH_STRING',
+    type: 'CHANGE_CURRENT_CALL_TREE_SEARCH_STRING',
+    searchString,
+  };
+}
+
+export function commitCallTreeSearchString(): Action {
+  return {
+    type: 'COMMIT_CALL_TREE_SEARCH_STRING',
+  };
+}
+
+export function popCallTreeSearchString(searchString: string): Action {
+  return {
+    type: 'POP_CALL_TREE_SEARCH_STRING',
     searchString,
   };
 }

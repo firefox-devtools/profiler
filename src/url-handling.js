@@ -16,7 +16,7 @@ import { unexpectedCase } from './utils/flow';
 import type { UrlState } from './types/reducers';
 import type { DataSource, TabSlug } from './types/actions';
 
-export const CURRENT_URL_VERSION = 2;
+export const CURRENT_URL_VERSION = 3;
 
 function dataSourceDirs(urlState: UrlState) {
   const { dataSource } = urlState;
@@ -103,7 +103,8 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   const selectedTab = urlState.selectedTab;
   switch (selectedTab) {
     case 'calltree':
-      query.search = urlState.callTreeSearchString || undefined;
+      query.search = urlState.calltreeSearchString.stack;
+      query.currentSearch = urlState.calltreeSearchString.current || undefined;
       query.invertCallstack = urlState.invertCallstack ? null : undefined;
       query.implementation =
         urlState.implementation === 'combined'
@@ -117,7 +118,8 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       query.markerSearch = urlState.markersSearchString;
       break;
     case 'stack-chart':
-      query.search = urlState.callTreeSearchString || undefined;
+      query.search = urlState.calltreeSearchString.stack;
+      query.currentSearch = urlState.calltreeSearchString.current || undefined;
       query.invertCallstack = urlState.invertCallstack ? null : undefined;
       query.hidePlatformDetails = urlState.hidePlatformDetails
         ? null
@@ -199,6 +201,12 @@ export function stateFromLocation(location: Location): UrlState {
     implementation = query.implementation;
   }
 
+  // query-string will create an array if the same query parameter is specified
+  // more than once.
+  const searchStack = query.search
+    ? Array.isArray(query.search) ? query.search : [query.search]
+    : [];
+
   return {
     dataSource,
     hash: hasProfileHash ? pathParts[1] : '',
@@ -206,7 +214,10 @@ export function stateFromLocation(location: Location): UrlState {
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]),
     rangeFilters: query.range ? parseRangeFilters(query.range) : [],
     selectedThread: selectedThread,
-    callTreeSearchString: query.search || '',
+    calltreeSearchString: {
+      stack: searchStack,
+      current: query.currentSearch || '',
+    },
     markersSearchString: query.markerSearch || '',
     implementation,
     invertCallstack: query.invertCallstack !== undefined,
@@ -360,5 +371,9 @@ const _upgraders = {
       // Given:    /public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/
       // Matches:  $1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       .replace(/^(\/[^/]+\/[^/]+)\/markers\/?/, '$1/marker-table/');
+  },
+  [3]: (processedLocation: ProcessedLocation) => {
+    processedLocation.query.currentSearch = processedLocation.query.search;
+    processedLocation.query.search = [];
   },
 };
