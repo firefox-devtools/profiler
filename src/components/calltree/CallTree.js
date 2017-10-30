@@ -57,8 +57,7 @@ type Props = {
   addTransformToStack: typeof addTransformToStack,
 };
 
-class CallTreeComponent extends PureComponent {
-  props: Props;
+class CallTreeComponent extends PureComponent<Props> {
   _fixedColumns: Column[];
   _mainColumn: Column;
   _appendageColumn: Column;

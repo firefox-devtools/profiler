@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import withChartViewport from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
@@ -55,10 +55,8 @@ const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
 
-class StackChartCanvas extends PureComponent {
+class StackChartCanvas extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
-
-  props: Props;
 
   constructor(props: Props) {
     super(props);
@@ -193,7 +191,7 @@ class StackChartCanvas extends PureComponent {
   _getHoveredStackInfo({
     depth,
     stackTableIndex,
-  }: HoveredStackTiming): React$Element<*> {
+  }: HoveredStackTiming): React.Node {
     const {
       thread,
       getLabel,

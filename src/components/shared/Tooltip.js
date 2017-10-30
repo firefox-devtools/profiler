@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import ReactDOM from 'react-dom';
 import type { CssPixels } from '../../types/units';
 
@@ -14,17 +14,15 @@ const MOUSE_OFFSET = 21;
 type Props = {
   mouseX: CssPixels,
   mouseY: CssPixels,
-  children?: React$Element<*>,
+  children?: React.Node,
 };
 
-export default class Tooltip extends PureComponent {
-  props: Props;
+type State = {
+  interiorElement: HTMLElement | null,
+  isNewContentLaidOut: boolean,
+};
 
-  state: {
-    interiorElement: HTMLElement | null,
-    isNewContentLaidOut: boolean,
-  };
-
+export default class Tooltip extends React.PureComponent<Props, State> {
   _isMounted: boolean;
   _mountElement: ?HTMLElement;
 
@@ -37,7 +35,7 @@ export default class Tooltip extends PureComponent {
     };
   }
 
-  _setMountElement(el: HTMLElement) {
+  _setMountElement(el: HTMLElement | null) {
     this.setState({ interiorElement: el });
   }
 

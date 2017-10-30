@@ -21,9 +21,7 @@ type Props = {
   show404: string => void,
 };
 
-class UrlManager extends PureComponent {
-  props: Props;
-
+class UrlManager extends PureComponent<Props> {
   _updateState() {
     const { updateUrlState, stateFromLocation, show404 } = this.props;
     if (window.history.state) {

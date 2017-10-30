@@ -3,25 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { IDBFactory } from '../../src/types/indexeddb';
-
-type Lib = { debugName: string };
-
-declare class SymbolTable {
-  constructor(): SymbolTable,
-  getFuncAddressTableForLib(lib: Lib): Promise<Uint32Array>,
-  getSymbolsForAddressesInLib(
-    requestedAddressesIndices: number[],
-    lib: Lib
-  ): Promise<string[]>,
-}
+import type { IDBFactory, IDBKeyRange } from '../../src/types/indexeddb';
+import type { SymbolTableAsTuple } from '../../src/profile-logic/symbol-store-db';
 
 declare class GeckoProfiler {
   getProfile: () => Object,
   getSymbolTable: (
     debugName: string,
     breakpadId: string
-  ) => Promise<SymbolTable>,
+  ) => Promise<SymbolTableAsTuple>,
 }
 
 declare class Window extends EventTarget {
@@ -47,7 +37,7 @@ declare class Window extends EventTarget {
   requestAnimationFrame: typeof requestAnimationFrame,
   devicePixelRatio: number,
   indexedDB: IDBFactory,
-  IDBKeyRange: IDBKeyRange,
+  IDBKeyRange: IDBKeyRange<>,
   innerWidth: number,
   innerHeight: number,
   location: Location,

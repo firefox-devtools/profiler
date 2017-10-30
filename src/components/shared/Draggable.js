@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import type { Milliseconds } from '../../types/units';
 
 export type OnMove = (
@@ -18,7 +18,11 @@ type Props = {
   value: { selectionStart: Milliseconds, selectionEnd: Milliseconds },
   onMove: OnMove,
   className: string,
-  children?: HTMLElement,
+  children?: React.Node,
+};
+
+type State = {
+  dragging: boolean,
 };
 
 /**
@@ -29,13 +33,9 @@ type Props = {
  * x and y deltas compared to the mouse position at mousedown.
  * During the drag, the additional className 'dragging' is set on the element.
  */
-export default class Draggable extends PureComponent {
-  props: Props;
-  state: {
-    dragging: boolean,
-  };
+export default class Draggable extends React.PureComponent<Props, State> {
   _container: HTMLDivElement | null;
-  _containerCreated: HTMLDivElement => *;
+  _containerCreated: (HTMLDivElement | null) => *;
   _handlers: {
     mouseMoveHandler: MouseEvent => *,
     mouseUpHandler: MouseEvent => *,
@@ -52,7 +52,7 @@ export default class Draggable extends PureComponent {
     };
   }
 
-  _onMouseDown(e: SyntheticMouseEvent) {
+  _onMouseDown(e: SyntheticMouseEvent<>) {
     if (!this._container || e.button !== 0) {
       return;
     }

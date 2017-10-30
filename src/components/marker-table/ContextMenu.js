@@ -31,8 +31,7 @@ type Props = {
   selection: ProfileSelection,
 };
 
-class MarkersContextMenu extends PureComponent {
-  props: Props;
+class MarkersContextMenu extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any).handleClick = this.handleClick.bind(this);
@@ -95,7 +94,7 @@ class MarkersContextMenu extends PureComponent {
   }
 
   handleClick(
-    event: SyntheticEvent,
+    event: SyntheticEvent<>,
     data: { type: 'setStartRange' | 'setEndRange' | 'copyMarkerJSON' }
   ): void {
     switch (data.type) {

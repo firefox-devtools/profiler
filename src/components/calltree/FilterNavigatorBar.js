@@ -16,15 +16,14 @@ type Props = {
   selectedItem: number,
 };
 
-class FilterNavigatorBar extends PureComponent {
-  props: Props;
+class FilterNavigatorBar extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._onLiClick = this._onLiClick.bind(this);
   }
 
-  _onLiClick(e: SyntheticMouseEvent & { target: HTMLLIElement }) {
-    const element = e.target.closest('.filterNavigatorBarItem');
+  _onLiClick(e: SyntheticMouseEvent<HTMLLIElement>) {
+    const element = e.currentTarget.closest('.filterNavigatorBarItem');
     if (!(element instanceof HTMLElement)) {
       return;
     }
