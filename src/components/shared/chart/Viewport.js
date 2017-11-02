@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { connect } from 'react-redux';
 import { getHasZoomedViaMousewheel } from '../../../reducers/app';
-import actions from '../../../actions';
+import { setHasZoomedViaMousewheel } from '../../../actions/stack-chart';
 
 import type {
   CssPixels,
@@ -22,16 +22,41 @@ const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
     ? new WheelEvent('mouse')
     : { DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2 };
 
-type Props = {
+// These are the props consumed by this Higher-Order Component (HOC)
+type ViewportProps = {
   viewportNeedsUpdate: any,
   timeRange: StartEndRange,
   maxViewportHeight: number,
   maximumZoom: UnitIntervalOfProfileRange,
   updateProfileSelection: UpdateProfileSelection,
   selection: ProfileSelection,
-  hasZoomedViaMousewheel: () => void,
   setHasZoomedViaMousewheel: () => void,
   hasZoomedViaMousewheel: boolean,
+};
+
+// These are the props injected by the HOC to WrappedComponent
+type InjectedProps = {
+  containerWidth: CssPixels,
+  containerHeight: CssPixels,
+  viewportLeft: UnitIntervalOfProfileRange,
+  viewportRight: UnitIntervalOfProfileRange,
+  viewportTop: CssPixels,
+  viewportBottom: CssPixels,
+  isDragging: boolean,
+};
+
+type State = {
+  containerWidth: CssPixels,
+  containerHeight: CssPixels,
+  containerLeft: CssPixels,
+  viewportTop: CssPixels,
+  viewportBottom: CssPixels,
+  viewportLeft: UnitIntervalOfProfileRange,
+  viewportRight: UnitIntervalOfProfileRange,
+  dragX: CssPixels,
+  dragY: CssPixels,
+  isDragging: boolean,
+  isShiftScrollHintVisible: boolean,
 };
 
 require('./Viewport.css');
@@ -63,27 +88,35 @@ require('./Viewport.css');
  * viewportRight += mouseMoveDelta * unitPixel
  * viewportLeft += mouseMoveDelta * unitPixel
  **/
-export default function withChartViewport<T>(WrappedComponent: ReactClass<T>) {
-  class ChartViewport extends PureComponent {
-    props: Props;
+/**
+ * About the Flow typing:
+ *
+ * - `Props` are the props for the returned component. It means that they are the
+ *   props that the user for this component will need to specify. From the
+ *   generic definition `<Props: ViewportProps>`, they must include the
+ *   properties consumed par this HOC.
+ *
+ * - The argument, which is the augmented component (the `WrappedComponent`),
+ *   needs to accept both the `InjectedProps` and some supertype of `Props`.
+ *   A supertype of `Props` is an object will some properties of
+ *   `Props` but not all of them.
+ *   To understand what this means to Flow, we need, like sometimes, to think
+ *   backwards: from the props of `WrappedComponent`, take out `InjectedProps`,
+ *   and make it part of `Props`.
+ *
+ * So `Props` will need to hold both `ViewportProps` as said earlier and the
+ * props from `WrappedComponent` that aren't `Injectedprops`.
+ * This is exactly what we want Flow to check: that the user of this HOC
+ * properly passes all these props!
+ */
+export default function withChartViewport<Props: ViewportProps>(
+  WrappedComponent: React.ComponentType<InjectedProps & $Supertype<Props>>
+): React.ComponentType<Props> {
+  class ChartViewport extends React.PureComponent<Props, State> {
     shiftScrollId: number;
     zoomRangeSelectionScheduled: boolean;
     zoomRangeSelectionScrollDelta: number;
     _container: ?HTMLElement;
-
-    state: {
-      containerWidth: CssPixels,
-      containerHeight: CssPixels,
-      containerLeft: CssPixels,
-      viewportTop: CssPixels,
-      viewportBottom: CssPixels,
-      viewportLeft: UnitIntervalOfProfileRange,
-      viewportRight: UnitIntervalOfProfileRange,
-      dragX: CssPixels,
-      dragY: CssPixels,
-      isDragging: boolean,
-      isShiftScrollHintVisible: boolean,
-    };
 
     constructor(props: Props) {
       super(props);
@@ -102,7 +135,7 @@ export default function withChartViewport<T>(WrappedComponent: ReactClass<T>) {
       this.state = this.getDefaultState(props);
     }
 
-    getHorizontalViewport({ selection, timeRange }: Props) {
+    getHorizontalViewport({ selection, timeRange }: ViewportProps) {
       if (selection.hasSelection) {
         const { selectionStart, selectionEnd } = selection;
         const timeRangeLength = timeRange.end - timeRange.start;
@@ -117,7 +150,7 @@ export default function withChartViewport<T>(WrappedComponent: ReactClass<T>) {
       };
     }
 
-    getDefaultState(props: Props) {
+    getDefaultState(props: ViewportProps) {
       const { viewportLeft, viewportRight } = this.getHorizontalViewport(props);
       return {
         containerWidth: 0,
@@ -191,7 +224,7 @@ export default function withChartViewport<T>(WrappedComponent: ReactClass<T>) {
       requestAnimationFrame(this._setSize);
     }
 
-    _mouseWheelListener(event: SyntheticWheelEvent) {
+    _mouseWheelListener(event: SyntheticWheelEvent<>) {
       if (event.shiftKey) {
         this.zoomRangeSelection(event);
         return;
@@ -208,7 +241,7 @@ export default function withChartViewport<T>(WrappedComponent: ReactClass<T>) {
       );
     }
 
-    zoomRangeSelection(event: SyntheticWheelEvent) {
+    zoomRangeSelection(event: SyntheticWheelEvent<>) {
       if (!this.props.hasZoomedViaMousewheel) {
         this.props.setHasZoomedViaMousewheel();
       }
@@ -290,7 +323,7 @@ export default function withChartViewport<T>(WrappedComponent: ReactClass<T>) {
       }
     }
 
-    _mouseDownListener(event: SyntheticMouseEvent) {
+    _mouseDownListener(event: SyntheticMouseEvent<>) {
       this.setState({
         dragX: event.clientX,
         dragY: event.clientY,
@@ -447,6 +480,7 @@ export default function withChartViewport<T>(WrappedComponent: ReactClass<T>) {
           }}
         >
           <WrappedComponent
+            {...this.props}
             containerWidth={containerWidth}
             containerHeight={containerHeight}
             viewportLeft={viewportLeft}
@@ -454,7 +488,6 @@ export default function withChartViewport<T>(WrappedComponent: ReactClass<T>) {
             viewportTop={viewportTop}
             viewportBottom={viewportBottom}
             isDragging={isDragging}
-            {...this.props}
           />
           <div className={shiftScrollClassName}>
             Zoom Chart:
@@ -468,11 +501,12 @@ export default function withChartViewport<T>(WrappedComponent: ReactClass<T>) {
 
   // Connect this component so that it knows whether or not to nag the user to use shift
   // for zooming on range selections.
-  return connect(state => {
-    return {
+  return connect(
+    state => ({
       hasZoomedViaMousewheel: getHasZoomedViaMousewheel(state),
-    };
-  }, (actions: Object))(ChartViewport);
+    }),
+    { setHasZoomedViaMousewheel }
+  )(ChartViewport);
 }
 
 function clamp(min, max, value) {
@@ -486,7 +520,7 @@ const SCROLL_LINE_SIZE = 15;
  * into CssPixels. https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/deltaMode
  */
 function getNormalizedScrollDelta(
-  event: SyntheticWheelEvent,
+  event: SyntheticWheelEvent<>,
   pageHeight: number,
   key: 'deltaY' | 'deltaX'
 ): CssPixels {

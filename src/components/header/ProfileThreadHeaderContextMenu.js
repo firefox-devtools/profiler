@@ -23,9 +23,7 @@ type Props = {|
   showThread: typeof showThread,
 |};
 
-class ProfileThreadHeaderContextMenu extends PureComponent {
-  props: Props;
-
+class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._toggleThreadVisibility = this._toggleThreadVisibility.bind(

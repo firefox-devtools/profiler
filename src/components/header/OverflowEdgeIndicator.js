@@ -4,28 +4,28 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 
 import './OverflowEdgeIndicator.css';
 
 type Props = {
   className: string,
-  children: number,
+  children: React.Node,
 };
 
-class OverflowEdgeIndicator extends PureComponent {
-  props: Props;
-  state: {
-    overflowsOnTop: boolean,
-    overflowsOnRight: boolean,
-    overflowsOnBottom: boolean,
-    overflowsOnLeft: boolean,
-  };
-  _containerCreated: (elem: HTMLDivElement) => void;
-  _container: HTMLDivElement;
-  _contentsWrapperCreated: (elem: HTMLDivElement) => void;
-  _contentsWrapper: HTMLDivElement;
+type State = {
+  overflowsOnTop: boolean,
+  overflowsOnRight: boolean,
+  overflowsOnBottom: boolean,
+  overflowsOnLeft: boolean,
+};
+
+class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
+  _containerCreated: (elem: HTMLDivElement | null) => void;
+  _container: HTMLDivElement | null;
+  _contentsWrapperCreated: (elem: HTMLDivElement | null) => void;
+  _contentsWrapper: HTMLDivElement | null;
 
   constructor(props: Props) {
     super(props);
@@ -53,9 +53,11 @@ class OverflowEdgeIndicator extends PureComponent {
   }
 
   _updateIndicatorStatus() {
-    if (this._container && this._contentsWrapper) {
-      const containerRect = this._container.getBoundingClientRect();
-      const contentsRect = this._contentsWrapper.getBoundingClientRect();
+    const container = this._container;
+    const contentsWrapper = this._contentsWrapper;
+    if (container && contentsWrapper) {
+      const containerRect = container.getBoundingClientRect();
+      const contentsRect = contentsWrapper.getBoundingClientRect();
       const oneDevicePixel = 1 / window.devicePixelRatio;
       this.setState({
         overflowsOnTop: contentsRect.top <= containerRect.top - oneDevicePixel,
@@ -98,10 +100,5 @@ class OverflowEdgeIndicator extends PureComponent {
     );
   }
 }
-
-OverflowEdgeIndicator.propTypes = {
-  className: PropTypes.string,
-  children: PropTypes.any,
-};
 
 export default OverflowEdgeIndicator;

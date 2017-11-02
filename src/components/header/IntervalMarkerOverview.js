@@ -40,10 +40,7 @@ type State = {
   mouseY: CssPixels,
 };
 
-class IntervalMarkerOverview extends PureComponent {
-  props: Props;
-  state: State;
-
+class IntervalMarkerOverview extends PureComponent<Props, State> {
   _canvas: HTMLCanvasElement | null;
   _requestedAnimationFrame: boolean | null;
 
@@ -63,7 +60,7 @@ class IntervalMarkerOverview extends PureComponent {
     this._canvas = null;
   }
 
-  _takeCanvasRef(c: HTMLCanvasElement) {
+  _takeCanvasRef(c: HTMLCanvasElement | null) {
     this._canvas = c;
   }
 
@@ -107,7 +104,7 @@ class IntervalMarkerOverview extends PureComponent {
     return null;
   }
 
-  _onMouseMove(event: SyntheticMouseEvent) {
+  _onMouseMove(event: SyntheticMouseEvent<>) {
     const hoveredItem = this._hitTest(event);
     if (hoveredItem !== null) {
       this.setState({

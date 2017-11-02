@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React from 'react';
+import * as React from 'react';
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';

@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
 import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2016-12-06.png';
@@ -44,7 +44,7 @@ const InstallButton = ({
 type InstallButtonProps = {
   name: string,
   xpiUrl: string,
-  children?: React.Element<*>,
+  children?: React.Node,
   className?: string,
 };
 
@@ -52,9 +52,8 @@ type UploadButtonProps = {
   retrieveProfileFromFile: File => void,
 };
 
-class UploadButton extends PureComponent {
-  props: UploadButtonProps;
-  _input: HTMLInputElement;
+class UploadButton extends React.PureComponent<UploadButtonProps> {
+  _input: HTMLInputElement | null;
 
   constructor(props: UploadButtonProps) {
     super(props);
@@ -76,7 +75,9 @@ class UploadButton extends PureComponent {
   }
 
   _upload() {
-    this.props.retrieveProfileFromFile(this._input.files[0]);
+    if (this._input) {
+      this.props.retrieveProfileFromFile(this._input.files[0]);
+    }
   }
 }
 
@@ -108,12 +109,12 @@ type HomeProps = {
   retrieveProfileFromFile: File => void,
 };
 
-class Home extends PureComponent {
-  state: {
-    isDragging: boolean,
-    isAddonInstalled: boolean,
-  };
-  props: HomeProps;
+type HomeState = {
+  isDragging: boolean,
+  isAddonInstalled: boolean,
+};
+
+class Home extends React.PureComponent<HomeProps, HomeState> {
   _supportsWebExtensionAPI: boolean;
   _isFirefox: boolean;
 

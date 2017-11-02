@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import {
   formatNumber,
@@ -22,7 +22,7 @@ function _markerDetail<T: NotVoidOrNull>(
   label: string,
   value: T,
   fn: T => string = String
-): Array<React$Element<*> | string> {
+): React.Node {
   return [
     <div className="tooltipLabel" key="{key}">
       {label}:
@@ -31,7 +31,7 @@ function _markerDetail<T: NotVoidOrNull>(
   ];
 }
 
-function getMarkerDetails(data: MarkerPayload): React$Element<*> | null {
+function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
   if (data) {
     switch (data.type) {
       case 'UserTiming': {
@@ -244,9 +244,7 @@ type Props = {
   threadName?: string,
 };
 
-export default class MarkerTooltipContents extends PureComponent {
-  props: Props;
-
+export default class MarkerTooltipContents extends React.PureComponent<Props> {
   render() {
     const { marker, className, threadName } = this.props;
     const details = getMarkerDetails(marker.data);

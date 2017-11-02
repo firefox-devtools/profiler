@@ -132,18 +132,16 @@ export interface IDBIndex<K, L, V> extends EventTarget {
   unique: boolean,
 }
 
-// Theorically we'd need to have static functions with a different generic key,
-// but this doesn't make a practical difference in this case.
 export interface IDBKeyRange<K> {
-  bound(
-    lower: K,
-    upper: K,
+  static bound<J>(
+    lower: J,
+    upper: J,
     lowerOpen?: boolean,
     upperOpen?: boolean
-  ): IDBKeyRange<K>,
-  only(value: K): IDBKeyRange<K>,
-  lowerBound(bound: K, open?: boolean): IDBKeyRange<K>,
-  upperBound(bound: K, open?: boolean): IDBKeyRange<K>,
+  ): IDBKeyRange<J>,
+  static only<J>(value: J): IDBKeyRange<J>,
+  static lowerBound<J>(bound: J, open?: boolean): IDBKeyRange<J>,
+  static upperBound<J>(bound: J, open?: boolean): IDBKeyRange<J>,
   lower: K,
   upper: K,
   lowerOpen: boolean,

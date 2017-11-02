@@ -48,9 +48,7 @@ type Props = {
   changeSelectedCallNode: (IndexIntoCallNodeTable, CallNodePath) => void,
 };
 
-class ProfileThreadHeaderBar extends PureComponent {
-  props: Props;
-
+class ProfileThreadHeaderBar extends PureComponent<Props> {
   constructor(props) {
     super(props);
     (this: any)._onLabelMouseDown = this._onLabelMouseDown.bind(this);

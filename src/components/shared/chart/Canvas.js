@@ -1,5 +1,5 @@
 // @flow
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import { timeCode } from '../../../utils/time-code';
 import classNames from 'classnames';
 import Tooltip from '../Tooltip';
@@ -11,7 +11,7 @@ type Props<HoveredItem> = {
   containerHeight: CssPixels,
   className: string,
   onDoubleClickItem: (HoveredItem | null) => void,
-  getHoveredItemInfo: HoveredItem => React$Element<*>,
+  getHoveredItemInfo: HoveredItem => React.Node,
   drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
   isDragging: boolean,
   hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
@@ -25,16 +25,13 @@ type State<HoveredItem> = {
 
 require('./Canvas.css');
 
-export default class ChartCanvas<HoveredItem> extends PureComponent<
-  void,
+export default class ChartCanvas<HoveredItem> extends React.PureComponent<
   Props<HoveredItem>,
   State<HoveredItem>
 > {
-  props: Props<HoveredItem>;
-  state: State<HoveredItem>;
   _devicePixelRatio: number;
   _ctx: CanvasRenderingContext2D;
-  _canvas: ?HTMLCanvasElement;
+  _canvas: HTMLCanvasElement | null;
 
   constructor(props: Props<HoveredItem>) {
     super(props);
@@ -94,7 +91,7 @@ export default class ChartCanvas<HoveredItem> extends PureComponent<
     }
   }
 
-  _onMouseMove(event: SyntheticMouseEvent) {
+  _onMouseMove(event: SyntheticMouseEvent<>) {
     if (!this._canvas) {
       return;
     }
@@ -128,7 +125,7 @@ export default class ChartCanvas<HoveredItem> extends PureComponent<
     this.props.onDoubleClickItem(this.state.hoveredItem);
   }
 
-  _getHoveredItemInfo(): null | React$Element<*> {
+  _getHoveredItemInfo(): React.Node {
     const { hoveredItem } = this.state;
     if (hoveredItem === null) {
       return null;
@@ -136,7 +133,7 @@ export default class ChartCanvas<HoveredItem> extends PureComponent<
     return this.props.getHoveredItemInfo(hoveredItem);
   }
 
-  _setCanvasRef(canvas: HTMLCanvasElement) {
+  _setCanvasRef(canvas: HTMLCanvasElement | null) {
     this._canvas = canvas;
   }
 

@@ -24,14 +24,14 @@ type Props = {
   onChangeTabOrder: (number[]) => Action,
 };
 
-class TabBar extends PureComponent {
+class TabBar extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._mouseDownListener = this._mouseDownListener.bind(this);
   }
 
-  _mouseDownListener(e: SyntheticMouseEvent & { target: HTMLElement }) {
-    this.props.onSelectTab(e.target.dataset.name);
+  _mouseDownListener(e: SyntheticMouseEvent<HTMLElement>) {
+    this.props.onSelectTab(e.currentTarget.dataset.name);
   }
 
   render() {

@@ -42,11 +42,11 @@ type Props = {
   changeTabOrder: (number[]) => Action,
 };
 
-class ProfileViewer extends PureComponent {
-  props: Props;
-  state: {
-    isMounted: boolean,
-  };
+type State = {
+  isMounted: boolean,
+};
+
+class ProfileViewer extends PureComponent<Props, State> {
   _tabs: Tab[];
 
   constructor(props) {

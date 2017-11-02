@@ -976,7 +976,7 @@ export function unserializeProfileOfArbitraryFormat(
 }
 
 export class ProfileProcessor {
-  processProfile(geckoProfile: GeckoProfile) {
+  processProfile(geckoProfile: GeckoProfile): Promise<*> {
     return new Promise(resolve => {
       resolve(processProfile(geckoProfile));
     });

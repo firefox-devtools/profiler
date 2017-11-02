@@ -11,9 +11,7 @@ type Props = {
   profilerUrl: string,
 };
 
-class Initializing extends PureComponent {
-  props: Props;
-
+class Initializing extends PureComponent<Props> {
   render() {
     const { className, profilerUrl } = this.props;
 

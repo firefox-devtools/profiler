@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import bisection from 'bisection';
 import clamp from 'clamp';
 import arrayMove from 'array-move';
@@ -19,7 +19,19 @@ type Props = {|
   className: string,
   order: number[],
   onChangeOrder: (number[]) => Action,
-  children?: React$Element<*>,
+  // This forces the children to be an array of React Elements.
+  // See https://flow.org/en/docs/react/children/ for more information.
+  children: React.ChildrenArray<React.Element<any>>,
+|};
+
+type State = {|
+  phase: 'RESTING' | 'FINISHING' | 'MANIPULATING',
+  manipulatingIndex: number,
+  destinationIndex: number,
+  manipulationDelta: number,
+  adjustPrecedingBy: number,
+  adjustSucceedingBy: number,
+  finalOffset: number,
 |};
 
 type XY = {|
@@ -31,21 +43,9 @@ type XY = {|
 
 type EventWithPageProperties = { pageX: number, pageY: number };
 
-class Reorderable extends PureComponent {
-  props: Props;
-
-  state: {|
-    phase: 'RESTING' | 'FINISHING' | 'MANIPULATING',
-    manipulatingIndex: number,
-    destinationIndex: number,
-    manipulationDelta: number,
-    adjustPrecedingBy: number,
-    adjustSucceedingBy: number,
-    finalOffset: number,
-  |};
-
+class Reorderable extends React.PureComponent<Props, State> {
   _xy: {| horizontal: XY, vertical: XY |};
-  _container: ?HTMLElement;
+  _container: HTMLElement | null;
 
   constructor(props: Props) {
     super(props);
@@ -77,15 +77,15 @@ class Reorderable extends PureComponent {
     };
   }
 
-  _setContainerRef(container: HTMLElement) {
+  _setContainerRef(container: HTMLElement | null) {
     this._container = container;
   }
 
-  _onMouseDown(event: SyntheticMouseEvent) {
+  _onMouseDown(event: SyntheticMouseEvent<>) {
     if (
       !this._container ||
-      event.target === this._container ||
-      !(event.target instanceof HTMLElement) ||
+      event.currentTarget === this._container ||
+      !(event.currentTarget instanceof HTMLElement) ||
       // Only run for left clicks.
       event.button !== 0
     ) {
@@ -93,7 +93,7 @@ class Reorderable extends PureComponent {
     }
     // Flow: Coerce the event target into an HTMLElement in combination with the above
     // `instanceof` statement.
-    let element = (event.target: HTMLElement);
+    let element = (event.currentTarget: HTMLElement);
     if (!element.matches('.grippy, .grippy *')) {
       // Don't handle this event. Only clicking inside a grippy should start the dragging process.
       return;
@@ -230,9 +230,7 @@ class Reorderable extends PureComponent {
 
   render() {
     const { className, order } = this.props;
-    const children: React$Element<*>[] = React.Children.toArray(
-      this.props.children
-    );
+    const children = React.Children.toArray(this.props.children);
     const orderedChildren = order.map(childIndex => children[childIndex]);
     const TagName = this.props.tagName;
     const xy = this._getXY();

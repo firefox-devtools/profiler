@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 
 require('./ArrowPanel.css');
@@ -15,19 +15,19 @@ type Props = {
   onOkButtonClick?: () => mixed,
   onCancelButtonClick?: () => mixed,
   className: string,
-  children: React$Element<*>,
+  children: React.Node,
   title?: string,
   okButtonText?: string,
   cancelButtonText?: string,
 };
 
-class ArrowPanel extends PureComponent {
-  props: Props;
-  state: {
-    open: boolean,
-  };
-  _panelElementCreated: HTMLElement => void;
-  _panelElement: HTMLElement;
+type State = {
+  open: boolean,
+};
+
+class ArrowPanel extends React.PureComponent<Props, State> {
+  _panelElementCreated: (HTMLElement | null) => void;
+  _panelElement: HTMLElement | null;
 
   constructor(props: Props) {
     super(props);
@@ -35,7 +35,7 @@ class ArrowPanel extends PureComponent {
     (this: any)._windowMouseDownListener = this._windowMouseDownListener.bind(
       this
     );
-    this._panelElementCreated = (elem: HTMLElement) => {
+    this._panelElementCreated = (elem: HTMLElement | null) => {
       this._panelElement = elem;
     };
     (this: any)._onOkButtonClick = this._onOkButtonClick.bind(this);

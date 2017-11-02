@@ -25,8 +25,7 @@ type Props = {
   onZoomButtonClick: (start: Milliseconds, end: Milliseconds) => *,
 };
 
-export default class SelectionScrubberOverlay extends PureComponent {
-  props: Props;
+export default class SelectionScrubberOverlay extends PureComponent<Props> {
   _rangeStartOnMove: OnMove;
   _moveRangeOnMove: OnMove;
   _rangeEndOnMove: OnMove;
@@ -72,11 +71,11 @@ export default class SelectionScrubberOverlay extends PureComponent {
     (this: any)._zoomButtonOnClick = this._zoomButtonOnClick.bind(this);
   }
 
-  _zoomButtonOnMouseDown(e: SyntheticMouseEvent) {
+  _zoomButtonOnMouseDown(e: SyntheticMouseEvent<>) {
     e.stopPropagation();
   }
 
-  _zoomButtonOnClick(e: SyntheticMouseEvent) {
+  _zoomButtonOnClick(e: SyntheticMouseEvent<>) {
     e.stopPropagation();
     const { selectionStart, selectionEnd } = this.props;
     this.props.onZoomButtonClick(selectionStart, selectionEnd);

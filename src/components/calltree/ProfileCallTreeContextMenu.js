@@ -38,8 +38,7 @@ type Props = {
 
 require('./ProfileCallTreeContextMenu.css');
 
-class ProfileCallTreeContextMenu extends PureComponent {
-  props: Props;
+class ProfileCallTreeContextMenu extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any).handleClick = this.handleClick.bind(this);
@@ -95,7 +94,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
     copy(stack);
   }
 
-  handleClick(event: SyntheticEvent, data: { type: string }): void {
+  handleClick(event: SyntheticEvent<>, data: { type: string }): void {
     const { type } = data;
     switch (type) {
       case 'copy-function-name':

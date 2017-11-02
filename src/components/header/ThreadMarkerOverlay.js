@@ -15,18 +15,17 @@ type Props = {
   onSelectMarker: number => *,
 };
 
-class ThreadMarkerOverlay extends PureComponent {
-  props: Props;
+class ThreadMarkerOverlay extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._mouseDownListener = this._mouseDownListener.bind(this);
   }
 
-  _mouseDownListener(e: SyntheticMouseEvent & { target: HTMLElement }) {
-    if (!('index' in e.target.dataset)) {
+  _mouseDownListener(e: SyntheticMouseEvent<HTMLElement>) {
+    if (!('index' in e.currentTarget.dataset)) {
       return;
     }
-    this.props.onSelectMarker(+e.target.dataset.index);
+    this.props.onSelectMarker(+e.currentTarget.dataset.index);
   }
 
   render() {

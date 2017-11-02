@@ -16,9 +16,7 @@ type Props = {
   iconStartLoading: string => void,
 };
 
-class NodeIcon extends PureComponent {
-  props: Props;
-
+class NodeIcon extends PureComponent<Props> {
   constructor(props) {
     super(props);
     if (props.icon) {

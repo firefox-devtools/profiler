@@ -31,9 +31,7 @@ type Props = {
   changeCallTreeSearchString: typeof changeCallTreeSearchString,
 };
 
-class ProfileCallTreeSettings extends PureComponent {
-  props: Props;
-
+class ProfileCallTreeSettings extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._onImplementationFilterChange = this._onImplementationFilterChange.bind(
@@ -47,16 +45,16 @@ class ProfileCallTreeSettings extends PureComponent {
     );
   }
 
-  _onImplementationFilterChange(e: Event & { target: HTMLSelectElement }) {
+  _onImplementationFilterChange(e: SyntheticEvent<HTMLSelectElement>) {
     this.props.changeImplementationFilter(
       // This function is here to satisfy Flow that we are getting a valid
       // implementation filter.
-      toValidImplementationFilter(e.target.value)
+      toValidImplementationFilter(e.currentTarget.value)
     );
   }
 
-  _onInvertCallstackClick(e: Event & { target: HTMLInputElement }) {
-    this.props.changeInvertCallstack(e.target.checked);
+  _onInvertCallstackClick(e: SyntheticEvent<HTMLInputElement>) {
+    this.props.changeInvertCallstack(e.currentTarget.checked);
   }
 
   _onSearchFieldIdleAfterChange(value: string) {

@@ -7,7 +7,10 @@
 import { UniqueStringArray } from '../utils/unique-string-array';
 import type { TaskTracer } from '../types/profile';
 
-export function getTasksByThread(taskTable: Object, threadTable: Object) {
+export function getTasksByThread(
+  taskTable: Object,
+  threadTable: Object
+): Map<*, *> {
   const threadIndexToTaskIndicesMap = new Map();
   for (let threadIndex = 0; threadIndex < threadTable.length; threadIndex++) {
     const taskIndices = [];
