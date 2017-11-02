@@ -18,6 +18,9 @@ interface Panel {
   open(): mixed,
 }
 
+/* Note about the `panel` prop: we accept any React element whose Component
+ * class implements the `Panel` interface above, and has at least the props from
+ * `PanelProps` above, and any State type. */
 type Props = {
   className: string,
   label: string,

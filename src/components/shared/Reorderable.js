@@ -19,6 +19,8 @@ type Props = {|
   className: string,
   order: number[],
   onChangeOrder: (number[]) => Action,
+  // This forces the children to be an array of React Elements.
+  // See https://flow.org/en/docs/react/children/ for more information.
   children: React.ChildrenArray<React.Element<any>>,
 |};
 

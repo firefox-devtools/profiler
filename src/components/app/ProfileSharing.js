@@ -89,7 +89,6 @@ class ProfileSharingCompositeButton extends PureComponent<
   ProfileSharingCompositeButtonProps,
   ProfileSharingCompositeButtonState
 > {
-  props: ProfileSharingCompositeButtonProps;
   _permalinkButton: ButtonWithPanel | null;
   _uploadErrorButton: ButtonWithPanel | null;
   _permalinkTextField: HTMLInputElement | null;

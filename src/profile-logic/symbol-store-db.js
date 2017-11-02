@@ -9,6 +9,7 @@ import type {
   IDBDatabase,
   IDBObjectStore,
   IDBIndex,
+  IDBKeyRange,
 } from '../types/indexeddb';
 
 export type SymbolTableAsTuple = [
@@ -27,6 +28,7 @@ type SymbolItem = {|
 |};
 
 type SymbolPrimaryKey = [string, string];
+type SymbolDateKey = $PropertyType<SymbolItem, 'lastUsedDate'>;
 type SymbolStore = IDBObjectStore<SymbolPrimaryKey, SymbolItem>;
 
 const kTwoWeeksInMilliseconds = 2 * 7 * 24 * 60 * 60 * 1000;
@@ -233,10 +235,11 @@ export class SymbolStoreDB {
     beforeDate: Date,
     callback: () => void
   ): void {
-    const lastUsedDateIndex = store.index('lastUsedDate');
+    const lastUsedDateIndex: IDBIndex<*, Date, *> = store.index('lastUsedDate');
     // Get a cursor that walks all records whose lastUsedDate is less than beforeDate.
+    const range = window.IDBKeyRange.upperBound(beforeDate, true);
     const cursorReq = lastUsedDateIndex.openCursor(
-      window.IDBKeyRange.upperBound(beforeDate, true)
+      (range: IDBKeyRange<SymbolDateKey>)
     );
     // Iterate over all records in this cursor and delete them.
     cursorReq.onsuccess = () => {

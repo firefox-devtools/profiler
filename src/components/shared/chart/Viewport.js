@@ -17,8 +17,6 @@ import type {
 import typeof { updateProfileSelection as UpdateProfileSelection } from '../../../actions/profile-view';
 import type { ProfileSelection } from '../../../types/actions';
 
-require('./Viewport.css');
-
 const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
   typeof window === 'object' && window.WheelEvent
     ? new WheelEvent('mouse')

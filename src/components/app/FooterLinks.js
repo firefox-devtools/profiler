@@ -3,12 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import * as React from 'react';
+import React, { PureComponent } from 'react';
 require('./FooterLinks.css');
 
 type State = {| hide: boolean |};
 
-class FooterLinks extends React.PureComponent<{||}, State> {
+class FooterLinks extends PureComponent<{||}, State> {
   constructor() {
     super();
     this.state = {
