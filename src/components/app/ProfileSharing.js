@@ -160,10 +160,7 @@ class ProfileSharingCompositeButton extends PureComponent<
     }
   }
 
-  _attemptToShare() {
-    if (this.state.state !== 'local' && this.state.state !== 'error') {
-      return;
-    }
+  _notifyAnalytics() {
     const { ga } = window;
     if (ga) {
       ga('send', {
@@ -172,6 +169,13 @@ class ProfileSharingCompositeButton extends PureComponent<
         eventAction: 'start',
       });
     }
+  }
+
+  _attemptToShare() {
+    if (this.state.state !== 'local' && this.state.state !== 'error') {
+      return;
+    }
+    this._notifyAnalytics();
 
     const { profile, predictUrl } = this.props;
 

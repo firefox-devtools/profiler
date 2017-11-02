@@ -13,17 +13,17 @@ export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {
     const previousTab = getSelectedTab(getState());
     if (previousTab !== selectedTab) {
-      dispatch({
-        type: 'CHANGE_SELECTED_TAB',
-        selectedTab,
-      });
-      const ga = window.ga;
+      const { ga } = window;
       if (ga) {
         ga('send', {
           hitType: 'pageview',
           page: selectedTab,
         });
       }
+      dispatch({
+        type: 'CHANGE_SELECTED_TAB',
+        selectedTab,
+      });
     }
   };
 }
@@ -54,6 +54,11 @@ export function urlSetupDone(): ThunkAction<void> {
       ga('send', {
         hitType: 'pageview',
         page: dataSource === 'none' ? 'home' : getSelectedTab(getState()),
+      });
+      ga('send', {
+        hitType: 'event',
+        eventCategory: 'datasource',
+        eventAction: dataSource,
       });
     }
   };

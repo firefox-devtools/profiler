@@ -6,11 +6,15 @@
 import {
   selectorsForThread,
   selectedThreadSelectors,
+  getThreads,
 } from '../reducers/profile-view';
 import {
   getImplementationFilter,
   getSelectedThreadIndex,
+  getThreadOrder,
+  getHiddenThreads,
 } from '../reducers/url-state';
+import { getFriendlyThreadName } from '../profile-logic/profile-data';
 
 import type { ProfileSelection, ImplementationFilter } from '../types/actions';
 import type { Action, ThunkAction } from '../types/store';
@@ -55,23 +59,25 @@ export function changeThreadOrder(threadOrder: ThreadIndex[]): Action {
   };
 }
 
-export function hideThread(
-  threadIndex: ThreadIndex,
-  threadOrder: ThreadIndex[],
-  hiddenThreads: ThreadIndex[]
-): ThunkAction<void> {
-  return dispatch => {
+export function hideThread(threadIndex: ThreadIndex): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const threadOrder = getThreadOrder(getState());
+    const hiddenThreads = getHiddenThreads(getState());
+
     // Do not allow hiding the last thread.
     if (hiddenThreads.length + 1 === threadOrder.length) {
       return;
     }
+
     const { ga } = window;
     if (ga) {
+      const threads = getThreads(getState());
+      const thread = threads[threadIndex];
       ga('send', {
         hitType: 'event',
-        eventCategory: 'profile',
-        eventAction: 'toggle thread',
-        eventLabel: 'hide',
+        eventCategory: 'threads',
+        eventAction: 'hide',
+        eventLabel: getFriendlyThreadName(threads, thread),
       });
     }
 
@@ -86,20 +92,24 @@ export function hideThread(
   };
 }
 
-export function showThread(threadIndex: ThreadIndex): Action {
-  const { ga } = window;
-  if (ga) {
-    ga('send', {
-      hitType: 'event',
-      eventCategory: 'profile',
-      eventAction: 'toggle thread',
-      eventLabel: 'show',
-    });
-  }
+export function showThread(threadIndex: ThreadIndex): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const { ga } = window;
+    if (ga) {
+      const threads = getThreads(getState());
+      const thread = threads[threadIndex];
+      ga('send', {
+        hitType: 'event',
+        eventCategory: 'threads',
+        eventAction: 'show',
+        eventLabel: getFriendlyThreadName(threads, thread),
+      });
+    }
 
-  return {
-    type: 'SHOW_THREAD',
-    threadIndex,
+    dispatch({
+      type: 'SHOW_THREAD',
+      threadIndex,
+    });
   };
 }
 
@@ -166,7 +176,7 @@ export function changeImplementationFilter(
       ga('send', {
         hitType: 'event',
         eventCategory: 'profile',
-        eventAction: 'change hide platform details',
+        eventAction: 'change implementation filter',
         eventLabel: implementation,
       });
     }
