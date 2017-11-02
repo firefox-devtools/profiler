@@ -4,6 +4,7 @@
 
 // @flow
 import { getSelectedTab, getDataSource } from '../reducers/url-state';
+import { sendAnalytics } from '../utils/analytics';
 
 import type { Action, ThunkAction } from '../types/store';
 import type { TabSlug } from '../types/actions';
@@ -13,13 +14,10 @@ export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {
     const previousTab = getSelectedTab(getState());
     if (previousTab !== selectedTab) {
-      const { ga } = window;
-      if (ga) {
-        ga('send', {
-          hitType: 'pageview',
-          page: selectedTab,
-        });
-      }
+      sendAnalytics({
+        hitType: 'pageview',
+        page: selectedTab,
+      });
       dispatch({
         type: 'CHANGE_SELECTED_TAB',
         selectedTab,
@@ -48,19 +46,16 @@ export function urlSetupDone(): ThunkAction<void> {
 
     // After the url setup is done, we can successfully query our state about its
     // initial page.
-    const { ga } = window;
-    if (ga) {
-      const dataSource = getDataSource(getState());
-      ga('send', {
-        hitType: 'pageview',
-        page: dataSource === 'none' ? 'home' : getSelectedTab(getState()),
-      });
-      ga('send', {
-        hitType: 'event',
-        eventCategory: 'datasource',
-        eventAction: dataSource,
-      });
-    }
+    const dataSource = getDataSource(getState());
+    sendAnalytics({
+      hitType: 'pageview',
+      page: dataSource === 'none' ? 'home' : getSelectedTab(getState()),
+    });
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'datasource',
+      eventAction: dataSource,
+    });
   };
 }
 

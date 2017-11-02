@@ -5,6 +5,7 @@
 
 import type { IDBFactory, IDBKeyRange } from '../../src/types/indexeddb';
 import type { SymbolTableAsTuple } from '../../src/profile-logic/symbol-store-db';
+import type { GoogleAnalytics } from '../../src/utils/analytics';
 
 declare class GeckoProfiler {
   getProfile: () => Object,
@@ -13,32 +14,6 @@ declare class GeckoProfiler {
     breakpadId: string
   ) => Promise<SymbolTableAsTuple>,
 }
-
-// Document Google Analytics API
-// https://developers.google.com/analytics/devguides/collection/analyticsjs/pages
-type GAEvent = {|
-  hitType: 'event',
-  // Specifies the event category. Must not be empty
-  eventCategory: string,
-  eventAction: string,
-  eventLabel?: string,
-  eventValue?: number,
-|};
-
-type GAPageView = {|
-  hitType: 'pageview',
-  page: location.pathname,
-|};
-
-type GATiming = {|
-  hitType: 'timing',
-  timingCategory: string,
-  timingVar: string,
-  timingValue: number,
-  timingLabel?: string,
-|};
-
-type GoogleAnalytics = ('send', GAEvent | GAPageView | GATiming) => {};
 
 declare class Window extends EventTarget {
   // Google Analytics

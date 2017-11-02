@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { sendAnalytics } from './analytics';
 
 const MAX_TIMINGS_PER_LABEL = 3;
 const _timingsPerLabel = {};
@@ -24,10 +25,9 @@ export function timeCode<T>(label: string, codeAsACallback: () => T): T {
 
     // Some portion of users will have timing information sent. Limit this further to
     // only send a few labels per user.
-    const { ga } = self;
-    if (ga && _timingsPerLabel[label] <= MAX_TIMINGS_PER_LABEL) {
+    if (_timingsPerLabel[label] <= MAX_TIMINGS_PER_LABEL) {
       _timingsPerLabel[label] = 1 + (_timingsPerLabel[label] || 0);
-      ga('send', {
+      sendAnalytics({
         hitType: 'timing',
         timingCategory: 'timeCode',
         timingVar: label,

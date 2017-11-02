@@ -15,6 +15,7 @@ import {
   getHiddenThreads,
 } from '../reducers/url-state';
 import { getFriendlyThreadName } from '../profile-logic/profile-data';
+import { sendAnalytics } from '../utils/analytics';
 
 import type { ProfileSelection, ImplementationFilter } from '../types/actions';
 import type { Action, ThunkAction } from '../types/store';
@@ -45,14 +46,11 @@ export function changeSelectedThread(selectedThread: ThreadIndex): Action {
 }
 
 export function changeThreadOrder(threadOrder: ThreadIndex[]): Action {
-  const { ga } = window;
-  if (ga) {
-    ga('send', {
-      hitType: 'event',
-      eventCategory: 'profile',
-      eventAction: 'change thread order',
-    });
-  }
+  sendAnalytics({
+    hitType: 'event',
+    eventCategory: 'profile',
+    eventAction: 'change thread order',
+  });
   return {
     type: 'CHANGE_THREAD_ORDER',
     threadOrder,
@@ -69,17 +67,14 @@ export function hideThread(threadIndex: ThreadIndex): ThunkAction<void> {
       return;
     }
 
-    const { ga } = window;
-    if (ga) {
-      const threads = getThreads(getState());
-      const thread = threads[threadIndex];
-      ga('send', {
-        hitType: 'event',
-        eventCategory: 'threads',
-        eventAction: 'hide',
-        eventLabel: getFriendlyThreadName(threads, thread),
-      });
-    }
+    const threads = getThreads(getState());
+    const thread = threads[threadIndex];
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'threads',
+      eventAction: 'hide',
+      eventLabel: getFriendlyThreadName(threads, thread),
+    });
 
     dispatch(
       ({
@@ -94,17 +89,14 @@ export function hideThread(threadIndex: ThreadIndex): ThunkAction<void> {
 
 export function showThread(threadIndex: ThreadIndex): ThunkAction<void> {
   return (dispatch, getState) => {
-    const { ga } = window;
-    if (ga) {
-      const threads = getThreads(getState());
-      const thread = threads[threadIndex];
-      ga('send', {
-        hitType: 'event',
-        eventCategory: 'threads',
-        eventAction: 'show',
-        eventLabel: getFriendlyThreadName(threads, thread),
-      });
-    }
+    const threads = getThreads(getState());
+    const thread = threads[threadIndex];
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'threads',
+      eventAction: 'show',
+      eventLabel: getFriendlyThreadName(threads, thread),
+    });
 
     dispatch({
       type: 'SHOW_THREAD',
@@ -116,11 +108,10 @@ export function showThread(threadIndex: ThreadIndex): ThunkAction<void> {
 let _callTreeSearchAnalyticsSent = false;
 
 export function changeCallTreeSearchString(searchString: string): Action {
-  const { ga } = window;
-  if (ga && !_callTreeSearchAnalyticsSent) {
+  if (!_callTreeSearchAnalyticsSent) {
     // Only send this event once, since it could be fired frequently with typing.
     _callTreeSearchAnalyticsSent = true;
-    ga('send', {
+    sendAnalytics({
       hitType: 'event',
       eventCategory: 'profile',
       eventAction: 'call tree search string',
@@ -171,15 +162,12 @@ export function changeImplementationFilter(
       getState()
     );
 
-    const { ga } = window;
-    if (ga) {
-      ga('send', {
-        hitType: 'event',
-        eventCategory: 'profile',
-        eventAction: 'change implementation filter',
-        eventLabel: implementation,
-      });
-    }
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'change implementation filter',
+      eventLabel: implementation,
+    });
 
     dispatch({
       type: 'CHANGE_IMPLEMENTATION_FILTER',
@@ -192,14 +180,11 @@ export function changeImplementationFilter(
 }
 
 export function changeInvertCallstack(invertCallstack: boolean): Action {
-  const { ga } = window;
-  if (ga) {
-    ga('send', {
-      hitType: 'event',
-      eventCategory: 'profile',
-      eventAction: 'change invert callstack',
-    });
-  }
+  sendAnalytics({
+    hitType: 'event',
+    eventCategory: 'profile',
+    eventAction: 'change invert callstack',
+  });
   return {
     type: 'CHANGE_INVERT_CALLSTACK',
     invertCallstack,
@@ -209,14 +194,11 @@ export function changeInvertCallstack(invertCallstack: boolean): Action {
 export function changeHidePlatformDetails(
   hidePlatformDetails: boolean
 ): Action {
-  const { ga } = window;
-  if (ga) {
-    ga('send', {
-      hitType: 'event',
-      eventCategory: 'profile',
-      eventAction: 'change hide platform details',
-    });
-  }
+  sendAnalytics({
+    hitType: 'event',
+    eventCategory: 'profile',
+    eventAction: 'change hide platform details',
+  });
   return {
     type: 'CHANGE_HIDE_PLATFORM_DETAILS',
     hidePlatformDetails,
@@ -283,15 +265,12 @@ export function addTransformToStack(
       transform,
       transformedThread,
     });
-    const { ga } = window;
-    if (ga) {
-      ga('send', {
-        hitType: 'event',
-        eventCategory: 'profile',
-        eventAction: 'add transform',
-        eventLabel: transform.type,
-      });
-    }
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'add transform',
+      eventLabel: transform.type,
+    });
   };
 }
 

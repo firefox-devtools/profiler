@@ -26,6 +26,7 @@ import shortenUrl from '../../utils/shorten-url';
 import { serializeProfile } from '../../profile-logic/process-profile';
 import prettyBytes from 'pretty-bytes';
 import sha1 from '../../utils/sha1';
+import { sendAnalytics } from '../../utils/analytics';
 import url from 'url';
 
 import type { StartEndRange } from '../../types/units';
@@ -161,14 +162,11 @@ class ProfileSharingCompositeButton extends PureComponent<
   }
 
   _notifyAnalytics() {
-    const { ga } = window;
-    if (ga) {
-      ga('send', {
-        hitType: 'event',
-        eventCategory: 'profile upload',
-        eventAction: 'start',
-      });
-    }
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile upload',
+      eventAction: 'start',
+    });
   }
 
   _attemptToShare() {
@@ -224,14 +222,11 @@ class ProfileSharingCompositeButton extends PureComponent<
             shortUrl: newShortUrl,
           });
 
-          const { ga } = window;
-          if (ga) {
-            ga('send', {
-              hitType: 'event',
-              eventCategory: 'profile upload',
-              eventAction: 'succeeded',
-            });
-          }
+          sendAnalytics({
+            hitType: 'event',
+            eventCategory: 'profile upload',
+            eventAction: 'succeeded',
+          });
         });
         const shortenUrlPromise = this._shortenUrlAndFocusTextFieldOnCompletion();
         Promise.race([uploadPromise, shortenUrlPromise]).then(() => {
@@ -249,14 +244,11 @@ class ProfileSharingCompositeButton extends PureComponent<
         if (this._uploadErrorButton) {
           this._uploadErrorButton.openPanel();
         }
-        const { ga } = window;
-        if (ga) {
-          ga('send', {
-            hitType: 'event',
-            eventCategory: 'profile upload',
-            eventAction: 'failed',
-          });
-        }
+        sendAnalytics({
+          hitType: 'event',
+          eventCategory: 'profile upload',
+          eventAction: 'failed',
+        });
       });
   }
 
@@ -396,14 +388,11 @@ class ProfileDownloadButton extends PureComponent<
         compressedSize: blob.size,
       });
     });
-    const { ga } = window;
-    if (ga) {
-      ga('send', {
-        hitType: 'event',
-        eventCategory: 'profile save locally',
-        eventAction: 'save',
-      });
-    }
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile save locally',
+      eventAction: 'save',
+    });
   }
 
   render() {
