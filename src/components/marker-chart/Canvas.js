@@ -349,7 +349,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  /* This function currently returns `React.Element<any>` because we exactly
+  /**
+   * This function currently returns `React.Element<any>` because we exactly
    * know its return type. This needs to be a subtype of React.Node so this
    * could be changed in the future if necessary. */
   getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React.Element<any> {
