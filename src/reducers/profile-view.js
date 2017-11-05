@@ -16,6 +16,7 @@ import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
 import * as StackTiming from '../profile-logic/stack-timing';
+import * as CallNodeSamples from '../profile-logic/call-node-samples';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import * as TaskTracerTools from '../profile-logic/task-tracer';
@@ -448,6 +449,7 @@ export type SelectorsForThread = {
   getCallNodeMaxDepthForStackChart: State => number,
   getStackTimingByDepthForStackChart: State => StackTiming.StackTimingByDepth,
   getLeafCategoryStackTimingForStackChart: State => StackTiming.StackTimingByDepth,
+  getCallNodeSamplesByDepthForFlameGraph: State => CallNodeSamples.CallNodeSamplesByDepth,
   getFriendlyThreadName: State => string,
   getThreadProcessDetails: State => string,
   getSearchFilteredMarkers: State => MarkersTable,
@@ -723,6 +725,12 @@ export const selectorsForThread = (
       getProfileInterval,
       StackTiming.getStackTimingByDepth
     );
+    const getCallNodeSamplesByDepthForFlameGraph = createSelector(
+      getFilteredThreadForStackChart,
+      getCallNodeInfoOfFilteredThreadForStackChart,
+      getCallNodeMaxDepthForStackChart,
+      CallNodeSamples.getCallNodeSamplesByDepth
+    );
     const getLeafCategoryStackTimingForStackChart = createSelector(
       getFilteredThreadForStackChart,
       getProfileInterval,
@@ -761,6 +769,7 @@ export const selectorsForThread = (
       getCallNodeMaxDepthForStackChart,
       getStackTimingByDepthForStackChart,
       getLeafCategoryStackTimingForStackChart,
+      getCallNodeSamplesByDepthForFlameGraph,
       getFriendlyThreadName,
       getThreadProcessDetails,
       getSearchFilteredMarkers,

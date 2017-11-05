@@ -140,6 +140,25 @@ describe('selectors/getStackTimingByDepthForStackChart', function() {
   });
 });
 
+describe('selectors/getCallNodeSamplesByDepthForFlameGraph', function() {
+  it('computes call node samples by depth', function() {
+    const store = storeWithProfile();
+    const callNodeSamplesByDepth = selectedThreadSelectors.getCallNodeSamplesByDepthForFlameGraph(
+      store.getState()
+    );
+
+    expect(callNodeSamplesByDepth).toEqual([
+      { start: [0], end: [10], callNode: [0], length: 1 },
+      { start: [0], end: [9], callNode: [1], length: 1 },
+      { start: [0, 2, 3], end: [2, 3, 7], callNode: [2, 3, 4], length: 3 },
+      { start: [3], end: [5], callNode: [5], length: 1 },
+      { start: [3], end: [4], callNode: [6], length: 1 },
+      { start: [3], end: [4], callNode: [7], length: 1 },
+      { start: [3], end: [4], callNode: [8], length: 1 },
+    ]);
+  });
+});
+
 describe('selectors/getCallNodeMaxDepthForStackChart', function() {
   it('calculates the max func depth and observes of platform-detail filters', function() {
     const store = storeWithProfile();
