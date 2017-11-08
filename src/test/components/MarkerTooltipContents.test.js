@@ -62,6 +62,7 @@ describe('MarkerTooltipContents', function() {
             bytes_tenured: 4 * 1024 * 1024,
             bytes_used: 8 * 1024 * 1024,
             new_capacity: 16 * 1024 * 1024,
+            lazy_capacity: 12 * 1024 * 1024,
             phase_times: {},
           },
         },

@@ -86,6 +86,13 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
                     nursery.new_capacity,
                     formatBytes
                   )}
+                  {nursery.lazy_capacity &&
+                    _markerDetail(
+                      'gclazynurserysize',
+                      'Lazy-allocated size',
+                      nursery.lazy_capacity,
+                      formatBytes
+                    )}
                 </div>
               );
             }
