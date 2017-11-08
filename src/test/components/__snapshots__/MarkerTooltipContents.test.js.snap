@@ -294,6 +294,13 @@ exports[`MarkerTooltipContents renders tooltips for various markers 5`] = `
       :
     </div>
     16MB
+    <div
+      className="tooltipLabel"
+    >
+      Lazy-allocated size
+      :
+    </div>
+    12MB
   </div>
 </div>
 `;

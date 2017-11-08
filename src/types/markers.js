@@ -188,6 +188,12 @@ export type GCMinorCompletedData = {
   cur_capacity?: number,
   new_capacity: number,
 
+  // The nursery may be dynamically resized (since version 58)
+  // this field is the lazy-allocated size.  It is not present in older
+  // versions.
+  // In the future it may be omitted if it matches cur_capacity.
+  lazy_capacity?: number,
+
   phase_times: PhaseTimes,
 };
 
