@@ -80,12 +80,13 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
                         formatBytes
                       )
                     )}
-                  {_markerDetail(
-                    'gcnewnurserysize',
-                    'New nursery size',
-                    nursery.new_capacity,
-                    formatBytes
-                  )}
+                  {nursery.new_capacity &&
+                    _markerDetail(
+                      'gcnewnurserysize',
+                      'New nursery size',
+                      nursery.new_capacity,
+                      formatBytes
+                    )}
                   {nursery.lazy_capacity &&
                     _markerDetail(
                       'gclazynurserysize',

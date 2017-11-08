@@ -186,12 +186,17 @@ export type GCMinorCompletedData = {
   // Capacity may change as the nursery size is tuned after each collection.
   // cur_capacity isn't in older profiles.
   cur_capacity?: number,
-  new_capacity: number,
+
+  // If the nursery is resized after this collection then this field is
+  // present giving the new size.
+  new_capacity?: number,
 
   // The nursery may be dynamically resized (since version 58)
   // this field is the lazy-allocated size.  It is not present in older
   // versions.
-  // In the future it may be omitted if it matches cur_capacity.
+  // If the currently allocated size is different from the size
+  // (cur_capacity) then this field is present and shows how much memory is
+  // actually allocated.
   lazy_capacity?: number,
 
   phase_times: PhaseTimes,
