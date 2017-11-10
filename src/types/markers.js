@@ -108,7 +108,8 @@ type GCMajorCompleted_Shared = {
   total_zones: number,
   total_compartments: number,
   minor_gcs: number,
-  store_buffer_overflows: number,
+  // Present when non-zero.
+  store_buffer_overflows?: number,
   slices: number,
 
   // Timing for the SCC sweep phase.
@@ -116,13 +117,14 @@ type GCMajorCompleted_Shared = {
   scc_sweep_max_pause: Milliseconds,
 
   // The reason (if not 'None') why this GC ran non-incrementally.
-  nonincremental_reason: string,
+  nonincremental_reason?: string,
 
   // The allocated space for the whole heap before the GC started.
   allocated_bytes: number,
 
-  added_chunks: number,
-  removed_chunks: number,
+  // Only present if non-zero.
+  added_chunks?: number,
+  removed_chunks?: number,
 
   // The number for the start of this GC event.
   major_gc_number: number,

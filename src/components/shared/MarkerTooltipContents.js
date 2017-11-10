@@ -126,15 +126,21 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
               </div>
             );
           case 'completed': {
+            let nonIncrementalReason;
+            if (
+              timings.nonincremental_reason &&
+              timings.nonincremental_reason !== 'None'
+            ) {
+              nonIncrementalReason = _markerDetail(
+                'gcnonincrementalreason',
+                'Non-incremental reason',
+                timings.nonincremental_reason
+              );
+            }
             return (
               <div className="tooltipDetails">
                 {_markerDetail('gcreason', 'Reason', timings.reason)}
-                {timings.nonincremental_reason !== 'None' &&
-                  _markerDetail(
-                    'gcnonincrementalreason',
-                    'Non-incremental reason',
-                    timings.nonincremental_reason
-                  )}
+                {nonIncrementalReason}
                 {_markerDetail(
                   'gctime',
                   'Total slice times',
