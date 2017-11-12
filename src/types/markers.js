@@ -55,7 +55,6 @@ type GCSliceData_Shared = {
   slice: number,
 
   pause: Milliseconds,
-  when: Milliseconds,
 
   // The reason for this slice.
   reason: string,
@@ -75,11 +74,11 @@ type GCSliceData_Shared = {
   trigger_amount?: number,
   trigger_threshold?: number,
 
-  // The number of page faults that occured during the slice.
-  page_faults: number,
+  // The number of page faults that occured during the slice.  If missing
+  // there were 0 page faults.
+  page_faults?: number,
 
   start_timestamp: Seconds,
-  end_timestamp: Seconds,
 };
 export type GCSliceData_Gecko = GCSliceData_Shared & {
   times: PhaseTimes,

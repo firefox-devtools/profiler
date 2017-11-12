@@ -213,7 +213,8 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
               timings.initial_state + ' – ' + timings.final_state
             )}
             {triggers}
-            {_markerDetail('gcfaults', 'Page faults', timings.page_faults)}
+            {timings.page_faults &&
+              _markerDetail('gcfaults', 'Page faults', timings.page_faults)}
           </div>
         );
       }

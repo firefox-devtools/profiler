@@ -479,12 +479,6 @@ exports[`MarkerTooltipContents renders tooltips for various markers 7`] = `
       :
     </div>
     Initial – Final
-    <div
-      className="tooltipLabel"
-    >
-      Page faults
-      :
-    </div>
     0
   </div>
 </div>
