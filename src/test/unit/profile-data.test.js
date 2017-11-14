@@ -272,6 +272,27 @@ describe('process-profile', function() {
       expect(thread.stringTable.getString(name1)).toEqual('chrome://blargh');
     });
   });
+  describe('DevTools profiles', function() {
+    it('should process correctly', function() {
+      // Mock out a DevTools profile.
+      const profile = processProfile({
+        label: null,
+        duration: null,
+        markers: null,
+        frames: null,
+        memory: null,
+        ticks: null,
+        allocations: null,
+        profile: getGeckoProfile(),
+        configuration: null,
+        systemHost: null,
+        systemClient: null,
+        fileType: null,
+        version: null,
+      });
+      expect(profile.threads.length).toEqual(3);
+    });
+  });
 });
 
 describe('profile-data', function() {

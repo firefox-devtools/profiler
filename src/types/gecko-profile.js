@@ -130,7 +130,7 @@ export type GeckoThread = {
   stringTable: string[],
 };
 
-export type GeckoProfile = {
+export type GeckoProfile = {|
   meta: {|
     interval: Milliseconds,
     startTime: Milliseconds,
@@ -150,4 +150,4 @@ export type GeckoProfile = {
   pausedRanges: PausedRange[],
   tasktracer?: Object,
   processes: GeckoProfile[],
-};
+|};
