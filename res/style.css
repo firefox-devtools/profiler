@@ -665,13 +665,6 @@ body, #root, .profileViewer {
   background-color: var(--grey-40);
 }
 
-.profileSummaryView {
-  border-top: 1px solid var(--grey-30);
-  padding: 10px;
-  flex: 1;
-  overflow-y: auto;
-}
-
 .treeViewFixedColumn.timestamp {
   left: 0px;
   width: 80px;
@@ -702,10 +695,6 @@ body, #root, .profileViewer {
   left: 0;
   margin: 0;
   padding: 10px;
-}
-
-.profileSummaryP {
-  margin: 0;
 }
 
 .taskTracerView {

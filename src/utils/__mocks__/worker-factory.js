@@ -3,7 +3,6 @@ import Worker from 'workerjs';
 const workerFiles = {
   // Paths are relative to workerjs' requireworker.js file
   'zee-worker': '../../res/zee-worker.js',
-  worker: '../../src/profile-logic/summary-worker/index.js',
 };
 
 const workerInstances = [];

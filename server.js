@@ -2,12 +2,11 @@ const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const config = require('./webpack.config');
 const { oneLine } = require('common-tags');
-const baseConfig = config[0];
 const port = process.env.PERFHTML_PORT || 4242;
 
 new WebpackDevServer(webpack(config), {
-  contentBase: baseConfig.output.path,
-  publicPath: baseConfig.output.publicPath,
+  contentBase: config.output.path,
+  publicPath: config.output.publicPath,
   hot: process.env.NODE_ENV === 'development' ? true : false,
   historyApiFallback: {
     disableDotRule: true,
