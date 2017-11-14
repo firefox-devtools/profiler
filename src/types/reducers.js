@@ -4,10 +4,8 @@
 
 // @flow
 
-import type { ProfileSummary } from '../profile-logic/summarize-profile';
 import type {
   Action,
-  ExpandedSet,
   DataSource,
   ProfileSelection,
   ImplementationFilter,
@@ -58,11 +56,6 @@ export type AppState = {
   hasZoomedViaMousewheel: boolean,
 };
 
-export type SummaryViewState = {
-  summary: null | ProfileSummary,
-  expanded: null | ExpandedSet,
-};
-
 export type RangeFilterState = {
   start: number,
   end: number,
@@ -95,7 +88,6 @@ export type StackChartState = {
 export type State = {
   app: AppState,
   profileView: ProfileViewState,
-  summaryView: SummaryViewState,
   urlState: UrlState,
   stackChart: StackChartState,
   icons: IconState,

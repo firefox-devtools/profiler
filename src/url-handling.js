@@ -124,8 +124,6 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
         : undefined;
       break;
     case 'marker-chart':
-    case 'summary':
-      // No additional query params required.
       break;
     default:
       unexpectedCase(selectedTab);
@@ -232,7 +230,6 @@ function toValidTabSlug(slug: ?string): TabSlug {
     case 'stack-chart':
     case 'marker-chart':
     case 'marker-table':
-    case 'summary':
       return slug;
     case undefined:
       return defaultTab;

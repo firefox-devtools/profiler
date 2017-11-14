@@ -8,11 +8,7 @@ import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { createLogger } from 'redux-logger';
 import reducers from './reducers';
-import threadDispatcher from './utils/thread-middleware';
-import messages from './profile-logic/summary-worker/messages-content';
-import handleMessages from './utils/message-handler';
 import type { Store } from './types/store';
-import Worker from './utils/worker-factory';
 
 /**
  * Isolate the store creation into a function, so that it can be used outside of the
@@ -20,9 +16,7 @@ import Worker from './utils/worker-factory';
  * @return {object} Redux store.
  */
 export default function initializeStore(): Store {
-  const worker = new Worker('worker');
-
-  const middlewares = [thunk, threadDispatcher(worker, 'toWorker')];
+  const middlewares = [thunk];
 
   if (process.env.NODE_ENV === 'development') {
     middlewares.push(
@@ -33,8 +27,6 @@ export default function initializeStore(): Store {
   }
 
   const store = createStore(reducers, applyMiddleware(...middlewares));
-
-  handleMessages(worker, store, messages);
 
   return store;
 }

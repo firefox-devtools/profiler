@@ -5,7 +5,6 @@
 // @flow
 import profileView from './profile-view';
 import app from './app';
-import summaryView from './summary-view';
 import urlState from './url-state';
 import stackChart from './stack-chart';
 import icons from './icons';
@@ -14,7 +13,6 @@ import { combineReducers } from 'redux';
 export default combineReducers({
   app,
   profileView,
-  summaryView,
   urlState,
   stackChart,
   icons,
