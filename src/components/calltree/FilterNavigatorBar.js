@@ -23,10 +23,7 @@ class FilterNavigatorBar extends PureComponent<Props> {
   }
 
   _onLiClick(e: SyntheticMouseEvent<HTMLLIElement>) {
-    const element = e.currentTarget.closest('.filterNavigatorBarItem');
-    if (!(element instanceof HTMLElement)) {
-      return;
-    }
+    const element = e.currentTarget;
     const index = parseInt(element.dataset.index, 10) || 0;
     this.props.onPop(index);
   }

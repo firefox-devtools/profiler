@@ -45,11 +45,9 @@ type EventWithPageProperties = { pageX: number, pageY: number };
 
 class Reorderable extends React.PureComponent<Props, State> {
   _xy: {| horizontal: XY, vertical: XY |};
-  _container: HTMLElement | null;
 
   constructor(props: Props) {
     super(props);
-    (this: any)._setContainerRef = this._setContainerRef.bind(this);
     (this: any)._onMouseDown = this._onMouseDown.bind(this);
     this.state = {
       phase: 'RESTING',
@@ -77,32 +75,29 @@ class Reorderable extends React.PureComponent<Props, State> {
     };
   }
 
-  _setContainerRef(container: HTMLElement | null) {
-    this._container = container;
-  }
+  _onMouseDown(
+    event: { target: EventTarget } & SyntheticMouseEvent<HTMLElement>
+  ) {
+    const container = event.currentTarget;
 
-  _onMouseDown(event: SyntheticMouseEvent<>) {
     if (
-      !this._container ||
-      event.currentTarget === this._container ||
-      !(event.currentTarget instanceof HTMLElement) ||
+      event.target === container ||
+      !(event.target instanceof HTMLElement) ||
       // Only run for left clicks.
       event.button !== 0
     ) {
       return;
     }
+
     // Flow: Coerce the event target into an HTMLElement in combination with the above
     // `instanceof` statement.
-    let element = (event.currentTarget: HTMLElement);
+    let element = (event.target: HTMLElement);
     if (!element.matches('.grippy, .grippy *')) {
       // Don't handle this event. Only clicking inside a grippy should start the dragging process.
       return;
     }
 
-    while (
-      element instanceof HTMLElement &&
-      element.parentNode !== this._container
-    ) {
+    while (element instanceof HTMLElement && element.parentNode !== container) {
       element = element.parentNode;
     }
 
@@ -110,10 +105,7 @@ class Reorderable extends React.PureComponent<Props, State> {
       return;
     }
 
-    // Double check the container still exists for flow.
-    if (this._container) {
-      this._startDraggingElement(this._container, element, event);
-    }
+    this._startDraggingElement(container, element, event);
   }
 
   _getXY(): XY {
@@ -237,11 +229,7 @@ class Reorderable extends React.PureComponent<Props, State> {
 
     if (this.state.phase === 'RESTING') {
       return (
-        <TagName
-          className={className}
-          onMouseDown={this._onMouseDown}
-          ref={this._setContainerRef}
-        >
+        <TagName className={className} onMouseDown={this._onMouseDown}>
           {orderedChildren}
         </TagName>
       );
@@ -257,7 +245,7 @@ class Reorderable extends React.PureComponent<Props, State> {
     const adjustedClassName =
       phase === 'MANIPULATING' ? className + ' beingReordered' : className;
     return (
-      <TagName className={adjustedClassName} ref={this._setContainerRef}>
+      <TagName className={adjustedClassName}>
         {orderedChildren.map((child, childIndex) => {
           const style = {
             transition: '200ms ease-in-out transform',
