@@ -5,6 +5,7 @@
 
 import type { IDBFactory, IDBKeyRange } from '../../src/types/indexeddb';
 import type { SymbolTableAsTuple } from '../../src/profile-logic/symbol-store-db';
+import type { GoogleAnalytics } from '../../src/utils/analytics';
 
 declare class GeckoProfiler {
   getProfile: () => Object,
@@ -15,6 +16,8 @@ declare class GeckoProfiler {
 }
 
 declare class Window extends EventTarget {
+  // Google Analytics
+  ga?: GoogleAnalytics,
   // perf.html and Gecko Profiler Addon
   geckoProfilerPromise: Promise<GeckoProfiler>,
   geckoProfilerAddonInstalled?: () => void,
