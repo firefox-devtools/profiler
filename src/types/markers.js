@@ -116,8 +116,9 @@ type GCMajorCompleted_Shared = {
   scc_sweep_total: Milliseconds,
   scc_sweep_max_pause: Milliseconds,
 
-  // The reason (if not 'None') why this GC ran non-incrementally.
-  nonincremental_reason?: string,
+  // The reason why this GC ran non-incrementally. Older profiles could have the string
+  // 'None' as a reason.
+  nonincremental_reason?: 'None' | string,
 
   // The allocated space for the whole heap before the GC started.
   allocated_bytes: number,

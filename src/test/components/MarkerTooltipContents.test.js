@@ -116,7 +116,7 @@ describe('MarkerTooltipContents', function() {
             initial_state: 'Initial',
             final_state: 'Final',
             major_gc_number: 1,
-            page_faults: 0,
+            page_faults: 1,
             start_timestamp: 17,
             end_timestamp: 17,
             phase_times: {},

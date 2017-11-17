@@ -42,14 +42,16 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
         );
       }
       case 'DOMEvent': {
-        let latency = 0;
-        if (data.timeStamp) {
-          latency = `${formatNumber(data.startTime - data.timeStamp)}ms`;
-        }
+        const latency =
+          data.timeStamp === undefined
+            ? null
+            : `${formatNumber(data.startTime - data.timeStamp)}ms`;
         return (
           <div className="tooltipDetails">
             {_markerDetail('type', 'Type', data.eventType)}
-            {latency ? _markerDetail('latency', 'Latency', latency) : null}
+            {latency === null
+              ? null
+              : _markerDetail('latency', 'Latency', latency)}
           </div>
         );
       }
@@ -70,30 +72,33 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
                       formatBytes
                     )
                   )}
-                  {nursery.cur_capacity &&
-                    _markerDetail(
-                      'gcnurseryusage',
-                      'Bytes used',
-                      formatValueTotal(
-                        nursery.bytes_used,
-                        nursery.cur_capacity,
+                  {nursery.cur_capacity === undefined
+                    ? null
+                    : _markerDetail(
+                        'gcnurseryusage',
+                        'Bytes used',
+                        formatValueTotal(
+                          nursery.bytes_used,
+                          nursery.cur_capacity,
+                          formatBytes
+                        )
+                      )}
+                  {nursery.new_capacity === undefined
+                    ? null
+                    : _markerDetail(
+                        'gcnewnurserysize',
+                        'New nursery size',
+                        nursery.new_capacity,
                         formatBytes
-                      )
-                    )}
-                  {nursery.new_capacity &&
-                    _markerDetail(
-                      'gcnewnurserysize',
-                      'New nursery size',
-                      nursery.new_capacity,
-                      formatBytes
-                    )}
-                  {nursery.lazy_capacity &&
-                    _markerDetail(
-                      'gclazynurserysize',
-                      'Lazy-allocated size',
-                      nursery.lazy_capacity,
-                      formatBytes
-                    )}
+                      )}
+                  {nursery.lazy_capacity === undefined
+                    ? null
+                    : _markerDetail(
+                        'gclazynurserysize',
+                        'Lazy-allocated size',
+                        nursery.lazy_capacity,
+                        formatBytes
+                      )}
                 </div>
               );
             }
@@ -219,8 +224,9 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
               timings.initial_state + ' – ' + timings.final_state
             )}
             {triggers}
-            {timings.page_faults &&
-              _markerDetail('gcfaults', 'Page faults', timings.page_faults)}
+            {timings.page_faults === undefined
+              ? null
+              : _markerDetail('gcfaults', 'Page faults', timings.page_faults)}
           </div>
         );
       }
