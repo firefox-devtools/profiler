@@ -4,7 +4,8 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import clamp from 'clamp';
 import Draggable from '../shared/Draggable';
