@@ -55,7 +55,6 @@ type GCSliceData_Shared = {
   slice: number,
 
   pause: Milliseconds,
-  when: Milliseconds,
 
   // The reason for this slice.
   reason: string,
@@ -75,11 +74,11 @@ type GCSliceData_Shared = {
   trigger_amount?: number,
   trigger_threshold?: number,
 
-  // The number of page faults that occured during the slice.
-  page_faults: number,
+  // The number of page faults that occured during the slice.  If missing
+  // there were 0 page faults.
+  page_faults?: number,
 
   start_timestamp: Seconds,
-  end_timestamp: Seconds,
 };
 export type GCSliceData_Gecko = GCSliceData_Shared & {
   times: PhaseTimes,
@@ -109,21 +108,24 @@ type GCMajorCompleted_Shared = {
   total_zones: number,
   total_compartments: number,
   minor_gcs: number,
-  store_buffer_overflows: number,
+  // Present when non-zero.
+  store_buffer_overflows?: number,
   slices: number,
 
   // Timing for the SCC sweep phase.
   scc_sweep_total: Milliseconds,
   scc_sweep_max_pause: Milliseconds,
 
-  // The reason (if not 'None') why this GC ran non-incrementally.
-  nonincremental_reason: string,
+  // The reason why this GC ran non-incrementally. Older profiles could have the string
+  // 'None' as a reason.
+  nonincremental_reason?: 'None' | string,
 
   // The allocated space for the whole heap before the GC started.
   allocated_bytes: number,
 
-  added_chunks: number,
-  removed_chunks: number,
+  // Only present if non-zero.
+  added_chunks?: number,
+  removed_chunks?: number,
 
   // The number for the start of this GC event.
   major_gc_number: number,
@@ -186,12 +188,17 @@ export type GCMinorCompletedData = {
   // Capacity may change as the nursery size is tuned after each collection.
   // cur_capacity isn't in older profiles.
   cur_capacity?: number,
-  new_capacity: number,
+
+  // If the nursery is resized after this collection then this field is
+  // present giving the new size.
+  new_capacity?: number,
 
   // The nursery may be dynamically resized (since version 58)
   // this field is the lazy-allocated size.  It is not present in older
   // versions.
-  // In the future it may be omitted if it matches cur_capacity.
+  // If the currently allocated size is different from the size
+  // (cur_capacity) then this field is present and shows how much memory is
+  // actually allocated.
   lazy_capacity?: number,
 
   phase_times: PhaseTimes,

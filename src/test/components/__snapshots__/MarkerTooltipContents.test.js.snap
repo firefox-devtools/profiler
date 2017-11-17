@@ -485,7 +485,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers 7`] = `
       Page faults
       :
     </div>
-    0
+    1
   </div>
 </div>
 `;
