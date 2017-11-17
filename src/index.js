@@ -10,6 +10,21 @@ import createStore from './create-store';
 import 'photon-colors/colors.css';
 import '../res/style.css';
 
+// Mock out Google Analytics for anything that's not production so that we have run-time
+// code coverage in development and testing.
+if (process.env.NODE_ENV === 'development') {
+  window.ga = (event, ...payload) => {
+    console.log(
+      `%cAnalytics:%c"${event}"`,
+      'color: #FF6D00; font-weight: bold',
+      'color: #FF6D00;',
+      ...payload
+    );
+  };
+} else if (process.env.NODE_ENV !== 'production') {
+  window.ga = () => {};
+}
+
 if (process.env.NODE_ENV === 'production') {
   const runtime = require('offline-plugin/runtime');
   runtime.install({

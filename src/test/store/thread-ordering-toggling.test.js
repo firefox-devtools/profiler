@@ -52,14 +52,7 @@ describe('thread ordering and toggling', function() {
       },
 
       hideThread: threadIndex => {
-        const state = getState();
-        dispatch(
-          ProfileViewActions.hideThread(
-            threadIndex,
-            UrlStateSelectors.getThreadOrder(state),
-            UrlStateSelectors.getHiddenThreads(state)
-          )
-        );
+        dispatch(ProfileViewActions.hideThread(threadIndex));
       },
 
       showThread: threadIndex => {
