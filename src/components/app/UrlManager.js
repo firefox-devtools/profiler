@@ -4,7 +4,8 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { getIsUrlSetupDone } from '../../reducers/app';
 import { updateUrlState, urlSetupDone, show404 } from '../../actions/app';

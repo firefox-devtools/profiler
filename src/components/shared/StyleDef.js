@@ -11,7 +11,8 @@
 // needed with some simple logic than having a complex code to detect
 // duplication.
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 
 export class StyleDef extends PureComponent {
   componentDidMount() {
