@@ -6,11 +6,16 @@
 import {
   selectorsForThread,
   selectedThreadSelectors,
+  getThreads,
 } from '../reducers/profile-view';
 import {
   getImplementationFilter,
   getSelectedThreadIndex,
+  getThreadOrder,
+  getHiddenThreads,
 } from '../reducers/url-state';
+import { getFriendlyThreadName } from '../profile-logic/profile-data';
+import { sendAnalytics } from '../utils/analytics';
 
 import type { ProfileSelection, ImplementationFilter } from '../types/actions';
 import type { Action, ThunkAction } from '../types/store';
@@ -41,22 +46,35 @@ export function changeSelectedThread(selectedThread: ThreadIndex): Action {
 }
 
 export function changeThreadOrder(threadOrder: ThreadIndex[]): Action {
+  sendAnalytics({
+    hitType: 'event',
+    eventCategory: 'profile',
+    eventAction: 'change thread order',
+  });
   return {
     type: 'CHANGE_THREAD_ORDER',
     threadOrder,
   };
 }
 
-export function hideThread(
-  threadIndex: ThreadIndex,
-  threadOrder: ThreadIndex[],
-  hiddenThreads: ThreadIndex[]
-): ThunkAction<void> {
-  return dispatch => {
+export function hideThread(threadIndex: ThreadIndex): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const threadOrder = getThreadOrder(getState());
+    const hiddenThreads = getHiddenThreads(getState());
+
     // Do not allow hiding the last thread.
     if (hiddenThreads.length + 1 === threadOrder.length) {
       return;
     }
+
+    const threads = getThreads(getState());
+    const thread = threads[threadIndex];
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'threads',
+      eventAction: 'hide',
+      eventLabel: getFriendlyThreadName(threads, thread),
+    });
 
     dispatch(
       ({
@@ -69,14 +87,36 @@ export function hideThread(
   };
 }
 
-export function showThread(threadIndex: ThreadIndex): Action {
-  return {
-    type: 'SHOW_THREAD',
-    threadIndex,
+export function showThread(threadIndex: ThreadIndex): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const threads = getThreads(getState());
+    const thread = threads[threadIndex];
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'threads',
+      eventAction: 'show',
+      eventLabel: getFriendlyThreadName(threads, thread),
+    });
+
+    dispatch({
+      type: 'SHOW_THREAD',
+      threadIndex,
+    });
   };
 }
 
+let _callTreeSearchAnalyticsSent = false;
+
 export function changeCallTreeSearchString(searchString: string): Action {
+  if (!_callTreeSearchAnalyticsSent) {
+    // Only send this event once, since it could be fired frequently with typing.
+    _callTreeSearchAnalyticsSent = true;
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'call tree search string',
+    });
+  }
   return {
     type: 'CHANGE_CALL_TREE_SEARCH_STRING',
     searchString,
@@ -122,6 +162,13 @@ export function changeImplementationFilter(
       getState()
     );
 
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'change implementation filter',
+      eventLabel: implementation,
+    });
+
     dispatch({
       type: 'CHANGE_IMPLEMENTATION_FILTER',
       implementation,
@@ -133,6 +180,11 @@ export function changeImplementationFilter(
 }
 
 export function changeInvertCallstack(invertCallstack: boolean): Action {
+  sendAnalytics({
+    hitType: 'event',
+    eventCategory: 'profile',
+    eventAction: 'change invert callstack',
+  });
   return {
     type: 'CHANGE_INVERT_CALLSTACK',
     invertCallstack,
@@ -142,6 +194,11 @@ export function changeInvertCallstack(invertCallstack: boolean): Action {
 export function changeHidePlatformDetails(
   hidePlatformDetails: boolean
 ): Action {
+  sendAnalytics({
+    hitType: 'event',
+    eventCategory: 'profile',
+    eventAction: 'change hide platform details',
+  });
   return {
     type: 'CHANGE_HIDE_PLATFORM_DETAILS',
     hidePlatformDetails,
@@ -207,6 +264,12 @@ export function addTransformToStack(
       threadIndex,
       transform,
       transformedThread,
+    });
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'add transform',
+      eventLabel: transform.type,
     });
   };
 }

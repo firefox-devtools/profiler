@@ -26,6 +26,7 @@ import shortenUrl from '../../utils/shorten-url';
 import { serializeProfile } from '../../profile-logic/process-profile';
 import prettyBytes from 'pretty-bytes';
 import sha1 from '../../utils/sha1';
+import { sendAnalytics } from '../../utils/analytics';
 import url from 'url';
 
 import type { StartEndRange } from '../../types/units';
@@ -160,10 +161,19 @@ class ProfileSharingCompositeButton extends PureComponent<
     }
   }
 
+  _notifyAnalytics() {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile upload',
+      eventAction: 'start',
+    });
+  }
+
   _attemptToShare() {
     if (this.state.state !== 'local' && this.state.state !== 'error') {
       return;
     }
+    this._notifyAnalytics();
 
     const { profile, predictUrl } = this.props;
 
@@ -211,6 +221,12 @@ class ProfileSharingCompositeButton extends PureComponent<
             fullUrl: window.location.href,
             shortUrl: newShortUrl,
           });
+
+          sendAnalytics({
+            hitType: 'event',
+            eventCategory: 'profile upload',
+            eventAction: 'succeeded',
+          });
         });
         const shortenUrlPromise = this._shortenUrlAndFocusTextFieldOnCompletion();
         Promise.race([uploadPromise, shortenUrlPromise]).then(() => {
@@ -228,6 +244,11 @@ class ProfileSharingCompositeButton extends PureComponent<
         if (this._uploadErrorButton) {
           this._uploadErrorButton.openPanel();
         }
+        sendAnalytics({
+          hitType: 'event',
+          eventCategory: 'profile upload',
+          eventAction: 'failed',
+        });
       });
   }
 
@@ -366,6 +387,11 @@ class ProfileDownloadButton extends PureComponent<
         compressedBlobUrl: blobUrl,
         compressedSize: blob.size,
       });
+    });
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile save locally',
+      eventAction: 'save',
     });
   }
 
