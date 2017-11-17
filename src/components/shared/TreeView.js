@@ -156,7 +156,11 @@ class TreeViewRowScrolledColumns extends React.PureComponent<
     (this: any)._onClick = this._onClick.bind(this);
   }
 
-  _onClick(event: SyntheticMouseEvent<Element>) {
+  /**
+   * In this mousedown handler, we use event delegation so we have to use
+   * `target` instead of `currentTarget`.
+   */
+  _onClick(event: { target: Element } & SyntheticMouseEvent<Element>) {
     const {
       nodeId,
       isExpanded,
@@ -164,15 +168,13 @@ class TreeViewRowScrolledColumns extends React.PureComponent<
       onClick,
       onAppendageButtonClick,
     } = this.props;
-    if (event.currentTarget.classList.contains('treeRowToggleButton')) {
+    if (event.target.classList.contains('treeRowToggleButton')) {
       onToggle(nodeId, !isExpanded, event.altKey === true);
-    } else if (
-      event.currentTarget.classList.contains('treeViewRowAppendageButton')
-    ) {
+    } else if (event.target.classList.contains('treeViewRowAppendageButton')) {
       if (onAppendageButtonClick) {
         onAppendageButtonClick(
           nodeId,
-          event.currentTarget.getAttribute('data-appendage-button-name') || ''
+          event.target.getAttribute('data-appendage-button-name') || ''
         );
       }
     } else {
