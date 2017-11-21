@@ -4,26 +4,45 @@
 
 // @flow
 
+import React from 'react';
 import { connect } from 'react-redux';
 import IntervalMarkerOverview from './IntervalMarkerOverview';
+import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import { selectorsForThread } from '../../reducers/profile-view';
 import {
   styles,
   overlayFills,
 } from '../../profile-logic/interval-marker-styles';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+import {
+  getSelectedThreadIndex,
+  getImplementationFilter,
+} from '../../reducers/url-state';
 
 export default connect((state, props) => {
   const { threadIndex } = props;
   const selectors = selectorsForThread(threadIndex);
   const selectedThread = getSelectedThreadIndex(state);
+  const threadName = selectors.getFriendlyThreadName(state);
+  const thread = selectors.getThread(state);
+  const implementationFilter = getImplementationFilter(state);
   const intervalMarkers = selectors.getRangeSelectionFilteredTracingMarkersForHeader(
     state
   );
+  const getTooltipContents = item => {
+    return (
+      <MarkerTooltipContents
+        marker={item}
+        threadName={threadName}
+        thread={thread}
+        implementationFilter={implementationFilter}
+      />
+    );
+  };
   return {
     intervalMarkers,
-    threadName: selectors.getFriendlyThreadName(state),
+    getTooltipContents,
     isSelected: threadIndex === selectedThread,
+    threadIndex,
     styles,
     overlayFills,
   };

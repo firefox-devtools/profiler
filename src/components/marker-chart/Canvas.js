@@ -6,7 +6,6 @@
 import * as React from 'react';
 import withChartViewport from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
-import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import TextMeasurement from '../../utils/text-measurement';
 import { BLUE_40 } from '../../utils/colors';
 
@@ -43,6 +42,7 @@ type Props = {
   markerTimingRows: MarkerTimingRows,
   rowHeight: CssPixels,
   markers: TracingMarker[],
+  getTooltipContents: TracingMarker => React.Node,
   updateProfileSelection: ProfileSelection => Action,
   isDragging: boolean,
 };
@@ -349,13 +349,9 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  /**
-   * This function currently returns `React.Element<any>` because we exactly
-   * know its return type. This needs to be a subtype of React.Node so this
-   * could be changed in the future if necessary. */
-  getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React.Element<any> {
+  getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React.Node {
     const marker = this.props.markers[hoveredItem];
-    return <MarkerTooltipContents marker={marker} />;
+    return this.props.getTooltipContents(marker);
   }
 
   render() {

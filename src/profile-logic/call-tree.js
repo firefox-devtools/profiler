@@ -4,7 +4,11 @@
 
 // @flow
 import { timeCode } from '../utils/time-code';
-import { getSampleCallNodes, resourceTypes } from './profile-data';
+import {
+  getSampleCallNodes,
+  resourceTypes,
+  getOriginAnnotationForFunc,
+} from './profile-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import type {
   Thread,
@@ -175,23 +179,12 @@ export class CallTree {
   }
 
   _getOriginAnnotation(funcIndex: IndexIntoFuncTable): string {
-    const fileNameIndex = this._funcTable.fileName[funcIndex];
-    if (fileNameIndex !== null) {
-      const fileName = this._stringTable.getString(fileNameIndex);
-      const lineNumber = this._funcTable.lineNumber[funcIndex];
-      if (lineNumber !== null) {
-        return fileName + ':' + lineNumber;
-      }
-      return fileName;
-    }
-
-    const resourceIndex = this._funcTable.resource[funcIndex];
-    const resourceNameIndex = this._resourceTable.name[resourceIndex];
-    if (resourceNameIndex !== undefined) {
-      return this._stringTable.getString(resourceNameIndex);
-    }
-
-    return '';
+    return getOriginAnnotationForFunc(
+      funcIndex,
+      this._funcTable,
+      this._resourceTable,
+      this._stringTable
+    );
   }
 }
 

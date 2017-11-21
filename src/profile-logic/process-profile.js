@@ -46,6 +46,7 @@ import type {
 import type {
   MarkerPayload,
   MarkerPayload_Gecko,
+  PaintProfilerMarkerTracing,
   GCSliceData_Gecko,
   GCMajorCompleted,
   GCMajorCompleted_Gecko,
@@ -533,6 +534,21 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
                 throw new Error('Unknown GCMajor status');
             }
           }
+          case 'tracing': {
+            const newData = Object.assign({}, m);
+            delete newData.stack;
+            if ('stack' in m && m.stack && m.stack.samples.data.length > 0) {
+              const stack = m.stack;
+              const stackIndex =
+                stack.samples.data[0][stack.samples.schema.stack];
+              const time = stack.samples.data[0][stack.samples.schema.time];
+              if (stackIndex !== null) {
+                newData.cause = { time, stack: stackIndex };
+              }
+            }
+            const result: PaintProfilerMarkerTracing = newData;
+            return result;
+          }
           default:
             return m;
         }
@@ -807,6 +823,9 @@ function _adjustMarkerTimestamps(
       }
       if (newData.type === 'DOMEvent' && 'timeStamp' in newData) {
         newData.timeStamp += delta;
+      }
+      if (newData.type === 'tracing' && newData.cause) {
+        newData.cause.time += delta;
       }
       return newData;
     }),
