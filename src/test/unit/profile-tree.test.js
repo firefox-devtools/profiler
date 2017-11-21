@@ -5,7 +5,6 @@
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import {
   getCallTree,
-  getOriginAnnotation,
   computeCallTreeCountsAndTimings,
   CallTree,
 } from '../../profile-logic/call-tree';
@@ -13,6 +12,7 @@ import {
   getCallNodeInfo,
   invertCallstack,
   getCallNodeFromPath,
+  getOriginAnnotationForFunc,
 } from '../../profile-logic/profile-data';
 import { formatTree } from '../fixtures/utils';
 
@@ -392,11 +392,11 @@ describe('origin annotation', function() {
   addResource('D', 'libxul.so', null, null);
 
   function getOrigin(funcName: string): string {
-    return getOriginAnnotation(
-      thread.resourceTable,
-      thread.stringTable,
+    return getOriginAnnotationForFunc(
+      funcNames.indexOf(funcName),
       thread.funcTable,
-      funcNames.indexOf(funcName)
+      thread.resourceTable,
+      thread.stringTable
     );
   }
 

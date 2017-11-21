@@ -4,6 +4,8 @@
 // @flow
 
 import type { Milliseconds, Microseconds, Seconds } from './units';
+import type { GeckoMarkerStack } from './gecko-profile';
+import type { IndexIntoStackTable } from './profile';
 
 /**
  * Measurement for how long draw calls take for the compositor.
@@ -16,36 +18,32 @@ export type GPUMarkerPayload = {
   cpuend: Milliseconds,
   gpustart: Milliseconds, // Always 0.
   gpuend: Milliseconds, // The time the GPU took to execute the command.
-  stack?: Object,
+};
+
+export type CauseBacktrace = {
+  time: Milliseconds,
+  stack: IndexIntoStackTable,
 };
 
 /**
  * These markers have a start and end time.
  */
-export type ProfilerMarkerTracing = {
+export type PaintProfilerMarkerTracing_Gecko = {
   type: 'tracing',
-  startTime: Milliseconds, // Same as cpustart
-  endTime: Milliseconds, // Same as cpuend
-  stack?: Object,
+  category: 'Paint',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  stack?: GeckoMarkerStack,
   interval: 'start' | 'end',
 };
 
-export type PaintProfilerMarkerTracing = ProfilerMarkerTracing & {
+export type PaintProfilerMarkerTracing = {
+  type: 'tracing',
   category: 'Paint',
-  name:
-    | 'RefreshDriverTick'
-    | 'FireScrollEvent'
-    | 'Scripts'
-    | 'Styles'
-    | 'Reflow'
-    | 'DispatchSynthMouseMove'
-    | 'DisplayList'
-    | 'LayerBuilding'
-    | 'Rasterize'
-    | 'ForwardTransaction'
-    | 'NotifyDidPaint'
-    | 'LayerTransaction'
-    | 'Composite',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  cause?: CauseBacktrace,
+  interval: 'start' | 'end',
 };
 
 export type PhaseTimes<Unit> = { [phase: string]: Unit };
@@ -309,7 +307,7 @@ export type MarkerPayload =
 export type MarkerPayload_Gecko =
   | GPUMarkerPayload
   | UserTimingMarkerPayload
-  | PaintProfilerMarkerTracing
+  | PaintProfilerMarkerTracing_Gecko
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload
   | GCMajorMarkerPayload_Gecko

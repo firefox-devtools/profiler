@@ -4,14 +4,19 @@
 
 // @flow
 
+import React from 'react';
 import explicitConnect from '../../utils/connect';
 import IntervalMarkerOverview from './IntervalMarkerOverview';
+import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import { selectorsForThread } from '../../reducers/profile-view';
 import {
   styles,
   overlayFills,
 } from '../../profile-logic/interval-marker-styles';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+import {
+  getSelectedThreadIndex,
+  getImplementationFilter,
+} from '../../reducers/url-state';
 
 import type { ExplicitConnectOptions } from '../../utils/connect';
 import type { StateProps, OwnProps } from './IntervalMarkerOverview';
@@ -21,11 +26,24 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     const { threadIndex } = props;
     const selectors = selectorsForThread(threadIndex);
     const threadName = selectors.getFriendlyThreadName(state);
+    const thread = selectors.getThread(state);
     const selectedThread = getSelectedThreadIndex(state);
+    const implementationFilter = getImplementationFilter(state);
+    const getTooltipContents = item => {
+      return (
+        <MarkerTooltipContents
+          marker={item}
+          threadName={threadName}
+          thread={thread}
+          implementationFilter={implementationFilter}
+        />
+      );
+    };
+
     return {
       intervalMarkers: selectors.getJankInstances(state),
       isSelected: threadIndex === selectedThread,
-      threadName,
+      getTooltipContents,
       styles,
       overlayFills,
     };

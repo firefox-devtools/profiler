@@ -3,17 +3,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { timeCode } from '../../utils/time-code';
 import { withSize } from '../shared/WithSize';
 import Tooltip from '../shared/Tooltip';
-import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 
 import type { Milliseconds, CssPixels } from '../../types/units';
 import type { TracingMarker } from '../../types/profile-derived';
 import type { SizeProps } from '../shared/WithSize';
 import type { ConnectedProps } from '../../utils/connect';
+import type { ThreadIndex } from '../../types/profile';
 
 type MarkerState = 'PRESSED' | 'HOVERED' | 'NONE';
 
@@ -22,7 +22,7 @@ export type OwnProps = {|
   +className: string,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +threadIndex: number,
+  +threadIndex: ThreadIndex,
   +onSelect: any,
   +isModifyingSelection: boolean,
 |};
@@ -30,12 +30,12 @@ export type OwnProps = {|
 export type StateProps = {|
   +intervalMarkers: TracingMarker[],
   +isSelected: boolean,
-  +threadName: string,
   +styles: any,
   +overlayFills: {
     +HOVERED: string,
     +PRESSED: string,
   },
+  +getTooltipContents: TracingMarker => React.Node,
 |};
 
 type Props = ConnectedProps<SizeProps, OwnProps, StateProps>;
@@ -47,7 +47,7 @@ type State = {
   mouseY: CssPixels,
 };
 
-class IntervalMarkerOverview extends PureComponent<Props, State> {
+class IntervalMarkerOverview extends React.PureComponent<Props, State> {
   _canvas: HTMLCanvasElement | null;
   _requestedAnimationFrame: boolean | null;
 
@@ -180,7 +180,7 @@ class IntervalMarkerOverview extends PureComponent<Props, State> {
       className,
       isSelected,
       isModifyingSelection,
-      threadName,
+      getTooltipContents,
     } = this.props;
 
     const { mouseDownItem, hoveredItem, mouseX, mouseY } = this.state;
@@ -205,10 +205,7 @@ class IntervalMarkerOverview extends PureComponent<Props, State> {
         />
         {shouldShowTooltip && hoveredItem
           ? <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              <MarkerTooltipContents
-                marker={hoveredItem}
-                threadName={threadName}
-              />
+              {getTooltipContents(hoveredItem)}
             </Tooltip>
           : null}
       </div>

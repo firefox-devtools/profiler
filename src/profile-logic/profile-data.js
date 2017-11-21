@@ -12,6 +12,7 @@ import type {
   FrameTable,
   FuncTable,
   MarkersTable,
+  ResourceTable,
   IndexIntoFuncTable,
   IndexIntoStringTable,
   IndexIntoSamplesTable,
@@ -34,6 +35,7 @@ import type { StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
 import type { ImplementationFilter } from '../types/actions';
 import bisection from 'bisection';
+import type { UniqueStringArray } from '../utils/unique-string-array';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -1080,4 +1082,46 @@ export function getEmptyProfile(): Profile {
     },
     threads: [],
   };
+}
+
+export function getOriginAnnotationForFunc(
+  funcIndex: IndexIntoFuncTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  stringTable: UniqueStringArray
+): string {
+  const resourceIndex = funcTable.resource[funcIndex];
+  const resourceNameIndex = resourceTable.name[resourceIndex];
+
+  let origin;
+  if (resourceNameIndex !== undefined) {
+    origin = stringTable.getString(resourceNameIndex);
+  }
+
+  const fileNameIndex = funcTable.fileName[funcIndex];
+  let fileName;
+  if (fileNameIndex !== null) {
+    fileName = stringTable.getString(fileNameIndex);
+    const lineNumber = funcTable.lineNumber[funcIndex];
+    if (lineNumber !== null) {
+      fileName += ':' + lineNumber;
+    }
+  }
+
+  if (fileName) {
+    // If the origin string is just a URL prefix that's part of the
+    // filename, it doesn't add any useful information, so just return
+    // the filename. If it's something else (e.g., an extension or
+    // library name), prepend it to the filename.
+    if (origin && !fileName.startsWith(origin)) {
+      return `${origin}: ${fileName}`;
+    }
+    return fileName;
+  }
+
+  if (origin) {
+    return origin;
+  }
+
+  return '';
 }

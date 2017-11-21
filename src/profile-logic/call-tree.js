@@ -4,7 +4,11 @@
 
 // @flow
 import { timeCode } from '../utils/time-code';
-import { getSampleCallNodes, resourceTypes } from './profile-data';
+import {
+  getSampleCallNodes,
+  resourceTypes,
+  getOriginAnnotationForFunc,
+} from './profile-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import type {
   Thread,
@@ -37,48 +41,6 @@ type CallTreeCountsAndTimings = {
 function extractFaviconFromLibname(libname: string): string | null {
   const url = new URL('/favicon.ico', libname);
   return url.href;
-}
-
-export function getOriginAnnotation(
-  resourceTable: ResourceTable,
-  stringTable: UniqueStringArray,
-  funcTable: FuncTable,
-  funcIndex: number
-): string {
-  const resourceIndex = funcTable.resource[funcIndex];
-  const resourceNameIndex = resourceTable.name[resourceIndex];
-
-  let origin;
-  if (resourceNameIndex !== undefined) {
-    origin = stringTable.getString(resourceNameIndex);
-  }
-
-  const fileNameIndex = funcTable.fileName[funcIndex];
-  let fileName;
-  if (fileNameIndex !== null) {
-    fileName = stringTable.getString(fileNameIndex);
-    const lineNumber = funcTable.lineNumber[funcIndex];
-    if (lineNumber !== null) {
-      fileName += ':' + lineNumber;
-    }
-  }
-
-  if (fileName) {
-    // If the origin string is just a URL prefix that's part of the
-    // filename, it doesn't add any useful information, so just return
-    // the filename. If it's something else (e.g., an extension or
-    // library name), prepend it to the filename.
-    if (origin && !fileName.startsWith(origin)) {
-      return `${origin}: ${fileName}`;
-    }
-    return fileName;
-  }
-
-  if (origin) {
-    return origin;
-  }
-
-  return '';
 }
 
 export class CallTree {
@@ -235,11 +197,11 @@ export class CallTree {
   }
 
   _getOriginAnnotation(funcIndex: IndexIntoFuncTable): string {
-    return getOriginAnnotation(
-      this._resourceTable,
-      this._stringTable,
+    return getOriginAnnotationForFunc(
+      funcIndex,
       this._funcTable,
-      funcIndex
+      this._resourceTable,
+      this._stringTable
     );
   }
 }

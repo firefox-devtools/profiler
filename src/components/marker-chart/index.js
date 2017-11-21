@@ -6,13 +6,17 @@
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import MarkerChartCanvas from './Canvas';
+import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import {
   selectedThreadSelectors,
   getDisplayRange,
   getProfileInterval,
   getProfileViewOptions,
 } from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+import {
+  getSelectedThreadIndex,
+  getImplementationFilter,
+} from '../../reducers/url-state';
 import { updateProfileSelection } from '../../actions/profile-view';
 
 import type {
@@ -47,6 +51,7 @@ type StateProps = {|
   +selection: ProfileSelection,
   +threadName: string,
   +processDetails: string,
+  +getTooltipContents: TracingMarker => React.Node,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -70,6 +75,7 @@ class MarkerChart extends React.PureComponent<Props> {
       selection,
       threadName,
       processDetails,
+      getTooltipContents,
       updateProfileSelection,
     } = this.props;
 
@@ -97,6 +103,7 @@ class MarkerChart extends React.PureComponent<Props> {
             markerTimingRows,
             markers,
             updateProfileSelection,
+            getTooltipContents,
             rangeStart: timeRange.start,
             rangeEnd: timeRange.end,
             rowHeight: ROW_HEIGHT,
@@ -119,6 +126,19 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
     const markers = selectedThreadSelectors.getTracingMarkers(state);
     const markerTimingRows = selectedThreadSelectors.getMarkerTiming(state);
+    const threadName = selectedThreadSelectors.getFriendlyThreadName(state);
+    const thread = selectedThreadSelectors.getThread(state);
+    const implementationFilter = getImplementationFilter(state);
+    const getTooltipContents = item => {
+      return (
+        <MarkerTooltipContents
+          marker={item}
+          threadName={threadName}
+          thread={thread}
+          implementationFilter={implementationFilter}
+        />
+      );
+    };
 
     return {
       markers,
@@ -128,7 +148,8 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
       selection: getProfileViewOptions(state).selection,
-      threadName: selectedThreadSelectors.getFriendlyThreadName(state),
+      threadName,
+      getTooltipContents,
       processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
     };
   },
