@@ -550,9 +550,9 @@ export const selectorsForThread = (
     );
     const _getImplementationAndSearchFilteredThread = createSelector(
       _getImplementationFilteredThread,
-      UrlState.getSearchString,
-      (thread, searchString): Thread => {
-        return ProfileData.filterThreadToSearchString(thread, searchString);
+      UrlState.getSearchStrings,
+      (thread: Thread, searchStrings: string[]): Thread => {
+        return ProfileData.filterThreadToSearchStrings(thread, searchStrings);
       }
     );
     const getFilteredThread = createSelector(
@@ -686,19 +686,19 @@ export const selectorsForThread = (
       getRangeFilteredThread,
       UrlState.getHidePlatformDetails,
       UrlState.getInvertCallstack,
-      UrlState.getSearchString,
+      UrlState.getSearchStrings,
       (
         thread: Thread,
         shouldHidePlatformDetails: boolean,
         shouldInvertCallstack: boolean,
-        searchString: string
+        searchStrings: string[]
       ): Thread => {
         // Unlike for the call tree filtered profile, the individual steps of
         // this filtering are not memoized. I hope it's not too bad.
         let filteredThread = thread;
-        filteredThread = ProfileData.filterThreadToSearchString(
+        filteredThread = ProfileData.filterThreadToSearchStrings(
           filteredThread,
-          searchString
+          searchStrings
         );
         if (shouldHidePlatformDetails) {
           filteredThread = ProfileData.collapsePlatformStackFrames(

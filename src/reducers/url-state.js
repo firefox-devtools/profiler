@@ -284,8 +284,20 @@ export const getHidePlatformDetails = (state: State) =>
   getUrlState(state).hidePlatformDetails;
 export const getInvertCallstack = (state: State) =>
   getUrlState(state).invertCallstack;
-export const getSearchString = (state: State) =>
+export const getCurrentSearchString = (state: State) =>
   getUrlState(state).callTreeSearchString;
+export const getSearchStrings = createSelector(
+  getCurrentSearchString,
+  searchString => {
+    if (!searchString) {
+      return [];
+    }
+    return searchString
+      .split(',')
+      .map(part => part.trim())
+      .filter(part => part);
+  }
+);
 export const getMarkersSearchString = (state: State) =>
   getUrlState(state).markersSearchString;
 
