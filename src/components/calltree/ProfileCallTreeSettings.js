@@ -9,27 +9,24 @@ import { connect } from 'react-redux';
 import {
   changeImplementationFilter,
   changeInvertCallstack,
-  changeCallTreeSearchString,
 } from '../../actions/profile-view';
 import {
   getImplementationFilter,
   getInvertCallstack,
-  getSearchString,
 } from '../../reducers/url-state';
-import IdleSearchField from '../shared/IdleSearchField';
+import StackSearchField from '../shared/StackSearchField';
 import { toValidImplementationFilter } from '../../profile-logic/profile-data';
+
 import './ProfileCallTreeSettings.css';
 
 import type { ImplementationFilter } from '../../types/actions';
 
-type Props = {
-  implementationFilter: ImplementationFilter,
-  invertCallstack: boolean,
-  searchString: string,
-  changeImplementationFilter: typeof changeImplementationFilter,
-  changeInvertCallstack: typeof changeInvertCallstack,
-  changeCallTreeSearchString: typeof changeCallTreeSearchString,
-};
+type Props = {|
+  +implementationFilter: ImplementationFilter,
+  +invertCallstack: boolean,
+  +changeImplementationFilter: typeof changeImplementationFilter,
+  +changeInvertCallstack: typeof changeInvertCallstack,
+|};
 
 class ProfileCallTreeSettings extends PureComponent<Props> {
   constructor(props: Props) {
@@ -38,9 +35,6 @@ class ProfileCallTreeSettings extends PureComponent<Props> {
       this
     );
     (this: any)._onInvertCallstackClick = this._onInvertCallstackClick.bind(
-      this
-    );
-    (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(
       this
     );
   }
@@ -57,12 +51,9 @@ class ProfileCallTreeSettings extends PureComponent<Props> {
     this.props.changeInvertCallstack(e.currentTarget.checked);
   }
 
-  _onSearchFieldIdleAfterChange(value: string) {
-    this.props.changeCallTreeSearchString(value);
-  }
-
   render() {
-    const { implementationFilter, invertCallstack, searchString } = this.props;
+    const { implementationFilter, invertCallstack } = this.props;
+
     return (
       <div className="profileCallTreeSettings">
         <ul className="profileCallTreeSettingsList">
@@ -92,18 +83,7 @@ class ProfileCallTreeSettings extends PureComponent<Props> {
             </label>
           </li>
         </ul>
-        <div className="profileCallTreeSettingsSearchbar">
-          <label className="profileCallTreeSettingsSearchbarLabel">
-            {'Filter stacks: '}
-            <IdleSearchField
-              className="profileCallTreeSettingsSearchField"
-              title="Only display stacks which contain a function whose name matches this substring"
-              idlePeriod={200}
-              defaultValue={searchString}
-              onIdleAfterChange={this._onSearchFieldIdleAfterChange}
-            />
-          </label>
-        </div>
+        <StackSearchField className="profileCallTreeSettingsSearchField" />
       </div>
     );
   }
@@ -113,11 +93,9 @@ export default connect(
   state => ({
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
-    searchString: getSearchString(state),
   }),
   {
     changeImplementationFilter,
     changeInvertCallstack,
-    changeCallTreeSearchString,
   }
 )(ProfileCallTreeSettings);

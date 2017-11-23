@@ -4,37 +4,36 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import './IdleSearchField.css';
 
-type Props = {
-  onIdleAfterChange: string => void,
-  idlePeriod: number,
-  defaultValue: ?string,
-  className: ?string,
-  title: ?string,
-};
+type Props = {|
+  +onIdleAfterChange: string => void,
+  +onSubmit?: () => void,
+  +onFocus?: () => void,
+  +onBlur?: (Element | null) => void,
+  +idlePeriod: number,
+  +defaultValue: ?string,
+  +className: ?string,
+  +title: ?string,
+|};
 
 type State = {
   value: string,
 };
 
 class IdleSearchField extends PureComponent<Props, State> {
-  _onSearchFieldChange: Event => void;
-  _onSearchFieldFocus: Event => void;
-  _onClearButtonClick: Event => void;
-  _onTimeout: void => void;
   _timeout: number;
   _previouslyNotifiedValue: string;
 
   constructor(props: Props) {
     super(props);
-    this._onSearchFieldChange = this._onSearchFieldChange.bind(this);
-    this._onSearchFieldFocus = this._onSearchFieldFocus.bind(this);
-    this._onClearButtonClick = this._onClearButtonClick.bind(this);
-    this._onTimeout = this._onTimeout.bind(this);
+    (this: any)._onSearchFieldChange = this._onSearchFieldChange.bind(this);
+    (this: any)._onSearchFieldFocus = this._onSearchFieldFocus.bind(this);
+    (this: any)._onSearchFieldBlur = this._onSearchFieldBlur.bind(this);
+    (this: any)._onClearButtonClick = this._onClearButtonClick.bind(this);
+    (this: any)._onTimeout = this._onTimeout.bind(this);
     this._timeout = 0;
     this.state = {
       value: props.defaultValue || '',
@@ -44,6 +43,16 @@ class IdleSearchField extends PureComponent<Props, State> {
 
   _onSearchFieldFocus(e: SyntheticFocusEvent<HTMLInputElement>) {
     e.currentTarget.select();
+
+    if (this.props.onFocus) {
+      this.props.onFocus();
+    }
+  }
+
+  _onSearchFieldBlur(e: { relatedTarget: Element | null }) {
+    if (this.props.onBlur) {
+      this.props.onBlur(e.relatedTarget);
+    }
   }
 
   _onSearchFieldChange(e: SyntheticEvent<HTMLInputElement>) {
@@ -70,6 +79,9 @@ class IdleSearchField extends PureComponent<Props, State> {
   }
 
   _onClearButtonClick() {
+    clearTimeout(this._timeout);
+    this._timeout = 0;
+
     this.setState({ value: '' });
     this._notifyIfChanged('');
   }
@@ -110,6 +122,7 @@ class IdleSearchField extends PureComponent<Props, State> {
           value={this.state.value}
           onChange={this._onSearchFieldChange}
           onFocus={this._onSearchFieldFocus}
+          onBlur={this._onSearchFieldBlur}
         />
         <input
           type="reset"
@@ -121,13 +134,5 @@ class IdleSearchField extends PureComponent<Props, State> {
     );
   }
 }
-
-IdleSearchField.propTypes = {
-  onIdleAfterChange: PropTypes.func.isRequired,
-  idlePeriod: PropTypes.number.isRequired,
-  defaultValue: PropTypes.string,
-  className: PropTypes.string,
-  title: PropTypes.string,
-};
 
 export default IdleSearchField;
