@@ -4,8 +4,10 @@
 
 // @flow
 import { combineReducers } from 'redux';
-import { defaultThreadOrder } from '../profile-logic/profile-data';
+import escapeStringRegexp from 'escape-string-regexp';
 import { createSelector } from 'reselect';
+
+import { defaultThreadOrder } from '../profile-logic/profile-data';
 import { urlFromState } from '../url-handling';
 import * as RangeFilters from '../profile-logic/range-filters';
 
@@ -296,6 +298,16 @@ export const getSearchStrings = createSelector(
       .split(',')
       .map(part => part.trim())
       .filter(part => part);
+  }
+);
+export const getSearchStringsAsRegExp = createSelector(
+  getSearchStrings,
+  strings => {
+    if (!strings.length) {
+      return null;
+    }
+    const regexpStr = strings.map(escapeStringRegexp).join('|');
+    return new RegExp(regexpStr, 'gi');
   }
 );
 export const getMarkersSearchString = (state: State) =>

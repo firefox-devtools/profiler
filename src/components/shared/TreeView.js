@@ -7,7 +7,6 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import escapeStringRegexp from 'escape-string-regexp';
 import VirtualList from './VirtualList';
 import { BackgroundImageStyleDef } from './StyleDef';
 
@@ -49,15 +48,15 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) =>
 
 function reactStringWithHighlightedSubstrings(
   string: string,
-  substrings: ?(string[]),
+  re: ?RegExp,
   className: string
 ) {
-  if (!substrings || !substrings.length) {
+  if (!re) {
     return string;
   }
 
-  const regexpStr = substrings.map(escapeStringRegexp).join('|');
-  const re = new RegExp(regexpStr, 'gi');
+  // Since the regexp is reused and likely global, let's make sure we reset it.
+  re.lastIndex = 0;
 
   const highlighted = [];
   let lastOccurrence = 0;
@@ -86,7 +85,7 @@ type TreeViewRowFixedColumnsProps = {
   index: number,
   selected: boolean,
   onClick: (IndexIntoCallNodeTable, SyntheticMouseEvent<>) => mixed,
-  highlightStrings?: string[],
+  highlightRe: RegExp | null,
 };
 
 class TreeViewRowFixedColumns extends React.PureComponent<
@@ -103,7 +102,7 @@ class TreeViewRowFixedColumns extends React.PureComponent<
   }
 
   render() {
-    const { node, columns, index, selected, highlightStrings } = this.props;
+    const { node, columns, index, selected, highlightRe } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     return (
       <div
@@ -125,7 +124,7 @@ class TreeViewRowFixedColumns extends React.PureComponent<
                 ? <RenderComponent node={node} />
                 : reactStringWithHighlightedSubstrings(
                     node[col.propName],
-                    highlightStrings,
+                    highlightRe,
                     'treeViewHighlighting'
                   )}
             </span>
@@ -152,7 +151,7 @@ type TreeViewRowScrolledColumnsProps = {
   onAppendageButtonClick:
     | ((IndexIntoCallNodeTable | null, string) => mixed)
     | null,
-  highlightStrings?: string[],
+  highlightRe: RegExp | null,
 };
 
 class TreeViewRowScrolledColumns extends React.PureComponent<
@@ -199,7 +198,7 @@ class TreeViewRowScrolledColumns extends React.PureComponent<
       canBeExpanded,
       isExpanded,
       selected,
-      highlightStrings,
+      highlightRe,
       appendageButtons,
     } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
@@ -226,7 +225,7 @@ class TreeViewRowScrolledColumns extends React.PureComponent<
         >
           {reactStringWithHighlightedSubstrings(
             node[mainColumn.propName],
-            highlightStrings,
+            highlightRe,
             'treeViewHighlighting'
           )}
         </span>
@@ -236,7 +235,7 @@ class TreeViewRowScrolledColumns extends React.PureComponent<
             >
               {reactStringWithHighlightedSubstrings(
                 node[appendageColumn.propName],
-                highlightStrings,
+                highlightRe,
                 'treeViewHighlighting'
               )}
             </span>
@@ -264,7 +263,7 @@ type TreeViewProps = {|
   expandedNodeIds: Array<IndexIntoCallNodeTable | null>,
   selectedNodeId: IndexIntoCallNodeTable | null,
   onExpandedNodesChange: PropTypes.func.isRequired,
-  highlightStrings?: string[],
+  highlightRe?: RegExp | null,
   appendageColumn: Column,
   appendageButtons: string[],
   disableOverscan: boolean,
@@ -328,7 +327,7 @@ class TreeView extends React.PureComponent<TreeViewProps> {
       mainColumn,
       appendageColumn,
       selectedNodeId,
-      highlightStrings,
+      highlightRe,
       appendageButtons,
       onAppendageButtonClick,
     } = this.props;
@@ -342,7 +341,7 @@ class TreeView extends React.PureComponent<TreeViewProps> {
           index={index}
           selected={nodeId === selectedNodeId}
           onClick={this._onRowClicked}
-          highlightStrings={highlightStrings}
+          highlightRe={highlightRe || null}
         />
       );
     }
@@ -363,7 +362,7 @@ class TreeView extends React.PureComponent<TreeViewProps> {
         selected={nodeId === selectedNodeId}
         onClick={this._onRowClicked}
         onAppendageButtonClick={onAppendageButtonClick}
-        highlightStrings={highlightStrings}
+        highlightRe={highlightRe || null}
       />
     );
   }
@@ -583,7 +582,7 @@ TreeView.propTypes = {
   selectedNodeId: PropTypes.number,
   onExpandedNodesChange: PropTypes.func.isRequired,
   onSelectionChange: PropTypes.func.isRequired,
-  highlightStrings: PropTypes.arrayOf(PropTypes.string),
+  highlightRe: PropTypes.instanceOf(RegExp),
   appendageColumn: PropTypes.shape({
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,

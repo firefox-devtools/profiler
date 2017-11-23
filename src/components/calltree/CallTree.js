@@ -12,7 +12,7 @@ import { getCallNodePath } from '../../profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
-  getSearchStrings,
+  getSearchStringsAsRegExp,
   getSelectedThreadIndex,
 } from '../../reducers/url-state';
 import {
@@ -47,7 +47,7 @@ type Props = {
   callNodeInfo: CallNodeInfo,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
-  searchStrings: string[],
+  searchStringsRe: RegExp,
   disableOverscan: boolean,
   implementationFilter: ImplementationFilter,
   invertCallstack: boolean,
@@ -174,7 +174,7 @@ class CallTreeComponent extends PureComponent<Props> {
       tree,
       selectedCallNodeIndex,
       expandedCallNodeIndexes,
-      searchStrings,
+      searchStringsRe,
       disableOverscan,
     } = this.props;
     return (
@@ -187,7 +187,7 @@ class CallTreeComponent extends PureComponent<Props> {
         onExpandedNodesChange={this._onExpandedCallNodesChange}
         selectedNodeId={selectedCallNodeIndex}
         expandedNodeIds={expandedCallNodeIndexes}
-        highlightStrings={searchStrings}
+        highlightRe={searchStringsRe}
         disableOverscan={disableOverscan}
         appendageButtons={this._appendageButtons}
         onAppendageButtonClick={this._onAppendageButtonClick}
@@ -215,7 +215,7 @@ export default connect(
     expandedCallNodeIndexes: selectedThreadSelectors.getExpandedCallNodeIndexes(
       state
     ),
-    searchStrings: getSearchStrings(state),
+    searchStringsRe: getSearchStringsAsRegExp(state),
     disableOverscan: getProfileViewOptions(state).selection.isModifying,
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
