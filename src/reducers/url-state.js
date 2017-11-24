@@ -292,18 +292,24 @@ export const getSearchStrings = createSelector(
   getCurrentSearchString,
   searchString => {
     if (!searchString) {
-      return [];
+      return null;
     }
-    return searchString
+    const result = searchString
       .split(',')
       .map(part => part.trim())
       .filter(part => part);
+
+    if (result.length) {
+      return result;
+    }
+
+    return null;
   }
 );
 export const getSearchStringsAsRegExp = createSelector(
   getSearchStrings,
   strings => {
-    if (!strings.length) {
+    if (!strings || !strings.length) {
       return null;
     }
     const regexpStr = strings.map(escapeStringRegexp).join('|');

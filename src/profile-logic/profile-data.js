@@ -419,10 +419,10 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
 
 export function filterThreadToSearchStrings(
   thread: Thread,
-  searchStrings: string[]
+  searchStrings: string[] | null
 ): Thread {
   return timeCode('filterThreadToSearchStrings', () => {
-    if (!searchStrings.length) {
+    if (!searchStrings || !searchStrings.length) {
       return thread;
     }
 

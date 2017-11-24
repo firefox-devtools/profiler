@@ -48,7 +48,7 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) =>
 
 function reactStringWithHighlightedSubstrings(
   string: string,
-  re: ?RegExp,
+  re: RegExp | null,
   className: string
 ) {
   if (!re) {

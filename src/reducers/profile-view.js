@@ -551,7 +551,7 @@ export const selectorsForThread = (
     const _getImplementationAndSearchFilteredThread = createSelector(
       _getImplementationFilteredThread,
       UrlState.getSearchStrings,
-      (thread: Thread, searchStrings: string[]): Thread => {
+      (thread: Thread, searchStrings: string[] | null): Thread => {
         return ProfileData.filterThreadToSearchStrings(thread, searchStrings);
       }
     );
@@ -691,7 +691,7 @@ export const selectorsForThread = (
         thread: Thread,
         shouldHidePlatformDetails: boolean,
         shouldInvertCallstack: boolean,
-        searchStrings: string[]
+        searchStrings: string[] | null
       ): Thread => {
         // Unlike for the call tree filtered profile, the individual steps of
         // this filtering are not memoized. I hope it's not too bad.
