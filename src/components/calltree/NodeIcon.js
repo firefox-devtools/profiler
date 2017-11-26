@@ -4,7 +4,8 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import { getIconClassNameForNode } from '../../reducers/icons';
@@ -16,9 +17,7 @@ type Props = {
   iconStartLoading: string => void,
 };
 
-class NodeIcon extends PureComponent {
-  props: Props;
-
+class NodeIcon extends PureComponent<Props> {
   constructor(props) {
     super(props);
     if (props.icon) {

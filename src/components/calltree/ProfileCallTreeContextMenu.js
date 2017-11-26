@@ -7,6 +7,7 @@ import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
 import { connect } from 'react-redux';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 import { getFunctionName } from '../../profile-logic/function-info';
 import copy from 'copy-to-clipboard';
 import { addTransformToStack } from '../../actions/profile-view';
@@ -37,8 +38,7 @@ type Props = {
 
 require('./ProfileCallTreeContextMenu.css');
 
-class ProfileCallTreeContextMenu extends PureComponent {
-  props: Props;
+class ProfileCallTreeContextMenu extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any).handleClick = this.handleClick.bind(this);
@@ -94,7 +94,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
     copy(stack);
   }
 
-  handleClick(event: SyntheticEvent, data: { type: string }): void {
+  handleClick(event: SyntheticEvent<>, data: { type: string }): void {
     const { type } = data;
     switch (type) {
       case 'copy-function-name':
@@ -112,6 +112,7 @@ class ProfileCallTreeContextMenu extends PureComponent {
       case 'focus-subtree':
       case 'focus-function':
       case 'collapse-resource':
+      case 'collapse-direct-recursion':
         this.addTransformToStack(type);
         break;
       default:
@@ -180,6 +181,14 @@ class ProfileCallTreeContextMenu extends PureComponent {
         });
         break;
       }
+      case 'collapse-direct-recursion': {
+        addTransformToStack(threadIndex, {
+          type: 'collapse-direct-recursion',
+          funcIndex: selectedFunc,
+          implementation,
+        });
+        break;
+      }
       default:
         throw new Error('Type not found.');
     }
@@ -212,6 +221,24 @@ class ProfileCallTreeContextMenu extends PureComponent {
       return null;
     }
     return libs[libIndex].name;
+  }
+
+  /**
+   * Determine if this CallNode represent a recursive function call.
+   */
+  isRecursiveCall(): boolean {
+    const { selectedCallNodePath, thread, implementation } = this.props;
+    const funcIndex = selectedCallNodePath[selectedCallNodePath.length - 1];
+    if (funcIndex === undefined) {
+      return false;
+    }
+    // Do the easy thing first, see if this function was called by itself.
+    if (selectedCallNodePath[selectedCallNodePath.length - 2] === funcIndex) {
+      return true;
+    }
+
+    // Do a full check of the stackTable for recursion.
+    return funcHasRecursiveCall(thread, implementation, funcIndex);
   }
 
   render() {
@@ -264,6 +291,15 @@ class ProfileCallTreeContextMenu extends PureComponent {
               <span className="profileCallTreeContextMenuLabel">
                 {nameForResource}
               </span>
+            </MenuItem>
+          : null}
+        {this.isRecursiveCall()
+          ? <MenuItem
+              onClick={this.handleClick}
+              data={{ type: 'collapse-direct-recursion' }}
+            >
+              <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+              Collapse direct recursion
             </MenuItem>
           : null}
         <div className="react-contextmenu-separator" />

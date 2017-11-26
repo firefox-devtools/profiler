@@ -818,7 +818,12 @@ function _adjustMarkerTimestamps(
  * Throws an exception if it encounters an incompatible profile.
  * For a description of the processed format, look at docs/gecko-profile-format.md
  */
-export function processProfile(geckoProfile: GeckoProfile): Profile {
+export function processProfile(
+  rawProfile: GeckoProfile | { profile: GeckoProfile }
+): Profile {
+  // We may have been given a DevTools profile, in that case extract the Gecko Profile.
+  const geckoProfile = rawProfile.profile ? rawProfile.profile : rawProfile;
+
   // Handle profiles from older versions of Gecko. This call might throw an
   // exception.
   upgradeGeckoProfileToCurrentVersion(geckoProfile);
@@ -976,7 +981,7 @@ export function unserializeProfileOfArbitraryFormat(
 }
 
 export class ProfileProcessor {
-  processProfile(geckoProfile: GeckoProfile) {
+  processProfile(geckoProfile: GeckoProfile): Promise<*> {
     return new Promise(resolve => {
       resolve(processProfile(geckoProfile));
     });

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import withChartViewport from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
@@ -47,20 +47,18 @@ type Props = {
   isDragging: boolean,
 };
 
+type State = {
+  hoveredItem: null | number,
+};
+
 const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
 const MARKER_LABEL_MAX_LENGTH = 30;
 
-class MarkerChartCanvas extends PureComponent {
+class MarkerChartCanvas extends React.PureComponent<Props, State> {
   _textMeasurement: null | TextMeasurement;
-
-  props: Props;
-
-  state: {
-    hoveredItem: null | number,
-  };
 
   constructor(props: Props) {
     super(props);
@@ -351,7 +349,11 @@ class MarkerChartCanvas extends PureComponent {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React$Element<*> {
+  /**
+   * This function currently returns `React.Element<any>` because we exactly
+   * know its return type. This needs to be a subtype of React.Node so this
+   * could be changed in the future if necessary. */
+  getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React.Element<any> {
     const marker = this.props.markers[hoveredItem];
     return <MarkerTooltipContents marker={marker} />;
   }

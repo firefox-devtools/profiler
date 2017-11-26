@@ -235,13 +235,11 @@ export class SymbolStoreDB {
     beforeDate: Date,
     callback: () => void
   ): void {
-    const lastUsedDateIndex = store.index('lastUsedDate');
+    const lastUsedDateIndex: IDBIndex<*, Date, *> = store.index('lastUsedDate');
     // Get a cursor that walks all records whose lastUsedDate is less than beforeDate.
+    const range = window.IDBKeyRange.upperBound(beforeDate, true);
     const cursorReq = lastUsedDateIndex.openCursor(
-      (window.IDBKeyRange: IDBKeyRange<SymbolDateKey>).upperBound(
-        beforeDate,
-        true
-      )
+      (range: IDBKeyRange<SymbolDateKey>)
     );
     // Iterate over all records in this cursor and delete them.
     cursorReq.onsuccess = () => {

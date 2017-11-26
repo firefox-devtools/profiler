@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import { connect } from 'react-redux';
 import StackChartCanvas from './Canvas';
 import {
@@ -48,9 +48,7 @@ type Props = {
   processDetails: string,
 };
 
-class StackChartGraph extends PureComponent {
-  props: Props;
-
+class StackChartGraph extends React.PureComponent<Props> {
   /**
    * Determine the maximum amount available to zoom in.
    */

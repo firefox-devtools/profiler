@@ -1,5 +1,5 @@
 // @flow
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import { connect } from 'react-redux';
 import MarkerChartCanvas from './Canvas';
 import {
@@ -39,9 +39,7 @@ type Props = {
   markers: TracingMarker[],
 };
 
-class MarkerChart extends PureComponent {
-  props: Props;
-
+class MarkerChart extends React.PureComponent<Props> {
   /**
    * Determine the maximum zoom of the viewport.
    */

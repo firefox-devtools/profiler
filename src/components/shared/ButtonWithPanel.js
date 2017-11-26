@@ -4,38 +4,44 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 
 require('./ButtonWithPanel.css');
 
+type PanelProps = {
+  onOpen?: () => mixed,
+  onClose?: () => mixed,
+};
+
 interface Panel {
-  props: {
-    onOpen: () => mixed,
-    onClose: () => mixed,
-  },
   open(): mixed,
 }
 
+/**
+ * Note about the `panel` prop: we accept any React element whose Component
+ * class implements the `Panel` interface above, and has at least the props from
+ * `PanelProps` above, and any State type. */
 type Props = {
   className: string,
   label: string,
-  panel: React$Element<*>, // Ideally we'd like to say that panel implements Panel, but I can't express it with Flow
+  panel: React.Element<
+    Class<Panel & React.Component<$Subtype<PanelProps>, any>>
+  >,
   open?: boolean,
   disabled?: boolean,
 };
 
-class ButtonWithPanel extends PureComponent {
-  props: Props;
-  state: {|
-    open: boolean,
-  |};
+type State = {|
+  open: boolean,
+|};
 
+class ButtonWithPanel extends React.PureComponent<Props, State> {
   _panel: Panel | null;
 
   _onPanelOpen: () => void;
   _onPanelClose: () => void;
-  _panelCreated: Panel => void;
+  _panelCreated: (Panel | null) => void;
 
   constructor(props: Props) {
     super(props);
@@ -53,7 +59,7 @@ class ButtonWithPanel extends PureComponent {
       }
     };
     (this: any)._onButtonClick = this._onButtonClick.bind(this);
-    this._panelCreated = (panel: Panel) => {
+    this._panelCreated = (panel: Panel | null) => {
       this._panel = panel;
     };
   }

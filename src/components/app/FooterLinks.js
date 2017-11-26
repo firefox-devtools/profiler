@@ -6,11 +6,9 @@
 import React, { PureComponent } from 'react';
 require('./FooterLinks.css');
 
-class FooterLinks extends PureComponent {
-  state: {
-    hide: boolean,
-  };
+type State = {| hide: boolean |};
 
+class FooterLinks extends PureComponent<{||}, State> {
   constructor() {
     super();
     this.state = {

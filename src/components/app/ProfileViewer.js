@@ -4,7 +4,8 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import TabBar from './TabBar';
 import classNames from 'classnames';
@@ -42,11 +43,11 @@ type Props = {
   changeTabOrder: (number[]) => Action,
 };
 
-class ProfileViewer extends PureComponent {
-  props: Props;
-  state: {
-    isMounted: boolean,
-  };
+type State = {
+  isMounted: boolean,
+};
+
+class ProfileViewer extends PureComponent<Props, State> {
   _tabs: Tab[];
 
   constructor(props) {

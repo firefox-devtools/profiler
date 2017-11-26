@@ -26,6 +26,7 @@ import shortenUrl from '../../utils/shorten-url';
 import { serializeProfile } from '../../profile-logic/process-profile';
 import prettyBytes from 'pretty-bytes';
 import sha1 from '../../utils/sha1';
+import { sendAnalytics } from '../../utils/analytics';
 import url from 'url';
 
 import type { StartEndRange } from '../../types/units';
@@ -76,22 +77,25 @@ type ProfileSharingCompositeButtonProps = {
   onProfilePublished: typeof actions.profilePublished,
 };
 
-class ProfileSharingCompositeButton extends PureComponent {
-  props: ProfileSharingCompositeButtonProps;
-  _permalinkButton: ButtonWithPanel;
-  _uploadErrorButton: ButtonWithPanel;
-  _permalinkTextField: HTMLInputElement;
-  _permalinkButtonCreated: ButtonWithPanel => void;
-  _uploadErrorButtonCreated: ButtonWithPanel => void;
-  _permalinkTextFieldCreated: HTMLInputElement => void;
-  state: {
-    state: string,
-    uploadProgress: number,
-    hash: string,
-    error: Error | null,
-    fullUrl: string,
-    shortUrl: string,
-  };
+type ProfileSharingCompositeButtonState = {
+  state: string,
+  uploadProgress: number,
+  hash: string,
+  error: Error | null,
+  fullUrl: string,
+  shortUrl: string,
+};
+
+class ProfileSharingCompositeButton extends PureComponent<
+  ProfileSharingCompositeButtonProps,
+  ProfileSharingCompositeButtonState
+> {
+  _permalinkButton: ButtonWithPanel | null;
+  _uploadErrorButton: ButtonWithPanel | null;
+  _permalinkTextField: HTMLInputElement | null;
+  _permalinkButtonCreated: (ButtonWithPanel | null) => void;
+  _uploadErrorButtonCreated: (ButtonWithPanel | null) => void;
+  _permalinkTextFieldCreated: (HTMLInputElement | null) => void;
 
   constructor(props: ProfileSharingCompositeButtonProps) {
     super(props);
@@ -108,13 +112,13 @@ class ProfileSharingCompositeButton extends PureComponent {
     (this: any)._attemptToShare = this._attemptToShare.bind(this);
     (this: any)._onPermalinkPanelOpen = this._onPermalinkPanelOpen.bind(this);
     (this: any)._onPermalinkPanelClose = this._onPermalinkPanelClose.bind(this);
-    this._permalinkButtonCreated = (elem: ButtonWithPanel) => {
+    this._permalinkButtonCreated = (elem: ButtonWithPanel | null) => {
       this._permalinkButton = elem;
     };
-    this._uploadErrorButtonCreated = (elem: ButtonWithPanel) => {
+    this._uploadErrorButtonCreated = (elem: ButtonWithPanel | null) => {
       this._uploadErrorButton = elem;
     };
-    this._permalinkTextFieldCreated = (elem: HTMLInputElement) => {
+    this._permalinkTextFieldCreated = (elem: HTMLInputElement | null) => {
       this._permalinkTextField = elem;
     };
   }
@@ -142,9 +146,10 @@ class ProfileSharingCompositeButton extends PureComponent {
     return shortenUrl(this.state.fullUrl)
       .then(shortUrl => {
         this.setState({ shortUrl });
-        if (this._permalinkTextField) {
-          this._permalinkTextField.focus();
-          this._permalinkTextField.select();
+        const textField = this._permalinkTextField;
+        if (textField) {
+          textField.focus();
+          textField.select();
         }
       })
       .catch(() => {});
@@ -156,10 +161,19 @@ class ProfileSharingCompositeButton extends PureComponent {
     }
   }
 
+  _notifyAnalytics() {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile upload',
+      eventAction: 'start',
+    });
+  }
+
   _attemptToShare() {
     if (this.state.state !== 'local' && this.state.state !== 'error') {
       return;
     }
+    this._notifyAnalytics();
 
     const { profile, predictUrl } = this.props;
 
@@ -207,6 +221,12 @@ class ProfileSharingCompositeButton extends PureComponent {
             fullUrl: window.location.href,
             shortUrl: newShortUrl,
           });
+
+          sendAnalytics({
+            hitType: 'event',
+            eventCategory: 'profile upload',
+            eventAction: 'succeeded',
+          });
         });
         const shortenUrlPromise = this._shortenUrlAndFocusTextFieldOnCompletion();
         Promise.race([uploadPromise, shortenUrlPromise]).then(() => {
@@ -224,6 +244,11 @@ class ProfileSharingCompositeButton extends PureComponent {
         if (this._uploadErrorButton) {
           this._uploadErrorButton.openPanel();
         }
+        sendAnalytics({
+          hitType: 'event',
+          eventCategory: 'profile upload',
+          eventAction: 'failed',
+        });
       });
   }
 
@@ -316,15 +341,18 @@ type ProfileDownloadButtonProps = {
   rootRange: StartEndRange,
 };
 
-class ProfileDownloadButton extends PureComponent {
-  props: ProfileDownloadButtonProps;
-  state: {|
-    uncompressedBlobUrl: string,
-    compressedBlobUrl: string,
-    uncompressedSize: number,
-    compressedSize: number,
-    filename: string,
-  |};
+type ProfileDownloadButtonState = {|
+  uncompressedBlobUrl: string,
+  compressedBlobUrl: string,
+  uncompressedSize: number,
+  compressedSize: number,
+  filename: string,
+|};
+
+class ProfileDownloadButton extends PureComponent<
+  ProfileDownloadButtonProps,
+  ProfileDownloadButtonState
+> {
   constructor(props: ProfileDownloadButtonProps) {
     super(props);
     this.state = {
@@ -359,6 +387,11 @@ class ProfileDownloadButton extends PureComponent {
         compressedBlobUrl: blobUrl,
         compressedSize: blob.size,
       });
+    });
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile save locally',
+      eventAction: 'save',
     });
   }
 

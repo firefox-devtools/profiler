@@ -4,11 +4,11 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { getIsUrlSetupDone } from '../../reducers/app';
-
-import type { Dispatch } from '../../types/store';
+import { updateUrlState, urlSetupDone, show404 } from '../../actions/app';
 
 type Props = {
   stateFromLocation: Location => any,
@@ -21,9 +21,7 @@ type Props = {
   show404: string => void,
 };
 
-class UrlManager extends PureComponent {
-  props: Props;
-
+class UrlManager extends PureComponent<Props> {
   _updateState() {
     const { updateUrlState, stateFromLocation, show404 } = this.props;
     if (window.history.state) {
@@ -39,11 +37,9 @@ class UrlManager extends PureComponent {
     }
   }
   componentDidMount() {
-    const { urlSetupDone } = this.props;
-
     this._updateState();
     window.addEventListener('popstate', () => this._updateState());
-    urlSetupDone();
+    this.props.urlSetupDone();
   }
 
   componentWillReceiveProps(nextProps: Props) {
@@ -82,10 +78,9 @@ export default connect(
     urlState: state.urlState,
     isUrlSetupDone: getIsUrlSetupDone(state),
   }),
-  (dispatch: Dispatch) => ({
-    updateUrlState: urlState =>
-      dispatch({ type: '@@urlenhancer/updateUrlState', urlState }),
-    urlSetupDone: () => dispatch({ type: '@@urlenhancer/urlSetupDone' }),
-    show404: url => dispatch({ type: 'ROUTE_NOT_FOUND', url }),
-  })
+  {
+    updateUrlState,
+    urlSetupDone,
+    show404,
+  }
 )(UrlManager);

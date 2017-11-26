@@ -4,7 +4,8 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './FilterNavigatorBar.css';
@@ -16,18 +17,14 @@ type Props = {
   selectedItem: number,
 };
 
-class FilterNavigatorBar extends PureComponent {
-  props: Props;
+class FilterNavigatorBar extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._onLiClick = this._onLiClick.bind(this);
   }
 
-  _onLiClick(e: SyntheticMouseEvent & { target: HTMLLIElement }) {
-    const element = e.target.closest('.filterNavigatorBarItem');
-    if (!(element instanceof HTMLElement)) {
-      return;
-    }
+  _onLiClick(e: SyntheticMouseEvent<HTMLLIElement>) {
+    const element = e.currentTarget;
     const index = parseInt(element.dataset.index, 10) || 0;
     this.props.onPop(index);
   }

@@ -3,7 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import './IdleSearchField.css';
@@ -16,19 +17,17 @@ type Props = {
   title: ?string,
 };
 
-class IdleSearchField extends PureComponent {
+type State = {
+  value: string,
+};
+
+class IdleSearchField extends PureComponent<Props, State> {
   _onSearchFieldChange: Event => void;
   _onSearchFieldFocus: Event => void;
   _onClearButtonClick: Event => void;
   _onTimeout: void => void;
   _timeout: number;
   _previouslyNotifiedValue: string;
-
-  props: Props;
-
-  state: {
-    value: string,
-  };
 
   constructor(props: Props) {
     super(props);
@@ -43,11 +42,11 @@ class IdleSearchField extends PureComponent {
     this._previouslyNotifiedValue = this.state.value;
   }
 
-  _onSearchFieldFocus(e: Event & { currentTarget: HTMLInputElement }) {
+  _onSearchFieldFocus(e: SyntheticFocusEvent<HTMLInputElement>) {
     e.currentTarget.select();
   }
 
-  _onSearchFieldChange(e: Event & { currentTarget: HTMLInputElement }) {
+  _onSearchFieldChange(e: SyntheticEvent<HTMLInputElement>) {
     this.setState({
       value: e.currentTarget.value,
     });
@@ -76,7 +75,7 @@ class IdleSearchField extends PureComponent {
   }
 
   _onClearButtonFocus(
-    e: Event & { relatedTarget: HTMLElement, currentTarget: HTMLElement }
+    e: SyntheticEvent<HTMLElement> & { relatedTarget: HTMLElement }
   ) {
     // prevent the focus on the clear button
     if (e.relatedTarget) {

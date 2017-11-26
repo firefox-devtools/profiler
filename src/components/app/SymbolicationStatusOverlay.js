@@ -31,9 +31,7 @@ type Props = {
   waitingForLibs: Set<RequestedLib>,
 };
 
-class SymbolicationStatusOverlay extends PureComponent {
-  props: Props;
-
+class SymbolicationStatusOverlay extends PureComponent<Props> {
   render() {
     const { symbolicationStatus, waitingForLibs } = this.props;
     if (symbolicationStatus === 'SYMBOLICATING') {

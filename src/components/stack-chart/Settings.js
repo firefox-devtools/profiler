@@ -4,7 +4,8 @@
 
 // @flow
 
-import React, { PureComponent, PropTypes } from 'react';
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import actions from '../../actions';
 import {
@@ -25,9 +26,7 @@ type Props = {
   changeCallTreeSearchString: string => void,
 };
 
-class StackChartSettings extends PureComponent {
-  props: Props;
-
+class StackChartSettings extends PureComponent<Props> {
   constructor(props) {
     super(props);
     (this: any)._onHidePlatformDetailsClick = this._onHidePlatformDetailsClick.bind(
@@ -41,12 +40,12 @@ class StackChartSettings extends PureComponent {
     );
   }
 
-  _onHidePlatformDetailsClick(e: Event & { target: HTMLInputElement }) {
-    this.props.changeHidePlatformDetails(e.target.checked);
+  _onHidePlatformDetailsClick(e: SyntheticMouseEvent<HTMLInputElement>) {
+    this.props.changeHidePlatformDetails(e.currentTarget.checked);
   }
 
-  _onInvertCallstackClick(e: Event & { target: HTMLInputElement }) {
-    this.props.changeInvertCallstack(e.target.checked);
+  _onInvertCallstackClick(e: SyntheticMouseEvent<HTMLInputElement>) {
+    this.props.changeInvertCallstack(e.currentTarget.checked);
   }
 
   _onSearchFieldIdleAfterChange(value: string) {

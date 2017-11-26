@@ -17,9 +17,7 @@ type Props = {
   changeMarkersSearchString: string => void,
 };
 
-class Settings extends PureComponent {
-  props: Props;
-
+class Settings extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(

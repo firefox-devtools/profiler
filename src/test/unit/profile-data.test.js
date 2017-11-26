@@ -46,6 +46,7 @@ import {
 } from '../../profile-logic/color-categories';
 import getCallNodeProfile from '../fixtures/profiles/call-nodes';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 
 import type { Thread, IndexIntoStackTable } from '../../types/profile';
 
@@ -269,6 +270,27 @@ describe('process-profile', function() {
       const [name0, name1] = thread.resourceTable.name;
       expect(thread.stringTable.getString(name0)).toEqual('firefox');
       expect(thread.stringTable.getString(name1)).toEqual('chrome://blargh');
+    });
+  });
+  describe('DevTools profiles', function() {
+    it('should process correctly', function() {
+      // Mock out a DevTools profile.
+      const profile = processProfile({
+        label: null,
+        duration: null,
+        markers: null,
+        frames: null,
+        memory: null,
+        ticks: null,
+        allocations: null,
+        profile: getGeckoProfile(),
+        configuration: null,
+        systemHost: null,
+        systemClient: null,
+        fileType: null,
+        version: null,
+      });
+      expect(profile.threads.length).toEqual(3);
     });
   });
 });
@@ -807,5 +829,24 @@ describe('get-sample-index-closest-to-time', function() {
     expect(getSampleIndexClosestToTime(samples, 1.5, interval)).toBe(1);
     expect(getSampleIndexClosestToTime(samples, 9.9, interval)).toBe(9);
     expect(getSampleIndexClosestToTime(samples, 100, interval)).toBe(9);
+  });
+});
+
+describe('funcHasRecursiveCall', function() {
+  const { profile, funcNames } = getProfileFromTextSamples(`
+    A.js
+    B.js
+    C.cpp
+    B.js
+    D.js
+  `);
+  const [thread] = profile.threads;
+
+  it('correctly identifies recursive functions based taking into account implementation', function() {
+    expect([
+      funcHasRecursiveCall(thread, 'combined', funcNames.indexOf('A.js')),
+      funcHasRecursiveCall(thread, 'combined', funcNames.indexOf('B.js')),
+      funcHasRecursiveCall(thread, 'js', funcNames.indexOf('B.js')),
+    ]).toEqual([false, false, true]);
   });
 });

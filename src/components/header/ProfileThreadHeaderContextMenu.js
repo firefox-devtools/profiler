@@ -23,9 +23,7 @@ type Props = {|
   showThread: typeof showThread,
 |};
 
-class ProfileThreadHeaderContextMenu extends PureComponent {
-  props: Props;
-
+class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._toggleThreadVisibility = this._toggleThreadVisibility.bind(
@@ -36,18 +34,16 @@ class ProfileThreadHeaderContextMenu extends PureComponent {
   _toggleThreadVisibility(
     _,
     data: {
-      threadOrder: ThreadIndex[],
-      hiddenThreads: ThreadIndex[],
       threadIndex: ThreadIndex,
       isHidden: boolean,
     }
   ): void {
-    const { threadOrder, hiddenThreads, threadIndex, isHidden } = data;
+    const { threadIndex, isHidden } = data;
     const { hideThread, showThread } = this.props;
     if (isHidden) {
       showThread(threadIndex);
     } else {
-      hideThread(threadIndex, threadOrder, hiddenThreads);
+      hideThread(threadIndex);
     }
   }
 
@@ -62,7 +58,7 @@ class ProfileThreadHeaderContextMenu extends PureComponent {
             <MenuItem
               key={threadIndex}
               preventClose={true}
-              data={{ threadOrder, hiddenThreads, threadIndex, isHidden }}
+              data={{ threadIndex, isHidden }}
               onClick={this._toggleThreadVisibility}
               attributes={{
                 className: classNames({ checkable: true, checked: !isHidden }),
