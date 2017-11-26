@@ -76,6 +76,7 @@ export type IndexIntoTracingMarkers = number;
 
 export type CallNodeDisplayData = {
   totalTime: string,
+  totalTimeRelative: number,
   totalTimePercent: string,
   selfTime: string,
   name: string,
