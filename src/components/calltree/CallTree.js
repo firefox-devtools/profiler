@@ -60,6 +60,7 @@ class CallTreeComponent extends PureComponent<Props> {
   _appendageColumn: Column;
   _appendageButtons: string[];
   _treeView: TreeView | null;
+  _takeTreeViewRef = treeView => (this._treeView = treeView);
 
   constructor(props: Props) {
     super(props);
@@ -188,9 +189,7 @@ class CallTreeComponent extends PureComponent<Props> {
         disableOverscan={disableOverscan}
         appendageButtons={this._appendageButtons}
         onAppendageButtonClick={this._onAppendageButtonClick}
-        ref={ref => {
-          this._treeView = ref;
-        }}
+        ref={this._takeTreeViewRef}
         contextMenuId={'ProfileCallTreeContextMenu'}
         icons={this.props.icons}
       />

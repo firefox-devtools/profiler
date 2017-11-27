@@ -21,7 +21,7 @@ module.exports = {
     },
     sourceType: 'module',
   },
-  plugins: ['react', 'flowtype', 'import', 'prettier'],
+  plugins: ['babel', 'react', 'flowtype', 'import', 'prettier'],
   rules: {
     // Plugin rules:
     'import/no-duplicates': 'error',
@@ -66,7 +66,9 @@ module.exports = {
     'no-extra-bind': 'error',
     'no-extra-label': 'error',
     'no-implied-eval': 'error',
-    'no-invalid-this': 'error',
+    // We use the version from the babel plugin so that `this` in a function
+    // class property doesn't give a false positive.
+    'babel/no-invalid-this': 'error',
     'no-return-await': 'error',
     'no-self-compare': 'error',
     'no-throw-literal': 'error',

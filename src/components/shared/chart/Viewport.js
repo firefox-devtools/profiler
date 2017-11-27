@@ -116,7 +116,8 @@ export default function withChartViewport<Props: ViewportProps>(
     shiftScrollId: number;
     zoomRangeSelectionScheduled: boolean;
     zoomRangeSelectionScrollDelta: number;
-    _container: ?HTMLElement;
+    _container: HTMLElement | null;
+    _takeContainerRef = container => (this._container = container);
 
     constructor(props: Props) {
       super(props);
@@ -131,6 +132,7 @@ export default function withChartViewport<Props: ViewportProps>(
       this.shiftScrollId = 0;
       this.zoomRangeSelectionScheduled = false;
       this.zoomRangeSelectionScrollDelta = 0;
+      this._container = null;
 
       this.state = this.getDefaultState(props);
     }
@@ -477,9 +479,7 @@ export default function withChartViewport<Props: ViewportProps>(
           className={viewportClassName}
           onWheel={this._mouseWheelListener}
           onMouseDown={this._mouseDownListener}
-          ref={container => {
-            this._container = container;
-          }}
+          ref={this._takeContainerRef}
         >
           <WrappedComponent
             {...this.props}

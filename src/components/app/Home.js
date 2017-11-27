@@ -19,6 +19,15 @@ const ADDON_URL =
 const LEGACY_ADDON_URL =
   'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
 
+function onInstallClick(e: SyntheticEvent<HTMLAnchorElement>) {
+  if (window.InstallTrigger) {
+    const name = e.currentTarget.dataset.name;
+    const xpiUrl = e.currentTarget.href;
+    window.InstallTrigger.install({ [name]: xpiUrl });
+  }
+  e.preventDefault();
+}
+
 const InstallButton = ({
   name,
   xpiUrl,
@@ -29,12 +38,8 @@ const InstallButton = ({
     <a
       href={xpiUrl}
       className={className}
-      onClick={e => {
-        if (window.InstallTrigger) {
-          window.InstallTrigger.install({ [name]: xpiUrl });
-        }
-        e.preventDefault();
-      }}
+      data-name={name}
+      onClick={onInstallClick}
     >
       {children}
     </a>
@@ -54,6 +59,7 @@ type UploadButtonProps = {
 
 class UploadButton extends React.PureComponent<UploadButtonProps> {
   _input: HTMLInputElement | null;
+  _takeInputRef = input => (this._input = input);
 
   constructor(props: UploadButtonProps) {
     super(props);
@@ -63,13 +69,7 @@ class UploadButton extends React.PureComponent<UploadButtonProps> {
   render() {
     return (
       <div>
-        <input
-          type="file"
-          ref={input => {
-            this._input = input;
-          }}
-          onChange={this._upload}
-        />
+        <input type="file" ref={this._takeInputRef} onChange={this._upload} />
       </div>
     );
   }

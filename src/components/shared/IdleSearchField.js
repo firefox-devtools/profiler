@@ -97,6 +97,10 @@ class IdleSearchField extends PureComponent<Props, State> {
     }
   }
 
+  _onFormSubmit(e: SyntheticEvent<HTMLFormElement>) {
+    e.preventDefault();
+  }
+
   componentWillReceiveProps(nextProps: Props) {
     if (nextProps.defaultValue !== this.props.defaultValue) {
       this._notifyIfChanged(nextProps.defaultValue || '');
@@ -111,7 +115,7 @@ class IdleSearchField extends PureComponent<Props, State> {
     return (
       <form
         className={classNames('idleSearchField', className)}
-        onSubmit={e => e.preventDefault()}
+        onSubmit={this._onFormSubmit}
       >
         <input
           type="search"

@@ -231,6 +231,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           </p>
           <a
             className="homeSectionInstallButton"
+            data-name="Gecko Profiler"
             href="https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi"
             onClick={[Function]}
           >
@@ -386,6 +387,7 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
              
             <a
               className={undefined}
+              data-name="Gecko Profiler"
               href="https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi"
               onClick={[Function]}
             >

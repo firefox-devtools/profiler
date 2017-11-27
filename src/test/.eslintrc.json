@@ -1,6 +1,9 @@
 {
   "env": {
-      "jest": true
-    }
+    "jest": true
+  },
+  "rules": {
+    "react/jsx-no-bind": 0
+  }
 }
 

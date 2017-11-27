@@ -115,6 +115,8 @@ class MarkerTree {
 }
 
 class MarkerTable extends PureComponent {
+  _takeTreeViewRef = treeView => (this._treeView = treeView);
+
   constructor(props) {
     super(props);
     this._fixedColumns = [
@@ -155,7 +157,7 @@ class MarkerTable extends PureComponent {
           onExpandedNodesChange={this._onExpandedNodeIdsChange}
           selectedNodeId={selectedMarker}
           expandedNodeIds={this._expandedNodeIds}
-          ref={ref => (this._treeView = ref)}
+          ref={this._takeTreeViewRef}
           contextMenuId={'MarkersContextMenu'}
         />
       </div>
