@@ -16,7 +16,6 @@ import {
   getSelectedThreadIndex,
 } from '../../reducers/url-state';
 import {
-  getProfile,
   selectedThreadSelectors,
   getScrollToSelectionGeneration,
   getProfileViewOptions,
@@ -31,7 +30,7 @@ import {
 import type { IconWithClassName, State } from '../../types/reducers';
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { ImplementationFilter } from '../../types/actions';
-import type { Thread, ThreadIndex } from '../../types/profile';
+import type { ThreadIndex } from '../../types/profile';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -39,10 +38,8 @@ import type {
 import type { Column } from '../shared/TreeView';
 
 type Props = {
-  thread: Thread,
   threadIndex: ThreadIndex,
   scrollToSelectionGeneration: number,
-  interval: number,
   tree: CallTree,
   callNodeInfo: CallNodeInfo,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -203,10 +200,8 @@ class CallTreeComponent extends PureComponent<Props> {
 
 export default connect(
   (state: State) => ({
-    thread: selectedThreadSelectors.getFilteredThread(state),
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-    interval: getProfile(state).meta.interval,
     tree: selectedThreadSelectors.getCallTree(state),
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
     selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
