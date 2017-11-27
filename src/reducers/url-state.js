@@ -331,13 +331,6 @@ export const getTransformStack = (
 export const getThreadOrder = (state: State) => getUrlState(state).threadOrder;
 export const getHiddenThreads = (state: State) =>
   getUrlState(state).hiddenThreads;
-export const getVisibleThreadOrder = createSelector(
-  getThreadOrder,
-  getHiddenThreads,
-  (threadOrder: ThreadIndex[], hiddenThreads: ThreadIndex[]) => {
-    return threadOrder.filter(index => !hiddenThreads.includes(index));
-  }
-);
 export const getUrlPredictor = createSelector(
   getUrlState,
   (oldUrlState: UrlState) => (actionOrActionList: Action | Action[]) => {
