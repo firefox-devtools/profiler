@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 // @flow
 import * as React from 'react';
 import { timeCode } from '../../../utils/time-code';
@@ -25,7 +29,9 @@ type State<HoveredItem> = {
 
 require('./Canvas.css');
 
-export default class ChartCanvas<HoveredItem> extends React.PureComponent<
+// This isn't a PureComponent on purpose: we always want to update if the parent updates
+// But we still conditionally update the canvas itself, see componentDidUpdate.
+export default class ChartCanvas<HoveredItem> extends React.Component<
   Props<HoveredItem>,
   State<HoveredItem>
 > {
@@ -135,11 +141,6 @@ export default class ChartCanvas<HoveredItem> extends React.PureComponent<
 
   _setCanvasRef(canvas: HTMLCanvasElement | null) {
     this._canvas = canvas;
-  }
-
-  shouldComponentUpdate() {
-    // always try to update if the parent updates
-    return true;
   }
 
   componentDidUpdate(
