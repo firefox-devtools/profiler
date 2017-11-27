@@ -202,14 +202,18 @@ class ProfileSharingCompositeButton extends PureComponent<
         ).then((hash: string) => {
           const { onProfilePublished } = this.props;
           onProfilePublished(hash);
-          const newShortUrl =
-            this.state.fullUrl === window.location.href
-              ? this.state.shortUrl
-              : window.location.href;
-          this.setState({
-            state: 'public',
-            fullUrl: window.location.href,
-            shortUrl: newShortUrl,
+
+          this.setState(prevState => {
+            const newShortUrl =
+              prevState.fullUrl === window.location.href
+                ? prevState.shortUrl
+                : window.location.href;
+
+            return {
+              state: 'public',
+              fullUrl: window.location.href,
+              shortUrl: newShortUrl,
+            };
           });
 
           sendAnalytics({
