@@ -24,7 +24,7 @@ const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
 
 // These are the props consumed by this Higher-Order Component (HOC)
 type ViewportProps = {
-  viewportNeedsUpdate: any,
+  viewportNeedsUpdate: (ViewportProps, ViewportProps) => boolean,
   timeRange: StartEndRange,
   maxViewportHeight: number,
   maximumZoom: UnitIntervalOfProfileRange,
@@ -210,12 +210,12 @@ export default function withChartViewport<Props: ViewportProps>(
           this.state.containerWidth !== rect.width ||
           this.state.containerHeight !== rect.height
         ) {
-          this.setState({
+          this.setState(prevState => ({
             containerWidth: rect.width,
             containerHeight: rect.height,
             containerLeft: rect.left,
-            viewportBottom: this.state.viewportTop + rect.height,
-          });
+            viewportBottom: prevState.viewportTop + rect.height,
+          }));
         }
       }
     }
