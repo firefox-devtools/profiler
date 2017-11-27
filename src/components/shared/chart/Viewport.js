@@ -189,17 +189,11 @@ export default function withChartViewport<Props: ViewportProps>(
       }, 1000);
     }
 
-    componentDidUpdate(prevProps: Props) {
-      // TODO Consider merging this in componentWillReceiveProps
-      if (this.props.viewportNeedsUpdate(prevProps, this.props)) {
-        // eslint-disable-next-line react/no-did-update-set-state
-        this.setState(this.getDefaultState(this.props));
-        this._setSizeNextFrame();
-      }
-    }
-
     componentWillReceiveProps(newProps: Props) {
-      if (
+      if (this.props.viewportNeedsUpdate(this.props, newProps)) {
+        this.setState(this.getDefaultState(newProps));
+        this._setSizeNextFrame();
+      } else if (
         this.props.selection !== newProps.selection ||
         this.props.timeRange !== newProps.timeRange
       ) {
