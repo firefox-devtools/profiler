@@ -12,11 +12,7 @@ import {
   getProfileRootRange,
   getProfileViewOptions,
 } from '../../reducers/profile-view';
-import {
-  getDataSource,
-  getHash,
-  getUrlPredictor,
-} from '../../reducers/url-state';
+import { getDataSource, getUrlPredictor } from '../../reducers/url-state';
 import actions from '../../actions';
 import { compress } from '../../utils/gz';
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -71,7 +67,6 @@ const UploadingStatus = ({ progress }: { progress: number }) =>
 type ProfileSharingCompositeButtonProps = {
   profile: Profile,
   dataSource: DataSource,
-  hash: string,
   symbolicationStatus: SymbolicationStatus,
   predictUrl: (Action | Action[]) => string,
   onProfilePublished: typeof actions.profilePublished,
@@ -80,7 +75,6 @@ type ProfileSharingCompositeButtonProps = {
 type ProfileSharingCompositeButtonState = {
   state: string,
   uploadProgress: number,
-  hash: string,
   error: Error | null,
   fullUrl: string,
   shortUrl: string,
@@ -99,11 +93,10 @@ class ProfileSharingCompositeButton extends PureComponent<
 
   constructor(props: ProfileSharingCompositeButtonProps) {
     super(props);
-    const { dataSource, hash } = props;
+    const { dataSource } = props;
     this.state = {
       state: dataSource === 'public' ? 'public' : 'local', // local -> uploading (<-> error) -> public
       uploadProgress: 0,
-      hash,
       error: null,
       fullUrl: window.location.href,
       shortUrl: window.location.href,
@@ -125,10 +118,9 @@ class ProfileSharingCompositeButton extends PureComponent<
 
   componentWillReceiveProps({
     dataSource,
-    hash,
   }: ProfileSharingCompositeButtonProps) {
     if (dataSource === 'public' && this.state.state !== 'public') {
-      this.setState({ state: 'public', hash });
+      this.setState({ state: 'public' });
     }
     if (window.location.href !== this.state.fullUrl) {
       this.setState({
@@ -199,7 +191,6 @@ class ProfileSharingCompositeButton extends PureComponent<
           predictUrl(actions.profilePublished(hash))
         );
         this.setState({
-          hash,
           fullUrl: predictedUrl,
           shortUrl: predictedUrl,
         });
@@ -217,7 +208,6 @@ class ProfileSharingCompositeButton extends PureComponent<
               : window.location.href;
           this.setState({
             state: 'public',
-            hash,
             fullUrl: window.location.href,
             shortUrl: newShortUrl,
           });
@@ -448,7 +438,6 @@ type ProfileSharingProps = {
   profile: Profile,
   rootRange: StartEndRange,
   dataSource: DataSource,
-  hash: string,
   symbolicationStatus: SymbolicationStatus,
   profilePublished: typeof actions.profilePublished,
   predictUrl: (Action | Action[]) => string,
@@ -458,7 +447,6 @@ const ProfileSharing = ({
   profile,
   rootRange,
   dataSource,
-  hash,
   symbolicationStatus,
   profilePublished,
   predictUrl,
@@ -467,7 +455,6 @@ const ProfileSharing = ({
     <ProfileSharingCompositeButton
       profile={profile}
       dataSource={dataSource}
-      hash={hash}
       symbolicationStatus={symbolicationStatus}
       onProfilePublished={profilePublished}
       predictUrl={predictUrl}
@@ -480,7 +467,6 @@ export default connect(
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     dataSource: getDataSource(state),
-    hash: getHash(state),
     symbolicationStatus: getProfileViewOptions(state).symbolicationStatus,
     predictUrl: getUrlPredictor(state),
   }),
