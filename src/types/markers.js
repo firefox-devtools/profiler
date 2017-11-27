@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Milliseconds, Seconds } from './units';
+import type { Milliseconds, Microseconds, Seconds } from './units';
 
 /**
  * Measurement for how long draw calls take for the compositor.
@@ -48,7 +48,7 @@ export type PaintProfilerMarkerTracing = ProfilerMarkerTracing & {
     | 'Composite',
 };
 
-export type PhaseTimes = { [phase: string]: Milliseconds };
+export type PhaseTimes = { [phase: string]: Microseconds };
 
 type GCSliceData_Shared = {
   // Slice number within the GCMajor collection.
