@@ -47,7 +47,7 @@ type Props = {
   callNodeInfo: CallNodeInfo,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
-  searchStringsRe: RegExp,
+  searchStringsRegExp: RegExp,
   disableOverscan: boolean,
   implementationFilter: ImplementationFilter,
   invertCallstack: boolean,
@@ -174,7 +174,7 @@ class CallTreeComponent extends PureComponent<Props> {
       tree,
       selectedCallNodeIndex,
       expandedCallNodeIndexes,
-      searchStringsRe,
+      searchStringsRegExp,
       disableOverscan,
     } = this.props;
     return (
@@ -187,7 +187,7 @@ class CallTreeComponent extends PureComponent<Props> {
         onExpandedNodesChange={this._onExpandedCallNodesChange}
         selectedNodeId={selectedCallNodeIndex}
         expandedNodeIds={expandedCallNodeIndexes}
-        highlightRe={searchStringsRe}
+        highlightRegExp={searchStringsRegExp}
         disableOverscan={disableOverscan}
         appendageButtons={this._appendageButtons}
         onAppendageButtonClick={this._onAppendageButtonClick}
@@ -215,7 +215,7 @@ export default connect(
     expandedCallNodeIndexes: selectedThreadSelectors.getExpandedCallNodeIndexes(
       state
     ),
-    searchStringsRe: getSearchStringsAsRegExp(state),
+    searchStringsRegExp: getSearchStringsAsRegExp(state),
     disableOverscan: getProfileViewOptions(state).selection.isModifying,
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
