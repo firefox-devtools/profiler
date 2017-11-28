@@ -236,7 +236,7 @@ export function getTransformLabels(
     if (transform.type === 'collapse-resource') {
       const libIndex = resourceTable.lib[transform.resourceIndex];
       let resourceName;
-      if (libIndex === undefined || libIndex === null) {
+      if (libIndex === undefined || libIndex === null || libIndex === -1) {
         const nameIndex = resourceTable.name[transform.resourceIndex];
         if (nameIndex === -1) {
           throw new Error('Attempting to collapse a resource without a name');
