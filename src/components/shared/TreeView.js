@@ -116,16 +116,18 @@ class TreeViewRowFixedColumns extends React.PureComponent<
       >
         {columns.map(col => {
           const RenderComponent = col.component;
+          const text = node[col.propName];
 
           return (
             <span
               className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
               key={col.propName}
+              title={text}
             >
               {RenderComponent
                 ? <RenderComponent node={node} />
                 : reactStringWithHighlightedSubstrings(
-                    node[col.propName],
+                    text,
                     highlightRegExp,
                     'treeViewHighlighting'
                   )}

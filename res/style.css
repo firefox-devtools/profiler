@@ -159,6 +159,10 @@ body, #root, .profileViewer {
   flex-flow: column nowrap;
   align-items: center;
 }
+.treeViewRowColumn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .treeViewRowColumn.totalTime,
 .treeViewRowColumn.totalTimePercent,
 .treeViewRowColumn.selfTime,
