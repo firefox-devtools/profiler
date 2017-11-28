@@ -189,21 +189,25 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="67%"
                 >
                   67%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -221,21 +225,25 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="67%"
                 >
                   67%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -253,21 +261,25 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="67%"
                 >
                   67%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -285,21 +297,25 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="33%"
                 >
                   33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -317,21 +333,25 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="33%"
                 >
                   33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -349,21 +369,25 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="33%"
                 >
                   33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -381,21 +405,25 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="33%"
                 >
                   33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -881,21 +909,25 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="3"
                 >
                   3
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -913,21 +945,25 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="3"
                 >
                   3
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -945,21 +981,25 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="67%"
                 >
                   67%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -977,21 +1017,25 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="33%"
                 >
                   33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -1009,21 +1053,25 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="33%"
                 >
                   33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -1041,21 +1089,25 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="33%"
                 >
                   33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -1073,21 +1125,25 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="33%"
                 >
                   33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -1573,21 +1629,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="3"
                 >
                   3
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -1605,21 +1665,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="3"
                 >
                   3
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -1637,21 +1701,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="67%"
                 >
                   67%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -1669,21 +1737,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="33%"
                 >
                   33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -1701,21 +1773,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="33%"
                 >
                   33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -1733,21 +1809,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="33%"
                 >
                   33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -1765,21 +1845,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="33%"
                 >
                   33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -2265,21 +2349,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -2297,21 +2385,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -2329,21 +2421,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -2361,21 +2457,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="50%"
                 >
                   50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -2393,21 +2493,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="50%"
                 >
                   50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -2425,21 +2529,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="50%"
                 >
                   50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -2894,21 +3002,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -2926,21 +3038,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -2958,21 +3074,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -2990,21 +3110,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="50%"
                 >
                   50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -3022,21 +3146,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="50%"
                 >
                   50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -3054,21 +3182,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="50%"
                 >
                   50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -3523,21 +3655,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -3555,21 +3691,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -3587,21 +3727,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -3619,21 +3763,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -4020,21 +4168,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -4052,21 +4204,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -4084,21 +4240,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -4116,21 +4276,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -4517,21 +4681,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -4549,21 +4717,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -4581,21 +4753,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
                 >
                   100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
                 >
                   2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -4613,21 +4789,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="50%"
                 >
                   50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -4645,21 +4825,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="50%"
                 >
                   50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "
@@ -4677,21 +4861,25 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="50%"
                 >
                   50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
                 >
                   1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
                 >
                   —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
+                  title={null}
                 >
                   <div
                     className="treeRowIcon "

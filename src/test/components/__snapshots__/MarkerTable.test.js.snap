@@ -112,11 +112,13 @@ exports[`MarkerTable renders some basic markers 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn timestamp"
+                  title="0.000s"
                 >
                   0.000s
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn category"
+                  title="DOMEvent"
                 >
                   DOMEvent
                 </span>
@@ -132,11 +134,13 @@ exports[`MarkerTable renders some basic markers 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn timestamp"
+                  title="0.002s"
                 >
                   0.002s
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn category"
+                  title="unknown"
                 >
                   unknown
                 </span>
