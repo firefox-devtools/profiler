@@ -86,7 +86,7 @@ describe('extract functions and resource from location strings', function() {
           resourceType = resourceTable.type[resourceIndex];
         }
         const lib =
-          libIndex === undefined || libIndex === null
+          libIndex === undefined || libIndex === null || libIndex === -1
             ? undefined
             : libs[libIndex];
 
