@@ -4,6 +4,7 @@
 
 .idleSearchField {
   display: inline-flex;
+  position: relative; /* to properly position the button */
   flex-flow: row nowrap;
   align-items: center;
 }
@@ -15,7 +16,7 @@
   -moz-appearance: none;
   border: 0.5px solid #AAA;
   margin: 0;
-  padding: 0 2px 0 17px;
+  padding: 0 18px 0 17px; /* right padding for the reset button, left padding for the search icon */
   border-radius: 2px;
   box-shadow: inset 0 0 0.5px rgba(0,0,0,0.15), 0 0 0.5px rgba(0,0,0,0.1);
   background: url(../../../res/searchfield-icon.svg) 3px center no-repeat white;
@@ -29,8 +30,11 @@
 }
 
 .idleSearchFieldButton {
+  position: absolute;
+  right: 5px;
   width: 11px;
   height: 11px;
+
   overflow: hidden;
   background: url(../../../res/searchfield-cancel.svg) top left no-repeat;
   background-size: contain;
@@ -38,8 +42,6 @@
   padding: 0;
   vertical-align: middle;
   color: transparent;
-  position: relative;
-  margin-left: -16px;
   -moz-user-focus: ignore;
 }
 

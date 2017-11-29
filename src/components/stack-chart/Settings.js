@@ -5,26 +5,25 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import actions from '../../actions';
+import {
+  changeHidePlatformDetails,
+  changeInvertCallstack,
+} from '../../actions/profile-view';
 import {
   getHidePlatformDetails,
   getInvertCallstack,
-  getSearchString,
 } from '../../reducers/url-state';
-import IdleSearchField from '../shared/IdleSearchField';
+import StackSearchField from '../shared/StackSearchField';
 
 import './Settings.css';
 
-type Props = {
-  hidePlatformDetails: boolean,
-  invertCallstack: boolean,
-  searchString: string,
-  changeHidePlatformDetails: boolean => void,
-  changeInvertCallstack: boolean => void,
-  changeCallTreeSearchString: string => void,
-};
+type Props = {|
+  +hidePlatformDetails: boolean,
+  +invertCallstack: boolean,
+  +changeHidePlatformDetails: boolean => void,
+  +changeInvertCallstack: boolean => void,
+|};
 
 class StackChartSettings extends PureComponent<Props> {
   constructor(props) {
@@ -33,9 +32,6 @@ class StackChartSettings extends PureComponent<Props> {
       this
     );
     (this: any)._onInvertCallstackClick = this._onInvertCallstackClick.bind(
-      this
-    );
-    (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(
       this
     );
   }
@@ -48,12 +44,8 @@ class StackChartSettings extends PureComponent<Props> {
     this.props.changeInvertCallstack(e.currentTarget.checked);
   }
 
-  _onSearchFieldIdleAfterChange(value: string) {
-    this.props.changeCallTreeSearchString(value);
-  }
-
   render() {
-    const { hidePlatformDetails, invertCallstack, searchString } = this.props;
+    const { hidePlatformDetails, invertCallstack } = this.props;
     return (
       <div className="stackChartSettings">
         <ul className="stackChartSettingsList">
@@ -80,37 +72,19 @@ class StackChartSettings extends PureComponent<Props> {
             </label>
           </li>
         </ul>
-        <div className="stackChartSettingsSearchbar">
-          <label className="stackChartSettingsSearchbarLabel">
-            {'Filter stacks: '}
-            <IdleSearchField
-              className="stackChartSettingsSearchField"
-              title="Only display stacks which contain a function whose name matches this substring"
-              idlePeriod={200}
-              defaultValue={searchString}
-              onIdleAfterChange={this._onSearchFieldIdleAfterChange}
-            />
-          </label>
-        </div>
+        <StackSearchField className="stackChartSettingsSearchField" />
       </div>
     );
   }
 }
 
-StackChartSettings.propTypes = {
-  hidePlatformDetails: PropTypes.bool.isRequired,
-  changeHidePlatformDetails: PropTypes.func.isRequired,
-  invertCallstack: PropTypes.bool.isRequired,
-  changeInvertCallstack: PropTypes.func.isRequired,
-  changeCallTreeSearchString: PropTypes.func.isRequired,
-  searchString: PropTypes.string.isRequired,
-};
-
 export default connect(
   state => ({
     invertCallstack: getInvertCallstack(state),
     hidePlatformDetails: getHidePlatformDetails(state),
-    searchString: getSearchString(state),
   }),
-  actions
+  {
+    changeHidePlatformDetails,
+    changeInvertCallstack,
+  }
 )(StackChartSettings);
