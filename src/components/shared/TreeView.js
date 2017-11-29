@@ -16,6 +16,10 @@ import type { IndexIntoCallNodeTable, Node } from '../../types/profile-derived';
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { IconWithClassName } from '../../types/reducers';
 
+// This is used for the result of RegExp.prototype.exec because Flow doesn't do it.
+// See https://github.com/facebook/flow/issues/4099
+type RegExpResult = null | ({ index: number, input: string } & string[]);
+
 export type Column = {
   propName: string,
   title: string,
@@ -46,30 +50,34 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) =>
 
 function reactStringWithHighlightedSubstrings(
   string: string,
-  substring: string | null,
+  regExp: RegExp | null,
   className: string
 ) {
-  if (!substring) {
+  if (!regExp) {
     return string;
   }
-  const lowercaseString = string.toLowerCase();
-  const result = [];
-  let startAt = 0;
-  let nextOccurrence = -1;
-  while (
-    (nextOccurrence = lowercaseString.indexOf(substring, startAt)) !== -1
-  ) {
-    const afterNextOccurrence = nextOccurrence + substring.length;
-    result.push(string.substring(startAt, nextOccurrence));
-    result.push(
-      <span key={nextOccurrence} className={className}>
-        {string.substring(nextOccurrence, afterNextOccurrence)}
+
+  // Since the regexp is reused and likely global, let's make sure we reset it.
+  regExp.lastIndex = 0;
+
+  const highlighted = [];
+  let lastOccurrence = 0;
+  let result;
+  while ((result = regExp.exec(string))) {
+    const typedResult: RegExpResult = result;
+    if (typedResult === null) {
+      break;
+    }
+    highlighted.push(string.substring(lastOccurrence, typedResult.index));
+    lastOccurrence = regExp.lastIndex;
+    highlighted.push(
+      <span key={typedResult.index} className={className}>
+        {typedResult[0]}
       </span>
     );
-    startAt = afterNextOccurrence;
   }
-  result.push(string.substring(startAt));
-  return result;
+  highlighted.push(string.substring(lastOccurrence));
+  return highlighted;
 }
 
 type TreeViewRowFixedColumnsProps = {
@@ -79,7 +87,7 @@ type TreeViewRowFixedColumnsProps = {
   index: number,
   selected: boolean,
   onClick: (IndexIntoCallNodeTable, SyntheticMouseEvent<>) => mixed,
-  highlightString: string,
+  highlightRegExp: RegExp | null,
 };
 
 class TreeViewRowFixedColumns extends React.PureComponent<
@@ -96,7 +104,7 @@ class TreeViewRowFixedColumns extends React.PureComponent<
   }
 
   render() {
-    const { node, columns, index, selected, highlightString } = this.props;
+    const { node, columns, index, selected, highlightRegExp } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     return (
       <div
@@ -118,7 +126,7 @@ class TreeViewRowFixedColumns extends React.PureComponent<
                 ? <RenderComponent node={node} />
                 : reactStringWithHighlightedSubstrings(
                     node[col.propName],
-                    highlightString,
+                    highlightRegExp,
                     'treeViewHighlighting'
                   )}
             </span>
@@ -145,7 +153,7 @@ type TreeViewRowScrolledColumnsProps = {
   onAppendageButtonClick:
     | ((IndexIntoCallNodeTable | null, string) => mixed)
     | null,
-  highlightString: string,
+  highlightRegExp: RegExp | null,
 };
 
 class TreeViewRowScrolledColumns extends React.PureComponent<
@@ -192,7 +200,7 @@ class TreeViewRowScrolledColumns extends React.PureComponent<
       canBeExpanded,
       isExpanded,
       selected,
-      highlightString,
+      highlightRegExp,
       appendageButtons,
     } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
@@ -219,7 +227,7 @@ class TreeViewRowScrolledColumns extends React.PureComponent<
         >
           {reactStringWithHighlightedSubstrings(
             node[mainColumn.propName],
-            highlightString,
+            highlightRegExp,
             'treeViewHighlighting'
           )}
         </span>
@@ -229,7 +237,7 @@ class TreeViewRowScrolledColumns extends React.PureComponent<
             >
               {reactStringWithHighlightedSubstrings(
                 node[appendageColumn.propName],
-                highlightString,
+                highlightRegExp,
                 'treeViewHighlighting'
               )}
             </span>
@@ -250,14 +258,14 @@ class TreeViewRowScrolledColumns extends React.PureComponent<
   }
 }
 
-type TreeViewProps = {
+type TreeViewProps = {|
   fixedColumns: Column[],
   mainColumn: Column,
   tree: CallTree,
   expandedNodeIds: Array<IndexIntoCallNodeTable | null>,
   selectedNodeId: IndexIntoCallNodeTable | null,
   onExpandedNodesChange: PropTypes.func.isRequired,
-  highlightString: string,
+  highlightRegExp?: RegExp | null,
   appendageColumn: Column,
   appendageButtons: string[],
   disableOverscan: boolean,
@@ -268,7 +276,7 @@ type TreeViewProps = {
     | ((IndexIntoCallNodeTable | null, string) => mixed)
     | null,
   onSelectionChange: IndexIntoCallNodeTable => mixed,
-};
+|};
 
 class TreeView extends React.PureComponent<TreeViewProps> {
   _specialItems: (IndexIntoCallNodeTable | null)[];
@@ -321,7 +329,7 @@ class TreeView extends React.PureComponent<TreeViewProps> {
       mainColumn,
       appendageColumn,
       selectedNodeId,
-      highlightString,
+      highlightRegExp,
       appendageButtons,
       onAppendageButtonClick,
     } = this.props;
@@ -335,7 +343,7 @@ class TreeView extends React.PureComponent<TreeViewProps> {
           index={index}
           selected={nodeId === selectedNodeId}
           onClick={this._onRowClicked}
-          highlightString={highlightString}
+          highlightRegExp={highlightRegExp || null}
         />
       );
     }
@@ -356,7 +364,7 @@ class TreeView extends React.PureComponent<TreeViewProps> {
         selected={nodeId === selectedNodeId}
         onClick={this._onRowClicked}
         onAppendageButtonClick={onAppendageButtonClick}
-        highlightString={highlightString}
+        highlightRegExp={highlightRegExp || null}
       />
     );
   }
@@ -576,7 +584,7 @@ TreeView.propTypes = {
   selectedNodeId: PropTypes.number,
   onExpandedNodesChange: PropTypes.func.isRequired,
   onSelectionChange: PropTypes.func.isRequired,
-  highlightString: PropTypes.string,
+  highlightRegExp: PropTypes.instanceOf(RegExp),
   appendageColumn: PropTypes.shape({
     propName: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,

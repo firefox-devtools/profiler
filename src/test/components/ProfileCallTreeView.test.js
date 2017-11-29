@@ -21,7 +21,7 @@ describe('calltree/ProfileCallTreeView', function() {
     B B B
     C C H
     D F I
-    E G
+    E E
   `);
 
   it('renders an unfiltered call tree', () => {
@@ -57,9 +57,8 @@ describe('calltree/ProfileCallTreeView', function() {
     expect(calltree.toJSON()).toMatchSnapshot();
   });
 
-  it('renders call tree with a search string', () => {
+  it('renders call tree with some search strings', () => {
     const store = storeWithProfile(profile);
-    store.dispatch(changeCallTreeSearchString('H'));
     const calltree = renderer.create(
       <Provider store={store}>
         <ProfileCallTreeView />
@@ -67,7 +66,22 @@ describe('calltree/ProfileCallTreeView', function() {
       { createNodeMock }
     );
 
-    expect(calltree.toJSON()).toMatchSnapshot();
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCallTreeSearchString('C'));
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCallTreeSearchString('C,'));
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCallTreeSearchString('C, F'));
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCallTreeSearchString('C, F,E'));
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCallTreeSearchString(' C , E   '));
+    expect(calltree).toMatchSnapshot();
   });
 });
 
