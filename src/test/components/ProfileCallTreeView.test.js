@@ -9,7 +9,10 @@ import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
-import { changeCallTreeSearchString } from '../../actions/profile-view';
+import {
+  changeCallTreeSearchString,
+  changeInvertCallstack,
+} from '../../actions/profile-view';
 import { getBoundingBox } from '../fixtures/utils';
 
 describe('calltree/ProfileCallTreeView', function() {
@@ -41,9 +44,11 @@ describe('calltree/ProfileCallTreeView', function() {
       E Z Y
           Z
     `).profile;
+    const store = storeWithProfile(profileForInvertedTree);
+    store.dispatch(changeInvertCallstack(true));
 
     const calltree = renderer.create(
-      <Provider store={storeWithProfile(profileForInvertedTree)}>
+      <Provider store={store}>
         <ProfileCallTreeView />
       </Provider>,
       { createNodeMock }
