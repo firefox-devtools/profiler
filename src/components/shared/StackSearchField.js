@@ -19,7 +19,7 @@ import './StackSearchField.css';
 type Props = {|
   +className?: string,
   +currentSearchString: string,
-  +searchStrings: string[],
+  +searchStrings: string[] | null,
   +changeCallTreeSearchString: typeof changeCallTreeSearchString,
 |};
 type State = {| searchFieldFocused: boolean |};
@@ -53,6 +53,7 @@ class StackSearchField extends React.PureComponent<Props, State> {
     const { searchFieldFocused } = this.state;
     const showIntroduction =
       searchFieldFocused &&
+      searchStrings &&
       searchStrings.length &&
       !currentSearchString.includes(',');
     return (
