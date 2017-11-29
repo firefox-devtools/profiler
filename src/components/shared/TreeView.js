@@ -16,6 +16,8 @@ import type { IndexIntoCallNodeTable, Node } from '../../types/profile-derived';
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { IconWithClassName } from '../../types/reducers';
 
+// This is used for the result of RegExp.prototype.exec because Flow doesn't do it.
+// See https://github.com/facebook/flow/issues/4099
 type RegExpResult = null | ({ index: number, input: string } & string[]);
 
 export type Column = {
