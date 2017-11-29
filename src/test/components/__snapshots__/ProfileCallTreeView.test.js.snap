@@ -47,7 +47,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           className="profileCallTreeSettingsLabel"
         >
           <input
-            checked={false}
+            checked={true}
             className="profileCallTreeSettingsCheckbox"
             onChange={[Function]}
             type="checkbox"
@@ -190,17 +190,17 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  100%
+                  67%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
                 >
-                  3
+                  2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  —
+                  2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -222,12 +222,12 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                 >
-                  100%
+                  67%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
                 >
-                  3
+                  2
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
@@ -328,7 +328,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  1
+                  —
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -392,7 +392,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn selfTime"
                 >
-                  —
+                  1
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
@@ -447,7 +447,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
-                  A
+                  Z
                 </span>
                 <span
                   className="treeViewRowColumn treeViewAppendageColumn lib"
@@ -484,7 +484,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
-                  B
+                  Y
                 </span>
                 <span
                   className="treeViewRowColumn treeViewAppendageColumn lib"
@@ -521,7 +521,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
-                  C
+                  X
                 </span>
                 <span
                   className="treeViewRowColumn treeViewAppendageColumn lib"
@@ -558,7 +558,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
-                  D
+                  B
                 </span>
                 <span
                   className="treeViewRowColumn treeViewAppendageColumn lib"
@@ -595,7 +595,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
-                  E
+                  A
                 </span>
                 <span
                   className="treeViewRowColumn treeViewAppendageColumn lib"
@@ -632,7 +632,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
-                  X
+                  C
                 </span>
                 <span
                   className="treeViewRowColumn treeViewAppendageColumn lib"
@@ -659,7 +659,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   className="treeRowIndentSpacer"
                   style={
                     Object {
-                      "width": "20px",
+                      "width": "0px",
                     }
                   }
                 />
@@ -669,7 +669,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
-                  X
+                  E
                 </span>
                 <span
                   className="treeViewRowColumn treeViewAppendageColumn lib"
