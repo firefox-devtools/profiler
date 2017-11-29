@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { ProfileSummary } from '../profile-logic/summarize-profile';
 import type {
   Profile,
   Thread,
@@ -17,7 +16,6 @@ import type { GetCategory } from '../profile-logic/color-categories';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform } from './transforms';
 
-export type ExpandedSet = Set<ThreadIndex>;
 export type DataSource =
   | 'none'
   | 'from-file'
@@ -48,13 +46,7 @@ export type TabSlug =
   | 'calltree'
   | 'stack-chart'
   | 'marker-chart'
-  | 'marker-table'
-  | 'summary';
-
-type ProfileSummaryAction =
-  | { type: 'PROFILE_SUMMARY_PROCESSED', summary: ProfileSummary }
-  | { type: 'PROFILE_SUMMARY_EXPAND', threadIndex: ThreadIndex }
-  | { type: 'PROFILE_SUMMARY_COLLAPSE', threadIndex: ThreadIndex };
+  | 'marker-table';
 
 type ProfileAction =
   | { type: 'ROUTE_NOT_FOUND', url: string }
@@ -111,7 +103,6 @@ type ReceiveProfileAction =
     }
   | { type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_STORE', error: Error }
   | { type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_URL', error: Error }
-  | { type: 'PROFILE_PROCESSED', profile: Profile, toWorker: true }
   | { type: 'RECEIVE_PROFILE_FROM_ADDON', profile: Profile }
   | { type: 'RECEIVE_PROFILE_FROM_FILE', profile: Profile }
   | { type: 'RECEIVE_PROFILE_FROM_STORE', profile: Profile }
@@ -119,7 +110,6 @@ type ReceiveProfileAction =
   | { type: 'REQUESTING_SYMBOL_TABLE', requestedLib: RequestedLib }
   | { type: 'RECEIVED_SYMBOL_TABLE_REPLY', requestedLib: RequestedLib }
   | { type: 'START_SYMBOLICATING' }
-  | { type: 'SUMMARIZE_PROFILE', toWorker: true }
   | { type: 'WAITING_FOR_PROFILE_FROM_ADDON' }
   | { type: 'WAITING_FOR_PROFILE_FROM_STORE' }
   | { type: 'WAITING_FOR_PROFILE_FROM_URL' };
@@ -168,7 +158,6 @@ type IconsAction =
   | { type: 'ICON_IN_ERROR', icon: string };
 
 export type Action =
-  | ProfileSummaryAction
   | ProfileAction
   | ReceiveProfileAction
   | StackChartAction

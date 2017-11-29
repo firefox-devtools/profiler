@@ -9,7 +9,6 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import TabBar from './TabBar';
 import classNames from 'classnames';
-import ProfileSummaryView from '../summary/ProfileSummaryView';
 import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
 import MarkerTable from '../marker-table';
 import ProfileTaskTracerView from '../tasktracer/ProfileTaskTracerView';
@@ -72,10 +71,6 @@ class ProfileViewer extends PureComponent<Props, State> {
         name: 'marker-table',
         title: 'Marker Table',
       },
-      {
-        name: 'summary',
-        title: 'Summary',
-      },
     ];
   }
 
@@ -119,7 +114,6 @@ class ProfileViewer extends PureComponent<Props, State> {
         />
         {
           {
-            summary: <ProfileSummaryView />,
             calltree: <ProfileCallTreeView />,
             'marker-table': <MarkerTable />,
             tasktracer: (

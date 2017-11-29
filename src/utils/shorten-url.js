@@ -4,7 +4,6 @@
 
 // @flow
 
-import fetchJsonP from 'fetch-jsonp';
 import queryString from 'query-string';
 import url from 'url';
 
@@ -27,7 +26,7 @@ export default function shortenUrl(urlToShorten: string): Promise<string> {
       format: 'json',
       access_token: 'b177b00a130faf3ecda6960e8b59fde73e902422',
     });
-  return fetchJsonP(bitlyQueryUrl)
+  return fetch(bitlyQueryUrl)
     .then(response => response.json())
     .then(json => json.data.url);
 }

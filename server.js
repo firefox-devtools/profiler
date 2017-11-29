@@ -2,12 +2,11 @@ const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const config = require('./webpack.config');
 const { oneLine } = require('common-tags');
-const baseConfig = config[0];
 const port = process.env.PERFHTML_PORT || 4242;
 
 new WebpackDevServer(webpack(config), {
-  contentBase: baseConfig.output.path,
-  publicPath: baseConfig.output.publicPath,
+  contentBase: config.output.path,
+  publicPath: config.output.publicPath,
   hot: process.env.NODE_ENV === 'development' ? true : false,
   historyApiFallback: {
     disableDotRule: true,
@@ -25,7 +24,6 @@ new WebpackDevServer(webpack(config), {
         'self'
         'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw='
         'sha256-AdiT28wTL5FNaRVHWQVFC0ic3E20Gu4/PiC9xukS9+E='
-        https://api-ssl.bitly.com
         https://www.google-analytics.com;
       style-src 'self' 'unsafe-inline';
       img-src *;

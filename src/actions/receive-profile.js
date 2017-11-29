@@ -4,7 +4,6 @@
 
 // @flow
 import { oneLine } from 'common-tags';
-import { getProfile } from '../reducers/profile-view';
 import {
   processProfile,
   unserializeProfileOfArbitraryFormat,
@@ -65,26 +64,8 @@ export function startSymbolicating(): Action {
   };
 }
 
-export function doneSymbolicating(): ThunkAction<void> {
-  return function(dispatch, getState) {
-    dispatch({ type: 'DONE_SYMBOLICATING' });
-
-    // TODO - Do not use selectors here.
-    dispatch(
-      ({
-        toWorker: true,
-        type: 'PROFILE_PROCESSED',
-        profile: getProfile(getState()),
-      }: Action)
-    );
-
-    dispatch(
-      ({
-        toWorker: true,
-        type: 'SUMMARIZE_PROFILE',
-      }: Action)
-    );
-  };
+export function doneSymbolicating(): Action {
+  return { type: 'DONE_SYMBOLICATING' };
 }
 
 export function coalescedFunctionsUpdate(
@@ -352,39 +333,17 @@ export function waitingForProfileFromUrl(): Action {
   };
 }
 
-export function receiveProfileFromStore(profile: Profile): ThunkAction<void> {
-  return dispatch => {
-    dispatch({
-      type: 'RECEIVE_PROFILE_FROM_STORE',
-      profile,
-    });
-    dispatch({
-      toWorker: true,
-      type: 'PROFILE_PROCESSED',
-      profile: profile,
-    });
-    dispatch({
-      toWorker: true,
-      type: 'SUMMARIZE_PROFILE',
-    });
+export function receiveProfileFromStore(profile: Profile): Action {
+  return {
+    type: 'RECEIVE_PROFILE_FROM_STORE',
+    profile,
   };
 }
 
-export function receiveProfileFromUrl(profile: Profile): ThunkAction<void> {
-  return dispatch => {
-    dispatch({
-      type: 'RECEIVE_PROFILE_FROM_URL',
-      profile,
-    });
-    dispatch({
-      toWorker: true,
-      type: 'PROFILE_PROCESSED',
-      profile: profile,
-    });
-    dispatch({
-      toWorker: true,
-      type: 'SUMMARIZE_PROFILE',
-    });
+export function receiveProfileFromUrl(profile: Profile): Action {
+  return {
+    type: 'RECEIVE_PROFILE_FROM_URL',
+    profile,
   };
 }
 
@@ -561,21 +520,10 @@ export function waitingForProfileFromFile(): Action {
   };
 }
 
-export function receiveProfileFromFile(profile: Profile): ThunkAction<void> {
-  return dispatch => {
-    dispatch({
-      type: 'RECEIVE_PROFILE_FROM_FILE',
-      profile,
-    });
-    dispatch({
-      toWorker: true,
-      type: 'PROFILE_PROCESSED',
-      profile: profile,
-    });
-    dispatch({
-      toWorker: true,
-      type: 'SUMMARIZE_PROFILE',
-    });
+export function receiveProfileFromFile(profile: Profile): Action {
+  return {
+    type: 'RECEIVE_PROFILE_FROM_FILE',
+    profile,
   };
 }
 

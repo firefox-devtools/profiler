@@ -9,24 +9,7 @@ const es6modulePaths = es6modules.map(module => {
   return path.join(__dirname, 'node_modules', module);
 });
 
-const basePlugins = [
-  new webpack.DefinePlugin({
-    'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
-  }),
-  new webpack.LoaderOptionsPlugin({
-    options: {
-      worker: {
-        output: {
-          filename: '[hash].worker.js',
-          chunkFilename: '[id].[hash].worker.js',
-        },
-      },
-    },
-  }),
-  new webpack.optimize.ModuleConcatenationPlugin(),
-];
-
-const baseConfig = {
+const config = {
   resolve: {
     alias: {
       'redux-devtools/lib': path.join(__dirname, '..', '..', 'src'),
@@ -72,23 +55,17 @@ const baseConfig = {
   node: {
     process: false,
   },
-};
-
-if (process.env.NODE_ENV === 'development') {
-  baseConfig.devtool = 'source-map';
-  baseConfig.entry = ['webpack-dev-server/client?http://localhost:4242'].concat(
-    baseConfig.entry
-  );
-}
-
-const contentConfig = Object.assign({}, baseConfig, {
-  plugins: basePlugins.concat(
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
+    }),
+    new webpack.optimize.ModuleConcatenationPlugin(),
     new HtmlWebpackPlugin({
       title: 'perf.html',
       template: 'res/index.html',
       favicon: 'res/favicon.png',
-    })
-  ),
+    }),
+  ],
   entry: ['./src/index'],
   output: {
     path: path.join(__dirname, 'dist'),
@@ -96,10 +73,17 @@ const contentConfig = Object.assign({}, baseConfig, {
     chunkFilename: '[id].[hash].bundle.js',
     publicPath: '/',
   },
-});
+};
+
+if (process.env.NODE_ENV === 'development') {
+  config.devtool = 'source-map';
+  config.entry = ['webpack-dev-server/client?http://localhost:4242'].concat(
+    config.entry
+  );
+}
 
 if (process.env.NODE_ENV === 'production') {
-  contentConfig.plugins.push(
+  config.plugins.push(
     new OfflinePlugin({
       relativePaths: false,
       AppCache: false,
@@ -120,14 +104,4 @@ if (process.env.NODE_ENV === 'production') {
   );
 }
 
-const workerConfig = Object.assign({}, baseConfig, {
-  plugins: basePlugins.slice(0),
-  entry: ['./src/profile-logic/summary-worker/index'],
-  output: {
-    path: path.join(__dirname, 'dist'),
-    filename: 'worker.js',
-    publicPath: '/',
-  },
-});
-
-module.exports = [contentConfig, workerConfig];
+module.exports = config;
