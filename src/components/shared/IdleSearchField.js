@@ -10,7 +10,6 @@ import './IdleSearchField.css';
 
 type Props = {|
   +onIdleAfterChange: string => void,
-  +onSubmit?: () => void,
   +onFocus?: () => void,
   +onBlur?: (Element | null) => void,
   +idlePeriod: number,
