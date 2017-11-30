@@ -2,11 +2,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-class TimeRuler extends PureComponent {
-  _findNiceNumberGreaterOrEqualTo(uglyNumber) {
+import type { Milliseconds, CssPixels } from '../../types/units';
+
+type Props = {|
+  +className: string,
+  +zeroAt: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +width: CssPixels,
+|};
+
+class TimeRuler extends PureComponent<Props> {
+  _findNiceNumberGreaterOrEqualTo(uglyNumber: number) {
     // Write uglyNumber as a * 10^b, with 1 <= a < 10.
     // Return the lowest of 2 * 10^b, 5 * 10^b, 10 * 10^b that is greater or equal to uglyNumber.
     const b = Math.floor(Math.log10(uglyNumber));

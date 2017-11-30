@@ -75,7 +75,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
     changeSelectedThread(threadIndex);
   }
 
-  _onGraphClick(time: number) {
+  _onGraphClick(time: number | void) {
     const { threadIndex, interval } = this.props;
     if (time !== undefined) {
       const { thread, callNodeInfo, changeSelectedCallNode } = this.props;

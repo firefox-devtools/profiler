@@ -34,6 +34,7 @@ import type { ThreadIndex } from '../../types/profile';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
+  CallNodeDisplayData,
 } from '../../types/profile-derived';
 import type { Column } from '../shared/TreeView';
 
@@ -59,7 +60,7 @@ class CallTreeComponent extends PureComponent<Props> {
   _mainColumn: Column;
   _appendageColumn: Column;
   _appendageButtons: string[];
-  _treeView: TreeView | null;
+  _treeView: TreeView<IndexIntoCallNodeTable, CallNodeDisplayData> | null;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
   constructor(props: Props) {

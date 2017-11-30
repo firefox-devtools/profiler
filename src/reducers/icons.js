@@ -6,7 +6,7 @@
 import { createSelector } from 'reselect';
 import type { Action } from '../types/actions';
 import type { IconWithClassName, State, Reducer } from '../types/reducers';
-import type { Node } from '../types/profile-derived';
+import type { CallNodeDisplayData } from '../types/profile-derived';
 
 function classNameFromUrl(url) {
   return url.replace(/[/:.+>< ~()#,]/g, '_');
@@ -27,20 +27,25 @@ export default iconsStateReducer;
 
 export const getIcons = (state: State) => state.icons;
 
-export const getIconForNode = (state: State, node: Node) => {
+export const getIconForCallNode = (
+  state: State,
+  displayData: CallNodeDisplayData
+) => {
   // Without an intermediary variable, flow doesn't seem to be able to refine
-  // node.icon type from `string | null` to `string`.
+  // displayData.icon type from `string | null` to `string`.
   // See https://github.com/facebook/flow/issues/3715
   const icons = getIcons(state);
-  return node.icon !== null && icons.has(node.icon) ? node.icon : null;
+  return displayData.icon !== null && icons.has(displayData.icon)
+    ? displayData.icon
+    : null;
 };
 
-export const getIconClassNameForNode = createSelector(
+export const getIconClassNameForCallNode = createSelector(
   getIcons,
-  (state, node) => node,
-  (icons, node) =>
-    node.icon !== null && icons.has(node.icon)
-      ? classNameFromUrl(node.icon)
+  (state, displayData: CallNodeDisplayData) => displayData,
+  (icons, displayData: CallNodeDisplayData) =>
+    displayData.icon !== null && icons.has(displayData.icon)
+      ? classNameFromUrl(displayData.icon)
       : null
 );
 

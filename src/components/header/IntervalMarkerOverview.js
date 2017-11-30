@@ -21,6 +21,7 @@ type Props = {
   rangeEnd: Milliseconds,
   intervalMarkers: TracingMarker[],
   width: number,
+  height: number,
   threadIndex: number,
   threadName: string,
   onSelect: any,

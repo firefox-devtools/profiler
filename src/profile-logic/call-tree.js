@@ -16,7 +16,7 @@ import type {
   CallNodeTable,
   IndexIntoCallNodeTable,
   CallNodeInfo,
-  Node,
+  CallNodeDisplayData,
 } from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
 
@@ -46,7 +46,7 @@ export class CallTree {
   _stringTable: UniqueStringArray;
   _rootTotalTime: number;
   _rootCount: number;
-  _nodes: Map<IndexIntoCallNodeTable, Node>;
+  _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
   _children: Map<IndexIntoCallNodeTable, CallNodeChildren>;
   _jsOnly: boolean;
   _isIntegerInterval: boolean;
@@ -69,7 +69,7 @@ export class CallTree {
     this._stringTable = stringTable;
     this._rootTotalTime = rootTotalTime;
     this._rootCount = rootCount;
-    this._nodes = new Map();
+    this._displayDataByIndex = new Map();
     this._children = new Map();
     this._jsOnly = jsOnly;
     this._isIntegerInterval = isIntegerInterval;
@@ -79,11 +79,6 @@ export class CallTree {
     return this.getChildren(-1);
   }
 
-  /**
-   * Return an array of callNodeIndex for the children of the node with index callNodeIndex.
-   * @param  {[type]} callNodeIndex [description]
-   * @return {[type]}                [description]
-   */
   getChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
     let children = this._children.get(callNodeIndex);
     if (children === undefined) {
@@ -118,7 +113,9 @@ export class CallTree {
     return this.getChildren(callNodeIndex).length !== 0;
   }
 
-  getParent(callNodeIndex: IndexIntoCallNodeTable): IndexIntoCallNodeTable {
+  getParent(
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCallNodeTable | -1 {
     return this._callNodeTable.prefix[callNodeIndex];
   }
 
@@ -130,14 +127,9 @@ export class CallTree {
     return this._callNodeTable === tree._callNodeTable;
   }
 
-  /**
-   * Return an object with information about the node with index callNodeIndex.
-   * @param  {[type]} callNodeIndex [description]
-   * @return {[type]}                [description]
-   */
-  getNode(callNodeIndex: IndexIntoCallNodeTable): Node {
-    let node = this._nodes.get(callNodeIndex);
-    if (node === undefined) {
+  getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
+    let displayData = this._displayDataByIndex.get(callNodeIndex);
+    if (displayData === undefined) {
       const funcIndex = this._callNodeTable.func[callNodeIndex];
       const funcName = this._stringTable.getString(
         this._funcTable.name[funcIndex]
@@ -152,7 +144,7 @@ export class CallTree {
         ? _formatIntegerNumber
         : _formatDecimalNumber;
 
-      node = {
+      displayData = {
         totalTime: `${formatNumber(
           this._callNodeTimes.totalTime[callNodeIndex]
         )}`,
@@ -169,9 +161,9 @@ export class CallTree {
             ? extractFaviconFromLibname(libName)
             : null,
       };
-      this._nodes.set(callNodeIndex, node);
+      this._displayDataByIndex.set(callNodeIndex, displayData);
     }
-    return node;
+    return displayData;
   }
 
   _getOriginAnnotation(funcIndex: IndexIntoFuncTable): string {

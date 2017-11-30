@@ -2,7 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { PureComponent } from 'react';
+// @flow
+
+import * as React from 'react';
 import PropTypes from 'prop-types';
 import TimeRuler from './TimeRuler';
 import SelectionScrubberOverlay from './SelectionScrubberOverlay';
@@ -10,32 +12,61 @@ import clamp from 'clamp';
 import { getContentRect } from '../../utils/css-geometry-tools';
 import { withSize } from '../shared/WithSize';
 
-class TimeSelectionScrubberImpl extends PureComponent {
-  constructor(props) {
+import type { Milliseconds, CssPixels } from '../../types/units';
+import type { ProfileSelection } from '../../types/actions';
+
+type MouseHandler = (event: MouseEvent) => void;
+
+type Props = {|
+  +className: string,
+  +zeroAt: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +minSelectionStartWidth: Milliseconds,
+  +selection: ProfileSelection,
+  +width: CssPixels,
+  +height: CssPixels,
+  +onSelectionChange: ProfileSelection => *,
+  +onZoomButtonClick: (
+    selectionStart: Milliseconds,
+    selectionEnd: Milliseconds
+  ) => *,
+  +children: React.Node,
+|};
+
+type State = {|
+  hoverLocation: null | CssPixels,
+|};
+
+class TimeSelectionScrubberImpl extends React.PureComponent<Props, State> {
+  _handlers: ?{
+    mouseMoveHandler: MouseHandler,
+    mouseUpHandler: MouseHandler,
+  };
+  _container: ?HTMLElement;
+
+  constructor(props: Props) {
     super(props);
     this.state = {
       hoverLocation: null,
     };
-    this._onMouseDown = this._onMouseDown.bind(this);
-    this._onMouseMove = this._onMouseMove.bind(this);
-    this.handlers = null;
-    this._container = null;
-    this._containerCreated = c => {
-      this._container = c;
-    };
   }
 
-  _onMouseDown(e) {
-    if (!this._container || e.button !== 0) {
+  _containerCreated = (element: HTMLElement | null) => {
+    this._container = element;
+  };
+
+  _onMouseDown = (event: SyntheticMouseEvent<>) => {
+    if (!this._container || event.button !== 0) {
       return;
     }
 
-    const r = getContentRect(this._container);
+    const rect = getContentRect(this._container);
     if (
-      e.pageX < r.left ||
-      e.pageX >= r.right ||
-      e.pageY < r.top ||
-      e.pageY >= r.bottom
+      event.pageX < rect.left ||
+      event.pageX >= rect.right ||
+      event.pageY < rect.top ||
+      event.pageY >= rect.bottom
     ) {
       return;
     }
@@ -43,17 +74,19 @@ class TimeSelectionScrubberImpl extends PureComponent {
     // Don't steal focus. The -moz-user-focus: ignore declaration achieves
     // this more reliably in Gecko, so this preventDefault is mostly for other
     // browsers.
-    e.preventDefault();
+    event.preventDefault();
 
     const { rangeStart, rangeEnd, minSelectionStartWidth } = this.props;
     const mouseDownTime =
-      (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
+      (event.pageX - rect.left) / rect.width * (rangeEnd - rangeStart) +
+      rangeStart;
 
     let isRangeSelecting = false;
 
-    const mouseMoveHandler = e => {
+    const mouseMoveHandler = event => {
       const mouseMoveTime =
-        (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
+        (event.pageX - rect.left) / rect.width * (rangeEnd - rangeStart) +
+        rangeStart;
       const selectionStart = clamp(
         Math.min(mouseDownTime, mouseMoveTime),
         rangeStart,
@@ -78,10 +111,11 @@ class TimeSelectionScrubberImpl extends PureComponent {
       }
     };
 
-    const mouseUpHandler = e => {
+    const mouseUpHandler = event => {
       if (isRangeSelecting) {
         const mouseMoveTime =
-          (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
+          (event.pageX - rect.left) / rect.width * (rangeEnd - rangeStart) +
+          rangeStart;
         const selectionStart = clamp(
           Math.min(mouseDownTime, mouseMoveTime),
           rangeStart,
@@ -98,7 +132,7 @@ class TimeSelectionScrubberImpl extends PureComponent {
           selectionEnd,
           isModifying: false,
         });
-        e.stopPropagation();
+        event.stopPropagation();
         this._uninstallMoveAndUpHandlers();
         return;
       }
@@ -106,7 +140,8 @@ class TimeSelectionScrubberImpl extends PureComponent {
       const { selection } = this.props;
       if (selection.hasSelection) {
         const mouseUpTime =
-          (e.pageX - r.left) / r.width * (rangeEnd - rangeStart) + rangeStart;
+          (event.pageX - rect.left) / rect.width * (rangeEnd - rangeStart) +
+          rangeStart;
         const { selectionStart, selectionEnd } = selection;
         if (mouseUpTime < selectionStart || mouseUpTime >= selectionEnd) {
           // Unset selection.
@@ -122,9 +157,12 @@ class TimeSelectionScrubberImpl extends PureComponent {
     };
 
     this._installMoveAndUpHandlers(mouseMoveHandler, mouseUpHandler);
-  }
+  };
 
-  _installMoveAndUpHandlers(mouseMoveHandler, mouseUpHandler) {
+  _installMoveAndUpHandlers(
+    mouseMoveHandler: MouseHandler,
+    mouseUpHandler: MouseHandler
+  ) {
     this._handlers = { mouseMoveHandler, mouseUpHandler };
     window.addEventListener('mousemove', mouseMoveHandler, true);
     window.addEventListener('mouseup', mouseUpHandler, true);
@@ -138,23 +176,23 @@ class TimeSelectionScrubberImpl extends PureComponent {
     }
   }
 
-  _onMouseMove(e) {
+  _onMouseMove = (event: SyntheticMouseEvent<>) => {
     if (!this._container) {
       return;
     }
 
-    const r = getContentRect(this._container);
+    const rect = getContentRect(this._container);
     if (
-      e.pageX < r.left ||
-      e.pageX >= r.right ||
-      e.pageY < r.top ||
-      e.pageY >= r.bottom
+      event.pageX < rect.left ||
+      event.pageX >= rect.right ||
+      event.pageY < rect.top ||
+      event.pageY >= rect.bottom
     ) {
       this.setState({ hoverLocation: null });
     } else {
-      this.setState({ hoverLocation: e.pageX - r.left });
+      this.setState({ hoverLocation: event.pageX - rect.left });
     }
-  }
+  };
 
   render() {
     const {

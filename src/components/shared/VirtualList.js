@@ -2,12 +2,28 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { PureComponent } from 'react';
+// @flow
+import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import range from 'array-range';
 
-class VirtualListRow extends PureComponent {
+import type { CssPixels } from '../../types/units';
+
+type RenderItem = (*, number, number) => React.Node;
+
+type VirtualListRowProps = {|
+  +renderItem: RenderItem,
+  +item: *,
+  +index: number,
+  +columnIndex: number,
+  +isSpecial: boolean,
+  // Items are not used directly, but are needed for strict equality checks so that
+  // the components update correctly.
+  +items: *,
+|};
+
+class VirtualListRow extends React.PureComponent<VirtualListRowProps> {
   render() {
     const { renderItem, item, index, columnIndex } = this.props;
     return renderItem(item, index, columnIndex);
@@ -24,7 +40,19 @@ VirtualListRow.propTypes = {
   isSpecial: PropTypes.bool, // eslint-disable-line react/no-unused-prop-types
 };
 
-class VirtualListInnerChunk extends PureComponent {
+type VirtualListInnerChunkProps = {|
+  +className: string,
+  +renderItem: RenderItem,
+  +items: Array<*>,
+  +specialItems: Array<*>,
+  +visibleRangeStart: number,
+  +visibleRangeEnd: number,
+  +columnIndex: number,
+|};
+
+class VirtualListInnerChunk extends React.PureComponent<
+  VirtualListInnerChunkProps
+> {
   render() {
     const {
       className,
@@ -70,12 +98,27 @@ VirtualListInnerChunk.propTypes = {
   columnIndex: PropTypes.number.isRequired,
 };
 
-class VirtualListInner extends PureComponent {
+type VirtualListInnerProps = {
+  itemHeight: CssPixels,
+  className: string,
+  renderItem: RenderItem,
+  items: *[],
+  specialItems: *[],
+  visibleRangeStart: number,
+  visibleRangeEnd: number,
+  columnIndex: number,
+};
+
+class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
+  _container: ?HTMLElement;
+
+  _containerCreated(element: ?HTMLDivElement) {
+    this._container = element;
+  }
+
   constructor(props) {
     super(props);
-    this._containerCreated = e => {
-      this._container = e;
-    };
+    (this: any)._containerCreated = this._containerCreated.bind(this);
   }
 
   getBoundingClientRect() {
@@ -152,29 +195,66 @@ VirtualListInner.propTypes = {
   columnIndex: PropTypes.number.isRequired,
 };
 
-class VirtualList extends PureComponent {
-  constructor(props) {
+type VirtualListProps = {|
+  +itemHeight: CssPixels,
+  +className: string,
+  +renderItem: RenderItem,
+  +items: *[],
+  +focusable: boolean,
+  +specialItems: *[],
+  +onKeyDown: KeyboardEvent => void,
+  +onCopy: Event => void,
+  +disableOverscan: boolean,
+  +columnCount: number,
+|};
+
+type Geometry = {
+  outerRect: DOMRect | ClientRect,
+  innerRectY: CssPixels,
+};
+
+class VirtualList extends React.PureComponent<VirtualListProps> {
+  _container: ?HTMLDivElement;
+  _inner: ?VirtualListInner;
+  _geometry: ?Geometry;
+
+  constructor(props: VirtualListProps) {
     super(props);
-    this._onScroll = this._onScroll.bind(this);
-    this._onCopy = this._onCopy.bind(this);
-    this._geometry = undefined;
-    this._containerCreated = elem => {
-      this._container = elem;
-    };
-    this._innerCreated = elem => {
-      this._inner = elem;
-    };
+    (this: any)._onScroll = this._onScroll.bind(this);
+    (this: any)._onCopy = this._onCopy.bind(this);
+    (this: any)._containerCreated = this._containerCreated.bind(this);
+    (this: any)._innerCreated = this._innerCreated.bind(this);
+  }
+
+  _containerCreated(element: ?HTMLDivElement) {
+    this._container = element;
+  }
+
+  _innerCreated(element: ?VirtualListInner) {
+    this._inner = element;
   }
 
   componentDidMount() {
     document.addEventListener('copy', this._onCopy, false);
-    this._container.addEventListener('scroll', this._onScroll);
+    const container = this._container;
+    if (!container) {
+      throw new Error(
+        'The container was assumed to exist while mounting The VirtualList.'
+      );
+    }
+    container.addEventListener('scroll', this._onScroll);
     this._onScroll(); // for initial size
   }
 
   componentWillUnmount() {
     document.removeEventListener('copy', this._onCopy, false);
-    this._container.removeEventListener('scroll', this._onScroll);
+    const container = this._container;
+    if (!container) {
+      throw new Error(
+        'The container was assumed to exist while unmounting The VirtualList.'
+      );
+    }
+    container.removeEventListener('scroll', this._onScroll);
   }
 
   _onScroll() {
@@ -182,18 +262,20 @@ class VirtualList extends PureComponent {
     this.forceUpdate();
   }
 
-  _onCopy(event) {
+  _onCopy(event: Event) {
     if (document.activeElement === this._container) {
       this.props.onCopy(event);
     }
   }
 
-  _queryGeometry() {
-    if (!this._container) {
+  _queryGeometry(): Geometry | void {
+    const container = this._container;
+    const inner = this._inner;
+    if (!container || !inner) {
       return undefined;
     }
-    const outerRect = this._container.getBoundingClientRect();
-    const innerRectY = this._inner.getBoundingClientRect().top;
+    const outerRect = container.getBoundingClientRect();
+    const innerRectY = inner.getBoundingClientRect().top;
     return { outerRect, innerRectY };
   }
 
@@ -216,7 +298,7 @@ class VirtualList extends PureComponent {
     return { visibleRangeStart, visibleRangeEnd };
   }
 
-  scrollItemIntoView(itemIndex, offsetX) {
+  scrollItemIntoView(itemIndex: number, offsetX: CssPixels) {
     if (!this._container) {
       return;
     }
@@ -248,7 +330,10 @@ class VirtualList extends PureComponent {
   }
 
   focus() {
-    this._container.focus();
+    const container = this._container;
+    if (container) {
+      container.focus();
+    }
   }
 
   render() {

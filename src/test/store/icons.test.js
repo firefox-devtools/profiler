@@ -57,15 +57,15 @@ describe('actions/icons', function() {
       expect(initialState.size).toEqual(0);
     });
 
-    it('getIconForNode returns null for any icon', function() {
-      const subject = iconsAccessors.getIconForNode(state, {
+    it('getIconForCallNode returns null for any icon', function() {
+      const subject = iconsAccessors.getIconForCallNode(state, {
         icon: validIcons[0],
       });
       expect(subject).toBeNull();
     });
 
-    it('getIconClassNameForNode returns null for any icon', function() {
-      const subject = iconsAccessors.getIconClassNameForNode(state, {
+    it('getIconClassNameForCallNode returns null for any icon', function() {
+      const subject = iconsAccessors.getIconClassNameForCallNode(state, {
         icon: validIcons[0],
       });
       expect(subject).toBeNull();
@@ -106,10 +106,10 @@ describe('actions/icons', function() {
       );
 
       validIcons.forEach((icon, i) => {
-        subject = iconsAccessors.getIconForNode(state, { icon });
+        subject = iconsAccessors.getIconForCallNode(state, { icon });
         expect(subject).toEqual(icon);
 
-        subject = iconsAccessors.getIconClassNameForNode(state, { icon });
+        subject = iconsAccessors.getIconClassNameForCallNode(state, { icon });
         expect(subject).toEqual(expectedClasses[i]);
       });
     });
@@ -129,10 +129,10 @@ describe('actions/icons', function() {
       let subject = iconsAccessors.getIcons(state);
       expect([...subject]).toEqual([]);
 
-      subject = iconsAccessors.getIconForNode(state, { icon: invalidIcon });
+      subject = iconsAccessors.getIconForCallNode(state, { icon: invalidIcon });
       expect(subject).toBeNull();
 
-      subject = iconsAccessors.getIconClassNameForNode(state, {
+      subject = iconsAccessors.getIconClassNameForCallNode(state, {
         icon: invalidIcon,
       });
       expect(subject).toBeNull();
