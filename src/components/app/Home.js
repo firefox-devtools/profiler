@@ -19,28 +19,6 @@ const ADDON_URL =
 const LEGACY_ADDON_URL =
   'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
 
-const InstallButton = ({
-  name,
-  xpiUrl,
-  children,
-  className,
-}: InstallButtonProps) => {
-  return (
-    <a
-      href={xpiUrl}
-      className={className}
-      onClick={e => {
-        if (window.InstallTrigger) {
-          window.InstallTrigger.install({ [name]: xpiUrl });
-        }
-        e.preventDefault();
-      }}
-    >
-      {children}
-    </a>
-  );
-};
-
 type InstallButtonProps = {
   name: string,
   xpiUrl: string,
@@ -48,12 +26,32 @@ type InstallButtonProps = {
   className?: string,
 };
 
+class InstallButton extends React.PureComponent<InstallButtonProps> {
+  onInstallClick = (e: SyntheticEvent<HTMLAnchorElement>) => {
+    if (window.InstallTrigger) {
+      const { name, xpiUrl } = this.props;
+      window.InstallTrigger.install({ [name]: xpiUrl });
+    }
+    e.preventDefault();
+  };
+
+  render() {
+    const { xpiUrl, children, className } = this.props;
+    return (
+      <a href={xpiUrl} className={className} onClick={this.onInstallClick}>
+        {children}
+      </a>
+    );
+  }
+}
+
 type UploadButtonProps = {
   retrieveProfileFromFile: File => void,
 };
 
 class UploadButton extends React.PureComponent<UploadButtonProps> {
   _input: HTMLInputElement | null;
+  _takeInputRef = input => (this._input = input);
 
   constructor(props: UploadButtonProps) {
     super(props);
@@ -63,13 +61,7 @@ class UploadButton extends React.PureComponent<UploadButtonProps> {
   render() {
     return (
       <div>
-        <input
-          type="file"
-          ref={input => {
-            this._input = input;
-          }}
-          onChange={this._upload}
-        />
+        <input type="file" ref={this._takeInputRef} onChange={this._upload} />
       </div>
     );
   }

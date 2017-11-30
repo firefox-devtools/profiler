@@ -38,7 +38,6 @@ type Props = {
   maxStackDepth: number,
   stackTimingByDepth: StackTimingByDepth,
   timeRange: { start: Milliseconds, end: Milliseconds },
-  threadIndex: number,
   interval: Milliseconds,
   getCategory: GetCategory,
   getLabel: GetLabel,

@@ -282,6 +282,7 @@ class TreeView extends React.PureComponent<TreeViewProps> {
   _specialItems: (IndexIntoCallNodeTable | null)[];
   _visibleRows: IndexIntoCallNodeTable[];
   _list: VirtualList | null;
+  _takeListRef = (list: VirtualList | null) => (this._list = list);
 
   constructor(props: TreeViewProps) {
     super(props);
@@ -556,9 +557,7 @@ class TreeView extends React.PureComponent<TreeViewProps> {
             specialItems={this._specialItems}
             disableOverscan={disableOverscan}
             onCopy={this._onCopy}
-            ref={ref => {
-              this._list = ref;
-            }}
+            ref={this._takeListRef}
           />
         </ContextMenuTrigger>
         {contextMenu}

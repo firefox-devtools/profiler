@@ -26,14 +26,6 @@ describe('thread ordering and toggling', function() {
         );
       },
 
-      getVisibleOrderedThreadNames: () => {
-        const state = getState();
-        const threads = ProfileViewSelectors.getThreads(state);
-        return UrlStateSelectors.getVisibleThreadOrder(state).map(
-          i => threads[i].name
-        );
-      },
-
       getHiddenThreadNames: () => {
         const state = getState();
         const threads = ProfileViewSelectors.getThreads(state);
@@ -67,7 +59,6 @@ describe('thread ordering and toggling', function() {
     );
     const {
       getOrderedThreadNames,
-      getVisibleOrderedThreadNames,
       getHiddenThreadNames,
       hideThread,
       showThread,
@@ -75,31 +66,26 @@ describe('thread ordering and toggling', function() {
 
     it('starts out with the initial sorting', function() {
       expect(getOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
-      expect(getVisibleOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
       expect(getHiddenThreadNames()).toEqual([]);
     });
 
     it('can hide threads', function() {
       hideThread(C);
       expect(getOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
-      expect(getVisibleOrderedThreadNames()).toEqual(['A', 'B', 'D']);
       expect(getHiddenThreadNames()).toEqual(['C']);
 
       hideThread(A);
       expect(getOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
-      expect(getVisibleOrderedThreadNames()).toEqual(['B', 'D']);
       expect(getHiddenThreadNames()).toEqual(['C', 'A']);
     });
 
     it('can show threads', function() {
       showThread(C);
       expect(getOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
-      expect(getVisibleOrderedThreadNames()).toEqual(['B', 'C', 'D']);
       expect(getHiddenThreadNames()).toEqual(['A']);
 
       showThread(A);
       expect(getOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
-      expect(getVisibleOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
       expect(getHiddenThreadNames()).toEqual([]);
     });
   });
@@ -110,7 +96,6 @@ describe('thread ordering and toggling', function() {
     );
     const {
       getOrderedThreadNames,
-      getVisibleOrderedThreadNames,
       getHiddenThreadNames,
       hideThread,
       showThread,
@@ -119,14 +104,12 @@ describe('thread ordering and toggling', function() {
 
     it('starts out with the initial sorting', function() {
       expect(getOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
-      expect(getVisibleOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
       expect(getHiddenThreadNames()).toEqual([]);
     });
 
     it('is resortable', function() {
       changeThreadOrder([3, 2, 1, 0]);
       expect(getOrderedThreadNames()).toEqual(['D', 'C', 'B', 'A']);
-      expect(getVisibleOrderedThreadNames()).toEqual(['D', 'C', 'B', 'A']);
       expect(getHiddenThreadNames()).toEqual([]);
     });
 
@@ -134,19 +117,16 @@ describe('thread ordering and toggling', function() {
       hideThread(C);
       hideThread(A);
       expect(getOrderedThreadNames()).toEqual(['D', 'C', 'B', 'A']);
-      expect(getVisibleOrderedThreadNames()).toEqual(['D', 'B']);
       expect(getHiddenThreadNames()).toEqual(['C', 'A']);
     });
 
     it('can show sorted threads', function() {
       showThread(C);
       expect(getOrderedThreadNames()).toEqual(['D', 'C', 'B', 'A']);
-      expect(getVisibleOrderedThreadNames()).toEqual(['D', 'C', 'B']);
       expect(getHiddenThreadNames()).toEqual(['A']);
 
       showThread(A);
       expect(getOrderedThreadNames()).toEqual(['D', 'C', 'B', 'A']);
-      expect(getVisibleOrderedThreadNames()).toEqual(['D', 'C', 'B', 'A']);
       expect(getHiddenThreadNames()).toEqual([]);
     });
   });
@@ -157,14 +137,12 @@ describe('thread ordering and toggling', function() {
     );
     const {
       getOrderedThreadNames,
-      getVisibleOrderedThreadNames,
       getHiddenThreadNames,
       hideThread,
     } = setupHelpers(store);
 
     it('starts out with the initial sorting', function() {
       expect(getOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
-      expect(getVisibleOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
       expect(getHiddenThreadNames()).toEqual([]);
     });
 
@@ -174,7 +152,6 @@ describe('thread ordering and toggling', function() {
       hideThread(C);
       hideThread(D);
       expect(getOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
-      expect(getVisibleOrderedThreadNames()).toEqual(['D']);
       expect(getHiddenThreadNames()).toEqual(['A', 'B', 'C']);
     });
   });
