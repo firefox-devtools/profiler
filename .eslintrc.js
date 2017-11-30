@@ -38,7 +38,7 @@ module.exports = {
     // `no-unused-prop-types` is buggy when we use destructuring parameters in
     // functions as it misunderstands them as functional components.
     // See https://github.com/yannickcr/eslint-plugin-react/issues/1561
-    'react/no-unused-prop-types': 'warn',
+    // 'react/no-unused-prop-types': 'error',
     'react/no-unused-state': 'error',
     'react/prefer-stateless-function': 'error',
     'react/prefer-stateless-function': [
