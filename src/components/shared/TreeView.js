@@ -134,7 +134,7 @@ class TreeViewRowFixedColumns<
               {RenderComponent
                 ? <RenderComponent displayData={displayData} />
                 : reactStringWithHighlightedSubstrings(
-                    displayData[col.propName] || '',
+                    text,
                     highlightRegExp,
                     'treeViewHighlighting'
                   )}

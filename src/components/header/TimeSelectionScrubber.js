@@ -14,18 +14,17 @@ import { withSize } from '../shared/WithSize';
 
 import type { Milliseconds, CssPixels } from '../../types/units';
 import type { ProfileSelection } from '../../types/actions';
+import type { SizeProps } from '../shared/WithSize';
 
 type MouseHandler = (event: MouseEvent) => void;
 
-type Props = {|
+type Props = SizeProps & {|
   +className: string,
   +zeroAt: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +minSelectionStartWidth: Milliseconds,
   +selection: ProfileSelection,
-  +width: CssPixels,
-  +height: CssPixels,
   +onSelectionChange: ProfileSelection => *,
   +onZoomButtonClick: (
     selectionStart: Milliseconds,
@@ -43,14 +42,12 @@ class TimeSelectionScrubberImpl extends React.PureComponent<Props, State> {
     mouseMoveHandler: MouseHandler,
     mouseUpHandler: MouseHandler,
   };
+
   _container: ?HTMLElement;
 
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      hoverLocation: null,
-    };
-  }
+  state = {
+    hoverLocation: null,
+  };
 
   _containerCreated = (element: HTMLElement | null) => {
     this._container = element;

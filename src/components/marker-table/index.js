@@ -27,11 +27,11 @@ import type {
 } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 
-type MarkerDisplayData = {
+type MarkerDisplayData = {|
   timestamp: string,
   name: string,
   category: string,
-};
+|};
 
 class MarkerTree {
   _markers: MarkersTable;
@@ -140,27 +140,16 @@ type Props = {|
   +changeSelectedMarker: typeof changeSelectedMarker,
 |};
 
-import type { Column } from '../shared/TreeView';
-
 class MarkerTable extends PureComponent<Props> {
-  _fixedColumns: Array<Column>;
-  _mainColumn: Column;
-  _expandedNodeIds: Array<IndexIntoMarkersTable | null>;
-  _onExpandedNodeIdsChange: void => void;
-  _treeView: null | TreeView<IndexIntoMarkersTable, MarkerDisplayData>;
+  _fixedColumns = [
+    { propName: 'timestamp', title: 'Time Stamp' },
+    { propName: 'category', title: 'Category' },
+  ];
+  _mainColumn = { propName: 'name', title: '' };
+  _expandedNodeIds: Array<IndexIntoMarkersTable | null> = [];
+  _onExpandedNodeIdsChange = () => {};
+  _treeView: ?TreeView<IndexIntoMarkersTable, MarkerDisplayData>;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
-
-  constructor(props: Props) {
-    super(props);
-    this._fixedColumns = [
-      { propName: 'timestamp', title: 'Time Stamp' },
-      { propName: 'category', title: 'Category' },
-    ];
-    this._mainColumn = { propName: 'name', title: '' };
-    this._expandedNodeIds = [];
-    this._onExpandedNodeIdsChange = () => {};
-    this._treeView = null;
-  }
 
   componentDidMount() {
     this.focus();

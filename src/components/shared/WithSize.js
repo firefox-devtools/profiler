@@ -7,10 +7,10 @@ import * as React from 'react';
 import { findDOMNode } from 'react-dom';
 import type { CssPixels } from '../../types/units';
 
-type Sizing = {
+export type SizeProps = {|
   width: CssPixels,
   height: CssPixels,
-};
+|};
 
 /**
  * Wraps a React component and makes 'width' and 'height' available in the
@@ -22,35 +22,38 @@ type Sizing = {
  * Note that the props are *not* updated if the size of the element changes
  * for reasons other than a window resize.
  */
-export function withSize(
-  Wrapped: React.ComponentType<*>
-): React.ComponentType<*> {
-  return class WithSizeWrapper extends React.PureComponent<*, Sizing> {
+export function withSize<WrappedProps: Object>(
+  Wrapped: React.ComponentType<{ ...WrappedProps, ...SizeProps }>
+): React.ComponentType<{ ...WrappedProps }> {
+  return class WithSizeWrapper extends React.PureComponent<*, SizeProps> {
     _resizeListener: Event => void;
+    state = { width: 0, height: 0 };
 
-    constructor(props: *) {
-      super(props);
-      this.state = { width: 0, height: 0 };
-      (this: any)._observeSize = this._observeSize.bind(this);
-    }
-
-    _observeSize(wrappedComponent: React.Component<*>) {
+    _observeSize = (
+      wrappedComponent: React.Component<{ ...WrappedProps, ...SizeProps }>
+    ) => {
       if (!wrappedComponent) {
         return;
       }
       const container = findDOMNode(wrappedComponent); // eslint-disable-line react/no-find-dom-node
+      if (!container) {
+        throw new Error('Unable to find the DOMNode');
+      }
       this._resizeListener = () => {
         this._updateWidth(container);
       };
       window.addEventListener('resize', this._resizeListener);
       this._updateWidth(container);
-    }
+    };
 
     componentWillUnmount() {
       window.removeEventListener('resize', this._resizeListener);
     }
 
-    _updateWidth(container: *) {
+    _updateWidth(container: Element | Text) {
+      if (typeof container.getBoundingClientRect !== 'function') {
+        throw new Error('Cannot measure a Text node.');
+      }
       const { width, height } = container.getBoundingClientRect();
       this.setState({ width, height });
     }

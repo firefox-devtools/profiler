@@ -30,21 +30,11 @@ class VirtualListRow extends React.PureComponent<VirtualListRowProps> {
   }
 }
 
-VirtualListRow.propTypes = {
-  renderItem: PropTypes.func.isRequired,
-  item: PropTypes.any.isRequired,
-  index: PropTypes.number.isRequired,
-  columnIndex: PropTypes.number.isRequired,
-  // This prop is not used directly, it's used merely to force its rerendering,
-  // especially when it's selected / unselected.
-  isSpecial: PropTypes.bool, // eslint-disable-line react/no-unused-prop-types
-};
-
 type VirtualListInnerChunkProps = {|
   +className: string,
   +renderItem: RenderItem,
-  +items: Array<*>,
-  +specialItems: Array<*>,
+  +items: *[],
+  +specialItems: *[],
   +visibleRangeStart: number,
   +visibleRangeEnd: number,
   +columnIndex: number,
@@ -88,16 +78,6 @@ class VirtualListInnerChunk extends React.PureComponent<
   }
 }
 
-VirtualListInnerChunk.propTypes = {
-  className: PropTypes.string,
-  renderItem: PropTypes.func.isRequired,
-  items: PropTypes.array.isRequired,
-  specialItems: PropTypes.array.isRequired,
-  visibleRangeStart: PropTypes.number.isRequired,
-  visibleRangeEnd: PropTypes.number.isRequired,
-  columnIndex: PropTypes.number.isRequired,
-};
-
 type VirtualListInnerProps = {
   itemHeight: CssPixels,
   className: string,
@@ -112,14 +92,9 @@ type VirtualListInnerProps = {
 class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
   _container: ?HTMLElement;
 
-  _containerCreated(element: ?HTMLDivElement) {
+  _takeContainerRef = (element: ?HTMLDivElement) => {
     this._container = element;
-  }
-
-  constructor(props) {
-    super(props);
-    (this: any)._containerCreated = this._containerCreated.bind(this);
-  }
+  };
 
   getBoundingClientRect() {
     if (this._container) {
@@ -151,7 +126,7 @@ class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
     return (
       <div
         className={className}
-        ref={this._containerCreated}
+        ref={this._takeContainerRef}
         style={{
           height: `${items.length * itemHeight}px`,
           width: columnIndex === 1 ? '3000px' : undefined,
@@ -184,17 +159,6 @@ class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
   }
 }
 
-VirtualListInner.propTypes = {
-  itemHeight: PropTypes.number.isRequired,
-  className: PropTypes.string,
-  renderItem: PropTypes.func.isRequired,
-  items: PropTypes.array.isRequired,
-  specialItems: PropTypes.array.isRequired,
-  visibleRangeStart: PropTypes.number.isRequired,
-  visibleRangeEnd: PropTypes.number.isRequired,
-  columnIndex: PropTypes.number.isRequired,
-};
-
 type VirtualListProps = {|
   +itemHeight: CssPixels,
   +className: string,
@@ -209,6 +173,10 @@ type VirtualListProps = {|
 |};
 
 type Geometry = {
+  // getBoundingClientRect in the Flow definitions is wrong, and labels the return values
+  // as a ClientRect, and not a DOMRect. https://github.com/facebook/flow/issues/5475
+  //
+  // Account for that here:
   outerRect: DOMRect | ClientRect,
   innerRectY: CssPixels,
 };
@@ -218,21 +186,13 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
   _inner: ?VirtualListInner;
   _geometry: ?Geometry;
 
-  constructor(props: VirtualListProps) {
-    super(props);
-    (this: any)._onScroll = this._onScroll.bind(this);
-    (this: any)._onCopy = this._onCopy.bind(this);
-    (this: any)._containerCreated = this._containerCreated.bind(this);
-    (this: any)._innerCreated = this._innerCreated.bind(this);
-  }
-
-  _containerCreated(element: ?HTMLDivElement) {
+  _takeContainerRef = (element: ?HTMLDivElement) => {
     this._container = element;
-  }
+  };
 
-  _innerCreated(element: ?VirtualListInner) {
+  _innerCreated = (element: ?VirtualListInner) => {
     this._inner = element;
-  }
+  };
 
   componentDidMount() {
     document.addEventListener('copy', this._onCopy, false);
@@ -257,16 +217,16 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
     container.removeEventListener('scroll', this._onScroll);
   }
 
-  _onScroll() {
+  _onScroll = () => {
     this._geometry = this._queryGeometry();
     this.forceUpdate();
-  }
+  };
 
-  _onCopy(event: Event) {
+  _onCopy = (event: Event) => {
     if (document.activeElement === this._container) {
       this.props.onCopy(event);
     }
-  }
+  };
 
   _queryGeometry(): Geometry | void {
     const container = this._container;
@@ -351,7 +311,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
     return (
       <div
         className={className}
-        ref={this._containerCreated}
+        ref={this._takeContainerRef}
         tabIndex={focusable ? 0 : -1}
         onKeyDown={onKeyDown}
       >

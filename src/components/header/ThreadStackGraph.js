@@ -10,7 +10,7 @@ import { timeCode } from '../../utils/time-code';
 import { getSampleCallNodes } from '../../profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 
-import type { Thread, IndexIntoMarkersTable } from '../../types/profile';
+import type { Thread } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type {
   CallNodeInfo,
@@ -25,8 +25,7 @@ type Props = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable,
   +className: string,
-  +onClick: (time: Milliseconds | void) => void,
-  +onMarkerSelect: IndexIntoMarkersTable => void,
+  +onStackClick: (time: Milliseconds) => void,
 |};
 
 class ThreadStackGraph extends PureComponent<Props> {
@@ -152,21 +151,14 @@ class ThreadStackGraph extends PureComponent<Props> {
 
   _onMouseUp = (e: SyntheticMouseEvent<>) => {
     const canvas = this._canvas;
-    if (this.props.onClick && canvas) {
+    if (canvas) {
       const { rangeStart, rangeEnd } = this.props;
       const r = canvas.getBoundingClientRect();
 
       const x = e.pageX - r.left;
       const time = rangeStart + x / r.width * (rangeEnd - rangeStart);
-      this.props.onClick(time);
+      this.props.onStackClick(time);
     }
-  };
-
-  _onMarkerSelected = (markerIndex: IndexIntoMarkersTable) => {
-    if (this.props.onMarkerSelect) {
-      this.props.onMarkerSelect(markerIndex);
-    }
-    this.props.onClick();
   };
 
   render() {
@@ -199,8 +191,7 @@ ThreadStackGraph.propTypes = {
   }).isRequired,
   selectedCallNodeIndex: PropTypes.number,
   className: PropTypes.string,
-  onClick: PropTypes.func,
-  onMarkerSelect: PropTypes.func,
+  onStackClick: PropTypes.func.isRequired,
 };
 
 export default ThreadStackGraph;

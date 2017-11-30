@@ -12,16 +12,15 @@ import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 
 import type { Milliseconds, CssPixels } from '../../types/units';
 import type { TracingMarker } from '../../types/profile-derived';
+import type { SizeProps } from '../shared/WithSize';
 
 type MarkerState = 'PRESSED' | 'HOVERED' | 'NONE';
 
-type Props = {
+type Props = SizeProps & {|
   className: string,
   rangeStart: Milliseconds,
   rangeEnd: Milliseconds,
   intervalMarkers: TracingMarker[],
-  width: number,
-  height: number,
   threadIndex: number,
   threadName: string,
   onSelect: any,
@@ -32,7 +31,7 @@ type Props = {
     HOVERED: string,
     PRESSED: string,
   },
-};
+|};
 
 type State = {
   hoveredItem: TracingMarker | null,

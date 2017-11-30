@@ -52,9 +52,8 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
   constructor(props) {
     super(props);
     (this: any)._onLabelMouseDown = this._onLabelMouseDown.bind(this);
-    (this: any)._onGraphClick = this._onGraphClick.bind(this);
+    (this: any)._onStackClick = this._onStackClick.bind(this);
     (this: any)._onLineClick = this._onLineClick.bind(this);
-    (this: any)._onMarkerSelect = this._onMarkerSelect.bind(this);
     (this: any)._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(
       this
     );
@@ -75,25 +74,23 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
     changeSelectedThread(threadIndex);
   }
 
-  _onGraphClick(time: number | void) {
+  _onStackClick(time: number) {
     const { threadIndex, interval } = this.props;
-    if (time !== undefined) {
-      const { thread, callNodeInfo, changeSelectedCallNode } = this.props;
-      const sampleIndex = getSampleIndexClosestToTime(
-        thread.samples,
-        time,
-        interval
-      );
-      const newSelectedStack = thread.samples.stack[sampleIndex];
-      const newSelectedCallNode =
-        newSelectedStack === null
-          ? -1
-          : callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
-      changeSelectedCallNode(
-        threadIndex,
-        getCallNodePath(newSelectedCallNode, callNodeInfo.callNodeTable)
-      );
-    }
+    const { thread, callNodeInfo, changeSelectedCallNode } = this.props;
+    const sampleIndex = getSampleIndexClosestToTime(
+      thread.samples,
+      time,
+      interval
+    );
+    const newSelectedStack = thread.samples.stack[sampleIndex];
+    const newSelectedCallNode =
+      newSelectedStack === null
+        ? -1
+        : callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
+    changeSelectedCallNode(
+      threadIndex,
+      getCallNodePath(newSelectedCallNode, callNodeInfo.callNodeTable)
+    );
   }
 
   _onIntervalMarkerSelect(
@@ -115,8 +112,6 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
     });
     changeSelectedThread(threadIndex);
   }
-
-  _onMarkerSelect(/* markerIndex */) {}
 
   render() {
     const {
@@ -198,8 +193,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
             selectedCallNodeIndex={selectedCallNodeIndex}
-            onClick={this._onGraphClick}
-            onMarkerSelect={this._onMarkerSelect}
+            onStackClick={this._onStackClick}
           />
         </div>
       </li>
