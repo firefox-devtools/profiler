@@ -19,39 +19,31 @@ const ADDON_URL =
 const LEGACY_ADDON_URL =
   'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
 
-function onInstallClick(e: SyntheticEvent<HTMLAnchorElement>) {
-  if (window.InstallTrigger) {
-    const name = e.currentTarget.dataset.name;
-    const xpiUrl = e.currentTarget.href;
-    window.InstallTrigger.install({ [name]: xpiUrl });
-  }
-  e.preventDefault();
-}
-
-const InstallButton = ({
-  name,
-  xpiUrl,
-  children,
-  className,
-}: InstallButtonProps) => {
-  return (
-    <a
-      href={xpiUrl}
-      className={className}
-      data-name={name}
-      onClick={onInstallClick}
-    >
-      {children}
-    </a>
-  );
-};
-
 type InstallButtonProps = {
   name: string,
   xpiUrl: string,
   children?: React.Node,
   className?: string,
 };
+
+class InstallButton extends React.PureComponent<InstallButtonProps> {
+  onInstallClick = (e: SyntheticEvent<HTMLAnchorElement>) => {
+    if (window.InstallTrigger) {
+      const { name, xpiUrl } = this.props;
+      window.InstallTrigger.install({ [name]: xpiUrl });
+    }
+    e.preventDefault();
+  };
+
+  render() {
+    const { xpiUrl, children, className } = this.props;
+    return (
+      <a href={xpiUrl} className={className} onClick={this.onInstallClick}>
+        {children}
+      </a>
+    );
+  }
+}
 
 type UploadButtonProps = {
   retrieveProfileFromFile: File => void,
