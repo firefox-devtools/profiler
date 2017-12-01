@@ -173,7 +173,10 @@ describe('selectors/getFlameGraphTiming', function() {
   }
 
   it('computes a basic example', function() {
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       A A A
       B B B
       C C H
@@ -192,7 +195,10 @@ describe('selectors/getFlameGraphTiming', function() {
   });
 
   it('can handle null samples', function() {
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       A A X A
       B B   B
       C C   H
@@ -214,7 +220,10 @@ describe('selectors/getFlameGraphTiming', function() {
   });
 
   it('sorts stacks in alphabetical order', function() {
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       D D A D
       E F B F
           C G

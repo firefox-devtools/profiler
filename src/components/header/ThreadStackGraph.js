@@ -122,6 +122,8 @@ class ThreadStackGraph extends PureComponent<Props> {
       }
       return callNodeIndex === selectedCallNodeIndex;
     }
+
+    // Draw all of the samples
     for (let i = 0; i < sampleCallNodes.length; i++) {
       const sampleTime = thread.samples.time[i];
       if (

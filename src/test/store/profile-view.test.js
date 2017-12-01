@@ -9,7 +9,10 @@ import * as ProfileView from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 
 describe('call node paths on implementation filter change', function() {
-  const { profile, funcNames } = getProfileFromTextSamples(`
+  const {
+    profile,
+    funcNamesPerThread: [funcNames],
+  } = getProfileFromTextSamples(`
     A.cpp
     B.js
     C.cpp

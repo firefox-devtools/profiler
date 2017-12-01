@@ -833,7 +833,10 @@ describe('get-sample-index-closest-to-time', function() {
 });
 
 describe('funcHasRecursiveCall', function() {
-  const { profile, funcNames } = getProfileFromTextSamples(`
+  const {
+    profile,
+    funcNamesPerThread: [funcNames],
+  } = getProfileFromTextSamples(`
     A.js
     B.js
     C.cpp

@@ -13,10 +13,59 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getBoundingBox } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
 
+import type { Profile } from '../../types/profile';
+
 jest.useFakeTimers();
 ReactDOM.findDOMNode = jest.fn(() => ({
   getBoundingClientRect: () => getBoundingBox(300, 300),
 }));
+
+function _getProfileWithDroppedSamples(): Profile {
+  const { profile } = getProfileFromTextSamples(
+    // The base thread is 9 samples long.
+    '1 2 3 4 5 6 7 8 9',
+    // Create a second thread where `x` is when the thread wasn't yet initialized
+    // and where e is an empty sample. The profile fixture will be mutated below
+    // to follow this.
+    `
+      x x e e A A A x x
+              B B B
+              C C H
+              D F I
+              E G
+    `
+  );
+
+  const [thread1, thread2] = profile.threads;
+
+  // Manually choose the timings:
+  const sampleStartIndex = 2;
+  const sampleEndIndex = 7;
+  Object.assign(thread2, {
+    processStartupTime: thread2.samples.time[sampleStartIndex],
+    registerTime: thread2.samples.time[sampleStartIndex],
+    processShutdownTime: thread2.samples.time[sampleEndIndex],
+    unregisterTime: null,
+  });
+  thread1.name = 'Main Thread';
+  thread2.name = 'Thread with dropped samples';
+
+  // Remove the samples that contain 'x' and 'e'.
+  {
+    const samples = thread2.samples;
+    for (const key in samples) {
+      if (samples.hasOwnProperty(key) && Array.isArray(samples[key])) {
+        // Slice just the stacks we care about, simulating a thread that was started
+        // later, and with dropped data in its buffer.
+        samples[key] = samples[key].slice(4, 7);
+      }
+    }
+  }
+  thread2.samples.length = thread2.samples.time.length;
+
+  profile.threads.push(thread2);
+  return profile;
+}
 
 describe('calltree/ProfileViewerHeader', function() {
   it('renders the header', () => {
@@ -38,13 +87,7 @@ describe('calltree/ProfileViewerHeader', function() {
       return null;
     }
 
-    const { profile } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E G
-    `);
+    const profile = _getProfileWithDroppedSamples();
 
     const header = renderer.create(
       <Provider store={storeWithProfile(profile)}>
