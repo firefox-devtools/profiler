@@ -482,6 +482,7 @@ export type SelectorsForThread = {
   getFriendlyThreadName: State => string,
   getThreadProcessDetails: State => string,
   getSearchFilteredMarkers: State => MarkersTable,
+  unfilteredSamplesRange: State => StartEndRange | null,
 };
 
 const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
@@ -784,6 +785,21 @@ export const selectorsForThread = (
       UrlState.getMarkersSearchString,
       ProfileData.getSearchFilteredMarkers
     );
+    /**
+     * The buffers of the samples can be cleared out. This function lets us know the
+     * absolute range of samples that we have collected.
+     */
+    const unfilteredSamplesRange = createSelector(
+      getThread,
+      getProfileInterval,
+      (thread, interval) => {
+        const { time } = thread.samples;
+        if (time.length === 0) {
+          return null;
+        }
+        return { start: time[0], end: time[time.length - 1] + interval };
+      }
+    );
 
     selectorsForThreads[threadIndex] = {
       getThread,
@@ -817,6 +833,7 @@ export const selectorsForThread = (
       getFriendlyThreadName,
       getThreadProcessDetails,
       getSearchFilteredMarkers,
+      unfilteredSamplesRange,
     };
   }
   return selectorsForThreads[threadIndex];

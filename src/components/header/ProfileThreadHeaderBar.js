@@ -23,9 +23,10 @@ import {
   changeSelectedCallNode,
   focusCallTree,
 } from '../../actions/profile-view';
+import EmptyThreadIndicator from './EmptyThreadIndicator';
 
 import type { Thread, ThreadIndex } from '../../types/profile';
-import type { Milliseconds } from '../../types/units';
+import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -33,24 +34,25 @@ import type {
 import type { State } from '../../types/reducers';
 
 type Props = {
-  threadIndex: ThreadIndex,
-  thread: Thread,
-  callNodeInfo: CallNodeInfo,
-  interval: Milliseconds,
-  rangeStart: Milliseconds,
-  rangeEnd: Milliseconds,
-  selectedCallNodeIndex: IndexIntoCallNodeTable,
-  isSelected: boolean,
-  isHidden: boolean,
-  isModifyingSelection: boolean,
-  style: Object,
-  threadName: string,
-  processDetails: string,
-  changeSelectedThread: typeof changeSelectedThread,
-  changeRightClickedThread: typeof changeRightClickedThread,
-  updateProfileSelection: typeof updateProfileSelection,
-  changeSelectedCallNode: typeof changeSelectedCallNode,
-  focusCallTree: typeof focusCallTree,
+  +threadIndex: ThreadIndex,
+  +thread: Thread,
+  +callNodeInfo: CallNodeInfo,
+  +interval: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +selectedCallNodeIndex: IndexIntoCallNodeTable,
+  +isSelected: boolean,
+  +isHidden: boolean,
+  +isModifyingSelection: boolean,
+  +style: Object,
+  +threadName: string,
+  +processDetails: string,
+  +changeSelectedThread: typeof changeSelectedThread,
+  +changeRightClickedThread: typeof changeRightClickedThread,
+  +updateProfileSelection: typeof updateProfileSelection,
+  +changeSelectedCallNode: typeof changeSelectedCallNode,
+  +focusCallTree: typeof focusCallTree,
+  +unfilteredSamplesRange: StartEndRange | null,
 };
 
 class ProfileThreadHeaderBar extends PureComponent<Props> {
@@ -147,6 +149,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
       processDetails,
       isHidden,
       isModifyingSelection,
+      unfilteredSamplesRange,
     } = this.props;
 
     if (isHidden) {
@@ -214,6 +217,13 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
             selectedCallNodeIndex={selectedCallNodeIndex}
             onStackClick={this._onStackClick}
           />
+          <EmptyThreadIndicator
+            thread={thread}
+            interval={interval}
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            unfilteredSamplesRange={unfilteredSamplesRange}
+          />
         </div>
       </li>
     );
@@ -236,6 +246,7 @@ export default connect(
           : -1,
       isSelected: threadIndex === selectedThread,
       threadIndex,
+      unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
     };
   },
   {

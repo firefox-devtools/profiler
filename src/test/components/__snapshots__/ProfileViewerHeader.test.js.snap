@@ -30,21 +30,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
         className="timeRulerNotch"
         style={
           Object {
-            "left": "100px",
-          }
-        }
-      >
-        <span
-          className="timeRulerNotchText"
-        >
-          0.001s
-        </span>
-      </li>
-      <li
-        className="timeRulerNotch"
-        style={
-          Object {
-            "left": "200px",
+            "left": "66.66666666666667px",
           }
         }
       >
@@ -58,14 +44,42 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
         className="timeRulerNotch"
         style={
           Object {
-            "left": "300px",
+            "left": "133.33333333333334px",
           }
         }
       >
         <span
           className="timeRulerNotchText"
         >
-          0.003s
+          0.004s
+        </span>
+      </li>
+      <li
+        className="timeRulerNotch"
+        style={
+          Object {
+            "left": "200px",
+          }
+        }
+      >
+        <span
+          className="timeRulerNotchText"
+        >
+          0.006s
+        </span>
+      </li>
+      <li
+        className="timeRulerNotch"
+        style={
+          Object {
+            "left": "266.6666666666667px",
+          }
+        }
+      >
+        <span
+          className="timeRulerNotchText"
+        >
+          0.008s
         </span>
       </li>
     </ol>
@@ -109,13 +123,13 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
               onMouseUp={[Function]}
               onTouchEnd={[Function]}
               onTouchStart={[Function]}
-              title="thread: \\"Empty\\" (0)
+              title="thread: \\"Main Thread\\" (0)
             process: \\"default\\" (0)"
             >
               <h1
                 className="profileThreadHeaderBarThreadName"
               >
-                Empty
+                Main Thread
               </h1>
             </div>
             <div
@@ -127,6 +141,153 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
                 <canvas
                   className="threadStackGraphCanvas threadStackGraphCanvas"
                   onMouseUp={[Function]}
+                />
+              </div>
+              <div
+                className="headerEmptyThreadIndicator"
+              />
+            </div>
+          </li>
+          <li
+            className="profileThreadHeaderBar"
+            onClick={[Function]}
+            style={undefined}
+          >
+            <div
+              className="react-contextmenu-wrapper grippy profileThreadHeaderBarThreadLabel"
+              onContextMenu={[Function]}
+              onMouseDown={[Function]}
+              onMouseOut={[Function]}
+              onMouseUp={[Function]}
+              onTouchEnd={[Function]}
+              onTouchStart={[Function]}
+              title="thread: \\"Thread with dropped samples\\" (0)
+            process: \\"default\\" (0)"
+            >
+              <h1
+                className="profileThreadHeaderBarThreadName"
+              >
+                Thread with dropped samples
+              </h1>
+            </div>
+            <div
+              className="profileThreadHeaderBarThreadDetails"
+            >
+              <div
+                className="threadStackGraph"
+              >
+                <canvas
+                  className="threadStackGraphCanvas threadStackGraphCanvas"
+                  onMouseUp={[Function]}
+                />
+              </div>
+              <div
+                className="headerEmptyThreadIndicator"
+              >
+                <div
+                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorStartup"
+                  onMouseEnter={[Function]}
+                  onMouseLeave={[Function]}
+                  style={
+                    Object {
+                      "left": 0,
+                      "width": 66.66666666666667,
+                    }
+                  }
+                />
+                <div
+                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorShutdown"
+                  onMouseEnter={[Function]}
+                  onMouseLeave={[Function]}
+                  style={
+                    Object {
+                      "right": 0,
+                      "width": 66.66666666666667,
+                    }
+                  }
+                />
+                <div
+                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorEmptyBuffer"
+                  onMouseEnter={[Function]}
+                  onMouseLeave={[Function]}
+                  style={
+                    Object {
+                      "left": 66.66666666666667,
+                      "right": 166.66666666666666,
+                    }
+                  }
+                />
+              </div>
+            </div>
+          </li>
+          <li
+            className="profileThreadHeaderBar"
+            onClick={[Function]}
+            style={undefined}
+          >
+            <div
+              className="react-contextmenu-wrapper grippy profileThreadHeaderBarThreadLabel"
+              onContextMenu={[Function]}
+              onMouseDown={[Function]}
+              onMouseOut={[Function]}
+              onMouseUp={[Function]}
+              onTouchEnd={[Function]}
+              onTouchStart={[Function]}
+              title="thread: \\"Thread with dropped samples\\" (0)
+            process: \\"default\\" (0)"
+            >
+              <h1
+                className="profileThreadHeaderBarThreadName"
+              >
+                Thread with dropped samples
+              </h1>
+            </div>
+            <div
+              className="profileThreadHeaderBarThreadDetails"
+            >
+              <div
+                className="threadStackGraph"
+              >
+                <canvas
+                  className="threadStackGraphCanvas threadStackGraphCanvas"
+                  onMouseUp={[Function]}
+                />
+              </div>
+              <div
+                className="headerEmptyThreadIndicator"
+              >
+                <div
+                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorStartup"
+                  onMouseEnter={[Function]}
+                  onMouseLeave={[Function]}
+                  style={
+                    Object {
+                      "left": 0,
+                      "width": 66.66666666666667,
+                    }
+                  }
+                />
+                <div
+                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorShutdown"
+                  onMouseEnter={[Function]}
+                  onMouseLeave={[Function]}
+                  style={
+                    Object {
+                      "right": 0,
+                      "width": 66.66666666666667,
+                    }
+                  }
+                />
+                <div
+                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorEmptyBuffer"
+                  onMouseEnter={[Function]}
+                  onMouseLeave={[Function]}
+                  style={
+                    Object {
+                      "left": 66.66666666666667,
+                      "right": 166.66666666666666,
+                    }
+                  }
                 />
               </div>
             </div>
@@ -156,8 +317,107 @@ Array [
   Array [
     "fillRect",
     0,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    22.22222222222222,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    44.44444444444444,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    66.66666666666666,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    88.88888888888889,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    111.11111111111111,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    133.33333333333331,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    155.55555555555554,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    177.77777777777777,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    88.88888888888889,
     0,
-    66.66666666666667,
+    22.22222222222222,
     300,
   ],
   Array [
@@ -166,9 +426,9 @@ Array [
   ],
   Array [
     "fillRect",
-    66.66666666666667,
+    111.11111111111111,
     0,
-    66.66666666666667,
+    22.22222222222222,
     300,
   ],
   Array [
@@ -177,9 +437,42 @@ Array [
   ],
   Array [
     "fillRect",
-    133.33333333333334,
+    133.33333333333331,
     75,
-    66.66666666666667,
+    22.22222222222222,
+    225,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    88.88888888888889,
+    0,
+    22.22222222222222,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    111.11111111111111,
+    0,
+    22.22222222222222,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    133.33333333333331,
+    75,
+    22.22222222222222,
     225,
   ],
 ]

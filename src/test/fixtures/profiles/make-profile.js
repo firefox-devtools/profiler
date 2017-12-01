@@ -152,10 +152,51 @@ export function getEmptyThread(overrides: ?Object): Thread {
  * is trimmed.
  */
 export function getProfileFromTextSamples(
-  text: string
-): { profile: Profile, funcNames: string[] } {
-  const nonEmpty = t => t;
-  const lines = text.split('\n').filter(nonEmpty);
+  ...allTextSamples: string[]
+): { profile: Profile, funcNamesPerThread: Array<string[]> } {
+  const profile = getEmptyProfile();
+  const funcNamesPerThread = [];
+
+  profile.threads = allTextSamples.map(textSamples => {
+    // Process the text.
+    const textOnlyStacks = _parseTextSamples(textSamples);
+    const funcNames = textOnlyStacks
+      // Flatten the arrays.
+      .reduce((memo, row) => [...memo, ...row], [])
+      // Make the list unique.
+      .filter((item, index, array) => array.indexOf(item) === index);
+    funcNamesPerThread.push(funcNames);
+
+    // Turn this into a real thread.
+    return _buildThreadFromTextOnlyStacks(textOnlyStacks, funcNames);
+  });
+
+  return { profile, funcNamesPerThread };
+}
+
+/**
+ * Turn a text blob into a list of stacks.
+ *
+ * e.g:
+ * const text = `
+ *   A  A
+ *   B  B
+ *   C  C
+ *      D
+ *      E
+ * `
+ *
+ * Returns:
+ * [
+ *   ['A', 'B', 'C'],
+ *   ['A', 'B', 'C', 'D', E'],
+ * ]
+ */
+function _parseTextSamples(textSamples: string): Array<string[]> {
+  const lines = textSamples.split('\n').filter(
+    // Filter out empty lines
+    t => t
+  );
 
   // Compute the index of where the columns start in the string. String.prototype.split
   // can't be used here because it would put functions on the wrong sample. In the example
@@ -205,7 +246,7 @@ export function getProfileFromTextSamples(
   }
 
   // Go from rows to columns
-  const columns = firstRow.map((_, columnIndex) => {
+  return firstRow.map((_, columnIndex) => {
     const column = [];
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       const value = rows[rowIndex][columnIndex];
@@ -216,10 +257,14 @@ export function getProfileFromTextSamples(
     }
     return column;
   });
+}
 
-  const profile = getEmptyProfile();
+function _buildThreadFromTextOnlyStacks(
+  textOnlyStacks: Array<string[]>,
+  funcNames: string[]
+): Thread {
   const thread = getEmptyThread();
-  profile.threads.push(thread);
+
   const {
     funcTable,
     stringTable,
@@ -229,12 +274,6 @@ export function getProfileFromTextSamples(
     resourceTable,
     libs,
   } = thread;
-
-  const funcNames = columns
-    // Flatten the arrays.
-    .reduce((memo, row) => [...memo, ...row], [])
-    // Make the list unique.
-    .filter((item, index, array) => array.indexOf(item) === index);
 
   const resourceIndexCache = {};
 
@@ -283,7 +322,7 @@ export function getProfileFromTextSamples(
   });
 
   // Create the samples, stacks, and frames.
-  columns.forEach((column, columnIndex) => {
+  textOnlyStacks.forEach((column, columnIndex) => {
     let prefix = null;
     column.forEach(funcName => {
       // There is a one-to-one relationship between strings and funcIndexes here, so
@@ -328,6 +367,5 @@ export function getProfileFromTextSamples(
     samples.stack.push(prefix);
     samples.time.push(columnIndex);
   });
-
-  return { profile, funcNames };
+  return thread;
 }
