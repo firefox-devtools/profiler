@@ -291,8 +291,12 @@ body, #root, .profileViewer {
 }
 
 .profileViewerHeaderTimeRuler {
+  position: sticky;
+  top: 0;
   height: 20px;
   overflow: hidden;
+  background: white;
+  z-index: 1;
 }
 
 .profileViewerHeaderTimeRuler::after {
@@ -323,7 +327,6 @@ body, #root, .profileViewer {
   font-size: 9px;
   color: #888;
   cursor: default;
-  z-index: 1; /* between .profileThreadHeaderBar background and .profileThreadHeaderBarThreadDetails */
 }
 
 .timeRulerNotch {
@@ -432,7 +435,6 @@ body, #root, .profileViewer {
 .profileThreadHeaderBarThreadDetails {
   flex: 1;
   position: relative;
-  z-index: 1;
   display: flex;
   flex-flow: column nowrap;
 }
