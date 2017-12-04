@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 9; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 10; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -391,6 +391,44 @@ const _upgraders = {
               break;
           }
           thread.markers.data[i] = marker;
+        }
+      }
+    }
+  },
+  [10]: profile => {
+    // Cause backtraces
+    // Styles and reflow tracing markers supply call stacks that were captured
+    // at the time that style or layout was invalidated. In version 9, this
+    // call stack was embedded as a "syncProfile", which is essentially its own
+    // small thread with an empty markers list and a samples list that only
+    // contains one sample.
+    // Starting with version 10, this is replaced with the CauseBacktrace type
+    // which just has a "time" and a "stack" field, where the stack field is
+    // a simple number, the stack index.
+    for (const thread of profile.threads) {
+      for (let i = 0; i < thread.markers.length; i++) {
+        const marker = thread.markers.data[i];
+        const adjustTimestampBy =
+          thread.processType === 'default' ? 0 : thread.processStartupTime;
+        if (marker) {
+          if (
+            'stack' in marker &&
+            marker.stack &&
+            marker.stack.samples.data.length > 0
+          ) {
+            const syncProfile = marker.stack;
+            const stackIndex =
+              syncProfile.samples.data[0][syncProfile.samples.schema.stack];
+            const timeRelativeToProcess =
+              syncProfile.samples.data[0][syncProfile.samples.schema.time];
+            if (stackIndex !== null) {
+              marker.cause = {
+                time: timeRelativeToProcess + adjustTimestampBy,
+                stack: stackIndex,
+              };
+            }
+          }
+          delete marker.stack;
         }
       }
     }

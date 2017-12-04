@@ -11,6 +11,7 @@ import type {
   FrameTable,
   FuncTable,
   MarkersTable,
+  ResourceTable,
   IndexIntoFuncTable,
   IndexIntoStringTable,
   IndexIntoSamplesTable,
@@ -34,6 +35,7 @@ import { timeCode } from '../utils/time-code';
 import { getEmptyTaskTracerData } from './task-tracer';
 import type { ImplementationFilter } from '../types/actions';
 import bisection from 'bisection';
+import type { UniqueStringArray } from '../utils/unique-string-array';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -1042,4 +1044,29 @@ export function getEmptyProfile(): Profile {
     threads: [],
     tasktracer: getEmptyTaskTracerData(),
   };
+}
+
+export function getOriginAnnotationForFunc(
+  funcIndex: IndexIntoFuncTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  stringTable: UniqueStringArray
+): string {
+  const fileNameIndex = funcTable.fileName[funcIndex];
+  if (fileNameIndex !== null) {
+    const fileName = stringTable.getString(fileNameIndex);
+    const lineNumber = funcTable.lineNumber[funcIndex];
+    if (lineNumber !== null) {
+      return fileName + ':' + lineNumber;
+    }
+    return fileName;
+  }
+
+  const resourceIndex = funcTable.resource[funcIndex];
+  const resourceNameIndex = resourceTable.name[resourceIndex];
+  if (resourceNameIndex !== undefined) {
+    return stringTable.getString(resourceNameIndex);
+  }
+
+  return '';
 }

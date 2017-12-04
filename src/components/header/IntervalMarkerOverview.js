@@ -3,15 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { timeCode } from '../../utils/time-code';
 import { withSize } from '../shared/WithSize';
 import Tooltip from '../shared/Tooltip';
-import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 
 import type { Milliseconds, CssPixels } from '../../types/units';
 import type { TracingMarker } from '../../types/profile-derived';
+import type { ThreadIndex } from '../../types/profile';
 
 type MarkerState = 'PRESSED' | 'HOVERED' | 'NONE';
 
@@ -21,8 +21,8 @@ type Props = {
   rangeEnd: Milliseconds,
   intervalMarkers: TracingMarker[],
   width: number,
-  threadIndex: number,
-  threadName: string,
+  getTooltipContents: TracingMarker => React.Node,
+  threadIndex: ThreadIndex,
   onSelect: any,
   styles: any,
   isSelected: boolean,
@@ -40,7 +40,7 @@ type State = {
   mouseY: CssPixels,
 };
 
-class IntervalMarkerOverview extends PureComponent<Props, State> {
+class IntervalMarkerOverview extends React.PureComponent<Props, State> {
   _canvas: HTMLCanvasElement | null;
   _requestedAnimationFrame: boolean | null;
 
@@ -173,7 +173,7 @@ class IntervalMarkerOverview extends PureComponent<Props, State> {
       className,
       isSelected,
       isModifyingSelection,
-      threadName,
+      getTooltipContents,
     } = this.props;
 
     const { mouseDownItem, hoveredItem, mouseX, mouseY } = this.state;
@@ -198,10 +198,7 @@ class IntervalMarkerOverview extends PureComponent<Props, State> {
         />
         {shouldShowTooltip && hoveredItem
           ? <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              <MarkerTooltipContents
-                marker={hoveredItem}
-                threadName={threadName}
-              />
+              {getTooltipContents(hoveredItem)}
             </Tooltip>
           : null}
       </div>

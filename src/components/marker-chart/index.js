@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import MarkerChartCanvas from './Canvas';
+import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import {
   selectedThreadSelectors,
   getDisplayRange,
@@ -9,6 +10,7 @@ import {
   getProfileViewOptions,
 } from '../../reducers/profile-view';
 import { updateProfileSelection } from '../../actions/profile-view';
+import { getImplementationFilter } from '../../reducers/url-state';
 
 import type {
   TracingMarker,
@@ -34,6 +36,7 @@ type Props = {
   updateProfileSelection: typeof updateProfileSelection,
   selection: ProfileSelection,
   threadName: string,
+  getTooltipContents: TracingMarker => React.Node,
   processDetails: string,
   markerTimingRows: MarkerTimingRows,
   markers: TracingMarker[],
@@ -61,6 +64,7 @@ class MarkerChart extends React.PureComponent<Props> {
       selection,
       threadName,
       processDetails,
+      getTooltipContents,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -91,6 +95,7 @@ class MarkerChart extends React.PureComponent<Props> {
           markerTimingRows={markerTimingRows}
           maxMarkerRows={maxMarkerRows}
           markers={markers}
+          getTooltipContents={getTooltipContents}
           rowHeight={ROW_HEIGHT}
         />
       </div>
@@ -107,6 +112,19 @@ export default connect(
     const { threadIndex } = ownProps;
     const markers = selectedThreadSelectors.getTracingMarkers(state);
     const markerTimingRows = selectedThreadSelectors.getMarkerTiming(state);
+    const threadName = selectedThreadSelectors.getFriendlyThreadName(state);
+    const thread = selectedThreadSelectors.getThread(state);
+    const implementationFilter = getImplementationFilter(state);
+    const getTooltipContents = item => {
+      return (
+        <MarkerTooltipContents
+          marker={item}
+          threadName={threadName}
+          thread={thread}
+          implementationFilter={implementationFilter}
+        />
+      );
+    };
 
     return {
       markers,
@@ -114,9 +132,10 @@ export default connect(
       maxMarkerRows: markerTimingRows.length,
       timeRange: getDisplayRange(state),
       interval: getProfileInterval(state),
-      threadIndex,
       selection: getProfileViewOptions(state).selection,
-      threadName: selectedThreadSelectors.getFriendlyThreadName(state),
+      threadName,
+      threadIndex,
+      getTooltipContents,
       processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
     };
   },

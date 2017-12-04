@@ -38,9 +38,13 @@ class MarkerTree {
   }
 
   hasChildren(markerIndex) {
+    // If this marker has a cause callstack, indicate it with a tree disclosure
+    // arrow. However, we don't currently support expanding those marker nodes
+    // or displaying the cause callstacks, so this is not the greatest piece
+    // of UI.
     return (
       this._markers.data[markerIndex] !== null &&
-      'stack' in this._markers.data[markerIndex]
+      'cause' in this._markers.data[markerIndex]
     );
   }
 
