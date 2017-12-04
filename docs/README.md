@@ -16,6 +16,7 @@ This project is a client for reading profiles from the Gecko Profiler and potent
    - [Flow types - `/src/types`](../src/types)
    - [Utility files - `/src/utils`](../src/utils)
  * [Gecko profile format](./gecko-profile-format.md)
+ * [Loading in profiles from various sources](./loading-in-profiles.md)
  * [Processed profile format](./processed-profile-format.md)
  * [Markers](./markers.md)
  * [TraskTracer](./tasktracer.md) - TODO
