@@ -4,8 +4,10 @@
 
 // @flow
 import { combineReducers } from 'redux';
-import { defaultThreadOrder } from '../profile-logic/profile-data';
+import escapeStringRegexp from 'escape-string-regexp';
 import { createSelector } from 'reselect';
+
+import { defaultThreadOrder } from '../profile-logic/profile-data';
 import { urlFromState } from '../url-handling';
 import * as RangeFilters from '../profile-logic/range-filters';
 
@@ -284,8 +286,36 @@ export const getHidePlatformDetails = (state: State) =>
   getUrlState(state).hidePlatformDetails;
 export const getInvertCallstack = (state: State) =>
   getUrlState(state).invertCallstack;
-export const getSearchString = (state: State) =>
+export const getCurrentSearchString = (state: State) =>
   getUrlState(state).callTreeSearchString;
+export const getSearchStrings = createSelector(
+  getCurrentSearchString,
+  searchString => {
+    if (!searchString) {
+      return null;
+    }
+    const result = searchString
+      .split(',')
+      .map(part => part.trim())
+      .filter(part => part);
+
+    if (result.length) {
+      return result;
+    }
+
+    return null;
+  }
+);
+export const getSearchStringsAsRegExp = createSelector(
+  getSearchStrings,
+  strings => {
+    if (!strings || !strings.length) {
+      return null;
+    }
+    const regexpStr = strings.map(escapeStringRegexp).join('|');
+    return new RegExp(regexpStr, 'gi');
+  }
+);
 export const getMarkersSearchString = (state: State) =>
   getUrlState(state).markersSearchString;
 
@@ -301,13 +331,6 @@ export const getTransformStack = (
 export const getThreadOrder = (state: State) => getUrlState(state).threadOrder;
 export const getHiddenThreads = (state: State) =>
   getUrlState(state).hiddenThreads;
-export const getVisibleThreadOrder = createSelector(
-  getThreadOrder,
-  getHiddenThreads,
-  (threadOrder: ThreadIndex[], hiddenThreads: ThreadIndex[]) => {
-    return threadOrder.filter(index => !hiddenThreads.includes(index));
-  }
-);
 export const getUrlPredictor = createSelector(
   getUrlState,
   (oldUrlState: UrlState) => (actionOrActionList: Action | Action[]) => {

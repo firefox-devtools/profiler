@@ -132,6 +132,28 @@ describe('threadOrder and hiddenThreads', function() {
   });
 });
 
+describe('search strings', function() {
+  it('properly handles the search string stacks with 1 item', function() {
+    const { getState } = _getStoreWithURL({ search: '?search=string' });
+    expect(urlStateReducers.getCurrentSearchString(getState())).toBe('string');
+    expect(urlStateReducers.getSearchStrings(getState())).toEqual(['string']);
+  });
+
+  it('properly handles the search string stacks with several items', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?search=string,foo,%20bar',
+    });
+    expect(urlStateReducers.getCurrentSearchString(getState())).toBe(
+      'string,foo, bar'
+    );
+    expect(urlStateReducers.getSearchStrings(getState())).toEqual([
+      'string',
+      'foo',
+      'bar',
+    ]);
+  });
+});
+
 describe('url upgrading', function() {
   /**
    * Originally transform stacks were called call tree filters. This test asserts that

@@ -9,7 +9,10 @@ import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
-import { changeCallTreeSearchString } from '../../actions/profile-view';
+import {
+  changeCallTreeSearchString,
+  changeInvertCallstack,
+} from '../../actions/profile-view';
 import { getBoundingBox } from '../fixtures/utils';
 
 describe('calltree/ProfileCallTreeView', function() {
@@ -18,7 +21,7 @@ describe('calltree/ProfileCallTreeView', function() {
     B B B
     C C H
     D F I
-    E G
+    E E
   `);
 
   it('renders an unfiltered call tree', () => {
@@ -41,20 +44,9 @@ describe('calltree/ProfileCallTreeView', function() {
       E Z Y
           Z
     `).profile;
+    const store = storeWithProfile(profileForInvertedTree);
+    store.dispatch(changeInvertCallstack(true));
 
-    const calltree = renderer.create(
-      <Provider store={storeWithProfile(profileForInvertedTree)}>
-        <ProfileCallTreeView />
-      </Provider>,
-      { createNodeMock }
-    );
-
-    expect(calltree.toJSON()).toMatchSnapshot();
-  });
-
-  it('renders call tree with a search string', () => {
-    const store = storeWithProfile(profile);
-    store.dispatch(changeCallTreeSearchString('H'));
     const calltree = renderer.create(
       <Provider store={store}>
         <ProfileCallTreeView />
@@ -63,6 +55,33 @@ describe('calltree/ProfileCallTreeView', function() {
     );
 
     expect(calltree.toJSON()).toMatchSnapshot();
+  });
+
+  it('renders call tree with some search strings', () => {
+    const store = storeWithProfile(profile);
+    const calltree = renderer.create(
+      <Provider store={store}>
+        <ProfileCallTreeView />
+      </Provider>,
+      { createNodeMock }
+    );
+
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCallTreeSearchString('C'));
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCallTreeSearchString('C,'));
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCallTreeSearchString('C, F'));
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCallTreeSearchString('C, F,E'));
+    expect(calltree).toMatchSnapshot();
+
+    store.dispatch(changeCallTreeSearchString(' C , E   '));
+    expect(calltree).toMatchSnapshot();
   });
 });
 

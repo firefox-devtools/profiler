@@ -16,17 +16,12 @@ import {
   getDisplayRange,
   getZeroAt,
 } from '../../reducers/profile-view';
-import {
-  getVisibleThreadOrder,
-  getHiddenThreads,
-  getThreadOrder,
-} from '../../reducers/url-state';
+import { getHiddenThreads, getThreadOrder } from '../../reducers/url-state';
 
 import {
   changeThreadOrder,
   updateProfileSelection,
   addRangeFilterAndUnsetSelection,
-  changeSelectedThread,
 } from '../../actions/profile-view';
 
 import type { Profile, ThreadIndex } from '../../types/profile';
@@ -37,7 +32,6 @@ import type { Milliseconds, StartEndRange } from '../../types/units';
 type Props = {|
   profile: Profile,
   className: string,
-  visibleThreadOrder: ThreadIndex[],
   hiddenThreads: ThreadIndex[],
   threadOrder: ThreadIndex[],
   selection: ProfileSelection,
@@ -45,7 +39,6 @@ type Props = {|
   zeroAt: Milliseconds,
   changeThreadOrder: typeof changeThreadOrder,
   addRangeFilterAndUnsetSelection: typeof addRangeFilterAndUnsetSelection,
-  changeSelectedThread: typeof changeSelectedThread,
   updateProfileSelection: typeof updateProfileSelection,
 |};
 
@@ -120,7 +113,6 @@ export default connect(
     profile: getProfile(state),
     selection: getProfileViewOptions(state).selection,
     className: 'profileViewer',
-    visibleThreadOrder: getVisibleThreadOrder(state),
     threadOrder: getThreadOrder(state),
     hiddenThreads: getHiddenThreads(state),
     timeRange: getDisplayRange(state),
@@ -130,6 +122,5 @@ export default connect(
     changeThreadOrder,
     updateProfileSelection,
     addRangeFilterAndUnsetSelection,
-    changeSelectedThread,
   }
 )(ProfileViewerHeader);

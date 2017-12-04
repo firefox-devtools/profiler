@@ -19,7 +19,9 @@ VirtualListRow.propTypes = {
   item: PropTypes.any.isRequired,
   index: PropTypes.number.isRequired,
   columnIndex: PropTypes.number.isRequired,
-  isSpecial: PropTypes.bool,
+  // This prop is not used directly, it's used merely to force its rerendering,
+  // especially when it's selected / unselected.
+  isSpecial: PropTypes.bool, // eslint-disable-line react/no-unused-prop-types
 };
 
 class VirtualListInnerChunk extends PureComponent {

@@ -31,7 +31,6 @@ type MarkerDrawingInformation = {
 };
 
 type Props = {
-  interval: Milliseconds,
   rangeStart: Milliseconds,
   rangeEnd: Milliseconds,
   containerWidth: CssPixels,

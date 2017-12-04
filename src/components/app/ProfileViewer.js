@@ -80,6 +80,8 @@ class ProfileViewer extends PureComponent<Props, State> {
   }
 
   componentDidMount() {
+    // TODO use ReactCSSTransition instead of this hack. https://github.com/devtools-html/perf.html/issues/648
+    // eslint-disable-next-line react/no-did-mount-set-state
     this.setState({ isMounted: true });
   }
 

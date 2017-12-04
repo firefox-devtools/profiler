@@ -24,7 +24,7 @@ const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
 
 // These are the props consumed by this Higher-Order Component (HOC)
 type ViewportProps = {
-  viewportNeedsUpdate: any,
+  viewportNeedsUpdate: (ViewportProps, ViewportProps) => boolean,
   timeRange: StartEndRange,
   maxViewportHeight: number,
   maximumZoom: UnitIntervalOfProfileRange,
@@ -116,7 +116,8 @@ export default function withChartViewport<Props: ViewportProps>(
     shiftScrollId: number;
     zoomRangeSelectionScheduled: boolean;
     zoomRangeSelectionScrollDelta: number;
-    _container: ?HTMLElement;
+    _container: HTMLElement | null;
+    _takeContainerRef = container => (this._container = container);
 
     constructor(props: Props) {
       super(props);
@@ -131,6 +132,7 @@ export default function withChartViewport<Props: ViewportProps>(
       this.shiftScrollId = 0;
       this.zoomRangeSelectionScheduled = false;
       this.zoomRangeSelectionScrollDelta = 0;
+      this._container = null;
 
       this.state = this.getDefaultState(props);
     }
@@ -187,15 +189,11 @@ export default function withChartViewport<Props: ViewportProps>(
       }, 1000);
     }
 
-    componentDidUpdate(prevProps: Props) {
-      if (this.props.viewportNeedsUpdate(prevProps, this.props)) {
-        this.setState(this.getDefaultState(this.props));
-        this._setSizeNextFrame();
-      }
-    }
-
     componentWillReceiveProps(newProps: Props) {
-      if (
+      if (this.props.viewportNeedsUpdate(this.props, newProps)) {
+        this.setState(this.getDefaultState(newProps));
+        this._setSizeNextFrame();
+      } else if (
         this.props.selection !== newProps.selection ||
         this.props.timeRange !== newProps.timeRange
       ) {
@@ -210,12 +208,12 @@ export default function withChartViewport<Props: ViewportProps>(
           this.state.containerWidth !== rect.width ||
           this.state.containerHeight !== rect.height
         ) {
-          this.setState({
+          this.setState(prevState => ({
             containerWidth: rect.width,
             containerHeight: rect.height,
             containerLeft: rect.left,
-            viewportBottom: this.state.viewportTop + rect.height,
-          });
+            viewportBottom: prevState.viewportTop + rect.height,
+          }));
         }
       }
     }
@@ -475,9 +473,7 @@ export default function withChartViewport<Props: ViewportProps>(
           className={viewportClassName}
           onWheel={this._mouseWheelListener}
           onMouseDown={this._mouseDownListener}
-          ref={container => {
-            this._container = container;
-          }}
+          ref={this._takeContainerRef}
         >
           <WrappedComponent
             {...this.props}

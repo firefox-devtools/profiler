@@ -9,6 +9,10 @@ require('./FooterLinks.css');
 type State = {| hide: boolean |};
 
 class FooterLinks extends PureComponent<{||}, State> {
+  _onClick = () => {
+    this.setState({ hide: true });
+  };
+
   constructor() {
     super();
     this.state = {
@@ -26,7 +30,7 @@ class FooterLinks extends PureComponent<{||}, State> {
           aria-label="Hide links to legal information"
           title="Hide links to legal information"
           className="appFooterLinksClose"
-          onClick={() => this.setState({ hide: true })}
+          onClick={this._onClick}
         >
           ✕
         </button>

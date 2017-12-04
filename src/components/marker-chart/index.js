@@ -55,7 +55,6 @@ class MarkerChart extends React.PureComponent<Props> {
       isSelected,
       timeRange,
       threadIndex,
-      interval,
       markerTimingRows,
       markers,
       updateProfileSelection,
@@ -87,7 +86,6 @@ class MarkerChart extends React.PureComponent<Props> {
           updateProfileSelection={updateProfileSelection}
           viewportNeedsUpdate={viewportNeedsUpdate}
           // MarkerChartCanvas props
-          interval={interval}
           rangeStart={timeRange.start}
           rangeEnd={timeRange.end}
           markerTimingRows={markerTimingRows}

@@ -42,19 +42,20 @@ exports[`renders StackChartGraph correctly 1`] = `
       </li>
     </ul>
     <div
-      className="stackChartSettingsSearchbar"
+      className="stackSearchField stackChartSettingsSearchField"
     >
       <label
-        className="stackChartSettingsSearchbarLabel"
+        className="stackSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          className="idleSearchField stackChartSettingsSearchField"
+          className="idleSearchField stackSearchFieldInput"
           onSubmit={[Function]}
         >
           <input
             className="idleSearchFieldInput"
             name="search"
+            onBlur={[Function]}
             onChange={[Function]}
             onFocus={[Function]}
             required="required"
@@ -69,6 +70,11 @@ exports[`renders StackChartGraph correctly 1`] = `
             type="reset"
           />
         </form>
+        <div
+          className="stackSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
       </label>
     </div>
   </div>

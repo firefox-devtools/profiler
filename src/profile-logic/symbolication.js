@@ -106,7 +106,7 @@ function gatherFuncsInThread(thread: Thread): Map<Lib, IndexIntoFuncTable[]> {
     }
 
     const libIndex = resourceTable.lib[resourceIndex];
-    if (libIndex === null || libIndex === undefined) {
+    if (libIndex === null || libIndex === undefined || libIndex === -1) {
       throw new Error('libIndex must be a valid index.');
     }
     const lib = libs[libIndex];

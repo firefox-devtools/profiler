@@ -47,6 +47,7 @@
     "classnames": "^2.2.5",
     "common-tags": "^1.4.0",
     "copy-to-clipboard": "^3.0.8",
+    "escape-string-regexp": "^1.0.5",
     "lodash.uniqwith": "^4.5.0",
     "memoize-immutable": "^3.0.0",
     "offline-plugin": "^4.8.3",
@@ -89,6 +90,9 @@
           "polyfill": false,
           "regenerator": true
         }
+      ],
+      [
+        "transform-class-properties"
       ]
     ]
   },
@@ -98,6 +102,7 @@
     "babel-eslint": "^7.2.3",
     "babel-jest": "^20.0.3",
     "babel-loader": "^7.1.2",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
@@ -106,12 +111,13 @@
     "babel-preset-react-hmre": "^1.1.1",
     "css-loader": "^0.28.7",
     "devtools-license-check": "^0.5.0",
-    "eslint": "^4.6.1",
+    "eslint": "^4.12.0",
     "eslint-config-prettier": "^2.4.0",
-    "eslint-plugin-flowtype": "^2.35.1",
-    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-babel": "^4.1.2",
+    "eslint-plugin-flowtype": "^2.39.1",
+    "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-prettier": "^2.2.0",
-    "eslint-plugin-react": "^7.4.0",
+    "eslint-plugin-react": "^7.5.1",
     "express": "^4.15.4",
     "fake-indexeddb": "^2.0.3",
     "file-loader": "^0.11.2",

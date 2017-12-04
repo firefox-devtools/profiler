@@ -10,6 +10,8 @@ import { getSampleCallNodes } from '../../profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 
 class ThreadStackGraph extends PureComponent {
+  _takeCanvasRef = canvas => (this._canvas = canvas);
+
   constructor(props) {
     super(props);
     this._resizeListener = () => this.forceUpdate();
@@ -146,7 +148,7 @@ class ThreadStackGraph extends PureComponent {
             `${this.props.className}Canvas`,
             'threadStackGraphCanvas'
           )}
-          ref={ref => (this._canvas = ref)}
+          ref={this._takeCanvasRef}
           onMouseUp={this._onMouseUp}
         />
       </div>
