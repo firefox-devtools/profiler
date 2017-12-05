@@ -48,7 +48,7 @@ export type PaintProfilerMarkerTracing = ProfilerMarkerTracing & {
     | 'Composite',
 };
 
-export type PhaseTimes = { [phase: string]: Microseconds };
+export type PhaseTimes<Unit> = { [phase: string]: Unit };
 
 type GCSliceData_Shared = {
   // Slice number within the GCMajor collection.
@@ -81,10 +81,10 @@ type GCSliceData_Shared = {
   start_timestamp: Seconds,
 };
 export type GCSliceData_Gecko = GCSliceData_Shared & {
-  times: PhaseTimes,
+  times: PhaseTimes<Milliseconds>,
 };
 export type GCSliceData = GCSliceData_Shared & {
-  phase_times: PhaseTimes,
+  phase_times: PhaseTimes<Microseconds>,
 };
 
 export type GCMajorAborted = {
@@ -149,13 +149,13 @@ export type GCMajorCompleted = GCMajorCompleted_Shared & {
   mmu_50ms: number,
 
   // The duration of each phase.
-  phase_times: PhaseTimes,
+  phase_times: PhaseTimes<Microseconds>,
 };
 export type GCMajorCompleted_Gecko = GCMajorCompleted_Shared & {
   // As above except in parts of 100.
   mmu_20ms: number,
   mmu_50ms: number,
-  totals: PhaseTimes,
+  totals: PhaseTimes<Milliseconds>,
 };
 
 export type GCMajorMarkerPayload = {
@@ -201,7 +201,7 @@ export type GCMinorCompletedData = {
   // actually allocated.
   lazy_capacity?: number,
 
-  phase_times: PhaseTimes,
+  phase_times: PhaseTimes<Microseconds>,
 };
 
 export type GCMinorDisabledData = {|
