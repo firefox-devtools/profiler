@@ -438,6 +438,7 @@ export type SelectorsForThread = {
   getFilteredThread: State => Thread,
   getRangeSelectionFilteredThread: State => Thread,
   getCallNodeInfo: State => CallNodeInfo,
+  getCallNodeMaxDepth: State => number,
   getSelectedCallNodePath: State => CallNodePath,
   getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
   getExpandedCallNodePaths: State => CallNodePath[],
@@ -635,6 +636,11 @@ export const selectorsForThread = (
         return ProfileData.getCallNodeInfo(stackTable, frameTable, funcTable);
       }
     );
+    const getCallNodeMaxDepth = createSelector(
+      getFilteredThread,
+      getCallNodeInfo,
+      StackTiming.computeCallNodeMaxDepth
+    );
     const getSelectedCallNodePath = createSelector(
       getViewOptions,
       (threadViewOptions): CallNodePath =>
@@ -757,6 +763,7 @@ export const selectorsForThread = (
       getFilteredThread,
       getRangeSelectionFilteredThread,
       getCallNodeInfo,
+      getCallNodeMaxDepth,
       getSelectedCallNodePath,
       getSelectedCallNodeIndex,
       getExpandedCallNodePaths,
