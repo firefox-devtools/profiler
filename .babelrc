@@ -5,7 +5,7 @@
       {
         targets: {
           node: "current",
-          browsers: "defaults"
+          browsers: "last 2 chrome versions, last 2 firefox versions"
         },
         modules: false
       }
@@ -22,7 +22,8 @@
       }
     ],
     [
-      "transform-class-properties"
+      "transform-class-properties",
+
     ]
   ],
   env: {
