@@ -7,9 +7,8 @@
     "build:clean": "rimraf dist && mkdirp dist && cp res/.htaccess res/zee-worker.js res/analytics.js dist/",
     "build:quiet": "yarn build:clean && env NODE_ENV=development webpack",
     "build": "yarn build:quiet --progress",
-    "build-prod:quiet": "yarn build:clean && env NODE_ENV=production webpack -p",
+    "build-prod:quiet": "yarn build:clean && env NODE_ENV=production webpack",
     "build-prod": "yarn build-prod:quiet --progress",
-    "build-prod-readable": "yarn build:clean && env NODE_ENV=production webpack --progress",
     "build-docs": "documentation build src/types/profile.js -f md > docs/processed-profile-format.md; cat docs/processed-profile-format.md",
     "lint": "eslint *.js bin src",
     "lint-fix": "yarn lint --fix",
@@ -112,6 +111,7 @@
     "sinon": "^4.3.0",
     "style-loader": "^0.20.1",
     "text-encoding": "^0.6.4",
+    "uglifyjs-webpack-plugin": "^1.2.3",
     "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.1",
     "workerjs": "github:jasonLaster/workerjs"
