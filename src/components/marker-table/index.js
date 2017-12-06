@@ -174,6 +174,7 @@ class MarkerTable extends PureComponent<Props> {
       <div className="markerTable">
         <Settings />
         <TreeView
+          maxNodeDepth={0}
           tree={tree}
           fixedColumns={this._fixedColumns}
           mainColumn={this._mainColumn}

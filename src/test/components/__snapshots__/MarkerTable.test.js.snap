@@ -152,7 +152,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
             style={
               Object {
                 "height": "32px",
-                "width": "3000px",
+                "width": 3000,
               }
             }
           >

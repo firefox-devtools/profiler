@@ -78,16 +78,17 @@ class VirtualListInnerChunk extends React.PureComponent<
   }
 }
 
-type VirtualListInnerProps = {
-  itemHeight: CssPixels,
-  className: string,
-  renderItem: RenderItem,
-  items: *[],
-  specialItems: *[],
-  visibleRangeStart: number,
-  visibleRangeEnd: number,
-  columnIndex: number,
-};
+type VirtualListInnerProps = {|
+  +itemHeight: CssPixels,
+  +className: string,
+  +renderItem: RenderItem,
+  +items: *[],
+  +specialItems: *[],
+  +visibleRangeStart: number,
+  +visibleRangeEnd: number,
+  +columnIndex: number,
+  +containerWidth: CssPixels,
+|};
 
 class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
   _container: ?HTMLElement;
@@ -113,6 +114,7 @@ class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
       visibleRangeStart,
       visibleRangeEnd,
       columnIndex,
+      containerWidth,
     } = this.props;
 
     const chunkSize = 16;
@@ -129,7 +131,7 @@ class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
         ref={this._takeContainerRef}
         style={{
           height: `${items.length * itemHeight}px`,
-          width: columnIndex === 1 ? '3000px' : undefined,
+          width: columnIndex === 1 ? containerWidth : undefined,
         }}
       >
         <div
@@ -170,6 +172,7 @@ type VirtualListProps = {|
   +onCopy: Event => void,
   +disableOverscan: boolean,
   +columnCount: number,
+  +containerWidth: CssPixels,
 |};
 
 type Geometry = {
@@ -305,6 +308,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
       focusable,
       specialItems,
       onKeyDown,
+      containerWidth,
     } = this.props;
     const columnCount = this.props.columnCount || 1;
     const { visibleRangeStart, visibleRangeEnd } = this.computeVisibleRange();
@@ -329,6 +333,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
               items={items}
               specialItems={specialItems}
               columnIndex={columnIndex}
+              containerWidth={containerWidth}
               key={columnIndex}
               ref={columnIndex === 0 ? this._innerCreated : undefined}
             />

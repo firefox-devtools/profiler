@@ -83,6 +83,21 @@ describe('calltree/ProfileCallTreeView', function() {
     store.dispatch(changeCallTreeSearchString(' C , E   '));
     expect(calltree).toMatchSnapshot();
   });
+
+  it('computes a width for a call tree of a really deep stack', () => {
+    const { profile } = getProfileFromTextSamples(
+      Array(113).fill('name').join('\n')
+    );
+    const store = storeWithProfile(profile);
+    const calltree = renderer.create(
+      <Provider store={store}>
+        <ProfileCallTreeView />
+      </Provider>,
+      { createNodeMock }
+    );
+
+    expect(calltree).toMatchSnapshot();
+  });
 });
 
 /**
