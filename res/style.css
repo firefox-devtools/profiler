@@ -294,7 +294,6 @@ body, #root, .profileViewer {
   position: sticky;
   top: 0;
   height: 20px;
-  overflow: hidden;
   background: white;
   z-index: 1;
 }
