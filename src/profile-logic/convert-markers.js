@@ -10,6 +10,7 @@ import type {
   GCMajorCompleted,
   PhaseTimes,
 } from '../types/markers';
+import type { Milliseconds, Microseconds } from '../types/units';
 
 export function upgradeGCMinorMarker(marker8: Object): GCMinorMarkerPayload {
   if ('nursery' in marker8) {
@@ -50,7 +51,9 @@ export function upgradeGCMinorMarker(marker8: Object): GCMinorMarkerPayload {
 /*
  * Fix the units for GCMajor and GCSlice phase times.
  */
-export function convertPhaseTimes(old_phases: PhaseTimes): PhaseTimes {
+export function convertPhaseTimes(
+  old_phases: PhaseTimes<Milliseconds>
+): PhaseTimes<Microseconds> {
   const phases = {};
   for (const phase in old_phases) {
     phases[phase] = old_phases[phase] * 1000;
