@@ -2,29 +2,47 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import React, { PureComponent } from 'react';
+// @flow
+import * as React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import range from 'array-range';
 
-class VirtualListRow extends PureComponent {
+import type { CssPixels } from '../../types/units';
+
+type RenderItem = (*, number, number) => React.Node;
+
+type VirtualListRowProps = {|
+  +renderItem: RenderItem,
+  +item: *,
+  +index: number,
+  +columnIndex: number,
+  +isSpecial: boolean,
+  // Items are not used directly, but are needed for strict equality checks so that
+  // the components update correctly.
+  +items: *,
+|};
+
+class VirtualListRow extends React.PureComponent<VirtualListRowProps> {
   render() {
     const { renderItem, item, index, columnIndex } = this.props;
     return renderItem(item, index, columnIndex);
   }
 }
 
-VirtualListRow.propTypes = {
-  renderItem: PropTypes.func.isRequired,
-  item: PropTypes.any.isRequired,
-  index: PropTypes.number.isRequired,
-  columnIndex: PropTypes.number.isRequired,
-  // This prop is not used directly, it's used merely to force its rerendering,
-  // especially when it's selected / unselected.
-  isSpecial: PropTypes.bool, // eslint-disable-line react/no-unused-prop-types
-};
+type VirtualListInnerChunkProps = {|
+  +className: string,
+  +renderItem: RenderItem,
+  +items: *[],
+  +specialItems: *[],
+  +visibleRangeStart: number,
+  +visibleRangeEnd: number,
+  +columnIndex: number,
+|};
 
-class VirtualListInnerChunk extends PureComponent {
+class VirtualListInnerChunk extends React.PureComponent<
+  VirtualListInnerChunkProps
+> {
   render() {
     const {
       className,
@@ -60,23 +78,23 @@ class VirtualListInnerChunk extends PureComponent {
   }
 }
 
-VirtualListInnerChunk.propTypes = {
-  className: PropTypes.string,
-  renderItem: PropTypes.func.isRequired,
-  items: PropTypes.array.isRequired,
-  specialItems: PropTypes.array.isRequired,
-  visibleRangeStart: PropTypes.number.isRequired,
-  visibleRangeEnd: PropTypes.number.isRequired,
-  columnIndex: PropTypes.number.isRequired,
+type VirtualListInnerProps = {
+  itemHeight: CssPixels,
+  className: string,
+  renderItem: RenderItem,
+  items: *[],
+  specialItems: *[],
+  visibleRangeStart: number,
+  visibleRangeEnd: number,
+  columnIndex: number,
 };
 
-class VirtualListInner extends PureComponent {
-  constructor(props) {
-    super(props);
-    this._containerCreated = e => {
-      this._container = e;
-    };
-  }
+class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
+  _container: ?HTMLElement;
+
+  _takeContainerRef = (element: ?HTMLDivElement) => {
+    this._container = element;
+  };
 
   getBoundingClientRect() {
     if (this._container) {
@@ -108,7 +126,7 @@ class VirtualListInner extends PureComponent {
     return (
       <div
         className={className}
-        ref={this._containerCreated}
+        ref={this._takeContainerRef}
         style={{
           height: `${items.length * itemHeight}px`,
           width: columnIndex === 1 ? '3000px' : undefined,
@@ -141,59 +159,83 @@ class VirtualListInner extends PureComponent {
   }
 }
 
-VirtualListInner.propTypes = {
-  itemHeight: PropTypes.number.isRequired,
-  className: PropTypes.string,
-  renderItem: PropTypes.func.isRequired,
-  items: PropTypes.array.isRequired,
-  specialItems: PropTypes.array.isRequired,
-  visibleRangeStart: PropTypes.number.isRequired,
-  visibleRangeEnd: PropTypes.number.isRequired,
-  columnIndex: PropTypes.number.isRequired,
+type VirtualListProps = {|
+  +itemHeight: CssPixels,
+  +className: string,
+  +renderItem: RenderItem,
+  +items: *[],
+  +focusable: boolean,
+  +specialItems: *[],
+  +onKeyDown: KeyboardEvent => void,
+  +onCopy: Event => void,
+  +disableOverscan: boolean,
+  +columnCount: number,
+|};
+
+type Geometry = {
+  // getBoundingClientRect in the Flow definitions is wrong, and labels the return values
+  // as a ClientRect, and not a DOMRect. https://github.com/facebook/flow/issues/5475
+  //
+  // Account for that here:
+  outerRect: DOMRect | ClientRect,
+  innerRectY: CssPixels,
 };
 
-class VirtualList extends PureComponent {
-  constructor(props) {
-    super(props);
-    this._onScroll = this._onScroll.bind(this);
-    this._onCopy = this._onCopy.bind(this);
-    this._geometry = undefined;
-    this._containerCreated = elem => {
-      this._container = elem;
-    };
-    this._innerCreated = elem => {
-      this._inner = elem;
-    };
-  }
+class VirtualList extends React.PureComponent<VirtualListProps> {
+  _container: ?HTMLDivElement;
+  _inner: ?VirtualListInner;
+  _geometry: ?Geometry;
+
+  _takeContainerRef = (element: ?HTMLDivElement) => {
+    this._container = element;
+  };
+
+  _innerCreated = (element: ?VirtualListInner) => {
+    this._inner = element;
+  };
 
   componentDidMount() {
     document.addEventListener('copy', this._onCopy, false);
-    this._container.addEventListener('scroll', this._onScroll);
+    const container = this._container;
+    if (!container) {
+      throw new Error(
+        'The container was assumed to exist while mounting The VirtualList.'
+      );
+    }
+    container.addEventListener('scroll', this._onScroll);
     this._onScroll(); // for initial size
   }
 
   componentWillUnmount() {
     document.removeEventListener('copy', this._onCopy, false);
-    this._container.removeEventListener('scroll', this._onScroll);
+    const container = this._container;
+    if (!container) {
+      throw new Error(
+        'The container was assumed to exist while unmounting The VirtualList.'
+      );
+    }
+    container.removeEventListener('scroll', this._onScroll);
   }
 
-  _onScroll() {
+  _onScroll = () => {
     this._geometry = this._queryGeometry();
     this.forceUpdate();
-  }
+  };
 
-  _onCopy(event) {
+  _onCopy = (event: Event) => {
     if (document.activeElement === this._container) {
       this.props.onCopy(event);
     }
-  }
+  };
 
-  _queryGeometry() {
-    if (!this._container) {
+  _queryGeometry(): Geometry | void {
+    const container = this._container;
+    const inner = this._inner;
+    if (!container || !inner) {
       return undefined;
     }
-    const outerRect = this._container.getBoundingClientRect();
-    const innerRectY = this._inner.getBoundingClientRect().top;
+    const outerRect = container.getBoundingClientRect();
+    const innerRectY = inner.getBoundingClientRect().top;
     return { outerRect, innerRectY };
   }
 
@@ -216,7 +258,7 @@ class VirtualList extends PureComponent {
     return { visibleRangeStart, visibleRangeEnd };
   }
 
-  scrollItemIntoView(itemIndex, offsetX) {
+  scrollItemIntoView(itemIndex: number, offsetX: CssPixels) {
     if (!this._container) {
       return;
     }
@@ -248,7 +290,10 @@ class VirtualList extends PureComponent {
   }
 
   focus() {
-    this._container.focus();
+    const container = this._container;
+    if (container) {
+      container.focus();
+    }
   }
 
   render() {
@@ -266,7 +311,7 @@ class VirtualList extends PureComponent {
     return (
       <div
         className={className}
-        ref={this._containerCreated}
+        ref={this._takeContainerRef}
         tabIndex={focusable ? 0 : -1}
         onKeyDown={onKeyDown}
       >

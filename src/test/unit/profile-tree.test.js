@@ -196,9 +196,9 @@ describe('unfiltered call tree', function() {
       });
     });
 
-    describe('getNode()', function() {
+    describe('getDisplayData()', function() {
       it('gets a node for a given callNodeIndex', function() {
-        expect(callTree.getNode(A)).toEqual({
+        expect(callTree.getDisplayData(A)).toEqual({
           dim: false,
           icon: null,
           lib: '',

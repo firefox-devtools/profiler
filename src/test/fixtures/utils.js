@@ -1,3 +1,6 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { CallTree } from '../../profile-logic/call-tree';
 import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
@@ -24,7 +27,9 @@ export function formatTree(
   const whitespace = Array(depth * 2).join(' ');
 
   return children.reduce((string, callNodeIndex) => {
-    const { name, totalTime, selfTime } = callTree.getNode(callNodeIndex);
+    const { name, totalTime, selfTime } = callTree.getDisplayData(
+      callNodeIndex
+    );
     const text = `\n${whitespace}- ${name} (total: ${totalTime}, self:${selfTime})`;
     return formatTree(
       callTree,

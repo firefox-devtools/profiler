@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
-import { getIconClassNameForNode } from '../../reducers/icons';
+import { getIconClassNameForCallNode } from '../../reducers/icons';
 import actions from '../../actions';
 
 type Props = {
@@ -43,9 +43,9 @@ NodeIcon.propTypes = {
 };
 
 export default connect(
-  (state, { node }) => ({
-    className: getIconClassNameForNode(state, node),
-    icon: node.icon,
+  (state, { displayData }) => ({
+    className: getIconClassNameForCallNode(state, displayData),
+    icon: displayData.icon,
   }),
   actions
 )(NodeIcon);
