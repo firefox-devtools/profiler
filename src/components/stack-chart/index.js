@@ -71,7 +71,7 @@ class StackChartGraph extends React.PureComponent<Props> {
       processDetails,
     } = this.props;
 
-    const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
+    const maxViewportHeight = (maxStackDepth + 1) * STACK_FRAME_HEIGHT;
 
     return (
       <div className="stackChart">
