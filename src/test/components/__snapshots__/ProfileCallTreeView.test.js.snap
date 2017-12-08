@@ -873,7 +873,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
             style={
               Object {
                 "height": "304px",
-                "width": 3120,
+                "width": 3130,
               }
             }
           >
