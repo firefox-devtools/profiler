@@ -146,12 +146,12 @@ describe('selectors/getCallNodeMaxDepthForStackChart', function() {
     const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
       store.getState()
     );
-    expect(allSamplesMaxDepth).toEqual(6);
+    expect(allSamplesMaxDepth).toEqual(7);
     store.dispatch(changeHidePlatformDetails(true));
     const jsOnlySamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
       store.getState()
     );
-    expect(jsOnlySamplesMaxDepth).toEqual(4);
+    expect(jsOnlySamplesMaxDepth).toEqual(5);
   });
 
   it('acts upon the current range', function() {
@@ -160,12 +160,21 @@ describe('selectors/getCallNodeMaxDepthForStackChart', function() {
     const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
       store.getState()
     );
-    expect(allSamplesMaxDepth).toEqual(2);
+    expect(allSamplesMaxDepth).toEqual(3);
     store.dispatch(changeHidePlatformDetails(true));
     const jsOnlySamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
       store.getState()
     );
-    expect(jsOnlySamplesMaxDepth).toEqual(0);
+    expect(jsOnlySamplesMaxDepth).toEqual(1);
+  });
+
+  it('returns zero if no samples are in range', function() {
+    const store = storeWithProfile();
+    store.dispatch(addRangeFilter(0, 0));
+    const noSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
+      store.getState()
+    );
+    expect(noSamplesMaxDepth).toEqual(0);
   });
 });
 
