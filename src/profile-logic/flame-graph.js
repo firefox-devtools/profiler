@@ -8,6 +8,9 @@ import type { IndexIntoCallNodeTable } from '../types/profile-derived';
 
 import * as CallTree from './call-tree';
 
+export type FlameGraphDepth = number;
+export type IndexIntoFlameGraphTiming = number;
+
 export type FlameGraphTiming = Array<{
   start: UnitIntervalOfProfileRange[],
   end: UnitIntervalOfProfileRange[],
@@ -22,9 +25,6 @@ type Stack = Array<{
 
 /**
  * Build a FlameGraphTiming table from a call tree.
- *
- * @param {CallTree} callTree - The call tree.
- * @return {array} flameGraphTiming
  */
 export function getFlameGraphTiming(
   callTree: CallTree.CallTree
@@ -41,7 +41,7 @@ export function getFlameGraphTiming(
 
   while (stack.length) {
     const { depth, nodeIndex } = stack.pop();
-    const totalTime = callTree.getNodeData(nodeIndex).totalTimeRelative;
+    const { totalTimeRelative } = callTree.getNodeData(nodeIndex);
 
     // Select an existing row, or create a new one.
     let row = timing[depth];
@@ -57,7 +57,7 @@ export function getFlameGraphTiming(
 
     // Compute the timing information.
     row.start.push(timeOffset[depth]);
-    row.end.push(timeOffset[depth] + totalTime);
+    row.end.push(timeOffset[depth] + totalTimeRelative);
     row.callNode.push(nodeIndex);
     row.length++;
 
@@ -65,9 +65,9 @@ export function getFlameGraphTiming(
     // we'll make sure that the first child (if any) begins with the
     // same time offset.
     timeOffset[depth + 1] = timeOffset[depth];
-    timeOffset[depth] += totalTime;
+    timeOffset[depth] += totalTimeRelative;
 
-    let children = callTree.getChildren(nodeIndex);
+    let children = callTree.getChildren(nodeIndex).slice();
     children.sort(
       (a, b) =>
         callTree.getNodeData(a).funcName < callTree.getNodeData(b).funcName

@@ -450,6 +450,7 @@ export type SelectorsForThread = {
   getCallNodeMaxDepthForStackChart: State => number,
   getStackTimingByDepthForStackChart: State => StackTiming.StackTimingByDepth,
   getLeafCategoryStackTimingForStackChart: State => StackTiming.StackTimingByDepth,
+  getCallNodeMaxDepthForFlameGraph: State => number,
   getFlameGraphTiming: State => FlameGraph.FlameGraphTiming,
   getFriendlyThreadName: State => string,
   getThreadProcessDetails: State => string,
@@ -641,7 +642,7 @@ export const selectorsForThread = (
     const getCallNodeMaxDepth = createSelector(
       getFilteredThread,
       getCallNodeInfo,
-      StackTiming.computeCallNodeMaxDepth
+      ProfileData.computeCallNodeMaxDepth
     );
     const getSelectedCallNodePath = createSelector(
       getViewOptions,
@@ -728,7 +729,7 @@ export const selectorsForThread = (
     const getCallNodeMaxDepthForStackChart = createSelector(
       getFilteredThreadForStackChart,
       getCallNodeInfoOfFilteredThreadForStackChart,
-      StackTiming.computeCallNodeMaxDepth
+      ProfileData.computeCallNodeMaxDepth
     );
     const getStackTimingByDepthForStackChart = createSelector(
       getFilteredThreadForStackChart,
@@ -736,6 +737,11 @@ export const selectorsForThread = (
       getCallNodeMaxDepthForStackChart,
       getProfileInterval,
       StackTiming.getStackTimingByDepth
+    );
+    const getCallNodeMaxDepthForFlameGraph = createSelector(
+      getRangeSelectionFilteredThread,
+      getCallNodeInfo,
+      ProfileData.computeCallNodeMaxDepth
     );
     const getFlameGraphTiming = createSelector(
       getCallTree,
@@ -780,6 +786,7 @@ export const selectorsForThread = (
       getCallNodeMaxDepthForStackChart,
       getStackTimingByDepthForStackChart,
       getLeafCategoryStackTimingForStackChart,
+      getCallNodeMaxDepthForFlameGraph,
       getFlameGraphTiming,
       getFriendlyThreadName,
       getThreadProcessDetails,

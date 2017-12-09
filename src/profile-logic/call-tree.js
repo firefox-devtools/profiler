@@ -16,6 +16,7 @@ import type {
   CallNodeTable,
   IndexIntoCallNodeTable,
   CallNodeInfo,
+  CallNodeData,
   CallNodeDisplayData,
 } from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
@@ -127,7 +128,7 @@ export class CallTree {
     return this._callNodeTable === tree._callNodeTable;
   }
 
-  getNodeData(callNodeIndex: IndexIntoCallNodeTable) {
+  getNodeData(callNodeIndex: IndexIntoCallNodeTable): CallNodeData {
     const funcIndex = this._callNodeTable.func[callNodeIndex];
     const funcName = this._stringTable.getString(
       this._funcTable.name[funcIndex]
@@ -157,7 +158,6 @@ export class CallTree {
 
       displayData = {
         totalTime: `${formatNumber(totalTime)}`,
-        totalTimeRelative: totalTimeRelative,
         totalTimePercent: `${(100 * totalTimeRelative).toFixed(precision)}%`,
         selfTime: selfTime === 0 ? '—' : `${formatNumber(selfTime)}`,
         name: funcName,

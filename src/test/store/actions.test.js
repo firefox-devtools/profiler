@@ -267,6 +267,33 @@ describe('selectors/getCallNodeMaxDepthForStackChart', function() {
   });
 });
 
+describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
+  it('calculates the max call node depth', function() {
+    const { profile } = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C C
+      D
+    `);
+
+    const store = storeWithProfile(profile);
+    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+      store.getState()
+    );
+    expect(allSamplesMaxDepth).toEqual(4);
+  });
+
+  it('returns zero if no samples are visible in current range', function() {
+    const { profile } = getProfileFromTextSamples(` `);
+    const store = storeWithProfile(profile);
+    store.dispatch(addRangeFilter(0, 0));
+    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+      store.getState()
+    );
+    expect(allSamplesMaxDepth).toEqual(0);
+  });
+});
+
 describe('selectors/getLeafCategoryStackTimingForStackChart', function() {
   /**
    * This table shows off how stack timings get filtered to a single row by concurrent

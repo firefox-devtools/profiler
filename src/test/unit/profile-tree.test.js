@@ -205,7 +205,6 @@ describe('unfiltered call tree', function() {
           name: 'A',
           selfTime: '—',
           totalTime: '3',
-          totalTimeRelative: 1,
           totalTimePercent: '100%',
         });
       });
