@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
 // inspired from https://gist.github.com/jviereck/9a71734afcfe848ddbe2 -- simplified
 //
 // Because JSX isn't nice with CSS content because of the braces, we use a
@@ -14,22 +15,36 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
-export class StyleDef extends PureComponent {
+type StyleDefProps = {|
+  +content: string,
+|};
+
+export class StyleDef extends PureComponent<StyleDefProps> {
+  _dom: ?HTMLStyleElement;
+
   componentDidMount() {
-    this._dom = document.createElement('style');
-    this._dom.textContent = this.props.content;
-    document.head.appendChild(this._dom);
+    const dom = document.createElement('style');
+    dom.textContent = this.props.content;
+    const documentHead = document.head;
+    if (documentHead) {
+      documentHead.appendChild(dom);
+      this._dom = dom;
+    }
   }
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.content !== this.props.content) {
-      this._dom.textContent = this.props.content;
+  componentDidUpdate(prevProps: StyleDefProps) {
+    const dom = this._dom;
+    if (prevProps.content !== this.props.content && dom) {
+      dom.textContent = this.props.content;
     }
   }
 
   componentWillUnmount() {
-    this._dom.remove();
-    this._dom = null;
+    const dom = this._dom;
+    if (dom) {
+      dom.remove();
+      this._dom = null;
+    }
   }
 
   render() {
@@ -42,7 +57,14 @@ StyleDef.propTypes = {
   content: PropTypes.string.isRequired,
 };
 
-export class BackgroundImageStyleDef extends StyleDef {
+type BackgroundImageStyleDefProps = {|
+  +className: string,
+  +url: string,
+|};
+
+export class BackgroundImageStyleDef extends PureComponent<
+  BackgroundImageStyleDefProps
+> {
   render() {
     const content = `
       .${this.props.className} {

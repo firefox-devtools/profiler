@@ -78,7 +78,7 @@ export function getStackTimingByDepth(
   interval: number
 ): StackTimingByDepth {
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-  const stackTimingByDepth = Array.from({ length: maxDepth + 1 }, () => ({
+  const stackTimingByDepth = Array.from({ length: maxDepth }, () => ({
     start: [],
     end: [],
     stack: [],
@@ -196,18 +196,27 @@ function _pushStacks(
   }
 }
 
+/**
+ * Compute maximum depth of call stack for a given thread.
+ *
+ * Returns the depth of the deepest call node, but with a one-based
+ * depth instead of a zero-based.
+ *
+ * If no samples are found, 0 is returned.
+ */
 export function computeCallNodeMaxDepth(
-  rangedThread: Thread,
+  thread: Thread,
   callNodeInfo: CallNodeInfo
 ): number {
   let maxDepth = 0;
-  const { samples } = rangedThread;
+  const { samples } = thread;
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-  for (let i = 0; i < rangedThread.samples.length; i++) {
+  for (let i = 0; i < samples.length; i++) {
     const stackIndex = samples.stack[i];
     if (stackIndex !== null) {
       const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
-      const depth = callNodeTable.depth[callNodeIndex];
+      // Change to one-based depth
+      const depth = callNodeTable.depth[callNodeIndex] + 1;
       if (depth > maxDepth) {
         maxDepth = depth;
       }

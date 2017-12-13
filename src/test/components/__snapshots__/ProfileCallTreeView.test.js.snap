@@ -1,5 +1,1609 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`calltree/ProfileCallTreeView computes a width for a call tree of a really deep stack 1`] = `
+<div
+  className="treeAndSidebarWrapper"
+>
+  <div
+    className="profileCallTreeSettings"
+  >
+    <ul
+      className="profileCallTreeSettingsList"
+    >
+      <li
+        className="profileCallTreeSettingsListItem"
+      >
+        <label
+          className="profileCallTreeSettingsLabel"
+        >
+          Filter:
+          <select
+            className="profileCallTreeSettingsSelect"
+            onChange={[Function]}
+            value="combined"
+          >
+            <option
+              value="combined"
+            >
+              Combined stacks
+            </option>
+            <option
+              value="js"
+            >
+              JS only
+            </option>
+            <option
+              value="cpp"
+            >
+              C++ only
+            </option>
+          </select>
+        </label>
+      </li>
+      <li
+        className="profileCallTreeSettingsListItem"
+      >
+        <label
+          className="profileCallTreeSettingsLabel"
+        >
+          <input
+            checked={false}
+            className="profileCallTreeSettingsCheckbox"
+            onChange={[Function]}
+            type="checkbox"
+          />
+           Invert call stack
+        </label>
+      </li>
+    </ul>
+    <div
+      className="stackSearchField profileCallTreeSettingsSearchField"
+    >
+      <label
+        className="stackSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          className="idleSearchField stackSearchFieldInput"
+          onSubmit={[Function]}
+        >
+          <input
+            className="idleSearchFieldInput"
+            name="search"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            required="required"
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            className="idleSearchFieldButton"
+            onClick={[Function]}
+            onFocus={[Function]}
+            type="reset"
+          />
+        </form>
+        <div
+          className="stackSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    className="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      className="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index={0}
+      onClick={[Function]}
+      title="Complete \\"Empty\\""
+    >
+      <span
+        className="filterNavigatorBarItemContent"
+      >
+        Complete "Empty"
+      </span>
+    </li>
+  </ol>
+  <div
+    className="treeView"
+  >
+    <div
+      className="treeViewHeader"
+    >
+      <span
+        className="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+      >
+        
+      </span>
+      <span
+        className="treeViewHeaderColumn treeViewFixedColumn totalTime"
+      >
+        Running Time (ms)
+      </span>
+      <span
+        className="treeViewHeaderColumn treeViewFixedColumn selfTime"
+      >
+        Self (ms)
+      </span>
+      <span
+        className="treeViewHeaderColumn treeViewFixedColumn icon"
+      >
+        
+      </span>
+      <span
+        className="treeViewHeaderColumn treeViewMainColumn name"
+      >
+        
+      </span>
+    </div>
+    <div
+      className="react-contextmenu-wrapper treeViewContextMenu"
+      onContextMenu={[Function]}
+      onMouseDown={[Function]}
+      onMouseOut={[Function]}
+      onMouseUp={[Function]}
+      onTouchEnd={[Function]}
+      onTouchStart={[Function]}
+    >
+      <div
+        className="treeViewBody"
+        onKeyDown={[Function]}
+        tabIndex={0}
+      >
+        <div
+          className="treeViewBodyInnerWrapper"
+        >
+          <div
+            className="treeViewBodyInner treeViewBodyInner0"
+            style={
+              Object {
+                "height": "304px",
+                "width": undefined,
+              }
+            }
+          >
+            <div
+              className="treeViewBodyInner treeViewBodyInner0TopSpacer"
+              style={
+                Object {
+                  "height": "0px",
+                }
+              }
+            />
+            <div
+              className="treeViewBodyInner treeViewBodyInner0InnerChunk"
+            >
+              <div
+                className="treeViewRow treeViewRowFixedColumns even "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns odd "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns even "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns odd "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns even "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns odd "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns even "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns odd "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns even "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns odd "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns even "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns odd "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns even "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns odd "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns even "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns odd "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+            </div>
+            <div
+              className="treeViewBodyInner treeViewBodyInner0InnerChunk"
+            >
+              <div
+                className="treeViewRow treeViewRowFixedColumns even "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns odd selected"
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns even "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="1"
+                >
+                  1
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    className="treeRowIcon "
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            className="treeViewBodyInner treeViewBodyInner1"
+            style={
+              Object {
+                "height": "304px",
+                "width": 3130,
+              }
+            }
+          >
+            <div
+              className="treeViewBodyInner treeViewBodyInner1TopSpacer"
+              style={
+                Object {
+                  "height": "0px",
+                }
+              }
+            />
+            <div
+              className="treeViewBodyInner treeViewBodyInner1InnerChunk"
+            >
+              <div
+                className="treeViewRow treeViewRowScrolledColumns even  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "0px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns odd  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "10px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns even  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "20px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns odd  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "30px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns even  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "40px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns odd  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "50px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns even  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "60px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns odd  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "70px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns even  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "80px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns odd  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "90px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns even  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "100px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns odd  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "110px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns even  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "120px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns odd  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "130px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns even  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "140px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns odd  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "150px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+            </div>
+            <div
+              className="treeViewBodyInner treeViewBodyInner1InnerChunk"
+            >
+              <div
+                className="treeViewRow treeViewRowScrolledColumns even  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "160px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns odd selected "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "170px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns even  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "180px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  name
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewAppendageColumn lib"
+                >
+                  
+                </span>
+                <input
+                  className="treeViewRowAppendageButton focusCallstackButton"
+                  data-appendage-button-name="focusCallstackButton"
+                  type="button"
+                  value=""
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
 <div
   className="treeAndSidebarWrapper"
@@ -207,7 +1811,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -243,7 +1847,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -279,7 +1883,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -315,7 +1919,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -351,7 +1955,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -387,7 +1991,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -423,7 +2027,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -437,7 +2041,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
             style={
               Object {
                 "height": "112px",
-                "width": "3000px",
+                "width": 3000,
               }
             }
           >
@@ -927,7 +2531,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -963,7 +2567,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -999,7 +2603,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -1035,7 +2639,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -1071,7 +2675,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -1107,7 +2711,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -1143,7 +2747,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -1157,7 +2761,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
             style={
               Object {
                 "height": "112px",
-                "width": "3000px",
+                "width": 3000,
               }
             }
           >
@@ -1647,7 +3251,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -1683,7 +3287,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -1719,7 +3323,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -1755,7 +3359,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -1791,7 +3395,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -1827,7 +3431,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -1863,7 +3467,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -1877,7 +3481,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             style={
               Object {
                 "height": "112px",
-                "width": "3000px",
+                "width": 3000,
               }
             }
           >
@@ -2367,7 +3971,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -2403,7 +4007,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -2439,7 +4043,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -2475,7 +4079,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -2511,7 +4115,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -2547,7 +4151,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -2561,7 +4165,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             style={
               Object {
                 "height": "96px",
-                "width": "3000px",
+                "width": 3000,
               }
             }
           >
@@ -3020,7 +4624,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -3056,7 +4660,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -3092,7 +4696,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -3128,7 +4732,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -3164,7 +4768,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -3200,7 +4804,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -3214,7 +4818,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             style={
               Object {
                 "height": "96px",
-                "width": "3000px",
+                "width": 3000,
               }
             }
           >
@@ -3673,7 +5277,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -3709,7 +5313,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -3745,7 +5349,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -3781,7 +5385,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -3795,7 +5399,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             style={
               Object {
                 "height": "64px",
-                "width": "3000px",
+                "width": 3000,
               }
             }
           >
@@ -4186,7 +5790,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -4222,7 +5826,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -4258,7 +5862,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -4294,7 +5898,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -4308,7 +5912,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             style={
               Object {
                 "height": "64px",
-                "width": "3000px",
+                "width": 3000,
               }
             }
           >
@@ -4699,7 +6303,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -4735,7 +6339,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -4771,7 +6375,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -4807,7 +6411,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -4843,7 +6447,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -4879,7 +6483,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn icon"
-                  title={null}
+                  title=""
                 >
                   <div
                     className="treeRowIcon "
@@ -4893,7 +6497,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             style={
               Object {
                 "height": "96px",
-                "width": "3000px",
+                "width": 3000,
               }
             }
           >

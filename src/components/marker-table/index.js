@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// @flow
+
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -11,21 +13,40 @@ import {
   selectedThreadSelectors,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
-import actions from '../../actions';
+import { changeSelectedMarker } from '../../actions/profile-view';
 import { formatNumber } from '../../utils/format-numbers';
 import Settings from './Settings';
 
 import './index.css';
 
+import type {
+  Thread,
+  ThreadIndex,
+  MarkersTable,
+  IndexIntoMarkersTable,
+} from '../../types/profile';
+import type { Milliseconds } from '../../types/units';
+
+type MarkerDisplayData = {|
+  timestamp: string,
+  name: string,
+  category: string,
+|};
+
 class MarkerTree {
-  constructor(thread, markers, zeroAt) {
+  _markers: MarkersTable;
+  _thread: Thread;
+  _zeroAt: Milliseconds;
+  _displayDataByIndex: Map<IndexIntoMarkersTable, MarkerDisplayData>;
+
+  constructor(thread: Thread, markers: MarkersTable, zeroAt: Milliseconds) {
     this._markers = markers;
     this._thread = thread;
     this._zeroAt = zeroAt;
-    this._nodes = new Map();
+    this._displayDataByIndex = new Map();
   }
 
-  getRoots() {
+  getRoots(): IndexIntoMarkersTable[] {
     const markerIndices = [];
     for (let i = 0; i < this._markers.length; i++) {
       markerIndices.push(i);
@@ -33,19 +54,20 @@ class MarkerTree {
     return markerIndices;
   }
 
-  getChildren(markerIndex) {
+  getChildren(markerIndex: IndexIntoMarkersTable): IndexIntoMarkersTable[] {
     return markerIndex === -1 ? this.getRoots() : [];
   }
 
-  hasChildren(markerIndex) {
+  hasChildren(markerIndex: IndexIntoMarkersTable): boolean {
     return (
       this._markers.data[markerIndex] !== null &&
       'stack' in this._markers.data[markerIndex]
     );
   }
 
-  getParent() {
-    return null;
+  getParent(): IndexIntoMarkersTable {
+    // -1 isn't used, but needs to be compatible with the call tree.
+    return -1;
   }
 
   getDepth() {
@@ -56,14 +78,9 @@ class MarkerTree {
     return this._markers === tree._markers;
   }
 
-  /**
-   * Return an object with information about the node with index markerIndex.
-   * @param  {[type]} markerIndex [description]
-   * @return {[type]}             [description]
-   */
-  getNode(markerIndex) {
-    let node = this._nodes.get(markerIndex);
-    if (node === undefined) {
+  getDisplayData(markerIndex: IndexIntoMarkersTable): MarkerDisplayData {
+    let displayData = this._displayDataByIndex.get(markerIndex);
+    if (displayData === undefined) {
       const markers = this._markers;
       const { stringTable } = this._thread;
       let category = 'unknown';
@@ -71,7 +88,7 @@ class MarkerTree {
       if (markers.data[markerIndex]) {
         const data = markers.data[markerIndex];
 
-        if ('category' in data) {
+        if (typeof data.category === 'string') {
           category = data.category;
         }
 
@@ -102,46 +119,53 @@ class MarkerTree {
         }
       }
 
-      node = {
+      displayData = {
         timestamp: `${((markers.time[markerIndex] - this._zeroAt) /
           1000).toFixed(3)}s`,
         name,
         category,
       };
-      this._nodes.set(markerIndex, node);
+      this._displayDataByIndex.set(markerIndex, displayData);
     }
-    return node;
+    return displayData;
   }
 }
 
-class MarkerTable extends PureComponent {
-  _takeTreeViewRef = treeView => (this._treeView = treeView);
+type Props = {|
+  +thread: Thread,
+  +markers: MarkersTable,
+  +threadIndex: ThreadIndex,
+  +selectedMarker: IndexIntoMarkersTable,
+  +zeroAt: Milliseconds,
+  +changeSelectedMarker: typeof changeSelectedMarker,
+|};
 
-  constructor(props) {
-    super(props);
-    this._fixedColumns = [
-      { propName: 'timestamp', title: 'Time Stamp' },
-      { propName: 'category', title: 'Category' },
-    ];
-    this._mainColumn = { propName: 'name', title: '' };
-    this._expandedNodeIds = [];
-    this._onExpandedNodeIdsChange = () => {};
-    this._onSelectionChange = this._onSelectionChange.bind(this);
-    this._treeView = null;
-  }
+class MarkerTable extends PureComponent<Props> {
+  _fixedColumns = [
+    { propName: 'timestamp', title: 'Time Stamp' },
+    { propName: 'category', title: 'Category' },
+  ];
+  _mainColumn = { propName: 'name', title: '' };
+  _expandedNodeIds: Array<IndexIntoMarkersTable | null> = [];
+  _onExpandedNodeIdsChange = () => {};
+  _treeView: ?TreeView<IndexIntoMarkersTable, MarkerDisplayData>;
+  _takeTreeViewRef = treeView => (this._treeView = treeView);
 
   componentDidMount() {
     this.focus();
   }
 
   focus() {
-    this._treeView.focus();
+    const treeView = this._treeView;
+    if (treeView) {
+      treeView.focus();
+    }
   }
 
-  _onSelectionChange(selectedMarker) {
+  _onSelectionChange = (selectedMarker: IndexIntoMarkersTable) => {
     const { threadIndex, changeSelectedMarker } = this.props;
     changeSelectedMarker(threadIndex, selectedMarker);
-  }
+  };
 
   render() {
     const { thread, markers, zeroAt, selectedMarker } = this.props;
@@ -150,6 +174,7 @@ class MarkerTable extends PureComponent {
       <div className="markerTable">
         <Settings />
         <TreeView
+          maxNodeDepth={0}
           tree={tree}
           fixedColumns={this._fixedColumns}
           mainColumn={this._mainColumn}
@@ -183,5 +208,5 @@ export default connect(
       .selectedMarker,
     zeroAt: getZeroAt(state),
   }),
-  actions
+  { changeSelectedMarker }
 )(MarkerTable);

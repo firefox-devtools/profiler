@@ -34,6 +34,7 @@ import type { ThreadIndex } from '../../types/profile';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
+  CallNodeDisplayData,
 } from '../../types/profile-derived';
 import type { Column } from '../shared/TreeView';
 
@@ -46,6 +47,7 @@ type Props = {
   expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
   searchStringsRegExp: RegExp,
   disableOverscan: boolean,
+  callNodeMaxDepth: number,
   implementationFilter: ImplementationFilter,
   invertCallstack: boolean,
   icons: IconWithClassName[],
@@ -59,7 +61,7 @@ class CallTreeComponent extends PureComponent<Props> {
   _mainColumn: Column;
   _appendageColumn: Column;
   _appendageButtons: string[];
-  _treeView: TreeView | null;
+  _treeView: TreeView<IndexIntoCallNodeTable, CallNodeDisplayData> | null;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
   constructor(props: Props) {
@@ -174,6 +176,7 @@ class CallTreeComponent extends PureComponent<Props> {
       expandedCallNodeIndexes,
       searchStringsRegExp,
       disableOverscan,
+      callNodeMaxDepth,
     } = this.props;
     return (
       <TreeView
@@ -191,6 +194,7 @@ class CallTreeComponent extends PureComponent<Props> {
         onAppendageButtonClick={this._onAppendageButtonClick}
         ref={this._takeTreeViewRef}
         contextMenuId={'ProfileCallTreeContextMenu'}
+        maxNodeDepth={callNodeMaxDepth}
         icons={this.props.icons}
       />
     );
@@ -214,6 +218,7 @@ export default connect(
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
     icons: getIconsWithClassNames(state),
+    callNodeMaxDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
   }),
   {
     changeSelectedCallNode,

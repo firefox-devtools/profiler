@@ -74,7 +74,7 @@ export type TracingMarker = {
 
 export type IndexIntoTracingMarkers = number;
 
-export type Node = {
+export type CallNodeDisplayData = {
   totalTime: string,
   totalTimePercent: string,
   selfTime: string,
