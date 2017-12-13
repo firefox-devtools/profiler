@@ -203,17 +203,13 @@ function _pushStacks(
  * depth instead of a zero-based.
  *
  * If no samples are found, 0 is returned.
- *
- * @param {object} thread
- * @param {object} callNodeInfo
- * @return {number} maxDepth
  */
 export function computeCallNodeMaxDepth(
-  rangedThread: Thread,
+  thread: Thread,
   callNodeInfo: CallNodeInfo
 ): number {
   let maxDepth = 0;
-  const { samples } = rangedThread;
+  const { samples } = thread;
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
   for (let i = 0; i < samples.length; i++) {
     const stackIndex = samples.stack[i];

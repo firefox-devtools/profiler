@@ -17,6 +17,7 @@ import {
 } from '../../actions/profile-view';
 import { changeStackChartColorStrategy } from '../../actions/stack-chart';
 import { getCategoryByImplementation } from '../../profile-logic/color-categories';
+import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 
 const { selectedThreadSelectors } = ProfileViewSelectors;
 
@@ -168,9 +169,9 @@ describe('selectors/getCallNodeMaxDepthForStackChart', function() {
     expect(jsOnlySamplesMaxDepth).toEqual(1);
   });
 
-  it('returns zero if no samples are in range', function() {
-    const store = storeWithProfile();
-    store.dispatch(addRangeFilter(0, 0));
+  it('returns zero if there are no samples', function() {
+    const { profile } = getProfileFromTextSamples(` `);
+    const store = storeWithProfile(profile);
     const noSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
       store.getState()
     );
