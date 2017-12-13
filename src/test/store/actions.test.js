@@ -283,10 +283,9 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
     expect(allSamplesMaxDepth).toEqual(4);
   });
 
-  it('returns zero if no samples are visible in current range', function() {
+  it('returns zero if there are no samples', function() {
     const { profile } = getProfileFromTextSamples(` `);
     const store = storeWithProfile(profile);
-    store.dispatch(addRangeFilter(0, 0));
     const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
       store.getState()
     );
