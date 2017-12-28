@@ -14,14 +14,23 @@ import {
   getThreadOrder,
   getHiddenThreads,
 } from '../reducers/url-state';
-import { getFriendlyThreadName } from '../profile-logic/profile-data';
+import {
+  getFriendlyThreadName,
+  getCallNodePath,
+} from '../profile-logic/profile-data';
 import { sendAnalytics } from '../utils/analytics';
 
 import type { ProfileSelection, ImplementationFilter } from '../types/actions';
 import type { Action, ThunkAction } from '../types/store';
 import type { ThreadIndex, IndexIntoMarkersTable } from '../types/profile';
-import type { CallNodePath } from '../types/profile-derived';
+import type {
+  CallNodePath,
+  CallNodeInfo,
+  IndexIntoCallNodeTable,
+} from '../types/profile-derived';
 import type { Transform } from '../types/transforms';
+import type { CallTree } from '../profile-logic/call-tree';
+
 /**
  * The actions that pertain to changing the view on the profile, including searching
  * and filtering. Currently the call tree's actions are in this file, but should be
@@ -158,6 +167,34 @@ export function changeCallTreeSearchString(searchString: string): Action {
     type: 'CHANGE_CALL_TREE_SEARCH_STRING',
     searchString,
   };
+}
+
+function _addAllDescendants(
+  tree: CallTree,
+  newSet: Set<IndexIntoCallNodeTable | null>,
+  callNodeIndex: IndexIntoCallNodeTable
+) {
+  tree.getChildren(callNodeIndex).forEach(childId => {
+    newSet.add(childId);
+    _addAllDescendants(tree, newSet, childId);
+  });
+}
+
+export function expandAllCallNodeDescendants(
+  threadIndex: ThreadIndex,
+  callNodeIndex: IndexIntoCallNodeTable,
+  tree: CallTree,
+  callNodeInfo: CallNodeInfo,
+  expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>
+): Action {
+  const newSet = new Set(expandedCallNodeIndexes);
+  newSet.add(callNodeIndex);
+  _addAllDescendants(tree, newSet, callNodeIndex);
+
+  const expandedCallNodePaths = Array.from(newSet.values()).map(callNodeIndex =>
+    getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable)
+  );
+  return changeExpandedCallNodes(threadIndex, expandedCallNodePaths);
 }
 
 export function changeExpandedCallNodes(
