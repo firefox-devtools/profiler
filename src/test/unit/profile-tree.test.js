@@ -170,6 +170,13 @@ describe('unfiltered call tree', function() {
       });
     });
 
+    describe('getAllDescendants()', function() {
+      it('returns a set with the descendant indexes', function() {
+        expect(callTree.getAllDescendants(C)).toEqual(new Set([D, E, F, G]));
+        expect(callTree.getAllDescendants(E)).toEqual(new Set([]));
+      });
+    });
+
     describe('getParent()', function() {
       it("finds a callNode's parent", function() {
         expect(callTree.getParent(A)).toBe(-1);
