@@ -13,21 +13,24 @@ import {
   getSampleIndexClosestToTime,
   getCallNodePath,
 } from '../../profile-logic/profile-data';
-import actions from '../../actions';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import ProfileThreadJankOverview from './ProfileThreadJankOverview';
 import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOverview';
+import {
+  changeSelectedThread,
+  updateProfileSelection,
+  changeRightClickedThread,
+  changeSelectedCallNode,
+  focusCallTree,
+} from '../../actions/profile-view';
 
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type {
   CallNodeInfo,
-  CallNodePath,
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { State } from '../../types/reducers';
-
-import { updateProfileSelection } from '../../actions/profile-view';
 
 type Props = {
   threadIndex: ThreadIndex,
@@ -43,10 +46,11 @@ type Props = {
   style: Object,
   threadName: string,
   processDetails: string,
-  changeSelectedThread: ThreadIndex => void,
+  changeSelectedThread: typeof changeSelectedThread,
+  changeRightClickedThread: typeof changeRightClickedThread,
   updateProfileSelection: typeof updateProfileSelection,
-  changeSelectedCallNode: (IndexIntoCallNodeTable, CallNodePath) => void,
-  focusCallTree: () => void,
+  changeSelectedCallNode: typeof changeSelectedCallNode,
+  focusCallTree: typeof focusCallTree,
 };
 
 class ProfileThreadHeaderBar extends PureComponent<Props> {
@@ -61,12 +65,20 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
   }
 
   _onLabelMouseDown(event: MouseEvent) {
+    const {
+      changeSelectedThread,
+      changeRightClickedThread,
+      threadIndex,
+    } = this.props;
     if (event.button === 0) {
-      const { changeSelectedThread, threadIndex } = this.props;
       changeSelectedThread(threadIndex);
 
       // Don't allow clicks on the threads list to steal focus from the tree view.
       event.preventDefault();
+    } else if (event.button === 2) {
+      // This is needed to allow the context menu to know what was right clicked without
+      // actually changing the current selection.
+      changeRightClickedThread(threadIndex);
     }
   }
 
@@ -208,20 +220,29 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
   }
 }
 
-export default connect((state: State, props) => {
-  const threadIndex: ThreadIndex = props.index;
-  const selectors = selectorsForThread(threadIndex);
-  const selectedThread = getSelectedThreadIndex(state);
-  return {
-    thread: selectors.getFilteredThread(state),
-    threadName: selectors.getFriendlyThreadName(state),
-    processDetails: selectors.getThreadProcessDetails(state),
-    callNodeInfo: selectors.getCallNodeInfo(state),
-    selectedCallNodeIndex:
-      threadIndex === selectedThread
-        ? selectors.getSelectedCallNodeIndex(state)
-        : -1,
-    isSelected: threadIndex === selectedThread,
-    threadIndex,
-  };
-}, actions)(ProfileThreadHeaderBar);
+export default connect(
+  (state: State, props) => {
+    const threadIndex: ThreadIndex = props.index;
+    const selectors = selectorsForThread(threadIndex);
+    const selectedThread = getSelectedThreadIndex(state);
+    return {
+      thread: selectors.getFilteredThread(state),
+      threadName: selectors.getFriendlyThreadName(state),
+      processDetails: selectors.getThreadProcessDetails(state),
+      callNodeInfo: selectors.getCallNodeInfo(state),
+      selectedCallNodeIndex:
+        threadIndex === selectedThread
+          ? selectors.getSelectedCallNodeIndex(state)
+          : -1,
+      isSelected: threadIndex === selectedThread,
+      threadIndex,
+    };
+  },
+  {
+    changeSelectedThread,
+    updateProfileSelection,
+    changeRightClickedThread,
+    changeSelectedCallNode,
+    focusCallTree,
+  }
+)(ProfileThreadHeaderBar);

@@ -362,6 +362,15 @@ function tabOrder(state: number[] = [0, 1, 2, 3], action: Action) {
   }
 }
 
+function rightClickedThread(state: ThreadIndex = 0, action: Action) {
+  switch (action.type) {
+    case 'CHANGE_RIGHT_CLICKED_THREAD':
+      return action.selectedThread;
+    default:
+      return state;
+  }
+}
+
 const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
   viewOptions: combineReducers({
     perThread: viewOptionsPerThread,
@@ -373,6 +382,7 @@ const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
     rootRange,
     zeroAt,
     tabOrder,
+    rightClickedThread,
   }),
   profile,
 });
@@ -437,6 +447,8 @@ export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
 export const getProfileTaskTracerData = (state: State): TaskTracer =>
   getProfile(state).tasktracer;
+export const getRightClickedThreadIndex = (state: State) =>
+  getProfileViewOptions(state).rightClickedThread;
 
 export type SelectorsForThread = {
   getThread: State => Thread,
