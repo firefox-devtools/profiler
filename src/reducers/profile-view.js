@@ -513,9 +513,6 @@ export const selectorsForThread = (
                 transform.callNodePath,
                 transform.implementation
               );
-        case 'merge-subtree':
-          // TODO - Implement this transform.
-          return thread;
         case 'merge-call-node':
           return Transforms.mergeCallNode(
             thread,
@@ -524,6 +521,8 @@ export const selectorsForThread = (
           );
         case 'merge-function':
           return Transforms.mergeFunction(thread, transform.funcIndex);
+        case 'drop-function':
+          return Transforms.dropFunction(thread, transform.funcIndex);
         case 'focus-function':
           return Transforms.focusFunction(thread, transform.funcIndex);
         case 'collapse-resource':

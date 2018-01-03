@@ -108,11 +108,11 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
         break;
       case 'merge-call-node':
       case 'merge-function':
-      case 'merge-subtree':
       case 'focus-subtree':
       case 'focus-function':
       case 'collapse-resource':
       case 'collapse-direct-recursion':
+      case 'drop-function':
         this.addTransformToStack(type);
         break;
       default:
@@ -146,14 +146,6 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
           funcIndex: selectedFunc,
         });
         break;
-      case 'merge-subtree':
-        addTransformToStack(threadIndex, {
-          type: 'merge-subtree',
-          callNodePath: selectedCallNodePath,
-          implementation,
-          inverted,
-        });
-        break;
       case 'merge-call-node':
         addTransformToStack(threadIndex, {
           type: 'merge-call-node',
@@ -164,6 +156,12 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       case 'merge-function':
         addTransformToStack(threadIndex, {
           type: 'merge-function',
+          funcIndex: selectedFunc,
+        });
+        break;
+      case 'drop-function':
+        addTransformToStack(threadIndex, {
+          type: 'drop-function',
           funcIndex: selectedFunc,
         });
         break;
@@ -268,9 +266,6 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
           <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
           Merge function into caller across the entire tree
         </MenuItem>
-        {/* <MenuItem onClick={this.handleClick} data={{ type: 'mergeSubtree' }}>
-          Merge subtree into calling function
-        </MenuItem> */}
         <MenuItem onClick={this.handleClick} data={{ type: 'focus-subtree' }}>
           <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus" />
           Focus on subtree
@@ -302,6 +297,10 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
               Collapse direct recursion
             </MenuItem>
           : null}
+        <MenuItem onClick={this.handleClick} data={{ type: 'drop-function' }}>
+          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconDrop" />
+          Drop samples with this function
+        </MenuItem>
         <div className="react-contextmenu-separator" />
         <MenuItem
           onClick={this.handleClick}

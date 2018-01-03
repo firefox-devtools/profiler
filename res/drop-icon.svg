@@ -1,0 +1,14 @@
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+    <circle fill="#000000" cx="8" cy="2" r="2"></circle>
+    <circle fill="#000000" cx="11" cy="8" r="2"></circle>
+    <circle fill="#000000" cx="14" cy="14" r="2"></circle>
+    <path d="M6.5,14.5 L1.5,9.5" stroke="#000000" stroke-width="1.5" stroke-linecap="round"></path>
+    <path d="M1.5,14.5 L6.5,9.5" stroke="#000000" stroke-width="1.5" stroke-linecap="round"></path>
+    <path d="M10.5,6.5 L8.5,3.5" stroke="#000000" stroke-linecap="square"></path>
+    <path d="M13.5,12.5 L11.5,9.5" stroke="#000000" stroke-linecap="square"></path>
+  </g>
+</svg>
