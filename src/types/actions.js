@@ -59,6 +59,11 @@ type ProfileAction =
     }
   | { type: 'SHOW_THREAD', threadIndex: ThreadIndex }
   | {
+      type: 'ISOLATE_THREAD',
+      hiddenThreadIndexes: ThreadIndex[],
+      isolatedThreadIndex: ThreadIndex,
+    }
+  | {
       type: 'ASSIGN_TASK_TRACER_NAMES',
       addressIndices: number[],
       symbolNames: string[],
@@ -132,6 +137,7 @@ type UrlStateAction =
   | { type: 'ADD_RANGE_FILTER', start: number, end: number }
   | { type: 'POP_RANGE_FILTERS', firstRemovedFilterIndex: number }
   | { type: 'CHANGE_SELECTED_THREAD', selectedThread: ThreadIndex }
+  | { type: 'CHANGE_RIGHT_CLICKED_THREAD', selectedThread: ThreadIndex }
   | { type: 'CHANGE_CALL_TREE_SEARCH_STRING', searchString: string }
   | {
       type: 'ADD_TRANSFORM_TO_STACK',

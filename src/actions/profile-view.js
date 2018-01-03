@@ -51,6 +51,13 @@ export function focusCallTree(): Action {
   };
 }
 
+export function changeRightClickedThread(selectedThread: ThreadIndex): Action {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_THREAD',
+    selectedThread,
+  };
+}
+
 export function changeThreadOrder(threadOrder: ThreadIndex[]): Action {
   sendAnalytics({
     hitType: 'event',
@@ -107,6 +114,30 @@ export function showThread(threadIndex: ThreadIndex): ThunkAction<void> {
     dispatch({
       type: 'SHOW_THREAD',
       threadIndex,
+    });
+  };
+}
+
+export function isolateThread(
+  isolatedThreadIndex: ThreadIndex
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const threads = getThreads(getState());
+    const thread = threads[isolatedThreadIndex];
+    const threadIndexes = threads.map((_, index) => index);
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'threads',
+      eventAction: 'isolate',
+      eventLabel: getFriendlyThreadName(threads, thread),
+    });
+
+    dispatch({
+      type: 'ISOLATE_THREAD',
+      hiddenThreadIndexes: threadIndexes.filter(
+        index => index !== isolatedThreadIndex
+      ),
+      isolatedThreadIndex,
     });
   };
 }

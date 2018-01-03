@@ -50,6 +50,10 @@ describe('thread ordering and toggling', function() {
       showThread: threadIndex => {
         dispatch(ProfileViewActions.showThread(threadIndex));
       },
+
+      isolateThread: threadIndex => {
+        dispatch(ProfileViewActions.isolateThread(threadIndex));
+      },
     };
   }
 
@@ -168,6 +172,43 @@ describe('thread ordering and toggling', function() {
 
     it('will select another thread when hidden', function() {
       hideThread(A);
+      expect(getSelectedThreadIndex()).toEqual(B);
+    });
+  });
+
+  describe('isolate a thread', function() {
+    function setup() {
+      const store = storeWithProfile(
+        getProfileWithNamedThreads(['A', 'B', 'C', 'D'])
+      );
+      return setupHelpers(store);
+    }
+
+    it('starts out with the initial sorting', function() {
+      const { getOrderedThreadNames, getHiddenThreadNames } = setup();
+      expect(getOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
+      expect(getHiddenThreadNames()).toEqual([]);
+    });
+
+    it('has the first thread selected', function() {
+      const { getSelectedThreadIndex } = setup();
+      expect(getSelectedThreadIndex()).toEqual(A);
+    });
+
+    it('isolates a thread', function() {
+      const {
+        getOrderedThreadNames,
+        getHiddenThreadNames,
+        isolateThread,
+      } = setup();
+      isolateThread(B);
+      expect(getOrderedThreadNames()).toEqual(['A', 'B', 'C', 'D']);
+      expect(getHiddenThreadNames()).toEqual(['A', 'C', 'D']);
+    });
+
+    it('selects the isolated thread', function() {
+      const { getSelectedThreadIndex, isolateThread } = setup();
+      isolateThread(B);
       expect(getSelectedThreadIndex()).toEqual(B);
     });
   });

@@ -39,6 +39,7 @@ export type ProfileViewState = {
     rootRange: StartEndRange,
     zeroAt: Milliseconds,
     tabOrder: number[],
+    rightClickedThread: ThreadIndex,
   },
   profile: Profile,
 };

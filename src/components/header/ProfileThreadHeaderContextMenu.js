@@ -5,9 +5,16 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
-import { hideThread, showThread } from '../../actions/profile-view';
+import {
+  hideThread,
+  showThread,
+  isolateThread,
+} from '../../actions/profile-view';
 import { connect } from 'react-redux';
-import { getThreads } from '../../reducers/profile-view';
+import {
+  getThreads,
+  getRightClickedThreadIndex,
+} from '../../reducers/profile-view';
 import { getThreadOrder, getHiddenThreads } from '../../reducers/url-state';
 import { getFriendlyThreadName } from '../../profile-logic/profile-data';
 import classNames from 'classnames';
@@ -19,8 +26,10 @@ type Props = {|
   threads: Thread[],
   threadOrder: ThreadIndex[],
   hiddenThreads: ThreadIndex[],
+  rightClickedThreadIndex: ThreadIndex,
   hideThread: typeof hideThread,
   showThread: typeof showThread,
+  isolateThread: typeof isolateThread,
 |};
 
 class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
@@ -47,11 +56,34 @@ class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
     }
   }
 
+  _isolateThread = () => {
+    const { isolateThread, rightClickedThreadIndex } = this.props;
+    isolateThread(rightClickedThreadIndex);
+  };
+
   render() {
-    const { threads, threadOrder, hiddenThreads } = this.props;
+    const {
+      threads,
+      threadOrder,
+      hiddenThreads,
+      rightClickedThreadIndex,
+    } = this.props;
+
+    const clickedThreadName = getFriendlyThreadName(
+      threads,
+      threads[rightClickedThreadIndex]
+    );
 
     return (
       <ContextMenu id={'ProfileThreadHeaderContextMenu'}>
+        {hiddenThreads.length === threads.length - 1
+          ? null
+          : <div>
+              <MenuItem onClick={this._isolateThread}>
+                Only show: {`"${clickedThreadName}"`}
+              </MenuItem>
+              <div className="react-contextmenu-separator" />
+            </div>}
         {threadOrder.map(threadIndex => {
           const isHidden = hiddenThreads.includes(threadIndex);
           return (
@@ -78,6 +110,7 @@ export default connect(
     threads: getThreads(state),
     threadOrder: getThreadOrder(state),
     hiddenThreads: getHiddenThreads(state),
+    rightClickedThreadIndex: getRightClickedThreadIndex(state),
   }),
-  { hideThread, showThread }
+  { hideThread, showThread, isolateThread }
 )(ProfileThreadHeaderContextMenu);
