@@ -236,7 +236,7 @@ describe('url upgrading', function() {
 
 describe('URL serialization of the transform stack', function() {
   const transformString =
-    'f-combined-012~ms-js-123~mcn-combined-234~f-js-345-i~mf-6~ff-7~cr-combined-8-9~rec-combined-10';
+    'f-combined-012~mcn-combined-234~f-js-345-i~mf-6~ff-7~cr-combined-8-9~rec-combined-10~df-11';
   const { getState } = _getStoreWithURL({
     search: '?transforms=' + transformString,
   });
@@ -252,12 +252,6 @@ describe('URL serialization of the transform stack', function() {
         type: 'focus-subtree',
         callNodePath: [0, 1, 2],
         implementation: 'combined',
-        inverted: false,
-      },
-      {
-        type: 'merge-subtree',
-        callNodePath: [1, 2, 3],
-        implementation: 'js',
         inverted: false,
       },
       {
@@ -289,6 +283,10 @@ describe('URL serialization of the transform stack', function() {
         type: 'collapse-direct-recursion',
         funcIndex: 10,
         implementation: 'combined',
+      },
+      {
+        type: 'drop-function',
+        funcIndex: 11,
       },
     ]);
   });

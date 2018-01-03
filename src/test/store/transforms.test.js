@@ -352,6 +352,52 @@ describe('"merge-function" transform', function() {
   });
 });
 
+describe('"drop-function" transform', function() {
+  describe('on a call tree', function() {
+    const { profile, funcNames } = getProfileFromTextSamples(`
+      A A A A
+      B B C B
+      C C   E
+        D
+    `);
+    const threadIndex = 0;
+    const C = funcNames.indexOf('C');
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+
+    function formatTreeIntoArray(tree) {
+      return formatTree(tree).split('\n').filter(string => string);
+    }
+
+    it('starts as an unfiltered call tree', function() {
+      expect(formatTreeIntoArray(originalCallTree)).toEqual([
+        '- A (total: 4, self:—)',
+        ' - B (total: 3, self:—)',
+        '   - C (total: 2, self:1)',
+        '     - D (total: 1, self:1)',
+        '   - E (total: 1, self:1)',
+        ' - C (total: 1, self:1)',
+      ]);
+    });
+
+    it('function C can be merged into callers', function() {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'drop-function',
+          funcIndex: C,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTreeIntoArray(callTree)).toEqual([
+        '- A (total: 1, self:—)',
+        ' - B (total: 1, self:—)',
+        '   - E (total: 1, self:1)',
+      ]);
+    });
+  });
+});
+
 describe('"focus-function" transform', function() {
   describe('on a call tree', function() {
     /**

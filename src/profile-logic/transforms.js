@@ -34,9 +34,9 @@ import type { Transform, TransformStack } from '../types/transforms';
 const TRANSFORM_TO_SHORT_KEY = {
   'focus-subtree': 'f',
   'focus-function': 'ff',
-  'merge-subtree': 'ms',
   'merge-call-node': 'mcn',
   'merge-function': 'mf',
+  'drop-function': 'df',
   'collapse-resource': 'cr',
   'collapse-direct-recursion': 'rec',
 };
@@ -44,9 +44,9 @@ const TRANSFORM_TO_SHORT_KEY = {
 const SHORT_KEY_TO_TRANSFORM = {
   f: 'focus-subtree',
   ff: 'focus-function',
-  ms: 'merge-subtree',
   mcn: 'merge-call-node',
   mf: 'merge-function',
+  df: 'drop-function',
   cr: 'collapse-resource',
   rec: 'collapse-direct-recursion',
 };
@@ -108,6 +108,7 @@ export function parseTransforms(stringValue: string = ''): TransformStack {
         break;
       }
       case 'merge-function':
+      case 'drop-function':
       case 'focus-function': {
         // e.g. "mf-325"
         const [, funcIndexRaw] = tuple;
@@ -127,6 +128,12 @@ export function parseTransforms(stringValue: string = ''): TransformStack {
                 funcIndex,
               });
               break;
+            case 'drop-function':
+              transforms.push({
+                type: 'drop-function',
+                funcIndex,
+              });
+              break;
             default:
               throw new Error('Unmatched transform.');
           }
@@ -134,8 +141,7 @@ export function parseTransforms(stringValue: string = ''): TransformStack {
         break;
       }
       case 'focus-subtree':
-      case 'merge-call-node':
-      case 'merge-subtree': {
+      case 'merge-call-node': {
         // e.g. "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
         const [
           ,
@@ -163,14 +169,6 @@ export function parseTransforms(stringValue: string = ''): TransformStack {
               callNodePath,
             });
             break;
-          case 'merge-subtree':
-            transforms.push({
-              type: 'merge-subtree',
-              implementation,
-              callNodePath,
-              inverted,
-            });
-            break;
           default:
             throw new Error('Unmatched transform.');
         }
@@ -193,6 +191,7 @@ export function stringifyTransforms(transforms: TransformStack = []): string {
       const shortKey = TRANSFORM_TO_SHORT_KEY[transform.type];
       switch (transform.type) {
         case 'merge-function':
+        case 'drop-function':
           return `${shortKey}-${transform.funcIndex}`;
         case 'focus-function': {
           let string = `${shortKey}-${transform.funcIndex}`;
@@ -206,8 +205,7 @@ export function stringifyTransforms(transforms: TransformStack = []): string {
         case 'collapse-direct-recursion':
           return `${shortKey}-${transform.implementation}-${transform.funcIndex}`;
         case 'focus-subtree':
-        case 'merge-call-node':
-        case 'merge-subtree': {
+        case 'merge-call-node': {
           let string = [
             shortKey,
             transform.implementation,
@@ -252,12 +250,12 @@ export function getTransformLabels(
     let funcIndex;
     switch (transform.type) {
       case 'focus-subtree':
-      case 'merge-subtree':
       case 'merge-call-node':
         funcIndex = transform.callNodePath[transform.callNodePath.length - 1];
         break;
       case 'focus-function':
       case 'merge-function':
+      case 'drop-function':
       case 'collapse-direct-recursion':
         funcIndex = transform.funcIndex;
         break;
@@ -272,12 +270,12 @@ export function getTransformLabels(
         return `Focus Node: ${funcName}`;
       case 'focus-function':
         return `Focus: ${funcName}`;
-      case 'merge-subtree':
-        return `Merge Subtree: ${funcName}`;
       case 'merge-call-node':
         return `Merge Node: ${funcName}`;
       case 'merge-function':
         return `Merge: ${funcName}`;
+      case 'drop-function':
+        return `Drop: ${funcName}`;
       case 'collapse-direct-recursion':
         return `Collapse recursion: ${funcName}`;
       default:
@@ -305,6 +303,8 @@ export function applyTransformToCallNodePath(
       return _mergeNodeInCallNodePath(transform.callNodePath, callNodePath);
     case 'merge-function':
       return _mergeFunctionInCallNodePath(transform.funcIndex, callNodePath);
+    case 'drop-function':
+      return _dropFunctionInCallNodePath(transform.funcIndex, callNodePath);
     case 'collapse-resource':
       return _collapseResourceInCallNodePath(
         transform.resourceIndex,
@@ -355,6 +355,14 @@ function _mergeFunctionInCallNodePath(
   callNodePath: CallNodePath
 ): CallNodePath {
   return callNodePath.filter(nodeFunc => nodeFunc !== funcIndex);
+}
+
+function _dropFunctionInCallNodePath(
+  funcIndex: IndexIntoFuncTable,
+  callNodePath: CallNodePath
+): CallNodePath {
+  // If the CallNodePath contains the function, return an empty path.
+  return callNodePath.includes(funcIndex) ? [] : callNodePath;
 }
 
 function _collapseResourceInCallNodePath(
@@ -569,6 +577,42 @@ export function mergeFunction(
   return Object.assign({}, thread, {
     stackTable: newStackTable,
     samples: newSamples,
+  });
+}
+
+/**
+ * Drop any samples that contain the given function.
+ */
+export function dropFunction(
+  thread: Thread,
+  funcIndexToDrop: IndexIntoFuncTable
+) {
+  const { stackTable, frameTable, samples } = thread;
+
+  // Go through each stack, and label it as containing the function or not.
+  const stackContainsFunc: Array<void | true> = [];
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefix = stackTable.prefix[stackIndex];
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    if (
+      // This is the function we want to remove.
+      funcIndex === funcIndexToDrop ||
+      // The parent of this stack contained the function.
+      (prefix !== null && stackContainsFunc[prefix])
+    ) {
+      stackContainsFunc[stackIndex] = true;
+    }
+  }
+
+  // Regenerate the stacks for the samples table.
+  const stack = samples.stack.map(
+    stack => (stack !== null && stackContainsFunc[stack] ? null : stack)
+  );
+
+  // Return the thread with the replaced samples.
+  return Object.assign({}, thread, {
+    samples: Object.assign({}, samples, { stack }),
   });
 }
 

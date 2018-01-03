@@ -115,7 +115,7 @@ export type FocusFunctionSubtree = {|
 |};
 
 /**
- * The MergeSubtree transform represents merging a CallNode into the parent CallNode. The
+ * The MergeCallNode transform represents merging a CallNode into the parent CallNode. The
  * CallNode must match the given CallNodePath. In the call tree below, if the CallNode
  * at path [A, B, C] is removed, then the `D` and `F` CallNodes are re-assigned to `B`.
  * No self time in this case would change, as `C` was not a leaf CallNode, but the
@@ -188,6 +188,26 @@ export type MergeFunction = {|
 |};
 
 /**
+ * The DropFunction transform removes samples from the thread that have a function
+ * somewhere in its stack.
+ *
+ *                 A:4,0                              A:1,0
+ *                 /    \        Drop Func C            |
+ *                v      v           -->                v
+ *            B:3,0     C:1,0                         B:1,0
+ *           /      \                                   |
+ *          v        v                                  v
+ *        C:2,1     D:1,1                             D:1,1
+ *        |
+ *        v
+ *      D:1,1
+ */
+export type DropFunction = {|
+  type: 'drop-function',
+  funcIndex: IndexIntoFuncTable,
+|};
+
+/**
  * Collapse resource takes CallNodes that are of a consecutive library, and collapses
  * them into a new collapsed pseudo-stack. Given a call tree like below, where each node
  * is defined by either "function_name" or "function_name:library_name":
@@ -233,22 +253,12 @@ export type CollapseDirectRecursion = {|
   implementation: ImplementationFilter,
 |};
 
-/**
- * TODO - Once implemented.
- */
-export type MergeSubtree = {|
-  type: 'merge-subtree',
-  callNodePath: CallNodePath,
-  implementation: ImplementationFilter,
-  inverted: boolean,
-|};
-
 export type Transform =
   | FocusSubtree
   | FocusFunctionSubtree
-  | MergeSubtree
   | MergeCallNode
   | MergeFunction
+  | DropFunction
   | CollapseResource
   | CollapseDirectRecursion;
 
