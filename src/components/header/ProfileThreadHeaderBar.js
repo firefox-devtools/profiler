@@ -46,6 +46,7 @@ type Props = {
   changeSelectedThread: ThreadIndex => void,
   updateProfileSelection: typeof updateProfileSelection,
   changeSelectedCallNode: (IndexIntoCallNodeTable, CallNodePath) => void,
+  focusCallTree: () => void,
 };
 
 class ProfileThreadHeaderBar extends PureComponent<Props> {
@@ -76,7 +77,12 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
 
   _onStackClick(time: number) {
     const { threadIndex, interval } = this.props;
-    const { thread, callNodeInfo, changeSelectedCallNode } = this.props;
+    const {
+      thread,
+      callNodeInfo,
+      changeSelectedCallNode,
+      focusCallTree,
+    } = this.props;
     const sampleIndex = getSampleIndexClosestToTime(
       thread.samples,
       time,
@@ -91,6 +97,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
       threadIndex,
       getCallNodePath(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
+    focusCallTree();
   }
 
   _onIntervalMarkerSelect(
