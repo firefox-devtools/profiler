@@ -45,6 +45,12 @@ export function changeSelectedThread(selectedThread: ThreadIndex): Action {
   };
 }
 
+export function focusCallTree(): Action {
+  return {
+    type: 'FOCUS_CALL_TREE',
+  };
+}
+
 export function changeThreadOrder(threadOrder: ThreadIndex[]): Action {
   sendAnalytics({
     hitType: 'event',
