@@ -16,6 +16,7 @@ import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
 import * as StackTiming from '../profile-logic/stack-timing';
+import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import * as TaskTracerTools from '../profile-logic/task-tracer';
@@ -316,6 +317,15 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
   }
 }
 
+function focusCallTreeGeneration(state: number = 0, action: Action) {
+  switch (action.type) {
+    case 'FOCUS_CALL_TREE':
+      return state + 1;
+    default:
+      return state;
+  }
+}
+
 function rootRange(
   state: StartEndRange = { start: 0, end: 1 },
   action: Action
@@ -359,6 +369,7 @@ const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
     waitingForLibs,
     selection,
     scrollToSelectionGeneration,
+    focusCallTreeGeneration,
     rootRange,
     zeroAt,
     tabOrder,
@@ -381,6 +392,11 @@ export const getProfileRootRange = (state: State) =>
 export const getScrollToSelectionGeneration = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.scrollToSelectionGeneration
+);
+
+export const getFocusCallTreeGeneration = createSelector(
+  getProfileViewOptions,
+  viewOptions => viewOptions.focusCallTreeGeneration
 );
 
 export const getZeroAt = createSelector(
@@ -449,6 +465,8 @@ export type SelectorsForThread = {
   getCallNodeMaxDepthForStackChart: State => number,
   getStackTimingByDepthForStackChart: State => StackTiming.StackTimingByDepth,
   getLeafCategoryStackTimingForStackChart: State => StackTiming.StackTimingByDepth,
+  getCallNodeMaxDepthForFlameGraph: State => number,
+  getFlameGraphTiming: State => FlameGraph.FlameGraphTiming,
   getFriendlyThreadName: State => string,
   getThreadProcessDetails: State => string,
   getSearchFilteredMarkers: State => MarkersTable,
@@ -639,7 +657,7 @@ export const selectorsForThread = (
     const getCallNodeMaxDepth = createSelector(
       getFilteredThread,
       getCallNodeInfo,
-      StackTiming.computeCallNodeMaxDepth
+      ProfileData.computeCallNodeMaxDepth
     );
     const getSelectedCallNodePath = createSelector(
       getViewOptions,
@@ -726,7 +744,7 @@ export const selectorsForThread = (
     const getCallNodeMaxDepthForStackChart = createSelector(
       getFilteredThreadForStackChart,
       getCallNodeInfoOfFilteredThreadForStackChart,
-      StackTiming.computeCallNodeMaxDepth
+      ProfileData.computeCallNodeMaxDepth
     );
     const getStackTimingByDepthForStackChart = createSelector(
       getFilteredThreadForStackChart,
@@ -734,6 +752,15 @@ export const selectorsForThread = (
       getCallNodeMaxDepthForStackChart,
       getProfileInterval,
       StackTiming.getStackTimingByDepth
+    );
+    const getCallNodeMaxDepthForFlameGraph = createSelector(
+      getRangeSelectionFilteredThread,
+      getCallNodeInfo,
+      ProfileData.computeCallNodeMaxDepth
+    );
+    const getFlameGraphTiming = createSelector(
+      getCallTree,
+      FlameGraph.getFlameGraphTiming
     );
     const getLeafCategoryStackTimingForStackChart = createSelector(
       getFilteredThreadForStackChart,
@@ -774,6 +801,8 @@ export const selectorsForThread = (
       getCallNodeMaxDepthForStackChart,
       getStackTimingByDepthForStackChart,
       getLeafCategoryStackTimingForStackChart,
+      getCallNodeMaxDepthForFlameGraph,
+      getFlameGraphTiming,
       getFriendlyThreadName,
       getThreadProcessDetails,
       getSearchFilteredMarkers,
