@@ -33,6 +33,9 @@ class TabBar extends PureComponent<Props> {
 
   _mouseDownListener(e: SyntheticMouseEvent<HTMLElement>) {
     this.props.onSelectTab(e.currentTarget.dataset.name);
+    // Prevent focusing the tab so that actual content like the
+    // calltree can perform its own focusing.
+    e.preventDefault();
   }
 
   render() {

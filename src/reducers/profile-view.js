@@ -317,6 +317,15 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
   }
 }
 
+function focusCallTreeGeneration(state: number = 0, action: Action) {
+  switch (action.type) {
+    case 'FOCUS_CALL_TREE':
+      return state + 1;
+    default:
+      return state;
+  }
+}
+
 function rootRange(
   state: StartEndRange = { start: 0, end: 1 },
   action: Action
@@ -360,6 +369,7 @@ const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
     waitingForLibs,
     selection,
     scrollToSelectionGeneration,
+    focusCallTreeGeneration,
     rootRange,
     zeroAt,
     tabOrder,
@@ -382,6 +392,11 @@ export const getProfileRootRange = (state: State) =>
 export const getScrollToSelectionGeneration = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.scrollToSelectionGeneration
+);
+
+export const getFocusCallTreeGeneration = createSelector(
+  getProfileViewOptions,
+  viewOptions => viewOptions.focusCallTreeGeneration
 );
 
 export const getZeroAt = createSelector(
