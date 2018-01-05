@@ -28,16 +28,6 @@ body, #root, .profileViewer {
   z-index: 0;
 }
 
-.profileViewer {
-  background-color: #fff;
-  opacity: 0;
-  transition: opacity 200ms;
-}
-
-.profileViewerIsMounted {
-  opacity: 1;
-}
-
 .treeView {
   display: flex;
   flex-flow: column nowrap;
