@@ -16,6 +16,7 @@ import type {
   CallNodeTable,
   IndexIntoCallNodeTable,
   CallNodeInfo,
+  CallNodeData,
   CallNodeDisplayData,
 } from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
@@ -127,13 +128,24 @@ export class CallTree {
     return this._callNodeTable === tree._callNodeTable;
   }
 
+  getNodeData(callNodeIndex: IndexIntoCallNodeTable): CallNodeData {
+    const funcIndex = this._callNodeTable.func[callNodeIndex];
+    const funcName = this._stringTable.getString(
+      this._funcTable.name[funcIndex]
+    );
+    const totalTime = this._callNodeTimes.totalTime[callNodeIndex];
+    const totalTimeRelative = totalTime / this._rootTotalTime;
+    return { funcName, totalTime, totalTimeRelative };
+  }
+
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
     let displayData = this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
-      const funcIndex = this._callNodeTable.func[callNodeIndex];
-      const funcName = this._stringTable.getString(
-        this._funcTable.name[funcIndex]
+      const { funcName, totalTime, totalTimeRelative } = this.getNodeData(
+        callNodeIndex
       );
+
+      const funcIndex = this._callNodeTable.func[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
@@ -145,12 +157,8 @@ export class CallTree {
         : _formatDecimalNumber;
 
       displayData = {
-        totalTime: `${formatNumber(
-          this._callNodeTimes.totalTime[callNodeIndex]
-        )}`,
-        totalTimePercent: `${(100 *
-          this._callNodeTimes.totalTime[callNodeIndex] /
-          this._rootTotalTime).toFixed(precision)}%`,
+        totalTime: `${formatNumber(totalTime)}`,
+        totalTimePercent: `${(100 * totalTimeRelative).toFixed(precision)}%`,
         selfTime: selfTime === 0 ? '—' : `${formatNumber(selfTime)}`,
         name: funcName,
         lib: libName,

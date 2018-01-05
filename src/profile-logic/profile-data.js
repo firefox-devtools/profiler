@@ -635,6 +635,35 @@ export function getCallNodePath(
   return callNodePath;
 }
 
+/**
+ * Compute maximum depth of call stack for a given thread.
+ *
+ * Returns the depth of the deepest call node, but with a one-based
+ * depth instead of a zero-based.
+ *
+ * If no samples are found, 0 is returned.
+ */
+export function computeCallNodeMaxDepth(
+  thread: Thread,
+  callNodeInfo: CallNodeInfo
+): number {
+  let maxDepth = 0;
+  const { samples } = thread;
+  const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
+  for (let i = 0; i < samples.length; i++) {
+    const stackIndex = samples.stack[i];
+    if (stackIndex !== null) {
+      const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+      // Change to one-based depth
+      const depth = callNodeTable.depth[callNodeIndex] + 1;
+      if (depth > maxDepth) {
+        maxDepth = depth;
+      }
+    }
+  }
+  return maxDepth;
+}
+
 export function invertCallstack(thread: Thread): Thread {
   return timeCode('invertCallstack', () => {
     const { stackTable, frameTable, samples } = thread;
