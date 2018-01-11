@@ -5,7 +5,7 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import {
   changeHidePlatformDetails,
   changeInvertCallstack,
@@ -16,14 +16,24 @@ import {
 } from '../../reducers/url-state';
 import StackSearchField from '../shared/StackSearchField';
 
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
+
 import './Settings.css';
 
-type Props = {|
-  +hidePlatformDetails: boolean,
+type StateProps = {|
   +invertCallstack: boolean,
-  +changeHidePlatformDetails: boolean => void,
-  +changeInvertCallstack: boolean => void,
+  +hidePlatformDetails: boolean,
 |};
+
+type DispatchProps = {|
+  +changeHidePlatformDetails: typeof changeHidePlatformDetails,
+  +changeInvertCallstack: typeof changeInvertCallstack,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class StackChartSettings extends PureComponent<Props> {
   constructor(props) {
@@ -78,13 +88,15 @@ class StackChartSettings extends PureComponent<Props> {
   }
 }
 
-export default connect(
-  state => ({
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+  mapStateToProps: state => ({
     invertCallstack: getInvertCallstack(state),
     hidePlatformDetails: getHidePlatformDetails(state),
   }),
-  {
+  mapDispatchToProps: {
     changeHidePlatformDetails,
     changeInvertCallstack,
-  }
-)(StackChartSettings);
+  },
+  component: StackChartSettings,
+};
+export default explicitConnect(options);

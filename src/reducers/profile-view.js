@@ -307,7 +307,6 @@ function selection(
 function scrollToSelectionGeneration(state: number = 0, action: Action) {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
-    case 'CHANGE_JS_ONLY':
     case 'CHANGE_SELECTED_CALL_NODE':
     case 'CHANGE_SELECTED_THREAD':
     case 'HIDE_THREAD':

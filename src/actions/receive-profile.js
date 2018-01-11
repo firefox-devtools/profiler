@@ -77,10 +77,16 @@ export function coalescedFunctionsUpdate(
   };
 }
 
-const requestIdleCallbackPolyfill: typeof requestIdleCallback =
-  typeof window === 'object' && window.requestIdleCallback
-    ? window.requestIdleCallback
-    : callback => setTimeout(callback, 0);
+let requestIdleCallbackPolyfill: (
+  callback: () => void,
+  _opts?: { timeout: number }
+) => mixed;
+
+if (typeof window === 'object' && window.requestIdleCallback) {
+  requestIdleCallbackPolyfill = window.requestIdleCallback;
+} else {
+  requestIdleCallbackPolyfill = callback => setTimeout(callback, 0);
+}
 
 class ColascedFunctionsUpdateDispatcher {
   _updates: FunctionsUpdatePerThread;

@@ -312,12 +312,14 @@ export function addTransformToStack(
 }
 
 export function popTransformsFromStack(
-  threadIndex: ThreadIndex,
   firstRemovedFilterIndex: number
-): Action {
-  return {
-    type: 'POP_TRANSFORMS_FROM_STACK',
-    threadIndex,
-    firstRemovedFilterIndex,
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const threadIndex = getSelectedThreadIndex(getState());
+    dispatch({
+      type: 'POP_TRANSFORMS_FROM_STACK',
+      threadIndex,
+      firstRemovedFilterIndex,
+    });
   };
 }

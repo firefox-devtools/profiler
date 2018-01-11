@@ -124,7 +124,8 @@ type ReceiveProfileAction =
 
 type StackChartAction =
   | { type: 'CHANGE_STACK_CHART_COLOR_STRATEGY', getCategory: GetCategory }
-  | { type: 'CHANGE_STACK_CHART_LABELING_STRATEGY', getLabel: GetLabel };
+  | { type: 'CHANGE_STACK_CHART_LABELING_STRATEGY', getLabel: GetLabel }
+  | { type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' };
 
 type UrlEnhancerAction =
   | { type: '@@urlenhancer/urlSetupDone' }

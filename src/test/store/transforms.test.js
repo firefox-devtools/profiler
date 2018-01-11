@@ -69,7 +69,7 @@ describe('"focus-subtree" transform', function() {
     });
 
     it('can remove the transform', function() {
-      dispatch(popTransformsFromStack(threadIndex, 0));
+      dispatch(popTransformsFromStack(0));
       const callTree = selectedThreadSelectors.getCallTree(getState());
       const formattedTree = formatTree(callTree);
       expect(formattedTree).toMatchSnapshot();

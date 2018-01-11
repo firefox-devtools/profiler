@@ -23,38 +23,32 @@ type State = {
 };
 
 class IdleSearchField extends PureComponent<Props, State> {
-  _timeout: number;
+  _timeout: TimeoutID | null = null;
   _previouslyNotifiedValue: string;
 
   constructor(props: Props) {
     super(props);
-    (this: any)._onSearchFieldChange = this._onSearchFieldChange.bind(this);
-    (this: any)._onSearchFieldFocus = this._onSearchFieldFocus.bind(this);
-    (this: any)._onSearchFieldBlur = this._onSearchFieldBlur.bind(this);
-    (this: any)._onClearButtonClick = this._onClearButtonClick.bind(this);
-    (this: any)._onTimeout = this._onTimeout.bind(this);
-    this._timeout = 0;
     this.state = {
       value: props.defaultValue || '',
     };
     this._previouslyNotifiedValue = this.state.value;
   }
 
-  _onSearchFieldFocus(e: SyntheticFocusEvent<HTMLInputElement>) {
+  _onSearchFieldFocus = (e: SyntheticFocusEvent<HTMLInputElement>) => {
     e.currentTarget.select();
 
     if (this.props.onFocus) {
       this.props.onFocus();
     }
-  }
+  };
 
-  _onSearchFieldBlur(e: { relatedTarget: Element | null }) {
+  _onSearchFieldBlur = (e: { relatedTarget: Element | null }) => {
     if (this.props.onBlur) {
       this.props.onBlur(e.relatedTarget);
     }
-  }
+  };
 
-  _onSearchFieldChange(e: SyntheticEvent<HTMLInputElement>) {
+  _onSearchFieldChange = (e: SyntheticEvent<HTMLInputElement>) => {
     this.setState({
       value: e.currentTarget.value,
     });
@@ -63,12 +57,12 @@ class IdleSearchField extends PureComponent<Props, State> {
       clearTimeout(this._timeout);
     }
     this._timeout = setTimeout(this._onTimeout, this.props.idlePeriod);
-  }
+  };
 
-  _onTimeout() {
-    this._timeout = 0;
+  _onTimeout = () => {
+    this._timeout = null;
     this._notifyIfChanged(this.state.value);
-  }
+  };
 
   _notifyIfChanged(value: string) {
     if (value !== this._previouslyNotifiedValue) {
@@ -77,13 +71,15 @@ class IdleSearchField extends PureComponent<Props, State> {
     }
   }
 
-  _onClearButtonClick() {
-    clearTimeout(this._timeout);
-    this._timeout = 0;
+  _onClearButtonClick = () => {
+    if (this._timeout !== null) {
+      clearTimeout(this._timeout);
+      this._timeout = null;
+    }
 
     this.setState({ value: '' });
     this._notifyIfChanged('');
-  }
+  };
 
   _onClearButtonFocus(
     e: SyntheticEvent<HTMLElement> & { relatedTarget: HTMLElement }

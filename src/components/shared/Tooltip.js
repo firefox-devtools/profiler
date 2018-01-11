@@ -124,11 +124,16 @@ export default class Tooltip extends React.PureComponent<Props, State> {
       top: mouseY - offsetY,
     };
 
+    const mountElement = this._mountElement;
+    if (!mountElement) {
+      throw new Error('There should have been a mount element.');
+    }
+
     ReactDOM.render(
       <div className="tooltip" style={style} ref={this._setMountElement}>
         {children}
       </div>,
-      this._mountElement
+      mountElement
     );
   }
 

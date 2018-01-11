@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import type { TabSlug } from '../types/actions';
+
 /**
  * This file contains utils that help Flow understand things better. Occasionally
  * statements can be logically equivalent, but Flow infers them in a specific way. Most
@@ -28,4 +30,20 @@ export function unexpectedCase(notValid: empty): void {
  */
 export function immutableUpdate<T: Object>(object: T, ...rest: Object[]): T {
   return Object.assign({}, object, ...rest);
+}
+
+/**
+ * This function takes a string and returns either a valid TabSlug or null, this doesn't
+ * throw an error so that any arbitrary string can be converted, e.g. from a URL.
+ */
+export function toValidTabSlug(tabSlug: string): TabSlug | null {
+  switch (tabSlug) {
+    case 'calltree':
+    case 'stack-chart':
+    case 'marker-chart':
+    case 'marker-table':
+      return tabSlug;
+    default:
+      return null;
+  }
 }

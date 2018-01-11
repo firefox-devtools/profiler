@@ -5,7 +5,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import { updateProfileSelection } from '../../actions/profile-view';
 import {
   selectedThreadSelectors,
@@ -21,15 +21,24 @@ import type {
   MarkersTable,
 } from '../../types/profile';
 import type { ProfileSelection } from '../../types/actions';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
-type Props = {
-  thread: Thread,
-  selectedMarker: IndexIntoMarkersTable,
-  markers: MarkersTable,
-  updateProfileSelection: typeof updateProfileSelection,
-  displayRange: StartEndRange,
-  selection: ProfileSelection,
-};
+type StateProps = {|
+  +thread: Thread,
+  +markers: MarkersTable,
+  +selection: ProfileSelection,
+  +displayRange: StartEndRange,
+  +selectedMarker: IndexIntoMarkersTable,
+|};
+
+type DispatchProps = {|
+  +updateProfileSelection: typeof updateProfileSelection,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkersContextMenu extends PureComponent<Props> {
   constructor(props: Props) {
@@ -129,8 +138,8 @@ class MarkersContextMenu extends PureComponent<Props> {
   }
 }
 
-export default connect(
-  state => ({
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+  mapStateToProps: state => ({
     thread: selectedThreadSelectors.getThread(state),
     markers: selectedThreadSelectors.getSearchFilteredMarkers(state),
     selection: getProfileViewOptions(state).selection,
@@ -138,5 +147,7 @@ export default connect(
     selectedMarker: selectedThreadSelectors.getViewOptions(state)
       .selectedMarker,
   }),
-  { updateProfileSelection }
-)(MarkersContextMenu);
+  mapDispatchToProps: { updateProfileSelection },
+  component: MarkersContextMenu,
+};
+export default explicitConnect(options);

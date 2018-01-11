@@ -5,7 +5,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 import { getFunctionName } from '../../profile-logic/function-info';
@@ -24,17 +24,26 @@ import type {
   CallNodePath,
 } from '../../types/profile-derived';
 import type { Thread, ThreadIndex } from '../../types/profile';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
-type Props = {
-  thread: Thread,
-  threadIndex: ThreadIndex,
-  callNodeInfo: CallNodeInfo,
-  implementation: ImplementationFilter,
-  selectedCallNodePath: CallNodePath,
-  selectedCallNodeIndex: IndexIntoCallNodeTable,
-  inverted: boolean,
-  addTransformToStack: typeof addTransformToStack,
-};
+type StateProps = {|
+  +thread: Thread,
+  +threadIndex: ThreadIndex,
+  +callNodeInfo: CallNodeInfo,
+  +implementation: ImplementationFilter,
+  +inverted: boolean,
+  +selectedCallNodePath: CallNodePath,
+  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+|};
+
+type DispatchProps = {|
+  +addTransformToStack: typeof addTransformToStack,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 require('./ProfileCallTreeContextMenu.css');
 
@@ -51,6 +60,12 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       callNodeInfo: { callNodeTable },
     } = this.props;
 
+    if (selectedCallNodeIndex === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
+
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
     const stringIndex = funcTable.name[funcIndex];
@@ -66,6 +81,12 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       callNodeInfo: { callNodeTable },
     } = this.props;
 
+    if (selectedCallNodeIndex === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
+
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const stringIndex = funcTable.fileName[funcIndex];
     if (stringIndex !== null) {
@@ -80,6 +101,12 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       thread: { stringTable, funcTable },
       callNodeInfo: { callNodeTable },
     } = this.props;
+
+    if (selectedCallNodeIndex === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
 
     let stack = '';
     let callNodeIndex = selectedCallNodeIndex;
@@ -246,6 +273,13 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       thread: { funcTable },
       callNodeInfo: { callNodeTable },
     } = this.props;
+
+    if (selectedCallNodeIndex === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
+
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
     // This could be the C++ library, or the JS filename.
@@ -321,8 +355,8 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
   }
 }
 
-export default connect(
-  state => ({
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+  mapStateToProps: state => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     threadIndex: getSelectedThreadIndex(state),
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
@@ -335,5 +369,7 @@ export default connect(
       state
     ),
   }),
-  { addTransformToStack }
-)(ProfileCallTreeContextMenu);
+  mapDispatchToProps: { addTransformToStack },
+  component: ProfileCallTreeContextMenu,
+};
+export default explicitConnect(options);

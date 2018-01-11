@@ -4,10 +4,14 @@
 
 // @flow
 import * as React from 'react';
-import withChartViewport from '../shared/chart/Viewport';
+import {
+  withChartViewport,
+  type WithChartViewport,
+} from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import TextMeasurement from '../../utils/text-measurement';
+import { updateProfileSelection } from '../../actions/profile-view';
 import { BLUE_40 } from '../../utils/colors';
 
 import type {
@@ -20,7 +24,7 @@ import type {
   MarkerTimingRows,
   IndexIntoMarkerTiming,
 } from '../../types/profile-derived';
-import type { Action, ProfileSelection } from '../../types/actions';
+import type { Viewport } from '../shared/chart/Viewport';
 
 type MarkerDrawingInformation = {
   x: CssPixels,
@@ -30,25 +34,24 @@ type MarkerDrawingInformation = {
   text: string,
 };
 
-type Props = {
-  rangeStart: Milliseconds,
-  rangeEnd: Milliseconds,
-  containerWidth: CssPixels,
-  containerHeight: CssPixels,
-  viewportLeft: UnitIntervalOfProfileRange,
-  viewportRight: UnitIntervalOfProfileRange,
-  viewportTop: CssPixels,
-  viewportBottom: CssPixels,
-  markerTimingRows: MarkerTimingRows,
-  rowHeight: CssPixels,
-  markers: TracingMarker[],
-  updateProfileSelection: ProfileSelection => Action,
-  isDragging: boolean,
-};
+type OwnProps = {|
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +markerTimingRows: MarkerTimingRows,
+  +rowHeight: CssPixels,
+  +markers: TracingMarker[],
+  +updateProfileSelection: typeof updateProfileSelection,
+|};
 
-type State = {
+type Props = {|
+  ...OwnProps,
+  // Bring in the viewport props from the higher order Viewport component.
+  +viewport: Viewport,
+|};
+
+type State = {|
   hoveredItem: null | number,
-};
+|};
 
 const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
@@ -72,12 +75,14 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     hoveredItem: IndexIntoMarkerTiming | null
   ) {
     const {
-      viewportTop,
-      viewportBottom,
       rowHeight,
-      containerWidth,
-      containerHeight,
       markerTimingRows,
+      viewport: {
+        viewportTop,
+        viewportBottom,
+        containerWidth,
+        containerHeight,
+      },
     } = this.props;
     // Convert CssPixels to Stack Depth
     const startRow = Math.floor(viewportTop / rowHeight);
@@ -153,12 +158,9 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const {
       rangeStart,
       rangeEnd,
-      containerWidth,
       markerTimingRows,
       rowHeight,
-      viewportLeft,
-      viewportRight,
-      viewportTop,
+      viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
     } = this.props;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
@@ -236,8 +238,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const {
       markerTimingRows,
       rowHeight,
-      viewportTop,
-      containerWidth,
+      viewport: { viewportTop, containerWidth },
     } = this.props;
 
     // Draw separators
@@ -283,11 +284,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       rangeStart,
       rangeEnd,
       markerTimingRows,
-      viewportLeft,
-      viewportRight,
-      viewportTop,
-      containerWidth,
       rowHeight,
+      viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
@@ -358,7 +356,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { containerWidth, containerHeight, isDragging } = this.props;
+    const { containerWidth, containerHeight, isDragging } = this.props.viewport;
 
     return (
       <ChartCanvas
@@ -375,4 +373,6 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
   }
 }
 
-export default withChartViewport(MarkerChartCanvas);
+export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
+  MarkerChartCanvas
+);

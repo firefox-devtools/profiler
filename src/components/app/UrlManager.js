@@ -4,26 +4,39 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import { getIsUrlSetupDone } from '../../reducers/app';
 import { updateUrlState, urlSetupDone, show404 } from '../../actions/app';
+import { urlFromState, stateFromLocation } from '../../url-handling';
 
-type Props = {
-  stateFromLocation: Location => any,
-  urlFromState: any => string,
-  children: any,
-  urlState: any,
-  isUrlSetupDone: boolean,
-  updateUrlState: string => void,
-  urlSetupDone: void => void,
-  show404: string => void,
-};
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
+import type { UrlState } from '../../types/reducers';
 
-class UrlManager extends PureComponent<Props> {
+type StateProps = {|
+  +urlState: UrlState,
+  +isUrlSetupDone: boolean,
+|};
+
+type DispatchProps = {|
+  +updateUrlState: typeof updateUrlState,
+  +urlSetupDone: typeof urlSetupDone,
+  +show404: typeof show404,
+|};
+
+type OwnProps = {|
+  +children: React.Node,
+|};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+
+class UrlManager extends React.PureComponent<Props> {
   _updateState() {
-    const { updateUrlState, stateFromLocation, show404 } = this.props;
+    const { updateUrlState, show404 } = this.props;
     if (window.history.state) {
       updateUrlState(window.history.state);
     } else {
@@ -43,7 +56,7 @@ class UrlManager extends PureComponent<Props> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    const { urlFromState, isUrlSetupDone } = this.props;
+    const { isUrlSetupDone } = this.props;
     const newUrl = urlFromState(nextProps.urlState);
     if (newUrl !== window.location.pathname + window.location.search) {
       if (isUrlSetupDone) {
@@ -63,8 +76,6 @@ class UrlManager extends PureComponent<Props> {
 }
 
 UrlManager.propTypes = {
-  stateFromLocation: PropTypes.func.isRequired,
-  urlFromState: PropTypes.func.isRequired,
   children: PropTypes.any.isRequired,
   urlState: PropTypes.object.isRequired,
   isUrlSetupDone: PropTypes.bool.isRequired,
@@ -73,14 +84,17 @@ UrlManager.propTypes = {
   show404: PropTypes.func.isRequired,
 };
 
-export default connect(
-  state => ({
+const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+  mapStateToProps: state => ({
     urlState: state.urlState,
     isUrlSetupDone: getIsUrlSetupDone(state),
   }),
-  {
+  mapDispatchToProps: {
     updateUrlState,
     urlSetupDone,
     show404,
-  }
-)(UrlManager);
+  },
+  component: UrlManager,
+};
+
+export default explicitConnect(options);

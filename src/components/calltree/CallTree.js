@@ -5,7 +5,7 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import NodeIcon from './NodeIcon';
 import { getCallNodePath } from '../../profile-logic/profile-data';
@@ -38,25 +38,34 @@ import type {
   CallNodeDisplayData,
 } from '../../types/profile-derived';
 import type { Column } from '../shared/TreeView';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
-type Props = {
-  threadIndex: ThreadIndex,
-  scrollToSelectionGeneration: number,
-  focusCallTreeGeneration: number,
-  tree: CallTree,
-  callNodeInfo: CallNodeInfo,
-  selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
-  searchStringsRegExp: RegExp,
-  disableOverscan: boolean,
-  callNodeMaxDepth: number,
-  implementationFilter: ImplementationFilter,
-  invertCallstack: boolean,
-  icons: IconWithClassName[],
-  changeSelectedCallNode: typeof changeSelectedCallNode,
-  changeExpandedCallNodes: typeof changeExpandedCallNodes,
-  addTransformToStack: typeof addTransformToStack,
-};
+type StateProps = {|
+  +threadIndex: ThreadIndex,
+  +scrollToSelectionGeneration: number,
+  +focusCallTreeGeneration: number,
+  +tree: CallTree,
+  +callNodeInfo: CallNodeInfo,
+  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
+  +searchStringsRegExp: RegExp | null,
+  +disableOverscan: boolean,
+  +invertCallstack: boolean,
+  +implementationFilter: ImplementationFilter,
+  +icons: IconWithClassName[],
+  +callNodeMaxDepth: number,
+|};
+
+type DispatchProps = {|
+  +changeSelectedCallNode: typeof changeSelectedCallNode,
+  +changeExpandedCallNodes: typeof changeExpandedCallNodes,
+  +addTransformToStack: typeof addTransformToStack,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class CallTreeComponent extends PureComponent<Props> {
   _fixedColumns: Column[];
@@ -209,8 +218,8 @@ class CallTreeComponent extends PureComponent<Props> {
   }
 }
 
-export default connect(
-  (state: State) => ({
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+  mapStateToProps: (state: State) => ({
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     focusCallTreeGeneration: getFocusCallTreeGeneration(state),
@@ -229,11 +238,13 @@ export default connect(
     icons: getIconsWithClassNames(state),
     callNodeMaxDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
   }),
-  {
+  mapDispatchToProps: {
     changeSelectedCallNode,
     changeExpandedCallNodes,
     addTransformToStack,
   },
-  null,
-  { withRef: true }
-)(CallTreeComponent);
+  options: { withRef: true },
+  component: CallTreeComponent,
+};
+
+export default explicitConnect(options);

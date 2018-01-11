@@ -14,7 +14,8 @@ export default function mockCanvasContext() {
    * important for canvas rendering.
    */
   function spyLog(name: string, fn: MaybeFn = identity) {
-    return jest.fn((...args) => {
+    // This function is extremely polymorphic and defies typing.
+    return (jest.fn: any)((...args) => {
       log.push([name, ...args]);
       if (fn) {
         return fn(...args);

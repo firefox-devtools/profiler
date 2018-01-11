@@ -13,25 +13,32 @@ import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import type { Milliseconds, CssPixels } from '../../types/units';
 import type { TracingMarker } from '../../types/profile-derived';
 import type { SizeProps } from '../shared/WithSize';
+import type { ConnectedProps } from '../../utils/connect';
 
 type MarkerState = 'PRESSED' | 'HOVERED' | 'NONE';
 
-type Props = SizeProps & {|
-  className: string,
-  rangeStart: Milliseconds,
-  rangeEnd: Milliseconds,
-  intervalMarkers: TracingMarker[],
-  threadIndex: number,
-  threadName: string,
-  onSelect: any,
-  styles: any,
-  isSelected: boolean,
-  isModifyingSelection: boolean,
-  overlayFills: {
-    HOVERED: string,
-    PRESSED: string,
+// Typically this component is wrapped in a connect function, but in other files.
+export type OwnProps = {|
+  +className: string,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +threadIndex: number,
+  +onSelect: any,
+  +isModifyingSelection: boolean,
+|};
+
+export type StateProps = {|
+  +intervalMarkers: TracingMarker[],
+  +isSelected: boolean,
+  +threadName: string,
+  +styles: any,
+  +overlayFills: {
+    +HOVERED: string,
+    +PRESSED: string,
   },
 |};
+
+type Props = ConnectedProps<SizeProps, OwnProps, StateProps>;
 
 type State = {
   hoveredItem: TracingMarker | null,
