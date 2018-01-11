@@ -293,6 +293,53 @@ describe('process-profile', function() {
       expect(profile.threads.length).toEqual(3);
     });
   });
+  describe('extensions metadata', function() {
+    it('should be processed correctly', function() {
+      const geckoProfile = getGeckoProfile();
+      geckoProfile.meta.extensions = {
+        schema: {
+          id: 0,
+          name: 1,
+          baseURL: 2,
+        },
+        data: [
+          [
+            'geckoprofiler@mozilla.com',
+            'Gecko Profiler',
+            'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/',
+          ],
+          [
+            'screenshots@mozilla.org',
+            'Firefox Screenshots',
+            'moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/',
+          ],
+        ],
+      };
+
+      const profile = processProfile(geckoProfile);
+      expect(profile.meta.extensions).toEqual({
+        baseURL: [
+          'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/',
+          'moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/',
+        ],
+        id: ['geckoprofiler@mozilla.com', 'screenshots@mozilla.org'],
+        name: ['Gecko Profiler', 'Firefox Screenshots'],
+        length: 2,
+      });
+    });
+    it('should be handled correctly if missing', function() {
+      const geckoProfile = getGeckoProfile();
+      delete geckoProfile.meta.extensions;
+
+      const profile = processProfile(geckoProfile);
+      expect(profile.meta.extensions).toEqual({
+        baseURL: [],
+        id: [],
+        name: [],
+        length: 0,
+      });
+    });
+  });
 });
 
 describe('profile-data', function() {

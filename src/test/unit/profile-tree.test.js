@@ -5,6 +5,7 @@
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import {
   getCallTree,
+  getOriginAnnotation,
   computeCallTreeCountsAndTimings,
   CallTree,
 } from '../../profile-logic/call-tree';
@@ -307,5 +308,82 @@ describe('inverted call tree', function() {
     it('computes an inverted call tree', function() {
       expect(formatTree(callTree)).toMatchSnapshot();
     });
+  });
+});
+
+describe('origin annotation', function() {
+  const {
+    profile: { threads: [thread] },
+    funcNamesPerThread: [funcNames],
+  } = getProfileFromTextSamples(`
+    A
+    B
+    C
+    D
+  `);
+
+  function addResource(
+    funcName: string,
+    name: string,
+    host: string | null,
+    location: string | null
+  ) {
+    const resourceIndex = thread.resourceTable.length;
+    const funcIndex = funcNames.indexOf(funcName);
+    thread.funcTable.resource[funcIndex] = resourceIndex;
+    thread.funcTable.fileName[funcIndex] = location
+      ? thread.stringTable.indexForString(location)
+      : null;
+    thread.resourceTable.lib.push(-1);
+    thread.resourceTable.name.push(thread.stringTable.indexForString(name));
+    thread.resourceTable.host.push(
+      host ? thread.stringTable.indexForString(host) : undefined
+    );
+    thread.resourceTable.length++;
+  }
+
+  addResource(
+    'A',
+    'http://foobar.com',
+    'http://foobar.com',
+    'http://foobar.com/script.js'
+  );
+
+  addResource(
+    'B',
+    'Extension "Gecko Profiler"',
+    'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85',
+    'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/script.js'
+  );
+
+  addResource('C', 'libxul.so', null, '/home/user/mozilla-central/xul.cpp');
+
+  addResource('D', 'libxul.so', null, null);
+
+  function getOrigin(funcName: string): string {
+    return getOriginAnnotation(
+      thread.resourceTable,
+      thread.stringTable,
+      thread.funcTable,
+      funcNames.indexOf(funcName)
+    );
+  }
+
+  it('formats web origins correctly', function() {
+    expect(getOrigin('A')).toEqual('http://foobar.com/script.js');
+  });
+
+  it('formats extension origins correctly', function() {
+    expect(getOrigin('B')).toEqual(
+      'Extension "Gecko Profiler": ' +
+        'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/script.js'
+    );
+  });
+
+  it('formats library origins correctly', function() {
+    expect(getOrigin('C')).toEqual(
+      'libxul.so: /home/user/mozilla-central/xul.cpp'
+    );
+    expect(getOrigin('D')).toEqual('libxul.so');
   });
 });

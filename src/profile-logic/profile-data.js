@@ -8,6 +8,7 @@ import type {
   Thread,
   SamplesTable,
   StackTable,
+  ExtensionTable,
   FrameTable,
   FuncTable,
   MarkersTable,
@@ -48,6 +49,13 @@ export const resourceTypes = {
   otherhost: 4,
   url: 5,
 };
+
+export const emptyExtensions: ExtensionTable = Object.freeze({
+  id: Object.freeze([]),
+  name: Object.freeze([]),
+  baseURL: Object.freeze([]),
+  length: 0,
+});
 
 /**
  * Generate the CallNodeInfo which contains the CallNodeTable, and a map to convert
@@ -1062,6 +1070,7 @@ export function getEmptyProfile(): Profile {
       oscpu: '',
       platform: '',
       processType: 0,
+      extensions: emptyExtensions,
       product: 'Firefox',
       stackwalk: 0,
       toolkit: '',

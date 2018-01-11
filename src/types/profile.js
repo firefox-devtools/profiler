@@ -173,6 +173,13 @@ export type Thread = {
   resourceTable: ResourceTable,
 };
 
+export type ExtensionTable = {|
+  baseURL: string[],
+  id: string[],
+  name: string[],
+  length: number,
+|};
+
 /**
  * Meta information associated for the entire profile.
  */
@@ -184,6 +191,7 @@ export type ProfileMeta = {|
   oscpu: string,
   platform: string,
   processType: number, // TODO find the possible values
+  extensions?: ExtensionTable,
   product: string,
   stackwalk: number,
   toolkit: string,
