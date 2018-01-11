@@ -1,10 +1,12 @@
+// flow-typed signature: 7242133add1d3bd16fc3e9d648152c63
+// flow-typed version: 00301f0d29/reselect_v3.x.x/flow_>=v0.47.x
+
 // flow-typed signature: 0199525b667f385f2e61dbeae3215f21
 // flow-typed version: b43dff3e0e/reselect_v3.x.x/flow_>=v0.28.x
 
-declare module 'reselect' {
-  declare type Selector<-TState, TProps, TResult> = {
-    (state: TState, props: TProps, ...rest: any[]): TResult,
-  };
+declare module "reselect" {
+  declare type Selector<-TState, TProps, TResult> =
+    (state: TState, props: TProps, ...rest: any[]) => TResult
 
   declare type SelectorCreator = {
     <TState, TProps, TResult, T1>(
@@ -36,7 +38,7 @@ declare module 'reselect' {
       selectors: [
         Selector<TState, TProps, T1>,
         Selector<TState, TProps, T2>,
-        Selector<TState, TProps, T3>,
+        Selector<TState, TProps, T3>
       ],
       resultFunc: (arg1: T1, arg2: T2, arg3: T3) => TResult
     ): Selector<TState, TProps, TResult>,
@@ -53,7 +55,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T1>,
         Selector<TState, TProps, T2>,
         Selector<TState, TProps, T3>,
-        Selector<TState, TProps, T4>,
+        Selector<TState, TProps, T4>
       ],
       resultFunc: (arg1: T1, arg2: T2, arg3: T3, arg4: T4) => TResult
     ): Selector<TState, TProps, TResult>,
@@ -72,7 +74,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T2>,
         Selector<TState, TProps, T3>,
         Selector<TState, TProps, T4>,
-        Selector<TState, TProps, T5>,
+        Selector<TState, TProps, T5>
       ],
       resultFunc: (arg1: T1, arg2: T2, arg3: T3, arg4: T4, arg5: T5) => TResult
     ): Selector<TState, TProps, TResult>,
@@ -100,7 +102,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T3>,
         Selector<TState, TProps, T4>,
         Selector<TState, TProps, T5>,
-        Selector<TState, TProps, T6>,
+        Selector<TState, TProps, T6>
       ],
       resultFunc: (
         arg1: T1,
@@ -138,7 +140,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T4>,
         Selector<TState, TProps, T5>,
         Selector<TState, TProps, T6>,
-        Selector<TState, TProps, T7>,
+        Selector<TState, TProps, T7>
       ],
       resultFunc: (
         arg1: T1,
@@ -180,7 +182,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T5>,
         Selector<TState, TProps, T6>,
         Selector<TState, TProps, T7>,
-        Selector<TState, TProps, T8>,
+        Selector<TState, TProps, T8>
       ],
       resultFunc: (
         arg1: T1,
@@ -226,7 +228,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T6>,
         Selector<TState, TProps, T7>,
         Selector<TState, TProps, T8>,
-        Selector<TState, TProps, T9>,
+        Selector<TState, TProps, T9>
       ],
       resultFunc: (
         arg1: T1,
@@ -276,7 +278,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T7>,
         Selector<TState, TProps, T8>,
         Selector<TState, TProps, T9>,
-        Selector<TState, TProps, T10>,
+        Selector<TState, TProps, T10>
       ],
       resultFunc: (
         arg1: T1,
@@ -330,7 +332,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T8>,
         Selector<TState, TProps, T9>,
         Selector<TState, TProps, T10>,
-        Selector<TState, TProps, T11>,
+        Selector<TState, TProps, T11>
       ],
       resultFunc: (
         arg1: T1,
@@ -420,7 +422,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T9>,
         Selector<TState, TProps, T10>,
         Selector<TState, TProps, T11>,
-        Selector<TState, TProps, T12>,
+        Selector<TState, TProps, T12>
       ],
       resultFunc: (
         arg1: T1,
@@ -516,7 +518,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T10>,
         Selector<TState, TProps, T11>,
         Selector<TState, TProps, T12>,
-        Selector<TState, TProps, T13>,
+        Selector<TState, TProps, T13>
       ],
       resultFunc: (
         arg1: T1,
@@ -618,7 +620,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T11>,
         Selector<TState, TProps, T12>,
         Selector<TState, TProps, T13>,
-        Selector<TState, TProps, T14>,
+        Selector<TState, TProps, T14>
       ],
       resultFunc: (
         arg1: T1,
@@ -726,7 +728,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T12>,
         Selector<TState, TProps, T13>,
         Selector<TState, TProps, T14>,
-        Selector<TState, TProps, T15>,
+        Selector<TState, TProps, T15>
       ],
       resultFunc: (
         arg1: T1,
@@ -840,7 +842,7 @@ declare module 'reselect' {
         Selector<TState, TProps, T13>,
         Selector<TState, TProps, T14>,
         Selector<TState, TProps, T15>,
-        Selector<TState, TProps, T16>,
+        Selector<TState, TProps, T16>
       ],
       resultFunc: (
         arg1: T1,
@@ -860,7 +862,7 @@ declare module 'reselect' {
         arg15: T15,
         arg16: T16
       ) => TResult
-    ): Selector<TState, TProps, TResult>,
+    ): Selector<TState, TProps, TResult>
   };
 
   declare type Reselect = {
@@ -878,11 +880,11 @@ declare module 'reselect' {
 
     createStructuredSelector: <TState, TProps>(
       inputSelectors: {
-        [k: string | number]: Selector<TState, TProps, any>,
+        [k: string | number]: Selector<TState, TProps, any>
       },
       selectorCreator?: SelectorCreator
-    ) => Selector<TState, TProps, any>,
+    ) => Selector<TState, TProps, any>
   };
 
-  declare var exports: Reselect;
+  declare module.exports: Reselect;
 }
