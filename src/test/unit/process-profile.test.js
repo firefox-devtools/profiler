@@ -21,6 +21,12 @@ describe('extract functions and resource from location strings', function() {
     'jsFunction1 (http://script.com/one.js:456)',
     'http://script.com/one.js:456',
 
+    // Extension locations
+    'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:1',
+    'moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:1',
+    'backgroundFunction (moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:2)',
+    'contentfunction (moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:2)',
+
     // Something unknown
     'mysterious location',
   ];
@@ -42,6 +48,15 @@ describe('extract functions and resource from location strings', function() {
   const locationIndexes = locations.map(location =>
     stringTable.indexForString(location)
   );
+  const extensions = {
+    baseURL: [
+      'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/',
+      'moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/',
+    ],
+    id: ['geckoprofiler@mozilla.com', 'screenshots@mozilla.org'],
+    name: ['Gecko Profiler', 'Firefox Screenshots'],
+    length: 2,
+  };
 
   it('extracts the information for all different types of locations', function() {
     const [
@@ -51,7 +66,8 @@ describe('extract functions and resource from location strings', function() {
     ] = extractFuncsAndResourcesFromFrameLocations(
       locationIndexes,
       stringTable,
-      libs
+      libs,
+      extensions
     );
 
     expect(

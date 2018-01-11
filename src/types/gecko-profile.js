@@ -130,12 +130,22 @@ export type GeckoThread = {
   stringTable: string[],
 };
 
+export type GeckoExtensionMeta = {|
+  schema: {|
+    id: 0,
+    name: 1,
+    baseURL: 2,
+  |},
+  data: Array<[string, string, string]>,
+|};
+
 export type GeckoProfile = {|
   meta: {|
     interval: Milliseconds,
     startTime: Milliseconds,
     shutdownTime: Milliseconds | null,
     abi: string,
+    extensions?: GeckoExtensionMeta,
     misc: string,
     oscpu: string,
     platform: string,
