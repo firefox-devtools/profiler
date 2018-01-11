@@ -5,7 +5,7 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import ThreadStackGraph from './ThreadStackGraph';
 import { selectorsForThread } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
@@ -32,28 +32,39 @@ import type {
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { State } from '../../types/reducers';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
-type Props = {
+type OwnProps = {|
   +threadIndex: ThreadIndex,
-  +thread: Thread,
-  +callNodeInfo: CallNodeInfo,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable,
-  +isSelected: boolean,
   +isHidden: boolean,
   +isModifyingSelection: boolean,
-  +style: Object,
+|};
+
+type StateProps = {|
+  +thread: Thread,
   +threadName: string,
   +processDetails: string,
+  +callNodeInfo: CallNodeInfo,
+  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +isSelected: boolean,
+  +unfilteredSamplesRange: StartEndRange | null,
+|};
+
+type DispatchProps = {|
   +changeSelectedThread: typeof changeSelectedThread,
   +changeRightClickedThread: typeof changeRightClickedThread,
   +updateProfileSelection: typeof updateProfileSelection,
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
-  +unfilteredSamplesRange: StartEndRange | null,
-};
+|};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class ProfileThreadHeaderBar extends PureComponent<Props> {
   constructor(props) {
@@ -144,7 +155,6 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
       callNodeInfo,
       selectedCallNodeIndex,
       isSelected,
-      style,
       threadName,
       processDetails,
       isHidden,
@@ -171,7 +181,6 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
       <li
         className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')}
         onClick={this._onLineClick}
-        style={style}
       >
         <ContextMenuTrigger
           id={'ProfileThreadHeaderContextMenu'}
@@ -230,9 +239,9 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
   }
 }
 
-export default connect(
-  (state: State, props) => {
-    const threadIndex: ThreadIndex = props.index;
+const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+  mapStateToProps: (state: State, ownProps: OwnProps) => {
+    const { threadIndex } = ownProps;
     const selectors = selectorsForThread(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
     return {
@@ -245,15 +254,16 @@ export default connect(
           ? selectors.getSelectedCallNodeIndex(state)
           : -1,
       isSelected: threadIndex === selectedThread,
-      threadIndex,
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
     };
   },
-  {
+  mapDispatchToProps: {
     changeSelectedThread,
     updateProfileSelection,
     changeRightClickedThread,
     changeSelectedCallNode,
     focusCallTree,
-  }
-)(ProfileThreadHeaderBar);
+  },
+  component: ProfileThreadHeaderBar,
+};
+export default explicitConnect(options);

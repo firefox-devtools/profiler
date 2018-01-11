@@ -10,12 +10,12 @@ import classNames from 'classnames';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './FilterNavigatorBar.css';
 
-type Props = {
-  className: string,
-  items: string[],
-  onPop: number => *,
-  selectedItem: number,
-};
+type Props = {|
+  +className: string,
+  +items: string[],
+  +onPop: number => *,
+  +selectedItem: number,
+|};
 
 class FilterNavigatorBar extends PureComponent<Props> {
   constructor(props: Props) {

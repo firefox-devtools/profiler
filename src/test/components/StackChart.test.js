@@ -16,7 +16,7 @@ jest.useFakeTimers();
 
 it('renders StackChartGraph correctly', () => {
   // Tie the requestAnimationFrame into jest's fake timers.
-  window.requestAnimationFrame = fn => setTimeout(fn, 0);
+  (window: any).requestAnimationFrame = fn => setTimeout(fn, 0);
   window.devicePixelRatio = 1;
   const ctx = mockCanvasContext();
 
@@ -53,7 +53,7 @@ it('renders StackChartGraph correctly', () => {
 
   const stackChart = renderer.create(
     <Provider store={store}>
-      <StackChartGraph threadIndex={0} viewHeight={1000} />
+      <StackChartGraph />
     </Provider>,
     { createNodeMock }
   );

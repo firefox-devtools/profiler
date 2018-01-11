@@ -4,8 +4,7 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import actions from '../../actions';
+import explicitConnect from '../../utils/connect';
 import {
   getTasksByThread,
   getProfileTaskTracerData,
@@ -170,10 +169,12 @@ ProfileTaskTracerView.propTypes = {
   rangeEnd: PropTypes.number.isRequired,
 };
 
-export default connect(
-  state => ({
+// There is no type coverage for this connect function as it needs
+// type annotations with ExplicitConnectOptions.
+export default explicitConnect({
+  mapStateToProps: state => ({
     tasktracer: getProfileTaskTracerData(state),
     tasksByThread: getTasksByThread(state),
   }),
-  actions
-)(ProfileTaskTracerView);
+  component: ProfileTaskTracerView,
+});

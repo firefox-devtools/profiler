@@ -16,9 +16,14 @@ import ReactDOM from 'react-dom';
 import type { Profile } from '../../types/profile';
 
 jest.useFakeTimers();
-ReactDOM.findDOMNode = jest.fn(() => ({
-  getBoundingClientRect: () => getBoundingBox(300, 300),
-}));
+ReactDOM.findDOMNode = jest.fn(() => {
+  // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
+  // opt out of the type checker for this mock by returning `any`.
+  const mockEl = ({
+    getBoundingClientRect: () => getBoundingBox(300, 300),
+  }: any);
+  return mockEl;
+});
 
 function _getProfileWithDroppedSamples(): Profile {
   const { profile } = getProfileFromTextSamples(
@@ -69,7 +74,7 @@ function _getProfileWithDroppedSamples(): Profile {
 
 describe('calltree/ProfileViewerHeader', function() {
   it('renders the header', () => {
-    window.requestAnimationFrame = fn => setTimeout(fn, 0);
+    (window: any).requestAnimationFrame = fn => setTimeout(fn, 0);
     window.devicePixelRatio = 1;
     const ctx = mockCanvasContext();
     /**

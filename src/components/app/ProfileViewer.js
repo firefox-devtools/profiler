@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import TabBar from './TabBar';
 import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
 import MarkerTable from '../marker-table';
@@ -16,7 +16,7 @@ import ProfileSharing from './ProfileSharing';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import StackChart from '../stack-chart/';
 import MarkerChart from '../marker-chart/';
-import actions from '../../actions';
+import { changeSelectedTab, changeTabOrder } from '../../actions/app';
 import {
   getProfileViewOptions,
   getDisplayRange,
@@ -27,21 +27,30 @@ import ProfileCallTreeContextMenu from '../calltree/ProfileCallTreeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
 import FooterLinks from './FooterLinks';
+import { toValidTabSlug } from '../../utils/flow';
 
 import type { StartEndRange } from '../../types/units';
 import type { Tab } from './TabBar';
-import type { Action } from '../../types/actions';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
 require('./ProfileViewer.css');
 
-type Props = {
-  className: string,
-  tabOrder: number[],
-  timeRange: StartEndRange,
-  selectedTab: string,
-  changeSelectedTab: string => void,
-  changeTabOrder: (number[]) => Action,
-};
+type StateProps = {|
+  +tabOrder: number[],
+  +selectedTab: string,
+  +className: string,
+  +timeRange: StartEndRange,
+|};
+
+type DispatchProps = {|
+  +changeSelectedTab: typeof changeSelectedTab,
+  +changeTabOrder: typeof changeTabOrder,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class ProfileViewer extends PureComponent<Props> {
   _tabs: Tab[];
@@ -72,7 +81,11 @@ class ProfileViewer extends PureComponent<Props> {
 
   _onSelectTab(selectedTab: string) {
     const { changeSelectedTab } = this.props;
-    changeSelectedTab(selectedTab);
+    const tabSlug = toValidTabSlug(selectedTab);
+    if (!tabSlug) {
+      throw new Error('Attempted to change to a tab that does not exist.');
+    }
+    changeSelectedTab(tabSlug);
   }
 
   render() {
@@ -131,12 +144,18 @@ ProfileViewer.propTypes = {
   changeTabOrder: PropTypes.func.isRequired,
 };
 
-export default connect(
-  state => ({
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+  mapStateToProps: state => ({
     tabOrder: getProfileViewOptions(state).tabOrder,
     selectedTab: getSelectedTab(state),
     className: 'profileViewer',
     timeRange: getDisplayRange(state),
   }),
-  actions
-)(ProfileViewer);
+  mapDispatchToProps: {
+    changeSelectedTab,
+    changeTabOrder,
+  },
+  component: ProfileViewer,
+};
+
+export default explicitConnect(options);

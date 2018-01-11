@@ -4,7 +4,7 @@
 
 // @flow
 
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import IntervalMarkerOverview from './IntervalMarkerOverview';
 import { selectorsForThread } from '../../reducers/profile-view';
 import {
@@ -13,18 +13,25 @@ import {
 } from '../../profile-logic/interval-marker-styles';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 
-export default connect((state, props) => {
-  const { threadIndex } = props;
-  const selectors = selectorsForThread(threadIndex);
-  const selectedThread = getSelectedThreadIndex(state);
-  const intervalMarkers = selectors.getRangeSelectionFilteredTracingMarkersForHeader(
-    state
-  );
-  return {
-    intervalMarkers,
-    threadName: selectors.getFriendlyThreadName(state),
-    isSelected: threadIndex === selectedThread,
-    styles,
-    overlayFills,
-  };
-})(IntervalMarkerOverview);
+import type { ExplicitConnectOptions } from '../../utils/connect';
+import type { StateProps, OwnProps } from './IntervalMarkerOverview';
+
+const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+  mapStateToProps: (state, props) => {
+    const { threadIndex } = props;
+    const selectors = selectorsForThread(threadIndex);
+    const selectedThread = getSelectedThreadIndex(state);
+    const intervalMarkers = selectors.getRangeSelectionFilteredTracingMarkersForHeader(
+      state
+    );
+    return {
+      intervalMarkers,
+      threadName: selectors.getFriendlyThreadName(state),
+      isSelected: threadIndex === selectedThread,
+      styles,
+      overlayFills,
+    };
+  },
+  component: IntervalMarkerOverview,
+};
+export default explicitConnect(options);

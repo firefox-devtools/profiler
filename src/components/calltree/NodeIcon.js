@@ -6,19 +6,33 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-
+import explicitConnect from '../../utils/connect';
 import { getIconClassNameForCallNode } from '../../reducers/icons';
-import actions from '../../actions';
+import { iconStartLoading } from '../../actions/icons';
 
-type Props = {
-  className: string,
-  icon: string,
-  iconStartLoading: string => void,
-};
+import type { CallNodeDisplayData } from '../../types/profile-derived';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
+
+type OwnProps = {|
+  +displayData: CallNodeDisplayData,
+|};
+
+type StateProps = {|
+  +className: string,
+  +icon: string | null,
+|};
+
+type DispatchProps = {|
+  +iconStartLoading: typeof iconStartLoading,
+|};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class NodeIcon extends PureComponent<Props> {
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     if (props.icon) {
       props.iconStartLoading(props.icon);
@@ -32,7 +46,7 @@ class NodeIcon extends PureComponent<Props> {
   }
 
   render() {
-    return <div className={`treeRowIcon ${this.props.className || ''}`} />;
+    return <div className={`treeRowIcon ${this.props.className}`} />;
   }
 }
 
@@ -42,10 +56,12 @@ NodeIcon.propTypes = {
   iconStartLoading: PropTypes.func.isRequired,
 };
 
-export default connect(
-  (state, { displayData }) => ({
+const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+  mapStateToProps: (state, { displayData }) => ({
     className: getIconClassNameForCallNode(state, displayData),
     icon: displayData.icon,
   }),
-  actions
-)(NodeIcon);
+  mapDispatchToProps: { iconStartLoading },
+  component: NodeIcon,
+};
+export default explicitConnect(options);

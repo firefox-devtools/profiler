@@ -7,10 +7,12 @@ import * as React from 'react';
 import { findDOMNode } from 'react-dom';
 import type { CssPixels } from '../../types/units';
 
-export type SizeProps = {|
+type State = {|
   width: CssPixels,
   height: CssPixels,
 |};
+
+export type SizeProps = $ReadOnly<State>;
 
 /**
  * Wraps a React component and makes 'width' and 'height' available in the
@@ -22,16 +24,22 @@ export type SizeProps = {|
  * Note that the props are *not* updated if the size of the element changes
  * for reasons other than a window resize.
  */
-export function withSize<WrappedProps: Object>(
-  Wrapped: React.ComponentType<{ ...WrappedProps, ...SizeProps }>
-): React.ComponentType<{ ...WrappedProps }> {
-  return class WithSizeWrapper extends React.PureComponent<*, SizeProps> {
+export function withSize<
+  // The SizeProps act as a bounds on the generic props. This ensures that the props
+  // that passed in take into account they are being given the width and height.
+  Props: $ReadOnly<{ ...SizeProps }>
+>(
+  Wrapped: React.ComponentType<Props>
+): React.ComponentType<
+  // The component that is returned does not accept width and height parameters, as
+  // they are injected by this higher order component.
+  $ReadOnly<$Diff<Props, SizeProps>>
+> {
+  return class WithSizeWrapper extends React.PureComponent<*, State> {
     _resizeListener: Event => void;
     state = { width: 0, height: 0 };
 
-    _observeSize = (
-      wrappedComponent: React.Component<{ ...WrappedProps, ...SizeProps }>
-    ) => {
+    _observeSize = (wrappedComponent: React.Component<any> | null) => {
       if (!wrappedComponent) {
         return;
       }

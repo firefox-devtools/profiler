@@ -23,7 +23,7 @@ type Props = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +callNodeInfo: CallNodeInfo,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable,
+  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +className: string,
   +onStackClick: (time: Milliseconds) => void,
 |};

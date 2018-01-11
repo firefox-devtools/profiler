@@ -4,15 +4,22 @@
 
 // @flow
 
-import { connect } from 'react-redux';
-import actions from '../../actions';
+import explicitConnect from '../../utils/connect';
+import { popRangeFiltersAndUnsetSelection } from '../../actions/profile-view';
 import { getRangeFilterLabels } from '../../reducers/url-state';
 import FilterNavigatorBar from '../calltree/FilterNavigatorBar';
 
-import type { State } from '../../types/reducers';
+import type { ExplicitConnectOptions } from '../../utils/connect';
+import type { ElementProps } from 'react';
 
-export default connect(
-  (state: State) => {
+type Props = ElementProps<typeof FilterNavigatorBar>;
+type DispatchProps = {|
+  +onPop: $PropertyType<Props, 'onPop'>,
+|};
+type StateProps = $ReadOnly<$Exact<$Diff<Props, DispatchProps>>>;
+
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+  mapStateToProps: state => {
     const items = getRangeFilterLabels(state);
     return {
       className: 'profileFilterNavigator',
@@ -20,7 +27,10 @@ export default connect(
       selectedItem: items.length - 1,
     };
   },
-  {
-    onPop: actions.popRangeFiltersAndUnsetSelection,
-  }
-)(FilterNavigatorBar);
+  mapDispatchToProps: {
+    onPop: popRangeFiltersAndUnsetSelection,
+  },
+  component: FilterNavigatorBar,
+};
+
+export default explicitConnect(options);

@@ -77,7 +77,7 @@ function rangeFilters(state: StartEndRange[] = [], action: Action) {
   }
 }
 
-function selectedThread(state: ThreadIndex = 0, action: Action) {
+function selectedThread(state: ThreadIndex = 0, action: Action): ThreadIndex {
   function findDefaultThreadIndex(threads) {
     const contentThreadId = threads.findIndex(
       thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
