@@ -35,9 +35,11 @@ export type ProfileViewState = {
     waitingForLibs: Set<RequestedLib>,
     selection: ProfileSelection,
     scrollToSelectionGeneration: number,
+    focusCallTreeGeneration: number,
     rootRange: StartEndRange,
     zeroAt: Milliseconds,
     tabOrder: number[],
+    rightClickedThread: ThreadIndex,
   },
   profile: Profile,
 };

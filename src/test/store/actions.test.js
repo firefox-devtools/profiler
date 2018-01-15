@@ -141,6 +141,103 @@ describe('selectors/getStackTimingByDepthForStackChart', function() {
   });
 });
 
+describe('selectors/getFlameGraphTiming', function() {
+  /**
+   * Map the flameGraphTiming data structure into a human readable format where
+   * each line takes the form:
+   *
+   * "FunctionName1 (StartTime:EndTime) | FunctionName2 (StartTime:EndTime)"
+   */
+  function getHumanReadableFlameGraphTiming(store, funcNames) {
+    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
+      store.getState()
+    );
+    const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
+      store.getState()
+    );
+
+    return flameGraphTiming.map(({ callNode, end, length, start }) => {
+      const lines = [];
+      for (let i = 0; i < length; i++) {
+        const callNodeIndex = callNode[i];
+        const funcIndex = callNodeTable.func[callNodeIndex];
+        const funcName = funcNames[funcIndex];
+        lines.push(
+          `${funcName} (${parseFloat(start[i].toFixed(2))}:${parseFloat(
+            end[i].toFixed(2)
+          )})`
+        );
+      }
+      return lines.join(' | ');
+    });
+  }
+
+  it('computes a basic example', function() {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C C H
+      D F I
+      E G
+    `);
+
+    const store = storeWithProfile(profile);
+    expect(getHumanReadableFlameGraphTiming(store, funcNames)).toEqual([
+      'A (0:1)',
+      'B (0:1)',
+      'C (0:0.67) | H (0.67:1)',
+      'D (0:0.33) | F (0.33:0.67) | I (0.67:1)',
+      'E (0:0.33) | G (0.33:0.67)',
+    ]);
+  });
+
+  it('can handle null samples', function() {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A A X A
+      B B   B
+      C C   H
+      D F   I
+      E G
+    `);
+
+    // Remove the X sample by setting it's stack to null.
+    profile.threads[0].samples.stack[2] = null;
+
+    const store = storeWithProfile(profile);
+    expect(getHumanReadableFlameGraphTiming(store, funcNames)).toEqual([
+      'A (0:1)',
+      'B (0:1)',
+      'C (0:0.67) | H (0.67:1)',
+      'D (0:0.33) | F (0.33:0.67) | I (0.67:1)',
+      'E (0:0.33) | G (0.33:0.67)',
+    ]);
+  });
+
+  it('sorts stacks in alphabetical order', function() {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      D D A D
+      E F B F
+          C G
+    `);
+
+    const store = storeWithProfile(profile);
+    expect(getHumanReadableFlameGraphTiming(store, funcNames)).toEqual([
+      'A (0:0.25) | D (0.25:1)',
+      'B (0:0.25) | E (0.25:0.5) | F (0.5:1)',
+      'C (0:0.25) | G (0.5:0.75)',
+    ]);
+  });
+});
+
 describe('selectors/getCallNodeMaxDepthForStackChart', function() {
   it('calculates the max func depth and observes of platform-detail filters', function() {
     const store = storeWithProfile();
@@ -176,6 +273,32 @@ describe('selectors/getCallNodeMaxDepthForStackChart', function() {
       store.getState()
     );
     expect(noSamplesMaxDepth).toEqual(0);
+  });
+});
+
+describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
+  it('calculates the max call node depth', function() {
+    const { profile } = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C C
+      D
+    `);
+
+    const store = storeWithProfile(profile);
+    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+      store.getState()
+    );
+    expect(allSamplesMaxDepth).toEqual(4);
+  });
+
+  it('returns zero if there are no samples', function() {
+    const { profile } = getProfileFromTextSamples(` `);
+    const store = storeWithProfile(profile);
+    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+      store.getState()
+    );
+    expect(allSamplesMaxDepth).toEqual(0);
   });
 });
 

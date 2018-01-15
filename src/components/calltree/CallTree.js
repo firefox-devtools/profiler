@@ -18,6 +18,7 @@ import {
 import {
   selectedThreadSelectors,
   getScrollToSelectionGeneration,
+  getFocusCallTreeGeneration,
   getProfileViewOptions,
 } from '../../reducers/profile-view';
 import { getIconsWithClassNames } from '../../reducers/icons';
@@ -41,6 +42,7 @@ import type { Column } from '../shared/TreeView';
 type Props = {
   threadIndex: ThreadIndex,
   scrollToSelectionGeneration: number,
+  focusCallTreeGeneration: number,
   tree: CallTree,
   callNodeInfo: CallNodeInfo,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -100,6 +102,12 @@ class CallTreeComponent extends PureComponent<Props> {
       if (this._treeView) {
         this._treeView.scrollSelectionIntoView();
       }
+    }
+
+    if (
+      this.props.focusCallTreeGeneration > prevProps.focusCallTreeGeneration
+    ) {
+      this.focus();
     }
   }
 
@@ -205,6 +213,7 @@ export default connect(
   (state: State) => ({
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
+    focusCallTreeGeneration: getFocusCallTreeGeneration(state),
     tree: selectedThreadSelectors.getCallTree(state),
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
     selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(

@@ -8,7 +8,6 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import TabBar from './TabBar';
-import classNames from 'classnames';
 import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
 import MarkerTable from '../marker-table';
 import ProfileTaskTracerView from '../tasktracer/ProfileTaskTracerView';
@@ -33,6 +32,8 @@ import type { StartEndRange } from '../../types/units';
 import type { Tab } from './TabBar';
 import type { Action } from '../../types/actions';
 
+require('./ProfileViewer.css');
+
 type Props = {
   className: string,
   tabOrder: number[],
@@ -42,17 +43,12 @@ type Props = {
   changeTabOrder: (number[]) => Action,
 };
 
-type State = {
-  isMounted: boolean,
-};
-
-class ProfileViewer extends PureComponent<Props, State> {
+class ProfileViewer extends PureComponent<Props> {
   _tabs: Tab[];
 
   constructor(props) {
     super(props);
     (this: any)._onSelectTab = this._onSelectTab.bind(this);
-    this.state = { isMounted: false };
     // If updating this list, make sure and update the tabOrder reducer with another index.
     this._tabs = [
       {
@@ -79,12 +75,6 @@ class ProfileViewer extends PureComponent<Props, State> {
     changeSelectedTab(selectedTab);
   }
 
-  componentDidMount() {
-    // TODO use ReactCSSTransition instead of this hack. https://github.com/devtools-html/perf.html/issues/648
-    // eslint-disable-next-line react/no-did-mount-set-state
-    this.setState({ isMounted: true });
-  }
-
   render() {
     const {
       className,
@@ -93,15 +83,9 @@ class ProfileViewer extends PureComponent<Props, State> {
       changeTabOrder,
       selectedTab,
     } = this.props;
-    const { isMounted } = this.state;
 
     return (
-      <div
-        className={classNames(
-          className,
-          isMounted ? `${className}IsMounted` : null
-        )}
-      >
+      <div className={className}>
         <div className={`${className}TopBar`}>
           <ProfileFilterNavigator />
           <ProfileSharing />

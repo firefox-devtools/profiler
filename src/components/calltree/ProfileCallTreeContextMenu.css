@@ -23,6 +23,10 @@
   background: url(../../../res/focus-icon.svg) center center no-repeat;
 }
 
+.profileCallTreeContextMenuIconDrop {
+  background: url(../../../res/drop-icon.svg) center center no-repeat;
+}
+
 .profileCallTreeContextMenuLabel {
   color: #555;
   font-weight: bold;

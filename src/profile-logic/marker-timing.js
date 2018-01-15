@@ -95,23 +95,10 @@ export function getMarkerTiming(
         markerTimingsByName.push(markerTimingsRow);
       }
 
-      let continueSearching = false;
-
-      // Search for a spot not already taken up by another marker of this type.
-      for (let j = 0; j < markerTimingsRow.length; j++) {
-        const otherStart = markerTimingsRow.start[j];
-        const otherEnd = markerTimingsRow.end[j];
-        if (otherStart > marker.start + marker.dur) {
-          break;
-        }
-        if (otherEnd > marker.start) {
-          continueSearching = true;
-          break;
-        }
-      }
-
-      if (!continueSearching) {
-        // An empty spot was found, fill the values in the table.
+      // Since the markers are sorted, look at the last added marker in this row. If
+      // the new marker fits, go ahead and insert it.
+      const otherEnd = markerTimingsRow.end[markerTimingsRow.length - 1] || 0;
+      if (otherEnd <= marker.start) {
         markerTimingsRow.start.push(marker.start);
         markerTimingsRow.end.push(marker.start + marker.dur);
         markerTimingsRow.label.push(computeMarkerLabel(marker.data));

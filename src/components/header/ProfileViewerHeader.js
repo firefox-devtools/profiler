@@ -30,16 +30,16 @@ import type { State } from '../../types/reducers';
 import type { Milliseconds, StartEndRange } from '../../types/units';
 
 type Props = {|
-  profile: Profile,
-  className: string,
-  hiddenThreads: ThreadIndex[],
-  threadOrder: ThreadIndex[],
-  selection: ProfileSelection,
-  timeRange: StartEndRange,
-  zeroAt: Milliseconds,
-  changeThreadOrder: typeof changeThreadOrder,
-  addRangeFilterAndUnsetSelection: typeof addRangeFilterAndUnsetSelection,
-  updateProfileSelection: typeof updateProfileSelection,
+  +profile: Profile,
+  +className: string,
+  +hiddenThreads: ThreadIndex[],
+  +threadOrder: ThreadIndex[],
+  +selection: ProfileSelection,
+  +timeRange: StartEndRange,
+  +zeroAt: Milliseconds,
+  +changeThreadOrder: typeof changeThreadOrder,
+  +addRangeFilterAndUnsetSelection: typeof addRangeFilterAndUnsetSelection,
+  +updateProfileSelection: typeof updateProfileSelection,
 |};
 
 class ProfileViewerHeader extends PureComponent<Props> {

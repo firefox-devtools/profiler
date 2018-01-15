@@ -1,0 +1,14 @@
+@keyframes profileViewerFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.profileViewer {
+  background-color: #fff;
+  animation-name: profileViewerFadeIn;
+  animation-duration: 200ms;
+}

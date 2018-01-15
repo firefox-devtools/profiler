@@ -16,6 +16,7 @@ import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
 import * as StackTiming from '../profile-logic/stack-timing';
+import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import * as TaskTracerTools from '../profile-logic/task-tracer';
@@ -316,6 +317,15 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
   }
 }
 
+function focusCallTreeGeneration(state: number = 0, action: Action) {
+  switch (action.type) {
+    case 'FOCUS_CALL_TREE':
+      return state + 1;
+    default:
+      return state;
+  }
+}
+
 function rootRange(
   state: StartEndRange = { start: 0, end: 1 },
   action: Action
@@ -352,6 +362,15 @@ function tabOrder(state: number[] = [0, 1, 2, 3], action: Action) {
   }
 }
 
+function rightClickedThread(state: ThreadIndex = 0, action: Action) {
+  switch (action.type) {
+    case 'CHANGE_RIGHT_CLICKED_THREAD':
+      return action.selectedThread;
+    default:
+      return state;
+  }
+}
+
 const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
   viewOptions: combineReducers({
     perThread: viewOptionsPerThread,
@@ -359,9 +378,11 @@ const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
     waitingForLibs,
     selection,
     scrollToSelectionGeneration,
+    focusCallTreeGeneration,
     rootRange,
     zeroAt,
     tabOrder,
+    rightClickedThread,
   }),
   profile,
 });
@@ -381,6 +402,11 @@ export const getProfileRootRange = (state: State) =>
 export const getScrollToSelectionGeneration = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.scrollToSelectionGeneration
+);
+
+export const getFocusCallTreeGeneration = createSelector(
+  getProfileViewOptions,
+  viewOptions => viewOptions.focusCallTreeGeneration
 );
 
 export const getZeroAt = createSelector(
@@ -421,6 +447,8 @@ export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
 export const getProfileTaskTracerData = (state: State): TaskTracer =>
   getProfile(state).tasktracer;
+export const getRightClickedThreadIndex = (state: State) =>
+  getProfileViewOptions(state).rightClickedThread;
 
 export type SelectorsForThread = {
   getThread: State => Thread,
@@ -449,9 +477,12 @@ export type SelectorsForThread = {
   getCallNodeMaxDepthForStackChart: State => number,
   getStackTimingByDepthForStackChart: State => StackTiming.StackTimingByDepth,
   getLeafCategoryStackTimingForStackChart: State => StackTiming.StackTimingByDepth,
+  getCallNodeMaxDepthForFlameGraph: State => number,
+  getFlameGraphTiming: State => FlameGraph.FlameGraphTiming,
   getFriendlyThreadName: State => string,
   getThreadProcessDetails: State => string,
   getSearchFilteredMarkers: State => MarkersTable,
+  unfilteredSamplesRange: State => StartEndRange | null,
 };
 
 const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
@@ -495,9 +526,6 @@ export const selectorsForThread = (
                 transform.callNodePath,
                 transform.implementation
               );
-        case 'merge-subtree':
-          // TODO - Implement this transform.
-          return thread;
         case 'merge-call-node':
           return Transforms.mergeCallNode(
             thread,
@@ -506,6 +534,8 @@ export const selectorsForThread = (
           );
         case 'merge-function':
           return Transforms.mergeFunction(thread, transform.funcIndex);
+        case 'drop-function':
+          return Transforms.dropFunction(thread, transform.funcIndex);
         case 'focus-function':
           return Transforms.focusFunction(thread, transform.funcIndex);
         case 'collapse-resource':
@@ -639,7 +669,7 @@ export const selectorsForThread = (
     const getCallNodeMaxDepth = createSelector(
       getFilteredThread,
       getCallNodeInfo,
-      StackTiming.computeCallNodeMaxDepth
+      ProfileData.computeCallNodeMaxDepth
     );
     const getSelectedCallNodePath = createSelector(
       getViewOptions,
@@ -726,7 +756,7 @@ export const selectorsForThread = (
     const getCallNodeMaxDepthForStackChart = createSelector(
       getFilteredThreadForStackChart,
       getCallNodeInfoOfFilteredThreadForStackChart,
-      StackTiming.computeCallNodeMaxDepth
+      ProfileData.computeCallNodeMaxDepth
     );
     const getStackTimingByDepthForStackChart = createSelector(
       getFilteredThreadForStackChart,
@@ -734,6 +764,15 @@ export const selectorsForThread = (
       getCallNodeMaxDepthForStackChart,
       getProfileInterval,
       StackTiming.getStackTimingByDepth
+    );
+    const getCallNodeMaxDepthForFlameGraph = createSelector(
+      getRangeSelectionFilteredThread,
+      getCallNodeInfo,
+      ProfileData.computeCallNodeMaxDepth
+    );
+    const getFlameGraphTiming = createSelector(
+      getCallTree,
+      FlameGraph.getFlameGraphTiming
     );
     const getLeafCategoryStackTimingForStackChart = createSelector(
       getFilteredThreadForStackChart,
@@ -745,6 +784,21 @@ export const selectorsForThread = (
       getRangeSelectionFilteredThread,
       UrlState.getMarkersSearchString,
       ProfileData.getSearchFilteredMarkers
+    );
+    /**
+     * The buffers of the samples can be cleared out. This function lets us know the
+     * absolute range of samples that we have collected.
+     */
+    const unfilteredSamplesRange = createSelector(
+      getThread,
+      getProfileInterval,
+      (thread, interval) => {
+        const { time } = thread.samples;
+        if (time.length === 0) {
+          return null;
+        }
+        return { start: time[0], end: time[time.length - 1] + interval };
+      }
     );
 
     selectorsForThreads[threadIndex] = {
@@ -774,9 +828,12 @@ export const selectorsForThread = (
       getCallNodeMaxDepthForStackChart,
       getStackTimingByDepthForStackChart,
       getLeafCategoryStackTimingForStackChart,
+      getCallNodeMaxDepthForFlameGraph,
+      getFlameGraphTiming,
       getFriendlyThreadName,
       getThreadProcessDetails,
       getSearchFilteredMarkers,
+      unfilteredSamplesRange,
     };
   }
   return selectorsForThreads[threadIndex];

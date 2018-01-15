@@ -34,7 +34,10 @@ describe('"focus-subtree" transform', function() {
      *            v           v
      *          E:1,1       G:1,1
      */
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       A A A
       B B B
       C C H
@@ -102,7 +105,10 @@ describe('"focus-subtree" transform', function() {
      *                        ↓                               ↓
      *                      A:1,0                           X:1,1
      */
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       A A A
       B B B
       C X C
@@ -163,7 +169,10 @@ describe('"merge-call-node" transform', function() {
      *            v           v
      *          E:1,1       G:1,1
      */
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       A A A
       B B B
       C C H
@@ -195,7 +204,10 @@ describe('"merge-call-node" transform', function() {
   });
 
   describe('on a JS call tree', function() {
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       JS::RunScript.cpp  JS::RunScript.cpp       JS::RunScript.cpp
       onLoad.js          onLoad.js               onLoad.js
       a.js               js::jit::IonCannon.cpp  js::jit::IonCannon.cpp
@@ -322,7 +334,10 @@ describe('"merge-function" transform', function() {
      *            v           v
      *          E:1,1       G:1,1
      */
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       A A A
       B B B
       C C H
@@ -352,6 +367,55 @@ describe('"merge-function" transform', function() {
   });
 });
 
+describe('"drop-function" transform', function() {
+  describe('on a call tree', function() {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A A A A
+      B B C B
+      C C   E
+        D
+    `);
+    const threadIndex = 0;
+    const C = funcNames.indexOf('C');
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+
+    function formatTreeIntoArray(tree) {
+      return formatTree(tree).split('\n').filter(string => string);
+    }
+
+    it('starts as an unfiltered call tree', function() {
+      expect(formatTreeIntoArray(originalCallTree)).toEqual([
+        '- A (total: 4, self:—)',
+        ' - B (total: 3, self:—)',
+        '   - C (total: 2, self:1)',
+        '     - D (total: 1, self:1)',
+        '   - E (total: 1, self:1)',
+        ' - C (total: 1, self:1)',
+      ]);
+    });
+
+    it('function C can be merged into callers', function() {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'drop-function',
+          funcIndex: C,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTreeIntoArray(callTree)).toEqual([
+        '- A (total: 1, self:—)',
+        ' - B (total: 1, self:—)',
+        '   - E (total: 1, self:1)',
+      ]);
+    });
+  });
+});
+
 describe('"focus-function" transform', function() {
   describe('on a call tree', function() {
     /**
@@ -377,7 +441,10 @@ describe('"focus-function" transform', function() {
      *                   v
      *                 D:2,2
      */
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       A A A
       X B B
       Y X X
@@ -426,7 +493,10 @@ describe('"collapse-resource" transform', function() {
      *        v
      *        D
      */
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       A          A
       B:firefox  E:firefox
       C:firefox  F
@@ -512,7 +582,10 @@ describe('"collapse-resource" transform', function() {
      * firefox library stacks, but E.js and I.js will be collapsed as well. The only
      * retained leaf "js" stack is G.js, because it follows a non-collapsed "cpp" stack.
      */
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       A.js           A.js
       B.cpp:firefox  H.cpp:firefox
       C.js           I.js
@@ -590,7 +663,10 @@ describe('"collapse-direct-recursion" transform', function() {
      *    ↓
      *    C
      */
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       A A A A
       B B B F
       B B E
@@ -650,7 +726,10 @@ describe('"collapse-direct-recursion" transform', function() {
      *     ↓
      *    D.js
      */
-    const { profile, funcNames } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
       A.js   A.js   A.js   A.js   A.js
       B.js   B.js   B.js   B.js   G.js
       B.js   B.js   B.js   F.js
@@ -687,7 +766,10 @@ describe('"collapse-direct-recursion" transform', function() {
 });
 
 describe('expanded and selected CallNodePaths', function() {
-  const { profile, funcNames } = getProfileFromTextSamples(`
+  const {
+    profile,
+    funcNamesPerThread: [funcNames],
+  } = getProfileFromTextSamples(`
     A
     B
     C
@@ -771,7 +853,10 @@ describe('expanded and selected CallNodePaths', function() {
 });
 
 describe('expanded and selected CallNodePaths on inverted trees', function() {
-  const { profile, funcNames } = getProfileFromTextSamples(`
+  const {
+    profile,
+    funcNamesPerThread: [funcNames],
+  } = getProfileFromTextSamples(`
     A
     B
     X

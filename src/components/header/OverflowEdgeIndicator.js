@@ -54,6 +54,10 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
     this._updateIndicatorStatus();
   }
 
+  componentDidUpdate() {
+    this._updateIndicatorStatus();
+  }
+
   _updateIndicatorStatus() {
     const container = this._container;
     const contentsWrapper = this._contentsWrapper;

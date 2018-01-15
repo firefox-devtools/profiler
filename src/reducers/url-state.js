@@ -107,6 +107,8 @@ function selectedThread(state: ThreadIndex = 0, action: Action) {
       }
       return findDefaultThreadIndex(action.profile.threads);
     }
+    case 'ISOLATE_THREAD':
+      return action.isolatedThreadIndex;
     case 'HIDE_THREAD': {
       const { threadIndex, hiddenThreads, threadOrder } = action;
       // If the currently selected thread is being hidden, then re-select a new one.
@@ -237,6 +239,9 @@ function hiddenThreads(state: ThreadIndex[] = [], action: Action) {
     case 'SHOW_THREAD': {
       const { threadIndex } = action;
       return state.filter(index => index !== threadIndex);
+    }
+    case 'ISOLATE_THREAD': {
+      return action.hiddenThreadIndexes;
     }
     default:
       return state;
