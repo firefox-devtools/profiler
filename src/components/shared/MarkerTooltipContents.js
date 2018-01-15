@@ -99,6 +99,13 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
                         nursery.lazy_capacity,
                         formatBytes
                       )}
+                  {nursery.chunk_alloc_us === undefined
+                    ? null
+                    : _markerDetail(
+                        'gctimeinchunkalloc',
+                        'Time spent allocating chunks in mutator',
+                        formatNumber(nursery.chunk_alloc_us) + 'μs'
+                      )}
                 </div>
               );
             }
