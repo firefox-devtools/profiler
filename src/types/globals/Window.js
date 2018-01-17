@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { IDBFactory, IDBKeyRange } from '../../src/types/indexeddb';
-import type { SymbolTableAsTuple } from '../../src/profile-logic/symbol-store-db';
-import type { GoogleAnalytics } from '../../src/utils/analytics';
+import type { IDBFactory, IDBKeyRange } from '../indexeddb';
+import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
+import type { GoogleAnalytics } from '../../utils/analytics';
 
 declare class GeckoProfiler {
   getProfile: () => Object,
