@@ -14,7 +14,7 @@
     "lint-fix": "yarn lint --fix",
     "flow": "flow",
     "flow-coverage": "flow-coverage-report -i 'src/**/*.js' -t html -t text",
-    "flow-generate-libdefs": "flow-typed install",
+    "flow-generate-libdefs": "flow-typed install --skip --libdefDir src/types/libdef",
     "license-check": "devtools-license-check",
     "postcheckout": "node bin/post-checkout.js",
     "postmerge": "node bin/post-merge.js",

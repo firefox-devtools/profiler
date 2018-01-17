@@ -4,4 +4,5 @@
 res/analytics.js
 
 [libs]
-flow-typed
+src/types/libdef
+src/types/globals
