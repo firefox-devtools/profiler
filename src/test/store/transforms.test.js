@@ -4,7 +4,7 @@
 
 // @flow
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
-import { formatTree } from '../fixtures/utils';
+import { formatTree, formatTreeAsArray } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   addTransformToStack,
@@ -647,6 +647,120 @@ describe('"collapse-resource" transform', function() {
         selectedThreadSelectors.getSelectedCallNodePath(getState())
       ).toEqual(['firefox'].map(name => collapsedFuncNames.indexOf(name)));
     });
+  });
+});
+
+describe('"collapse-function-subtree" transform', function() {
+  /**
+   *                  A:4,0                             A:4,0
+   *                    |                                 |
+   *                    v                                 v
+   *                  B:4,0                             B:4,0
+   *                  /    \     Collapse subtree C    /     \
+   *                 v      v           -->           v       v
+   *             C:2,0     H:2,0                    C:2,2     H:2,0
+   *            /      \         \                              |
+   *           v        v         v                             v
+   *         D:1,0     F:1,0     C:2,0                        C:2,2
+   *         /          /        /   \
+   *        v          v        v     v
+   *      E:1,1     G:1,1    I:1,1    J:1,1
+   */
+  const {
+    profile,
+    funcNamesPerThread: [funcNames],
+  } = getProfileFromTextSamples(`
+    A A A A
+    B B B B
+    C C H H
+    D F C C
+    E G I J
+  `);
+  const threadIndex = 0;
+  const collapseTransform = {
+    type: 'collapse-function-subtree',
+    funcIndex: funcNames.indexOf('C'),
+  };
+
+  it('starts as an unfiltered call tree', function() {
+    const { getState } = storeWithProfile(profile);
+    expect(
+      formatTreeAsArray(selectedThreadSelectors.getCallTree(getState()))
+    ).toEqual([
+      '- A (total: 4, self:—)',
+      ' - B (total: 4, self:—)',
+      '   - C (total: 2, self:—)', // <- C is here!
+      '     - D (total: 1, self:—)',
+      '       - E (total: 1, self:1)',
+      '     - F (total: 1, self:—)',
+      '       - G (total: 1, self:1)',
+      '   - H (total: 2, self:—)',
+      '     - C (total: 2, self:—)', // <- C is here!
+      '       - I (total: 1, self:1)',
+      '       - J (total: 1, self:1)',
+    ]);
+  });
+
+  it('can collapse the C function', function() {
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(addTransformToStack(threadIndex, collapseTransform));
+    expect(
+      formatTreeAsArray(selectedThreadSelectors.getCallTree(getState()))
+    ).toEqual([
+      '- A (total: 4, self:—)',
+      ' - B (total: 4, self:—)',
+      '   - C (total: 2, self:2)', // All children are gone, and the self time was applied.
+      '   - H (total: 2, self:—)',
+      '     - C (total: 2, self:2)', // All children are gone, and the self time was applied.
+    ]);
+  });
+
+  it('can update apply the transform to the selected CallNodePaths', function() {
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(
+      changeSelectedCallNode(
+        threadIndex,
+        ['A', 'B', 'C', 'D', 'E'].map(name => funcNames.indexOf(name))
+      )
+    );
+    dispatch(addTransformToStack(threadIndex, collapseTransform));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      ['A', 'B', 'C'].map(name => funcNames.indexOf(name))
+    );
+  });
+
+  it('can update apply the transform to the expanded CallNodePaths', function() {
+    const { dispatch, getState } = storeWithProfile(profile);
+    const toIds = (paths: Array<string[]>) =>
+      paths.map(path => path.map(name => funcNames.indexOf(name)));
+    dispatch(
+      changeSelectedCallNode(
+        threadIndex,
+        ['A', 'B', 'C', 'D', 'E'].map(name => funcNames.indexOf(name))
+      )
+    );
+    expect(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState())
+    ).toEqual(
+      toIds([
+        // Force Prettier to make this readable:
+        ['A'],
+        ['A', 'B'],
+        ['A', 'B', 'C'],
+        ['A', 'B', 'C', 'D'],
+      ])
+    );
+    dispatch(addTransformToStack(threadIndex, collapseTransform));
+    expect(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState())
+    ).toEqual(
+      toIds([
+        // Force Prettier to make this readable:
+        ['A'],
+        ['A', 'B'],
+        ['A', 'B', 'C'],
+      ])
+    );
   });
 });
 

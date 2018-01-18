@@ -260,6 +260,28 @@ export type TransformDefinitions = {
     +funcIndex: IndexIntoFuncTable,
     +implementation: ImplementationFilter,
   |},
+
+  /**
+   * Collapse the subtree of a function into that function across the entire tree.
+   *
+   *                  A:4,0                             A:4,0
+   *                    |                                 |
+   *                    v                                 v
+   *                  B:4,0                             B:4,0
+   *                  /    \     Collapse subtree C    /     \
+   *                 v      v           -->           v       v
+   *             C:2,0     H:2,0                    C:2,2     H:2,0
+   *            /      \         \                              |
+   *           v        v         v                             v
+   *         D:1,0     F:1,0     C:2,0                        C:2,2
+   *         /          /        /   \
+   *        v          v        v     v
+   *      E:1,1     G:1,1    I:1,1    J:1,1
+   */
+  'collapse-function-subtree': {|
+    +type: 'collapse-function-subtree',
+    +funcIndex: IndexIntoFuncTable,
+  |},
 };
 
 // Extract the transforms into a union.

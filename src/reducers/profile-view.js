@@ -49,7 +49,7 @@ import type {
   SymbolicationStatus,
   ThreadViewOptions,
 } from '../types/reducers';
-import type { TransformStack } from '../types/transforms';
+import type { Transform, TransformStack } from '../types/transforms';
 
 function profile(
   state: Profile = ProfileData.getEmptyProfile(),
@@ -512,9 +512,8 @@ export const selectorsForThread = (
         return ProfileData.filterThreadToRange(thread, start, end);
       }
     );
-    const applyTransform = (thread, transform) => {
-      const { type } = transform;
-      switch (type) {
+    const applyTransform = (thread: Thread, transform: Transform) => {
+      switch (transform.type) {
         case 'focus-subtree':
           return transform.inverted
             ? Transforms.focusInvertedSubtree(
@@ -551,8 +550,13 @@ export const selectorsForThread = (
             transform.funcIndex,
             transform.implementation
           );
+        case 'collapse-function-subtree':
+          return Transforms.collapseFunctionSubtree(
+            thread,
+            transform.funcIndex
+          );
         default:
-          throw assertExhaustiveCheck(type);
+          throw assertExhaustiveCheck(transform);
       }
     };
     // It becomes very expensive to apply each transform over and over again as they
