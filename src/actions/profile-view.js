@@ -29,7 +29,6 @@ import type {
   IndexIntoCallNodeTable,
 } from '../types/profile-derived';
 import type { Transform } from '../types/transforms';
-import type { CallTree } from '../profile-logic/call-tree';
 
 /**
  * The actions that pertain to changing the view on the profile, including searching
@@ -169,32 +168,32 @@ export function changeCallTreeSearchString(searchString: string): Action {
   };
 }
 
-function _addAllDescendants(
-  tree: CallTree,
-  newSet: Set<IndexIntoCallNodeTable | null>,
-  callNodeIndex: IndexIntoCallNodeTable
-) {
-  tree.getChildren(callNodeIndex).forEach(childId => {
-    newSet.add(childId);
-    _addAllDescendants(tree, newSet, childId);
-  });
-}
-
 export function expandAllCallNodeDescendants(
   threadIndex: ThreadIndex,
   callNodeIndex: IndexIntoCallNodeTable,
-  tree: CallTree,
-  callNodeInfo: CallNodeInfo,
-  expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>
-): Action {
-  const newSet = new Set(expandedCallNodeIndexes);
-  newSet.add(callNodeIndex);
-  _addAllDescendants(tree, newSet, callNodeIndex);
+  callNodeInfo: CallNodeInfo
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const expandedCallNodeIndexes = selectedThreadSelectors.getExpandedCallNodeIndexes(
+      getState()
+    );
+    const tree = selectedThreadSelectors.getCallTree(getState());
 
-  const expandedCallNodePaths = Array.from(newSet.values()).map(callNodeIndex =>
-    getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable)
-  );
-  return changeExpandedCallNodes(threadIndex, expandedCallNodePaths);
+    // Create a set with the selected call node and its descendants
+    const descendants = tree.getAllDescendants(callNodeIndex);
+    descendants.add(callNodeIndex);
+    // And also add all the call nodes that already were expanded
+    expandedCallNodeIndexes.forEach(callNodeIndex => {
+      if (callNodeIndex !== null) {
+        descendants.add(callNodeIndex);
+      }
+    });
+
+    const expandedCallNodePaths = [...descendants].map(callNodeIndex =>
+      getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable)
+    );
+    dispatch(changeExpandedCallNodes(threadIndex, expandedCallNodePaths));
+  };
 }
 
 export function changeExpandedCallNodes(

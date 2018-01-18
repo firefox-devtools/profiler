@@ -27,7 +27,6 @@ import type {
   CallNodePath,
 } from '../../types/profile-derived';
 import type { Thread, ThreadIndex } from '../../types/profile';
-import type { CallTree } from '../../profile-logic/call-tree';
 
 type Props = {
   thread: Thread,
@@ -36,8 +35,6 @@ type Props = {
   implementation: ImplementationFilter,
   selectedCallNodePath: CallNodePath,
   selectedCallNodeIndex: IndexIntoCallNodeTable,
-  expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
-  tree: CallTree,
   inverted: boolean,
   addTransformToStack: typeof addTransformToStack,
   expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
@@ -207,16 +204,12 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       expandAllCallNodeDescendants,
       threadIndex,
       selectedCallNodeIndex,
-      tree,
       callNodeInfo,
-      expandedCallNodeIndexes,
     } = this.props;
     expandAllCallNodeDescendants(
       threadIndex,
       selectedCallNodeIndex,
-      tree,
-      callNodeInfo,
-      expandedCallNodeIndexes
+      callNodeInfo
     );
   }
 
@@ -366,10 +359,6 @@ export default connect(
     selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
       state
     ),
-    expandedCallNodeIndexes: selectedThreadSelectors.getExpandedCallNodeIndexes(
-      state
-    ),
-    tree: selectedThreadSelectors.getCallTree(state),
   }),
   { addTransformToStack, expandAllCallNodeDescendants }
 )(ProfileCallTreeContextMenu);

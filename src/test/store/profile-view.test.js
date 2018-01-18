@@ -134,8 +134,6 @@ describe('expand all call node descendants', function() {
 
   it('expands whole tree from root', function() {
     const { dispatch, getState } = storeWithProfile(profile);
-
-    const tree = selectedThreadSelectors.getCallTree(getState());
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
 
     // Before expand all action is dispatched, nothing is expanded
@@ -147,14 +145,12 @@ describe('expand all call node descendants', function() {
       ProfileView.expandAllCallNodeDescendants(
         threadIndex,
         0, // A
-        tree,
-        callNodeInfo,
-        []
+        callNodeInfo
       )
     );
 
     expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()).sort()
     ).toEqual([
       // Paths
       [A],
@@ -171,10 +167,6 @@ describe('expand all call node descendants', function() {
     // First expand A by selecting B
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B]));
 
-    const expandedCallNodeIndexes = selectedThreadSelectors.getExpandedCallNodeIndexes(
-      getState()
-    );
-    const tree = selectedThreadSelectors.getCallTree(getState());
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
 
     // Before expand all action is dispatched, only A is expanded
@@ -189,14 +181,12 @@ describe('expand all call node descendants', function() {
       ProfileView.expandAllCallNodeDescendants(
         threadIndex,
         1, // B
-        tree,
-        callNodeInfo,
-        expandedCallNodeIndexes
+        callNodeInfo
       )
     );
 
     expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()).sort()
     ).toEqual([
       // Paths
       [A],

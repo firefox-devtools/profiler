@@ -278,6 +278,7 @@ interface Tree<NodeIndex: number, DisplayData: Object> {
   getParent(NodeIndex): NodeIndex,
   getChildren(NodeIndex): NodeIndex[],
   hasChildren(NodeIndex): boolean,
+  getAllDescendants(NodeIndex): Set<NodeIndex>,
 }
 
 type TreeViewProps<NodeIndex, DisplayData> = {|
@@ -421,13 +422,6 @@ class TreeView<
     return !this.props.expandedNodeIds.includes(nodeId);
   }
 
-  _addAllDescendants(newSet: Set<NodeIndex | null>, nodeId: NodeIndex) {
-    this.props.tree.getChildren(nodeId).forEach(childId => {
-      newSet.add(childId);
-      this._addAllDescendants(newSet, childId);
-    });
-  }
-
   _toggle(
     nodeId: NodeIndex,
     newExpanded: boolean = this._isCollapsed(nodeId),
@@ -437,7 +431,9 @@ class TreeView<
     if (newExpanded) {
       newSet.add(nodeId);
       if (toggleAll) {
-        this._addAllDescendants(newSet, nodeId);
+        for (const descendant of this.props.tree.getAllDescendants(nodeId)) {
+          newSet.add(descendant);
+        }
       }
     } else {
       newSet.delete(nodeId);
