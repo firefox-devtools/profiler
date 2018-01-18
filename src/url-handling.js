@@ -12,7 +12,7 @@ import {
   stringifyTransforms,
   parseTransforms,
 } from './profile-logic/transforms';
-import { unexpectedCase } from './utils/flow';
+import { assertExhaustiveCheck } from './utils/flow';
 import type { UrlState } from './types/reducers';
 import type { DataSource, TabSlug } from './types/actions';
 
@@ -126,7 +126,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     case 'marker-chart':
       break;
     default:
-      unexpectedCase(selectedTab);
+      assertExhaustiveCheck(selectedTab);
   }
   return { query, pathParts };
 }

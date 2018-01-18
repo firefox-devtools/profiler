@@ -4,6 +4,7 @@
 // @flow
 
 import type { TabSlug } from '../types/actions';
+import type { TransformType } from '../types/transforms';
 
 /**
  * This file contains utils that help Flow understand things better. Occasionally
@@ -14,13 +15,12 @@ import type { TabSlug } from '../types/actions';
 
 /**
  * This function can be run as the default arm of a switch statement to ensure exhaustive
- * checking of a given type. It relies on an assumption that a given case will not be
- * the string 'Error: non exhaustive switch found.' This assumption generates more
- * readable errors. Flow will only generate an error if it's possible to get there
- * within the type system.
+ * checking of a given type. It relies on an assumption that all cases will be handled
+ * and the input to the function will be empty. This function hopefully makes that check
+ * more readable.
  */
-export function unexpectedCase(notValid: empty): void {
-  throw new Error(`Unexpected case ${notValid}`);
+export function assertExhaustiveCheck(notValid: empty): void {
+  throw new Error(`There was an unhandled case for the value: "${notValid}"`);
 }
 
 /**
@@ -36,14 +36,60 @@ export function immutableUpdate<T: Object>(object: T, ...rest: Object[]): T {
  * This function takes a string and returns either a valid TabSlug or null, this doesn't
  * throw an error so that any arbitrary string can be converted, e.g. from a URL.
  */
-export function toValidTabSlug(tabSlug: string): TabSlug | null {
-  switch (tabSlug) {
+export function toValidTabSlug(tabSlug: any): TabSlug | null {
+  const coercedTabSlug = (tabSlug: TabSlug);
+  switch (coercedTabSlug) {
     case 'calltree':
     case 'stack-chart':
     case 'marker-chart':
     case 'marker-table':
-      return tabSlug;
-    default:
+      return coercedTabSlug;
+    default: {
+      // The coerced type SHOULD be empty here. If in reality we get
+      // here, then it's not a valid transform type, so return null.
+      const unhandledCase: empty = coercedTabSlug; // eslint-disable-line no-unused-vars
       return null;
+    }
   }
+}
+
+/**
+ * This function will take an arbitrary string, and try to convert it to a valid
+ * TransformType.
+ */
+export function convertToTransformType(type: string): TransformType | null {
+  // Coerce this into a TransformType even if it's not one.
+  const coercedType = ((type: any): TransformType);
+  switch (coercedType) {
+    // Exhaustively check each TransformType. The default arm will assert that
+    // we have been exhaustive.
+    case 'merge-call-node':
+    case 'merge-function':
+    case 'focus-subtree':
+    case 'focus-function':
+    case 'collapse-resource':
+    case 'collapse-direct-recursion':
+    case 'drop-function':
+      return coercedType;
+    default: {
+      // The coerced type SHOULD be empty here. If in reality we get
+      // here, then it's not a valid transform type, so return null.
+      const unhandledCase: empty = coercedType; // eslint-disable-line no-unused-vars
+      return null;
+    }
+  }
+}
+
+/**
+ * This function will take an arbitrary string, and will turn it into a TransformType
+ * it will throw an error if an invalid type was passed to it.
+ */
+export function ensureIsTransformType(type: string): TransformType {
+  const assertedType = convertToTransformType(type);
+  if (!assertedType) {
+    throw new Error(
+      `Attempted to assert that "${type}" is a valid TransformType, and it was not.`
+    );
+  }
+  return assertedType;
 }
