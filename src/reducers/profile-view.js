@@ -560,7 +560,6 @@ export const selectorsForThread = (
     // memoize each step individually so that they transform stack can be pushed and
     // popped frequently and easily.
     const applyTransformMemoized = memoize(applyTransform, {
-      limit: 15,
       cache: new WeakTupleMap(),
     });
     const getTransformStack = (state: State): TransformStack =>
