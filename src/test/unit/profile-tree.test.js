@@ -131,7 +131,17 @@ describe('unfiltered call tree', function() {
     `);
     const callTree = callTreeFromProfile(profile);
     it('computes an unfiltered call tree', function() {
-      expect(formatTree(callTree)).toMatchSnapshot();
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 3, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - C (total: 2, self: —)',
+        '      - D (total: 1, self: —)',
+        '        - E (total: 1, self: 1)',
+        '      - F (total: 1, self: —)',
+        '        - G (total: 1, self: 1)',
+        '    - H (total: 1, self: —)',
+        '      - I (total: 1, self: 1)',
+      ]);
     });
   });
 
@@ -312,7 +322,21 @@ describe('inverted call tree', function() {
      *      L         M         R   <- Label the branches. (left, middle, right)
      */
     it('computes an inverted call tree', function() {
-      expect(formatTree(callTree)).toMatchSnapshot();
+      expect(formatTree(callTree)).toEqual([
+        '- Z (total: 2, self: 2)',
+        '  - Y (total: 2, self: —)',
+        '    - X (total: 2, self: —)',
+        '      - B (total: 1, self: —)',
+        '        - A (total: 1, self: —)',
+        '      - C (total: 1, self: —)',
+        '        - B (total: 1, self: —)',
+        '          - A (total: 1, self: —)',
+        '- E (total: 1, self: 1)',
+        '  - D (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - B (total: 1, self: —)',
+        '        - A (total: 1, self: —)',
+      ]);
     });
   });
 });
