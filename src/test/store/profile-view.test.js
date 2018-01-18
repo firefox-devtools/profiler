@@ -115,3 +115,84 @@ describe('call node paths on implementation filter change', function() {
     ]);
   });
 });
+
+describe('expand all call node descendants', function() {
+  const {
+    profile,
+    funcNamesPerThread: [funcNames],
+  } = getProfileFromTextSamples(`
+    A A A
+    B B E
+    C D
+  `);
+  const threadIndex = 0;
+  const A = funcNames.indexOf('A');
+  const B = funcNames.indexOf('B');
+  const C = funcNames.indexOf('C');
+  const D = funcNames.indexOf('D');
+  const E = funcNames.indexOf('E');
+
+  it('expands whole tree from root', function() {
+    const { dispatch, getState } = storeWithProfile(profile);
+    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
+
+    // Before expand all action is dispatched, nothing is expanded
+    expect(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState())
+    ).toEqual([]);
+
+    dispatch(
+      ProfileView.expandAllCallNodeDescendants(
+        threadIndex,
+        0, // A
+        callNodeInfo
+      )
+    );
+
+    expect(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()).sort()
+    ).toEqual([
+      // Paths
+      [A],
+      [A, B],
+      [A, B, C],
+      [A, B, D],
+      [A, E],
+    ]);
+  });
+
+  it('expands subtrees', function() {
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    // First expand A by selecting B
+    dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B]));
+
+    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
+
+    // Before expand all action is dispatched, only A is expanded
+    expect(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState())
+    ).toEqual([
+      // Paths
+      [A],
+    ]);
+
+    dispatch(
+      ProfileView.expandAllCallNodeDescendants(
+        threadIndex,
+        1, // B
+        callNodeInfo
+      )
+    );
+
+    expect(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()).sort()
+    ).toEqual([
+      // Paths
+      [A],
+      [A, B],
+      [A, B, C],
+      [A, B, D],
+    ]);
+  });
+});
