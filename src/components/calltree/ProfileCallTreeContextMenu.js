@@ -136,6 +136,7 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     const transformType = convertToTransformType(type);
     if (transformType) {
       this.addTransformToStack(transformType);
+      return;
     }
 
     switch (type) {
@@ -220,6 +221,13 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
           type: 'collapse-direct-recursion',
           funcIndex: selectedFunc,
           implementation,
+        });
+        break;
+      }
+      case 'collapse-function-subtree': {
+        addTransformToStack(threadIndex, {
+          type: 'collapse-function-subtree',
+          funcIndex: selectedFunc,
         });
         break;
       }
@@ -338,6 +346,13 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
           {inverted
             ? 'Focus on calls made by this function'
             : 'Focus on function'}
+        </MenuItem>
+        <MenuItem
+          onClick={this.handleClick}
+          data={{ type: 'collapse-function-subtree' }}
+        >
+          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+          {'Collapse function’s subtree across the entire tree'}
         </MenuItem>
         {nameForResource
           ? <MenuItem

@@ -12,9 +12,9 @@ import {
   stringifyTransforms,
   parseTransforms,
 } from './profile-logic/transforms';
-import { assertExhaustiveCheck } from './utils/flow';
+import { assertExhaustiveCheck, toValidTabSlug } from './utils/flow';
 import type { UrlState } from './types/reducers';
-import type { DataSource, TabSlug } from './types/actions';
+import type { DataSource } from './types/actions';
 
 export const CURRENT_URL_VERSION = 2;
 
@@ -201,7 +201,7 @@ export function stateFromLocation(location: Location): UrlState {
     dataSource,
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
-    selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]),
+    selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
     rangeFilters: query.range ? parseRangeFilters(query.range) : [],
     selectedThread: selectedThread,
     callTreeSearchString: query.search || '',
@@ -221,25 +221,6 @@ export function stateFromLocation(location: Location): UrlState {
         : [],
     },
   };
-}
-
-function toValidTabSlug(slug: ?string): TabSlug {
-  const defaultTab = 'calltree';
-  switch (slug) {
-    case 'calltree':
-    case 'stack-chart':
-    case 'marker-chart':
-    case 'marker-table':
-      return slug;
-    case undefined:
-      return defaultTab;
-    default:
-      console.error(
-        'Unknown tab found, maybe a URL upgrader needs to be written.',
-        slug
-      );
-      return defaultTab;
-  }
 }
 
 type ProcessedLocation = { pathname: string, hash: string, query: Object };

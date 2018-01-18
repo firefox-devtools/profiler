@@ -47,7 +47,7 @@ export function toValidTabSlug(tabSlug: any): TabSlug | null {
     default: {
       // The coerced type SHOULD be empty here. If in reality we get
       // here, then it's not a valid transform type, so return null.
-      const unhandledCase: empty = coercedTabSlug; // eslint-disable-line no-unused-vars
+      (coercedTabSlug: empty); // eslint-disable-line no-unused-expressions
       return null;
     }
   }
@@ -69,12 +69,13 @@ export function convertToTransformType(type: string): TransformType | null {
     case 'focus-function':
     case 'collapse-resource':
     case 'collapse-direct-recursion':
+    case 'collapse-function-subtree':
     case 'drop-function':
       return coercedType;
     default: {
       // The coerced type SHOULD be empty here. If in reality we get
       // here, then it's not a valid transform type, so return null.
-      const unhandledCase: empty = coercedType; // eslint-disable-line no-unused-vars
+      (coercedType: empty); // eslint-disable-line no-unused-expressions
       return null;
     }
   }

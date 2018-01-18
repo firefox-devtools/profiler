@@ -39,3 +39,12 @@ export function formatTree(
     );
   }, previousString);
 }
+
+/**
+ * Formatting a tree like this allows the assertions to not be as snapshots.
+ * This makes it easier to debug and read tests, while still giving nice test output
+ * when they fail.
+ */
+export function formatTreeAsArray(callTree: CallTree): string[] {
+  return formatTree(callTree).split('\n').filter(a => a);
+}
