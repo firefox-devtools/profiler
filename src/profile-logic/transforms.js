@@ -9,6 +9,7 @@ import {
 } from '../utils/uintarray-encoding';
 import { toValidImplementationFilter } from './profile-data';
 import { timeCode } from '../utils/time-code';
+import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
 
 import type {
   Thread,
@@ -28,28 +29,54 @@ import type { Transform, TransformStack } from '../types/transforms';
  * to profile data.
  */
 
+// Create mappings from a transform name, to a url-friendly short name.
+export const TRANSFORM_TO_SHORT_KEY = {};
+export const SHORT_KEY_TO_TRANSFORM = {};
+[
+  'focus-subtree',
+  'focus-function',
+  'merge-call-node',
+  'merge-function',
+  'drop-function',
+  'collapse-resource',
+  'collapse-direct-recursion',
+].forEach(transform => {
+  // This is kind of an awkward switch, but it ensures we've exhaustively checked that
+  // we have a mapping for every transform.
+  let shortKey;
+  switch (transform) {
+    case 'focus-subtree':
+      shortKey = 'f';
+      break;
+    case 'focus-function':
+      shortKey = 'ff';
+      break;
+    case 'merge-call-node':
+      shortKey = 'mcn';
+      break;
+    case 'merge-function':
+      shortKey = 'mf';
+      break;
+    case 'drop-function':
+      shortKey = 'df';
+      break;
+    case 'collapse-resource':
+      shortKey = 'cr';
+      break;
+    case 'collapse-direct-recursion':
+      shortKey = 'rec';
+      break;
+    default: {
+      throw assertExhaustiveCheck(transform);
+    }
+  }
+  TRANSFORM_TO_SHORT_KEY[transform] = shortKey;
+  SHORT_KEY_TO_TRANSFORM[shortKey] = transform;
+});
+
 /**
  * Map each transform key into a short representation.
  */
-const TRANSFORM_TO_SHORT_KEY = {
-  'focus-subtree': 'f',
-  'focus-function': 'ff',
-  'merge-call-node': 'mcn',
-  'merge-function': 'mf',
-  'drop-function': 'df',
-  'collapse-resource': 'cr',
-  'collapse-direct-recursion': 'rec',
-};
-
-const SHORT_KEY_TO_TRANSFORM = {
-  f: 'focus-subtree',
-  ff: 'focus-function',
-  mcn: 'merge-call-node',
-  mf: 'merge-function',
-  df: 'drop-function',
-  cr: 'collapse-resource',
-  rec: 'collapse-direct-recursion',
-};
 
 /**
  * Every transform is separated by the "~" character.
@@ -66,8 +93,11 @@ export function parseTransforms(stringValue: string = ''): TransformStack {
   stringValue.split('~').forEach(s => {
     const tuple = s.split('-');
     const shortKey = tuple[0];
-    const type = SHORT_KEY_TO_TRANSFORM[shortKey];
-
+    const type = convertToTransformType(SHORT_KEY_TO_TRANSFORM[shortKey]);
+    if (!type) {
+      console.error('Unrecognized transform was passed to the URL.', shortKey);
+      return;
+    }
     switch (type) {
       case 'collapse-resource': {
         // e.g. "cr-js-325-8"
@@ -176,9 +206,7 @@ export function parseTransforms(stringValue: string = ''): TransformStack {
         break;
       }
       default:
-        // Do not throw an error, as we don't trust the data coming from a user.
-        console.error('Unrecognized transform was passed to the URL.', type);
-        break;
+        throw assertExhaustiveCheck(type);
     }
   });
 
@@ -189,6 +217,11 @@ export function stringifyTransforms(transforms: TransformStack = []): string {
   return transforms
     .map(transform => {
       const shortKey = TRANSFORM_TO_SHORT_KEY[transform.type];
+      if (!shortKey) {
+        throw new Error(
+          'Expected to be able to convert a transform into its short key.'
+        );
+      }
       switch (transform.type) {
         case 'merge-function':
         case 'drop-function':
@@ -217,7 +250,7 @@ export function stringifyTransforms(transforms: TransformStack = []): string {
           return string;
         }
         default:
-          throw new Error('An unknown transform was found when stringifying.');
+          throw assertExhaustiveCheck(transform);
       }
     })
     .join('~');
@@ -260,7 +293,7 @@ export function getTransformLabels(
         funcIndex = transform.funcIndex;
         break;
       default:
-        throw new Error('Unexpected transform type');
+        throw assertExhaustiveCheck(transform);
     }
     const nameIndex = funcTable.name[funcIndex];
     const funcName = stringTable.getString(nameIndex);
@@ -279,7 +312,7 @@ export function getTransformLabels(
       case 'collapse-direct-recursion':
         return `Collapse recursion: ${funcName}`;
       default:
-        throw new Error('Unexpected transform type');
+        throw assertExhaustiveCheck(transform);
     }
   });
   labels.unshift(`Complete "${threadName}"`);
@@ -318,9 +351,7 @@ export function applyTransformToCallNodePath(
         callNodePath
       );
     default:
-      throw new Error(
-        'Cannot apply an unknown transform to update the CallNodePath'
-      );
+      throw assertExhaustiveCheck(transform);
   }
 }
 

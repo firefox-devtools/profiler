@@ -22,6 +22,7 @@ import * as CallTree from '../profile-logic/call-tree';
 import * as TaskTracerTools from '../profile-logic/task-tracer';
 import { getCategoryColorStrategy } from './stack-chart';
 import uniqWith from 'lodash.uniqwith';
+import { assertExhaustiveCheck } from '../utils/flow';
 
 import type {
   Profile,
@@ -512,7 +513,8 @@ export const selectorsForThread = (
       }
     );
     const applyTransform = (thread, transform) => {
-      switch (transform.type) {
+      const { type } = transform;
+      switch (type) {
         case 'focus-subtree':
           return transform.inverted
             ? Transforms.focusInvertedSubtree(
@@ -550,7 +552,7 @@ export const selectorsForThread = (
             transform.implementation
           );
         default:
-          throw new Error('Unhandled transform.');
+          throw assertExhaustiveCheck(type);
       }
     };
     // It becomes very expensive to apply each transform over and over again as they
