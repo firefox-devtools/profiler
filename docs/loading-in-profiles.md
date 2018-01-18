@@ -21,14 +21,75 @@ uploadprofile /path/to/profile.js
 
 > `https://perf-html.io/from-url/{URL}`
 
-Profiles can also be loaded in from arbitrary URLs. In addition, you can then upload it to the online storage directly from perf.html's interface.
+Profiles can also be loaded in from arbitrary URLs. In addition, you can then upload it to the online storage directly from perf.html's interface. The profile needs to be served from https, and have the appropriate `Access-Control-Allow-Origin` header set to either `*` or `https://perf-html.io`.
 
 See the function below for an easy utility for converting to the proper URL format. Here is a simple utility function to turn a profile URL into a perf.html URL to view it:
 
 ```js
 function getPerfHtmlUrl (profileUrl) {
-  return `https://perf-html.io/from-url/${encodeURIComponent(profileUrl)}`;
+  return "https://perf-html.io/from-url/" + encodeURIComponent(profileUrl)};
 }
+```
+
+Or in Python:
+
+```python
+import urllib
+
+def get_perf_html_url(url):
+    return "https://perf-html.io/from-url/" + urllib.quote(url, safe="")
+```
+
+Here is an example profile server written in Node.js:
+
+```js
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
+const querystring = require('querystring');
+
+const PORT = 3000;
+
+// If loading in a self-signed certificate, you must first manually add an exception
+// to it in the browser, or else perf.html will throw a NetworkError error.
+const options = {
+  key: fs.readFileSync(path.join(__dirname, 'server.key')),
+  cert: fs.readFileSync(path.join(__dirname, 'server.crt')),
+};
+
+// The server must be "https"
+const server = https.createServer(options, (request, response) => {
+  // You must give access to perf.html
+  response.setHeader('Access-Control-Allow-Origin', 'https://perf-html.io');
+
+  // You could also do * to allow anyone to load it:
+  // response.setHeader('Access-Control-Allow-Origin', "*");
+
+  // Write out the headers and file:
+  response.writeHead(200, { 'Content-Type': 'application/json' });
+  response.end(
+    // Pull in a profile.json file.
+    fs.readFileSync(path.join(__dirname, 'profile.json'))
+  );
+});
+
+// Start listening on the port.
+server.listen(PORT, err => {
+  if (err) {
+    return console.log('Error starting server', err);
+  }
+  // This is the URL of the profile we're serving.
+  const profileUrl = `https://localhost:${PORT}/profile.json`;
+
+  // This is the URL to perf-html.io, it should look like the following when
+  // properly encoded:
+  // https://perf-html.io/from-url/https%3A%2F%2Flocalhost%3A3000%2Fprofile.json
+  const perfHtmlUrl =
+    'https://perf-html.io/from-url/' + querystring.escape(profileUrl);
+
+  console.log('Serving the profile from: ' + profileUrl);
+  console.log('View it on perf.html: ' + perfHtmlUrl);
+});
 ```
 
 ### Add-on
