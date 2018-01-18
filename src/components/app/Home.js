@@ -7,7 +7,7 @@
 import * as React from 'react';
 import { connect } from 'react-redux';
 import classNames from 'classnames';
-import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2016-12-06.png';
+import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2018-01-18.png';
 import PerfScreenshot from '../../../res/perf-screenshot-2017-09-08.jpg';
 import { retrieveProfileFromFile } from '../../actions/receive-profile';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
