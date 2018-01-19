@@ -414,6 +414,11 @@ export const getZeroAt = createSelector(
   viewOptions => viewOptions.zeroAt
 );
 
+export const getTabOrder = createSelector(
+  getProfileViewOptions,
+  viewOptions => viewOptions.tabOrder
+);
+
 export const getDisplayRange = createSelector(
   (state: State) => getProfileViewOptions(state).rootRange,
   (state: State) => getProfileViewOptions(state).zeroAt,
