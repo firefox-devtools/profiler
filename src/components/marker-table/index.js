@@ -69,6 +69,10 @@ class MarkerTree {
     );
   }
 
+  getAllDescendants() {
+    return new Set();
+  }
+
   getParent(): IndexIntoMarkersTable {
     // -1 isn't used, but needs to be compatible with the call tree.
     return -1;

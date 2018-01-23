@@ -10,7 +10,10 @@ import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 import { getFunctionName } from '../../profile-logic/function-info';
 import copy from 'copy-to-clipboard';
-import { addTransformToStack } from '../../actions/profile-view';
+import {
+  addTransformToStack,
+  expandAllCallNodeDescendants,
+} from '../../actions/profile-view';
 import {
   getSelectedThreadIndex,
   getImplementationFilter,
@@ -41,6 +44,7 @@ type StateProps = {|
 
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
+  +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -142,6 +146,9 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       case 'drop-function':
         this.addTransformToStack(type);
         break;
+      case 'expand-all':
+        this.expandAll();
+        break;
       default:
         throw new Error(`Unknown type ${data.type}`);
     }
@@ -217,6 +224,26 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       default:
         throw new Error('Type not found.');
     }
+  }
+
+  expandAll(): void {
+    const {
+      expandAllCallNodeDescendants,
+      threadIndex,
+      selectedCallNodeIndex,
+      callNodeInfo,
+    } = this.props;
+    if (selectedCallNodeIndex === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
+
+    expandAllCallNodeDescendants(
+      threadIndex,
+      selectedCallNodeIndex,
+      callNodeInfo
+    );
   }
 
   getNameForSelectedResource(): string | null {
@@ -336,6 +363,10 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
           Drop samples with this function
         </MenuItem>
         <div className="react-contextmenu-separator" />
+        <MenuItem onClick={this.handleClick} data={{ type: 'expand-all' }}>
+          Expand all
+        </MenuItem>
+        <div className="react-contextmenu-separator" />
         <MenuItem
           onClick={this.handleClick}
           data={{ type: 'copy-function-name' }}
@@ -369,7 +400,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       state
     ),
   }),
-  mapDispatchToProps: { addTransformToStack },
+  mapDispatchToProps: { addTransformToStack, expandAllCallNodeDescendants },
   component: ProfileCallTreeContextMenu,
 };
 export default explicitConnect(options);
