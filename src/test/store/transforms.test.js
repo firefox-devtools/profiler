@@ -1198,8 +1198,8 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
   it('can update call node references for focusing a subtree', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     // This opens expands the call nodes up to this point.
-    dispatch(changeSelectedCallNode(threadIndex, selectedCallNodePath));
     dispatch(changeInvertCallstack(true));
+    dispatch(changeSelectedCallNode(threadIndex, selectedCallNodePath));
     dispatch(
       addTransformToStack(threadIndex, {
         type: 'focus-subtree',
@@ -1224,8 +1224,8 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
   it('can update call node references for merging a call node', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     // This opens expands the call nodes up to this point.
-    dispatch(changeSelectedCallNode(threadIndex, selectedCallNodePath));
     dispatch(changeInvertCallstack(true));
+    dispatch(changeSelectedCallNode(threadIndex, selectedCallNodePath));
     dispatch(
       addTransformToStack(threadIndex, {
         type: 'merge-call-node',
