@@ -252,15 +252,23 @@ export function changeImplementationFilter(
   };
 }
 
-export function changeInvertCallstack(invertCallstack: boolean): Action {
-  sendAnalytics({
-    hitType: 'event',
-    eventCategory: 'profile',
-    eventAction: 'change invert callstack',
-  });
-  return {
-    type: 'CHANGE_INVERT_CALLSTACK',
-    invertCallstack,
+export function changeInvertCallstack(
+  invertCallstack: boolean
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'change invert callstack',
+    });
+    dispatch({
+      type: 'CHANGE_INVERT_CALLSTACK',
+      invertCallstack,
+      selectedThreadIndex: getSelectedThreadIndex(getState()),
+      callTree: selectedThreadSelectors.getCallTree(getState()),
+      callNodeTable: selectedThreadSelectors.getCallNodeInfo(getState())
+        .callNodeTable,
+    });
   };
 }
 

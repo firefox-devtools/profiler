@@ -170,6 +170,31 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
         ...state.slice(threadIndex + 1),
       ];
     }
+    case 'CHANGE_INVERT_CALLSTACK': {
+      const { callTree, callNodeTable, selectedThreadIndex } = action;
+      return state.map((viewOptions, threadIndex) => {
+        if (selectedThreadIndex === threadIndex) {
+          // Only attempt this on the current thread, as we need the transformed thread
+          // There is no guarantee that this has been calculated on all the other threads,
+          // and we shouldn't attempt to expect it, as that could be quite a perf cost.
+          const selectedCallNodePath = Transforms.invertCallNodePath(
+            viewOptions.selectedCallNodePath,
+            callTree,
+            callNodeTable
+          );
+
+          const expandedCallNodePaths = [];
+          for (let i = 1; i < selectedCallNodePath.length; i++) {
+            expandedCallNodePaths.push(selectedCallNodePath.slice(0, i));
+          }
+          return Object.assign({}, viewOptions, {
+            selectedCallNodePath,
+            expandedCallNodePaths,
+          });
+        }
+        return viewOptions;
+      });
+    }
     case 'CHANGE_EXPANDED_CALL_NODES': {
       const { threadIndex, expandedCallNodePaths } = action;
       return [

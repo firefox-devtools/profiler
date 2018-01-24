@@ -612,8 +612,7 @@ export function getCallNodeFromPath(
     fs = nextFS;
   }
 
-  // The fs could still be -1 here, which we want to interpret as null to follow
-  // the function's type signature.
+  // The fs could still be -1 here, so ensure we return null if that is the case.
   return fs === -1 ? null : fs;
 }
 

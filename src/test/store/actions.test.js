@@ -14,6 +14,7 @@ import {
   changeInvertCallstack,
   updateProfileSelection,
   changeImplementationFilter,
+  changeSelectedCallNode,
 } from '../../actions/profile-view';
 import { changeStackChartColorStrategy } from '../../actions/stack-chart';
 import { getCategoryByImplementation } from '../../profile-logic/color-categories';
@@ -381,6 +382,102 @@ describe('actions/updateProfileSelection', function() {
       isModifying: false,
       selectionStart: 100,
       selectionEnd: 200,
+    });
+  });
+});
+
+describe('actions/changeInvertCallstack', function() {
+  // This profile has a heavily weighted path of A, B, I, J that should be selected.
+  const {
+    profile,
+    funcNamesPerThread: [funcNames],
+  } = getProfileFromTextSamples(`
+      A A A A A
+      B E B B B
+      C F I I I
+      D G J J J
+        H
+    `);
+  const toFuncIndex = funcName => funcNames.indexOf(funcName);
+  const threadIndex = 0;
+
+  // The assumptions in this tests is that we are going between these two call node
+  // paths, one uninverted, the other inverted:
+  const callNodePath = ['A', 'B'].map(toFuncIndex);
+  const invertedCallNodePath = ['J', 'I', 'B'].map(toFuncIndex);
+
+  // Make tests more readable by grabbing the relevant paths, and transforming
+  // them to their function names, rather than indexes.
+  const getPaths = state => ({
+    selectedCallNodePath: selectedThreadSelectors
+      .getSelectedCallNodePath(state)
+      .map(index => funcNames[index]),
+    expandedCallNodePaths: selectedThreadSelectors
+      .getExpandedCallNodePaths(state)
+      .map(path => path.map(index => funcNames[index])),
+  });
+
+  describe('on a normal call tree', function() {
+    // Each test uses a normal call tree, with a selected call node.
+    const storeWithNormalCallTree = () => {
+      const store = storeWithProfile(profile);
+      store.dispatch(changeSelectedCallNode(threadIndex, callNodePath));
+      return store;
+    };
+
+    it('starts with a selectedCallNodePath', function() {
+      const { getState } = storeWithNormalCallTree();
+      const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
+        getState()
+      );
+      expect(selectedCallNodePath).toEqual(['A', 'B']);
+      expect(expandedCallNodePaths).toEqual([['A']]);
+    });
+
+    it('inverts the selectedCallNodePath', function() {
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(changeSelectedCallNode(threadIndex, callNodePath));
+      dispatch(changeInvertCallstack(true));
+      const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
+        getState()
+      );
+
+      // Do not select the first alphabetical path:
+      expect(selectedCallNodePath).not.toEqual(['D', 'C', 'B']);
+
+      // Pick the heaviest path:
+      expect(selectedCallNodePath).toEqual(['J', 'I', 'B']);
+      expect(expandedCallNodePaths).toEqual([['J'], ['J', 'I']]);
+    });
+  });
+
+  describe('on an inverted call tree', function() {
+    // Each test uses a store with an inverted profile, and a selected call node.
+    const storeWithInvertedCallTree = () => {
+      const store = storeWithProfile(profile);
+      store.dispatch(changeInvertCallstack(true));
+      store.dispatch(changeSelectedCallNode(threadIndex, invertedCallNodePath));
+      return store;
+    };
+
+    it('starts with a selectedCallNodePath', function() {
+      const { getState } = storeWithInvertedCallTree();
+      const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
+        getState()
+      );
+      expect(selectedCallNodePath).toEqual(['J', 'I', 'B']);
+      expect(expandedCallNodePaths).toEqual([['J'], ['J', 'I']]);
+    });
+
+    it('uninverts the selectedCallNodePath', function() {
+      const { dispatch, getState } = storeWithInvertedCallTree();
+      dispatch(changeInvertCallstack(false));
+      const { selectedCallNodePath, expandedCallNodePaths } = getPaths(
+        getState()
+      );
+
+      expect(selectedCallNodePath).toEqual(['A', 'B']);
+      expect(expandedCallNodePaths).toEqual([['A']]);
     });
   });
 });
