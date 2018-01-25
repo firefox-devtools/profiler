@@ -31,7 +31,6 @@ import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profil
 
 import type { StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
-import { getEmptyTaskTracerData } from './task-tracer';
 import type { ImplementationFilter } from '../types/actions';
 import bisection from 'bisection';
 
@@ -1071,6 +1070,5 @@ export function getEmptyProfile(): Profile {
       preprocessedProfileVersion: PROCESSED_PROFILE_VERSION,
     },
     threads: [],
-    tasktracer: getEmptyTaskTracerData(),
   };
 }

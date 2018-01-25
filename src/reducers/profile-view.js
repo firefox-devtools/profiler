@@ -6,7 +6,6 @@
 import {
   applyFunctionMerging,
   setFuncNames,
-  setTaskTracerNames,
 } from '../profile-logic/symbolication';
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
@@ -19,7 +18,6 @@ import * as StackTiming from '../profile-logic/stack-timing';
 import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
-import * as TaskTracerTools from '../profile-logic/task-tracer';
 import { getCategoryColorStrategy } from './stack-chart';
 import uniqWith from 'lodash.uniqwith';
 import { assertExhaustiveCheck } from '../utils/flow';
@@ -29,7 +27,6 @@ import type {
   Thread,
   ThreadIndex,
   SamplesTable,
-  TaskTracer,
   MarkersTable,
 } from '../types/profile';
 import type {
@@ -82,18 +79,6 @@ function profile(
         );
       });
       return Object.assign({}, state, { threads });
-    }
-    case 'ASSIGN_TASK_TRACER_NAMES': {
-      if (!state.tasktracer.taskTable.length) {
-        return state;
-      }
-      const { addressIndices, symbolNames } = action;
-      const tasktracer = setTaskTracerNames(
-        state.tasktracer,
-        addressIndices,
-        symbolNames
-      );
-      return Object.assign({}, state, { tasktracer });
     }
     default:
       return state;
@@ -459,12 +444,6 @@ export const getDisplayRange = createSelector(
   }
 );
 
-export const getTasksByThread = createSelector(
-  (state: State) => getProfileTaskTracerData(state).taskTable,
-  (state: State) => getProfileTaskTracerData(state).threadTable,
-  TaskTracerTools.getTasksByThread
-);
-
 /**
  * Profile
  */
@@ -475,8 +454,6 @@ export const getProfileInterval = (state: State): Milliseconds =>
 export const getThreads = (state: State): Thread[] => getProfile(state).threads;
 export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
-export const getProfileTaskTracerData = (state: State): TaskTracer =>
-  getProfile(state).tasktracer;
 export const getRightClickedThreadIndex = (state: State) =>
   getProfileViewOptions(state).rightClickedThread;
 
