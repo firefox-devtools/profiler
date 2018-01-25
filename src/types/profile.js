@@ -15,7 +15,6 @@ export type IndexIntoStringTable = number;
 export type IndexIntoFuncTable = number;
 export type IndexIntoResourceTable = number;
 export type IndexIntoLibs = number;
-export type IndexIntoTaskTracerAddresses = number;
 export type categoryBitMask = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
@@ -192,46 +191,9 @@ export type ProfileMeta = {|
 |};
 
 /**
- * TaskTracer data - TODO.
- */
-export type TaskTracer = {|
-  taskTable: {|
-    length: number,
-    dispatchTime: any[],
-    sourceEventId: any[],
-    sourceEventType: any[],
-    parentTaskId: any[],
-    beginTime: any[],
-    processId: any[],
-    threadIndex: any[],
-    endTime: any[],
-    ipdlMsg: any[],
-    label: any[],
-    address: any[],
-  |},
-  addressTable: {|
-    length: number,
-    address: MemoryOffset[],
-    className: IndexIntoStringTable[],
-    lib: Array<null | Lib>,
-  |},
-  threadTable: {|
-    length: number,
-    tid: any[],
-    name: any[],
-    start: any[],
-  |},
-  tasksIdToTaskIndexMap: Map<any, any>,
-  addressIndicesByLib: Map<Lib, MemoryOffset[]>,
-  stringTable: UniqueStringArray,
-  tidToThreadIndexMap: Map<any, any>,
-|};
-
-/**
  * All of the data for a processed profile.
  */
 export type Profile = {
   meta: ProfileMeta,
-  tasktracer: TaskTracer,
   threads: Thread[],
 };
