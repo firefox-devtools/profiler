@@ -1,0 +1,3 @@
+.profileViewerHeaderOverflowEdgeIndicator > .topEdge {
+  top: 20px; /* Height of the time ruler */
+}

@@ -32,6 +32,8 @@ import type {
   ConnectedProps,
 } from '../../utils/connect';
 
+import './ProfileViewerHeader.css';
+
 type StateProps = {|
   +profile: Profile,
   +selection: ProfileSelection,
