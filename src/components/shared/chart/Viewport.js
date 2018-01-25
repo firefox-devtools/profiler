@@ -81,6 +81,7 @@ type ViewportOwnProps<ChartProps> = {|
   +viewportProps: {|
     +timeRange: StartEndRange,
     +maxViewportHeight: number,
+    +startsAtBottom?: boolean,
     +maximumZoom: UnitIntervalOfProfileRange,
     +selection: ProfileSelection,
     // These props are defined by the generic variables passed into to the type
@@ -195,12 +196,13 @@ export const withChartViewport: WithChartViewport<*, *> =
         const { viewportLeft, viewportRight } = this.getHorizontalViewport(
           props
         );
+        const { startsAtBottom, maxViewportHeight } = props.viewportProps;
         return {
           containerWidth: 0,
           containerHeight: 0,
           containerLeft: 0,
           viewportTop: 0,
-          viewportBottom: 0,
+          viewportBottom: startsAtBottom ? maxViewportHeight : 0,
           viewportLeft,
           viewportRight,
           dragX: 0,
@@ -251,6 +253,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       _setSize() {
         if (this._container) {
           const rect = this._container.getBoundingClientRect();
+          const { startsAtBottom } = this.props.viewportProps;
           if (
             this.state.containerWidth !== rect.width ||
             this.state.containerHeight !== rect.height
@@ -259,7 +262,12 @@ export const withChartViewport: WithChartViewport<*, *> =
               containerWidth: rect.width,
               containerHeight: rect.height,
               containerLeft: rect.left,
-              viewportBottom: prevState.viewportTop + rect.height,
+              viewportBottom: startsAtBottom
+                ? prevState.viewportBottom
+                : prevState.viewportTop + rect.height,
+              viewportTop: startsAtBottom
+                ? prevState.viewportBottom - rect.height
+                : prevState.viewportTop,
             }));
           }
         }
@@ -408,7 +416,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       moveViewport(offsetX: CssPixels, offsetY: CssPixels): boolean {
         const {
           updateProfileSelection,
-          viewportProps: { maxViewportHeight, timeRange },
+          viewportProps: { maxViewportHeight, timeRange, startsAtBottom },
         } = this.props;
         const {
           containerWidth,
@@ -437,15 +445,21 @@ export const withChartViewport: WithChartViewport<*, *> =
         let newViewportTop: CssPixels = viewportTop - offsetY;
         let newViewportBottom: CssPixels = newViewportTop + containerHeight;
 
-        // Constrain the viewport to the bottom.
-        if (newViewportBottom > maxViewportHeight) {
+        if (maxViewportHeight < containerHeight) {
+          // If the view is extra small, anchor content to the top or bottom.
+          if (startsAtBottom) {
+            newViewportTop = maxViewportHeight - containerHeight;
+            newViewportBottom = maxViewportHeight;
+          } else {
+            newViewportTop = 0;
+            newViewportBottom = containerHeight;
+          }
+        } else if (newViewportBottom > maxViewportHeight) {
+          // Constrain the viewport to the bottom.
           newViewportTop = maxViewportHeight - containerHeight;
           newViewportBottom = maxViewportHeight;
-        }
-
-        // Constrain the viewport to the top. This must be after constraining to the bottom
-        // so if the view is extra small the content is anchored to the top, and not the bottom.
-        if (newViewportTop < 0) {
+        } else if (newViewportTop < 0) {
+          // Constrain the viewport to the top.
           newViewportTop = 0;
           newViewportBottom = containerHeight;
         }

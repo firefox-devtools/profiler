@@ -1,0 +1,38 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.flameGraphSettings {
+  height: 25px;
+  padding: 0;
+  line-height: 25px;
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.flameGraphSettingsList {
+  display: block;
+  flex: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.flameGraphSettingsListItem {
+  display: inline-block;
+  margin: 0 5px;
+  padding: 0;
+}
+
+.flameGraphSettingsLabel {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  display: inline-flex;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+.flameGraphSettingsCheckbox {
+  margin: 0 5px;
+}
