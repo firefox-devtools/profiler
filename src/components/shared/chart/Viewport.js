@@ -84,6 +84,7 @@ type ViewportOwnProps<ChartProps> = {|
     +startsAtBottom?: boolean,
     +maximumZoom: UnitIntervalOfProfileRange,
     +selection: ProfileSelection,
+    +disableHorizontalMovement?: boolean,
     // These props are defined by the generic variables passed into to the type
     // WithChartViewport when calling withChartViewport. This is how the relationship
     // is guaranteed. e.g. here with OwnProps:
@@ -278,12 +279,18 @@ export const withChartViewport: WithChartViewport<*, *> =
       }
 
       _mouseWheelListener(event: SyntheticWheelEvent<>) {
+        const { disableHorizontalMovement } = this.props.viewportProps;
         if (event.shiftKey) {
-          this.zoomRangeSelection(event);
+          event.preventDefault();
+          if (!disableHorizontalMovement) {
+            this.zoomRangeSelection(event);
+          }
           return;
         }
 
-        this.showShiftScrollingHint();
+        if (!disableHorizontalMovement) {
+          this.showShiftScrollingHint();
+        }
 
         // Do the work to move the viewport.
         const { containerHeight } = this.state;
@@ -302,7 +309,6 @@ export const withChartViewport: WithChartViewport<*, *> =
         if (!hasZoomedViaMousewheel && setHasZoomedViaMousewheel) {
           setHasZoomedViaMousewheel();
         }
-        event.preventDefault();
 
         // Shift is a modifier that will change some mice to scroll horizontally, check
         // for that here.
@@ -416,7 +422,12 @@ export const withChartViewport: WithChartViewport<*, *> =
       moveViewport(offsetX: CssPixels, offsetY: CssPixels): boolean {
         const {
           updateProfileSelection,
-          viewportProps: { maxViewportHeight, timeRange, startsAtBottom },
+          viewportProps: {
+            maxViewportHeight,
+            timeRange,
+            startsAtBottom,
+            disableHorizontalMovement,
+          },
         } = this.props;
         const {
           containerWidth,
@@ -468,7 +479,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         const viewportHorizontalChanged = newViewportLeft !== viewportLeft;
         const viewportVerticalChanged = newViewportTop !== viewportTop;
 
-        if (viewportHorizontalChanged) {
+        if (viewportHorizontalChanged && !disableHorizontalMovement) {
           updateProfileSelection({
             hasSelection: true,
             isModifying: false,

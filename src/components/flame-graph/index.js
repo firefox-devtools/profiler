@@ -76,6 +76,7 @@ class FlameGraph extends React.PureComponent<Props> {
               maximumZoom: 1,
               selection,
               startsAtBottom: true,
+              disableHorizontalMovement: true,
               viewportNeedsUpdate,
             }}
             // FlameGraphCanvas props
