@@ -123,6 +123,9 @@ body, #root, .profileViewer {
   text-align: right;
 }
 .treeViewRowColumn.treeViewFixedColumn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+
   box-sizing: border-box;
   border-right: 1px solid var(--grey-30);
 }
@@ -148,10 +151,6 @@ body, #root, .profileViewer {
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
-}
-.treeViewRowColumn {
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .treeViewRowColumn.totalTime,
 .treeViewRowColumn.totalTimePercent,
@@ -195,13 +194,16 @@ body, #root, .profileViewer {
 }
 
 .treeViewHighlighting {
-  padding: 1px;
-  margin: -1px;
+  /* This negative margin enlarges the background to the top, so that it fully
+   * covers the underlying background. There's an underlying background when the
+   * line is selected. */
+  margin: -1px 0;
+  padding: 1px 0;
+
   color: #000;
   background: #cbe8fe;
   border-radius: 2px;
   box-shadow: 0 0 0 0.5px rgba(0,0,0,0.05), 0 1px 1px rgba(0,0,0,.3);
-  position: relative;
 }
 
 
