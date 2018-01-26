@@ -31,9 +31,9 @@ type GATiming = {|
   timingLabel?: string,
 |};
 
-type GAPayload = GAEvent | GAPageView | GATiming;
+export type GAPayload = GAEvent | GAPageView | GATiming;
 
-export type GoogleAnalytics = ('send', GAPayload) => {};
+export type GoogleAnalytics = ('send', GAPayload) => void;
 
 export function sendAnalytics(payload: GAPayload) {
   const ga: ?GoogleAnalytics = self.ga;
