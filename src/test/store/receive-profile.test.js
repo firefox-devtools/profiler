@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+ // @flow
 import sinon from 'sinon';
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
