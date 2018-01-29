@@ -44,6 +44,7 @@ type OwnProps = {|
   +rangeEnd: Milliseconds,
   +isHidden: boolean,
   +isModifyingSelection: boolean,
+  +style?: Object /* This is used by Reorderable */,
 |};
 
 type StateProps = {|
@@ -160,6 +161,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
       isHidden,
       isModifyingSelection,
       unfilteredSamplesRange,
+      style,
     } = this.props;
 
     if (isHidden) {
@@ -181,6 +183,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
       <li
         className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')}
         onClick={this._onLineClick}
+        style={style}
       >
         <ContextMenuTrigger
           id={'ProfileThreadHeaderContextMenu'}
