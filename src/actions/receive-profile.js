@@ -242,7 +242,7 @@ async function getSymbolStore(dispatch, geckoProfiler) {
   return symbolStore;
 }
 
-async function doSymbolicateProfile(
+export async function doSymbolicateProfile(
   dispatch: Dispatch,
   profile: Profile,
   symbolStore: SymbolStore

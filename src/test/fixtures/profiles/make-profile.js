@@ -280,7 +280,9 @@ function _buildThreadFromTextOnlyStacks(
   // Create the FuncTable.
   funcNames.forEach(funcName => {
     funcTable.name.push(stringTable.indexForString(funcName));
-    funcTable.address.push(0);
+    funcTable.address.push(
+      funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : 0
+    );
     funcTable.fileName.push(null);
     funcTable.isJS.push(funcName.endsWith('js'));
     funcTable.lineNumber.push(null);

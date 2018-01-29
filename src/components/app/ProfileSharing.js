@@ -10,7 +10,7 @@ import classNames from 'classnames';
 import {
   getProfile,
   getProfileRootRange,
-  getProfileViewOptions,
+  getSymbolicationStatus,
 } from '../../reducers/profile-view';
 import { getDataSource, getUrlPredictor } from '../../reducers/url-state';
 import actions from '../../actions';
@@ -488,7 +488,7 @@ const options: ExplicitConnectOptions<
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     dataSource: getDataSource(state),
-    symbolicationStatus: getProfileViewOptions(state).symbolicationStatus,
+    symbolicationStatus: getSymbolicationStatus(state),
     predictUrl: getUrlPredictor(state),
   }),
   mapDispatchToProps: { profilePublished: actions.profilePublished },

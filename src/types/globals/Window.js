@@ -7,13 +7,13 @@ import type { IDBFactory, IDBKeyRange } from '../indexeddb';
 import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 import type { GoogleAnalytics } from '../../utils/analytics';
 
-declare class GeckoProfiler {
+declare type GeckoProfiler = {
   getProfile: () => Object,
   getSymbolTable: (
     debugName: string,
     breakpadId: string
   ) => Promise<SymbolTableAsTuple>,
-}
+};
 
 declare class Window extends EventTarget {
   // Google Analytics
@@ -35,6 +35,9 @@ declare class Window extends EventTarget {
     element: HTMLElement,
     pseudoEl: ?string
   ) => CSSStyleDeclaration,
+  TextDecoder: typeof TextDecoder,
+  setTimeout: typeof setTimeout,
+  fetch: typeof fetch,
   DOMRect: typeof DOMRect,
   requestIdleCallback: typeof requestIdleCallback,
   requestAnimationFrame: typeof requestAnimationFrame,
