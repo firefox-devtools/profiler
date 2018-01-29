@@ -21,6 +21,7 @@ type Props = {|
   onChangeOrder: (number[]) => Action,
   // This forces the children to be an array of React Elements.
   // See https://flow.org/en/docs/react/children/ for more information.
+  // Be careful: children need to handle a `style` property.
   children: React.ChildrenArray<React.Element<any>>,
 |};
 
@@ -275,6 +276,8 @@ class Reorderable extends React.PureComponent<Props, State> {
           ) {
             style.transform = `${xy.translateXY}(${adjustSucceedingBy}px)`;
           }
+
+          // Note: the child element needs to handle this `style` property.
           return React.cloneElement(child, { style });
         })}
       </TagName>

@@ -113,6 +113,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
           <li
             className="profileThreadHeaderBar selected"
             onClick={[Function]}
+            style={undefined}
           >
             <div
               className="react-contextmenu-wrapper grippy profileThreadHeaderBarThreadLabel"
@@ -150,6 +151,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
           <li
             className="profileThreadHeaderBar"
             onClick={[Function]}
+            style={undefined}
           >
             <div
               className="react-contextmenu-wrapper grippy profileThreadHeaderBarThreadLabel"
@@ -221,6 +223,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
           <li
             className="profileThreadHeaderBar"
             onClick={[Function]}
+            style={undefined}
           >
             <div
               className="react-contextmenu-wrapper grippy profileThreadHeaderBarThreadLabel"
