@@ -285,8 +285,7 @@ body, #root, .profileViewer {
 
 .profileViewerHeader {
   position: relative;
-  margin-left: 149px;
-  border-left: 1px solid var(--grey-30);
+  margin-left: 150px;
   -moz-user-focus: ignore;
 }
 
@@ -347,8 +346,6 @@ body, #root, .profileViewer {
 }
 
 .profileViewerHeaderOverflowEdgeIndicatorScrollbox {
-  margin: 0 0 0 -150px;
-  padding-left: 150px;
   max-height: 250px;
   overflow: auto;
 }
