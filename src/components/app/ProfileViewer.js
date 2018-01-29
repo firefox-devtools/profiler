@@ -17,10 +17,7 @@ import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import StackChart from '../stack-chart/';
 import MarkerChart from '../marker-chart/';
 import { changeSelectedTab, changeTabOrder } from '../../actions/app';
-import {
-  getProfileViewOptions,
-  getDisplayRange,
-} from '../../reducers/profile-view';
+import { getTabOrder, getDisplayRange } from '../../reducers/profile-view';
 import { getSelectedTab } from '../../reducers/url-state';
 import ProfileViewerHeader from '../header/ProfileViewerHeader';
 import ProfileCallTreeContextMenu from '../calltree/ProfileCallTreeContextMenu';
@@ -146,7 +143,7 @@ ProfileViewer.propTypes = {
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
-    tabOrder: getProfileViewOptions(state).tabOrder,
+    tabOrder: getTabOrder(state),
     selectedTab: getSelectedTab(state),
     className: 'profileViewer',
     timeRange: getDisplayRange(state),
