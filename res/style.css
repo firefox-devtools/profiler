@@ -324,8 +324,9 @@ body, #root, .profileViewer {
   position: absolute;
   top: 0;
   /* See the explanation for this value in the rule for
-   * `.profileViewerHeaderTimeRuler` above. */
-  left: var(--left-gutter-width);
+   * `.profileViewerHeaderTimeRuler` above.
+   * "- 1px" compensate for the border. */
+  left: calc(var(--left-gutter-width) - 1px);
   right: 0;
   bottom: 0;
 
@@ -333,6 +334,7 @@ body, #root, .profileViewer {
   margin: 0;
   padding: 0;
 
+  border-left: 1px solid var(--grey-30);
   overflow: hidden;
   list-style: none;
   -moz-user-select: none;
