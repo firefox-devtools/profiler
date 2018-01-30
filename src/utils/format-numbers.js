@@ -4,6 +4,8 @@
 
 // @flow
 
+import type { Microseconds, Milliseconds } from '../types/units';
+
 /**
  * Format a positive float into a string.
  *
@@ -48,6 +50,14 @@ export function formatBytes(bytes: number): string {
   } else {
     return formatNumber(bytes / (1024 * 1024 * 1024)) + 'GB';
   }
+}
+
+export function formatMicroseconds(time: Microseconds) {
+  return formatNumber(time) + 'μs';
+}
+
+export function formatMilliseconds(time: Milliseconds) {
+  return formatNumber(time) + 'ms';
 }
 
 /*
