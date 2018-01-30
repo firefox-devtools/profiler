@@ -160,13 +160,23 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
                   'gctime',
                   'Total slice times',
                   timings.total_time,
-                  x => x + 'ms'
+                  x =>
+                    formatMilliseconds(
+                      x,
+                      /* significantDigits */ 3,
+                      /* maxFractionalDigits */ 2
+                    )
                 )}
                 {_markerDetail(
                   'gcmaxpause',
                   'Max Pause',
                   timings.max_pause,
-                  x => x + 'ms'
+                  x =>
+                    formatMilliseconds(
+                      x,
+                      /* significantDigits */ 3,
+                      /* maxFractionalDigits */ 2
+                    )
                 )}
                 {_markerDetail(
                   'gcusage',
