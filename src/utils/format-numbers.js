@@ -9,35 +9,47 @@ import type { Microseconds, Milliseconds } from '../types/units';
 /**
  * Format a positive float into a string.
  *
- * Try to format the value to 2 significant digits as much as possible but
- * without using scientific notation.  The number of decimal places depends
- * on the value: the closer to zero the value is, the more decimal places
- * are used in the resulting string.
+ * Try to format the value to with `significantDigits` significant digits as
+ * much as possible but without using scientific notation.  The number of
+ * decimal places depends on the value: the closer to zero the value is, the
+ * more decimal places are used in the resulting string.  No more than
+ * `maxFractionalDigits` decimal places will be used.
  *
- * For example:
+ * For example, using significantDigits = 2 (the default):
  *
- * formatNumber(123,   ) = "123"
- * formatNumber(12.3,  ) =  "12"
- * formatNumber(1.23,  ) =   "1.2"
+ * formatNumber(123    ) = "123"
+ * formatNumber(12.3   ) =  "12"
+ * formatNumber(1.23   ) =   "1.2"
  * formatNumber(0.01234) =   "0.012"
  */
-export function formatNumber(value: number): string {
-  let result: string;
-  if (value >= 10) {
-    result = value.toFixed(0);
-  } else if (value >= 1) {
-    result = value.toFixed(1);
-  } else if (value >= 0.1) {
-    result = value.toFixed(2);
-  } else {
-    result = value.toFixed(3);
+export function formatNumber(
+  value: number,
+  significantDigits: number = 2,
+  maxFractionalDigits: number = 3
+): string {
+  /*
+   * Note that numDigitsOnLeft can be negative when the first non-zero digit
+   * is on the right of the decimal point.  0.01 = -1
+   */
+  const numDigitsOnLeft = Math.floor(Math.log10(Math.abs(value))) + 1;
+  let places = significantDigits - numDigitsOnLeft;
+  if (places < 0) {
+    places = 0;
+  } else if (places > maxFractionalDigits) {
+    places = maxFractionalDigits;
   }
 
-  return result;
+  return value.toFixed(places);
 }
 
 export function formatPercent(value: number): string {
-  return formatNumber(value * 100) + '%';
+  return (
+    formatNumber(
+      value * 100,
+      /* significantDigits */ 2,
+      /* maxFractionalDigits */ 1
+    ) + '%'
+  );
 }
 
 export function formatBytes(bytes: number): string {
@@ -52,12 +64,20 @@ export function formatBytes(bytes: number): string {
   }
 }
 
-export function formatMicroseconds(time: Microseconds) {
-  return formatNumber(time) + 'μs';
+export function formatMicroseconds(
+  time: Microseconds,
+  significantDigits: number = 2,
+  maxFractionalDigits: number = 3
+) {
+  return formatNumber(time, significantDigits, maxFractionalDigits) + 'μs';
 }
 
-export function formatMilliseconds(time: Milliseconds) {
-  return formatNumber(time) + 'ms';
+export function formatMilliseconds(
+  time: Milliseconds,
+  significantDigits: number = 2,
+  maxFractionalDigits: number = 3
+) {
+  return formatNumber(time, significantDigits, maxFractionalDigits) + 'ms';
 }
 
 /*
