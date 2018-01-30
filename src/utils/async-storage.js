@@ -44,6 +44,7 @@
  *
  */
 
+ // @flow
 export function getStore(dbName) {
   const DBVERSION = 1;
   const STORENAME = 'keyvaluestore';

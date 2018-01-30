@@ -1,3 +1,5 @@
+
+// @flow
 import Worker from 'workerjs';
 
 const workerFiles = {

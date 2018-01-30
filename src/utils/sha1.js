@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // Copied and adapted from https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
-
+// @flow
 function hex(buffer) {
   const hexCodes = [];
   const view = new DataView(buffer);
