@@ -62,7 +62,7 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     (this: any).handleClick = this.handleClick.bind(this);
   }
 
-  copyFunctionName(): void {
+  _getFunctionName(): string {
     const {
       selectedCallNodeIndex,
       thread: { stringTable, funcTable },
@@ -80,7 +80,19 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     const stringIndex = funcTable.name[funcIndex];
     const functionCall = stringTable.getString(stringIndex);
     const name = isJS ? functionCall : getFunctionName(functionCall);
-    copy(name);
+    return name;
+  }
+
+  lookupFunctionOnSearchfox(): void {
+    const name = this._getFunctionName();
+    window.open(
+      `http://searchfox.org/mozilla-central/search?q=${name}`,
+      '_blank'
+    );
+  }
+
+  copyFunctionName(): void {
+    copy(this._getFunctionName());
   }
 
   copyUrl(): void {
@@ -140,6 +152,9 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     }
 
     switch (type) {
+      case 'searchfox':
+        this.lookupFunctionOnSearchfox();
+        break;
       case 'copy-function-name':
         this.copyFunctionName();
         break;
@@ -384,6 +399,9 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
           Expand all
         </MenuItem>
         <div className="react-contextmenu-separator" />
+        <MenuItem onClick={this.handleClick} data={{ type: 'searchfox' }}>
+          Lookup function on Searchfox
+        </MenuItem>
         <MenuItem
           onClick={this.handleClick}
           data={{ type: 'copy-function-name' }}

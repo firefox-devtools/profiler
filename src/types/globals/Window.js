@@ -44,6 +44,7 @@ declare class Window extends EventTarget {
   innerWidth: number,
   innerHeight: number,
   location: Location,
+  open: (url: string, windowName: string, windowFeatures: ?string) => Window,
   history: History,
   Worker: typeof Worker,
   WheelEvent: WheelEvent,
