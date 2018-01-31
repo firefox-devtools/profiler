@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyThreadIndicator rendering matches the snapshot when rendering all three types of indicators 1`] = `
+<div
+  className="headerEmptyThreadIndicator"
+>
+  <div
+    className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorStartup"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    style={
+      Object {
+        "left": 0,
+        "width": 30,
+      }
+    }
+  />
+  <div
+    className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorShutdown"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    style={
+      Object {
+        "right": 0,
+        "width": 10,
+      }
+    }
+  />
+  <div
+    className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorEmptyBuffer"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+    style={
+      Object {
+        "left": 30,
+        "width": 20,
+      }
+    }
+  />
+</div>
+`;
+
+exports[`EmptyThreadIndicator rendering matches the snapshot when rendering no indicators 1`] = `
+<div
+  className="headerEmptyThreadIndicator"
+/>
+`;

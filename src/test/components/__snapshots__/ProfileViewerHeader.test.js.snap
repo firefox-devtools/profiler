@@ -213,7 +213,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
                   style={
                     Object {
                       "left": 66.66666666666667,
-                      "right": 166.66666666666666,
+                      "width": 66.66666666666667,
                     }
                   }
                 />
@@ -285,7 +285,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
                   style={
                     Object {
                       "left": 66.66666666666667,
-                      "right": 166.66666666666666,
+                      "width": 66.66666666666667,
                     }
                   }
                 />
