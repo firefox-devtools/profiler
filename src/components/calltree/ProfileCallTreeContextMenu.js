@@ -86,7 +86,9 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
   lookupFunctionOnSearchfox(): void {
     const name = this._getFunctionName();
     window.open(
-      `http://searchfox.org/mozilla-central/search?q=${name}`,
+      `https://searchfox.org/mozilla-central/search?q=${encodeURIComponent(
+        name
+      )}`,
       '_blank'
     );
   }
@@ -400,7 +402,7 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
         </MenuItem>
         <div className="react-contextmenu-separator" />
         <MenuItem onClick={this.handleClick} data={{ type: 'searchfox' }}>
-          Lookup function on Searchfox
+          Look up the function name on Searchfox
         </MenuItem>
         <MenuItem
           onClick={this.handleClick}
