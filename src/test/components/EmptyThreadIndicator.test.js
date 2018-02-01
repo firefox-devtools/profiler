@@ -46,7 +46,7 @@ describe('EmptyThreadIndicator', function() {
       rangeStart: viewport.start,
       rangeEnd: viewport.end,
       thread: thread,
-      interval: 1,
+      interval: 0.1,
       unfilteredSamplesRange: { start: 5, end: 8 },
       width,
       height: 10,
@@ -56,18 +56,16 @@ describe('EmptyThreadIndicator', function() {
     it('matches the snapshot when rendering all three types of indicators', () => {
       const props = propsFromViewportRange({ start: 0, end: 10 });
       expect(
-        renderer
-          .create(
-            // The props have to be passed in manually to avoid adding the SizeProps.
-            <EmptyThreadIndicator
-              rangeStart={props.rangeStart}
-              rangeEnd={props.rangeEnd}
-              thread={props.thread}
-              interval={props.interval}
-              unfilteredSamplesRange={props.unfilteredSamplesRange}
-            />
-          )
-          .toJSON()
+        renderer.create(
+          // The props have to be passed in manually to avoid adding the SizeProps.
+          <EmptyThreadIndicator
+            rangeStart={props.rangeStart}
+            rangeEnd={props.rangeEnd}
+            thread={props.thread}
+            interval={props.interval}
+            unfilteredSamplesRange={props.unfilteredSamplesRange}
+          />
+        )
       ).toMatchSnapshot();
     });
 
@@ -75,18 +73,16 @@ describe('EmptyThreadIndicator', function() {
       // This range has samples throughout it.
       const props = propsFromViewportRange({ start: 5.5, end: 6.5 });
       expect(
-        renderer
-          .create(
-            // The props have to be passed in manually to avoid adding the SizeProps.
-            <EmptyThreadIndicator
-              rangeStart={props.rangeStart}
-              rangeEnd={props.rangeEnd}
-              thread={props.thread}
-              interval={props.interval}
-              unfilteredSamplesRange={props.unfilteredSamplesRange}
-            />
-          )
-          .toJSON()
+        renderer.create(
+          // The props have to be passed in manually to avoid adding the SizeProps.
+          <EmptyThreadIndicator
+            rangeStart={props.rangeStart}
+            rangeEnd={props.rangeEnd}
+            thread={props.thread}
+            interval={props.interval}
+            unfilteredSamplesRange={props.unfilteredSamplesRange}
+          />
+        )
       ).toMatchSnapshot();
     });
   });
@@ -168,8 +164,39 @@ describe('EmptyThreadIndicator', function() {
     // Thread startup is between 0 and 3 seconds in the mock data. In addition the space
     // is 100px wide.
 
+    it('in range during and after', () => {
+      //           0  1  2  3  4  5  6  7  8  9 10
+      //  registered        |-----------------|
+      //  samples                 |--------|
+      //  viewport             |-----------------|
+      //  empty                |--|
+      const { emptyBufferStart } = getIndicatorPositions(
+        propsFromViewportRange({ start: 4, end: 10 })
+      );
+
+      // Break the assertion down
+      expect(emptyBufferStart && emptyBufferStart.left).toEqual(0);
+      expect(emptyBufferStart && emptyBufferStart.width).toBeCloseTo(16.66666);
+    });
+
+    it('in range during and before', () => {
+      //           0  1  2  3  4  5  6  7  8  9 10
+      //  registered        |-----------------|
+      //  samples                 |--------|
+      //  viewport |--------------|
+      //  empty             |-----|
+      const { emptyBufferStart } = getIndicatorPositions(
+        propsFromViewportRange({ start: 0, end: 5 })
+      );
+
+      // Break the assertion down
+      expect(emptyBufferStart).toEqual({ left: 60, width: 40 });
+    });
+
     it('is on screen when zoomed all the way out', () => {
       //           0  1  2  3  4  5  6  7  8  9  10
+      //  registered        |-----------------|
+      //  samples                 |--------|
       //  viewport |------------------------------|
       //  empty             |-----|
       const { emptyBufferStart } = getIndicatorPositions(
@@ -181,8 +208,10 @@ describe('EmptyThreadIndicator', function() {
 
     it('is 100% on screen zoomed far into emptyBufferStart time', () => {
       //           0  1  2  3  4  5  6  7  8  9  10
+      //  registered        |-----------------|
+      //  samples                 |--------|
       //  viewport           |--|
-      //  empty             |-----|
+      //  empty              |--|
       const { emptyBufferStart } = getIndicatorPositions(
         propsFromViewportRange({ start: 3.5, end: 4.5 })
       );
@@ -192,8 +221,10 @@ describe('EmptyThreadIndicator', function() {
 
     it('is not shown when the viewport isn’t in range before', () => {
       //           0  1  2  3  4  5  6  7  8  9  10
+      //  registered        |-----------------|
+      //  samples                 |--------|
       //  viewport |-----|
-      //  empty             |-----|
+      //  empty             none in range
       const { emptyBufferStart } = getIndicatorPositions(
         propsFromViewportRange({ start: 0, end: 2 })
       );
@@ -203,8 +234,10 @@ describe('EmptyThreadIndicator', function() {
 
     it('is not shown when the viewport isn’t in range after', () => {
       //           0  1  2  3  4  5  6  7  8  9  10
+      //  registered        |-----------------|
+      //  samples                 |--------|
       //  viewport                   |-----|
-      //  empty             |-----|
+      //  empty             none in range
       const { emptyBufferStart } = getIndicatorPositions(
         propsFromViewportRange({ start: 6, end: 8 })
       );

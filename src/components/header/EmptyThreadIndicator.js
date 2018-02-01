@@ -126,17 +126,18 @@ export function getIndicatorPositions(
     // Was the buffer empty at the beginning of the range, at least one interval length
     // into the profile? This interval length ensures no awkward cut off where it's not
     // really needed.
-    unfilteredSamplesRange.start > rangeStart + interval &&
+    unfilteredSamplesRange.start >= rangeStart + interval &&
     // Only show this if it's actually in the current range.
     registerTime < rangeEnd
   ) {
     const startMilliseconds = Math.max(0, registerTime - rangeStart);
     emptyBufferStart = {
       left: startMilliseconds * xPixelsPerMs,
-      width:
-        (Math.min(unfilteredSamplesRange.start, rangeEnd) -
-          Math.max(registerTime, rangeStart)) *
-        xPixelsPerMs,
+      width: Math.min(
+        width,
+        (unfilteredSamplesRange.start - Math.max(registerTime, rangeStart)) *
+          xPixelsPerMs
+      ),
     };
   }
 
