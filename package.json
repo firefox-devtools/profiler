@@ -65,7 +65,6 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.2.0",
     "reselect": "^3.0.1",
-    "text-encoding": "^0.6.4",
     "url": "^0.11.0",
     "weaktuplemap": "^1.0.0"
   },
@@ -140,6 +139,7 @@
     "rimraf": "^2.5.4",
     "sinon": "^3.2.1",
     "style-loader": "^0.18.2",
+    "text-encoding": "^0.6.4",
     "webpack": "^3.5.6",
     "webpack-dev-server": "^2.7.1",
     "workerjs": "github:jasonLaster/workerjs"

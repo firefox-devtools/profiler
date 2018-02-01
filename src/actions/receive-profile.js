@@ -197,17 +197,6 @@ export function assignFunctionNames(
   };
 }
 
-export function assignTaskTracerNames(
-  addressIndices: number[],
-  symbolNames: string[]
-): Action {
-  return {
-    type: 'ASSIGN_TASK_TRACER_NAMES',
-    addressIndices,
-    symbolNames,
-  };
-}
-
 /**
  * If the profile object we got from the add-on is an ArrayBuffer, convert it
  * to a gecko profile object by parsing the JSON.
@@ -253,7 +242,7 @@ async function getSymbolStore(dispatch, geckoProfiler) {
   return symbolStore;
 }
 
-async function doSymbolicateProfile(
+export async function doSymbolicateProfile(
   dispatch: Dispatch,
   profile: Profile,
   symbolStore: SymbolStore
@@ -272,9 +261,6 @@ async function doSymbolicateProfile(
       funcNames: string[]
     ) => {
       dispatch(assignFunctionNames(threadIndex, funcIndices, funcNames));
-    },
-    onGotTaskTracerNames: (addressIndices, symbolNames) => {
-      dispatch(assignTaskTracerNames(addressIndices, symbolNames));
     },
   });
 

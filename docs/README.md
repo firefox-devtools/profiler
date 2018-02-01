@@ -19,7 +19,6 @@ This project is a client for reading profiles from the Gecko Profiler and potent
  * [Loading in profiles from various sources](./loading-in-profiles.md)
  * [Processed profile format](./processed-profile-format.md)
  * [Markers](./markers.md)
- * [TraskTracer](./tasktracer.md) - TODO
  * [Upgrading profiles](./upgrading-profiles.md)
  * [Potential performance data sources in Gecko](./data-sources.md)
  * [Call tree](./call-tree.md)
