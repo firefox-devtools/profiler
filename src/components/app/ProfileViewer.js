@@ -10,14 +10,13 @@ import explicitConnect from '../../utils/connect';
 import TabBar from './TabBar';
 import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
 import MarkerTable from '../marker-table';
-import ProfileTaskTracerView from '../tasktracer/ProfileTaskTracerView';
 import ProfileFilterNavigator from './ProfileFilterNavigator';
 import ProfileSharing from './ProfileSharing';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import StackChart from '../stack-chart/';
 import MarkerChart from '../marker-chart/';
 import { changeSelectedTab, changeTabOrder } from '../../actions/app';
-import { getTabOrder, getDisplayRange } from '../../reducers/profile-view';
+import { getTabOrder } from '../../reducers/profile-view';
 import { getSelectedTab } from '../../reducers/url-state';
 import ProfileViewerHeader from '../header/ProfileViewerHeader';
 import ProfileCallTreeContextMenu from '../calltree/ProfileCallTreeContextMenu';
@@ -26,7 +25,6 @@ import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContext
 import FooterLinks from './FooterLinks';
 import { toValidTabSlug } from '../../utils/flow';
 
-import type { StartEndRange } from '../../types/units';
 import type { Tab } from './TabBar';
 import type {
   ExplicitConnectOptions,
@@ -39,7 +37,6 @@ type StateProps = {|
   +tabOrder: number[],
   +selectedTab: string,
   +className: string,
-  +timeRange: StartEndRange,
 |};
 
 type DispatchProps = {|
@@ -86,13 +83,7 @@ class ProfileViewer extends PureComponent<Props> {
   }
 
   render() {
-    const {
-      className,
-      tabOrder,
-      timeRange,
-      changeTabOrder,
-      selectedTab,
-    } = this.props;
+    const { className, tabOrder, changeTabOrder, selectedTab } = this.props;
 
     return (
       <div className={className}>
@@ -112,12 +103,6 @@ class ProfileViewer extends PureComponent<Props> {
           {
             calltree: <ProfileCallTreeView />,
             'marker-table': <MarkerTable />,
-            tasktracer: (
-              <ProfileTaskTracerView
-                rangeStart={timeRange.start}
-                rangeEnd={timeRange.end}
-              />
-            ),
             'stack-chart': <StackChart />,
             'marker-chart': <MarkerChart />,
           }[selectedTab]
@@ -135,7 +120,6 @@ class ProfileViewer extends PureComponent<Props> {
 ProfileViewer.propTypes = {
   className: PropTypes.string.isRequired,
   tabOrder: PropTypes.arrayOf(PropTypes.number).isRequired,
-  timeRange: PropTypes.object.isRequired,
   selectedTab: PropTypes.string.isRequired,
   changeSelectedTab: PropTypes.func.isRequired,
   changeTabOrder: PropTypes.func.isRequired,
@@ -146,7 +130,6 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     tabOrder: getTabOrder(state),
     selectedTab: getSelectedTab(state),
     className: 'profileViewer',
-    timeRange: getDisplayRange(state),
   }),
   mapDispatchToProps: {
     changeSelectedTab,

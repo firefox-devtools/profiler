@@ -329,9 +329,7 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     } = this.props;
 
     if (selectedCallNodeIndex === null) {
-      throw new Error(
-        "The context menu assumes there is a selected call node and there wasn't one."
-      );
+      return null;
     }
 
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];

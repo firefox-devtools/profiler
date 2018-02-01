@@ -6,7 +6,6 @@
 import {
   applyFunctionMerging,
   setFuncNames,
-  setTaskTracerNames,
 } from '../profile-logic/symbolication';
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
@@ -19,7 +18,6 @@ import * as StackTiming from '../profile-logic/stack-timing';
 import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
-import * as TaskTracerTools from '../profile-logic/task-tracer';
 import { getCategoryColorStrategy } from './stack-chart';
 import uniqWith from 'lodash.uniqwith';
 import { assertExhaustiveCheck } from '../utils/flow';
@@ -29,7 +27,6 @@ import type {
   Thread,
   ThreadIndex,
   SamplesTable,
-  TaskTracer,
   MarkersTable,
 } from '../types/profile';
 import type {
@@ -82,18 +79,6 @@ function profile(
         );
       });
       return Object.assign({}, state, { threads });
-    }
-    case 'ASSIGN_TASK_TRACER_NAMES': {
-      if (!state.tasktracer.taskTable.length) {
-        return state;
-      }
-      const { addressIndices, symbolNames } = action;
-      const tasktracer = setTaskTracerNames(
-        state.tasktracer,
-        addressIndices,
-        symbolNames
-      );
-      return Object.assign({}, state, { tasktracer });
     }
     default:
       return state;
@@ -169,6 +154,31 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
         }),
         ...state.slice(threadIndex + 1),
       ];
+    }
+    case 'CHANGE_INVERT_CALLSTACK': {
+      const { callTree, callNodeTable, selectedThreadIndex } = action;
+      return state.map((viewOptions, threadIndex) => {
+        if (selectedThreadIndex === threadIndex) {
+          // Only attempt this on the current thread, as we need the transformed thread
+          // There is no guarantee that this has been calculated on all the other threads,
+          // and we shouldn't attempt to expect it, as that could be quite a perf cost.
+          const selectedCallNodePath = Transforms.invertCallNodePath(
+            viewOptions.selectedCallNodePath,
+            callTree,
+            callNodeTable
+          );
+
+          const expandedCallNodePaths = [];
+          for (let i = 1; i < selectedCallNodePath.length; i++) {
+            expandedCallNodePaths.push(selectedCallNodePath.slice(0, i));
+          }
+          return Object.assign({}, viewOptions, {
+            selectedCallNodePath,
+            expandedCallNodePaths,
+          });
+        }
+        return viewOptions;
+      });
     }
     case 'CHANGE_EXPANDED_CALL_NODES': {
       const { threadIndex, expandedCallNodePaths } = action;
@@ -398,7 +408,8 @@ export const getProfileViewOptions = (state: State) =>
   getProfileView(state).viewOptions;
 export const getProfileRootRange = (state: State) =>
   getProfileViewOptions(state).rootRange;
-
+export const getSymbolicationStatus = (state: State) =>
+  getProfileViewOptions(state).symbolicationStatus;
 export const getScrollToSelectionGeneration = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.scrollToSelectionGeneration
@@ -434,12 +445,6 @@ export const getDisplayRange = createSelector(
   }
 );
 
-export const getTasksByThread = createSelector(
-  (state: State) => getProfileTaskTracerData(state).taskTable,
-  (state: State) => getProfileTaskTracerData(state).threadTable,
-  TaskTracerTools.getTasksByThread
-);
-
 /**
  * Profile
  */
@@ -450,8 +455,6 @@ export const getProfileInterval = (state: State): Milliseconds =>
 export const getThreads = (state: State): Thread[] => getProfile(state).threads;
 export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
-export const getProfileTaskTracerData = (state: State): TaskTracer =>
-  getProfile(state).tasktracer;
 export const getRightClickedThreadIndex = (state: State) =>
   getProfileViewOptions(state).rightClickedThread;
 

@@ -5,7 +5,6 @@
 
 import bisection from 'bisection';
 import { resourceTypes } from './profile-data';
-import { immutableUpdate } from '../utils/flow';
 
 import type {
   Profile,
@@ -13,9 +12,7 @@ import type {
   ThreadIndex,
   FuncTable,
   Lib,
-  TaskTracer,
   IndexIntoFuncTable,
-  IndexIntoTaskTracerAddresses,
 } from '../types/profile';
 import type { MemoryOffset } from '../types/units';
 import type { SymbolStore } from './symbol-store';
@@ -30,7 +27,6 @@ type SymbolicationHandlers = {
     funcIndices: IndexIntoFuncTable[],
     funcNames: string[]
   ) => void,
-  onGotTaskTracerNames: (IndexIntoTaskTracerAddresses[], string[]) => void,
 };
 
 type IndexIntoAddressTable = number;
@@ -60,25 +56,6 @@ export function getContainingLibrary(
     }
   }
   return null;
-}
-
-/**
- * Given a memory address, find the nearest library.
- */
-export function getClosestLibrary(
-  libs: Lib[],
-  address: MemoryOffset
-): null | Lib {
-  if (isNaN(address)) {
-    return null;
-  }
-
-  const startAddresses = libs.map(lib => lib.start);
-  const libIndex = bisection.right(startAddresses, address, 0) - 1;
-  if (libIndex < 0) {
-    return null;
-  }
-  return libs[libIndex];
 }
 
 /**
@@ -302,102 +279,6 @@ async function symbolicateThread(
   );
 }
 
-async function symbolicateTaskTracer(
-  tasktracer: TaskTracer,
-  symbolStore: SymbolStore,
-  symbolicationHandlers: SymbolicationHandlers
-): Promise<void> {
-  const { addressTable, addressIndicesByLib } = tasktracer;
-  await Promise.all(
-    Array.from(addressIndicesByLib).map(([lib, addressIndices]) => {
-      return symbolStore
-        .getFuncAddressTableForLib(lib)
-        .then(funcAddressTable => {
-          addressIndices.sort(
-            (a, b) => addressTable.address[a] - addressTable.address[b]
-          );
-          const funcAddrIndices = [];
-          const addressIndicesToSymbolicate = [];
-          for (const addressIndex of addressIndices) {
-            const address = addressTable.address[addressIndex];
-            const funcAddressIndex =
-              bisection.right(funcAddressTable, address, 0) - 1;
-            if (funcAddressIndex >= 0) {
-              funcAddrIndices.push(funcAddressIndex);
-              addressIndicesToSymbolicate.push(addressIndex);
-            }
-          }
-          return symbolStore
-            .getSymbolsForAddressesInLib(funcAddrIndices, lib)
-            .then(symbolNames => {
-              symbolicationHandlers.onGotTaskTracerNames(
-                addressIndicesToSymbolicate,
-                symbolNames
-              );
-            });
-        });
-    })
-  );
-}
-
-/**
- * Modify certain known symbol names for cleaner presentations.
- */
-function classNameFromSymbolName(symbolName: string): string {
-  let className = symbolName;
-
-  const vtablePrefix = 'vtable for ';
-  if (className.startsWith(vtablePrefix)) {
-    className = className.substring(vtablePrefix.length);
-  }
-
-  const sourceEventMarkerPos = className.indexOf(
-    'SourceEventType)::CreateSourceEvent'
-  );
-  if (sourceEventMarkerPos !== -1) {
-    return className.substring(
-      sourceEventMarkerPos + 'SourceEventType)::Create'.length
-    );
-  }
-
-  const runnableFunctionMarker = 'mozilla::detail::RunnableFunction<';
-  if (className.startsWith(runnableFunctionMarker)) {
-    const parenPos = className.indexOf('(', runnableFunctionMarker.length + 1);
-    const functionName = className.substring(
-      runnableFunctionMarker.length,
-      parenPos
-    );
-    return `RunnableFunction(${functionName})`;
-  }
-
-  const runnableMethodMarker = 'mozilla::detail::RunnableMethodImpl<';
-  if (className.startsWith(runnableMethodMarker)) {
-    const parenPos = className.indexOf('(', runnableMethodMarker.length);
-    const endPos = className.indexOf('::*)', parenPos + 1);
-    className = className.substring(parenPos + 1, endPos);
-    return `RunnableMethod(${className})`;
-  }
-
-  return className;
-}
-
-export function setTaskTracerNames(
-  tasktracer: TaskTracer,
-  addressIndices: IndexIntoTaskTracerAddresses[],
-  symbolNames: string[]
-): TaskTracer {
-  const { stringTable, addressTable } = tasktracer;
-  const className = addressTable.className.slice();
-  for (let i = 0; i < addressIndices.length; i++) {
-    const addressIndex = addressIndices[i];
-    const classNameString = classNameFromSymbolName(symbolNames[i]);
-    className[addressIndex] = stringTable.indexForString(classNameString);
-  }
-  return immutableUpdate(tasktracer, {
-    addressTable: immutableUpdate(tasktracer.addressTable, { className }),
-  });
-}
-
 /**
  * When collecting profile samples, the profiler only collects raw memory addresses
  * of the program's functions. This function takes the list of memory addresses, and
@@ -420,14 +301,5 @@ export function symbolicateProfile(
       symbolicationHandlers
     );
   });
-  if ('tasktracer' in profile) {
-    symbolicationPromises.push(
-      symbolicateTaskTracer(
-        profile.tasktracer,
-        symbolStore,
-        symbolicationHandlers
-      )
-    );
-  }
   return Promise.all(symbolicationPromises).then(() => undefined);
 }

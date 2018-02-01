@@ -6,7 +6,6 @@
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes } from './profile-data';
 import { CURRENT_VERSION } from './gecko-profile-versioning.js';
-import { getEmptyTaskTracerData } from './task-tracer';
 
 /**
  * The "old cleopatra format" is the profile format that was used by the
@@ -364,6 +363,5 @@ export function convertOldCleopatraProfile(
     threads: threads.map(t =>
       _convertThread(t, meta.interval, symbolicationTable)
     ),
-    tasktracer: getEmptyTaskTracerData(),
   };
 }

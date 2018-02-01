@@ -10,6 +10,8 @@ import {
   formatNumber,
   formatPercent,
   formatBytes,
+  formatMicroseconds,
+  formatMilliseconds,
   formatValueTotal,
 } from '../../utils/format-numbers';
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
@@ -45,7 +47,7 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
         const latency =
           data.timeStamp === undefined
             ? null
-            : `${formatNumber(data.startTime - data.timeStamp)}ms`;
+            : formatMilliseconds(data.startTime - data.timeStamp);
         return (
           <div className="tooltipDetails">
             {_markerDetail('type', 'Type', data.eventType)}
@@ -104,7 +106,8 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
                     : _markerDetail(
                         'gctimeinchunkalloc',
                         'Time spent allocating chunks in mutator',
-                        formatNumber(nursery.chunk_alloc_us) + 'μs'
+                        nursery.chunk_alloc_us,
+                        formatMicroseconds
                       )}
                 </div>
               );
@@ -157,13 +160,23 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
                   'gctime',
                   'Total slice times',
                   timings.total_time,
-                  x => x + 'ms'
+                  x =>
+                    formatMilliseconds(
+                      x,
+                      /* significantDigits */ 3,
+                      /* maxFractionalDigits */ 2
+                    )
                 )}
                 {_markerDetail(
                   'gcmaxpause',
                   'Max Pause',
                   timings.max_pause,
-                  x => x + 'ms'
+                  x =>
+                    formatMilliseconds(
+                      x,
+                      /* significantDigits */ 3,
+                      /* maxFractionalDigits */ 2
+                    )
                 )}
                 {_markerDetail(
                   'gcusage',

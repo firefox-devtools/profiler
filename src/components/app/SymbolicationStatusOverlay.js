@@ -5,7 +5,10 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { getProfileViewOptions } from '../../reducers/profile-view';
+import {
+  getProfileViewOptions,
+  getSymbolicationStatus,
+} from '../../reducers/profile-view';
 import explicitConnect from '../../utils/connect';
 
 import type { RequestedLib } from '../../types/reducers';
@@ -68,7 +71,7 @@ class SymbolicationStatusOverlay extends PureComponent<Props> {
 
 const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
   mapStateToProps: state => ({
-    symbolicationStatus: getProfileViewOptions(state).symbolicationStatus,
+    symbolicationStatus: getSymbolicationStatus(state),
     waitingForLibs: getProfileViewOptions(state).waitingForLibs,
   }),
   component: SymbolicationStatusOverlay,
