@@ -145,6 +145,8 @@ export type GeckoProfile = {|
     startTime: Milliseconds,
     shutdownTime: Milliseconds | null,
     abi: string,
+    // The extensions property landed in Firefox 60, and is only optional because
+    // older profile versions may not have it. No upgrader was written for this change.
     extensions?: GeckoExtensionMeta,
     misc: string,
     oscpu: string,
