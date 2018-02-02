@@ -13,6 +13,8 @@
   position: absolute;
   top: 0;
   bottom: 0;
+  /* Don't add the border to the width, as this causes the block to overflow. */
+  box-sizing: border-box;
 }
 
 .headerEmptyThreadIndicatorStartup {

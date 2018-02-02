@@ -27,69 +27,18 @@ type Props = {|
   ...SizeProps,
 |};
 
+/**
+ * This component displays the reasons why a thread may be empty. The supported indicators
+ * include showing when the thread hasn't started up, when the buffer is empty with no
+ * samples (most likely due to the circular buffer dropping data), and finally when the
+ * thread was shut down.
+ */
 class EmptyThreadIndicator extends PureComponent<Props> {
   _canvas: HTMLCanvasElement | null;
   _requestedAnimationFrame: boolean | null;
 
-  _getIndicatorPositions(): {|
-    startup: SyntheticCssDeclarations | null,
-    shutdown: SyntheticCssDeclarations | null,
-    emptyBufferStart: SyntheticCssDeclarations | null,
-  |} {
-    const {
-      rangeStart,
-      rangeEnd,
-      width,
-      unfilteredSamplesRange,
-      interval,
-      thread: { processShutdownTime, registerTime, unregisterTime },
-    } = this.props;
-    const rangeLength = rangeEnd - rangeStart;
-    const xPixelsPerMs = width / rangeLength;
-
-    const threadEndTime =
-      unregisterTime === null ? processShutdownTime : unregisterTime;
-
-    // Did this thread startup in this time range?
-    let startup = null;
-    if (registerTime > rangeStart) {
-      startup = {
-        left: 0,
-        width: (registerTime - rangeStart) * xPixelsPerMs,
-      };
-    }
-
-    // Did this thread shut down in this time range?
-    let shutdown = null;
-    if (threadEndTime !== null && threadEndTime < rangeEnd) {
-      shutdown = {
-        right: 0,
-        width: (rangeEnd - threadEndTime) * xPixelsPerMs,
-      };
-    }
-
-    let emptyBufferStart = null;
-    if (
-      // Threads could have no samples, and therefore no range.
-      unfilteredSamplesRange !== null &&
-      // Was the buffer empty at the beginning of the range, at least one interval length
-      // into the profile? This interval length ensures no awkward cut off where it's not
-      // really needed.
-      unfilteredSamplesRange.start > rangeStart + interval
-    ) {
-      const startMilliseconds = Math.max(0, registerTime - rangeStart);
-      emptyBufferStart = {
-        left: startMilliseconds * xPixelsPerMs,
-        right:
-          width - (unfilteredSamplesRange.start - rangeStart) * xPixelsPerMs,
-      };
-    }
-
-    return { startup, shutdown, emptyBufferStart };
-  }
-
   render() {
-    const style = this._getIndicatorPositions();
+    const style = getIndicatorPositions(this.props);
     return (
       <div className="headerEmptyThreadIndicator">
         {style.startup
@@ -124,6 +73,75 @@ class EmptyThreadIndicator extends PureComponent<Props> {
       </div>
     );
   }
+}
+
+/**
+ * Define this outside of the class so that it's easily testable. The internals
+ * are a little complicated with the math, but the test file should have some
+ * pretty clear explanations of the requirements:
+ * src/test/components/EmptyThreadIndicator.test.js
+ */
+export function getIndicatorPositions(
+  props: Props
+): {|
+  startup: SyntheticCssDeclarations | null,
+  shutdown: SyntheticCssDeclarations | null,
+  emptyBufferStart: SyntheticCssDeclarations | null,
+|} {
+  const {
+    rangeStart,
+    rangeEnd,
+    width,
+    unfilteredSamplesRange,
+    interval,
+    thread: { processShutdownTime, registerTime, unregisterTime },
+  } = props;
+  const rangeLength = rangeEnd - rangeStart;
+  const xPixelsPerMs = width / rangeLength;
+  const threadEndTime =
+    unregisterTime === null ? processShutdownTime : unregisterTime;
+
+  // Did this thread startup in this time range?
+  let startup = null;
+  if (registerTime > rangeStart) {
+    startup = {
+      left: 0,
+      width: Math.min(width, (registerTime - rangeStart) * xPixelsPerMs),
+    };
+  }
+
+  // Did this thread shut down in this time range?
+  let shutdown = null;
+  if (threadEndTime !== null && threadEndTime < rangeEnd) {
+    shutdown = {
+      right: 0,
+      width: Math.min(width, (rangeEnd - threadEndTime) * xPixelsPerMs),
+    };
+  }
+
+  let emptyBufferStart = null;
+  if (
+    // Threads could have no samples, and therefore no range.
+    unfilteredSamplesRange !== null &&
+    // Was the buffer empty at the beginning of the range, at least one interval length
+    // into the profile? This interval length ensures no awkward cut off where it's not
+    // really needed.
+    unfilteredSamplesRange.start >= rangeStart + interval &&
+    // Only show this if it's actually in the current range.
+    registerTime < rangeEnd
+  ) {
+    const startMilliseconds = Math.max(0, registerTime - rangeStart);
+    emptyBufferStart = {
+      left: startMilliseconds * xPixelsPerMs,
+      width: Math.min(
+        width,
+        (unfilteredSamplesRange.start - Math.max(registerTime, rangeStart)) *
+          xPixelsPerMs
+      ),
+    };
+  }
+
+  return { startup, shutdown, emptyBufferStart };
 }
 
 export default withSize(EmptyThreadIndicator);
