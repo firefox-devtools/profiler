@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import seedrandom from 'seedrandom';
+import * as colors from 'photon-colors';
 import {
   withChartViewport,
   type WithChartViewport,
@@ -47,18 +47,6 @@ require('./Canvas.css');
 const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
-
-function assignColor(depth, funcName) {
-  function hexStr(n) {
-    return ('0' + n.toString(16)).slice(-2);
-  }
-  // alea seems to be the fastest PRNG according to seedrandom README
-  const rng = seedrandom.alea(funcName + depth);
-  const red = hexStr(205 + parseInt(50 * rng()));
-  const green = hexStr(0 + parseInt(230 * rng()));
-  const blue = hexStr(0 + parseInt(55 * rng()));
-  return `#${red}${green}${blue}`;
-}
 
 class FlameGraphCanvas extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
@@ -132,13 +120,12 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
           thread.funcTable.name[funcIndex]
         );
 
-        const color = assignColor(depth, funcName);
         const isHovered =
           hoveredItem &&
           depth === hoveredItem.depth &&
           i === hoveredItem.flameGraphTimingIndex;
 
-        ctx.fillStyle = isHovered ? 'Highlight' : color;
+        ctx.fillStyle = isHovered ? 'Highlight' : colors.GREY_20;
         ctx.fillRect(x, y, w, h);
         // Ensure spacing between blocks.
         ctx.clearRect(x, y, 1, h);
