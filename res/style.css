@@ -123,6 +123,9 @@ body, #root, .profileViewer {
   text-align: right;
 }
 .treeViewRowColumn.treeViewFixedColumn {
+  overflow: hidden;
+  text-overflow: ellipsis;
+
   box-sizing: border-box;
   border-right: 1px solid var(--grey-30);
 }
@@ -148,10 +151,6 @@ body, #root, .profileViewer {
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
-}
-.treeViewRowColumn {
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .treeViewRowColumn.totalTime,
 .treeViewRowColumn.totalTimePercent,
@@ -195,13 +194,16 @@ body, #root, .profileViewer {
 }
 
 .treeViewHighlighting {
-  padding: 1px;
-  margin: -1px;
+  /* This negative margin enlarges the background to the top, so that it fully
+   * covers the underlying background. There's an underlying background when the
+   * line is selected. */
+  margin: -1px 0;
+  padding: 1px 0;
+
   color: #000;
   background: #cbe8fe;
   border-radius: 2px;
   box-shadow: 0 0 0 0.5px rgba(0,0,0,0.05), 0 1px 1px rgba(0,0,0,.3);
-  position: relative;
 }
 
 
@@ -674,96 +676,6 @@ body, #root, .profileViewer {
   flex: 1;
   display: flex;
   flex-flow: column nowrap;
-}
-
-.taskTracerViewWrapper,
-.logViewWrapper {
-  border-top: 1px solid var(--grey-30);
-  flex: 1;
-  overflow: auto;
-  position: relative;
-}
-
-.logViewPre {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  padding: 10px;
-}
-
-.taskTracerView {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  display: block;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  flex-flow: column nowrap;
-}
-
-.taskTracerThreadView {
-  display: flex;
-  flex-flow: row nowrap;
-}
-
-.taskTracerThreadViewThreadName {
-  width: 150px;
-  margin: 0;
-  border-right: 1px solid var(--grey-30);
-  border-bottom: 1px solid var(--grey-30);
-  font-size: 1em;
-  font-weight: normal;
-  box-sizing: border-box;
-  padding: 5px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.taskTracerThreadViewTracks {
-  flex: 1;
-  display: flex;
-  flex-flow: column nowrap;
-}
-
-.taskTracerThreadViewTrack {
-  list-style: none;
-  display: block;
-  margin: 0;
-  padding: 0;
-  height: 4px;
-  position: relative;
-  overflow: hidden;
-}
-
-.taskTracerThreadViewTrackTask {
-  margin: 0;
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  height: 4px;
-  border-bottom: 1px solid white;
-  background: #7990c8;
-  box-sizing: border-box;
-}
-
-.taskTracerThreadViewTrackTask:hover {
-  background: #38445f;
-}
-
-.taskTracerThreadViewTrackTaskBeginDelay {
-  display: block;
-  position: absolute;
-  top: 0px;
-  border-top: 1px solid white;
-  border-bottom: 2px solid white;
-  height: 1px;
-  background-color: inherit;
-  opacity: 0.4;
 }
 
 .initializing {

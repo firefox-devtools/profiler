@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import {
   getZeroAt,
@@ -26,6 +26,10 @@ import type {
   IndexIntoMarkersTable,
 } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
 type MarkerDisplayData = {|
   timestamp: string,
@@ -63,6 +67,10 @@ class MarkerTree {
       this._markers.data[markerIndex] !== null &&
       'stack' in this._markers.data[markerIndex]
     );
+  }
+
+  getAllDescendants() {
+    return new Set();
   }
 
   getParent(): IndexIntoMarkersTable {
@@ -131,14 +139,19 @@ class MarkerTree {
   }
 }
 
-type Props = {|
+type StateProps = {|
+  +threadIndex: ThreadIndex,
   +thread: Thread,
   +markers: MarkersTable,
-  +threadIndex: ThreadIndex,
   +selectedMarker: IndexIntoMarkersTable,
   +zeroAt: Milliseconds,
+|};
+
+type DispatchProps = {|
   +changeSelectedMarker: typeof changeSelectedMarker,
 |};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkerTable extends PureComponent<Props> {
   _fixedColumns = [
@@ -199,8 +212,8 @@ MarkerTable.propTypes = {
   changeSelectedMarker: PropTypes.func.isRequired,
 };
 
-export default connect(
-  state => ({
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+  mapStateToProps: state => ({
     threadIndex: getSelectedThreadIndex(state),
     thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state),
     markers: selectedThreadSelectors.getSearchFilteredMarkers(state),
@@ -208,5 +221,7 @@ export default connect(
       .selectedMarker,
     zeroAt: getZeroAt(state),
   }),
-  { changeSelectedMarker }
-)(MarkerTable);
+  mapDispatchToProps: { changeSelectedMarker },
+  component: MarkerTable,
+};
+export default explicitConnect(options);

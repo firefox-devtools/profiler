@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { CallTree } from '../profile-logic/call-tree';
 import type {
   Profile,
   Thread,
@@ -10,7 +11,7 @@ import type {
   IndexIntoMarkersTable,
   IndexIntoFuncTable,
 } from './profile';
-import type { CallNodePath } from './profile-derived';
+import type { CallNodePath, CallNodeTable } from './profile-derived';
 import type { GetLabel } from '../profile-logic/labeling-strategies';
 import type { GetCategory } from '../profile-logic/color-categories';
 import type { TemporaryError } from '../utils/errors';
@@ -124,7 +125,8 @@ type ReceiveProfileAction =
 
 type StackChartAction =
   | { type: 'CHANGE_STACK_CHART_COLOR_STRATEGY', getCategory: GetCategory }
-  | { type: 'CHANGE_STACK_CHART_LABELING_STRATEGY', getLabel: GetLabel };
+  | { type: 'CHANGE_STACK_CHART_LABELING_STRATEGY', getLabel: GetLabel }
+  | { type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' };
 
 type UrlEnhancerAction =
   | { type: '@@urlenhancer/urlSetupDone' }
@@ -158,7 +160,13 @@ type UrlStateAction =
       previousImplementation: ImplementationFilter,
       implementation: ImplementationFilter,
     }
-  | { type: 'CHANGE_INVERT_CALLSTACK', invertCallstack: boolean }
+  | {|
+      type: 'CHANGE_INVERT_CALLSTACK',
+      invertCallstack: boolean,
+      callTree: CallTree,
+      callNodeTable: CallNodeTable,
+      selectedThreadIndex: ThreadIndex,
+    |}
   | { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean }
   | { type: 'CHANGE_MARKER_SEARCH_STRING', searchString: string };
 

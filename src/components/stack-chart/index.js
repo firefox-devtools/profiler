@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import StackChartCanvas from './Canvas';
 import {
   selectedThreadSelectors,
@@ -16,8 +16,8 @@ import {
   getCategoryColorStrategy,
   getLabelingStrategy,
 } from '../../reducers/stack-chart';
-import { updateProfileSelection } from '../../actions/profile-view';
 import StackChartSettings from './Settings';
+import { updateProfileSelection } from '../../actions/profile-view';
 
 import type { Thread } from '../../types/profile';
 import type {
@@ -28,24 +28,33 @@ import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
 import type { GetCategory } from '../../profile-logic/color-categories';
 import type { GetLabel } from '../../profile-logic/labeling-strategies';
 import type { ProfileSelection } from '../../types/actions';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
 require('./index.css');
 
 const STACK_FRAME_HEIGHT = 16;
 
-type Props = {
-  thread: Thread,
-  maxStackDepth: number,
-  stackTimingByDepth: StackTimingByDepth,
-  timeRange: { start: Milliseconds, end: Milliseconds },
-  interval: Milliseconds,
-  getCategory: GetCategory,
-  getLabel: GetLabel,
-  updateProfileSelection: typeof updateProfileSelection,
-  selection: ProfileSelection,
-  threadName: string,
-  processDetails: string,
-};
+type StateProps = {|
+  +thread: Thread,
+  +maxStackDepth: number,
+  +stackTimingByDepth: StackTimingByDepth,
+  +timeRange: { start: Milliseconds, end: Milliseconds },
+  +interval: Milliseconds,
+  +getCategory: GetCategory,
+  +getLabel: GetLabel,
+  +selection: ProfileSelection,
+  +threadName: string,
+  +processDetails: string,
+|};
+
+type DispatchProps = {|
+  +updateProfileSelection: typeof updateProfileSelection,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class StackChartGraph extends React.PureComponent<Props> {
   /**
@@ -65,10 +74,10 @@ class StackChartGraph extends React.PureComponent<Props> {
       interval,
       getCategory,
       getLabel,
-      updateProfileSelection,
       selection,
       threadName,
       processDetails,
+      updateProfileSelection,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -83,23 +92,24 @@ class StackChartGraph extends React.PureComponent<Props> {
             </span>
           </div>
           <StackChartCanvas
-            // ChartViewport props
-            timeRange={timeRange}
-            maxViewportHeight={maxViewportHeight}
-            maximumZoom={this.getMaximumZoom()}
-            selection={selection}
-            updateProfileSelection={updateProfileSelection}
-            viewportNeedsUpdate={viewportNeedsUpdate}
-            // StackChartCanvas props
-            interval={interval}
-            thread={thread}
-            rangeStart={timeRange.start}
-            rangeEnd={timeRange.end}
-            stackTimingByDepth={stackTimingByDepth}
-            getCategory={getCategory}
-            getLabel={getLabel}
-            maxStackDepth={maxStackDepth}
-            stackFrameHeight={STACK_FRAME_HEIGHT}
+            viewportProps={{
+              selection,
+              timeRange,
+              maxViewportHeight,
+              viewportNeedsUpdate,
+              maximumZoom: this.getMaximumZoom(),
+            }}
+            chartProps={{
+              interval,
+              thread,
+              getCategory,
+              getLabel,
+              stackTimingByDepth,
+              updateProfileSelection,
+              rangeStart: timeRange.start,
+              rangeEnd: timeRange.end,
+              stackFrameHeight: STACK_FRAME_HEIGHT,
+            }}
           />
         </div>
       </div>
@@ -107,8 +117,8 @@ class StackChartGraph extends React.PureComponent<Props> {
   }
 }
 
-export default connect(
-  state => {
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+  mapStateToProps: state => {
     const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForStackChart(
       state
     );
@@ -128,9 +138,15 @@ export default connect(
       processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
     };
   },
-  { updateProfileSelection }
-)(StackChartGraph);
+  mapDispatchToProps: { updateProfileSelection },
+  component: StackChartGraph,
+};
+export default explicitConnect(options);
 
-function viewportNeedsUpdate(prevProps, newProps) {
+// This function is given the StackChartCanvas's chartProps.
+function viewportNeedsUpdate(
+  prevProps: { +stackTimingByDepth: StackTimingByDepth },
+  newProps: { +stackTimingByDepth: StackTimingByDepth }
+) {
   return prevProps.stackTimingByDepth !== newProps.stackTimingByDepth;
 }

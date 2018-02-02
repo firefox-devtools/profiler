@@ -7,8 +7,13 @@ import {
   uintArrayToString,
   stringToUintArray,
 } from '../utils/uintarray-encoding';
-import { toValidImplementationFilter } from './profile-data';
+import {
+  toValidImplementationFilter,
+  getCallNodeFromPath,
+} from './profile-data';
 import { timeCode } from '../utils/time-code';
+import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
+import { CallTree } from '../profile-logic/call-tree';
 
 import type {
   Thread,
@@ -19,37 +24,71 @@ import type {
   IndexIntoStackTable,
   IndexIntoResourceTable,
 } from '../types/profile';
-import type { CallNodePath } from '../types/profile-derived';
+import type { CallNodePath, CallNodeTable } from '../types/profile-derived';
 import type { ImplementationFilter } from '../types/actions';
-import type { Transform, TransformStack } from '../types/transforms';
+import type {
+  Transform,
+  TransformType,
+  TransformStack,
+} from '../types/transforms';
 
 /**
  * This file contains the functions and logic for working with and applying transforms
  * to profile data.
  */
 
+// Create mappings from a transform name, to a url-friendly short name.
+const TRANSFORM_TO_SHORT_KEY: { [TransformType]: string } = {};
+const SHORT_KEY_TO_TRANSFORM: { [string]: TransformType } = {};
+[
+  'focus-subtree',
+  'focus-function',
+  'merge-call-node',
+  'merge-function',
+  'drop-function',
+  'collapse-resource',
+  'collapse-direct-recursion',
+  'collapse-function-subtree',
+].forEach((transform: TransformType) => {
+  // This is kind of an awkward switch, but it ensures we've exhaustively checked that
+  // we have a mapping for every transform.
+  let shortKey;
+  switch (transform) {
+    case 'focus-subtree':
+      shortKey = 'f';
+      break;
+    case 'focus-function':
+      shortKey = 'ff';
+      break;
+    case 'merge-call-node':
+      shortKey = 'mcn';
+      break;
+    case 'merge-function':
+      shortKey = 'mf';
+      break;
+    case 'drop-function':
+      shortKey = 'df';
+      break;
+    case 'collapse-resource':
+      shortKey = 'cr';
+      break;
+    case 'collapse-direct-recursion':
+      shortKey = 'rec';
+      break;
+    case 'collapse-function-subtree':
+      shortKey = 'cfs';
+      break;
+    default: {
+      throw assertExhaustiveCheck(transform);
+    }
+  }
+  TRANSFORM_TO_SHORT_KEY[transform] = shortKey;
+  SHORT_KEY_TO_TRANSFORM[shortKey] = transform;
+});
+
 /**
  * Map each transform key into a short representation.
  */
-const TRANSFORM_TO_SHORT_KEY = {
-  'focus-subtree': 'f',
-  'focus-function': 'ff',
-  'merge-call-node': 'mcn',
-  'merge-function': 'mf',
-  'drop-function': 'df',
-  'collapse-resource': 'cr',
-  'collapse-direct-recursion': 'rec',
-};
-
-const SHORT_KEY_TO_TRANSFORM = {
-  f: 'focus-subtree',
-  ff: 'focus-function',
-  mcn: 'merge-call-node',
-  mf: 'merge-function',
-  df: 'drop-function',
-  cr: 'collapse-resource',
-  rec: 'collapse-direct-recursion',
-};
 
 /**
  * Every transform is separated by the "~" character.
@@ -66,8 +105,14 @@ export function parseTransforms(stringValue: string = ''): TransformStack {
   stringValue.split('~').forEach(s => {
     const tuple = s.split('-');
     const shortKey = tuple[0];
-    const type = SHORT_KEY_TO_TRANSFORM[shortKey];
-
+    const type = convertToTransformType(SHORT_KEY_TO_TRANSFORM[shortKey]);
+    if (type === null) {
+      console.error('Unrecognized transform was passed to the URL.', shortKey);
+      return;
+    }
+    // This switch breaks down each transform into the minimum amount of data needed
+    // to represent it in the URL. Each transform has slightly different requirements
+    // as defined in src/types/transforms.js.
     switch (type) {
       case 'collapse-resource': {
         // e.g. "cr-js-325-8"
@@ -108,8 +153,9 @@ export function parseTransforms(stringValue: string = ''): TransformStack {
         break;
       }
       case 'merge-function':
+      case 'focus-function':
       case 'drop-function':
-      case 'focus-function': {
+      case 'collapse-function-subtree': {
         // e.g. "mf-325"
         const [, funcIndexRaw] = tuple;
         const funcIndex = parseInt(funcIndexRaw, 10);
@@ -131,6 +177,12 @@ export function parseTransforms(stringValue: string = ''): TransformStack {
             case 'drop-function':
               transforms.push({
                 type: 'drop-function',
+                funcIndex,
+              });
+              break;
+            case 'collapse-function-subtree':
+              transforms.push({
+                type: 'collapse-function-subtree',
                 funcIndex,
               });
               break;
@@ -176,9 +228,7 @@ export function parseTransforms(stringValue: string = ''): TransformStack {
         break;
       }
       default:
-        // Do not throw an error, as we don't trust the data coming from a user.
-        console.error('Unrecognized transform was passed to the URL.', type);
-        break;
+        throw assertExhaustiveCheck(type);
     }
   });
 
@@ -189,9 +239,19 @@ export function stringifyTransforms(transforms: TransformStack = []): string {
   return transforms
     .map(transform => {
       const shortKey = TRANSFORM_TO_SHORT_KEY[transform.type];
+      if (!shortKey) {
+        throw new Error(
+          'Expected to be able to convert a transform into its short key.'
+        );
+      }
+      // This switch breaks down each transform into shared groups of what data
+      // they need, as defined in src/types/transforms.js. For instance some transforms
+      // need only a funcIndex, while some care about the current implemention, or
+      // other pieces of data.
       switch (transform.type) {
         case 'merge-function':
         case 'drop-function':
+        case 'collapse-function-subtree':
           return `${shortKey}-${transform.funcIndex}`;
         case 'focus-function': {
           let string = `${shortKey}-${transform.funcIndex}`;
@@ -217,7 +277,7 @@ export function stringifyTransforms(transforms: TransformStack = []): string {
           return string;
         }
         default:
-          throw new Error('An unknown transform was found when stringifying.');
+          throw assertExhaustiveCheck(transform);
       }
     })
     .join('~');
@@ -257,10 +317,11 @@ export function getTransformLabels(
       case 'merge-function':
       case 'drop-function':
       case 'collapse-direct-recursion':
+      case 'collapse-function-subtree':
         funcIndex = transform.funcIndex;
         break;
       default:
-        throw new Error('Unexpected transform type');
+        throw assertExhaustiveCheck(transform);
     }
     const nameIndex = funcTable.name[funcIndex];
     const funcName = stringTable.getString(nameIndex);
@@ -278,8 +339,10 @@ export function getTransformLabels(
         return `Drop: ${funcName}`;
       case 'collapse-direct-recursion':
         return `Collapse recursion: ${funcName}`;
+      case 'collapse-function-subtree':
+        return `Collapse subtree: ${funcName}`;
       default:
-        throw new Error('Unexpected transform type');
+        throw assertExhaustiveCheck(transform);
     }
   });
   labels.unshift(`Complete "${threadName}"`);
@@ -317,10 +380,13 @@ export function applyTransformToCallNodePath(
         transform.funcIndex,
         callNodePath
       );
-    default:
-      throw new Error(
-        'Cannot apply an unknown transform to update the CallNodePath'
+    case 'collapse-function-subtree':
+      return _collapseFunctionSubtreeInCallNodePath(
+        transform.funcIndex,
+        callNodePath
       );
+    default:
+      throw assertExhaustiveCheck(transform);
   }
 }
 
@@ -407,6 +473,14 @@ function _collapseDirectRecursionInCallNodePath(
   return newPath;
 }
 
+function _collapseFunctionSubtreeInCallNodePath(
+  funcIndex: IndexIntoFuncTable,
+  callNodePath: CallNodePath
+) {
+  const index = callNodePath.indexOf(funcIndex);
+  return index === -1 ? callNodePath : callNodePath.slice(0, index + 1);
+}
+
 function _callNodePathHasPrefixPath(
   prefixPath: CallNodePath,
   callNodePath: CallNodePath
@@ -414,6 +488,53 @@ function _callNodePathHasPrefixPath(
   return (
     prefixPath.length <= callNodePath.length &&
     prefixPath.every((prefixFunc, i) => prefixFunc === callNodePath[i])
+  );
+}
+
+/**
+ * Take a CallNodePath, and invert it given a CallTree. Note that if the CallTree
+ * is itself inverted, you will get back the uninverted CallNodePath to the regular
+ * CallTree.
+ *
+ * e.g:
+ *   (invertedPath, invertedCallTree) => path
+ *   (path, callTree) => invertedPath
+ *
+ * Call trees are sorted with the CallNodes with the heaviest total time as the first
+ * entry. This function walks to the tip of the heaviest branches to find the leaf node,
+ * then construct an inverted CallNodePath with the result. This gives a pretty decent
+ * result, but it doesn't guarantee that it will select the heaviest CallNodePath for the
+ * INVERTED call tree. This would require doing a round trip through the reducers or
+ * some other mechanism in order to first calculate the next inverted call tree. This is
+ * probably not worth it, so go ahead and use the uninverted call tree, as it's probably
+ * good enough.
+ */
+export function invertCallNodePath(
+  path: CallNodePath,
+  callTree: CallTree,
+  callNodeTable: CallNodeTable
+): CallNodePath {
+  let callNodeIndex = getCallNodeFromPath(path, callNodeTable);
+  if (callNodeIndex === null) {
+    // No path was found, return an empty CallNodePath.
+    return [];
+  }
+  let children = [callNodeIndex];
+  const pathToLeaf = [];
+  do {
+    // Walk down the tree's depth to construct a path to the leaf node, this should
+    // be the heaviest branch of the tree.
+    callNodeIndex = children[0];
+    pathToLeaf.push(callNodeIndex);
+    children = callTree.getChildren(callNodeIndex);
+  } while (children && children.length > 0);
+
+  return (
+    pathToLeaf
+      // Map the CallNodeIndex to FuncIndex.
+      .map(index => callNodeTable.func[index])
+      // Reverse it so that it's in the proper inverted order.
+      .reverse()
   );
 }
 
@@ -439,6 +560,8 @@ export function mergeCallNode(
       IndexIntoStackTable | null,
       IndexIntoStackTable | null
     > = new Map();
+    // A root stack's prefix will be null. Maintain that relationship from old to new
+    // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
     const newStackTable = {
       length: 0,
@@ -537,6 +660,8 @@ export function mergeFunction(
     IndexIntoStackTable | null,
     IndexIntoStackTable | null
   > = new Map();
+  // A root stack's prefix will be null. Maintain that relationship from old to new
+  // stacks by mapping from null to null.
   oldStackToNewStack.set(null, null);
   const newStackTable = {
     length: 0,
@@ -657,6 +782,8 @@ export function collapseResource(
   const collapsedStacks: Set<IndexIntoStackTable | null> = new Set();
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
 
+  // A root stack's prefix will be null. Maintain that relationship from old to new
+  // stacks by mapping from null to null.
   oldStackToNewStack.set(null, null);
   // A new func and frame will be created on the first stack that is found that includes
   // the given resource.
@@ -784,6 +911,8 @@ export function collapseDirectRecursion(
     IndexIntoStackTable | null,
     IndexIntoStackTable | null
   > = new Map();
+  // A root stack's prefix will be null. Maintain that relationship from old to new
+  // stacks by mapping from null to null.
   oldStackToNewStack.set(null, null);
   const recursiveStacks = new Set();
   const newStackTable = {
@@ -874,6 +1003,81 @@ const FUNC_MATCHES = {
   },
 };
 
+export function collapseFunctionSubtree(
+  thread: Thread,
+  funcToCollapse: IndexIntoFuncTable
+): Thread {
+  const { stackTable, frameTable, samples } = thread;
+  const oldStackToNewStack: Map<
+    IndexIntoStackTable | null,
+    IndexIntoStackTable | null
+  > = new Map();
+  // A root stack's prefix will be null. Maintain that relationship from old to new
+  // stacks by mapping from null to null.
+  oldStackToNewStack.set(null, null);
+  const collapsedStacks = new Set();
+  const newStackTable = {
+    length: 0,
+    prefix: [],
+    frame: [],
+  };
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefix = stackTable.prefix[stackIndex];
+    if (
+      // The previous stack was collapsed, this one is collapsed too.
+      collapsedStacks.has(prefix)
+    ) {
+      // Only remember that this stack is collapsed.
+      const newPrefixStackIndex = oldStackToNewStack.get(prefix);
+      if (newPrefixStackIndex === undefined) {
+        throw new Error('newPrefixStackIndex cannot be undefined');
+      }
+      // Many collapsed stacks will potentially all point to the first stack that used the
+      // funcToCollapse, so newPrefixStackIndex will potentially be assigned to many
+      // stacks. This is what actually "collapses" a stack.
+      oldStackToNewStack.set(stackIndex, newPrefixStackIndex);
+      collapsedStacks.add(stackIndex);
+    } else {
+      // Add this stack.
+      const newStackIndex = newStackTable.length++;
+      const newStackPrefix = oldStackToNewStack.get(prefix);
+      if (newStackPrefix === undefined) {
+        throw new Error(
+          'The newStackPrefix must exist because prefix < stackIndex as the StackTable is ordered.'
+        );
+      }
+
+      const frameIndex = stackTable.frame[stackIndex];
+      newStackTable.prefix[newStackIndex] = newStackPrefix;
+      newStackTable.frame[newStackIndex] = frameIndex;
+      oldStackToNewStack.set(stackIndex, newStackIndex);
+
+      // If this is the function to collapse, keep the stack, but note that its children
+      // should be discarded.
+      const funcIndex = frameTable.func[frameIndex];
+      if (funcToCollapse === funcIndex) {
+        collapsedStacks.add(stackIndex);
+      }
+    }
+  }
+  const newSamples = Object.assign({}, samples, {
+    stack: samples.stack.map(oldStack => {
+      const newStack = oldStackToNewStack.get(oldStack);
+      if (newStack === undefined) {
+        throw new Error(
+          'Converting from the old stack to a new stack cannot be undefined'
+        );
+      }
+      return newStack;
+    }),
+  });
+  return Object.assign({}, thread, {
+    stackTable: newStackTable,
+    samples: newSamples,
+  });
+}
+
 /**
  * Filter thread to only contain stacks which start with a CallNodePath, and
  * only samples with those stacks. The new stacks' roots will be frames whose
@@ -893,6 +1097,8 @@ export function focusSubtree(
       IndexIntoStackTable | null,
       IndexIntoStackTable | null
     > = new Map();
+    // A root stack's prefix will be null. Maintain that relationship from old to new
+    // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
     const newStackTable = {
       length: 0,
@@ -979,6 +1185,8 @@ export function focusInvertedSubtree(
     }
 
     const oldStackToNewStack = new Map();
+    // A root stack's prefix will be null. Maintain that relationship from old to new
+    // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
     const newSamples = Object.assign({}, samples, {
       stack: samples.stack.map(stackIndex => {
@@ -1005,6 +1213,8 @@ export function focusFunction(
       IndexIntoStackTable | null,
       IndexIntoStackTable | null
     > = new Map();
+    // A root stack's prefix will be null. Maintain that relationship from old to new
+    // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
     const newStackTable = {
       length: 0,

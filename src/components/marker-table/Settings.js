@@ -5,17 +5,27 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import { changeMarkersSearchString } from '../../actions/profile-view';
 import { getMarkersSearchString } from '../../reducers/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
 
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
+
 import './Settings.css';
 
-type Props = {
-  searchString: string,
-  changeMarkersSearchString: string => void,
-};
+type StateProps = {|
+  +searchString: string,
+|};
+
+type DispatchProps = {|
+  +changeMarkersSearchString: typeof changeMarkersSearchString,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class Settings extends PureComponent<Props> {
   constructor(props: Props) {
@@ -50,9 +60,11 @@ class Settings extends PureComponent<Props> {
   }
 }
 
-export default connect(
-  state => ({
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+  mapStateToProps: state => ({
     searchString: getMarkersSearchString(state),
   }),
-  { changeMarkersSearchString }
-)(Settings);
+  mapDispatchToProps: { changeMarkersSearchString },
+  component: Settings,
+};
+export default explicitConnect(options);

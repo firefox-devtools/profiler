@@ -64,11 +64,11 @@ describe('actions/icons', function() {
       expect(subject).toBeNull();
     });
 
-    it('getIconClassNameForCallNode returns null for any icon', function() {
+    it('getIconClassNameForCallNode returns an empty string for any icon', function() {
       const subject = iconsAccessors.getIconClassNameForCallNode(state, {
         icon: validIcons[0],
       });
-      expect(subject).toBeNull();
+      expect(subject).toBe('');
     });
 
     it('getIconsWithClassNames returns an empty array', function() {
@@ -135,7 +135,7 @@ describe('actions/icons', function() {
       subject = iconsAccessors.getIconClassNameForCallNode(state, {
         icon: invalidIcon,
       });
-      expect(subject).toBeNull();
+      expect(subject).toBe('');
 
       subject = iconsAccessors.getIconsWithClassNames(state);
       expect(subject).toEqual([]);

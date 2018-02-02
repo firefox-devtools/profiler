@@ -92,7 +92,7 @@ module.exports = {
     react: {
       pragma: 'React',
       version: '15.0',
-      flowVersion: '0.54.1',
+      flowVersion: '0.63.1',
     },
   },
 };

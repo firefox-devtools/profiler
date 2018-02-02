@@ -5,12 +5,12 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import {
   getProfile,
   getProfileRootRange,
-  getProfileViewOptions,
+  getSymbolicationStatus,
 } from '../../reducers/profile-view';
 import { getDataSource, getUrlPredictor } from '../../reducers/url-state';
 import actions from '../../actions';
@@ -29,6 +29,10 @@ import type { StartEndRange } from '../../types/units';
 import type { Profile } from '../../types/profile';
 import type { Action, DataSource } from '../../types/actions';
 import type { SymbolicationStatus } from '../../types/reducers';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
 require('./ProfileSharing.css');
 
@@ -438,14 +442,23 @@ class ProfileDownloadButton extends PureComponent<
   }
 }
 
-type ProfileSharingProps = {
-  profile: Profile,
-  rootRange: StartEndRange,
-  dataSource: DataSource,
-  symbolicationStatus: SymbolicationStatus,
-  profilePublished: typeof actions.profilePublished,
-  predictUrl: (Action | Action[]) => string,
-};
+type ProfileSharingStateProps = {|
+  +profile: Profile,
+  +rootRange: StartEndRange,
+  +dataSource: DataSource,
+  +symbolicationStatus: SymbolicationStatus,
+  +predictUrl: (Action | Action[]) => string,
+|};
+
+type ProfileSharingDispatchProps = {|
+  +profilePublished: typeof actions.profilePublished,
+|};
+
+type ProfileSharingProps = ConnectedProps<
+  {||},
+  ProfileSharingStateProps,
+  ProfileSharingDispatchProps
+>;
 
 const ProfileSharing = ({
   profile,
@@ -466,13 +479,19 @@ const ProfileSharing = ({
     <ProfileDownloadButton profile={profile} rootRange={rootRange} />
   </div>;
 
-export default connect(
-  state => ({
+const options: ExplicitConnectOptions<
+  {||},
+  ProfileSharingStateProps,
+  ProfileSharingDispatchProps
+> = {
+  mapStateToProps: state => ({
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     dataSource: getDataSource(state),
-    symbolicationStatus: getProfileViewOptions(state).symbolicationStatus,
+    symbolicationStatus: getSymbolicationStatus(state),
     predictUrl: getUrlPredictor(state),
   }),
-  { profilePublished: actions.profilePublished }
-)(ProfileSharing);
+  mapDispatchToProps: { profilePublished: actions.profilePublished },
+  component: ProfileSharing,
+};
+export default explicitConnect(options);

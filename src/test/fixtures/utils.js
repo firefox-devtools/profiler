@@ -18,24 +18,43 @@ export function getBoundingBox(width: number, height: number) {
   };
 }
 
+/**
+ * This function formats a call tree into a human readable form, to make it easy
+ * to assert certain relationships about the data structure in a really terse
+ * and human-friendly fashion. For instance a call tree could become formatted
+ * like so:
+ *
+ * [
+ *   '- A (total: 4, self: —)',
+ *   '  - B (total: 3, self: —)',
+ *   '    - C (total: 1, self: 1)',
+ *   '    - D (total: 1, self: 1)',
+ *   '    - E (total: 1, self: 1)',
+ *   '  - F (total: 1, self: 1)',
+ * ]
+ *
+ * This structure is easy to read, avoids whitespace issues, and diffs really well
+ * on the test output, showing where errors occur. Previously snapshots were used,
+ * but the assertion was hidden in another file, which really hurt discoverability
+ * and maintainability.
+ */
 export function formatTree(
   callTree: CallTree,
   children: IndexIntoCallNodeTable[] = callTree.getRoots(),
   depth: number = 0,
-  previousString: string = ''
-) {
-  const whitespace = Array(depth * 2).join(' ');
+  lines: string[] = []
+): string[] {
+  const whitespace = Array(depth * 2 + 1).join(' ');
 
-  return children.reduce((string, callNodeIndex) => {
+  children.forEach(callNodeIndex => {
     const { name, totalTime, selfTime } = callTree.getDisplayData(
       callNodeIndex
     );
-    const text = `\n${whitespace}- ${name} (total: ${totalTime}, self:${selfTime})`;
-    return formatTree(
-      callTree,
-      callTree.getChildren(callNodeIndex),
-      depth + 1,
-      string + text
+    lines.push(
+      `${whitespace}- ${name} (total: ${totalTime}, self: ${selfTime})`
     );
-  }, previousString);
+    formatTree(callTree, callTree.getChildren(callNodeIndex), depth + 1, lines);
+  });
+
+  return lines;
 }

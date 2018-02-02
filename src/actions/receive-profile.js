@@ -77,10 +77,16 @@ export function coalescedFunctionsUpdate(
   };
 }
 
-const requestIdleCallbackPolyfill: typeof requestIdleCallback =
-  typeof window === 'object' && window.requestIdleCallback
-    ? window.requestIdleCallback
-    : callback => setTimeout(callback, 0);
+let requestIdleCallbackPolyfill: (
+  callback: () => void,
+  _opts?: { timeout: number }
+) => mixed;
+
+if (typeof window === 'object' && window.requestIdleCallback) {
+  requestIdleCallbackPolyfill = window.requestIdleCallback;
+} else {
+  requestIdleCallbackPolyfill = callback => setTimeout(callback, 0);
+}
 
 class ColascedFunctionsUpdateDispatcher {
   _updates: FunctionsUpdatePerThread;
@@ -191,17 +197,6 @@ export function assignFunctionNames(
   };
 }
 
-export function assignTaskTracerNames(
-  addressIndices: number[],
-  symbolNames: string[]
-): Action {
-  return {
-    type: 'ASSIGN_TASK_TRACER_NAMES',
-    addressIndices,
-    symbolNames,
-  };
-}
-
 /**
  * If the profile object we got from the add-on is an ArrayBuffer, convert it
  * to a gecko profile object by parsing the JSON.
@@ -247,7 +242,7 @@ async function getSymbolStore(dispatch, geckoProfiler) {
   return symbolStore;
 }
 
-async function doSymbolicateProfile(
+export async function doSymbolicateProfile(
   dispatch: Dispatch,
   profile: Profile,
   symbolStore: SymbolStore
@@ -266,9 +261,6 @@ async function doSymbolicateProfile(
       funcNames: string[]
     ) => {
       dispatch(assignFunctionNames(threadIndex, funcIndices, funcNames));
-    },
-    onGotTaskTracerNames: (addressIndices, symbolNames) => {
-      dispatch(assignTaskTracerNames(addressIndices, symbolNames));
     },
   });
 

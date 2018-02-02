@@ -46,7 +46,7 @@ export const getIconClassNameForCallNode = createSelector(
   (icons, displayData: CallNodeDisplayData) =>
     displayData.icon !== null && icons.has(displayData.icon)
       ? classNameFromUrl(displayData.icon)
-      : null
+      : ''
 );
 
 export const getIconsWithClassNames: State => IconWithClassName[] = createSelector(

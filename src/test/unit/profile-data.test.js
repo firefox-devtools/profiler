@@ -598,7 +598,6 @@ describe('symbolication', function() {
               funcNames
             );
           },
-          onGotTaskTracerNames: () => {},
         }
       );
       return symbolicationPromise;

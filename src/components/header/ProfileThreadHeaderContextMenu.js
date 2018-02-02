@@ -10,7 +10,7 @@ import {
   showThread,
   isolateThread,
 } from '../../actions/profile-view';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import {
   getThreads,
   getRightClickedThreadIndex,
@@ -21,16 +21,25 @@ import classNames from 'classnames';
 
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type { State } from '../../types/reducers';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
-type Props = {|
-  threads: Thread[],
-  threadOrder: ThreadIndex[],
-  hiddenThreads: ThreadIndex[],
-  rightClickedThreadIndex: ThreadIndex,
-  hideThread: typeof hideThread,
-  showThread: typeof showThread,
-  isolateThread: typeof isolateThread,
+type StateProps = {|
+  +threads: Thread[],
+  +threadOrder: ThreadIndex[],
+  +hiddenThreads: ThreadIndex[],
+  +rightClickedThreadIndex: ThreadIndex,
 |};
+
+type DispatchProps = {|
+  +hideThread: typeof hideThread,
+  +showThread: typeof showThread,
+  +isolateThread: typeof isolateThread,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
   constructor(props: Props) {
@@ -105,12 +114,14 @@ class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
   }
 }
 
-export default connect(
-  (state: State) => ({
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+  mapStateToProps: (state: State) => ({
     threads: getThreads(state),
     threadOrder: getThreadOrder(state),
     hiddenThreads: getHiddenThreads(state),
     rightClickedThreadIndex: getRightClickedThreadIndex(state),
   }),
-  { hideThread, showThread, isolateThread }
-)(ProfileThreadHeaderContextMenu);
+  mapDispatchToProps: { hideThread, showThread, isolateThread },
+  component: ProfileThreadHeaderContextMenu,
+};
+export default explicitConnect(options);

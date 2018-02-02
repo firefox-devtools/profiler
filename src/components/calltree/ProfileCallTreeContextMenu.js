@@ -5,18 +5,26 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 import { getFunctionName } from '../../profile-logic/function-info';
 import copy from 'copy-to-clipboard';
-import { addTransformToStack } from '../../actions/profile-view';
+import {
+  addTransformToStack,
+  expandAllCallNodeDescendants,
+} from '../../actions/profile-view';
 import {
   getSelectedThreadIndex,
   getImplementationFilter,
   getInvertCallstack,
 } from '../../reducers/url-state';
+import {
+  convertToTransformType,
+  assertExhaustiveCheck,
+} from '../../utils/flow';
 
+import type { TransformType } from '../../types/transforms';
 import type { ImplementationFilter } from '../../types/actions';
 import type {
   IndexIntoCallNodeTable,
@@ -24,17 +32,27 @@ import type {
   CallNodePath,
 } from '../../types/profile-derived';
 import type { Thread, ThreadIndex } from '../../types/profile';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
-type Props = {
-  thread: Thread,
-  threadIndex: ThreadIndex,
-  callNodeInfo: CallNodeInfo,
-  implementation: ImplementationFilter,
-  selectedCallNodePath: CallNodePath,
-  selectedCallNodeIndex: IndexIntoCallNodeTable,
-  inverted: boolean,
-  addTransformToStack: typeof addTransformToStack,
-};
+type StateProps = {|
+  +thread: Thread,
+  +threadIndex: ThreadIndex,
+  +callNodeInfo: CallNodeInfo,
+  +implementation: ImplementationFilter,
+  +inverted: boolean,
+  +selectedCallNodePath: CallNodePath,
+  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+|};
+
+type DispatchProps = {|
+  +addTransformToStack: typeof addTransformToStack,
+  +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 require('./ProfileCallTreeContextMenu.css');
 
@@ -44,19 +62,39 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     (this: any).handleClick = this.handleClick.bind(this);
   }
 
-  copyFunctionName(): void {
+  _getFunctionName(): string {
     const {
       selectedCallNodeIndex,
       thread: { stringTable, funcTable },
       callNodeInfo: { callNodeTable },
     } = this.props;
 
+    if (selectedCallNodeIndex === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
+
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
     const stringIndex = funcTable.name[funcIndex];
     const functionCall = stringTable.getString(stringIndex);
     const name = isJS ? functionCall : getFunctionName(functionCall);
-    copy(name);
+    return name;
+  }
+
+  lookupFunctionOnSearchfox(): void {
+    const name = this._getFunctionName();
+    window.open(
+      `https://searchfox.org/mozilla-central/search?q=${encodeURIComponent(
+        name
+      )}`,
+      '_blank'
+    );
+  }
+
+  copyFunctionName(): void {
+    copy(this._getFunctionName());
   }
 
   copyUrl(): void {
@@ -65,6 +103,12 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       thread: { stringTable, funcTable },
       callNodeInfo: { callNodeTable },
     } = this.props;
+
+    if (selectedCallNodeIndex === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
 
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const stringIndex = funcTable.fileName[funcIndex];
@@ -81,6 +125,12 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       callNodeInfo: { callNodeTable },
     } = this.props;
 
+    if (selectedCallNodeIndex === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
+
     let stack = '';
     let callNodeIndex = selectedCallNodeIndex;
 
@@ -96,7 +146,17 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
 
   handleClick(event: SyntheticEvent<>, data: { type: string }): void {
     const { type } = data;
+
+    const transformType = convertToTransformType(type);
+    if (transformType) {
+      this.addTransformToStack(transformType);
+      return;
+    }
+
     switch (type) {
+      case 'searchfox':
+        this.lookupFunctionOnSearchfox();
+        break;
       case 'copy-function-name':
         this.copyFunctionName();
         break;
@@ -106,21 +166,15 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       case 'copy-stack':
         this.copyStack();
         break;
-      case 'merge-call-node':
-      case 'merge-function':
-      case 'focus-subtree':
-      case 'focus-function':
-      case 'collapse-resource':
-      case 'collapse-direct-recursion':
-      case 'drop-function':
-        this.addTransformToStack(type);
+      case 'expand-all':
+        this.expandAll();
         break;
       default:
-        throw new Error(`Unknown type ${data.type}`);
+        throw new Error(`Unknown type ${type}`);
     }
   }
 
-  addTransformToStack(type: string): void {
+  addTransformToStack(type: TransformType): void {
     const {
       addTransformToStack,
       threadIndex,
@@ -187,9 +241,36 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
         });
         break;
       }
+      case 'collapse-function-subtree': {
+        addTransformToStack(threadIndex, {
+          type: 'collapse-function-subtree',
+          funcIndex: selectedFunc,
+        });
+        break;
+      }
       default:
-        throw new Error('Type not found.');
+        assertExhaustiveCheck(type);
     }
+  }
+
+  expandAll(): void {
+    const {
+      expandAllCallNodeDescendants,
+      threadIndex,
+      selectedCallNodeIndex,
+      callNodeInfo,
+    } = this.props;
+    if (selectedCallNodeIndex === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
+
+    expandAllCallNodeDescendants(
+      threadIndex,
+      selectedCallNodeIndex,
+      callNodeInfo
+    );
   }
 
   getNameForSelectedResource(): string | null {
@@ -246,6 +327,11 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       thread: { funcTable },
       callNodeInfo: { callNodeTable },
     } = this.props;
+
+    if (selectedCallNodeIndex === null) {
+      return null;
+    }
+
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
     // This could be the C++ library, or the JS filename.
@@ -276,6 +362,13 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
             ? 'Focus on calls made by this function'
             : 'Focus on function'}
         </MenuItem>
+        <MenuItem
+          onClick={this.handleClick}
+          data={{ type: 'collapse-function-subtree' }}
+        >
+          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+          {'Collapse function’s subtree across the entire tree'}
+        </MenuItem>
         {nameForResource
           ? <MenuItem
               onClick={this.handleClick}
@@ -302,6 +395,13 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
           Drop samples with this function
         </MenuItem>
         <div className="react-contextmenu-separator" />
+        <MenuItem onClick={this.handleClick} data={{ type: 'expand-all' }}>
+          Expand all
+        </MenuItem>
+        <div className="react-contextmenu-separator" />
+        <MenuItem onClick={this.handleClick} data={{ type: 'searchfox' }}>
+          Look up the function name on Searchfox
+        </MenuItem>
         <MenuItem
           onClick={this.handleClick}
           data={{ type: 'copy-function-name' }}
@@ -321,8 +421,8 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
   }
 }
 
-export default connect(
-  state => ({
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+  mapStateToProps: state => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     threadIndex: getSelectedThreadIndex(state),
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
@@ -335,5 +435,7 @@ export default connect(
       state
     ),
   }),
-  { addTransformToStack }
-)(ProfileCallTreeContextMenu);
+  mapDispatchToProps: { addTransformToStack, expandAllCallNodeDescendants },
+  component: ProfileCallTreeContextMenu,
+};
+export default explicitConnect(options);

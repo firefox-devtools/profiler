@@ -132,7 +132,17 @@ describe('unfiltered call tree', function() {
     `);
     const callTree = callTreeFromProfile(profile);
     it('computes an unfiltered call tree', function() {
-      expect(formatTree(callTree)).toMatchSnapshot();
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 3, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - C (total: 2, self: —)',
+        '      - D (total: 1, self: —)',
+        '        - E (total: 1, self: 1)',
+        '      - F (total: 1, self: —)',
+        '        - G (total: 1, self: 1)',
+        '    - H (total: 1, self: —)',
+        '      - I (total: 1, self: 1)',
+      ]);
     });
   });
 
@@ -168,6 +178,13 @@ describe('unfiltered call tree', function() {
       it('determines if nodes have children', function() {
         expect(callTree.hasChildren(C)).toEqual(true);
         expect(callTree.hasChildren(E)).toEqual(false);
+      });
+    });
+
+    describe('getAllDescendants()', function() {
+      it('returns a set with the descendant indexes', function() {
+        expect(callTree.getAllDescendants(C)).toEqual(new Set([D, E, F, G]));
+        expect(callTree.getAllDescendants(E)).toEqual(new Set([]));
       });
     });
 
@@ -306,7 +323,21 @@ describe('inverted call tree', function() {
      *      L         M         R   <- Label the branches. (left, middle, right)
      */
     it('computes an inverted call tree', function() {
-      expect(formatTree(callTree)).toMatchSnapshot();
+      expect(formatTree(callTree)).toEqual([
+        '- Z (total: 2, self: 2)',
+        '  - Y (total: 2, self: —)',
+        '    - X (total: 2, self: —)',
+        '      - B (total: 1, self: —)',
+        '        - A (total: 1, self: —)',
+        '      - C (total: 1, self: —)',
+        '        - B (total: 1, self: —)',
+        '          - A (total: 1, self: —)',
+        '- E (total: 1, self: 1)',
+        '  - D (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - B (total: 1, self: —)',
+        '        - A (total: 1, self: —)',
+      ]);
     });
   });
 });

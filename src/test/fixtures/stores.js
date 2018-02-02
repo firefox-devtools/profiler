@@ -7,6 +7,8 @@ import createStore from '../../create-store';
 import { receiveProfileFromAddon } from '../../actions/receive-profile';
 import exampleProfile from './profiles/timings-with-js';
 import { processProfile } from '../../profile-logic/process-profile';
+import { getProfileFromTextSamples } from './profiles/make-profile';
+
 import type { Store } from '../../types/store';
 import type { Profile } from '../../types/profile';
 
@@ -20,4 +22,15 @@ export function storeWithProfile(
   const store = createStore();
   store.dispatch(receiveProfileFromAddon(profile));
   return store;
+}
+
+export function storeWithSimpleProfile(): Store {
+  const { profile } = getProfileFromTextSamples(`
+    A A A
+    B B B
+    C C H
+    D F I
+    E G
+  `);
+  return storeWithProfile(profile);
 }

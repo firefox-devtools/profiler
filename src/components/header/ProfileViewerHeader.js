@@ -9,7 +9,7 @@ import ProfileThreadHeaderBar from './ProfileThreadHeaderBar';
 import Reorderable from '../shared/Reorderable';
 import TimeSelectionScrubber from './TimeSelectionScrubber';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import {
   getProfile,
   getProfileViewOptions,
@@ -26,21 +26,28 @@ import {
 
 import type { Profile, ThreadIndex } from '../../types/profile';
 import type { ProfileSelection } from '../../types/actions';
-import type { State } from '../../types/reducers';
 import type { Milliseconds, StartEndRange } from '../../types/units';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
-type Props = {|
+type StateProps = {|
   +profile: Profile,
-  +className: string,
-  +hiddenThreads: ThreadIndex[],
-  +threadOrder: ThreadIndex[],
   +selection: ProfileSelection,
+  +threadOrder: ThreadIndex[],
+  +hiddenThreads: ThreadIndex[],
   +timeRange: StartEndRange,
   +zeroAt: Milliseconds,
+|};
+
+type DispatchProps = {|
   +changeThreadOrder: typeof changeThreadOrder,
   +addRangeFilterAndUnsetSelection: typeof addRangeFilterAndUnsetSelection,
   +updateProfileSelection: typeof updateProfileSelection,
 |};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class ProfileViewerHeader extends PureComponent<Props> {
   constructor(props: Props) {
@@ -56,7 +63,6 @@ class ProfileViewerHeader extends PureComponent<Props> {
   render() {
     const {
       profile,
-      className,
       threadOrder,
       changeThreadOrder,
       selection,
@@ -69,7 +75,7 @@ class ProfileViewerHeader extends PureComponent<Props> {
 
     return (
       <TimeSelectionScrubber
-        className={`${className}Header`}
+        className="profileViewerHeader"
         zeroAt={zeroAt}
         rangeStart={timeRange.start}
         rangeEnd={timeRange.end}
@@ -78,13 +84,11 @@ class ProfileViewerHeader extends PureComponent<Props> {
         onSelectionChange={updateProfileSelection}
         onZoomButtonClick={this._onZoomButtonClick}
       >
-        <OverflowEdgeIndicator
-          className={`${className}HeaderOverflowEdgeIndicator`}
-        >
+        <OverflowEdgeIndicator className="profileViewerHeaderOverflowEdgeIndicator">
           {
             <Reorderable
               tagName="ol"
-              className={`${className}HeaderThreadList`}
+              className="profileViewerHeaderThreadList"
               order={threadOrder}
               orient="vertical"
               onChangeOrder={changeThreadOrder}
@@ -92,7 +96,7 @@ class ProfileViewerHeader extends PureComponent<Props> {
               {threads.map((thread, threadIndex) =>
                 <ProfileThreadHeaderBar
                   key={threadIndex}
-                  index={threadIndex}
+                  threadIndex={threadIndex}
                   interval={profile.meta.interval}
                   rangeStart={timeRange.start}
                   rangeEnd={timeRange.end}
@@ -108,19 +112,21 @@ class ProfileViewerHeader extends PureComponent<Props> {
   }
 }
 
-export default connect(
-  (state: State) => ({
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+  mapStateToProps: state => ({
     profile: getProfile(state),
     selection: getProfileViewOptions(state).selection,
-    className: 'profileViewer',
     threadOrder: getThreadOrder(state),
     hiddenThreads: getHiddenThreads(state),
     timeRange: getDisplayRange(state),
     zeroAt: getZeroAt(state),
   }),
-  {
+  mapDispatchToProps: {
     changeThreadOrder,
     updateProfileSelection,
     addRangeFilterAndUnsetSelection,
-  }
-)(ProfileViewerHeader);
+  },
+  component: ProfileViewerHeader,
+};
+
+export default explicitConnect(options);

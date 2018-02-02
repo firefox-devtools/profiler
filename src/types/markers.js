@@ -201,6 +201,8 @@ export type GCMinorCompletedData = {
   // actually allocated.
   lazy_capacity?: number,
 
+  chunk_alloc_us?: Microseconds,
+
   phase_times: PhaseTimes<Microseconds>,
 };
 

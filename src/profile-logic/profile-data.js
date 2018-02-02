@@ -32,7 +32,6 @@ import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profil
 
 import type { StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
-import { getEmptyTaskTracerData } from './task-tracer';
 import type { ImplementationFilter } from '../types/actions';
 import bisection from 'bisection';
 
@@ -619,7 +618,9 @@ export function getCallNodeFromPath(
     }
     fs = nextFS;
   }
-  return fs;
+
+  // The fs could still be -1 here, so ensure we return null if that is the case.
+  return fs === -1 ? null : fs;
 }
 
 export function getCallNodePath(
@@ -1078,6 +1079,5 @@ export function getEmptyProfile(): Profile {
       preprocessedProfileVersion: PROCESSED_PROFILE_VERSION,
     },
     threads: [],
-    tasktracer: getEmptyTaskTracerData(),
   };
 }

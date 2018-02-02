@@ -4,9 +4,8 @@
 
 // @flow
 import * as React from 'react';
-import { connect } from 'react-redux';
+import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
-
 import IdleSearchField from './IdleSearchField';
 import { changeCallTreeSearchString } from '../../actions/profile-view';
 import {
@@ -14,14 +13,28 @@ import {
   getSearchStrings,
 } from '../../reducers/url-state';
 
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
+
 import './StackSearchField.css';
 
-type Props = {|
-  +className?: string,
+type OwnProps = {|
+  +className: string,
+|};
+
+type StateProps = {|
   +currentSearchString: string,
   +searchStrings: string[] | null,
+|};
+
+type DispatchProps = {|
   +changeCallTreeSearchString: typeof changeCallTreeSearchString,
 |};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+
 type State = {| searchFieldFocused: boolean |};
 
 class StackSearchField extends React.PureComponent<Props, State> {
@@ -84,10 +97,12 @@ class StackSearchField extends React.PureComponent<Props, State> {
   }
 }
 
-export default connect(
-  state => ({
+const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+  mapStateToProps: state => ({
     currentSearchString: getCurrentSearchString(state),
     searchStrings: getSearchStrings(state),
   }),
-  { changeCallTreeSearchString }
-)(StackSearchField);
+  mapDispatchToProps: { changeCallTreeSearchString },
+  component: StackSearchField,
+};
+export default explicitConnect(options);

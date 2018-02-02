@@ -5,9 +5,17 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux';
-import { getProfileViewOptions } from '../../reducers/profile-view';
+import {
+  getProfileViewOptions,
+  getSymbolicationStatus,
+} from '../../reducers/profile-view';
+import explicitConnect from '../../utils/connect';
+
 import type { RequestedLib } from '../../types/reducers';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
 function englishSgPlLibrary(count) {
   return count === 1 ? 'library' : 'libraries';
@@ -26,10 +34,12 @@ function englishListJoin(list) {
   }
 }
 
-type Props = {
-  symbolicationStatus: string,
-  waitingForLibs: Set<RequestedLib>,
-};
+type StateProps = {|
+  +symbolicationStatus: string,
+  +waitingForLibs: Set<RequestedLib>,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, {||}>;
 
 class SymbolicationStatusOverlay extends PureComponent<Props> {
   render() {
@@ -59,7 +69,11 @@ class SymbolicationStatusOverlay extends PureComponent<Props> {
   }
 }
 
-export default connect(state => ({
-  symbolicationStatus: getProfileViewOptions(state).symbolicationStatus,
-  waitingForLibs: getProfileViewOptions(state).waitingForLibs,
-}))(SymbolicationStatusOverlay);
+const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+  mapStateToProps: state => ({
+    symbolicationStatus: getSymbolicationStatus(state),
+    waitingForLibs: getProfileViewOptions(state).waitingForLibs,
+  }),
+  component: SymbolicationStatusOverlay,
+};
+export default explicitConnect(options);

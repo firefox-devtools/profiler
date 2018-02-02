@@ -361,14 +361,14 @@ exports[`MarkerTooltipContents renders tooltips for various markers 6`] = `
       Total slice times
       :
     </div>
-    157.215ms
+    157ms
     <div
       className="tooltipLabel"
     >
       Max Pause
       :
     </div>
-    103.65ms
+    104ms
     <div
       className="tooltipLabel"
     >
@@ -382,14 +382,14 @@ exports[`MarkerTooltipContents renders tooltips for various markers 6`] = `
       MMU 20ms
       :
     </div>
-    0.000%
+    0.0%
     <div
       className="tooltipLabel"
     >
       MMU 50ms
       :
     </div>
-    0.000%
+    0.0%
     <div
       className="tooltipLabel"
     >

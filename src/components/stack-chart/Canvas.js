@@ -4,10 +4,14 @@
 
 // @flow
 import * as React from 'react';
-import withChartViewport from '../shared/chart/Viewport';
+import {
+  withChartViewport,
+  type WithChartViewport,
+} from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatNumber } from '../../utils/format-numbers';
+import { updateProfileSelection } from '../../actions/profile-view';
 
 import type { Thread } from '../../types/profile';
 import type {
@@ -22,32 +26,29 @@ import type {
 } from '../../profile-logic/stack-timing';
 import type { GetCategory } from '../../profile-logic/color-categories';
 import type { GetLabel } from '../../profile-logic/labeling-strategies';
-import type { Action, ProfileSelection } from '../../types/actions';
+import type { Viewport } from '../shared/chart/Viewport';
 
-type Props = {
-  thread: Thread,
-  interval: Milliseconds,
-  rangeStart: Milliseconds,
-  rangeEnd: Milliseconds,
-  containerWidth: CssPixels,
-  containerHeight: CssPixels,
-  viewportLeft: UnitIntervalOfProfileRange,
-  viewportRight: UnitIntervalOfProfileRange,
-  viewportTop: CssPixels,
-  viewportBottom: CssPixels,
-  stackTimingByDepth: StackTimingByDepth,
-  stackFrameHeight: CssPixels,
-  getCategory: GetCategory,
-  getLabel: GetLabel,
-  updateProfileSelection: ProfileSelection => Action,
-  isDragging: boolean,
-  isRowExpanded: boolean,
-};
+type OwnProps = {|
+  +thread: Thread,
+  +interval: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +stackTimingByDepth: StackTimingByDepth,
+  +stackFrameHeight: CssPixels,
+  +getCategory: GetCategory,
+  +getLabel: GetLabel,
+  +updateProfileSelection: typeof updateProfileSelection,
+|};
 
-type HoveredStackTiming = {
-  depth: StackTimingDepth,
-  stackTableIndex: IndexIntoStackTiming,
-};
+type Props = $ReadOnly<{|
+  ...OwnProps,
+  +viewport: Viewport,
+|}>;
+
+type HoveredStackTiming = {|
+  +depth: StackTimingDepth,
+  +stackTableIndex: IndexIntoStackTiming,
+|};
 
 require('./Canvas.css');
 
@@ -83,16 +84,18 @@ class StackChartCanvas extends React.PureComponent<Props> {
       thread,
       rangeStart,
       rangeEnd,
-      containerWidth,
       getLabel,
-      containerHeight,
       stackTimingByDepth,
       stackFrameHeight,
       getCategory,
-      viewportLeft,
-      viewportRight,
-      viewportTop,
-      viewportBottom,
+      viewport: {
+        containerWidth,
+        containerHeight,
+        viewportLeft,
+        viewportRight,
+        viewportTop,
+        viewportBottom,
+      },
     } = this.props;
 
     // Ensure the text measurement tool is created, since this is the first time
@@ -192,13 +195,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     depth,
     stackTableIndex,
   }: HoveredStackTiming): React.Node {
-    const {
-      thread,
-      getLabel,
-      getCategory,
-      stackTimingByDepth,
-      isRowExpanded,
-    } = this.props;
+    const { thread, getLabel, getCategory, stackTimingByDepth } = this.props;
     const stackTiming = stackTimingByDepth[depth];
 
     const duration =
@@ -211,36 +208,32 @@ class StackChartCanvas extends React.PureComponent<Props> {
     const funcIndex = thread.frameTable.func[frameIndex];
 
     let resourceOrFileName = null;
-    // Only show resources or filenames if the chart is expanded, as collapsed stacks
-    // would show incorrect details about a group of stacks.
-    if (isRowExpanded) {
-      // Only JavaScript functions have a filename.
-      const fileNameIndex = thread.funcTable.fileName[funcIndex];
-      if (fileNameIndex !== null) {
-        // Because of our use of Grid Layout, all our elements need to be direct
-        // children of the grid parent. That's why we use arrays here, to add
-        // the elements as direct children.
-        resourceOrFileName = [
-          <div className="tooltipLabel" key="file">
-            File:
-          </div>,
-          thread.stringTable.getString(fileNameIndex),
-        ];
-      } else {
-        const resourceIndex = thread.funcTable.resource[funcIndex];
-        if (resourceIndex !== -1) {
-          const resourceNameIndex = thread.resourceTable.name[resourceIndex];
-          if (resourceNameIndex !== -1) {
-            // Because of our use of Grid Layout, all our elements need to be direct
-            // children of the grid parent. That's why we use arrays here, to add
-            // the elements as direct children.
-            resourceOrFileName = [
-              <div className="tooltipLabel" key="resource">
-                Resource:
-              </div>,
-              thread.stringTable.getString(resourceNameIndex),
-            ];
-          }
+    // Only JavaScript functions have a filename.
+    const fileNameIndex = thread.funcTable.fileName[funcIndex];
+    if (fileNameIndex !== null) {
+      // Because of our use of Grid Layout, all our elements need to be direct
+      // children of the grid parent. That's why we use arrays here, to add
+      // the elements as direct children.
+      resourceOrFileName = [
+        <div className="tooltipLabel" key="file">
+          File:
+        </div>,
+        thread.stringTable.getString(fileNameIndex),
+      ];
+    } else {
+      const resourceIndex = thread.funcTable.resource[funcIndex];
+      if (resourceIndex !== -1) {
+        const resourceNameIndex = thread.resourceTable.name[resourceIndex];
+        if (resourceNameIndex !== -1) {
+          // Because of our use of Grid Layout, all our elements need to be direct
+          // children of the grid parent. That's why we use arrays here, to add
+          // the elements as direct children.
+          resourceOrFileName = [
+            <div className="tooltipLabel" key="resource">
+              Resource:
+            </div>,
+            thread.stringTable.getString(resourceNameIndex),
+          ];
         }
       }
     }
@@ -288,11 +281,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
     const {
       rangeStart,
       rangeEnd,
-      viewportLeft,
-      viewportRight,
-      viewportTop,
-      containerWidth,
       stackTimingByDepth,
+      viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
@@ -320,7 +310,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
   }
 
   render() {
-    const { containerWidth, containerHeight, isDragging } = this.props;
+    const { containerWidth, containerHeight, isDragging } = this.props.viewport;
 
     return (
       <ChartCanvas
@@ -337,4 +327,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
   }
 }
 
-export default withChartViewport(StackChartCanvas);
+//
+export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
+  StackChartCanvas
+);

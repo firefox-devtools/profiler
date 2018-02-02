@@ -14,14 +14,22 @@ import {
   getThreadOrder,
   getHiddenThreads,
 } from '../reducers/url-state';
-import { getFriendlyThreadName } from '../profile-logic/profile-data';
+import {
+  getFriendlyThreadName,
+  getCallNodePath,
+} from '../profile-logic/profile-data';
 import { sendAnalytics } from '../utils/analytics';
 
 import type { ProfileSelection, ImplementationFilter } from '../types/actions';
 import type { Action, ThunkAction } from '../types/store';
 import type { ThreadIndex, IndexIntoMarkersTable } from '../types/profile';
-import type { CallNodePath } from '../types/profile-derived';
+import type {
+  CallNodePath,
+  CallNodeInfo,
+  IndexIntoCallNodeTable,
+} from '../types/profile-derived';
 import type { Transform } from '../types/transforms';
+
 /**
  * The actions that pertain to changing the view on the profile, including searching
  * and filtering. Currently the call tree's actions are in this file, but should be
@@ -160,6 +168,34 @@ export function changeCallTreeSearchString(searchString: string): Action {
   };
 }
 
+export function expandAllCallNodeDescendants(
+  threadIndex: ThreadIndex,
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfo
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const expandedCallNodeIndexes = selectedThreadSelectors.getExpandedCallNodeIndexes(
+      getState()
+    );
+    const tree = selectedThreadSelectors.getCallTree(getState());
+
+    // Create a set with the selected call node and its descendants
+    const descendants = tree.getAllDescendants(callNodeIndex);
+    descendants.add(callNodeIndex);
+    // And also add all the call nodes that already were expanded
+    expandedCallNodeIndexes.forEach(callNodeIndex => {
+      if (callNodeIndex !== null) {
+        descendants.add(callNodeIndex);
+      }
+    });
+
+    const expandedCallNodePaths = [...descendants].map(callNodeIndex =>
+      getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable)
+    );
+    dispatch(changeExpandedCallNodes(threadIndex, expandedCallNodePaths));
+  };
+}
+
 export function changeExpandedCallNodes(
   threadIndex: ThreadIndex,
   expandedCallNodePaths: Array<CallNodePath>
@@ -216,15 +252,23 @@ export function changeImplementationFilter(
   };
 }
 
-export function changeInvertCallstack(invertCallstack: boolean): Action {
-  sendAnalytics({
-    hitType: 'event',
-    eventCategory: 'profile',
-    eventAction: 'change invert callstack',
-  });
-  return {
-    type: 'CHANGE_INVERT_CALLSTACK',
-    invertCallstack,
+export function changeInvertCallstack(
+  invertCallstack: boolean
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'change invert callstack',
+    });
+    dispatch({
+      type: 'CHANGE_INVERT_CALLSTACK',
+      invertCallstack,
+      selectedThreadIndex: getSelectedThreadIndex(getState()),
+      callTree: selectedThreadSelectors.getCallTree(getState()),
+      callNodeTable: selectedThreadSelectors.getCallNodeInfo(getState())
+        .callNodeTable,
+    });
   };
 }
 
@@ -312,12 +356,14 @@ export function addTransformToStack(
 }
 
 export function popTransformsFromStack(
-  threadIndex: ThreadIndex,
   firstRemovedFilterIndex: number
-): Action {
-  return {
-    type: 'POP_TRANSFORMS_FROM_STACK',
-    threadIndex,
-    firstRemovedFilterIndex,
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const threadIndex = getSelectedThreadIndex(getState());
+    dispatch({
+      type: 'POP_TRANSFORMS_FROM_STACK',
+      threadIndex,
+      firstRemovedFilterIndex,
+    });
   };
 }

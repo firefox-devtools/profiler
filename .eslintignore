@@ -1,2 +1,2 @@
-flow-typed/npm
+src/types/libdef/npm
 res/analytics.js
