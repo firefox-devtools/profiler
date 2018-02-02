@@ -5,7 +5,7 @@
 
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
-import { resourceTypes } from './profile-data';
+import { resourceTypes, emptyExtensions } from './profile-data';
 import { provideHostSide } from '../utils/promise-worker';
 import { immutableUpdate } from '../utils/flow';
 import {
@@ -22,6 +22,7 @@ import { convertPhaseTimes } from './convert-markers';
 import type {
   Profile,
   Thread,
+  ExtensionTable,
   FrameTable,
   SamplesTable,
   StackTable,
@@ -133,7 +134,8 @@ type ExtractionInfo = {
 export function extractFuncsAndResourcesFromFrameLocations(
   locationStringIndexes: IndexIntoStringTable[],
   stringTable: UniqueStringArray,
-  libs: Lib[]
+  libs: Lib[],
+  extensions: ExtensionTable = emptyExtensions
 ): [FuncTable, ResourceTable, IndexIntoFuncTable[]] {
   // Explicitly create FuncTable. If Flow complains about this, then all of
   // the functions in this file starting with the word "extract" should be updated.
@@ -168,6 +170,10 @@ export function extractFuncsAndResourcesFromFrameLocations(
     libNameToResourceIndex: new Map(),
     stringToNewFuncIndex: new Map(),
   };
+
+  for (let i = 0; i < extensions.length; i++) {
+    _addExtensionOrigin(extractionInfo, extensions, i);
+  }
 
   // Go through every frame location string, and deduce the function and resource
   // information by applying various string matching heuristics.
@@ -331,6 +337,33 @@ function _extractCppFunction(
   return newFuncIndex;
 }
 
+// Adds a resource table entry for an extension's base URL origin
+// string, mapping it to the extension's name and internal ID.
+function _addExtensionOrigin(
+  extractionInfo: ExtractionInfo,
+  extensions: ExtensionTable,
+  index: number
+): void {
+  const { originToResourceIndex, resourceTable, stringTable } = extractionInfo;
+  const origin = new URL(extensions.baseURL[index]).origin;
+
+  let resourceIndex = originToResourceIndex.get(origin);
+  if (resourceIndex === undefined) {
+    resourceIndex = resourceTable.length++;
+    originToResourceIndex.set(origin, resourceIndex);
+
+    const quotedName = JSON.stringify(extensions.name[index]);
+    const name = `Extension ${quotedName} (ID: ${extensions.id[index]})`;
+
+    const idIndex = stringTable.indexForString(extensions.id[index]);
+
+    resourceTable.lib[resourceIndex] = undefined;
+    resourceTable.name[resourceIndex] = stringTable.indexForString(name);
+    resourceTable.host[resourceIndex] = idIndex;
+    resourceTable.type[resourceIndex] = resourceTypes.addon;
+  }
+}
+
 /**
  * Given a location string that looks like a JS function (by matching various regular
  * expressions) e.g. "functionName:134", this function will classify it as a JS
@@ -370,8 +403,14 @@ function _extractJsFunction(
   let host;
   try {
     const url = new URL(scriptURI);
-    if (!(url.protocol === 'http:' || url.protocol === 'https:')) {
-      throw new Error('not a webhost protocol');
+    if (
+      !(
+        url.protocol === 'http:' ||
+        url.protocol === 'https:' ||
+        url.protocol === 'moz-extension:'
+      )
+    ) {
+      throw new Error('not a webhost or extension protocol');
     }
     origin = url.origin;
     host = url.host;
@@ -565,7 +604,8 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
  */
 function _processThread(
   thread: GeckoThread,
-  processProfile: GeckoProfile
+  processProfile: GeckoProfile,
+  extensions: ExtensionTable
 ): Thread {
   const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
     thread.frameTable
@@ -589,7 +629,8 @@ function _processThread(
   ] = extractFuncsAndResourcesFromFrameLocations(
     geckoFrameStruct.location,
     stringTable,
-    libs
+    libs,
+    extensions
   );
   const frameTable: FrameTable = _processFrameTable(
     geckoFrameStruct,
@@ -684,8 +725,12 @@ export function processProfile(
 
   let threads = [];
 
+  const extensions: ExtensionTable = geckoProfile.meta.extensions
+    ? _toStructOfArrays(geckoProfile.meta.extensions)
+    : emptyExtensions;
+
   for (const thread of geckoProfile.threads) {
-    threads.push(_processThread(thread, geckoProfile));
+    threads.push(_processThread(thread, geckoProfile, extensions));
   }
 
   for (const subprocessProfile of geckoProfile.processes) {
@@ -693,7 +738,7 @@ export function processProfile(
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
     threads = threads.concat(
       subprocessProfile.threads.map(thread => {
-        const newThread = _processThread(thread, subprocessProfile);
+        const newThread = _processThread(thread, subprocessProfile, extensions);
         newThread.samples = _adjustSampleTimestamps(
           newThread.samples,
           adjustTimestampsBy
@@ -719,6 +764,7 @@ export function processProfile(
     interval: geckoProfile.meta.interval,
     startTime: geckoProfile.meta.startTime,
     abi: geckoProfile.meta.abi,
+    extensions: extensions,
     misc: geckoProfile.meta.misc,
     oscpu: geckoProfile.meta.oscpu,
     platform: geckoProfile.meta.platform,

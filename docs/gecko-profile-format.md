@@ -60,7 +60,17 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
     misc: "rv:52.0",
     abi: "x86_64-gcc3",
     toolkit: "cocoa",
-    product: "Firefox"
+    product: "Firefox",
+    extensions: {
+      schema: {
+        id: 0,
+        name: 1,
+        baseURL: 2
+      },
+      data: [
+        ["geckoprofiler@mozilla.com", "Gecko Profiler", "moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/"]
+      ]
+    }
   },
 
   // Array of shared library data.

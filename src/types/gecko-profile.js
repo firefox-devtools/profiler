@@ -130,12 +130,24 @@ export type GeckoThread = {
   stringTable: string[],
 };
 
+export type GeckoExtensionMeta = {|
+  schema: {|
+    id: 0,
+    name: 1,
+    baseURL: 2,
+  |},
+  data: Array<[string, string, string]>,
+|};
+
 export type GeckoProfile = {|
   meta: {|
     interval: Milliseconds,
     startTime: Milliseconds,
     shutdownTime: Milliseconds | null,
     abi: string,
+    // The extensions property landed in Firefox 60, and is only optional because
+    // older profile versions may not have it. No upgrader was written for this change.
+    extensions?: GeckoExtensionMeta,
     misc: string,
     oscpu: string,
     platform: string,

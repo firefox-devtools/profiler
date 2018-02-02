@@ -20,6 +20,7 @@ import type {
   CallNodeDisplayData,
 } from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
+import ExtensionIcon from '../../res/extension.svg';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeTimes = {
@@ -36,6 +37,48 @@ type CallTreeCountsAndTimings = {
 function extractFaviconFromLibname(libname: string): string | null {
   const url = new URL('/favicon.ico', libname);
   return url.href;
+}
+
+export function getOriginAnnotation(
+  resourceTable: ResourceTable,
+  stringTable: UniqueStringArray,
+  funcTable: FuncTable,
+  funcIndex: number
+): string {
+  const resourceIndex = funcTable.resource[funcIndex];
+  const resourceNameIndex = resourceTable.name[resourceIndex];
+
+  let origin;
+  if (resourceNameIndex !== undefined) {
+    origin = stringTable.getString(resourceNameIndex);
+  }
+
+  const fileNameIndex = funcTable.fileName[funcIndex];
+  let fileName;
+  if (fileNameIndex !== null) {
+    fileName = stringTable.getString(fileNameIndex);
+    const lineNumber = funcTable.lineNumber[funcIndex];
+    if (lineNumber !== null) {
+      fileName += ':' + lineNumber;
+    }
+  }
+
+  if (fileName) {
+    // If the origin string is just a URL prefix that's part of the
+    // filename, it doesn't add any useful information, so just return
+    // the filename. If it's something else (e.g., an extension or
+    // library name), prepend it to the filename.
+    if (origin && !fileName.startsWith(origin)) {
+      return `${origin}: ${fileName}`;
+    }
+    return fileName;
+  }
+
+  if (origin) {
+    return origin;
+  }
+
+  return '';
 }
 
 export class CallTree {
@@ -169,6 +212,13 @@ export class CallTree {
         ? _formatIntegerNumber
         : _formatDecimalNumber;
 
+      let icon = null;
+      if (resourceType === resourceTypes.webhost) {
+        icon = extractFaviconFromLibname(libName);
+      } else if (resourceType === resourceTypes.addon) {
+        icon = ExtensionIcon;
+      }
+
       displayData = {
         totalTime: `${formatNumber(totalTime)}`,
         totalTimePercent: `${(100 * totalTimeRelative).toFixed(precision)}%`,
@@ -177,10 +227,7 @@ export class CallTree {
         lib: libName,
         // Dim platform pseudo-stacks.
         dim: !isJS && this._jsOnly,
-        icon:
-          resourceType === resourceTypes.webhost
-            ? extractFaviconFromLibname(libName)
-            : null,
+        icon,
       };
       this._displayDataByIndex.set(callNodeIndex, displayData);
     }
@@ -188,23 +235,12 @@ export class CallTree {
   }
 
   _getOriginAnnotation(funcIndex: IndexIntoFuncTable): string {
-    const fileNameIndex = this._funcTable.fileName[funcIndex];
-    if (fileNameIndex !== null) {
-      const fileName = this._stringTable.getString(fileNameIndex);
-      const lineNumber = this._funcTable.lineNumber[funcIndex];
-      if (lineNumber !== null) {
-        return fileName + ':' + lineNumber;
-      }
-      return fileName;
-    }
-
-    const resourceIndex = this._funcTable.resource[funcIndex];
-    const resourceNameIndex = this._resourceTable.name[resourceIndex];
-    if (resourceNameIndex !== undefined) {
-      return this._stringTable.getString(resourceNameIndex);
-    }
-
-    return '';
+    return getOriginAnnotation(
+      this._resourceTable,
+      this._stringTable,
+      this._funcTable,
+      funcIndex
+    );
   }
 }
 
