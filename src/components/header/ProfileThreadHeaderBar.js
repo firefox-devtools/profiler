@@ -171,7 +171,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
     }
 
     const processType = thread.processType;
-    const displayJank = thread.name === 'GeckoMain' && processType !== 'plugin';
+    const displayJank = processType !== 'plugin';
     const displayTracingMarkers =
       (thread.name === 'GeckoMain' ||
         thread.name === 'Compositor' ||
