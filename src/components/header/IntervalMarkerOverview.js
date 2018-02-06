@@ -8,6 +8,7 @@ import classNames from 'classnames';
 import { timeCode } from '../../utils/time-code';
 import { withSize } from '../shared/WithSize';
 import Tooltip from '../shared/Tooltip';
+import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 
 import type { Milliseconds, CssPixels } from '../../types/units';
 import type { TracingMarker } from '../../types/profile-derived';
@@ -35,7 +36,6 @@ export type StateProps = {|
     +HOVERED: string,
     +PRESSED: string,
   },
-  +getTooltipContents: TracingMarker => React.Node,
 |};
 
 type Props = ConnectedProps<SizeProps, OwnProps, StateProps>;
@@ -180,7 +180,7 @@ class IntervalMarkerOverview extends React.PureComponent<Props, State> {
       className,
       isSelected,
       isModifyingSelection,
-      getTooltipContents,
+      threadIndex,
     } = this.props;
 
     const { mouseDownItem, hoveredItem, mouseX, mouseY } = this.state;
@@ -205,7 +205,10 @@ class IntervalMarkerOverview extends React.PureComponent<Props, State> {
         />
         {shouldShowTooltip && hoveredItem
           ? <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              {getTooltipContents(hoveredItem)}
+              <MarkerTooltipContents
+                marker={hoveredItem}
+                threadIndex={threadIndex}
+              />
             </Tooltip>
           : null}
       </div>

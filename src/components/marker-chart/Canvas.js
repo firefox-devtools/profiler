@@ -9,6 +9,7 @@ import {
   type WithChartViewport,
 } from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
+import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import TextMeasurement from '../../utils/text-measurement';
 import { updateProfileSelection } from '../../actions/profile-view';
 import { BLUE_40 } from '../../utils/colors';
@@ -18,6 +19,7 @@ import type {
   CssPixels,
   UnitIntervalOfProfileRange,
 } from '../../types/units';
+import type { ThreadIndex } from '../../types/profile';
 import type {
   TracingMarker,
   MarkerTimingRows,
@@ -39,8 +41,8 @@ type OwnProps = {|
   +markerTimingRows: MarkerTimingRows,
   +rowHeight: CssPixels,
   +markers: TracingMarker[],
+  +threadIndex: ThreadIndex,
   +updateProfileSelection: typeof updateProfileSelection,
-  +getTooltipContents: TracingMarker => React.Node,
 |};
 
 type Props = {|
@@ -348,7 +350,12 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
   getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React.Node {
     const marker = this.props.markers[hoveredItem];
-    return this.props.getTooltipContents(marker);
+    return (
+      <MarkerTooltipContents
+        marker={marker}
+        threadIndex={this.props.threadIndex}
+      />
+    );
   }
 
   render() {
