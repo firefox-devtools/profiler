@@ -4,6 +4,7 @@
 
 // @flow
 import React from 'react';
+import { Provider } from 'react-redux';
 import MarkersTooltipContents from '../../components/shared/MarkerTooltipContents';
 import renderer from 'react-test-renderer';
 import { storeWithProfile } from '../fixtures/stores';
@@ -12,7 +13,7 @@ import {
   getProfileFromTextSamples,
 } from '../fixtures/profiles/make-profile';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
-import { getImplementationFilter } from '../../reducers/url-state';
+import { getSelectedThreadIndex } from '../../reducers/url-state';
 
 describe('MarkerTooltipContents', function() {
   it('renders tooltips for various markers', () => {
@@ -47,6 +48,9 @@ describe('MarkerTooltipContents', function() {
       mozilla::GeckoRestyleManager::PostRestyleEvent
       nsRefreshDriver::AddStyleFlushObserver
     `);
+
+    profile.threads[0].name = 'Main Thread';
+
     // Now add some markers to the profile.
     // Enumerate through all of the switch arms of the tooltip for coverage.
     addMarkersToProfileReplacingSamples(
@@ -204,22 +208,21 @@ describe('MarkerTooltipContents', function() {
       ],
       profile
     );
-    const { getState } = storeWithProfile(profile);
-    const state = getState();
-    const implementationFilter = getImplementationFilter(state);
-    const thread = selectedThreadSelectors.getThread(state);
+    const store = storeWithProfile(profile);
+    const state = store.getState();
+    const threadIndex = getSelectedThreadIndex(state);
     const tracingMarkers = selectedThreadSelectors.getTracingMarkers(state);
 
     tracingMarkers.forEach(marker => {
       expect(
         renderer.create(
-          <MarkersTooltipContents
-            marker={marker}
-            className="propClass"
-            thread={thread}
-            threadName="Main Thread"
-            implementationFilter={implementationFilter}
-          />
+          <Provider store={store}>
+            <MarkersTooltipContents
+              marker={marker}
+              threadIndex={threadIndex}
+              className="propClass"
+            />
+          </Provider>
         )
       ).toMatchSnapshot();
     });
