@@ -36,7 +36,6 @@ require('./ProfileViewer.css');
 type StateProps = {|
   +tabOrder: number[],
   +selectedTab: string,
-  +className: string,
 |};
 
 type DispatchProps = {|
@@ -83,11 +82,11 @@ class ProfileViewer extends PureComponent<Props> {
   }
 
   render() {
-    const { className, tabOrder, changeTabOrder, selectedTab } = this.props;
-
+    const { tabOrder, changeTabOrder, selectedTab } = this.props;
     return (
-      <div className={className}>
-        <div className={`${className}TopBar`}>
+      <div className="profileViewer">
+        <div className="profileViewerTopBar">
+          <div className="profileViewerName">Foobar profile</div>
           <ProfileFilterNavigator />
           <ProfileSharing />
         </div>
@@ -124,7 +123,6 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     tabOrder: getTabOrder(state),
     selectedTab: getSelectedTab(state),
-    className: 'profileViewer',
   }),
   mapDispatchToProps: {
     changeSelectedTab,

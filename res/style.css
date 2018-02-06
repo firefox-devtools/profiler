@@ -90,6 +90,7 @@ body, #root, .profileViewer {
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
+  align-items: center;
 }
 
 .treeRowIcon {
@@ -216,7 +217,6 @@ body, #root, .profileViewer {
   width: 16px;
   height: 16px;
   overflow: hidden;
-  vertical-align: top;
   color: transparent;
 }
 

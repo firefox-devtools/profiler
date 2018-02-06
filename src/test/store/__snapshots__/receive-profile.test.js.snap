@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`actions/receive-profile _fetchProfile fails if a bad profile JSON is passed in 1`] = `[Error: The profile’s JSON could not be decoded. The full error information has been printed out to the DevTool’s console.]`;
+
+exports[`actions/receive-profile _fetchProfile fails if a bad profile JSON is passed in 2`] = `
+Array [
+  Array [
+    "The profile’s JSON could not be decoded.",
+  ],
+  Array [
+    "JSON parsing error:",
+    [Error: Invalid JSON],
+  ],
+  Array [
+    "Fetch response:",
+    Object {
+      "arrayBuffer": undefined,
+      "headers": Object {
+        "get": [Function],
+      },
+      "json": [Function],
+      "ok": true,
+      "status": 200,
+    },
+  ],
+]
+`;
+
+exports[`actions/receive-profile _fetchProfile fails if a bad profile JSON is passed in, with no content type 1`] = `[Error: The profile’s JSON could not be decoded. The file was not sent with the "application/json" content type, but it did have a .json file ending. Are you sure it was actually JSON? The full error information has been printed out to the DevTool’s console.]`;
+
+exports[`actions/receive-profile _fetchProfile fails if a bad profile JSON is passed in, with no content type 2`] = `
+Array [
+  Array [
+    "The profile’s JSON could not be decoded. The file was not sent with the \\"application/json\\" content type, but it did have a .json file ending. Are you sure it was actually JSON?",
+  ],
+  Array [
+    "JSON parsing error:",
+    [Error: Invalid JSON],
+  ],
+  Array [
+    "Fetch response:",
+    Object {
+      "arrayBuffer": undefined,
+      "headers": Object {
+        "get": [Function],
+      },
+      "json": [Function],
+      "ok": true,
+      "status": 200,
+    },
+  ],
+]
+`;
+
+exports[`actions/receive-profile _fetchProfile fails if a bad zip file is passed in 1`] = `[Error: Unable to unzip the zip file. The full error information has been printed out to the DevTool’s console.]`;
+
+exports[`actions/receive-profile _fetchProfile fails if a bad zip file is passed in 2`] = `
+Array [
+  Array [
+    "Unable to unzip the zip file.",
+  ],
+  Array [
+    "Error:",
+    [Error: Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html],
+  ],
+  Array [
+    "Fetch response:",
+    Object {
+      "arrayBuffer": [Function],
+      "headers": Object {
+        "get": [Function],
+      },
+      "json": undefined,
+      "ok": true,
+      "status": 200,
+    },
+  ],
+]
+`;
+
+exports[`actions/receive-profile _fetchProfile fails if a completely unknown file is passed in 1`] = `[Error: The profile could not be decoded. This does not look like a supported file type. The full error information has been printed out to the DevTool’s console.]`;
+
+exports[`actions/receive-profile _fetchProfile fails if a completely unknown file is passed in 2`] = `
+Array [
+  Array [
+    "The profile could not be decoded. This does not look like a supported file type.",
+  ],
+  Array [
+    "JSON parsing error:",
+    [Error: Invalid JSON],
+  ],
+  Array [
+    "Fetch response:",
+    Object {
+      "arrayBuffer": undefined,
+      "headers": Object {
+        "get": [Function],
+      },
+      "json": [Function],
+      "ok": true,
+      "status": 200,
+    },
+  ],
+]
+`;

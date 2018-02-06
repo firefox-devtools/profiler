@@ -12,6 +12,7 @@ import { BackgroundImageStyleDef } from './StyleDef';
 import ContextMenuTrigger from './ContextMenuTrigger';
 
 import type { IconWithClassName } from '../../types/reducers';
+import type { CssPixels } from '../../types/units';
 
 // This is used for the result of RegExp.prototype.exec because Flow doesn't do it.
 // See https://github.com/facebook/flow/issues/4099
@@ -80,15 +81,16 @@ function reactStringWithHighlightedSubstrings(
   return highlighted;
 }
 
-type TreeViewRowFixedColumnsProps<NodeIndex: number, DisplayData: Object> = {
-  displayData: DisplayData,
-  nodeId: NodeIndex,
-  columns: Column[],
-  index: number,
-  selected: boolean,
-  onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
-  highlightRegExp: RegExp | null,
-};
+type TreeViewRowFixedColumnsProps<NodeIndex: number, DisplayData: Object> = {|
+  +displayData: DisplayData,
+  +nodeId: NodeIndex,
+  +columns: Column[],
+  +index: number,
+  +selected: boolean,
+  +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
+  +highlightRegExp: RegExp | null,
+  +rowHeightStyle: { height: CssPixels, lineHeight: string },
+|};
 
 class TreeViewRowFixedColumns<
   NodeIndex: number,
@@ -113,6 +115,7 @@ class TreeViewRowFixedColumns<
       index,
       selected,
       highlightRegExp,
+      rowHeightStyle,
     } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     return (
@@ -120,7 +123,7 @@ class TreeViewRowFixedColumns<
         className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${
           selected ? 'selected' : ''
         }`}
-        style={{ height: '16px' }}
+        style={rowHeightStyle}
         onMouseDown={this._onClick}
       >
         {columns.map(col => {
@@ -170,6 +173,8 @@ type TreeViewRowScrolledColumnsProps<
   +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
   +onAppendageButtonClick?: ((NodeIndex | null, string) => mixed) | null,
   +highlightRegExp: RegExp | null,
+  +rowHeightStyle: { height: CssPixels, lineHeight: string },
+  +indentWidth: CssPixels,
 |};
 
 class TreeViewRowScrolledColumns<
@@ -221,6 +226,8 @@ class TreeViewRowScrolledColumns<
       selected,
       highlightRegExp,
       appendageButtons,
+      rowHeightStyle,
+      indentWidth,
     } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
 
@@ -229,12 +236,12 @@ class TreeViewRowScrolledColumns<
         className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${
           selected ? 'selected' : ''
         } ${displayData.dim ? 'dim' : ''}`}
-        style={{ height: '16px' }}
+        style={rowHeightStyle}
         onMouseDown={this._onClick}
       >
         <span
           className="treeRowIndentSpacer"
-          style={{ width: `${depth * 10}px` }}
+          style={{ width: `${depth * indentWidth}px` }}
         />
         <span
           className={`treeRowToggleButton ${
@@ -308,6 +315,8 @@ type TreeViewProps<NodeIndex, DisplayData> = {|
   +maxNodeDepth: number,
   +onAppendageButtonClick?: ((NodeIndex | null, string) => mixed) | null,
   +onSelectionChange: NodeIndex => mixed,
+  +rowHeight: CssPixels,
+  +indentWidth: CssPixels,
 |};
 
 class TreeView<
@@ -364,8 +373,12 @@ class TreeView<
       highlightRegExp,
       appendageButtons,
       onAppendageButtonClick,
+      rowHeight,
+      indentWidth,
     } = this.props;
     const displayData = tree.getDisplayData(nodeId);
+    const rowHeightStyle = { height: rowHeight, lineHeight: `${rowHeight}px` };
+
     if (columnIndex === 0) {
       return (
         <TreeViewRowFixedColumns
@@ -376,6 +389,7 @@ class TreeView<
           selected={nodeId === selectedNodeId}
           onClick={this._onRowClicked}
           highlightRegExp={highlightRegExp || null}
+          rowHeightStyle={rowHeightStyle}
         />
       );
     }
@@ -383,6 +397,7 @@ class TreeView<
     const isExpanded = expandedNodeIds.includes(nodeId);
     return (
       <TreeViewRowScrolledColumns
+        rowHeightStyle={rowHeightStyle}
         displayData={displayData}
         mainColumn={mainColumn}
         appendageColumn={appendageColumn}
@@ -397,6 +412,7 @@ class TreeView<
         onClick={this._onRowClicked}
         onAppendageButtonClick={onAppendageButtonClick}
         highlightRegExp={highlightRegExp || null}
+        indentWidth={indentWidth}
       />
     );
   }
@@ -564,6 +580,7 @@ class TreeView<
       contextMenuId,
       icons,
       maxNodeDepth,
+      rowHeight,
     } = this.props;
     return (
       <div className="treeView">
@@ -584,7 +601,7 @@ class TreeView<
             className="treeViewBody"
             items={this._visibleRows}
             renderItem={this._renderRow}
-            itemHeight={16}
+            itemHeight={rowHeight}
             columnCount={2}
             focusable={true}
             onKeyDown={this._onKeyDown}

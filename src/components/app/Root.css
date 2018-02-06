@@ -47,7 +47,7 @@
   position: absolute;
   height: 8px;
   border-radius: 2px;
-  animation-name: loadingdiv;
+  /* animation-name: loadingdiv; */
 
   animation-duration: 4000ms;
   animation-iteration-count: infinite;

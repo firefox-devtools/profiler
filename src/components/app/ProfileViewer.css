@@ -12,3 +12,13 @@
   animation-name: profileViewerFadeIn;
   animation-duration: 200ms;
 }
+
+.profileViewerName {
+    height: 24px;
+    line-height: 24px;
+    padding-left: 7px;
+    font-weight: bold;
+    color: var(--grey-60);
+    border-right: 1px solid var(--grey-30);
+    padding-right: 6px;
+}

@@ -1,0 +1,31 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app actions zipFile ZipFileTree can get compute display data 1`] = `
+Object {
+  "name": "foo",
+}
+`;
+
+exports[`app actions zipFile ZipFileTree can get compute display data 2`] = `
+Object {
+  "name": "baz",
+}
+`;
+
+exports[`app actions zipFile ZipFileTree can get compute display data 3`] = `
+Object {
+  "name": "bar",
+}
+`;
+
+exports[`app actions zipFile ZipFileTree can get compute display data 4`] = `
+Object {
+  "name": "profile2.json",
+}
+`;
+
+exports[`app actions zipFile ZipFileTree can get compute display data 5`] = `
+Object {
+  "name": "profile3.json",
+}
+`;

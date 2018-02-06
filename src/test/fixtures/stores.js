@@ -4,7 +4,7 @@
 // @flow
 
 import createStore from '../../create-store';
-import { receiveProfileFromAddon } from '../../actions/receive-profile';
+import { viewProfile } from '../../actions/receive-profile';
 import exampleProfile from './profiles/timings-with-js';
 import { processProfile } from '../../profile-logic/process-profile';
 import { getProfileFromTextSamples } from './profiles/make-profile';
@@ -20,7 +20,7 @@ export function storeWithProfile(
   profile: Profile = processProfile(exampleProfile())
 ): Store {
   const store = createStore();
-  store.dispatch(receiveProfileFromAddon(profile));
+  store.dispatch(viewProfile(profile));
   return store;
 }
 
