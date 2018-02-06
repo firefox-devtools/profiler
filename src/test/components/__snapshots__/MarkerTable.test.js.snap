@@ -106,7 +106,8 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -128,7 +129,8 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -172,7 +174,8 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -198,7 +201,8 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
