@@ -5,6 +5,12 @@
   z-index: 1;
 }
 
+.stackSearchFieldLabel {
+  /* We fix the height so that the stackSearchFieldIntroduction doesn't increase it */
+  display: block;
+  height: 100%;
+}
+
 .stackSearchFieldInput {
   width: 300px;
 }
