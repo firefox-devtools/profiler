@@ -43,6 +43,7 @@ export function toValidTabSlug(tabSlug: any): TabSlug | null {
     case 'stack-chart':
     case 'marker-chart':
     case 'marker-table':
+    case 'flame-graph':
       return coercedTabSlug;
     default: {
       // The coerced type SHOULD be empty here. If in reality we get

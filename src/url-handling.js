@@ -124,6 +124,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
         : undefined;
       break;
     case 'marker-chart':
+    case 'flame-graph':
       break;
     default:
       assertExhaustiveCheck(selectedTab);
