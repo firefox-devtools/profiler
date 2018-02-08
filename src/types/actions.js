@@ -47,7 +47,8 @@ export type TabSlug =
   | 'calltree'
   | 'stack-chart'
   | 'marker-chart'
-  | 'marker-table';
+  | 'marker-table'
+  | 'flame-graph';
 
 type ProfileAction =
   | { type: 'ROUTE_NOT_FOUND', url: string }
