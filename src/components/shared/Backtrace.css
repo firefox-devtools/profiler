@@ -2,7 +2,23 @@
   margin: 5px;
   padding: 0;
   max-height: 25em;
-  overflow: auto;
+  overflow: hidden;
+  position: relative; /* For the positioning of the generated content below */
+}
+
+.backtrace::after {
+  display: block;
+  content: '';
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+
+  /* The length of 21em is to be kept synchronized with the max-height of 25em
+   * above, so that it's showed only when the element is tall enough. */
+  background: linear-gradient(to bottom, transparent, transparent 21em, white);
 }
 
 .backtraceStackFrame {
