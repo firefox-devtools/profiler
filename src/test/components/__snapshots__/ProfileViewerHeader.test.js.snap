@@ -136,6 +136,17 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
               className="profileThreadHeaderBarThreadDetails"
             >
               <div
+                className="profileThreadHeaderBarIntervalMarkerOverview profileThreadHeaderBarIntervalMarkerOverviewJank selected"
+              >
+                <canvas
+                  className="profileThreadHeaderBarIntervalMarkerOverviewCanvas profileThreadHeaderBarIntervalMarkerOverviewJankCanvas intervalMarkerTimelineCanvas"
+                  onMouseDown={[Function]}
+                  onMouseMove={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseUp={[Function]}
+                />
+              </div>
+              <div
                 className="threadStackGraph"
               >
                 <canvas
@@ -173,6 +184,17 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
             <div
               className="profileThreadHeaderBarThreadDetails"
             >
+              <div
+                className="profileThreadHeaderBarIntervalMarkerOverview profileThreadHeaderBarIntervalMarkerOverviewJank"
+              >
+                <canvas
+                  className="profileThreadHeaderBarIntervalMarkerOverviewCanvas profileThreadHeaderBarIntervalMarkerOverviewJankCanvas intervalMarkerTimelineCanvas"
+                  onMouseDown={[Function]}
+                  onMouseMove={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseUp={[Function]}
+                />
+              </div>
               <div
                 className="threadStackGraph"
               >
@@ -245,6 +267,17 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
             <div
               className="profileThreadHeaderBarThreadDetails"
             >
+              <div
+                className="profileThreadHeaderBarIntervalMarkerOverview profileThreadHeaderBarIntervalMarkerOverviewJank"
+              >
+                <canvas
+                  className="profileThreadHeaderBarIntervalMarkerOverviewCanvas profileThreadHeaderBarIntervalMarkerOverviewJankCanvas intervalMarkerTimelineCanvas"
+                  onMouseDown={[Function]}
+                  onMouseMove={[Function]}
+                  onMouseOut={[Function]}
+                  onMouseUp={[Function]}
+                />
+              </div>
               <div
                 className="threadStackGraph"
               >
@@ -474,6 +507,57 @@ Array [
     75,
     22.22222222222222,
     225,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    300,
+    300,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    300,
+    300,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    300,
+    300,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
   ],
 ]
 `;
