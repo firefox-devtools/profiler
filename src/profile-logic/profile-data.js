@@ -1084,6 +1084,11 @@ export function getEmptyProfile(): Profile {
   };
 }
 
+/**
+ * This function returns the source origin for a function. This can be:
+ * - a filename (javascript or object file)
+ * - a URL (if the source is a website)
+ */
 export function getOriginAnnotationForFunc(
   funcIndex: IndexIntoFuncTable,
   funcTable: FuncTable,
