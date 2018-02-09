@@ -666,6 +666,13 @@ export function convertStackToCallNodePath(
 }
 
 /**
+ * This function returns a list of call node paths to reach this specific path.
+ */
+export function decomposeCallNodePath(path: CallNodePath): CallNodePath[] {
+  return path.map((_, i, path) => path.slice(0, i + 1));
+}
+
+/**
  * Compute maximum depth of call stack for a given thread.
  *
  * Returns the depth of the deepest call node, but with a one-based

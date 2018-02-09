@@ -122,7 +122,7 @@ export class CallTree {
   getAllDescendants(
     callNodeIndex: IndexIntoCallNodeTable
   ): Set<IndexIntoCallNodeTable> {
-    const result = new Set([]);
+    const result = new Set();
     for (const child of this.getChildren(callNodeIndex)) {
       result.add(child);
       for (const descendant of this.getAllDescendants(child)) {

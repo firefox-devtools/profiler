@@ -25,6 +25,7 @@ import { getIconsWithClassNames } from '../../reducers/icons';
 import {
   changeSelectedCallNode,
   changeExpandedCallNodes,
+  expandSingleBranchedDescendants,
   addTransformToStack,
 } from '../../actions/profile-view';
 
@@ -62,6 +63,10 @@ type StateProps = {|
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeExpandedCallNodes: typeof changeExpandedCallNodes,
+  +expandSingleBranchedDescendants: (
+    ThreadIndex,
+    IndexIntoCallNodeTable
+  ) => IndexIntoCallNodeTable,
   +addTransformToStack: typeof addTransformToStack,
 |};
 
@@ -87,15 +92,6 @@ class CallTreeComponent extends PureComponent<Props> {
     this._appendageColumn = { propName: 'lib', title: '' };
     this._appendageButtons = ['focusCallstackButton'];
     this._treeView = null;
-    (this: any)._onSelectedCallNodeChange = this._onSelectedCallNodeChange.bind(
-      this
-    );
-    (this: any)._onExpandedCallNodesChange = this._onExpandedCallNodesChange.bind(
-      this
-    );
-    (this: any)._onAppendageButtonClick = this._onAppendageButtonClick.bind(
-      this
-    );
   }
 
   componentDidMount() {
@@ -126,17 +122,17 @@ class CallTreeComponent extends PureComponent<Props> {
     }
   }
 
-  _onSelectedCallNodeChange(newSelectedCallNode: IndexIntoCallNodeTable) {
+  _onSelectedCallNodeChange = (newSelectedCallNode: IndexIntoCallNodeTable) => {
     const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadIndex,
       getCallNodePath(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
-  }
+  };
 
-  _onExpandedCallNodesChange(
+  _onExpandedCallNodesChange = (
     newExpandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>
-  ) {
+  ) => {
     const { callNodeInfo, threadIndex, changeExpandedCallNodes } = this.props;
     changeExpandedCallNodes(
       threadIndex,
@@ -144,9 +140,18 @@ class CallTreeComponent extends PureComponent<Props> {
         getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable)
       )
     );
-  }
+  };
 
-  _onAppendageButtonClick(callNodeIndex: IndexIntoCallNodeTable | null) {
+  _onExpandNode = (
+    callNodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCallNodeTable => {
+    return this.props.expandSingleBranchedDescendants(
+      this.props.threadIndex,
+      callNodeIndex
+    );
+  };
+
+  _onAppendageButtonClick = (callNodeIndex: IndexIntoCallNodeTable | null) => {
     const {
       callNodeInfo,
       threadIndex,
@@ -164,7 +169,7 @@ class CallTreeComponent extends PureComponent<Props> {
       implementation,
       inverted: invertCallstack,
     });
-  }
+  };
 
   procureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame
@@ -209,6 +214,7 @@ class CallTreeComponent extends PureComponent<Props> {
         disableOverscan={disableOverscan}
         appendageButtons={this._appendageButtons}
         onAppendageButtonClick={this._onAppendageButtonClick}
+        onExpandNode={this._onExpandNode}
         ref={this._takeTreeViewRef}
         contextMenuId={'ProfileCallTreeContextMenu'}
         maxNodeDepth={callNodeMaxDepth}
@@ -241,6 +247,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapDispatchToProps: {
     changeSelectedCallNode,
     changeExpandedCallNodes,
+    expandSingleBranchedDescendants,
     addTransformToStack,
   },
   options: { withRef: true },

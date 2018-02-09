@@ -15,6 +15,7 @@ import {
   getHiddenThreads,
 } from '../reducers/url-state';
 import {
+  decomposeCallNodePath,
   getFriendlyThreadName,
   getCallNodePath,
 } from '../profile-logic/profile-data';
@@ -174,10 +175,11 @@ export function expandAllCallNodeDescendants(
   callNodeInfo: CallNodeInfo
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const expandedCallNodeIndexes = selectedThreadSelectors.getExpandedCallNodeIndexes(
+    const selectors = selectorsForThread(threadIndex);
+    const expandedCallNodeIndexes = selectors.getExpandedCallNodeIndexes(
       getState()
     );
-    const tree = selectedThreadSelectors.getCallTree(getState());
+    const tree = selectors.getCallTree(getState());
 
     // Create a set with the selected call node and its descendants
     const descendants = tree.getAllDescendants(callNodeIndex);
@@ -193,6 +195,45 @@ export function expandAllCallNodeDescendants(
       getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable)
     );
     dispatch(changeExpandedCallNodes(threadIndex, expandedCallNodePaths));
+  };
+}
+
+// This action will return the deepest expanded node.
+export function expandSingleBranchedDescendants(
+  threadIndex: ThreadIndex,
+  callNodeIndex: IndexIntoCallNodeTable
+): ThunkAction<IndexIntoCallNodeTable> {
+  return (dispatch, getState) => {
+    const selectors = selectorsForThread(threadIndex);
+    const tree = selectors.getCallTree(getState());
+    const { callNodeTable } = selectors.getCallNodeInfo(getState());
+    const expandedCallNodePaths = selectors.getExpandedCallNodePaths(
+      getState()
+    );
+
+    let deepestExpandedIndex = callNodeIndex;
+
+    for (
+      let i = 0, children = tree.getChildren(deepestExpandedIndex);
+      i < 10 && children.length === 1;
+      i++, children = tree.getChildren(deepestExpandedIndex)
+    ) {
+      deepestExpandedIndex = children[0];
+    }
+
+    const deepestExpandedPath = getCallNodePath(
+      deepestExpandedIndex,
+      callNodeTable
+    );
+
+    const newExpandedPaths = [
+      ...expandedCallNodePaths,
+      ...decomposeCallNodePath(deepestExpandedPath),
+    ];
+
+    dispatch(changeExpandedCallNodes(threadIndex, newExpandedPaths));
+
+    return deepestExpandedIndex;
   };
 }
 
