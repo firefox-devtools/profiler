@@ -6,10 +6,12 @@
 
 import React from 'react';
 import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
-import { getOriginAnnotationForFunc } from '../../profile-logic/profile-data';
+import {
+  getOriginAnnotationForFunc,
+  convertStackToCallNodePath,
+} from '../../profile-logic/profile-data';
 
-import type { Thread, IndexIntoStackTable } from '../../types/profile';
-import type { CallNodePath } from '../../types/profile-derived';
+import type { Thread } from '../../types/profile';
 import type { CauseBacktrace } from '../../types/markers';
 import type { ImplementationFilter } from '../../types/actions';
 
@@ -21,29 +23,13 @@ type Props = {|
   +implementationFilter: ImplementationFilter,
 |};
 
-function callNodePathForStack(
-  thread: Thread,
-  stack: IndexIntoStackTable
-): CallNodePath {
-  const { stackTable, frameTable } = thread;
-  const path = [];
-  for (
-    let stackIndex = stack;
-    stackIndex !== null;
-    stackIndex = stackTable.prefix[stackIndex]
-  ) {
-    path.push(frameTable.func[stackTable.frame[stackIndex]]);
-  }
-  return path;
-}
-
 function Backtrace(props: Props) {
   const { cause, thread, implementationFilter } = props;
   const { funcTable, stringTable } = thread;
   const callNodePath = filterCallNodePathByImplementation(
     thread,
     implementationFilter,
-    callNodePathForStack(thread, cause.stack)
+    convertStackToCallNodePath(thread, cause.stack)
   );
 
   return (

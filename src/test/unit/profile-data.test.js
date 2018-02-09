@@ -21,6 +21,7 @@ import {
   filterThreadByImplementation,
   getCallNodePath,
   getSampleIndexClosestToTime,
+  convertStackToCallNodePath,
 } from '../../profile-logic/profile-data';
 import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
@@ -897,5 +898,21 @@ describe('funcHasRecursiveCall', function() {
       funcHasRecursiveCall(thread, 'combined', funcNames.indexOf('B.js')),
       funcHasRecursiveCall(thread, 'js', funcNames.indexOf('B.js')),
     ]).toEqual([false, false, true]);
+  });
+});
+
+describe('convertStackToCallNodePath', function() {
+  it('correctly returns a call node path for a stack', function() {
+    const { threads: [thread] } = getCallNodeProfile();
+    const stack1 = thread.samples.stack[0];
+    const stack2 = thread.samples.stack[1];
+    if (stack1 === null || stack2 === null) {
+      // Makes flow happy
+      throw new Error("stack shouldn't be null");
+    }
+    let callNodePath = convertStackToCallNodePath(thread, stack1);
+    expect(callNodePath).toEqual([4, 3, 2, 1, 0]);
+    callNodePath = convertStackToCallNodePath(thread, stack2);
+    expect(callNodePath).toEqual([5, 3, 2, 1, 0]);
   });
 });

@@ -647,6 +647,25 @@ export function getCallNodePath(
 }
 
 /**
+ * This function converts a stack information into a call node path structure.
+ */
+export function convertStackToCallNodePath(
+  thread: Thread,
+  stack: IndexIntoStackTable
+): CallNodePath {
+  const { stackTable, frameTable } = thread;
+  const path = [];
+  for (
+    let stackIndex = stack;
+    stackIndex !== null;
+    stackIndex = stackTable.prefix[stackIndex]
+  ) {
+    path.push(frameTable.func[stackTable.frame[stackIndex]]);
+  }
+  return path;
+}
+
+/**
  * Compute maximum depth of call stack for a given thread.
  *
  * Returns the depth of the deepest call node, but with a one-based
