@@ -7,7 +7,7 @@ import Perf from 'react-addons-perf';
 import { render } from 'react-dom';
 import Root from './components/app/Root';
 import createStore from './create-store';
-import 'photon-colors/colors.css';
+import 'photon-colors/photon-colors.css';
 import '../res/style.css';
 import {
   addDataToWindowObject,
