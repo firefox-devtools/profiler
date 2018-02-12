@@ -1,0 +1,42 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`console-accessible values on the window object logs a friendly message 1`] = `
+Array [
+  Array [
+    "%c                  __ _     _             _ 
+                 / _| |   | |           | |
+ _ __   ___ _ __| |_| |__ | |_ _ __ ___ | |
+| '_ \\\\ / _ \\\\ '__|  _| '_ \\\\| __| '_ \` _ \\\\| |
+| |_) |  __/ |  | |_| | | | |_| | | | | | |
+| .__/ \\\\___|_|  |_(_)_| |_|\\\\__|_| |_| |_|_|
+| |                                        
+|_|                                        ",
+    "font-family: monospace;",
+  ],
+  Array [
+    "%cThe following profiler information is available via the console:%c
+
+%cwindow.profile%c - The currently loaded profile
+%cwindow.filteredThread%c - The current filtered thread
+%cwindow.callTree%c - The call tree of the current filtered thread
+
+The profile format is document here:
+%chttps://github.com/devtools-html/perf.html/blob/master/docs/processed-profile-format.md%c
+
+The CallTree class's source code is available here:
+%chttps://github.com/devtools-html/perf.html/blob/master/src/profile-logic/call-tree.js%c",
+    "font-size: 130%;",
+    "",
+    "font-weight: bold;",
+    "",
+    "font-weight: bold;",
+    "",
+    "font-weight: bold;",
+    "",
+    "font-style: italic; text-decoration: underline;",
+    "",
+    "font-style: italic; text-decoration: underline;",
+    "",
+  ],
+]
+`;
