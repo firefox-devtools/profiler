@@ -30,6 +30,7 @@ class FooterLinks extends PureComponent<{||}, State> {
           aria-label="Hide links to legal information"
           title="Hide links to legal information"
           className="appFooterLinksClose"
+          type="button"
           onClick={this._onClick}
         >
           ✕

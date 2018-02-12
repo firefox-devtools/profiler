@@ -132,6 +132,7 @@ export default class SelectionScrubberOverlay extends PureComponent<Props> {
               className={classNames('selectionScrubberZoomButton', {
                 hidden: isModifying,
               })}
+              type="button"
               onMouseDown={this._zoomButtonOnMouseDown}
               onClick={this._zoomButtonOnClick}
             />
