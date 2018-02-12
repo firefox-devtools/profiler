@@ -27,6 +27,17 @@ export type GeckoMarkerStruct = {
   length: number,
 };
 
+export type GeckoMarkerStack = {
+  name: 'SyncProfile',
+  registerTime: null,
+  unregisterTime: null,
+  processType: string,
+  tid: number,
+  pid: number,
+  markers: GeckoMarkers,
+  samples: GeckoSamples,
+};
+
 export type GeckoSamples = {
   schema: {
     stack: 0,
@@ -118,8 +129,8 @@ export type GeckoStackStruct = {
 
 export type GeckoThread = {
   name: string,
-  processType: string,
   registerTime: number,
+  processType: string,
   unregisterTime: number | null,
   tid: number,
   pid: number,

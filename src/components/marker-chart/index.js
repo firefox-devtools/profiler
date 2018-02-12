@@ -100,6 +100,7 @@ class MarkerChart extends React.PureComponent<Props> {
             rangeStart: timeRange.start,
             rangeEnd: timeRange.end,
             rowHeight: ROW_HEIGHT,
+            threadIndex,
           }}
         />
       </div>
@@ -119,6 +120,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
     const markers = selectedThreadSelectors.getTracingMarkers(state);
     const markerTimingRows = selectedThreadSelectors.getMarkerTiming(state);
+    const threadName = selectedThreadSelectors.getFriendlyThreadName(state);
 
     return {
       markers,
@@ -128,7 +130,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
       selection: getProfileViewOptions(state).selection,
-      threadName: selectedThreadSelectors.getFriendlyThreadName(state),
+      threadName,
       processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
     };
   },

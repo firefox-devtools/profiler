@@ -1,0 +1,36 @@
+.backtrace {
+  --max-height: 30em;
+  --gradient-height: calc(var(--max-height) - 5em);
+
+  margin: 5px;
+  padding: 0;
+  max-height: var(--max-height);
+  overflow: hidden;
+
+  font-size: .9em;
+  line-height: 1.5;
+
+  /* The gradient is defined towards the bottom so that we hide the end of the
+   * backtrace only when the element is tall enough, which is when the backtrace
+   * is long. */
+  -webkit-mask-image: linear-gradient(to bottom, white, white var(--gradient-height), transparent);
+  mask-image: linear-gradient(to bottom, white, white var(--gradient-height), transparent);
+}
+
+.backtraceStackFrame {
+  display: block;
+  margin: 0;
+  padding: 0;
+  max-width: 35em;
+
+  list-style: none;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.backtraceStackFrameOrigin {
+  color: rgba(0,0,0,0.4);
+  margin-left: 10px;
+  font-style: normal;
+}

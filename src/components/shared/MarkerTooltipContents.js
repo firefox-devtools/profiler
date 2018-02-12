@@ -14,10 +14,21 @@ import {
   formatMilliseconds,
   formatValueTotal,
 } from '../../utils/format-numbers';
+import explicitConnect from '../../utils/connect';
+import { selectorsForThread } from '../../reducers/profile-view';
+import { getImplementationFilter } from '../../reducers/url-state';
+
+import Backtrace from './Backtrace';
+
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 import type { TracingMarker } from '../../types/profile-derived';
-import type { MarkerPayload } from '../../types/markers';
 import type { NotVoidOrNull } from '../../types/utils';
+import type { ImplementationFilter } from '../../types/actions';
+import type { Thread, ThreadIndex } from '../../types/profile';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
 function _markerDetail<T: NotVoidOrNull>(
   key: string,
@@ -33,7 +44,12 @@ function _markerDetail<T: NotVoidOrNull>(
   ];
 }
 
-function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
+function getMarkerDetails(
+  marker: TracingMarker,
+  thread: Thread,
+  implementationFilter: ImplementationFilter
+): React.Element<any> | null {
+  const data = marker.data;
   if (data) {
     switch (data.type) {
       case 'UserTiming': {
@@ -273,22 +289,56 @@ function getMarkerDetails(data: MarkerPayload): React.Element<any> | null {
           </div>
         );
       }
+      case 'tracing': {
+        if ('cause' in data && data.cause) {
+          const { cause } = data;
+          const causeAge = marker.start - cause.time;
+          return (
+            <div className="tooltipDetailsBackTrace">
+              <h2 className="tooltipBackTraceTitle">
+                First invalidated {formatNumber(causeAge)}ms before the flush,
+                at:
+              </h2>
+              <Backtrace
+                cause={cause}
+                thread={thread}
+                implementationFilter={implementationFilter}
+              />
+            </div>
+          );
+        }
+        break;
+      }
       default:
     }
   }
   return null;
 }
 
-type Props = {
-  marker: TracingMarker,
-  className?: string,
-  threadName?: string,
-};
+type OwnProps = {|
+  +marker: TracingMarker,
+  +threadIndex: ThreadIndex,
+  +className?: string,
+|};
 
-export default class MarkerTooltipContents extends React.PureComponent<Props> {
+type StateProps = {|
+  +threadName?: string,
+  +thread: Thread,
+  +implementationFilter: ImplementationFilter,
+|};
+
+type Props = ConnectedProps<OwnProps, StateProps, {||}>;
+
+class MarkerTooltipContents extends React.PureComponent<Props> {
   render() {
-    const { marker, className, threadName } = this.props;
-    const details = getMarkerDetails(marker.data);
+    const {
+      marker,
+      className,
+      threadName,
+      thread,
+      implementationFilter,
+    } = this.props;
+    const details = getMarkerDetails(marker, thread, implementationFilter);
 
     return (
       <div className={classNames('tooltipMarker', className)}>
@@ -313,3 +363,21 @@ export default class MarkerTooltipContents extends React.PureComponent<Props> {
     );
   }
 }
+
+const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+  mapStateToProps: (state, props) => {
+    const { threadIndex } = props;
+    const selectors = selectorsForThread(threadIndex);
+    const threadName = selectors.getFriendlyThreadName(state);
+    const thread = selectors.getThread(state);
+    const implementationFilter = getImplementationFilter(state);
+    return {
+      threadName,
+      thread,
+      implementationFilter,
+    };
+  },
+  component: MarkerTooltipContents,
+};
+
+export default explicitConnect(options);

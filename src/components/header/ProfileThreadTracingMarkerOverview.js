@@ -26,7 +26,6 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     );
     return {
       intervalMarkers,
-      threadName: selectors.getFriendlyThreadName(state),
       isSelected: threadIndex === selectedThread,
       styles,
       overlayFills,

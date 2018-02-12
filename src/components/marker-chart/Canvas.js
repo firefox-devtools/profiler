@@ -19,6 +19,7 @@ import type {
   CssPixels,
   UnitIntervalOfProfileRange,
 } from '../../types/units';
+import type { ThreadIndex } from '../../types/profile';
 import type {
   TracingMarker,
   MarkerTimingRows,
@@ -40,6 +41,7 @@ type OwnProps = {|
   +markerTimingRows: MarkerTimingRows,
   +rowHeight: CssPixels,
   +markers: TracingMarker[],
+  +threadIndex: ThreadIndex,
   +updateProfileSelection: typeof updateProfileSelection,
 |};
 
@@ -346,13 +348,14 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  /**
-   * This function currently returns `React.Element<any>` because we exactly
-   * know its return type. This needs to be a subtype of React.Node so this
-   * could be changed in the future if necessary. */
-  getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React.Element<any> {
+  getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React.Node {
     const marker = this.props.markers[hoveredItem];
-    return <MarkerTooltipContents marker={marker} />;
+    return (
+      <MarkerTooltipContents
+        marker={marker}
+        threadIndex={this.props.threadIndex}
+      />
+    );
   }
 
   render() {

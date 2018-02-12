@@ -20,12 +20,11 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = selectorsForThread(threadIndex);
-    const threadName = selectors.getFriendlyThreadName(state);
     const selectedThread = getSelectedThreadIndex(state);
+
     return {
       intervalMarkers: selectors.getJankInstances(state),
       isSelected: threadIndex === selectedThread,
-      threadName,
       styles,
       overlayFills,
     };

@@ -64,3 +64,10 @@
   white-space: nowrap;
   text-align: right;
 }
+
+.tooltipBackTraceTitle {
+  color: #666;
+  font-weight: normal;
+  margin: 0;
+  font-size: 100%;
+}

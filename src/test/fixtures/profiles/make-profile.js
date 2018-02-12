@@ -5,7 +5,7 @@
 // @flow
 import { getEmptyProfile } from '../../../profile-logic/profile-data';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
-import type { Profile, Thread, MarkersTable } from '../../../types/profile';
+import type { Profile, Thread } from '../../../types/profile';
 import type { MarkerPayload } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
 
@@ -19,16 +19,13 @@ type TestDefinedMarkers = Array<[MarkerName, MarkerTime, DataPayload]>;
 
 export { getEmptyProfile } from '../../../profile-logic/profile-data';
 
-export function getProfileWithMarkers(markers: TestDefinedMarkers): Profile {
-  const profile = getEmptyProfile();
-  const thread = getEmptyThread();
+export function addMarkersToProfileReplacingSamples(
+  markers: TestDefinedMarkers,
+  profile: Profile
+) {
+  const thread = profile.threads[0];
   const stringTable = thread.stringTable;
-  const markersTable: MarkersTable = {
-    name: [],
-    time: [],
-    data: [],
-    length: 0,
-  };
+  const markersTable = thread.markers;
   const samples = {
     time: [],
     responsiveness: [],
@@ -37,6 +34,7 @@ export function getProfileWithMarkers(markers: TestDefinedMarkers): Profile {
     uss: [],
     length: 0,
   };
+  thread.samples = samples;
 
   markers.forEach(([name, time, data]) => {
     if (data && !data.type) {
@@ -60,9 +58,12 @@ export function getProfileWithMarkers(markers: TestDefinedMarkers): Profile {
   });
 
   samples.time.sort();
-  profile.threads.push(
-    Object.assign({}, thread, { markers: markersTable, samples })
-  );
+}
+
+export function getProfileWithMarkers(markers: TestDefinedMarkers): Profile {
+  const profile = getEmptyProfile();
+  profile.threads.push(getEmptyThread());
+  addMarkersToProfileReplacingSamples(markers, profile);
   return profile;
 }
 
@@ -139,6 +140,7 @@ export function getEmptyThread(overrides: ?Object): Thread {
  *
  * Example usage:
  *
+ * ```
  * const profile = getProfileFromTextSamples(`
  *   A       A        A     A
  *   B.js    B.js     F     F
@@ -146,6 +148,7 @@ export function getEmptyThread(overrides: ?Object): Thread {
  *   D       D              H
  *   E       E
  * `);
+ * ```
  *
  * The function names are aligned vertically on the left. This would produce 4 samples
  * with the stacks based off of those functions listed, with A being the root. Whitespace

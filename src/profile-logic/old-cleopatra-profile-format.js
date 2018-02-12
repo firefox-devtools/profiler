@@ -120,22 +120,10 @@ function _convertThread(
   const frameMap = new Map();
   const stackMap = new Map();
 
-  let lastSampleTime = 0;
-
-  for (let i = 0; i < thread.samples.length; i++) {
-    const sample = thread.samples[i];
-    // sample has the shape: {
-    //   frames: [symbolicationTableIndices for the stack frames]
-    //   extraInfo: {
-    //     responsiveness,
-    //     time,
-    //   }
-    // }
-    //
+  function convertStack(frames) {
     // We map every stack frame to a frame.
     // Then we walk the stack, creating "stacks" (= (prefix stack, frame) pairs)
     // as needed, and arrive at the sample's stackIndex.
-    const frames = sample.frames;
     let prefix = null;
     for (let i = 0; i < frames.length; i++) {
       const frameSymbolicationTableIndex = frames[i];
@@ -160,8 +148,23 @@ function _convertThread(
       }
       prefix = stackIndex;
     }
+    return prefix;
+  }
+
+  let lastSampleTime = 0;
+
+  for (let i = 0; i < thread.samples.length; i++) {
+    const sample = thread.samples[i];
+    // sample has the shape: {
+    //   frames: [symbolicationTableIndices for the stack frames]
+    //   extraInfo: {
+    //     responsiveness,
+    //     time,
+    //   }
+    // }
+    const stackIndex = convertStack(sample.frames);
     const sampleIndex = samples.length++;
-    samples.stack[sampleIndex] = prefix;
+    samples.stack[sampleIndex] = stackIndex;
     const hasTime =
       'time' in sample.extraInfo && typeof sample.extraInfo.time === 'number';
     const sampleTime = hasTime
@@ -182,6 +185,29 @@ function _convertThread(
   for (let i = 0; i < thread.markers.length; i++) {
     const marker = thread.markers[i];
     const markerIndex = markers.length++;
+    const data = marker.data;
+    if (data && 'stack' in data) {
+      // data.stack is an array of strings
+      const stackIndex = convertStack(
+        data.stack.map(s => stringTable.indexForString(s))
+      );
+      data.stack = {
+        markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+        name: 'SyncProfile',
+        samples: {
+          schema: {
+            stack: 0,
+            time: 1,
+            responsiveness: 2,
+            rss: 3,
+            uss: 4,
+            frameNumber: 5,
+            power: 6,
+          },
+          data: [[stackIndex, marker.time]],
+        },
+      };
+    }
     markers.data[markerIndex] = marker.data;
     markers.name[markerIndex] = stringTable.indexForString(marker.name);
     markers.time[markerIndex] = marker.time;

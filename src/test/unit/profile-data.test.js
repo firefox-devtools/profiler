@@ -21,6 +21,7 @@ import {
   filterThreadByImplementation,
   getCallNodePath,
   getSampleIndexClosestToTime,
+  convertStackToCallNodePath,
 } from '../../profile-logic/profile-data';
 import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
@@ -634,14 +635,17 @@ describe('symbolication', function() {
 
 describe('upgrades', function() {
   describe('old-cleopatra-profile', function() {
-    const exampleOldCleopatraProfiles = [
-      require('../fixtures/upgrades/old-cleopatra-profile.sps.json'),
-      require('../fixtures/upgrades/ancient-cleopatra-profile.sps.json'),
-    ];
-    exampleOldCleopatraProfiles.forEach(exampleOldCleopatraProfile => {
+    const oldCleopatraProfile = require('../fixtures/upgrades/old-cleopatra-profile.sps.json');
+    const ancientCleopatraProfile = require('../fixtures/upgrades/ancient-cleopatra-profile.sps.json');
+
+    [
+      oldCleopatraProfile,
+      ancientCleopatraProfile,
+    ].forEach(exampleOldCleopatraProfile => {
       it('should detect the profile as an old cleopatra profile', function() {
         expect(isOldCleopatraFormat(exampleOldCleopatraProfile)).toBe(true);
       });
+
       it('should be able to convert the old cleopatra profile into a processed profile', function() {
         const profile = convertOldCleopatraProfile(exampleOldCleopatraProfile);
         expect(isProcessedProfile(profile)).toBe(true);
@@ -651,7 +655,48 @@ describe('upgrades', function() {
         expect(profile.threads[0].name).toBe('GeckoMain');
       });
     });
+
+    // Executing this only for oldCleopatraProfile because
+    // ancientCleopatraProfile doesn't have any causes for markers.
+    it('should be able to convert causes from old cleopatra profiles', function() {
+      const profile = unserializeProfileOfArbitraryFormat(oldCleopatraProfile);
+
+      const [thread] = profile.threads;
+      const { markers } = thread;
+
+      const markerWithCauseIndex = markers.data.findIndex(
+        marker => marker !== null && marker.type === 'tracing' && marker.cause
+      );
+
+      if (markerWithCauseIndex < -1) {
+        throw new Error('We should have found one marker with a cause!');
+      }
+
+      const markerNameIndex = markers.name[markerWithCauseIndex];
+      expect(thread.stringTable.getString(markerNameIndex)).toEqual('Styles');
+
+      const markerWithCause = markers.data[markerWithCauseIndex];
+
+      // This makes Flow happy
+      if (
+        markerWithCause === null ||
+        markerWithCause === undefined ||
+        markerWithCause.type !== 'tracing' ||
+        !markerWithCause.cause
+      ) {
+        throw new Error('This marker should have a cause!');
+      }
+
+      // This is the stack we should get
+      expect(markerWithCause).toEqual({
+        category: 'Paint',
+        cause: { stack: 10563, time: 4195720.505958 },
+        interval: 'start',
+        type: 'tracing',
+      });
+    });
   });
+
   function compareProcessedProfiles(lhs, rhs) {
     // Processed profiles contain a stringTable which isn't easily comparable.
     // Instead, serialize the profiles first, so that the stringTable becomes a
@@ -897,5 +942,21 @@ describe('funcHasRecursiveCall', function() {
       funcHasRecursiveCall(thread, 'combined', funcNames.indexOf('B.js')),
       funcHasRecursiveCall(thread, 'js', funcNames.indexOf('B.js')),
     ]).toEqual([false, false, true]);
+  });
+});
+
+describe('convertStackToCallNodePath', function() {
+  it('correctly returns a call node path for a stack', function() {
+    const { threads: [thread] } = getCallNodeProfile();
+    const stack1 = thread.samples.stack[0];
+    const stack2 = thread.samples.stack[1];
+    if (stack1 === null || stack2 === null) {
+      // Makes flow happy
+      throw new Error("stack shouldn't be null");
+    }
+    let callNodePath = convertStackToCallNodePath(thread, stack1);
+    expect(callNodePath).toEqual([4, 3, 2, 1, 0]);
+    callNodePath = convertStackToCallNodePath(thread, stack2);
+    expect(callNodePath).toEqual([5, 3, 2, 1, 0]);
   });
 });
