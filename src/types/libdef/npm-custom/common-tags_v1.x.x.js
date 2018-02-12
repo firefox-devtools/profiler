@@ -8,4 +8,9 @@ declare module 'common-tags' {
     template: string[],
     ...expressions: string[]
   ): string;
+
+  declare function stripIndent(
+    template: string[],
+    ...expressions: string[]
+  ): string;
 }
