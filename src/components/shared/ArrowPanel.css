@@ -12,7 +12,7 @@
 .arrowPanel {
   --internal-offset-from-right: var(--offset-from-right, 60px);
   --internal-offset-from-top: 15px;
-  --internal-width: var(--width, auto);
+  --internal-width: var(--width, initial);
   --internal-button-height: 30px;
   --internal-ok-button-background: var(--ok-button-background, #7990c8);
   --internal-ok-button-color: var(--ok-button-color, white);
