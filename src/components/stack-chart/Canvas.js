@@ -241,12 +241,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
     return (
       <div className="stackChartCanvasTooltip">
         <div className="tooltipOneLine tooltipHeader">
-          <div className="tooltipTiming">
-            {formatNumber(duration)}ms
-          </div>
-          <div className="tooltipTitle">
-            {label}
-          </div>
+          <div className="tooltipTiming">{formatNumber(duration)}ms</div>
+          <div className="tooltipTitle">{label}</div>
         </div>
         <div className="tooltipDetails">
           <div className="tooltipLabel">Category:</div>

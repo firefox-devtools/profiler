@@ -63,11 +63,7 @@ function fewTimes(count: number) {
 
 function toParagraphs(str: string) {
   return str.split('\n').map((s, i) => {
-    return (
-      <p key={i}>
-        {s}
-      </p>
-    );
+    return <p key={i}>{s}</p>;
   });
 }
 type ProfileViewStateProps = {|
@@ -131,28 +127,26 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       <div className="rootMessageContainer">
         <div className="rootMessage">
           <h1 className="rootMessageTitle">perf.html</h1>
-          <div className="rootMessageText">
-            {message}
-          </div>
-          {additionalMessage
-            ? <div className="rootMessageAdditional">
-                {toParagraphs(additionalMessage)}
-              </div>
-            : null}
-          {showLoader
-            ? <div className="loading">
-                <div className="loading-div loading-div-1 loading-row-1" />
-                <div className="loading-div loading-div-2 loading-row-2" />
-                <div className="loading-div loading-div-3 loading-row-3" />
-                <div className="loading-div loading-div-4 loading-row-3" />
-                <div className="loading-div loading-div-5 loading-row-4" />
-                <div className="loading-div loading-div-6 loading-row-4" />
-                <div className="loading-div loading-div-7 loading-row-4" />
-                <div className="loading-div loading-div-8 loading-row-4" />
-                <div className="loading-div loading-div-9 loading-row-4" />
-                <div className="loading-div loading-div-10 loading-row-4" />
-              </div>
-            : null}
+          <div className="rootMessageText">{message}</div>
+          {additionalMessage ? (
+            <div className="rootMessageAdditional">
+              {toParagraphs(additionalMessage)}
+            </div>
+          ) : null}
+          {showLoader ? (
+            <div className="loading">
+              <div className="loading-div loading-div-1 loading-row-1" />
+              <div className="loading-div loading-div-2 loading-row-2" />
+              <div className="loading-div loading-div-3 loading-row-3" />
+              <div className="loading-div loading-div-4 loading-row-3" />
+              <div className="loading-div loading-div-5 loading-row-4" />
+              <div className="loading-div loading-div-6 loading-row-4" />
+              <div className="loading-div loading-div-7 loading-row-4" />
+              <div className="loading-div loading-div-8 loading-row-4" />
+              <div className="loading-div loading-div-9 loading-row-4" />
+              <div className="loading-div loading-div-10 loading-row-4" />
+            </div>
+          ) : null}
         </div>
         <FooterLinks />
       </div>
@@ -179,9 +173,9 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
 
           if (view.additionalData.attempt) {
             const attempt = view.additionalData.attempt;
-            additionalMessage += `\nTried ${fewTimes(
-              attempt.count
-            )} out of ${attempt.total}.`;
+            additionalMessage += `\nTried ${fewTimes(attempt.count)} out of ${
+              attempt.total
+            }.`;
           }
         }
 

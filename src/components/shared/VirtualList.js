@@ -320,7 +320,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
         onKeyDown={onKeyDown}
       >
         <div className={`${className}InnerWrapper`}>
-          {range(columnCount).map(columnIndex =>
+          {range(columnCount).map(columnIndex => (
             <VirtualListInner
               className={classNames(
                 `${className}Inner`,
@@ -337,7 +337,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
               key={columnIndex}
               ref={columnIndex === 0 ? this._innerCreated : undefined}
             />
-          )}
+          ))}
         </div>
       </div>
     );

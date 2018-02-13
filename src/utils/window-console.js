@@ -61,18 +61,14 @@ export function logFriendlyPreamble() {
   console.log(
     // This is gratuitous, I know:
     [
-      // Prettier breaks this formatting, but newer versions don't.
-      // https://github.com/devtools-html/perf.html/issues/776
-      /* eslint-disable prettier/prettier */
-      "%c                  __ _     _             _ ",
-      "                 / _| |   | |           | |",
-      " _ __   ___ _ __| |_| |__ | |_ _ __ ___ | |",
+      '%c                  __ _     _             _ ',
+      '                 / _| |   | |           | |',
+      ' _ __   ___ _ __| |_| |__ | |_ _ __ ___ | |',
       "| '_ \\ / _ \\ '__|  _| '_ \\| __| '_ ` _ \\| |",
-      "| |_) |  __/ |  | |_| | | | |_| | | | | | |",
-      "| .__/ \\___|_|  |_(_)_| |_|\\__|_| |_| |_|_|",
-      "| |                                        ",
-      "|_|                                        ",
-      /* eslint-enable prettier/prettier */
+      '| |_) |  __/ |  | |_| | | | |_| | | | | | |',
+      '| .__/ \\___|_|  |_(_)_| |_|\\__|_| |_| |_|_|',
+      '| |                                        ',
+      '|_|                                        ',
     ].join('\n'),
     'font-family: monospace;'
   );

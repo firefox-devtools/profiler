@@ -55,7 +55,7 @@ class TabBar extends PureComponent<Props> {
           orient="horizontal"
           onChangeOrder={onChangeTabOrder}
         >
-          {tabs.map(({ name, title }, i) =>
+          {tabs.map(({ name, title }, i) => (
             <li
               className={classNames('tabBarTab', 'grippy', {
                 selected: name === selectedTabName,
@@ -66,7 +66,7 @@ class TabBar extends PureComponent<Props> {
             >
               {title}
             </li>
-          )}
+          ))}
         </Reorderable>
       </div>
     );

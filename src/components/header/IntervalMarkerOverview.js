@@ -203,14 +203,14 @@ class IntervalMarkerOverview extends React.PureComponent<Props, State> {
           onMouseUp={this._onMouseUp}
           onMouseOut={this._onMouseOut}
         />
-        {shouldShowTooltip && hoveredItem
-          ? <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              <MarkerTooltipContents
-                marker={hoveredItem}
-                threadIndex={threadIndex}
-              />
-            </Tooltip>
-          : null}
+        {shouldShowTooltip && hoveredItem ? (
+          <Tooltip mouseX={mouseX} mouseY={mouseY}>
+            <MarkerTooltipContents
+              marker={hoveredItem}
+              threadIndex={threadIndex}
+            />
+          </Tooltip>
+        ) : null}
       </div>
     );
   }

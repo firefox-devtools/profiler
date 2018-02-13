@@ -86,7 +86,9 @@ describe('calltree/ProfileCallTreeView', function() {
 
   it('computes a width for a call tree of a really deep stack', () => {
     const { profile } = getProfileFromTextSamples(
-      Array(113).fill('name').join('\n')
+      Array(113)
+        .fill('name')
+        .join('\n')
     );
     const store = storeWithProfile(profile);
     const calltree = renderer.create(

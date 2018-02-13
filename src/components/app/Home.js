@@ -343,7 +343,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           <h1 className="homeTitle">
             <span className="homeTitleText">perf.html</span>
             <span className="homeTitleSubtext">
-              {' '}&mdash; Web app for Firefox performance analysis
+              {' '}
+              &mdash; Web app for Firefox performance analysis
             </span>
             <a
               className="homeTitleGithubIcon"
@@ -364,11 +365,9 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               </svg>
             </a>
           </h1>
-          {specialMessage
-            ? <div className="homeSpecialMessage">
-                {specialMessage}
-              </div>
-            : null}
+          {specialMessage ? (
+            <div className="homeSpecialMessage">{specialMessage}</div>
+          ) : null}
           <p>
             Capture a performance profile. Analyze it. Share it. Make the web
             faster.

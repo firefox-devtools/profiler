@@ -339,15 +339,15 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
 
     return (
       <ContextMenu id={'ProfileCallTreeContextMenu'}>
-        {inverted
-          ? null
-          : <MenuItem
-              onClick={this.handleClick}
-              data={{ type: 'merge-call-node' }}
-            >
-              <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
-              Merge node into calling function
-            </MenuItem>}
+        {inverted ? null : (
+          <MenuItem
+            onClick={this.handleClick}
+            data={{ type: 'merge-call-node' }}
+          >
+            <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
+            Merge node into calling function
+          </MenuItem>
+        )}
         <MenuItem onClick={this.handleClick} data={{ type: 'merge-function' }}>
           <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
           Merge function into caller across the entire tree
@@ -369,27 +369,27 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
           <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
           {'Collapse function’s subtree across the entire tree'}
         </MenuItem>
-        {nameForResource
-          ? <MenuItem
-              onClick={this.handleClick}
-              data={{ type: 'collapse-resource' }}
-            >
-              <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
-              Collapse functions in{' '}
-              <span className="profileCallTreeContextMenuLabel">
-                {nameForResource}
-              </span>
-            </MenuItem>
-          : null}
-        {this.isRecursiveCall()
-          ? <MenuItem
-              onClick={this.handleClick}
-              data={{ type: 'collapse-direct-recursion' }}
-            >
-              <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
-              Collapse direct recursion
-            </MenuItem>
-          : null}
+        {nameForResource ? (
+          <MenuItem
+            onClick={this.handleClick}
+            data={{ type: 'collapse-resource' }}
+          >
+            <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+            Collapse functions in{' '}
+            <span className="profileCallTreeContextMenuLabel">
+              {nameForResource}
+            </span>
+          </MenuItem>
+        ) : null}
+        {this.isRecursiveCall() ? (
+          <MenuItem
+            onClick={this.handleClick}
+            data={{ type: 'collapse-direct-recursion' }}
+          >
+            <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+            Collapse direct recursion
+          </MenuItem>
+        ) : null}
         <MenuItem onClick={this.handleClick} data={{ type: 'drop-function' }}>
           <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconDrop" />
           Drop samples with this function
@@ -408,11 +408,11 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
         >
           Copy function name
         </MenuItem>
-        {isJS
-          ? <MenuItem onClick={this.handleClick} data={{ type: 'copy-url' }}>
-              Copy script URL
-            </MenuItem>
-          : null}
+        {isJS ? (
+          <MenuItem onClick={this.handleClick} data={{ type: 'copy-url' }}>
+            Copy script URL
+          </MenuItem>
+        ) : null}
         <MenuItem onClick={this.handleClick} data={{ type: 'copy-stack' }}>
           Copy stack
         </MenuItem>

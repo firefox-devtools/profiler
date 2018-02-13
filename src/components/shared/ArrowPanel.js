@@ -125,30 +125,24 @@ class ArrowPanel extends React.PureComponent<Props, State> {
           ref={this._panelElementCreated}
         >
           <div className="arrowPanelArrow" />
-          {hasTitle
-            ? <h1 className="arrowPanelTitle">
-                {title}
-              </h1>
-            : null}
-          <div className="arrowPanelContent">
-            {children}
-          </div>
-          {hasButtons
-            ? <div className="arrowPanelButtons">
-                <input
-                  type="button"
-                  className="arrowPanelCancelButton"
-                  value={cancelButtonText}
-                  onClick={this._onCancelButtonClick}
-                />
-                <input
-                  type="button"
-                  className="arrowPanelOkButton"
-                  value={okButtonText}
-                  onClick={this._onOkButtonClick}
-                />
-              </div>
-            : null}
+          {hasTitle ? <h1 className="arrowPanelTitle">{title}</h1> : null}
+          <div className="arrowPanelContent">{children}</div>
+          {hasButtons ? (
+            <div className="arrowPanelButtons">
+              <input
+                type="button"
+                className="arrowPanelCancelButton"
+                value={cancelButtonText}
+                onClick={this._onCancelButtonClick}
+              />
+              <input
+                type="button"
+                className="arrowPanelOkButton"
+                value={okButtonText}
+                onClick={this._onOkButtonClick}
+              />
+            </div>
+          ) : null}
         </div>
       </div>
     );

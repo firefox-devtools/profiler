@@ -80,9 +80,7 @@ class MarkerChart extends React.PureComponent<Props> {
     return (
       <div className="markerChart">
         <div className="markerChartLabels grippy" title={processDetails}>
-          <span className="markerChartLabelsName">
-            {threadName}
-          </span>
+          <span className="markerChartLabelsName">{threadName}</span>
         </div>
         <MarkerChartCanvas
           key={threadIndex}

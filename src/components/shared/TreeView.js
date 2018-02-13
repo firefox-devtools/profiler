@@ -29,22 +29,25 @@ type TreeViewHeaderProps = {|
   +mainColumn: Column,
 |};
 
-const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) =>
+const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => (
   <div className="treeViewHeader">
-    {fixedColumns.map(col =>
+    {fixedColumns.map(col => (
       <span
         className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
         key={col.propName}
       >
         {col.title}
       </span>
-    )}
+    ))}
     <span
-      className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}
+      className={`treeViewHeaderColumn treeViewMainColumn ${
+        mainColumn.propName
+      }`}
     >
       {mainColumn.title}
     </span>
-  </div>;
+  </div>
+);
 
 function reactStringWithHighlightedSubstrings(
   string: string,
@@ -115,9 +118,9 @@ class TreeViewRowFixedColumns<
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     return (
       <div
-        className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${selected
-          ? 'selected'
-          : ''}`}
+        className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${
+          selected ? 'selected' : ''
+        }`}
         style={{ height: '16px' }}
         onMouseDown={this._onClick}
       >
@@ -127,17 +130,21 @@ class TreeViewRowFixedColumns<
 
           return (
             <span
-              className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
+              className={`treeViewRowColumn treeViewFixedColumn ${
+                col.propName
+              }`}
               key={col.propName}
               title={text}
             >
-              {RenderComponent
-                ? <RenderComponent displayData={displayData} />
-                : reactStringWithHighlightedSubstrings(
-                    text,
-                    highlightRegExp,
-                    'treeViewHighlighting'
-                  )}
+              {RenderComponent ? (
+                <RenderComponent displayData={displayData} />
+              ) : (
+                reactStringWithHighlightedSubstrings(
+                  text,
+                  highlightRegExp,
+                  'treeViewHighlighting'
+                )
+              )}
             </span>
           );
         })}
@@ -220,9 +227,9 @@ class TreeViewRowScrolledColumns<
 
     return (
       <div
-        className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${selected
-          ? 'selected'
-          : ''} ${displayData.dim ? 'dim' : ''}`}
+        className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${
+          selected ? 'selected' : ''
+        } ${displayData.dim ? 'dim' : ''}`}
         style={{ height: '16px' }}
         onMouseDown={this._onClick}
       >
@@ -231,12 +238,14 @@ class TreeViewRowScrolledColumns<
           style={{ width: `${depth * 10}px` }}
         />
         <span
-          className={`treeRowToggleButton ${isExpanded
-            ? 'expanded'
-            : 'collapsed'} ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`}
+          className={`treeRowToggleButton ${
+            isExpanded ? 'expanded' : 'collapsed'
+          } ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`}
         />
         <span
-          className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}
+          className={`treeViewRowColumn treeViewMainColumn ${
+            mainColumn.propName
+          }`}
         >
           {reactStringWithHighlightedSubstrings(
             displayData[mainColumn.propName],
@@ -244,19 +253,21 @@ class TreeViewRowScrolledColumns<
             'treeViewHighlighting'
           )}
         </span>
-        {appendageColumn
-          ? <span
-              className={`treeViewRowColumn treeViewAppendageColumn ${appendageColumn.propName}`}
-            >
-              {reactStringWithHighlightedSubstrings(
-                displayData[appendageColumn.propName],
-                highlightRegExp,
-                'treeViewHighlighting'
-              )}
-            </span>
-          : null}
+        {appendageColumn ? (
+          <span
+            className={`treeViewRowColumn treeViewAppendageColumn ${
+              appendageColumn.propName
+            }`}
+          >
+            {reactStringWithHighlightedSubstrings(
+              displayData[appendageColumn.propName],
+              highlightRegExp,
+              'treeViewHighlighting'
+            )}
+          </span>
+        ) : null}
         {appendageButtons
-          ? appendageButtons.map(buttonName =>
+          ? appendageButtons.map(buttonName => (
               <input
                 className={classNames('treeViewRowAppendageButton', buttonName)}
                 type="button"
@@ -264,7 +275,7 @@ class TreeViewRowScrolledColumns<
                 data-appendage-button-name={buttonName}
                 value=""
               />
-            )
+            ))
           : null}
       </div>
     );
@@ -272,13 +283,13 @@ class TreeViewRowScrolledColumns<
 }
 
 interface Tree<NodeIndex: number, DisplayData: Object> {
-  getDepth(NodeIndex): number,
-  getRoots(): NodeIndex[],
-  getDisplayData(NodeIndex): DisplayData,
-  getParent(NodeIndex): NodeIndex,
-  getChildren(NodeIndex): NodeIndex[],
-  hasChildren(NodeIndex): boolean,
-  getAllDescendants(NodeIndex): Set<NodeIndex>,
+  getDepth(NodeIndex): number;
+  getRoots(): NodeIndex[];
+  getDisplayData(NodeIndex): DisplayData;
+  getParent(NodeIndex): NodeIndex;
+  getChildren(NodeIndex): NodeIndex[];
+  hasChildren(NodeIndex): boolean;
+  getAllDescendants(NodeIndex): Set<NodeIndex>;
 }
 
 type TreeViewProps<NodeIndex, DisplayData> = {|
@@ -558,13 +569,13 @@ class TreeView<
     return (
       <div className="treeView">
         {icons &&
-          icons.map(({ className, icon }) =>
+          icons.map(({ className, icon }) => (
             <BackgroundImageStyleDef
               className={className}
               url={icon}
               key={className}
             />
-          )}
+          ))}
         <TreeViewHeader fixedColumns={fixedColumns} mainColumn={mainColumn} />
         <ContextMenuTrigger
           id={contextMenuId}

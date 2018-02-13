@@ -3,5 +3,5 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 declare class ClipboardEvent extends Event {
-  clipboardData: DataTransfer,
+  clipboardData: DataTransfer;
 }

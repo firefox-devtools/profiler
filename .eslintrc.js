@@ -27,7 +27,7 @@ module.exports = {
     'import/no-duplicates': 'error',
     'import/no-unresolved': 'error',
     'import/named': 'error',
-    'prettier/prettier': ['error', { singleQuote: true, trailingComma: 'es5' }],
+    'prettier/prettier': 'error',
     'react/button-has-type': 'error',
     'react/no-access-state-in-setstate': 'error',
     'react/no-danger': 'error',

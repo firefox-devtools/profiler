@@ -176,11 +176,11 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
           onMouseOut={this._onMouseOut}
           onDoubleClick={this._onDoubleClick}
         />
-        {!isDragging && tooltipContents
-          ? <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              {tooltipContents}
-            </Tooltip>
-          : null}
+        {!isDragging && tooltipContents ? (
+          <Tooltip mouseX={mouseX} mouseY={mouseY}>
+            {tooltipContents}
+          </Tooltip>
+        ) : null}
       </div>
     );
   }

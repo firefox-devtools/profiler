@@ -69,9 +69,11 @@ class UrlManager extends React.PureComponent<Props> {
 
   render() {
     const { isUrlSetupDone } = this.props;
-    return isUrlSetupDone
-      ? this.props.children
-      : <div className="processingUrl" />;
+    return isUrlSetupDone ? (
+      this.props.children
+    ) : (
+      <div className="processingUrl" />
+    );
   }
 }
 
