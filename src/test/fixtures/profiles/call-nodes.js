@@ -35,14 +35,9 @@ import { getEmptyThread, getEmptyProfile } from './make-profile';
 export default function getProfile(): Profile {
   const profile = getEmptyProfile();
   const thread = getEmptyThread();
-  const funcNames = [
-    'funcA',
-    'funcB',
-    'funcC',
-    'funcD',
-    'funcE',
-    'funcF',
-  ].map(name => thread.stringTable.indexForString(name));
+  const funcNames = ['funcA', 'funcB', 'funcC', 'funcD', 'funcE', 'funcF'].map(
+    name => thread.stringTable.indexForString(name)
+  );
 
   // Be explicit about table creation so flow errors are really readable.
   const funcTable: FuncTable = {

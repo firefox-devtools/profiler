@@ -93,7 +93,7 @@ class ProfileViewerHeader extends PureComponent<Props> {
               orient="vertical"
               onChangeOrder={changeThreadOrder}
             >
-              {threads.map((thread, threadIndex) =>
+              {threads.map((thread, threadIndex) => (
                 <ProfileThreadHeaderBar
                   key={threadIndex}
                   threadIndex={threadIndex}
@@ -103,7 +103,7 @@ class ProfileViewerHeader extends PureComponent<Props> {
                   isHidden={hiddenThreads.includes(threadIndex)}
                   isModifyingSelection={selection.isModifying}
                 />
-              )}
+              ))}
             </Reorderable>
           }
         </OverflowEdgeIndicator>

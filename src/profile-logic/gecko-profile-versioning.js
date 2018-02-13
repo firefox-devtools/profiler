@@ -9,7 +9,7 @@
  * run perf.html on non-Nightly versions of Firefox, and we want to be able
  * to load old saved profiles, so this file upgrades old profiles to the
  * current format.
-*/
+ */
 
 import {
   upgradeGCMinorMarker,

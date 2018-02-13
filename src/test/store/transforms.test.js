@@ -841,35 +841,35 @@ describe('"collapse-function-subtree" transform', function() {
 
   it('starts as an unfiltered call tree', function() {
     const { getState } = storeWithProfile(profile);
-    expect(
-      formatTree(selectedThreadSelectors.getCallTree(getState()))
-    ).toEqual([
-      '- A (total: 4, self: —)',
-      '  - B (total: 4, self: —)',
-      '    - C (total: 2, self: —)', // <- C is here!
-      '      - D (total: 1, self: —)',
-      '        - E (total: 1, self: 1)',
-      '      - F (total: 1, self: —)',
-      '        - G (total: 1, self: 1)',
-      '    - H (total: 2, self: —)',
-      '      - C (total: 2, self: —)', // <- C is here!
-      '        - I (total: 1, self: 1)',
-      '        - J (total: 1, self: 1)',
-    ]);
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 4, self: —)',
+        '  - B (total: 4, self: —)',
+        '    - C (total: 2, self: —)', // <- C is here!
+        '      - D (total: 1, self: —)',
+        '        - E (total: 1, self: 1)',
+        '      - F (total: 1, self: —)',
+        '        - G (total: 1, self: 1)',
+        '    - H (total: 2, self: —)',
+        '      - C (total: 2, self: —)', // <- C is here!
+        '        - I (total: 1, self: 1)',
+        '        - J (total: 1, self: 1)',
+      ]
+    );
   });
 
   it('can collapse the C function', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(addTransformToStack(threadIndex, collapseTransform));
-    expect(
-      formatTree(selectedThreadSelectors.getCallTree(getState()))
-    ).toEqual([
-      '- A (total: 4, self: —)',
-      '  - B (total: 4, self: —)',
-      '    - C (total: 2, self: 2)', // All children are gone, and the self time was applied.
-      '    - H (total: 2, self: —)',
-      '      - C (total: 2, self: 2)', // All children are gone, and the self time was applied.
-    ]);
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 4, self: —)',
+        '  - B (total: 4, self: —)',
+        '    - C (total: 2, self: 2)', // All children are gone, and the self time was applied.
+        '    - H (total: 2, self: —)',
+        '      - C (total: 2, self: 2)', // All children are gone, and the self time was applied.
+      ]
+    );
   });
 
   it('can update apply the transform to the selected CallNodePaths', function() {
@@ -1092,9 +1092,9 @@ describe('expanded and selected CallNodePaths', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     // This opens expands the call nodes up to this point.
     dispatch(changeSelectedCallNode(threadIndex, selectedCallNodePath));
-    expect(
-      selectedThreadSelectors.getSelectedCallNodePath(getState())
-    ).toEqual([A, B, C, D]);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, C, D]
+    );
 
     expect(
       selectedThreadSelectors.getExpandedCallNodePaths(getState())
@@ -1119,9 +1119,9 @@ describe('expanded and selected CallNodePaths', function() {
       })
     );
 
-    expect(
-      selectedThreadSelectors.getSelectedCallNodePath(getState())
-    ).toEqual([B, C, D]);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [B, C, D]
+    );
     expect(
       selectedThreadSelectors.getExpandedCallNodePaths(getState())
     ).toEqual([
@@ -1143,9 +1143,9 @@ describe('expanded and selected CallNodePaths', function() {
       })
     );
 
-    expect(
-      selectedThreadSelectors.getSelectedCallNodePath(getState())
-    ).toEqual([A, C, D]);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, C, D]
+    );
     expect(
       selectedThreadSelectors.getExpandedCallNodePaths(getState())
     ).toEqual([
@@ -1182,9 +1182,9 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
     dispatch(changeInvertCallstack(true));
     dispatch(changeSelectedCallNode(threadIndex, selectedCallNodePath));
 
-    expect(
-      selectedThreadSelectors.getSelectedCallNodePath(getState())
-    ).toEqual([Z, Y, X, B]);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [Z, Y, X, B]
+    );
     expect(
       selectedThreadSelectors.getExpandedCallNodePaths(getState())
     ).toEqual([
@@ -1209,9 +1209,9 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
       })
     );
 
-    expect(
-      selectedThreadSelectors.getSelectedCallNodePath(getState())
-    ).toEqual([Y, X, B]);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [Y, X, B]
+    );
     expect(
       selectedThreadSelectors.getExpandedCallNodePaths(getState())
     ).toEqual([
@@ -1234,9 +1234,9 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
       })
     );
 
-    expect(
-      selectedThreadSelectors.getSelectedCallNodePath(getState())
-    ).toEqual([Z, X, B]);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [Z, X, B]
+    );
     expect(
       selectedThreadSelectors.getExpandedCallNodePaths(getState())
     ).toEqual([

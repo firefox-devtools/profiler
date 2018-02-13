@@ -70,11 +70,11 @@ export default class DivWithTooltip extends React.PureComponent<Props, State> {
         {...containerProps}
       >
         {children}
-        {shouldShowTooltip && tooltip
-          ? <Tooltip mouseX={mouseX} mouseY={mouseY}>
-              {tooltip}
-            </Tooltip>
-          : null}
+        {shouldShowTooltip && tooltip ? (
+          <Tooltip mouseX={mouseX} mouseY={mouseY}>
+            {tooltip}
+          </Tooltip>
+        ) : null}
       </div>
     );
   }

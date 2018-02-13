@@ -63,9 +63,7 @@ class FlameGraph extends React.PureComponent<Props> {
         <FlameGraphSettings />
         <div className="flameGraphContent">
           <div title={processDetails} className="flameGraphLabels grippy">
-            <span>
-              {threadName}
-            </span>
+            <span>{threadName}</span>
           </div>
           <FlameGraphCanvas
             key={threadIndex}

@@ -194,31 +194,31 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
             onMouseDown: this._onLabelMouseDown,
           }}
         >
-          <h1 className="profileThreadHeaderBarThreadName">
-            {threadName}
-          </h1>
+          <h1 className="profileThreadHeaderBarThreadName">{threadName}</h1>
         </ContextMenuTrigger>
         <div className="profileThreadHeaderBarThreadDetails">
-          {displayJank
-            ? <ProfileThreadJankOverview
-                className={`${className}IntervalMarkerOverview ${className}IntervalMarkerOverviewJank`}
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                threadIndex={threadIndex}
-                onSelect={this._onIntervalMarkerSelect}
-                isModifyingSelection={isModifyingSelection}
-              />
-            : null}
-          {displayTracingMarkers
-            ? <ProfileThreadTracingMarkerOverview
-                className={`${className}IntervalMarkerOverview ${className}IntervalMarkerOverviewGfx ${className}IntervalMarkerOverviewThread${thread.name}`}
-                rangeStart={rangeStart}
-                rangeEnd={rangeEnd}
-                threadIndex={threadIndex}
-                onSelect={this._onIntervalMarkerSelect}
-                isModifyingSelection={isModifyingSelection}
-              />
-            : null}
+          {displayJank ? (
+            <ProfileThreadJankOverview
+              className={`${className}IntervalMarkerOverview ${className}IntervalMarkerOverviewJank`}
+              rangeStart={rangeStart}
+              rangeEnd={rangeEnd}
+              threadIndex={threadIndex}
+              onSelect={this._onIntervalMarkerSelect}
+              isModifyingSelection={isModifyingSelection}
+            />
+          ) : null}
+          {displayTracingMarkers ? (
+            <ProfileThreadTracingMarkerOverview
+              className={`${className}IntervalMarkerOverview ${className}IntervalMarkerOverviewGfx ${className}IntervalMarkerOverviewThread${
+                thread.name
+              }`}
+              rangeStart={rangeStart}
+              rangeEnd={rangeEnd}
+              threadIndex={threadIndex}
+              onSelect={this._onIntervalMarkerSelect}
+              isModifyingSelection={isModifyingSelection}
+            />
+          ) : null}
           <ThreadStackGraph
             interval={interval}
             thread={thread}

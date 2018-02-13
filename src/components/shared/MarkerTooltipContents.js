@@ -344,19 +344,15 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       <div className={classNames('tooltipMarker', className)}>
         <div className={classNames({ tooltipHeader: details })}>
           <div className="tooltipOneLine">
-            <div className="tooltipTiming">
-              {formatNumber(marker.dur)}ms
-            </div>
-            <div className="tooltipTitle">
-              {marker.title || marker.name}
-            </div>
+            <div className="tooltipTiming">{formatNumber(marker.dur)}ms</div>
+            <div className="tooltipTitle">{marker.title || marker.name}</div>
           </div>
-          {threadName
-            ? <div className="tooltipDetails">
-                <div className="tooltipLabel">Thread:</div>
-                {threadName}
-              </div>
-            : null}
+          {threadName ? (
+            <div className="tooltipDetails">
+              <div className="tooltipLabel">Thread:</div>
+              {threadName}
+            </div>
+          ) : null}
         </div>
         {details}
       </div>

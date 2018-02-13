@@ -36,7 +36,7 @@ class FilterNavigatorBar extends PureComponent<Props> {
         component="ol"
         className={classNames('filterNavigatorBar', className)}
       >
-        {items.map((item, i) =>
+        {items.map((item, i) => (
           <CSSTransition
             key={i}
             classNames="filterNavigatorBarTransition"
@@ -53,12 +53,10 @@ class FilterNavigatorBar extends PureComponent<Props> {
               title={item}
               onClick={this._onLiClick}
             >
-              <span className="filterNavigatorBarItemContent">
-                {item}
-              </span>
+              <span className="filterNavigatorBarItemContent">{item}</span>
             </li>
           </CSSTransition>
-        )}
+        ))}
       </TransitionGroup>
     );
   }

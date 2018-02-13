@@ -17,43 +17,43 @@ declare type GeckoProfiler = {
 
 declare class Window extends EventTarget {
   // Google Analytics
-  ga?: GoogleAnalytics,
+  ga?: GoogleAnalytics;
   // perf.html and Gecko Profiler Addon
-  geckoProfilerPromise: Promise<GeckoProfiler>,
-  geckoProfilerAddonInstalled?: () => void,
-  isGeckoProfilerAddonInstalled?: boolean,
+  geckoProfilerPromise: Promise<GeckoProfiler>;
+  geckoProfilerAddonInstalled?: () => void;
+  isGeckoProfilerAddonInstalled?: boolean;
   legacyRangeFilters: Array<{
     start: number,
     end: number,
-  }>,
+  }>;
   InstallTrigger?: {
     install: Object => {},
-  },
+  };
 
   // Built-ins.
   getComputedStyle: (
     element: HTMLElement,
     pseudoEl: ?string
-  ) => CSSStyleDeclaration,
-  TextDecoder: typeof TextDecoder,
-  setTimeout: typeof setTimeout,
-  fetch: typeof fetch,
-  DOMRect: typeof DOMRect,
-  requestIdleCallback: typeof requestIdleCallback,
-  requestAnimationFrame: typeof requestAnimationFrame,
-  devicePixelRatio: number,
-  indexedDB: IDBFactory,
-  IDBKeyRange: IDBKeyRange<>,
-  innerWidth: number,
-  innerHeight: number,
-  location: Location,
-  open: (url: string, windowName: string, windowFeatures: ?string) => Window,
-  history: History,
-  Worker: typeof Worker,
-  WheelEvent: WheelEvent,
+  ) => CSSStyleDeclaration;
+  TextDecoder: typeof TextDecoder;
+  setTimeout: typeof setTimeout;
+  fetch: typeof fetch;
+  DOMRect: typeof DOMRect;
+  requestIdleCallback: typeof requestIdleCallback;
+  requestAnimationFrame: typeof requestAnimationFrame;
+  devicePixelRatio: number;
+  indexedDB: IDBFactory;
+  IDBKeyRange: IDBKeyRange<>;
+  innerWidth: number;
+  innerHeight: number;
+  location: Location;
+  open: (url: string, windowName: string, windowFeatures: ?string) => Window;
+  history: History;
+  Worker: typeof Worker;
+  WheelEvent: WheelEvent;
   navigator: {
     userAgent: string,
-  },
+  };
 }
 
 declare var window: Window;

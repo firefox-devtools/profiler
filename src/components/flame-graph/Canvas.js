@@ -170,12 +170,8 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     return (
       <div className="flameGraphCanvasTooltip">
         <div className="tooltipOneLine">
-          <div className="tooltipTiming">
-            {(100 * duration).toFixed(2)}%
-          </div>
-          <div className="tooltipTitle">
-            {funcName}
-          </div>
+          <div className="tooltipTiming">{(100 * duration).toFixed(2)}%</div>
+          <div className="tooltipTitle">{funcName}</div>
         </div>
       </div>
     );

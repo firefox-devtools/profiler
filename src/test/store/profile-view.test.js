@@ -30,9 +30,9 @@ describe('call node paths on implementation filter change', function() {
   it('starts with combined CallNodePaths', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
-    expect(
-      selectedThreadSelectors.getSelectedCallNodePath(getState())
-    ).toEqual([A, B, C, D, E]);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, C, D, E]
+    );
     expect(
       selectedThreadSelectors.getExpandedCallNodePaths(getState())
     ).toEqual([
@@ -48,9 +48,9 @@ describe('call node paths on implementation filter change', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
-    expect(
-      selectedThreadSelectors.getSelectedCallNodePath(getState())
-    ).toEqual([B, D, E]);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [B, D, E]
+    );
     expect(
       selectedThreadSelectors.getExpandedCallNodePaths(getState())
     ).toEqual([
@@ -64,9 +64,9 @@ describe('call node paths on implementation filter change', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
     dispatch(ProfileView.changeImplementationFilter('js'));
-    expect(
-      selectedThreadSelectors.getSelectedCallNodePath(getState())
-    ).toEqual([B, D, E]);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [B, D, E]
+    );
     expect(
       selectedThreadSelectors.getExpandedCallNodePaths(getState())
     ).toEqual([
@@ -81,9 +81,9 @@ describe('call node paths on implementation filter change', function() {
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     dispatch(ProfileView.changeImplementationFilter('combined'));
-    expect(
-      selectedThreadSelectors.getSelectedCallNodePath(getState())
-    ).toEqual([A, B, C, D, E]);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, C, D, E]
+    );
     expect(
       selectedThreadSelectors
         .getExpandedCallNodePaths(getState())
@@ -104,9 +104,9 @@ describe('call node paths on implementation filter change', function() {
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     dispatch(ProfileView.changeImplementationFilter('cpp'));
-    expect(
-      selectedThreadSelectors.getSelectedCallNodePath(getState())
-    ).toEqual([A, C]);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, C]
+    );
     expect(
       selectedThreadSelectors.getExpandedCallNodePaths(getState())
     ).toEqual([

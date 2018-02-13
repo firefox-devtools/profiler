@@ -63,13 +63,13 @@ class TimeRuler extends PureComponent<Props> {
     return (
       <div className={className}>
         <ol className="timeRulerContainer">
-          {notches.map(({ time, pos }, i) =>
+          {notches.map(({ time, pos }, i) => (
             <li className="timeRulerNotch" key={i} style={{ left: `${pos}px` }}>
               <span className="timeRulerNotchText">{`${time.toFixed(
                 decimalPlaces
               )}s`}</span>
             </li>
-          )}
+          ))}
         </ol>
       </div>
     );

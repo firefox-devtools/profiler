@@ -34,23 +34,25 @@ function Backtrace(props: Props) {
 
   return (
     <ol className="backtrace">
-      {callNodePath.length > 0
-        ? callNodePath.map((func, i) =>
-            <li key={i} className="backtraceStackFrame">
-              {stringTable.getString(funcTable.name[func])}
-              <em className="backtraceStackFrameOrigin">
-                {getOriginAnnotationForFunc(
-                  func,
-                  thread.funcTable,
-                  thread.resourceTable,
-                  thread.stringTable
-                )}
-              </em>
-            </li>
-          )
-        : <li className="backtraceStackFrame">
-            (stack empty or all stack frames filtered out)
-          </li>}
+      {callNodePath.length > 0 ? (
+        callNodePath.map((func, i) => (
+          <li key={i} className="backtraceStackFrame">
+            {stringTable.getString(funcTable.name[func])}
+            <em className="backtraceStackFrameOrigin">
+              {getOriginAnnotationForFunc(
+                func,
+                thread.funcTable,
+                thread.resourceTable,
+                thread.stringTable
+              )}
+            </em>
+          </li>
+        ))
+      ) : (
+        <li className="backtraceStackFrame">
+          (stack empty or all stack frames filtered out)
+        </li>
+      )}
     </ol>
   );
 }

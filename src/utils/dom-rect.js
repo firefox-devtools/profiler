@@ -4,14 +4,14 @@
 // @flow
 
 export interface DOMRectInterface {
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  left: number,
-  top: number,
-  right: number,
-  bottom: number,
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
 }
 
 export type DOMRectLiteral = {

@@ -132,8 +132,10 @@ class MarkerTree {
       }
 
       displayData = {
-        timestamp: `${((markers.time[markerIndex] - this._zeroAt) /
-          1000).toFixed(3)}s`,
+        timestamp: `${(
+          (markers.time[markerIndex] - this._zeroAt) /
+          1000
+        ).toFixed(3)}s`,
         name,
         category,
       };

@@ -15,7 +15,7 @@ type PanelProps = {
 };
 
 interface Panel {
-  open(): mixed,
+  open(): mixed;
 }
 
 /**

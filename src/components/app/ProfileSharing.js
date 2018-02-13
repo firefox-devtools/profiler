@@ -36,28 +36,23 @@ import type {
 
 require('./ProfileSharing.css');
 
-const PrivacyNotice = () =>
+const PrivacyNotice = () => (
   <section className="privacyNotice">
     <p
     >{`You’re about to upload your profile publicly where anyone will be able to access it.
       To better diagnose performance problems profiles include the following information:`}</p>
     <ul>
-      <li>
-        {'The URLs and scripts of the tabs that were executing.'}
-      </li>
-      <li>
-        {'The metadata of all your add-ons to identify slow add-ons.'}
-      </li>
-      <li>
-        {'Firefox build and runtime configuration.'}
-      </li>
+      <li>{'The URLs and scripts of the tabs that were executing.'}</li>
+      <li>{'The metadata of all your add-ons to identify slow add-ons.'}</li>
+      <li>{'Firefox build and runtime configuration.'}</li>
     </ul>
     <p
     >{`To view all the information you can download the full profile to a file and open the
       json structure with a text editor.`}</p>
-  </section>;
+  </section>
+);
 
-const UploadingStatus = ({ progress }: { progress: number }) =>
+const UploadingStatus = ({ progress }: { progress: number }) => (
   <div className="profileSharingUploadingButton">
     <div className="profileSharingUploadingButtonInner">
       <progress
@@ -66,7 +61,8 @@ const UploadingStatus = ({ progress }: { progress: number }) =>
       />
       <div className="profileSharingUploadingButtonLabel">Uploading...</div>
     </div>
-  </div>;
+  </div>
+);
 
 type ProfileSharingCompositeButtonProps = {
   profile: Profile,
@@ -316,9 +312,7 @@ class ProfileSharingCompositeButton extends PureComponent<
               onOkButtonClick={this._attemptToShare}
             >
               <p>An error occurred during upload:</p>
-              <pre>
-                {error && error.toString()}
-              </pre>
+              <pre>{error && error.toString()}</pre>
             </ArrowPanel>
           }
         />
@@ -412,28 +406,28 @@ class ProfileDownloadButton extends PureComponent<
             onOpen={this._onPanelOpen}
           >
             <section>
-              {uncompressedBlobUrl
-                ? <p>
-                    <a
-                      className="profileSharingDownloadLink"
-                      href={uncompressedBlobUrl}
-                      download={filename}
-                    >
-                      {`${filename} (${prettyBytes(uncompressedSize)})`}
-                    </a>
-                  </p>
-                : null}
-              {compressedBlobUrl
-                ? <p>
-                    <a
-                      className="profileSharingDownloadLink"
-                      href={compressedBlobUrl}
-                      download={`${filename}.gz`}
-                    >
-                      {`${filename}.gz (${prettyBytes(compressedSize)})`}
-                    </a>
-                  </p>
-                : null}
+              {uncompressedBlobUrl ? (
+                <p>
+                  <a
+                    className="profileSharingDownloadLink"
+                    href={uncompressedBlobUrl}
+                    download={filename}
+                  >
+                    {`${filename} (${prettyBytes(uncompressedSize)})`}
+                  </a>
+                </p>
+              ) : null}
+              {compressedBlobUrl ? (
+                <p>
+                  <a
+                    className="profileSharingDownloadLink"
+                    href={compressedBlobUrl}
+                    download={`${filename}.gz`}
+                  >
+                    {`${filename}.gz (${prettyBytes(compressedSize)})`}
+                  </a>
+                </p>
+              ) : null}
             </section>
           </ArrowPanel>
         }
@@ -467,7 +461,7 @@ const ProfileSharing = ({
   symbolicationStatus,
   profilePublished,
   predictUrl,
-}: ProfileSharingProps) =>
+}: ProfileSharingProps) => (
   <div className="profileSharing">
     <ProfileSharingCompositeButton
       profile={profile}
@@ -477,7 +471,8 @@ const ProfileSharing = ({
       predictUrl={predictUrl}
     />
     <ProfileDownloadButton profile={profile} rootRange={rootRange} />
-  </div>;
+  </div>
+);
 
 const options: ExplicitConnectOptions<
   {||},

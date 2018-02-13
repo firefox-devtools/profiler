@@ -87,9 +87,7 @@ class StackChartGraph extends React.PureComponent<Props> {
         <StackChartSettings />
         <div className="stackChartGraph">
           <div title={processDetails} className="stackChartLabels grippy">
-            <span>
-              {threadName}
-            </span>
+            <span>{threadName}</span>
           </div>
           <StackChartCanvas
             viewportProps={{

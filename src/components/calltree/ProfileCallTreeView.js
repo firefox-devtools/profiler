@@ -9,12 +9,13 @@ import CallTree from './CallTree';
 import ProfileCallTreeSettings from './ProfileCallTreeSettings';
 import TransformNavigator from './TransformNavigator';
 
-const ProfileCallTreeView = () =>
+const ProfileCallTreeView = () => (
   <div className="treeAndSidebarWrapper">
     <ProfileCallTreeSettings />
     <TransformNavigator />
     <CallTree />
-  </div>;
+  </div>
+);
 
 ProfileCallTreeView.propTypes = {};
 

@@ -221,18 +221,18 @@ class TimeSelectionScrubberImpl extends React.PureComponent<Props, State> {
           width={width}
         />
         {children}
-        {selection.hasSelection
-          ? <SelectionScrubberOverlay
-              rangeStart={rangeStart}
-              rangeEnd={rangeEnd}
-              selectionStart={selection.selectionStart}
-              selectionEnd={selection.selectionEnd}
-              isModifying={selection.isModifying}
-              width={width}
-              onSelectionChange={onSelectionChange}
-              onZoomButtonClick={onZoomButtonClick}
-            />
-          : null}
+        {selection.hasSelection ? (
+          <SelectionScrubberOverlay
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            selectionStart={selection.selectionStart}
+            selectionEnd={selection.selectionEnd}
+            isModifying={selection.isModifying}
+            width={width}
+            onSelectionChange={onSelectionChange}
+            onZoomButtonClick={onZoomButtonClick}
+          />
+        ) : null}
         <div
           className="timeSelectionScrubberHoverIndicator"
           style={{

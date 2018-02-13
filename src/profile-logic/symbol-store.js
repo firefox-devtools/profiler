@@ -15,7 +15,7 @@ interface SymbolProvider {
   requestSymbolTable(
     debugName: string,
     breakpadId: string
-  ): Promise<SymbolTableAsTuple>,
+  ): Promise<SymbolTableAsTuple>;
 }
 
 /**
