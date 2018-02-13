@@ -28,12 +28,14 @@ module.exports = {
     'import/no-unresolved': 'error',
     'import/named': 'error',
     'prettier/prettier': ['error', { singleQuote: true, trailingComma: 'es5' }],
+    'react/button-has-type': 'error',
     'react/no-access-state-in-setstate': 'error',
     'react/no-danger': 'error',
     'react/no-did-mount-set-state': 'error',
     'react/no-did-update-set-state': 'error',
     'react/no-will-update-set-state': 'error',
     'react/no-redundant-should-component-update': 'error',
+    'react/no-this-in-sfc': 'error',
     'react/no-typos': 'error',
     // `no-unused-prop-types` is buggy when we use destructuring parameters in
     // functions as it misunderstands them as functional components.
@@ -46,6 +48,13 @@ module.exports = {
       { ignorePureComponents: true },
     ],
     'react/jsx-no-bind': 'error',
+    // We still have too many files without the file annotation. Let's enable it
+    // once we flow-type everything.
+    // 'flowtype/require-valid-file-annotation': [ 'error', 'always', { annotationStyle: 'line' } ],
+    // no-dupe-keys crashes with recent eslint. See
+    // https://github.com/gajus/eslint-plugin-flowtype/pull/266 and
+    // https://github.com/gajus/eslint-plugin-flowtype/pull/302
+    // 'flowtype/no-dupe-keys': 'error',
 
     // overriding recommended rules
     'no-constant-condition': ['error', { checkLoops: false }],
@@ -73,7 +82,9 @@ module.exports = {
     'no-self-compare': 'error',
     'no-throw-literal': 'error',
     'no-unmodified-loop-condition': 'error',
-    'no-unused-expressions': 'error',
+    // We use the version from the flowtype plugin so that flow assertions don't
+    // output an error.
+    'flowtype/no-unused-expressions': 'error',
     'no-useless-call': 'error',
     'no-useless-computed-key': 'error',
     'no-useless-concat': 'error',

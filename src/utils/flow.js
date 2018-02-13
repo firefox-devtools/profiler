@@ -48,7 +48,7 @@ export function toValidTabSlug(tabSlug: any): TabSlug | null {
     default: {
       // The coerced type SHOULD be empty here. If in reality we get
       // here, then it's not a valid transform type, so return null.
-      (coercedTabSlug: empty); // eslint-disable-line no-unused-expressions
+      (coercedTabSlug: empty);
       return null;
     }
   }
@@ -76,7 +76,7 @@ export function convertToTransformType(type: string): TransformType | null {
     default: {
       // The coerced type SHOULD be empty here. If in reality we get
       // here, then it's not a valid transform type, so return null.
-      (coercedType: empty); // eslint-disable-line no-unused-expressions
+      (coercedType: empty);
       return null;
     }
   }

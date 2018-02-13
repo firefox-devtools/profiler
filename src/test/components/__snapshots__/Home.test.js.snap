@@ -116,6 +116,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
       className="appFooterLinksClose"
       onClick={[Function]}
       title="Hide links to legal information"
+      type="button"
     >
       ✕
     </button>
@@ -271,6 +272,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
       className="appFooterLinksClose"
       onClick={[Function]}
       title="Hide links to legal information"
+      type="button"
     >
       ✕
     </button>
@@ -460,6 +462,7 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
       className="appFooterLinksClose"
       onClick={[Function]}
       title="Hide links to legal information"
+      type="button"
     >
       ✕
     </button>
@@ -633,6 +636,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
       className="appFooterLinksClose"
       onClick={[Function]}
       title="Hide links to legal information"
+      type="button"
     >
       ✕
     </button>
