@@ -56,148 +56,40 @@
       ],
       "frameTable": {
         "length": 5,
-        "implementation": [
-          null,
-          null,
-          null,
-          null,
-          6
-        ],
-        "optimizations": [
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
-        "line": [
-          null,
-          null,
-          null,
-          4391,
-          34
-        ],
-        "category": [
-          null,
-          null,
-          null,
-          16,
-          null
-        ],
-        "func": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
-        "address": [
-          -1,
-          3972,
-          6725,
-          -1,
-          -1
-        ]
+        "implementation": [null, null, null, null, 6],
+        "optimizations": [null, null, null, null, null],
+        "line": [null, null, null, 4391, 34],
+        "category": [null, null, null, 16, null],
+        "func": [0, 1, 2, 3, 4],
+        "address": [-1, 3972, 6725, -1, -1]
       },
       "funcTable": {
         "length": 5,
-        "name": [
-          0,
-          1,
-          2,
-          3,
-          13
-        ],
-        "resource": [
-          -1,
-          0,
-          0,
-          -1,
-          1
-        ],
-        "address": [
-          -1,
-          3972,
-          6725,
-          -1,
-          -1
-        ],
-        "isJS": [
-          false,
-          false,
-          false,
-          false,
-          true
-        ],
-        "fileName": [
-          null,
-          null,
-          null,
-          null,
-          12
-        ],
-        "lineNumber": [
-          null,
-          null,
-          null,
-          null,
-          34
-        ]
+        "name": [0, 1, 2, 3, 13],
+        "resource": [-1, 0, 0, -1, 1],
+        "address": [-1, 3972, 6725, -1, -1],
+        "isJS": [false, false, false, false, true],
+        "fileName": [null, null, null, null, 12],
+        "lineNumber": [null, null, null, null, 34]
       },
       "resourceTable": {
         "length": 2,
-        "type": [
-          1,
-          5
-        ],
-        "name": [
-          11,
-          12
-        ],
-        "lib": [
-          0
-        ],
+        "type": [1, 5],
+        "name": [11, 12],
+        "lib": [0],
         "icon": [],
         "addonId": [],
         "host": []
       },
       "stackTable": {
         "length": 5,
-        "prefix": [
-          null,
-          0,
-          1,
-          1,
-          1
-        ],
-        "frame": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
+        "prefix": [null, 0, 1, 1, 1],
+        "frame": [0, 1, 2, 3, 4]
       },
       "markers": {
         "length": 7,
-        "name": [
-          4,
-          5,
-          10,
-          10,
-          5,
-          8,
-          9
-        ],
-        "time": [
-          0,
-          2,
-          4,
-          5,
-          8,
-          9,
-          11
-        ],
+        "name": [4, 5, 10, 10, 5, 8, 9],
+        "time": [0, 2, 4, 5, 8, 9, 11],
         "data": [
           {
             "category": "VsyncTimestamp",
@@ -226,12 +118,7 @@
                   "frameNumber": 5,
                   "power": 6
                 },
-                "data": [
-                  [
-                    2,
-                    1
-                  ]
-                ]
+                "data": [[2, 1]]
               }
             },
             "type": "tracing"
@@ -266,51 +153,11 @@
       },
       "samples": {
         "length": 7,
-        "stack": [
-          1,
-          2,
-          2,
-          3,
-          0,
-          1,
-          4
-        ],
-        "time": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6
-        ],
-        "responsiveness": [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        "rss": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
-        "uss": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ]
+        "stack": [1, 2, 2, 3, 0, 1, 4],
+        "time": [0, 1, 2, 3, 4, 5, 6],
+        "responsiveness": [0, 0, 0, 0, 0, 0, 0],
+        "rss": [null, null, null, null, null, null, null],
+        "uss": [null, null, null, null, null, null, null]
       },
       "stringArray": [
         "(root)",
@@ -371,148 +218,40 @@
       ],
       "frameTable": {
         "length": 5,
-        "implementation": [
-          null,
-          null,
-          null,
-          null,
-          6
-        ],
-        "optimizations": [
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
-        "line": [
-          null,
-          null,
-          null,
-          4391,
-          34
-        ],
-        "category": [
-          null,
-          null,
-          null,
-          16,
-          null
-        ],
-        "func": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
-        "address": [
-          -1,
-          3972,
-          6725,
-          -1,
-          -1
-        ]
+        "implementation": [null, null, null, null, 6],
+        "optimizations": [null, null, null, null, null],
+        "line": [null, null, null, 4391, 34],
+        "category": [null, null, null, 16, null],
+        "func": [0, 1, 2, 3, 4],
+        "address": [-1, 3972, 6725, -1, -1]
       },
       "funcTable": {
         "length": 5,
-        "name": [
-          0,
-          1,
-          2,
-          3,
-          13
-        ],
-        "resource": [
-          -1,
-          0,
-          0,
-          -1,
-          1
-        ],
-        "address": [
-          -1,
-          3972,
-          6725,
-          -1,
-          -1
-        ],
-        "isJS": [
-          false,
-          false,
-          false,
-          false,
-          true
-        ],
-        "fileName": [
-          null,
-          null,
-          null,
-          null,
-          12
-        ],
-        "lineNumber": [
-          null,
-          null,
-          null,
-          null,
-          34
-        ]
+        "name": [0, 1, 2, 3, 13],
+        "resource": [-1, 0, 0, -1, 1],
+        "address": [-1, 3972, 6725, -1, -1],
+        "isJS": [false, false, false, false, true],
+        "fileName": [null, null, null, null, 12],
+        "lineNumber": [null, null, null, null, 34]
       },
       "resourceTable": {
         "length": 2,
-        "type": [
-          1,
-          5
-        ],
-        "name": [
-          11,
-          12
-        ],
-        "lib": [
-          0
-        ],
+        "type": [1, 5],
+        "name": [11, 12],
+        "lib": [0],
         "icon": [],
         "addonId": [],
         "host": []
       },
       "stackTable": {
         "length": 5,
-        "prefix": [
-          null,
-          0,
-          1,
-          1,
-          1
-        ],
-        "frame": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
+        "prefix": [null, 0, 1, 1, 1],
+        "frame": [0, 1, 2, 3, 4]
       },
       "markers": {
         "length": 7,
-        "name": [
-          4,
-          5,
-          10,
-          10,
-          5,
-          8,
-          9
-        ],
-        "time": [
-          0,
-          2,
-          4,
-          5,
-          8,
-          9,
-          11
-        ],
+        "name": [4, 5, 10, 10, 5, 8, 9],
+        "time": [0, 2, 4, 5, 8, 9, 11],
         "data": [
           {
             "category": "VsyncTimestamp",
@@ -541,12 +280,7 @@
                   "frameNumber": 5,
                   "power": 6
                 },
-                "data": [
-                  [
-                    2,
-                    1
-                  ]
-                ]
+                "data": [[2, 1]]
               }
             },
             "type": "tracing"
@@ -581,51 +315,11 @@
       },
       "samples": {
         "length": 7,
-        "stack": [
-          1,
-          2,
-          2,
-          3,
-          0,
-          1,
-          4
-        ],
-        "time": [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6
-        ],
-        "responsiveness": [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        "rss": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
-        "uss": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ]
+        "stack": [1, 2, 2, 3, 0, 1, 4],
+        "time": [0, 1, 2, 3, 4, 5, 6],
+        "responsiveness": [0, 0, 0, 0, 0, 0, 0],
+        "rss": [null, null, null, null, null, null, null],
+        "uss": [null, null, null, null, null, null, null]
       },
       "stringArray": [
         "(root)",
@@ -686,148 +380,40 @@
       ],
       "frameTable": {
         "length": 5,
-        "implementation": [
-          null,
-          null,
-          null,
-          null,
-          6
-        ],
-        "optimizations": [
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
-        "line": [
-          null,
-          null,
-          null,
-          4391,
-          34
-        ],
-        "category": [
-          null,
-          null,
-          null,
-          16,
-          null
-        ],
-        "func": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ],
-        "address": [
-          -1,
-          3972,
-          6725,
-          -1,
-          -1
-        ]
+        "implementation": [null, null, null, null, 6],
+        "optimizations": [null, null, null, null, null],
+        "line": [null, null, null, 4391, 34],
+        "category": [null, null, null, 16, null],
+        "func": [0, 1, 2, 3, 4],
+        "address": [-1, 3972, 6725, -1, -1]
       },
       "funcTable": {
         "length": 5,
-        "name": [
-          0,
-          1,
-          2,
-          3,
-          13
-        ],
-        "resource": [
-          -1,
-          0,
-          0,
-          -1,
-          1
-        ],
-        "address": [
-          -1,
-          3972,
-          6725,
-          -1,
-          -1
-        ],
-        "isJS": [
-          false,
-          false,
-          false,
-          false,
-          true
-        ],
-        "fileName": [
-          null,
-          null,
-          null,
-          null,
-          12
-        ],
-        "lineNumber": [
-          null,
-          null,
-          null,
-          null,
-          34
-        ]
+        "name": [0, 1, 2, 3, 13],
+        "resource": [-1, 0, 0, -1, 1],
+        "address": [-1, 3972, 6725, -1, -1],
+        "isJS": [false, false, false, false, true],
+        "fileName": [null, null, null, null, 12],
+        "lineNumber": [null, null, null, null, 34]
       },
       "resourceTable": {
         "length": 2,
-        "type": [
-          1,
-          5
-        ],
-        "name": [
-          11,
-          12
-        ],
-        "lib": [
-          0
-        ],
+        "type": [1, 5],
+        "name": [11, 12],
+        "lib": [0],
         "icon": [],
         "addonId": [],
         "host": []
       },
       "stackTable": {
         "length": 5,
-        "prefix": [
-          null,
-          0,
-          1,
-          1,
-          1
-        ],
-        "frame": [
-          0,
-          1,
-          2,
-          3,
-          4
-        ]
+        "prefix": [null, 0, 1, 1, 1],
+        "frame": [0, 1, 2, 3, 4]
       },
       "markers": {
         "length": 7,
-        "name": [
-          4,
-          5,
-          10,
-          10,
-          5,
-          8,
-          9
-        ],
-        "time": [
-          1000,
-          1002,
-          1004,
-          1005,
-          1008,
-          1009,
-          1011
-        ],
+        "name": [4, 5, 10, 10, 5, 8, 9],
+        "time": [1000, 1002, 1004, 1005, 1008, 1009, 1011],
         "data": [
           {
             "category": "VsyncTimestamp",
@@ -856,12 +442,7 @@
                   "frameNumber": 5,
                   "power": 6
                 },
-                "data": [
-                  [
-                    2,
-                    1
-                  ]
-                ]
+                "data": [[2, 1]]
               }
             },
             "type": "tracing"
@@ -896,51 +477,11 @@
       },
       "samples": {
         "length": 7,
-        "stack": [
-          1,
-          2,
-          2,
-          3,
-          0,
-          1,
-          4
-        ],
-        "time": [
-          1000,
-          1001,
-          1002,
-          1003,
-          1004,
-          1005,
-          1006
-        ],
-        "responsiveness": [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0
-        ],
-        "rss": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ],
-        "uss": [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null
-        ]
+        "stack": [1, 2, 2, 3, 0, 1, 4],
+        "time": [1000, 1001, 1002, 1003, 1004, 1005, 1006],
+        "responsiveness": [0, 0, 0, 0, 0, 0, 0],
+        "rss": [null, null, null, null, null, null, null],
+        "uss": [null, null, null, null, null, null, null]
       },
       "stringArray": [
         "(root)",

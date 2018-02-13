@@ -716,6 +716,8 @@ describe('upgrades', function() {
 
   // Uncomment this to output your next ./upgrades/processed-X.json
   // console.log(serializeProfile(afterUpgradeReference));
+  // Then run prettier on it with the following command:
+  //   yarn run prettier --write <file name>
   it('should import an old profile and upgrade it to be the same as the reference processed profile', function() {
     expect(afterUpgradeReference.meta.preprocessedProfileVersion).toEqual(
       CURRENT_PROCESSED_VERSION
@@ -799,6 +801,8 @@ describe('upgrades', function() {
     // Uncomment this to output your next ./upgrades/gecko-X.json
     // upgradeGeckoProfileToCurrentVersion(afterUpgradeGeckoReference);
     // console.log(JSON.stringify(afterUpgradeGeckoReference));
+    // Then run prettier on it with the following command:
+    //   yarn run prettier --write <file name>
     expect(afterUpgradeGeckoReference.meta.version).toEqual(
       CURRENT_GECKO_VERSION
     );
