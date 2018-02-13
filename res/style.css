@@ -78,7 +78,6 @@ body, #root, .profileViewer {
   left: 0;
   position: sticky;
   z-index: 2;
-  min-width: min-content;
 }
 
 .treeViewBodyInner {
