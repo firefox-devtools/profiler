@@ -5,7 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 
 import type { Milliseconds, CssPixels } from '../../types/units';
 
@@ -75,13 +74,5 @@ class TimeRuler extends PureComponent<Props> {
     );
   }
 }
-
-TimeRuler.propTypes = {
-  className: PropTypes.string.isRequired,
-  zeroAt: PropTypes.number.isRequired,
-  rangeStart: PropTypes.number.isRequired,
-  rangeEnd: PropTypes.number.isRequired,
-  width: PropTypes.number.isRequired,
-};
 
 export default TimeRuler;

@@ -13,7 +13,6 @@
 // duplication.
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 
 type StyleDefProps = {|
   +content: string,
@@ -53,10 +52,6 @@ export class StyleDef extends PureComponent<StyleDefProps> {
   }
 }
 
-StyleDef.propTypes = {
-  content: PropTypes.string.isRequired,
-};
-
 type BackgroundImageStyleDefProps = {|
   +className: string,
   +url: string,
@@ -74,8 +69,3 @@ export class BackgroundImageStyleDef extends PureComponent<
     return <StyleDef content={content} />;
   }
 }
-
-BackgroundImageStyleDef.propTypes = {
-  className: PropTypes.string.isRequired,
-  url: PropTypes.string.isRequired,
-};

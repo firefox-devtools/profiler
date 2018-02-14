@@ -17,6 +17,4 @@ const ProfileCallTreeView = () => (
   </div>
 );
 
-ProfileCallTreeView.propTypes = {};
-
 export default ProfileCallTreeView;

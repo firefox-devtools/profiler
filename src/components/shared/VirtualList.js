@@ -4,7 +4,6 @@
 
 // @flow
 import * as React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import range from 'array-range';
 
@@ -343,18 +342,5 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
     );
   }
 }
-
-VirtualList.propTypes = {
-  itemHeight: PropTypes.number.isRequired,
-  className: PropTypes.string,
-  renderItem: PropTypes.func.isRequired,
-  items: PropTypes.array.isRequired,
-  focusable: PropTypes.bool.isRequired,
-  specialItems: PropTypes.array.isRequired,
-  onKeyDown: PropTypes.func.isRequired,
-  onCopy: PropTypes.func.isRequired,
-  disableOverscan: PropTypes.bool,
-  columnCount: PropTypes.number,
-};
 
 export default VirtualList;

@@ -4,7 +4,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { timeCode } from '../../utils/time-code';
 import { getSampleCallNodes } from '../../profile-logic/profile-data';
@@ -179,21 +178,5 @@ class ThreadStackGraph extends PureComponent<Props> {
     );
   }
 }
-
-ThreadStackGraph.propTypes = {
-  thread: PropTypes.shape({
-    samples: PropTypes.object.isRequired,
-  }).isRequired,
-  interval: PropTypes.number.isRequired,
-  rangeStart: PropTypes.number.isRequired,
-  rangeEnd: PropTypes.number.isRequired,
-  callNodeInfo: PropTypes.shape({
-    callNodeTable: PropTypes.object.isRequired,
-    stackIndexToCallNodeIndex: PropTypes.any.isRequired,
-  }).isRequired,
-  selectedCallNodeIndex: PropTypes.number,
-  className: PropTypes.string,
-  onStackClick: PropTypes.func.isRequired,
-};
 
 export default ThreadStackGraph;

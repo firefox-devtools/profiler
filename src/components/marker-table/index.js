@@ -5,7 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import {
@@ -208,15 +207,6 @@ class MarkerTable extends PureComponent<Props> {
     );
   }
 }
-
-MarkerTable.propTypes = {
-  thread: PropTypes.object.isRequired,
-  markers: PropTypes.object.isRequired,
-  threadIndex: PropTypes.number.isRequired,
-  selectedMarker: PropTypes.number.isRequired,
-  zeroAt: PropTypes.number.isRequired,
-  changeSelectedMarker: PropTypes.func.isRequired,
-};
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
