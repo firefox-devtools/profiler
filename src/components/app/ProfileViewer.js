@@ -5,7 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import explicitConnect from '../../utils/connect';
 import TabBar from './TabBar';
 import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
@@ -120,14 +119,6 @@ class ProfileViewer extends PureComponent<Props> {
     );
   }
 }
-
-ProfileViewer.propTypes = {
-  className: PropTypes.string.isRequired,
-  tabOrder: PropTypes.arrayOf(PropTypes.number).isRequired,
-  selectedTab: PropTypes.string.isRequired,
-  changeSelectedTab: PropTypes.func.isRequired,
-  changeTabOrder: PropTypes.func.isRequired,
-};
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({

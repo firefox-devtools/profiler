@@ -5,7 +5,6 @@
 // @flow
 
 import * as React from 'react';
-import PropTypes from 'prop-types';
 import TimeRuler from './TimeRuler';
 import SelectionScrubberOverlay from './SelectionScrubberOverlay';
 import clamp from 'clamp';
@@ -247,19 +246,6 @@ class TimeSelectionScrubberImpl extends React.PureComponent<Props, State> {
     );
   }
 }
-
-TimeSelectionScrubberImpl.propTypes = {
-  className: PropTypes.string.isRequired,
-  zeroAt: PropTypes.number.isRequired,
-  rangeStart: PropTypes.number.isRequired,
-  rangeEnd: PropTypes.number.isRequired,
-  minSelectionStartWidth: PropTypes.number.isRequired,
-  selection: PropTypes.object.isRequired,
-  width: PropTypes.number.isRequired,
-  onSelectionChange: PropTypes.func,
-  onZoomButtonClick: PropTypes.func,
-  children: PropTypes.node,
-};
 
 const TimeSelectionScrubber = withSize(TimeSelectionScrubberImpl);
 

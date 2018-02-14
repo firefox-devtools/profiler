@@ -5,7 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './FilterNavigatorBar.css';
@@ -61,12 +60,5 @@ class FilterNavigatorBar extends PureComponent<Props> {
     );
   }
 }
-
-FilterNavigatorBar.propTypes = {
-  className: PropTypes.string,
-  items: PropTypes.array.isRequired,
-  selectedItem: PropTypes.number.isRequired,
-  onPop: PropTypes.func.isRequired,
-};
 
 export default FilterNavigatorBar;

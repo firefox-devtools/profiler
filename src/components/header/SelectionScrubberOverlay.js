@@ -5,7 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import clamp from 'clamp';
 import Draggable from '../shared/Draggable';
@@ -143,14 +142,3 @@ export default class SelectionScrubberOverlay extends PureComponent<Props> {
     );
   }
 }
-
-SelectionScrubberOverlay.propTypes = {
-  rangeStart: PropTypes.number.isRequired,
-  rangeEnd: PropTypes.number.isRequired,
-  selectionStart: PropTypes.number,
-  selectionEnd: PropTypes.number,
-  isModifying: PropTypes.bool.isRequired,
-  width: PropTypes.number.isRequired,
-  onSelectionChange: PropTypes.func,
-  onZoomButtonClick: PropTypes.func,
-};

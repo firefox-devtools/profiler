@@ -5,7 +5,6 @@
 // @flow
 
 import * as React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import VirtualList from './VirtualList';
 import { BackgroundImageStyleDef } from './StyleDef';
@@ -298,7 +297,7 @@ type TreeViewProps<NodeIndex, DisplayData> = {|
   +tree: Tree<NodeIndex, DisplayData>,
   +expandedNodeIds: Array<NodeIndex | null>,
   +selectedNodeId: NodeIndex | null,
-  +onExpandedNodesChange: PropTypes.func.isRequired,
+  +onExpandedNodesChange: Array<NodeIndex | null>,
   +highlightRegExp?: RegExp | null,
   +appendageColumn?: Column,
   +appendageButtons?: string[],
@@ -603,35 +602,5 @@ class TreeView<
     );
   }
 }
-
-TreeView.propTypes = {
-  fixedColumns: PropTypes.arrayOf(
-    PropTypes.shape({
-      propName: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      component: PropTypes.func,
-    })
-  ).isRequired,
-  mainColumn: PropTypes.shape({
-    propName: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-  }).isRequired,
-  tree: PropTypes.object.isRequired,
-  expandedNodeIds: PropTypes.arrayOf(PropTypes.number).isRequired,
-  selectedNodeId: PropTypes.number,
-  onExpandedNodesChange: PropTypes.func.isRequired,
-  onSelectionChange: PropTypes.func.isRequired,
-  highlightRegExp: PropTypes.instanceOf(RegExp),
-  appendageColumn: PropTypes.shape({
-    propName: PropTypes.string.isRequired,
-    title: PropTypes.string.isRequired,
-  }),
-  appendageButtons: PropTypes.arrayOf(PropTypes.string),
-  onAppendageButtonClick: PropTypes.func,
-  disableOverscan: PropTypes.bool,
-  contextMenu: PropTypes.object,
-  contextMenuId: PropTypes.string,
-  icons: PropTypes.array,
-};
 
 export default TreeView;

@@ -5,7 +5,6 @@
 // @flow
 
 import * as React from 'react';
-import PropTypes from 'prop-types';
 import explicitConnect from '../../utils/connect';
 import { getIsUrlSetupDone } from '../../reducers/app';
 import { updateUrlState, urlSetupDone, show404 } from '../../actions/app';
@@ -76,15 +75,6 @@ class UrlManager extends React.PureComponent<Props> {
     );
   }
 }
-
-UrlManager.propTypes = {
-  children: PropTypes.any.isRequired,
-  urlState: PropTypes.object.isRequired,
-  isUrlSetupDone: PropTypes.bool.isRequired,
-  updateUrlState: PropTypes.func.isRequired,
-  urlSetupDone: PropTypes.func.isRequired,
-  show404: PropTypes.func.isRequired,
-};
 
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({

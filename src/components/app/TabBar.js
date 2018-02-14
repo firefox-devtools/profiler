@@ -5,7 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import Reorderable from '../shared/Reorderable';
 
@@ -72,19 +71,5 @@ class TabBar extends PureComponent<Props> {
     );
   }
 }
-
-TabBar.propTypes = {
-  className: PropTypes.string,
-  tabs: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-  selectedTabName: PropTypes.string.isRequired,
-  tabOrder: PropTypes.arrayOf(PropTypes.number).isRequired,
-  onSelectTab: PropTypes.func.isRequired,
-  onChangeTabOrder: PropTypes.func.isRequired,
-};
 
 export default TabBar;
