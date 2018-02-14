@@ -81,7 +81,7 @@ export function logFriendlyPreamble() {
       %cwindow.filteredThread%c - The current filtered thread
       %cwindow.callTree%c - The call tree of the current filtered thread
 
-      The profile format is document here:
+      The profile format is documented here:
       %chttps://github.com/devtools-html/perf.html/blob/master/docs/processed-profile-format.md%c
 
       The CallTree class's source code is available here:
