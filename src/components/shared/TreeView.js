@@ -5,7 +5,6 @@
 // @flow
 
 import * as React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import VirtualList from './VirtualList';
 import { BackgroundImageStyleDef } from './StyleDef';
@@ -298,7 +297,7 @@ type TreeViewProps<NodeIndex, DisplayData> = {|
   +tree: Tree<NodeIndex, DisplayData>,
   +expandedNodeIds: Array<NodeIndex | null>,
   +selectedNodeId: NodeIndex | null,
-  +onExpandedNodesChange: PropTypes.func.isRequired,
+  +onExpandedNodesChange: (Array<NodeIndex | null>) => mixed,
   +highlightRegExp?: RegExp | null,
   +appendageColumn?: Column,
   +appendageButtons?: string[],
