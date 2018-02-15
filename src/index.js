@@ -17,12 +17,8 @@ import {
 // code coverage in development and testing.
 if (process.env.NODE_ENV === 'development') {
   window.ga = (event, ...payload) => {
-    console.log(
-      `%cAnalytics:%c"${event}"`,
-      'color: #FF6D00; font-weight: bold',
-      'color: #FF6D00;',
-      ...payload
-    );
+    const style = 'color: #FF6D00; font-weight: bold';
+    console.log(`[analytics] %c"${event}"`, style, ...payload);
   };
 } else if (process.env.NODE_ENV !== 'production') {
   window.ga = () => {};
