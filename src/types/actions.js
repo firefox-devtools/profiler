@@ -18,7 +18,7 @@ import type { GetCategory } from '../profile-logic/color-categories';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
-import type { UrlState, State } from '../types/reducers';
+import type { UrlState } from '../types/reducers';
 
 export type DataSource =
   | 'none'
@@ -144,8 +144,9 @@ type StackChartAction =
   | { type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' };
 
 type UrlEnhancerAction =
-  | { type: 'URL_SETUP_DONE' }
-  | { type: 'UPDATE_URL_STATE', newUrlState: UrlState, state: State };
+  | {| type: 'ENABLE_HISTORY_PUSH_STATE' |}
+  | {| type: 'ENABLE_HISTORY_REPLACE_STATE' |}
+  | {| type: 'UPDATE_URL_STATE', urlState: UrlState |};
 
 type UrlStateAction =
   | { type: 'WAITING_FOR_PROFILE_FROM_FILE' }

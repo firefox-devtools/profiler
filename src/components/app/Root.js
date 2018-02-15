@@ -240,7 +240,7 @@ export default class Root extends PureComponent<RootProps> {
     const { store } = this.props;
     return (
       <Provider store={store}>
-        <UrlManager store={store}>
+        <UrlManager>
           <ProfileViewWhenReady />
         </UrlManager>
       </Provider>

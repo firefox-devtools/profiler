@@ -261,7 +261,7 @@ const urlStateReducer: Reducer<UrlState> = (regularUrlStateReducer => (
 ): UrlState => {
   switch (action.type) {
     case 'UPDATE_URL_STATE':
-      return action.newUrlState;
+      return action.urlState;
     default:
       return regularUrlStateReducer(state, action);
   }
