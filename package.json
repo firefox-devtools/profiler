@@ -41,6 +41,7 @@
   "dependencies": {
     "array-move": "^1.0.0",
     "array-range": "^1.0.1",
+    "babel-runtime": "^6.26.0",
     "bisection": "0.0.3",
     "clamp": "^1.0.1",
     "classnames": "^2.2.5",
@@ -51,7 +52,6 @@
     "memoize-immutable": "^3.0.0",
     "offline-plugin": "^4.9.0",
     "photon-colors": "2.0.1",
-    "pretty-bytes": "^4.0.2",
     "prop-types": "^15.6.0",
     "query-string": "^5.1.0",
     "react": "^16.2.0",
