@@ -143,6 +143,7 @@ export function viewProfileFromZip(
         });
       }
     } catch (error) {
+      console.error('Failed to process the profile in the zip file.', error);
       dispatch({ type: 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE', error });
     }
   };
@@ -150,4 +151,8 @@ export function viewProfileFromZip(
 
 export function returnToZipFileList() {
   return { type: 'RETURN_TO_ZIP_FILE_LIST' };
+}
+
+export function showErrorForNoFileInZip(zipFilePath: string) {
+  return { type: 'FILE_NOT_FOUND_IN_ZIP_FILE', zipFilePath };
 }

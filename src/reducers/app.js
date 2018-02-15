@@ -99,7 +99,10 @@ function _validateStateTransition(
       ];
       break;
     case 'LIST_FILES_IN_ZIP_FILE':
-      expectedNextPhases = ['PROCESS_PROFILE_FROM_ZIP_FILE'];
+      expectedNextPhases = [
+        'PROCESS_PROFILE_FROM_ZIP_FILE',
+        'FILE_NOT_FOUND_IN_ZIP_FILE',
+      ];
       break;
     case 'PROCESS_PROFILE_FROM_ZIP_FILE':
       expectedNextPhases = [
@@ -108,6 +111,9 @@ function _validateStateTransition(
         // When navigating with the URL, it's possible to go back and list the files.
         'LIST_FILES_IN_ZIP_FILE',
       ];
+      break;
+    case 'FILE_NOT_FOUND_IN_ZIP_FILE':
+      expectedNextPhases = ['LIST_FILES_IN_ZIP_FILE'];
       break;
     case 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE':
       expectedNextPhases = ['LIST_FILES_IN_ZIP_FILE'];
@@ -119,6 +125,9 @@ function _validateStateTransition(
       throw new Error(`Unhandled ZipFileState “${(prevPhase: empty)}”`);
   }
   if (!expectedNextPhases.includes(next.phase)) {
+    console.error('Previous ZipFileState:', prev);
+    console.error('Next ZipFileState:', next);
+
     throw new Error(oneLine`
       Attempted to transition the ZipFileState from the phase “${prev.phase}”
       to “${next.phase}”, however “${prev.phase}” can only transition to
@@ -176,6 +185,12 @@ function zipFile(
     case 'PROCESS_PROFILE_FROM_ZIP_FILE':
       return _validateStateTransition(state, {
         phase: 'PROCESS_PROFILE_FROM_ZIP_FILE',
+        zip: _getZipFile(state),
+        zipFilePath: action.zipFilePath,
+      });
+    case 'FILE_NOT_FOUND_IN_ZIP_FILE':
+      return _validateStateTransition(state, {
+        phase: 'FILE_NOT_FOUND_IN_ZIP_FILE',
         zip: _getZipFile(state),
         zipFilePath: action.zipFilePath,
       });

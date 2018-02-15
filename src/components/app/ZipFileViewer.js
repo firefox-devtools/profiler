@@ -18,6 +18,7 @@ import {
   changeExpandedZipFile,
   viewProfileFromZip,
   returnToZipFileList,
+  showErrorForNoFileInZip,
 } from '../../actions/app';
 import {
   getZipFileState,
@@ -51,6 +52,7 @@ type DispatchProps = {|
   +changeExpandedZipFile: typeof changeExpandedZipFile,
   +viewProfileFromZip: typeof viewProfileFromZip,
   +returnToZipFileList: typeof returnToZipFileList,
+  +showErrorForNoFileInZip: typeof showErrorForNoFileInZip,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -113,6 +115,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
       viewProfileFromZip,
       zipFileTable,
       returnToZipFileList,
+      showErrorForNoFileInZip,
     } = nextProps;
 
     if (zipFilePathFromUrl !== zipFileState.zipFilePath) {
@@ -128,9 +131,10 @@ class ZipFileViewer extends React.PureComponent<Props> {
         // started doing that.
         const zipFileIndex = zipFileTable.path.indexOf(zipFilePathFromUrl);
         if (zipFileIndex === -1) {
-          throw new Error('Could not find the zip file at that path.');
+          showErrorForNoFileInZip(zipFilePathFromUrl);
+        } else {
+          viewProfileFromZip(zipFileIndex);
         }
-        viewProfileFromZip(zipFileIndex);
       }
     }
   }
@@ -162,6 +166,19 @@ class ZipFileViewer extends React.PureComponent<Props> {
     );
   }
 
+  _renderBackButton() {
+    return (
+      <button
+        key="backButton"
+        type="button"
+        className="homeSectionInstallButton"
+        onClick={this.props.returnToZipFileList}
+      >
+        ← Back to zip file list
+      </button>
+    );
+  }
+
   render() {
     const {
       zipFileState,
@@ -171,7 +188,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
       expandedZipFileIndexes,
       changeSelectedZipFile,
       changeExpandedZipFile,
-      returnToZipFileList,
+      zipFilePathFromUrl,
     } = this.props;
 
     if (!zipFileTree) {
@@ -218,20 +235,36 @@ class ZipFileViewer extends React.PureComponent<Props> {
           <span>Loading the profile from the zip file...</span>
         );
       case 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE':
-        return this._renderMessage(
-          <div>
-            <span>
-              Failed to process the profile. Are you sure this is a profile?
-            </span>
-            <button
-              type="button"
-              className="homeSectionInstallButton"
-              onClick={returnToZipFileList}
-            >
-              ← Back to zip file list
-            </button>
-          </div>
-        );
+        return this._renderMessage([
+          <span key="message">
+            Are you sure this is a profile? Failed to process the file in the
+            zip file at the following path:
+          </span>,
+          <span className="zipFileViewerUntrustedFilePath" key="path">
+            /{
+              // This is text that comes from the URL, make sure it looks visually
+              // distinct for guarding against someone doing anything too funky
+              // with it.
+              zipFilePathFromUrl
+            }
+          </span>,
+          this._renderBackButton(),
+        ]);
+      case 'FILE_NOT_FOUND_IN_ZIP_FILE':
+        return this._renderMessage([
+          <span key="message">
+            Failed to find a file in the zip at the following path:
+          </span>,
+          <span className="zipFileViewerUntrustedFilePath" key="path">
+            /{
+              // This is text that comes from the URL, make sure it looks visually
+              // distinct for guarding against someone doing anything too funky
+              // with it.
+              zipFilePathFromUrl
+            }
+          </span>,
+          this._renderBackButton(),
+        ]);
       case 'VIEW_PROFILE_IN_ZIP_FILE':
         return <ProfileViewer />;
       default:
@@ -270,6 +303,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     changeExpandedZipFile,
     viewProfileFromZip,
     returnToZipFileList,
+    showErrorForNoFileInZip,
   },
   component: ZipFileViewer,
 };

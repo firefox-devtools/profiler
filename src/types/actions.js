@@ -130,6 +130,7 @@ type ReceiveProfileAction =
   | {| +type: 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE', error: any |}
   | {| +type: 'DISMISS_PROCESS_PROFILE_FROM_ZIP_ERROR' |}
   | {| +type: 'RETURN_TO_ZIP_FILE_LIST' |}
+  | {| +type: 'FILE_NOT_FOUND_IN_ZIP_FILE', zipFilePath: string |}
   | { type: 'REQUESTING_SYMBOL_TABLE', requestedLib: RequestedLib }
   | { type: 'RECEIVED_SYMBOL_TABLE_REPLY', requestedLib: RequestedLib }
   | { type: 'START_SYMBOLICATING' }

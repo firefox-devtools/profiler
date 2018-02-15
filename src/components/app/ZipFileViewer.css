@@ -42,11 +42,32 @@
 }
 
 .zipFileViewerMessage {
-  flex: 1;
   display: flex;
+  flex: 1;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
+
   border-top: 1px solid var(--grey-30);
   background-color: #f5f5f5;
   font-size: 14px;
+}
+
+.zipFileViewerMessage > * {
+  margin: 10px 30px;
+}
+
+.zipFileViewerUntrustedFilePath {
+  /**
+   * Make the max width 50% so that some random user can't spam a bunch of misleading
+   * content into an error message on perf.html.
+   */
+  max-width: 70%;
+  background-color: var(--grey-30);
+  padding: 0 5px;
+  display: inline-block;
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 3px;
 }

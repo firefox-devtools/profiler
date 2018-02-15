@@ -81,6 +81,11 @@ export type ZipFileState =
       +zipFilePath: string,
     |}
   | {|
+      +phase: 'FILE_NOT_FOUND_IN_ZIP_FILE',
+      +zip: JSZip,
+      +zipFilePath: string,
+    |}
+  | {|
       +phase: 'VIEW_PROFILE_IN_ZIP_FILE',
       +zip: JSZip,
       +zipFilePath: string,
