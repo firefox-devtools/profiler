@@ -41,7 +41,6 @@
   "dependencies": {
     "array-move": "^1.0.0",
     "array-range": "^1.0.1",
-    "babel-runtime": "^6.26.0",
     "bisection": "0.0.3",
     "clamp": "^1.0.1",
     "classnames": "^2.2.5",
