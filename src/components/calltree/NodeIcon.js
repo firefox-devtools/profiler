@@ -5,7 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import explicitConnect from '../../utils/connect';
 import { getIconClassNameForCallNode } from '../../reducers/icons';
 import { iconStartLoading } from '../../actions/icons';
@@ -49,12 +48,6 @@ class NodeIcon extends PureComponent<Props> {
     return <div className={`treeRowIcon ${this.props.className}`} />;
   }
 }
-
-NodeIcon.propTypes = {
-  className: PropTypes.string,
-  icon: PropTypes.string,
-  iconStartLoading: PropTypes.func.isRequired,
-};
 
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: (state, { displayData }) => ({
