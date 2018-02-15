@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React from 'react';
-import Perf from 'react-addons-perf';
 import { render } from 'react-dom';
 import Root from './components/app/Root';
 import createStore from './create-store';
@@ -45,8 +44,6 @@ window.geckoProfilerPromise = new Promise(function(resolve) {
 const store = createStore();
 
 render(<Root store={store} />, document.getElementById('root'));
-
-window.Perf = Perf;
 
 addDataToWindowObject(store.getState);
 logFriendlyPreamble();
