@@ -53,7 +53,6 @@
     "offline-plugin": "^4.9.0",
     "photon-colors": "2.0.1",
     "pretty-bytes": "^4.0.2",
-    "prop-types": "^15.6.0",
     "query-string": "^5.1.0",
     "react": "^15.6.1",
     "react-addons-perf": "^15.4.2",
