@@ -1,0 +1,28 @@
+{
+  presets: [
+    [
+      "env",
+      {
+        targets: {
+          node: "current",
+          browsers: "defaults"
+        },
+        modules: false
+      }
+    ],
+    "react",
+    "flow"
+  ],
+  plugins: [
+    [
+      "transform-runtime",
+      {
+        polyfill: false,
+        regenerator: true
+      }
+    ],
+    [
+      "transform-class-properties"
+    ]
+  ]
+}

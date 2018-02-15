@@ -67,34 +67,6 @@
     "url": "^0.11.0",
     "weaktuplemap": "^1.0.0"
   },
-  "babel": {
-    "presets": [
-      "react",
-      [
-        "env",
-        {
-          "targets": {
-            "node": "current",
-            "browsers": "defaults"
-          },
-          "modules": false
-        }
-      ],
-      "flow"
-    ],
-    "plugins": [
-      [
-        "transform-runtime",
-        {
-          "polyfill": false,
-          "regenerator": true
-        }
-      ],
-      [
-        "transform-class-properties"
-      ]
-    ]
-  },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
