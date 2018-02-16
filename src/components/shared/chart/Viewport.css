@@ -43,9 +43,9 @@
   text-overflow: ellipsis;
   will-change: opacity, transform;
   bottom: 0;
-  right: 0;
-  padding: 3px 10px;
-  border-radius: 5px 0 0 0;
+  left: 0;
+  padding: 3px 0px 3px 3px;
+  border-radius: 0 5px 0 0;
   opacity: 1;
   background: rgba(0,0,0,0.07);
   line-height: 20px;
@@ -64,7 +64,7 @@
   border-radius: .2em;
   display: inline-block;
   padding: 0 .5em;
-  box-shadow: .1em .1em 0 #bbb;
+  box-shadow: -.1em .1em 0 #bbb;
   margin: 0 .2em;
   top: -1px;
   position: relative;
