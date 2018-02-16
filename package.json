@@ -52,7 +52,7 @@
     "memoize-immutable": "^3.0.0",
     "offline-plugin": "^4.9.0",
     "photon-colors": "2.0.1",
-    "pretty-bytes": "^4.0.2",
+    "prop-types": "^15.6.0",
     "query-string": "^5.1.0",
     "react": "^16.2.0",
     "react-contextmenu": "^2.9.2",
@@ -65,33 +65,6 @@
     "reselect": "^3.0.1",
     "url": "^0.11.0",
     "weaktuplemap": "^1.0.0"
-  },
-  "babel": {
-    "presets": [
-      "react",
-      [
-        "env",
-        {
-          "targets": {
-            "node": "current",
-            "browsers": "defaults"
-          }
-        }
-      ],
-      "flow"
-    ],
-    "plugins": [
-      [
-        "transform-runtime",
-        {
-          "polyfill": false,
-          "regenerator": true
-        }
-      ],
-      [
-        "transform-class-properties"
-      ]
-    ]
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

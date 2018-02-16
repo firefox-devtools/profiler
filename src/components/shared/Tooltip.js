@@ -6,6 +6,7 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
+import PropTypes from 'prop-types';
 import type { CssPixels } from '../../types/units';
 
 require('./Tooltip.css');
@@ -30,6 +31,7 @@ export default class Tooltip extends React.PureComponent<Props, State> {
   // This allows to get the store so that we can pass it along to the tooltip
   // children with a react-redux Provider. We can safely remove it once we use
   // React 16's portals.
+  static contextTypes = { store: PropTypes.object.isRequired };
 
   constructor(props: Props) {
     super(props);
