@@ -20,7 +20,12 @@ export function timeCode<T>(label: string, codeAsACallback: () => T): T {
 
     // Only log timing information in development mode.
     if (process.env.NODE_ENV === 'development') {
-      console.log(`${label} took ${elapsed}ms to execute.`);
+      const style = 'font-weight: bold; color: #f0a';
+      console.log(
+        `[timing]    %c"${label}"`,
+        style,
+        `took ${elapsed}ms to execute.`
+      );
     }
 
     // Some portion of users will have timing information sent. Limit this further to
