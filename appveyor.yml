@@ -22,7 +22,7 @@ test_script:
   # stop flow to recover some memory
   - yarn flow stop
   - yarn test
-  - yarn build:quiet
+  - yarn build-prod:quiet
 
 cache:
   - node_modules
