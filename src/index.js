@@ -46,4 +46,7 @@ const store = createStore();
 render(<Root store={store} />, document.getElementById('root'));
 
 addDataToWindowObject(store.getState);
-logFriendlyPreamble();
+if (process.env.NODE_ENV === 'production') {
+  // Don't clutter the console in development mode.
+  logFriendlyPreamble();
+}
