@@ -21,6 +21,7 @@ body, #root, .profileViewer {
 :root {
   /* Photon animation curve */
   --animation-curve: cubic-bezier(.07,.95,0,1);
+  --left-gutter-width: 150px;
   color: var(--grey-90);
 }
 
@@ -286,21 +287,34 @@ body, #root, .profileViewer {
 
 .profileViewerHeader {
   position: relative;
-  margin-left: 149px;
-  border-left: 1px solid var(--grey-30);
+  /* profileViewerHeader is the container where the selection UI occurs. So it
+   * needs to be on top of the timeline itself and that's why it's pushed left. */
+  margin-left: var(--left-gutter-width);
   -moz-user-focus: ignore;
 }
 
 .profileViewerHeaderTimeRuler {
+  position: sticky;
+  top: 0;
+
   height: 20px;
-  overflow: hidden;
+  /* This margin-left is useful to extend the background of the time ruler to
+   * the window's edge left. This is especially visible when the header is
+   * scrolled up. This goes with the timeRulerContainer's `left` property below.
+   * It's also made necessary by the margin for `profileViewerHeader` above. */
+  margin-left: calc(-1 * var(--left-gutter-width));
+
+  background: white;
+  z-index: 1;
 }
 
 .profileViewerHeaderTimeRuler::after {
   content: '';
   position: absolute;
   top: 20px;
-  left: -150px;
+  /* This `left` value is necessary so that the horizontal line below the time
+   * ruler goes all the way to the window's left edge. */
+  left: calc(-1 * var(--left-gutter-width));
   right: 0;
   height: 1px;
   background: var(--grey-30);
@@ -308,23 +322,28 @@ body, #root, .profileViewer {
 }
 
 .timeRulerContainer {
-  overflow: hidden;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: block;
   position: absolute;
   top: 0;
-  left: 0;
+  /* See the explanation for this value in the rule for
+   * `.profileViewerHeaderTimeRuler` above.
+   * "- 1px" compensate for the border. */
+  left: calc(var(--left-gutter-width) - 1px);
   right: 0;
   bottom: 0;
+
+  display: block;
+  margin: 0;
+  padding: 0;
+
+  border-left: 1px solid var(--grey-30);
+  overflow: hidden;
+  list-style: none;
   -moz-user-select: none;
   user-select: none;
   line-height: 20px;
   font-size: 9px;
   color: #888;
   cursor: default;
-  z-index: 1; /* between .profileThreadHeaderBar background and .profileThreadHeaderBarThreadDetails */
 }
 
 .timeRulerNotch {
@@ -333,7 +352,6 @@ body, #root, .profileViewer {
   top: 0;
   bottom: 0;
   width: 1px;
-  margin-left: -1px;
   white-space: nowrap;
   text-align: right;
   background: linear-gradient(transparent, var(--grey-30) 19px, var(--grey-30) 20px, #d7d7db66 0);
@@ -346,8 +364,6 @@ body, #root, .profileViewer {
 }
 
 .profileViewerHeaderOverflowEdgeIndicatorScrollbox {
-  margin: 0 0 0 -150px;
-  padding-left: 150px;
   max-height: 250px;
   overflow: auto;
 }
@@ -383,7 +399,9 @@ body, #root, .profileViewer {
 
 .profileViewerHeaderThreadList {
   list-style: none;
-  margin: 0 0 0 -150px;
+  /* This is made necessary by the margin of `profileViewerHeader` above, so
+   * that the list of threads is at the right place. */
+  margin: 0 0 0 calc(-1 * var(--left-gutter-width));
   padding: 0;
   box-shadow: inset 0 1px var(--grey-30);
 }
@@ -408,7 +426,7 @@ body, #root, .profileViewer {
 
 .profileThreadHeaderBarThreadLabel {
   box-sizing: border-box;
-  width: 150px;
+  width: var(--left-gutter-width);
   border-right: 1px solid var(--grey-30);
   padding-left: 14px;
   cursor: default;
@@ -433,7 +451,6 @@ body, #root, .profileViewer {
 .profileThreadHeaderBarThreadDetails {
   flex: 1;
   position: relative;
-  z-index: 1;
   display: flex;
   flex-flow: column nowrap;
 }

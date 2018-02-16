@@ -19,7 +19,7 @@
 .overflowEdgeIndicatorEdge.topEdge,
 .overflowEdgeIndicatorEdge.leftEdge,
 .overflowEdgeIndicatorEdge.bottomEdge {
-  left: 0;
+  left: var(--left-gutter-width); /* This is defined in res/style.css */
 }
 
 .overflowEdgeIndicatorEdge.topEdge,

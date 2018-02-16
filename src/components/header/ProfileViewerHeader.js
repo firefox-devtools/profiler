@@ -32,6 +32,8 @@ import type {
   ConnectedProps,
 } from '../../utils/connect';
 
+import './ProfileViewerHeader.css';
+
 type StateProps = {|
   +profile: Profile,
   +selection: ProfileSelection,
@@ -74,17 +76,17 @@ class ProfileViewerHeader extends PureComponent<Props> {
     const threads = profile.threads;
 
     return (
-      <TimeSelectionScrubber
-        className="profileViewerHeader"
-        zeroAt={zeroAt}
-        rangeStart={timeRange.start}
-        rangeEnd={timeRange.end}
-        minSelectionStartWidth={profile.meta.interval}
-        selection={selection}
-        onSelectionChange={updateProfileSelection}
-        onZoomButtonClick={this._onZoomButtonClick}
-      >
-        <OverflowEdgeIndicator className="profileViewerHeaderOverflowEdgeIndicator">
+      <OverflowEdgeIndicator className="profileViewerHeaderOverflowEdgeIndicator">
+        <TimeSelectionScrubber
+          className="profileViewerHeader"
+          zeroAt={zeroAt}
+          rangeStart={timeRange.start}
+          rangeEnd={timeRange.end}
+          minSelectionStartWidth={profile.meta.interval}
+          selection={selection}
+          onSelectionChange={updateProfileSelection}
+          onZoomButtonClick={this._onZoomButtonClick}
+        >
           {
             <Reorderable
               tagName="ol"
@@ -106,8 +108,8 @@ class ProfileViewerHeader extends PureComponent<Props> {
               ))}
             </Reorderable>
           }
-        </OverflowEdgeIndicator>
-      </TimeSelectionScrubber>
+        </TimeSelectionScrubber>
+      </OverflowEdgeIndicator>
     );
   }
 }
