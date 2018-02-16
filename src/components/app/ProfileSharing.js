@@ -20,7 +20,7 @@ import ArrowPanel from '../shared/ArrowPanel';
 import ButtonWithPanel from '../shared/ButtonWithPanel';
 import shortenUrl from '../../utils/shorten-url';
 import { serializeProfile } from '../../profile-logic/process-profile';
-import prettyBytes from 'pretty-bytes';
+import prettyBytes from '../../utils/pretty-bytes';
 import sha1 from '../../utils/sha1';
 import { sendAnalytics } from '../../utils/analytics';
 import url from 'url';
