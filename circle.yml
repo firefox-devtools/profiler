@@ -18,7 +18,9 @@ test:
   override:
     - yarn lint
     - yarn flow --quiet
+    # stop flow to recover some memory
+    - yarn flow stop
     - yarn test --coverage --runInBand
-    - yarn build:quiet
+    - yarn build-prod:quiet
   post:
     - bash <(curl -s https://codecov.io/bash)
