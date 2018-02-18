@@ -23,9 +23,8 @@ export default function initializeStore(): Store {
       createLogger({
         collapsed: true,
         titleFormatter: (action, time, duration) =>
-          `[action]    ${action.type} (in ${duration} ms)`,
+          `[action]    ${action.type} (in ${duration.toFixed(2)} ms)`,
         logErrors: false,
-        diff: true,
         duration: true,
       })
     );
