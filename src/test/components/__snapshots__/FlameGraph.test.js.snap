@@ -1,0 +1,422 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders FlameGraph correctly 1`] = `
+<div
+  className="flameGraph"
+>
+  <div
+    className="flameGraphSettings"
+  >
+    <ul
+      className="flameGraphSettingsList"
+    >
+      <li
+        className="flameGraphSettingsListItem"
+      >
+        <label
+          className="flameGraphSettingsLabel"
+        >
+          <input
+            checked={false}
+            className="flameGraphSettingsCheckbox"
+            onChange={[Function]}
+            type="checkbox"
+          />
+           Invert call stack
+        </label>
+      </li>
+    </ul>
+    <div
+      className="stackSearchField flameGraphSettingsSearchField"
+    >
+      <label
+        className="stackSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          className="idleSearchField stackSearchFieldInput"
+          onSubmit={[Function]}
+        >
+          <input
+            className="idleSearchFieldInput"
+            name="search"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            required="required"
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            className="idleSearchFieldButton"
+            onClick={[Function]}
+            onFocus={[Function]}
+            type="reset"
+          />
+        </form>
+        <div
+          className="stackSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <div
+    className="flameGraphContent"
+  >
+    <div
+      className="flameGraphLabels grippy"
+      title="thread: \\"Empty\\" (0)
+    process: \\"default\\" (0)"
+    >
+      <span>
+        Empty
+      </span>
+    </div>
+    <div
+      className="chartViewport"
+      onMouseDown={[Function]}
+      onWheel={[Function]}
+    >
+      <div>
+        <canvas
+          className="chartCanvas flameGraphCanvas"
+          onDoubleClick={[Function]}
+          onMouseMove={[Function]}
+          onMouseOut={[Function]}
+        />
+      </div>
+      <div
+        className="chartViewportShiftScroll hidden"
+      >
+        Zoom Chart:
+        <kbd
+          className="chartViewportShiftScrollKbd"
+        >
+          Shift
+        </kbd>
+        <kbd
+          className="chartViewportShiftScrollKbd"
+        >
+          Scroll
+        </kbd>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders FlameGraph correctly 2`] = `
+Array [
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    284,
+    200,
+    15,
+  ],
+  Array [
+    "clearRect",
+    0,
+    284,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "A",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "A",
+    3,
+    295,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    268,
+    200,
+    15,
+  ],
+  Array [
+    "clearRect",
+    0,
+    268,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "B",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "B",
+    3,
+    279,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    252,
+    133.33333333333331,
+    15,
+  ],
+  Array [
+    "clearRect",
+    0,
+    252,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "C",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "C",
+    3,
+    263,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    133.33333333333331,
+    252,
+    66.66666666666667,
+    15,
+  ],
+  Array [
+    "clearRect",
+    133.33333333333331,
+    252,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "H",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "H",
+    136.33333333333331,
+    263,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    236,
+    66.66666666666666,
+    15,
+  ],
+  Array [
+    "clearRect",
+    0,
+    236,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "D",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "D",
+    3,
+    247,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    66.66666666666666,
+    236,
+    66.66666666666666,
+    15,
+  ],
+  Array [
+    "clearRect",
+    66.66666666666666,
+    236,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "F",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "F",
+    69.66666666666666,
+    247,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    133.33333333333331,
+    236,
+    66.66666666666667,
+    15,
+  ],
+  Array [
+    "clearRect",
+    133.33333333333331,
+    236,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "I",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "I",
+    136.33333333333331,
+    247,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    220,
+    66.66666666666666,
+    15,
+  ],
+  Array [
+    "clearRect",
+    0,
+    220,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "E",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "E",
+    3,
+    231,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    66.66666666666666,
+    220,
+    66.66666666666666,
+    15,
+  ],
+  Array [
+    "clearRect",
+    66.66666666666666,
+    220,
+    1,
+    15,
+  ],
+  Array [
+    "measureText",
+    "G",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "G",
+    69.66666666666666,
+    231,
+  ],
+]
+`;
