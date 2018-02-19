@@ -11,7 +11,6 @@ import {
 import { SymbolStore } from '../profile-logic/symbol-store';
 import { symbolicateProfile } from '../profile-logic/symbolication';
 import { decompress } from '../utils/gz';
-import { getTimeRangeIncludingAllThreads } from '../profile-logic/profile-data';
 import { TemporaryError } from '../utils/errors';
 
 import type {
@@ -451,17 +450,6 @@ export function retrieveProfileFromStore(
         throw new Error('Unable to parse the profile.');
       }
 
-      if (typeof window !== 'undefined' && window.legacyRangeFilters) {
-        const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
-        window.legacyRangeFilters.forEach(({ start, end }) =>
-          dispatch({
-            type: 'ADD_RANGE_FILTER',
-            start: start - zeroAt,
-            end: end - zeroAt,
-          })
-        );
-      }
-
       dispatch(receiveProfileFromStore(profile));
     } catch (error) {
       dispatch(fatalErrorReceivingProfileFromStore(error));
@@ -486,17 +474,6 @@ export function retrieveProfileFromUrl(
       const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
       if (profile === undefined) {
         throw new Error('Unable to parse the profile.');
-      }
-
-      if (typeof window !== 'undefined' && window.legacyRangeFilters) {
-        const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
-        window.legacyRangeFilters.forEach(({ start, end }) =>
-          dispatch({
-            type: 'ADD_RANGE_FILTER',
-            start: start - zeroAt,
-            end: end - zeroAt,
-          })
-        );
       }
 
       dispatch(receiveProfileFromUrl(profile));
