@@ -22,10 +22,6 @@ declare class Window extends EventTarget {
   geckoProfilerPromise: Promise<GeckoProfiler>;
   geckoProfilerAddonInstalled?: () => void;
   isGeckoProfilerAddonInstalled?: boolean;
-  legacyRangeFilters: Array<{
-    start: number,
-    end: number,
-  }>;
   InstallTrigger?: {
     install: Object => {},
   };
