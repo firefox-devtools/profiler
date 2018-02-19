@@ -272,21 +272,6 @@ const _upgraders = {
         queryString.parse(processedLocation.hash)
       );
       if ('report' in legacyQuery) {
-        // Process any legacy filters.
-        if ('filter' in legacyQuery) {
-          const filters = JSON.parse(legacyQuery.filter);
-          // We can't convert these parameters to the new URL parameters here
-          // because they're relative to different things - the legacy range
-          // filters were relative to profile.meta.startTime, and the new
-          // rangeFilters param is relative to
-          // getTimeRangeIncludingAllThreads(profile).start.
-          // So we stuff this information into a global here, and then later,
-          // once we have the profile, we convert that information into URL params
-          // again. This is not pretty.
-          window.legacyRangeFilters = filters
-            .filter(f => f.type === 'RangeSampleFilter')
-            .map(({ start, end }) => ({ start, end }));
-        }
         // Put the report into the pathname.
         processedLocation.pathname = `/public/${legacyQuery.report}/calltree/`;
         processedLocation.hash = '';
