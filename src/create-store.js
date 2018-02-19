@@ -21,7 +21,11 @@ export default function initializeStore(): Store {
   if (process.env.NODE_ENV === 'development') {
     middlewares.push(
       createLogger({
-        titleFormatter: action => `content action ${action.type}`,
+        collapsed: true,
+        titleFormatter: (action, time, duration) =>
+          `[action]    ${action.type} (in ${duration.toFixed(2)} ms)`,
+        logErrors: false,
+        duration: true,
       })
     );
   }
