@@ -44,7 +44,7 @@
   will-change: opacity, transform;
   bottom: 0;
   left: 0;
-  padding: 3px 0px 3px 3px;
+  padding: 3px 10px;;
   border-radius: 0 5px 0 0;
   opacity: 1;
   background: rgba(0,0,0,0.07);
