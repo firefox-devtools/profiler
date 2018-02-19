@@ -545,11 +545,12 @@ class TreeView<
       // KEY_LEFT
       const isCollapsed = this._isCollapsed(selected);
       if (!isCollapsed) {
-        this._toggle(selected);
+        this._collapse(selected);
       } else {
         const parent = tree.getParent(selected);
         if (parent !== -1) {
           this._select(parent);
+          this._collapse(parent);
         }
       }
     } else if (event.keyCode === 38) {
