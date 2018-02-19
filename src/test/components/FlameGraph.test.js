@@ -61,10 +61,9 @@ it('renders FlameGraph correctly', () => {
   // Flush any requestAnimationFrames.
   jest.runAllTimers();
 
-  const tree = flameGraph.toJSON();
   const drawCalls = ctx.__flushDrawLog();
 
-  expect(tree).toMatchSnapshot();
+  expect(flameGraph).toMatchSnapshot();
   expect(drawCalls).toMatchSnapshot();
 
   delete window.requestAnimationFrame;
