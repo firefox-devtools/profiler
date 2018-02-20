@@ -464,7 +464,35 @@ body, #root, .profileViewer {
   bottom: 0;
   width: 1px;
   background: rgba(0,0,0,0.4);
-  z-index: 1;
+  z-index: 5;
+}
+
+.screenshotContainer {
+  position: absolute;
+  top: calc(100% + 6px);
+  width: 350px;
+  padding: 5px;
+  left: -180px;
+  background: #FAFAFA;
+  border-radius: 5px;
+  filter: drop-shadow(0 0 0.5px rgba(0,0,0,0.4)) drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+
+.screenshotContainer::before {
+  content: '';
+  background-color: inherit;
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  transform: rotate(45deg);
+  transform-origin: top left;
+}
+
+.screenshotImage {
+  position: relative;
+  width: 100%;
 }
 
 .profileViewerHeader:hover > .timeSelectionScrubberHoverIndicator {

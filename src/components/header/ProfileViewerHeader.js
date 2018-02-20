@@ -49,15 +49,62 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
+function getScreenshotURLAtTime(
+  profile: Profile,
+  time: Milliseconds
+): string | null {
+  const compositorThreads = profile.threads.filter(
+    thread => thread.name === 'Compositor' || thread.name === 'Renderer'
+  );
+  for (const compositorThread of compositorThreads) {
+    const { markers, stringTable } = compositorThread;
+    let markerIndex;
+    const compositorScreenshotNameStringIndex = stringTable.indexForString(
+      'CompositorScreenshot'
+    );
+    for (let i = 0; i < markers.length; i++) {
+      if (markers.time[i] > time) {
+        break;
+      }
+      if (markers.name[i] === compositorScreenshotNameStringIndex) {
+        markerIndex = i;
+      }
+    }
+    if (markerIndex !== undefined) {
+      if (
+        markers.data[markerIndex] !== undefined &&
+        'url' in markers.data[markerIndex]
+      ) {
+        return stringTable.getString(markers.data[markerIndex].url);
+      }
+    }
+  }
+  return null;
+}
+
 class ProfileViewerHeader extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._onZoomButtonClick = this._onZoomButtonClick.bind(this);
+    (this: any)._renderHoverIndicator = this._renderHoverIndicator.bind(this);
   }
 
   _onZoomButtonClick(start: Milliseconds, end: Milliseconds) {
     const { addRangeFilterAndUnsetSelection, zeroAt } = this.props;
     addRangeFilterAndUnsetSelection(start - zeroAt, end - zeroAt);
+  }
+
+  _renderHoverIndicator(hoverTime: Milliseconds) {
+    const { profile } = this.props;
+    const screenshotURL = getScreenshotURLAtTime(profile, hoverTime);
+    if (screenshotURL) {
+      return (
+        <div className="screenshotContainer">
+          <img src={screenshotURL} alt="" className="screenshotImage" />
+        </div>
+      );
+    }
+    return null;
   }
 
   render() {
@@ -83,6 +130,7 @@ class ProfileViewerHeader extends PureComponent<Props> {
         selection={selection}
         onSelectionChange={updateProfileSelection}
         onZoomButtonClick={this._onZoomButtonClick}
+        renderHoverIndicator={this._renderHoverIndicator}
       >
         <OverflowEdgeIndicator className="profileViewerHeaderOverflowEdgeIndicator">
           {
