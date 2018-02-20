@@ -42,7 +42,7 @@ function _getStoreWithURL(
 
   const searchWithVersion =
     v === false ? search : `${search ? search + '&' : '?'}v=${v}`;
-  const urlState = stateFromLocation({
+  const newUrlState = stateFromLocation({
     pathname,
     search: searchWithVersion,
     hash,
@@ -50,7 +50,8 @@ function _getStoreWithURL(
   const store = blankStore();
   store.dispatch({
     type: 'UPDATE_URL_STATE',
-    urlState,
+    newUrlState,
+    state: store.getState(),
   });
   store.dispatch(viewProfile(profile));
   return store;
@@ -59,14 +60,15 @@ function _getStoreWithURL(
 describe('selectedThread', function() {
   function storeWithThread(threadIndex) {
     const store = blankStore();
-    const urlState = stateFromLocation({
+    const newUrlState = stateFromLocation({
       pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
       search: `?thread=${threadIndex}`,
       hash: '',
     });
     store.dispatch({
       type: 'UPDATE_URL_STATE',
-      urlState,
+      newUrlState,
+      state: store.getState(),
     });
 
     return store;
@@ -312,11 +314,11 @@ describe('URL serialization of the transform stack', function() {
 
 describe('urlFromState', function() {
   it('outputs the current URL version', function() {
-    const urlState = stateFromLocation({
+    const newUrlState = stateFromLocation({
       pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
       search: '',
       hash: '',
     });
-    expect(urlFromState(urlState)).toMatch(`v=${CURRENT_URL_VERSION}`);
+    expect(urlFromState(newUrlState)).toMatch(`v=${CURRENT_URL_VERSION}`);
   });
 });

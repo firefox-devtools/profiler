@@ -9,7 +9,7 @@ import { getZipFileTable, getZipFileState } from '../reducers/app';
 import { unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
 import type { Action, ThunkAction } from '../types/store';
 import type { TabSlug } from '../types/actions';
-import type { UrlState } from '../types/reducers';
+import type { UrlState, State } from '../types/reducers';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
@@ -44,7 +44,7 @@ export function changeTabOrder(tabOrder: number[]): Action {
 
 export function urlSetupDone(): ThunkAction<void> {
   return (dispatch, getState) => {
-    dispatch(enableHistoryPushState());
+    dispatch({ type: 'URL_SETUP_DONE' });
 
     // After the url setup is done, we can successfully query our state about its
     // initial page.
@@ -59,10 +59,6 @@ export function urlSetupDone(): ThunkAction<void> {
       eventAction: dataSource,
     });
   };
-}
-
-export function enableHistoryPushState(): Action {
-  return { type: 'ENABLE_HISTORY_PUSH_STATE' };
 }
 
 export function changeSelectedZipFile(
@@ -93,8 +89,8 @@ export function show404(url: string): Action {
  * the history API. Please note that the `State` still contains the OLD UrlState.
  * It is the job of the reducers to handle this new UrlState.
  */
-export function updateUrlState(urlState: UrlState): Action {
-  return { type: 'UPDATE_URL_STATE', urlState };
+export function updateUrlState(newUrlState: UrlState, state: State): Action {
+  return { type: 'UPDATE_URL_STATE', newUrlState, state };
 }
 
 /**
@@ -140,20 +136,11 @@ export function viewProfileFromZip(
         zipFileState.zipFilePath === zipFilePath &&
         zipFileState.phase === 'PROCESS_PROFILE_FROM_ZIP_FILE'
       ) {
-        // Make sure no history is registered so any UrlState changes for first viewing
-        // the profile do not affect the back button. This allows the UrlState to be
-        // updated with default selection information for the new profile.
-        dispatch({ type: 'ENABLE_HISTORY_REPLACE_STATE' });
-
-        // View the profile.
         dispatch({
           type: 'VIEW_PROFILE',
           profile,
           zipFilePath,
         });
-
-        // Turn on history viewing.
-        dispatch({ type: 'ENABLE_HISTORY_PUSH_STATE' });
       }
     } catch (error) {
       console.error('Failed to process the profile in the zip file.', error);

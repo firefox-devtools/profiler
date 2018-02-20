@@ -56,16 +56,10 @@ function view(
   }
 }
 
-/**
- * This reducer represents whether or not to perform history.pushState or
- * history.replaceState when the UrlState changes.
- */
-function shouldPushHistoryState(state: boolean = false, action: Action) {
+function isUrlSetupDone(state: boolean = false, action: Action) {
   switch (action.type) {
-    case 'ENABLE_HISTORY_PUSH_STATE':
+    case 'URL_SETUP_DONE':
       return true;
-    case 'ENABLE_HISTORY_REPLACE_STATE':
-      return false;
     default:
       return state;
   }
@@ -250,7 +244,7 @@ function expandedZipFileIndexes(
 
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
-  shouldPushHistoryState,
+  isUrlSetupDone,
   hasZoomedViaMousewheel,
   zipFile,
   selectedZipFileIndex,
@@ -265,8 +259,8 @@ export const getSelectedZipFileIndex = (state: State) =>
   getApp(state).selectedZipFileIndex;
 export const getExpandedZipFileIndexes = (state: State) =>
   getApp(state).expandedZipFileIndexes;
-export const getShouldPushHistoryState = (state: State): boolean =>
-  getApp(state).shouldPushHistoryState;
+export const getIsUrlSetupDone = (state: State): boolean =>
+  getApp(state).isUrlSetupDone;
 export const getHasZoomedViaMousewheel = (state: Object): boolean => {
   return getApp(state).hasZoomedViaMousewheel;
 };

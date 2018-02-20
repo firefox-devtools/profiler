@@ -82,9 +82,9 @@ describe('app actions', function() {
   describe('urlSetupDone', function() {
     it('will remember when url setup is done', function() {
       const { dispatch, getState } = storeWithSimpleProfile();
-      expect(AppSelectors.getShouldPushHistoryState(getState())).toEqual(false);
+      expect(AppSelectors.getIsUrlSetupDone(getState())).toEqual(false);
       dispatch(AppActions.urlSetupDone());
-      expect(AppSelectors.getShouldPushHistoryState(getState())).toEqual(true);
+      expect(AppSelectors.getIsUrlSetupDone(getState())).toEqual(true);
     });
 
     it('records analytics events for pageview and datasource', function() {
@@ -143,7 +143,7 @@ describe('app actions', function() {
       );
 
       // Now revert it to the original, and make sure everything resets.
-      dispatch(AppActions.updateUrlState(originalUrlState));
+      dispatch(AppActions.updateUrlState(originalUrlState, getState()));
       expect(UrlStateSelectors.getUrlState(getState())).toBe(originalUrlState);
       expect(UrlStateSelectors.getSelectedTab(getState())).toEqual('calltree');
     });
