@@ -188,6 +188,7 @@ body, #root, .profileViewer {
   color: #aaa;
 }
 .treeViewBody:focus > * > * > * > .treeViewRow.selected,
+.treeViewBody:focus > * > * > * > .treeViewRow.selected a,
 .treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeViewFixedColumn {
   background-color: highlight;
   color: highlighttext;

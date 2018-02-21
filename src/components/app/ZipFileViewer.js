@@ -105,7 +105,6 @@ class ZipFileRow extends React.PureComponent<ZipFileRowProps> {
 class ZipFileViewer extends React.PureComponent<Props> {
   _fixedColumns = [];
   _mainColumn = { propName: 'name', title: '', component: ZipFileRow };
-  _appendageButtons = ['focusCallstackButton'];
   _treeView: ?TreeView<
     IndexIntoZipFileTable,
     ZipDisplayData,
@@ -218,6 +217,10 @@ class ZipFileViewer extends React.PureComponent<Props> {
     );
   }
 
+  _onEnter = (zipTableIndex: IndexIntoZipFileTable) => {
+    this.props.viewProfileFromZip(zipTableIndex);
+  };
+
   render() {
     const {
       zipFileState,
@@ -260,7 +263,6 @@ class ZipFileViewer extends React.PureComponent<Props> {
                 onExpandedNodesChange={changeExpandedZipFile}
                 selectedNodeId={selectedZipFileIndex}
                 expandedNodeIds={expandedZipFileIndexes}
-                appendageButtons={this._appendageButtons}
                 onAppendageButtonClick={this._onAppendageButtonClick}
                 ref={this._takeTreeViewRef}
                 contextMenuId={'MarkersContextMenu'}
@@ -269,6 +271,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
                 sharedRowProps={{
                   viewProfileFromZip,
                 }}
+                onEnter={this._onEnter}
               />
             </div>
           </section>

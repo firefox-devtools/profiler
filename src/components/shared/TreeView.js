@@ -345,6 +345,7 @@ type TreeViewProps<NodeIndex, DisplayData, SharedRowProps> = {|
   +maxNodeDepth: number,
   +onAppendageButtonClick?: ((NodeIndex | null, string) => mixed) | null,
   +onSelectionChange: NodeIndex => mixed,
+  +onEnter?: NodeIndex => mixed,
   +rowHeight: CssPixels,
   +indentWidth: CssPixels,
   +sharedRowProps: SharedRowProps,
@@ -543,14 +544,14 @@ class TreeView<
   }
 
   _onKeyDown(event: KeyboardEvent) {
-    if (event.ctrlKey || event.altKey || event.metaKey) {
-      return;
-    }
+    const hasModifier = event.ctrlKey || event.altKey || event.metaKey;
+    const isArrowKey = event.keyCode >= 37 && event.keyCode <= 40;
+    const isAsterisk = event.key === '*';
+    const isEnter = event.keyCode === 13;
 
-    if (event.keyCode < 37 || event.keyCode > 40) {
-      if (event.keyCode !== 0 || String.fromCharCode(event.charCode) !== '*') {
-        return;
-      }
+    if (hasModifier || (!isArrowKey && !isAsterisk && !isEnter)) {
+      // No key events that we care about were found, so don't try and handle them.
+      return;
     }
     event.stopPropagation();
     event.preventDefault();
@@ -567,40 +568,62 @@ class TreeView<
       return;
     }
 
-    if (event.keyCode === 37) {
-      // KEY_LEFT
-      const isCollapsed = this._isCollapsed(selected);
-      if (!isCollapsed) {
-        this._toggle(selected);
-      } else {
-        const parent = this.props.tree.getParent(selected);
-        if (parent !== -1) {
-          this._select(parent);
-        }
+    if (isArrowKey) {
+      switch (event.keyCode) {
+        case 37: // KEY_LEFT
+          {
+            const isCollapsed = this._isCollapsed(selected);
+            if (!isCollapsed) {
+              this._toggle(selected);
+            } else {
+              const parent = this.props.tree.getParent(selected);
+              if (parent !== -1) {
+                this._select(parent);
+              }
+            }
+          }
+          break;
+        case 38: // KEY_UP
+          {
+            if (selectedRowIndex > 0) {
+              this._select(visibleRows[selectedRowIndex - 1]);
+            }
+          }
+          break;
+        case 39: // KEY_RIGHT
+          {
+            const isCollapsed = this._isCollapsed(selected);
+            if (isCollapsed) {
+              this._toggle(selected);
+            } else {
+              // Do KEY_DOWN only if the next element is a child
+              if (this.props.tree.hasChildren(selected)) {
+                this._select(this.props.tree.getChildren(selected)[0]);
+              }
+            }
+          }
+          break;
+        case 40: // KEY_DOWN
+          {
+            if (selectedRowIndex < visibleRows.length - 1) {
+              this._select(visibleRows[selectedRowIndex + 1]);
+            }
+          }
+          break;
+        default:
+          throw new Error('Unhandled arrow key.');
       }
-    } else if (event.keyCode === 38) {
-      // KEY_UP
-      if (selectedRowIndex > 0) {
-        this._select(visibleRows[selectedRowIndex - 1]);
-      }
-    } else if (event.keyCode === 39) {
-      // KEY_RIGHT
-      const isCollapsed = this._isCollapsed(selected);
-      if (isCollapsed) {
-        this._toggle(selected);
-      } else {
-        // Do KEY_DOWN only if the next element is a child
-        if (this.props.tree.hasChildren(selected)) {
-          this._select(this.props.tree.getChildren(selected)[0]);
-        }
-      }
-    } else if (event.keyCode === 40) {
-      // KEY_DOWN
-      if (selectedRowIndex < visibleRows.length - 1) {
-        this._select(visibleRows[selectedRowIndex + 1]);
-      }
-    } else if (String.fromCharCode(event.charCode) === '*') {
+    }
+
+    if (isAsterisk) {
       this._toggleAll(selected);
+    }
+
+    if (isEnter) {
+      const { onEnter, selectedNodeId } = this.props;
+      if (onEnter && selectedNodeId !== null) {
+        onEnter(selectedNodeId);
+      }
     }
   }
 
