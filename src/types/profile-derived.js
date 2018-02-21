@@ -78,6 +78,8 @@ export type CallNodeData = {
   funcName: string,
   totalTime: number,
   totalTimeRelative: number,
+  selfTime: number,
+  selfTimeRelative: number,
 };
 
 export type CallNodeDisplayData = {

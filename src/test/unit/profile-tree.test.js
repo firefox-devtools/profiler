@@ -214,6 +214,18 @@ describe('unfiltered call tree', function() {
       });
     });
 
+    describe('getNodeData()', function() {
+      it('gets a node for a given callNodeIndex', function() {
+        expect(callTree.getNodeData(A)).toEqual({
+          funcName: 'A',
+          totalTime: 3,
+          totalTimeRelative: 1,
+          selfTime: 0,
+          selfTimeRelative: 0,
+        });
+      });
+    });
+
     describe('getDisplayData()', function() {
       it('gets a node for a given callNodeIndex', function() {
         expect(callTree.getDisplayData(A)).toEqual({
