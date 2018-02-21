@@ -4,7 +4,6 @@
 
 // @flow
 import * as React from 'react';
-import * as colors from 'photon-colors';
 import {
   withChartViewport,
   type WithChartViewport,
@@ -21,7 +20,7 @@ import type {
   IndexIntoFlameGraphTiming,
 } from '../../profile-logic/flame-graph';
 
-import type { CallNodeInfo } from '../../types/profile-derived';
+import type { CallNodeInfo, Implementation } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
 
 export type OwnProps = {|
@@ -57,6 +56,38 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     (this: any)._getHoveredStackInfo = this._getHoveredStackInfo.bind(this);
     (this: any)._drawCanvas = this._drawCanvas.bind(this);
     (this: any)._hitTest = this._hitTest.bind(this);
+  }
+
+  getColor(implementation: Implementation, selfTimeRelative: number): string {
+    let h, s, l;
+    // The more self time a function has, the darker the color
+    // returned.  Do this by subtracting a lightness value from a base
+    // color for a particular implementation.  `a` and `b` are factors
+    // used in calcuating how much ligthness to subtract.  `limit` is
+    // the lower limit of the lightness.
+    let a, b, limit;
+
+    if (implementation === 'cpp') {
+      [h, s, l] = [358, 98, 82];
+      a = 4;
+      b = 5;
+      limit = 55;
+    } else if (implementation === 'js') {
+      [h, s, l] = [188, 53, 71];
+      a = 8;
+      b = 6;
+      limit = 40;
+    } else {
+      // Unknown implementation
+      [h, s, l] = [77, 70, 71];
+      a = 10;
+      b = 10;
+      limit = 40;
+    }
+
+    l -= a * Math.log(b * selfTimeRelative * 100 + 1);
+    l = Math.max(l, limit);
+    return `hsl(${h}, ${s}%, ${l}%)`;
   }
 
   _drawCanvas(
@@ -126,7 +157,13 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
           depth === hoveredItem.depth &&
           i === hoveredItem.flameGraphTimingIndex;
 
-        ctx.fillStyle = isHovered ? 'Highlight' : colors.GREY_20;
+        const implementation = funcToImplementation(thread, funcIndex);
+        const color = this.getColor(
+          implementation,
+          stackTiming.selfTimeRelative[i]
+        );
+
+        ctx.fillStyle = isHovered ? 'Highlight' : color;
         ctx.fillRect(x, y, w, h);
         // Ensure spacing between blocks.
         ctx.clearRect(x, y, 1, h);
@@ -169,6 +206,11 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     );
 
     const implementation = funcToImplementation(thread, funcIndex);
+    const color = this.getColor(
+      implementation,
+      stackTiming.selfTimeRelative[flameGraphTimingIndex]
+    );
+
     let implementationLabel = 'Unknown';
     if (implementation === 'js') {
       implementationLabel = 'JS';
@@ -185,7 +227,10 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         </div>
         <div className="tooltipDetails">
           <div className="tooltipLabel">Implementation:</div>
-          <div>{implementationLabel}</div>
+          <div>
+            <div className="tooltipSwatch" style={{ backgroundColor: color }} />
+            {implementationLabel}
+          </div>
           <div className="tooltipLabel">Running Time (ms):</div>
           <div>{totalTime}</div>
           <div className="tooltipLabel">Self (ms):</div>
