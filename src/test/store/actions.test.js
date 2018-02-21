@@ -129,7 +129,7 @@ describe('selectors/getFlameGraphTiming', function() {
    *
    * "FunctionName1 (StartTime:EndTime) | FunctionName2 (StartTime:EndTime)"
    */
-  function getHumanReadableFlameGraphTiming(store, funcNames) {
+  function getHumanReadableFlameGraphRanges(store, funcNames) {
     const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
@@ -153,6 +153,37 @@ describe('selectors/getFlameGraphTiming', function() {
     });
   }
 
+  /**
+   * Map the flameGraphTiming data structure into a human readable format where
+   * each line takes the form:
+   *
+   * "FunctionName1 (TotalTime:SelfTime:SelfTimeRelative) | ..."
+   */
+  function getHumanReadableFlameGraphTimings(store, funcNames) {
+    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
+      store.getState()
+    );
+    const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
+      store.getState()
+    );
+
+    return flameGraphTiming.map(
+      ({ selfTimeRelative, display, callNode, length }) => {
+        const lines = [];
+        for (let i = 0; i < length; i++) {
+          const callNodeIndex = callNode[i];
+          const funcIndex = callNodeTable.func[callNodeIndex];
+          const funcName = funcNames[funcIndex];
+          const { totalTime, selfTime } = display[i];
+          lines.push(
+            `${funcName} (${totalTime}:${selfTime}:${selfTimeRelative[i]})`
+          );
+        }
+        return lines.join(' | ');
+      }
+    );
+  }
+
   it('computes a basic example', function() {
     const {
       profile,
@@ -166,7 +197,7 @@ describe('selectors/getFlameGraphTiming', function() {
     `);
 
     const store = storeWithProfile(profile);
-    expect(getHumanReadableFlameGraphTiming(store, funcNames)).toEqual([
+    expect(getHumanReadableFlameGraphRanges(store, funcNames)).toEqual([
       'A (0:1)',
       'B (0:1)',
       'C (0:0.67) | H (0.67:1)',
@@ -191,7 +222,7 @@ describe('selectors/getFlameGraphTiming', function() {
     profile.threads[0].samples.stack[2] = null;
 
     const store = storeWithProfile(profile);
-    expect(getHumanReadableFlameGraphTiming(store, funcNames)).toEqual([
+    expect(getHumanReadableFlameGraphRanges(store, funcNames)).toEqual([
       'A (0:1)',
       'B (0:1)',
       'C (0:0.67) | H (0.67:1)',
@@ -211,10 +242,28 @@ describe('selectors/getFlameGraphTiming', function() {
     `);
 
     const store = storeWithProfile(profile);
-    expect(getHumanReadableFlameGraphTiming(store, funcNames)).toEqual([
+    expect(getHumanReadableFlameGraphRanges(store, funcNames)).toEqual([
       'A (0:0.25) | D (0.25:1)',
       'B (0:0.25) | E (0.25:0.5) | F (0.5:1)',
       'C (0:0.25) | G (0.5:0.75)',
+    ]);
+  });
+
+  it('contains totalTime, selfTime and selfTimeRelative', function() {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A A A A
+      B
+      C
+    `);
+
+    const store = storeWithProfile(profile);
+    expect(getHumanReadableFlameGraphTimings(store, funcNames)).toEqual([
+      'A (4:3:0.75)',
+      'B (1:—:0)',
+      'C (1:1:0.25)',
     ]);
   });
 });

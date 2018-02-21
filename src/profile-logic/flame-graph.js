@@ -14,6 +14,8 @@ export type IndexIntoFlameGraphTiming = number;
 export type FlameGraphTiming = Array<{
   start: UnitIntervalOfProfileRange[],
   end: UnitIntervalOfProfileRange[],
+  selfTimeRelative: Array<number>,
+  display: Array<{ totalTime: string, selfTime: string }>,
   callNode: IndexIntoCallNodeTable[],
   length: number,
 }>;
@@ -41,7 +43,11 @@ export function getFlameGraphTiming(
 
   while (stack.length) {
     const { depth, nodeIndex } = stack.pop();
-    const { totalTimeRelative } = callTree.getNodeData(nodeIndex);
+    const { totalTimeRelative, selfTimeRelative } = callTree.getNodeData(
+      nodeIndex
+    );
+
+    const { totalTime, selfTime } = callTree.getDisplayData(nodeIndex);
 
     // Select an existing row, or create a new one.
     let row = timing[depth];
@@ -49,6 +55,8 @@ export function getFlameGraphTiming(
       row = {
         start: [],
         end: [],
+        selfTimeRelative: [],
+        display: [],
         callNode: [],
         length: 0,
       };
@@ -58,6 +66,8 @@ export function getFlameGraphTiming(
     // Compute the timing information.
     row.start.push(timeOffset[depth]);
     row.end.push(timeOffset[depth] + totalTimeRelative);
+    row.selfTimeRelative.push(selfTimeRelative);
+    row.display.push({ totalTime, selfTime });
     row.callNode.push(nodeIndex);
     row.length++;
 
