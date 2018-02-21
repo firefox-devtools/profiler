@@ -16,6 +16,10 @@ type MapDispatchToProps<OwnProps: Object, DispatchProps: Object> =
   | ((dispatch: Dispatch, ownProps: OwnProps) => DispatchProps)
   | DispatchProps;
 
+type ExtractReturnType = <R>((...rest: any) => R) => R;
+
+type Dispatched<P> = $ObjMap<$ObjMap<P, ExtractReturnType>, Dispatch>;
+
 type MergeProps<
   StateProps,
   DispatchProps: Object,
@@ -23,7 +27,7 @@ type MergeProps<
   Props: Object
 > = (
   stateProps: StateProps,
-  dispatchProps: DispatchProps,
+  dispatchProps: Dispatched<DispatchProps>,
   ownProps: OwnProps
 ) => Props;
 
@@ -63,7 +67,7 @@ export type ConnectedProps<
 > = $ReadOnly<{|
   ...OwnProps,
   ...StateProps,
-  ...DispatchProps,
+  ...Dispatched<DispatchProps>,
 |}>;
 
 export type ConnectedComponent<
