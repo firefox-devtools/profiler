@@ -105,3 +105,5 @@ export type MarkerTiming = {
   length: number,
 };
 export type MarkerTimingRows = Array<MarkerTiming>;
+
+export type Implementation = 'js' | 'cpp' | 'unknown';

@@ -11,6 +11,7 @@ import {
 } from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
+import { funcToImplementation } from '../../profile-logic/transforms';
 
 import type { Thread } from '../../types/profile';
 import type { CssPixels } from '../../types/units';
@@ -167,11 +168,28 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       thread.funcTable.name[funcIndex]
     );
 
+    const implementation = funcToImplementation(thread, funcIndex);
+    let implementationLabel = 'Unknown';
+    if (implementation === 'js') {
+      implementationLabel = 'JS';
+    } else if (implementation === 'cpp') {
+      implementationLabel = 'C++';
+    }
+    const { totalTime, selfTime } = stackTiming.display[flameGraphTimingIndex];
+
     return (
       <div className="flameGraphCanvasTooltip">
-        <div className="tooltipOneLine">
+        <div className="tooltipOneLine tooltipHeader">
           <div className="tooltipTiming">{(100 * duration).toFixed(2)}%</div>
           <div className="tooltipTitle">{funcName}</div>
+        </div>
+        <div className="tooltipDetails">
+          <div className="tooltipLabel">Implementation:</div>
+          <div>{implementationLabel}</div>
+          <div className="tooltipLabel">Running Time (ms):</div>
+          <div>{totalTime}</div>
+          <div className="tooltipLabel">Self (ms):</div>
+          <div>{selfTime}</div>
         </div>
       </div>
     );
