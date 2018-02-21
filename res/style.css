@@ -764,7 +764,7 @@ body, #root, .profileViewer {
   border-radius: 3px;
   display: none;
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 10px 12px rgba(0, 0, 0, 0.3);
-  z-index: 2;
+  z-index: 4; /* needs to be on a higher level than .overflowEdgeIndicatorEdge */
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
