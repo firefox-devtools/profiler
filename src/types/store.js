@@ -14,7 +14,7 @@ export type State = StateRef;
 
 // R = Result of a thunk action
 type ThunkDispatch = <R>(action: ThunkAction<R>) => R;
-type PlainDispatch = (action: Action) => Action;
+type PlainDispatch = <A: Action>(action: A) => A;
 export type GetState = () => State;
 export type ThunkAction<R> = (dispatch: Dispatch, GetState) => R;
 // The `dispatch` function can accept either a plain action or a thunk action.
