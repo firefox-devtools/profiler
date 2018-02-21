@@ -6,7 +6,7 @@
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import { oneLine } from 'common-tags';
-
+import { getProfileUrl } from './url-state';
 import * as ZipFiles from '../profile-logic/zip-files';
 
 import type { Action } from '../types/store';
@@ -285,6 +285,9 @@ export const getZipFileMaxDepth = createSelector(
 
 export const getZipFileTree = createSelector(
   getZipFileTable,
-  zipFileTable =>
-    zipFileTable === null ? null : new ZipFiles.ZipFileTree(zipFileTable)
+  getProfileUrl,
+  (zipFileTable, zipFileUrl) =>
+    zipFileTable === null
+      ? null
+      : new ZipFiles.ZipFileTree(zipFileTable, zipFileUrl)
 );

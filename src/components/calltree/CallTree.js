@@ -67,12 +67,14 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
+const EMPTY_OBJECT = {};
+
 class CallTreeComponent extends PureComponent<Props> {
   _fixedColumns: Column[];
   _mainColumn: Column;
   _appendageColumn: Column;
   _appendageButtons: string[];
-  _treeView: TreeView<IndexIntoCallNodeTable, CallNodeDisplayData> | null;
+  _treeView: TreeView<IndexIntoCallNodeTable, CallNodeDisplayData, {}> | null;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
   constructor(props: Props) {
@@ -215,6 +217,7 @@ class CallTreeComponent extends PureComponent<Props> {
         icons={this.props.icons}
         rowHeight={16}
         indentWidth={10}
+        sharedRowProps={EMPTY_OBJECT}
       />
     );
   }

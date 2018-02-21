@@ -32,7 +32,10 @@ import { getZipFilePathFromUrl } from '../../reducers/url-state';
 import TreeView from '../shared/TreeView';
 import ProfileViewer from './ProfileViewer';
 import type { ZipFileState } from '../../types/reducers';
-import type { ZipFileTable } from '../../profile-logic/zip-files';
+import type {
+  ZipFileTable,
+  ZipDisplayData,
+} from '../../profile-logic/zip-files';
 import './ZipFileViewer.css';
 
 type StateProps = {|
@@ -57,9 +60,41 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-type ZipDisplayData = {|
-  +name: string,
+type ZipFileSharedRowProps = {|
+  +viewProfileFromZip: typeof viewProfileFromZip,
 |};
+type ZipFileRowProps = {|
+  +sharedRowProps: ZipFileSharedRowProps,
+  +displayData: ZipDisplayData,
+|};
+
+class ZipFileRow extends React.PureComponent<ZipFileRowProps> {
+  _handleClick = (event: SyntheticMouseEvent<HTMLElement>) => {
+    if (event.metaKey || event.ctrlKey) {
+      return;
+    }
+    event.preventDefault();
+    const {
+      sharedRowProps: { viewProfileFromZip },
+      displayData: { zipTableIndex },
+    } = this.props;
+    if (zipTableIndex !== null) {
+      viewProfileFromZip(zipTableIndex);
+    }
+  };
+  render() {
+    const { name, url } = this.props.displayData;
+    if (!url) {
+      return name;
+    }
+
+    return (
+      <a href={url} onClick={this._handleClick}>
+        {name}
+      </a>
+    );
+  }
+}
 
 /**
  * This component is a viewer for zip files. It was built to load
@@ -69,9 +104,13 @@ type ZipDisplayData = {|
  */
 class ZipFileViewer extends React.PureComponent<Props> {
   _fixedColumns = [];
-  _mainColumn = { propName: 'name', title: '' };
+  _mainColumn = { propName: 'name', title: '', component: ZipFileRow };
   _appendageButtons = ['focusCallstackButton'];
-  _treeView: ?TreeView<IndexIntoZipFileTable, ZipDisplayData>;
+  _treeView: ?TreeView<
+    IndexIntoZipFileTable,
+    ZipDisplayData,
+    ZipFileSharedRowProps
+  >;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
   componentWillMount() {
@@ -189,6 +228,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
       changeSelectedZipFile,
       changeExpandedZipFile,
       zipFilePathFromUrl,
+      viewProfileFromZip,
     } = this.props;
 
     if (!zipFileTree) {
@@ -226,6 +266,9 @@ class ZipFileViewer extends React.PureComponent<Props> {
                 contextMenuId={'MarkersContextMenu'}
                 rowHeight={30}
                 indentWidth={15}
+                sharedRowProps={{
+                  viewProfileFromZip,
+                }}
               />
             </div>
           </section>

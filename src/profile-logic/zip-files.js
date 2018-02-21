@@ -4,7 +4,7 @@
 // @flow
 
 import JSZip, { type JSZipFile } from 'jszip';
-
+import { ensureIsValidTabSlug } from '../utils/flow';
 export type IndexIntoZipFileTable = number;
 
 /**
@@ -19,6 +19,12 @@ export type ZipFileTable = {|
   file: Array<JSZipFile | null>,
   depth: number[],
   length: number,
+|};
+
+export type ZipDisplayData = {|
+  +name: string,
+  +url: null | string,
+  +zipTableIndex: IndexIntoZipFileTable,
 |};
 
 export function createZipTable(zipEntries: JSZip): ZipFileTable {
@@ -94,10 +100,6 @@ export function getZipFileMaxDepth(zipFileTable: ZipFileTable | null): number {
   return maxDepth;
 }
 
-type ZipDisplayData = {|
-  name: string,
-|};
-
 export class ZipFileTree {
   _zipFileTable: ZipFileTable;
   _parentToChildren: null | Map<
@@ -105,9 +107,11 @@ export class ZipFileTree {
     IndexIntoZipFileTable[]
   >;
   _displayDataByIndex: Map<IndexIntoZipFileTable, ZipDisplayData>;
+  _zipFileUrl: string;
 
-  constructor(zipFileTable: ZipFileTable) {
+  constructor(zipFileTable: ZipFileTable, zipFileUrl: string) {
     this._zipFileTable = zipFileTable;
+    this._zipFileUrl = zipFileUrl;
     this._displayDataByIndex = new Map();
   }
 
@@ -203,8 +207,25 @@ export class ZipFileTree {
   getDisplayData(zipTableIndex: IndexIntoZipFileTable): ZipDisplayData {
     let displayData = this._displayDataByIndex.get(zipTableIndex);
     if (displayData === undefined) {
+      let url = null;
+
+      // Build up a URL for the profile.
+      if (!this.hasChildren(zipTableIndex)) {
+        url =
+          window.location.origin +
+          '/from-url/' +
+          encodeURIComponent(this._zipFileUrl) +
+          '/' +
+          // Type check the slug:
+          ensureIsValidTabSlug('calltree') +
+          '/?file=' +
+          encodeURIComponent(this._zipFileTable.path[zipTableIndex]);
+      }
+
       displayData = {
         name: this._zipFileTable.partName[zipTableIndex],
+        url,
+        zipTableIndex,
       };
       this._displayDataByIndex.set(zipTableIndex, displayData);
     }

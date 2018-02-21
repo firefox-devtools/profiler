@@ -493,27 +493,9 @@ export async function _fetchProfile(
 export function retrieveProfileFromStore(
   hash: string
 ): ThunkAction<Promise<void>> {
-  return async function(dispatch) {
-    dispatch(waitingForProfileFromStore());
-
-    try {
-      const serializedProfile = await _fetchProfile({
-        url: `https://profile-store.commondatastorage.googleapis.com/${hash}`,
-        onTemporaryError: (e: TemporaryError) => {
-          dispatch(temporaryErrorReceivingProfileFromStore(e));
-        },
-      });
-
-      const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
-      if (profile === undefined) {
-        throw new Error('Unable to parse the profile.');
-      }
-
-      dispatch(viewProfile(profile));
-    } catch (error) {
-      dispatch(fatalErrorReceivingProfileFromStore(error));
-    }
-  };
+  return retrieveProfileOrZipFromUrl(
+    `https://profile-store.commondatastorage.googleapis.com/${hash}`
+  );
 }
 
 /**
