@@ -15,7 +15,7 @@ import {
 import ProfileViewer from './ProfileViewer';
 import ZipFileViewer from './ZipFileViewer';
 import Home from './Home';
-import { getView, hasZipFile } from '../../reducers/app';
+import { getView, getHasZipFile } from '../../reducers/app';
 import {
   getDataSource,
   getHash,
@@ -220,7 +220,7 @@ const options: ExplicitConnectOptions<
     dataSource: getDataSource(state),
     hash: getHash(state),
     profileUrl: getProfileUrl(state),
-    hasZipFile: hasZipFile(state),
+    hasZipFile: getHasZipFile(state),
   }),
   mapDispatchToProps: {
     retrieveProfileFromStore,

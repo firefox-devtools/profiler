@@ -270,7 +270,7 @@ export const getZipFileState = (state: State): ZipFileState =>
 export const getZipFile = (state: State): JSZip | null => {
   return getZipFileState(state).zip;
 };
-export const hasZipFile = (state: State): boolean =>
+export const getHasZipFile = (state: State): boolean =>
   getZipFileState(state).phase !== 'NO_ZIP_FILE';
 
 export const getZipFileTable = createSelector(

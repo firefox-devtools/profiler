@@ -365,6 +365,20 @@ export const getUrlPredictor = createSelector(
 export const getZipFilePathFromUrl = (state: State) =>
   getUrlState(state).zipFilePath;
 
+/**
+ * For now only provide a name for a profile if it came from a zip file.
+ */
+export const getProfileName: State => null | string = createSelector(
+  getZipFilePathFromUrl,
+  zipFilePath => {
+    if (!zipFilePath) {
+      return null;
+    }
+    const pathParts = zipFilePath.split('/');
+    return pathParts[pathParts.length - 1];
+  }
+);
+
 export const getRangeFilterLabels = createSelector(
   getRangeFilters,
   RangeFilters.getRangeFilterLabels

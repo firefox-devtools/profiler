@@ -177,6 +177,16 @@ class ZipFileViewer extends React.PureComponent<Props> {
     }
   }
 
+  componentDidUpdate(prevProps: Props) {
+    if (
+      prevProps.zipFileState.phase !== 'LIST_FILES_IN_ZIP_FILE' &&
+      this.props.zipFileState.phase === 'LIST_FILES_IN_ZIP_FILE'
+    ) {
+      // Re-focus if listing zip files again.
+      this.focus();
+    }
+  }
+
   focus() {
     const treeView = this._treeView;
     if (treeView) {
