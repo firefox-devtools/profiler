@@ -419,23 +419,45 @@ function isCallNodeContextMenuVisible(state: boolean = false, action: Action) {
   }
 }
 
-const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
-  viewOptions: combineReducers({
-    perThread: viewOptionsPerThread,
-    symbolicationStatus,
-    waitingForLibs,
-    selection,
-    scrollToSelectionGeneration,
-    focusCallTreeGeneration,
-    rootRange,
-    zeroAt,
-    tabOrder,
-    rightClickedThread,
-    isCallNodeContextMenuVisible,
-  }),
-  profile,
-});
-export default profileViewReducer;
+/**
+ * Provide a mechanism to wrap the reducer in a special function that can reset
+ * the state to the default values. This is useful when viewing multiple profiles
+ * (e.g. in zip files).
+ */
+const wrapReducerInResetter = (
+  regularReducer: Reducer<ProfileViewState>
+): Reducer<ProfileViewState> => {
+  return (state, action) => {
+    switch (action.type) {
+      case 'RETURN_TO_ZIP_FILE_LIST':
+        // Provide a mechanism to wipe this state clean when returning to the zip file
+        // list, as it invalidates all of the profile view state.
+        return regularReducer(undefined, action);
+      default:
+        // Run the normal reducer.
+        return regularReducer(state, action);
+    }
+  };
+};
+
+export default wrapReducerInResetter(
+  combineReducers({
+    viewOptions: combineReducers({
+      perThread: viewOptionsPerThread,
+      symbolicationStatus,
+      waitingForLibs,
+      selection,
+      scrollToSelectionGeneration,
+      focusCallTreeGeneration,
+      rootRange,
+      zeroAt,
+      tabOrder,
+      rightClickedThread,
+      isCallNodeContextMenuVisible,
+    }),
+    profile,
+  })
+);
 
 export const getProfileView = (state: State): ProfileViewState =>
   state.profileView;

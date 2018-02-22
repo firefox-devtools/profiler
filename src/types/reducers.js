@@ -20,10 +20,9 @@ import type { GetCategory } from '../profile-logic/color-categories';
 import type { TransformStacksPerThread } from './transforms';
 import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
-
 import type { PathSet } from '../utils/path.js';
 
-export type Reducer<T> = (T, Action) => T;
+export type Reducer<T> = (T | void, Action) => T;
 
 export type RequestedLib = { debugName: string, breakpadId: string };
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
@@ -113,22 +112,24 @@ export type RangeFilterState = {
   end: number,
 };
 
-export type UrlState = {
+export type UrlState = {|
   dataSource: DataSource,
   hash: string,
   profileUrl: string,
   selectedTab: TabSlug,
-  rangeFilters: RangeFilterState[],
-  selectedThread: ThreadIndex | null,
-  callTreeSearchString: string,
-  markersSearchString: string,
   implementation: ImplementationFilter,
   invertCallstack: boolean,
-  threadOrder: ThreadIndex[],
-  hiddenThreads: ThreadIndex[],
-  transforms: TransformStacksPerThread,
   pathInZipFile: string | null,
-};
+  profileSpecific: {|
+    rangeFilters: RangeFilterState[],
+    selectedThread: ThreadIndex | null,
+    callTreeSearchString: string,
+    threadOrder: ThreadIndex[],
+    hiddenThreads: ThreadIndex[],
+    markersSearchString: string,
+    transforms: TransformStacksPerThread,
+  |},
+|};
 
 export type IconState = Set<string>;
 
