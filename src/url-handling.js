@@ -88,9 +88,10 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   // Start with the query parameters that are shown regardless of the active tab.
   const query: Object = {
     range: stringifyRangeFilters(urlState.rangeFilters) || undefined,
-    thread: `${urlState.selectedThread}`,
+    thread: urlState.selectedThread,
     threadOrder: urlState.threadOrder.join('-'),
     hiddenThreads: urlState.hiddenThreads.join('-'),
+    file: urlState.pathInZipFile || undefined,
     v: CURRENT_URL_VERSION,
   };
 
@@ -104,17 +105,20 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   const selectedTab = urlState.selectedTab;
   switch (selectedTab) {
     case 'stack-chart':
-    case 'calltree':
+    case 'calltree': {
       query.search = urlState.callTreeSearchString || undefined;
       query.invertCallstack = urlState.invertCallstack ? null : undefined;
       query.implementation =
         urlState.implementation === 'combined'
           ? undefined
           : urlState.implementation;
-      query.transforms =
-        stringifyTransforms(urlState.transforms[urlState.selectedThread]) ||
-        undefined;
+      const selectedThread = urlState.selectedThread;
+      if (selectedThread !== null) {
+        query.transforms =
+          stringifyTransforms(urlState.transforms[selectedThread]) || undefined;
+      }
       break;
+    }
     case 'marker-table':
       query.markerSearch = urlState.markersSearchString;
       break;
@@ -204,6 +208,7 @@ export function stateFromLocation(location: Location): UrlState {
     markersSearchString: query.markerSearch || '',
     implementation,
     invertCallstack: query.invertCallstack !== undefined,
+    pathInZipFile: query.file || null,
     hiddenThreads: query.hiddenThreads
       ? query.hiddenThreads.split('-').map(index => Number(index))
       : [],

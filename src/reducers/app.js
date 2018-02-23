@@ -12,7 +12,7 @@ function view(
   state: AppViewState = { phase: 'INITIALIZING' },
   action: Action
 ): AppViewState {
-  if (state.phase === 'PROFILE') {
+  if (state.phase === 'DATA_LOADED') {
     // Let's not come back at another phase if we're already displaying a profile
     return state;
   }
@@ -37,11 +37,9 @@ function view(
       return { phase: 'INITIALIZING' };
     case 'ROUTE_NOT_FOUND':
       return { phase: 'ROUTE_NOT_FOUND' };
-    case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_STORE':
-    case 'RECEIVE_PROFILE_FROM_URL':
-    case 'RECEIVE_PROFILE_FROM_FILE':
-      return { phase: 'PROFILE' };
+    case 'RECEIVE_ZIP_FILE':
+    case 'VIEW_PROFILE':
+      return { phase: 'DATA_LOADED' };
     default:
       return state;
   }
@@ -49,7 +47,7 @@ function view(
 
 function isUrlSetupDone(state: boolean = false, action: Action) {
   switch (action.type) {
-    case '@@urlenhancer/urlSetupDone':
+    case 'URL_SETUP_DONE':
       return true;
     default:
       return state;
@@ -65,12 +63,12 @@ function hasZoomedViaMousewheel(state: boolean = false, action: Action) {
       return state;
   }
 }
-
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   isUrlSetupDone,
   hasZoomedViaMousewheel,
 });
+
 export default appStateReducer;
 
 export const getApp = (state: State): AppState => state.app;

@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`reducer zipFileState will fail when trying to load an invalid profile 1`] = `
+Array [
+  Array [
+    "Failed to process the profile in the zip file with the following error:",
+  ],
+  Array [
+    [Error: Unserializing the profile failed: SyntaxError: Unexpected token o in JSON at position 1],
+  ],
+]
+`;

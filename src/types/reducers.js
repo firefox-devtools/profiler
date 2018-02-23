@@ -18,6 +18,8 @@ import type { Attempt } from '../utils/errors';
 import type { GetLabel } from '../profile-logic/labeling-strategies';
 import type { GetCategory } from '../profile-logic/color-categories';
 import type { TransformStacksPerThread } from './transforms';
+import type JSZip from 'jszip';
+import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 
 export type Reducer<T> = (T, Action) => T;
 
@@ -41,21 +43,66 @@ export type ProfileViewState = {
     tabOrder: number[],
     rightClickedThread: ThreadIndex,
   },
-  profile: Profile,
+  profile: Profile | null,
 };
 
 export type AppViewState =
-  | {| phase: string |}
-  | {
-      phase: 'INITIALIZING',
-      additionalData: { attempt: Attempt | null, message: string },
-    }
-  | { phase: 'FATAL_ERROR', error: Error };
+  | {| +phase: 'ROUTE_NOT_FOUND' |}
+  | {| +phase: 'DATA_LOADED' |}
+  | {| +phase: 'FATAL_ERROR', +error: Error |}
+  | {|
+      +phase: 'INITIALIZING',
+      +additionalData?: {| +attempt: Attempt | null, +message: string |},
+    |};
+
+/**
+ * This represents the finite state machine for loading zip files. The phase represents
+ * where the state is now.
+ */
+export type ZipFileState =
+  | {|
+      +phase: 'NO_ZIP_FILE',
+      +zip: null,
+      +pathInZipFile: null,
+    |}
+  | {|
+      +phase: 'LIST_FILES_IN_ZIP_FILE',
+      +zip: JSZip,
+      +pathInZipFile: null,
+    |}
+  | {|
+      +phase: 'PROCESS_PROFILE_FROM_ZIP_FILE',
+      +zip: JSZip,
+      +pathInZipFile: string,
+    |}
+  | {|
+      +phase: 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE',
+      +zip: JSZip,
+      +pathInZipFile: string,
+    |}
+  | {|
+      +phase: 'FILE_NOT_FOUND_IN_ZIP_FILE',
+      +zip: JSZip,
+      +pathInZipFile: string,
+    |}
+  | {|
+      +phase: 'VIEW_PROFILE_IN_ZIP_FILE',
+      +zip: JSZip,
+      +pathInZipFile: string,
+    |};
 
 export type AppState = {
   view: AppViewState,
   isUrlSetupDone: boolean,
   hasZoomedViaMousewheel: boolean,
+};
+
+export type ZippedProfilesState = {
+  zipFile: ZipFileState,
+  selectedZipFileIndex: IndexIntoZipFileTable | null,
+  // In practice this should never contain null, but needs to support the
+  // TreeView interface.
+  expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
 };
 
 export type RangeFilterState = {
@@ -69,7 +116,7 @@ export type UrlState = {
   profileUrl: string,
   selectedTab: TabSlug,
   rangeFilters: RangeFilterState[],
-  selectedThread: ThreadIndex,
+  selectedThread: ThreadIndex | null,
   callTreeSearchString: string,
   markersSearchString: string,
   implementation: ImplementationFilter,
@@ -77,6 +124,7 @@ export type UrlState = {
   threadOrder: ThreadIndex[],
   hiddenThreads: ThreadIndex[],
   transforms: TransformStacksPerThread,
+  pathInZipFile: string | null,
 };
 
 export type IconState = Set<string>;
@@ -86,13 +134,14 @@ export type StackChartState = {
   labelingStrategy: GetLabel,
 };
 
-export type State = {
+export type State = {|
   app: AppState,
   profileView: ProfileViewState,
   urlState: UrlState,
   stackChart: StackChartState,
   icons: IconState,
-};
+  zippedProfiles: ZippedProfilesState,
+|};
 
 export type IconWithClassName = {
   icon: string,

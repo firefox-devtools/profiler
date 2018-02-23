@@ -19,7 +19,7 @@ import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import uniqWith from 'lodash.uniqwith';
-import { assertExhaustiveCheck } from '../utils/flow';
+import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 
 import type {
   Profile,
@@ -47,17 +47,16 @@ import type {
 } from '../types/reducers';
 import type { Transform, TransformStack } from '../types/transforms';
 
-function profile(
-  state: Profile = ProfileData.getEmptyProfile(),
-  action: Action
-) {
+function profile(state: Profile | null = null, action: Action): Profile | null {
   switch (action.type) {
-    case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_STORE':
-    case 'RECEIVE_PROFILE_FROM_URL':
-    case 'RECEIVE_PROFILE_FROM_FILE':
+    case 'VIEW_PROFILE':
       return action.profile;
     case 'COALESCED_FUNCTIONS_UPDATE': {
+      if (state === null) {
+        throw new Error(
+          'Assumed that a profile would be loaded in time for a coalesced functions update.'
+        );
+      }
       if (!state.threads.length) {
         return state;
       }
@@ -98,12 +97,12 @@ function symbolicationStatus(
   }
 }
 
-function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
+function viewOptionsPerThread(
+  state: ThreadViewOptions[] = [],
+  action: Action
+): ThreadViewOptions[] {
   switch (action.type) {
-    case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_STORE':
-    case 'RECEIVE_PROFILE_FROM_URL':
-    case 'RECEIVE_PROFILE_FROM_FILE':
+    case 'VIEW_PROFILE':
       return action.profile.threads.map(() => ({
         selectedCallNodePath: [],
         expandedCallNodePaths: [],
@@ -304,7 +303,7 @@ function waitingForLibs(state: Set<RequestedLib> = new Set(), action: Action) {
 function selection(
   state: ProfileSelection = { hasSelection: false, isModifying: false },
   action: Action
-) {
+): ProfileSelection {
   // TODO: Rename to timeRangeSelection
   switch (action.type) {
     case 'UPDATE_PROFILE_SELECTION':
@@ -340,10 +339,7 @@ function rootRange(
   action: Action
 ) {
   switch (action.type) {
-    case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_STORE':
-    case 'RECEIVE_PROFILE_FROM_URL':
-    case 'RECEIVE_PROFILE_FROM_FILE':
+    case 'VIEW_PROFILE':
       return ProfileData.getTimeRangeIncludingAllThreads(action.profile);
     default:
       return state;
@@ -352,10 +348,7 @@ function rootRange(
 
 function zeroAt(state: Milliseconds = 0, action: Action) {
   switch (action.type) {
-    case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_STORE':
-    case 'RECEIVE_PROFILE_FROM_URL':
-    case 'RECEIVE_PROFILE_FROM_FILE':
+    case 'VIEW_PROFILE':
       return ProfileData.getTimeRangeIncludingAllThreads(action.profile).start;
     default:
       return state;
@@ -447,8 +440,13 @@ export const getDisplayRange = createSelector(
 /**
  * Profile
  */
-export const getProfile = (state: State): Profile =>
+export const getProfileOrNull = (state: State): Profile | null =>
   getProfileView(state).profile;
+export const getProfile = (state: State): Profile =>
+  ensureExists(
+    getProfileOrNull(state),
+    'Tried to access the profile before it was loaded.'
+  );
 export const getProfileInterval = (state: State): Milliseconds =>
   getProfile(state).meta.interval;
 export const getThreads = (state: State): Thread[] => getProfile(state).threads;

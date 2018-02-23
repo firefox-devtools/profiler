@@ -48,6 +48,7 @@
     "common-tags": "^1.7.2",
     "copy-to-clipboard": "^3.0.8",
     "escape-string-regexp": "^1.0.5",
+    "jszip": "^3.1.5",
     "lodash.uniqwith": "^4.5.0",
     "memoize-immutable": "^3.0.0",
     "offline-plugin": "^4.9.0",

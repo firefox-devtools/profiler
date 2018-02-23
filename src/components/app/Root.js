@@ -10,7 +10,7 @@ import explicitConnect from '../../utils/connect';
 import {
   retrieveProfileFromAddon,
   retrieveProfileFromStore,
-  retrieveProfileFromUrl,
+  retrieveProfileOrZipFromUrl,
 } from '../../actions/receive-profile';
 import ProfileViewer from './ProfileViewer';
 import Home from './Home';
@@ -76,7 +76,7 @@ type ProfileViewStateProps = {|
 type ProfileViewDispatchProps = {|
   +retrieveProfileFromAddon: typeof retrieveProfileFromAddon,
   +retrieveProfileFromStore: typeof retrieveProfileFromStore,
-  +retrieveProfileFromUrl: typeof retrieveProfileFromUrl,
+  +retrieveProfileOrZipFromUrl: typeof retrieveProfileOrZipFromUrl,
 |};
 
 type ProfileViewProps = ConnectedProps<
@@ -93,7 +93,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       profileUrl,
       retrieveProfileFromAddon,
       retrieveProfileFromStore,
-      retrieveProfileFromUrl,
+      retrieveProfileOrZipFromUrl,
     } = this.props;
     switch (dataSource) {
       case 'from-addon':
@@ -108,7 +108,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
         retrieveProfileFromStore(hash);
         break;
       case 'from-url':
-        retrieveProfileFromUrl(profileUrl);
+        retrieveProfileOrZipFromUrl(profileUrl);
         break;
       case 'none':
         // nothing to do
@@ -155,7 +155,8 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
 
   render() {
     const { view, dataSource } = this.props;
-    switch (view.phase) {
+    const phase = view.phase;
+    switch (phase) {
       case 'INITIALIZING': {
         if (dataSource === 'none') {
           return <Home />;
@@ -194,10 +195,13 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
 
         return this.renderMessage(message, additionalMessage, false);
       }
-      case 'PROFILE':
+      case 'DATA_LOADED':
         return <ProfileViewer />;
       case 'ROUTE_NOT_FOUND':
       default:
+        // Assert with Flow that we've handled all the cases, as the only thing left
+        // should be 'ROUTE_NOT_FOUND'.
+        (phase: 'ROUTE_NOT_FOUND');
         return (
           <Home specialMessage="The URL you came in on was not recognized." />
         );
@@ -218,7 +222,7 @@ const options: ExplicitConnectOptions<
   }),
   mapDispatchToProps: {
     retrieveProfileFromStore,
-    retrieveProfileFromUrl,
+    retrieveProfileOrZipFromUrl,
     retrieveProfileFromAddon,
   },
   component: ProfileViewWhenReadyImpl,
