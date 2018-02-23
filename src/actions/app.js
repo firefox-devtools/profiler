@@ -5,7 +5,6 @@
 // @flow
 import { getSelectedTab, getDataSource } from '../reducers/url-state';
 import { sendAnalytics } from '../utils/analytics';
-
 import type { Action, ThunkAction } from '../types/store';
 import type { TabSlug } from '../types/actions';
 import type { UrlState } from '../types/reducers';
@@ -42,7 +41,7 @@ export function changeTabOrder(tabOrder: number[]): Action {
 
 export function urlSetupDone(): ThunkAction<void> {
   return (dispatch, getState) => {
-    dispatch({ type: '@@urlenhancer/urlSetupDone' });
+    dispatch({ type: 'URL_SETUP_DONE' });
 
     // After the url setup is done, we can successfully query our state about its
     // initial page.
@@ -63,6 +62,11 @@ export function show404(url: string): Action {
   return { type: 'ROUTE_NOT_FOUND', url };
 }
 
-export function updateUrlState(urlState: UrlState): Action {
-  return { type: '@@urlenhancer/updateUrlState', urlState };
+/**
+ * This function is called when a browser navigation event happens. A new UrlState
+ * is generated when the window.location is serialized, or the state is pulled out of
+ * the history API.
+ */
+export function updateUrlState(newUrlState: UrlState): Action {
+  return { type: 'UPDATE_URL_STATE', newUrlState };
 }

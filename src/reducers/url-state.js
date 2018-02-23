@@ -77,8 +77,15 @@ function rangeFilters(state: StartEndRange[] = [], action: Action) {
   }
 }
 
-function selectedThread(state: ThreadIndex = 0, action: Action): ThreadIndex {
+function selectedThread(
+  state: ThreadIndex | null = null,
+  action: Action
+): ThreadIndex | null {
   function findDefaultThreadIndex(threads) {
+    if (threads.length === 0) {
+      // Tests may have no threads.
+      return null;
+    }
     const contentThreadId = threads.findIndex(
       thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
     );
@@ -90,23 +97,17 @@ function selectedThread(state: ThreadIndex = 0, action: Action): ThreadIndex {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
       return action.selectedThread;
-    case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_FILE': {
+    case 'VIEW_PROFILE':
+      // The thread index could be set from the URL, so ensure that it is within a valid
+      // range.
+      if (state !== null && state < action.profile.threads.length) {
+        return state;
+      }
       // When loading in a brand new profile, select either the GeckoMain [tab] thread,
       // or the first thread in the thread order. For profiles from the Web, the
       // selectedThread has already been initialized from the URL and does not require
       // looking at the profile.
       return findDefaultThreadIndex(action.profile.threads);
-    }
-    case 'RECEIVE_PROFILE_FROM_STORE':
-    case 'RECEIVE_PROFILE_FROM_URL': {
-      // For profiles from the web, we only need to ensure the selected thread
-      // is actually valid.
-      if (state < action.profile.threads.length) {
-        return state;
-      }
-      return findDefaultThreadIndex(action.profile.threads);
-    }
     case 'ISOLATE_THREAD':
       return action.isolatedThreadIndex;
     case 'HIDE_THREAD': {
@@ -194,10 +195,7 @@ function invertCallstack(state: boolean = false, action: Action) {
 
 function threadOrder(state: ThreadIndex[] = [], action: Action) {
   switch (action.type) {
-    case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_STORE':
-    case 'RECEIVE_PROFILE_FROM_URL':
-    case 'RECEIVE_PROFILE_FROM_FILE': {
+    case 'VIEW_PROFILE': {
       // When receiving a new profile, try to use the thread order specified in the URL,
       // but ensure that the IDs are correct.
       const threads = defaultThreadOrder(action.profile.threads);
@@ -214,10 +212,7 @@ function threadOrder(state: ThreadIndex[] = [], action: Action) {
 
 function hiddenThreads(state: ThreadIndex[] = [], action: Action) {
   switch (action.type) {
-    case 'RECEIVE_PROFILE_FROM_ADDON':
-    case 'RECEIVE_PROFILE_FROM_STORE':
-    case 'RECEIVE_PROFILE_FROM_URL':
-    case 'RECEIVE_PROFILE_FROM_FILE': {
+    case 'VIEW_PROFILE': {
       // When receiving a new profile, try to use the hidden threads specified in the URL,
       // but ensure that the IDs are correct.
       const threads = action.profile.threads.map(
@@ -239,13 +234,29 @@ function hiddenThreads(state: ThreadIndex[] = [], action: Action) {
   }
 }
 
+function pathInZipFile(
+  state: string | null = null,
+  action: Action
+): string | null {
+  switch (action.type) {
+    // Update the URL the moment the zip file is starting to be
+    // processed, not when it is viewed. The processing is async.
+    case 'PROCESS_PROFILE_FROM_ZIP_FILE':
+      return action.pathInZipFile ? action.pathInZipFile : null;
+    case 'RETURN_TO_ZIP_FILE_LIST':
+      return null;
+    default:
+      return state;
+  }
+}
+
 const urlStateReducer: Reducer<UrlState> = (regularUrlStateReducer => (
   state: UrlState,
   action: Action
 ): UrlState => {
   switch (action.type) {
-    case '@@urlenhancer/updateUrlState':
-      return action.urlState;
+    case 'UPDATE_URL_STATE':
+      return action.newUrlState;
     default:
       return regularUrlStateReducer(state, action);
   }
@@ -264,6 +275,7 @@ const urlStateReducer: Reducer<UrlState> = (regularUrlStateReducer => (
     hiddenThreads,
     markersSearchString,
     transforms,
+    pathInZipFile,
   })
 );
 export default urlStateReducer;
@@ -313,8 +325,15 @@ export const getMarkersSearchString = (state: State) =>
   getUrlState(state).markersSearchString;
 
 export const getSelectedTab = (state: State) => getUrlState(state).selectedTab;
-export const getSelectedThreadIndex = (state: State) =>
-  getUrlState(state).selectedThread;
+export const getSelectedThreadIndex = (state: State) => {
+  const threadIndex = getUrlState(state).selectedThread;
+  if (threadIndex === null) {
+    throw new Error(
+      'Attempted to get a thread index before a profile was loaded.'
+    );
+  }
+  return threadIndex;
+};
 export const getTransformStack = (
   state: State,
   threadIndex: ThreadIndex
@@ -332,6 +351,23 @@ export const getUrlPredictor = createSelector(
       : [actionOrActionList];
     const newUrlState = actionList.reduce(urlStateReducer, oldUrlState);
     return urlFromState(newUrlState);
+  }
+);
+
+export const getPathInZipFileFromUrl = (state: State) =>
+  getUrlState(state).pathInZipFile;
+
+/**
+ * For now only provide a name for a profile if it came from a zip file.
+ */
+export const getProfileName: State => null | string = createSelector(
+  getPathInZipFileFromUrl,
+  pathInZipFile => {
+    if (!pathInZipFile) {
+      return null;
+    }
+    const pathParts = pathInZipFile.split('/');
+    return pathParts[pathParts.length - 1];
   }
 );
 
