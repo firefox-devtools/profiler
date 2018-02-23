@@ -1,6 +1,5 @@
 [ignore]
-.*node_modules/fbjs.*
-.*custom_format_broken.json
+.*node_modules/.*
 res/analytics.js
 
 [libs]

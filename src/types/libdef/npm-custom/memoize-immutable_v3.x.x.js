@@ -5,9 +5,9 @@
 
 declare module 'memoize-immutable' {
   declare interface CacheInstance<K, V> {
-    has(K): boolean,
-    get(K): V,
-    set(K, V): void,
+    has(K): boolean;
+    get(K): V;
+    set(K, V): void;
   }
 
   // TODO also support caches that come from immutable
