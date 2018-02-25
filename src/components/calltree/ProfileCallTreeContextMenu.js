@@ -13,6 +13,7 @@ import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
   expandAllCallNodeDescendants,
+  setProfileCallTreeContextMenuVisibility,
 } from '../../actions/profile-view';
 import {
   getSelectedThreadIndex,
@@ -50,6 +51,7 @@ type StateProps = {|
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
   +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
+  +setProfileCallTreeContextMenuVisibility: typeof setProfileCallTreeContextMenuVisibility,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -61,6 +63,14 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     super(props);
     (this: any).handleClick = this.handleClick.bind(this);
   }
+
+  _menuShown = () => {
+    this.props.setProfileCallTreeContextMenuVisibility(true);
+  };
+
+  _menuHidden = () => {
+    this.props.setProfileCallTreeContextMenuVisibility(false);
+  };
 
   _getFunctionName(): string {
     const {
@@ -329,6 +339,11 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     } = this.props;
 
     if (selectedCallNodeIndex === null) {
+      // If the menu was visible while selectedCallNodeIndex was
+      // changed to null, the onHide callback will not execute when
+      // null is returned below. Call _menuHidden() here to be ensure
+      // the visibility state is updated.
+      this._menuHidden();
       return null;
     }
 
@@ -338,7 +353,11 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     const nameForResource = this.getNameForSelectedResource();
 
     return (
-      <ContextMenu id={'ProfileCallTreeContextMenu'}>
+      <ContextMenu
+        id={'ProfileCallTreeContextMenu'}
+        onShow={this._menuShown}
+        onHide={this._menuHidden}
+      >
         {inverted ? null : (
           <MenuItem
             onClick={this.handleClick}
@@ -435,7 +454,11 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       state
     ),
   }),
-  mapDispatchToProps: { addTransformToStack, expandAllCallNodeDescendants },
+  mapDispatchToProps: {
+    addTransformToStack,
+    expandAllCallNodeDescendants,
+    setProfileCallTreeContextMenuVisibility,
+  },
   component: ProfileCallTreeContextMenu,
 };
 export default explicitConnect(options);

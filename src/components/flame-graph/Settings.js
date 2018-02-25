@@ -6,44 +6,70 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
-import { changeInvertCallstack } from '../../actions/profile-view';
-import { getInvertCallstack } from '../../reducers/url-state';
+import {
+  changeImplementationFilter,
+  changeInvertCallstack,
+} from '../../actions/profile-view';
+import {
+  getImplementationFilter,
+  getInvertCallstack,
+} from '../../reducers/url-state';
 import StackSearchField from '../shared/StackSearchField';
+import { toValidImplementationFilter } from '../../profile-logic/profile-data';
 
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
+import type { ImplementationFilter } from '../../types/actions';
 
 import './Settings.css';
 
 type StateProps = {|
+  +implementationFilter: ImplementationFilter,
   +invertCallstack: boolean,
 |};
 
 type DispatchProps = {|
+  +changeImplementationFilter: typeof changeImplementationFilter,
   +changeInvertCallstack: typeof changeInvertCallstack,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class FlameGraphSettings extends PureComponent<Props> {
-  constructor(props) {
-    super(props);
-    (this: any)._onInvertCallstackClick = this._onInvertCallstackClick.bind(
-      this
+  _onImplementationFilterChange = (e: SyntheticEvent<HTMLSelectElement>) => {
+    this.props.changeImplementationFilter(
+      // This function is here to satisfy Flow that we are getting a valid
+      // implementation filter.
+      toValidImplementationFilter(e.currentTarget.value)
     );
-  }
+  };
 
-  _onInvertCallstackClick(e: SyntheticMouseEvent<HTMLInputElement>) {
+  _onInvertCallstackClick = (e: SyntheticMouseEvent<HTMLInputElement>) => {
     this.props.changeInvertCallstack(e.currentTarget.checked);
-  }
+  };
 
   render() {
-    const { invertCallstack } = this.props;
+    const { implementationFilter, invertCallstack } = this.props;
     return (
       <div className="flameGraphSettings">
         <ul className="flameGraphSettingsList">
+          <li className="flameGraphSettingsListItem">
+            <label className="flameGraphSettingsLabel">
+              Filter:
+              <select
+                className="flameGraphSettingsSelect"
+                onChange={this._onImplementationFilterChange}
+                value={implementationFilter}
+              >
+                <option value="combined">Combined stacks</option>
+                <option value="js">JS only</option>
+                <option value="cpp">C++ only</option>
+              </select>
+            </label>
+          </li>
+
           <li className="flameGraphSettingsListItem">
             <label className="flameGraphSettingsLabel">
               <input
@@ -64,9 +90,11 @@ class FlameGraphSettings extends PureComponent<Props> {
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
+    implementationFilter: getImplementationFilter(state),
     invertCallstack: getInvertCallstack(state),
   }),
   mapDispatchToProps: {
+    changeImplementationFilter,
     changeInvertCallstack,
   },
   component: FlameGraphSettings,

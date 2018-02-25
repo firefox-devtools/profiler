@@ -24,6 +24,7 @@ process: \\"default\\" (0)"
       <canvas
         className="chartCanvas markerChartCanvas"
         onDoubleClick={[Function]}
+        onMouseDown={[Function]}
         onMouseMove={[Function]}
         onMouseOut={[Function]}
       />

@@ -42,6 +42,7 @@ export type ProfileViewState = {
     zeroAt: Milliseconds,
     tabOrder: number[],
     rightClickedThread: ThreadIndex,
+    profileCallTreeContextMenuVisible: boolean,
   },
   profile: Profile | null,
 };

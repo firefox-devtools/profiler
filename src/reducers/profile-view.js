@@ -373,6 +373,18 @@ function rightClickedThread(state: ThreadIndex = 0, action: Action) {
   }
 }
 
+function profileCallTreeContextMenuVisible(
+  state: boolean = false,
+  action: Action
+) {
+  switch (action.type) {
+    case 'SET_PROFILE_CALL_TREE_CONTEXT_MENU_VISIBILITY':
+      return action.isVisible;
+    default:
+      return state;
+  }
+}
+
 const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
   viewOptions: combineReducers({
     perThread: viewOptionsPerThread,
@@ -385,6 +397,7 @@ const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
     zeroAt,
     tabOrder,
     rightClickedThread,
+    profileCallTreeContextMenuVisible,
   }),
   profile,
 });
@@ -454,6 +467,8 @@ export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
 export const getRightClickedThreadIndex = (state: State) =>
   getProfileViewOptions(state).rightClickedThread;
+export const getSelection = (state: State) =>
+  getProfileViewOptions(state).selection;
 
 export type SelectorsForThread = {
   getThread: State => Thread,
@@ -602,12 +617,12 @@ export const selectorsForThread = (
     );
     const getRangeSelectionFilteredThread = createSelector(
       getFilteredThread,
-      getProfileViewOptions,
-      (thread, viewOptions): Thread => {
-        if (!viewOptions.selection.hasSelection) {
+      getSelection,
+      (thread, selection): Thread => {
+        if (!selection.hasSelection) {
           return thread;
         }
-        const { selectionStart, selectionEnd } = viewOptions.selection;
+        const { selectionStart, selectionEnd } = selection;
         return ProfileData.filterThreadToRange(
           thread,
           selectionStart,

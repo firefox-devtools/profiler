@@ -66,6 +66,15 @@ export function changeRightClickedThread(selectedThread: ThreadIndex): Action {
   };
 }
 
+export function setProfileCallTreeContextMenuVisibility(
+  isVisible: boolean
+): Action {
+  return {
+    type: 'SET_PROFILE_CALL_TREE_CONTEXT_MENU_VISIBILITY',
+    isVisible,
+  };
+}
+
 export function changeThreadOrder(threadOrder: ThreadIndex[]): Action {
   sendAnalytics({
     hitType: 'event',
