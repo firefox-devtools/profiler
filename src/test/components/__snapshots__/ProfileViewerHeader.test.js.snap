@@ -355,19 +355,11 @@ Array [
     NaN,
   ],
   Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
     "fillRect",
     22.22222222222222,
     NaN,
     22.22222222222222,
     NaN,
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff",
   ],
   Array [
     "fillRect",
@@ -377,19 +369,11 @@ Array [
     NaN,
   ],
   Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
     "fillRect",
     66.66666666666666,
     NaN,
     22.22222222222222,
     NaN,
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff",
   ],
   Array [
     "fillRect",
@@ -399,19 +383,11 @@ Array [
     NaN,
   ],
   Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
     "fillRect",
     111.11111111111111,
     NaN,
     22.22222222222222,
     NaN,
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff",
   ],
   Array [
     "fillRect",
@@ -421,19 +397,11 @@ Array [
     NaN,
   ],
   Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
     "fillRect",
     155.55555555555554,
     NaN,
     22.22222222222222,
     NaN,
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff",
   ],
   Array [
     "fillRect",
@@ -444,36 +412,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
-    "fillRect",
-    88.88888888888889,
-    0,
-    22.22222222222222,
-    300,
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
-    "fillRect",
-    111.11111111111111,
-    0,
-    22.22222222222222,
-    300,
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
-    "fillRect",
-    133.33333333333331,
-    75,
-    22.22222222222222,
-    225,
+    "#003eaa",
   ],
   Array [
     "set fillStyle",
@@ -487,8 +426,33 @@ Array [
     300,
   ],
   Array [
+    "fillRect",
+    111.11111111111111,
+    0,
+    22.22222222222222,
+    300,
+  ],
+  Array [
+    "fillRect",
+    133.33333333333331,
+    75,
+    22.22222222222222,
+    225,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
     "set fillStyle",
     "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    88.88888888888889,
+    0,
+    22.22222222222222,
+    300,
   ],
   Array [
     "fillRect",
@@ -498,15 +462,15 @@ Array [
     300,
   ],
   Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
     "fillRect",
     133.33333333333331,
     75,
     22.22222222222222,
     225,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
   ],
   Array [
     "clearRect",
