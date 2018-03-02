@@ -13,10 +13,11 @@ import {
   parseTransforms,
 } from './profile-logic/transforms';
 import { assertExhaustiveCheck, toValidTabSlug } from './utils/flow';
+import { oneLine } from 'common-tags';
 import type { UrlState } from './types/reducers';
 import type { DataSource } from './types/actions';
 
-export const CURRENT_URL_VERSION = 2;
+export const CURRENT_URL_VERSION = 3;
 
 function dataSourceDirs(urlState: UrlState) {
   const { dataSource } = urlState;
@@ -102,6 +103,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   // Depending on which tab is active, also show tab-specific query parameters.
   const selectedTab = urlState.selectedTab;
   switch (selectedTab) {
+    case 'stack-chart':
     case 'calltree':
       query.search = urlState.callTreeSearchString || undefined;
       query.invertCallstack = urlState.invertCallstack ? null : undefined;
@@ -115,13 +117,6 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       break;
     case 'marker-table':
       query.markerSearch = urlState.markersSearchString;
-      break;
-    case 'stack-chart':
-      query.search = urlState.callTreeSearchString || undefined;
-      query.invertCallstack = urlState.invertCallstack ? null : undefined;
-      query.hidePlatformDetails = urlState.hidePlatformDetails
-        ? null
-        : undefined;
       break;
     case 'marker-chart':
     case 'flame-graph':
@@ -209,7 +204,6 @@ export function stateFromLocation(location: Location): UrlState {
     markersSearchString: query.markerSearch || '',
     implementation,
     invertCallstack: query.invertCallstack !== undefined,
-    hidePlatformDetails: query.hidePlatformDetails !== undefined,
     hiddenThreads: query.hiddenThreads
       ? query.hiddenThreads.split('-').map(index => Number(index))
       : [],
@@ -325,4 +319,19 @@ const _upgraders = {
       // Matches:  $1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       .replace(/^(\/[^/]+\/[^/]+)\/markers\/?/, '$1/marker-table/');
   },
+  [3]: (processedLocation: ProcessedLocation) => {
+    const { query } = processedLocation;
+    // Removed "Platform only" checkbox from the stack chart.
+    if ('hidePlatformDetails' in query) {
+      delete query.hidePlatformDetails;
+      query.implementation = 'js';
+    }
+  },
 };
+
+if (Object.keys(_upgraders).length - 1 !== CURRENT_URL_VERSION) {
+  throw new Error(oneLine`
+    CURRENT_URL_VERSION does not match the numer of URL upgraders. If you added a
+    new upgrader, make sure and bump the CURRENT_URL_VERSION variable.
+  `);
+}
