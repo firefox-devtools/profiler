@@ -9,20 +9,16 @@ import * as UrlStateSelectors from '../../reducers/url-state';
 
 import {
   changeCallTreeSearchString,
-  changeHidePlatformDetails,
-  addRangeFilter,
   changeInvertCallstack,
   updateProfileSelection,
   changeImplementationFilter,
   changeSelectedCallNode,
 } from '../../actions/profile-view';
-import { changeStackChartColorStrategy } from '../../actions/stack-chart';
-import { getCategoryByImplementation } from '../../profile-logic/color-categories';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 
 const { selectedThreadSelectors } = ProfileViewSelectors;
 
-describe('selectors/getStackTimingByDepthForStackChart', function() {
+describe('selectors/getStackTimingByDepth', function() {
   /**
    * This table shows off how a stack chart gets filtered to JS only, where the number is
    * the stack index, and P is platform code, and J javascript.
@@ -41,7 +37,7 @@ describe('selectors/getStackTimingByDepthForStackChart', function() {
 
   it('computes unfiltered stack timing by depth', function() {
     const store = storeWithProfile();
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForStackChart(
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
@@ -55,26 +51,10 @@ describe('selectors/getStackTimingByDepthForStackChart', function() {
     ]);
   });
 
-  it('computes "Hide platform details" stack timing by depth', function() {
-    const store = storeWithProfile();
-    store.dispatch(changeHidePlatformDetails(true));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForStackChart(
-      store.getState()
-    );
-
-    expect(stackTimingByDepth).toEqual([
-      { start: [0], end: [91], stack: [0], length: 1 },
-      { start: [60], end: [91], stack: [1], length: 1 },
-      { start: [70], end: [90], stack: [2], length: 1 },
-      { start: [80], end: [90], stack: [3], length: 1 },
-      { start: [80], end: [90], stack: [4], length: 1 },
-    ]);
-  });
-
   it('uses search strings', function() {
     const store = storeWithProfile();
     store.dispatch(changeCallTreeSearchString('javascript'));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForStackChart(
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
@@ -107,7 +87,7 @@ describe('selectors/getStackTimingByDepthForStackChart', function() {
   it('can handle inverted stacks', function() {
     const store = storeWithProfile();
     store.dispatch(changeInvertCallstack(true));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForStackChart(
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
@@ -239,44 +219,6 @@ describe('selectors/getFlameGraphTiming', function() {
   });
 });
 
-describe('selectors/getCallNodeMaxDepthForStackChart', function() {
-  it('calculates the max func depth and observes of platform-detail filters', function() {
-    const store = storeWithProfile();
-    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
-      store.getState()
-    );
-    expect(allSamplesMaxDepth).toEqual(7);
-    store.dispatch(changeHidePlatformDetails(true));
-    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
-      store.getState()
-    );
-    expect(jsOnlySamplesMaxDepth).toEqual(5);
-  });
-
-  it('acts upon the current range', function() {
-    const store = storeWithProfile();
-    store.dispatch(addRangeFilter(0, 20));
-    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
-      store.getState()
-    );
-    expect(allSamplesMaxDepth).toEqual(3);
-    store.dispatch(changeHidePlatformDetails(true));
-    const jsOnlySamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
-      store.getState()
-    );
-    expect(jsOnlySamplesMaxDepth).toEqual(1);
-  });
-
-  it('returns zero if there are no samples', function() {
-    const { profile } = getProfileFromTextSamples(` `);
-    const store = storeWithProfile(profile);
-    const noSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
-      store.getState()
-    );
-    expect(noSamplesMaxDepth).toEqual(0);
-  });
-});
-
 describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
   it('calculates the max call node depth', function() {
     const { profile } = getProfileFromTextSamples(`
@@ -300,41 +242,6 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
       store.getState()
     );
     expect(allSamplesMaxDepth).toEqual(0);
-  });
-});
-
-describe('selectors/getLeafCategoryStackTimingForStackChart', function() {
-  /**
-   * This table shows off how stack timings get filtered to a single row by concurrent
-   * color categories. P is platform code, J javascript baseline, and I is javascript
-   * interpreter.
-   *
-   *            Unfiltered             ->      By Concurrent Leaf Category
-   *   0-10-20-30-40-50-60-70-80-90-91      0-10-20-30-40-50-60-70-80-90-91 <- Timing (ms)
-   *  ================================     ================================
-   *  0P 0P 0P 0P 0P 0P 0P 0P 0P 0P  |     1P 1P 1P 1P 1P 1P 4J 4J 8I 4J  |
-   *  1P 1P 1P 1P    1P 1P 1P 1P 1P  |
-   *     2P 2P 3P       4J 4J 4J 4J  |
-   *                       5J 5J     |
-   *                          6P     |
-   *                          7P     |
-   *                          8I     |
-   */
-  it('gets the unfiltered leaf-stack timing by implementation', function() {
-    const store = storeWithProfile();
-    store.dispatch(changeStackChartColorStrategy(getCategoryByImplementation));
-    const leafStackTiming = selectedThreadSelectors.getLeafCategoryStackTimingForStackChart(
-      store.getState()
-    );
-
-    expect(leafStackTiming).toEqual([
-      {
-        start: [0, 60, 80, 90],
-        end: [60, 80, 90, 91],
-        stack: [1, 4, 8, 4],
-        length: 4,
-      },
-    ]);
   });
 });
 

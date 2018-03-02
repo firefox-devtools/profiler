@@ -18,7 +18,6 @@ import * as StackTiming from '../profile-logic/stack-timing';
 import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
-import { getCategoryColorStrategy } from './stack-chart';
 import uniqWith from 'lodash.uniqwith';
 import { assertExhaustiveCheck } from '../utils/flow';
 
@@ -480,11 +479,7 @@ export type SelectorsForThread = {
   getExpandedCallNodePaths: State => CallNodePath[],
   getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
   getCallTree: State => CallTree.CallTree,
-  getFilteredThreadForStackChart: State => Thread,
-  getCallNodeInfoOfFilteredThreadForStackChart: State => CallNodeInfo,
-  getCallNodeMaxDepthForStackChart: State => number,
-  getStackTimingByDepthForStackChart: State => StackTiming.StackTimingByDepth,
-  getLeafCategoryStackTimingForStackChart: State => StackTiming.StackTimingByDepth,
+  getStackTimingByDepth: State => StackTiming.StackTimingByDepth,
   getCallNodeMaxDepthForFlameGraph: State => number,
   getFlameGraphTiming: State => FlameGraph.FlameGraphTiming,
   getFriendlyThreadName: State => string,
@@ -723,57 +718,10 @@ export const selectorsForThread = (
       UrlState.getInvertCallstack,
       CallTree.getCallTree
     );
-
-    // The selectors below diverge from the thread filtering that's done above;
-    // they respect the "hidePlatformDetails" setting instead of the "jsOnly"
-    // setting. This type of filtering is needed for the stack chart.
-    // This divergence is hopefully temporary, as we figure out how to filter
-    // out unneeded detail from stacks in a way that satisfy both the stack
-    // chart and the call tree.
-    const getFilteredThreadForStackChart = createSelector(
-      getRangeFilteredThread,
-      UrlState.getHidePlatformDetails,
-      UrlState.getInvertCallstack,
-      UrlState.getSearchStrings,
-      (
-        thread: Thread,
-        shouldHidePlatformDetails: boolean,
-        shouldInvertCallstack: boolean,
-        searchStrings: string[] | null
-      ): Thread => {
-        // Unlike for the call tree filtered profile, the individual steps of
-        // this filtering are not memoized. I hope it's not too bad.
-        let filteredThread = thread;
-        filteredThread = ProfileData.filterThreadToSearchStrings(
-          filteredThread,
-          searchStrings
-        );
-        if (shouldHidePlatformDetails) {
-          filteredThread = ProfileData.collapsePlatformStackFrames(
-            filteredThread
-          );
-        }
-        if (shouldInvertCallstack) {
-          filteredThread = ProfileData.invertCallstack(filteredThread);
-        }
-        return filteredThread;
-      }
-    );
-    const getCallNodeInfoOfFilteredThreadForStackChart = createSelector(
-      getFilteredThreadForStackChart,
-      ({ stackTable, frameTable, funcTable }): CallNodeInfo => {
-        return ProfileData.getCallNodeInfo(stackTable, frameTable, funcTable);
-      }
-    );
-    const getCallNodeMaxDepthForStackChart = createSelector(
-      getFilteredThreadForStackChart,
-      getCallNodeInfoOfFilteredThreadForStackChart,
-      ProfileData.computeCallNodeMaxDepth
-    );
-    const getStackTimingByDepthForStackChart = createSelector(
-      getFilteredThreadForStackChart,
-      getCallNodeInfoOfFilteredThreadForStackChart,
-      getCallNodeMaxDepthForStackChart,
+    const getStackTimingByDepth = createSelector(
+      getFilteredThread,
+      getCallNodeInfo,
+      getCallNodeMaxDepth,
       getProfileInterval,
       StackTiming.getStackTimingByDepth
     );
@@ -785,12 +733,6 @@ export const selectorsForThread = (
     const getFlameGraphTiming = createSelector(
       getCallTree,
       FlameGraph.getFlameGraphTiming
-    );
-    const getLeafCategoryStackTimingForStackChart = createSelector(
-      getFilteredThreadForStackChart,
-      getProfileInterval,
-      getCategoryColorStrategy,
-      StackTiming.getLeafCategoryStackTiming
     );
     const getSearchFilteredMarkers = createSelector(
       getRangeSelectionFilteredThread,
@@ -835,11 +777,7 @@ export const selectorsForThread = (
       getExpandedCallNodePaths,
       getExpandedCallNodeIndexes,
       getCallTree,
-      getFilteredThreadForStackChart,
-      getCallNodeInfoOfFilteredThreadForStackChart,
-      getCallNodeMaxDepthForStackChart,
-      getStackTimingByDepthForStackChart,
-      getLeafCategoryStackTimingForStackChart,
+      getStackTimingByDepth,
       getCallNodeMaxDepthForFlameGraph,
       getFlameGraphTiming,
       getFriendlyThreadName,

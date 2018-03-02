@@ -192,15 +192,6 @@ function invertCallstack(state: boolean = false, action: Action) {
   }
 }
 
-function hidePlatformDetails(state: boolean = false, action: Action) {
-  switch (action.type) {
-    case 'CHANGE_HIDE_PLATFORM_DETAILS':
-      return action.hidePlatformDetails;
-    default:
-      return state;
-  }
-}
-
 function threadOrder(state: ThreadIndex[] = [], action: Action) {
   switch (action.type) {
     case 'RECEIVE_PROFILE_FROM_ADDON':
@@ -269,7 +260,6 @@ const urlStateReducer: Reducer<UrlState> = (regularUrlStateReducer => (
     callTreeSearchString,
     implementation,
     invertCallstack,
-    hidePlatformDetails,
     threadOrder,
     hiddenThreads,
     markersSearchString,
@@ -287,8 +277,6 @@ export const getRangeFilters = (state: State) =>
   getUrlState(state).rangeFilters;
 export const getImplementationFilter = (state: State) =>
   getUrlState(state).implementation;
-export const getHidePlatformDetails = (state: State) =>
-  getUrlState(state).hidePlatformDetails;
 export const getInvertCallstack = (state: State) =>
   getUrlState(state).invertCallstack;
 export const getCurrentSearchString = (state: State) =>

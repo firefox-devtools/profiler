@@ -272,20 +272,6 @@ export function changeInvertCallstack(
   };
 }
 
-export function changeHidePlatformDetails(
-  hidePlatformDetails: boolean
-): Action {
-  sendAnalytics({
-    hitType: 'event',
-    eventCategory: 'profile',
-    eventAction: 'change hide platform details',
-  });
-  return {
-    type: 'CHANGE_HIDE_PLATFORM_DETAILS',
-    hidePlatformDetails,
-  };
-}
-
 export function updateProfileSelection(selection: ProfileSelection): Action {
   return {
     type: 'UPDATE_PROFILE_SELECTION',

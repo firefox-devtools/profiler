@@ -60,7 +60,7 @@ type MarkersQuery = BaseQuery & {
 type StackChartQuery = BaseQuery & {
   search?: string, // "js::RunScript"
   invertCallstack?: null | void,
-  hidePlatformDetails?: null | void,
+  implementation?: string,
 };
 
 type UrlObject = {
