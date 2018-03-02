@@ -5,6 +5,7 @@
 
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
+import bisection from 'bisection';
 import { timeCode } from '../../utils/time-code';
 import { getSampleCallNodes } from '../../profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
@@ -122,31 +123,69 @@ class ThreadStackGraph extends PureComponent<Props> {
       return callNodeIndex === selectedCallNodeIndex;
     }
 
-    // Draw all of the samples
-    for (let i = 0; i < sampleCallNodes.length; i++) {
+    const firstDrawnSampleTime = range[0] - drawnIntervalWidth / xPixelsPerMs;
+    const lastDrawnSampleTime = range[1];
+
+    const firstDrawnSampleIndex = bisection.right(
+      thread.samples.time,
+      firstDrawnSampleTime
+    );
+    const afterLastDrawnSampleIndex = bisection.right(
+      thread.samples.time,
+      lastDrawnSampleTime,
+      firstDrawnSampleIndex
+    );
+
+    // Do one pass over the samples array to gather the samples we want to draw.
+    const regularSamples = {
+      height: [],
+      xPos: [],
+    };
+    const highlightedSamples = {
+      height: [],
+      xPos: [],
+    };
+    // Enforce a minimum distance so that we don't draw more than 4 samples per
+    // pixel.
+    const minGapMs = 0.25 / xPixelsPerMs;
+    let nextMinTime = -Infinity;
+    for (let i = firstDrawnSampleIndex; i < afterLastDrawnSampleIndex; i++) {
       const sampleTime = thread.samples.time[i];
-      if (
-        sampleTime + drawnIntervalWidth / xPixelsPerMs < range[0] ||
-        sampleTime > range[1]
-      ) {
+      if (sampleTime < nextMinTime) {
         continue;
       }
       const callNodeIndex = sampleCallNodes[i];
       if (callNodeIndex === null) {
         continue;
       }
-      const isHighlighted = hasSelectedCallNodePrefix(callNodeIndex);
-      const sampleHeight = callNodeTable.depth[callNodeIndex] * yPixelsPerDepth;
-      const startY = canvas.height - sampleHeight;
-      // const responsiveness = thread.samples.responsiveness[i];
-      // const jankSeverity = Math.min(1, responsiveness / 100);
-      ctx.fillStyle = isHighlighted ? BLUE_70 : BLUE_40;
-      ctx.fillRect(
-        (sampleTime - range[0]) * xPixelsPerMs,
-        startY,
-        drawnIntervalWidth,
-        sampleHeight
-      );
+      const height = callNodeTable.depth[callNodeIndex] * yPixelsPerDepth;
+      const xPos = (sampleTime - range[0]) * xPixelsPerMs;
+      if (hasSelectedCallNodePrefix(callNodeIndex)) {
+        highlightedSamples.height.push(height);
+        highlightedSamples.xPos.push(xPos);
+      } else {
+        regularSamples.height.push(height);
+        regularSamples.xPos.push(xPos);
+      }
+      nextMinTime = sampleTime + minGapMs;
+    }
+
+    // Draw the regular samples first, and then the highlighted samples.
+    // This means that we only set ctx.fillStyle twice, which saves on time
+    // that's spent parsing color strings.
+    ctx.fillStyle = BLUE_40;
+    for (let i = 0; i < regularSamples.height.length; i++) {
+      const height = regularSamples.height[i];
+      const startY = canvas.height - height;
+      const xPos = regularSamples.xPos[i];
+      ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
+    }
+    ctx.fillStyle = BLUE_70;
+    for (let i = 0; i < highlightedSamples.height.length; i++) {
+      const height = highlightedSamples.height[i];
+      const startY = canvas.height - height;
+      const xPos = highlightedSamples.xPos[i];
+      ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
     }
   }
 
