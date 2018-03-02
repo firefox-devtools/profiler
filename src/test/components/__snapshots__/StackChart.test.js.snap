@@ -5,35 +5,50 @@ exports[`renders StackChartGraph correctly 1`] = `
   className="stackChart"
 >
   <div
-    className="stackChartSettings"
+    className="stackSettings"
   >
     <ul
-      className="stackChartSettingsList"
+      className="stackSettingsList"
     >
       <li
-        className="stackChartSettingsListItem"
+        className="stackSettingsListItem"
       >
         <label
-          className="stackChartSettingsLabel"
+          className="stackSettingsLabel"
         >
-          <input
-            checked={false}
-            className="stackChartSettingsCheckbox"
+          Filter:
+          <select
+            className="stackSettingsSelect"
             onChange={[Function]}
-            type="checkbox"
-          />
-           Hide platform details
+            value="combined"
+          >
+            <option
+              value="combined"
+            >
+              Combined stacks
+            </option>
+            <option
+              value="js"
+            >
+              JS only
+            </option>
+            <option
+              value="cpp"
+            >
+              C++ only
+            </option>
+          </select>
         </label>
       </li>
       <li
-        className="stackChartSettingsListItem"
+        className="stackSettingsListItem"
       >
         <label
-          className="stackChartSettingsLabel"
+          className="stackSettingsLabel"
         >
           <input
             checked={false}
-            className="stackChartSettingsCheckbox"
+            className="stackSettingsCheckbox"
             onChange={[Function]}
             type="checkbox"
           />
@@ -42,7 +57,7 @@ exports[`renders StackChartGraph correctly 1`] = `
       </li>
     </ul>
     <div
-      className="stackSearchField stackChartSettingsSearchField"
+      className="stackSearchField stackSettingsSearchField"
     >
       <label
         className="stackSearchFieldLabel"
