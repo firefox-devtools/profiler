@@ -58,7 +58,9 @@ describe('doSymbolicateProfile', function() {
           return thread.funcTable.name.indexOf(stringIndex);
         }),
       symbolStore: new SymbolStore(symbolStoreName, {
-        requestSymbolTable: () => Promise.resolve(exampleSymbolTable),
+        requestSymbolsFromServer: requests =>
+          requests.map(() => Promise.reject(new Error(''))),
+        requestSymbolTableFromAddon: () => Promise.resolve(exampleSymbolTable),
       }),
     };
   }

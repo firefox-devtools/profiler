@@ -608,21 +608,20 @@ describe('symbolication', function() {
 
     beforeAll(function() {
       unsymbolicatedProfile = processProfile(getGeckoProfile());
-      const symbolTable = {};
-      symbolTable[0] = 'first symbol';
-      symbolTable[0xf00] = 'second symbol';
-      symbolTable[0x1a00] = 'third symbol';
-      symbolTable[0x2000] = 'last symbol';
-      const symbolProvider = new FakeSymbolStore({
-        firefox: symbolTable,
-        'firefox-webcontent': symbolTable,
-      });
+      const symbolTable = new Map();
+      symbolTable.set(0, 'first symbol');
+      symbolTable.set(0xf00, 'second symbol');
+      symbolTable.set(0x1a00, 'third symbol');
+      symbolTable.set(0x2000, 'last symbol');
+      const symbolStore = new FakeSymbolStore(
+        new Map([['firefox', symbolTable], ['firefox-webcontent', symbolTable]])
+      );
       symbolicatedProfile = Object.assign({}, unsymbolicatedProfile, {
         threads: unsymbolicatedProfile.threads.slice(),
       });
       const symbolicationPromise = symbolicateProfile(
         unsymbolicatedProfile,
-        symbolProvider,
+        symbolStore,
         {
           onMergeFunctions: (threadIndex, oldFuncToNewFuncMap) => {
             if (!symbolicatedProfile) {

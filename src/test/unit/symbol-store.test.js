@@ -8,6 +8,7 @@ import { TextDecoder } from 'text-encoding';
 import exampleSymbolTable from '../fixtures/example-symbol-table';
 import fakeIndexedDB from 'fake-indexeddb';
 import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
+import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 
 describe('SymbolStore', function() {
   let symbolProvider, symbolStore;
@@ -36,54 +37,85 @@ describe('SymbolStore', function() {
     symbolStore = null;
   });
 
-  beforeEach(function() {
-    symbolProvider = {
-      requestSymbolTable: jest.fn(() => Promise.resolve(exampleSymbolTable)),
-    };
-    symbolStore = new SymbolStore('perf-html-async-storage', symbolProvider);
-  });
-
   afterEach(async function() {
     await deleteDatabase();
   });
 
   it('should only request symbols from the symbol provider once per library', async function() {
-    expect(symbolProvider.requestSymbolTable).not.toHaveBeenCalled();
+    symbolProvider = {
+      requestSymbolsFromServer: jest.fn(requests =>
+        requests.map(() =>
+          Promise.reject(new Error('this example only supports symbol tables'))
+        )
+      ),
+      requestSymbolTableFromAddon: jest.fn(() =>
+        Promise.resolve(exampleSymbolTable)
+      ),
+    };
+    symbolStore = new SymbolStore('perf-html-async-storage', symbolProvider);
+
+    expect(symbolProvider.requestSymbolTableFromAddon).not.toHaveBeenCalled();
 
     const lib1 = { debugName: 'firefox', breakpadId: 'dont-care' };
-    const addrsForLib1 = await symbolStore.getFuncAddressTableForLib(lib1);
-    expect(symbolProvider.requestSymbolTable).toHaveBeenCalledTimes(1);
-    expect(Array.from(addrsForLib1)).toEqual([0, 0xf00, 0x1a00, 0x2000]);
-
-    const secondAndThirdSymbol = await symbolStore.getSymbolsForAddressesInLib(
-      [1, 2],
-      lib1
+    let secondAndThirdSymbol;
+    await symbolStore.getSymbols(
+      [{ lib: lib1, addresses: new Set([0xf01, 0x1a50]) }],
+      (request, results) => {
+        secondAndThirdSymbol = results;
+      },
+      (_request, _error) => {}
     );
-    expect(symbolProvider.requestSymbolTable).toHaveBeenCalledTimes(1);
-    expect(secondAndThirdSymbol).toEqual(['second symbol', 'third symbol']);
+    expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(1);
+    expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
+    expect(secondAndThirdSymbol.get(0xf01)).toEqual({
+      name: 'second symbol',
+      functionOffset: 1,
+    });
+    expect(secondAndThirdSymbol.get(0x1a50)).toEqual({
+      name: 'third symbol',
+      functionOffset: 0x50,
+    });
 
     const lib2 = { debugName: 'firefox2', breakpadId: 'dont-care2' };
-    const addrsForLib2 = await symbolStore.getFuncAddressTableForLib(lib2);
-    expect(symbolProvider.requestSymbolTable).toHaveBeenCalledTimes(2);
-    expect(Array.from(addrsForLib2)).toEqual([0, 0xf00, 0x1a00, 0x2000]);
-
-    const firstAndLastSymbol = await symbolStore.getSymbolsForAddressesInLib(
-      [0, 3],
-      lib2
+    let firstAndLastSymbol;
+    await symbolStore.getSymbols(
+      [{ lib: lib2, addresses: new Set([0x33, 0x2000]) }],
+      (request, results) => {
+        firstAndLastSymbol = results;
+      },
+      (_request, _error) => {}
     );
-    expect(symbolProvider.requestSymbolTable).toHaveBeenCalledTimes(2);
-    expect(firstAndLastSymbol).toEqual(['first symbol', 'last symbol']);
-
-    const addrsForLib1AfterTheSecondTime = await symbolStore.getFuncAddressTableForLib(
-      lib1
-    );
-    expect(symbolProvider.requestSymbolTable).toHaveBeenCalledTimes(2);
-    expect(addrsForLib1).toEqual(addrsForLib1AfterTheSecondTime);
+    expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
+    expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(2);
+    expect(firstAndLastSymbol.get(0x33)).toEqual({
+      name: 'first symbol',
+      functionOffset: 0x33,
+    });
+    expect(firstAndLastSymbol.get(0x2000)).toEqual({
+      name: 'last symbol',
+      functionOffset: 0,
+    });
   });
 
   it('should persist in DB', async function() {
+    symbolProvider = {
+      requestSymbolsFromServer: jest.fn(requests =>
+        requests.map(() =>
+          Promise.reject(new Error('this example only supports symbol tables'))
+        )
+      ),
+      requestSymbolTableFromAddon: jest.fn(() =>
+        Promise.resolve(exampleSymbolTable)
+      ),
+    };
+    symbolStore = new SymbolStore('perf-html-async-storage', symbolProvider);
+
     const lib = { debugName: 'firefox', breakpadId: 'dont-care' };
-    const addrsForLib1 = await symbolStore.getFuncAddressTableForLib(lib);
+    await symbolStore.getSymbols(
+      [{ lib: lib, addresses: new Set([0]) }],
+      (_request, _results) => {},
+      (_request, _error) => {}
+    );
 
     // Using another symbol store simulates a page reload
     // Due to https://github.com/dumbmatter/fakeIndexedDB/issues/22 we need to
@@ -93,9 +125,118 @@ describe('SymbolStore', function() {
       symbolProvider
     );
 
-    const addrsForLib2 = await symbolStore2.getFuncAddressTableForLib(lib);
+    await symbolStore2.getSymbols(
+      [{ lib: lib, addresses: new Set([0x1]) }],
+      (_request, _results) => {},
+      (_request, _error) => {}
+    );
 
-    expect(symbolProvider.requestSymbolTable).toHaveBeenCalledTimes(1);
-    expect(addrsForLib2).toEqual(addrsForLib1);
+    expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call requestSymbolsFromServer first', async function() {
+    const symbolTable = new Map();
+    symbolTable.set(0, 'first symbol');
+    symbolTable.set(0xf00, 'second symbol');
+    symbolTable.set(0x1a00, 'third symbol');
+    symbolTable.set(0x2000, 'last symbol');
+    const fakeSymbolStore = new FakeSymbolStore(
+      new Map([['available-for-addresses', symbolTable]])
+    );
+
+    let symbolsForAddressesRequestCount = 0;
+
+    symbolProvider = {
+      requestSymbolsFromServer: jest.fn(requests => {
+        symbolsForAddressesRequestCount += requests.length;
+        return requests.map(
+          request =>
+            new Promise((resolve, reject) => {
+              fakeSymbolStore.getSymbols(
+                [request],
+                (_request, results) => resolve(results),
+                (_request, error) => reject(error)
+              );
+            })
+        );
+      }),
+      requestSymbolTableFromAddon: jest
+        .fn()
+        .mockResolvedValue(exampleSymbolTable),
+    };
+    symbolStore = new SymbolStore('perf-html-async-storage', symbolProvider);
+
+    const lib1 = {
+      debugName: 'available-for-addresses',
+      breakpadId: 'dont-care',
+    };
+    const lib2 = {
+      debugName: 'available-as-entire-symboltable-only',
+      breakpadId: 'dont-care',
+    };
+
+    const symbolsPerLibrary = new Map();
+    await symbolStore.getSymbols(
+      [
+        { lib: lib1, addresses: new Set([0xf01, 0x1a50]) },
+        { lib: lib2, addresses: new Set([0x33, 0x2000]) },
+      ],
+      (request, results) => {
+        symbolsPerLibrary.set(request.lib, results);
+      },
+      (_request, _error) => {}
+    );
+
+    // Both requests should have been coalesced into one call to
+    // requestSymbolsFromServer.
+    expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(1);
+    expect(symbolsForAddressesRequestCount).toEqual(2);
+
+    // requestSymbolsFromServer should have failed for lib2, so
+    // requestSymbolTableFromAddon should have been called for it, once.
+    expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
+
+    expect(symbolsPerLibrary.get(lib1).get(0xf01)).toEqual({
+      name: 'second symbol',
+      functionOffset: 1,
+    });
+    expect(symbolsPerLibrary.get(lib1).get(0x1a50)).toEqual({
+      name: 'third symbol',
+      functionOffset: 0x50,
+    });
+    expect(symbolsPerLibrary.get(lib2).get(0x33)).toEqual({
+      name: 'first symbol',
+      functionOffset: 0x33,
+    });
+    expect(symbolsPerLibrary.get(lib2).get(0x2000)).toEqual({
+      name: 'last symbol',
+      functionOffset: 0,
+    });
+
+    // Using another symbol store simulates a page reload
+    // Due to https://github.com/dumbmatter/fakeIndexedDB/issues/22 we need to
+    // take care to sequence the DB open requests.
+    const symbolStore2 = new SymbolStore(
+      'perf-html-async-storage',
+      symbolProvider
+    );
+
+    await symbolStore2.getSymbols(
+      [
+        { lib: lib1, addresses: new Set([0xf01, 0x1a50]) },
+        { lib: lib2, addresses: new Set([0x33, 0x2000]) },
+      ],
+      (_request, _results) => {},
+      (_request, _error) => {}
+    );
+
+    // The symbolStore should already have a cached symbol table for lib2 now,
+    // so requestSymbolsFromServer should only have been called for one request.
+    expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
+    expect(symbolsForAddressesRequestCount).toEqual(3);
+
+    // requestSymbolsFromServer should have succeeded for that one request,
+    // so requestSymbolTableFromAddon should not have been called again.
+    expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
   });
 });
