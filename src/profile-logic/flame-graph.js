@@ -11,6 +11,25 @@ import * as CallTree from './call-tree';
 export type FlameGraphDepth = number;
 export type IndexIntoFlameGraphTiming = number;
 
+/* FlameGraphTiming is an array containing data used for rendering the
+ * flame graph. Each element in the array describes one row in the
+ * graph. Each such element in turn contains one or more functions,
+ * drawn as boxes with start and end positions, represented as unit
+ * intervals of the profile range. It should be noted that start and
+ * end does not represent units of time, but only positions on the
+ * x-axis, derived from an alphabetical sort.
+ *
+ * callNode allows extracting information such as function names which
+ * are shown in the flame graph.
+ *
+ * selfTimeRelative contains the self time relative to the total time,
+ * which is used to color the drawn functions.
+ *
+ * display contains formatted strings intended to be used for
+ * displaying extra information (like in a tooltip) not readily
+ * apparent from visual inspection of the boxes in the flame graph.
+ */
+
 export type FlameGraphTiming = Array<{
   start: UnitIntervalOfProfileRange[],
   end: UnitIntervalOfProfileRange[],

@@ -106,4 +106,4 @@ export type MarkerTiming = {
 };
 export type MarkerTimingRows = Array<MarkerTiming>;
 
-export type Implementation = 'js' | 'cpp' | 'unknown';
+export type StackType = 'js' | 'native' | 'unsymbolicated';

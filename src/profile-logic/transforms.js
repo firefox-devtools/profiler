@@ -27,7 +27,7 @@ import type {
 import type {
   CallNodePath,
   CallNodeTable,
-  Implementation,
+  StackType,
 } from '../types/profile-derived';
 import type { ImplementationFilter } from '../types/actions';
 import type {
@@ -1337,16 +1337,16 @@ export function restoreAllFunctionsInCallNodePath(
   return newCallNodePath.reverse();
 }
 
-export function funcToImplementation(
+export function getStackType(
   thread: Thread,
   funcIndex: IndexIntoFuncTable
-): Implementation {
+): StackType {
   if (FUNC_MATCHES.cpp(thread, funcIndex)) {
-    return 'cpp';
+    return 'native';
   } else if (FUNC_MATCHES.js(thread, funcIndex)) {
     return 'js';
   }
-  return 'unknown';
+  return 'unsymbolicated';
 }
 
 export function filterCallNodePathByImplementation(

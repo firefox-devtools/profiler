@@ -10,7 +10,7 @@ import {
 } from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
-import { funcToImplementation } from '../../profile-logic/transforms';
+import { getStackType } from '../../profile-logic/transforms';
 
 import type { Thread } from '../../types/profile';
 import type { CssPixels } from '../../types/units';
@@ -20,8 +20,12 @@ import type {
   IndexIntoFlameGraphTiming,
 } from '../../profile-logic/flame-graph';
 
-import type { CallNodeInfo, Implementation } from '../../types/profile-derived';
+import colors from 'photon-colors';
+
+import type { CallNodeInfo, StackType } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
+
+import { interpolateRgb } from 'd3-interpolate';
 
 export type OwnProps = {|
   +thread: Thread,
@@ -48,6 +52,64 @@ const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
 
+/* Return the background and foreground colors used to paint a box in
+ * the flame graph. The passed stack type determines the hue while the
+ * self time determines the lightness of the color. Darker colors
+ * indicate higher self times. */
+export function getColors(
+  stackType: StackType,
+  selfTimeRelative: number
+): {| background: string, foreground: string |} {
+  /* The background colors below are defined as a range where the
+   * starting color is the color shown when the function has no self
+   * time at all, and the ending color is when all available self time
+   * (the total time) in the flame graph is assigned to a single
+   * function. This latter case occurs when there's only a single box
+   * at the top, stretching over all horizontal space in the graph,
+   * covering all boxes below it. When the self time lies in between
+   * these two extremes, the color is an interpolated value lying
+   * between the starting and ending colors in the range.
+   *
+   * The interpolated color is derived from `selfTimeRelative`, which
+   * is the self time of the frame relative to all available self time
+   * possibly represented in the flame graph. However, using this
+   * value to interpolate to a color linearly will require the value
+   * to be relatively big in order to be able to see the shift in
+   * color, and such large self times would be visually apparent from
+   * the shape of the flame graph anyway. We are better off if we can
+   * discern also small values of self time from the color, and this
+   * is accomplished by changing the linear interpolation to a
+   * logarithmic one instead, with a steep increase in the beginning.
+   *
+   * Below we use the transformation y(x) = log(c * x + 1) / log(c + 1),
+   * where c is a constant. It has the property that y(0) = 0 and
+   * y(1) = 1. The constant has been chosen by visual inspection of
+   * the graph. */
+
+  let backgroundRange: [string, string];
+  let foreground: string;
+
+  const t = Math.log(5000 * selfTimeRelative + 1) / Math.log(5001);
+
+  switch (stackType) {
+    case 'native':
+      backgroundRange = [colors.BLUE_40, colors.BLUE_70];
+      foreground = t > 0.25 ? '#ffffff' : colors.BLUE_90;
+      break;
+    case 'js':
+      backgroundRange = [colors.ORANGE_50, colors.ORANGE_70];
+      foreground = t > 0.33 ? '#ffffff' : colors.ORANGE_90;
+      break;
+    case 'unsymbolicated':
+      backgroundRange = [colors.GREY_30, colors.GREY_50];
+      foreground = t > 0.33 ? '#ffffff' : colors.GREY_90;
+      break;
+    default:
+      throw new Error(`Unknown stack type case "${(stackType: empty)}".`);
+  }
+  return { background: interpolateRgb(...backgroundRange)(t), foreground };
+}
+
 class FlameGraphCanvas extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
 
@@ -56,38 +118,6 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     (this: any)._getHoveredStackInfo = this._getHoveredStackInfo.bind(this);
     (this: any)._drawCanvas = this._drawCanvas.bind(this);
     (this: any)._hitTest = this._hitTest.bind(this);
-  }
-
-  getColor(implementation: Implementation, selfTimeRelative: number): string {
-    let h, s, l;
-    // The more self time a function has, the darker the color
-    // returned.  Do this by subtracting a lightness value from a base
-    // color for a particular implementation.  `a` and `b` are factors
-    // used in calcuating how much ligthness to subtract.  `limit` is
-    // the lower limit of the lightness.
-    let a, b, limit;
-
-    if (implementation === 'cpp') {
-      [h, s, l] = [358, 98, 82];
-      a = 4;
-      b = 5;
-      limit = 55;
-    } else if (implementation === 'js') {
-      [h, s, l] = [188, 53, 71];
-      a = 8;
-      b = 6;
-      limit = 40;
-    } else {
-      // Unknown implementation
-      [h, s, l] = [77, 70, 71];
-      a = 10;
-      b = 10;
-      limit = 40;
-    }
-
-    l -= a * Math.log(b * selfTimeRelative * 100 + 1);
-    l = Math.max(l, limit);
-    return `hsl(${h}, ${s}%, ${l}%)`;
   }
 
   _drawCanvas(
@@ -157,13 +187,13 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
           depth === hoveredItem.depth &&
           i === hoveredItem.flameGraphTimingIndex;
 
-        const implementation = funcToImplementation(thread, funcIndex);
-        const color = this.getColor(
-          implementation,
+        const stackType = getStackType(thread, funcIndex);
+        const { background, foreground } = getColors(
+          stackType,
           stackTiming.selfTimeRelative[i]
         );
 
-        ctx.fillStyle = isHovered ? 'Highlight' : color;
+        ctx.fillStyle = isHovered ? 'Highlight' : background;
         ctx.fillRect(x, y, w, h);
         // Ensure spacing between blocks.
         ctx.clearRect(x, y, 1, h);
@@ -176,7 +206,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         if (w2 > textMeasurement.minWidth) {
           const fittedText = textMeasurement.getFittedText(funcName, w2);
           if (fittedText) {
-            ctx.fillStyle = isHovered ? 'HighlightText' : '#000000';
+            ctx.fillStyle = isHovered ? 'HighlightText' : foreground;
             ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
           }
         }
@@ -205,17 +235,25 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       thread.funcTable.name[funcIndex]
     );
 
-    const implementation = funcToImplementation(thread, funcIndex);
-    const color = this.getColor(
-      implementation,
+    const stackType = getStackType(thread, funcIndex);
+    const { background } = getColors(
+      stackType,
       stackTiming.selfTimeRelative[flameGraphTimingIndex]
     );
 
-    let implementationLabel = 'Unknown';
-    if (implementation === 'js') {
-      implementationLabel = 'JS';
-    } else if (implementation === 'cpp') {
-      implementationLabel = 'C++';
+    let stackTypeLabel;
+    switch (stackType) {
+      case 'native':
+        stackTypeLabel = 'Native';
+        break;
+      case 'js':
+        stackTypeLabel = 'JavaScript';
+        break;
+      case 'unsymbolicated':
+        stackTypeLabel = 'Unsymbolicated Native';
+        break;
+      default:
+        throw new Error(`Unknown stack type case "${stackType}".`);
     }
     const { totalTime, selfTime } = stackTiming.display[flameGraphTimingIndex];
 
@@ -226,10 +264,13 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
           <div className="tooltipTitle">{funcName}</div>
         </div>
         <div className="tooltipDetails">
-          <div className="tooltipLabel">Implementation:</div>
+          <div className="tooltipLabel">Stack Type:</div>
           <div>
-            <div className="tooltipSwatch" style={{ backgroundColor: color }} />
-            {implementationLabel}
+            <div
+              className="tooltipSwatch"
+              style={{ backgroundColor: background }}
+            />
+            {stackTypeLabel}
           </div>
           <div className="tooltipLabel">Running Time (ms):</div>
           <div>{totalTime}</div>
