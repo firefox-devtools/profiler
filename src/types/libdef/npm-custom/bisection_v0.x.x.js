@@ -15,5 +15,5 @@ declare module 'bisection' {
     right: bisectionFn,
     left: bisectionFn,
     version: string,
-  };
+  } & bisectionFn;
 }

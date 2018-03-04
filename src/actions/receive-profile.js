@@ -10,6 +10,7 @@ import {
 } from '../profile-logic/process-profile';
 import { SymbolStore } from '../profile-logic/symbol-store';
 import { symbolicateProfile } from '../profile-logic/symbolication';
+import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { decompress } from '../utils/gz';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
@@ -225,18 +226,35 @@ async function getProfileFromAddon(dispatch, geckoProfiler) {
 
 async function getSymbolStore(dispatch, geckoProfiler) {
   const symbolStore = new SymbolStore('perf-html-async-storage', {
-    requestSymbolTable: async (debugName, breakpadId) => {
-      const requestedLib = { debugName, breakpadId };
-      dispatch(requestingSymbolTable(requestedLib));
+    requestSymbolsFromServer: requests => {
+      for (const { lib } of requests) {
+        dispatch(requestingSymbolTable(lib));
+      }
+      return MozillaSymbolicationAPI.requestSymbols(requests).map(
+        async (libPromise, i) => {
+          try {
+            const result = libPromise;
+            dispatch(receivedSymbolTableReply(requests[i].lib));
+            return result;
+          } catch (error) {
+            dispatch(receivedSymbolTableReply(requests[i].lib));
+            throw error;
+          }
+        }
+      );
+    },
+    requestSymbolTableFromAddon: async lib => {
+      const { debugName, breakpadId } = lib;
+      dispatch(requestingSymbolTable(lib));
       try {
         const symbolTable = await geckoProfiler.getSymbolTable(
           debugName,
           breakpadId
         );
-        dispatch(receivedSymbolTableReply(requestedLib));
+        dispatch(receivedSymbolTableReply(lib));
         return symbolTable;
       } catch (error) {
-        dispatch(receivedSymbolTableReply(requestedLib));
+        dispatch(receivedSymbolTableReply(lib));
         throw error;
       }
     },

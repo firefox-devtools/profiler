@@ -14,6 +14,25 @@ import type {
   IDBKeyRange,
 } from '../types/indexeddb';
 
+// Contains a symbol table, which can be used to map addresses to strings.
+// Symbol tables of this format are created within Firefox's implementation of
+// the geckoProfiler WebExtension API, at
+// https://searchfox.org/mozilla-central/source/browser/components/extensions/ParseSymbols.jsm
+//
+// The first element of this tuple, commonly named "addrs", is a sorted array of
+// symbol addresses, as library-relative offsets in bytes, in ascending order.
+// The third element of this tuple, commonly named "buffer", is a buffer of
+// bytes that contains all strings from this symbol table, in the order of the
+// addresses they correspond to, in utf-8 encoded form, all concatenated
+// together.
+// The second element of this tuple, commonly named "index", contains positions
+// into "buffer". For every address, that position is where the string for that
+// address starts in the buffer.
+// index.length == addrs.length + 1.
+// index[addrs.length] is the end position of the last string in the buffer.
+//
+// The string for the address addrs[i] is
+// (new TextDecoder()).decode(buffer.subarray(index[i], index[i + 1]))
 export type SymbolTableAsTuple = [
   Uint32Array, // addrs
   Uint32Array, // index
