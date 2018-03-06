@@ -695,3 +695,205 @@ describe('actions/ProfileView', function() {
     });
   });
 });
+
+/**
+ * Naively run through all the selectors. The correctness of what they are computing
+ * should be left up to better informed unit tests. This provides some base coverage
+ * of mechanically running through the selectors in tests.
+ */
+describe('snapshots of selectors/profile-view', function() {
+  // Set up a profile that has some nice features that can show that the selectors work.
+  const {
+    profile,
+    funcNamesPerThread: [funcNames],
+  } = getProfileFromTextSamples(`
+    A A A A A A A A A
+    B B B B B B B B B
+    C C C C C C H H H
+    D D D F F F I I I
+    E E E G G G
+  `);
+  const A = funcNames.indexOf('A');
+  const B = funcNames.indexOf('B');
+  const C = funcNames.indexOf('C');
+
+  const [samplesThread] = profile.threads;
+  // Add in a thread with markers
+  const { threads: [markersThread] } = getProfileWithMarkers([
+    ['A', 0, null],
+    ['B', 1, null],
+    ['C', 2, null],
+    ['D', 3, null],
+    ['E', 4, null],
+    ['F', 5, null],
+  ]);
+  profile.threads.push(markersThread);
+  const { getState, dispatch } = storeWithProfile(profile);
+  samplesThread.name = 'Thread with samples';
+  markersThread.name = 'Thread with markers';
+  samplesThread.markers = markersThread.markers;
+  // This is a jank sample:
+  samplesThread.samples.responsiveness[4] = 100;
+  const mergeFunction = {
+    type: 'merge-function',
+    funcIndex: C,
+  };
+  dispatch(ProfileView.addTransformToStack(0, mergeFunction));
+  dispatch(ProfileView.changeExpandedCallNodes(0, [[A], [A, B]]));
+  dispatch(ProfileView.changeSelectedCallNode(0, [A, B]));
+  dispatch(ProfileView.changeSelectedMarker(0, 1));
+  dispatch(ProfileView.addRangeFilter(3, 7));
+
+  it('matches the last stored run of getProfile', function() {
+    expect(ProfileViewSelectors.getProfile(getState())).toMatchSnapshot();
+  });
+  it('matches the last stored run of getProfileInterval', function() {
+    expect(ProfileViewSelectors.getProfileInterval(getState())).toEqual(1);
+  });
+  it('matches the last stored run of getThreads', function() {
+    expect(ProfileViewSelectors.getThreads(getState())).toMatchSnapshot();
+  });
+  it('matches the last stored run of getThreadNames', function() {
+    expect(ProfileViewSelectors.getThreadNames(getState())).toEqual([
+      'Thread with samples',
+      'Thread with markers',
+    ]);
+  });
+  it('matches the last stored run of getRightClickedThreadIndex', function() {
+    expect(ProfileViewSelectors.getRightClickedThreadIndex(getState())).toEqual(
+      0
+    );
+  });
+  it('matches the last stored run of selectedThreadSelector.getThread', function() {
+    expect(selectedThreadSelectors.getThread(getState())).toEqual(
+      samplesThread
+    );
+  });
+  it('matches the last stored run of selectedThreadSelector.getViewOptions', function() {
+    expect(
+      selectedThreadSelectors.getViewOptions(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getTransformStack', function() {
+    expect(selectedThreadSelectors.getTransformStack(getState())).toEqual([
+      mergeFunction,
+    ]);
+  });
+  it('matches the last stored run of selectedThreadSelector.getTransformLabels', function() {
+    expect(selectedThreadSelectors.getTransformLabels(getState())).toEqual([
+      'Complete "Thread with samples"',
+      'Merge: C',
+    ]);
+  });
+  it('matches the last stored run of selectedThreadSelector.getRangeFilteredThread', function() {
+    expect(
+      selectedThreadSelectors.getRangeFilteredThread(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getRangeAndTransformFilteredThread', function() {
+    expect(
+      selectedThreadSelectors.getRangeAndTransformFilteredThread(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getJankInstances', function() {
+    expect(
+      selectedThreadSelectors.getJankInstances(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getProcessedMarkersThread', function() {
+    expect(
+      selectedThreadSelectors.getProcessedMarkersThread(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getTracingMarkers', function() {
+    expect(
+      selectedThreadSelectors.getTracingMarkers(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getMarkerTiming', function() {
+    expect(
+      selectedThreadSelectors.getMarkerTiming(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getRangeSelectionFilteredTracingMarkers', function() {
+    expect(
+      selectedThreadSelectors.getRangeSelectionFilteredTracingMarkers(
+        getState()
+      )
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getRangeSelectionFilteredTracingMarkersForHeader', function() {
+    expect(
+      selectedThreadSelectors.getRangeSelectionFilteredTracingMarkersForHeader(
+        getState()
+      )
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getFilteredThread', function() {
+    expect(
+      selectedThreadSelectors.getFilteredThread(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getRangeSelectionFilteredThread', function() {
+    expect(
+      selectedThreadSelectors.getRangeSelectionFilteredThread(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getCallNodeInfo', function() {
+    expect(
+      selectedThreadSelectors.getCallNodeInfo(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getCallNodeMaxDepth', function() {
+    expect(selectedThreadSelectors.getCallNodeMaxDepth(getState())).toEqual(4);
+  });
+  it('matches the last stored run of selectedThreadSelector.getSelectedCallNodePath', function() {
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B]
+    );
+  });
+  it('matches the last stored run of selectedThreadSelector.getSelectedCallNodeIndex', function() {
+    expect(
+      selectedThreadSelectors.getSelectedCallNodeIndex(getState())
+    ).toEqual(1);
+  });
+  it('matches the last stored run of selectedThreadSelector.getExpandedCallNodePaths', function() {
+    expect(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState())
+    ).toEqual([[A], [A, B], [A]]);
+  });
+  it('matches the last stored run of selectedThreadSelector.getExpandedCallNodeIndexes', function() {
+    expect(
+      selectedThreadSelectors.getExpandedCallNodeIndexes(getState())
+    ).toEqual([0, 1, 0]);
+  });
+  it('matches the last stored run of selectedThreadSelector.getCallTree', function() {
+    expect(selectedThreadSelectors.getCallTree(getState())).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getFlameGraphTiming', function() {
+    expect(
+      selectedThreadSelectors.getFlameGraphTiming(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getFriendlyThreadName', function() {
+    expect(selectedThreadSelectors.getFriendlyThreadName(getState())).toEqual(
+      'Thread with samples'
+    );
+  });
+  it('matches the last stored run of selectedThreadSelector.getThreadProcessDetails', function() {
+    expect(
+      selectedThreadSelectors.getThreadProcessDetails(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getSearchFilteredMarkers', function() {
+    expect(
+      selectedThreadSelectors.getSearchFilteredMarkers(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.unfilteredSamplesRange', function() {
+    expect(selectedThreadSelectors.unfilteredSamplesRange(getState())).toEqual({
+      end: 9,
+      start: 0,
+    });
+  });
+});
