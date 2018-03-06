@@ -321,7 +321,7 @@ const _upgraders = {
   },
   [3]: (processedLocation: ProcessedLocation) => {
     const { query } = processedLocation;
-    // Removed "Platform only" checkbox from the stack chart.
+    // Removed "Hide platform details" checkbox from the stack chart.
     if ('hidePlatformDetails' in query) {
       delete query.hidePlatformDetails;
       query.implementation = 'js';
@@ -331,7 +331,7 @@ const _upgraders = {
 
 if (Object.keys(_upgraders).length - 1 !== CURRENT_URL_VERSION) {
   throw new Error(oneLine`
-    CURRENT_URL_VERSION does not match the numer of URL upgraders. If you added a
+    CURRENT_URL_VERSION does not match the number of URL upgraders. If you added a
     new upgrader, make sure and bump the CURRENT_URL_VERSION variable.
   `);
 }

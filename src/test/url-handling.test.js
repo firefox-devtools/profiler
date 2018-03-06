@@ -218,8 +218,8 @@ describe('url upgrading', function() {
     it('switches to the stack chart when given a timeline tab', function() {
       const { getState } = _getStoreWithURL({
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/',
-        search: '?hidePlatformDetails&v=2',
-        v: false,
+        search: '?hidePlatformDetails',
+        v: 2,
       });
       expect(urlStateReducers.getImplementationFilter(getState())).toBe('js');
     });
