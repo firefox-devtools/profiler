@@ -1,5 +1,377 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tree with no samples 1`] = `
+<div
+  className="treeAndSidebarWrapper"
+>
+  <div
+    className="profileCallTreeSettings"
+  >
+    <ul
+      className="profileCallTreeSettingsList"
+    >
+      <li
+        className="profileCallTreeSettingsListItem"
+      >
+        <label
+          className="profileCallTreeSettingsLabel"
+        >
+          Filter:
+          <select
+            className="profileCallTreeSettingsSelect"
+            onChange={[Function]}
+            value="combined"
+          >
+            <option
+              value="combined"
+            >
+              Combined stacks
+            </option>
+            <option
+              value="js"
+            >
+              JS only
+            </option>
+            <option
+              value="cpp"
+            >
+              C++ only
+            </option>
+          </select>
+        </label>
+      </li>
+      <li
+        className="profileCallTreeSettingsListItem"
+      >
+        <label
+          className="profileCallTreeSettingsLabel"
+        >
+          <input
+            checked={false}
+            className="profileCallTreeSettingsCheckbox"
+            onChange={[Function]}
+            type="checkbox"
+          />
+           Invert call stack
+        </label>
+      </li>
+    </ul>
+    <div
+      className="stackSearchField profileCallTreeSettingsSearchField"
+    >
+      <label
+        className="stackSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          className="idleSearchField stackSearchFieldInput"
+          onSubmit={[Function]}
+        >
+          <input
+            className="idleSearchFieldInput"
+            name="search"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            required="required"
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            className="idleSearchFieldButton"
+            onClick={[Function]}
+            onFocus={[Function]}
+            type="reset"
+          />
+        </form>
+        <div
+          className="stackSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    className="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      className="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index={0}
+      onClick={[Function]}
+      title="Complete \\"Empty Thread\\""
+    >
+      <span
+        className="filterNavigatorBarItemContent"
+      >
+        Complete "Empty Thread"
+      </span>
+    </li>
+  </ol>
+  <div
+    className="CallTreeEmptyReasons"
+  >
+    <h3>
+      The call tree is empty for “
+      Empty Thread
+      ”
+    </h3>
+    <p>
+      This thread has no samples.
+    </p>
+  </div>
+</div>
+`;
+
+exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out of range of a threads samples 1`] = `
+<div
+  className="treeAndSidebarWrapper"
+>
+  <div
+    className="profileCallTreeSettings"
+  >
+    <ul
+      className="profileCallTreeSettingsList"
+    >
+      <li
+        className="profileCallTreeSettingsListItem"
+      >
+        <label
+          className="profileCallTreeSettingsLabel"
+        >
+          Filter:
+          <select
+            className="profileCallTreeSettingsSelect"
+            onChange={[Function]}
+            value="combined"
+          >
+            <option
+              value="combined"
+            >
+              Combined stacks
+            </option>
+            <option
+              value="js"
+            >
+              JS only
+            </option>
+            <option
+              value="cpp"
+            >
+              C++ only
+            </option>
+          </select>
+        </label>
+      </li>
+      <li
+        className="profileCallTreeSettingsListItem"
+      >
+        <label
+          className="profileCallTreeSettingsLabel"
+        >
+          <input
+            checked={false}
+            className="profileCallTreeSettingsCheckbox"
+            onChange={[Function]}
+            type="checkbox"
+          />
+           Invert call stack
+        </label>
+      </li>
+    </ul>
+    <div
+      className="stackSearchField profileCallTreeSettingsSearchField"
+    >
+      <label
+        className="stackSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          className="idleSearchField stackSearchFieldInput"
+          onSubmit={[Function]}
+        >
+          <input
+            className="idleSearchFieldInput"
+            name="search"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            required="required"
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            className="idleSearchFieldButton"
+            onClick={[Function]}
+            onFocus={[Function]}
+            type="reset"
+          />
+        </form>
+        <div
+          className="stackSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    className="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      className="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index={0}
+      onClick={[Function]}
+      title="Complete \\"Thread with samples\\""
+    >
+      <span
+        className="filterNavigatorBarItemContent"
+      >
+        Complete "Thread with samples"
+      </span>
+    </li>
+  </ol>
+  <div
+    className="CallTreeEmptyReasons"
+  >
+    <h3>
+      The call tree is empty for “
+      Thread with samples
+      ”
+    </h3>
+    <p>
+      Broaden the selected range to view samples.
+    </p>
+  </div>
+</div>
+`;
+
+exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when samples are completely filtered out 1`] = `
+<div
+  className="treeAndSidebarWrapper"
+>
+  <div
+    className="profileCallTreeSettings"
+  >
+    <ul
+      className="profileCallTreeSettingsList"
+    >
+      <li
+        className="profileCallTreeSettingsListItem"
+      >
+        <label
+          className="profileCallTreeSettingsLabel"
+        >
+          Filter:
+          <select
+            className="profileCallTreeSettingsSelect"
+            onChange={[Function]}
+            value="js"
+          >
+            <option
+              value="combined"
+            >
+              Combined stacks
+            </option>
+            <option
+              value="js"
+            >
+              JS only
+            </option>
+            <option
+              value="cpp"
+            >
+              C++ only
+            </option>
+          </select>
+        </label>
+      </li>
+      <li
+        className="profileCallTreeSettingsListItem"
+      >
+        <label
+          className="profileCallTreeSettingsLabel"
+        >
+          <input
+            checked={false}
+            className="profileCallTreeSettingsCheckbox"
+            onChange={[Function]}
+            type="checkbox"
+          />
+           Invert call stack
+        </label>
+      </li>
+    </ul>
+    <div
+      className="stackSearchField profileCallTreeSettingsSearchField"
+    >
+      <label
+        className="stackSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          className="idleSearchField stackSearchFieldInput"
+          onSubmit={[Function]}
+        >
+          <input
+            className="idleSearchFieldInput"
+            name="search"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            required="required"
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            className="idleSearchFieldButton"
+            onClick={[Function]}
+            onFocus={[Function]}
+            type="reset"
+          />
+        </form>
+        <div
+          className="stackSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    className="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      className="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index={0}
+      onClick={[Function]}
+      title="Complete \\"Thread with samples\\""
+    >
+      <span
+        className="filterNavigatorBarItemContent"
+      >
+        Complete "Thread with samples"
+      </span>
+    </li>
+  </ol>
+  <div
+    className="CallTreeEmptyReasons"
+  >
+    <h3>
+      The call tree is empty for “
+      Thread with samples
+      ”
+    </h3>
+    <p>
+      Try broadening the selected range, removing search terms, or call tree transforms to view samples.
+    </p>
+  </div>
+</div>
+`;
+
 exports[`calltree/ProfileCallTreeView computes a width for a call tree of a really deep stack 1`] = `
 <div
   className="treeAndSidebarWrapper"
