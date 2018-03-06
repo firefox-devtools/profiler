@@ -3,10 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { SymbolStoreDB } from './symbol-store-db';
+import SymbolStoreDB from './symbol-store-db';
+import { SymbolsNotFoundError } from './errors';
 import type { SymbolTableAsTuple } from './symbol-store-db';
 
-type Library = {
+export type Library = {
   debugName: string,
   breakpadId: string,
 };
@@ -57,8 +58,9 @@ export class SymbolStore {
 
     if (this._failedRequests.has(libid)) {
       return Promise.reject(
-        new Error(
-          "We've tried to request a symbol table for this library before and failed, so we're not trying again."
+        new SymbolsNotFoundError(
+          "We've tried to request a symbol table for this library before and failed, so we're not trying again.",
+          lib
         )
       );
     }
@@ -74,7 +76,12 @@ export class SymbolStore {
     // Try to get the symbol table from the database
     const symbolTablePromise = this._db
       .getSymbolTable(debugName, breakpadId)
-      .catch(() => {
+      .catch(e => {
+        if (!(e instanceof SymbolsNotFoundError)) {
+          // rethrow JavaScript programming errors
+          throw e;
+        }
+
         // Request the symbol table from the symbol provider.
         const symbolTablePromise = this._symbolProvider
           .requestSymbolTable(debugName, breakpadId)
@@ -82,7 +89,11 @@ export class SymbolStore {
             console.error(`Failed to symbolicate library ${debugName}`, error);
             this._failedRequests.add(libid);
             this._requestedSymbolTables.delete(libid);
-            throw error;
+            throw new SymbolsNotFoundError(
+              `Failed to symbolicate library ${debugName}`,
+              lib,
+              error
+            );
           });
 
         // Once the symbol table comes in, store it in the database, but don't

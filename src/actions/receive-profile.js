@@ -83,6 +83,9 @@ let requestIdleCallbackPolyfill: (
 
 if (typeof window === 'object' && window.requestIdleCallback) {
   requestIdleCallbackPolyfill = window.requestIdleCallback;
+} else if (typeof process === 'object' && process.nextTick) {
+  // Node environment
+  requestIdleCallbackPolyfill = process.nextTick;
 } else {
   requestIdleCallbackPolyfill = callback => setTimeout(callback, 0);
 }

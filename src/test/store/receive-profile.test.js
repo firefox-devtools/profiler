@@ -4,6 +4,7 @@
 // @flow
 
 import sinon from 'sinon';
+
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
@@ -17,6 +18,13 @@ import {
 
 import preprocessedProfile from '../fixtures/profiles/profile-2d-canvas.json';
 import getGeckoProfile from '../fixtures/profiles/gecko-profile';
+
+// Mocking SymbolStoreDB
+import exampleSymbolTable from '../fixtures/example-symbol-table';
+import SymbolStoreDB from '../../profile-logic/symbol-store-db';
+jest.mock('../../profile-logic/symbol-store-db');
+
+import { TextDecoder } from 'text-encoding';
 
 describe('actions/receive-profile', function() {
   /**
@@ -66,6 +74,14 @@ describe('actions/receive-profile', function() {
         getSymbolTable: () => Promise.resolve(),
       };
       window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
+
+      // This is a mock implementation because of the `mock` call above, but
+      // Flow doesn't know this.
+      (SymbolStoreDB: any).mockImplementation(() => ({
+        getSymbolTable: jest.fn().mockResolvedValue(exampleSymbolTable),
+      }));
+
+      window.TextDecoder = TextDecoder;
     });
 
     afterEach(function() {
@@ -73,6 +89,8 @@ describe('actions/receive-profile', function() {
 
       geckoProfiler = null;
       delete window.geckoProfilerPromise;
+      delete window.TextDecoder;
+      delete window.requestIdleCallback;
     });
 
     it('can retrieve a profile from the addon', async function() {

@@ -5,6 +5,7 @@
 
 import bisection from 'bisection';
 import { resourceTypes } from './profile-data';
+import { SymbolsNotFoundError } from './errors';
 
 import type {
   Profile,
@@ -270,7 +271,11 @@ async function symbolicateThread(
               );
             });
         })
-        .catch(() => {
+        .catch(e => {
+          if (!(e instanceof SymbolsNotFoundError)) {
+            // rethrow JavaScript programming error
+            throw e;
+          }
           // We could not find symbols for this library.
           // Don't throw, so that the resulting promise will be resolved, thereby
           // indicating that we're done symbolicating with lib.

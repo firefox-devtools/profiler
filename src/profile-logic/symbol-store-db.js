@@ -4,6 +4,8 @@
 
 // @flow
 
+import { SymbolsNotFoundError } from './errors';
+
 import type {
   IDBFactory,
   IDBDatabase,
@@ -38,7 +40,7 @@ const kTwoWeeksInMilliseconds = 2 * 7 * 24 * 60 * 60 * 1000;
  * @class SymbolStoreDB
  * @classdesc Where does this description show up?
  */
-export class SymbolStoreDB {
+export default class SymbolStoreDB {
   _dbPromise: Promise<IDBDatabase> | null;
   _maxCount: number;
   _maxAge: number; // in milliseconds
@@ -196,7 +198,10 @@ export class SymbolStoreDB {
             updateDateReq.onsuccess = () => resolve([addrs, index, buffer]);
           } else {
             reject(
-              new Error('The requested library does not exist in the database.')
+              new SymbolsNotFoundError(
+                'The requested library does not exist in the database.',
+                { debugName, breakpadId }
+              )
             );
           }
         };
