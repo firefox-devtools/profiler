@@ -1,12 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-
 // @flow
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
+import EmptyReasons from './EmptyReasons';
 import NodeIcon from './NodeIcon';
 import { getCallNodePath } from '../../profile-logic/profile-data';
 import {
@@ -173,6 +173,10 @@ class CallTreeComponent extends PureComponent<Props> {
     const newExpandedCallNodeIndexes = expandedCallNodeIndexes.slice();
     const maxInterestingDepth = 17; // scientifically determined
     let currentCallNodeIndex = tree.getRoots()[0];
+    if (currentCallNodeIndex === undefined) {
+      // This tree is empty.
+      return;
+    }
     newExpandedCallNodeIndexes.push(currentCallNodeIndex);
     for (let i = 0; i < maxInterestingDepth; i++) {
       const children = tree.getChildren(currentCallNodeIndex);
@@ -195,6 +199,9 @@ class CallTreeComponent extends PureComponent<Props> {
       disableOverscan,
       callNodeMaxDepth,
     } = this.props;
+    if (tree.getRoots().length === 0) {
+      return <EmptyReasons />;
+    }
     return (
       <TreeView
         tree={tree}

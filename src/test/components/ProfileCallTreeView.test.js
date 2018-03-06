@@ -8,10 +8,16 @@ import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import {
+  getProfileFromTextSamples,
+  getEmptyThread,
+  getEmptyProfile,
+} from '../fixtures/profiles/make-profile';
 import {
   changeCallTreeSearchString,
+  changeImplementationFilter,
   changeInvertCallstack,
+  addRangeFilter,
 } from '../../actions/profile-view';
 import { getBoundingBox } from '../fixtures/utils';
 
@@ -99,6 +105,48 @@ describe('calltree/ProfileCallTreeView', function() {
     );
 
     expect(calltree).toMatchSnapshot();
+  });
+});
+
+describe('calltree/ProfileCallTreeView EmptyReasons', function() {
+  const { profile } = getProfileFromTextSamples(`
+    A A A
+    B B B
+    C C H
+    D F I
+    E E
+  `);
+  profile.threads[0].name = 'Thread with samples';
+
+  function renderWithStore(store) {
+    return renderer.create(
+      <Provider store={store}>
+        <ProfileCallTreeView />
+      </Provider>,
+      { createNodeMock }
+    );
+  }
+
+  it('shows a reason for a call tree with no samples', function() {
+    const profile = getEmptyProfile();
+    const thread = getEmptyThread();
+    thread.name = 'Empty Thread';
+    profile.threads.push(thread);
+
+    const store = storeWithProfile(profile);
+    expect(renderWithStore(store)).toMatchSnapshot();
+  });
+
+  it('shows reasons for being out of range of a threads samples', function() {
+    const store = storeWithProfile(profile);
+    store.dispatch(addRangeFilter(5, 10));
+    expect(renderWithStore(store)).toMatchSnapshot();
+  });
+
+  it('shows reasons for when samples are completely filtered out', function() {
+    const store = storeWithProfile(profile);
+    store.dispatch(changeImplementationFilter('js'));
+    expect(renderWithStore(store)).toMatchSnapshot();
   });
 });
 
