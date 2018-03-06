@@ -124,7 +124,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
               onTouchEnd={[Function]}
               onTouchStart={[Function]}
               title="thread: \\"Main Thread\\" (0)
-            process: \\"default\\" (0)"
+process: \\"default\\" (0)"
             >
               <h1
                 className="profileThreadHeaderBarThreadName"
@@ -173,7 +173,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
               onTouchEnd={[Function]}
               onTouchStart={[Function]}
               title="thread: \\"Thread with dropped samples\\" (0)
-            process: \\"default\\" (0)"
+process: \\"default\\" (0)"
             >
               <h1
                 className="profileThreadHeaderBarThreadName"
@@ -256,7 +256,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
               onTouchEnd={[Function]}
               onTouchStart={[Function]}
               title="thread: \\"Thread with dropped samples\\" (0)
-            process: \\"default\\" (0)"
+process: \\"default\\" (0)"
             >
               <h1
                 className="profileThreadHeaderBarThreadName"

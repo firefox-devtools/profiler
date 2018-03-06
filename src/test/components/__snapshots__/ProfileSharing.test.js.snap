@@ -43,7 +43,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
             >
               <p>
                 You’re about to upload your profile publicly where anyone will be able to access it.
-                      To better diagnose performance problems profiles include the following information:
+      To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -58,7 +58,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
               </ul>
               <p>
                 To view all the information you can download the full profile to a file and open the
-                      json structure with a text editor.
+      json structure with a text editor.
               </p>
             </section>
           </div>
@@ -272,7 +272,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
             >
               <p>
                 You’re about to upload your profile publicly where anyone will be able to access it.
-                      To better diagnose performance problems profiles include the following information:
+      To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -287,7 +287,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
               </ul>
               <p>
                 To view all the information you can download the full profile to a file and open the
-                      json structure with a text editor.
+      json structure with a text editor.
               </p>
             </section>
           </div>

@@ -7,7 +7,7 @@ exports[`renders MarkerChart correctly 1`] = `
   <div
     className="markerChartLabels grippy"
     title="thread: \\"Empty\\" (0)
-  process: \\"default\\" (0)"
+process: \\"default\\" (0)"
   >
     <span
       className="markerChartLabelsName"
@@ -337,7 +337,18 @@ Array [
   Array [
     "set fillStyle",
     Object {
-      "addColorStop": [Function],
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "rgba(255, 255, 255, 0.8)",
+          ],
+          Array [
+            1,
+            "rgba(255, 255, 255, 0.0)",
+          ],
+        ],
+      },
     },
   ],
   Array [
