@@ -14,6 +14,8 @@ export class SymbolsNotFoundError extends Error {
 
   constructor(message: string, library: Library, error?: Error) {
     super(message);
+    // Workaround for a babel issue when extending Errors
+    (this: any).__proto__ = SymbolsNotFoundError.prototype;
     this.name = 'SymbolsNotFoundError';
     this.library = library;
     this.error = error;

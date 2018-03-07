@@ -14,6 +14,8 @@ export class TemporaryError extends Error {
 
   constructor(message: string, attempt: Attempt | null = null) {
     super(message);
+    // Workaround for a babel issue when extending Errors
+    (this: any).__proto__ = TemporaryError.prototype;
     this.name = 'TemporaryError';
     this.attempt = attempt;
   }
