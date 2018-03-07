@@ -298,6 +298,7 @@ type TreeViewProps<NodeIndex, DisplayData> = {|
   +expandedNodeIds: Array<NodeIndex | null>,
   +selectedNodeId: NodeIndex | null,
   +onExpandedNodesChange: (Array<NodeIndex | null>) => mixed,
+  +onExpandNode?: NodeIndex => NodeIndex,
   +highlightRegExp?: RegExp | null,
   +appendageColumn?: Column,
   +appendageButtons?: string[],
@@ -432,23 +433,50 @@ class TreeView<
     return !this.props.expandedNodeIds.includes(nodeId);
   }
 
+  // This function returns the deepest expanded node, but only if expandAll is
+  // false, because in this case it's meaningless.
+  _expand(nodeId: NodeIndex, expandAll: * = false): NodeIndex | null {
+    const {
+      tree,
+      expandedNodeIds,
+      onExpandedNodesChange,
+      onExpandNode,
+    } = this.props;
+
+    if (expandAll) {
+      const newSet = new Set(expandedNodeIds);
+      newSet.add(nodeId);
+      for (const descendant of tree.getAllDescendants(nodeId)) {
+        newSet.add(descendant);
+      }
+      onExpandedNodesChange([...newSet]);
+
+      return null;
+    } else if (onExpandNode) {
+      return onExpandNode(nodeId);
+    } else {
+      onExpandedNodesChange([...expandedNodeIds, nodeId]);
+      return nodeId;
+    }
+  }
+
+  _collapse(nodeId: NodeIndex) {
+    const { expandedNodeIds, onExpandedNodesChange } = this.props;
+    onExpandedNodesChange(expandedNodeIds.filter(idx => idx !== nodeId));
+  }
+
+  // Returns the deepest expanded child, only if newExpanded is true and
+  // toggleAll is false.
   _toggle(
     nodeId: NodeIndex,
     newExpanded: boolean = this._isCollapsed(nodeId),
     toggleAll: * = false
   ) {
-    const newSet = new Set(this.props.expandedNodeIds);
     if (newExpanded) {
-      newSet.add(nodeId);
-      if (toggleAll) {
-        for (const descendant of this.props.tree.getAllDescendants(nodeId)) {
-          newSet.add(descendant);
-        }
-      }
+      this._expand(nodeId, toggleAll);
     } else {
-      newSet.delete(nodeId);
+      this._collapse(nodeId);
     }
-    this.props.onExpandedNodesChange(Array.from(newSet.values()));
   }
 
   _toggleAll(
@@ -500,6 +528,7 @@ class TreeView<
     event.stopPropagation();
     event.preventDefault();
 
+    const { tree } = this.props;
     const selected = this.props.selectedNodeId;
     const visibleRows = this._getAllVisibleRows(this.props);
     const selectedRowIndex = visibleRows.findIndex(
@@ -516,11 +545,12 @@ class TreeView<
       // KEY_LEFT
       const isCollapsed = this._isCollapsed(selected);
       if (!isCollapsed) {
-        this._toggle(selected);
+        this._collapse(selected);
       } else {
-        const parent = this.props.tree.getParent(selected);
+        const parent = tree.getParent(selected);
         if (parent !== -1) {
           this._select(parent);
+          this._collapse(parent);
         }
       }
     } else if (event.keyCode === 38) {
@@ -530,14 +560,16 @@ class TreeView<
       }
     } else if (event.keyCode === 39) {
       // KEY_RIGHT
-      const isCollapsed = this._isCollapsed(selected);
-      if (isCollapsed) {
-        this._toggle(selected);
-      } else {
-        // Do KEY_DOWN only if the next element is a child
-        if (this.props.tree.hasChildren(selected)) {
-          this._select(this.props.tree.getChildren(selected)[0]);
-        }
+      // If the selected element has no children, there's nothing to expand or
+      // select.
+      if (!tree.hasChildren(selected)) {
+        return;
+      }
+
+      const deepestChild = this._expand(selected);
+      if (deepestChild !== null) {
+        const deepestChildChildren = tree.getChildren(deepestChild);
+        this._select(deepestChildChildren[0] || deepestChild);
       }
     } else if (event.keyCode === 40) {
       // KEY_DOWN

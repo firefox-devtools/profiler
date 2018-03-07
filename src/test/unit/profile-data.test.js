@@ -22,6 +22,7 @@ import {
   getCallNodePath,
   getSampleIndexClosestToTime,
   convertStackToCallNodePath,
+  decomposeCallNodePath,
 } from '../../profile-logic/profile-data';
 import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
@@ -965,5 +966,18 @@ describe('convertStackToCallNodePath', function() {
     expect(callNodePath).toEqual([4, 3, 2, 1, 0]);
     callNodePath = convertStackToCallNodePath(thread, stack2);
     expect(callNodePath).toEqual([5, 3, 2, 1, 0]);
+  });
+});
+
+describe('decomposeCallNodePath', function() {
+  it('correctly decomposes a call node path into a list of call node paths', function() {
+    const callNodePath = [4, 3, 2, 1, 0];
+    expect(decomposeCallNodePath(callNodePath)).toEqual([
+      [4],
+      [4, 3],
+      [4, 3, 2],
+      [4, 3, 2, 1],
+      [4, 3, 2, 1, 0],
+    ]);
   });
 });

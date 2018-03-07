@@ -6,7 +6,10 @@
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import * as ProfileView from '../../actions/profile-view';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import {
+  selectedThreadSelectors,
+  selectorsForThread,
+} from '../../reducers/profile-view';
 
 describe('call node paths on implementation filter change', function() {
   const {
@@ -134,12 +137,11 @@ describe('expand all call node descendants', function() {
 
   it('expands whole tree from root', function() {
     const { dispatch, getState } = storeWithProfile(profile);
-    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
+    const selectors = selectorsForThread(threadIndex);
+    const callNodeInfo = selectors.getCallNodeInfo(getState());
 
     // Before expand all action is dispatched, nothing is expanded
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([]);
+    expect(selectors.getExpandedCallNodePaths(getState())).toEqual([]);
 
     dispatch(
       ProfileView.expandAllCallNodeDescendants(
@@ -149,9 +151,7 @@ describe('expand all call node descendants', function() {
       )
     );
 
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()).sort()
-    ).toEqual([
+    expect(selectors.getExpandedCallNodePaths(getState()).sort()).toEqual([
       // Paths
       [A],
       [A, B],
@@ -163,16 +163,15 @@ describe('expand all call node descendants', function() {
 
   it('expands subtrees', function() {
     const { dispatch, getState } = storeWithProfile(profile);
+    const selectors = selectorsForThread(threadIndex);
 
     // First expand A by selecting B
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B]));
 
-    const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
+    const callNodeInfo = selectors.getCallNodeInfo(getState());
 
     // Before expand all action is dispatched, only A is expanded
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([
+    expect(selectors.getExpandedCallNodePaths(getState())).toEqual([
       // Paths
       [A],
     ]);
@@ -185,14 +184,108 @@ describe('expand all call node descendants', function() {
       )
     );
 
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()).sort()
-    ).toEqual([
+    expect(selectors.getExpandedCallNodePaths(getState()).sort()).toEqual([
       // Paths
       [A],
       [A, B],
       [A, B, C],
       [A, B, D],
+    ]);
+  });
+});
+
+describe('expandSingleBranchedDescendants', function() {
+  it('expands up to the first branch', function() {
+    const {
+      profile,
+      funcNamesDictPerThread: [{ A, B, C, D }],
+    } = getProfileFromTextSamples(`
+      A A
+      B B
+      C C
+      D D
+      E F
+    `);
+    const threadIndex = 0;
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    const selectors = selectorsForThread(threadIndex);
+
+    dispatch(ProfileView.expandSingleBranchedDescendants(threadIndex, A));
+    expect(selectors.getExpandedCallNodePaths(getState())).toEqual([
+      [A],
+      [A, B],
+      [A, B, C],
+      [A, B, C, D],
+    ]);
+  });
+
+  it('expands up to 10 elements', function() {
+    const {
+      profile,
+      funcNamesDictPerThread: [{ A, B, C, D, E, F, G, H, I, J, K }],
+    } = getProfileFromTextSamples(`
+      A
+      B
+      C
+      D
+      E
+      F
+      G
+      H
+      I
+      J
+      K
+      L
+    `);
+
+    const threadIndex = 0;
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    const selectors = selectorsForThread(threadIndex);
+
+    dispatch(ProfileView.expandSingleBranchedDescendants(threadIndex, A));
+    const expanded = selectors.getExpandedCallNodePaths(getState());
+    expect(expanded).toEqual([
+      [A],
+      [A, B],
+      [A, B, C],
+      [A, B, C, D],
+      [A, B, C, D, E],
+      [A, B, C, D, E, F],
+      [A, B, C, D, E, F, G],
+      [A, B, C, D, E, F, G, H],
+      [A, B, C, D, E, F, G, H, I],
+      [A, B, C, D, E, F, G, H, I, J],
+      [A, B, C, D, E, F, G, H, I, J, K],
+    ]);
+  });
+
+  it('expands up to the last child', function() {
+    const {
+      profile,
+      funcNamesDictPerThread: [{ A, B, C, D, E }],
+    } = getProfileFromTextSamples(`
+      A
+      B
+      C
+      D
+      E
+    `);
+
+    const threadIndex = 0;
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    const selectors = selectorsForThread(threadIndex);
+
+    dispatch(ProfileView.expandSingleBranchedDescendants(threadIndex, A));
+    const expanded = selectors.getExpandedCallNodePaths(getState());
+    expect(expanded).toEqual([
+      [A],
+      [A, B],
+      [A, B, C],
+      [A, B, C, D],
+      [A, B, C, D, E],
     ]);
   });
 });

@@ -140,12 +140,13 @@ function viewOptionsPerThread(state: ThreadViewOptions[] = [], action: Action) {
     }
     case 'CHANGE_SELECTED_CALL_NODE': {
       const { selectedCallNodePath, threadIndex } = action;
-      const expandedCallNodePaths = state[
-        threadIndex
-      ].expandedCallNodePaths.slice();
-      for (let i = 1; i < selectedCallNodePath.length; i++) {
-        expandedCallNodePaths.push(selectedCallNodePath.slice(0, i));
-      }
+      const expandedCallNodePaths = [
+        ...state[threadIndex].expandedCallNodePaths,
+        ...ProfileData.decomposeCallNodePath(selectedCallNodePath),
+      ];
+      // We don't want to expand the selected item itself
+      expandedCallNodePaths.splice(-1);
+
       return [
         ...state.slice(0, threadIndex),
         Object.assign({}, state[threadIndex], {

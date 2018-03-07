@@ -156,9 +156,14 @@ export function getEmptyThread(overrides: ?Object): Thread {
  */
 export function getProfileFromTextSamples(
   ...allTextSamples: string[]
-): { profile: Profile, funcNamesPerThread: Array<string[]> } {
+): {
+  profile: Profile,
+  funcNamesPerThread: Array<string[]>,
+  funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
+} {
   const profile = getEmptyProfile();
   const funcNamesPerThread = [];
+  const funcNamesDictPerThread = [];
 
   profile.threads = allTextSamples.map(textSamples => {
     // Process the text.
@@ -168,13 +173,18 @@ export function getProfileFromTextSamples(
       .reduce((memo, row) => [...memo, ...row], [])
       // Make the list unique.
       .filter((item, index, array) => array.indexOf(item) === index);
+    const funcNamesDict = funcNames.reduce((result, item, index) => {
+      result[item] = index;
+      return result;
+    }, {});
     funcNamesPerThread.push(funcNames);
+    funcNamesDictPerThread.push(funcNamesDict);
 
     // Turn this into a real thread.
     return _buildThreadFromTextOnlyStacks(textOnlyStacks, funcNames);
   });
 
-  return { profile, funcNamesPerThread };
+  return { profile, funcNamesPerThread, funcNamesDictPerThread };
 }
 
 /**
