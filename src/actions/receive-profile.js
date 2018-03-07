@@ -12,6 +12,7 @@ import { SymbolStore } from '../profile-logic/symbol-store';
 import { symbolicateProfile } from '../profile-logic/symbolication';
 import { decompress } from '../utils/gz';
 import { TemporaryError } from '../utils/errors';
+import JSZip from 'jszip';
 
 import type {
   FunctionsUpdatePerThread,
@@ -36,10 +37,10 @@ export function waitingForProfileFromAddon(): Action {
   };
 }
 
-export function receiveProfileFromAddon(profile: Profile): Action {
+export function viewProfile(profile: Profile): Action {
   return {
-    type: 'RECEIVE_PROFILE_FROM_ADDON',
-    profile: profile,
+    type: 'VIEW_PROFILE',
+    profile,
   };
 }
 
@@ -217,7 +218,7 @@ async function getProfileFromAddon(dispatch, geckoProfiler) {
   // XXX update state to show that we're connected to the profiler addon
   const rawGeckoProfile = await geckoProfiler.getProfile();
   const profile = processProfile(_unpackGeckoProfileFromAddon(rawGeckoProfile));
-  dispatch(receiveProfileFromAddon(profile));
+  dispatch(viewProfile(profile));
 
   return profile;
 }
@@ -327,17 +328,10 @@ export function waitingForProfileFromUrl(): Action {
   };
 }
 
-export function receiveProfileFromStore(profile: Profile): Action {
+export function receiveZipFile(zip: JSZip): Action {
   return {
-    type: 'RECEIVE_PROFILE_FROM_STORE',
-    profile,
-  };
-}
-
-export function receiveProfileFromUrl(profile: Profile): Action {
-  return {
-    type: 'RECEIVE_PROFILE_FROM_URL',
-    profile,
+    type: 'RECEIVE_ZIP_FILE',
+    zip,
   };
 }
 
@@ -380,6 +374,7 @@ function _wait(delayMs) {
 type FetchProfileArgs = {
   url: string,
   onTemporaryError: TemporaryError => void,
+  reportError?: (...args: any[]) => void,
 };
 
 /**
@@ -390,16 +385,80 @@ type FetchProfileArgs = {
  * If we can retrieve the profile properly, the returned promise is resolved
  * with the JSON.parsed profile.
  */
-async function _fetchProfile({ url, onTemporaryError }: FetchProfileArgs) {
+export async function _fetchProfile(
+  args: FetchProfileArgs
+): Promise<{
+  profile?: any,
+  zip?: JSZip,
+}> {
   const MAX_WAIT_SECONDS = 10;
   let i = 0;
+  const { url, onTemporaryError } = args;
+  // Allow tests to capture the reported error, but normally use console.error.
+  const reportError = args.reportError || console.error;
+  const moreInfoMessage =
+    'The full error information has been printed out to the DevTool’s console.';
 
   while (true) {
     const response = await fetch(url);
     // Case 1: successful answer.
     if (response.ok) {
-      const json = await response.json();
-      return json;
+      const contentType = response.headers.get('content-type');
+
+      // We're getting information from third parties, they may not serve them correctly.
+      // Try to do the right thing for them to reduce errors.
+      const isZipContentType = contentType === 'application/zip';
+      const isJsonContentType = contentType === 'application/json';
+      const isUnknownContentType = !isZipContentType && !isJsonContentType;
+      const hasZipEnding = !!url.match(/\.zip$/);
+      const hasJsonEnding = !!url.match(/\.json/);
+
+      if (isZipContentType || (isUnknownContentType && hasZipEnding)) {
+        // Probably a zip file.
+        const buffer = await response.arrayBuffer();
+        try {
+          return {
+            zip: await JSZip.loadAsync(buffer),
+          };
+        } catch (error) {
+          const message = 'Unable to unzip the zip file.';
+          reportError(message);
+          reportError('Error:', error);
+          reportError('Fetch response:', response);
+          throw new Error(`${message} ${moreInfoMessage}`);
+        }
+      } else {
+        try {
+          // Don't check the content-type, but attempt to parse the response as JSON.
+          return {
+            profile: await response.json(),
+          };
+        } catch (error) {
+          // Change the error message depending on the circumstance:
+          let message;
+          if (isJsonContentType) {
+            message = 'The profile’s JSON could not be decoded.';
+          } else if (hasJsonEnding) {
+            message = oneLine`
+              The profile’s JSON could not be decoded. The file was not sent with the
+              "application/json" content type, but it did have a .json file ending.
+              Are you sure it was actually JSON?
+            `;
+          } else {
+            message = oneLine`
+              The profile could not be decoded. This does not look like a supported file
+              type.
+            `;
+          }
+
+          // Provide helpful debugging information to the console.
+          reportError(message);
+          reportError('JSON parsing error:', error);
+          reportError('Fetch response:', response);
+
+          throw new Error(`${message} ${moreInfoMessage}`);
+        }
+      }
     }
 
     // case 2: unrecoverable error.
@@ -437,49 +496,46 @@ async function _fetchProfile({ url, onTemporaryError }: FetchProfileArgs) {
 export function retrieveProfileFromStore(
   hash: string
 ): ThunkAction<Promise<void>> {
-  return async function(dispatch) {
-    dispatch(waitingForProfileFromStore());
-
-    try {
-      const serializedProfile = await _fetchProfile({
-        url: `https://profile-store.commondatastorage.googleapis.com/${hash}`,
-        onTemporaryError: (e: TemporaryError) => {
-          dispatch(temporaryErrorReceivingProfileFromStore(e));
-        },
-      });
-
-      const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
-      if (profile === undefined) {
-        throw new Error('Unable to parse the profile.');
-      }
-
-      dispatch(receiveProfileFromStore(profile));
-    } catch (error) {
-      dispatch(fatalErrorReceivingProfileFromStore(error));
-    }
-  };
+  return retrieveProfileOrZipFromUrl(
+    `https://profile-store.commondatastorage.googleapis.com/${hash}`
+  );
 }
 
-export function retrieveProfileFromUrl(
+/**
+ * Runs a fetch on a URL, and downloads the file. If it's JSON, then it attempts
+ * to process the profile. If it's a zip file, it tries to unzip it, and save it
+ * into the store so that the user can then choose which file to load.
+ */
+export function retrieveProfileOrZipFromUrl(
   profileUrl: string
 ): ThunkAction<Promise<void>> {
   return async function(dispatch) {
     dispatch(waitingForProfileFromUrl());
 
     try {
-      const serializedProfile = await _fetchProfile({
+      const response = await _fetchProfile({
         url: profileUrl,
         onTemporaryError: (e: TemporaryError) => {
           dispatch(temporaryErrorReceivingProfileFromUrl(e));
         },
       });
 
-      const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
-      if (profile === undefined) {
-        throw new Error('Unable to parse the profile.');
-      }
+      const serializedProfile = response.profile;
+      const zip = response.zip;
+      if (serializedProfile) {
+        const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
+        if (profile === undefined) {
+          throw new Error('Unable to parse the profile.');
+        }
 
-      dispatch(receiveProfileFromUrl(profile));
+        dispatch(viewProfile(profile));
+      } else if (zip) {
+        dispatch(receiveZipFile(zip));
+      } else {
+        throw new Error(
+          'Expected to receive a zip file or profile from _fetchProfile.'
+        );
+      }
     } catch (error) {
       dispatch(fatalErrorReceivingProfileFromUrl(error));
     }
@@ -489,13 +545,6 @@ export function retrieveProfileFromUrl(
 export function waitingForProfileFromFile(): Action {
   return {
     type: 'WAITING_FOR_PROFILE_FROM_FILE',
-  };
-}
-
-export function receiveProfileFromFile(profile: Profile): Action {
-  return {
-    type: 'RECEIVE_PROFILE_FROM_FILE',
-    profile,
   };
 }
 
@@ -543,7 +592,7 @@ export function retrieveProfileFromFile(
         throw new Error('Unable to parse the profile.');
       }
 
-      dispatch(receiveProfileFromFile(profile));
+      dispatch(viewProfile(profile));
       return;
     } catch (e) {
       // continuing the function normally, as we return in the try block above;
@@ -560,7 +609,7 @@ export function retrieveProfileFromFile(
         throw new Error('Unable to parse the profile.');
       }
 
-      dispatch(receiveProfileFromFile(profile));
+      dispatch(viewProfile(profile));
     } catch (error) {
       dispatch(errorReceivingProfileFromFile(error));
     }

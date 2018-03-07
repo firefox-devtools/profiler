@@ -10,14 +10,18 @@ import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
 import { getView } from '../../reducers/app';
 import {
-  receiveProfileFromAddon,
+  viewProfile,
   retrieveProfileFromAddon,
   retrieveProfileFromStore,
-  retrieveProfileFromUrl,
+  retrieveProfileOrZipFromUrl,
+  _fetchProfile,
 } from '../../actions/receive-profile';
 
 import preprocessedProfile from '../fixtures/profiles/profile-2d-canvas.json';
 import getGeckoProfile from '../fixtures/profiles/gecko-profile';
+import { getEmptyProfile } from '../../profile-logic/profile-data';
+import JSZip from 'jszip';
+import { serializeProfile } from '../../profile-logic/process-profile';
 
 // Mocking SymbolStoreDB
 import exampleSymbolTable from '../fixtures/example-symbol-table';
@@ -48,14 +52,19 @@ describe('actions/receive-profile', function() {
     return states;
   }
 
-  describe('receiveProfileFromAddon', function() {
-    it('can take a profile from an addon and save it to state', function() {
+  describe('viewProfile', function() {
+    it('can take a profile and view it', function() {
       const store = blankStore();
 
-      const initialProfile = ProfileViewSelectors.getProfile(store.getState());
-      expect(initialProfile).toBeTruthy();
-      expect(initialProfile.threads).toHaveLength(0);
-      store.dispatch(receiveProfileFromAddon(preprocessedProfile));
+      expect(() => {
+        ProfileViewSelectors.getProfile(store.getState());
+      }).toThrow();
+
+      const initialProfile = ProfileViewSelectors.getProfileOrNull(
+        store.getState()
+      );
+      expect(initialProfile).toBeNull();
+      store.dispatch(viewProfile(preprocessedProfile));
       expect(ProfileViewSelectors.getProfile(store.getState())).toBe(
         preprocessedProfile
       );
@@ -98,7 +107,7 @@ describe('actions/receive-profile', function() {
       await store.dispatch(retrieveProfileFromAddon());
 
       const state = store.getState();
-      expect(getView(state)).toEqual({ phase: 'PROFILE' });
+      expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
         start: 0,
         end: 1007,
@@ -128,11 +137,11 @@ describe('actions/receive-profile', function() {
           additionalData: { attempt: null, message: errorMessage },
         }, // when the error happens
         { phase: 'INITIALIZING' }, // when we could connect to the addon but waiting for the profile
-        { phase: 'PROFILE' }, // yay, we got a profile!
+        { phase: 'DATA_LOADED' }, // yay, we got a profile!
       ]);
 
       const state = store.getState();
-      expect(getView(state)).toEqual({ phase: 'PROFILE' });
+      expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
         start: 0,
         end: 1007,
@@ -148,6 +157,9 @@ describe('actions/receive-profile', function() {
     const fetch200Response = {
       ok: true,
       status: 200,
+      headers: {
+        get: () => 'appliciation/json',
+      },
       json: () => Promise.resolve(getGeckoProfile()),
     };
 
@@ -175,7 +187,7 @@ describe('actions/receive-profile', function() {
       await store.dispatch(retrieveProfileFromStore(hash));
 
       const state = store.getState();
-      expect(getView(state)).toEqual({ phase: 'PROFILE' });
+      expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
         start: 0,
         end: 1007,
@@ -208,7 +220,7 @@ describe('actions/receive-profile', function() {
             message: errorMessage,
           },
         },
-        { phase: 'PROFILE' },
+        { phase: 'DATA_LOADED' },
       ]);
 
       const state = store.getState();
@@ -256,12 +268,15 @@ describe('actions/receive-profile', function() {
     });
   });
 
-  describe('retrieveProfileFromUrl', function() {
+  describe('retrieveProfileOrZipFromUrl', function() {
     const fetch403Response = { ok: false, status: 403 };
     const fetch500Response = { ok: false, status: 500 };
     const fetch200Response = {
       ok: true,
       status: 200,
+      headers: {
+        get: () => 'application/json',
+      },
       json: () => Promise.resolve(getGeckoProfile()),
     };
 
@@ -285,10 +300,10 @@ describe('actions/receive-profile', function() {
       window.fetch.withArgs(expectedUrl).resolves(fetch200Response);
 
       const store = blankStore();
-      await store.dispatch(retrieveProfileFromUrl(expectedUrl));
+      await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
 
       const state = store.getState();
-      expect(getView(state)).toEqual({ phase: 'PROFILE' });
+      expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
         start: 0,
         end: 1007,
@@ -307,7 +322,7 @@ describe('actions/receive-profile', function() {
 
       const store = blankStore();
       const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileFromUrl(expectedUrl))
+        store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
       )).map(state => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
@@ -320,7 +335,7 @@ describe('actions/receive-profile', function() {
             message: errorMessage,
           },
         },
-        { phase: 'PROFILE' },
+        { phase: 'DATA_LOADED' },
       ]);
 
       const state = store.getState();
@@ -336,7 +351,7 @@ describe('actions/receive-profile', function() {
       const expectedUrl = 'https://profiles.club/shared.json';
       const store = blankStore();
       const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileFromUrl(expectedUrl))
+        store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
       )).map(state => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -360,11 +375,215 @@ describe('actions/receive-profile', function() {
       window.fetch.resolves(fetch500Response);
 
       const store = blankStore();
-      await store.dispatch(retrieveProfileFromUrl(expectedUrl));
+      await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
       expect(getView(store.getState())).toEqual({
         phase: 'FATAL_ERROR',
         error: expect.any(Error),
       });
+    });
+  });
+
+  /**
+   * _fetchProfile is a helper function for the actions, but it is tested separately
+   * since it has a decent amount of complexity around different issues with loading
+   * in different support URL formats. It's mainly testing what happens when JSON
+   * and zip file is sent, and what happens when things fail.
+   */
+  describe('_fetchProfile', function() {
+    beforeEach(function() {
+      window.fetch = sinon.stub();
+      sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
+    });
+
+    afterEach(function() {
+      delete window.fetch;
+      window.setTimeout.restore();
+    });
+
+    /**
+     * This helper function encapsulates various configurations for the type of content
+     * as well and response headers.
+     */
+    async function configureFetch(obj: {
+      url: string,
+      contentType?: string,
+      isZipped?: true,
+      isJSON?: true,
+      arrayBuffer?: () => Promise<Uint8Array>,
+      json?: () => Promise<mixed>,
+    }) {
+      const { url, contentType, isZipped, isJSON } = obj;
+      const profile = getEmptyProfile();
+      let arrayBuffer = obj.arrayBuffer;
+      let json = obj.json;
+
+      if (isZipped) {
+        const zip = new JSZip();
+        zip.file('profile.json', serializeProfile(profile));
+        const buffer = await zip.generateAsync({ type: 'uint8array' });
+        arrayBuffer = () => buffer;
+        json = () => Promise.reject(new Error('Not JSON'));
+      }
+
+      if (isJSON) {
+        arrayBuffer = () => Promise.reject(new Error('Unhandled mock'));
+        json = () => Promise.resolve(profile);
+      }
+
+      const zippedProfileResponse = {
+        ok: true,
+        status: 200,
+        json,
+        arrayBuffer,
+        headers: {
+          get: (name: string) => {
+            switch (name) {
+              case 'content-type':
+                return contentType;
+              default:
+                throw new Error(
+                  "Unhandled stub for fetch's response.headers.get"
+                );
+            }
+          },
+        },
+      };
+      window.fetch.withArgs(url).resolves(zippedProfileResponse);
+      const reportError = jest.fn();
+      const args = {
+        url,
+        onTemporaryError: () => {},
+        reportError,
+      };
+
+      // Return fetch's args, based on the inputs.
+      return { profile, args, reportError };
+    }
+
+    it('fetches a normal profile with the correct content-type headers', async function() {
+      const { profile, args } = await configureFetch({
+        url: 'https://example.com/profile.json',
+        contentType: 'application/json',
+        isJSON: true,
+      });
+
+      const { profile: profileFetched } = await _fetchProfile(args);
+      expect(profileFetched).toEqual(profile);
+    });
+
+    it('fetches a zipped profile with correct content-type headers', async function() {
+      const { args, reportError } = await configureFetch({
+        url: 'https://example.com/profile.zip',
+        contentType: 'application/zip',
+        isZipped: true,
+      });
+
+      const { zip } = await _fetchProfile(args);
+      expect(zip).toBeTruthy();
+      expect(reportError.mock.calls.length).toBe(0);
+    });
+
+    it('fetches a zipped profile with incorrect content-type headers, but .zip extension', async function() {
+      const { args, reportError } = await configureFetch({
+        url: 'https://example.com/profile.zip',
+        isZipped: true,
+      });
+
+      const { zip } = await _fetchProfile(args);
+      expect(zip).toBeTruthy();
+      expect(reportError.mock.calls.length).toBe(0);
+    });
+
+    it('fetches a profile with incorrect content-type headers, but .json extension', async function() {
+      const { profile, args, reportError } = await configureFetch({
+        url: 'https://example.com/profile.json',
+        isJSON: true,
+      });
+
+      const { profile: profileFetched } = await _fetchProfile(args);
+      expect(profileFetched).toEqual(profile);
+      expect(reportError.mock.calls.length).toBe(0);
+    });
+
+    it('fetches a profile with incorrect content-type headers, no known extension, and attempts to JSON parse it it', async function() {
+      const { profile, args, reportError } = await configureFetch({
+        url: 'https://example.com/profile.file',
+        isJSON: true,
+      });
+
+      const { profile: profileFetched } = await _fetchProfile(args);
+      expect(profileFetched).toEqual(profile);
+      expect(reportError.mock.calls.length).toBe(0);
+    });
+
+    it('fails if a bad zip file is passed in', async function() {
+      const { args, reportError } = await configureFetch({
+        url: 'https://example.com/profile.file',
+        contentType: 'application/zip',
+        arrayBuffer: () => Promise.resolve(new Uint8Array([0, 1, 2, 3])),
+      });
+
+      let userFacingError;
+      try {
+        await _fetchProfile(args);
+      } catch (error) {
+        userFacingError = error;
+      }
+      expect(userFacingError).toMatchSnapshot();
+      expect(reportError.mock.calls.length).toBeGreaterThan(0);
+      expect(reportError.mock.calls).toMatchSnapshot();
+    });
+
+    it('fails if a bad profile JSON is passed in', async function() {
+      const { args, reportError } = await configureFetch({
+        url: 'https://example.com/profile.json',
+        contentType: 'application/json',
+        json: () => Promise.reject(new Error('Invalid JSON')),
+      });
+
+      let userFacingError;
+      try {
+        await _fetchProfile(args);
+      } catch (error) {
+        userFacingError = error;
+      }
+      expect(userFacingError).toMatchSnapshot();
+      expect(reportError.mock.calls.length).toBeGreaterThan(0);
+      expect(reportError.mock.calls).toMatchSnapshot();
+    });
+
+    it('fails if a bad profile JSON is passed in, with no content type', async function() {
+      const { args, reportError } = await configureFetch({
+        url: 'https://example.com/profile.json',
+        json: () => Promise.reject(new Error('Invalid JSON')),
+      });
+
+      let userFacingError;
+      try {
+        await _fetchProfile(args);
+      } catch (error) {
+        userFacingError = error;
+      }
+      expect(userFacingError).toMatchSnapshot();
+      expect(reportError.mock.calls.length).toBeGreaterThan(0);
+      expect(reportError.mock.calls).toMatchSnapshot();
+    });
+
+    it('fails if a completely unknown file is passed in', async function() {
+      const { args, reportError } = await configureFetch({
+        url: 'https://example.com/profile.unknown',
+        json: () => Promise.reject(new Error('Invalid JSON')),
+      });
+
+      let userFacingError;
+      try {
+        await _fetchProfile(args);
+      } catch (error) {
+        userFacingError = error;
+      }
+      expect(userFacingError).toMatchSnapshot();
+      expect(reportError.mock.calls.length).toBeGreaterThan(0);
+      expect(reportError.mock.calls).toMatchSnapshot();
     });
   });
 });

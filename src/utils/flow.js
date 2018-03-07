@@ -55,6 +55,20 @@ export function toValidTabSlug(tabSlug: any): TabSlug | null {
 }
 
 /**
+ * This function will take an arbitrary string, and will turn it into a TabSlug
+ * it will throw an error if an invalid type was passed to it.
+ */
+export function ensureIsValidTabSlug(type: string): TabSlug {
+  const assertedType = toValidTabSlug(type);
+  if (!assertedType) {
+    throw new Error(
+      `Attempted to assert that "${type}" is a valid TransformType, and it was not.`
+    );
+  }
+  return assertedType;
+}
+
+/**
  * This function will take an arbitrary string, and try to convert it to a valid
  * TransformType.
  */
@@ -80,6 +94,16 @@ export function convertToTransformType(type: string): TransformType | null {
       return null;
     }
   }
+}
+
+/**
+ * This is a type-friendly version of Object.values that assumes the object has
+ * a Map-like structure.
+ */
+export function objectValues<Value, Obj: {| [string]: Value |}>(
+  object: Obj
+): Value[] {
+  return (Object.values: Function)(object);
 }
 
 /**

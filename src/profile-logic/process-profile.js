@@ -737,7 +737,6 @@ export function processProfile(
 ): Profile {
   // We may have been given a DevTools profile, in that case extract the Gecko Profile.
   const geckoProfile = rawProfile.profile ? rawProfile.profile : rawProfile;
-
   // Handle profiles from older versions of Gecko. This call might throw an
   // exception.
   upgradeGeckoProfileToCurrentVersion(geckoProfile);

@@ -16,7 +16,7 @@ import {
 import { blankStore } from './fixtures/stores';
 import getGeckoProfile from './fixtures/profiles/gecko-profile';
 import { processProfile } from '../profile-logic/process-profile';
-import { receiveProfileFromStore } from '../actions/receive-profile';
+import { viewProfile } from '../actions/receive-profile';
 import { selectedThreadSelectors } from '../reducers/profile-view';
 import type { Profile } from '../types/profile';
 import getProfile from './fixtures/profiles/call-nodes';
@@ -42,26 +42,34 @@ function _getStoreWithURL(
 
   const searchWithVersion =
     v === false ? search : `${search ? search + '&' : '?'}v=${v}`;
-  const urlState = stateFromLocation({
+  const newUrlState = stateFromLocation({
     pathname,
     search: searchWithVersion,
     hash,
   });
   const store = blankStore();
-  store.dispatch({ type: '@@urlenhancer/updateUrlState', urlState });
-  store.dispatch(receiveProfileFromStore(profile));
+  store.dispatch({
+    type: 'UPDATE_URL_STATE',
+    newUrlState,
+    state: store.getState(),
+  });
+  store.dispatch(viewProfile(profile));
   return store;
 }
 
 describe('selectedThread', function() {
   function storeWithThread(threadIndex) {
     const store = blankStore();
-    const urlState = stateFromLocation({
+    const newUrlState = stateFromLocation({
       pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
       search: `?thread=${threadIndex}`,
       hash: '',
     });
-    store.dispatch({ type: '@@urlenhancer/updateUrlState', urlState });
+    store.dispatch({
+      type: 'UPDATE_URL_STATE',
+      newUrlState,
+      state: store.getState(),
+    });
 
     return store;
   }
@@ -70,7 +78,7 @@ describe('selectedThread', function() {
     const profile: Profile = processProfile(getGeckoProfile());
 
     const store = storeWithThread(1);
-    store.dispatch(receiveProfileFromStore(profile));
+    store.dispatch(viewProfile(profile));
 
     expect(urlStateReducers.getSelectedThreadIndex(store.getState())).toBe(1);
   });
@@ -79,7 +87,7 @@ describe('selectedThread', function() {
     const profile: Profile = processProfile(getGeckoProfile());
 
     const store = storeWithThread(100);
-    store.dispatch(receiveProfileFromStore(profile));
+    store.dispatch(viewProfile(profile));
 
     // "2" is the content process' main tab
     expect(urlStateReducers.getSelectedThreadIndex(store.getState())).toBe(2);
@@ -306,11 +314,11 @@ describe('URL serialization of the transform stack', function() {
 
 describe('urlFromState', function() {
   it('outputs the current URL version', function() {
-    const urlState = stateFromLocation({
+    const newUrlState = stateFromLocation({
       pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
       search: '',
       hash: '',
     });
-    expect(urlFromState(urlState)).toMatch(`v=${CURRENT_URL_VERSION}`);
+    expect(urlFromState(newUrlState)).toMatch(`v=${CURRENT_URL_VERSION}`);
   });
 });

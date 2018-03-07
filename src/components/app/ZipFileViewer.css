@@ -1,0 +1,73 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.zipFileViewer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  align-items: center;
+  line-height: 1.5;
+}
+
+.zipFileViewerHeader {
+  font-size: 130%;
+  padding: 0 20px;
+}
+
+.zipFileViewerSection {
+  position: relative;
+  width: 75vw;
+  height: 75vh;
+  max-width: 1200px;
+
+  display: flex;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+
+  flex-direction: column;
+  box-shadow: 0 5px 25px #0b1f50;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+.zipFileViewerSection > .treeView {
+  font-size: 14px;
+}
+
+.zipFileViewerSection .treeRowToggleButton {
+  margin: 0 5px;
+}
+
+.zipFileViewerMessage {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  border-top: 1px solid var(--grey-30);
+  background-color: #f5f5f5;
+  font-size: 14px;
+}
+
+.zipFileViewerMessage > * {
+  margin: 10px 30px;
+}
+
+.zipFileViewerUntrustedFilePath {
+  /**
+   * Make the max width 50% so that some random user can't spam a bunch of misleading
+   * content into an error message on perf.html.
+   */
+  max-width: 70%;
+  background-color: var(--grey-30);
+  padding: 0 5px;
+  display: inline-block;
+  font-family: monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-radius: 3px;
+}

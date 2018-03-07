@@ -14,11 +14,13 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
-import type { UrlState } from '../../types/reducers';
+import type { Store } from '../../types/store';
+import type { State, UrlState } from '../../types/reducers';
 
 type StateProps = {|
   +urlState: UrlState,
   +isUrlSetupDone: boolean,
+  +state: State,
 |};
 
 type DispatchProps = {|
@@ -28,6 +30,7 @@ type DispatchProps = {|
 |};
 
 type OwnProps = {|
+  +store: Store,
   +children: React.Node,
 |};
 
@@ -35,19 +38,20 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class UrlManager extends React.PureComponent<Props> {
   _updateState() {
-    const { updateUrlState, show404 } = this.props;
+    const { updateUrlState, show404, store } = this.props;
     if (window.history.state) {
-      updateUrlState(window.history.state);
+      updateUrlState(window.history.state, store.getState());
     } else {
       try {
-        const urlState = stateFromLocation(window.location);
-        updateUrlState(urlState);
+        const newUrlState = stateFromLocation(window.location);
+        updateUrlState(newUrlState, store.getState());
       } catch (e) {
         console.error(e);
         show404(window.location.pathname + window.location.search);
       }
     }
   }
+
   componentDidMount() {
     this._updateState();
     window.addEventListener('popstate', () => this._updateState());
@@ -80,6 +84,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     urlState: state.urlState,
     isUrlSetupDone: getIsUrlSetupDone(state),
+    state,
   }),
   mapDispatchToProps: {
     updateUrlState,

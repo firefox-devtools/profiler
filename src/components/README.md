@@ -30,7 +30,7 @@ export default connect(
   // passed in the full actions object. This is incrementally being addressed.)
   {
     retrieveProfileFromStore,
-    retrieveProfileFromUrl,
+    retrieveProfileOrZipFromUrl,
     retrieveProfileFromAddon,
   }
   // Finally pass in the non-connected component. Redux will then merge the various
