@@ -118,7 +118,8 @@
   "jest": {
     "collectCoverageFrom": [
       "src/**/*.{js,jsx}",
-      "!**/node_modules/**"
+      "!**/node_modules/**",
+      "!src/types/libdef/**"
     ],
     "testEnvironment": "jsdom",
     "moduleFileExtensions": [
