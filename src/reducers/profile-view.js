@@ -19,7 +19,7 @@ import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
-import { PathSet } from '../utils/path';
+import { arePathsEqual, PathSet } from '../utils/path';
 
 import type {
   Profile,
@@ -136,12 +136,37 @@ function viewOptionsPerThread(
     }
     case 'CHANGE_SELECTED_CALL_NODE': {
       const { selectedCallNodePath, threadIndex } = action;
-      const expandedCallNodePaths = new PathSet(
-        state[threadIndex].expandedCallNodePaths
-      );
-      for (let i = 1; i < selectedCallNodePath.length; i++) {
-        expandedCallNodePaths.add(selectedCallNodePath.slice(0, i));
+
+      const threadState = state[threadIndex];
+      const previousSelectedCallNodePath = threadState.selectedCallNodePath;
+
+      // If the selected node doesn't actually change, let's return the previous
+      // state to avoid rerenders.
+      if (arePathsEqual(selectedCallNodePath, previousSelectedCallNodePath)) {
+        return state;
       }
+
+      let { expandedCallNodePaths } = threadState;
+
+      /* Looking into the current state to know whether we want to generate a
+       * new one. It can be expensive to clone when we have a lot of expanded
+       * lines, but it's very infrequent that we actually want to expand new
+       * lines as a result of a selection. */
+      const selectedNodeParentPaths = [];
+      for (let i = 1; i < selectedCallNodePath.length; i++) {
+        selectedNodeParentPaths.push(selectedCallNodePath.slice(0, i));
+      }
+      const hasNewExpandedPaths = selectedNodeParentPaths.some(
+        path => !expandedCallNodePaths.has(path)
+      );
+
+      if (hasNewExpandedPaths) {
+        expandedCallNodePaths = new PathSet(expandedCallNodePaths);
+        selectedNodeParentPaths.forEach(path =>
+          expandedCallNodePaths.add(path)
+        );
+      }
+
       return [
         ...state.slice(0, threadIndex),
         Object.assign({}, state[threadIndex], {
