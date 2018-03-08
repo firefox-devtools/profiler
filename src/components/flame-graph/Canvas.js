@@ -4,6 +4,8 @@
 
 // @flow
 import * as React from 'react';
+import colors from 'photon-colors';
+import { interpolateRgb } from 'd3-interpolate';
 import {
   withChartViewport,
   type WithChartViewport,
@@ -20,12 +22,8 @@ import type {
   IndexIntoFlameGraphTiming,
 } from '../../profile-logic/flame-graph';
 
-import colors from 'photon-colors';
-
 import type { CallNodeInfo, StackType } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
-
-import { interpolateRgb } from 'd3-interpolate';
 
 export type OwnProps = {|
   +thread: Thread,
