@@ -4,7 +4,7 @@
 
 // @flow
 
-import { PathSet } from '../../utils/path';
+import { PathSet, arePathsEqual } from '../../utils/path';
 
 describe('PathSet', function() {
   const sampleValues = [[1], [1, 3], [2, 3, 9]];
@@ -109,5 +109,22 @@ describe('PathSet', function() {
 
     const expectedEntries = sampleValues.map(val => [val, val]);
     expect(Array.from(set.entries())).toEqual(expectedEntries);
+  });
+});
+
+describe('arePathsEqual', function() {
+  it('returns true for equal paths', function() {
+    expect(arePathsEqual([1], [1])).toBe(true);
+    expect(arePathsEqual([1, 5], [1, 5])).toBe(true);
+    expect(arePathsEqual([1, 5, 15], [1, 5, 15])).toBe(true);
+
+    const path = [6, 9, 255];
+    expect(arePathsEqual(path, path)).toBe(true);
+  });
+
+  it('returns false for unequal paths', function() {
+    expect(arePathsEqual([1], [2])).toBe(false);
+    expect(arePathsEqual([1], [1, 2])).toBe(false);
+    expect(arePathsEqual([1, 2], [2, 1])).toBe(false);
   });
 });
