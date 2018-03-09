@@ -124,19 +124,21 @@ describe('call node paths on implementation filter change', function() {
 });
 
 /**
- * The following tests naively runs through a dispatch and selector to provide coverage
- * over the Redux store to ensure that it behaves correctly.
+ * The following tests run through a dispatch and selector to provide coverage
+ * over the Redux store to ensure that it behaves correctly. The intent is to cover
+ * every single action, but do the bare minimum in the test to assert the relationship
+ * between the actions and reducers.
  */
 describe('actions/ProfileView', function() {
   describe('changeSelectedCallNode', function() {
-    const { profile } = getProfileFromTextSamples(`
-      A
-      B
-      C
-    `);
-    const { dispatch, getState } = storeWithProfile(profile);
+    it('can change the call node', function() {
+      const { profile } = getProfileFromTextSamples(`
+        A
+        B
+        C
+        `);
+      const { dispatch, getState } = storeWithProfile(profile);
 
-    it('starts as not having a call node path', function() {
       expect(
         selectedThreadSelectors.getSelectedCallNodePath(getState())
       ).toEqual([]);
@@ -148,10 +150,10 @@ describe('actions/ProfileView', function() {
   });
 
   describe('changeSelectedThread', function() {
-    const { profile } = getProfileFromTextSamples('A', 'B');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('can set and change the selected thread', function() {
+      const { profile } = getProfileFromTextSamples('A', 'B');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
       dispatch(ProfileView.changeSelectedThread(1));
       expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(1);
@@ -159,10 +161,10 @@ describe('actions/ProfileView', function() {
   });
 
   describe('focusCallTree', function() {
-    const { profile } = getProfileFromTextSamples('A');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('updates the focus call tree generation', function() {
+      const { profile } = getProfileFromTextSamples('A');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(
         ProfileViewSelectors.getFocusCallTreeGeneration(getState())
       ).toEqual(0);
@@ -174,10 +176,10 @@ describe('actions/ProfileView', function() {
   });
 
   describe('changeRightClickedThread', function() {
-    const { profile } = getProfileFromTextSamples('A', 'B');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('changes the right clicked thread index', function() {
+      const { profile } = getProfileFromTextSamples('A', 'B');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(
         ProfileViewSelectors.getRightClickedThreadIndex(getState())
       ).toEqual(0);
@@ -189,57 +191,47 @@ describe('actions/ProfileView', function() {
   });
 
   describe('changeThreadOrder', function() {
-    const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('changes the thread order', function() {
+      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(UrlStateSelectors.getThreadOrder(getState())).toEqual([0, 1, 2]);
       withAnalyticsMock(() => {
         dispatch(ProfileView.changeThreadOrder([2, 1, 0]));
-        expect(self.ga.mock.calls).toEqual([
-          [
-            'send',
-            {
-              eventAction: 'change thread order',
-              eventCategory: 'profile',
-              hitType: 'event',
-            },
-          ],
-        ]);
+        expect(self.ga).toBeCalledWith('send', {
+          eventAction: 'change thread order',
+          eventCategory: 'profile',
+          hitType: 'event',
+        });
       });
       expect(UrlStateSelectors.getThreadOrder(getState())).toEqual([2, 1, 0]);
     });
   });
 
   describe('hideThread', function() {
-    const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('hides threads', function() {
+      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([]);
       withAnalyticsMock(() => {
         dispatch(ProfileView.hideThread(1));
-        expect(self.ga.mock.calls).toEqual([
-          [
-            'send',
-            {
-              eventAction: 'hide',
-              eventCategory: 'threads',
-              eventLabel: 'Empty',
-              hitType: 'event',
-            },
-          ],
-        ]);
+        expect(self.ga).toBeCalledWith('send', {
+          eventAction: 'hide',
+          eventCategory: 'threads',
+          eventLabel: 'Empty',
+          hitType: 'event',
+        });
       });
       expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([1]);
     });
   });
 
   describe('showThread', function() {
-    const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('shows threads', function() {
+      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       dispatch(ProfileView.hideThread(0));
       dispatch(ProfileView.hideThread(1));
 
@@ -247,53 +239,43 @@ describe('actions/ProfileView', function() {
 
       withAnalyticsMock(() => {
         dispatch(ProfileView.showThread(0));
-        expect(self.ga.mock.calls).toEqual([
-          [
-            'send',
-            {
-              eventAction: 'show',
-              eventCategory: 'threads',
-              eventLabel: 'Empty',
-              hitType: 'event',
-            },
-          ],
-        ]);
+        expect(self.ga).toBeCalledWith('send', {
+          eventAction: 'show',
+          eventCategory: 'threads',
+          eventLabel: 'Empty',
+          hitType: 'event',
+        });
       });
       expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([1]);
     });
   });
 
   describe('isolateThread', function() {
-    const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('isolates a thread', function() {
+      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([]);
 
       withAnalyticsMock(() => {
         dispatch(ProfileView.isolateThread(1));
 
         expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([0, 2]);
-        expect(self.ga.mock.calls).toEqual([
-          [
-            'send',
-            {
-              eventAction: 'isolate',
-              eventCategory: 'threads',
-              eventLabel: 'Empty',
-              hitType: 'event',
-            },
-          ],
-        ]);
+        expect(self.ga).toBeCalledWith('send', {
+          eventAction: 'isolate',
+          eventCategory: 'threads',
+          eventLabel: 'Empty',
+          hitType: 'event',
+        });
       });
     });
   });
 
   describe('changeCallTreeSearchString', function() {
-    const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('changes the call tree search string', function() {
+      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       withAnalyticsMock(() => {
         expect(UrlStateSelectors.getCurrentSearchString(getState())).toEqual(
           ''
@@ -303,16 +285,11 @@ describe('actions/ProfileView', function() {
           'foobar'
         );
 
-        expect(self.ga.mock.calls).toEqual([
-          [
-            'send',
-            {
-              eventAction: 'call tree search string',
-              eventCategory: 'profile',
-              hitType: 'event',
-            },
-          ],
-        ]);
+        expect(self.ga).toBeCalledWith('send', {
+          eventAction: 'call tree search string',
+          eventCategory: 'profile',
+          hitType: 'event',
+        });
       });
     });
   });
@@ -322,23 +299,27 @@ describe('actions/ProfileView', function() {
    * tests, which are more for asserting their simple getter/setter types of behavior.
    */
   describe('expandAllCallNodeDescendants', function() {
-    const {
-      profile,
-      funcNamesPerThread: [funcNames],
-    } = getProfileFromTextSamples(`
-      A A A
-      B B E
-      C D
-    `);
-    const threadIndex = 0;
-    const A = funcNames.indexOf('A');
-    const B = funcNames.indexOf('B');
-    const C = funcNames.indexOf('C');
-    const D = funcNames.indexOf('D');
-    const E = funcNames.indexOf('E');
+    function setupStore() {
+      const {
+        profile,
+        funcNamesPerThread: [funcNames],
+      } = getProfileFromTextSamples(`
+        A A A
+        B B E
+        C D
+      `);
+      const threadIndex = 0;
+      const A = funcNames.indexOf('A');
+      const B = funcNames.indexOf('B');
+      const C = funcNames.indexOf('C');
+      const D = funcNames.indexOf('D');
+      const E = funcNames.indexOf('E');
+      const { getState, dispatch } = storeWithProfile(profile);
+      return { A, B, C, D, E, threadIndex, getState, dispatch };
+    }
 
     it('expands whole tree from root', function() {
-      const { dispatch, getState } = storeWithProfile(profile);
+      const { getState, dispatch, threadIndex, A, B, C, D, E } = setupStore();
       const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
 
       // Before expand all action is dispatched, nothing is expanded
@@ -367,7 +348,7 @@ describe('actions/ProfileView', function() {
     });
 
     it('expands subtrees', function() {
-      const { dispatch, getState } = storeWithProfile(profile);
+      const { getState, dispatch, threadIndex, A, B, C, D } = setupStore();
 
       // First expand A by selecting B
       dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B]));
@@ -403,15 +384,15 @@ describe('actions/ProfileView', function() {
   });
 
   describe('changeExpandedCallNodes', function() {
-    const { profile } = getProfileFromTextSamples(`
-      A
-      B
-      C
-      D
-    `);
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('changes the expanded call nodes', function() {
+      const { profile } = getProfileFromTextSamples(`
+        A
+        B
+        C
+        D
+        `);
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(
         selectedThreadSelectors.getExpandedCallNodePaths(getState())
       ).toEqual([]);
@@ -423,10 +404,10 @@ describe('actions/ProfileView', function() {
   });
 
   describe('changeSelectedMarker', function() {
-    const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('changes the selected marker', function() {
+      const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(
         selectedThreadSelectors.getViewOptions(getState()).selectedMarker
       ).toEqual(-1);
@@ -438,10 +419,10 @@ describe('actions/ProfileView', function() {
   });
 
   describe('changeMarkersSearchString', function() {
-    const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('changes the search string', function() {
+      const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('');
       dispatch(ProfileView.changeMarkersSearchString('a'));
       expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('a');
@@ -449,26 +430,21 @@ describe('actions/ProfileView', function() {
   });
 
   describe('changeImplementationFilter', function() {
-    const { profile } = getProfileFromTextSamples('A');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('changes the implementation filter', function() {
+      const { profile } = getProfileFromTextSamples('A');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(UrlStateSelectors.getImplementationFilter(getState())).toEqual(
         'combined'
       );
       withAnalyticsMock(() => {
         dispatch(ProfileView.changeImplementationFilter('js'));
-        expect(self.ga.mock.calls).toEqual([
-          [
-            'send',
-            {
-              eventAction: 'change implementation filter',
-              eventCategory: 'profile',
-              eventLabel: 'js',
-              hitType: 'event',
-            },
-          ],
-        ]);
+        expect(self.ga).toBeCalledWith('send', {
+          eventAction: 'change implementation filter',
+          eventCategory: 'profile',
+          eventLabel: 'js',
+          hitType: 'event',
+        });
       });
       expect(UrlStateSelectors.getImplementationFilter(getState())).toEqual(
         'js'
@@ -477,33 +453,28 @@ describe('actions/ProfileView', function() {
   });
 
   describe('changeInvertCallstack', function() {
-    const { profile } = getProfileFromTextSamples('A');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('changes the callstack inversion', function() {
+      const { profile } = getProfileFromTextSamples('A');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
       withAnalyticsMock(() => {
         dispatch(ProfileView.changeInvertCallstack(true));
-        expect(self.ga.mock.calls).toEqual([
-          [
-            'send',
-            {
-              eventAction: 'change invert callstack',
-              eventCategory: 'profile',
-              hitType: 'event',
-            },
-          ],
-        ]);
+        expect(self.ga).toBeCalledWith('send', {
+          eventAction: 'change invert callstack',
+          eventCategory: 'profile',
+          hitType: 'event',
+        });
       });
       expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
     });
   });
 
   describe('updateProfileSelection', function() {
-    const { profile } = getProfileFromTextSamples('A');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('updates the profile selection', function() {
+      const { profile } = getProfileFromTextSamples('A');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(
         ProfileViewSelectors.getProfileViewOptions(getState()).selection
       ).toEqual({ hasSelection: false, isModifying: false });
@@ -527,10 +498,10 @@ describe('actions/ProfileView', function() {
   });
 
   describe('addRangeFilter', function() {
-    const { profile } = getProfileFromTextSamples('A');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('adds a range filter', function() {
+      const { profile } = getProfileFromTextSamples('A');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([]);
       dispatch(ProfileView.addRangeFilter(0, 10));
       expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
@@ -546,10 +517,10 @@ describe('actions/ProfileView', function() {
   });
 
   describe('addRangeFilterAndUnsetSelection', function() {
-    const { profile } = getProfileFromTextSamples('A');
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('adds a range filter and unsets a selection', function() {
+      const { profile } = getProfileFromTextSamples('A');
+      const { dispatch, getState } = storeWithProfile(profile);
+
       dispatch(ProfileView.addRangeFilter(0, 10));
       dispatch(
         ProfileView.updateProfileSelection({
@@ -586,14 +557,18 @@ describe('actions/ProfileView', function() {
   });
 
   describe('popRangeFilters', function() {
-    const { profile } = getProfileFromTextSamples('A');
-    const { dispatch, getState } = storeWithProfile(profile);
+    function setupStore() {
+      const { profile } = getProfileFromTextSamples('A');
+      const store = storeWithProfile(profile);
+      store.dispatch(ProfileView.addRangeFilter(0, 10));
+      store.dispatch(ProfileView.addRangeFilter(1, 9));
+      store.dispatch(ProfileView.addRangeFilter(2, 8));
+      store.dispatch(ProfileView.addRangeFilter(3, 7));
+      return store;
+    }
 
     it('pops a range filter', function() {
-      dispatch(ProfileView.addRangeFilter(0, 10));
-      dispatch(ProfileView.addRangeFilter(1, 9));
-      dispatch(ProfileView.addRangeFilter(2, 8));
-      dispatch(ProfileView.addRangeFilter(3, 7));
+      const { getState, dispatch } = setupStore();
       expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
@@ -606,17 +581,9 @@ describe('actions/ProfileView', function() {
         { start: 1, end: 9 },
       ]);
     });
-  });
-
-  describe('popRangeFiltersAndUnsetSelection', function() {
-    const { profile } = getProfileFromTextSamples('A');
-    const { dispatch, getState } = storeWithProfile(profile);
 
     it('pops a range filter and unsets the selection', function() {
-      dispatch(ProfileView.addRangeFilter(0, 10));
-      dispatch(ProfileView.addRangeFilter(1, 9));
-      dispatch(ProfileView.addRangeFilter(2, 8));
-      dispatch(ProfileView.addRangeFilter(3, 7));
+      const { getState, dispatch } = setupStore();
       dispatch(
         ProfileView.updateProfileSelection({
           hasSelection: true,
@@ -655,14 +622,14 @@ describe('actions/ProfileView', function() {
   });
 
   describe('addTransformToStack', function() {
-    const { profile } = getProfileFromTextSamples(`
-      A
-      B
-      C
-    `);
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('can add a transform to the stack', function() {
+      const { profile } = getProfileFromTextSamples(`
+        A
+        B
+        C
+        `);
+      const { dispatch, getState } = storeWithProfile(profile);
+
       expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([]);
       withAnalyticsMock(() => {
         dispatch(
@@ -671,17 +638,12 @@ describe('actions/ProfileView', function() {
             funcIndex: 1,
           })
         );
-        expect(self.ga.mock.calls).toEqual([
-          [
-            'send',
-            {
-              eventAction: 'add transform',
-              eventCategory: 'profile',
-              eventLabel: 'merge-function',
-              hitType: 'event',
-            },
-          ],
-        ]);
+        expect(self.ga).toBeCalledWith('send', {
+          eventAction: 'add transform',
+          eventCategory: 'profile',
+          eventLabel: 'merge-function',
+          hitType: 'event',
+        });
       });
       expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([
         {
@@ -693,14 +655,14 @@ describe('actions/ProfileView', function() {
   });
 
   describe('popTransformToStack', function() {
-    const { profile } = getProfileFromTextSamples(`
-      A
-      B
-      C
-    `);
-    const { dispatch, getState } = storeWithProfile(profile);
-
     it('can add a transform to the stack', function() {
+      const { profile } = getProfileFromTextSamples(`
+        A
+        B
+        C
+        `);
+      const { dispatch, getState } = storeWithProfile(profile);
+
       dispatch(
         ProfileView.addTransformToStack(0, {
           type: 'merge-function',
