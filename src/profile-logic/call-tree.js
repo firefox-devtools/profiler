@@ -119,16 +119,21 @@ export class CallTree {
     return this.getChildren(callNodeIndex).length !== 0;
   }
 
+  _addDescendantsToSet(
+    callNodeIndex: IndexIntoCallNodeTable,
+    set: Set<IndexIntoCallNodeTable>
+  ): void {
+    for (const child of this.getChildren(callNodeIndex)) {
+      set.add(child);
+      this._addDescendantsToSet(child, set);
+    }
+  }
+
   getAllDescendants(
     callNodeIndex: IndexIntoCallNodeTable
   ): Set<IndexIntoCallNodeTable> {
-    const result = new Set([]);
-    for (const child of this.getChildren(callNodeIndex)) {
-      result.add(child);
-      for (const descendant of this.getAllDescendants(child)) {
-        result.add(descendant);
-      }
-    }
+    const result = new Set();
+    this._addDescendantsToSet(callNodeIndex, result);
     return result;
   }
 
