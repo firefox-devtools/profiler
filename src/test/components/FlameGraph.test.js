@@ -11,12 +11,10 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
-
-jest.useFakeTimers();
+import mockRaf from '../fixtures/mocks/request-animation-frame';
 
 it('renders FlameGraph correctly', () => {
-  // Tie the requestAnimationFrame into jest's fake timers.
-  (window: any).requestAnimationFrame = fn => setTimeout(fn, 0);
+  const flushRafCalls = mockRaf();
   window.devicePixelRatio = 1;
   const ctx = mockCanvasContext();
 
@@ -58,14 +56,12 @@ it('renders FlameGraph correctly', () => {
     { createNodeMock }
   );
 
-  // Flush any requestAnimationFrames.
-  jest.runAllTimers();
+  flushRafCalls();
 
   const drawCalls = ctx.__flushDrawLog();
 
   expect(flameGraph).toMatchSnapshot();
   expect(drawCalls).toMatchSnapshot();
 
-  delete window.requestAnimationFrame;
   delete window.devicePixelRatio;
 });

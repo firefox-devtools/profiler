@@ -11,12 +11,10 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 import { getBoundingBox } from '../fixtures/utils';
-
-jest.useFakeTimers();
+import mockRaf from '../fixtures/mocks/request-animation-frame';
 
 it('renders MarkerChart correctly', () => {
-  // Tie the requestAnimationFrame into jest's fake timers.
-  (window: any).requestAnimationFrame = fn => setTimeout(fn, 0);
+  const flushRafCalls = mockRaf();
   window.devicePixelRatio = 1;
   const ctx = mockCanvasContext();
 
@@ -72,8 +70,7 @@ it('renders MarkerChart correctly', () => {
     { createNodeMock }
   );
 
-  // Flush any requestAnimationFrames.
-  jest.runAllTimers();
+  flushRafCalls();
 
   const tree = markerChart.toJSON();
   const drawCalls = ctx.__flushDrawLog();
@@ -81,6 +78,5 @@ it('renders MarkerChart correctly', () => {
   expect(tree).toMatchSnapshot();
   expect(drawCalls).toMatchSnapshot();
 
-  delete window.requestAnimationFrame;
   delete window.devicePixelRatio;
 });
