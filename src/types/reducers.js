@@ -74,7 +74,6 @@ export type UrlState = {
   markersSearchString: string,
   implementation: ImplementationFilter,
   invertCallstack: boolean,
-  hidePlatformDetails: boolean,
   threadOrder: ThreadIndex[],
   hiddenThreads: ThreadIndex[],
   transforms: TransformStacksPerThread,

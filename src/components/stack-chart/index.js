@@ -16,7 +16,7 @@ import {
   getCategoryColorStrategy,
   getLabelingStrategy,
 } from '../../reducers/stack-chart';
-import StackChartSettings from './Settings';
+import StackSettings from '../shared/StackSettings';
 import { updateProfileSelection } from '../../actions/profile-view';
 
 import type { Thread } from '../../types/profile';
@@ -84,7 +84,7 @@ class StackChartGraph extends React.PureComponent<Props> {
 
     return (
       <div className="stackChart">
-        <StackChartSettings />
+        <StackSettings />
         <div className="stackChartGraph">
           <div title={processDetails} className="stackChartLabels grippy">
             <span>{threadName}</span>
@@ -117,15 +117,13 @@ class StackChartGraph extends React.PureComponent<Props> {
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepthForStackChart(
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
       state
     );
 
     return {
-      thread: selectedThreadSelectors.getFilteredThreadForStackChart(state),
-      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForStackChart(
-        state
-      ),
+      thread: selectedThreadSelectors.getFilteredThread(state),
+      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
       stackTimingByDepth,
       timeRange: getDisplayRange(state),
       interval: getProfileInterval(state),

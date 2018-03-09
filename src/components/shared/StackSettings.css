@@ -2,37 +2,45 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.stackChartSettings {
+.stackSettings {
   height: 25px;
   padding: 0;
   line-height: 25px;
   display: flex;
   flex-flow: row nowrap;
+  color: var(--ink-70);
 }
 
-.stackChartSettingsList {
+.stackSettingsList {
   display: block;
   flex: 1;
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  align-items: flex-start;
 }
 
-.stackChartSettingsListItem {
-  display: inline-block;
+.stackSettingsListItem {
   margin: 0 5px;
   padding: 0;
 }
 
-.stackChartSettingsLabel {
+.stackSettingsLabel {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
   display: inline-flex;
   flex-flow: row nowrap;
   align-items: center;
+  height: 25px;
 }
 
-.stackChartSettingsCheckbox {
+.stackSettingsSelect {
+  margin: 0 5px;
+  font-size: 11px;
+}
+
+.stackSettingsCheckbox {
   margin: 0 5px;
 }

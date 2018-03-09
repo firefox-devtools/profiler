@@ -17,7 +17,7 @@ import {
 import StackSearchField from '../shared/StackSearchField';
 import { toValidImplementationFilter } from '../../profile-logic/profile-data';
 
-import './ProfileCallTreeSettings.css';
+import './StackSettings.css';
 
 import type { ImplementationFilter } from '../../types/actions';
 
@@ -28,7 +28,7 @@ type Props = {|
   +changeInvertCallstack: typeof changeInvertCallstack,
 |};
 
-class ProfileCallTreeSettings extends PureComponent<Props> {
+class StackSettings extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._onImplementationFilterChange = this._onImplementationFilterChange.bind(
@@ -55,13 +55,13 @@ class ProfileCallTreeSettings extends PureComponent<Props> {
     const { implementationFilter, invertCallstack } = this.props;
 
     return (
-      <div className="profileCallTreeSettings">
-        <ul className="profileCallTreeSettingsList">
-          <li className="profileCallTreeSettingsListItem">
-            <label className="profileCallTreeSettingsLabel">
+      <div className="stackSettings">
+        <ul className="stackSettingsList">
+          <li className="stackSettingsListItem">
+            <label className="stackSettingsLabel">
               Filter:
               <select
-                className="profileCallTreeSettingsSelect"
+                className="stackSettingsSelect"
                 onChange={this._onImplementationFilterChange}
                 value={implementationFilter}
               >
@@ -71,11 +71,11 @@ class ProfileCallTreeSettings extends PureComponent<Props> {
               </select>
             </label>
           </li>
-          <li className="profileCallTreeSettingsListItem">
-            <label className="profileCallTreeSettingsLabel">
+          <li className="stackSettingsListItem">
+            <label className="stackSettingsLabel">
               <input
                 type="checkbox"
-                className="profileCallTreeSettingsCheckbox"
+                className="stackSettingsCheckbox"
                 onChange={this._onInvertCallstackClick}
                 checked={invertCallstack}
               />
@@ -83,7 +83,7 @@ class ProfileCallTreeSettings extends PureComponent<Props> {
             </label>
           </li>
         </ul>
-        <StackSearchField className="profileCallTreeSettingsSearchField" />
+        <StackSearchField className="stackSettingsSearchField" />
       </div>
     );
   }
@@ -98,4 +98,4 @@ export default connect(
     changeImplementationFilter,
     changeInvertCallstack,
   }
-)(ProfileCallTreeSettings);
+)(StackSettings);

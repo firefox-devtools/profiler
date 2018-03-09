@@ -6,12 +6,12 @@
 
 import React from 'react';
 import CallTree from './CallTree';
-import ProfileCallTreeSettings from './ProfileCallTreeSettings';
+import StackSettings from '../shared/StackSettings';
 import TransformNavigator from './TransformNavigator';
 
 const ProfileCallTreeView = () => (
   <div className="treeAndSidebarWrapper">
-    <ProfileCallTreeSettings />
+    <StackSettings />
     <TransformNavigator />
     <CallTree />
   </div>

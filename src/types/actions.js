@@ -168,7 +168,6 @@ type UrlStateAction =
       callNodeTable: CallNodeTable,
       selectedThreadIndex: ThreadIndex,
     |}
-  | { type: 'CHANGE_HIDE_PLATFORM_DETAILS', hidePlatformDetails: boolean }
   | { type: 'CHANGE_MARKER_SEARCH_STRING', searchString: string };
 
 type IconsAction =

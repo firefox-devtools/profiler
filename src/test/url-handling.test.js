@@ -214,6 +214,17 @@ describe('url upgrading', function() {
     });
   });
 
+  describe('version 3: remove platform only option', function() {
+    it('switches to the stack chart when given a timeline tab', function() {
+      const { getState } = _getStoreWithURL({
+        pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/',
+        search: '?hidePlatformDetails',
+        v: 2,
+      });
+      expect(urlStateReducers.getImplementationFilter(getState())).toBe('js');
+    });
+  });
+
   // More general checks
   it("won't run if the version is specified", function() {
     const { getState } = _getStoreWithURL({
