@@ -1030,8 +1030,6 @@ CallTree {
       "G",
       "H",
       "I",
-      "Bailout",
-      "Invalidate",
     ],
     "_stringToIndex": Map {
       "A" => 0,
@@ -1043,8 +1041,6 @@ CallTree {
       "G" => 6,
       "H" => 7,
       "I" => 8,
-      "Bailout" => 9,
-      "Invalidate" => 10,
     },
   },
 }
@@ -1288,8 +1284,6 @@ Object {
       "G",
       "H",
       "I",
-      "Bailout",
-      "Invalidate",
     ],
     "_stringToIndex": Map {
       "A" => 0,
@@ -1301,8 +1295,6 @@ Object {
       "G" => 6,
       "H" => 7,
       "I" => 8,
-      "Bailout" => 9,
-      "Invalidate" => 10,
     },
   },
   "tid": 0,
@@ -2527,8 +2519,6 @@ Object {
       "G",
       "H",
       "I",
-      "Bailout",
-      "Invalidate",
     ],
     "_stringToIndex": Map {
       "A" => 0,
@@ -2540,8 +2530,6 @@ Object {
       "G" => 6,
       "H" => 7,
       "I" => 8,
-      "Bailout" => 9,
-      "Invalidate" => 10,
     },
   },
   "tid": 0,
