@@ -8,15 +8,14 @@ import StackChartGraph from '../../components/stack-chart';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
-
 jest.useFakeTimers();
 
 it('renders StackChartGraph correctly', () => {
-  // Tie the requestAnimationFrame into jest's fake timers.
-  (window: any).requestAnimationFrame = fn => setTimeout(fn, 0);
+  const flushRafCalls = mockRaf();
   window.devicePixelRatio = 1;
   const ctx = mockCanvasContext();
 
@@ -58,8 +57,7 @@ it('renders StackChartGraph correctly', () => {
     { createNodeMock }
   );
 
-  // Flush any requestAnimationFrames.
-  jest.runAllTimers();
+  flushRafCalls();
 
   const tree = stackChart.toJSON();
   const drawCalls = ctx.__flushDrawLog();
@@ -67,6 +65,5 @@ it('renders StackChartGraph correctly', () => {
   expect(tree).toMatchSnapshot();
   expect(drawCalls).toMatchSnapshot();
 
-  delete window.requestAnimationFrame;
   delete window.devicePixelRatio;
 });

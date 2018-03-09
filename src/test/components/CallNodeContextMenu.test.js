@@ -125,10 +125,8 @@ describe('calltree/CallNodeContextMenu', function() {
     it('can copy a function name', function() {
       const { findMenuItem } = setup();
       // Copy is a mocked module, clear it both before and after.
-      copy.mockClear();
       findMenuItem('copy-function-name').simulate('click');
       expect(copy).toBeCalledWith('B:library');
-      copy.mockClear();
     });
 
     it('can copy a script URL', function() {
@@ -150,19 +148,15 @@ describe('calltree/CallNodeContextMenu', function() {
       const { findMenuItem } = setup(store);
 
       // Copy is a mocked module, clear it both before and after.
-      copy.mockClear();
       findMenuItem('copy-url').simulate('click');
       expect(copy).toBeCalledWith('https://example.com/script.js');
-      copy.mockClear();
     });
 
     it('can copy a stack', function() {
       const { findMenuItem } = setup();
       // Copy is a mocked module, clear it both before and after.
-      copy.mockClear();
       findMenuItem('copy-stack').simulate('click');
       expect(copy).toBeCalledWith(`B:library\nA\n`);
-      copy.mockClear();
     });
   });
 });

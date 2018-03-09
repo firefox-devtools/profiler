@@ -141,6 +141,7 @@
       "enzyme-to-json/serializer"
     ],
     "restoreMocks": true,
+    "resetMocks": true,
     "setupTestFrameworkScriptFile": "./src/test/setup.js",
     "verbose": true
   },

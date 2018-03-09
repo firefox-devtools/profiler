@@ -10,20 +10,11 @@ import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { getBoundingBox } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
 
 import type { Profile } from '../../types/profile';
-
-jest.useFakeTimers();
-ReactDOM.findDOMNode = jest.fn(() => {
-  // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
-  // opt out of the type checker for this mock by returning `any`.
-  const mockEl = ({
-    getBoundingClientRect: () => getBoundingBox(300, 300),
-  }: any);
-  return mockEl;
-});
 
 function _getProfileWithDroppedSamples(): Profile {
   const { profile } = getProfileFromTextSamples(
@@ -73,8 +64,18 @@ function _getProfileWithDroppedSamples(): Profile {
 }
 
 describe('calltree/ProfileViewerHeader', function() {
+  beforeEach(() => {
+    jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
+      // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
+      // opt out of the type checker for this mock by returning `any`.
+      const mockEl = ({
+        getBoundingClientRect: () => getBoundingBox(300, 300),
+      }: any);
+      return mockEl;
+    });
+  });
   it('renders the header', () => {
-    (window: any).requestAnimationFrame = fn => setTimeout(fn, 0);
+    const flushRafCalls = mockRaf();
     window.devicePixelRatio = 1;
     const ctx = mockCanvasContext();
     /**
@@ -101,15 +102,13 @@ describe('calltree/ProfileViewerHeader', function() {
       { createNodeMock }
     );
 
-    // Flush any requestAnimationFrames.
-    jest.runAllTimers();
+    flushRafCalls();
 
     const drawCalls = ctx.__flushDrawLog();
 
     expect(header.toJSON()).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
 
-    delete window.requestAnimationFrame;
     delete window.devicePixelRatio;
   });
 });
