@@ -132,7 +132,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "rgb(69, 161, 255)",
+    "#c1e0ff",
   ],
   Array [
     "fillRect",
@@ -164,7 +164,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "rgb(69, 161, 255)",
+    "#c1e0ff",
   ],
   Array [
     "fillRect",
@@ -196,7 +196,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "rgb(69, 161, 255)",
+    "#c1e0ff",
   ],
   Array [
     "fillRect",
@@ -228,7 +228,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "rgb(69, 161, 255)",
+    "#c1e0ff",
   ],
   Array [
     "fillRect",
@@ -260,7 +260,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "rgb(69, 161, 255)",
+    "#c1e0ff",
   ],
   Array [
     "fillRect",
@@ -292,7 +292,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "rgb(69, 161, 255)",
+    "#c1e0ff",
   ],
   Array [
     "fillRect",
@@ -324,7 +324,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "rgb(9, 75, 181)",
+    "#218fff",
   ],
   Array [
     "fillRect",
@@ -356,7 +356,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "rgb(9, 75, 181)",
+    "#218fff",
   ],
   Array [
     "fillRect",
@@ -388,7 +388,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "rgb(9, 75, 181)",
+    "#218fff",
   ],
   Array [
     "fillRect",
