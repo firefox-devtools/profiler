@@ -11,7 +11,8 @@ import * as CallTree from './call-tree';
 export type FlameGraphDepth = number;
 export type IndexIntoFlameGraphTiming = number;
 
-/* FlameGraphTiming is an array containing data used for rendering the
+/**
+ * FlameGraphTiming is an array containing data used for rendering the
  * flame graph. Each element in the array describes one row in the
  * graph. Each such element in turn contains one or more functions,
  * drawn as boxes with start and end positions, represented as unit
@@ -29,7 +30,6 @@ export type IndexIntoFlameGraphTiming = number;
  * displaying extra information (like in a tooltip) not readily
  * apparent from visual inspection of the boxes in the flame graph.
  */
-
 export type FlameGraphTiming = Array<{
   start: UnitIntervalOfProfileRange[],
   end: UnitIntervalOfProfileRange[],
