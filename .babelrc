@@ -5,7 +5,10 @@
       {
         targets: {
           node: "current",
-          browsers: "defaults"
+          // ESR starting May 2018:
+          firefox: "60",
+          // Current version as of March 2018:
+          chrome: "65"
         },
         modules: false
       }
@@ -14,13 +17,6 @@
     "flow"
   ],
   plugins: [
-    [
-      "transform-runtime",
-      {
-        polyfill: false,
-        regenerator: true
-      }
-    ],
     [
       "transform-class-properties"
     ]
