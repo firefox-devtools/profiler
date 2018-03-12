@@ -963,8 +963,10 @@ export function extractMarkerDataFromName(thread: Thread): Thread {
 
 export function getTracingMarkers(thread: Thread): TracingMarker[] {
   const { stringTable, markers } = thread;
-  const tracingMarkers: TracingMarker[] = [];
+  const tracingMarkers: Array<null | TracingMarker> = [];
   const openMarkers: Map<IndexIntoStringTable, TracingMarker> = new Map();
+  const markNameToTracingIndex: Map<string, number> = new Map();
+  const markNamesToSkip: Set<string> = new Set();
   for (let i = 0; i < markers.length; i++) {
     const data = markers.data[i];
     if (!data) {
@@ -1001,6 +1003,44 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
     } else if ('startTime' in data && 'endTime' in data) {
       const { startTime, endTime } = data;
       if (typeof startTime === 'number' && typeof endTime === 'number') {
+        if (data.type === 'UserTiming') {
+          if (data.entryType === 'measure') {
+            // De-duplicate performance.mark, as performance.measure can be built from
+            // marks.
+            const { startMark, endMark } = data;
+
+            // Check start marks.
+            if (typeof startMark === 'string') {
+              const startMarkIndex = markNameToTracingIndex.get(startMark);
+              if (startMarkIndex === undefined) {
+                // This mark has not been found yet, remember it.
+                markNamesToSkip.add(startMark);
+              } else {
+                // This mark was already added as a tracing marker, remove it now.
+                tracingMarkers[startMarkIndex] = null;
+              }
+            }
+
+            // Check end marks.
+            if (typeof endMark === 'string') {
+              const endMarkIndex = markNameToTracingIndex.get(endMark);
+              if (endMarkIndex === undefined) {
+                // This mark has not been found yet, remember it.
+                markNamesToSkip.add(endMark);
+              } else {
+                // This mark was already added as a tracing marker, remove it now.
+                tracingMarkers[endMarkIndex] = null;
+              }
+            }
+          } else {
+            const { name } = data;
+            markNameToTracingIndex.set(name, tracingMarkers.length);
+            if (markNamesToSkip.has(name)) {
+              markNamesToSkip.delete(name);
+              continue;
+            }
+          }
+        }
         const name = stringTable.getString(markers.name[i]);
         const duration = endTime - startTime;
         tracingMarkers.push({
@@ -1013,8 +1053,16 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
       }
     }
   }
-  tracingMarkers.sort((a, b) => a.start - b.start);
-  return tracingMarkers;
+
+  // Remove null markers in a Flow-friendly manner (Array.prototype.filter doesn't work.)
+  const nonNullTracingMarkers: TracingMarker[] = [];
+  for (const marker of tracingMarkers) {
+    if (marker) {
+      nonNullTracingMarkers.push(marker);
+    }
+  }
+
+  return nonNullTracingMarkers.sort((a, b) => a.start - b.start);
 }
 
 export function filterTracingMarkersToRange(

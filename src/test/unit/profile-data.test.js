@@ -46,10 +46,14 @@ import {
   implementationCategoryMap,
 } from '../../profile-logic/color-categories';
 import getCallNodeProfile from '../fixtures/profiles/call-nodes';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import {
+  getProfileFromTextSamples,
+  getProfileWithMarkers,
+} from '../fixtures/profiles/make-profile';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 
 import type { Thread, IndexIntoStackTable } from '../../types/profile';
+import type { UserTimingMarkerPayload } from '../../types/markers';
 
 describe('unique-string-array', function() {
   const u = new UniqueStringArray(['foo', 'bar', 'baz']);
@@ -499,6 +503,135 @@ describe('profile-data', function() {
         start: 12,
         title: null,
       });
+    });
+  });
+  describe('getTracingMarkers - de-duplicate performance.mark', function() {
+    function createMarkers(markers) {
+      const profile = getProfileWithMarkers(markers);
+      return getTracingMarkers(profile.threads[0]);
+    }
+    it('should de-duplicate performance.marks for a start time, that are placed before a measure', function() {
+      const tracingMarkers = createMarkers([
+        [
+          'Measure #0',
+          0,
+          ({
+            type: 'UserTiming',
+            entryType: 'mark',
+            startTime: 0,
+            endTime: 0,
+            name: 'Measure #0',
+          }: UserTimingMarkerPayload),
+        ],
+        [
+          'Measure',
+          0,
+          ({
+            type: 'UserTiming',
+            entryType: 'measure',
+            startTime: 0,
+            endTime: 2,
+            name: 'Measure',
+            startMark: 'Measure #0',
+            endMark: null,
+          }: UserTimingMarkerPayload),
+        ],
+      ]);
+      expect(tracingMarkers.length).toBe(1);
+      expect((tracingMarkers[0].data: any).name).toBe('Measure');
+    });
+
+    it('should de-duplicate performance.marks for a start time, that are placed after a measure', function() {
+      const tracingMarkers = createMarkers([
+        [
+          'Measure',
+          0,
+          ({
+            type: 'UserTiming',
+            entryType: 'measure',
+            startTime: 0,
+            endTime: 2,
+            name: 'Measure',
+            startMark: 'Measure #0',
+            endMark: null,
+          }: UserTimingMarkerPayload),
+        ],
+        [
+          'Measure #0',
+          0,
+          ({
+            type: 'UserTiming',
+            entryType: 'mark',
+            startTime: 0,
+            endTime: 0,
+            name: 'Measure #0',
+          }: UserTimingMarkerPayload),
+        ],
+      ]);
+      expect(tracingMarkers.length).toBe(1);
+      expect((tracingMarkers[0].data: any).name).toBe('Measure');
+    });
+
+    it('should de-duplicate performance.marks for an end time, that are placed after a measure', function() {
+      const tracingMarkers = createMarkers([
+        [
+          'Measure #0',
+          0,
+          ({
+            type: 'UserTiming',
+            entryType: 'mark',
+            startTime: 0,
+            endTime: 0,
+            name: 'Measure #0',
+          }: UserTimingMarkerPayload),
+        ],
+        [
+          'Measure',
+          0,
+          ({
+            type: 'UserTiming',
+            entryType: 'measure',
+            startTime: 0,
+            endTime: 2,
+            name: 'Measure',
+            startMark: null,
+            endMark: 'Measure #0',
+          }: UserTimingMarkerPayload),
+        ],
+      ]);
+      expect(tracingMarkers.length).toBe(1);
+      expect((tracingMarkers[0].data: any).name).toBe('Measure');
+    });
+
+    it('should de-duplicate performance.marks for an end time, that are placed after a measure', function() {
+      const tracingMarkers = createMarkers([
+        [
+          'Measure',
+          0,
+          ({
+            type: 'UserTiming',
+            entryType: 'measure',
+            startTime: 0,
+            endTime: 2,
+            name: 'Measure',
+            startMark: null,
+            endMark: 'Measure #0',
+          }: UserTimingMarkerPayload),
+        ],
+        [
+          'Measure #0',
+          0,
+          ({
+            type: 'UserTiming',
+            entryType: 'mark',
+            startTime: 0,
+            endTime: 0,
+            name: 'Measure #0',
+          }: UserTimingMarkerPayload),
+        ],
+      ]);
+      expect(tracingMarkers.length).toBe(1);
+      expect((tracingMarkers[0].data: any).name).toBe('Measure');
     });
   });
 });
