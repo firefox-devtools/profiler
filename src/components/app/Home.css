@@ -199,6 +199,8 @@
 
 @media (max-width: 767px) {
   .homeSection {
-    width: 90%;
+    width: 80%;
+    padding-left: 1em;
+    padding-right: 1em;
   }
 }
