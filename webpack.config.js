@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OfflinePlugin = require('offline-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
 
 const es6modules = ['pretty-bytes'];
@@ -84,6 +85,11 @@ if (process.env.NODE_ENV === 'development') {
 
 if (process.env.NODE_ENV === 'production') {
   config.plugins.push(
+    new UglifyJsPlugin({
+      sourceMap: true,
+      parallel: true,
+      cache: true,
+    }),
     new OfflinePlugin({
       relativePaths: false,
       AppCache: false,
