@@ -18,9 +18,8 @@ import * as StackTiming from '../profile-logic/stack-timing';
 import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
-import uniqWith from 'lodash.uniqwith';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
-import { arePathsEqual } from '../utils/path-set';
+import { PathSet } from '../utils/path';
 
 import type {
   Profile,
@@ -106,7 +105,7 @@ function viewOptionsPerThread(
     case 'VIEW_PROFILE':
       return action.profile.threads.map(() => ({
         selectedCallNodePath: [],
-        expandedCallNodePaths: [],
+        expandedCallNodePaths: new PathSet(),
         selectedMarker: -1,
       }));
     case 'COALESCED_FUNCTIONS_UPDATE': {
@@ -118,20 +117,18 @@ function viewOptionsPerThread(
           return threadViewOptions;
         }
         const { oldFuncToNewFuncMap } = functionsUpdatePerThread[threadIndex];
+        const mapOldFuncToNewFunc = oldFunc => {
+          const newFunc = oldFuncToNewFuncMap.get(oldFunc);
+          return newFunc === undefined ? oldFunc : newFunc;
+        };
         return {
           selectedCallNodePath: threadViewOptions.selectedCallNodePath.map(
-            oldFunc => {
-              const newFunc = oldFuncToNewFuncMap.get(oldFunc);
-              return newFunc === undefined ? oldFunc : newFunc;
-            }
+            mapOldFuncToNewFunc
           ),
-          expandedCallNodePaths: threadViewOptions.expandedCallNodePaths.map(
-            oldPath => {
-              return oldPath.map(oldFunc => {
-                const newFunc = oldFuncToNewFuncMap.get(oldFunc);
-                return newFunc === undefined ? oldFunc : newFunc;
-              });
-            }
+          expandedCallNodePaths: new PathSet(
+            Array.from(threadViewOptions.expandedCallNodePaths).map(oldPath =>
+              oldPath.map(mapOldFuncToNewFunc)
+            )
           ),
           selectedMarker: threadViewOptions.selectedMarker,
         };
@@ -139,11 +136,11 @@ function viewOptionsPerThread(
     }
     case 'CHANGE_SELECTED_CALL_NODE': {
       const { selectedCallNodePath, threadIndex } = action;
-      const expandedCallNodePaths = state[
-        threadIndex
-      ].expandedCallNodePaths.slice();
+      const expandedCallNodePaths = new PathSet(
+        state[threadIndex].expandedCallNodePaths
+      );
       for (let i = 1; i < selectedCallNodePath.length; i++) {
-        expandedCallNodePaths.push(selectedCallNodePath.slice(0, i));
+        expandedCallNodePaths.add(selectedCallNodePath.slice(0, i));
       }
       return [
         ...state.slice(0, threadIndex),
@@ -167,9 +164,9 @@ function viewOptionsPerThread(
             callNodeTable
           );
 
-          const expandedCallNodePaths = [];
+          const expandedCallNodePaths = new PathSet();
           for (let i = 1; i < selectedCallNodePath.length; i++) {
-            expandedCallNodePaths.push(selectedCallNodePath.slice(0, i));
+            expandedCallNodePaths.add(selectedCallNodePath.slice(0, i));
           }
           return Object.assign({}, viewOptions, {
             selectedCallNodePath,
@@ -183,7 +180,9 @@ function viewOptionsPerThread(
       const { threadIndex, expandedCallNodePaths } = action;
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], { expandedCallNodePaths }),
+        Object.assign({}, state[threadIndex], {
+          expandedCallNodePaths: new PathSet(expandedCallNodePaths),
+        }),
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -197,8 +196,8 @@ function viewOptionsPerThread(
     }
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadIndex, transform, transformedThread } = action;
-      const expandedCallNodePaths = uniqWith(
-        state[threadIndex].expandedCallNodePaths
+      const expandedCallNodePaths = new PathSet(
+        Array.from(state[threadIndex].expandedCallNodePaths)
           .map(path =>
             Transforms.applyTransformToCallNodePath(
               path,
@@ -206,8 +205,7 @@ function viewOptionsPerThread(
               transformedThread
             )
           )
-          .filter(path => path.length > 0),
-        arePathsEqual
+          .filter(path => path.length > 0)
       );
 
       const selectedCallNodePath = Transforms.applyTransformToCallNodePath(
@@ -265,9 +263,9 @@ function viewOptionsPerThread(
         );
       }
 
-      const expandedCallNodePaths = [];
+      const expandedCallNodePaths = new PathSet();
       for (let i = 1; i < selectedCallNodePath.length; i++) {
-        expandedCallNodePaths.push(selectedCallNodePath.slice(0, i));
+        expandedCallNodePaths.add(selectedCallNodePath.slice(0, i));
       }
 
       return [
@@ -487,7 +485,7 @@ export type SelectorsForThread = {
   getCallNodeMaxDepth: State => number,
   getSelectedCallNodePath: State => CallNodePath,
   getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
-  getExpandedCallNodePaths: State => CallNodePath[],
+  getExpandedCallNodePaths: State => PathSet,
   getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
   getCallTree: State => CallTree.CallTree,
   getStackTimingByDepth: State => StackTiming.StackTimingByDepth,
@@ -706,14 +704,13 @@ export const selectorsForThread = (
     );
     const getExpandedCallNodePaths = createSelector(
       getViewOptions,
-      (threadViewOptions): Array<CallNodePath> =>
-        threadViewOptions.expandedCallNodePaths
+      (threadViewOptions): PathSet => threadViewOptions.expandedCallNodePaths
     );
     const getExpandedCallNodeIndexes = createSelector(
       getCallNodeInfo,
       getExpandedCallNodePaths,
       (callNodeInfo, callNodePaths): (IndexIntoCallNodeTable | null)[] => {
-        return callNodePaths.map(callNodePath =>
+        return Array.from(callNodePaths).map(callNodePath =>
           ProfileData.getCallNodeFromPath(
             callNodePath,
             callNodeInfo.callNodeTable

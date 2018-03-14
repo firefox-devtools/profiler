@@ -21,13 +21,15 @@ import type { TransformStacksPerThread } from './transforms';
 import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 
+import type { PathSet } from '../utils/path.js';
+
 export type Reducer<T> = (T, Action) => T;
 
 export type RequestedLib = { debugName: string, breakpadId: string };
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {
   selectedCallNodePath: CallNodePath,
-  expandedCallNodePaths: Array<CallNodePath>,
+  expandedCallNodePaths: PathSet,
   selectedMarker: IndexIntoMarkersTable | -1,
 };
 export type ProfileViewState = {
