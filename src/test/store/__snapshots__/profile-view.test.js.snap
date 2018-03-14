@@ -2710,18 +2710,17 @@ Array [
 
 exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getViewOptions 1`] = `
 Object {
-  "expandedCallNodePaths": Array [
-    Array [
-      0,
-    ],
-    Array [
-      0,
-      1,
-    ],
-    Array [
-      0,
-    ],
-  ],
+  "expandedCallNodePaths": PathSet {
+    "_table": Map {
+      "0" => Array [
+        0,
+      ],
+      "0-1" => Array [
+        0,
+        1,
+      ],
+    },
+  },
   "selectedCallNodePath": Array [
     0,
     1,
