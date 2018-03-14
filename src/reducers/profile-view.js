@@ -20,6 +20,7 @@ import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import uniqWith from 'lodash.uniqwith';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import { arePathsEqual } from '../utils/path-set';
 
 import type {
   Profile,
@@ -206,7 +207,7 @@ function viewOptionsPerThread(
             )
           )
           .filter(path => path.length > 0),
-        Transforms.pathsAreEqual
+        arePathsEqual
       );
 
       const selectedCallNodePath = Transforms.applyTransformToCallNodePath(
