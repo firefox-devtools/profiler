@@ -71,3 +71,9 @@
   margin: 0;
   font-size: 100%;
 }
+
+.tooltipDetails + .tooltipDetailsBackTrace {
+  padding-top: 5px;
+  margin-top: 5px;
+  border-top: 1px solid var(--grey-40);
+}
