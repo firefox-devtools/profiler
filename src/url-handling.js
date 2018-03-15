@@ -90,10 +90,12 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     range: stringifyRangeFilters(urlState.rangeFilters) || undefined,
     thread: urlState.selectedThread,
     threadOrder: urlState.threadOrder.join('-'),
-    hiddenThreads: urlState.hiddenThreads.join('-'),
     file: urlState.pathInZipFile || undefined,
     v: CURRENT_URL_VERSION,
   };
+  if (urlState.hiddenThreads.length > 0) {
+    query.hiddenThreads = urlState.hiddenThreads.join('-');
+  }
 
   if (process.env.NODE_ENV === 'development') {
     /* eslint-disable camelcase */
