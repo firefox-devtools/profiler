@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Provider } from 'react-redux';
 import MarkersTooltipContents from '../../components/shared/MarkerTooltipContents';
 import renderer from 'react-test-renderer';
@@ -234,18 +234,21 @@ describe('MarkerTooltipContents', function() {
     const threadIndex = getSelectedThreadIndex(state);
     const tracingMarkers = selectedThreadSelectors.getTracingMarkers(state);
 
-    tracingMarkers.forEach(marker => {
-      expect(
-        renderer.create(
-          <Provider store={store}>
-            <MarkersTooltipContents
-              marker={marker}
-              threadIndex={threadIndex}
-              className="propClass"
-            />
-          </Provider>
-        )
-      ).toMatchSnapshot();
-    });
+    expect(
+      renderer.create(
+        <Provider store={store}>
+          <Fragment>
+            {tracingMarkers.map((marker, i) => (
+              <MarkersTooltipContents
+                key={i}
+                marker={marker}
+                threadIndex={threadIndex}
+                className="propClass"
+              />
+            ))}
+          </Fragment>
+        </Provider>
+      )
+    ).toMatchSnapshot();
   });
 });

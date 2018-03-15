@@ -1,25 +1,37 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MarkerTooltipContents renders tooltips for various markers 1`] = `
-<div
-  className="tooltipMarker propClass"
->
+Array [
   <div
-    className="tooltipHeader"
+    className="tooltipMarker propClass"
   >
     <div
-      className="tooltipOneLine"
+      className="tooltipHeader"
     >
       <div
-        className="tooltipTiming"
+        className="tooltipOneLine"
       >
-        0.000
-        ms
+        <div
+          className="tooltipTiming"
+        >
+          0.000
+          ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          Bailout
+        </div>
       </div>
       <div
-        className="tooltipTitle"
+        className="tooltipDetails"
       >
-        Bailout
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
       </div>
     </div>
     <div
@@ -28,87 +40,84 @@ exports[`MarkerTooltipContents renders tooltips for various markers 1`] = `
       <div
         className="tooltipLabel"
       >
-        Thread:
+        Type
+        :
       </div>
-      Main Thread
-    </div>
-  </div>
-  <div
-    className="tooltipDetails"
-  >
-    <div
-      className="tooltipLabel"
-    >
-      Type
-      :
-    </div>
-    ShapeGuard
-    <div
-      className="tooltipLabel"
-    >
-      Where
-      :
-    </div>
-    after getelem
-    <div
-      className="tooltipLabel"
-    >
-      Script
-      :
-    </div>
-    resource://foo.js -&gt; resource://bar.js
-    <div
-      className="tooltipLabel"
-    >
-      Function Line
-      :
-    </div>
-    3662
-    <div
-      className="tooltipLabel"
-    >
-      Bailout Line
-      :
-    </div>
-    3666
-    <div
-      className="tooltipLabel"
-    >
-      Description:
-    </div>
-    <div
-      style={
-        Object {
-          "maxWidth": "300px",
+      ShapeGuard
+      <div
+        className="tooltipLabel"
+      >
+        Where
+        :
+      </div>
+      after getelem
+      <div
+        className="tooltipLabel"
+      >
+        Script
+        :
+      </div>
+      resource://foo.js -&gt; resource://bar.js
+      <div
+        className="tooltipLabel"
+      >
+        Function Line
+        :
+      </div>
+      3662
+      <div
+        className="tooltipLabel"
+      >
+        Bailout Line
+        :
+      </div>
+      3666
+      <div
+        className="tooltipLabel"
+      >
+        Description:
+      </div>
+      <div
+        style={
+          Object {
+            "maxWidth": "300px",
+          }
         }
-      }
-    >
-      A shape guard based on TI information failed. (We saw an object whose shape does not match that / any of those observed by the baseline IC.)
+      >
+        A shape guard based on TI information failed. (We saw an object whose shape does not match that / any of those observed by the baseline IC.)
+      </div>
     </div>
-  </div>
-</div>
-`;
-
-exports[`MarkerTooltipContents renders tooltips for various markers 2`] = `
-<div
-  className="tooltipMarker propClass"
->
+  </div>,
   <div
-    className="tooltipHeader"
+    className="tooltipMarker propClass"
   >
     <div
-      className="tooltipOneLine"
+      className="tooltipHeader"
     >
       <div
-        className="tooltipTiming"
+        className="tooltipOneLine"
       >
-        0.000
-        ms
+        <div
+          className="tooltipTiming"
+        >
+          0.000
+          ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          Invalidate
+        </div>
       </div>
       <div
-        className="tooltipTitle"
+        className="tooltipDetails"
       >
-        Invalidate
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
       </div>
     </div>
     <div
@@ -117,52 +126,49 @@ exports[`MarkerTooltipContents renders tooltips for various markers 2`] = `
       <div
         className="tooltipLabel"
       >
-        Thread:
+        URL
+        :
       </div>
-      Main Thread
+      http://mozilla.com/script.js
+      <div
+        className="tooltipLabel"
+      >
+        Line
+        :
+      </div>
+      1234
     </div>
-  </div>
+  </div>,
   <div
-    className="tooltipDetails"
+    className="tooltipMarker propClass"
   >
     <div
-      className="tooltipLabel"
-    >
-      URL
-      :
-    </div>
-    http://mozilla.com/script.js
-    <div
-      className="tooltipLabel"
-    >
-      Line
-      :
-    </div>
-    1234
-  </div>
-</div>
-`;
-
-exports[`MarkerTooltipContents renders tooltips for various markers 3`] = `
-<div
-  className="tooltipMarker propClass"
->
-  <div
-    className="tooltipHeader"
-  >
-    <div
-      className="tooltipOneLine"
+      className="tooltipHeader"
     >
       <div
-        className="tooltipTiming"
+        className="tooltipOneLine"
       >
-        0.80
-        ms
+        <div
+          className="tooltipTiming"
+        >
+          0.80
+          ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          DOMEvent
+        </div>
       </div>
       <div
-        className="tooltipTitle"
+        className="tooltipDetails"
       >
-        DOMEvent
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
       </div>
     </div>
     <div
@@ -171,45 +177,42 @@ exports[`MarkerTooltipContents renders tooltips for various markers 3`] = `
       <div
         className="tooltipLabel"
       >
-        Thread:
+        Type
+        :
       </div>
-      Main Thread
+      commandupdate
     </div>
-  </div>
+  </div>,
   <div
-    className="tooltipDetails"
+    className="tooltipMarker propClass"
   >
     <div
-      className="tooltipLabel"
-    >
-      Type
-      :
-    </div>
-    commandupdate
-  </div>
-</div>
-`;
-
-exports[`MarkerTooltipContents renders tooltips for various markers 4`] = `
-<div
-  className="tooltipMarker propClass"
->
-  <div
-    className="tooltipHeader"
-  >
-    <div
-      className="tooltipOneLine"
+      className="tooltipHeader"
     >
       <div
-        className="tooltipTiming"
+        className="tooltipOneLine"
       >
-        0.000
-        ms
+        <div
+          className="tooltipTiming"
+        >
+          0.000
+          ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          UserTiming
+        </div>
       </div>
       <div
-        className="tooltipTitle"
+        className="tooltipDetails"
       >
-        UserTiming
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
       </div>
     </div>
     <div
@@ -218,45 +221,42 @@ exports[`MarkerTooltipContents renders tooltips for various markers 4`] = `
       <div
         className="tooltipLabel"
       >
-        Thread:
+        Name
+        :
       </div>
-      Main Thread
+      foobar
     </div>
-  </div>
+  </div>,
   <div
-    className="tooltipDetails"
+    className="tooltipMarker propClass"
   >
     <div
-      className="tooltipLabel"
-    >
-      Name
-      :
-    </div>
-    foobar
-  </div>
-</div>
-`;
-
-exports[`MarkerTooltipContents renders tooltips for various markers 5`] = `
-<div
-  className="tooltipMarker propClass"
->
-  <div
-    className="tooltipHeader"
-  >
-    <div
-      className="tooltipOneLine"
+      className="tooltipHeader"
     >
       <div
-        className="tooltipTiming"
+        className="tooltipOneLine"
       >
-        0.000
-        ms
+        <div
+          className="tooltipTiming"
+        >
+          0.000
+          ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          GCMinor
+        </div>
       </div>
       <div
-        className="tooltipTitle"
+        className="tooltipDetails"
       >
-        GCMinor
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
       </div>
     </div>
     <div
@@ -265,66 +265,63 @@ exports[`MarkerTooltipContents renders tooltips for various markers 5`] = `
       <div
         className="tooltipLabel"
       >
-        Thread:
+        Reason
+        :
       </div>
-      Main Thread
+      CC_WAITING
+      <div
+        className="tooltipLabel"
+      >
+        Bytes tenured
+        :
+      </div>
+      4.0MB / 8.0MB (50%)
+      <div
+        className="tooltipLabel"
+      >
+        New nursery size
+        :
+      </div>
+      16MB
+      <div
+        className="tooltipLabel"
+      >
+        Lazy-allocated size
+        :
+      </div>
+      12MB
     </div>
-  </div>
+  </div>,
   <div
-    className="tooltipDetails"
+    className="tooltipMarker propClass"
   >
     <div
-      className="tooltipLabel"
-    >
-      Reason
-      :
-    </div>
-    CC_WAITING
-    <div
-      className="tooltipLabel"
-    >
-      Bytes tenured
-      :
-    </div>
-    4.0MB / 8.0MB (50%)
-    <div
-      className="tooltipLabel"
-    >
-      New nursery size
-      :
-    </div>
-    16MB
-    <div
-      className="tooltipLabel"
-    >
-      Lazy-allocated size
-      :
-    </div>
-    12MB
-  </div>
-</div>
-`;
-
-exports[`MarkerTooltipContents renders tooltips for various markers 6`] = `
-<div
-  className="tooltipMarker propClass"
->
-  <div
-    className="tooltipHeader"
-  >
-    <div
-      className="tooltipOneLine"
+      className="tooltipHeader"
     >
       <div
-        className="tooltipTiming"
+        className="tooltipOneLine"
       >
-        0.000
-        ms
+        <div
+          className="tooltipTiming"
+        >
+          0.000
+          ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          GCMajor
+        </div>
       </div>
       <div
-        className="tooltipTitle"
+        className="tooltipDetails"
       >
-        GCMajor
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
       </div>
     </div>
     <div
@@ -333,115 +330,112 @@ exports[`MarkerTooltipContents renders tooltips for various markers 6`] = `
       <div
         className="tooltipLabel"
       >
-        Thread:
+        Reason
+        :
       </div>
-      Main Thread
+      CC_WAITING
+      <div
+        className="tooltipLabel"
+      >
+        Non-incremental reason
+        :
+      </div>
+      Non incremental reason
+      <div
+        className="tooltipLabel"
+      >
+        Total slice times
+        :
+      </div>
+      157ms
+      <div
+        className="tooltipLabel"
+      >
+        Max Pause
+        :
+      </div>
+      104ms
+      <div
+        className="tooltipLabel"
+      >
+        Heap usage
+        :
+      </div>
+      16MB
+      <div
+        className="tooltipLabel"
+      >
+        MMU 20ms
+        :
+      </div>
+      0.0%
+      <div
+        className="tooltipLabel"
+      >
+        MMU 50ms
+        :
+      </div>
+      0.0%
+      <div
+        className="tooltipLabel"
+      >
+        Minor GCs
+        :
+      </div>
+      9
+      <div
+        className="tooltipLabel"
+      >
+        Slices
+        :
+      </div>
+      13
+      <div
+        className="tooltipLabel"
+      >
+        Zones
+        :
+      </div>
+      3 / 5 (60%)
+      <div
+        className="tooltipLabel"
+      >
+        Compartments
+        :
+      </div>
+      79
     </div>
-  </div>
+  </div>,
   <div
-    className="tooltipDetails"
+    className="tooltipMarker propClass"
   >
     <div
-      className="tooltipLabel"
-    >
-      Reason
-      :
-    </div>
-    CC_WAITING
-    <div
-      className="tooltipLabel"
-    >
-      Non-incremental reason
-      :
-    </div>
-    Non incremental reason
-    <div
-      className="tooltipLabel"
-    >
-      Total slice times
-      :
-    </div>
-    157ms
-    <div
-      className="tooltipLabel"
-    >
-      Max Pause
-      :
-    </div>
-    104ms
-    <div
-      className="tooltipLabel"
-    >
-      Heap usage
-      :
-    </div>
-    16MB
-    <div
-      className="tooltipLabel"
-    >
-      MMU 20ms
-      :
-    </div>
-    0.0%
-    <div
-      className="tooltipLabel"
-    >
-      MMU 50ms
-      :
-    </div>
-    0.0%
-    <div
-      className="tooltipLabel"
-    >
-      Minor GCs
-      :
-    </div>
-    9
-    <div
-      className="tooltipLabel"
-    >
-      Slices
-      :
-    </div>
-    13
-    <div
-      className="tooltipLabel"
-    >
-      Zones
-      :
-    </div>
-    3 / 5 (60%)
-    <div
-      className="tooltipLabel"
-    >
-      Compartments
-      :
-    </div>
-    79
-  </div>
-</div>
-`;
-
-exports[`MarkerTooltipContents renders tooltips for various markers 7`] = `
-<div
-  className="tooltipMarker propClass"
->
-  <div
-    className="tooltipHeader"
-  >
-    <div
-      className="tooltipOneLine"
+      className="tooltipHeader"
     >
       <div
-        className="tooltipTiming"
+        className="tooltipOneLine"
       >
-        0.000
-        ms
+        <div
+          className="tooltipTiming"
+        >
+          0.000
+          ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          GCSlice
+        </div>
       </div>
       <div
-        className="tooltipTitle"
+        className="tooltipDetails"
       >
-        GCSlice
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
       </div>
     </div>
     <div
@@ -450,663 +444,647 @@ exports[`MarkerTooltipContents renders tooltips for various markers 7`] = `
       <div
         className="tooltipLabel"
       >
-        Thread:
+        Reason
+        :
       </div>
-      Main Thread
+      CC_WAITING
+      <div
+        className="tooltipLabel"
+      >
+        Budget
+        :
+      </div>
+      11
+      <div
+        className="tooltipLabel"
+      >
+        States
+        :
+      </div>
+      Initial – Final
+      <div
+        className="tooltipLabel"
+      >
+        Page faults
+        :
+      </div>
+      1
     </div>
-  </div>
+  </div>,
   <div
-    className="tooltipDetails"
+    className="tooltipMarker propClass"
   >
     <div
-      className="tooltipLabel"
-    >
-      Reason
-      :
-    </div>
-    CC_WAITING
-    <div
-      className="tooltipLabel"
-    >
-      Budget
-      :
-    </div>
-    11
-    <div
-      className="tooltipLabel"
-    >
-      States
-      :
-    </div>
-    Initial – Final
-    <div
-      className="tooltipLabel"
-    >
-      Page faults
-      :
-    </div>
-    1
-  </div>
-</div>
-`;
-
-exports[`MarkerTooltipContents renders tooltips for various markers 8`] = `
-<div
-  className="tooltipMarker propClass"
->
-  <div
-    className="tooltipHeader"
-  >
-    <div
-      className="tooltipOneLine"
+      className="tooltipHeader"
     >
       <div
-        className="tooltipTiming"
+        className="tooltipOneLine"
       >
+        <div
+          className="tooltipTiming"
+        >
+          0.50
+          ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          Styles
+        </div>
+      </div>
+      <div
+        className="tooltipDetails"
+      >
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
+      </div>
+    </div>
+    <div
+      className="tooltipDetailsBackTrace"
+    >
+      <h2
+        className="tooltipBackTraceTitle"
+      >
+        First invalidated 
+        1.5
+        ms before the flush, at:
+      </h2>
+      <ol
+        className="backtrace"
+      >
+        <li
+          className="backtraceStackFrame"
+        >
+          nsRefreshDriver::AddStyleFlushObserver
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::PostRestyleEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::ContentStateChanged
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::PresShell::ContentStateChanged
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsDocument::ContentStateChanged
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::dom::Element::RemoveStates
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::UpdateAncestorState
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::SetContentState
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::NotifyMouseOut
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::GenerateMouseEnterExit
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::PreHandleEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandleEventInternal
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandlePositionedEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandleEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsViewManager::DispatchEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsView::HandleEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsChildView::DispatchEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          ChildViewMouseTracker::MouseMoved
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsAppShell::Run
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsAppStartup::Run
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          XREMain::XRE_mainRun
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          XREMain::XRE_main
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          XRE_main
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          _main
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+      </ol>
+    </div>
+  </div>,
+  <div
+    className="tooltipMarker propClass"
+  >
+    <div
+      className="tooltipHeader"
+    >
+      <div
+        className="tooltipOneLine"
+      >
+        <div
+          className="tooltipTiming"
+        >
+          0.50
+          ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          Styles
+        </div>
+      </div>
+      <div
+        className="tooltipDetails"
+      >
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
+      </div>
+    </div>
+    <div
+      className="tooltipDetails"
+    >
+      <div
+        className="tooltipLabel"
+      >
+        Elements traversed
+        :
+      </div>
+      100
+      <div
+        className="tooltipLabel"
+      >
+        Elements styled
+        :
+      </div>
+      50
+      <div
+        className="tooltipLabel"
+      >
+        Elements matched
+        :
+      </div>
+      10
+      <div
+        className="tooltipLabel"
+      >
+        Styles shared
+        :
+      </div>
+      15
+      <div
+        className="tooltipLabel"
+      >
+        Styles reused
+        :
+      </div>
+      20
+    </div>
+    <div
+      className="tooltipDetailsBackTrace"
+    >
+      <h2
+        className="tooltipBackTraceTitle"
+      >
+        First invalidated 
         0.50
-        ms
-      </div>
-      <div
-        className="tooltipTitle"
+        ms before the flush, at:
+      </h2>
+      <ol
+        className="backtrace"
       >
-        Styles
-      </div>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsRefreshDriver::AddStyleFlushObserver
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::PostRestyleEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::GeckoRestyleManager::ContentStateChanged
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::PresShell::ContentStateChanged
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsDocument::ContentStateChanged
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::dom::Element::RemoveStates
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::UpdateAncestorState
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::SetContentState
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::NotifyMouseOut
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::GenerateMouseEnterExit
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::EventStateManager::PreHandleEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandleEventInternal
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandlePositionedEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          mozilla::PresShell::HandleEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsViewManager::DispatchEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsView::HandleEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsChildView::DispatchEvent
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          ChildViewMouseTracker::MouseMoved
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsAppShell::Run
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          nsAppStartup::Run
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          XREMain::XRE_mainRun
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          XREMain::XRE_main
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          XRE_main
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+        <li
+          className="backtraceStackFrame"
+        >
+          _main
+          <em
+            className="backtraceStackFrameOrigin"
+          >
+            
+          </em>
+        </li>
+      </ol>
     </div>
-    <div
-      className="tooltipDetails"
-    >
-      <div
-        className="tooltipLabel"
-      >
-        Thread:
-      </div>
-      Main Thread
-    </div>
-  </div>
-  <div
-    className="tooltipDetailsBackTrace"
-  >
-    <h2
-      className="tooltipBackTraceTitle"
-    >
-      First invalidated 
-      1.5
-      ms before the flush, at:
-    </h2>
-    <ol
-      className="backtrace"
-    >
-      <li
-        className="backtraceStackFrame"
-      >
-        nsRefreshDriver::AddStyleFlushObserver
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::GeckoRestyleManager::PostRestyleEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::GeckoRestyleManager::ContentStateChanged
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::PresShell::ContentStateChanged
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        nsDocument::ContentStateChanged
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::dom::Element::RemoveStates
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::UpdateAncestorState
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::SetContentState
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::NotifyMouseOut
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::GenerateMouseEnterExit
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::PreHandleEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandleEventInternal
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandlePositionedEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandleEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        nsViewManager::DispatchEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        nsView::HandleEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        nsChildView::DispatchEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        ChildViewMouseTracker::MouseMoved
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        nsAppShell::Run
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        nsAppStartup::Run
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        XREMain::XRE_mainRun
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        XREMain::XRE_main
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        XRE_main
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        _main
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-    </ol>
-  </div>
-</div>
-`;
-
-exports[`MarkerTooltipContents renders tooltips for various markers 9`] = `
-<div
-  className="tooltipMarker propClass"
->
-  <div
-    className="tooltipHeader"
-  >
-    <div
-      className="tooltipOneLine"
-    >
-      <div
-        className="tooltipTiming"
-      >
-        0.50
-        ms
-      </div>
-      <div
-        className="tooltipTitle"
-      >
-        Styles
-      </div>
-    </div>
-    <div
-      className="tooltipDetails"
-    >
-      <div
-        className="tooltipLabel"
-      >
-        Thread:
-      </div>
-      Main Thread
-    </div>
-  </div>
-  <div
-    className="tooltipDetails"
-  >
-    <div
-      className="tooltipLabel"
-    >
-      Elements traversed
-      :
-    </div>
-    100
-    <div
-      className="tooltipLabel"
-    >
-      Elements styled
-      :
-    </div>
-    50
-    <div
-      className="tooltipLabel"
-    >
-      Elements matched
-      :
-    </div>
-    10
-    <div
-      className="tooltipLabel"
-    >
-      Styles shared
-      :
-    </div>
-    15
-    <div
-      className="tooltipLabel"
-    >
-      Styles reused
-      :
-    </div>
-    20
-  </div>
-  <div
-    className="tooltipDetailsBackTrace"
-  >
-    <h2
-      className="tooltipBackTraceTitle"
-    >
-      First invalidated 
-      0.50
-      ms before the flush, at:
-    </h2>
-    <ol
-      className="backtrace"
-    >
-      <li
-        className="backtraceStackFrame"
-      >
-        nsRefreshDriver::AddStyleFlushObserver
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::GeckoRestyleManager::PostRestyleEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::GeckoRestyleManager::ContentStateChanged
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::PresShell::ContentStateChanged
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        nsDocument::ContentStateChanged
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::dom::Element::RemoveStates
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::UpdateAncestorState
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::SetContentState
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::NotifyMouseOut
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::GenerateMouseEnterExit
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::EventStateManager::PreHandleEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandleEventInternal
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandlePositionedEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        mozilla::PresShell::HandleEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        nsViewManager::DispatchEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        nsView::HandleEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        nsChildView::DispatchEvent
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        ChildViewMouseTracker::MouseMoved
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        nsAppShell::Run
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        nsAppStartup::Run
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        XREMain::XRE_mainRun
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        XREMain::XRE_main
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        XRE_main
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-      <li
-        className="backtraceStackFrame"
-      >
-        _main
-        <em
-          className="backtraceStackFrameOrigin"
-        >
-          
-        </em>
-      </li>
-    </ol>
-  </div>
-</div>
+  </div>,
+]
 `;
