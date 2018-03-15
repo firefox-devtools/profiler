@@ -14,8 +14,7 @@ Array [
         <div
           className="tooltipTiming"
         >
-          0.000
-          ms
+          0.000ms
         </div>
         <div
           className="tooltipTitle"
@@ -100,8 +99,7 @@ Array [
         <div
           className="tooltipTiming"
         >
-          0.000
-          ms
+          0.000ms
         </div>
         <div
           className="tooltipTitle"
@@ -151,8 +149,7 @@ Array [
         <div
           className="tooltipTiming"
         >
-          0.80
-          ms
+          0.80ms
         </div>
         <div
           className="tooltipTitle"
@@ -195,8 +192,7 @@ Array [
         <div
           className="tooltipTiming"
         >
-          0.000
-          ms
+          0.000ms
         </div>
         <div
           className="tooltipTitle"
@@ -231,6 +227,38 @@ Array [
     className="tooltipMarker propClass"
   >
     <div
+      className=""
+    >
+      <div
+        className="tooltipOneLine"
+      >
+        <div
+          className="tooltipTiming"
+        >
+          unknown duration
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          NotifyDidPaint
+        </div>
+      </div>
+      <div
+        className="tooltipDetails"
+      >
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
+      </div>
+    </div>
+  </div>,
+  <div
+    className="tooltipMarker propClass"
+  >
+    <div
       className="tooltipHeader"
     >
       <div
@@ -239,8 +267,7 @@ Array [
         <div
           className="tooltipTiming"
         >
-          0.000
-          ms
+          0.000ms
         </div>
         <div
           className="tooltipTitle"
@@ -304,8 +331,7 @@ Array [
         <div
           className="tooltipTiming"
         >
-          0.000
-          ms
+          0.000ms
         </div>
         <div
           className="tooltipTitle"
@@ -418,8 +444,7 @@ Array [
         <div
           className="tooltipTiming"
         >
-          0.000
-          ms
+          0.000ms
         </div>
         <div
           className="tooltipTitle"
@@ -483,8 +508,7 @@ Array [
         <div
           className="tooltipTiming"
         >
-          0.50
-          ms
+          0.50ms
         </div>
         <div
           className="tooltipTitle"
@@ -771,8 +795,7 @@ Array [
         <div
           className="tooltipTiming"
         >
-          0.50
-          ms
+          0.50ms
         </div>
         <div
           className="tooltipTitle"

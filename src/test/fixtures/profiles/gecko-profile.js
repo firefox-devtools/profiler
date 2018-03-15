@@ -106,10 +106,22 @@ const thread = {
   markers: {
     schema: { name: 0, time: 1, data: 2 },
     data: [
-      [4, 0, { category: 'VsyncTimestamp', vsync: 0 }],
       [
-        5,
-        2,
+        // Ending a tracing but never starting it.
+        // Please keep it at the start if you add more markers in this structure
+        10, // Rasterize
+        1,
+        {
+          category: 'Paint',
+          interval: 'end',
+          type: 'tracing',
+        },
+      ],
+      // This marker is filtered out
+      [4, 2, { category: 'VsyncTimestamp', vsync: 0 }],
+      [
+        5, // Reflow
+        3,
         {
           category: 'Paint',
           interval: 'start',
@@ -133,7 +145,7 @@ const thread = {
         },
       ],
       [
-        10,
+        10, // Rasterize
         4,
         {
           category: 'Paint',
@@ -142,7 +154,7 @@ const thread = {
         },
       ],
       [
-        10,
+        10, // Rasterize
         5,
         {
           category: 'Paint',
@@ -151,7 +163,7 @@ const thread = {
         },
       ],
       [
-        5,
+        5, // Reflow
         8,
         {
           category: 'Paint',
@@ -161,9 +173,9 @@ const thread = {
       ],
       [
         9,
-        11,
+        11, // Note: this marker is out of order on purpose, to test we correctly sort
         {
-          // MinorGC at time 7ms from 7ms to 8ms
+          // MinorGC at time 11ms from 11ms to 12ms
           startTime: 11,
           endTime: 12,
         },
@@ -172,7 +184,7 @@ const thread = {
         8,
         9,
         {
-          // DOMEvent at time 5ms from 5ms to 6ms
+          // DOMEvent at time 9ms from 9ms to 10ms
           startTime: 9,
           endTime: 10,
           timeStamp: 1,
@@ -189,6 +201,86 @@ const thread = {
           type: 'UserTiming',
           name: 'processing-thread',
           entryType: 'measure',
+        },
+      ],
+      // Nested reflows
+      [
+        5, // Reflow
+        13,
+        {
+          category: 'Paint',
+          interval: 'start',
+          stack: {
+            markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+            name: 'SyncProfile',
+            samples: {
+              schema: {
+                stack: 0,
+                time: 1,
+                responsiveness: 2,
+                rss: 3,
+                uss: 4,
+                frameNumber: 5,
+                power: 6,
+              },
+              data: [[2, 1]], // (root), 0x100000f84, 0x100001a45
+            },
+          },
+          type: 'tracing',
+        },
+      ],
+      [
+        5, // Reflow
+        14,
+        {
+          category: 'Paint',
+          interval: 'start',
+          stack: {
+            markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+            name: 'SyncProfile',
+            samples: {
+              schema: {
+                stack: 0,
+                time: 1,
+                responsiveness: 2,
+                rss: 3,
+                uss: 4,
+                frameNumber: 5,
+                power: 6,
+              },
+              data: [[2, 1]], // (root), 0x100000f84, 0x100001a45
+            },
+          },
+          type: 'tracing',
+        },
+      ],
+      [
+        5, // Reflow
+        15,
+        {
+          category: 'Paint',
+          interval: 'end',
+          type: 'tracing',
+        },
+      ],
+      [
+        5, // Reflow
+        18,
+        {
+          category: 'Paint',
+          interval: 'end',
+          type: 'tracing',
+        },
+      ],
+      // Starting a tracing but never finishing it.
+      // Please keep it at the end if you add more markers in this structure
+      [
+        10, // Rasterize
+        20,
+        {
+          category: 'Paint',
+          interval: 'start',
+          type: 'tracing',
         },
       ],
     ],
