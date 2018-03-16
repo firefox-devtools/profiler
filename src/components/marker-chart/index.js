@@ -116,7 +116,9 @@ function viewportNeedsUpdate(
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
-    const markers = selectedThreadSelectors.getTracingMarkers(state);
+    const markers = selectedThreadSelectors.getRangeSelectionFilteredTracingMarkers(
+      state
+    );
     const markerTimingRows = selectedThreadSelectors.getMarkerTiming(state);
     const threadName = selectedThreadSelectors.getFriendlyThreadName(state);
 

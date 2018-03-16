@@ -1424,58 +1424,10 @@ exports[`snapshots of selectors/profile-view matches the last stored run of sele
 Array [
   Object {
     "end": Array [
-      0,
-    ],
-    "index": Array [
-      0,
-    ],
-    "label": Array [
-      "",
-    ],
-    "length": 1,
-    "name": "A",
-    "start": Array [
-      0,
-    ],
-  },
-  Object {
-    "end": Array [
-      1,
-    ],
-    "index": Array [
-      1,
-    ],
-    "label": Array [
-      "",
-    ],
-    "length": 1,
-    "name": "B",
-    "start": Array [
-      1,
-    ],
-  },
-  Object {
-    "end": Array [
-      2,
-    ],
-    "index": Array [
-      2,
-    ],
-    "label": Array [
-      "",
-    ],
-    "length": 1,
-    "name": "C",
-    "start": Array [
-      2,
-    ],
-  },
-  Object {
-    "end": Array [
       3,
     ],
     "index": Array [
-      3,
+      0,
     ],
     "label": Array [
       "",
@@ -1491,7 +1443,7 @@ Array [
       4,
     ],
     "index": Array [
-      4,
+      1,
     ],
     "label": Array [
       "",
@@ -1507,7 +1459,7 @@ Array [
       5,
     ],
     "index": Array [
-      5,
+      2,
     ],
     "label": Array [
       "",
