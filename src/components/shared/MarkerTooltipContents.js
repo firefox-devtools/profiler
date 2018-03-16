@@ -380,7 +380,13 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       <div className={classNames('tooltipMarker', className)}>
         <div className={classNames({ tooltipHeader: details })}>
           <div className="tooltipOneLine">
-            <div className="tooltipTiming">{formatNumber(marker.dur)}ms</div>
+            <div className="tooltipTiming">
+              {/* tracing markers with no start have a negative start, while the
+                ones with no end have an infinite duration */}
+              {Number.isFinite(marker.dur) && marker.start >= 0
+                ? formatNumber(marker.dur) + 'ms'
+                : 'unknown duration'}
+            </div>
             <div className="tooltipTitle">{marker.title || marker.name}</div>
           </div>
           {threadName ? (
