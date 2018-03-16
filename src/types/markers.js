@@ -281,6 +281,31 @@ export type DOMEventMarkerPayload = {
   phase: 0 | 1 | 2 | 3,
 };
 
+type StyleMarkerPayload_Shared = {
+  type: 'Styles',
+  category: 'Paint',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+
+  // Counts
+  elementsTraversed: number,
+  elementsStyled: number,
+  elementsMatched: number,
+  stylesShared: number,
+  stylesReused: number,
+};
+
+/**
+ * The payload for Styles.
+ */
+export type StyleMarkerPayload_Gecko = StyleMarkerPayload_Shared & {
+  stack?: GeckoMarkerStack,
+};
+
+export type StyleMarkerPayload = StyleMarkerPayload_Shared & {
+  cause?: CauseBacktrace,
+};
+
 export type DummyForTestsMarkerPayload = {
   type: 'DummyForTests',
   startTime: Milliseconds,
@@ -301,6 +326,7 @@ export type MarkerPayload =
   | GCMinorMarkerPayload
   | GCMajorMarkerPayload
   | GCSliceMarkerPayload
+  | StyleMarkerPayload
   | DummyForTestsMarkerPayload
   | null;
 
@@ -312,5 +338,6 @@ export type MarkerPayload_Gecko =
   | GCMinorMarkerPayload
   | GCMajorMarkerPayload_Gecko
   | GCSliceMarkerPayload_Gecko
+  | StyleMarkerPayload_Gecko
   | DummyForTestsMarkerPayload
   | null;

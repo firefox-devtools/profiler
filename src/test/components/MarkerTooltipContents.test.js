@@ -205,6 +205,27 @@ describe('MarkerTooltipContents', function() {
             endTime: 18.5,
           },
         ],
+        [
+          'Styles',
+          20.5,
+          {
+            type: 'Styles',
+            category: 'Paint',
+            startTime: 20.0,
+            endTime: 20.5,
+            elementsTraversed: 100,
+            elementsStyled: 50,
+            elementsMatched: 10,
+            stylesShared: 15,
+            stylesReused: 20,
+            cause: {
+              time: 19.5,
+              stack: funcNames.indexOf(
+                'nsRefreshDriver::AddStyleFlushObserver'
+              ),
+            },
+          },
+        ],
       ],
       profile
     );

@@ -780,3 +780,333 @@ exports[`MarkerTooltipContents renders tooltips for various markers 8`] = `
   </div>
 </div>
 `;
+
+exports[`MarkerTooltipContents renders tooltips for various markers 9`] = `
+<div
+  className="tooltipMarker propClass"
+>
+  <div
+    className="tooltipHeader"
+  >
+    <div
+      className="tooltipOneLine"
+    >
+      <div
+        className="tooltipTiming"
+      >
+        0.50
+        ms
+      </div>
+      <div
+        className="tooltipTitle"
+      >
+        Styles
+      </div>
+    </div>
+    <div
+      className="tooltipDetails"
+    >
+      <div
+        className="tooltipLabel"
+      >
+        Thread:
+      </div>
+      Main Thread
+    </div>
+  </div>
+  <div
+    className="tooltipDetails"
+  >
+    <div
+      className="tooltipLabel"
+    >
+      Elements traversed
+      :
+    </div>
+    100
+    <div
+      className="tooltipLabel"
+    >
+      Elements styled
+      :
+    </div>
+    50
+    <div
+      className="tooltipLabel"
+    >
+      Elements matched
+      :
+    </div>
+    10
+    <div
+      className="tooltipLabel"
+    >
+      Styles shared
+      :
+    </div>
+    15
+    <div
+      className="tooltipLabel"
+    >
+      Styles reused
+      :
+    </div>
+    20
+  </div>
+  <div
+    className="tooltipDetailsBackTrace"
+  >
+    <h2
+      className="tooltipBackTraceTitle"
+    >
+      First invalidated 
+      0.50
+      ms before the flush, at:
+    </h2>
+    <ol
+      className="backtrace"
+    >
+      <li
+        className="backtraceStackFrame"
+      >
+        nsRefreshDriver::AddStyleFlushObserver
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        mozilla::GeckoRestyleManager::PostRestyleEvent
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        mozilla::GeckoRestyleManager::ContentStateChanged
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        mozilla::PresShell::ContentStateChanged
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        nsDocument::ContentStateChanged
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        mozilla::dom::Element::RemoveStates
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        mozilla::EventStateManager::UpdateAncestorState
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        mozilla::EventStateManager::SetContentState
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        mozilla::EventStateManager::NotifyMouseOut
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        mozilla::EventStateManager::GenerateMouseEnterExit
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        mozilla::EventStateManager::PreHandleEvent
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        mozilla::PresShell::HandleEventInternal
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        mozilla::PresShell::HandlePositionedEvent
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        mozilla::PresShell::HandleEvent
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        nsViewManager::DispatchEvent
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        nsView::HandleEvent
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        nsChildView::DispatchEvent
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        ChildViewMouseTracker::MouseMoved
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        nsAppShell::Run
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        nsAppStartup::Run
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        XREMain::XRE_mainRun
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        XREMain::XRE_main
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        XRE_main
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+      <li
+        className="backtraceStackFrame"
+      >
+        _main
+        <em
+          className="backtraceStackFrameOrigin"
+        >
+          
+        </em>
+      </li>
+    </ol>
+  </div>
+</div>
+`;
