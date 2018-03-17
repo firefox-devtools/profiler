@@ -16,6 +16,7 @@ import {
   setProfileCallTreeContextMenuVisibility,
 } from '../../actions/profile-view';
 import {
+  getSelectedTab,
   getSelectedThreadIndex,
   getImplementationFilter,
   getInvertCallstack,
@@ -26,7 +27,7 @@ import {
 } from '../../utils/flow';
 
 import type { TransformType } from '../../types/transforms';
-import type { ImplementationFilter } from '../../types/actions';
+import type { ImplementationFilter, TabSlug } from '../../types/actions';
 import type {
   IndexIntoCallNodeTable,
   CallNodeInfo,
@@ -46,6 +47,7 @@ type StateProps = {|
   +inverted: boolean,
   +selectedCallNodePath: CallNodePath,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +selectedTab: TabSlug,
 |};
 
 type DispatchProps = {|
@@ -336,6 +338,7 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       inverted,
       thread: { funcTable },
       callNodeInfo: { callNodeTable },
+      selectedTab,
     } = this.props;
 
     if (selectedCallNodeIndex === null) {
@@ -351,6 +354,7 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     const isJS = funcTable.isJS[funcIndex];
     // This could be the C++ library, or the JS filename.
     const nameForResource = this.getNameForSelectedResource();
+    const showExpandAll = selectedTab === 'calltree';
 
     return (
       <ContextMenu
@@ -414,10 +418,14 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
           Drop samples with this function
         </MenuItem>
         <div className="react-contextmenu-separator" />
-        <MenuItem onClick={this.handleClick} data={{ type: 'expand-all' }}>
-          Expand all
-        </MenuItem>
-        <div className="react-contextmenu-separator" />
+        {showExpandAll ? (
+          <div>
+            <MenuItem onClick={this.handleClick} data={{ type: 'expand-all' }}>
+              Expand all
+            </MenuItem>
+            <div className="react-contextmenu-separator" />
+          </div>
+        ) : null}
         <MenuItem onClick={this.handleClick} data={{ type: 'searchfox' }}>
           Look up the function name on Searchfox
         </MenuItem>
@@ -453,6 +461,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
       state
     ),
+    selectedTab: getSelectedTab(state),
   }),
   mapDispatchToProps: {
     addTransformToStack,
