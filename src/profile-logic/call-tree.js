@@ -119,16 +119,21 @@ export class CallTree {
     return this.getChildren(callNodeIndex).length !== 0;
   }
 
+  _addDescendantsToSet(
+    callNodeIndex: IndexIntoCallNodeTable,
+    set: Set<IndexIntoCallNodeTable>
+  ): void {
+    for (const child of this.getChildren(callNodeIndex)) {
+      set.add(child);
+      this._addDescendantsToSet(child, set);
+    }
+  }
+
   getAllDescendants(
     callNodeIndex: IndexIntoCallNodeTable
   ): Set<IndexIntoCallNodeTable> {
-    const result = new Set([]);
-    for (const child of this.getChildren(callNodeIndex)) {
-      result.add(child);
-      for (const descendant of this.getAllDescendants(child)) {
-        result.add(descendant);
-      }
-    }
+    const result = new Set();
+    this._addDescendantsToSet(callNodeIndex, result);
     return result;
   }
 
@@ -153,15 +158,27 @@ export class CallTree {
     );
     const totalTime = this._callNodeTimes.totalTime[callNodeIndex];
     const totalTimeRelative = totalTime / this._rootTotalTime;
-    return { funcName, totalTime, totalTimeRelative };
+    const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
+    const selfTimeRelative = selfTime / this._rootTotalTime;
+
+    return {
+      funcName,
+      totalTime,
+      totalTimeRelative,
+      selfTime,
+      selfTimeRelative,
+    };
   }
 
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
     let displayData = this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
-      const { funcName, totalTime, totalTimeRelative } = this.getNodeData(
-        callNodeIndex
-      );
+      const {
+        funcName,
+        totalTime,
+        totalTimeRelative,
+        selfTime,
+      } = this.getNodeData(callNodeIndex);
 
       const funcIndex = this._callNodeTable.func[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
@@ -169,7 +186,6 @@ export class CallTree {
       const isJS = this._funcTable.isJS[funcIndex];
       const libName = this._getOriginAnnotation(funcIndex);
       const precision = this._isIntegerInterval ? 0 : 1;
-      const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
       const formatNumber = this._isIntegerInterval
         ? _formatIntegerNumber
         : _formatDecimalNumber;
