@@ -19,7 +19,7 @@ import { changeSelectedTab, changeTabOrder } from '../../actions/app';
 import { getTabOrder } from '../../reducers/profile-view';
 import { getSelectedTab } from '../../reducers/url-state';
 import ProfileViewerHeader from '../header/ProfileViewerHeader';
-import ProfileCallTreeContextMenu from '../calltree/ProfileCallTreeContextMenu';
+import ProfileCallTreeContextMenu from '../shared/ProfileCallTreeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
 import FooterLinks from './FooterLinks';

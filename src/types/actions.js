@@ -101,10 +101,10 @@ type ProfileAction =
       type: 'CHANGE_EXPANDED_ZIP_FILES',
       expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
     }
-  | {
-      type: 'SET_PROFILE_CALL_TREE_CONTEXT_MENU_VISIBILITY',
-      isVisible: boolean,
-    };
+  | {|
+      +type: 'SET_PROFILE_CALL_TREE_CONTEXT_MENU_VISIBILITY',
+      +isVisible: boolean,
+    |};
 
 type ReceiveProfileAction =
   | {

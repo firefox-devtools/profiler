@@ -5,20 +5,20 @@ exports[`renders FlameGraph correctly 1`] = `
   className="flameGraph"
 >
   <div
-    className="flameGraphSettings"
+    className="stackSettings"
   >
     <ul
-      className="flameGraphSettingsList"
+      className="stackSettingsList"
     >
       <li
-        className="flameGraphSettingsListItem"
+        className="stackSettingsListItem"
       >
         <label
-          className="flameGraphSettingsLabel"
+          className="stackSettingsLabel"
         >
           Filter:
           <select
-            className="flameGraphSettingsSelect"
+            className="stackSettingsSelect"
             onChange={[Function]}
             value="combined"
           >
@@ -41,14 +41,14 @@ exports[`renders FlameGraph correctly 1`] = `
         </label>
       </li>
       <li
-        className="flameGraphSettingsListItem"
+        className="stackSettingsListItem"
       >
         <label
-          className="flameGraphSettingsLabel"
+          className="stackSettingsLabel"
         >
           <input
             checked={false}
-            className="flameGraphSettingsCheckbox"
+            className="stackSettingsCheckbox"
             onChange={[Function]}
             type="checkbox"
           />
@@ -57,7 +57,7 @@ exports[`renders FlameGraph correctly 1`] = `
       </li>
     </ul>
     <div
-      className="stackSearchField flameGraphSettingsSearchField"
+      className="stackSearchField stackSettingsSearchField"
     >
       <label
         className="stackSearchFieldLabel"

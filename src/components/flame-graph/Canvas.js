@@ -65,13 +65,19 @@ function stringToHex(hexString: string): number {
   return parseInt(hexString.substr(1), 16);
 }
 
+// stringToHex is needed for interpolated colors
 const NATIVE_START_COLOR = stringToHex('#c1e0ff');
 const NATIVE_END_COLOR = stringToHex(colors.BLUE_50);
+const NATIVE_HOVER_COLOR = colors.BLUE_60;
 const NATIVE_WHITE_TEXT_THRESHOLD = 0.8;
+
 const JS_START_COLOR = stringToHex('#ffd79f');
 const JS_END_COLOR = stringToHex(colors.ORANGE_50);
+const JS_HOVER_COLOR = colors.ORANGE_60;
+
 const UNSYMBOLICATED_START_COLOR = stringToHex(colors.GREY_30);
 const UNSYMBOLICATED_END_COLOR = stringToHex(colors.GREY_50);
+const UNSYMBOLICATED_HOVER_COLOR = colors.GREY_60;
 const UNSYMBOLICATED_WHITE_TEXT_THRESHOLD = 0.66;
 
 /**
@@ -188,6 +194,19 @@ export function getForegroundColor(
   }
 }
 
+export function getHoverBackgroundColor(stackType: StackType): string {
+  switch (stackType) {
+    case 'native':
+      return NATIVE_HOVER_COLOR;
+    case 'js':
+      return JS_HOVER_COLOR;
+    case 'unsymbolicated':
+      return UNSYMBOLICATED_HOVER_COLOR;
+    default:
+      throw new Error(`Unknown stack type case "${(stackType: empty)}".`);
+  }
+}
+
 class FlameGraphCanvas extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
 
@@ -261,24 +280,29 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
           thread.funcTable.name[funcIndex]
         );
 
-        const isSelected = selectedCallNodeIndex === callNodeIndex;
+        const stackType = getStackType(thread, funcIndex);
         const isHovered =
           hoveredItem &&
           depth === hoveredItem.depth &&
           i === hoveredItem.flameGraphTimingIndex;
-        const highlightBox = isSelected || isHovered;
+        let background, foreground;
 
-        const stackType = getStackType(thread, funcIndex);
-        const background = getBackgroundColor(
-          stackType,
-          stackTiming.selfTimeRelative[i]
-        );
-        const foreground = getForegroundColor(
-          stackType,
-          stackTiming.selfTimeRelative[i]
-        );
+        if (isHovered) {
+          background = getHoverBackgroundColor(stackType);
+          foreground = '#ffffff';
+        } else {
+          background = getBackgroundColor(
+            stackType,
+            stackTiming.selfTimeRelative[i]
+          );
+          foreground = getForegroundColor(
+            stackType,
+            stackTiming.selfTimeRelative[i]
+          );
+        }
 
-        ctx.fillStyle = highlightBox ? 'Highlight' : background;
+        const isSelected = selectedCallNodeIndex === callNodeIndex;
+        ctx.fillStyle = isSelected ? 'Highlight' : background;
         ctx.fillRect(x, y, w, h);
         // Ensure spacing between blocks.
         ctx.clearRect(x, y, 1, h);
@@ -291,7 +315,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         if (w2 > textMeasurement.minWidth) {
           const fittedText = textMeasurement.getFittedText(funcName, w2);
           if (fittedText) {
-            ctx.fillStyle = highlightBox ? 'HighlightText' : foreground;
+            ctx.fillStyle = isSelected ? 'HighlightText' : foreground;
             ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
           }
         }

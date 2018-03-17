@@ -11,9 +11,9 @@ import {
   getDisplayRange,
   getProfileViewOptions,
 } from '../../reducers/profile-view';
-import FlameGraphSettings from './Settings';
+import StackSettings from '../shared/StackSettings';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
-import TransformNavigator from '../calltree/TransformNavigator';
+import TransformNavigator from '../shared/TransformNavigator';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePath } from '../../profile-logic/profile-data';
 import { changeSelectedCallNode } from '../../actions/profile-view';
@@ -47,7 +47,7 @@ type StateProps = {|
   +callNodeInfo: CallNodeInfo,
   +threadIndex: number,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +profileCallTreeContextMenuVisible: boolean,
+  +isProfileCallTreeContextMenuVisible: boolean,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -77,14 +77,14 @@ class FlameGraph extends React.PureComponent<Props> {
       threadName,
       processDetails,
       selectedCallNodeIndex,
-      profileCallTreeContextMenuVisible,
+      isProfileCallTreeContextMenuVisible,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
       <div className="flameGraph">
-        <FlameGraphSettings />
+        <StackSettings />
         <TransformNavigator />
         <div className="flameGraphContent">
           <div title={processDetails} className="flameGraphLabels grippy">
@@ -117,7 +117,7 @@ class FlameGraph extends React.PureComponent<Props> {
                 selectedCallNodeIndex,
                 stackFrameHeight: STACK_FRAME_HEIGHT,
                 onSelectionChange: this._onSelectedCallNodeChange,
-                disableTooltips: profileCallTreeContextMenuVisible,
+                disableTooltips: isProfileCallTreeContextMenuVisible,
               }}
             />
           </ContextMenuTrigger>
@@ -154,8 +154,8 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
-      profileCallTreeContextMenuVisible: getProfileViewOptions(state)
-        .profileCallTreeContextMenuVisible,
+      isProfileCallTreeContextMenuVisible: getProfileViewOptions(state)
+        .isProfileCallTreeContextMenuVisible,
     };
   },
   mapDispatchToProps: {
