@@ -170,6 +170,18 @@ export class CallTree {
     };
   }
 
+  getTimingDisplayData(callNodeIndex: IndexIntoCallNodeTable) {
+    const totalTime = this._callNodeTimes.totalTime[callNodeIndex];
+    const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
+    const formatNumber = this._isIntegerInterval
+      ? _formatIntegerNumber
+      : _formatDecimalNumber;
+    return {
+      totalTime: `${formatNumber(totalTime)}`,
+      selfTime: selfTime === 0 ? '—' : `${formatNumber(selfTime)}`,
+    };
+  }
+
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
     let displayData = this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
