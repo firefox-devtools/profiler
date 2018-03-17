@@ -15,7 +15,6 @@ body, #root, .profileViewer {
   display: flex;
   flex-flow: column nowrap;
   flex: 1;
-  max-height: 100%;
 }
 
 :root {
