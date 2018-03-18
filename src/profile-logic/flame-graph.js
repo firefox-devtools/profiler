@@ -50,6 +50,8 @@ type Stack = Array<{
 export function getFlameGraphTiming(
   callTree: CallTree.CallTree
 ): FlameGraphTiming {
+  callTree.preloadChildrenCache();
+
   const timing = [];
   // Array of call nodes to recursively process in the loop below.
   // Start with the roots of the call tree.
