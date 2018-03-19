@@ -185,22 +185,13 @@ export class CallTree {
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
     let displayData = this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
-      const {
-        funcName,
-        totalTime,
-        totalTimeRelative,
-        selfTime,
-      } = this.getNodeData(callNodeIndex);
-
+      const { funcName, totalTimeRelative } = this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeTable.func[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
       const libName = this._getOriginAnnotation(funcIndex);
       const precision = this._isIntegerInterval ? 0 : 1;
-      const formatNumber = this._isIntegerInterval
-        ? _formatIntegerNumber
-        : _formatDecimalNumber;
 
       let icon = null;
       if (resourceType === resourceTypes.webhost) {
@@ -210,9 +201,8 @@ export class CallTree {
       }
 
       displayData = {
-        totalTime: `${formatNumber(totalTime)}`,
+        ...this.getTimingDisplayData(callNodeIndex),
         totalTimePercent: `${(100 * totalTimeRelative).toFixed(precision)}%`,
-        selfTime: selfTime === 0 ? '—' : `${formatNumber(selfTime)}`,
         name: funcName,
         lib: libName,
         // Dim platform pseudo-stacks.
