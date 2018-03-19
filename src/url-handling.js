@@ -93,7 +93,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     file: urlState.pathInZipFile || undefined,
     v: CURRENT_URL_VERSION,
   };
-  
+
   // Add the parameter hiddenThreads only when needed
   if (urlState.hiddenThreads.length > 0) {
     query.hiddenThreads = urlState.hiddenThreads.join('-');
