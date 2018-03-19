@@ -78,6 +78,8 @@ export type CallNodeData = {
   funcName: string,
   totalTime: number,
   totalTimeRelative: number,
+  selfTime: number,
+  selfTimeRelative: number,
 };
 
 export type CallNodeDisplayData = {
@@ -103,3 +105,5 @@ export type MarkerTiming = {
   length: number,
 };
 export type MarkerTimingRows = Array<MarkerTiming>;
+
+export type StackType = 'js' | 'native' | 'unsymbolicated';

@@ -158,15 +158,27 @@ export class CallTree {
     );
     const totalTime = this._callNodeTimes.totalTime[callNodeIndex];
     const totalTimeRelative = totalTime / this._rootTotalTime;
-    return { funcName, totalTime, totalTimeRelative };
+    const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
+    const selfTimeRelative = selfTime / this._rootTotalTime;
+
+    return {
+      funcName,
+      totalTime,
+      totalTimeRelative,
+      selfTime,
+      selfTimeRelative,
+    };
   }
 
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
     let displayData = this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
-      const { funcName, totalTime, totalTimeRelative } = this.getNodeData(
-        callNodeIndex
-      );
+      const {
+        funcName,
+        totalTime,
+        totalTimeRelative,
+        selfTime,
+      } = this.getNodeData(callNodeIndex);
 
       const funcIndex = this._callNodeTable.func[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
@@ -174,7 +186,6 @@ export class CallTree {
       const isJS = this._funcTable.isJS[funcIndex];
       const libName = this._getOriginAnnotation(funcIndex);
       const precision = this._isIntegerInterval ? 0 : 1;
-      const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
       const formatNumber = this._isIntegerInterval
         ? _formatIntegerNumber
         : _formatDecimalNumber;

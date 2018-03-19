@@ -24,7 +24,11 @@ import type {
   IndexIntoStackTable,
   IndexIntoResourceTable,
 } from '../types/profile';
-import type { CallNodePath, CallNodeTable } from '../types/profile-derived';
+import type {
+  CallNodePath,
+  CallNodeTable,
+  StackType,
+} from '../types/profile-derived';
 import type { ImplementationFilter } from '../types/actions';
 import type {
   Transform,
@@ -1331,6 +1335,18 @@ export function restoreAllFunctionsInCallNodePath(
     newCallNodePath.push(funcIndex);
   }
   return newCallNodePath.reverse();
+}
+
+export function getStackType(
+  thread: Thread,
+  funcIndex: IndexIntoFuncTable
+): StackType {
+  if (FUNC_MATCHES.cpp(thread, funcIndex)) {
+    return 'native';
+  } else if (FUNC_MATCHES.js(thread, funcIndex)) {
+    return 'js';
+  }
+  return 'unsymbolicated';
 }
 
 export function filterCallNodePathByImplementation(
