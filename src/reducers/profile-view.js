@@ -373,12 +373,9 @@ function rightClickedThread(state: ThreadIndex = 0, action: Action) {
   }
 }
 
-function isProfileCallTreeContextMenuVisible(
-  state: boolean = false,
-  action: Action
-) {
+function isCallNodeContextMenuVisible(state: boolean = false, action: Action) {
   switch (action.type) {
-    case 'SET_PROFILE_CALL_TREE_CONTEXT_MENU_VISIBILITY':
+    case 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY':
       return action.isVisible;
     default:
       return state;
@@ -397,7 +394,7 @@ const profileViewReducer: Reducer<ProfileViewState> = combineReducers({
     zeroAt,
     tabOrder,
     rightClickedThread,
-    isProfileCallTreeContextMenuVisible,
+    isCallNodeContextMenuVisible,
   }),
   profile,
 });

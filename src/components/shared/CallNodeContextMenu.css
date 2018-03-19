@@ -1,4 +1,4 @@
-.profileCallTreeContextMenuIcon {
+.callNodeContextMenuIcon {
   width: 16px;
   height: 16px;
   pointer-events: auto;
@@ -7,31 +7,31 @@
   margin-inline-end: 8px;
   top: 2px;
 }
-.react-contextmenu-item--selected > .profileCallTreeContextMenuIcon {
+.react-contextmenu-item--selected > .callNodeContextMenuIcon {
   filter: invert(1);
 }
 
-.profileCallTreeContextMenuIconMerge {
+.callNodeContextMenuIconMerge {
   background: url(../../../res/merge-icon.svg) center center no-repeat;
 }
 
-.profileCallTreeContextMenuIconCollapse {
+.callNodeContextMenuIconCollapse {
   background: url(../../../res/collapse-icon.svg) center center no-repeat;
 }
 
-.profileCallTreeContextMenuIconFocus {
+.callNodeContextMenuIconFocus {
   background: url(../../../res/focus-icon.svg) center center no-repeat;
 }
 
-.profileCallTreeContextMenuIconDrop {
+.callNodeContextMenuIconDrop {
   background: url(../../../res/drop-icon.svg) center center no-repeat;
 }
 
-.profileCallTreeContextMenuLabel {
+.callNodeContextMenuLabel {
   color: #555;
   font-weight: bold;
 }
 
-.react-contextmenu-item--selected > .profileCallTreeContextMenuLabel {
+.react-contextmenu-item--selected > .callNodeContextMenuLabel {
   color: #fff;
 }

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
 import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
@@ -13,7 +13,7 @@ import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
   expandAllCallNodeDescendants,
-  setProfileCallTreeContextMenuVisibility,
+  setCallNodeContextMenuVisibility,
 } from '../../actions/profile-view';
 import {
   getSelectedTab,
@@ -53,25 +53,25 @@ type StateProps = {|
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
   +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
-  +setProfileCallTreeContextMenuVisibility: typeof setProfileCallTreeContextMenuVisibility,
+  +setCallNodeContextMenuVisibility: typeof setCallNodeContextMenuVisibility,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-require('./ProfileCallTreeContextMenu.css');
+require('./CallNodeContextMenu.css');
 
-class ProfileCallTreeContextMenu extends PureComponent<Props> {
+class CallNodeContextMenu extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any).handleClick = this.handleClick.bind(this);
   }
 
   _menuShown = () => {
-    this.props.setProfileCallTreeContextMenuVisibility(true);
+    this.props.setCallNodeContextMenuVisibility(true);
   };
 
   _menuHidden = () => {
-    this.props.setProfileCallTreeContextMenuVisibility(false);
+    this.props.setCallNodeContextMenuVisibility(false);
   };
 
   _getFunctionName(): string {
@@ -358,7 +358,7 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
 
     return (
       <ContextMenu
-        id={'ProfileCallTreeContextMenu'}
+        id={'CallNodeContextMenu'}
         onShow={this._menuShown}
         onHide={this._menuHidden}
       >
@@ -367,20 +367,20 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
             onClick={this.handleClick}
             data={{ type: 'merge-call-node' }}
           >
-            <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
+            <span className="callNodeContextMenuIcon callNodeContextMenuIconMerge" />
             Merge node into calling function
           </MenuItem>
         )}
         <MenuItem onClick={this.handleClick} data={{ type: 'merge-function' }}>
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconMerge" />
           Merge function into caller across the entire tree
         </MenuItem>
         <MenuItem onClick={this.handleClick} data={{ type: 'focus-subtree' }}>
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus" />
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconFocus" />
           Focus on subtree
         </MenuItem>
         <MenuItem onClick={this.handleClick} data={{ type: 'focus-function' }}>
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus" />
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconFocus" />
           {inverted
             ? 'Focus on calls made by this function'
             : 'Focus on function'}
@@ -389,7 +389,7 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
           onClick={this.handleClick}
           data={{ type: 'collapse-function-subtree' }}
         >
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
           {'Collapse function’s subtree across the entire tree'}
         </MenuItem>
         {nameForResource ? (
@@ -397,11 +397,9 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
             onClick={this.handleClick}
             data={{ type: 'collapse-resource' }}
           >
-            <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+            <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
             Collapse functions in{' '}
-            <span className="profileCallTreeContextMenuLabel">
-              {nameForResource}
-            </span>
+            <span className="callNodeContextMenuLabel">{nameForResource}</span>
           </MenuItem>
         ) : null}
         {this.isRecursiveCall() ? (
@@ -409,22 +407,22 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
             onClick={this.handleClick}
             data={{ type: 'collapse-direct-recursion' }}
           >
-            <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+            <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
             Collapse direct recursion
           </MenuItem>
         ) : null}
         <MenuItem onClick={this.handleClick} data={{ type: 'drop-function' }}>
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconDrop" />
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconDrop" />
           Drop samples with this function
         </MenuItem>
         <div className="react-contextmenu-separator" />
         {showExpandAll ? (
-          <div>
+          <Fragment>
             <MenuItem onClick={this.handleClick} data={{ type: 'expand-all' }}>
               Expand all
             </MenuItem>
             <div className="react-contextmenu-separator" />
-          </div>
+          </Fragment>
         ) : null}
         <MenuItem onClick={this.handleClick} data={{ type: 'searchfox' }}>
           Look up the function name on Searchfox
@@ -466,8 +464,8 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapDispatchToProps: {
     addTransformToStack,
     expandAllCallNodeDescendants,
-    setProfileCallTreeContextMenuVisibility,
+    setCallNodeContextMenuVisibility,
   },
-  component: ProfileCallTreeContextMenu,
+  component: CallNodeContextMenu,
 };
 export default explicitConnect(options);

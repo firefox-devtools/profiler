@@ -47,7 +47,7 @@ type StateProps = {|
   +callNodeInfo: CallNodeInfo,
   +threadIndex: number,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +isProfileCallTreeContextMenuVisible: boolean,
+  +isCallNodeContextMenuVisible: boolean,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -77,7 +77,7 @@ class FlameGraph extends React.PureComponent<Props> {
       threadName,
       processDetails,
       selectedCallNodeIndex,
-      isProfileCallTreeContextMenuVisible,
+      isCallNodeContextMenuVisible,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -91,7 +91,7 @@ class FlameGraph extends React.PureComponent<Props> {
             <span>{threadName}</span>
           </div>
           <ContextMenuTrigger
-            id={'ProfileCallTreeContextMenu'}
+            id={'CallNodeContextMenu'}
             attributes={{
               className: 'treeViewContextMenu',
             }}
@@ -117,7 +117,7 @@ class FlameGraph extends React.PureComponent<Props> {
                 selectedCallNodeIndex,
                 stackFrameHeight: STACK_FRAME_HEIGHT,
                 onSelectionChange: this._onSelectedCallNodeChange,
-                disableTooltips: isProfileCallTreeContextMenuVisible,
+                disableTooltips: isCallNodeContextMenuVisible,
               }}
             />
           </ContextMenuTrigger>
@@ -154,8 +154,8 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
-      isProfileCallTreeContextMenuVisible: getProfileViewOptions(state)
-        .isProfileCallTreeContextMenuVisible,
+      isCallNodeContextMenuVisible: getProfileViewOptions(state)
+        .isCallNodeContextMenuVisible,
     };
   },
   mapDispatchToProps: {

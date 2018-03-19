@@ -102,7 +102,7 @@ type ProfileAction =
       expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
     }
   | {|
-      +type: 'SET_PROFILE_CALL_TREE_CONTEXT_MENU_VISIBILITY',
+      +type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
     |};
 
