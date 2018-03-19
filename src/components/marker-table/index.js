@@ -158,8 +158,6 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-const EMPTY_OBJECT = {};
-
 class MarkerTable extends PureComponent<Props> {
   _fixedColumns = [
     { propName: 'timestamp', title: 'Time Stamp' },
@@ -168,7 +166,7 @@ class MarkerTable extends PureComponent<Props> {
   _mainColumn = { propName: 'name', title: '' };
   _expandedNodeIds: Array<IndexIntoMarkersTable | null> = [];
   _onExpandedNodeIdsChange = () => {};
-  _treeView: ?TreeView<IndexIntoMarkersTable, MarkerDisplayData, {}>;
+  _treeView: ?TreeView<IndexIntoMarkersTable, MarkerDisplayData>;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
   componentDidMount() {
@@ -206,7 +204,6 @@ class MarkerTable extends PureComponent<Props> {
           contextMenuId={'MarkersContextMenu'}
           rowHeight={16}
           indentWidth={10}
-          sharedRowProps={EMPTY_OBJECT}
         />
       </div>
     );

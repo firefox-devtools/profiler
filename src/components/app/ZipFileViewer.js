@@ -4,15 +4,8 @@
 
 // @flow
 import * as React from 'react';
-import explicitConnect, {
-  type ExplicitConnectOptions,
-  type ConnectedProps,
-} from '../../utils/connect';
-import {
-  procureInitialInterestingExpandedNodes,
-  type ZipFileTree,
-  type IndexIntoZipFileTable,
-} from '../../profile-logic/zip-files';
+import explicitConnect from '../../utils/connect';
+import { procureInitialInterestingExpandedNodes } from '../../profile-logic/zip-files';
 import {
   changeSelectedZipFile,
   changeExpandedZipFile,
@@ -31,11 +24,19 @@ import {
 import { getPathInZipFileFromUrl } from '../../reducers/url-state';
 import TreeView from '../shared/TreeView';
 import ProfileViewer from './ProfileViewer';
+
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 import type { ZipFileState } from '../../types/reducers';
 import type {
   ZipFileTable,
   ZipDisplayData,
+  ZipFileTree,
+  IndexIntoZipFileTable,
 } from '../../profile-logic/zip-files';
+
 import './ZipFileViewer.css';
 
 type StateProps = {|
@@ -60,24 +61,26 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-type ZipFileSharedRowProps = {|
+type ZipFileRowDispatchProps = {|
   +viewProfileFromZip: typeof viewProfileFromZip,
 |};
-type ZipFileRowProps = {|
-  +sharedRowProps: ZipFileSharedRowProps,
+type ZipFileRowOwnProps = {|
   +displayData: ZipDisplayData,
 |};
 
-class ZipFileRow extends React.PureComponent<ZipFileRowProps> {
+type ZipFileRowProps = ConnectedProps<
+  ZipFileRowOwnProps,
+  {||},
+  ZipFileRowDispatchProps
+>;
+
+class ZipFileRowImpl extends React.PureComponent<ZipFileRowProps> {
   _handleClick = (event: SyntheticMouseEvent<HTMLElement>) => {
     if (event.metaKey || event.ctrlKey) {
       return;
     }
     event.preventDefault();
-    const {
-      sharedRowProps: { viewProfileFromZip },
-      displayData: { zipTableIndex },
-    } = this.props;
+    const { viewProfileFromZip, displayData: { zipTableIndex } } = this.props;
     if (zipTableIndex !== null) {
       viewProfileFromZip(zipTableIndex);
     }
@@ -96,6 +99,21 @@ class ZipFileRow extends React.PureComponent<ZipFileRowProps> {
   }
 }
 
+const zipFileRowConnectOptions: ExplicitConnectOptions<
+  ZipFileRowOwnProps,
+  {||},
+  ZipFileRowDispatchProps
+> = {
+  // ZipFileRow is implemented as a connected component, only to provide access to
+  // dispatch-wrapped actions. Please consider the performance impact of using
+  // mapStateToProps here.
+  mapDispatchToProps: {
+    viewProfileFromZip,
+  },
+  component: ZipFileRowImpl,
+};
+const ZipFileRow = explicitConnect(zipFileRowConnectOptions);
+
 /**
  * This component is a viewer for zip files. It was built to load
  * multiple profiles recorded from Talos so that a user could navigate
@@ -105,11 +123,7 @@ class ZipFileRow extends React.PureComponent<ZipFileRowProps> {
 class ZipFileViewer extends React.PureComponent<Props> {
   _fixedColumns = [];
   _mainColumn = { propName: 'name', title: '', component: ZipFileRow };
-  _treeView: ?TreeView<
-    IndexIntoZipFileTable,
-    ZipDisplayData,
-    ZipFileSharedRowProps
-  >;
+  _treeView: ?TreeView<IndexIntoZipFileTable, ZipDisplayData>;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
   componentWillMount() {
@@ -226,7 +240,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
     );
   }
 
-  _onEnter = (zipTableIndex: IndexIntoZipFileTable) => {
+  _onEnterKey = (zipTableIndex: IndexIntoZipFileTable) => {
     this.props.viewProfileFromZip(zipTableIndex);
   };
 
@@ -240,7 +254,6 @@ class ZipFileViewer extends React.PureComponent<Props> {
       changeSelectedZipFile,
       changeExpandedZipFile,
       pathInZipFile,
-      viewProfileFromZip,
     } = this.props;
 
     if (!zipFileTree) {
@@ -277,10 +290,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
                 contextMenuId={'MarkersContextMenu'}
                 rowHeight={30}
                 indentWidth={15}
-                sharedRowProps={{
-                  viewProfileFromZip,
-                }}
-                onEnter={this._onEnter}
+                onEnterKey={this._onEnterKey}
               />
             </div>
           </section>
@@ -323,7 +333,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
       case 'VIEW_PROFILE_IN_ZIP_FILE':
         return <ProfileViewer />;
       default:
-        (phase: empty); // eslint-disable-line no-unused-expressions
+        (phase: empty);
         throw new Error('Unknown zip file phase.');
     }
   }

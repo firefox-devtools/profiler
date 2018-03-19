@@ -81,11 +81,7 @@ function reactStringWithHighlightedSubstrings(
   return highlighted;
 }
 
-type TreeViewRowFixedColumnsProps<
-  NodeIndex: number,
-  DisplayData: Object,
-  SharedRowProps: Object
-> = {|
+type TreeViewRowFixedColumnsProps<NodeIndex: number, DisplayData: Object> = {|
   +displayData: DisplayData,
   +nodeId: NodeIndex,
   +columns: Column[],
@@ -94,19 +90,15 @@ type TreeViewRowFixedColumnsProps<
   +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
   +highlightRegExp: RegExp | null,
   +rowHeightStyle: { height: CssPixels, lineHeight: string },
-  +sharedRowProps: SharedRowProps,
 |};
 
 class TreeViewRowFixedColumns<
   NodeIndex: number,
-  DisplayData: Object,
-  SharedRowProps: Object
+  DisplayData: Object
 > extends React.PureComponent<
-  TreeViewRowFixedColumnsProps<NodeIndex, DisplayData, SharedRowProps>
+  TreeViewRowFixedColumnsProps<NodeIndex, DisplayData>
 > {
-  constructor(
-    props: TreeViewRowFixedColumnsProps<NodeIndex, DisplayData, SharedRowProps>
-  ) {
+  constructor(props: TreeViewRowFixedColumnsProps<NodeIndex, DisplayData>) {
     super(props);
     (this: any)._onClick = this._onClick.bind(this);
   }
@@ -124,7 +116,6 @@ class TreeViewRowFixedColumns<
       selected,
       highlightRegExp,
       rowHeightStyle,
-      sharedRowProps,
     } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     return (
@@ -148,10 +139,7 @@ class TreeViewRowFixedColumns<
               title={text}
             >
               {RenderComponent ? (
-                <RenderComponent
-                  displayData={displayData}
-                  sharedRowProps={sharedRowProps}
-                />
+                <RenderComponent displayData={displayData} />
               ) : (
                 reactStringWithHighlightedSubstrings(
                   text,
@@ -169,8 +157,7 @@ class TreeViewRowFixedColumns<
 
 type TreeViewRowScrolledColumnsProps<
   NodeIndex: number,
-  DisplayData: Object,
-  SharedRowProps: Object
+  DisplayData: Object
 > = {|
   +displayData: DisplayData,
   +nodeId: NodeIndex,
@@ -188,23 +175,15 @@ type TreeViewRowScrolledColumnsProps<
   +highlightRegExp: RegExp | null,
   +rowHeightStyle: { height: CssPixels, lineHeight: string },
   +indentWidth: CssPixels,
-  +sharedRowProps: SharedRowProps,
 |};
 
 class TreeViewRowScrolledColumns<
   NodeIndex: number,
-  DisplayData: Object,
-  SharedRowProps: Object
+  DisplayData: Object
 > extends React.PureComponent<
-  TreeViewRowScrolledColumnsProps<NodeIndex, DisplayData, SharedRowProps>
+  TreeViewRowScrolledColumnsProps<NodeIndex, DisplayData>
 > {
-  constructor(
-    props: TreeViewRowScrolledColumnsProps<
-      NodeIndex,
-      DisplayData,
-      SharedRowProps
-    >
-  ) {
+  constructor(props: TreeViewRowScrolledColumnsProps<NodeIndex, DisplayData>) {
     super(props);
     (this: any)._onClick = this._onClick.bind(this);
   }
@@ -249,7 +228,6 @@ class TreeViewRowScrolledColumns<
       appendageButtons,
       rowHeightStyle,
       indentWidth,
-      sharedRowProps,
     } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     const RenderComponent = mainColumn.component;
@@ -277,10 +255,7 @@ class TreeViewRowScrolledColumns<
           }`}
         >
           {RenderComponent ? (
-            <RenderComponent
-              displayData={displayData}
-              sharedRowProps={sharedRowProps}
-            />
+            <RenderComponent displayData={displayData} />
           ) : (
             reactStringWithHighlightedSubstrings(
               displayData[mainColumn.propName],
@@ -328,7 +303,7 @@ interface Tree<NodeIndex: number, DisplayData: Object> {
   getAllDescendants(NodeIndex): Set<NodeIndex>;
 }
 
-type TreeViewProps<NodeIndex, DisplayData, SharedRowProps> = {|
+type TreeViewProps<NodeIndex, DisplayData> = {|
   +fixedColumns: Column[],
   +mainColumn: Column,
   +tree: Tree<NodeIndex, DisplayData>,
@@ -345,25 +320,21 @@ type TreeViewProps<NodeIndex, DisplayData, SharedRowProps> = {|
   +maxNodeDepth: number,
   +onAppendageButtonClick?: ((NodeIndex | null, string) => mixed) | null,
   +onSelectionChange: NodeIndex => mixed,
-  +onEnter?: NodeIndex => mixed,
+  +onEnterKey?: NodeIndex => mixed,
   +rowHeight: CssPixels,
   +indentWidth: CssPixels,
-  +sharedRowProps: SharedRowProps,
 |};
 
 class TreeView<
   NodeIndex: number,
-  DisplayData: Object,
-  SharedRowProps: Object
-> extends React.PureComponent<
-  TreeViewProps<NodeIndex, DisplayData, SharedRowProps>
-> {
+  DisplayData: Object
+> extends React.PureComponent<TreeViewProps<NodeIndex, DisplayData>> {
   _specialItems: (NodeIndex | null)[];
   _visibleRows: NodeIndex[];
   _list: VirtualList | null;
   _takeListRef = (list: VirtualList | null) => (this._list = list);
 
-  constructor(props: TreeViewProps<NodeIndex, DisplayData, SharedRowProps>) {
+  constructor(props: TreeViewProps<NodeIndex, DisplayData>) {
     super(props);
     (this: any)._renderRow = this._renderRow.bind(this);
     (this: any)._toggle = this._toggle.bind(this);
@@ -385,9 +356,7 @@ class TreeView<
     }
   }
 
-  componentWillReceiveProps(
-    nextProps: TreeViewProps<NodeIndex, DisplayData, SharedRowProps>
-  ) {
+  componentWillReceiveProps(nextProps: TreeViewProps<NodeIndex, DisplayData>) {
     if (nextProps.selectedNodeId !== this.props.selectedNodeId) {
       this._specialItems = [nextProps.selectedNodeId];
     }
@@ -412,7 +381,6 @@ class TreeView<
       onAppendageButtonClick,
       rowHeight,
       indentWidth,
-      sharedRowProps,
     } = this.props;
     const displayData = tree.getDisplayData(nodeId);
     const rowHeightStyle = { height: rowHeight, lineHeight: `${rowHeight}px` };
@@ -428,7 +396,6 @@ class TreeView<
           onClick={this._onRowClicked}
           highlightRegExp={highlightRegExp || null}
           rowHeightStyle={rowHeightStyle}
-          sharedRowProps={sharedRowProps}
         />
       );
     }
@@ -452,13 +419,12 @@ class TreeView<
         onAppendageButtonClick={onAppendageButtonClick}
         highlightRegExp={highlightRegExp || null}
         indentWidth={indentWidth}
-        sharedRowProps={sharedRowProps}
       />
     );
   }
 
   _addVisibleRowsFromNode(
-    props: TreeViewProps<NodeIndex, DisplayData, SharedRowProps>,
+    props: TreeViewProps<NodeIndex, DisplayData>,
     arr: NodeIndex[],
     nodeId: NodeIndex,
     depth: number
@@ -474,7 +440,7 @@ class TreeView<
   }
 
   _getAllVisibleRows(
-    props: TreeViewProps<NodeIndex, DisplayData, SharedRowProps>
+    props: TreeViewProps<NodeIndex, DisplayData>
   ): NodeIndex[] {
     const roots = props.tree.getRoots();
     const allRows = [];
@@ -545,11 +511,11 @@ class TreeView<
 
   _onKeyDown(event: KeyboardEvent) {
     const hasModifier = event.ctrlKey || event.altKey || event.metaKey;
-    const isArrowKey = event.keyCode >= 37 && event.keyCode <= 40;
-    const isAsterisk = event.key === '*';
-    const isEnter = event.keyCode === 13;
+    const isArrowKey = event.key.startsWith('Arrow');
+    const isAsteriskKey = event.key === '*';
+    const isEnterKey = event.key === 'Enter';
 
-    if (hasModifier || (!isArrowKey && !isAsterisk && !isEnter)) {
+    if (hasModifier || (!isArrowKey && !isAsteriskKey && !isEnterKey)) {
       // No key events that we care about were found, so don't try and handle them.
       return;
     }
@@ -615,14 +581,14 @@ class TreeView<
       }
     }
 
-    if (isAsterisk) {
+    if (isAsteriskKey) {
       this._toggleAll(selected);
     }
 
-    if (isEnter) {
-      const { onEnter, selectedNodeId } = this.props;
-      if (onEnter && selectedNodeId !== null) {
-        onEnter(selectedNodeId);
+    if (isEnterKey) {
+      const { onEnterKey, selectedNodeId } = this.props;
+      if (onEnterKey && selectedNodeId !== null) {
+        onEnterKey(selectedNodeId);
       }
     }
   }
