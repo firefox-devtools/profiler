@@ -734,14 +734,14 @@ export const selectorsForThread = (
     const getExpandedCallNodeIndexes = createSelector(
       getCallNodeInfo,
       getExpandedCallNodePaths,
-      (callNodeInfo, callNodePaths): (IndexIntoCallNodeTable | null)[] => {
-        return Array.from(callNodePaths).map(callNodePath =>
-          ProfileData.getCallNodeIndexFromPath(
-            callNodePath,
-            callNodeInfo.callNodeTable
-          )
-        );
-      }
+      (
+        { callNodeTable },
+        callNodePaths
+      ): Array<IndexIntoCallNodeTable | null> =>
+        ProfileData.getCallNodeIndicesFromPaths(
+          Array.from(callNodePaths),
+          callNodeTable
+        )
     );
     const getCallTree = createSelector(
       getRangeSelectionFilteredThread,

@@ -594,6 +594,15 @@ export function filterThreadToRange(
   });
 }
 
+export function getCallNodeIndicesFromPaths(
+  callNodePaths: CallNodePath[],
+  callNodeTable: CallNodeTable
+): Array<IndexIntoCallNodeTable | null> {
+  return callNodePaths.map(path =>
+    getCallNodeIndexFromPath(path, callNodeTable)
+  );
+}
+
 export function getCallNodeIndexFromPath(
   callNodePath: CallNodePath,
   callNodeTable: CallNodeTable
