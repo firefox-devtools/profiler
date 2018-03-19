@@ -5,7 +5,7 @@
       {
         targets: {
           node: "current",
-          browsers: "defaults"
+          browsers: "last 2 chrome versions, last 2 firefox versions"
         },
         modules: false
       }
@@ -13,18 +13,7 @@
     "react",
     "flow"
   ],
-  plugins: [
-    [
-      "transform-runtime",
-      {
-        polyfill: false,
-        regenerator: true
-      }
-    ],
-    [
-      "transform-class-properties"
-    ]
-  ],
+  plugins: [ "transform-class-properties" ],
   env: {
     // Needed for tests, as node doesn't support ES2015 modules yet.
     // The version of node we use doesn't need the generator polyfill so we're not including it
@@ -34,7 +23,7 @@
         "react",
         "flow"
       ],
-      plugins: [ "transform-class-properties" ]
+      plugins: [ "transform-class-properties" ],
     }
   }
 }

@@ -331,6 +331,7 @@ class TreeView<
 > extends React.PureComponent<TreeViewProps<NodeIndex, DisplayData>> {
   _specialItems: (NodeIndex | null)[];
   _visibleRows: NodeIndex[];
+  _expandedNodes: Set<NodeIndex | null>;
   _list: VirtualList | null;
   _takeListRef = (list: VirtualList | null) => (this._list = list);
 
@@ -342,6 +343,7 @@ class TreeView<
     (this: any)._onCopy = this._onCopy.bind(this);
     (this: any)._onRowClicked = this._onRowClicked.bind(this);
     this._specialItems = [props.selectedNodeId];
+    this._expandedNodes = new Set(props.expandedNodeIds);
     this._visibleRows = this._getAllVisibleRows(props);
     this._list = null;
   }
@@ -364,6 +366,7 @@ class TreeView<
       nextProps.tree !== this.props.tree ||
       nextProps.expandedNodeIds !== this.props.expandedNodeIds
     ) {
+      this._expandedNodes = new Set(nextProps.expandedNodeIds);
       this._visibleRows = this._getAllVisibleRows(nextProps);
     }
   }
@@ -371,7 +374,6 @@ class TreeView<
   _renderRow(nodeId: NodeIndex, index: number, columnIndex: number) {
     const {
       tree,
-      expandedNodeIds,
       fixedColumns,
       mainColumn,
       appendageColumn,
@@ -400,7 +402,7 @@ class TreeView<
       );
     }
     const canBeExpanded = tree.hasChildren(nodeId);
-    const isExpanded = expandedNodeIds.includes(nodeId);
+    const isExpanded = !this._isCollapsed(nodeId);
     return (
       <TreeViewRowScrolledColumns
         rowHeightStyle={rowHeightStyle}
@@ -430,7 +432,7 @@ class TreeView<
     depth: number
   ) {
     arr.push(nodeId);
-    if (!props.expandedNodeIds.includes(nodeId)) {
+    if (this._isCollapsed(nodeId)) {
       return;
     }
     const children = props.tree.getChildren(nodeId);
@@ -451,7 +453,7 @@ class TreeView<
   }
 
   _isCollapsed(nodeId: NodeIndex): boolean {
-    return !this.props.expandedNodeIds.includes(nodeId);
+    return !this._expandedNodes.has(nodeId);
   }
 
   _toggle(
@@ -459,7 +461,7 @@ class TreeView<
     newExpanded: boolean = this._isCollapsed(nodeId),
     toggleAll: * = false
   ) {
-    const newSet = new Set(this.props.expandedNodeIds);
+    const newSet = new Set(this._expandedNodes);
     if (newExpanded) {
       newSet.add(nodeId);
       if (toggleAll) {

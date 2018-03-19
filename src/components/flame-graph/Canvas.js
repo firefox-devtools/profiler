@@ -4,13 +4,14 @@
 
 // @flow
 import * as React from 'react';
-import * as colors from 'photon-colors';
+import colors from 'photon-colors';
 import {
   withChartViewport,
   type WithChartViewport,
 } from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
+import { getStackType } from '../../profile-logic/transforms';
 
 import type { Thread } from '../../types/profile';
 import type { CssPixels } from '../../types/units';
@@ -20,7 +21,7 @@ import type {
   IndexIntoFlameGraphTiming,
 } from '../../profile-logic/flame-graph';
 
-import type { CallNodeInfo } from '../../types/profile-derived';
+import type { CallNodeInfo, StackType } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
 
 export type OwnProps = {|
@@ -47,6 +48,138 @@ require('./Canvas.css');
 const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
+
+function stringToHex(hexString: string): number {
+  if (hexString.length !== 7 || hexString[0] !== '#') {
+    throw new Error('Expect a hex string of the form "#000000"');
+  }
+
+  // Go from a string of the form "#000000" to a number of the form 0x000000.
+  return parseInt(hexString.substr(1), 16);
+}
+
+const NATIVE_START_COLOR = stringToHex('#c1e0ff');
+const NATIVE_END_COLOR = stringToHex(colors.BLUE_50);
+const NATIVE_WHITE_TEXT_THRESHOLD = 0.8;
+const JS_START_COLOR = stringToHex('#ffd79f');
+const JS_END_COLOR = stringToHex(colors.ORANGE_50);
+const UNSYMBOLICATED_START_COLOR = stringToHex(colors.GREY_30);
+const UNSYMBOLICATED_END_COLOR = stringToHex(colors.GREY_50);
+const UNSYMBOLICATED_WHITE_TEXT_THRESHOLD = 0.66;
+
+/**
+ * Linear interpolation.
+ */
+function lerp(a: number, b: number, t: number): number {
+  return a * (1 - t) + b * t;
+}
+
+function lerpColors(hexColorA: number, hexColorB: number, t: number): string {
+  // Take the hex value, and get R G B values ranged 0-255.
+  const rA = (0xff0000 & hexColorA) >> 16;
+  const gA = (0x00ff00 & hexColorA) >> 8;
+  const bA = 0x0000ff & hexColorA;
+  const rB = (0xff0000 & hexColorB) >> 16;
+  const gB = (0x00ff00 & hexColorB) >> 8;
+  const bB = 0x0000ff & hexColorB;
+  const r = lerp(rA, rB, t);
+  const g = lerp(gA, gB, t);
+  const b = lerp(bA, bB, t);
+
+  // Turn this back into a value like 0x000000, but include an extra bit so it takes the
+  // form 0x1000000 and can keep the leading zeros.
+  const modifiedHex = 0xf000000 | (r << 16) | (g << 8) | b;
+
+  return '#' + modifiedHex.toString(16).substr(1);
+}
+
+/**
+ * Return the background color used to paint a flame graph box. The
+ * passed stack type determines the hue while the self time determines
+ * the lightness of the color. Darker colors indicate higher self
+ * times.
+ */
+export function getBackgroundColor(
+  stackType: StackType,
+  selfTimeRelative: number
+): string {
+  /**
+   * The colors are defined as a range where the starting color is the
+   * color shown when the function has no self time at all, and the
+   * ending color is when all available self time (the total time) in
+   * the flame graph is assigned to a single function. This latter
+   * case occurs when there's only a single box at the top, stretching
+   * over all horizontal space in the graph, covering all boxes below
+   * it. When the self time lies in between these two extremes, the
+   * color is an interpolated value lying between the starting and
+   * ending colors in the range.
+   *
+   * The interpolated color is derived from `selfTimeRelative`, which
+   * is the self time of the frame relative to all available self time
+   * possibly represented in the flame graph. However, using this
+   * value to interpolate to a color linearly will require the value
+   * to be relatively big in order to be able to see the shift in
+   * color, and such large self times would be visually apparent from
+   * the shape of the flame graph anyway. We are better off if we can
+   * discern also small values of self time from the color, and this
+   * is accomplished by changing the linear interpolation to a
+   * logarithmic one instead, with a steep increase in the beginning.
+   *
+   * Below we use the transformation y(x) = log(c * x + 1) / log(c + 1),
+   * where c is a constant. It has the property that y(0) = 0 and
+   * y(1) = 1. The constant has been chosen by visual inspection of
+   * the graph.
+   */
+
+  let backgroundRangeStart;
+  let backgroundRangeEnd;
+
+  const t = Math.log(5000 * selfTimeRelative + 1) / Math.log(5001);
+
+  switch (stackType) {
+    case 'native':
+      backgroundRangeStart = NATIVE_START_COLOR;
+      backgroundRangeEnd = NATIVE_END_COLOR;
+      break;
+    case 'js':
+      backgroundRangeStart = JS_START_COLOR;
+      backgroundRangeEnd = JS_END_COLOR;
+      break;
+    case 'unsymbolicated':
+      backgroundRangeStart = UNSYMBOLICATED_START_COLOR;
+      backgroundRangeEnd = UNSYMBOLICATED_END_COLOR;
+      break;
+    default:
+      throw new Error(`Unknown stack type case "${(stackType: empty)}".`);
+  }
+  return lerpColors(backgroundRangeStart, backgroundRangeEnd, t);
+}
+
+/**
+ * Return the foreground color used to draw text in a flame graph
+ * box. The color matches the background color returned from
+ * `getBackgroundColor` and this function thus expects the same
+ * parameters.
+ */
+export function getForegroundColor(
+  stackType: StackType,
+  selfTimeRelative: number
+): string {
+  const t = Math.log(5000 * selfTimeRelative + 1) / Math.log(5001);
+
+  switch (stackType) {
+    case 'native':
+      return t > NATIVE_WHITE_TEXT_THRESHOLD ? '#ffffff' : colors.BLUE_90;
+    case 'js':
+      return colors.ORANGE_90;
+    case 'unsymbolicated':
+      return t > UNSYMBOLICATED_WHITE_TEXT_THRESHOLD
+        ? '#ffffff'
+        : colors.GREY_90;
+    default:
+      throw new Error(`Unknown stack type case "${(stackType: empty)}".`);
+  }
+}
 
 class FlameGraphCanvas extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
@@ -125,7 +258,17 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
           depth === hoveredItem.depth &&
           i === hoveredItem.flameGraphTimingIndex;
 
-        ctx.fillStyle = isHovered ? 'Highlight' : colors.GREY_20;
+        const stackType = getStackType(thread, funcIndex);
+        const background = getBackgroundColor(
+          stackType,
+          stackTiming.selfTimeRelative[i]
+        );
+        const foreground = getForegroundColor(
+          stackType,
+          stackTiming.selfTimeRelative[i]
+        );
+
+        ctx.fillStyle = isHovered ? 'Highlight' : background;
         ctx.fillRect(x, y, w, h);
         // Ensure spacing between blocks.
         ctx.clearRect(x, y, 1, h);
@@ -138,7 +281,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         if (w2 > textMeasurement.minWidth) {
           const fittedText = textMeasurement.getFittedText(funcName, w2);
           if (fittedText) {
-            ctx.fillStyle = isHovered ? 'HighlightText' : '#000000';
+            ctx.fillStyle = isHovered ? 'HighlightText' : foreground;
             ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
           }
         }
@@ -167,11 +310,47 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       thread.funcTable.name[funcIndex]
     );
 
+    const stackType = getStackType(thread, funcIndex);
+    const background = getBackgroundColor(
+      stackType,
+      stackTiming.selfTimeRelative[flameGraphTimingIndex]
+    );
+
+    let stackTypeLabel;
+    switch (stackType) {
+      case 'native':
+        stackTypeLabel = 'Native';
+        break;
+      case 'js':
+        stackTypeLabel = 'JavaScript';
+        break;
+      case 'unsymbolicated':
+        stackTypeLabel = 'Unsymbolicated Native';
+        break;
+      default:
+        throw new Error(`Unknown stack type case "${stackType}".`);
+    }
+    const { totalTime, selfTime } = stackTiming.display[flameGraphTimingIndex];
+
     return (
       <div className="flameGraphCanvasTooltip">
-        <div className="tooltipOneLine">
+        <div className="tooltipOneLine tooltipHeader">
           <div className="tooltipTiming">{(100 * duration).toFixed(2)}%</div>
           <div className="tooltipTitle">{funcName}</div>
+        </div>
+        <div className="tooltipDetails">
+          <div className="tooltipLabel">Stack Type:</div>
+          <div>
+            <div
+              className="tooltipSwatch"
+              style={{ backgroundColor: background }}
+            />
+            {stackTypeLabel}
+          </div>
+          <div className="tooltipLabel">Running Time (ms):</div>
+          <div>{totalTime}</div>
+          <div className="tooltipLabel">Self (ms):</div>
+          <div>{selfTime}</div>
         </div>
       </div>
     );
