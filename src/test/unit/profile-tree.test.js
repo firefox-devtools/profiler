@@ -11,7 +11,7 @@ import {
 import {
   getCallNodeInfo,
   invertCallstack,
-  getCallNodeFromPath,
+  getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
 } from '../../profile-logic/profile-data';
 import { formatTree } from '../fixtures/utils';
@@ -263,7 +263,7 @@ describe('unfiltered call tree', function() {
    * While not specifically part of the call tree, this is a core function
    * to help navigate stacks through a list of functions.
    */
-  describe('getCallNodeFromPath', function() {
+  describe('getCallNodeIndexFromPath', function() {
     const profile = getProfile();
     const [thread] = profile.threads;
     const { callNodeTable } = getCallNodeInfo(
@@ -275,7 +275,9 @@ describe('unfiltered call tree', function() {
     // Helper to make the assertions a little less verbose.
     function checkStack(callNodePath, index, name) {
       it(`finds stack that ends in ${name}`, function() {
-        expect(getCallNodeFromPath(callNodePath, callNodeTable)).toBe(index);
+        expect(getCallNodeIndexFromPath(callNodePath, callNodeTable)).toBe(
+          index
+        );
       });
     }
 
@@ -292,9 +294,9 @@ describe('unfiltered call tree', function() {
     checkStack([A, B, H, I], I, 'I');
 
     it(`doesn't find a non-existent stack`, function() {
-      expect(getCallNodeFromPath([A, B, C, D, E, F, G], callNodeTable)).toBe(
-        null
-      );
+      expect(
+        getCallNodeIndexFromPath([A, B, C, D, E, F, G], callNodeTable)
+      ).toBe(null);
     });
   });
 });

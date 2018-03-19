@@ -721,7 +721,7 @@ export const selectorsForThread = (
       getCallNodeInfo,
       getSelectedCallNodePath,
       (callNodeInfo, callNodePath): IndexIntoCallNodeTable | null => {
-        return ProfileData.getCallNodeFromPath(
+        return ProfileData.getCallNodeIndexFromPath(
           callNodePath,
           callNodeInfo.callNodeTable
         );
@@ -736,7 +736,7 @@ export const selectorsForThread = (
       getExpandedCallNodePaths,
       (callNodeInfo, callNodePaths): (IndexIntoCallNodeTable | null)[] => {
         return Array.from(callNodePaths).map(callNodePath =>
-          ProfileData.getCallNodeFromPath(
+          ProfileData.getCallNodeIndexFromPath(
             callNodePath,
             callNodeInfo.callNodeTable
           )

@@ -19,7 +19,7 @@ import {
   getCallNodeInfo,
   getTracingMarkers,
   filterThreadByImplementation,
-  getCallNodePath,
+  getCallNodePathFromIndex,
   getSampleIndexClosestToTime,
   convertStackToCallNodePath,
 } from '../../profile-logic/profile-data';
@@ -408,11 +408,11 @@ describe('profile-data', function() {
     }
     const originalStackListA = _getStackList(thread, stack0);
     const originalStackListB = _getStackList(thread, stack1);
-    const mergedFuncListA = getCallNodePath(
+    const mergedFuncListA = getCallNodePathFromIndex(
       stackIndexToCallNodeIndex[stack0],
       callNodeTable
     );
-    const mergedFuncListB = getCallNodePath(
+    const mergedFuncListB = getCallNodePathFromIndex(
       stackIndexToCallNodeIndex[stack1],
       callNodeTable
     );

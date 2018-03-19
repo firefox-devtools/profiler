@@ -594,7 +594,7 @@ export function filterThreadToRange(
   });
 }
 
-export function getCallNodeFromPath(
+export function getCallNodeIndexFromPath(
   callNodePath: CallNodePath,
   callNodeTable: CallNodeTable
 ): IndexIntoCallNodeTable | null {
@@ -625,7 +625,7 @@ export function getCallNodeFromPath(
   return fs === -1 ? null : fs;
 }
 
-export function getCallNodePath(
+export function getCallNodePathFromIndex(
   callNodeIndex: IndexIntoCallNodeTable | null,
   callNodeTable: CallNodeTable
 ): CallNodePath {

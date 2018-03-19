@@ -8,7 +8,7 @@ import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import EmptyReasons from './EmptyReasons';
 import NodeIcon from './NodeIcon';
-import { getCallNodePath } from '../../profile-logic/profile-data';
+import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
@@ -130,7 +130,7 @@ class CallTreeComponent extends PureComponent<Props> {
     const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadIndex,
-      getCallNodePath(newSelectedCallNode, callNodeInfo.callNodeTable)
+      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
   }
 
@@ -141,7 +141,7 @@ class CallTreeComponent extends PureComponent<Props> {
     changeExpandedCallNodes(
       threadIndex,
       newExpandedCallNodeIndexes.map(callNodeIndex =>
-        getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable)
+        getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
       )
     );
   }
@@ -154,7 +154,7 @@ class CallTreeComponent extends PureComponent<Props> {
       implementationFilter: implementation,
       invertCallstack,
     } = this.props;
-    const callNodePath = getCallNodePath(
+    const callNodePath = getCallNodePathFromIndex(
       callNodeIndex,
       callNodeInfo.callNodeTable
     );
