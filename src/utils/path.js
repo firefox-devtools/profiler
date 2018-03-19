@@ -37,6 +37,13 @@ export class PathSet implements Iterable<CallNodePath> {
   _table: Map<string, CallNodePath>;
 
   constructor(iterable?: Iterable<CallNodePath>) {
+    if (iterable instanceof PathSet) {
+      // This shortcut avoids the call to `hashPath` by taking advantage of
+      // knowing some inner workings.
+      this._table = new Map(iterable._table);
+      return;
+    }
+
     this._table = new Map();
 
     if (!iterable) {
