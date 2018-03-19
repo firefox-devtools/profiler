@@ -9,6 +9,7 @@
     "build": "yarn build:quiet --progress",
     "build-prod:quiet": "yarn build:clean && env NODE_ENV=production webpack",
     "build-prod": "yarn build-prod:quiet --progress",
+    "build-prod-readable": "env UGLIFY_OPTIONS='{ \"mangle\": false }' yarn build-prod",
     "build-docs": "documentation build src/types/profile.js -f md > docs/processed-profile-format.md; cat docs/processed-profile-format.md",
     "lint": "eslint *.js bin src",
     "lint-fix": "yarn lint --fix",
