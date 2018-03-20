@@ -173,6 +173,8 @@ type TreeViewRowScrolledColumnsProps<
   +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
   +onAppendageButtonClick?: ((NodeIndex | null, string) => mixed) | null,
   +highlightRegExp: RegExp | null,
+  // React converts height into 'px' values, while lineHeight is valid in
+  // non-'px' units.
   +rowHeightStyle: { height: CssPixels, lineHeight: string },
   +indentWidth: CssPixels,
 |};
@@ -385,6 +387,8 @@ class TreeView<
       indentWidth,
     } = this.props;
     const displayData = tree.getDisplayData(nodeId);
+    // React converts height into 'px' values, while lineHeight is valid in
+    // non-'px' units.
     const rowHeightStyle = { height: rowHeight, lineHeight: `${rowHeight}px` };
 
     if (columnIndex === 0) {
