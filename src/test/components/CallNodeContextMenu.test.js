@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import ProfileCallTreeContextMenu from '../../components/calltree/ProfileCallTreeContextMenu';
+import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { mount } from 'enzyme';
@@ -14,7 +14,7 @@ import { Provider } from 'react-redux';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import copy from 'copy-to-clipboard';
 
-describe('calltree/ProfileCallTreeContextMenu', function() {
+describe('calltree/CallNodeContextMenu', function() {
   // Provide a store with a useful profile to assert context menu operations off of.
   function createStore() {
     // Create a profile that every transform can be applied to.
@@ -43,7 +43,7 @@ describe('calltree/ProfileCallTreeContextMenu', function() {
   function setup(store = createStore()) {
     const wrapper = mount(
       <Provider store={store}>
-        <ProfileCallTreeContextMenu />
+        <CallNodeContextMenu />
       </Provider>
     );
 
