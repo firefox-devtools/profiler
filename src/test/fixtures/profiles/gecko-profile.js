@@ -106,9 +106,11 @@ const thread = {
   markers: {
     schema: { name: 0, time: 1, data: 2 },
     data: [
+      // Please keep the next marker at the start if you add more markers in
+      // this structure.
+      // We want to test tracing markers with the missing "start" marker. So
+      // here is only the "end" marker without a matching "start" marker.
       [
-        // Ending a tracing but never starting it.
-        // Please keep it at the start if you add more markers in this structure
         10, // Rasterize
         1,
         {

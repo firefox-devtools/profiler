@@ -979,13 +979,17 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
       };
       tracingMarkers.push(marker);
     } else if (data.type === 'tracing') {
-      // Tracing markers come in the form of 2 distinct markers: the first is
-      // emitted at the start of some process, the second at the end. We convert
-      // these 2 one-time markers into one marker with a non-null duration.
+      // Tracing markers are created from two distinct markers that are created at
+      // the start and end of whatever code that is running that we care about.
+      // This is implemented by AutoProfilerTracing in Gecko.
+      //
+      // In this function we convert both of these raw markers into a single
+      // tracing marker with a non-null duration.
+      //
       // We also handle nested markers by assuming markers of the same type are
       // never interwoven: given input markers startA, startB, endC, endD, we'll
       // get 2 markers A-D and B-C.
-      // This is implemented by AutoProfilerTracing in Gecko.
+
       const time = markers.time[i];
       const nameStringIndex = markers.name[i];
       if (data.interval === 'start') {
@@ -1006,11 +1010,17 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
         const markerBucket = openMarkers.get(nameStringIndex);
         let marker;
         if (markerBucket && markerBucket.length) {
+          // We already encountered a matching "start" marker for this "end".
           marker = markerBucket.pop();
         } else {
+          // No matching "start" marker has been encountered before this "end",
+          // this means it was issued before the capture started. Here we create
+          // a fake "start" marker to create the final tracing marker.
+          // Note we won't have additional data (eg the cause stack) for this
+          // marker because that data is contained in the "start" marker.
+
           const nameStringIndex = markers.name[i];
-          // The tracing marker's start point is before the start of this
-          // profile. We'll miss the stack.
+
           marker = {
             start: -1, // Something negative so that we can distinguish it later
             name: stringTable.getString(nameStringIndex),
