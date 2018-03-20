@@ -82,6 +82,9 @@
     "babel-preset-react-hmre": "^1.1.1",
     "css-loader": "^0.28.9",
     "devtools-license-check": "^0.6.0",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "enzyme-to-json": "^3.3.1",
     "eslint": "^4.12.0",
     "eslint-config-prettier": "^2.4.0",
     "eslint-plugin-babel": "^4.1.2",
@@ -135,6 +138,9 @@
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/test/fixtures/mocks/file-mock.js",
       "\\.(css|less)$": "<rootDir>/src/test/fixtures/mocks/style-mock.js"
     },
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ],
     "restoreMocks": true,
     "setupTestFrameworkScriptFile": "./src/test/setup.js",
     "verbose": true

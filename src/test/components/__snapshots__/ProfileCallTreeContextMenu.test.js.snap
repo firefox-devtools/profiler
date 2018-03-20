@@ -1,0 +1,785 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`calltree/ProfileCallTreeContextMenu basic rendering renders a context menu 1`] = `
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <Connect(ProfileCallTreeContextMenu)>
+    <ProfileCallTreeContextMenu
+      addTransformToStack={[Function]}
+      callNodeInfo={
+        Object {
+          "callNodeTable": Object {
+            "depth": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              5,
+              6,
+              4,
+              5,
+            ],
+            "func": Int32Array [
+              0,
+              1,
+              1,
+              1,
+              2,
+              3,
+              4,
+              5,
+              4,
+              6,
+              7,
+            ],
+            "length": 11,
+            "prefix": Int32Array [
+              -1,
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              4,
+              7,
+              3,
+              9,
+            ],
+          },
+          "stackIndexToCallNodeIndex": Uint32Array [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+          ],
+        }
+      }
+      expandAllCallNodeDescendants={[Function]}
+      implementation="combined"
+      inverted={false}
+      selectedCallNodeIndex={1}
+      selectedCallNodePath={
+        Array [
+          0,
+          1,
+        ]
+      }
+      thread={
+        Object {
+          "frameTable": Object {
+            "address": Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
+            "category": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "func": Array [
+              0,
+              1,
+              1,
+              1,
+              2,
+              3,
+              4,
+              5,
+              4,
+              6,
+              7,
+            ],
+            "implementation": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "length": 11,
+            "line": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "optimizations": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+          },
+          "funcTable": Object {
+            "address": Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
+            "fileName": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "isJS": Array [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+            ],
+            "length": 8,
+            "lineNumber": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "name": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+            ],
+            "resource": Array [
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+            ],
+          },
+          "libs": Array [
+            Object {
+              "arch": "",
+              "breakpadId": "",
+              "debugName": "library",
+              "debugPath": "/path/to/library",
+              "end": 0,
+              "name": "library",
+              "offset": 0,
+              "path": "/path/to/library",
+              "start": 0,
+            },
+          ],
+          "markers": Object {
+            "data": Array [],
+            "length": 0,
+            "name": Array [],
+            "time": Array [],
+          },
+          "name": "Empty",
+          "pid": 0,
+          "processType": "default",
+          "resourceTable": Object {
+            "addonId": Array [],
+            "host": Array [
+              undefined,
+            ],
+            "icon": Array [],
+            "length": 1,
+            "lib": Array [
+              0,
+            ],
+            "name": Array [
+              8,
+            ],
+            "type": Array [
+              0,
+            ],
+          },
+          "samples": Object {
+            "length": 3,
+            "responsiveness": Array [
+              0,
+              0,
+              0,
+            ],
+            "rss": Array [
+              null,
+              null,
+              null,
+            ],
+            "stack": Array [
+              6,
+              8,
+              10,
+            ],
+            "time": Array [
+              0,
+              1,
+              2,
+            ],
+            "uss": Array [
+              null,
+              null,
+              null,
+            ],
+          },
+          "stackTable": Object {
+            "frame": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+            ],
+            "length": 11,
+            "prefix": Array [
+              null,
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              4,
+              7,
+              3,
+              9,
+            ],
+          },
+          "stringTable": UniqueStringArray {
+            "_array": Array [
+              "A",
+              "B:library",
+              "C",
+              "D",
+              "E",
+              "F",
+              "H",
+              "I",
+              "library",
+            ],
+            "_stringToIndex": Map {
+              "A" => 0,
+              "B:library" => 1,
+              "C" => 2,
+              "D" => 3,
+              "E" => 4,
+              "F" => 5,
+              "H" => 6,
+              "I" => 7,
+              "library" => 8,
+            },
+          },
+          "tid": 0,
+        }
+      }
+      threadIndex={0}
+    >
+      <ContextMenu
+        className=""
+        data={Object {}}
+        hideOnLeave={false}
+        id="ProfileCallTreeContextMenu"
+        onHide={[Function]}
+        onMouseLeave={[Function]}
+        onShow={[Function]}
+        style={Object {}}
+      >
+        <nav
+          className="react-contextmenu"
+          onContextMenu={[Function]}
+          onMouseLeave={[Function]}
+          role="menu"
+          style={
+            Object {
+              "opacity": 0,
+              "pointerEvents": "none",
+              "position": "fixed",
+            }
+          }
+          tabIndex="-1"
+        >
+          <MenuItem
+            attributes={Object {}}
+            data={
+              Object {
+                "type": "merge-call-node",
+              }
+            }
+            disabled={false}
+            divider={false}
+            key=".0"
+            onClick={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            preventClose={false}
+            selected={false}
+          >
+            <div
+              aria-disabled="false"
+              aria-orientation={null}
+              className="react-contextmenu-item"
+              onClick={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onTouchEnd={[Function]}
+              role="menuitem"
+              tabIndex="-1"
+            >
+              <span
+                className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge"
+              />
+              Merge node into calling function
+            </div>
+          </MenuItem>
+          <MenuItem
+            attributes={Object {}}
+            data={
+              Object {
+                "type": "merge-function",
+              }
+            }
+            disabled={false}
+            divider={false}
+            key=".1"
+            onClick={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            preventClose={false}
+            selected={false}
+          >
+            <div
+              aria-disabled="false"
+              aria-orientation={null}
+              className="react-contextmenu-item"
+              onClick={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onTouchEnd={[Function]}
+              role="menuitem"
+              tabIndex="-1"
+            >
+              <span
+                className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge"
+              />
+              Merge function into caller across the entire tree
+            </div>
+          </MenuItem>
+          <MenuItem
+            attributes={Object {}}
+            data={
+              Object {
+                "type": "focus-subtree",
+              }
+            }
+            disabled={false}
+            divider={false}
+            key=".2"
+            onClick={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            preventClose={false}
+            selected={false}
+          >
+            <div
+              aria-disabled="false"
+              aria-orientation={null}
+              className="react-contextmenu-item"
+              onClick={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onTouchEnd={[Function]}
+              role="menuitem"
+              tabIndex="-1"
+            >
+              <span
+                className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus"
+              />
+              Focus on subtree
+            </div>
+          </MenuItem>
+          <MenuItem
+            attributes={Object {}}
+            data={
+              Object {
+                "type": "focus-function",
+              }
+            }
+            disabled={false}
+            divider={false}
+            key=".3"
+            onClick={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            preventClose={false}
+            selected={false}
+          >
+            <div
+              aria-disabled="false"
+              aria-orientation={null}
+              className="react-contextmenu-item"
+              onClick={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onTouchEnd={[Function]}
+              role="menuitem"
+              tabIndex="-1"
+            >
+              <span
+                className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus"
+              />
+              Focus on function
+            </div>
+          </MenuItem>
+          <MenuItem
+            attributes={Object {}}
+            data={
+              Object {
+                "type": "collapse-function-subtree",
+              }
+            }
+            disabled={false}
+            divider={false}
+            key=".4"
+            onClick={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            preventClose={false}
+            selected={false}
+          >
+            <div
+              aria-disabled="false"
+              aria-orientation={null}
+              className="react-contextmenu-item"
+              onClick={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onTouchEnd={[Function]}
+              role="menuitem"
+              tabIndex="-1"
+            >
+              <span
+                className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse"
+              />
+              Collapse function’s subtree across the entire tree
+            </div>
+          </MenuItem>
+          <MenuItem
+            attributes={Object {}}
+            data={
+              Object {
+                "type": "collapse-resource",
+              }
+            }
+            disabled={false}
+            divider={false}
+            key=".5"
+            onClick={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            preventClose={false}
+            selected={false}
+          >
+            <div
+              aria-disabled="false"
+              aria-orientation={null}
+              className="react-contextmenu-item"
+              onClick={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onTouchEnd={[Function]}
+              role="menuitem"
+              tabIndex="-1"
+            >
+              <span
+                className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse"
+              />
+              Collapse functions in
+               
+              <span
+                className="profileCallTreeContextMenuLabel"
+              >
+                library
+              </span>
+            </div>
+          </MenuItem>
+          <MenuItem
+            attributes={Object {}}
+            data={
+              Object {
+                "type": "collapse-direct-recursion",
+              }
+            }
+            disabled={false}
+            divider={false}
+            key=".6"
+            onClick={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            preventClose={false}
+            selected={false}
+          >
+            <div
+              aria-disabled="false"
+              aria-orientation={null}
+              className="react-contextmenu-item"
+              onClick={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onTouchEnd={[Function]}
+              role="menuitem"
+              tabIndex="-1"
+            >
+              <span
+                className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse"
+              />
+              Collapse direct recursion
+            </div>
+          </MenuItem>
+          <MenuItem
+            attributes={Object {}}
+            data={
+              Object {
+                "type": "drop-function",
+              }
+            }
+            disabled={false}
+            divider={false}
+            key=".7"
+            onClick={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            preventClose={false}
+            selected={false}
+          >
+            <div
+              aria-disabled="false"
+              aria-orientation={null}
+              className="react-contextmenu-item"
+              onClick={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onTouchEnd={[Function]}
+              role="menuitem"
+              tabIndex="-1"
+            >
+              <span
+                className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconDrop"
+              />
+              Drop samples with this function
+            </div>
+          </MenuItem>
+          <div
+            className="react-contextmenu-separator"
+            key=".8"
+          />
+          <MenuItem
+            attributes={Object {}}
+            data={
+              Object {
+                "type": "expand-all",
+              }
+            }
+            disabled={false}
+            divider={false}
+            key=".9"
+            onClick={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            preventClose={false}
+            selected={false}
+          >
+            <div
+              aria-disabled="false"
+              aria-orientation={null}
+              className="react-contextmenu-item"
+              onClick={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onTouchEnd={[Function]}
+              role="menuitem"
+              tabIndex="-1"
+            >
+              Expand all
+            </div>
+          </MenuItem>
+          <div
+            className="react-contextmenu-separator"
+            key=".a"
+          />
+          <MenuItem
+            attributes={Object {}}
+            data={
+              Object {
+                "type": "searchfox",
+              }
+            }
+            disabled={false}
+            divider={false}
+            key=".b"
+            onClick={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            preventClose={false}
+            selected={false}
+          >
+            <div
+              aria-disabled="false"
+              aria-orientation={null}
+              className="react-contextmenu-item"
+              onClick={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onTouchEnd={[Function]}
+              role="menuitem"
+              tabIndex="-1"
+            >
+              Look up the function name on Searchfox
+            </div>
+          </MenuItem>
+          <MenuItem
+            attributes={Object {}}
+            data={
+              Object {
+                "type": "copy-function-name",
+              }
+            }
+            disabled={false}
+            divider={false}
+            key=".c"
+            onClick={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            preventClose={false}
+            selected={false}
+          >
+            <div
+              aria-disabled="false"
+              aria-orientation={null}
+              className="react-contextmenu-item"
+              onClick={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onTouchEnd={[Function]}
+              role="menuitem"
+              tabIndex="-1"
+            >
+              Copy function name
+            </div>
+          </MenuItem>
+          <MenuItem
+            attributes={Object {}}
+            data={
+              Object {
+                "type": "copy-stack",
+              }
+            }
+            disabled={false}
+            divider={false}
+            key=".e"
+            onClick={[Function]}
+            onMouseLeave={[Function]}
+            onMouseMove={[Function]}
+            preventClose={false}
+            selected={false}
+          >
+            <div
+              aria-disabled="false"
+              aria-orientation={null}
+              className="react-contextmenu-item"
+              onClick={[Function]}
+              onMouseLeave={[Function]}
+              onMouseMove={[Function]}
+              onTouchEnd={[Function]}
+              role="menuitem"
+              tabIndex="-1"
+            >
+              Copy stack
+            </div>
+          </MenuItem>
+        </nav>
+      </ContextMenu>
+    </ProfileCallTreeContextMenu>
+  </Connect(ProfileCallTreeContextMenu)>
+</Provider>
+`;
