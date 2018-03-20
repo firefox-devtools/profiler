@@ -264,13 +264,26 @@ export type InvalidationPayload = {
  * The payload for the UserTimings API. These are added through performance.measure()
  * and performance.mark(). https://developer.mozilla.org/en-US/docs/Web/API/Performance
  */
-export type UserTimingMarkerPayload = {
-  type: 'UserTiming',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
-  name: string,
-  entryType: 'measure' | 'mark',
-};
+export type UserTimingMarkerPayload =
+  | {|
+      +type: 'UserTiming',
+      +startTime: Milliseconds,
+      +endTime: Milliseconds,
+      +name: string,
+      +entryType: 'mark',
+    |}
+  | {|
+      +type: 'UserTiming',
+      +startTime: Milliseconds,
+      +endTime: Milliseconds,
+      +name: string,
+      +entryType: 'measure',
+      // Newer profiles will always be null | string, but older profiles could not have
+      // these properties. No profile upgrader was written for this as it doesn't break
+      // backwards compatibility.
+      +startMark?: null | string,
+      +endMark?: null | string,
+    |};
 
 export type DOMEventMarkerPayload = {
   type: 'DOMEvent',
