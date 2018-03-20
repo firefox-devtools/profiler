@@ -68,7 +68,7 @@ export function getFlameGraphTiming(
       nodeIndex
     );
 
-    const { totalTime, selfTime } = callTree.getDisplayData(nodeIndex);
+    const { totalTime, selfTime } = callTree.getTimingDisplayData(nodeIndex);
 
     // Select an existing row, or create a new one.
     let row = timing[depth];

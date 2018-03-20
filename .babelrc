@@ -13,7 +13,10 @@
     "react",
     "flow"
   ],
-  plugins: [ "transform-class-properties" ],
+  plugins: [
+    "transform-class-properties",
+    [ "transform-object-rest-spread", { "useBuiltIns": true }]
+  ],
   env: {
     // Needed for tests, as node doesn't support ES2015 modules yet.
     // The version of node we use doesn't need the generator polyfill so we're not including it
@@ -23,7 +26,10 @@
         "react",
         "flow"
       ],
-      plugins: [ "transform-class-properties" ],
+      plugins: [
+        "transform-class-properties",
+        [ "transform-object-rest-spread", { "useBuiltIns": true }]
+      ],
     }
   }
 }

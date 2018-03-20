@@ -30,3 +30,10 @@
   background: none;
   cursor: pointer;
 }
+
+@media (max-width: 767px) {
+  .appFooterLinks {
+    width: 100%;
+    text-align: center;
+  }
+}
