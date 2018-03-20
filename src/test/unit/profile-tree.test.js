@@ -174,6 +174,15 @@ describe('unfiltered call tree', function() {
       });
     });
 
+    describe('getChildren() after preloading cache', function() {
+      it('returns an array with the children indexes', function() {
+        const callTree = callTreeFromProfile(profile);
+        callTree.preloadChildrenCache();
+        expect(callTree.getChildren(C)).toEqual([D, F]);
+        expect(callTree.getChildren(E)).toEqual([]);
+      });
+    });
+
     describe('hasChildren()', function() {
       it('determines if nodes have children', function() {
         expect(callTree.hasChildren(C)).toEqual(true);
@@ -236,6 +245,15 @@ describe('unfiltered call tree', function() {
           selfTime: '—',
           totalTime: '3',
           totalTimePercent: '100%',
+        });
+      });
+    });
+
+    describe('getTimingDisplayData()', function() {
+      it('gets formatted timing data for a given callNodeIndex', function() {
+        expect(callTree.getTimingDisplayData(D)).toEqual({
+          selfTime: '—',
+          totalTime: '1',
         });
       });
     });

@@ -217,7 +217,7 @@ class CallTreeComponent extends PureComponent<Props> {
         appendageButtons={this._appendageButtons}
         onAppendageButtonClick={this._onAppendageButtonClick}
         ref={this._takeTreeViewRef}
-        contextMenuId={'ProfileCallTreeContextMenu'}
+        contextMenuId={'CallNodeContextMenu'}
         maxNodeDepth={callNodeMaxDepth}
         icons={this.props.icons}
         rowHeight={16}

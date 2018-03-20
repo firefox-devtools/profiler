@@ -14,6 +14,7 @@ type Props<HoveredItem> = {
   containerWidth: CssPixels,
   containerHeight: CssPixels,
   className: string,
+  onMouseDown?: (HoveredItem | null) => void,
   onDoubleClickItem: (HoveredItem | null) => void,
   getHoveredItemInfo: HoveredItem => React.Node,
   drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
@@ -49,6 +50,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     };
 
     (this: any)._setCanvasRef = this._setCanvasRef.bind(this);
+    (this: any)._onMouseDown = this._onMouseDown.bind(this);
     (this: any)._onMouseMove = this._onMouseMove.bind(this);
     (this: any)._onMouseOut = this._onMouseOut.bind(this);
     (this: any)._onDoubleClick = this._onDoubleClick.bind(this);
@@ -94,6 +96,12 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       const scale = 1 / this._devicePixelRatio * devicePixelRatio;
       ctx.scale(scale, scale);
       this._devicePixelRatio = devicePixelRatio;
+    }
+  }
+
+  _onMouseDown() {
+    if (this.props.onMouseDown !== undefined) {
+      this.props.onMouseDown(this.state.hoveredItem);
     }
   }
 
@@ -172,6 +180,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
         <canvas
           className={className}
           ref={this._setCanvasRef}
+          onMouseDown={this._onMouseDown}
           onMouseMove={this._onMouseMove}
           onMouseOut={this._onMouseOut}
           onDoubleClick={this._onDoubleClick}

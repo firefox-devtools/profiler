@@ -89,6 +89,9 @@ if (process.env.NODE_ENV === 'production') {
       sourceMap: true,
       parallel: true,
       cache: true,
+      uglifyOptions: process.env.UGLIFY_OPTIONS
+        ? JSON.parse(process.env.UGLIFY_OPTIONS)
+        : undefined,
     }),
     new OfflinePlugin({
       relativePaths: false,
