@@ -174,6 +174,15 @@ describe('unfiltered call tree', function() {
       });
     });
 
+    describe('getChildren() after preloading cache', function() {
+      it('returns an array with the children indexes', function() {
+        const callTree = callTreeFromProfile(profile);
+        callTree.preloadChildrenCache();
+        expect(callTree.getChildren(C)).toEqual([D, F]);
+        expect(callTree.getChildren(E)).toEqual([]);
+      });
+    });
+
     describe('hasChildren()', function() {
       it('determines if nodes have children', function() {
         expect(callTree.hasChildren(C)).toEqual(true);
