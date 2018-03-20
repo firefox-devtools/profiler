@@ -7,7 +7,7 @@
 import React from 'react';
 import CallTree from './CallTree';
 import StackSettings from '../shared/StackSettings';
-import TransformNavigator from './TransformNavigator';
+import TransformNavigator from '../shared/TransformNavigator';
 
 const ProfileCallTreeView = () => (
   <div className="treeAndSidebarWrapper">

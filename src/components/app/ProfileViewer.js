@@ -19,7 +19,7 @@ import { changeSelectedTab, changeTabOrder } from '../../actions/app';
 import { getTabOrder } from '../../reducers/profile-view';
 import { getSelectedTab } from '../../reducers/url-state';
 import ProfileViewerHeader from '../header/ProfileViewerHeader';
-import ProfileCallTreeContextMenu from '../calltree/ProfileCallTreeContextMenu';
+import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
 import FooterLinks from './FooterLinks';
@@ -111,7 +111,7 @@ class ProfileViewer extends PureComponent<Props> {
           }[selectedTab]
         }
         <SymbolicationStatusOverlay />
-        <ProfileCallTreeContextMenu />
+        <CallNodeContextMenu />
         <MarkerTableContextMenu />
         <ProfileThreadHeaderContextMenu />
         <FooterLinks />

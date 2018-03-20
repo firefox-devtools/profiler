@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
 import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
@@ -13,8 +13,10 @@ import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
   expandAllCallNodeDescendants,
+  setCallNodeContextMenuVisibility,
 } from '../../actions/profile-view';
 import {
+  getSelectedTab,
   getSelectedThreadIndex,
   getImplementationFilter,
   getInvertCallstack,
@@ -25,7 +27,7 @@ import {
 } from '../../utils/flow';
 
 import type { TransformType } from '../../types/transforms';
-import type { ImplementationFilter } from '../../types/actions';
+import type { ImplementationFilter, TabSlug } from '../../types/actions';
 import type {
   IndexIntoCallNodeTable,
   CallNodeInfo,
@@ -45,22 +47,32 @@ type StateProps = {|
   +inverted: boolean,
   +selectedCallNodePath: CallNodePath,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +selectedTab: TabSlug,
 |};
 
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
   +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
+  +setCallNodeContextMenuVisibility: typeof setCallNodeContextMenuVisibility,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-require('./ProfileCallTreeContextMenu.css');
+require('./CallNodeContextMenu.css');
 
-class ProfileCallTreeContextMenu extends PureComponent<Props> {
+class CallNodeContextMenu extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any).handleClick = this.handleClick.bind(this);
   }
+
+  _menuShown = () => {
+    this.props.setCallNodeContextMenuVisibility(true);
+  };
+
+  _menuHidden = () => {
+    this.props.setCallNodeContextMenuVisibility(false);
+  };
 
   _getFunctionName(): string {
     const {
@@ -326,9 +338,15 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       inverted,
       thread: { funcTable },
       callNodeInfo: { callNodeTable },
+      selectedTab,
     } = this.props;
 
     if (selectedCallNodeIndex === null) {
+      // If the menu was visible while selectedCallNodeIndex was
+      // changed to null, the onHide callback will not execute when
+      // null is returned below. Call _menuHidden() here to be ensure
+      // the visibility state is updated.
+      this._menuHidden();
       return null;
     }
 
@@ -336,28 +354,33 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     const isJS = funcTable.isJS[funcIndex];
     // This could be the C++ library, or the JS filename.
     const nameForResource = this.getNameForSelectedResource();
+    const showExpandAll = selectedTab === 'calltree';
 
     return (
-      <ContextMenu id={'ProfileCallTreeContextMenu'}>
+      <ContextMenu
+        id={'CallNodeContextMenu'}
+        onShow={this._menuShown}
+        onHide={this._menuHidden}
+      >
         {inverted ? null : (
           <MenuItem
             onClick={this.handleClick}
             data={{ type: 'merge-call-node' }}
           >
-            <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
+            <span className="callNodeContextMenuIcon callNodeContextMenuIconMerge" />
             Merge node into calling function
           </MenuItem>
         )}
         <MenuItem onClick={this.handleClick} data={{ type: 'merge-function' }}>
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconMerge" />
           Merge function into caller across the entire tree
         </MenuItem>
         <MenuItem onClick={this.handleClick} data={{ type: 'focus-subtree' }}>
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus" />
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconFocus" />
           Focus on subtree
         </MenuItem>
         <MenuItem onClick={this.handleClick} data={{ type: 'focus-function' }}>
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus" />
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconFocus" />
           {inverted
             ? 'Focus on calls made by this function'
             : 'Focus on function'}
@@ -366,7 +389,7 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
           onClick={this.handleClick}
           data={{ type: 'collapse-function-subtree' }}
         >
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
           {'Collapse function’s subtree across the entire tree'}
         </MenuItem>
         {nameForResource ? (
@@ -374,11 +397,9 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
             onClick={this.handleClick}
             data={{ type: 'collapse-resource' }}
           >
-            <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+            <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
             Collapse functions in{' '}
-            <span className="profileCallTreeContextMenuLabel">
-              {nameForResource}
-            </span>
+            <span className="callNodeContextMenuLabel">{nameForResource}</span>
           </MenuItem>
         ) : null}
         {this.isRecursiveCall() ? (
@@ -386,19 +407,23 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
             onClick={this.handleClick}
             data={{ type: 'collapse-direct-recursion' }}
           >
-            <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+            <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
             Collapse direct recursion
           </MenuItem>
         ) : null}
         <MenuItem onClick={this.handleClick} data={{ type: 'drop-function' }}>
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconDrop" />
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconDrop" />
           Drop samples with this function
         </MenuItem>
         <div className="react-contextmenu-separator" />
-        <MenuItem onClick={this.handleClick} data={{ type: 'expand-all' }}>
-          Expand all
-        </MenuItem>
-        <div className="react-contextmenu-separator" />
+        {showExpandAll ? (
+          <Fragment>
+            <MenuItem onClick={this.handleClick} data={{ type: 'expand-all' }}>
+              Expand all
+            </MenuItem>
+            <div className="react-contextmenu-separator" />
+          </Fragment>
+        ) : null}
         <MenuItem onClick={this.handleClick} data={{ type: 'searchfox' }}>
           Look up the function name on Searchfox
         </MenuItem>
@@ -434,8 +459,13 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
       state
     ),
+    selectedTab: getSelectedTab(state),
   }),
-  mapDispatchToProps: { addTransformToStack, expandAllCallNodeDescendants },
-  component: ProfileCallTreeContextMenu,
+  mapDispatchToProps: {
+    addTransformToStack,
+    expandAllCallNodeDescendants,
+    setCallNodeContextMenuVisibility,
+  },
+  component: CallNodeContextMenu,
 };
 export default explicitConnect(options);

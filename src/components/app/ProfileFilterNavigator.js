@@ -7,7 +7,7 @@
 import explicitConnect from '../../utils/connect';
 import { popRangeFiltersAndUnsetSelection } from '../../actions/profile-view';
 import { getRangeFilterLabels } from '../../reducers/url-state';
-import FilterNavigatorBar from '../calltree/FilterNavigatorBar';
+import FilterNavigatorBar from '../shared/FilterNavigatorBar';
 
 import type { ExplicitConnectOptions } from '../../utils/connect';
 import type { ElementProps } from 'react';
