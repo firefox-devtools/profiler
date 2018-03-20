@@ -220,6 +220,8 @@ class CallTreeComponent extends PureComponent<Props> {
         contextMenuId={'CallNodeContextMenu'}
         maxNodeDepth={callNodeMaxDepth}
         icons={this.props.icons}
+        rowHeight={16}
+        indentWidth={10}
       />
     );
   }
