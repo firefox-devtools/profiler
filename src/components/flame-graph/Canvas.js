@@ -21,7 +21,11 @@ import type {
   IndexIntoFlameGraphTiming,
 } from '../../profile-logic/flame-graph';
 
-import type { CallNodeInfo, StackType } from '../../types/profile-derived';
+import type {
+  CallNodeInfo,
+  IndexIntoCallNodeTable,
+  StackType,
+} from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
 
 export type OwnProps = {|
@@ -30,6 +34,9 @@ export type OwnProps = {|
   +flameGraphTiming: FlameGraphTiming,
   +callNodeInfo: CallNodeInfo,
   +stackFrameHeight: CssPixels,
+  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
+  +disableTooltips: boolean,
 |};
 
 type Props = {|
@@ -58,13 +65,19 @@ function stringToHex(hexString: string): number {
   return parseInt(hexString.substr(1), 16);
 }
 
+// stringToHex is needed for interpolated colors
 const NATIVE_START_COLOR = stringToHex('#c1e0ff');
 const NATIVE_END_COLOR = stringToHex(colors.BLUE_50);
+const NATIVE_HOVER_COLOR = colors.BLUE_60;
 const NATIVE_WHITE_TEXT_THRESHOLD = 0.8;
+
 const JS_START_COLOR = stringToHex('#ffd79f');
 const JS_END_COLOR = stringToHex(colors.ORANGE_50);
+const JS_HOVER_COLOR = colors.ORANGE_60;
+
 const UNSYMBOLICATED_START_COLOR = stringToHex(colors.GREY_30);
 const UNSYMBOLICATED_END_COLOR = stringToHex(colors.GREY_50);
+const UNSYMBOLICATED_HOVER_COLOR = colors.GREY_60;
 const UNSYMBOLICATED_WHITE_TEXT_THRESHOLD = 0.66;
 
 /**
@@ -181,6 +194,19 @@ export function getForegroundColor(
   }
 }
 
+export function getHoverBackgroundColor(stackType: StackType): string {
+  switch (stackType) {
+    case 'native':
+      return NATIVE_HOVER_COLOR;
+    case 'js':
+      return JS_HOVER_COLOR;
+    case 'unsymbolicated':
+      return UNSYMBOLICATED_HOVER_COLOR;
+    default:
+      throw new Error(`Unknown stack type case "${(stackType: empty)}".`);
+  }
+}
+
 class FlameGraphCanvas extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
 
@@ -201,6 +227,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       callNodeInfo: { callNodeTable },
       stackFrameHeight,
       maxStackDepth,
+      selectedCallNodeIndex,
       viewport: {
         containerWidth,
         containerHeight,
@@ -253,22 +280,29 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
           thread.funcTable.name[funcIndex]
         );
 
+        const stackType = getStackType(thread, funcIndex);
         const isHovered =
           hoveredItem &&
           depth === hoveredItem.depth &&
           i === hoveredItem.flameGraphTimingIndex;
+        let background, foreground;
 
-        const stackType = getStackType(thread, funcIndex);
-        const background = getBackgroundColor(
-          stackType,
-          stackTiming.selfTimeRelative[i]
-        );
-        const foreground = getForegroundColor(
-          stackType,
-          stackTiming.selfTimeRelative[i]
-        );
+        if (isHovered) {
+          background = getHoverBackgroundColor(stackType);
+          foreground = '#ffffff';
+        } else {
+          background = getBackgroundColor(
+            stackType,
+            stackTiming.selfTimeRelative[i]
+          );
+          foreground = getForegroundColor(
+            stackType,
+            stackTiming.selfTimeRelative[i]
+          );
+        }
 
-        ctx.fillStyle = isHovered ? 'Highlight' : background;
+        const isSelected = selectedCallNodeIndex === callNodeIndex;
+        ctx.fillStyle = isSelected ? 'Highlight' : background;
         ctx.fillRect(x, y, w, h);
         // Ensure spacing between blocks.
         ctx.clearRect(x, y, 1, h);
@@ -281,7 +315,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         if (w2 > textMeasurement.minWidth) {
           const fittedText = textMeasurement.getFittedText(funcName, w2);
           if (fittedText) {
-            ctx.fillStyle = isHovered ? 'HighlightText' : foreground;
+            ctx.fillStyle = isSelected ? 'HighlightText' : foreground;
             ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
           }
         }
@@ -297,7 +331,13 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       thread,
       flameGraphTiming,
       callNodeInfo: { callNodeTable },
+      disableTooltips,
     } = this.props;
+
+    if (disableTooltips) {
+      return null;
+    }
+
     const stackTiming = flameGraphTiming[depth];
 
     const duration =
@@ -356,6 +396,19 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     );
   }
 
+  _onMouseDown = (hoveredItem: HoveredStackTiming | null) => {
+    // Change our selection to the hovered item, or deselect (with
+    // null) if there's nothing hovered.
+    let callNodeIndex = null;
+    if (hoveredItem !== null) {
+      const { depth, flameGraphTimingIndex } = hoveredItem;
+      const { flameGraphTiming } = this.props;
+      const stackTiming = flameGraphTiming[depth];
+      callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
+    }
+    this.props.onSelectionChange(callNodeIndex);
+  };
+
   _hitTest(x: CssPixels, y: CssPixels): HoveredStackTiming | null {
     const {
       flameGraphTiming,
@@ -396,6 +449,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
+        onMouseDown={this._onMouseDown}
       />
     );
   }

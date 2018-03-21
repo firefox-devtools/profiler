@@ -5,17 +5,21 @@
 
 import {
   BLUE_50,
+  BLUE_60,
   BLUE_90,
   ORANGE_50,
+  ORANGE_60,
   ORANGE_90,
   GREY_30,
   GREY_50,
+  GREY_60,
   GREY_90,
 } from 'photon-colors';
 
 import {
   getBackgroundColor,
   getForegroundColor,
+  getHoverBackgroundColor,
 } from '../../components/flame-graph/Canvas';
 
 describe('colors for native stack type', function() {
@@ -51,5 +55,13 @@ describe('colors for unsymbolicated stack type', function() {
   it('has the correct ending colors', function() {
     expect(getBackgroundColor('unsymbolicated', 1)).toEqual(GREY_50);
     expect(getForegroundColor('unsymbolicated', 1)).toEqual('#ffffff');
+  });
+});
+
+describe('colors when hovering', function() {
+  it('has the correct hover colors for the different stack types', function() {
+    expect(getHoverBackgroundColor('native')).toEqual(BLUE_60);
+    expect(getHoverBackgroundColor('js')).toEqual(ORANGE_60);
+    expect(getHoverBackgroundColor('unsymbolicated')).toEqual(GREY_60);
   });
 });

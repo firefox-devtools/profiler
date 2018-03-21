@@ -114,6 +114,7 @@ process: \\"default\\" (0)"
         <canvas
           className="chartCanvas stackChartCanvas"
           onDoubleClick={[Function]}
+          onMouseDown={[Function]}
           onMouseMove={[Function]}
           onMouseOut={[Function]}
         />
