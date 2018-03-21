@@ -40,10 +40,10 @@ describe('calltree/CallNodeContextMenu', function() {
     return store;
   }
 
-  function setup(store = createStore()) {
+  function setup(store = createStore(), forceOpenForTests = true) {
     const wrapper = mount(
       <Provider store={store}>
-        <CallNodeContextMenu />
+        <CallNodeContextMenu forceOpenForTests={forceOpenForTests} />
       </Provider>
     );
 
@@ -58,8 +58,19 @@ describe('calltree/CallNodeContextMenu', function() {
   }
 
   describe('basic rendering', function() {
-    it('renders a context menu', () => {
-      const { wrapper } = setup();
+    it('renders a blank context menu (with only 1 div) before it is open', () => {
+      const isContextMenuOpen = false;
+      const { wrapper } = setup(createStore(), isContextMenuOpen);
+      expect(wrapper.find('ContextMenu > nav').children().length).toBe(1);
+      expect(wrapper).toMatchSnapshot();
+    });
+
+    it('renders a full context menu when open, with many nav items', () => {
+      const isContextMenuOpen = true;
+      const { wrapper } = setup(createStore(), isContextMenuOpen);
+      expect(
+        wrapper.find('ContextMenu > nav').children().length > 1
+      ).toBeTruthy();
       expect(wrapper).toMatchSnapshot();
     });
   });
