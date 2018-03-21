@@ -964,7 +964,8 @@ export function extractMarkerDataFromName(thread: Thread): Thread {
 export function getTracingMarkers(thread: Thread): TracingMarker[] {
   const { stringTable, markers } = thread;
   const tracingMarkers: TracingMarker[] = [];
-  const openMarkers: Map<IndexIntoStringTable, TracingMarker> = new Map();
+  // This map is used to track start and end markers for tracing markers.
+  const openMarkers: Map<IndexIntoStringTable, TracingMarker[]> = new Map();
   for (let i = 0; i < markers.length; i++) {
     const data = markers.data[i];
     if (!data) {
@@ -978,10 +979,27 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
       };
       tracingMarkers.push(marker);
     } else if (data.type === 'tracing') {
+      // Tracing markers are created from two distinct markers that are created at
+      // the start and end of whatever code that is running that we care about.
+      // This is implemented by AutoProfilerTracing in Gecko.
+      //
+      // In this function we convert both of these raw markers into a single
+      // tracing marker with a non-null duration.
+      //
+      // We also handle nested markers by assuming markers of the same type are
+      // never interwoven: given input markers startA, startB, endC, endD, we'll
+      // get 2 markers A-D and B-C.
+
       const time = markers.time[i];
       const nameStringIndex = markers.name[i];
       if (data.interval === 'start') {
-        openMarkers.set(nameStringIndex, {
+        let markerBucket = openMarkers.get(nameStringIndex);
+        if (markerBucket === undefined) {
+          markerBucket = [];
+          openMarkers.set(nameStringIndex, markerBucket);
+        }
+
+        markerBucket.push({
           start: time,
           name: stringTable.getString(nameStringIndex),
           dur: 0,
@@ -989,9 +1007,27 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
           data,
         });
       } else if (data.interval === 'end') {
-        const marker = openMarkers.get(nameStringIndex);
-        if (marker === undefined) {
-          continue;
+        const markerBucket = openMarkers.get(nameStringIndex);
+        let marker;
+        if (markerBucket && markerBucket.length) {
+          // We already encountered a matching "start" marker for this "end".
+          marker = markerBucket.pop();
+        } else {
+          // No matching "start" marker has been encountered before this "end",
+          // this means it was issued before the capture started. Here we create
+          // a fake "start" marker to create the final tracing marker.
+          // Note we won't have additional data (eg the cause stack) for this
+          // marker because that data is contained in the "start" marker.
+
+          const nameStringIndex = markers.name[i];
+
+          marker = {
+            start: -1, // Something negative so that we can distinguish it later
+            name: stringTable.getString(nameStringIndex),
+            dur: 0,
+            title: null,
+            data,
+          };
         }
         if (marker.start !== undefined) {
           marker.dur = time - marker.start;
@@ -1013,6 +1049,15 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
       }
     }
   }
+
+  // Loop over tracing "start" markers without any "end" markers
+  for (const markerBucket of openMarkers.values()) {
+    for (const marker of markerBucket) {
+      marker.dur = Infinity;
+      tracingMarkers.push(marker);
+    }
+  }
+
   tracingMarkers.sort((a, b) => a.start - b.start);
   return tracingMarkers;
 }

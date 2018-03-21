@@ -187,40 +187,49 @@ describe('process-profile', function() {
 
       expect(profile.threads[0].samples.time[0]).toEqual(0);
       expect(profile.threads[0].samples.time[1]).toEqual(1);
+
+      // 1 second later than the same samples in the main process because the
+      // content process' start time is 1s later.
       expect(profile.threads[2].samples.time[0]).toEqual(1000);
       expect(profile.threads[2].samples.time[1]).toEqual(1001);
-      expect(profile.threads[0].markers.time[0]).toEqual(0);
+
+      // Now about markers
+      expect(profile.threads[0].markers.time[0]).toEqual(1);
       expect(profile.threads[0].markers.time[1]).toEqual(2);
-      expect(profile.threads[0].markers.time[2]).toEqual(4);
-      expect(profile.threads[0].markers.time[3]).toEqual(5);
+      expect(profile.threads[0].markers.time[2]).toEqual(3);
+      expect(profile.threads[0].markers.time[3]).toEqual(4);
+      expect(profile.threads[0].markers.time[4]).toEqual(5);
       expect(
-        profile.threads[0].markers.data[5]
-          ? profile.threads[0].markers.data[5].startTime
+        profile.threads[0].markers.data[6]
+          ? profile.threads[0].markers.data[6].startTime
           : null
       ).toEqual(9);
       expect(
-        profile.threads[0].markers.data[5]
-          ? profile.threads[0].markers.data[5].endTime
+        profile.threads[0].markers.data[6]
+          ? profile.threads[0].markers.data[6].endTime
           : null
       ).toEqual(10);
-      expect(profile.threads[2].markers.time[0]).toEqual(1000);
+
+      // 1 second later than the same markers in the main process.
+      expect(profile.threads[2].markers.time[0]).toEqual(1001);
       expect(profile.threads[2].markers.time[1]).toEqual(1002);
-      expect(profile.threads[2].markers.time[2]).toEqual(1004);
-      expect(profile.threads[2].markers.time[3]).toEqual(1005);
+      expect(profile.threads[2].markers.time[2]).toEqual(1003);
+      expect(profile.threads[2].markers.time[3]).toEqual(1004);
+      expect(profile.threads[2].markers.time[4]).toEqual(1005);
       expect(
-        profile.threads[2].markers.data[5]
-          ? profile.threads[2].markers.data[5].startTime
+        profile.threads[2].markers.data[6]
+          ? profile.threads[2].markers.data[6].startTime
           : null
       ).toEqual(1009);
       expect(
-        profile.threads[2].markers.data[5]
-          ? profile.threads[2].markers.data[5].endTime
+        profile.threads[2].markers.data[6]
+          ? profile.threads[2].markers.data[6].endTime
           : null
       ).toEqual(1010);
       expect(
-        profile.threads[2].markers.data[5] &&
-        profile.threads[2].markers.data[5].type === 'DOMEvent'
-          ? profile.threads[2].markers.data[5].timeStamp
+        profile.threads[2].markers.data[6] &&
+        profile.threads[2].markers.data[6].type === 'DOMEvent'
+          ? profile.threads[2].markers.data[6].timeStamp
           : null
       ).toEqual(1001);
       // TODO: also shift the samples inside marker callstacks
@@ -463,29 +472,34 @@ describe('profile-data', function() {
     const profile = processProfile(getGeckoProfile());
     const thread = profile.threads[0];
     const tracingMarkers = getTracingMarkers(thread);
+
     it('should fold the two reflow markers into one tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(5);
-      expect(tracingMarkers[0].start).toEqual(2);
-      expect(tracingMarkers[0].name).toEqual('Reflow');
-      expect(tracingMarkers[0].dur).toEqual(6);
-      expect(tracingMarkers[0].title).toBeNull();
+      expect(tracingMarkers.length).toEqual(9);
+      expect(tracingMarkers[1]).toMatchObject({
+        start: 3,
+        dur: 5,
+        name: 'Reflow',
+        title: null,
+      });
     });
     it('should fold the two Rasterize markers into one tracing marker, after the reflow tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(5);
-      expect(tracingMarkers[1].start).toEqual(4);
-      expect(tracingMarkers[1].name).toEqual('Rasterize');
-      expect(tracingMarkers[1].dur).toEqual(1);
-      expect(tracingMarkers[1].title).toBeNull();
+      expect(tracingMarkers[2]).toMatchObject({
+        start: 4,
+        dur: 1,
+        name: 'Rasterize',
+        title: null,
+      });
     });
     it('should create a tracing marker for the MinorGC startTime/endTime marker', function() {
-      expect(tracingMarkers.length).toEqual(5);
-      expect(tracingMarkers[3].start).toEqual(11);
-      expect(tracingMarkers[3].name).toEqual('MinorGC');
-      expect(tracingMarkers[3].dur).toEqual(1);
-      expect(tracingMarkers[3].title).toBeNull();
+      expect(tracingMarkers[4]).toMatchObject({
+        start: 11,
+        dur: 1,
+        name: 'MinorGC',
+        title: null,
+      });
     });
     it('should create a tracing marker for the DOMEvent marker', function() {
-      expect(tracingMarkers[2]).toMatchObject({
+      expect(tracingMarkers[3]).toMatchObject({
         dur: 1,
         name: 'DOMEvent',
         start: 9,
@@ -493,10 +507,40 @@ describe('profile-data', function() {
       });
     });
     it('should create a tracing marker for the marker UserTiming', function() {
-      expect(tracingMarkers[4]).toMatchObject({
+      expect(tracingMarkers[5]).toMatchObject({
         dur: 1,
         name: 'UserTiming',
         start: 12,
+        title: null,
+      });
+    });
+    it('should handle tracing markers without a start', function() {
+      expect(tracingMarkers[0]).toMatchObject({
+        start: -1,
+        dur: 2, // This duration doesn't represent much and won't be displayed anyway
+        name: 'Rasterize',
+        title: null,
+      });
+    });
+    it('should handle tracing markers without an end', function() {
+      expect(tracingMarkers[8]).toMatchObject({
+        start: 20,
+        dur: Infinity,
+        name: 'Rasterize',
+        title: null,
+      });
+    });
+    it('should handle nested tracing markers correctly', function() {
+      expect(tracingMarkers[6]).toMatchObject({
+        start: 13,
+        dur: 5,
+        name: 'Reflow',
+        title: null,
+      });
+      expect(tracingMarkers[7]).toMatchObject({
+        start: 14,
+        dur: 1,
+        name: 'Reflow',
         title: null,
       });
     });
