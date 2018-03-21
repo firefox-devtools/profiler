@@ -1,0 +1,82 @@
+
+<svg width="601px" height="451px" viewBox="0 0 601 451" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 48.2 (47327) - http://www.bohemiancoding.com/sketch -->
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="138" height="54" rx="8"></rect>
+        <rect id="path-2" x="0" y="0" width="254" height="87" rx="8"></rect>
+        <rect id="path-3" x="0" y="0" width="254" height="87" rx="8"></rect>
+        <rect id="path-4" x="0" y="0" width="138" height="54" rx="8"></rect>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Gecko-Profiler">
+            <g id="Gecko" transform="translate(205.000000, 17.000000)">
+                <circle id="Oval-Copy-3" stroke="#737373" fill="#D7D7DB" cx="87.5" cy="87.5" r="87.5"></circle>
+                <text font-family="Helvetica-Bold, Helvetica" font-size="25" font-weight="bold" fill="#6F6F6F">
+                    <tspan x="50.2858887" y="53">Gecko</tspan>
+                </text>
+            </g>
+            <g transform="translate(226.000000, 92.000000)">
+                <g id="Rectangle">
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-1"></use>
+                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="137" height="53" rx="8"></rect>
+                </g>
+                <text font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                    <tspan x="12.8945312" y="24">Gecko Profiler</tspan>
+                </text>
+                <text id="C++-Native-Code" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
+                    <tspan x="23.4746094" y="42">C++ Native Code</tspan>
+                </text>
+            </g>
+            <path d="M293.5,146.416667 L293.5,221.5" id="Line-Copy-6" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
+            <path id="Line-Copy-6-decoration-1" d="M293.5,221.5 L296.5,210.7 L290.5,210.7 L293.5,221.5 Z" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
+            <path d="M253.5,276.416667 L207.5,347.5" id="Line-Copy-7" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
+            <path id="Line-Copy-7-decoration-1" d="M207.5,347.5 L215.886186,340.062804 L210.848923,336.803051 L207.5,347.5 Z" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
+            <path d="M341.5,276.416667 L388.5,345.5" id="Line-Copy-8" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
+            <path id="Line-Copy-8-decoration-1" d="M388.5,345.5 L384.905379,334.883094 L379.9446,338.258099 L388.5,345.5 Z" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
+            <g id="Group-2" transform="translate(17.000000, 347.000000)">
+                <g id="Rectangle-Copy">
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-2"></use>
+                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="253" height="86" rx="8"></rect>
+                </g>
+                <text id="new:-devtools/server" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold" line-spacing="20" fill="#000000">
+                    <tspan x="35.9697266" y="50">new:</tspan>
+                    <tspan x="63.3037109" y="50" font-family="Helvetica" font-weight="normal"> devtools/server/actors/perf.js</tspan>
+                    <tspan x="15.2978516" y="70">old: </tspan>
+                    <tspan x="40.6220703" y="70" font-family="Helvetica" font-weight="normal">devtools/server/actors/performance.js</tspan>
+                </text>
+                <text id="DevTools-Server-Acto" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                    <tspan x="32.565918" y="26">DevTools Server Actors</tspan>
+                </text>
+            </g>
+            <g id="Group" transform="translate(330.000000, 346.000000)">
+                <g id="Rectangle-Copy-2">
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-3"></use>
+                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="253" height="86" rx="8"></rect>
+                </g>
+                <text id="via:-browser.geckoPr" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold" line-spacing="20" fill="#000000">
+                    <tspan x="58.2998047" y="59">via: </tspan>
+                    <tspan x="82.3115234" y="59" font-family="Helvetica" font-weight="normal">browser.geckoProfiler</tspan>
+                </text>
+                <text id="Web-Extension" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                    <tspan x="67.2258301" y="35">Web Extension</tspan>
+                </text>
+            </g>
+            <text id="XPIDL" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
+                <tspan x="305.65918" y="211">XPIDL</tspan>
+            </text>
+            <g id="Group-3" transform="translate(226.000000, 222.000000)">
+                <g id="Rectangle">
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-4"></use>
+                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="137" height="53" rx="8"></rect>
+                </g>
+                <text id="nsIProfiler" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                    <tspan x="28.9606934" y="25">nsIProfiler</tspan>
+                </text>
+                <text id="JS-Interface" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
+                    <tspan x="37.484375" y="42">JS Interface</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>
