@@ -368,9 +368,9 @@ describe('actions/changeInvertCallstack', function() {
     selectedCallNodePath: selectedThreadSelectors
       .getSelectedCallNodePath(state)
       .map(index => funcNames[index]),
-    expandedCallNodePaths: selectedThreadSelectors
-      .getExpandedCallNodePaths(state)
-      .map(path => path.map(index => funcNames[index])),
+    expandedCallNodePaths: Array.from(
+      selectedThreadSelectors.getExpandedCallNodePaths(state)
+    ).map(path => path.map(index => funcNames[index])),
   });
 
   describe('on a normal call tree', function() {

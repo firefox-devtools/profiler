@@ -14,6 +14,7 @@ import {
   changeExpandedCallNodes,
 } from '../../actions/profile-view';
 import { formatTree } from '../fixtures/utils';
+import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
 import fakeIndexedDB from 'fake-indexeddb';
 import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
@@ -129,7 +130,8 @@ describe('doSymbolicateProfile', function() {
       dispatch(changeExpandedCallNodes(threadIndex, expandedCallNodePaths));
 
       expect(getSelectedCallNodePath(getState())).toEqual(selectedCallNodePath);
-      expect(getExpandedCallNodePaths(getState())).toEqual(
+      assertSetContainsOnly(
+        getExpandedCallNodePaths(getState()),
         expandedCallNodePaths
       );
     });
@@ -154,7 +156,8 @@ describe('doSymbolicateProfile', function() {
       // _createUnsymbolicatedProfile().
       dispatch(changeExpandedCallNodes(threadIndex, expandedCallNodePaths));
       expect(getSelectedCallNodePath(getState())).toEqual(selectedCallNodePath);
-      expect(getExpandedCallNodePaths(getState())).toEqual(
+      assertSetContainsOnly(
+        getExpandedCallNodePaths(getState()),
         expandedCallNodePaths
       );
 
@@ -164,10 +167,9 @@ describe('doSymbolicateProfile', function() {
         funcNamesToFuncIndexes(['first symbol', 'last symbol'])
       );
 
-      expect(getExpandedCallNodePaths(getState())).toEqual(
-        // Notice how these are duplicated, however they are equivalent.
-        // See: https://github.com/devtools-html/perf.html/issues/270
-        [['first symbol'], ['first symbol']].map(funcNamesToFuncIndexes)
+      assertSetContainsOnly(
+        getExpandedCallNodePaths(getState()),
+        [['first symbol']].map(funcNamesToFuncIndexes)
       );
     });
   });

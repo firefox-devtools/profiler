@@ -546,10 +546,6 @@ export function invertCallNodePath(
   );
 }
 
-export function pathsAreEqual(a: CallNodePath, b: CallNodePath): boolean {
-  return a.length === b.length && a.every((func, i) => func === b[i]);
-}
-
 /**
  * Transform a thread's stacks to merge stacks that match the CallNodePath into
  * the calling stack. See `src/types/transforms.js` for more information about the
