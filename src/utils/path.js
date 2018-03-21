@@ -26,13 +26,19 @@ export function arePathsEqual(a: CallNodePath, b: CallNodePath): boolean {
 }
 
 // We take the easy path by converting the path to a string that will be unique.
-// In the future and if necessary we might want to have an integer-based hash so
-// that it's faster. In that case we might want to use only the n last values
-// that should be more discriminate and keep it fast.
+// This is _quite_ costly because converting numbers to strings is costly.
+// But this is counter-balanced by the fact that this hash function is perfect:
+// it's a bijection. This avoids the need of buckets in the Set and Map
+// implementations which is a lot faster.
 export function hashPath(a: CallNodePath): string {
   return a.join('-');
 }
 
+// This class implements all of the methods of the native Set, but provides a
+// unique list of CallNodePaths. These paths can be different objects, but as
+// long as they contain the same data, they are considered to be the same.
+// These CallNodePaths are keyed off of the string value returned by the
+// `hashPath` function above.
 export class PathSet implements Iterable<CallNodePath> {
   _table: Map<string, CallNodePath>;
 
@@ -92,17 +98,20 @@ export class PathSet implements Iterable<CallNodePath> {
     return this._table.size;
   }
 
-  // https://github.com/facebook/flow/issues/3258
-  // $FlowFixMe
+  // Because Flow doesn't understand Symbols and well-known symbols yet, we need
+  // to resort to this hack to make it possible to implement the iterator.
+  // See https://github.com/facebook/flow/issues/3258 for more information
+  // and https://stackoverflow.com/questions/48491307/iterable-class-in-flow for
+  // the solution used here.
+
+  // $FlowFixMe ignore Flow error about computed properties in a class
   *[Symbol.iterator]() {
     yield* this._table.values();
   }
 
-  // This is a hack for Flow's Iterable support,
-  // see https://stackoverflow.com/questions/48491307/iterable-class-in-flow
   /*::
   @@iterator(): * {
-    // $FlowFixMe
+    // $FlowFixMe ignore Flow error about Symbol support
     return this[Symbol.iterator]()
   }
   */

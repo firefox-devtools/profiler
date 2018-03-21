@@ -6,6 +6,8 @@
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
+import { assertSetContainsOnly } from '../fixtures/custom-assertions';
+
 import {
   addTransformToStack,
   popTransformsFromStack,
@@ -14,7 +16,6 @@ import {
   changeSelectedCallNode,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
-import { assertSetContainsOnly } from './custom-assertions';
 
 describe('"focus-subtree" transform', function() {
   describe('on a call tree', function() {

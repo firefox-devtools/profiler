@@ -14,7 +14,7 @@ import {
   changeExpandedCallNodes,
 } from '../../actions/profile-view';
 import { formatTree } from '../fixtures/utils';
-import { assertSetContainsOnly } from './custom-assertions';
+import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
 import fakeIndexedDB from 'fake-indexeddb';
 import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';

@@ -9,11 +9,11 @@ import {
 } from '../fixtures/profiles/make-profile';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { storeWithProfile } from '../fixtures/stores';
+import { assertSetContainsOnly } from '../fixtures/custom-assertions';
+
 import * as ProfileView from '../../actions/profile-view';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
-
-import { assertSetContainsOnly } from './custom-assertions';
 
 const { selectedThreadSelectors } = ProfileViewSelectors;
 
