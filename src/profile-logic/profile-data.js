@@ -33,6 +33,7 @@ import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profil
 
 import type { StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
+import { hashPath } from '../utils/path';
 import type { ImplementationFilter } from '../types/actions';
 import bisection from 'bisection';
 import type { UniqueStringArray } from '../utils/unique-string-array';
@@ -594,46 +595,156 @@ export function filterThreadToRange(
   });
 }
 
+// --------------- CallNodePath and CallNodeIndex manipulations ---------------
+
+// Returns a list of CallNodeIndex from CallNodePaths. This function uses a map
+// to speed up the look-up process.
 export function getCallNodeIndicesFromPaths(
   callNodePaths: CallNodePath[],
   callNodeTable: CallNodeTable
 ): Array<IndexIntoCallNodeTable | null> {
+  // This is a Map<CallNodePathHash, IndexIntoCallNodeTable>. This map speeds up
+  // the look-up process by caching every CallNodePath we handle which avoids
+  // looking up parents again and again.
+  const cache = new Map();
   return callNodePaths.map(path =>
-    getCallNodeIndexFromPath(path, callNodeTable)
+    _getCallNodeIndexFromPathWithCache(path, callNodeTable, cache)
   );
 }
 
+// Returns a CallNodeIndex from a CallNodePath, using and contributing to the
+// cache parameter.
+function _getCallNodeIndexFromPathWithCache(
+  callNodePath: CallNodePath,
+  callNodeTable: CallNodeTable,
+  cache: Map<string, IndexIntoCallNodeTable>
+): IndexIntoCallNodeTable | null {
+  const hashFullPath = hashPath(callNodePath);
+  let result = cache.get(hashFullPath);
+  if (result !== undefined) {
+    // The cache already has the result for the full path.
+    return result;
+  }
+
+  // This map is basically the result of:
+  // `map.set(index, hashPath(callNodePath.slice(0, index)))`
+  // This is a cache to speed up contributing data to the `cache` map.
+  const sliceHashes = new Map();
+  sliceHashes.set(callNodePath.length, hashFullPath);
+
+  let i = callNodePath.length;
+  let index;
+  while (--i > 0) {
+    // Looking up each parent for this call node, starting from the deepest node.
+    // If we find a parent this makes it possible to start the look up from this location.
+    const subPath = callNodePath.slice(0, i);
+    const hash = hashPath(subPath);
+    index = cache.get(hash);
+    if (index !== undefined) {
+      // Yay, we already have the result for a parent!
+      break;
+    }
+    // Cache the hashed value because we'll need it later.
+    sliceHashes.set(i, hash);
+  }
+
+  result = _getCallNodeIndexFromPath(
+    callNodePath,
+    callNodeTable,
+    index,
+    i,
+    // This function is called at each "step" of the algorithm, so that we can
+    // cache the result for each node to speed up future lookups.
+    (callNodeIndex, indexInCallNodePath) => {
+      // indexInCallNodePath points to the func index that got resolved. That's
+      // why we need this `+ 1` incrementation to get the slice including this
+      // index.
+      // Reminder: this is the cached result of:
+      // `hashPath(callNodePath.slice(0, indexInCallNodePath + 1))`
+      const hash = sliceHashes.get(indexInCallNodePath + 1);
+      if (hash !== undefined) {
+        // caching the result for this path.
+        cache.set(hash, callNodeIndex);
+      }
+    }
+  );
+  return result;
+}
+
+// Returns the CallNodeIndex that matches the function `func` and whose parent's
+// CallNodeIndex is `parent`.
+function _getCallNodeIndexFromParentAndFunc(
+  parent: IndexIntoCallNodeTable,
+  func: IndexIntoFuncTable,
+  callNodeTable: CallNodeTable
+): IndexIntoCallNodeTable | null {
+  for (
+    let callNodeIndex = parent + 1; // the root parent is -1
+    callNodeIndex < callNodeTable.length;
+    callNodeIndex++
+  ) {
+    if (
+      callNodeTable.prefix[callNodeIndex] === parent &&
+      callNodeTable.func[callNodeIndex] === func
+    ) {
+      return callNodeIndex;
+    }
+  }
+
+  return null;
+}
+
+/*
+ * This function returns a CallNodeIndex from a CallNodePath, using the
+ * specified `callNodeTable`.
+ * The 2 additional arguments make it possible to start the algorithm with a
+ * specific state.
+ */
+function _getCallNodeIndexFromPath(
+  callNodePath: CallNodePath,
+  callNodeTable: CallNodeTable,
+  initialParent: IndexIntoFuncTable = -1, // -1 is the prefix we use for the root
+  initialIndexInCallNodePath: number = 0,
+  onNodeIndexFound?: (
+    IndexIntoCallNodeTable,
+    indexInCallNodePath: number
+  ) => void
+): IndexIntoCallNodeTable | null {
+  let nodeIndex = initialParent;
+
+  for (let i = initialIndexInCallNodePath; i < callNodePath.length; i++) {
+    const func = callNodePath[i];
+    const nextNodeIndex = _getCallNodeIndexFromParentAndFunc(
+      nodeIndex,
+      func,
+      callNodeTable
+    );
+
+    // We couldn't find this path into the call node table. This shouldn't
+    // normally happen.
+    if (nextNodeIndex === null) {
+      return null;
+    }
+
+    if (onNodeIndexFound) {
+      onNodeIndexFound(nextNodeIndex, i);
+    }
+
+    nodeIndex = nextNodeIndex;
+  }
+
+  return nodeIndex < 0 ? null : nodeIndex;
+}
+
+// This function exposes the public API for this process, with only 2 arguments.
 export function getCallNodeIndexFromPath(
   callNodePath: CallNodePath,
   callNodeTable: CallNodeTable
 ): IndexIntoCallNodeTable | null {
-  let fs = -1;
-  for (let i = 0; i < callNodePath.length; i++) {
-    const func = callNodePath[i];
-    let nextFS = -1;
-    for (
-      let callNodeIndex = fs + 1;
-      callNodeIndex < callNodeTable.length;
-      callNodeIndex++
-    ) {
-      if (
-        callNodeTable.prefix[callNodeIndex] === fs &&
-        callNodeTable.func[callNodeIndex] === func
-      ) {
-        nextFS = callNodeIndex;
-        break;
-      }
-    }
-    if (nextFS === -1) {
-      return null;
-    }
-    fs = nextFS;
-  }
-
-  // The fs could still be -1 here, so ensure we return null if that is the case.
-  return fs === -1 ? null : fs;
+  return _getCallNodeIndexFromPath(callNodePath, callNodeTable);
 }
 
+// This function returns a CallNodePath from a CallNodeIndex.
 export function getCallNodePathFromIndex(
   callNodeIndex: IndexIntoCallNodeTable | null,
   callNodeTable: CallNodeTable
