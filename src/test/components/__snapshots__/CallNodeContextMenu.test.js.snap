@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`calltree/CallNodeContextMenu basic rendering renders a context menu 1`] = `
+exports[`calltree/CallNodeContextMenu basic rendering renders a blank context menu (with only 1 div) before it is open 1`] = `
 <Provider
   store={
     Object {
@@ -12,7 +12,9 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a context menu 1`]
     }
   }
 >
-  <Connect(CallNodeContextMenu)>
+  <Connect(CallNodeContextMenu)
+    forceOpenForTests={false}
+  >
     <CallNodeContextMenu
       addTransformToStack={[Function]}
       callNodeInfo={
@@ -75,6 +77,401 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a context menu 1`]
         }
       }
       expandAllCallNodeDescendants={[Function]}
+      forceOpenForTests={false}
+      implementation="combined"
+      inverted={false}
+      selectedCallNodeIndex={1}
+      selectedCallNodePath={
+        Array [
+          0,
+          1,
+        ]
+      }
+      selectedTab="calltree"
+      setCallNodeContextMenuVisibility={[Function]}
+      thread={
+        Object {
+          "frameTable": Object {
+            "address": Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
+            "category": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "func": Array [
+              0,
+              1,
+              1,
+              1,
+              2,
+              3,
+              4,
+              5,
+              4,
+              6,
+              7,
+            ],
+            "implementation": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "length": 11,
+            "line": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "optimizations": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+          },
+          "funcTable": Object {
+            "address": Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
+            "fileName": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "isJS": Array [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+            ],
+            "length": 8,
+            "lineNumber": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "name": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+            ],
+            "resource": Array [
+              -1,
+              0,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+            ],
+          },
+          "libs": Array [
+            Object {
+              "arch": "",
+              "breakpadId": "",
+              "debugName": "library",
+              "debugPath": "/path/to/library",
+              "end": 0,
+              "name": "library",
+              "offset": 0,
+              "path": "/path/to/library",
+              "start": 0,
+            },
+          ],
+          "markers": Object {
+            "data": Array [],
+            "length": 0,
+            "name": Array [],
+            "time": Array [],
+          },
+          "name": "Empty",
+          "pid": 0,
+          "processType": "default",
+          "resourceTable": Object {
+            "addonId": Array [],
+            "host": Array [
+              undefined,
+            ],
+            "icon": Array [],
+            "length": 1,
+            "lib": Array [
+              0,
+            ],
+            "name": Array [
+              8,
+            ],
+            "type": Array [
+              0,
+            ],
+          },
+          "samples": Object {
+            "length": 3,
+            "responsiveness": Array [
+              0,
+              0,
+              0,
+            ],
+            "rss": Array [
+              null,
+              null,
+              null,
+            ],
+            "stack": Array [
+              6,
+              8,
+              10,
+            ],
+            "time": Array [
+              0,
+              1,
+              2,
+            ],
+            "uss": Array [
+              null,
+              null,
+              null,
+            ],
+          },
+          "stackTable": Object {
+            "frame": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+              8,
+              9,
+              10,
+            ],
+            "length": 11,
+            "prefix": Array [
+              null,
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              4,
+              7,
+              3,
+              9,
+            ],
+          },
+          "stringTable": UniqueStringArray {
+            "_array": Array [
+              "A",
+              "B:library",
+              "C",
+              "D",
+              "E",
+              "F",
+              "H",
+              "I",
+              "library",
+            ],
+            "_stringToIndex": Map {
+              "A" => 0,
+              "B:library" => 1,
+              "C" => 2,
+              "D" => 3,
+              "E" => 4,
+              "F" => 5,
+              "H" => 6,
+              "I" => 7,
+              "library" => 8,
+            },
+          },
+          "tid": 0,
+        }
+      }
+      threadIndex={0}
+    >
+      <ContextMenu
+        className=""
+        data={Object {}}
+        hideOnLeave={false}
+        id="CallNodeContextMenu"
+        onHide={[Function]}
+        onMouseLeave={[Function]}
+        onShow={[Function]}
+        style={Object {}}
+      >
+        <nav
+          className="react-contextmenu"
+          onContextMenu={[Function]}
+          onMouseLeave={[Function]}
+          role="menu"
+          style={
+            Object {
+              "opacity": 0,
+              "pointerEvents": "none",
+              "position": "fixed",
+            }
+          }
+          tabIndex="-1"
+        >
+          <div
+            key=".0"
+          />
+        </nav>
+      </ContextMenu>
+    </CallNodeContextMenu>
+  </Connect(CallNodeContextMenu)>
+</Provider>
+`;
+
+exports[`calltree/CallNodeContextMenu basic rendering renders a full context menu when open, with many nav items 1`] = `
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <Connect(CallNodeContextMenu)
+    forceOpenForTests={true}
+  >
+    <CallNodeContextMenu
+      addTransformToStack={[Function]}
+      callNodeInfo={
+        Object {
+          "callNodeTable": Object {
+            "depth": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              5,
+              6,
+              4,
+              5,
+            ],
+            "func": Int32Array [
+              0,
+              1,
+              1,
+              1,
+              2,
+              3,
+              4,
+              5,
+              4,
+              6,
+              7,
+            ],
+            "length": 11,
+            "prefix": Int32Array [
+              -1,
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              4,
+              7,
+              3,
+              9,
+            ],
+          },
+          "stackIndexToCallNodeIndex": Uint32Array [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+          ],
+        }
+      }
+      expandAllCallNodeDescendants={[Function]}
+      forceOpenForTests={true}
       implementation="combined"
       inverted={false}
       selectedCallNodeIndex={1}
