@@ -248,6 +248,19 @@ function viewOptionsPerThread(
         ...state.slice(threadIndex + 1),
       ];
     }
+    case 'POP_TRANSFORMS_FROM_STACK': {
+      // Simply reset the selected and expanded paths until this bug is fixed:
+      // https://github.com/devtools-html/perf.html/issues/882
+      const { threadIndex } = action;
+      return [
+        ...state.slice(0, threadIndex),
+        Object.assign({}, state[threadIndex], {
+          selectedCallNodePath: [],
+          expandedCallNodePaths: new PathSet(),
+        }),
+        ...state.slice(threadIndex + 1),
+      ];
+    }
     case 'CHANGE_IMPLEMENTATION_FILTER': {
       const {
         transformedThread,
