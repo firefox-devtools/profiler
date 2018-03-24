@@ -156,7 +156,7 @@ function getThreadSymbolicationInfo(thread: Thread): ThreadSymbolicationInfo {
   const { funcTable } = thread;
   const libKeyToAddressToFuncMap = new Map();
   for (const [lib, funcsToSymbolicate] of foundFuncMap) {
-    const libKey = `${lib.name}/${lib.breakpadId}`;
+    const libKey = `${lib.debugName}/${lib.breakpadId}`;
     const addressToFuncMap = new Map();
     libKeyToAddressToFuncMap.set(libKey, addressToFuncMap);
     for (const funcIndex of funcsToSymbolicate) {
