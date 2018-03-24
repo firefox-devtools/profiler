@@ -19,6 +19,7 @@ import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 import fakeIndexedDB from 'fake-indexeddb';
 import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
 import { TextDecoder } from 'text-encoding';
+import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
 /**
  * Symbolication happens across actions and reducers, so test this functionality in
@@ -60,7 +61,15 @@ describe('doSymbolicateProfile', function() {
       symbolStore: new SymbolStore(symbolStoreName, {
         requestSymbolsFromServer: requests =>
           requests.map(() => Promise.reject(new Error(''))),
-        requestSymbolTableFromAddon: () => Promise.resolve(exampleSymbolTable),
+        requestSymbolTableFromAddon: async lib => {
+          if (lib.debugName === 'firefox.pdb') {
+            return exampleSymbolTable;
+          }
+          throw new SymbolsNotFoundError(
+            'Should only have libs called firefox.pdb',
+            lib
+          );
+        },
       }),
     };
   }
@@ -195,9 +204,9 @@ function _createUnsymbolicatedProfile() {
     end: 0x4000,
     offset: 0,
     arch: '',
-    name: '',
+    name: 'firefox.exe',
     path: '',
-    debugName: '',
+    debugName: 'firefox.pdb',
     debugPath: '',
     breakpadId: '',
   };
