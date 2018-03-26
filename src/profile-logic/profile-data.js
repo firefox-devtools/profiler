@@ -626,11 +626,10 @@ function _getCallNodeIndexFromPathWithCache(
     return result;
   }
 
-  // This map is basically the result of:
-  // `map.set(index, hashPath(callNodePath.slice(0, index)))`
+  // This array serves as a map and is basically the result of:
+  // `sliceHashes[index] = hashPath(callNodePath.slice(0, index)))`
   // This is a cache to speed up contributing data to the `cache` map.
-  const sliceHashes = new Map();
-  sliceHashes.set(callNodePath.length, hashFullPath);
+  const sliceHashes = [hashFullPath];
 
   let i = callNodePath.length;
   let index;
@@ -645,7 +644,7 @@ function _getCallNodeIndexFromPathWithCache(
       break;
     }
     // Cache the hashed value because we'll need it later.
-    sliceHashes.set(i, hash);
+    sliceHashes.push(hash);
   }
 
   result = _getCallNodeIndexFromPath(
@@ -661,11 +660,8 @@ function _getCallNodeIndexFromPathWithCache(
       // index.
       // Reminder: this is the cached result of:
       // `hashPath(callNodePath.slice(0, indexInCallNodePath + 1))`
-      const hash = sliceHashes.get(indexInCallNodePath + 1);
-      if (hash !== undefined) {
-        // caching the result for this path.
-        cache.set(hash, callNodeIndex);
-      }
+      const hash = sliceHashes[callNodePath.length - indexInCallNodePath - 1];
+      cache.set(hash, callNodeIndex);
     }
   );
   return result;
@@ -678,6 +674,10 @@ function _getCallNodeIndexFromParentAndFunc(
   func: IndexIntoFuncTable,
   callNodeTable: CallNodeTable
 ): IndexIntoCallNodeTable | null {
+  // Node children always come after their parents in the call node table,
+  // that's why we start looping at `parent + 1`.
+  // Note that because the root parent is `-1`, we correctly start at `0` when
+  // we look for a top-level item.
   for (
     let callNodeIndex = parent + 1; // the root parent is -1
     callNodeIndex < callNodeTable.length;
