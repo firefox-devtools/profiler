@@ -727,25 +727,8 @@ export function getCallNodeIndexFromPath(
   callNodePath: CallNodePath,
   callNodeTable: CallNodeTable
 ): IndexIntoCallNodeTable | null {
-  let nodeIndex = -1;
-
-  for (const func of callNodePath) {
-    const nextNodeIndex = _getCallNodeIndexFromParentAndFunc(
-      nodeIndex,
-      func,
-      callNodeTable
-    );
-
-    // We couldn't find this path into the call node table. This shouldn't
-    // normally happen.
-    if (nextNodeIndex === null) {
-      return null;
-    }
-
-    nodeIndex = nextNodeIndex;
-  }
-
-  return nodeIndex < 0 ? null : nodeIndex;
+  const [result] = getCallNodeIndicesFromPaths([callNodePath], callNodeTable);
+  return result;
 }
 
 // This function returns a CallNodePath from a CallNodeIndex.
