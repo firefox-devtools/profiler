@@ -112,11 +112,13 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     case 'stack-chart':
     case 'calltree': {
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
-      query.invertCallstack = urlState.invertCallstack ? null : undefined;
+      query.invertCallstack = urlState.profileSpecific.invertCallstack
+        ? null
+        : undefined;
       query.implementation =
-        urlState.implementation === 'combined'
+        urlState.profileSpecific.implementation === 'combined'
           ? undefined
-          : urlState.implementation;
+          : urlState.profileSpecific.implementation;
       const selectedThread = urlState.profileSpecific.selectedThread;
       if (selectedThread !== null) {
         query.transforms =
@@ -209,10 +211,10 @@ export function stateFromLocation(location: Location): UrlState {
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
-    implementation,
-    invertCallstack: query.invertCallstack !== undefined,
     pathInZipFile: query.file || null,
     profileSpecific: {
+      implementation,
+      invertCallstack: query.invertCallstack !== undefined,
       rangeFilters: query.range ? parseRangeFilters(query.range) : [],
       selectedThread: selectedThread,
       callTreeSearchString: query.search || '',

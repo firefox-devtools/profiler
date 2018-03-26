@@ -10,13 +10,14 @@ import {
 import { procureInitialInterestingExpandedNodes } from '../../profile-logic/zip-files';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as ZippedProfilesSelectors from '../../reducers/zipped-profiles';
+import * as UrlStateSelectors from '../../reducers/url-state';
 import createStore from '../../create-store';
 import { ensureExists } from '../../utils/flow';
-
 import JSZip from 'jszip';
 
 import * as ZippedProfilesActions from '../../actions/zipped-profiles';
 import * as ReceiveProfileActions from '../../actions/receive-profile';
+import * as ProfileViewActions from '../../actions/profile-view';
 
 describe('reducer zipFileState', function() {
   it('can store the zip file in the reducer', async function() {
@@ -171,6 +172,72 @@ describe('selected and expanded zip files', function() {
 
     expect(ZippedProfilesSelectors.getSelectedZipFileIndex(getState())).toEqual(
       123
+    );
+  });
+});
+
+describe('profile state invalidation when switching between profiles', function() {
+  const getStoreViewingProfile = async () => {
+    const { dispatch, getState } = await storeWithZipFile([
+      'profile1.json',
+      'profile2.json',
+    ]);
+
+    const viewProfile = path =>
+      dispatch(ZippedProfilesActions.viewProfileFromPathInZipFile(path));
+
+    return { dispatch, getState, viewProfile };
+  };
+
+  it('invalidates profile-specific url state', async function() {
+    const { dispatch, getState, viewProfile } = await getStoreViewingProfile();
+    viewProfile('profile1.json');
+
+    // It starts out empty.
+    expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([]);
+
+    // Add a url-encoded bit of state.
+    dispatch(ProfileViewActions.addRangeFilter(0, 10));
+    expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      { start: 0, end: 10 },
+    ]);
+
+    // It switches to another profile and invalidates.
+    dispatch(ZippedProfilesActions.returnToZipFileList());
+    viewProfile('profile2.json');
+    expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([]);
+  });
+
+  it('invalidates profile view state', async function() {
+    const { dispatch, getState, viewProfile } = await getStoreViewingProfile();
+    viewProfile('profile1.json');
+
+    // Create new copies of the selection on each assertion and change, so
+    // that we are not relying on strict equality.
+    const getNoSelection = () => ({ hasSelection: false, isModifying: false });
+    const getSomeSelection = () => ({
+      hasSelection: true,
+      isModifying: true,
+      selectionStart: 0,
+      selectionEnd: 10,
+    });
+
+    // It starts with no selection.
+    expect(ProfileViewSelectors.getSelection(getState())).toEqual(
+      getNoSelection()
+    );
+
+    // Add a selection.
+    dispatch(ProfileViewActions.updateProfileSelection(getSomeSelection()));
+    expect(ProfileViewSelectors.getSelection(getState())).toEqual(
+      getSomeSelection()
+    );
+    dispatch(ZippedProfilesActions.returnToZipFileList());
+    viewProfile('profile2.json');
+
+    // It no longer has a selection when viewing another profile.
+    expect(ProfileViewSelectors.getSelection(getState())).toEqual(
+      getNoSelection()
     );
   });
 });
