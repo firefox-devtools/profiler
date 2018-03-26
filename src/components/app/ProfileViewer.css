@@ -29,12 +29,13 @@
   margin: 3px;
   padding: 0;
   border: 1px solid var(--green-60);
-
+  background: var(--green-50) url(../../../res/back-arrow.svg) center center no-repeat;
+  flex: none;
+  
   color: #000;
-  background-color: var(--green-50);
   border-radius: 3px;
 }
 
 .profileViewerZipButton:hover {
-  background-color: var(--green-60);
+  border-color: #000;
 }

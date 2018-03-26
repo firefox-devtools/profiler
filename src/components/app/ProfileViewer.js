@@ -104,9 +104,7 @@ class ProfileViewer extends PureComponent<Props> {
               className="profileViewerZipButton"
               title="View all files in the zip file"
               onClick={returnToZipFileList}
-            >
-              ←
-            </button>
+            />
           ) : null}
           {profileName ? (
             <div className="profileViewerName">{profileName}</div>
