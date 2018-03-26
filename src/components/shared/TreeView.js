@@ -29,25 +29,31 @@ type TreeViewHeaderProps = {|
   +mainColumn: Column,
 |};
 
-const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => (
-  <div className="treeViewHeader">
-    {fixedColumns.map(col => (
+const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => {
+  if (fixedColumns.length === 0 && !mainColumn.title) {
+    // If there is nothing to display in the header, do not render it.
+    return null;
+  }
+  return (
+    <div className="treeViewHeader">
+      {fixedColumns.map(col => (
+        <span
+          className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
+          key={col.propName}
+        >
+          {col.title}
+        </span>
+      ))}
       <span
-        className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
-        key={col.propName}
+        className={`treeViewHeaderColumn treeViewMainColumn ${
+          mainColumn.propName
+        }`}
       >
-        {col.title}
+        {mainColumn.title}
       </span>
-    ))}
-    <span
-      className={`treeViewHeaderColumn treeViewMainColumn ${
-        mainColumn.propName
-      }`}
-    >
-      {mainColumn.title}
-    </span>
-  </div>
-);
+    </div>
+  );
+};
 
 function reactStringWithHighlightedSubstrings(
   string: string,
