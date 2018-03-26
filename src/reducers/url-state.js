@@ -254,6 +254,8 @@ function pathInZipFile(
  * These values are specific to an individual profile.
  */
 const profileSpecific = combineReducers({
+  implementation,
+  invertCallstack,
   rangeFilters,
   selectedThread,
   callTreeSearchString,
@@ -295,8 +297,6 @@ const urlStateReducer = wrapReducerInResetter(
     hash,
     profileUrl,
     selectedTab,
-    implementation,
-    invertCallstack,
     pathInZipFile,
     profileSpecific,
   })
@@ -314,9 +314,9 @@ export const getProfileUrl = (state: State) => getUrlState(state).profileUrl;
 export const getRangeFilters = (state: State) =>
   getProfileSpecificState(state).rangeFilters;
 export const getImplementationFilter = (state: State) =>
-  getUrlState(state).implementation;
+  getProfileSpecificState(state).implementation;
 export const getInvertCallstack = (state: State) =>
-  getUrlState(state).invertCallstack;
+  getProfileSpecificState(state).invertCallstack;
 export const getCurrentSearchString = (state: State) =>
   getProfileSpecificState(state).callTreeSearchString;
 export const getSearchStrings = createSelector(

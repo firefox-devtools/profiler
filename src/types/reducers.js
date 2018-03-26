@@ -117,10 +117,10 @@ export type UrlState = {|
   hash: string,
   profileUrl: string,
   selectedTab: TabSlug,
-  implementation: ImplementationFilter,
-  invertCallstack: boolean,
   pathInZipFile: string | null,
   profileSpecific: {|
+    implementation: ImplementationFilter,
+    invertCallstack: boolean,
     rangeFilters: RangeFilterState[],
     selectedThread: ThreadIndex | null,
     callTreeSearchString: string,
