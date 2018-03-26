@@ -1,0 +1,17 @@
+.ProfileViewerContainer .layout-pane > * {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}
+
+/* overriding defaults from splitter-layout */
+.ProfileViewerContainer > .layout-splitter {
+  background: var(--grey-10); /* Same background as sidebars */
+  border-left: 1px solid var(--grey-40);
+}
+
+.ProfileViewerContainer > .layout-splitter:hover {
+  background: var(--grey-40); /* same as the border above */
+}
+
+

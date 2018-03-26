@@ -32,12 +32,13 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
+import type { TabSlug } from '../../types/actions';
 
 require('./ProfileViewer.css');
 
 type StateProps = {|
   +tabOrder: number[],
-  +selectedTab: string,
+  +selectedTab: TabSlug,
   +profileName: string | null,
   +hasZipFile: boolean,
 |};

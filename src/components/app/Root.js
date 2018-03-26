@@ -12,7 +12,7 @@ import {
   retrieveProfileFromStore,
   retrieveProfileOrZipFromUrl,
 } from '../../actions/receive-profile';
-import ProfileViewer from './ProfileViewer';
+import ProfileViewerContainer from './ProfileViewerContainer';
 import ZipFileViewer from './ZipFileViewer';
 import Home from './Home';
 import { getView } from '../../reducers/app';
@@ -202,7 +202,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
         // The data is now loaded. This could be either a single profile, or a zip file
         // with multiple profiles. Only show the ZipFileViewer if the data loaded is a
         // Zip file, and there is no stored path into the zip file.
-        return hasZipFile ? <ZipFileViewer /> : <ProfileViewer />;
+        return hasZipFile ? <ZipFileViewer /> : <ProfileViewerContainer />;
       case 'ROUTE_NOT_FOUND':
       default:
         // Assert with Flow that we've handled all the cases, as the only thing left

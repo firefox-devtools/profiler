@@ -1,0 +1,34 @@
+.sidebar {
+  padding: 1em .5em;
+  background: var(--grey-10);
+}
+
+.sidebar h2 {
+  margin: 0 0 1em 0;
+  padding: 0;
+}
+
+.sidebar h2 > * {
+  overflow-wrap: break-word;
+}
+
+.sidebar-subtitle {
+  font-weight: normal;
+  font-size: .9em; /* slightly smaller than the title */
+}
+
+.sidebar-details {
+  margin: 0 auto;
+  font-size: 1.2em; /* larger than the rest */
+
+  display: grid;
+  grid-template-columns: min-content min-content;
+  grid-gap: 2px 5px;
+  justify-content: center;
+}
+
+.sidebar-label {
+  color: var(--grey-50);
+  white-space: nowrap;
+  text-align: right;
+}
