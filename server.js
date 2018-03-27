@@ -36,7 +36,7 @@ const serverConfig = {
       connect-src *;
       frame-ancestors 'self';
       form-action 'none'
-    `, // NOTE: no upgrade-insecure-requests because we're serving as HTTP.
+    `,
   },
   stats: {
     colors: true,

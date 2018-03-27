@@ -11,6 +11,7 @@ import {
 import {
   getCallNodeInfo,
   invertCallstack,
+  resourceTypes,
   getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
 } from '../../profile-logic/profile-data';
@@ -246,6 +247,26 @@ describe('unfiltered call tree', function() {
           totalTime: '3',
           totalTimePercent: '100%',
         });
+      });
+    });
+
+    describe('icons from the call tree', function() {
+      it('upgrades http to https', function() {
+        const { profile } = getProfileFromTextSamples(`
+          A:examplecom.js
+        `);
+        const callTree = callTreeFromProfile(profile);
+        const [thread] = profile.threads;
+        const hostStringIndex = thread.stringTable.indexForString('examplecom');
+
+        thread.resourceTable.type[0] = resourceTypes.webhost;
+        thread.resourceTable.host[0] = hostStringIndex;
+        // Hijack the string table to provide the proper host name
+        thread.stringTable._array[hostStringIndex] = 'http://example.com';
+
+        expect(callTree.getDisplayData(A).icon).toEqual(
+          'https://example.com/favicon.ico'
+        );
       });
     });
 
