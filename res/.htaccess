@@ -44,6 +44,4 @@ Header set Referrer-Policy same-origin
 # 5. `connect-src` is `*` to support `from-url`. We also do requests to bitly to shorten URLs.
 # 6. `frame-ancestors` is the same purpose as `X-Frame-Options` above.
 # 7. `form-action`prevents forms, we don't need this.`
-# 8. `upgrade-insecure-requests` instructs the browser to upgrade all insecure
-#     requests to HTTPS, but only the ones to the same hostname.
-Header always add Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw=' 'sha256-AdiT28wTL5FNaRVHWQVFC0ic3E20Gu4/PiC9xukS9+E=' https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src *; object-src 'none'; connect-src *; frame-ancestors 'self'; form-action 'none'; upgrade-insecure-requests"
+Header always add Content-Security-Policy "default-src 'self'; script-src 'self' 'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw=' 'sha256-AdiT28wTL5FNaRVHWQVFC0ic3E20Gu4/PiC9xukS9+E=' https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src *; object-src 'none'; connect-src *; frame-ancestors 'self'; form-action 'none'"

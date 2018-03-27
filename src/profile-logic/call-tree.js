@@ -40,6 +40,10 @@ type CallTreeCountsAndTimings = {
 
 function extractFaviconFromLibname(libname: string): string | null {
   const url = new URL('/favicon.ico', libname);
+  if (url.protocol === 'http:') {
+    // Upgrade http requests.
+    url.protocol = 'https:';
+  }
   return url.href;
 }
 
