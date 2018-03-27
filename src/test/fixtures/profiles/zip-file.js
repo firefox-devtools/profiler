@@ -3,23 +3,30 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { getEmptyProfile } from '../../../profile-logic/profile-data';
+import { getProfileFromTextSamples } from '../../fixtures/profiles/make-profile';
 import { serializeProfile } from '../../../profile-logic/process-profile';
 import { receiveZipFile } from '../../../actions/receive-profile';
 import type { ZipFileTable } from '../../../profile-logic/zip-files';
 import createStore from '../../../create-store';
 import JSZip from 'jszip';
-
+import { objectValues } from '../../../utils/flow';
 /**
  * Puts a blank profile at each given path in a zip file.
  */
 export function getZippedProfiles(files: string[] = []): JSZip {
-  const profile = serializeProfile(getEmptyProfile());
+  const { profile } = getProfileFromTextSamples('A');
+  const profileText = serializeProfile(profile);
 
   const zip = new JSZip();
   files.forEach(fileName => {
-    zip.file(fileName, profile);
+    zip.file(fileName, profileText);
   });
+
+  for (const file of objectValues(zip.files)) {
+    // The date for files, and directories defaults to the current time,
+    // which breaks snapshot tests.
+    file.date = new Date('1997-08-29T05:14:14.617Z');
+  }
 
   return zip;
 }
@@ -32,6 +39,7 @@ export async function storeWithZipFile(files: string[] = []) {
   const zippedProfiles = getZippedProfiles(files);
   store.dispatch(receiveZipFile(zippedProfiles));
   return {
+    store,
     dispatch: store.dispatch,
     getState: store.getState,
     zippedProfiles,

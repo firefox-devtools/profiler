@@ -1,0 +1,1696 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`calltree/ZipFileTree clicking on a profile link kicks off the profile loading process when clicked 1`] = `"Loading the profile from the zip file..."`;
+
+exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <Connect(ZipFileViewer)>
+    <ZipFileViewer
+      changeExpandedZipFile={[Function]}
+      changeSelectedZipFile={[Function]}
+      expandedZipFileIndexes={
+        Array [
+          0,
+          4,
+          1,
+        ]
+      }
+      pathInZipFile={null}
+      returnToZipFileList={[Function]}
+      selectedZipFileIndex={null}
+      showErrorForNoFileInZip={[Function]}
+      viewProfileFromZip={[Function]}
+      zipFileMaxDepth={2}
+      zipFileState={
+        Object {
+          "pathInZipFile": null,
+          "phase": "LIST_FILES_IN_ZIP_FILE",
+          "zip": Object {
+            "clone": [Function],
+            "comment": null,
+            "files": Object {
+              "baz/": Object {
+                "_data": Promise {},
+                "_dataBinary": true,
+                "comment": null,
+                "date": 1997-08-29T05:14:14.617Z,
+                "dir": true,
+                "dosPermissions": null,
+                "name": "baz/",
+                "options": Object {
+                  "compression": "STORE",
+                  "compressionOptions": null,
+                },
+                "unixPermissions": null,
+              },
+              "baz/profile3.json": Object {
+                "_data": Promise {},
+                "_dataBinary": false,
+                "comment": null,
+                "date": 1997-08-29T05:14:14.617Z,
+                "dir": false,
+                "dosPermissions": null,
+                "name": "baz/profile3.json",
+                "options": Object {
+                  "compression": null,
+                  "compressionOptions": null,
+                },
+                "unixPermissions": null,
+              },
+              "foo/": Object {
+                "_data": Promise {},
+                "_dataBinary": true,
+                "comment": null,
+                "date": 1997-08-29T05:14:14.617Z,
+                "dir": true,
+                "dosPermissions": null,
+                "name": "foo/",
+                "options": Object {
+                  "compression": "STORE",
+                  "compressionOptions": null,
+                },
+                "unixPermissions": null,
+              },
+              "foo/bar/": Object {
+                "_data": Promise {},
+                "_dataBinary": true,
+                "comment": null,
+                "date": 1997-08-29T05:14:14.617Z,
+                "dir": true,
+                "dosPermissions": null,
+                "name": "foo/bar/",
+                "options": Object {
+                  "compression": "STORE",
+                  "compressionOptions": null,
+                },
+                "unixPermissions": null,
+              },
+              "foo/bar/profile1.json": Object {
+                "_data": Promise {},
+                "_dataBinary": false,
+                "comment": null,
+                "date": 1997-08-29T05:14:14.617Z,
+                "dir": false,
+                "dosPermissions": null,
+                "name": "foo/bar/profile1.json",
+                "options": Object {
+                  "compression": null,
+                  "compressionOptions": null,
+                },
+                "unixPermissions": null,
+              },
+              "foo/profile2.json": Object {
+                "_data": Promise {},
+                "_dataBinary": false,
+                "comment": null,
+                "date": 1997-08-29T05:14:14.617Z,
+                "dir": false,
+                "dosPermissions": null,
+                "name": "foo/profile2.json",
+                "options": Object {
+                  "compression": null,
+                  "compressionOptions": null,
+                },
+                "unixPermissions": null,
+              },
+            },
+            "root": "",
+          },
+        }
+      }
+      zipFileTable={
+        Object {
+          "depth": Array [
+            0,
+            1,
+            2,
+            1,
+            0,
+            1,
+          ],
+          "file": Array [
+            null,
+            null,
+            Object {
+              "_data": Promise {},
+              "_dataBinary": false,
+              "comment": null,
+              "date": 1997-08-29T05:14:14.617Z,
+              "dir": false,
+              "dosPermissions": null,
+              "name": "foo/bar/profile1.json",
+              "options": Object {
+                "compression": null,
+                "compressionOptions": null,
+              },
+              "unixPermissions": null,
+            },
+            Object {
+              "_data": Promise {},
+              "_dataBinary": false,
+              "comment": null,
+              "date": 1997-08-29T05:14:14.617Z,
+              "dir": false,
+              "dosPermissions": null,
+              "name": "foo/profile2.json",
+              "options": Object {
+                "compression": null,
+                "compressionOptions": null,
+              },
+              "unixPermissions": null,
+            },
+            null,
+            Object {
+              "_data": Promise {},
+              "_dataBinary": false,
+              "comment": null,
+              "date": 1997-08-29T05:14:14.617Z,
+              "dir": false,
+              "dosPermissions": null,
+              "name": "baz/profile3.json",
+              "options": Object {
+                "compression": null,
+                "compressionOptions": null,
+              },
+              "unixPermissions": null,
+            },
+          ],
+          "length": 6,
+          "partName": Array [
+            "foo",
+            "bar",
+            "profile1.json",
+            "profile2.json",
+            "baz",
+            "profile3.json",
+          ],
+          "path": Array [
+            "foo",
+            "foo/bar",
+            "foo/bar/profile1.json",
+            "foo/profile2.json",
+            "baz",
+            "baz/profile3.json",
+          ],
+          "prefix": Array [
+            null,
+            0,
+            1,
+            0,
+            null,
+            4,
+          ],
+        }
+      }
+      zipFileTree={
+        ZipFileTree {
+          "_displayDataByIndex": Map {
+            0 => Object {
+              "name": "foo",
+              "url": null,
+              "zipTableIndex": 0,
+            },
+            4 => Object {
+              "name": "baz",
+              "url": null,
+              "zipTableIndex": 4,
+            },
+            1 => Object {
+              "name": "bar",
+              "url": null,
+              "zipTableIndex": 1,
+            },
+            2 => Object {
+              "name": "profile1.json",
+              "url": "null/from-url//calltree/?file=foo%2Fbar%2Fprofile1.json",
+              "zipTableIndex": 2,
+            },
+            3 => Object {
+              "name": "profile2.json",
+              "url": "null/from-url//calltree/?file=foo%2Fprofile2.json",
+              "zipTableIndex": 3,
+            },
+            5 => Object {
+              "name": "profile3.json",
+              "url": "null/from-url//calltree/?file=baz%2Fprofile3.json",
+              "zipTableIndex": 5,
+            },
+          },
+          "_parentToChildren": Map {
+            null => Array [
+              0,
+              4,
+            ],
+            0 => Array [
+              1,
+              3,
+            ],
+            4 => Array [
+              5,
+            ],
+            1 => Array [
+              2,
+            ],
+            3 => Array [],
+            5 => Array [],
+            2 => Array [],
+          },
+          "_zipFileTable": Object {
+            "depth": Array [
+              0,
+              1,
+              2,
+              1,
+              0,
+              1,
+            ],
+            "file": Array [
+              null,
+              null,
+              Object {
+                "_data": Promise {},
+                "_dataBinary": false,
+                "comment": null,
+                "date": 1997-08-29T05:14:14.617Z,
+                "dir": false,
+                "dosPermissions": null,
+                "name": "foo/bar/profile1.json",
+                "options": Object {
+                  "compression": null,
+                  "compressionOptions": null,
+                },
+                "unixPermissions": null,
+              },
+              Object {
+                "_data": Promise {},
+                "_dataBinary": false,
+                "comment": null,
+                "date": 1997-08-29T05:14:14.617Z,
+                "dir": false,
+                "dosPermissions": null,
+                "name": "foo/profile2.json",
+                "options": Object {
+                  "compression": null,
+                  "compressionOptions": null,
+                },
+                "unixPermissions": null,
+              },
+              null,
+              Object {
+                "_data": Promise {},
+                "_dataBinary": false,
+                "comment": null,
+                "date": 1997-08-29T05:14:14.617Z,
+                "dir": false,
+                "dosPermissions": null,
+                "name": "baz/profile3.json",
+                "options": Object {
+                  "compression": null,
+                  "compressionOptions": null,
+                },
+                "unixPermissions": null,
+              },
+            ],
+            "length": 6,
+            "partName": Array [
+              "foo",
+              "bar",
+              "profile1.json",
+              "profile2.json",
+              "baz",
+              "profile3.json",
+            ],
+            "path": Array [
+              "foo",
+              "foo/bar",
+              "foo/bar/profile1.json",
+              "foo/profile2.json",
+              "baz",
+              "baz/profile3.json",
+            ],
+            "prefix": Array [
+              null,
+              0,
+              1,
+              0,
+              null,
+              4,
+            ],
+          },
+          "_zipFileUrl": "",
+        }
+      }
+    >
+      <section
+        className="zipFileViewer"
+      >
+        <div
+          className="zipFileViewerSection"
+        >
+          <header
+            className="zipFileViewerHeader"
+          >
+            <h1>
+              perf.html
+            </h1>
+            <p>
+              Choose a profile from this zip file
+            </p>
+          </header>
+          <TreeView
+            contextMenuId="MarkersContextMenu"
+            expandedNodeIds={
+              Array [
+                0,
+                4,
+                1,
+              ]
+            }
+            fixedColumns={Array []}
+            indentWidth={15}
+            mainColumn={
+              Object {
+                "component": [Function],
+                "propName": "name",
+                "title": "",
+              }
+            }
+            maxNodeDepth={2}
+            onAppendageButtonClick={[Function]}
+            onEnterKey={[Function]}
+            onExpandedNodesChange={[Function]}
+            onSelectionChange={[Function]}
+            rowHeight={30}
+            selectedNodeId={null}
+            tree={
+              ZipFileTree {
+                "_displayDataByIndex": Map {
+                  0 => Object {
+                    "name": "foo",
+                    "url": null,
+                    "zipTableIndex": 0,
+                  },
+                  4 => Object {
+                    "name": "baz",
+                    "url": null,
+                    "zipTableIndex": 4,
+                  },
+                  1 => Object {
+                    "name": "bar",
+                    "url": null,
+                    "zipTableIndex": 1,
+                  },
+                  2 => Object {
+                    "name": "profile1.json",
+                    "url": "null/from-url//calltree/?file=foo%2Fbar%2Fprofile1.json",
+                    "zipTableIndex": 2,
+                  },
+                  3 => Object {
+                    "name": "profile2.json",
+                    "url": "null/from-url//calltree/?file=foo%2Fprofile2.json",
+                    "zipTableIndex": 3,
+                  },
+                  5 => Object {
+                    "name": "profile3.json",
+                    "url": "null/from-url//calltree/?file=baz%2Fprofile3.json",
+                    "zipTableIndex": 5,
+                  },
+                },
+                "_parentToChildren": Map {
+                  null => Array [
+                    0,
+                    4,
+                  ],
+                  0 => Array [
+                    1,
+                    3,
+                  ],
+                  4 => Array [
+                    5,
+                  ],
+                  1 => Array [
+                    2,
+                  ],
+                  3 => Array [],
+                  5 => Array [],
+                  2 => Array [],
+                },
+                "_zipFileTable": Object {
+                  "depth": Array [
+                    0,
+                    1,
+                    2,
+                    1,
+                    0,
+                    1,
+                  ],
+                  "file": Array [
+                    null,
+                    null,
+                    Object {
+                      "_data": Promise {},
+                      "_dataBinary": false,
+                      "comment": null,
+                      "date": 1997-08-29T05:14:14.617Z,
+                      "dir": false,
+                      "dosPermissions": null,
+                      "name": "foo/bar/profile1.json",
+                      "options": Object {
+                        "compression": null,
+                        "compressionOptions": null,
+                      },
+                      "unixPermissions": null,
+                    },
+                    Object {
+                      "_data": Promise {},
+                      "_dataBinary": false,
+                      "comment": null,
+                      "date": 1997-08-29T05:14:14.617Z,
+                      "dir": false,
+                      "dosPermissions": null,
+                      "name": "foo/profile2.json",
+                      "options": Object {
+                        "compression": null,
+                        "compressionOptions": null,
+                      },
+                      "unixPermissions": null,
+                    },
+                    null,
+                    Object {
+                      "_data": Promise {},
+                      "_dataBinary": false,
+                      "comment": null,
+                      "date": 1997-08-29T05:14:14.617Z,
+                      "dir": false,
+                      "dosPermissions": null,
+                      "name": "baz/profile3.json",
+                      "options": Object {
+                        "compression": null,
+                        "compressionOptions": null,
+                      },
+                      "unixPermissions": null,
+                    },
+                  ],
+                  "length": 6,
+                  "partName": Array [
+                    "foo",
+                    "bar",
+                    "profile1.json",
+                    "profile2.json",
+                    "baz",
+                    "profile3.json",
+                  ],
+                  "path": Array [
+                    "foo",
+                    "foo/bar",
+                    "foo/bar/profile1.json",
+                    "foo/profile2.json",
+                    "baz",
+                    "baz/profile3.json",
+                  ],
+                  "prefix": Array [
+                    null,
+                    0,
+                    1,
+                    0,
+                    null,
+                    4,
+                  ],
+                },
+                "_zipFileUrl": "",
+              }
+            }
+          >
+            <div
+              className="treeView"
+            >
+              <TreeViewHeader
+                fixedColumns={Array []}
+                mainColumn={
+                  Object {
+                    "component": [Function],
+                    "propName": "name",
+                    "title": "",
+                  }
+                }
+              />
+              <MyContextMenuTrigger
+                attributes={
+                  Object {
+                    "className": "treeViewContextMenu",
+                  }
+                }
+                id="MarkersContextMenu"
+              >
+                <ContextMenuTrigger
+                  attributes={
+                    Object {
+                      "className": "treeViewContextMenu",
+                    }
+                  }
+                  collect={[Function]}
+                  disable={false}
+                  holdToDisplay={-1}
+                  id="MarkersContextMenu"
+                  renderTag="div"
+                >
+                  <div
+                    className="react-contextmenu-wrapper treeViewContextMenu"
+                    onContextMenu={[Function]}
+                    onMouseDown={[Function]}
+                    onMouseOut={[Function]}
+                    onMouseUp={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
+                  >
+                    <VirtualList
+                      className="treeViewBody"
+                      columnCount={2}
+                      containerWidth={3000}
+                      disableOverscan={false}
+                      focusable={true}
+                      itemHeight={30}
+                      items={
+                        Array [
+                          0,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                        ]
+                      }
+                      onCopy={[Function]}
+                      onKeyDown={[Function]}
+                      renderItem={[Function]}
+                      specialItems={
+                        Array [
+                          null,
+                        ]
+                      }
+                    >
+                      <div
+                        className="treeViewBody"
+                        onKeyDown={[Function]}
+                        tabIndex={0}
+                      >
+                        <div
+                          className="treeViewBodyInnerWrapper"
+                        >
+                          <VirtualListInner
+                            className="treeViewBodyInner treeViewBodyInner0"
+                            columnIndex={0}
+                            containerWidth={3000}
+                            itemHeight={30}
+                            items={
+                              Array [
+                                0,
+                                1,
+                                2,
+                                3,
+                                4,
+                                5,
+                              ]
+                            }
+                            key="0"
+                            renderItem={[Function]}
+                            specialItems={
+                              Array [
+                                null,
+                              ]
+                            }
+                            visibleRangeEnd={6}
+                            visibleRangeStart={0}
+                          >
+                            <div
+                              className="treeViewBodyInner treeViewBodyInner0"
+                              style={
+                                Object {
+                                  "height": "180px",
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="treeViewBodyInner treeViewBodyInner0TopSpacer"
+                                key="-1"
+                                style={
+                                  Object {
+                                    "height": "0px",
+                                  }
+                                }
+                              />
+                              <VirtualListInnerChunk
+                                className="treeViewBodyInner treeViewBodyInner0InnerChunk"
+                                columnIndex={0}
+                                items={
+                                  Array [
+                                    0,
+                                    1,
+                                    2,
+                                    3,
+                                    4,
+                                    5,
+                                  ]
+                                }
+                                key="0"
+                                renderItem={[Function]}
+                                specialItems={
+                                  Array [
+                                    null,
+                                  ]
+                                }
+                                visibleRangeEnd={6}
+                                visibleRangeStart={0}
+                              >
+                                <div
+                                  className="treeViewBodyInner treeViewBodyInner0InnerChunk"
+                                >
+                                  <VirtualListRow
+                                    columnIndex={0}
+                                    index={0}
+                                    isSpecial={false}
+                                    item={0}
+                                    items={
+                                      Array [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                      ]
+                                    }
+                                    key="0"
+                                    renderItem={[Function]}
+                                  >
+                                    <TreeViewRowFixedColumns
+                                      columns={Array []}
+                                      displayData={
+                                        Object {
+                                          "name": "foo",
+                                          "url": null,
+                                          "zipTableIndex": 0,
+                                        }
+                                      }
+                                      highlightRegExp={null}
+                                      index={0}
+                                      nodeId={0}
+                                      onClick={[Function]}
+                                      rowHeightStyle={
+                                        Object {
+                                          "height": 30,
+                                          "lineHeight": "30px",
+                                        }
+                                      }
+                                      selected={false}
+                                    >
+                                      <div
+                                        className="treeViewRow treeViewRowFixedColumns even "
+                                        onMouseDown={[Function]}
+                                        style={
+                                          Object {
+                                            "height": 30,
+                                            "lineHeight": "30px",
+                                          }
+                                        }
+                                      />
+                                    </TreeViewRowFixedColumns>
+                                  </VirtualListRow>
+                                  <VirtualListRow
+                                    columnIndex={0}
+                                    index={1}
+                                    isSpecial={false}
+                                    item={1}
+                                    items={
+                                      Array [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                      ]
+                                    }
+                                    key="1"
+                                    renderItem={[Function]}
+                                  >
+                                    <TreeViewRowFixedColumns
+                                      columns={Array []}
+                                      displayData={
+                                        Object {
+                                          "name": "bar",
+                                          "url": null,
+                                          "zipTableIndex": 1,
+                                        }
+                                      }
+                                      highlightRegExp={null}
+                                      index={1}
+                                      nodeId={1}
+                                      onClick={[Function]}
+                                      rowHeightStyle={
+                                        Object {
+                                          "height": 30,
+                                          "lineHeight": "30px",
+                                        }
+                                      }
+                                      selected={false}
+                                    >
+                                      <div
+                                        className="treeViewRow treeViewRowFixedColumns odd "
+                                        onMouseDown={[Function]}
+                                        style={
+                                          Object {
+                                            "height": 30,
+                                            "lineHeight": "30px",
+                                          }
+                                        }
+                                      />
+                                    </TreeViewRowFixedColumns>
+                                  </VirtualListRow>
+                                  <VirtualListRow
+                                    columnIndex={0}
+                                    index={2}
+                                    isSpecial={false}
+                                    item={2}
+                                    items={
+                                      Array [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                      ]
+                                    }
+                                    key="2"
+                                    renderItem={[Function]}
+                                  >
+                                    <TreeViewRowFixedColumns
+                                      columns={Array []}
+                                      displayData={
+                                        Object {
+                                          "name": "profile1.json",
+                                          "url": "null/from-url//calltree/?file=foo%2Fbar%2Fprofile1.json",
+                                          "zipTableIndex": 2,
+                                        }
+                                      }
+                                      highlightRegExp={null}
+                                      index={2}
+                                      nodeId={2}
+                                      onClick={[Function]}
+                                      rowHeightStyle={
+                                        Object {
+                                          "height": 30,
+                                          "lineHeight": "30px",
+                                        }
+                                      }
+                                      selected={false}
+                                    >
+                                      <div
+                                        className="treeViewRow treeViewRowFixedColumns even "
+                                        onMouseDown={[Function]}
+                                        style={
+                                          Object {
+                                            "height": 30,
+                                            "lineHeight": "30px",
+                                          }
+                                        }
+                                      />
+                                    </TreeViewRowFixedColumns>
+                                  </VirtualListRow>
+                                  <VirtualListRow
+                                    columnIndex={0}
+                                    index={3}
+                                    isSpecial={false}
+                                    item={3}
+                                    items={
+                                      Array [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                      ]
+                                    }
+                                    key="3"
+                                    renderItem={[Function]}
+                                  >
+                                    <TreeViewRowFixedColumns
+                                      columns={Array []}
+                                      displayData={
+                                        Object {
+                                          "name": "profile2.json",
+                                          "url": "null/from-url//calltree/?file=foo%2Fprofile2.json",
+                                          "zipTableIndex": 3,
+                                        }
+                                      }
+                                      highlightRegExp={null}
+                                      index={3}
+                                      nodeId={3}
+                                      onClick={[Function]}
+                                      rowHeightStyle={
+                                        Object {
+                                          "height": 30,
+                                          "lineHeight": "30px",
+                                        }
+                                      }
+                                      selected={false}
+                                    >
+                                      <div
+                                        className="treeViewRow treeViewRowFixedColumns odd "
+                                        onMouseDown={[Function]}
+                                        style={
+                                          Object {
+                                            "height": 30,
+                                            "lineHeight": "30px",
+                                          }
+                                        }
+                                      />
+                                    </TreeViewRowFixedColumns>
+                                  </VirtualListRow>
+                                  <VirtualListRow
+                                    columnIndex={0}
+                                    index={4}
+                                    isSpecial={false}
+                                    item={4}
+                                    items={
+                                      Array [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                      ]
+                                    }
+                                    key="4"
+                                    renderItem={[Function]}
+                                  >
+                                    <TreeViewRowFixedColumns
+                                      columns={Array []}
+                                      displayData={
+                                        Object {
+                                          "name": "baz",
+                                          "url": null,
+                                          "zipTableIndex": 4,
+                                        }
+                                      }
+                                      highlightRegExp={null}
+                                      index={4}
+                                      nodeId={4}
+                                      onClick={[Function]}
+                                      rowHeightStyle={
+                                        Object {
+                                          "height": 30,
+                                          "lineHeight": "30px",
+                                        }
+                                      }
+                                      selected={false}
+                                    >
+                                      <div
+                                        className="treeViewRow treeViewRowFixedColumns even "
+                                        onMouseDown={[Function]}
+                                        style={
+                                          Object {
+                                            "height": 30,
+                                            "lineHeight": "30px",
+                                          }
+                                        }
+                                      />
+                                    </TreeViewRowFixedColumns>
+                                  </VirtualListRow>
+                                  <VirtualListRow
+                                    columnIndex={0}
+                                    index={5}
+                                    isSpecial={false}
+                                    item={5}
+                                    items={
+                                      Array [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                      ]
+                                    }
+                                    key="5"
+                                    renderItem={[Function]}
+                                  >
+                                    <TreeViewRowFixedColumns
+                                      columns={Array []}
+                                      displayData={
+                                        Object {
+                                          "name": "profile3.json",
+                                          "url": "null/from-url//calltree/?file=baz%2Fprofile3.json",
+                                          "zipTableIndex": 5,
+                                        }
+                                      }
+                                      highlightRegExp={null}
+                                      index={5}
+                                      nodeId={5}
+                                      onClick={[Function]}
+                                      rowHeightStyle={
+                                        Object {
+                                          "height": 30,
+                                          "lineHeight": "30px",
+                                        }
+                                      }
+                                      selected={false}
+                                    >
+                                      <div
+                                        className="treeViewRow treeViewRowFixedColumns odd "
+                                        onMouseDown={[Function]}
+                                        style={
+                                          Object {
+                                            "height": 30,
+                                            "lineHeight": "30px",
+                                          }
+                                        }
+                                      />
+                                    </TreeViewRowFixedColumns>
+                                  </VirtualListRow>
+                                </div>
+                              </VirtualListInnerChunk>
+                            </div>
+                          </VirtualListInner>
+                          <VirtualListInner
+                            className="treeViewBodyInner treeViewBodyInner1"
+                            columnIndex={1}
+                            containerWidth={3000}
+                            itemHeight={30}
+                            items={
+                              Array [
+                                0,
+                                1,
+                                2,
+                                3,
+                                4,
+                                5,
+                              ]
+                            }
+                            key="1"
+                            renderItem={[Function]}
+                            specialItems={
+                              Array [
+                                null,
+                              ]
+                            }
+                            visibleRangeEnd={6}
+                            visibleRangeStart={0}
+                          >
+                            <div
+                              className="treeViewBodyInner treeViewBodyInner1"
+                              style={
+                                Object {
+                                  "height": "180px",
+                                  "width": 3000,
+                                }
+                              }
+                            >
+                              <div
+                                className="treeViewBodyInner treeViewBodyInner1TopSpacer"
+                                key="-1"
+                                style={
+                                  Object {
+                                    "height": "0px",
+                                  }
+                                }
+                              />
+                              <VirtualListInnerChunk
+                                className="treeViewBodyInner treeViewBodyInner1InnerChunk"
+                                columnIndex={1}
+                                items={
+                                  Array [
+                                    0,
+                                    1,
+                                    2,
+                                    3,
+                                    4,
+                                    5,
+                                  ]
+                                }
+                                key="0"
+                                renderItem={[Function]}
+                                specialItems={
+                                  Array [
+                                    null,
+                                  ]
+                                }
+                                visibleRangeEnd={6}
+                                visibleRangeStart={0}
+                              >
+                                <div
+                                  className="treeViewBodyInner treeViewBodyInner1InnerChunk"
+                                >
+                                  <VirtualListRow
+                                    columnIndex={1}
+                                    index={0}
+                                    isSpecial={false}
+                                    item={0}
+                                    items={
+                                      Array [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                      ]
+                                    }
+                                    key="0"
+                                    renderItem={[Function]}
+                                  >
+                                    <TreeViewRowScrolledColumns
+                                      canBeExpanded={true}
+                                      depth={0}
+                                      displayData={
+                                        Object {
+                                          "name": "foo",
+                                          "url": null,
+                                          "zipTableIndex": 0,
+                                        }
+                                      }
+                                      highlightRegExp={null}
+                                      indentWidth={15}
+                                      index={0}
+                                      isExpanded={true}
+                                      mainColumn={
+                                        Object {
+                                          "component": [Function],
+                                          "propName": "name",
+                                          "title": "",
+                                        }
+                                      }
+                                      nodeId={0}
+                                      onAppendageButtonClick={[Function]}
+                                      onClick={[Function]}
+                                      onToggle={[Function]}
+                                      rowHeightStyle={
+                                        Object {
+                                          "height": 30,
+                                          "lineHeight": "30px",
+                                        }
+                                      }
+                                      selected={false}
+                                    >
+                                      <div
+                                        className="treeViewRow treeViewRowScrolledColumns even  "
+                                        onMouseDown={[Function]}
+                                        style={
+                                          Object {
+                                            "height": 30,
+                                            "lineHeight": "30px",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="treeRowIndentSpacer"
+                                          style={
+                                            Object {
+                                              "width": "0px",
+                                            }
+                                          }
+                                        />
+                                        <span
+                                          className="treeRowToggleButton expanded canBeExpanded"
+                                        />
+                                        <span
+                                          className="treeViewRowColumn treeViewMainColumn name"
+                                        >
+                                          <Connect(ZipFileRowImpl)
+                                            displayData={
+                                              Object {
+                                                "name": "foo",
+                                                "url": null,
+                                                "zipTableIndex": 0,
+                                              }
+                                            }
+                                          >
+                                            <ZipFileRowImpl
+                                              displayData={
+                                                Object {
+                                                  "name": "foo",
+                                                  "url": null,
+                                                  "zipTableIndex": 0,
+                                                }
+                                              }
+                                              viewProfileFromZip={[Function]}
+                                            >
+                                              foo
+                                            </ZipFileRowImpl>
+                                          </Connect(ZipFileRowImpl)>
+                                        </span>
+                                      </div>
+                                    </TreeViewRowScrolledColumns>
+                                  </VirtualListRow>
+                                  <VirtualListRow
+                                    columnIndex={1}
+                                    index={1}
+                                    isSpecial={false}
+                                    item={1}
+                                    items={
+                                      Array [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                      ]
+                                    }
+                                    key="1"
+                                    renderItem={[Function]}
+                                  >
+                                    <TreeViewRowScrolledColumns
+                                      canBeExpanded={true}
+                                      depth={1}
+                                      displayData={
+                                        Object {
+                                          "name": "bar",
+                                          "url": null,
+                                          "zipTableIndex": 1,
+                                        }
+                                      }
+                                      highlightRegExp={null}
+                                      indentWidth={15}
+                                      index={1}
+                                      isExpanded={true}
+                                      mainColumn={
+                                        Object {
+                                          "component": [Function],
+                                          "propName": "name",
+                                          "title": "",
+                                        }
+                                      }
+                                      nodeId={1}
+                                      onAppendageButtonClick={[Function]}
+                                      onClick={[Function]}
+                                      onToggle={[Function]}
+                                      rowHeightStyle={
+                                        Object {
+                                          "height": 30,
+                                          "lineHeight": "30px",
+                                        }
+                                      }
+                                      selected={false}
+                                    >
+                                      <div
+                                        className="treeViewRow treeViewRowScrolledColumns odd  "
+                                        onMouseDown={[Function]}
+                                        style={
+                                          Object {
+                                            "height": 30,
+                                            "lineHeight": "30px",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="treeRowIndentSpacer"
+                                          style={
+                                            Object {
+                                              "width": "15px",
+                                            }
+                                          }
+                                        />
+                                        <span
+                                          className="treeRowToggleButton expanded canBeExpanded"
+                                        />
+                                        <span
+                                          className="treeViewRowColumn treeViewMainColumn name"
+                                        >
+                                          <Connect(ZipFileRowImpl)
+                                            displayData={
+                                              Object {
+                                                "name": "bar",
+                                                "url": null,
+                                                "zipTableIndex": 1,
+                                              }
+                                            }
+                                          >
+                                            <ZipFileRowImpl
+                                              displayData={
+                                                Object {
+                                                  "name": "bar",
+                                                  "url": null,
+                                                  "zipTableIndex": 1,
+                                                }
+                                              }
+                                              viewProfileFromZip={[Function]}
+                                            >
+                                              bar
+                                            </ZipFileRowImpl>
+                                          </Connect(ZipFileRowImpl)>
+                                        </span>
+                                      </div>
+                                    </TreeViewRowScrolledColumns>
+                                  </VirtualListRow>
+                                  <VirtualListRow
+                                    columnIndex={1}
+                                    index={2}
+                                    isSpecial={false}
+                                    item={2}
+                                    items={
+                                      Array [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                      ]
+                                    }
+                                    key="2"
+                                    renderItem={[Function]}
+                                  >
+                                    <TreeViewRowScrolledColumns
+                                      canBeExpanded={false}
+                                      depth={2}
+                                      displayData={
+                                        Object {
+                                          "name": "profile1.json",
+                                          "url": "null/from-url//calltree/?file=foo%2Fbar%2Fprofile1.json",
+                                          "zipTableIndex": 2,
+                                        }
+                                      }
+                                      highlightRegExp={null}
+                                      indentWidth={15}
+                                      index={2}
+                                      isExpanded={false}
+                                      mainColumn={
+                                        Object {
+                                          "component": [Function],
+                                          "propName": "name",
+                                          "title": "",
+                                        }
+                                      }
+                                      nodeId={2}
+                                      onAppendageButtonClick={[Function]}
+                                      onClick={[Function]}
+                                      onToggle={[Function]}
+                                      rowHeightStyle={
+                                        Object {
+                                          "height": 30,
+                                          "lineHeight": "30px",
+                                        }
+                                      }
+                                      selected={false}
+                                    >
+                                      <div
+                                        className="treeViewRow treeViewRowScrolledColumns even  "
+                                        onMouseDown={[Function]}
+                                        style={
+                                          Object {
+                                            "height": 30,
+                                            "lineHeight": "30px",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="treeRowIndentSpacer"
+                                          style={
+                                            Object {
+                                              "width": "30px",
+                                            }
+                                          }
+                                        />
+                                        <span
+                                          className="treeRowToggleButton collapsed leaf"
+                                        />
+                                        <span
+                                          className="treeViewRowColumn treeViewMainColumn name"
+                                        >
+                                          <Connect(ZipFileRowImpl)
+                                            displayData={
+                                              Object {
+                                                "name": "profile1.json",
+                                                "url": "null/from-url//calltree/?file=foo%2Fbar%2Fprofile1.json",
+                                                "zipTableIndex": 2,
+                                              }
+                                            }
+                                          >
+                                            <ZipFileRowImpl
+                                              displayData={
+                                                Object {
+                                                  "name": "profile1.json",
+                                                  "url": "null/from-url//calltree/?file=foo%2Fbar%2Fprofile1.json",
+                                                  "zipTableIndex": 2,
+                                                }
+                                              }
+                                              viewProfileFromZip={[Function]}
+                                            >
+                                              <a
+                                                href="null/from-url//calltree/?file=foo%2Fbar%2Fprofile1.json"
+                                                onClick={[Function]}
+                                              >
+                                                profile1.json
+                                              </a>
+                                            </ZipFileRowImpl>
+                                          </Connect(ZipFileRowImpl)>
+                                        </span>
+                                      </div>
+                                    </TreeViewRowScrolledColumns>
+                                  </VirtualListRow>
+                                  <VirtualListRow
+                                    columnIndex={1}
+                                    index={3}
+                                    isSpecial={false}
+                                    item={3}
+                                    items={
+                                      Array [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                      ]
+                                    }
+                                    key="3"
+                                    renderItem={[Function]}
+                                  >
+                                    <TreeViewRowScrolledColumns
+                                      canBeExpanded={false}
+                                      depth={1}
+                                      displayData={
+                                        Object {
+                                          "name": "profile2.json",
+                                          "url": "null/from-url//calltree/?file=foo%2Fprofile2.json",
+                                          "zipTableIndex": 3,
+                                        }
+                                      }
+                                      highlightRegExp={null}
+                                      indentWidth={15}
+                                      index={3}
+                                      isExpanded={false}
+                                      mainColumn={
+                                        Object {
+                                          "component": [Function],
+                                          "propName": "name",
+                                          "title": "",
+                                        }
+                                      }
+                                      nodeId={3}
+                                      onAppendageButtonClick={[Function]}
+                                      onClick={[Function]}
+                                      onToggle={[Function]}
+                                      rowHeightStyle={
+                                        Object {
+                                          "height": 30,
+                                          "lineHeight": "30px",
+                                        }
+                                      }
+                                      selected={false}
+                                    >
+                                      <div
+                                        className="treeViewRow treeViewRowScrolledColumns odd  "
+                                        onMouseDown={[Function]}
+                                        style={
+                                          Object {
+                                            "height": 30,
+                                            "lineHeight": "30px",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="treeRowIndentSpacer"
+                                          style={
+                                            Object {
+                                              "width": "15px",
+                                            }
+                                          }
+                                        />
+                                        <span
+                                          className="treeRowToggleButton collapsed leaf"
+                                        />
+                                        <span
+                                          className="treeViewRowColumn treeViewMainColumn name"
+                                        >
+                                          <Connect(ZipFileRowImpl)
+                                            displayData={
+                                              Object {
+                                                "name": "profile2.json",
+                                                "url": "null/from-url//calltree/?file=foo%2Fprofile2.json",
+                                                "zipTableIndex": 3,
+                                              }
+                                            }
+                                          >
+                                            <ZipFileRowImpl
+                                              displayData={
+                                                Object {
+                                                  "name": "profile2.json",
+                                                  "url": "null/from-url//calltree/?file=foo%2Fprofile2.json",
+                                                  "zipTableIndex": 3,
+                                                }
+                                              }
+                                              viewProfileFromZip={[Function]}
+                                            >
+                                              <a
+                                                href="null/from-url//calltree/?file=foo%2Fprofile2.json"
+                                                onClick={[Function]}
+                                              >
+                                                profile2.json
+                                              </a>
+                                            </ZipFileRowImpl>
+                                          </Connect(ZipFileRowImpl)>
+                                        </span>
+                                      </div>
+                                    </TreeViewRowScrolledColumns>
+                                  </VirtualListRow>
+                                  <VirtualListRow
+                                    columnIndex={1}
+                                    index={4}
+                                    isSpecial={false}
+                                    item={4}
+                                    items={
+                                      Array [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                      ]
+                                    }
+                                    key="4"
+                                    renderItem={[Function]}
+                                  >
+                                    <TreeViewRowScrolledColumns
+                                      canBeExpanded={true}
+                                      depth={0}
+                                      displayData={
+                                        Object {
+                                          "name": "baz",
+                                          "url": null,
+                                          "zipTableIndex": 4,
+                                        }
+                                      }
+                                      highlightRegExp={null}
+                                      indentWidth={15}
+                                      index={4}
+                                      isExpanded={true}
+                                      mainColumn={
+                                        Object {
+                                          "component": [Function],
+                                          "propName": "name",
+                                          "title": "",
+                                        }
+                                      }
+                                      nodeId={4}
+                                      onAppendageButtonClick={[Function]}
+                                      onClick={[Function]}
+                                      onToggle={[Function]}
+                                      rowHeightStyle={
+                                        Object {
+                                          "height": 30,
+                                          "lineHeight": "30px",
+                                        }
+                                      }
+                                      selected={false}
+                                    >
+                                      <div
+                                        className="treeViewRow treeViewRowScrolledColumns even  "
+                                        onMouseDown={[Function]}
+                                        style={
+                                          Object {
+                                            "height": 30,
+                                            "lineHeight": "30px",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="treeRowIndentSpacer"
+                                          style={
+                                            Object {
+                                              "width": "0px",
+                                            }
+                                          }
+                                        />
+                                        <span
+                                          className="treeRowToggleButton expanded canBeExpanded"
+                                        />
+                                        <span
+                                          className="treeViewRowColumn treeViewMainColumn name"
+                                        >
+                                          <Connect(ZipFileRowImpl)
+                                            displayData={
+                                              Object {
+                                                "name": "baz",
+                                                "url": null,
+                                                "zipTableIndex": 4,
+                                              }
+                                            }
+                                          >
+                                            <ZipFileRowImpl
+                                              displayData={
+                                                Object {
+                                                  "name": "baz",
+                                                  "url": null,
+                                                  "zipTableIndex": 4,
+                                                }
+                                              }
+                                              viewProfileFromZip={[Function]}
+                                            >
+                                              baz
+                                            </ZipFileRowImpl>
+                                          </Connect(ZipFileRowImpl)>
+                                        </span>
+                                      </div>
+                                    </TreeViewRowScrolledColumns>
+                                  </VirtualListRow>
+                                  <VirtualListRow
+                                    columnIndex={1}
+                                    index={5}
+                                    isSpecial={false}
+                                    item={5}
+                                    items={
+                                      Array [
+                                        0,
+                                        1,
+                                        2,
+                                        3,
+                                        4,
+                                        5,
+                                      ]
+                                    }
+                                    key="5"
+                                    renderItem={[Function]}
+                                  >
+                                    <TreeViewRowScrolledColumns
+                                      canBeExpanded={false}
+                                      depth={1}
+                                      displayData={
+                                        Object {
+                                          "name": "profile3.json",
+                                          "url": "null/from-url//calltree/?file=baz%2Fprofile3.json",
+                                          "zipTableIndex": 5,
+                                        }
+                                      }
+                                      highlightRegExp={null}
+                                      indentWidth={15}
+                                      index={5}
+                                      isExpanded={false}
+                                      mainColumn={
+                                        Object {
+                                          "component": [Function],
+                                          "propName": "name",
+                                          "title": "",
+                                        }
+                                      }
+                                      nodeId={5}
+                                      onAppendageButtonClick={[Function]}
+                                      onClick={[Function]}
+                                      onToggle={[Function]}
+                                      rowHeightStyle={
+                                        Object {
+                                          "height": 30,
+                                          "lineHeight": "30px",
+                                        }
+                                      }
+                                      selected={false}
+                                    >
+                                      <div
+                                        className="treeViewRow treeViewRowScrolledColumns odd  "
+                                        onMouseDown={[Function]}
+                                        style={
+                                          Object {
+                                            "height": 30,
+                                            "lineHeight": "30px",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="treeRowIndentSpacer"
+                                          style={
+                                            Object {
+                                              "width": "15px",
+                                            }
+                                          }
+                                        />
+                                        <span
+                                          className="treeRowToggleButton collapsed leaf"
+                                        />
+                                        <span
+                                          className="treeViewRowColumn treeViewMainColumn name"
+                                        >
+                                          <Connect(ZipFileRowImpl)
+                                            displayData={
+                                              Object {
+                                                "name": "profile3.json",
+                                                "url": "null/from-url//calltree/?file=baz%2Fprofile3.json",
+                                                "zipTableIndex": 5,
+                                              }
+                                            }
+                                          >
+                                            <ZipFileRowImpl
+                                              displayData={
+                                                Object {
+                                                  "name": "profile3.json",
+                                                  "url": "null/from-url//calltree/?file=baz%2Fprofile3.json",
+                                                  "zipTableIndex": 5,
+                                                }
+                                              }
+                                              viewProfileFromZip={[Function]}
+                                            >
+                                              <a
+                                                href="null/from-url//calltree/?file=baz%2Fprofile3.json"
+                                                onClick={[Function]}
+                                              >
+                                                profile3.json
+                                              </a>
+                                            </ZipFileRowImpl>
+                                          </Connect(ZipFileRowImpl)>
+                                        </span>
+                                      </div>
+                                    </TreeViewRowScrolledColumns>
+                                  </VirtualListRow>
+                                </div>
+                              </VirtualListInnerChunk>
+                            </div>
+                          </VirtualListInner>
+                        </div>
+                      </div>
+                    </VirtualList>
+                  </div>
+                </ContextMenuTrigger>
+              </MyContextMenuTrigger>
+            </div>
+          </TreeView>
+        </div>
+      </section>
+    </ZipFileViewer>
+  </Connect(ZipFileViewer)>
+</Provider>
+`;
