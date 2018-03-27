@@ -1,50 +1,52 @@
-
-<svg width="737px" height="681px" viewBox="0 0 737 681" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 48.2 (47327) - http://www.bohemiancoding.com/sketch -->
+<svg width="737px" height="644px" viewBox="0 0 737 644" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 49.2 (51160) - http://www.bohemiancoding.com/sketch -->
     <desc>Created with Sketch.</desc>
     <defs>
-        <rect id="path-1" x="16" y="14" width="709" height="256" rx="8"></rect>
-        <rect id="path-2" x="17" y="299" width="339" height="366" rx="8"></rect>
-        <rect id="path-3" x="385" y="299" width="339" height="366" rx="8"></rect>
+        <rect id="path-1" x="16" y="14" width="709" height="277" rx="8"></rect>
+        <rect id="path-2" x="17" y="315" width="329" height="310" rx="8"></rect>
+        <rect id="path-3" x="385" y="315" width="339" height="310" rx="8"></rect>
         <rect id="path-4" x="0" y="0" width="214" height="59" rx="8"></rect>
         <rect id="path-5" x="0" y="0" width="138" height="54" rx="8"></rect>
-        <rect id="path-6" x="0" y="0" width="254" height="86" rx="8"></rect>
-        <rect id="path-7" x="0" y="0" width="254" height="93" rx="8"></rect>
-        <rect id="path-8" x="0" y="0" width="101" height="86" rx="8"></rect>
-        <rect id="path-9" x="0" y="0" width="101" height="86" rx="8"></rect>
+        <rect id="path-6" x="0" y="0" width="81" height="42" rx="8"></rect>
+        <rect id="path-7" x="0" y="0" width="81" height="42" rx="8"></rect>
+        <rect id="path-8" x="0" y="0" width="81" height="42" rx="8"></rect>
+        <rect id="path-9" x="0" y="0" width="81" height="42" rx="8"></rect>
+        <rect id="path-10" x="0" y="0" width="81" height="42" rx="8"></rect>
+        <rect id="path-11" x="0" y="0" width="81" height="42" rx="8"></rect>
+        <rect id="path-12" x="0" y="0" width="254" height="86" rx="8"></rect>
     </defs>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g id="New-Recording-Panel">
             <g id="Rectangle-Copy-3">
                 <use fill="#D7D7DB" fill-rule="evenodd" xlink:href="#path-1"></use>
-                <rect stroke="#979797" stroke-width="1" x="16.5" y="14.5" width="708" height="255" rx="8"></rect>
+                <rect stroke="#979797" stroke-width="1" x="16.5" y="14.5" width="708" height="276" rx="8"></rect>
             </g>
             <g id="Rectangle-Copy-4">
-                <use fill="#D7D7DB" fill-rule="evenodd" xlink:href="#path-2"></use>
-                <rect stroke="#979797" stroke-width="1" x="17.5" y="299.5" width="338" height="365" rx="8"></rect>
+                <use fill="#F2F2F2" fill-rule="evenodd" xlink:href="#path-2"></use>
+                <rect stroke="#DCDBDB" stroke-width="1" x="17.5" y="315.5" width="328" height="309" rx="8"></rect>
             </g>
             <g id="Rectangle-Copy-5">
-                <use fill="#D7D7DB" fill-rule="evenodd" xlink:href="#path-3"></use>
-                <rect stroke="#979797" stroke-width="1" x="385.5" y="299.5" width="338" height="365" rx="8"></rect>
+                <use fill="#F2F2F2" fill-rule="evenodd" xlink:href="#path-3"></use>
+                <rect stroke="#DCDBDB" stroke-width="1" x="385.5" y="315.5" width="338" height="309" rx="8"></rect>
             </g>
             <text id="Instrumented-by-Geck" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
-                <tspan x="64.2744141" y="373">Instrumented by Gecko Profiler, no DevTools</tspan>
-                <tspan x="104.947266" y="387">instrumentation needed here.</tspan>
+                <tspan x="33" y="388">Instrumented by Gecko Profiler, no DevTools</tspan>
+                <tspan x="33" y="402">remote debugging instrumentation is needed here.</tspan>
+                <tspan x="33" y="416"></tspan>
+                <tspan x="33" y="430">There is currently no way to separate out the Gecko </tspan>
+                <tspan x="33" y="444">Profiler information to a specifically targeted tab. The old </tspan>
+                <tspan x="33" y="458">DevTools performance tool turned on the Gecko Profiler </tspan>
+                <tspan x="33" y="472">for individual content processes instead.</tspan>
+                <tspan x="33" y="486"></tspan>
+                <tspan x="33" y="500">The newer architecture turns it on in the parent process </tspan>
+                <tspan x="33" y="514">in order to capture information like the compositor </tspan>
+                <tspan x="33" y="528">thread, but also includes information from every single </tspan>
+                <tspan x="33" y="542">content process and tabs inside of them.</tspan>
             </text>
             <text id="Repeat-for-all-addit" font-family="Helvetica" font-size="12" font-weight="normal" line-spacing="17" fill="#000000">
-                <tspan x="409" y="380">Repeat for all additional content processes. There is </tspan>
-                <tspan x="409" y="397">currently no way to separate out the Gecko Profiler </tspan>
-                <tspan x="409" y="414">information to a specifically targeted tab. The old </tspan>
-                <tspan x="409" y="431">DevTools performance tool turned on the Gecko </tspan>
-                <tspan x="409" y="448">Profiler for individual content processes.</tspan>
-                <tspan x="409" y="465"></tspan>
-                <tspan x="409" y="482">The newer architecture turns it on in the parent process </tspan>
-                <tspan x="409" y="499">in order to capture information like the compositor </tspan>
-                <tspan x="409" y="516">thread, but also includes information from every single </tspan>
-                <tspan x="409" y="533">content process. There is currently no way to separate </tspan>
-                <tspan x="409" y="550">out information on a per-tab basis.</tspan>
+                <tspan x="441.930664" y="396">Repeat for all additional content processes.</tspan>
             </text>
-            <g id="Group-Copy" transform="translate(487.000000, 91.000000)">
+            <g id="Group-Copy" transform="translate(487.000000, 100.000000)">
                 <g id="Rectangle-Copy-2">
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-4"></use>
                     <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="213" height="58" rx="8"></rect>
@@ -53,7 +55,7 @@
                     <tspan x="44.3952637" y="34">DevTools Client</tspan>
                 </text>
             </g>
-            <g id="Gecko-Profiler" transform="translate(90.000000, 200.000000)">
+            <g id="Gecko-Profiler" transform="translate(90.000000, 210.000000)">
                 <g id="Rectangle">
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-5"></use>
                     <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="137" height="53" rx="8"></rect>
@@ -65,18 +67,72 @@
                     <tspan x="23.4746094" y="42">C++ Native Code</tspan>
                 </text>
             </g>
-            <text id="Parent-Process" font-family="Helvetica-Bold, Helvetica" font-size="25" font-weight="bold" fill="#6F6F6F">
-                <tspan x="68.4782715" y="54">Parent Process</tspan>
-            </text>
-            <text id="Content-Process" font-family="Helvetica-Bold, Helvetica" font-size="25" font-weight="bold" fill="#6F6F6F">
-                <tspan x="84.1713867" y="343">Content Process</tspan>
-            </text>
-            <text id="Content-Process" font-family="Helvetica-Bold, Helvetica" font-size="25" font-weight="bold" fill="#6F6F6F">
-                <tspan x="458.171387" y="343">Content Process</tspan>
-            </text>
-            <g id="Group-Copy-2" transform="translate(36.000000, 76.000000)">
-                <g id="Rectangle-Copy-2">
+            <g id="Gecko-Profiler-Copy-2" transform="translate(36.000000, 564.000000)">
+                <g id="Rectangle">
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-6"></use>
+                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="80" height="41" rx="8"></rect>
+                </g>
+                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                    <tspan x="26.0151367" y="26">Tab</tspan>
+                </text>
+            </g>
+            <g id="Gecko-Profiler-Copy-5" transform="translate(408.000000, 564.000000)">
+                <g id="Rectangle">
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-7"></use>
+                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="80" height="41" rx="8"></rect>
+                </g>
+                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                    <tspan x="26.0151367" y="26">Tab</tspan>
+                </text>
+            </g>
+            <g id="Gecko-Profiler-Copy-4" transform="translate(248.000000, 564.000000)">
+                <g id="Rectangle">
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-8"></use>
+                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="80" height="41" rx="8"></rect>
+                </g>
+                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                    <tspan x="26.0151367" y="26">Tab</tspan>
+                </text>
+            </g>
+            <g id="Gecko-Profiler-Copy-3" transform="translate(143.000000, 564.000000)">
+                <g id="Rectangle">
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-9"></use>
+                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="80" height="41" rx="8"></rect>
+                </g>
+                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                    <tspan x="26.0151367" y="26">Tab</tspan>
+                </text>
+            </g>
+            <g id="Gecko-Profiler-Copy-6" transform="translate(513.000000, 564.000000)">
+                <g id="Rectangle">
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-10"></use>
+                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="80" height="41" rx="8"></rect>
+                </g>
+                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                    <tspan x="26.0151367" y="26">Tab</tspan>
+                </text>
+            </g>
+            <g id="Gecko-Profiler-Copy-7" transform="translate(617.000000, 564.000000)">
+                <g id="Rectangle">
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-11"></use>
+                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="80" height="41" rx="8"></rect>
+                </g>
+                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                    <tspan x="26.0151367" y="26">Tab</tspan>
+                </text>
+            </g>
+            <text id="Parent-Process" font-family="Helvetica-Bold, Helvetica" font-size="25" font-weight="bold" fill="#6F6F6F">
+                <tspan x="68.4782715" y="64">Parent Process</tspan>
+            </text>
+            <text id="Content-Process" font-family="Helvetica-Bold, Helvetica" font-size="25" font-weight="bold" fill="#6F6F6F">
+                <tspan x="84.1713867" y="359">Content Process</tspan>
+            </text>
+            <text id="Content-Process" font-family="Helvetica-Bold, Helvetica" font-size="25" font-weight="bold" fill="#6F6F6F">
+                <tspan x="458.171387" y="359">Content Process</tspan>
+            </text>
+            <g id="Group-Copy-2" transform="translate(36.000000, 86.000000)">
+                <g id="Rectangle-Copy-2">
+                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-12"></use>
                     <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="253" height="85" rx="8"></rect>
                 </g>
                 <text id="DevTools-Debugger-Se" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
@@ -86,65 +142,17 @@
                     <tspan x="34.7929688" y="62">using devtools/server/actors/perf.js</tspan>
                 </text>
             </g>
-            <g id="Group-Copy-3" transform="translate(55.000000, 403.000000)">
-                <g id="Rectangle-Copy-2">
-                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-7"></use>
-                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="253" height="92" rx="8"></rect>
-                </g>
-                <text id="DevTools-Debugger-Se" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
-                    <tspan x="20.0087891" y="35">DevTools Debugger Server</tspan>
-                </text>
-                <text id="no-performance-proto" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
-                    <tspan x="41.7861328" y="62">no performance protocol is used</tspan>
-                    <tspan x="69.8027344" y="76">in the child processes</tspan>
-                </text>
-            </g>
-            <g id="Group-Copy-3" transform="translate(199.000000, 550.000000)">
-                <g id="Rectangle-Copy-2">
-                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-8"></use>
-                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="100" height="85" rx="8"></rect>
-                </g>
-                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
-                    <tspan x="36.5151367" y="35">Tab</tspan>
-                </text>
-            </g>
-            <g id="Group-Copy-4" transform="translate(51.000000, 550.000000)">
-                <g id="Rectangle-Copy-2">
-                    <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-9"></use>
-                    <rect stroke="#979797" stroke-width="1" x="0.5" y="0.5" width="100" height="85" rx="8"></rect>
-                </g>
-                <text id="Tab" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
-                    <tspan x="36.5151367" y="35">Tab</tspan>
-                </text>
-            </g>
-            <path d="M157.5,162.5 L157.5,199.5" id="Line-Copy-7" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
-            <path id="Line-Copy-7-decoration-1" d="M157.5,199.5 L160.5,188.7 L154.5,188.7 L157.5,199.5 Z" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
-            <path d="M120.5,495.5 L103.5,549.5" id="Line-Copy-11" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
-            <path id="Line-Copy-11-decoration-1" d="M103.5,549.5 L109.604635,540.099286 L103.88154,538.29757 L103.5,549.5 Z" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
-            <path d="M226.5,496.5 L243.5,549.5" id="Line-Copy-11" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
-            <path id="Line-Copy-11-decoration-1" d="M243.5,549.5 L243.058028,538.299792 L237.344736,540.132357 L243.5,549.5 Z" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
+            <path d="M157.5,172.5 L157.5,209.5" id="Line-Copy-7" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
+            <path id="Line-Copy-7-decoration-1" d="M157.5,209.5 L160.5,198.7 L154.5,198.7 L157.5,209.5 Z" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
             <text id="nsIProfiler" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
-                <tspan x="172.991211" y="187">nsIProfiler</tspan>
-            </text>
-            <text id="TabActor" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
-                <tspan x="53.3222656" y="523">TabActor</tspan>
-            </text>
-            <text id="TabActor-Copy" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
-                <tspan x="248.322266" y="523">TabActor</tspan>
+                <tspan x="172.991211" y="197">nsIProfiler</tspan>
             </text>
             <text id="Remote-Debugging-Pro" font-family="Helvetica" font-size="12" font-weight="normal" line-spacing="16" fill="#000000">
                 <tspan x="318.12207" y="147">Remote Debugging Protocol </tspan>
                 <tspan x="311.336914" y="163">using LocalDebuggerTransport</tspan>
             </text>
-            <text id="Remote-Debugging-Pro" font-family="Helvetica" font-size="12" font-weight="normal" line-spacing="16" fill="#000000">
-                <tspan x="525.890625" y="225">Remote Debugging Protocol for the </tspan>
-                <tspan x="529.230469" y="241">child content process is unused for  </tspan>
-                <tspan x="583.939453" y="257">performance recordings.</tspan>
-            </text>
             <path d="M486.5,121.5 L290.5,121.5" id="Line-Copy-7" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
             <path id="Line-Copy-7-decoration-1" d="M290.5,121.5 L301.3,124.5 L301.3,118.5 L290.5,121.5 Z" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
-            <path d="M556.5,149.5 L309.5,446.5" id="Line-Copy-7" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square" stroke-dasharray="10"></path>
-            <path id="Line-Copy-7-decoration-1" d="M309.5,446.5 L318.71231,440.1146 L314.099166,436.278079 L309.5,446.5 Z" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square" stroke-dasharray="10"></path>
         </g>
     </g>
 </svg>
