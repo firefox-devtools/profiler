@@ -4,7 +4,7 @@
 
 // @flow
 
-import { PathSet, arePathsEqual } from '../../utils/path';
+import { PathSet, arePathsEqual, hashPath } from '../../utils/path';
 
 describe('PathSet', function() {
   const sampleValues = [[1], [1, 3], [2, 3, 9]];
@@ -126,5 +126,14 @@ describe('arePathsEqual', function() {
     expect(arePathsEqual([1], [2])).toBe(false);
     expect(arePathsEqual([1], [1, 2])).toBe(false);
     expect(arePathsEqual([1, 2], [2, 1])).toBe(false);
+  });
+});
+
+describe('hashPath', function() {
+  it('returns the same value for different objects with the same content', function() {
+    const path = [1, 8, 3654, 8749874, 4, 9, 45, 5, 7];
+    // Note we use `toBe` on purpose here, because this is what's important when
+    // using the hash in a Map or Set.
+    expect(hashPath(path.slice())).toBe(hashPath(path.slice()));
   });
 });

@@ -248,6 +248,19 @@ function viewOptionsPerThread(
         ...state.slice(threadIndex + 1),
       ];
     }
+    case 'POP_TRANSFORMS_FROM_STACK': {
+      // Simply reset the selected and expanded paths until this bug is fixed:
+      // https://github.com/devtools-html/perf.html/issues/882
+      const { threadIndex } = action;
+      return [
+        ...state.slice(0, threadIndex),
+        Object.assign({}, state[threadIndex], {
+          selectedCallNodePath: [],
+          expandedCallNodePaths: new PathSet(),
+        }),
+        ...state.slice(threadIndex + 1),
+      ];
+    }
     case 'CHANGE_IMPLEMENTATION_FILTER': {
       const {
         transformedThread,
@@ -721,7 +734,7 @@ export const selectorsForThread = (
       getCallNodeInfo,
       getSelectedCallNodePath,
       (callNodeInfo, callNodePath): IndexIntoCallNodeTable | null => {
-        return ProfileData.getCallNodeFromPath(
+        return ProfileData.getCallNodeIndexFromPath(
           callNodePath,
           callNodeInfo.callNodeTable
         );
@@ -734,14 +747,14 @@ export const selectorsForThread = (
     const getExpandedCallNodeIndexes = createSelector(
       getCallNodeInfo,
       getExpandedCallNodePaths,
-      (callNodeInfo, callNodePaths): (IndexIntoCallNodeTable | null)[] => {
-        return Array.from(callNodePaths).map(callNodePath =>
-          ProfileData.getCallNodeFromPath(
-            callNodePath,
-            callNodeInfo.callNodeTable
-          )
-        );
-      }
+      (
+        { callNodeTable },
+        callNodePaths
+      ): Array<IndexIntoCallNodeTable | null> =>
+        ProfileData.getCallNodeIndicesFromPaths(
+          Array.from(callNodePaths),
+          callNodeTable
+        )
     );
     const getCallTree = createSelector(
       getRangeSelectionFilteredThread,

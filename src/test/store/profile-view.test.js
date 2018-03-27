@@ -666,7 +666,7 @@ describe('actions/ProfileView', function() {
   });
 
   describe('popTransformToStack', function() {
-    it('can add a transform to the stack', function() {
+    it('can add and remove a transform to the stack', function() {
       const { profile } = getProfileFromTextSamples(`
         A
         B

@@ -15,7 +15,7 @@ import StackSettings from '../shared/StackSettings';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import TransformNavigator from '../shared/TransformNavigator';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
-import { getCallNodePath } from '../../profile-logic/profile-data';
+import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import { changeSelectedCallNode } from '../../actions/profile-view';
 
 import type { Thread } from '../../types/profile';
@@ -61,7 +61,7 @@ class FlameGraph extends React.PureComponent<Props> {
     const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadIndex,
-      getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable)
+      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
   };
 

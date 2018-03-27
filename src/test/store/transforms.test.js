@@ -886,6 +886,13 @@ describe('"collapse-function-subtree" transform', function() {
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       ['A', 'B', 'C'].map(name => funcNames.indexOf(name))
     );
+
+    // Popping transforms resets the selected path
+    // see https://github.com/devtools-html/perf.html/issues/882
+    dispatch(popTransformsFromStack(0));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      []
+    );
   });
 
   it('can update apply the transform to the expanded CallNodePaths', function() {
@@ -917,6 +924,14 @@ describe('"collapse-function-subtree" transform', function() {
         ['A', 'B'],
         ['A', 'B', 'C'],
       ])
+    );
+
+    // Popping transforms resets the expanded paths
+    // see https://github.com/devtools-html/perf.html/issues/882
+    dispatch(popTransformsFromStack(0));
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      []
     );
   });
 });

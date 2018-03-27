@@ -16,7 +16,7 @@ import {
 } from '../reducers/url-state';
 import {
   getFriendlyThreadName,
-  getCallNodePath,
+  getCallNodePathFromIndex,
 } from '../profile-logic/profile-data';
 import { sendAnalytics } from '../utils/analytics';
 
@@ -197,7 +197,7 @@ export function expandAllCallNodeDescendants(
     });
 
     const expandedCallNodePaths = [...descendants].map(callNodeIndex =>
-      getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable)
+      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
     dispatch(changeExpandedCallNodes(threadIndex, expandedCallNodePaths));
   };

@@ -9,7 +9,7 @@ import {
 } from '../utils/uintarray-encoding';
 import {
   toValidImplementationFilter,
-  getCallNodeFromPath,
+  getCallNodeIndexFromPath,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
@@ -522,7 +522,7 @@ export function invertCallNodePath(
   callTree: CallTree,
   callNodeTable: CallNodeTable
 ): CallNodePath {
-  let callNodeIndex = getCallNodeFromPath(path, callNodeTable);
+  let callNodeIndex = getCallNodeIndexFromPath(path, callNodeTable);
   if (callNodeIndex === null) {
     // No path was found, return an empty CallNodePath.
     return [];
