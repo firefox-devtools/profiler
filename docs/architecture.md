@@ -18,4 +18,6 @@ Please note, this is the diagram for the new recording panel in DevTools that is
 
 ## Remote Profiling
 
+Remote profiling with DevTools is very similar to the above diagram, but involves slightly different transport messaging mechanisms in order to target remote devices.
+
 ![Remote Profiling diagram](images/remote-profiling.svg)
