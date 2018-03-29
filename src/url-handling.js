@@ -110,6 +110,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   const selectedTab = urlState.selectedTab;
   switch (selectedTab) {
     case 'stack-chart':
+    case 'flame-graph':
     case 'calltree': {
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
       query.invertCallstack = urlState.profileSpecific.invertCallstack
@@ -132,7 +133,6 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       query.markerSearch = urlState.profileSpecific.markersSearchString;
       break;
     case 'marker-chart':
-    case 'flame-graph':
       break;
     default:
       assertExhaustiveCheck(selectedTab);
