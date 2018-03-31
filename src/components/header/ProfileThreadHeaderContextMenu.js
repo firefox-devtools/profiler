@@ -89,9 +89,7 @@ class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
           <div>
             <MenuItem
               onClick={this._isolateThread}
-              disabled={
-                hiddenThreads.length === threads.length - 1 ? true : false
-              }
+              disabled={hiddenThreads.length === threads.length - 1}
             >
               Only show: {`"${clickedThreadName}"`}
             </MenuItem>
