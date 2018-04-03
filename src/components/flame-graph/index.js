@@ -12,11 +12,17 @@ import {
   getProfileViewOptions,
 } from '../../reducers/profile-view';
 import StackSettings from '../shared/StackSettings';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+import {
+  getSelectedThreadIndex,
+  getInvertCallstack,
+} from '../../reducers/url-state';
 import TransformNavigator from '../shared/TransformNavigator';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
-import { changeSelectedCallNode } from '../../actions/profile-view';
+import {
+  changeSelectedCallNode,
+  changeInvertCallstack,
+} from '../../actions/profile-view';
 
 import type { Thread } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
@@ -48,9 +54,11 @@ type StateProps = {|
   +threadIndex: number,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +isCallNodeContextMenuVisible: boolean,
+  +invertCallstack: boolean,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
+  +changeInvertCallstack: typeof changeInvertCallstack,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
@@ -63,6 +71,10 @@ class FlameGraph extends React.PureComponent<Props> {
       threadIndex,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
+  };
+
+  _onSwithToNormalCallstackClick = () => {
+    this.props.changeInvertCallstack(false);
   };
 
   render() {
@@ -78,6 +90,7 @@ class FlameGraph extends React.PureComponent<Props> {
       processDetails,
       selectedCallNodeIndex,
       isCallNodeContextMenuVisible,
+      invertCallstack,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -86,42 +99,57 @@ class FlameGraph extends React.PureComponent<Props> {
       <div className="flameGraph">
         <StackSettings />
         <TransformNavigator />
-        <div className="flameGraphContent">
-          <div title={processDetails} className="flameGraphLabels grippy">
-            <span>{threadName}</span>
+        {invertCallstack ? (
+          <div className="flameGraphDisabledMessage">
+            <h3>The Flame Graph is not available for inverted call stacks</h3>
+            <p>
+              <button
+                type="button"
+                onClick={this._onSwithToNormalCallstackClick}
+              >
+                Switch to the normal call stack
+              </button>{' '}
+              to show the Flame Graph.
+            </p>
           </div>
-          <ContextMenuTrigger
-            id={'CallNodeContextMenu'}
-            attributes={{
-              className: 'treeViewContextMenu',
-            }}
-          >
-            <FlameGraphCanvas
-              key={threadIndex}
-              // ChartViewport props
-              viewportProps={{
-                timeRange,
-                maxViewportHeight,
-                maximumZoom: 1,
-                selection,
-                startsAtBottom: true,
-                disableHorizontalMovement: true,
-                viewportNeedsUpdate,
+        ) : (
+          <div className="flameGraphContent">
+            <div title={processDetails} className="flameGraphLabels grippy">
+              <span>{threadName}</span>
+            </div>
+            <ContextMenuTrigger
+              id={'CallNodeContextMenu'}
+              attributes={{
+                className: 'treeViewContextMenu',
               }}
-              // FlameGraphCanvas props
-              chartProps={{
-                thread,
-                maxStackDepth,
-                flameGraphTiming,
-                callNodeInfo,
-                selectedCallNodeIndex,
-                stackFrameHeight: STACK_FRAME_HEIGHT,
-                onSelectionChange: this._onSelectedCallNodeChange,
-                disableTooltips: isCallNodeContextMenuVisible,
-              }}
-            />
-          </ContextMenuTrigger>
-        </div>
+            >
+              <FlameGraphCanvas
+                key={threadIndex}
+                // ChartViewport props
+                viewportProps={{
+                  timeRange,
+                  maxViewportHeight,
+                  maximumZoom: 1,
+                  selection,
+                  startsAtBottom: true,
+                  disableHorizontalMovement: true,
+                  viewportNeedsUpdate,
+                }}
+                // FlameGraphCanvas props
+                chartProps={{
+                  thread,
+                  maxStackDepth,
+                  flameGraphTiming,
+                  callNodeInfo,
+                  selectedCallNodeIndex,
+                  stackFrameHeight: STACK_FRAME_HEIGHT,
+                  onSelectionChange: this._onSelectedCallNodeChange,
+                  disableTooltips: isCallNodeContextMenuVisible,
+                }}
+              />
+            </ContextMenuTrigger>
+          </div>
+        )}
       </div>
     );
   }
@@ -156,10 +184,12 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       ),
       isCallNodeContextMenuVisible: getProfileViewOptions(state)
         .isCallNodeContextMenuVisible,
+      invertCallstack: getInvertCallstack(state),
     };
   },
   mapDispatchToProps: {
     changeSelectedCallNode,
+    changeInvertCallstack,
   },
   component: FlameGraph,
 };
