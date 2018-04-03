@@ -79,7 +79,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       return;
     }
     // Satisfy the null check for Flow.
-    const ctx = this._ctx || canvas.getContext('2d');
+    const ctx = this._ctx || canvas.getContext('2d', { alpha: false });
     if (!this._ctx) {
       this._ctx = ctx;
     }

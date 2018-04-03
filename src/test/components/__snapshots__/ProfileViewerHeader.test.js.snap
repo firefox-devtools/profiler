@@ -345,6 +345,17 @@ exports[`calltree/ProfileViewerHeader renders the header 2`] = `
 Array [
   Array [
     "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "set fillStyle",
     "#45a1ff",
   ],
   Array [
@@ -416,32 +427,14 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
+    "#ffffff",
   ],
   Array [
     "fillRect",
-    88.88888888888889,
     0,
-    22.22222222222222,
-    300,
-  ],
-  Array [
-    "fillRect",
-    111.11111111111111,
     0,
-    22.22222222222222,
+    200,
     300,
-  ],
-  Array [
-    "fillRect",
-    133.33333333333331,
-    75,
-    22.22222222222222,
-    225,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
   ],
   Array [
     "set fillStyle",
@@ -473,7 +466,51 @@ Array [
     "#003eaa",
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    88.88888888888889,
+    0,
+    22.22222222222222,
+    300,
+  ],
+  Array [
+    "fillRect",
+    111.11111111111111,
+    0,
+    22.22222222222222,
+    300,
+  ],
+  Array [
+    "fillRect",
+    133.33333333333331,
+    75,
+    22.22222222222222,
+    225,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     0,
     0,
     300,
@@ -490,7 +527,11 @@ Array [
     1,
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     0,
     0,
     300,
@@ -507,7 +548,11 @@ Array [
     1,
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     0,
     0,
     300,
