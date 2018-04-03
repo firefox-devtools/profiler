@@ -243,7 +243,8 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     }
     const textMeasurement = this._textMeasurement;
 
-    ctx.clearRect(0, 0, containerWidth, containerHeight);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, containerWidth, containerHeight);
 
     const startDepth = Math.floor(
       maxStackDepth - viewportBottom / stackFrameHeight
@@ -305,7 +306,8 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         ctx.fillStyle = isSelected ? 'Highlight' : background;
         ctx.fillRect(x, y, w, h);
         // Ensure spacing between blocks.
-        ctx.clearRect(x, y, 1, h);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(x, y, 1, h);
 
         // TODO - L10N RTL.
         // Constrain the x coordinate to the leftmost area.

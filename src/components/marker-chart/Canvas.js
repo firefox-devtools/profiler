@@ -93,7 +93,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       markerTimingRows.length
     );
 
-    ctx.clearRect(0, 0, containerWidth, containerHeight);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, containerWidth, containerHeight);
 
     this.drawMarkers(ctx, hoveredItem, startRow, endRow);
     this.drawSeparatorsAndLabels(ctx, startRow, endRow);

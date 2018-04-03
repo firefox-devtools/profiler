@@ -56,7 +56,11 @@ Array [
     1,
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     0,
     0,
     200,

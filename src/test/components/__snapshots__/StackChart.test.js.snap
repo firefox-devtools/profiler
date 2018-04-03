@@ -155,7 +155,11 @@ Array [
     "…",
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     0,
     0,
     200,
@@ -173,7 +177,11 @@ Array [
     15,
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     0,
     0,
     1,
@@ -205,7 +213,11 @@ Array [
     15,
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     0,
     16,
     1,
@@ -237,7 +249,11 @@ Array [
     15,
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     0,
     32,
     1,
@@ -269,7 +285,11 @@ Array [
     15,
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     133.33333333333331,
     32,
     1,
@@ -301,7 +321,11 @@ Array [
     15,
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     0,
     48,
     1,
@@ -333,7 +357,11 @@ Array [
     15,
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     66.66666666666666,
     48,
     1,
@@ -365,7 +393,11 @@ Array [
     15,
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     133.33333333333331,
     48,
     1,
@@ -397,7 +429,11 @@ Array [
     15,
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     0,
     64,
     1,
@@ -429,7 +465,11 @@ Array [
     15,
   ],
   Array [
-    "clearRect",
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
     66.66666666666666,
     64,
     1,

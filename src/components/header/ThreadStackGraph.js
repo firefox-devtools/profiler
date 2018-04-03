@@ -82,7 +82,9 @@ class ThreadStackGraph extends PureComponent<Props> {
     const rect = canvas.getBoundingClientRect();
     canvas.width = Math.round(rect.width * devicePixelRatio);
     canvas.height = Math.round(rect.height * devicePixelRatio);
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     let maxDepth = 0;
     const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
     const sampleCallNodes = getSampleCallNodes(
