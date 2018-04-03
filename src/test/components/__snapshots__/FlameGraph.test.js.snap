@@ -5,20 +5,50 @@ exports[`renders FlameGraph correctly 1`] = `
   className="flameGraph"
 >
   <div
-    className="flameGraphSettings"
+    className="stackSettings"
   >
     <ul
-      className="flameGraphSettingsList"
+      className="stackSettingsList"
     >
       <li
-        className="flameGraphSettingsListItem"
+        className="stackSettingsListItem"
       >
         <label
-          className="flameGraphSettingsLabel"
+          className="stackSettingsLabel"
+        >
+          Filter:
+          <select
+            className="stackSettingsSelect"
+            onChange={[Function]}
+            value="combined"
+          >
+            <option
+              value="combined"
+            >
+              Combined stacks
+            </option>
+            <option
+              value="js"
+            >
+              JS only
+            </option>
+            <option
+              value="cpp"
+            >
+              C++ only
+            </option>
+          </select>
+        </label>
+      </li>
+      <li
+        className="stackSettingsListItem"
+      >
+        <label
+          className="stackSettingsLabel"
         >
           <input
             checked={false}
-            className="flameGraphSettingsCheckbox"
+            className="stackSettingsCheckbox"
             onChange={[Function]}
             type="checkbox"
           />
@@ -27,7 +57,7 @@ exports[`renders FlameGraph correctly 1`] = `
       </li>
     </ul>
     <div
-      className="stackSearchField flameGraphSettingsSearchField"
+      className="stackSearchField stackSettingsSearchField"
     >
       <label
         className="stackSearchFieldLabel"
@@ -63,6 +93,22 @@ exports[`renders FlameGraph correctly 1`] = `
       </label>
     </div>
   </div>
+  <ol
+    className="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      className="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index={0}
+      onClick={[Function]}
+      title="Complete \\"Empty\\""
+    >
+      <span
+        className="filterNavigatorBarItemContent"
+      >
+        Complete "Empty"
+      </span>
+    </li>
+  </ol>
   <div
     className="flameGraphContent"
   >
@@ -76,32 +122,43 @@ process: \\"default\\" (0)"
       </span>
     </div>
     <div
-      className="chartViewport"
+      className="react-contextmenu-wrapper treeViewContextMenu"
+      onContextMenu={[Function]}
       onMouseDown={[Function]}
-      onWheel={[Function]}
+      onMouseOut={[Function]}
+      onMouseUp={[Function]}
+      onTouchEnd={[Function]}
+      onTouchStart={[Function]}
     >
-      <div>
-        <canvas
-          className="chartCanvas flameGraphCanvas"
-          onDoubleClick={[Function]}
-          onMouseMove={[Function]}
-          onMouseOut={[Function]}
-        />
-      </div>
       <div
-        className="chartViewportShiftScroll hidden"
+        className="chartViewport"
+        onMouseDown={[Function]}
+        onWheel={[Function]}
       >
-        Zoom Chart:
-        <kbd
-          className="chartViewportShiftScrollKbd"
+        <div>
+          <canvas
+            className="chartCanvas flameGraphCanvas"
+            onDoubleClick={[Function]}
+            onMouseDown={[Function]}
+            onMouseMove={[Function]}
+            onMouseOut={[Function]}
+          />
+        </div>
+        <div
+          className="chartViewportShiftScroll hidden"
         >
-          Shift
-        </kbd>
-        <kbd
-          className="chartViewportShiftScrollKbd"
-        >
-          Scroll
-        </kbd>
+          Zoom Chart:
+          <kbd
+            className="chartViewportShiftScrollKbd"
+          >
+            Shift
+          </kbd>
+          <kbd
+            className="chartViewportShiftScrollKbd"
+          >
+            Scroll
+          </kbd>
+        </div>
       </div>
     </div>
   </div>
@@ -132,7 +189,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#c1e0ff",
   ],
   Array [
     "fillRect",
@@ -154,7 +211,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#000000",
+    "#000f40",
   ],
   Array [
     "fillText",
@@ -164,7 +221,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#c1e0ff",
   ],
   Array [
     "fillRect",
@@ -186,7 +243,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#000000",
+    "#000f40",
   ],
   Array [
     "fillText",
@@ -196,7 +253,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#c1e0ff",
   ],
   Array [
     "fillRect",
@@ -218,7 +275,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#000000",
+    "#000f40",
   ],
   Array [
     "fillText",
@@ -228,7 +285,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#c1e0ff",
   ],
   Array [
     "fillRect",
@@ -250,7 +307,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#000000",
+    "#000f40",
   ],
   Array [
     "fillText",
@@ -260,7 +317,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#c1e0ff",
   ],
   Array [
     "fillRect",
@@ -282,7 +339,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#000000",
+    "#000f40",
   ],
   Array [
     "fillText",
@@ -292,7 +349,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#c1e0ff",
   ],
   Array [
     "fillRect",
@@ -314,7 +371,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#000000",
+    "#000f40",
   ],
   Array [
     "fillText",
@@ -324,7 +381,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#218fff",
   ],
   Array [
     "fillRect",
@@ -346,7 +403,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#000000",
+    "#ffffff",
   ],
   Array [
     "fillText",
@@ -356,7 +413,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#218fff",
   ],
   Array [
     "fillRect",
@@ -378,7 +435,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#000000",
+    "#ffffff",
   ],
   Array [
     "fillText",
@@ -388,7 +445,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#218fff",
   ],
   Array [
     "fillRect",
@@ -410,7 +467,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#000000",
+    "#ffffff",
   ],
   Array [
     "fillText",

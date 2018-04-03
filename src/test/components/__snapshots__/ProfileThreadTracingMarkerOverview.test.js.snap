@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders ProfileThreadTracingMarkerOverview correctly 1`] = `
+exports[`ProfileThreadTracingMarkerOverview renders correctly 1`] = `
 <div
   className="profileThreadTrackingMarkerOverview selected"
 >
@@ -14,7 +14,7 @@ exports[`renders ProfileThreadTracingMarkerOverview correctly 1`] = `
 </div>
 `;
 
-exports[`renders ProfileThreadTracingMarkerOverview correctly 2`] = `
+exports[`ProfileThreadTracingMarkerOverview renders correctly 2`] = `
 Array [
   Array [
     "clearRect",

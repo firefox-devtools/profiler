@@ -4,6 +4,7 @@
 // @flow
 import { CallTree } from '../../profile-logic/call-tree';
 import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
+import type { Store, State } from '../../types/store';
 
 export function getBoundingBox(width: number, height: number) {
   return {
@@ -57,4 +58,25 @@ export function formatTree(
   });
 
   return lines;
+}
+
+/**
+ * Wait until the Redux store gets into a specific state given a predicate function.
+ * Generally prefer hooking into existing promises, but this can be used in cases,
+ * like when clicking a component link in a test, where there is no Promise to
+ * wait on.
+ */
+export function waitUntilState(
+  store: Store,
+  predicate: State => boolean
+): Promise<void> {
+  return new Promise(resolve => {
+    store.subscribe(() => {
+      if (predicate(store.getState())) {
+        // Resolve the next Promise tick, and allow all other store subscribers
+        // to update first.
+        Promise.resolve().then(resolve);
+      }
+    });
+  });
 }

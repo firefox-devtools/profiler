@@ -12,68 +12,69 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 import ReactDOM from 'react-dom';
 import { getBoundingBox } from '../fixtures/utils';
+import mockRaf from '../fixtures/mocks/request-animation-frame';
 
-jest.useFakeTimers();
-ReactDOM.findDOMNode = jest.fn(() => {
-  // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
-  // opt out of the type checker for this mock by returning `any`.
-  const mockEl = ({
-    getBoundingClientRect: () => getBoundingBox(200, 300),
-  }: any);
-  return mockEl;
-});
-
-it('renders ProfileThreadTracingMarkerOverview correctly', () => {
-  // Tie the requestAnimationFrame into jest's fake timers.
-  (window: any).requestAnimationFrame = fn => setTimeout(fn, 0);
-  window.devicePixelRatio = 1;
-  const ctx = mockCanvasContext();
-
-  /**
-   * Mock out any created refs for the components with relevant information.
-   */
-  function createNodeMock(element) {
-    // This is the canvas used to draw markers
-    if (element.type === 'canvas') {
-      return {
+describe('ProfileThreadTracingMarkerOverview', function() {
+  beforeEach(() => {
+    jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
+      // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
+      // opt out of the type checker for this mock by returning `any`.
+      const mockEl = ({
         getBoundingClientRect: () => getBoundingBox(200, 300),
-        getContext: () => ctx,
-        style: {},
-      };
+      }: any);
+      return mockEl;
+    });
+  });
+
+  it('renders correctly', () => {
+    const flushRafCalls = mockRaf();
+    window.devicePixelRatio = 1;
+    const ctx = mockCanvasContext();
+
+    /**
+     * Mock out any created refs for the components with relevant information.
+     */
+    function createNodeMock(element) {
+      // This is the canvas used to draw markers
+      if (element.type === 'canvas') {
+        return {
+          getBoundingClientRect: () => getBoundingBox(200, 300),
+          getContext: () => ctx,
+          style: {},
+        };
+      }
+      return null;
     }
-    return null;
-  }
 
-  const profile = getProfileWithMarkers([
-    ['GCMajor', 2, { startTime: 2, endTime: 12 }],
-    ['Marker A', 0, { startTime: 0, endTime: 10 }],
-    ['Marker B', 0, { startTime: 0, endTime: 10 }],
-    ['Marker C', 5, { startTime: 5, endTime: 15 }],
-  ]);
+    const profile = getProfileWithMarkers([
+      ['GCMajor', 2, { startTime: 2, endTime: 12 }],
+      ['Marker A', 0, { startTime: 0, endTime: 10 }],
+      ['Marker B', 0, { startTime: 0, endTime: 10 }],
+      ['Marker C', 5, { startTime: 5, endTime: 15 }],
+    ]);
 
-  const overview = renderer.create(
-    <Provider store={storeWithProfile(profile)}>
-      <ProfileThreadTrackingMarkerOverview
-        className="profileThreadTrackingMarkerOverview"
-        rangeStart={0}
-        rangeEnd={15}
-        threadIndex={0}
-        onSelect={() => {}}
-        isModifyingSelection={false}
-      />
-    </Provider>,
-    { createNodeMock }
-  );
+    const overview = renderer.create(
+      <Provider store={storeWithProfile(profile)}>
+        <ProfileThreadTrackingMarkerOverview
+          className="profileThreadTrackingMarkerOverview"
+          rangeStart={0}
+          rangeEnd={15}
+          threadIndex={0}
+          onSelect={() => {}}
+          isModifyingSelection={false}
+        />
+      </Provider>,
+      { createNodeMock }
+    );
 
-  // Flush any requestAnimationFrames.
-  jest.runAllTimers();
+    flushRafCalls();
 
-  const tree = overview.toJSON();
-  const drawCalls = ctx.__flushDrawLog();
+    const tree = overview.toJSON();
+    const drawCalls = ctx.__flushDrawLog();
 
-  expect(tree).toMatchSnapshot();
-  expect(drawCalls).toMatchSnapshot();
+    expect(tree).toMatchSnapshot();
+    expect(drawCalls).toMatchSnapshot();
 
-  delete window.requestAnimationFrame;
-  delete window.devicePixelRatio;
+    delete window.devicePixelRatio;
+  });
 });

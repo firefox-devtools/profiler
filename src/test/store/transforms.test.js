@@ -6,6 +6,8 @@
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
+import { assertSetContainsOnly } from '../fixtures/custom-assertions';
+
 import {
   addTransformToStack,
   popTransformsFromStack,
@@ -884,6 +886,13 @@ describe('"collapse-function-subtree" transform', function() {
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       ['A', 'B', 'C'].map(name => funcNames.indexOf(name))
     );
+
+    // Popping transforms resets the selected path
+    // see https://github.com/devtools-html/perf.html/issues/882
+    dispatch(popTransformsFromStack(0));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      []
+    );
   });
 
   it('can update apply the transform to the expanded CallNodePaths', function() {
@@ -896,9 +905,8 @@ describe('"collapse-function-subtree" transform', function() {
         ['A', 'B', 'C', 'D', 'E'].map(name => funcNames.indexOf(name))
       )
     );
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual(
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
       toIds([
         // Force Prettier to make this readable:
         ['A'],
@@ -908,15 +916,22 @@ describe('"collapse-function-subtree" transform', function() {
       ])
     );
     dispatch(addTransformToStack(threadIndex, collapseTransform));
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual(
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
       toIds([
         // Force Prettier to make this readable:
         ['A'],
         ['A', 'B'],
         ['A', 'B', 'C'],
       ])
+    );
+
+    // Popping transforms resets the expanded paths
+    // see https://github.com/devtools-html/perf.html/issues/882
+    dispatch(popTransformsFromStack(0));
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      []
     );
   });
 });
@@ -1096,14 +1111,15 @@ describe('expanded and selected CallNodePaths', function() {
       [A, B, C, D]
     );
 
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([
-      // Expanded nodes:
-      [A],
-      [A, B],
-      [A, B, C],
-    ]);
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      [
+        // Expanded nodes:
+        [A],
+        [A, B],
+        [A, B, C],
+      ]
+    );
   });
 
   it('can update call node references for focusing a subtree', function() {
@@ -1122,13 +1138,14 @@ describe('expanded and selected CallNodePaths', function() {
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [B, C, D]
     );
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([
-      // Expanded nodes:
-      [B],
-      [B, C],
-    ]);
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      [
+        // Expanded nodes:
+        [B],
+        [B, C],
+      ]
+    );
   });
 
   it('can update call node references for merging a node', function() {
@@ -1146,13 +1163,14 @@ describe('expanded and selected CallNodePaths', function() {
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [A, C, D]
     );
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([
-      // Expanded nodes:
-      [A],
-      [A, C],
-    ]);
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      [
+        // Expanded nodes:
+        [A],
+        [A, C],
+      ]
+    );
   });
 });
 
@@ -1185,14 +1203,15 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [Z, Y, X, B]
     );
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([
-      // Expanded nodes:
-      [Z],
-      [Z, Y],
-      [Z, Y, X],
-    ]);
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      [
+        // Expanded nodes:
+        [Z],
+        [Z, Y],
+        [Z, Y, X],
+      ]
+    );
   });
 
   it('can update call node references for focusing a subtree', function() {
@@ -1212,13 +1231,14 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [Y, X, B]
     );
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([
-      // Expanded nodes:
-      [Y],
-      [Y, X],
-    ]);
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      [
+        // Expanded nodes:
+        [Y],
+        [Y, X],
+      ]
+    );
   });
 
   it('can update call node references for merging a call node', function() {
@@ -1237,12 +1257,13 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [Z, X, B]
     );
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([
-      // Expanded nodes:
-      [Z],
-      [Z, X],
-    ]);
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      [
+        // Expanded nodes:
+        [Z],
+        [Z, X],
+      ]
+    );
   });
 });

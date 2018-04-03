@@ -15,7 +15,6 @@ body, #root, .profileViewer {
   display: flex;
   flex-flow: column nowrap;
   flex: 1;
-  max-height: 100%;
 }
 
 :root {
@@ -90,6 +89,7 @@ body, #root, .profileViewer {
   display: flex;
   flex-flow: row nowrap;
   justify-content: flex-start;
+  align-items: center;
 }
 
 .treeRowIcon {
@@ -187,6 +187,7 @@ body, #root, .profileViewer {
   color: #aaa;
 }
 .treeViewBody:focus > * > * > * > .treeViewRow.selected,
+.treeViewBody:focus > * > * > * > .treeViewRow.selected a,
 .treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeViewFixedColumn {
   background-color: highlight;
   color: highlighttext;
@@ -216,7 +217,6 @@ body, #root, .profileViewer {
   width: 16px;
   height: 16px;
   overflow: hidden;
-  vertical-align: top;
   color: transparent;
 }
 

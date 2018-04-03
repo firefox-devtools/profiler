@@ -26,6 +26,10 @@ import type { NotVoidOrNull } from '../../types/utils';
 import type { ImplementationFilter } from '../../types/actions';
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type {
+  PaintProfilerMarkerTracing,
+  StyleMarkerPayload,
+} from '../../types/markers';
+import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
@@ -44,11 +48,36 @@ function _markerDetail<T: NotVoidOrNull>(
   ];
 }
 
+function _markerBacktrace(
+  marker: TracingMarker,
+  data: StyleMarkerPayload | PaintProfilerMarkerTracing,
+  thread: Thread,
+  implementationFilter: ImplementationFilter
+): React.Node {
+  if ('cause' in data && data.cause) {
+    const { cause } = data;
+    const causeAge = marker.start - cause.time;
+    return (
+      <div className="tooltipDetailsBackTrace" key="backtrace">
+        <h2 className="tooltipBackTraceTitle">
+          First invalidated {formatNumber(causeAge)}ms before the flush, at:
+        </h2>
+        <Backtrace
+          cause={cause}
+          thread={thread}
+          implementationFilter={implementationFilter}
+        />
+      </div>
+    );
+  }
+  return null;
+}
+
 function getMarkerDetails(
   marker: TracingMarker,
   thread: Thread,
   implementationFilter: ImplementationFilter
-): React.Element<any> | null {
+): React.Node {
   const data = marker.data;
   if (data) {
     switch (data.type) {
@@ -289,25 +318,32 @@ function getMarkerDetails(
           </div>
         );
       }
+      case 'Styles': {
+        return [
+          <div className="tooltipDetails" key="details">
+            {_markerDetail(
+              'elementsTraversed',
+              'Elements traversed',
+              data.elementsTraversed
+            )}
+            {_markerDetail(
+              'elementsStyled',
+              'Elements styled',
+              data.elementsStyled
+            )}
+            {_markerDetail(
+              'elementsMatched',
+              'Elements matched',
+              data.elementsMatched
+            )}
+            {_markerDetail('stylesShared', 'Styles shared', data.stylesShared)}
+            {_markerDetail('stylesReused', 'Styles reused', data.stylesReused)}
+          </div>,
+          _markerBacktrace(marker, data, thread, implementationFilter),
+        ];
+      }
       case 'tracing': {
-        if ('cause' in data && data.cause) {
-          const { cause } = data;
-          const causeAge = marker.start - cause.time;
-          return (
-            <div className="tooltipDetailsBackTrace">
-              <h2 className="tooltipBackTraceTitle">
-                First invalidated {formatNumber(causeAge)}ms before the flush,
-                at:
-              </h2>
-              <Backtrace
-                cause={cause}
-                thread={thread}
-                implementationFilter={implementationFilter}
-              />
-            </div>
-          );
-        }
-        break;
+        return _markerBacktrace(marker, data, thread, implementationFilter);
       }
       default:
     }
@@ -344,7 +380,13 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       <div className={classNames('tooltipMarker', className)}>
         <div className={classNames({ tooltipHeader: details })}>
           <div className="tooltipOneLine">
-            <div className="tooltipTiming">{formatNumber(marker.dur)}ms</div>
+            <div className="tooltipTiming">
+              {/* tracing markers with no start have a negative start, while the
+                ones with no end have an infinite duration */}
+              {Number.isFinite(marker.dur) && marker.start >= 0
+                ? formatNumber(marker.dur) + 'ms'
+                : 'unknown duration'}
+            </div>
             <div className="tooltipTitle">{marker.title || marker.name}</div>
           </div>
           {threadName ? (

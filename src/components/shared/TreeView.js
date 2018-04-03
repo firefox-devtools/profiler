@@ -12,6 +12,7 @@ import { BackgroundImageStyleDef } from './StyleDef';
 import ContextMenuTrigger from './ContextMenuTrigger';
 
 import type { IconWithClassName } from '../../types/reducers';
+import type { CssPixels } from '../../types/units';
 
 // This is used for the result of RegExp.prototype.exec because Flow doesn't do it.
 // See https://github.com/facebook/flow/issues/4099
@@ -28,25 +29,31 @@ type TreeViewHeaderProps = {|
   +mainColumn: Column,
 |};
 
-const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => (
-  <div className="treeViewHeader">
-    {fixedColumns.map(col => (
+const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => {
+  if (fixedColumns.length === 0 && !mainColumn.title) {
+    // If there is nothing to display in the header, do not render it.
+    return null;
+  }
+  return (
+    <div className="treeViewHeader">
+      {fixedColumns.map(col => (
+        <span
+          className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
+          key={col.propName}
+        >
+          {col.title}
+        </span>
+      ))}
       <span
-        className={`treeViewHeaderColumn treeViewFixedColumn ${col.propName}`}
-        key={col.propName}
+        className={`treeViewHeaderColumn treeViewMainColumn ${
+          mainColumn.propName
+        }`}
       >
-        {col.title}
+        {mainColumn.title}
       </span>
-    ))}
-    <span
-      className={`treeViewHeaderColumn treeViewMainColumn ${
-        mainColumn.propName
-      }`}
-    >
-      {mainColumn.title}
-    </span>
-  </div>
-);
+    </div>
+  );
+};
 
 function reactStringWithHighlightedSubstrings(
   string: string,
@@ -80,15 +87,16 @@ function reactStringWithHighlightedSubstrings(
   return highlighted;
 }
 
-type TreeViewRowFixedColumnsProps<NodeIndex: number, DisplayData: Object> = {
-  displayData: DisplayData,
-  nodeId: NodeIndex,
-  columns: Column[],
-  index: number,
-  selected: boolean,
-  onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
-  highlightRegExp: RegExp | null,
-};
+type TreeViewRowFixedColumnsProps<NodeIndex: number, DisplayData: Object> = {|
+  +displayData: DisplayData,
+  +nodeId: NodeIndex,
+  +columns: Column[],
+  +index: number,
+  +selected: boolean,
+  +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
+  +highlightRegExp: RegExp | null,
+  +rowHeightStyle: { height: CssPixels, lineHeight: string },
+|};
 
 class TreeViewRowFixedColumns<
   NodeIndex: number,
@@ -113,6 +121,7 @@ class TreeViewRowFixedColumns<
       index,
       selected,
       highlightRegExp,
+      rowHeightStyle,
     } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     return (
@@ -120,7 +129,7 @@ class TreeViewRowFixedColumns<
         className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${
           selected ? 'selected' : ''
         }`}
-        style={{ height: '16px' }}
+        style={rowHeightStyle}
         onMouseDown={this._onClick}
       >
         {columns.map(col => {
@@ -170,6 +179,10 @@ type TreeViewRowScrolledColumnsProps<
   +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
   +onAppendageButtonClick?: ((NodeIndex | null, string) => mixed) | null,
   +highlightRegExp: RegExp | null,
+  // React converts height into 'px' values, while lineHeight is valid in
+  // non-'px' units.
+  +rowHeightStyle: { height: CssPixels, lineHeight: string },
+  +indentWidth: CssPixels,
 |};
 
 class TreeViewRowScrolledColumns<
@@ -221,20 +234,23 @@ class TreeViewRowScrolledColumns<
       selected,
       highlightRegExp,
       appendageButtons,
+      rowHeightStyle,
+      indentWidth,
     } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
+    const RenderComponent = mainColumn.component;
 
     return (
       <div
         className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${
           selected ? 'selected' : ''
         } ${displayData.dim ? 'dim' : ''}`}
-        style={{ height: '16px' }}
+        style={rowHeightStyle}
         onMouseDown={this._onClick}
       >
         <span
           className="treeRowIndentSpacer"
-          style={{ width: `${depth * 10}px` }}
+          style={{ width: `${depth * indentWidth}px` }}
         />
         <span
           className={`treeRowToggleButton ${
@@ -246,10 +262,14 @@ class TreeViewRowScrolledColumns<
             mainColumn.propName
           }`}
         >
-          {reactStringWithHighlightedSubstrings(
-            displayData[mainColumn.propName],
-            highlightRegExp,
-            'treeViewHighlighting'
+          {RenderComponent ? (
+            <RenderComponent displayData={displayData} />
+          ) : (
+            reactStringWithHighlightedSubstrings(
+              displayData[mainColumn.propName],
+              highlightRegExp,
+              'treeViewHighlighting'
+            )
           )}
         </span>
         {appendageColumn ? (
@@ -308,6 +328,9 @@ type TreeViewProps<NodeIndex, DisplayData> = {|
   +maxNodeDepth: number,
   +onAppendageButtonClick?: ((NodeIndex | null, string) => mixed) | null,
   +onSelectionChange: NodeIndex => mixed,
+  +onEnterKey?: NodeIndex => mixed,
+  +rowHeight: CssPixels,
+  +indentWidth: CssPixels,
 |};
 
 class TreeView<
@@ -366,8 +389,14 @@ class TreeView<
       highlightRegExp,
       appendageButtons,
       onAppendageButtonClick,
+      rowHeight,
+      indentWidth,
     } = this.props;
     const displayData = tree.getDisplayData(nodeId);
+    // React converts height into 'px' values, while lineHeight is valid in
+    // non-'px' units.
+    const rowHeightStyle = { height: rowHeight, lineHeight: `${rowHeight}px` };
+
     if (columnIndex === 0) {
       return (
         <TreeViewRowFixedColumns
@@ -378,6 +407,7 @@ class TreeView<
           selected={nodeId === selectedNodeId}
           onClick={this._onRowClicked}
           highlightRegExp={highlightRegExp || null}
+          rowHeightStyle={rowHeightStyle}
         />
       );
     }
@@ -385,6 +415,7 @@ class TreeView<
     const isExpanded = !this._isCollapsed(nodeId);
     return (
       <TreeViewRowScrolledColumns
+        rowHeightStyle={rowHeightStyle}
         displayData={displayData}
         mainColumn={mainColumn}
         appendageColumn={appendageColumn}
@@ -399,6 +430,7 @@ class TreeView<
         onClick={this._onRowClicked}
         onAppendageButtonClick={onAppendageButtonClick}
         highlightRegExp={highlightRegExp || null}
+        indentWidth={indentWidth}
       />
     );
   }
@@ -490,14 +522,14 @@ class TreeView<
   }
 
   _onKeyDown(event: KeyboardEvent) {
-    if (event.ctrlKey || event.altKey || event.metaKey) {
-      return;
-    }
+    const hasModifier = event.ctrlKey || event.altKey || event.metaKey;
+    const isArrowKey = event.key.startsWith('Arrow');
+    const isAsteriskKey = event.key === '*';
+    const isEnterKey = event.key === 'Enter';
 
-    if (event.keyCode < 37 || event.keyCode > 40) {
-      if (event.keyCode !== 0 || String.fromCharCode(event.charCode) !== '*') {
-        return;
-      }
+    if (hasModifier || (!isArrowKey && !isAsteriskKey && !isEnterKey)) {
+      // No key events that we care about were found, so don't try and handle them.
+      return;
     }
     event.stopPropagation();
     event.preventDefault();
@@ -514,40 +546,62 @@ class TreeView<
       return;
     }
 
-    if (event.keyCode === 37) {
-      // KEY_LEFT
-      const isCollapsed = this._isCollapsed(selected);
-      if (!isCollapsed) {
-        this._toggle(selected);
-      } else {
-        const parent = this.props.tree.getParent(selected);
-        if (parent !== -1) {
-          this._select(parent);
-        }
+    if (isArrowKey) {
+      switch (event.keyCode) {
+        case 37: // KEY_LEFT
+          {
+            const isCollapsed = this._isCollapsed(selected);
+            if (!isCollapsed) {
+              this._toggle(selected);
+            } else {
+              const parent = this.props.tree.getParent(selected);
+              if (parent !== -1) {
+                this._select(parent);
+              }
+            }
+          }
+          break;
+        case 38: // KEY_UP
+          {
+            if (selectedRowIndex > 0) {
+              this._select(visibleRows[selectedRowIndex - 1]);
+            }
+          }
+          break;
+        case 39: // KEY_RIGHT
+          {
+            const isCollapsed = this._isCollapsed(selected);
+            if (isCollapsed) {
+              this._toggle(selected);
+            } else {
+              // Do KEY_DOWN only if the next element is a child
+              if (this.props.tree.hasChildren(selected)) {
+                this._select(this.props.tree.getChildren(selected)[0]);
+              }
+            }
+          }
+          break;
+        case 40: // KEY_DOWN
+          {
+            if (selectedRowIndex < visibleRows.length - 1) {
+              this._select(visibleRows[selectedRowIndex + 1]);
+            }
+          }
+          break;
+        default:
+          throw new Error('Unhandled arrow key.');
       }
-    } else if (event.keyCode === 38) {
-      // KEY_UP
-      if (selectedRowIndex > 0) {
-        this._select(visibleRows[selectedRowIndex - 1]);
-      }
-    } else if (event.keyCode === 39) {
-      // KEY_RIGHT
-      const isCollapsed = this._isCollapsed(selected);
-      if (isCollapsed) {
-        this._toggle(selected);
-      } else {
-        // Do KEY_DOWN only if the next element is a child
-        if (this.props.tree.hasChildren(selected)) {
-          this._select(this.props.tree.getChildren(selected)[0]);
-        }
-      }
-    } else if (event.keyCode === 40) {
-      // KEY_DOWN
-      if (selectedRowIndex < visibleRows.length - 1) {
-        this._select(visibleRows[selectedRowIndex + 1]);
-      }
-    } else if (String.fromCharCode(event.charCode) === '*') {
+    }
+
+    if (isAsteriskKey) {
       this._toggleAll(selected);
+    }
+
+    if (isEnterKey) {
+      const { onEnterKey, selectedNodeId } = this.props;
+      if (onEnterKey && selectedNodeId !== null) {
+        onEnterKey(selectedNodeId);
+      }
     }
   }
 
@@ -566,6 +620,7 @@ class TreeView<
       contextMenuId,
       icons,
       maxNodeDepth,
+      rowHeight,
     } = this.props;
     return (
       <div className="treeView">
@@ -586,7 +641,7 @@ class TreeView<
             className="treeViewBody"
             items={this._visibleRows}
             renderItem={this._renderRow}
-            itemHeight={16}
+            itemHeight={rowHeight}
             columnCount={2}
             focusable={true}
             onKeyDown={this._onKeyDown}

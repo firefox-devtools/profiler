@@ -9,7 +9,7 @@ import {
 } from '../utils/uintarray-encoding';
 import {
   toValidImplementationFilter,
-  getCallNodeFromPath,
+  getCallNodeIndexFromPath,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
@@ -24,7 +24,11 @@ import type {
   IndexIntoStackTable,
   IndexIntoResourceTable,
 } from '../types/profile';
-import type { CallNodePath, CallNodeTable } from '../types/profile-derived';
+import type {
+  CallNodePath,
+  CallNodeTable,
+  StackType,
+} from '../types/profile-derived';
 import type { ImplementationFilter } from '../types/actions';
 import type {
   Transform,
@@ -518,7 +522,7 @@ export function invertCallNodePath(
   callTree: CallTree,
   callNodeTable: CallNodeTable
 ): CallNodePath {
-  let callNodeIndex = getCallNodeFromPath(path, callNodeTable);
+  let callNodeIndex = getCallNodeIndexFromPath(path, callNodeTable);
   if (callNodeIndex === null) {
     // No path was found, return an empty CallNodePath.
     return [];
@@ -540,10 +544,6 @@ export function invertCallNodePath(
       // Reverse it so that it's in the proper inverted order.
       .reverse()
   );
-}
-
-export function pathsAreEqual(a: CallNodePath, b: CallNodePath): boolean {
-  return a.length === b.length && a.every((func, i) => func === b[i]);
 }
 
 /**
@@ -1331,6 +1331,18 @@ export function restoreAllFunctionsInCallNodePath(
     newCallNodePath.push(funcIndex);
   }
   return newCallNodePath.reverse();
+}
+
+export function getStackType(
+  thread: Thread,
+  funcIndex: IndexIntoFuncTable
+): StackType {
+  if (FUNC_MATCHES.cpp(thread, funcIndex)) {
+    return 'native';
+  } else if (FUNC_MATCHES.js(thread, funcIndex)) {
+    return 'js';
+  }
+  return 'unsymbolicated';
 }
 
 export function filterCallNodePathByImplementation(

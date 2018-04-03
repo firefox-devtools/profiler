@@ -11,7 +11,7 @@ import { selectorsForThread } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
   getSampleIndexClosestToTime,
-  getCallNodePath,
+  getCallNodePathFromIndex,
 } from '../../profile-logic/profile-data';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import ProfileThreadJankOverview from './ProfileThreadJankOverview';
@@ -121,7 +121,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
         : callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
     changeSelectedCallNode(
       threadIndex,
-      getCallNodePath(newSelectedCallNode, callNodeInfo.callNodeTable)
+      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
     focusCallTree();
   }

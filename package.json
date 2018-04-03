@@ -9,6 +9,7 @@
     "build": "yarn build:quiet --progress",
     "build-prod:quiet": "yarn build:clean && env NODE_ENV=production webpack",
     "build-prod": "yarn build-prod:quiet --progress",
+    "build-prod-readable": "env UGLIFY_OPTIONS='{ \"mangle\": false }' yarn build-prod",
     "build-docs": "documentation build src/types/profile.js -f md > docs/processed-profile-format.md; cat docs/processed-profile-format.md",
     "lint": "eslint *.js bin src",
     "lint-fix": "yarn lint --fix",
@@ -48,7 +49,6 @@
     "copy-to-clipboard": "^3.0.8",
     "escape-string-regexp": "^1.0.5",
     "jszip": "^3.1.5",
-    "lodash.uniqwith": "^4.5.0",
     "memoize-immutable": "^3.0.0",
     "offline-plugin": "^4.9.0",
     "photon-colors": "2.0.1",
@@ -73,6 +73,7 @@
     "babel-jest": "^22.4.1",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-flow": "^6.23.0",
@@ -80,6 +81,9 @@
     "babel-preset-react-hmre": "^1.1.1",
     "css-loader": "^0.28.9",
     "devtools-license-check": "^0.6.0",
+    "enzyme": "^3.3.0",
+    "enzyme-adapter-react-16": "^1.1.1",
+    "enzyme-to-json": "^3.3.1",
     "eslint": "^4.12.0",
     "eslint-config-prettier": "^2.4.0",
     "eslint-plugin-babel": "^4.1.2",
@@ -133,7 +137,11 @@
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/test/fixtures/mocks/file-mock.js",
       "\\.(css|less)$": "<rootDir>/src/test/fixtures/mocks/style-mock.js"
     },
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ],
     "restoreMocks": true,
+    "resetMocks": true,
     "setupTestFrameworkScriptFile": "./src/test/setup.js",
     "verbose": true
   },

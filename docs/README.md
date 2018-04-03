@@ -4,7 +4,7 @@ This project is a client for reading profiles from the Gecko Profiler and potent
 
 ## The Docs
 
- * [Project architecture docs in `/src`](../src)
+ * [perf.html src docs](../src)
    - [Redux action creators - `/src/actions`](../src/actions)
    - [React components - `/src/components`](../src/components)
    - [Manipulating and processing profiles - `/src/profile-logic`](../src/profile-logic)
@@ -15,8 +15,9 @@ This project is a client for reading profiles from the Gecko Profiler and potent
      - [Unit testing](../src/test/unit)
    - [Flow types - `/src/types`](../src/types)
    - [Utility files - `/src/utils`](../src/utils)
- * [Gecko profile format](./gecko-profile-format.md)
+ * [Profiler architecture](./architecture.md)
  * [Loading in profiles from various sources](./loading-in-profiles.md)
+ * [Gecko profile format](./gecko-profile-format.md)
  * [Processed profile format](./processed-profile-format.md)
  * [Markers](./markers.md)
  * [Upgrading profiles](./upgrading-profiles.md)

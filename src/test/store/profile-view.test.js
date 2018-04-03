@@ -9,6 +9,8 @@ import {
 } from '../fixtures/profiles/make-profile';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { storeWithProfile } from '../fixtures/stores';
+import { assertSetContainsOnly } from '../fixtures/custom-assertions';
+
 import * as ProfileView from '../../actions/profile-view';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
@@ -40,15 +42,17 @@ describe('call node paths on implementation filter change', function() {
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [A, B, C, D, E]
     );
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([
-      // Paths
-      [A],
-      [A, B],
-      [A, B, C],
-      [A, B, C, D],
-    ]);
+
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      [
+        // Paths
+        [A],
+        [A, B],
+        [A, B, C],
+        [A, B, C, D],
+      ]
+    );
   });
 
   it('starts with js CallNodePaths', function() {
@@ -58,13 +62,15 @@ describe('call node paths on implementation filter change', function() {
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [B, D, E]
     );
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([
-      // Paths
-      [B],
-      [B, D],
-    ]);
+
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      [
+        // Paths
+        [B],
+        [B, D],
+      ]
+    );
   });
 
   it('strips away the C++ functions when going from combined to JS', function() {
@@ -74,13 +80,15 @@ describe('call node paths on implementation filter change', function() {
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [B, D, E]
     );
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([
-      // Paths
-      [B],
-      [B, D],
-    ]);
+
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      [
+        // Paths
+        [B],
+        [B, D],
+      ]
+    );
   });
 
   it('re-adds the C++ functions when going from JS to combined', function() {
@@ -91,19 +99,17 @@ describe('call node paths on implementation filter change', function() {
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [A, B, C, D, E]
     );
-    expect(
-      selectedThreadSelectors
-        .getExpandedCallNodePaths(getState())
-        // The paths will be in a weird order, so sort by length.
-        .slice()
-        .sort((a, b) => a.length - b.length)
-    ).toEqual([
-      // Paths
-      [A],
-      [A, B],
-      [A, B, C],
-      [A, B, C, D],
-    ]);
+
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      [
+        // Paths
+        [A],
+        [A, B],
+        [A, B, C],
+        [A, B, C, D],
+      ]
+    );
   });
 
   it('can go from JS to C++ views', function() {
@@ -114,12 +120,13 @@ describe('call node paths on implementation filter change', function() {
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [A, C]
     );
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([
-      // Paths
-      [A],
-    ]);
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      [
+        // Paths
+        [A],
+      ]
+    );
   });
 });
 
@@ -324,7 +331,7 @@ describe('actions/ProfileView', function() {
 
       // Before expand all action is dispatched, nothing is expanded
       expect(
-        selectedThreadSelectors.getExpandedCallNodePaths(getState())
+        Array.from(selectedThreadSelectors.getExpandedCallNodePaths(getState()))
       ).toEqual([]);
 
       dispatch(
@@ -335,16 +342,17 @@ describe('actions/ProfileView', function() {
         )
       );
 
-      expect(
-        selectedThreadSelectors.getExpandedCallNodePaths(getState()).sort()
-      ).toEqual([
-        // Paths
-        [A],
-        [A, B],
-        [A, B, C],
-        [A, B, D],
-        [A, E],
-      ]);
+      assertSetContainsOnly(
+        selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+        [
+          // Paths
+          [A],
+          [A, B],
+          [A, B, C],
+          [A, B, D],
+          [A, E],
+        ]
+      );
     });
 
     it('expands subtrees', function() {
@@ -356,12 +364,13 @@ describe('actions/ProfileView', function() {
       const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
 
       // Before expand all action is dispatched, only A is expanded
-      expect(
-        selectedThreadSelectors.getExpandedCallNodePaths(getState())
-      ).toEqual([
-        // Paths
-        [A],
-      ]);
+      assertSetContainsOnly(
+        selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+        [
+          // Paths
+          [A],
+        ]
+      );
 
       dispatch(
         ProfileView.expandAllCallNodeDescendants(
@@ -371,15 +380,16 @@ describe('actions/ProfileView', function() {
         )
       );
 
-      expect(
-        selectedThreadSelectors.getExpandedCallNodePaths(getState()).sort()
-      ).toEqual([
-        // Paths
-        [A],
-        [A, B],
-        [A, B, C],
-        [A, B, D],
-      ]);
+      assertSetContainsOnly(
+        selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+        [
+          // Paths
+          [A],
+          [A, B],
+          [A, B, C],
+          [A, B, D],
+        ]
+      );
     });
   });
 
@@ -394,12 +404,13 @@ describe('actions/ProfileView', function() {
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(
-        selectedThreadSelectors.getExpandedCallNodePaths(getState())
+        Array.from(selectedThreadSelectors.getExpandedCallNodePaths(getState()))
       ).toEqual([]);
       dispatch(ProfileView.changeExpandedCallNodes(0, [[0], [0, 1]]));
-      expect(
-        selectedThreadSelectors.getExpandedCallNodePaths(getState())
-      ).toEqual([[0], [0, 1]]);
+      assertSetContainsOnly(
+        selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+        [[0], [0, 1]]
+      );
     });
   });
 
@@ -655,7 +666,7 @@ describe('actions/ProfileView', function() {
   });
 
   describe('popTransformToStack', function() {
-    it('can add a transform to the stack', function() {
+    it('can add and remove a transform to the stack', function() {
       const { profile } = getProfileFromTextSamples(`
         A
         B
@@ -884,15 +895,16 @@ describe('snapshots of selectors/profile-view', function() {
   });
   it('matches the last stored run of selectedThreadSelector.getExpandedCallNodePaths', function() {
     const { getState, A, B } = setupStore();
-    expect(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState())
-    ).toEqual([[A], [A, B], [A]]);
+    assertSetContainsOnly(
+      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      [[A], [A, B]]
+    );
   });
   it('matches the last stored run of selectedThreadSelector.getExpandedCallNodeIndexes', function() {
     const { getState } = setupStore();
     expect(
       selectedThreadSelectors.getExpandedCallNodeIndexes(getState())
-    ).toEqual([0, 1, 0]);
+    ).toEqual([0, 1]);
   });
   it('matches the last stored run of selectedThreadSelector.getCallTree', function() {
     const { getState } = setupStore();

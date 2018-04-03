@@ -16,18 +16,20 @@ import type { StartEndRange } from '../../types/units';
 import ReactDOM from 'react-dom';
 
 describe('EmptyThreadIndicator', function() {
+  beforeEach(() => {
+    jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
+      // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
+      // opt out of the type checker for this mock by returning `any`.
+      const mockEl = ({
+        getBoundingClientRect: () => getBoundingBox(width, height),
+      }: any);
+      return mockEl;
+    });
+  });
+
   // Sizing for the containing dom node.
   const width = 100;
   const height = 10;
-
-  ReactDOM.findDOMNode = jest.fn(() => {
-    // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
-    // opt out of the type checker for this mock by returning `any`.
-    const mockEl = ({
-      getBoundingClientRect: () => getBoundingBox(width, height),
-    }: any);
-    return mockEl;
-  });
 
   const { profile } = getProfileFromTextSamples(`
     A A A

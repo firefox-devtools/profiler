@@ -51,6 +51,7 @@ import type {
   GCMajorCompleted,
   GCMajorCompleted_Gecko,
   GCMajorAborted,
+  StyleMarkerPayload,
 } from '../types/markers';
 
 type RegExpResult = null | string[];
@@ -514,6 +515,21 @@ function _processStackTable(geckoStackTable: GeckoStackStruct): StackTable {
 }
 
 /**
+ * Convert stack field to cause field for the given payload.
+ */
+function _convertStackToCause(data: Object) {
+  if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
+    const stack = data.stack;
+    delete data.stack;
+    const stackIndex = stack.samples.data[0][stack.samples.schema.stack];
+    const time = stack.samples.data[0][stack.samples.schema.time];
+    if (stackIndex !== null) {
+      data.cause = { time, stack: stackIndex };
+    }
+  }
+}
+
+/**
  * Explicitly recreate the markers here to help enforce our assumptions about types.
  */
 function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
@@ -572,18 +588,19 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
                 throw new Error('Unknown GCMajor status');
             }
           }
+          /*
+           * This type exists in profiles from newer gecko only, while
+           * profiles from older gecko will be of type "tracing".
+           */
+          case 'Styles': {
+            const newData = Object.assign({}, m);
+            _convertStackToCause(newData);
+            const result: StyleMarkerPayload = newData;
+            return result;
+          }
           case 'tracing': {
             const newData = Object.assign({}, m);
-            delete newData.stack;
-            if ('stack' in m && m.stack && m.stack.samples.data.length > 0) {
-              const stack = m.stack;
-              const stackIndex =
-                stack.samples.data[0][stack.samples.schema.stack];
-              const time = stack.samples.data[0][stack.samples.schema.time];
-              if (stackIndex !== null) {
-                newData.cause = { time, stack: stackIndex };
-              }
-            }
+            _convertStackToCause(newData);
             const result: PaintProfilerMarkerTracing = newData;
             return result;
           }
@@ -719,8 +736,10 @@ function _adjustMarkerTimestamps(
       if (newData.type === 'DOMEvent' && 'timeStamp' in newData) {
         newData.timeStamp += delta;
       }
-      if (newData.type === 'tracing' && newData.cause) {
-        newData.cause.time += delta;
+      if (newData.type === 'tracing' || newData.type === 'Styles') {
+        if (newData.cause) {
+          newData.cause.time += delta;
+        }
       }
       return newData;
     }),

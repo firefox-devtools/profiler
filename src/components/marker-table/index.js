@@ -202,6 +202,8 @@ class MarkerTable extends PureComponent<Props> {
           expandedNodeIds={this._expandedNodeIds}
           ref={this._takeTreeViewRef}
           contextMenuId={'MarkersContextMenu'}
+          rowHeight={16}
+          indentWidth={10}
         />
       </div>
     );

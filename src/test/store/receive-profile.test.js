@@ -80,8 +80,11 @@ describe('actions/receive-profile', function() {
 
       geckoProfiler = {
         getProfile: () => Promise.resolve(getGeckoProfile()),
-        getSymbolTable: () => Promise.resolve(),
+        getSymbolTable: () =>
+          Promise.reject(new Error('No symbol tables available')),
       };
+      window.fetch = sinon.stub();
+      fetch.rejects(new Error('No symbolication API in place'));
       window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
 
       // This is a mock implementation because of the `mock` call above, but
@@ -100,6 +103,7 @@ describe('actions/receive-profile', function() {
       delete window.geckoProfilerPromise;
       delete window.TextDecoder;
       delete window.requestIdleCallback;
+      delete window.fetch;
     });
 
     it('can retrieve a profile from the addon', async function() {

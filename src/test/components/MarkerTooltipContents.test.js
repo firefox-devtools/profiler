@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Provider } from 'react-redux';
 import MarkersTooltipContents from '../../components/shared/MarkerTooltipContents';
 import renderer from 'react-test-renderer';
@@ -205,6 +205,27 @@ describe('MarkerTooltipContents', function() {
             endTime: 18.5,
           },
         ],
+        [
+          'Styles',
+          20.5,
+          {
+            type: 'Styles',
+            category: 'Paint',
+            startTime: 20.0,
+            endTime: 20.5,
+            elementsTraversed: 100,
+            elementsStyled: 50,
+            elementsMatched: 10,
+            stylesShared: 15,
+            stylesReused: 20,
+            cause: {
+              time: 19.5,
+              stack: funcNames.indexOf(
+                'nsRefreshDriver::AddStyleFlushObserver'
+              ),
+            },
+          },
+        ],
       ],
       profile
     );
@@ -213,18 +234,21 @@ describe('MarkerTooltipContents', function() {
     const threadIndex = getSelectedThreadIndex(state);
     const tracingMarkers = selectedThreadSelectors.getTracingMarkers(state);
 
-    tracingMarkers.forEach(marker => {
-      expect(
-        renderer.create(
-          <Provider store={store}>
-            <MarkersTooltipContents
-              marker={marker}
-              threadIndex={threadIndex}
-              className="propClass"
-            />
-          </Provider>
-        )
-      ).toMatchSnapshot();
-    });
+    expect(
+      renderer.create(
+        <Provider store={store}>
+          <Fragment>
+            {tracingMarkers.map((marker, i) => (
+              <MarkersTooltipContents
+                key={i}
+                marker={marker}
+                threadIndex={threadIndex}
+                className="propClass"
+              />
+            ))}
+          </Fragment>
+        </Provider>
+      )
+    ).toMatchSnapshot();
   });
 });

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
 import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
@@ -13,8 +13,10 @@ import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
   expandAllCallNodeDescendants,
+  setCallNodeContextMenuVisibility,
 } from '../../actions/profile-view';
 import {
+  getSelectedTab,
   getSelectedThreadIndex,
   getImplementationFilter,
   getInvertCallstack,
@@ -25,7 +27,7 @@ import {
 } from '../../utils/flow';
 
 import type { TransformType } from '../../types/transforms';
-import type { ImplementationFilter } from '../../types/actions';
+import type { ImplementationFilter, TabSlug } from '../../types/actions';
 import type {
   IndexIntoCallNodeTable,
   CallNodeInfo,
@@ -37,6 +39,10 @@ import type {
   ConnectedProps,
 } from '../../utils/connect';
 
+type OwnProps = {|
+  forceOpenForTests?: boolean,
+|};
+
 type StateProps = {|
   +thread: Thread,
   +threadIndex: ThreadIndex,
@@ -45,22 +51,40 @@ type StateProps = {|
   +inverted: boolean,
   +selectedCallNodePath: CallNodePath,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +selectedTab: TabSlug,
 |};
 
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
   +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
+  +setCallNodeContextMenuVisibility: typeof setCallNodeContextMenuVisibility,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-require('./ProfileCallTreeContextMenu.css');
+type State = {|
+  isShown: boolean,
+|};
 
-class ProfileCallTreeContextMenu extends PureComponent<Props> {
+require('./CallNodeContextMenu.css');
+
+class CallNodeContextMenu extends PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
-    (this: any).handleClick = this.handleClick.bind(this);
+    this.state = {
+      isShown: Boolean(this.props.forceOpenForTests),
+    };
   }
+
+  _showMenu = () => {
+    this.props.setCallNodeContextMenuVisibility(true);
+    this.setState({ isShown: true });
+  };
+
+  _hideMenu = () => {
+    this.props.setCallNodeContextMenuVisibility(false);
+    this.setState({ isShown: false });
+  };
 
   _getFunctionName(): string {
     const {
@@ -144,7 +168,7 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     copy(stack);
   }
 
-  handleClick(event: SyntheticEvent<>, data: { type: string }): void {
+  _handleClick = (event: SyntheticEvent<>, data: { type: string }): void => {
     const { type } = data;
 
     const transformType = convertToTransformType(type);
@@ -172,7 +196,7 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
       default:
         throw new Error(`Unknown type ${type}`);
     }
-  }
+  };
 
   addTransformToStack(type: TransformType): void {
     const {
@@ -320,108 +344,139 @@ class ProfileCallTreeContextMenu extends PureComponent<Props> {
     return funcHasRecursiveCall(thread, implementation, funcIndex);
   }
 
-  render() {
+  componentWillReceiveProps(nextProps: Props) {
+    if (nextProps.selectedCallNodeIndex === null && this.state.isShown) {
+      // If the menu was visible while selectedCallNodeIndex was
+      // changed to null, the onHide callback will not execute when
+      // null is returned below. Call _menuHidden() here to be ensure
+      // the visibility state is updated.
+      this._hideMenu();
+    }
+  }
+
+  renderContextMenuContents() {
     const {
       selectedCallNodeIndex,
       inverted,
       thread: { funcTable },
       callNodeInfo: { callNodeTable },
+      selectedTab,
     } = this.props;
 
     if (selectedCallNodeIndex === null) {
-      return null;
+      return <div />;
     }
 
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
     // This could be the C++ library, or the JS filename.
     const nameForResource = this.getNameForSelectedResource();
+    const showExpandAll = selectedTab === 'calltree';
 
     return (
-      <ContextMenu id={'ProfileCallTreeContextMenu'}>
+      <Fragment>
         {inverted ? null : (
           <MenuItem
-            onClick={this.handleClick}
+            onClick={this._handleClick}
             data={{ type: 'merge-call-node' }}
           >
-            <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
+            <span className="callNodeContextMenuIcon callNodeContextMenuIconMerge" />
             Merge node into calling function
           </MenuItem>
         )}
-        <MenuItem onClick={this.handleClick} data={{ type: 'merge-function' }}>
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconMerge" />
+        <MenuItem onClick={this._handleClick} data={{ type: 'merge-function' }}>
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconMerge" />
           Merge function into caller across the entire tree
         </MenuItem>
-        <MenuItem onClick={this.handleClick} data={{ type: 'focus-subtree' }}>
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus" />
+        <MenuItem onClick={this._handleClick} data={{ type: 'focus-subtree' }}>
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconFocus" />
           Focus on subtree
         </MenuItem>
-        <MenuItem onClick={this.handleClick} data={{ type: 'focus-function' }}>
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconFocus" />
+        <MenuItem onClick={this._handleClick} data={{ type: 'focus-function' }}>
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconFocus" />
           {inverted
             ? 'Focus on calls made by this function'
             : 'Focus on function'}
         </MenuItem>
         <MenuItem
-          onClick={this.handleClick}
+          onClick={this._handleClick}
           data={{ type: 'collapse-function-subtree' }}
         >
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
           {'Collapse function’s subtree across the entire tree'}
         </MenuItem>
         {nameForResource ? (
           <MenuItem
-            onClick={this.handleClick}
+            onClick={this._handleClick}
             data={{ type: 'collapse-resource' }}
           >
-            <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+            <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
             Collapse functions in{' '}
-            <span className="profileCallTreeContextMenuLabel">
-              {nameForResource}
-            </span>
+            <span className="callNodeContextMenuLabel">{nameForResource}</span>
           </MenuItem>
         ) : null}
         {this.isRecursiveCall() ? (
           <MenuItem
-            onClick={this.handleClick}
+            onClick={this._handleClick}
             data={{ type: 'collapse-direct-recursion' }}
           >
-            <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconCollapse" />
+            <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
             Collapse direct recursion
           </MenuItem>
         ) : null}
-        <MenuItem onClick={this.handleClick} data={{ type: 'drop-function' }}>
-          <span className="profileCallTreeContextMenuIcon profileCallTreeContextMenuIconDrop" />
+        <MenuItem onClick={this._handleClick} data={{ type: 'drop-function' }}>
+          <span className="callNodeContextMenuIcon callNodeContextMenuIconDrop" />
           Drop samples with this function
         </MenuItem>
         <div className="react-contextmenu-separator" />
-        <MenuItem onClick={this.handleClick} data={{ type: 'expand-all' }}>
-          Expand all
-        </MenuItem>
-        <div className="react-contextmenu-separator" />
-        <MenuItem onClick={this.handleClick} data={{ type: 'searchfox' }}>
+        {showExpandAll ? (
+          <Fragment>
+            <MenuItem onClick={this._handleClick} data={{ type: 'expand-all' }}>
+              Expand all
+            </MenuItem>
+            <div className="react-contextmenu-separator" />
+          </Fragment>
+        ) : null}
+        <MenuItem onClick={this._handleClick} data={{ type: 'searchfox' }}>
           Look up the function name on Searchfox
         </MenuItem>
         <MenuItem
-          onClick={this.handleClick}
+          onClick={this._handleClick}
           data={{ type: 'copy-function-name' }}
         >
           Copy function name
         </MenuItem>
         {isJS ? (
-          <MenuItem onClick={this.handleClick} data={{ type: 'copy-url' }}>
+          <MenuItem onClick={this._handleClick} data={{ type: 'copy-url' }}>
             Copy script URL
           </MenuItem>
         ) : null}
-        <MenuItem onClick={this.handleClick} data={{ type: 'copy-stack' }}>
+        <MenuItem onClick={this._handleClick} data={{ type: 'copy-stack' }}>
           Copy stack
         </MenuItem>
+      </Fragment>
+    );
+  }
+
+  render() {
+    return (
+      <ContextMenu
+        id={'CallNodeContextMenu'}
+        onShow={this._showMenu}
+        onHide={this._hideMenu}
+      >
+        {this.state.isShown ? (
+          this.renderContextMenuContents()
+        ) : (
+          // ContextMenu expects at least 1 child.
+          <div />
+        )}
       </ContextMenu>
     );
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     threadIndex: getSelectedThreadIndex(state),
@@ -434,8 +489,13 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
       state
     ),
+    selectedTab: getSelectedTab(state),
   }),
-  mapDispatchToProps: { addTransformToStack, expandAllCallNodeDescendants },
-  component: ProfileCallTreeContextMenu,
+  mapDispatchToProps: {
+    addTransformToStack,
+    expandAllCallNodeDescendants,
+    setCallNodeContextMenuVisibility,
+  },
+  component: CallNodeContextMenu,
 };
 export default explicitConnect(options);

@@ -11,7 +11,8 @@ import {
 import {
   getCallNodeInfo,
   invertCallstack,
-  getCallNodeFromPath,
+  resourceTypes,
+  getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
 } from '../../profile-logic/profile-data';
 import { formatTree } from '../fixtures/utils';
@@ -174,6 +175,15 @@ describe('unfiltered call tree', function() {
       });
     });
 
+    describe('getChildren() after preloading cache', function() {
+      it('returns an array with the children indexes', function() {
+        const callTree = callTreeFromProfile(profile);
+        callTree.preloadChildrenCache();
+        expect(callTree.getChildren(C)).toEqual([D, F]);
+        expect(callTree.getChildren(E)).toEqual([]);
+      });
+    });
+
     describe('hasChildren()', function() {
       it('determines if nodes have children', function() {
         expect(callTree.hasChildren(C)).toEqual(true);
@@ -214,6 +224,18 @@ describe('unfiltered call tree', function() {
       });
     });
 
+    describe('getNodeData()', function() {
+      it('gets a node for a given callNodeIndex', function() {
+        expect(callTree.getNodeData(A)).toEqual({
+          funcName: 'A',
+          totalTime: 3,
+          totalTimeRelative: 1,
+          selfTime: 0,
+          selfTimeRelative: 0,
+        });
+      });
+    });
+
     describe('getDisplayData()', function() {
       it('gets a node for a given callNodeIndex', function() {
         expect(callTree.getDisplayData(A)).toEqual({
@@ -227,13 +249,42 @@ describe('unfiltered call tree', function() {
         });
       });
     });
+
+    describe('icons from the call tree', function() {
+      it('upgrades http to https', function() {
+        const { profile } = getProfileFromTextSamples(`
+          A:examplecom.js
+        `);
+        const callTree = callTreeFromProfile(profile);
+        const [thread] = profile.threads;
+        const hostStringIndex = thread.stringTable.indexForString('examplecom');
+
+        thread.resourceTable.type[0] = resourceTypes.webhost;
+        thread.resourceTable.host[0] = hostStringIndex;
+        // Hijack the string table to provide the proper host name
+        thread.stringTable._array[hostStringIndex] = 'http://example.com';
+
+        expect(callTree.getDisplayData(A).icon).toEqual(
+          'https://example.com/favicon.ico'
+        );
+      });
+    });
+
+    describe('getTimingDisplayData()', function() {
+      it('gets formatted timing data for a given callNodeIndex', function() {
+        expect(callTree.getTimingDisplayData(D)).toEqual({
+          selfTime: '—',
+          totalTime: '1',
+        });
+      });
+    });
   });
 
   /**
    * While not specifically part of the call tree, this is a core function
    * to help navigate stacks through a list of functions.
    */
-  describe('getCallNodeFromPath', function() {
+  describe('getCallNodeIndexFromPath', function() {
     const profile = getProfile();
     const [thread] = profile.threads;
     const { callNodeTable } = getCallNodeInfo(
@@ -245,7 +296,9 @@ describe('unfiltered call tree', function() {
     // Helper to make the assertions a little less verbose.
     function checkStack(callNodePath, index, name) {
       it(`finds stack that ends in ${name}`, function() {
-        expect(getCallNodeFromPath(callNodePath, callNodeTable)).toBe(index);
+        expect(getCallNodeIndexFromPath(callNodePath, callNodeTable)).toBe(
+          index
+        );
       });
     }
 
@@ -262,9 +315,9 @@ describe('unfiltered call tree', function() {
     checkStack([A, B, H, I], I, 'I');
 
     it(`doesn't find a non-existent stack`, function() {
-      expect(getCallNodeFromPath([A, B, C, D, E, F, G], callNodeTable)).toBe(
-        null
-      );
+      expect(
+        getCallNodeIndexFromPath([A, B, C, D, E, F, G], callNodeTable)
+      ).toBe(null);
     });
   });
 });

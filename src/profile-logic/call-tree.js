@@ -40,6 +40,10 @@ type CallTreeCountsAndTimings = {
 
 function extractFaviconFromLibname(libname: string): string | null {
   const url = new URL('/favicon.ico', libname);
+  if (url.protocol === 'http:') {
+    // Upgrade http requests.
+    url.protocol = 'https:';
+  }
   return url.href;
 }
 
@@ -54,6 +58,7 @@ export class CallTree {
   _rootCount: number;
   _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
   _children: Map<IndexIntoCallNodeTable, CallNodeChildren>;
+  _isChildrenCachePreloaded: boolean;
   _jsOnly: boolean;
   _isIntegerInterval: boolean;
 
@@ -77,6 +82,7 @@ export class CallTree {
     this._rootCount = rootCount;
     this._displayDataByIndex = new Map();
     this._children = new Map();
+    this._isChildrenCachePreloaded = false;
     this._jsOnly = jsOnly;
     this._isIntegerInterval = isIntegerInterval;
   }
@@ -85,9 +91,62 @@ export class CallTree {
     return this.getChildren(-1);
   }
 
+  /**
+   * Preload the internal cache of children so that subsequent calls
+   * to getChildren() return in constant time.
+   *
+   * This is an essential optimization for the flame graph since it
+   * needs to traverse all children of the call tree in one pass.
+   */
+  preloadChildrenCache() {
+    if (!this._isChildrenCachePreloaded) {
+      this._children.clear();
+      this._children.set(-1, []); // -1 is the parent of the roots
+      for (
+        let callNodeIndex = 0;
+        callNodeIndex < this._callNodeTable.length;
+        callNodeIndex++
+      ) {
+        // This loop assumes parents always come before their children
+        // in the call node table. For every call node index, we set
+        // its children to be an empty array. Then we always have an
+        // array to append to when any call node acts as a parent
+        // through the prefix.
+        this._children.set(callNodeIndex, []);
+
+        if (this._callNodeTimes.totalTime[callNodeIndex] === 0) {
+          continue;
+        }
+
+        const siblings = this._children.get(
+          this._callNodeTable.prefix[callNodeIndex]
+        );
+        if (siblings === undefined) {
+          // We should definitely have created a children array for
+          // the parent in an earlier iteration of this loop. Add this
+          // condition to satisfy flow.
+          throw new Error(
+            "Failed to retrieve array of children. This shouldn't happen."
+          );
+        }
+        siblings.push(callNodeIndex);
+        siblings.sort(
+          (a, b) =>
+            this._callNodeTimes.totalTime[b] - this._callNodeTimes.totalTime[a]
+        );
+      }
+      this._isChildrenCachePreloaded = true;
+    }
+  }
+
   getChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
     let children = this._children.get(callNodeIndex);
     if (children === undefined) {
+      if (this._isChildrenCachePreloaded) {
+        console.error(
+          `Children for callNodeIndex ${callNodeIndex} not found in cache despite having a preloaded cache.`
+        );
+      }
       const childCount =
         callNodeIndex === -1
           ? this._rootCount
@@ -158,26 +217,40 @@ export class CallTree {
     );
     const totalTime = this._callNodeTimes.totalTime[callNodeIndex];
     const totalTimeRelative = totalTime / this._rootTotalTime;
-    return { funcName, totalTime, totalTimeRelative };
+    const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
+    const selfTimeRelative = selfTime / this._rootTotalTime;
+
+    return {
+      funcName,
+      totalTime,
+      totalTimeRelative,
+      selfTime,
+      selfTimeRelative,
+    };
+  }
+
+  getTimingDisplayData(callNodeIndex: IndexIntoCallNodeTable) {
+    const totalTime = this._callNodeTimes.totalTime[callNodeIndex];
+    const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
+    const formatNumber = this._isIntegerInterval
+      ? _formatIntegerNumber
+      : _formatDecimalNumber;
+    return {
+      totalTime: `${formatNumber(totalTime)}`,
+      selfTime: selfTime === 0 ? '—' : `${formatNumber(selfTime)}`,
+    };
   }
 
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
     let displayData = this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
-      const { funcName, totalTime, totalTimeRelative } = this.getNodeData(
-        callNodeIndex
-      );
-
+      const { funcName, totalTimeRelative } = this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeTable.func[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
       const libName = this._getOriginAnnotation(funcIndex);
       const precision = this._isIntegerInterval ? 0 : 1;
-      const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
-      const formatNumber = this._isIntegerInterval
-        ? _formatIntegerNumber
-        : _formatDecimalNumber;
 
       let icon = null;
       if (resourceType === resourceTypes.webhost) {
@@ -187,9 +260,8 @@ export class CallTree {
       }
 
       displayData = {
-        totalTime: `${formatNumber(totalTime)}`,
+        ...this.getTimingDisplayData(callNodeIndex),
         totalTimePercent: `${(100 * totalTimeRelative).toFixed(precision)}%`,
-        selfTime: selfTime === 0 ? '—' : `${formatNumber(selfTime)}`,
         name: funcName,
         lib: libName,
         // Dim platform pseudo-stacks.

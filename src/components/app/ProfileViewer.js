@@ -16,14 +16,16 @@ import StackChart from '../stack-chart/';
 import MarkerChart from '../marker-chart/';
 import FlameGraph from '../flame-graph/';
 import { changeSelectedTab, changeTabOrder } from '../../actions/app';
+import { returnToZipFileList } from '../../actions/zipped-profiles';
 import { getTabOrder } from '../../reducers/profile-view';
-import { getSelectedTab } from '../../reducers/url-state';
+import { getSelectedTab, getProfileName } from '../../reducers/url-state';
 import ProfileViewerHeader from '../header/ProfileViewerHeader';
-import ProfileCallTreeContextMenu from '../calltree/ProfileCallTreeContextMenu';
+import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
 import FooterLinks from './FooterLinks';
 import { toValidTabSlug } from '../../utils/flow';
+import { getHasZipFile } from '../../reducers/zipped-profiles';
 
 import type { Tab } from './TabBar';
 import type {
@@ -36,12 +38,14 @@ require('./ProfileViewer.css');
 type StateProps = {|
   +tabOrder: number[],
   +selectedTab: string,
-  +className: string,
+  +profileName: string | null,
+  +hasZipFile: boolean,
 |};
 
 type DispatchProps = {|
   +changeSelectedTab: typeof changeSelectedTab,
   +changeTabOrder: typeof changeTabOrder,
+  +returnToZipFileList: typeof returnToZipFileList,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -83,11 +87,28 @@ class ProfileViewer extends PureComponent<Props> {
   }
 
   render() {
-    const { className, tabOrder, changeTabOrder, selectedTab } = this.props;
-
+    const {
+      tabOrder,
+      changeTabOrder,
+      selectedTab,
+      hasZipFile,
+      profileName,
+      returnToZipFileList,
+    } = this.props;
     return (
-      <div className={className}>
-        <div className={`${className}TopBar`}>
+      <div className="profileViewer">
+        <div className="profileViewerTopBar">
+          {hasZipFile ? (
+            <button
+              type="button"
+              className="profileViewerZipButton"
+              title="View all files in the zip file"
+              onClick={returnToZipFileList}
+            />
+          ) : null}
+          {profileName ? (
+            <div className="profileViewerName">{profileName}</div>
+          ) : null}
           <ProfileFilterNavigator />
           <ProfileSharing />
         </div>
@@ -111,7 +132,7 @@ class ProfileViewer extends PureComponent<Props> {
           }[selectedTab]
         }
         <SymbolicationStatusOverlay />
-        <ProfileCallTreeContextMenu />
+        <CallNodeContextMenu />
         <MarkerTableContextMenu />
         <ProfileThreadHeaderContextMenu />
         <FooterLinks />
@@ -124,11 +145,13 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     tabOrder: getTabOrder(state),
     selectedTab: getSelectedTab(state),
-    className: 'profileViewer',
+    profileName: getProfileName(state),
+    hasZipFile: getHasZipFile(state),
   }),
   mapDispatchToProps: {
     changeSelectedTab,
     changeTabOrder,
+    returnToZipFileList,
   },
   component: ProfileViewer,
 };

@@ -16,7 +16,7 @@ import {
 } from '../reducers/url-state';
 import {
   getFriendlyThreadName,
-  getCallNodePath,
+  getCallNodePathFromIndex,
 } from '../profile-logic/profile-data';
 import { sendAnalytics } from '../utils/analytics';
 
@@ -63,6 +63,13 @@ export function changeRightClickedThread(selectedThread: ThreadIndex): Action {
   return {
     type: 'CHANGE_RIGHT_CLICKED_THREAD',
     selectedThread,
+  };
+}
+
+export function setCallNodeContextMenuVisibility(isVisible: boolean): Action {
+  return {
+    type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
+    isVisible,
   };
 }
 
@@ -190,7 +197,7 @@ export function expandAllCallNodeDescendants(
     });
 
     const expandedCallNodePaths = [...descendants].map(callNodeIndex =>
-      getCallNodePath(callNodeIndex, callNodeInfo.callNodeTable)
+      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
     dispatch(changeExpandedCallNodes(threadIndex, expandedCallNodePaths));
   };

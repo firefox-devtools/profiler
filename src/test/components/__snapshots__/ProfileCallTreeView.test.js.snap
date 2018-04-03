@@ -555,7 +555,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -591,7 +592,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -627,7 +629,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -663,7 +666,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -699,7 +703,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -735,7 +740,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -771,7 +777,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -807,7 +814,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -843,7 +851,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -879,7 +888,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -915,7 +925,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -951,7 +962,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -987,7 +999,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1023,7 +1036,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1059,7 +1073,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1095,7 +1110,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1135,7 +1151,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1171,7 +1188,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1207,7 +1225,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1265,7 +1284,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1302,7 +1322,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1339,7 +1360,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1376,7 +1398,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1413,7 +1436,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1450,7 +1474,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1487,7 +1512,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1524,7 +1550,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1561,7 +1588,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1598,7 +1626,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1635,7 +1664,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1672,7 +1702,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1709,7 +1740,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1746,7 +1778,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1783,7 +1816,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1820,7 +1854,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1861,7 +1896,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1898,7 +1934,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -1935,7 +1972,8 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2159,7 +2197,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2195,7 +2234,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2231,7 +2271,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2267,7 +2308,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2303,7 +2345,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2339,7 +2382,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2375,7 +2419,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2433,7 +2478,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2470,7 +2516,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2507,7 +2554,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2544,7 +2592,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2581,7 +2630,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2618,7 +2668,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2655,7 +2706,8 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2879,7 +2931,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2915,7 +2968,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2951,7 +3005,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -2987,7 +3042,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3023,7 +3079,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3059,7 +3116,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3095,7 +3153,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3153,7 +3212,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3190,7 +3250,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3227,7 +3288,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3264,7 +3326,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3301,7 +3364,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3338,7 +3402,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3375,7 +3440,8 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3599,7 +3665,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3635,7 +3702,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3671,7 +3739,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3707,7 +3776,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3743,7 +3813,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3779,7 +3850,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3815,7 +3887,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3873,7 +3946,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3910,7 +3984,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3947,7 +4022,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -3984,7 +4060,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4021,7 +4098,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4058,7 +4136,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4095,7 +4174,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4319,7 +4399,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4355,7 +4436,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4391,7 +4473,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4427,7 +4510,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4463,7 +4547,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4499,7 +4584,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4557,7 +4643,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4594,7 +4681,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4631,7 +4719,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4674,7 +4763,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4711,7 +4801,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4748,7 +4839,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -4972,7 +5064,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5008,7 +5101,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5044,7 +5138,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5080,7 +5175,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5116,7 +5212,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5152,7 +5249,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5210,7 +5308,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5247,7 +5346,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5284,7 +5384,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5327,7 +5428,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5364,7 +5466,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5401,7 +5504,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5625,7 +5729,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5661,7 +5766,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5697,7 +5803,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5733,7 +5840,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5791,7 +5899,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5828,7 +5937,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5865,7 +5975,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -5908,7 +6019,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6138,7 +6250,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6174,7 +6287,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6210,7 +6324,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6246,7 +6361,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6304,7 +6420,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6341,7 +6458,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6378,7 +6496,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6421,7 +6540,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6651,7 +6771,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6687,7 +6808,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6723,7 +6845,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6759,7 +6882,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6795,7 +6919,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6831,7 +6956,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6889,7 +7015,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6926,7 +7053,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -6963,7 +7091,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -7006,7 +7135,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -7043,7 +7173,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >
@@ -7086,7 +7217,8 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 onMouseDown={[Function]}
                 style={
                   Object {
-                    "height": "16px",
+                    "height": 16,
+                    "lineHeight": "16px",
                   }
                 }
               >

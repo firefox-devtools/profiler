@@ -14,10 +14,12 @@ import {
   changeExpandedCallNodes,
 } from '../../actions/profile-view';
 import { formatTree } from '../fixtures/utils';
+import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
 import fakeIndexedDB from 'fake-indexeddb';
 import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
 import { TextDecoder } from 'text-encoding';
+import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
 /**
  * Symbolication happens across actions and reducers, so test this functionality in
@@ -57,7 +59,17 @@ describe('doSymbolicateProfile', function() {
           return thread.funcTable.name.indexOf(stringIndex);
         }),
       symbolStore: new SymbolStore(symbolStoreName, {
-        requestSymbolTable: () => Promise.resolve(exampleSymbolTable),
+        requestSymbolsFromServer: requests =>
+          requests.map(() => Promise.reject(new Error(''))),
+        requestSymbolTableFromAddon: async lib => {
+          if (lib.debugName === 'firefox.pdb') {
+            return exampleSymbolTable;
+          }
+          throw new SymbolsNotFoundError(
+            'Should only have libs called firefox.pdb',
+            lib
+          );
+        },
       }),
     };
   }
@@ -129,7 +141,8 @@ describe('doSymbolicateProfile', function() {
       dispatch(changeExpandedCallNodes(threadIndex, expandedCallNodePaths));
 
       expect(getSelectedCallNodePath(getState())).toEqual(selectedCallNodePath);
-      expect(getExpandedCallNodePaths(getState())).toEqual(
+      assertSetContainsOnly(
+        getExpandedCallNodePaths(getState()),
         expandedCallNodePaths
       );
     });
@@ -154,7 +167,8 @@ describe('doSymbolicateProfile', function() {
       // _createUnsymbolicatedProfile().
       dispatch(changeExpandedCallNodes(threadIndex, expandedCallNodePaths));
       expect(getSelectedCallNodePath(getState())).toEqual(selectedCallNodePath);
-      expect(getExpandedCallNodePaths(getState())).toEqual(
+      assertSetContainsOnly(
+        getExpandedCallNodePaths(getState()),
         expandedCallNodePaths
       );
 
@@ -164,10 +178,9 @@ describe('doSymbolicateProfile', function() {
         funcNamesToFuncIndexes(['first symbol', 'last symbol'])
       );
 
-      expect(getExpandedCallNodePaths(getState())).toEqual(
-        // Notice how these are duplicated, however they are equivalent.
-        // See: https://github.com/devtools-html/perf.html/issues/270
-        [['first symbol'], ['first symbol']].map(funcNamesToFuncIndexes)
+      assertSetContainsOnly(
+        getExpandedCallNodePaths(getState()),
+        [['first symbol']].map(funcNamesToFuncIndexes)
       );
     });
   });
@@ -191,9 +204,9 @@ function _createUnsymbolicatedProfile() {
     end: 0x4000,
     offset: 0,
     arch: '',
-    name: '',
+    name: 'firefox.exe',
     path: '',
-    debugName: '',
+    debugName: 'firefox.pdb',
     debugPath: '',
     breakpadId: '',
   };
