@@ -40,21 +40,6 @@ exports[`renders FlameGraph correctly 1`] = `
           </select>
         </label>
       </li>
-      <li
-        className="stackSettingsListItem"
-      >
-        <label
-          className="stackSettingsLabel"
-        >
-          <input
-            checked={false}
-            className="stackSettingsCheckbox"
-            onChange={[Function]}
-            type="checkbox"
-          />
-           Invert call stack
-        </label>
-      </li>
     </ul>
     <div
       className="stackSearchField stackSettingsSearchField"

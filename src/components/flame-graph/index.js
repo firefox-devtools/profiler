@@ -97,7 +97,7 @@ class FlameGraph extends React.PureComponent<Props> {
 
     return (
       <div className="flameGraph">
-        <StackSettings />
+        <StackSettings hideInvertCallstack={true} />
         <TransformNavigator />
         {invertCallstack ? (
           <div className="flameGraphDisabledMessage">
