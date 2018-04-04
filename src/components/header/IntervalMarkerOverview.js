@@ -252,13 +252,12 @@ class IntervalMarkerOverview extends React.PureComponent<Props, State> {
       c.width = pixelWidth;
       c.height = pixelHeight;
     }
-    const ctx = c.getContext('2d', { alpha: false });
+    const ctx = c.getContext('2d');
     if (ctx === null || ctx === undefined) {
       return;
     }
 
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, pixelWidth, pixelHeight);
+    ctx.clearRect(0, 0, pixelWidth, pixelHeight);
     ctx.scale(devicePixelRatio, devicePixelRatio);
 
     intervalMarkers.forEach(marker => {
