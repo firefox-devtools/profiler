@@ -17,11 +17,7 @@ exports[`ProfileThreadTracingMarkerOverview renders correctly 1`] = `
 exports[`ProfileThreadTracingMarkerOverview renders correctly 2`] = `
 Array [
   Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
+    "clearRect",
     0,
     0,
     200,
