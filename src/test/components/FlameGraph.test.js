@@ -11,6 +11,7 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { changeInvertCallstack } from '../../actions/profile-view';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
 it('renders FlameGraph correctly', () => {
@@ -64,4 +65,21 @@ it('renders FlameGraph correctly', () => {
   expect(drawCalls).toMatchSnapshot();
 
   delete window.devicePixelRatio;
+});
+
+it('renders a message instead of FlameGraph when call stack is inverted', () => {
+  const { profile } = getProfileFromTextSamples(`
+    A B
+  `);
+
+  const store = storeWithProfile(profile);
+  store.dispatch(changeInvertCallstack(true));
+
+  const flameGraph = renderer.create(
+    <Provider store={store}>
+      <FlameGraph />
+    </Provider>
+  );
+
+  expect(flameGraph).toMatchSnapshot();
 });
