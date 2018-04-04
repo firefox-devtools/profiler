@@ -151,6 +151,15 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     this._canvas = canvas;
   }
 
+  componentWillReceiveProps() {
+    // It is possible that the data backing the chart has been
+    // changed, for instance after symbolication. Clear hoveredItem so
+    // that it doesn't point to possibly invalid data.
+    if (this.state.hoveredItem !== null) {
+      this.setState({ hoveredItem: null });
+    }
+  }
+
   componentDidUpdate(
     prevProps: Props<HoveredItem>,
     prevState: State<HoveredItem>
