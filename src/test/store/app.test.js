@@ -65,12 +65,14 @@ describe('app actions', function() {
         1,
         2,
         3,
+        4,
       ]);
-      dispatch(AppActions.changeTabOrder([2, 3, 1, 0]));
+      dispatch(AppActions.changeTabOrder([2, 3, 1, 4, 0]));
       expect(ProfileViewSelectors.getTabOrder(getState())).toEqual([
         2,
         3,
         1,
+        4,
         0,
       ]);
     });

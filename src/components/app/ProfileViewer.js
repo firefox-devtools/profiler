@@ -63,6 +63,10 @@ class ProfileViewer extends PureComponent<Props> {
         title: 'Call Tree',
       },
       {
+        name: 'flame-graph',
+        title: 'Flame Graph',
+      },
+      {
         name: 'stack-chart',
         title: 'Stack Chart',
       },
@@ -126,8 +130,6 @@ class ProfileViewer extends PureComponent<Props> {
             'marker-table': <MarkerTable />,
             'stack-chart': <StackChart />,
             'marker-chart': <MarkerChart />,
-            // The Flame Graph is not shown by the tab bar, but can still be accessed by
-            // manually typing "flame-graph" in the URL.
             'flame-graph': <FlameGraph />,
           }[selectedTab]
         }

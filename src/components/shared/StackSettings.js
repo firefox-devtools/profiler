@@ -24,6 +24,7 @@ import type { ImplementationFilter } from '../../types/actions';
 type Props = {|
   +implementationFilter: ImplementationFilter,
   +invertCallstack: boolean,
+  +hideInvertCallstack?: boolean,
   +changeImplementationFilter: typeof changeImplementationFilter,
   +changeInvertCallstack: typeof changeInvertCallstack,
 |};
@@ -52,7 +53,11 @@ class StackSettings extends PureComponent<Props> {
   }
 
   render() {
-    const { implementationFilter, invertCallstack } = this.props;
+    const {
+      implementationFilter,
+      invertCallstack,
+      hideInvertCallstack,
+    } = this.props;
 
     return (
       <div className="stackSettings">
@@ -71,17 +76,19 @@ class StackSettings extends PureComponent<Props> {
               </select>
             </label>
           </li>
-          <li className="stackSettingsListItem">
-            <label className="stackSettingsLabel">
-              <input
-                type="checkbox"
-                className="stackSettingsCheckbox"
-                onChange={this._onInvertCallstackClick}
-                checked={invertCallstack}
-              />
-              {' Invert call stack'}
-            </label>
-          </li>
+          {hideInvertCallstack ? null : (
+            <li className="stackSettingsListItem">
+              <label className="stackSettingsLabel">
+                <input
+                  type="checkbox"
+                  className="stackSettingsCheckbox"
+                  onChange={this._onInvertCallstackClick}
+                  checked={invertCallstack}
+                />
+                {' Invert call stack'}
+              </label>
+            </li>
+          )}
         </ul>
         <StackSearchField className="stackSettingsSearchField" />
       </div>
