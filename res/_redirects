@@ -1,0 +1,2 @@
+# Redirect everything to index.html, and allow the URL handling to decide what to show.
+/*    /index.html   200

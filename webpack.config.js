@@ -3,6 +3,7 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OfflinePlugin = require('offline-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
 
 const es6modules = ['pretty-bytes'];
@@ -66,6 +67,10 @@ const config = {
       template: 'res/index.html',
       favicon: 'res/favicon.png',
     }),
+    new CopyWebpackPlugin([
+      { from: 'res/_headers' },
+      { from: 'res/_redirects' },
+    ]),
   ],
   entry: ['./src/index'],
   output: {
