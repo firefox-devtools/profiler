@@ -1,0 +1,978 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CallTreeSidebar displays interesting data about the currently selected node 1`] = `
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <Connect(CallTreeSidebar)>
+    <CallTreeSidebar
+      dispatch={[Function]}
+      selectedNodeIndex={null}
+      tree={
+        CallTree {
+          "_callNodeChildCount": Uint32Array [
+            1,
+            2,
+            2,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+          ],
+          "_callNodeTable": Object {
+            "depth": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              3,
+              4,
+              2,
+              3,
+            ],
+            "func": Int32Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              4,
+              6,
+              7,
+            ],
+            "length": 9,
+            "prefix": Int32Array [
+              -1,
+              0,
+              1,
+              2,
+              3,
+              2,
+              5,
+              1,
+              7,
+            ],
+          },
+          "_callNodeTimes": Object {
+            "selfTime": Float32Array [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              0,
+              1,
+            ],
+            "totalTime": Float32Array [
+              3,
+              3,
+              2,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+            ],
+          },
+          "_children": Map {},
+          "_displayDataByIndex": Map {},
+          "_funcTable": Object {
+            "address": Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
+            "fileName": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "isJS": Array [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+            ],
+            "length": 8,
+            "lineNumber": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "name": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+            ],
+            "resource": Array [
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+            ],
+          },
+          "_isChildrenCachePreloaded": false,
+          "_isIntegerInterval": true,
+          "_jsOnly": false,
+          "_resourceTable": Object {
+            "addonId": Array [],
+            "host": Array [],
+            "icon": Array [],
+            "length": 0,
+            "lib": Array [],
+            "name": Array [],
+            "type": Array [],
+          },
+          "_rootCount": 1,
+          "_rootTotalTime": 3,
+          "_stringTable": UniqueStringArray {
+            "_array": Array [
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+              "H",
+              "I",
+            ],
+            "_stringToIndex": Map {
+              "A" => 0,
+              "B" => 1,
+              "C" => 2,
+              "D" => 3,
+              "E" => 4,
+              "F" => 5,
+              "H" => 6,
+              "I" => 7,
+            },
+          },
+        }
+      }
+    >
+      <div
+        className="sidebar sidebar-calltree"
+      >
+        Select a node to display some information about it.
+      </div>
+    </CallTreeSidebar>
+  </Connect(CallTreeSidebar)>
+</Provider>
+`;
+
+exports[`CallTreeSidebar displays interesting data about the currently selected node 2`] = `
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <Connect(CallTreeSidebar)>
+    <CallTreeSidebar
+      dispatch={[Function]}
+      selectedNodeIndex={2}
+      tree={
+        CallTree {
+          "_callNodeChildCount": Uint32Array [
+            1,
+            2,
+            2,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+          ],
+          "_callNodeTable": Object {
+            "depth": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              3,
+              4,
+              2,
+              3,
+            ],
+            "func": Int32Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              4,
+              6,
+              7,
+            ],
+            "length": 9,
+            "prefix": Int32Array [
+              -1,
+              0,
+              1,
+              2,
+              3,
+              2,
+              5,
+              1,
+              7,
+            ],
+          },
+          "_callNodeTimes": Object {
+            "selfTime": Float32Array [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              0,
+              1,
+            ],
+            "totalTime": Float32Array [
+              3,
+              3,
+              2,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+            ],
+          },
+          "_children": Map {},
+          "_displayDataByIndex": Map {
+            2 => Object {
+              "dim": false,
+              "icon": null,
+              "lib": "",
+              "name": "C",
+              "selfTime": "—",
+              "totalTime": "2",
+              "totalTimePercent": "67%",
+            },
+          },
+          "_funcTable": Object {
+            "address": Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
+            "fileName": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "isJS": Array [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+            ],
+            "length": 8,
+            "lineNumber": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "name": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+            ],
+            "resource": Array [
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+            ],
+          },
+          "_isChildrenCachePreloaded": false,
+          "_isIntegerInterval": true,
+          "_jsOnly": false,
+          "_resourceTable": Object {
+            "addonId": Array [],
+            "host": Array [],
+            "icon": Array [],
+            "length": 0,
+            "lib": Array [],
+            "name": Array [],
+            "type": Array [],
+          },
+          "_rootCount": 1,
+          "_rootTotalTime": 3,
+          "_stringTable": UniqueStringArray {
+            "_array": Array [
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+              "H",
+              "I",
+            ],
+            "_stringToIndex": Map {
+              "A" => 0,
+              "B" => 1,
+              "C" => 2,
+              "D" => 3,
+              "E" => 4,
+              "F" => 5,
+              "H" => 6,
+              "I" => 7,
+            },
+          },
+        }
+      }
+    >
+      <div
+        className="sidebar sidebar-calltree"
+      >
+        <h2>
+          <div
+            className="sidebar-title"
+          >
+            C
+          </div>
+          <div
+            className="sidebar-subtitle"
+          />
+        </h2>
+        <div
+          className="sidebar-details"
+        >
+          <SidebarDetail
+            label="Running Time"
+          >
+            <div
+              className="sidebar-label"
+            >
+              Running Time
+              :
+            </div>
+            2
+            ms
+          </SidebarDetail>
+          <SidebarDetail
+            label="Self Time"
+          >
+            <div
+              className="sidebar-label"
+            >
+              Self Time
+              :
+            </div>
+            —
+          </SidebarDetail>
+        </div>
+      </div>
+    </CallTreeSidebar>
+  </Connect(CallTreeSidebar)>
+</Provider>
+`;
+
+exports[`CallTreeSidebar displays interesting data about the currently selected node 3`] = `
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <Connect(CallTreeSidebar)>
+    <CallTreeSidebar
+      dispatch={[Function]}
+      selectedNodeIndex={3}
+      tree={
+        CallTree {
+          "_callNodeChildCount": Uint32Array [
+            1,
+            2,
+            2,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+          ],
+          "_callNodeTable": Object {
+            "depth": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              3,
+              4,
+              2,
+              3,
+            ],
+            "func": Int32Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              4,
+              6,
+              7,
+            ],
+            "length": 9,
+            "prefix": Int32Array [
+              -1,
+              0,
+              1,
+              2,
+              3,
+              2,
+              5,
+              1,
+              7,
+            ],
+          },
+          "_callNodeTimes": Object {
+            "selfTime": Float32Array [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              0,
+              1,
+            ],
+            "totalTime": Float32Array [
+              3,
+              3,
+              2,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+            ],
+          },
+          "_children": Map {},
+          "_displayDataByIndex": Map {
+            2 => Object {
+              "dim": false,
+              "icon": null,
+              "lib": "",
+              "name": "C",
+              "selfTime": "—",
+              "totalTime": "2",
+              "totalTimePercent": "67%",
+            },
+            3 => Object {
+              "dim": false,
+              "icon": null,
+              "lib": "",
+              "name": "D",
+              "selfTime": "—",
+              "totalTime": "1",
+              "totalTimePercent": "33%",
+            },
+          },
+          "_funcTable": Object {
+            "address": Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
+            "fileName": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "isJS": Array [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+            ],
+            "length": 8,
+            "lineNumber": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "name": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+            ],
+            "resource": Array [
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+            ],
+          },
+          "_isChildrenCachePreloaded": false,
+          "_isIntegerInterval": true,
+          "_jsOnly": false,
+          "_resourceTable": Object {
+            "addonId": Array [],
+            "host": Array [],
+            "icon": Array [],
+            "length": 0,
+            "lib": Array [],
+            "name": Array [],
+            "type": Array [],
+          },
+          "_rootCount": 1,
+          "_rootTotalTime": 3,
+          "_stringTable": UniqueStringArray {
+            "_array": Array [
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+              "H",
+              "I",
+            ],
+            "_stringToIndex": Map {
+              "A" => 0,
+              "B" => 1,
+              "C" => 2,
+              "D" => 3,
+              "E" => 4,
+              "F" => 5,
+              "H" => 6,
+              "I" => 7,
+            },
+          },
+        }
+      }
+    >
+      <div
+        className="sidebar sidebar-calltree"
+      >
+        <h2>
+          <div
+            className="sidebar-title"
+          >
+            D
+          </div>
+          <div
+            className="sidebar-subtitle"
+          />
+        </h2>
+        <div
+          className="sidebar-details"
+        >
+          <SidebarDetail
+            label="Running Time"
+          >
+            <div
+              className="sidebar-label"
+            >
+              Running Time
+              :
+            </div>
+            1
+            ms
+          </SidebarDetail>
+          <SidebarDetail
+            label="Self Time"
+          >
+            <div
+              className="sidebar-label"
+            >
+              Self Time
+              :
+            </div>
+            —
+          </SidebarDetail>
+        </div>
+      </div>
+    </CallTreeSidebar>
+  </Connect(CallTreeSidebar)>
+</Provider>
+`;
+
+exports[`CallTreeSidebar displays interesting data about the currently selected node 4`] = `
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <Connect(CallTreeSidebar)>
+    <CallTreeSidebar
+      dispatch={[Function]}
+      selectedNodeIndex={7}
+      tree={
+        CallTree {
+          "_callNodeChildCount": Uint32Array [
+            1,
+            2,
+            2,
+            1,
+            0,
+            1,
+            0,
+            1,
+            0,
+          ],
+          "_callNodeTable": Object {
+            "depth": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              3,
+              4,
+              2,
+              3,
+            ],
+            "func": Int32Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              4,
+              6,
+              7,
+            ],
+            "length": 9,
+            "prefix": Int32Array [
+              -1,
+              0,
+              1,
+              2,
+              3,
+              2,
+              5,
+              1,
+              7,
+            ],
+          },
+          "_callNodeTimes": Object {
+            "selfTime": Float32Array [
+              0,
+              0,
+              0,
+              0,
+              1,
+              0,
+              1,
+              0,
+              1,
+            ],
+            "totalTime": Float32Array [
+              3,
+              3,
+              2,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+            ],
+          },
+          "_children": Map {},
+          "_displayDataByIndex": Map {
+            2 => Object {
+              "dim": false,
+              "icon": null,
+              "lib": "",
+              "name": "C",
+              "selfTime": "—",
+              "totalTime": "2",
+              "totalTimePercent": "67%",
+            },
+            3 => Object {
+              "dim": false,
+              "icon": null,
+              "lib": "",
+              "name": "D",
+              "selfTime": "—",
+              "totalTime": "1",
+              "totalTimePercent": "33%",
+            },
+            7 => Object {
+              "dim": false,
+              "icon": null,
+              "lib": "",
+              "name": "H",
+              "selfTime": "—",
+              "totalTime": "1",
+              "totalTimePercent": "33%",
+            },
+          },
+          "_funcTable": Object {
+            "address": Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
+            "fileName": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "isJS": Array [
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+              false,
+            ],
+            "length": 8,
+            "lineNumber": Array [
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+              null,
+            ],
+            "name": Array [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+            ],
+            "resource": Array [
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+              -1,
+            ],
+          },
+          "_isChildrenCachePreloaded": false,
+          "_isIntegerInterval": true,
+          "_jsOnly": false,
+          "_resourceTable": Object {
+            "addonId": Array [],
+            "host": Array [],
+            "icon": Array [],
+            "length": 0,
+            "lib": Array [],
+            "name": Array [],
+            "type": Array [],
+          },
+          "_rootCount": 1,
+          "_rootTotalTime": 3,
+          "_stringTable": UniqueStringArray {
+            "_array": Array [
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+              "H",
+              "I",
+            ],
+            "_stringToIndex": Map {
+              "A" => 0,
+              "B" => 1,
+              "C" => 2,
+              "D" => 3,
+              "E" => 4,
+              "F" => 5,
+              "H" => 6,
+              "I" => 7,
+            },
+          },
+        }
+      }
+    >
+      <div
+        className="sidebar sidebar-calltree"
+      >
+        <h2>
+          <div
+            className="sidebar-title"
+          >
+            H
+          </div>
+          <div
+            className="sidebar-subtitle"
+          />
+        </h2>
+        <div
+          className="sidebar-details"
+        >
+          <SidebarDetail
+            label="Running Time"
+          >
+            <div
+              className="sidebar-label"
+            >
+              Running Time
+              :
+            </div>
+            1
+            ms
+          </SidebarDetail>
+          <SidebarDetail
+            label="Self Time"
+          >
+            <div
+              className="sidebar-label"
+            >
+              Self Time
+              :
+            </div>
+            —
+          </SidebarDetail>
+        </div>
+      </div>
+    </CallTreeSidebar>
+  </Connect(CallTreeSidebar)>
+</Provider>
+`;
