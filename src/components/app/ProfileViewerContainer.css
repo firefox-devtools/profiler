@@ -4,6 +4,10 @@
   height: 100%;
 }
 
+.ProfileViewerContainer .layout-pane:not(.layout-pane-primary) {
+  max-width: 250px;
+}
+
 /* overriding defaults from splitter-layout */
 .ProfileViewerContainer > .layout-splitter {
   background: var(--grey-10); /* Same background as sidebars */

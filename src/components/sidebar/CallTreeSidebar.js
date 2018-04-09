@@ -44,20 +44,27 @@ class CallTreeSidebar extends React.PureComponent<StateProps> {
     }
 
     const data = tree.getDisplayData(selectedNodeIndex);
+    // `data.selfTime` is a string, containing either a number or, if the value
+    // is 0, is '—'. So we we use isNaN on purpose (instead of Number.isNaN), to
+    // force a conversion and decide whether we should add the unit or keep the
+    // character '—'.
+    // We don't compare against '—' to avoid hardcoded values. In the future we
+    // should have a dedicated method in `tree` to recover the values we need in
+    // the format we need.
+    const selfTime = isNaN(data.selfTime)
+      ? data.selfTime
+      : data.selfTime + 'ms';
     return (
-      <div className="sidebar sidebar-calltree">
-        <h2>
-          <div className="sidebar-title">{getFunctionName(data.name)}</div>
-          <div className="sidebar-subtitle">{data.lib}</div>
-        </h2>
+      <aside className="sidebar sidebar-calltree">
+        <hgroup className="sidebar-titlegroup">
+          <h2 className="sidebar-title">{getFunctionName(data.name)}</h2>
+          <h3 className="sidebar-subtitle">{data.lib}</h3>
+        </hgroup>
         <div className="sidebar-details">
           <SidebarDetail label="Running Time">{data.totalTime}ms</SidebarDetail>
-          <SidebarDetail label="Self Time">
-            {/* Note: using isNaN instead of Number.isNaN on purpose, to force a conversion */
-            isNaN(data.selfTime) ? data.selfTime : data.selfTime + 'ms'}
-          </SidebarDetail>
+          <SidebarDetail label="Self Time">{selfTime}</SidebarDetail>
         </div>
-      </div>
+      </aside>
     );
   }
 }

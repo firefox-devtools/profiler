@@ -22,7 +22,7 @@ describe('app/ProfileViewerContainer', function() {
     E E
   `);
 
-  const tabSlugs = [
+  const tabSlugs: TabSlug[] = [
     'stack-chart',
     'marker-chart',
     'flame-graph',
@@ -43,17 +43,6 @@ describe('app/ProfileViewerContainer', function() {
       store.dispatch(changeSelectedTab(tabSlug));
 
       const view = shallowWithStore(<ProfileViewerContainer />, store);
-      expect(view.dive()).toMatchSnapshot();
-    });
-  });
-
-  it('can move between tabs', () => {
-    const store = storeWithProfile(profile);
-    const view = shallowWithStore(<ProfileViewerContainer />, store);
-
-    tabSlugs.forEach(tabSlug => {
-      store.dispatch(changeSelectedTab(tabSlug));
-      view.update();
       expect(view.dive()).toMatchSnapshot();
     });
   });

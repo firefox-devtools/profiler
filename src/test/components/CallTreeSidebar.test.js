@@ -34,7 +34,7 @@ describe('CallTreeSidebar', function() {
     return { store, funcNamesDict: funcNamesDictPerThread[0], selectNode };
   }
 
-  it('displays interesting data about the currently selected node', () => {
+  it('matches the snapshots when displaying data about the currently selected node', () => {
     const { store, selectNode, funcNamesDict: { A, B, C, D, H } } = setup();
 
     const view = mount(

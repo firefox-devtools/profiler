@@ -1,30 +1,41 @@
 .sidebar {
-  padding: 1em .5em;
+  padding: 1em;
+  overflow-x: hidden;
+
+  font-size: 11px;
   background: var(--grey-10);
 }
 
-.sidebar h2 {
+.sidebar-titlegroup {
   margin: 0 0 1em 0;
-  padding: 0;
+  line-height: 1.2;
 }
 
-.sidebar h2 > * {
+.sidebar-title, .sidebar-subtitle {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+
   overflow-wrap: break-word;
 }
 
+.sidebar-title {
+  font-size: 12px;
+  margin-bottom: .3em;
+}
+
 .sidebar-subtitle {
-  font-weight: normal;
-  font-size: .9em; /* slightly smaller than the title */
+  font-size: inherit; /* reset browser styles */
+  color: var(--grey-50);
 }
 
 .sidebar-details {
-  margin: 0 auto;
-  font-size: 1.2em; /* larger than the rest */
-
   display: grid;
   grid-template-columns: min-content min-content;
   grid-gap: 2px 5px;
   justify-content: center;
+
+  line-height: 1.5;
 }
 
 .sidebar-label {

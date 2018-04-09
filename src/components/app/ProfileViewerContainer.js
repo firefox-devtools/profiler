@@ -38,8 +38,6 @@ function ProfileViewerContainer({ selectedTab }: StateProps) {
     <SplitterLayout
       customClassName="ProfileViewerContainer"
       percentage
-      primaryMinSize={Sidebar ? 0 : 100}
-      secondaryMinSize={10}
       secondaryInitialSize={20}
       onDragEnd={dispatchResizeEvent}
     >

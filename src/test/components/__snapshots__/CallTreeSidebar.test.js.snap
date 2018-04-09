@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CallTreeSidebar displays interesting data about the currently selected node 1`] = `
+exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 1`] = `
 <Provider
   store={
     Object {
@@ -203,7 +203,7 @@ exports[`CallTreeSidebar displays interesting data about the currently selected 
 </Provider>
 `;
 
-exports[`CallTreeSidebar displays interesting data about the currently selected node 2`] = `
+exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 2`] = `
 <Provider
   store={
     Object {
@@ -406,19 +406,21 @@ exports[`CallTreeSidebar displays interesting data about the currently selected 
         }
       }
     >
-      <div
+      <aside
         className="sidebar sidebar-calltree"
       >
-        <h2>
-          <div
+        <hgroup
+          className="sidebar-titlegroup"
+        >
+          <h2
             className="sidebar-title"
           >
             C
-          </div>
-          <div
+          </h2>
+          <h3
             className="sidebar-subtitle"
           />
-        </h2>
+        </hgroup>
         <div
           className="sidebar-details"
         >
@@ -446,13 +448,13 @@ exports[`CallTreeSidebar displays interesting data about the currently selected 
             —
           </SidebarDetail>
         </div>
-      </div>
+      </aside>
     </CallTreeSidebar>
   </Connect(CallTreeSidebar)>
 </Provider>
 `;
 
-exports[`CallTreeSidebar displays interesting data about the currently selected node 3`] = `
+exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 3`] = `
 <Provider
   store={
     Object {
@@ -664,19 +666,21 @@ exports[`CallTreeSidebar displays interesting data about the currently selected 
         }
       }
     >
-      <div
+      <aside
         className="sidebar sidebar-calltree"
       >
-        <h2>
-          <div
+        <hgroup
+          className="sidebar-titlegroup"
+        >
+          <h2
             className="sidebar-title"
           >
             D
-          </div>
-          <div
+          </h2>
+          <h3
             className="sidebar-subtitle"
           />
-        </h2>
+        </hgroup>
         <div
           className="sidebar-details"
         >
@@ -704,13 +708,13 @@ exports[`CallTreeSidebar displays interesting data about the currently selected 
             —
           </SidebarDetail>
         </div>
-      </div>
+      </aside>
     </CallTreeSidebar>
   </Connect(CallTreeSidebar)>
 </Provider>
 `;
 
-exports[`CallTreeSidebar displays interesting data about the currently selected node 4`] = `
+exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 4`] = `
 <Provider
   store={
     Object {
@@ -931,19 +935,21 @@ exports[`CallTreeSidebar displays interesting data about the currently selected 
         }
       }
     >
-      <div
+      <aside
         className="sidebar sidebar-calltree"
       >
-        <h2>
-          <div
+        <hgroup
+          className="sidebar-titlegroup"
+        >
+          <h2
             className="sidebar-title"
           >
             H
-          </div>
-          <div
+          </h2>
+          <h3
             className="sidebar-subtitle"
           />
-        </h2>
+        </hgroup>
         <div
           className="sidebar-details"
         >
@@ -971,7 +977,7 @@ exports[`CallTreeSidebar displays interesting data about the currently selected 
             —
           </SidebarDetail>
         </div>
-      </div>
+      </aside>
     </CallTreeSidebar>
   </Connect(CallTreeSidebar)>
 </Provider>

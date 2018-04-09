@@ -1,91 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/ProfileViewerContainer can move between tabs 1`] = `
-<t
-  customClassName="ProfileViewerContainer"
-  onDragEnd={[Function]}
-  onDragStart={null}
-  onSecondaryPaneSizeChange={null}
-  percentage={true}
-  primaryIndex={0}
-  primaryMinSize={100}
-  secondaryInitialSize={20}
-  secondaryMinSize={10}
-  vertical={false}
->
-  <Connect(ProfileViewer) />
-</t>
-`;
-
-exports[`app/ProfileViewerContainer can move between tabs 2`] = `
-<t
-  customClassName="ProfileViewerContainer"
-  onDragEnd={[Function]}
-  onDragStart={null}
-  onSecondaryPaneSizeChange={null}
-  percentage={true}
-  primaryIndex={0}
-  primaryMinSize={100}
-  secondaryInitialSize={20}
-  secondaryMinSize={10}
-  vertical={false}
->
-  <Connect(ProfileViewer) />
-</t>
-`;
-
-exports[`app/ProfileViewerContainer can move between tabs 3`] = `
-<t
-  customClassName="ProfileViewerContainer"
-  onDragEnd={[Function]}
-  onDragStart={null}
-  onSecondaryPaneSizeChange={null}
-  percentage={true}
-  primaryIndex={0}
-  primaryMinSize={100}
-  secondaryInitialSize={20}
-  secondaryMinSize={10}
-  vertical={false}
->
-  <Connect(ProfileViewer) />
-</t>
-`;
-
-exports[`app/ProfileViewerContainer can move between tabs 4`] = `
-<t
-  customClassName="ProfileViewerContainer"
-  onDragEnd={[Function]}
-  onDragStart={null}
-  onSecondaryPaneSizeChange={null}
-  percentage={true}
-  primaryIndex={0}
-  primaryMinSize={100}
-  secondaryInitialSize={20}
-  secondaryMinSize={10}
-  vertical={false}
->
-  <Connect(ProfileViewer) />
-</t>
-`;
-
-exports[`app/ProfileViewerContainer can move between tabs 5`] = `
-<t
-  customClassName="ProfileViewerContainer"
-  onDragEnd={[Function]}
-  onDragStart={null}
-  onSecondaryPaneSizeChange={null}
-  percentage={true}
-  primaryIndex={0}
-  primaryMinSize={0}
-  secondaryInitialSize={20}
-  secondaryMinSize={10}
-  vertical={false}
->
-  <Connect(ProfileViewer) />
-  <Connect(CallTreeSidebar) />
-</t>
-`;
-
 exports[`app/ProfileViewerContainer renders an initial view 1`] = `
 <t
   customClassName="ProfileViewerContainer"
@@ -96,7 +10,7 @@ exports[`app/ProfileViewerContainer renders an initial view 1`] = `
   primaryIndex={0}
   primaryMinSize={0}
   secondaryInitialSize={20}
-  secondaryMinSize={10}
+  secondaryMinSize={0}
   vertical={false}
 >
   <Connect(ProfileViewer) />
@@ -114,7 +28,7 @@ exports[`app/ProfileViewerContainer renders initial views with tab calltree 1`] 
   primaryIndex={0}
   primaryMinSize={0}
   secondaryInitialSize={20}
-  secondaryMinSize={10}
+  secondaryMinSize={0}
   vertical={false}
 >
   <Connect(ProfileViewer) />
@@ -130,9 +44,9 @@ exports[`app/ProfileViewerContainer renders initial views with tab flame-graph 1
   onSecondaryPaneSizeChange={null}
   percentage={true}
   primaryIndex={0}
-  primaryMinSize={100}
+  primaryMinSize={0}
   secondaryInitialSize={20}
-  secondaryMinSize={10}
+  secondaryMinSize={0}
   vertical={false}
 >
   <Connect(ProfileViewer) />
@@ -147,9 +61,9 @@ exports[`app/ProfileViewerContainer renders initial views with tab marker-chart 
   onSecondaryPaneSizeChange={null}
   percentage={true}
   primaryIndex={0}
-  primaryMinSize={100}
+  primaryMinSize={0}
   secondaryInitialSize={20}
-  secondaryMinSize={10}
+  secondaryMinSize={0}
   vertical={false}
 >
   <Connect(ProfileViewer) />
@@ -164,9 +78,9 @@ exports[`app/ProfileViewerContainer renders initial views with tab marker-table 
   onSecondaryPaneSizeChange={null}
   percentage={true}
   primaryIndex={0}
-  primaryMinSize={100}
+  primaryMinSize={0}
   secondaryInitialSize={20}
-  secondaryMinSize={10}
+  secondaryMinSize={0}
   vertical={false}
 >
   <Connect(ProfileViewer) />
@@ -181,9 +95,9 @@ exports[`app/ProfileViewerContainer renders initial views with tab stack-chart 1
   onSecondaryPaneSizeChange={null}
   percentage={true}
   primaryIndex={0}
-  primaryMinSize={100}
+  primaryMinSize={0}
   secondaryInitialSize={20}
-  secondaryMinSize={10}
+  secondaryMinSize={0}
   vertical={false}
 >
   <Connect(ProfileViewer) />
