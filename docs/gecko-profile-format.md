@@ -8,17 +8,14 @@ The Gecko Profiler can be run on its own by executing the following code from a 
 
 ```js
 (() => {
-  const profiler = Components.classes["@mozilla.org/tools/profiler;1"]
-    .getService(Components.interfaces.nsIProfiler);
-
   const settings = {
     entries: 1000000,
     interval: 0.4,
-    features: ["js", "stackwalk", "threads", "leaf"],
+    features: ["js", "stackwalk", "threads", "privacy", "leaf"],
     threads: ["GeckoMain", "Compositor"]
   };
 
-  profiler.StartProfiler(
+  Services.profiler.StartProfiler(
     settings.entries,
     settings.interval,
     settings.features,
@@ -28,13 +25,13 @@ The Gecko Profiler can be run on its own by executing the following code from a 
   );
 
   setTimeout(() => {
-    profiler.getProfileDataAsync().then(profile => {
+    Services.profiler.getProfileDataAsync().then(profile => {
       for (let i = 0; i < profile.threads.length; i++) {
         const thread = profile.threads[i];
       }
       console.log(profile);
       // Stopping the profiler will delete the data in the buffer.
-      profiler.StopProfiler();
+      Services.profiler.StopProfiler();
     });
   }, 500);
 })();
