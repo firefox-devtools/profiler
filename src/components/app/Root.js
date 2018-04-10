@@ -151,7 +151,6 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
             </div>
           ) : null}
         </div>
-        <FooterLinks />
       </div>
     );
   }
@@ -247,6 +246,7 @@ export default class Root extends PureComponent<RootProps> {
       <Provider store={store}>
         <UrlManager>
           <ProfileViewWhenReady />
+          <FooterLinks />
         </UrlManager>
       </Provider>
     );

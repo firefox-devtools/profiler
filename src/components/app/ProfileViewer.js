@@ -23,7 +23,6 @@ import ProfileViewerHeader from '../header/ProfileViewerHeader';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
-import FooterLinks from './FooterLinks';
 import { toValidTabSlug } from '../../utils/flow';
 import { getHasZipFile } from '../../reducers/zipped-profiles';
 
@@ -138,7 +137,6 @@ class ProfileViewer extends PureComponent<Props> {
         <CallNodeContextMenu />
         <MarkerTableContextMenu />
         <ProfileThreadHeaderContextMenu />
-        <FooterLinks />
       </div>
     );
   }
