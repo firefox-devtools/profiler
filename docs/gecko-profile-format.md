@@ -11,7 +11,7 @@ The Gecko Profiler can be run on its own by executing the following code from a 
   const settings = {
     entries: 1000000,
     interval: 0.4,
-    features: ["js", "stackwalk", "threads", "privacy", "leaf"],
+    features: ["js", "stackwalk", "threads", "leaf"],
     threads: ["GeckoMain", "Compositor"]
   };
 
