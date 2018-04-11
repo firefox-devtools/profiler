@@ -121,23 +121,70 @@ function _makePhaseTimesArray(
  * sweeping.sweep
  *
  * Then marking.mark_roots, marking.mark_heap.a, sweeping.sweep are the only
- * leaves.  We select these since they will the person looking at the
+ * leaves.  We select these since they will give the person looking at the
  * profile the best clue about which (sub-)phases are taking the longest.
  * For example, it isn't useful to say "sweeping took 200ms" but it is
  * useful to say "sweeping.compacting took 20ms" (if compacting has no
  * sub-phases.
+ *
+ * We find leaf phases by constructing a tree of phase times and then
+ * reading its leaves.
  */
-function _isLeafPhase(
-  phaseName: string,
-  phases: Array<PhaseTimeTuple>
-): boolean {
-  return phases.every(
-    pt =>
-      // This phase is not the start of some other phase
-      !pt.name.startsWith(phaseName) ||
-      // Except itself.
-      pt.name === phaseName
-  );
+
+type PhaseTreeNode = {|
+  value?: PhaseTimeTuple,
+  branches: Map<string, PhaseTreeNode>,
+|};
+
+function _treeInsert(
+  tree: Map<string, PhaseTreeNode>,
+  path: Array<string>,
+  phase: PhaseTimeTuple
+) {
+  const component = path.shift();
+  if (component === undefined) {
+    // This path is not a leaf, it can be ignored.
+  } else {
+    const node = tree.get(component);
+    if (node) {
+      if (node.value) {
+        // Is a leaf
+        if (path.length > 0) {
+          // There are more path components, we need to convert this node
+          // into a branch and keep going.  We delete the value to change
+          // this node from a leaf to a branch.
+          delete node.value;
+        } else {
+          // Duplicate leaves.
+          throw new Error('Duplicate phases');
+        }
+      }
+      _treeInsert(node.branches, path, phase);
+    } else {
+      if (path.length === 0) {
+        const leafNode = { value: phase, branches: new Map() };
+        tree.set(component, leafNode);
+      } else {
+        const branchNode = { branches: new Map() };
+        tree.set(component, branchNode);
+        _treeInsert(branchNode.branches, path, phase);
+      }
+    }
+  }
+}
+
+function _treeGetLeaves(
+  tree: Map<string, PhaseTreeNode>
+): Array<PhaseTimeTuple> {
+  const leaves = [];
+  for (const node of tree.values()) {
+    if (node.value) {
+      leaves.push(node.value);
+    } else {
+      leaves.push(..._treeGetLeaves(node.branches));
+    }
+  }
+  return leaves;
 }
 
 function _filterInterestingPhaseTimes(
@@ -147,11 +194,14 @@ function _filterInterestingPhaseTimes(
   let phaseTimes = _makePhaseTimesArray(rawPhases);
 
   /*
-   * Select only the leaf phases.  This is quadratic since _isLeafPhase also
-   * iterates over all the phases.  The highest number of phases is about
-   * 60, maybe 65, so hopefully this doesn't cause a problem.
+   * Select only the leaf phases.
    */
-  phaseTimes = phaseTimes.filter(pt => _isLeafPhase(pt.name, phaseTimes));
+  const tree = new Map();
+  for (const phase of phaseTimes) {
+    const components = phase.name.split('.');
+    _treeInsert(tree, components, phase);
+  }
+  phaseTimes = _treeGetLeaves(tree);
 
   /*
    * Of those N leaf phases, select the M most interesting phases by
@@ -161,10 +211,11 @@ function _filterInterestingPhaseTimes(
    * order, then slicing off all the low items and looking at the first
    * item.
    */
-  const threshold = phaseTimes
+  const sortedPhaseTimes = phaseTimes
     .map(pt => pt.time)
-    .sort((a, b) => Number(a) - Number(b))
-    .slice(0 - numSelect)[0];
+    // Descending order
+    .sort((a, b) => b - a);
+  const threshold = sortedPhaseTimes[numSelect];
 
   /*
    * And then filtering the original list, which is in execution order which
