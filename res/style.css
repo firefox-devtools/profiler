@@ -169,26 +169,23 @@ body, #root, .profileViewer {
 
 .treeViewAppendageColumn {
   margin-left: 10px;
-  color: #999;
+  opacity: 0.6;
 }
 
-.treeViewRow.even, .treeViewRow.even > .treeViewFixedColumn {
+.treeViewRow.even {
   background-color: #FFFFFF;
 }
-.treeViewRow.odd, .treeViewRow.odd > .treeViewFixedColumn {
+.treeViewRow.odd {
   background-color: #F5F5F5;
 }
-.treeViewRow.selected,
-.treeViewRow.selected > .treeViewFixedColumn {
+.treeViewRow.selected {
   background-color: -moz-dialog;
   color: black;
 }
 .treeViewRow.dim > .treeViewMainColumn {
-  color: #aaa;
+  opacity: 0.7
 }
-.treeViewBody:focus > * > * > * > .treeViewRow.selected,
-.treeViewBody:focus > * > * > * > .treeViewRow.selected a,
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeViewFixedColumn {
+.treeViewBody:focus .treeViewRow.selected {
   background-color: highlight;
   color: highlighttext;
 }
