@@ -97,8 +97,8 @@ export function getMarkerTiming(
 
       // Since the markers are sorted, look at the last added marker in this row. If
       // the new marker fits, go ahead and insert it.
-      const otherEnd = markerTimingsRow.end[markerTimingsRow.length - 1] || 0;
-      if (otherEnd <= marker.start) {
+      const otherEnd = markerTimingsRow.end[markerTimingsRow.length - 1];
+      if (otherEnd === undefined || otherEnd <= marker.start) {
         markerTimingsRow.start.push(marker.start);
         markerTimingsRow.end.push(marker.start + marker.dur);
         markerTimingsRow.label.push(computeMarkerLabel(marker.data));
