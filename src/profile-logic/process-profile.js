@@ -727,10 +727,10 @@ function _adjustMarkerTimestamps(
         return data;
       }
       const newData = immutableUpdate(data);
-      if ('startTime' in newData) {
+      if (typeof newData.startTime === 'number') {
         newData.startTime += delta;
       }
-      if ('endTime' in newData) {
+      if (typeof newData.endTime === 'number') {
         newData.endTime += delta;
       }
       if (newData.type === 'DOMEvent' && 'timeStamp' in newData) {

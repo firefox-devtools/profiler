@@ -182,54 +182,44 @@ describe('process-profile', function() {
       }
     });
     it('should shift the content process by 1 second', function() {
-      // Should be Content, but modified by workaround for bug 1322471.
-      expect(profile.threads[2].name).toEqual('GeckoMain');
+      const thread0 = profile.threads[0];
+      const thread2 = profile.threads[2];
 
-      expect(profile.threads[0].samples.time[0]).toEqual(0);
-      expect(profile.threads[0].samples.time[1]).toEqual(1);
+      // Should be Content, but modified by workaround for bug 1322471.
+      expect(thread2.name).toEqual('GeckoMain');
+
+      expect(thread0.samples.time[0]).toEqual(0);
+      expect(thread0.samples.time[1]).toEqual(1);
 
       // 1 second later than the same samples in the main process because the
       // content process' start time is 1s later.
-      expect(profile.threads[2].samples.time[0]).toEqual(1000);
-      expect(profile.threads[2].samples.time[1]).toEqual(1001);
+      expect(thread2.samples.time[0]).toEqual(1000);
+      expect(thread2.samples.time[1]).toEqual(1001);
 
       // Now about markers
-      expect(profile.threads[0].markers.time[0]).toEqual(1);
-      expect(profile.threads[0].markers.time[1]).toEqual(2);
-      expect(profile.threads[0].markers.time[2]).toEqual(3);
-      expect(profile.threads[0].markers.time[3]).toEqual(4);
-      expect(profile.threads[0].markers.time[4]).toEqual(5);
-      expect(
-        profile.threads[0].markers.data[6]
-          ? profile.threads[0].markers.data[6].startTime
-          : null
-      ).toEqual(9);
-      expect(
-        profile.threads[0].markers.data[6]
-          ? profile.threads[0].markers.data[6].endTime
-          : null
-      ).toEqual(10);
+      expect(thread0.markers.time[0]).toEqual(1);
+      expect(thread0.markers.time[1]).toEqual(2);
+      expect(thread0.markers.time[2]).toEqual(3);
+      expect(thread0.markers.time[3]).toEqual(4);
+      expect(thread0.markers.time[4]).toEqual(5);
+
+      let data = thread0.markers.data[6];
+      expect(data && data.startTime ? data.startTime : null).toEqual(9);
+      expect(data && data.endTime ? data.endTime : null).toEqual(10);
 
       // 1 second later than the same markers in the main process.
-      expect(profile.threads[2].markers.time[0]).toEqual(1001);
-      expect(profile.threads[2].markers.time[1]).toEqual(1002);
-      expect(profile.threads[2].markers.time[2]).toEqual(1003);
-      expect(profile.threads[2].markers.time[3]).toEqual(1004);
-      expect(profile.threads[2].markers.time[4]).toEqual(1005);
+      expect(thread2.markers.time[0]).toEqual(1001);
+      expect(thread2.markers.time[1]).toEqual(1002);
+      expect(thread2.markers.time[2]).toEqual(1003);
+      expect(thread2.markers.time[3]).toEqual(1004);
+      expect(thread2.markers.time[4]).toEqual(1005);
+
+      data = thread2.markers.data[6];
+      expect(data && data.startTime ? data.startTime : null).toEqual(1009);
+      expect(data && data.endTime ? data.endTime : null).toEqual(1010);
       expect(
-        profile.threads[2].markers.data[6]
-          ? profile.threads[2].markers.data[6].startTime
-          : null
-      ).toEqual(1009);
-      expect(
-        profile.threads[2].markers.data[6]
-          ? profile.threads[2].markers.data[6].endTime
-          : null
-      ).toEqual(1010);
-      expect(
-        profile.threads[2].markers.data[6] &&
-        profile.threads[2].markers.data[6].type === 'DOMEvent'
-          ? profile.threads[2].markers.data[6].timeStamp
+        thread2.markers.data[6] && thread2.markers.data[6].type === 'DOMEvent'
+          ? thread2.markers.data[6].timeStamp
           : null
       ).toEqual(1001);
       // TODO: also shift the samples inside marker callstacks
