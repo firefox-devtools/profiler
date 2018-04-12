@@ -1,0 +1,45 @@
+.sidebar {
+  padding: 1em;
+  overflow-x: hidden;
+
+  font-size: 11px;
+  background: var(--grey-10);
+}
+
+.sidebar-titlegroup {
+  margin: 0 0 1em 0;
+  line-height: 1.2;
+}
+
+.sidebar-title, .sidebar-subtitle {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+
+  overflow-wrap: break-word;
+}
+
+.sidebar-title {
+  font-size: 12px;
+  margin-bottom: .3em;
+}
+
+.sidebar-subtitle {
+  font-size: inherit; /* reset browser styles */
+  color: var(--grey-50);
+}
+
+.sidebar-details {
+  display: grid;
+  grid-template-columns: min-content min-content;
+  grid-gap: 2px 5px;
+  justify-content: center;
+
+  line-height: 1.5;
+}
+
+.sidebar-label {
+  color: var(--grey-50);
+  white-space: nowrap;
+  text-align: right;
+}

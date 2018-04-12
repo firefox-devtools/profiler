@@ -141,7 +141,7 @@ export function getEmptyThread(overrides: ?Object): Thread {
  * Example usage:
  *
  * ```
- * const profile = getProfileFromTextSamples(`
+ * const { profile } = getProfileFromTextSamples(`
  *   A       A        A     A
  *   B.js    B.js     F     F
  *   C.js    C.js     G     G
@@ -153,12 +153,37 @@ export function getEmptyThread(overrides: ?Object): Thread {
  * The function names are aligned vertically on the left. This would produce 4 samples
  * with the stacks based off of those functions listed, with A being the root. Whitespace
  * is trimmed.
+ *
+ * The function returns more information as well, that is:
+ * * an array mapping the func indices (IndexIntoFuncTable) to their names
+ * * an array mapping the func names to their indices
+ *
+ * This can be useful when using it like this:
+ * ```
+ * const {
+ *   profile,
+ *   funcNamesDictPerThread: [{ A, B, C, D }],
+ * } = getProfileFromTextSamples(`
+ *    A A
+ *    B B
+ *    C C
+ *    D D
+ *    E F
+ *  `);
+ * ```
+ * Now the variables named A B C D directly refer to the func indices and can be
+ * used in tests.
  */
 export function getProfileFromTextSamples(
   ...allTextSamples: string[]
-): { profile: Profile, funcNamesPerThread: Array<string[]> } {
+): {
+  profile: Profile,
+  funcNamesPerThread: Array<string[]>,
+  funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
+} {
   const profile = getEmptyProfile();
   const funcNamesPerThread = [];
+  const funcNamesDictPerThread = [];
 
   profile.threads = allTextSamples.map(textSamples => {
     // Process the text.
@@ -168,13 +193,18 @@ export function getProfileFromTextSamples(
       .reduce((memo, row) => [...memo, ...row], [])
       // Make the list unique.
       .filter((item, index, array) => array.indexOf(item) === index);
+    const funcNamesDict = funcNames.reduce((result, item, index) => {
+      result[item] = index;
+      return result;
+    }, {});
     funcNamesPerThread.push(funcNames);
+    funcNamesDictPerThread.push(funcNamesDict);
 
     // Turn this into a real thread.
     return _buildThreadFromTextOnlyStacks(textOnlyStacks, funcNames);
   });
 
-  return { profile, funcNamesPerThread };
+  return { profile, funcNamesPerThread, funcNamesDictPerThread };
 }
 
 /**

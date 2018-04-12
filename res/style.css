@@ -13,8 +13,11 @@ html, body {
 
 body, #root, .profileViewer {
   display: flex;
-  flex-flow: column nowrap;
   flex: 1;
+}
+
+.profileViewer {
+  flex-flow: column nowrap;
 }
 
 :root {
