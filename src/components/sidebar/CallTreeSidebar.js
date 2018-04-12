@@ -56,10 +56,10 @@ class CallTreeSidebar extends React.PureComponent<StateProps> {
       : data.selfTime + 'ms';
     return (
       <aside className="sidebar sidebar-calltree">
-        <hgroup className="sidebar-titlegroup">
+        <header className="sidebar-titlegroup">
           <h2 className="sidebar-title">{getFunctionName(data.name)}</h2>
-          <h3 className="sidebar-subtitle">{data.lib}</h3>
-        </hgroup>
+          <p className="sidebar-subtitle">{data.lib}</p>
+        </header>
         <div className="sidebar-details">
           <SidebarDetail label="Running Time">{data.totalTime}ms</SidebarDetail>
           <SidebarDetail label="Self Time">{selfTime}</SidebarDetail>

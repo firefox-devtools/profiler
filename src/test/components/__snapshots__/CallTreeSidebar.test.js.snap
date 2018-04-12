@@ -409,7 +409,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <aside
         className="sidebar sidebar-calltree"
       >
-        <hgroup
+        <header
           className="sidebar-titlegroup"
         >
           <h2
@@ -417,10 +417,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
           >
             C
           </h2>
-          <h3
+          <p
             className="sidebar-subtitle"
           />
-        </hgroup>
+        </header>
         <div
           className="sidebar-details"
         >
@@ -669,7 +669,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <aside
         className="sidebar sidebar-calltree"
       >
-        <hgroup
+        <header
           className="sidebar-titlegroup"
         >
           <h2
@@ -677,10 +677,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
           >
             D
           </h2>
-          <h3
+          <p
             className="sidebar-subtitle"
           />
-        </hgroup>
+        </header>
         <div
           className="sidebar-details"
         >
@@ -938,7 +938,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <aside
         className="sidebar sidebar-calltree"
       >
-        <hgroup
+        <header
           className="sidebar-titlegroup"
         >
           <h2
@@ -946,10 +946,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
           >
             H
           </h2>
-          <h3
+          <p
             className="sidebar-subtitle"
           />
-        </hgroup>
+        </header>
         <div
           className="sidebar-details"
         >
