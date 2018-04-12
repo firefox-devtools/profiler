@@ -14,7 +14,6 @@ exports[`app/ProfileViewerContainer renders an initial view 1`] = `
   vertical={false}
 >
   <Connect(ProfileViewer) />
-  <Connect(CallTreeSidebar) />
 </t>
 `;
 
@@ -32,7 +31,6 @@ exports[`app/ProfileViewerContainer renders initial views with tab calltree 1`] 
   vertical={false}
 >
   <Connect(ProfileViewer) />
-  <Connect(CallTreeSidebar) />
 </t>
 `;
 

@@ -3,7 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import CallTreeSidebar from './CallTreeSidebar';
+// Disabling the call tree's sidebar until it's useful
+// https://github.com/devtools-html/perf.html/issues/914
+// import CallTreeSidebar from './CallTreeSidebar';
 
 import type { TabSlug } from '../../types/actions';
 
@@ -13,7 +15,8 @@ export default function selectSidebar(
   selectedTab: TabSlug
 ): React.ComponentType<{||}> | null {
   return {
-    calltree: CallTreeSidebar,
+    // calltree: CallTreeSidebar,
+    calltree: null,
     'marker-table': null,
     'stack-chart': null,
     'marker-chart': null,
