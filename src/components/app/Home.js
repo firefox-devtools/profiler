@@ -11,7 +11,6 @@ import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2018-01-18.p
 import PerfScreenshot from '../../../res/perf-screenshot-2017-09-08.jpg';
 import { retrieveProfileFromFile } from '../../actions/receive-profile';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import FooterLinks from './FooterLinks';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
@@ -381,7 +380,6 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             <div className="homeDropMessage">Drop a saved profile here</div>
           </div>
         </section>
-        <FooterLinks />
       </div>
     );
   }

@@ -1,0 +1,32 @@
+# Headers for the entire site. The /* represents matching all routes, NOT a comment.
+
+/*
+  # Do not try to guess the content-type for JS and CSS files served with a wrong mime-type.
+  X-Content-Type-Options: nosniff
+
+  # This is specific to Safari, Chrome and Internet Explorer, to provide some XSS
+  # Protection for versions that do not support CSP yet.
+  X-XSS-Protection: 1; mode=block
+
+  # Do not allow being embedded in a frame.
+  X-Frame-Options: SAMEORIGIN
+
+  # Do not give the referrer for external navigations.
+  Referrer-Policy: same-origin
+
+  # 1. script-src
+  #   a. The first hash is for the addon's content.js file being injected
+  #      with WebExt's tabs.executeScript API.
+  #   b. The second hash is for the addon's content-home.js being injected from
+  #      the addon's manifest.json.
+  #   You can generate these hashes using the website
+  #   https://report-uri.io/home/hash after grabbing the script from the Inspector.
+  #   NOTE: you can't use the script file directly as the API modifies it before injecting.
+  #   c. We use Google Analytics to track the usage of the application.
+  # 2. `unsafe-inline` in `style-src` is necessary to support favicons.
+  # 3. Same for `*` in `img-src`.
+  # 4. `object-src` is for plugins, we don't need them.
+  # 5. `connect-src` is `*` to support `from-url`. We also do requests to bitly to shorten URLs.
+  # 6. `frame-ancestors` is the same purpose as `X-Frame-Options` above.
+  # 7. `form-action`prevents forms, we don't need this.`
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw=' 'sha256-AdiT28wTL5FNaRVHWQVFC0ic3E20Gu4/PiC9xukS9+E=' https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src *; object-src 'none'; connect-src *; frame-ancestors 'self'; form-action 'none'
