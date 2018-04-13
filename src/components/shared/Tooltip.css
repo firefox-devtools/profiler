@@ -11,7 +11,7 @@
   display: inline-block;
   padding: 5px;
   border: 1px solid #ccc;
-  background-color: #f9f9f9;
+  background-color: var(--grey-10);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   text-align: left;
   overflow: hidden;
@@ -60,13 +60,13 @@
 }
 
 .tooltipLabel {
-  color: #666;
+  color: var(--grey-50);
   white-space: nowrap;
   text-align: right;
 }
 
 .tooltipBackTraceTitle {
-  color: #666;
+  color: var(--grey-50);
   font-weight: normal;
   margin: 0;
   font-size: 100%;

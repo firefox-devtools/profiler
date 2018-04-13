@@ -159,7 +159,7 @@ function viewportNeedsUpdate(
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
     return {
-      thread: selectedThreadSelectors.getThread(state),
+      thread: selectedThreadSelectors.getFilteredThread(state),
       maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
         state
       ),

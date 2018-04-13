@@ -108,43 +108,6 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
       </div>
     </div>
   </section>
-  <div
-    className="appFooterLinks"
-  >
-    <button
-      aria-label="Hide links to legal information"
-      className="appFooterLinksClose"
-      onClick={[Function]}
-      title="Hide links to legal information"
-      type="button"
-    >
-      ✕
-    </button>
-    <a
-      className="appFooterLinksLink"
-      href="https://www.mozilla.org/about/legal/terms/mozilla"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      Legal
-    </a>
-    <a
-      className="appFooterLinksLink"
-      href="https://www.mozilla.org/privacy/websites"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      Privacy
-    </a>
-    <a
-      className="appFooterLinksLink"
-      href="https://www.mozilla.org/privacy/websites/#cookies"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      Cookies
-    </a>
-  </div>
 </div>
 `;
 
@@ -264,43 +227,6 @@ exports[`app/Home renders the install screen for the extension 1`] = `
       </div>
     </div>
   </section>
-  <div
-    className="appFooterLinks"
-  >
-    <button
-      aria-label="Hide links to legal information"
-      className="appFooterLinksClose"
-      onClick={[Function]}
-      title="Hide links to legal information"
-      type="button"
-    >
-      ✕
-    </button>
-    <a
-      className="appFooterLinksLink"
-      href="https://www.mozilla.org/about/legal/terms/mozilla"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      Legal
-    </a>
-    <a
-      className="appFooterLinksLink"
-      href="https://www.mozilla.org/privacy/websites"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      Privacy
-    </a>
-    <a
-      className="appFooterLinksLink"
-      href="https://www.mozilla.org/privacy/websites/#cookies"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      Cookies
-    </a>
-  </div>
 </div>
 `;
 
@@ -454,43 +380,6 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
       </div>
     </div>
   </section>
-  <div
-    className="appFooterLinks"
-  >
-    <button
-      aria-label="Hide links to legal information"
-      className="appFooterLinksClose"
-      onClick={[Function]}
-      title="Hide links to legal information"
-      type="button"
-    >
-      ✕
-    </button>
-    <a
-      className="appFooterLinksLink"
-      href="https://www.mozilla.org/about/legal/terms/mozilla"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      Legal
-    </a>
-    <a
-      className="appFooterLinksLink"
-      href="https://www.mozilla.org/privacy/websites"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      Privacy
-    </a>
-    <a
-      className="appFooterLinksLink"
-      href="https://www.mozilla.org/privacy/websites/#cookies"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      Cookies
-    </a>
-  </div>
 </div>
 `;
 
@@ -628,42 +517,5 @@ exports[`app/Home renders the usage instructions for pages with the extension in
       </div>
     </div>
   </section>
-  <div
-    className="appFooterLinks"
-  >
-    <button
-      aria-label="Hide links to legal information"
-      className="appFooterLinksClose"
-      onClick={[Function]}
-      title="Hide links to legal information"
-      type="button"
-    >
-      ✕
-    </button>
-    <a
-      className="appFooterLinksLink"
-      href="https://www.mozilla.org/about/legal/terms/mozilla"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      Legal
-    </a>
-    <a
-      className="appFooterLinksLink"
-      href="https://www.mozilla.org/privacy/websites"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      Privacy
-    </a>
-    <a
-      className="appFooterLinksLink"
-      href="https://www.mozilla.org/privacy/websites/#cookies"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
-      Cookies
-    </a>
-  </div>
 </div>
 `;
