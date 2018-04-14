@@ -105,16 +105,24 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     }
   }
 
-  _onMouseMove(event: SyntheticMouseEvent<>) {
+  _hoveredItemFromMouseEvent(event: SyntheticMouseEvent<>): HoveredItem | null {
     if (!this._canvas) {
-      return;
+      throw new Error('Canvas ref not set');
     }
 
     const rect = this._canvas.getBoundingClientRect();
     const x: CssPixels = event.pageX - rect.left;
     const y: CssPixels = event.pageY - rect.top;
 
-    const maybeHoveredItem = this.props.hitTest(x, y);
+    return this.props.hitTest(x, y);
+  }
+
+  _onMouseMove(event: SyntheticMouseEvent<>) {
+    if (!this._canvas) {
+      return;
+    }
+
+    const maybeHoveredItem = this._hoveredItemFromMouseEvent(event);
 
     if (maybeHoveredItem !== null) {
       this.setState({
@@ -135,8 +143,18 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     }
   }
 
-  _onDoubleClick() {
-    this.props.onDoubleClickItem(this.state.hoveredItem);
+  _onDoubleClick(event: SyntheticMouseEvent<>) {
+    if (!this._canvas) {
+      return;
+    }
+
+    // The mouseDownListener in the Viewport triggers state updates
+    // which in turn causes componentWillReceiveProps in this
+    // component to clear the hovered item.  Thus, at the time when
+    // this event handler is called, `this.state.hoveredItem` is null.
+    // Obtain the hovered item from the mouse event instead.
+    const maybeHoveredItem = this._hoveredItemFromMouseEvent(event);
+    this.props.onDoubleClickItem(maybeHoveredItem);
   }
 
   _getHoveredItemInfo(): React.Node {
