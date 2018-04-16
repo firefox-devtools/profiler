@@ -26,13 +26,13 @@ export type CauseBacktrace = {
 };
 
 /**
- * These markers have a start and end time.
+ * These markers don't have a start and end time. They work in pairs, one
+ * specifying the start, the other specifying the end of a specific tracing
+ * marker.
  */
 export type PaintProfilerMarkerTracing_Gecko = {
   type: 'tracing',
   category: 'Paint',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
   stack?: GeckoMarkerStack,
   interval: 'start' | 'end',
 };
@@ -40,8 +40,6 @@ export type PaintProfilerMarkerTracing_Gecko = {
 export type PaintProfilerMarkerTracing = {
   type: 'tracing',
   category: 'Paint',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
   cause?: CauseBacktrace,
   interval: 'start' | 'end',
 };
