@@ -42,7 +42,9 @@ const PrivacyNotice = () => (
     >{`You’re about to upload your profile publicly where anyone will be able to access it.
       To better diagnose performance problems profiles include the following information:`}</p>
     <ul>
-      <li>{'The URLs and scripts of the tabs that were executing.'}</li>
+      <li>
+        {'The URLs of all network requests, painted tabs, and running scripts.'}
+      </li>
       <li>{'The metadata of all your add-ons to identify slow add-ons.'}</li>
       <li>{'Firefox build and runtime configuration.'}</li>
     </ul>
