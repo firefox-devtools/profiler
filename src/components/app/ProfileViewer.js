@@ -23,7 +23,6 @@ import ProfileViewerHeader from '../header/ProfileViewerHeader';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
-import FooterLinks from './FooterLinks';
 import { toValidTabSlug } from '../../utils/flow';
 import { getHasZipFile } from '../../reducers/zipped-profiles';
 
@@ -32,12 +31,13 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
+import type { TabSlug } from '../../types/actions';
 
 require('./ProfileViewer.css');
 
 type StateProps = {|
   +tabOrder: number[],
-  +selectedTab: string,
+  +selectedTab: TabSlug,
   +profileName: string | null,
   +hasZipFile: boolean,
 |};
@@ -137,7 +137,6 @@ class ProfileViewer extends PureComponent<Props> {
         <CallNodeContextMenu />
         <MarkerTableContextMenu />
         <ProfileThreadHeaderContextMenu />
-        <FooterLinks />
       </div>
     );
   }
