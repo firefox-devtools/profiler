@@ -47,7 +47,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
               </p>
               <ul>
                 <li>
-                  The URLs and scripts of the tabs that were executing.
+                  The URLs of all network requests, painted tabs, and running scripts.
                 </li>
                 <li>
                   The metadata of all your add-ons to identify slow add-ons.
@@ -276,7 +276,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
               </p>
               <ul>
                 <li>
-                  The URLs and scripts of the tabs that were executing.
+                  The URLs of all network requests, painted tabs, and running scripts.
                 </li>
                 <li>
                   The metadata of all your add-ons to identify slow add-ons.

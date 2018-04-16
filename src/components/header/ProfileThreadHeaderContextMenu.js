@@ -85,7 +85,7 @@ class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
 
     return (
       <ContextMenu id={'ProfileThreadHeaderContextMenu'}>
-        {
+        {threads.length <= 1 ? null : (
           <div>
             <MenuItem
               onClick={this._isolateThread}
@@ -95,7 +95,7 @@ class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
             </MenuItem>
             <div className="react-contextmenu-separator" />
           </div>
-        }
+        )}
         {threadOrder.map(threadIndex => {
           const isHidden = hiddenThreads.includes(threadIndex);
           return (
