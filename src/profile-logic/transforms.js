@@ -256,14 +256,8 @@ export function stringifyTransforms(transforms: TransformStack = []): string {
         case 'merge-function':
         case 'drop-function':
         case 'collapse-function-subtree':
+        case 'focus-function':
           return `${shortKey}-${transform.funcIndex}`;
-        case 'focus-function': {
-          let string = `${shortKey}-${transform.funcIndex}`;
-          if (transform.inverted) {
-            string += '-i';
-          }
-          return string;
-        }
         case 'collapse-resource':
           return `${shortKey}-${transform.implementation}-${
             transform.resourceIndex
@@ -297,7 +291,7 @@ export function getTransformLabels(
   transforms: Transform[]
 ) {
   const { funcTable, libs, stringTable, resourceTable } = thread;
-  const labels = transforms.map(transform => {
+  const labels: string[] = transforms.map(transform => {
     // Lookup library information.
     if (transform.type === 'collapse-resource') {
       const libIndex = resourceTable.lib[transform.resourceIndex];
