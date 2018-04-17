@@ -153,7 +153,10 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     // component to clear the hovered item.  Thus, at the time when
     // this event handler is called, `this.state.hoveredItem` is null.
     // Obtain the hovered item from the mouse event instead.
-    const maybeHoveredItem = this._hoveredItemFromMouseEvent(event);
+    const maybeHoveredItem =
+      this.state.hoveredItem === null
+        ? this._hoveredItemFromMouseEvent(event)
+        : this.state.hoveredItem;
     this.props.onDoubleClickItem(maybeHoveredItem);
   }
 
