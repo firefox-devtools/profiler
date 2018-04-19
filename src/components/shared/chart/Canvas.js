@@ -99,10 +99,28 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     }
   }
 
-  _onMouseDown() {
-    if (this.props.onMouseDown !== undefined) {
-      this.props.onMouseDown(this.state.hoveredItem);
+  _hoveredItemFromMouseEvent(event: SyntheticMouseEvent<>): HoveredItem | null {
+    if (!this._canvas) {
+      throw new Error('Canvas ref not set');
     }
+
+    const rect = this._canvas.getBoundingClientRect();
+    const x: CssPixels = event.pageX - rect.left;
+    const y: CssPixels = event.pageY - rect.top;
+
+    return this.props.hitTest(x, y);
+  }
+
+  _onMouseDown(event: SyntheticMouseEvent<>) {
+    if (!this._canvas || !this.props.onMouseDown) {
+      return;
+    }
+
+    const maybeHoveredItem =
+      this.state.hoveredItem === null
+        ? this._hoveredItemFromMouseEvent(event)
+        : this.state.hoveredItem;
+    this.props.onMouseDown(maybeHoveredItem);
   }
 
   _onMouseMove(event: SyntheticMouseEvent<>) {
@@ -110,11 +128,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       return;
     }
 
-    const rect = this._canvas.getBoundingClientRect();
-    const x: CssPixels = event.pageX - rect.left;
-    const y: CssPixels = event.pageY - rect.top;
-
-    const maybeHoveredItem = this.props.hitTest(x, y);
+    const maybeHoveredItem = this._hoveredItemFromMouseEvent(event);
 
     if (maybeHoveredItem !== null) {
       this.setState({
@@ -135,8 +149,16 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     }
   }
 
-  _onDoubleClick() {
-    this.props.onDoubleClickItem(this.state.hoveredItem);
+  _onDoubleClick(event: SyntheticMouseEvent<>) {
+    if (!this._canvas) {
+      return;
+    }
+
+    const maybeHoveredItem =
+      this.state.hoveredItem === null
+        ? this._hoveredItemFromMouseEvent(event)
+        : this.state.hoveredItem;
+    this.props.onDoubleClickItem(maybeHoveredItem);
   }
 
   _getHoveredItemInfo(): React.Node {

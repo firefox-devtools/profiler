@@ -76,6 +76,48 @@ describe('selectors/getMarkerTiming', function() {
       expect(markerTiming[1].name).toBe('Marker Name B');
     });
   });
+
+  describe('markers that are crossing the profile start or end', function() {
+    it('renders properly markers starting before profile start', function() {
+      const markerTiming = getMarkerTiming([
+        [
+          'Rasterize',
+          1,
+          { category: 'Paint', interval: 'end', type: 'tracing' },
+        ],
+      ]);
+      expect(markerTiming).toEqual([
+        {
+          name: 'Rasterize',
+          start: [-1],
+          end: [1],
+          index: [0],
+          label: [''],
+          length: 1,
+        },
+      ]);
+    });
+
+    it('renders properly markers ending after profile end', function() {
+      const markerTiming = getMarkerTiming([
+        [
+          'Rasterize',
+          20,
+          { category: 'Paint', interval: 'start', type: 'tracing' },
+        ],
+      ]);
+      expect(markerTiming).toEqual([
+        {
+          name: 'Rasterize',
+          start: [20],
+          end: [Infinity],
+          index: [0],
+          label: [''],
+          length: 1,
+        },
+      ]);
+    });
+  });
 });
 
 describe('getProcessedMarkersThread', function() {

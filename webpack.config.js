@@ -61,7 +61,6 @@ const config = {
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
     }),
-    new webpack.optimize.ModuleConcatenationPlugin(),
     new HtmlWebpackPlugin({
       title: 'perf.html',
       template: 'res/index.html',
@@ -90,6 +89,7 @@ if (process.env.NODE_ENV === 'development') {
 
 if (process.env.NODE_ENV === 'production') {
   config.plugins.push(
+    new webpack.optimize.ModuleConcatenationPlugin(),
     new UglifyJsPlugin({
       sourceMap: true,
       parallel: true,
