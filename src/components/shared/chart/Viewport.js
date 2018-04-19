@@ -392,11 +392,6 @@ export const withChartViewport: WithChartViewport<*, *> =
       }
 
       _mouseDownListener(event: SyntheticMouseEvent<>) {
-        this.setState({
-          dragX: event.clientX,
-          dragY: event.clientY,
-          isDragging: true,
-        });
         event.stopPropagation();
         event.preventDefault();
 
@@ -408,13 +403,19 @@ export const withChartViewport: WithChartViewport<*, *> =
         event.stopPropagation();
         event.preventDefault();
 
-        const { dragX, dragY } = this.state;
+        let { dragX, dragY } = this.state;
+        if (!this.state.isDragging) {
+          dragX = event.clientX;
+          dragY = event.clientY;
+        }
+
         const offsetX = event.clientX - dragX;
         const offsetY = event.clientY - dragY;
 
         this.setState({
           dragX: event.clientX,
           dragY: event.clientY,
+          isDragging: true,
         });
 
         this.moveViewport(offsetX, offsetY);
