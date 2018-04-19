@@ -6,15 +6,11 @@ import { stripIndent } from 'common-tags';
 import type { GetState } from '../types/store';
 import { getProfile, selectedThreadSelectors } from '../reducers/profile-view';
 
-// Provide a bit of typing hinting. Flow doesn't understand the dynamic nature of
-// Object.defineProperty and has no definitions around it.
-type DefineGetProperty<T> = (
-  object: Object,
-  key: string,
-  {
-    +get: () => T,
-  }
-) => void;
+// Despite providing a good libdef for Object.defineProperty, Flow still
+// special-cases the `value` property: if it's missing it throws an error. Using
+// this indirection seems to work around this issue.
+// See https://github.com/facebook/flow/issues/285
+const defineProperty = Object.defineProperty;
 
 /**
  * This function adds various values from the Redux Store to the window object so that
@@ -24,14 +20,14 @@ export function addDataToWindowObject(
   getState: GetState,
   target: Object = window
 ) {
-  (Object.defineProperty: DefineGetProperty<*>)(target, 'profile', {
+  defineProperty(target, 'profile', {
     enumerable: true,
     get() {
       return getProfile(getState());
     },
   });
 
-  (Object.defineProperty: DefineGetProperty<*>)(target, 'filteredThread', {
+  defineProperty(target, 'filteredThread', {
     enumerable: true,
     get() {
       return selectedThreadSelectors.getRangeSelectionFilteredThread(
@@ -40,7 +36,7 @@ export function addDataToWindowObject(
     },
   });
 
-  (Object.defineProperty: DefineGetProperty<*>)(target, 'callTree', {
+  defineProperty(target, 'callTree', {
     enumerable: true,
     get() {
       return selectedThreadSelectors.getCallTree(getState());

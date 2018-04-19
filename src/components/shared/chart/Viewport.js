@@ -218,16 +218,16 @@ export const withChartViewport: WithChartViewport<*, *> =
        */
       showShiftScrollingHint() {
         // Only show this message if we haven't shift zoomed yet.
-        if (this.props.viewportProps.hasZoomedViaMousewheel) {
+        if (this.props.hasZoomedViaMousewheel) {
           return;
         }
 
-        const scollId = ++this.shiftScrollId;
+        const scrollId = ++this.shiftScrollId;
         if (!this.state.isShiftScrollHintVisible) {
           this.setState({ isShiftScrollHintVisible: true });
         }
         setTimeout(() => {
-          if (scollId === this.shiftScrollId) {
+          if (scrollId === this.shiftScrollId) {
             this.setState({ isShiftScrollHintVisible: false });
           }
         }, 1000);
@@ -245,7 +245,8 @@ export const withChartViewport: WithChartViewport<*, *> =
         } else if (
           this.props.viewportProps.selection !==
             newProps.viewportProps.selection ||
-          this.props.viewportPropstimeRange !== newProps.viewportProps.timeRange
+          this.props.viewportProps.timeRange !==
+            newProps.viewportProps.timeRange
         ) {
           this.setState(this.getHorizontalViewport(newProps));
         }
