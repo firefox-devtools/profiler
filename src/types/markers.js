@@ -267,7 +267,7 @@ export type InvalidationPayload = {
  */
 export type NetworkPayload = {
   type: 'Network',
-  URI: string,
+  URI?: string,
   id: number,
   status: string,
   startTime: Milliseconds,

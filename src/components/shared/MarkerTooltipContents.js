@@ -321,7 +321,9 @@ function getMarkerDetails(
       case 'Network': {
         return (
           <div className="tooltipDetails">
-            {_markerDetail('url', 'URL', data.URI)}
+            {data.URI === undefined
+              ? null
+              : _markerDetail('url', 'URL', data.URI)}
             {_markerDetail('status', 'Status', data.status)}
           </div>
         );

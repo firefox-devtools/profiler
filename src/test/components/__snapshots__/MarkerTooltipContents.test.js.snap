@@ -19,6 +19,56 @@ Array [
         <div
           className="tooltipTitle"
         >
+          Invalidate
+        </div>
+      </div>
+      <div
+        className="tooltipDetails"
+      >
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
+      </div>
+    </div>
+    <div
+      className="tooltipDetails"
+    >
+      <div
+        className="tooltipLabel"
+      >
+        URL
+        :
+      </div>
+      http://mozilla.com/script.js
+      <div
+        className="tooltipLabel"
+      >
+        Line
+        :
+      </div>
+      1234
+    </div>
+  </div>,
+  <div
+    className="tooltipMarker propClass"
+  >
+    <div
+      className="tooltipHeader"
+    >
+      <div
+        className="tooltipOneLine"
+      >
+        <div
+          className="tooltipTiming"
+        >
+          0.000ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
           Bailout
         </div>
       </div>
@@ -99,12 +149,12 @@ Array [
         <div
           className="tooltipTiming"
         >
-          0.000ms
+          101ms
         </div>
         <div
           className="tooltipTitle"
         >
-          Invalidate
+          Load 1234
         </div>
       </div>
       <div
@@ -127,14 +177,14 @@ Array [
         URL
         :
       </div>
-      http://mozilla.com/script.js
+      https:/example.org/help-me.js
       <div
         className="tooltipLabel"
       >
-        Line
+        Status
         :
       </div>
-      1234
+      STATUS_START
     </div>
   </div>,
   <div
@@ -1107,6 +1157,49 @@ Array [
           </em>
         </li>
       </ol>
+    </div>
+  </div>,
+  <div
+    className="tooltipMarker propClass"
+  >
+    <div
+      className="tooltipHeader"
+    >
+      <div
+        className="tooltipOneLine"
+      >
+        <div
+          className="tooltipTiming"
+        >
+          11ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          Load 1234
+        </div>
+      </div>
+      <div
+        className="tooltipDetails"
+      >
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
+      </div>
+    </div>
+    <div
+      className="tooltipDetails"
+    >
+      <div
+        className="tooltipLabel"
+      >
+        Status
+        :
+      </div>
+      STATUS_READING
     </div>
   </div>,
 ]
