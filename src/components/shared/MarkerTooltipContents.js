@@ -318,6 +318,16 @@ function getMarkerDetails(
           </div>
         );
       }
+      case 'Network': {
+        return (
+          <div className="tooltipDetails">
+            {data.URI === undefined
+              ? null
+              : _markerDetail('url', 'URL', data.URI)}
+            {_markerDetail('status', 'Status', data.status)}
+          </div>
+        );
+      }
       case 'Styles': {
         return [
           <div className="tooltipDetails" key="details">
