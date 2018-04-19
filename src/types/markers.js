@@ -261,6 +261,22 @@ export type InvalidationPayload = {
 };
 
 /**
+ * Network http/https loads - one marker for each notification of network
+ * state that occurs, plus one for the initial START of the load, with the URI
+ * and the status.  A unique ID is included to allow these to be linked.
+ * Note that the 'name' field currently also has the id ("Load N") so that
+ * marker.js will not merge separate loads.
+ */
+export type NetworkPayload = {
+  type: 'Network',
+  URI: string,
+  id: number,
+  status: string,
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+};
+
+/**
  * The payload for the UserTimings API. These are added through performance.measure()
  * and performance.mark(). https://developer.mozilla.org/en-US/docs/Web/API/Performance
  */
@@ -320,6 +336,7 @@ export type MarkerPayload =
   | GPUMarkerPayload
   | BailoutPayload
   | InvalidationPayload
+  | NetworkPayload
   | UserTimingMarkerPayload
   | PaintProfilerMarkerTracing
   | DOMEventMarkerPayload
