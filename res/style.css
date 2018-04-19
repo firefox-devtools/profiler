@@ -176,10 +176,10 @@ body, #root, .profileViewer {
 }
 
 .treeViewRow.even {
-  background-color: #FFFFFF;
+  background-color: red;
 }
 .treeViewRow.odd {
-  background-color: #F5F5F5;
+  background-color: yellow;
 }
 .treeViewRow.selected {
   background-color: -moz-dialog;
