@@ -218,6 +218,7 @@ body, #root, .profileViewer {
   height: 16px;
   overflow: hidden;
   color: transparent;
+
 }
 
 .treeRowToggleButton {
@@ -235,6 +236,11 @@ body, #root, .profileViewer {
   background-position: -16px 0;
 }
 
+.treeRowToggleButton:active:hover,
+.focusCallstackButton:active:hover {
+  background-position: -16px 0;
+}
+
 .treeRowToggleButton.collapsed {
   background-position: 0 -16px;
 }
@@ -243,21 +249,21 @@ body, #root, .profileViewer {
   background-position: -16px -16px;
 }
 
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeRowToggleButton,
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .focusCallstackButton {
+.treeViewBody:focus .treeViewBodyInner .treeViewRow.selected > .treeRowToggleButton,
+.treeViewBody:focus .treeViewBodyInner .treeViewRow.selected > .focusCallstackButton {
   background-position: -32px 0;
 }
 
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeRowToggleButton.collapsed {
+.treeViewBody:focus .treeViewBodyInner .treeViewRow.selected > .treeRowToggleButton.collapsed {
   background-position: -32px -16px;
 }
 
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeRowToggleButton:active:hover,
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .focusCallstackButton:active:hover {
+.treeViewBody:focus .treeViewBodyInner .treeViewRow.selected > .treeRowToggleButton:active:hover,
+.treeViewBody:focus .treeViewBodyInner .treeViewRow.selected > .focusCallstackButton:active:hover {
   background-position: -48px 0;
 }
 
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeRowToggleButton.collapsed:active:hover {
+.treeViewBody:focus .treeViewBodyInner .treeViewRow.selected > .treeRowToggleButton.collapsed:active:hover {
   background-position: -48px -16px;
 }
 
