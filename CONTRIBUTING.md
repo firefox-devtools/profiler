@@ -77,7 +77,7 @@ When working on a new feature and code changes, it's important that things work 
 
 ## Finding something to work on
 
-If this is your first time here, check out the label [Good First Bug](https://github.com/devtools-html/perf.html/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+bug%22). We will mentor you through the process of completing a first bug, and these are usually pretty good self-contained problems. After leveling up on a few good first bugs, we also have the [Available](https://github.com/devtools-html/perf.html/issues?utf8=%E2%9C%93&q=is%3Aopen%20is%3Aissue%20label%3Aavailable%20) tag for bugs that no one is actively working on, but are well-scoped and ready to be tackled!
+If this is your first time here, check out the label [Good First Issue](https://github.com/devtools-html/perf.html/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22). We will mentor you through the process of completing a first bug, and these are usually pretty good self-contained problems. After leveling up on a few good first issues, we also have the [Available](https://github.com/devtools-html/perf.html/issues?utf8=%E2%9C%93&q=is%3Aopen%20is%3Aissue%20label%3Aavailable%20) tag for bugs that no one is actively working on, but are well-scoped and ready to be tackled!
 
 Make sure and comment on the issue letting someone know you are interested in working on an issue. Feel free to [chat with us on slack](https://devtools-html-slack.herokuapp.com/) if you need help finding something you might be interested to work on.
 
