@@ -255,7 +255,7 @@ body, #root, .profileViewer {
 }
 
 .treeRowToggleButton:active:hover {
-  color: #444;
+  color: var(--grey-60);
 }
 
 .treeViewBody:focus .treeViewBodyInner .treeViewRow.selected > .treeRowToggleButton {
