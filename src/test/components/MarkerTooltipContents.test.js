@@ -226,6 +226,29 @@ describe('MarkerTooltipContents', function() {
             },
           },
         ],
+        [
+          'Load 1234',
+          10.5,
+          {
+            type: 'Network',
+            startTime: 10.5,
+            endTime: 111.0,
+            status: 'STATUS_START',
+            URI: 'https:/example.org/help-me.js',
+            id: 1234,
+          },
+        ],
+        [
+          'Load 1234',
+          111.0,
+          {
+            type: 'Network',
+            startTime: 111.0,
+            endTime: 121.5,
+            status: 'STATUS_READING',
+            id: 1234,
+          },
+        ],
       ],
       profile
     );
