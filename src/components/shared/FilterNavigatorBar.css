@@ -102,6 +102,14 @@
   border-color: rgba(0, 0, 0, 0.2);
 }
 
+.filterNavigatorBarUncommittedItem {
+  opacity: 0.75;
+}
+
+.filterNavigatorBarUncommittedItem:hover {
+  opacity: 1;
+}
+
 /* Animation */
 
 .filterNavigatorBarTransition-enter {

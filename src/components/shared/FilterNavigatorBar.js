@@ -14,6 +14,7 @@ type Props = {|
   +items: string[],
   +onPop: number => *,
   +selectedItem: number,
+  +uncommittedItem?: string,
 |};
 
 class FilterNavigatorBar extends PureComponent<Props> {
@@ -29,7 +30,7 @@ class FilterNavigatorBar extends PureComponent<Props> {
   }
 
   render() {
-    const { className, items, selectedItem } = this.props;
+    const { className, items, selectedItem, uncommittedItem } = this.props;
     return (
       <TransitionGroup
         component="ol"
@@ -56,6 +57,20 @@ class FilterNavigatorBar extends PureComponent<Props> {
             </li>
           </CSSTransition>
         ))}
+        {uncommittedItem !== undefined ? (
+          <li
+            className={classNames(
+              'filterNavigatorBarItem',
+              'filterNavigatorBarLeafItem',
+              'filterNavigatorBarUncommittedItem'
+            )}
+            title={uncommittedItem}
+          >
+            <span className="filterNavigatorBarItemContent">
+              {uncommittedItem}
+            </span>
+          </li>
+        ) : null}
       </TransitionGroup>
     );
   }
