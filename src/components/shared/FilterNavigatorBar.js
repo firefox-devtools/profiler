@@ -57,19 +57,25 @@ class FilterNavigatorBar extends PureComponent<Props> {
             </li>
           </CSSTransition>
         ))}
-        {uncommittedItem !== undefined ? (
-          <li
-            className={classNames(
-              'filterNavigatorBarItem',
-              'filterNavigatorBarLeafItem',
-              'filterNavigatorBarUncommittedItem'
-            )}
-            title={uncommittedItem}
+        {uncommittedItem ? (
+          <CSSTransition
+            key={items.length}
+            classNames="filterNavigatorBarUncommittedTransition"
+            timeout={0}
           >
-            <span className="filterNavigatorBarItemContent">
-              {uncommittedItem}
-            </span>
-          </li>
+            <li
+              className={classNames(
+                'filterNavigatorBarItem',
+                'filterNavigatorBarLeafItem',
+                'filterNavigatorBarUncommittedItem'
+              )}
+              title={uncommittedItem}
+            >
+              <span className="filterNavigatorBarItemContent">
+                {uncommittedItem}
+              </span>
+            </li>
+          </CSSTransition>
         ) : null}
       </TransitionGroup>
     );

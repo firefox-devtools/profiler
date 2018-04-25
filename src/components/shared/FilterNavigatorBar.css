@@ -103,11 +103,7 @@
 }
 
 .filterNavigatorBarUncommittedItem {
-  opacity: 0.75;
-}
-
-.filterNavigatorBarUncommittedItem:hover {
-  opacity: 1;
+  opacity: 0.65;
 }
 
 /* Animation */

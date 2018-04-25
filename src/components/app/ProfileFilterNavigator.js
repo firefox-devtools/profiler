@@ -28,12 +28,12 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       ? getFormattedTimeLength(
           profileSelection.selectionEnd - profileSelection.selectionStart
         )
-      : ''; // Used to be undefined, but it seems Redux won't merge that
+      : undefined;
     return {
       className: 'profileFilterNavigator',
       items: items,
       selectedItem: items.length - 1,
-      uncommittedItem: uncommittedItem,
+      uncommittedItem,
     };
   },
   mapDispatchToProps: {
