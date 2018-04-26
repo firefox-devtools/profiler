@@ -153,7 +153,7 @@ describe('MarkerTooltipContents', function() {
               slice: 1,
               pause: 5,
               when: 17.5,
-              budget: 11,
+              budget: '11ms',
               initial_state: 'Initial',
               final_state: 'Final',
               major_gc_number: 1,
