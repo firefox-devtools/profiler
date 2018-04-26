@@ -60,7 +60,7 @@ type GCSliceData_Shared = {
   final_state: string,
 
   // The incremental GC budget for this slice (see pause above).
-  budget: Milliseconds,
+  budget: string,
 
   // The number of the GCMajor that this slice belongs to.
   major_gc_number: number,
