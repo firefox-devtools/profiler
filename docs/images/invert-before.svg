@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="410" height="375" viewBox="0 0 410 375">
+  <g fill="none" fill-rule="evenodd">
+    <rect width="36" height="35" x="142" y="265" fill="#4A90E2" rx="17.5"/>
+    <g transform="translate(236 55)">
+      <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M61.5 229.430556L61.5 259.569444M61.5 259.569444L64.5 248.769444 58.5 248.769444 61.5 259.569444z"/>
+      <ellipse cx="62.5" cy="273" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="57.308" y="280">Z</tspan>
+      </text>
+      <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M61.5 21.4305556L61.5 51.5694444M61.5 51.5694444L64.5 40.7694444 58.5 40.7694444 61.5 51.5694444zM11.5 178.430556L11.5 208.569444M11.5 208.569444L14.5 197.769444 8.5 197.769444 11.5 208.569444zM61.5 178.430556L61.5 208.569444M61.5 208.569444L64.5 197.769444 58.5 197.769444 61.5 208.569444zM107.5 178.430556L107.5 208.569444M107.5 208.569444L110.5 197.769444 104.5 197.769444 107.5 208.569444zM61.5652174 61.4339623L42.4347826 106.566038M42.4347826 106.566038L49.4117472 97.7932408 43.8875303 95.4516541 42.4347826 106.566038zM61.5652174 61.4339623L83.5 105.5M83.5 105.5L81.373016 94.4947313 76.0016717 97.1684291 83.5 105.5zM84.5652174 112.433962L106.5 156.5M106.5 156.5L104.373016 145.494731 99.0016717 148.168429 106.5 156.5zM80.5 126.5L66.5 157.5M66.5 157.5L73.6792484 148.891958 68.2110248 146.422437 66.5 157.5zM37.5652174 112.433962L18.4347826 157.566038M18.4347826 157.566038L25.4117472 148.793241 19.8875303 146.451654 18.4347826 157.566038z"/>
+      <ellipse cx="61.5" cy="12" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+      <ellipse cx="61.5" cy="65" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+      <ellipse cx="37.5" cy="118" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+      <ellipse cx="12.5" cy="170" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+      <ellipse cx="61.5" cy="170" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+      <ellipse cx="107.5" cy="170" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+      <ellipse cx="61.5" cy="222" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+      <ellipse cx="107.5" cy="222" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+      <ellipse cx="12.5" cy="222" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+      <ellipse cx="86.5" cy="118" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="56" y="19">A</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="56" y="72">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="31" y="125">X</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="7" y="177">Y</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="56" y="176">X</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="103" y="176">D</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="55.331" y="229">Y</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="101.331" y="229">E</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="7.308" y="229">Z</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="80" y="125">C</tspan>
+      </text>
+    </g>
+    <rect width="123" height="35" x="52" y="66" fill="#4A90E2" rx="17.5"/>
+    <rect width="123" height="35" x="52" y="116" fill="#4A90E2" rx="17.5"/>
+    <rect width="36" height="35" x="53" y="216" fill="#4A90E2" rx="17.5"/>
+    <rect width="36" height="35" x="140" y="216" fill="#4A90E2" rx="17.5"/>
+    <rect width="36" height="35" x="96" y="216" fill="#4A90E2" rx="17.5"/>
+    <rect width="36" height="35" x="53" y="265" fill="#4A90E2" rx="17.5"/>
+    <rect width="36" height="35" x="97" y="265" fill="#4A90E2" rx="17.5"/>
+    <rect width="36" height="35" x="99" y="317" fill="#4A90E2" rx="17.5"/>
+    <rect width="36" height="35" x="54" y="166" fill="#4A90E2" rx="17.5"/>
+    <rect width="81" height="35" x="96" y="166" fill="#4A90E2" rx="17.5"/>
+    <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M69.5 140.416667L69.5 169.583333M69.5 169.583333L72.5 158.783333 66.5 158.783333 69.5 169.583333zM157.5 140.416667L157.5 169.583333M157.5 169.583333L160.5 158.783333 154.5 158.783333 157.5 169.583333zM113.5 140.416667L113.5 169.583333M113.5 169.583333L116.5 158.783333 110.5 158.783333 113.5 169.583333zM69.5 190.416667L69.5 219.583333M69.5 219.583333L72.5 208.783333 66.5 208.783333 69.5 219.583333zM157.5 190.416667L157.5 219.583333M157.5 219.583333L160.5 208.783333 154.5 208.783333 157.5 219.583333zM113.5 190.416667L113.5 219.583333M113.5 219.583333L116.5 208.783333 110.5 208.783333 113.5 219.583333zM69.5 239.416667L69.5 268.583333M69.5 268.583333L72.5 257.783333 66.5 257.783333 69.5 268.583333zM112.5 239.416667L112.5 268.583333M112.5 268.583333L115.5 257.783333 109.5 257.783333 112.5 268.583333zM114.5 291.416667L114.5 320.583333M114.5 320.583333L117.5 309.783333 111.5 309.783333 114.5 320.583333zM69.5 90.4166667L69.5 119.583333M69.5 119.583333L72.5 108.783333 66.5 108.783333 69.5 119.583333zM157.5 90.4166667L157.5 119.583333M157.5 119.583333L160.5 108.783333 154.5 108.783333 157.5 119.583333zM113.5 90.4166667L113.5 119.583333M113.5 119.583333L116.5 108.783333 110.5 108.783333 113.5 119.583333z"/>
+    <circle cx="70" cy="83" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="158" cy="83" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="114" cy="83" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="70" cy="133" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="158" cy="133" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="114" cy="133" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M158.5 241.5L158.5 268.583333M158.5 268.583333L161.5 257.783333 155.5 257.783333 158.5 268.583333z"/>
+    <circle cx="71" cy="183" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="159" cy="183" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="115" cy="183" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="71" cy="233" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="114.5" cy="232.5" r="11.5" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="158.5" cy="232.5" r="11.5" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="71" cy="282" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="115" cy="282" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <circle cx="117" cy="334" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="64" y="88">A</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="152" y="88">A</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="108" y="88">A</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="64" y="139">B</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="152" y="139">B</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="108" y="139">B</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="65" y="189">X</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="153" y="189">C</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="109" y="189">C</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="65" y="238">Y</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="109" y="239">X</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="154" y="238">D</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="65" y="288">Z</tspan>
+    </text>
+    <circle cx="160" cy="282" r="12" fill="#D7D7DB" stroke="#737373"/>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="154" y="288">E</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="108.331" y="288">Y</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="110.808" y="340">Z</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="12">
+      <tspan x="57.165" y="57">1ms</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="12">
+      <tspan x="100.165" y="57">2ms</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="12">
+      <tspan x="144.165" y="57">3ms</tspan>
+    </text>
+    <text fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold">
+      <tspan x="78.037" y="29">Samples</tspan>
+    </text>
+    <text fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold">
+      <tspan x="262.56" y="29">Call Tree</tspan>
+    </text>
+  </g>
+</svg>
