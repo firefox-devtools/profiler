@@ -54,8 +54,8 @@ const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
     ? new WheelEvent('mouse')
     : { DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2 };
 
-// These viewport values are computed dynamically by the HOC, and then passed into
-// the props of the wrapped component.
+// These viewport values (most of which are computed dynamically by
+// the HOC) are passed into the props of the wrapped component.
 export type Viewport = {|
   +containerWidth: CssPixels,
   +containerHeight: CssPixels,
@@ -64,6 +64,7 @@ export type Viewport = {|
   +viewportTop: CssPixels,
   +viewportBottom: CssPixels,
   +isDragging: boolean,
+  +moveViewport: (CssPixels, CssPixels) => boolean,
 |};
 
 type ViewportStateProps = {|
@@ -161,6 +162,7 @@ export const withChartViewport: WithChartViewport<*, *> =
 
       constructor(props: ViewportProps) {
         super(props);
+        (this: any).moveViewport = this.moveViewport.bind(this);
         (this: any)._mouseWheelListener = this._mouseWheelListener.bind(this);
         (this: any)._mouseDownListener = this._mouseDownListener.bind(this);
         (this: any)._mouseMoveListener = this._mouseMoveListener.bind(this);
@@ -557,6 +559,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           viewportTop,
           viewportBottom,
           isDragging,
+          moveViewport: this.moveViewport,
         };
 
         return (

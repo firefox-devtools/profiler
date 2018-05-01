@@ -217,6 +217,19 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     (this: any)._hitTest = this._hitTest.bind(this);
   }
 
+  componentDidUpdate(prevProps) {
+    // If the stack depth changes (say, when changing the time range
+    // selection or applying a transform), move the viewport
+    // vertically so that its offset from the base of the flame graph
+    // is maintained.
+    if (prevProps.maxStackDepth !== this.props.maxStackDepth) {
+      this.props.viewport.moveViewport(
+        0,
+        (prevProps.maxStackDepth - this.props.maxStackDepth) * ROW_HEIGHT
+      );
+    }
+  }
+
   _drawCanvas(
     ctx: CanvasRenderingContext2D,
     hoveredItem: HoveredStackTiming | null

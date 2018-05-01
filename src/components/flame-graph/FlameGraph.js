@@ -148,12 +148,12 @@ class FlameGraph extends React.PureComponent<Props> {
   }
 }
 
-// This function is given the FlameGraphCanvas's chartProps.
-function viewportNeedsUpdate(
-  prevProps: { +flameGraphTiming: FlameGraphTiming },
-  newProps: { +flameGraphTiming: FlameGraphTiming }
-) {
-  return prevProps.flameGraphTiming !== newProps.flameGraphTiming;
+function viewportNeedsUpdate() {
+  // By always returning false we prevent the viewport from being
+  // reset and scrolled all the way to the bottom when doing
+  // operations like changing the time selection or applying a
+  // transform.
+  return false;
 }
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
