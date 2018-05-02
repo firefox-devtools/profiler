@@ -65,6 +65,7 @@ export type Viewport = {|
   +viewportBottom: CssPixels,
   +isDragging: boolean,
   +moveViewport: (CssPixels, CssPixels) => boolean,
+  +isSizeSet: boolean,
 |};
 
 type ViewportStateProps = {|
@@ -113,6 +114,7 @@ type State = {|
   dragY: CssPixels,
   isDragging: boolean,
   isShiftScrollHintVisible: boolean,
+  isSizeSet: boolean,
 |};
 
 require('./Viewport.css');
@@ -212,6 +214,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           dragY: 0,
           isDragging: false,
           isShiftScrollHintVisible: false,
+          isSizeSet: false,
         };
       }
 
@@ -272,6 +275,7 @@ export const withChartViewport: WithChartViewport<*, *> =
               viewportTop: startsAtBottom
                 ? prevState.viewportBottom - rect.height
                 : prevState.viewportTop,
+              isSizeSet: true,
             }));
           }
         }
@@ -539,6 +543,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           viewportRight,
           isDragging,
           isShiftScrollHintVisible,
+          isSizeSet,
         } = this.state;
 
         const viewportClassName = classNames({
@@ -560,6 +565,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           viewportBottom,
           isDragging,
           moveViewport: this.moveViewport,
+          isSizeSet,
         };
 
         return (
