@@ -10,6 +10,7 @@ import {
   selectedThreadSelectors,
   getDisplayRange,
   getProfileViewOptions,
+  getScrollToSelectionGeneration,
 } from '../../reducers/profile-view';
 import {
   getSelectedThreadIndex,
@@ -53,6 +54,7 @@ type StateProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +isCallNodeContextMenuVisible: boolean,
   +invertCallstack: boolean,
+  +scrollToSelectionGeneration: number,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -89,6 +91,7 @@ class FlameGraph extends React.PureComponent<Props> {
       selectedCallNodeIndex,
       isCallNodeContextMenuVisible,
       invertCallstack,
+      scrollToSelectionGeneration,
     } = this.props;
 
     if (invertCallstack) {
@@ -137,6 +140,7 @@ class FlameGraph extends React.PureComponent<Props> {
               flameGraphTiming,
               callNodeInfo,
               selectedCallNodeIndex,
+              scrollToSelectionGeneration,
               stackFrameHeight: STACK_FRAME_HEIGHT,
               onSelectionChange: this._onSelectedCallNodeChange,
               disableTooltips: isCallNodeContextMenuVisible,
@@ -176,6 +180,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       isCallNodeContextMenuVisible: getProfileViewOptions(state)
         .isCallNodeContextMenuVisible,
       invertCallstack: getInvertCallstack(state),
+      scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     };
   },
   mapDispatchToProps: {
