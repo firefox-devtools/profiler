@@ -364,9 +364,10 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
     } = this.props;
 
     if (selectedCallNodeIndex === null) {
-      throw new Error(
+      console.error(
         "The context menu assumes there is a selected call node and there wasn't one."
       );
+      return <div />;
     }
 
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
