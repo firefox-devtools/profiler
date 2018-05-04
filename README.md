@@ -6,7 +6,7 @@
 
 [Mozilla] develops this tool to help make [Firefox] silky smooth and fast for millions of its users, and to help make sites and apps faster across the web.
 
-![](./screenshot.png?raw=true)
+![Screenshot of perf.html](./docs-user/screenshot.png?raw=true)
 
 _This project was previously called [Cleopatra]._
 

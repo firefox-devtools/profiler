@@ -15,6 +15,7 @@
     "flow": "flow",
     "flow-coverage": "flow-coverage-report -i 'src/**/*.js' -t html -t text",
     "flow-generate-libdefs": "flow-typed install --libdefDir src/types/libdef",
+    "init-docs": "gitbook install ./docs-user",
     "license-check": "devtools-license-check",
     "postcheckout": "node bin/post-checkout.js",
     "postmerge": "node bin/post-merge.js",
@@ -28,6 +29,7 @@
     "start-prod": "yarn build-prod && yarn serve-static",
     "start-prod-readable": "yarn build-prod-readable && yarn serve-static",
     "start-examples": "ws -d examples/ -s index.html -p 4242",
+    "start-docs": "docsify serve ./docs-user",
     "test": "env NODE_ENV=test jest",
     "test-all": "run-p flow license-check lint test"
   },
@@ -99,6 +101,7 @@
     "flow-bin": "^0.70.0",
     "flow-coverage-report": "^0.5.0",
     "flow-typed": "^2.3.0",
+    "glob": "^7.1.2",
     "html-webpack-plugin": "^2.30.1",
     "http-server": "^0.11.1",
     "husky": "^0.14.3",

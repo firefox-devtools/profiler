@@ -1,6 +1,6 @@
 # Stack Samples and Call Trees
 
-The [profiler fundamentals](./profiler-fundamentals) details information about both samples and markers. While samples can collect any type of arbitrary information, this document explores one core idea about samples—that they can collect stacks.
+The [profiler fundamentals](./guide-profiler-fundamentals.md) details information about both samples and markers. While samples can collect any type of arbitrary information, this document explores one core idea about samples—that they can collect stacks.
 
 ## Stacks gathered over time
 
