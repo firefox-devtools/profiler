@@ -15,7 +15,7 @@ jobs:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
-      - run: yarn licence-check
+      - run: yarn license-check
       - run: yarn lint
       - run: yarn flow --quiet
       - run: yarn flow stop
