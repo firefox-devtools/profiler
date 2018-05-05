@@ -93,7 +93,7 @@ function parseExpectedNodeVersion() {
   // Let's fetch our minimal version from circleci's file
   const fs = require('fs');
   const circleConfig = fs.readFileSync('.circleci/config.yml', { encoding: 'utf8' });
-  const expectedNodeVersion = /image: circleci/node:\s+([\d.]+)/.exec(circleConfig)[1];
+  const expectedNodeVersion = /image: circleci\/node:([\d.]+)/.exec(circleConfig)[1];
   if (!expectedNodeVersion) {
     throw new Error(`Couldn't extract the node version from .circleci/config.yml.`);
   }
