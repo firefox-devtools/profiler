@@ -1,0 +1,25 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8.9
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-
+      - run: yarn install
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - run: yarn licence-check
+      - run: yarn lint
+      - run: yarn flow --quiet
+      - run: yarn flow stop
+      - run: yarn test --coveragee --runInBand
+      - run: yarn build-prod:quiet
+      - run: bash <(curl -s https://codecov.io/bash)
+
