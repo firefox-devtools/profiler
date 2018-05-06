@@ -92,10 +92,16 @@ function checkYarn(agents /*: AgentsVersion */) {
 function parseExpectedNodeVersion() {
   // Let's fetch our minimal version from circleci's file
   const fs = require('fs');
-  const circleConfig = fs.readFileSync('.circleci/config.yml', { encoding: 'utf8' });
-  const expectedNodeVersion = /image: circleci\/node:([\d.]+)/.exec(circleConfig)[1];
+  const circleConfig = fs.readFileSync('.circleci/config.yml', {
+    encoding: 'utf8',
+  });
+  const expectedNodeVersion = /image: circleci\/node:([\d.]+)/.exec(
+    circleConfig
+  )[1];
   if (!expectedNodeVersion) {
-    throw new Error(`Couldn't extract the node version from .circleci/config.yml.`);
+    throw new Error(
+      `Couldn't extract the node version from .circleci/config.yml.`
+    );
   }
   return expectedNodeVersion;
 }
