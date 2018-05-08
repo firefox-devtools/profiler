@@ -13,11 +13,11 @@ The following are the different types of filtering operations that are supported
 
 ## Search filter
 
-![A screenshot of the search box](../images/search-2018-05.jpg)
+![A screenshot of the search box](./images/search-2018-05.jpg)
 
 Searching will exclude samples that do not match a search string. The search filter looks at every function in the sample's stack. If the function's name, resource, or URL match, then the sample will be retained, otherwise it will be filtered out. Multiple search terms can be added, as long as they are separated by commas.
 
-![The image demonstrates the search filter. On the left is a call tree that has all stacks, and on the right is the filtered call tree that does not have any stacks that do not have the function C.](../images/filter-search.svg)
+![The image demonstrates the search filter. On the left is a call tree that has all stacks, and on the right is the filtered call tree that does not have any stacks that do not have the function C.](./images/filter-search.svg)
 
 The above diagram is reproduced in the profile below:
 
@@ -32,13 +32,13 @@ The following are some ideas on how to use search terms:
 
 ## Implementation filter
 
-![A screenshot of the implementation filter dropdown.](../images/implementation-2018-05.jpg)
+![A screenshot of the implementation filter dropdown.](./images/implementation-2018-05.jpg)
 
 The implementation filter is useful for narrowing down the call tree to a subset of stack types. For instance it can be useful to only show native stacks (C++ and Rust) or to only show JavaScript stacks.
 
 The following graphic demonstrates how it can be useful to filter to only JavaScript stacks.
 
-![](../images/implementation-filter.svg)
+![](./images/implementation-filter.svg)
 
 Before the the implementation filter, the call tree contains both C++ JavaScript internals, as well as the JavaScript stacks. This interleaving could be useful when diagnosing how the JS engine is optimizing code, but for normal JS performance profiling this could be confusing to find hot JS functions. When the native stacks are removed, the call tree that is generated is much more sensible for representing the execution of JavaScript code.
 
@@ -46,15 +46,15 @@ The implementation filter will modify the shape of stacks, and generate a comple
 
 ## Invert call stack
 
-![A screenshot of the "Invert call stacks" checkbox.](../images/invert-2018-05.jpg)
+![A screenshot of the "Invert call stacks" checkbox.](./images/invert-2018-05.jpg)
 
 Inverting the call stacks of samples will produce an entirely new call tree. All of the self time will be at the roots of the call tree. The implications to the shape of the call tree may be surprising, but consider the following graphics.
 
-![An image showing samples on the left, and the call tree on the right. This is before the invert operation.](../images/invert-before.svg)
+![An image showing samples on the left, and the call tree on the right. This is before the invert operation.](./images/invert-before.svg)
 
 In this profile, for the sake of brevity, there are only 3 samples that were collected 1ms apart. In most uninverted call trees, there is only one root node. In this case `A` calls `B`, and it's not until the third stack frames where the calls diverge to function `X` and function `C`. The call tree on the right is what is produced from these samples. Now consider inverting all of the stacks in the samples.
 
-![An image showing samples on the left, and the call tree on the right. This is after the invert operation.](../images/invert-after.svg)
+![An image showing samples on the left, and the call tree on the right. This is after the invert operation.](./images/invert-after.svg)
 
 Previously, the stacks `X -> Y -> Z` were each at different levels. However, in the inverted view, the stacks are now at the same level. When the call tree is created from these samples, there are now two different roots, starting from the function `Z` and the function `E`. The inversion made the `Z -> Y -> X` portions of the stacks fall into the same level.
 
