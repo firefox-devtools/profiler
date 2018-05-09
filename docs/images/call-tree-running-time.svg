@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="410" height="328" viewBox="0 0 410 328">
+  <g fill="none" fill-rule="evenodd">
+    <g transform="translate(38 48)">
+      <g fill="#000" font-family="Helvetica" font-size="12" transform="translate(87 1)">
+        <text>
+          <tspan x="125.165" y="11">3ms</tspan>
+        </text>
+        <text>
+          <tspan x="125.165" y="63">3ms</tspan>
+        </text>
+        <text>
+          <tspan x="164.165" y="119">1ms</tspan>
+        </text>
+        <text>
+          <tspan x="183.165" y="175">1ms</tspan>
+        </text>
+        <text>
+          <tspan x="184.165" y="232">1ms</tspan>
+        </text>
+        <text>
+          <tspan x="29.165" y="120">2ms</tspan>
+        </text>
+        <text>
+          <tspan x="1.165" y="174">1ms</tspan>
+        </text>
+        <text>
+          <tspan x="1.165" y="229">1ms</tspan>
+        </text>
+        <text>
+          <tspan x="111.165" y="174">1ms</tspan>
+        </text>
+        <text>
+          <tspan x="111.165" y="232">1ms</tspan>
+        </text>
+      </g>
+    </g>
+    <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M227.5 66.4305556L227.5 96.5694444M227.5 96.5694444L230.5 85.7694444 224.5 85.7694444 227.5 96.5694444zM166.5 231.430556L166.5 261.569444M166.5 261.569444L169.5 250.769444 163.5 250.769444 166.5 261.569444zM221.5 231.430556L221.5 261.569444M221.5 261.569444L224.5 250.769444 218.5 250.769444 221.5 261.569444zM293.5 231.430556L293.5 261.569444M293.5 261.569444L296.5 250.769444 290.5 250.769444 293.5 261.569444zM228.565217 108.433962L199.5 152.5M199.5 152.5L207.950786 145.136291 202.94217 141.832692 199.5 152.5zM228.565217 108.433962L264.5 153.5M264.5 153.5L260.11239 143.185502 255.421189 146.926174 264.5 153.5zM270.565217 162.433962L292.5 206.5M292.5 206.5L290.373016 195.494731 285.001672 198.168429 292.5 206.5zM189.565217 163.433962L216.5 208.5M216.5 208.5L213.53443 197.690495 208.384194 200.768656 216.5 208.5zM192.565217 162.433962L173.434783 207.566038M173.434783 207.566038L180.411747 198.793241 174.88753 196.451654 173.434783 207.566038z"/>
+    <ellipse cx="228.5" cy="55" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="228.5" cy="110" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="192.5" cy="165" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="167.5" cy="220" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="221.5" cy="220" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="293.5" cy="220" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="221.5" cy="275" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="293.5" cy="275" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="167.5" cy="275" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="272.5" cy="165" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="223" y="62">A</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="223" y="117">B</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="186.189" y="171.582">C</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="161.589" y="226.554">D</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="217" y="227">F</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="289" y="226">F</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="215" y="282">G</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="287" y="282">G</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="162" y="282">E</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="266.389" y="171.582">H</tspan>
+    </text>
+    <text fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold">
+      <tspan x="33" y="53">Call Tree</tspan> <tspan x="33" y="73">Running Time</tspan>
+    </text>
+  </g>
+</svg>
