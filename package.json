@@ -82,6 +82,7 @@
     "copy-webpack-plugin": "^4.5.1",
     "css-loader": "^0.28.9",
     "devtools-license-check": "^0.6.0",
+    "docsify-cli": "^4.2.1",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "enzyme-to-json": "^3.3.1",
