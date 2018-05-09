@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="410" height="328" viewBox="0 0 410 328">
+  <g fill="none" fill-rule="evenodd" transform="translate(38 35)">
+    <g transform="translate(19)">
+      <g opacity=".503" transform="translate(133 22)">
+        <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M11.5740741 75.3996433L11.5740741 104.736543M11.5740741 104.736543L14.5740741 93.9365435 8.57407407 93.9365435 11.5740741 104.736543zM11.5740741 128.434663L11.5740741 157.771563M11.5740741 157.771563L14.5740741 146.971563 8.57407407 146.971563 11.5740741 157.771563zM11.5740741 180.555285L11.5740741 209.892185M11.5740741 209.892185L14.5740741 199.092185 8.57407407 199.092185 11.5740741 209.892185zM11.5740741 22.3646239L11.5740741 51.701524M11.5740741 51.701524L14.5740741 40.901524 8.57407407 40.901524 11.5740741 51.701524z"/>
+        <ellipse cx="12.037" cy="11.887" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.887"/>
+        <ellipse cx="12.037" cy="64.922" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.887"/>
+        <ellipse cx="12.963" cy="117.957" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.887"/>
+        <ellipse cx="12.963" cy="170.992" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.887"/>
+        <ellipse cx="12.963" cy="223.113" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.887"/>
+      </g>
+      <g opacity=".332" transform="translate(176 22)">
+        <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M11.5740741 75.449375L11.5740741 104.805625M11.5740741 104.805625L14.5740741 94.005625 8.57407407 94.005625 11.5740741 104.805625zM11.5740741 128.519375L11.5740741 157.875625M11.5740741 157.875625L14.5740741 147.075625 8.57407407 147.075625 11.5740741 157.875625zM11.5740741 22.379375L11.5740741 51.735625M11.5740741 51.735625L14.5740741 40.935625 8.57407407 40.935625 11.5740741 51.735625z"/>
+        <ellipse cx="12.037" cy="11.895" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.895"/>
+        <ellipse cx="12.037" cy="64.965" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.895"/>
+        <ellipse cx="12.963" cy="118.035" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.895"/>
+        <ellipse cx="12.963" cy="171.105" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.895"/>
+      </g>
+      <g opacity=".159" transform="translate(216 22)">
+        <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M11.5384615 22.4201389L11.5384615 51.8298611M11.5384615 51.8298611L14.5384615 41.0298611 8.53846154 41.0298611 11.5384615 51.8298611z"/>
+        <ellipse cx="12" cy="11.917" fill="#D7D7DB" stroke="#737373" rx="12" ry="11.917"/>
+        <ellipse cx="12" cy="65.083" fill="#D7D7DB" stroke="#737373" rx="12" ry="11.917"/>
+      </g>
+      <g opacity=".145" transform="translate(256 22)">
+        <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M11.5740741 75.3996433L11.5740741 104.736543M11.5740741 104.736543L14.5740741 93.9365435 8.57407407 93.9365435 11.5740741 104.736543zM11.5740741 128.434663L11.5740741 157.771563M11.5740741 157.771563L14.5740741 146.971563 8.57407407 146.971563 11.5740741 157.771563zM11.5740741 180.555285L11.5740741 209.892185M11.5740741 209.892185L14.5740741 199.092185 8.57407407 199.092185 11.5740741 209.892185zM11.5740741 22.3646239L11.5740741 51.701524M11.5740741 51.701524L14.5740741 40.901524 8.57407407 40.901524 11.5740741 51.701524z"/>
+        <ellipse cx="12.037" cy="11.887" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.887"/>
+        <ellipse cx="12.037" cy="64.922" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.887"/>
+        <ellipse cx="12.963" cy="117.957" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.887"/>
+        <ellipse cx="12.963" cy="170.992" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.887"/>
+        <ellipse cx="12.963" cy="223.113" fill="#D7D7DB" stroke="#737373" rx="12.037" ry="11.887"/>
+      </g>
+      <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M13.5 97.4166667L13.5 126.583333M13.5 126.583333L16.5 115.783333 10.5 115.783333 13.5 126.583333zM101.5 97.4166667L101.5 126.583333M101.5 126.583333L104.5 115.783333 98.5 115.783333 101.5 126.583333zM57.5 97.4166667L57.5 126.583333M57.5 126.583333L60.5 115.783333 54.5 115.783333 57.5 126.583333zM13.5 150.416667L13.5 179.583333M13.5 179.583333L16.5 168.783333 10.5 168.783333 13.5 179.583333zM101.5 150.416667L101.5 179.583333M101.5 179.583333L104.5 168.783333 98.5 168.783333 101.5 179.583333zM57.5 150.416667L57.5 179.583333M57.5 179.583333L60.5 168.783333 54.5 168.783333 57.5 179.583333zM13.5 202.416667L13.5 231.583333M13.5 231.583333L16.5 220.783333 10.5 220.783333 13.5 231.583333zM56.5 202.416667L56.5 231.583333M56.5 231.583333L59.5 220.783333 53.5 220.783333 56.5 231.583333zM102.5 202.416667L102.5 231.583333M102.5 231.583333L105.5 220.783333 99.5 220.783333 102.5 231.583333zM13.5 44.4166667L13.5 73.5833333M13.5 73.5833333L16.5 62.7833333 10.5 62.7833333 13.5 73.5833333zM101.5 44.4166667L101.5 73.5833333M101.5 73.5833333L104.5 62.7833333 98.5 62.7833333 101.5 73.5833333zM57.5 44.4166667L57.5 73.5833333M57.5 73.5833333L60.5 62.7833333 54.5 62.7833333 57.5 73.5833333z"/>
+      <circle cx="14" cy="34" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="102" cy="34" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="58" cy="34" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="14" cy="87" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="102" cy="87" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="58" cy="87" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="15" cy="140" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="103" cy="140" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="59" cy="140" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="15" cy="193" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="103" cy="193" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="58.5" cy="192.5" r="11.5" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="15" cy="245" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="59" cy="245" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="103" cy="245" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="8" y="39">A</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="96" y="39">A</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="52" y="39">A</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="8" y="93">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="96" y="93">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="52" y="93">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="9" y="146">C</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="97" y="146">H</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="53" y="146">C</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="9" y="198">D</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="97.308" y="198">F</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="54" y="198">F</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="9" y="251">E</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="52" y="251">G</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="96" y="251">G</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="12">
+        <tspan x="1.165" y="11">1ms</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="12">
+        <tspan x="44.165" y="11">2ms</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="12">
+        <tspan x="88.165" y="11">3ms</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="12" opacity=".503">
+        <tspan x="131.165" y="11">4ms</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="12" opacity=".391">
+        <tspan x="174.165" y="11">5ms</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="12" opacity=".159">
+        <tspan x="217.165" y="11">6ms</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="12" opacity=".145">
+        <tspan x="255.165" y="11">7ms</tspan>
+      </text>
+    </g>
+  </g>
+</svg>
