@@ -9,6 +9,7 @@ import {
   withChartViewport,
   type WithChartViewport,
 } from '../shared/chart/Viewport';
+import NodeIcon from '../shared/NodeIcon';
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import { getStackType } from '../../profile-logic/transforms';
@@ -26,6 +27,7 @@ import type {
   IndexIntoCallNodeTable,
   StackType,
 } from '../../types/profile-derived';
+import type { CallTree } from '../../profile-logic/call-tree';
 import type { Viewport } from '../shared/chart/Viewport';
 
 export type OwnProps = {|
@@ -33,6 +35,7 @@ export type OwnProps = {|
   +maxStackDepth: number,
   +flameGraphTiming: FlameGraphTiming,
   +callNodeInfo: CallNodeInfo,
+  +callTree: CallTree,
   +stackFrameHeight: CssPixels,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
@@ -386,6 +389,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     const {
       thread,
       flameGraphTiming,
+      callTree,
       callNodeInfo: { callNodeTable },
       disableTooltips,
     } = this.props;
@@ -426,13 +430,24 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       default:
         throw new Error(`Unknown stack type case "${stackType}".`);
     }
-    const { totalTime, selfTime } = stackTiming.display[flameGraphTimingIndex];
+
+    const displayData = callTree.getDisplayData(callNodeIndex);
 
     return (
       <div className="flameGraphCanvasTooltip">
-        <div className="tooltipOneLine tooltipHeader">
-          <div className="tooltipTiming">{(100 * duration).toFixed(2)}%</div>
-          <div className="tooltipTitle">{funcName}</div>
+        <div className="tooltipHeader">
+          <div className="tooltipOneLine">
+            <div className="tooltipTiming">{(100 * duration).toFixed(2)}%</div>
+            <div className="tooltipTitle">{funcName}</div>
+          </div>
+          <div className="tooltipOneLine">
+            {displayData.icon ? (
+              <div className="tooltipIcon">
+                <NodeIcon displayData={displayData} />
+              </div>
+            ) : null}
+            <span className="tooltipLib">{displayData.lib}</span>
+          </div>
         </div>
         <div className="tooltipDetails">
           <div className="tooltipLabel">Stack Type:</div>
@@ -444,9 +459,9 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
             {stackTypeLabel}
           </div>
           <div className="tooltipLabel">Running Time (ms):</div>
-          <div>{totalTime}</div>
+          <div>{displayData.totalTime}</div>
           <div className="tooltipLabel">Self (ms):</div>
-          <div>{selfTime}</div>
+          <div>{displayData.selfTime}</div>
         </div>
       </div>
     );

@@ -229,22 +229,15 @@ export class CallTree {
     };
   }
 
-  getTimingDisplayData(callNodeIndex: IndexIntoCallNodeTable) {
-    const totalTime = this._callNodeTimes.totalTime[callNodeIndex];
-    const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
-    const formatNumber = this._isIntegerInterval
-      ? _formatIntegerNumber
-      : _formatDecimalNumber;
-    return {
-      totalTime: `${formatNumber(totalTime)}`,
-      selfTime: selfTime === 0 ? '—' : `${formatNumber(selfTime)}`,
-    };
-  }
-
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
     let displayData = this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
-      const { funcName, totalTimeRelative } = this.getNodeData(callNodeIndex);
+      const {
+        funcName,
+        totalTime,
+        totalTimeRelative,
+        selfTime,
+      } = this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeTable.func[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
@@ -259,8 +252,13 @@ export class CallTree {
         icon = ExtensionIcon;
       }
 
+      const formatNumber = this._isIntegerInterval
+        ? _formatIntegerNumber
+        : _formatDecimalNumber;
+
       displayData = {
-        ...this.getTimingDisplayData(callNodeIndex),
+        totalTime: `${formatNumber(totalTime)}`,
+        selfTime: selfTime === 0 ? '—' : `${formatNumber(selfTime)}`,
         totalTimePercent: `${(100 * totalTimeRelative).toFixed(precision)}%`,
         name: funcName,
         lib: libName,

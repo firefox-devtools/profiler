@@ -25,16 +25,11 @@ export type IndexIntoFlameGraphTiming = number;
  *
  * selfTimeRelative contains the self time relative to the total time,
  * which is used to color the drawn functions.
- *
- * display contains formatted strings intended to be used for
- * displaying extra information (like in a tooltip) not readily
- * apparent from visual inspection of the boxes in the flame graph.
  */
 export type FlameGraphTiming = Array<{
   start: UnitIntervalOfProfileRange[],
   end: UnitIntervalOfProfileRange[],
   selfTimeRelative: Array<number>,
-  display: Array<{ totalTime: string, selfTime: string }>,
   callNode: IndexIntoCallNodeTable[],
   length: number,
 }>;
@@ -68,8 +63,6 @@ export function getFlameGraphTiming(
       nodeIndex
     );
 
-    const { totalTime, selfTime } = callTree.getTimingDisplayData(nodeIndex);
-
     // Select an existing row, or create a new one.
     let row = timing[depth];
     if (row === undefined) {
@@ -77,7 +70,6 @@ export function getFlameGraphTiming(
         start: [],
         end: [],
         selfTimeRelative: [],
-        display: [],
         callNode: [],
         length: 0,
       };
@@ -88,7 +80,6 @@ export function getFlameGraphTiming(
     row.start.push(timeOffset[depth]);
     row.end.push(timeOffset[depth] + totalTimeRelative);
     row.selfTimeRelative.push(selfTimeRelative);
-    row.display.push({ totalTime, selfTime });
     row.callNode.push(nodeIndex);
     row.length++;
 

@@ -22,10 +22,14 @@ type Props<HoveredItem> = {
   hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
 };
 
+// The naming of the X and Y coordinates here correspond to the ones
+// found on the MouseEvent interface.
 type State<HoveredItem> = {
   hoveredItem: HoveredItem | null,
-  mouseX: CssPixels,
-  mouseY: CssPixels,
+  pageX: CssPixels,
+  pageY: CssPixels,
+  offsetX: CssPixels,
+  offsetY: CssPixels,
 };
 
 require('./Canvas.css');
@@ -45,8 +49,10 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     this._devicePixelRatio = 1;
     this.state = {
       hoveredItem: null,
-      mouseX: 0,
-      mouseY: 0,
+      pageX: 0,
+      pageY: 0,
+      offsetX: 0,
+      offsetY: 0,
     };
 
     (this: any)._setCanvasRef = this._setCanvasRef.bind(this);
@@ -99,28 +105,10 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     }
   }
 
-  _hoveredItemFromMouseEvent(event: SyntheticMouseEvent<>): HoveredItem | null {
-    if (!this._canvas) {
-      throw new Error('Canvas ref not set');
+  _onMouseDown() {
+    if (this.props.onMouseDown) {
+      this.props.onMouseDown(this.state.hoveredItem);
     }
-
-    const rect = this._canvas.getBoundingClientRect();
-    const x: CssPixels = event.pageX - rect.left;
-    const y: CssPixels = event.pageY - rect.top;
-
-    return this.props.hitTest(x, y);
-  }
-
-  _onMouseDown(event: SyntheticMouseEvent<>) {
-    if (!this._canvas || !this.props.onMouseDown) {
-      return;
-    }
-
-    const maybeHoveredItem =
-      this.state.hoveredItem === null
-        ? this._hoveredItemFromMouseEvent(event)
-        : this.state.hoveredItem;
-    this.props.onMouseDown(maybeHoveredItem);
   }
 
   _onMouseMove(event: SyntheticMouseEvent<>) {
@@ -128,13 +116,20 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       return;
     }
 
-    const maybeHoveredItem = this._hoveredItemFromMouseEvent(event);
+    // These offsets seem to be identical to
+    // `event.nativeEvent.offsetX/Y`, albeit not recognized by flow.
+    const rect = this._canvas.getBoundingClientRect();
+    const offsetX: CssPixels = event.pageX - rect.left;
+    const offsetY: CssPixels = event.pageY - rect.top;
+    const maybeHoveredItem = this.props.hitTest(offsetX, offsetY);
 
     if (maybeHoveredItem !== null) {
       this.setState({
         hoveredItem: maybeHoveredItem,
-        mouseX: event.pageX,
-        mouseY: event.pageY,
+        pageX: event.pageX,
+        pageY: event.pageY,
+        offsetX,
+        offsetY,
       });
     } else if (this.state.hoveredItem !== null) {
       this.setState({
@@ -149,16 +144,8 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     }
   }
 
-  _onDoubleClick(event: SyntheticMouseEvent<>) {
-    if (!this._canvas) {
-      return;
-    }
-
-    const maybeHoveredItem =
-      this.state.hoveredItem === null
-        ? this._hoveredItemFromMouseEvent(event)
-        : this.state.hoveredItem;
-    this.props.onDoubleClickItem(maybeHoveredItem);
+  _onDoubleClick() {
+    this.props.onDoubleClickItem(this.state.hoveredItem);
   }
 
   _getHoveredItemInfo(): React.Node {
@@ -175,9 +162,13 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
 
   componentWillReceiveProps() {
     // It is possible that the data backing the chart has been
-    // changed, for instance after symbolication. Clear hoveredItem so
-    // that it doesn't point to possibly invalid data.
-    if (this.state.hoveredItem !== null) {
+    // changed, for instance after symbolication. Clear the
+    // hoveredItem if the mouse no longer hovers over it.
+    const { hoveredItem, offsetX, offsetY } = this.state;
+    if (
+      hoveredItem !== null &&
+      !hoveredItemsAreEqual(this.props.hitTest(offsetX, offsetY), hoveredItem)
+    ) {
       this.setState({ hoveredItem: null });
     }
   }
@@ -196,7 +187,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
 
   render() {
     const { isDragging } = this.props;
-    const { hoveredItem, mouseX, mouseY } = this.state;
+    const { hoveredItem, pageX, pageY } = this.state;
 
     const className = classNames({
       chartCanvas: true,
@@ -217,7 +208,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
           onDoubleClick={this._onDoubleClick}
         />
         {!isDragging && tooltipContents ? (
-          <Tooltip mouseX={mouseX} mouseY={mouseY}>
+          <Tooltip mouseX={pageX} mouseY={pageY}>
             {tooltipContents}
           </Tooltip>
         ) : null}
