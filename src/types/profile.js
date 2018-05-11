@@ -198,6 +198,8 @@ export type ProfileMeta = {|
   toolkit: string,
   version: number,
   preprocessedProfileVersion: number,
+  appBuildID: string,
+  sourceURL: string,
 |};
 
 /**

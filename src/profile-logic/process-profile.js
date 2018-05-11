@@ -812,6 +812,8 @@ export function processProfile(
     toolkit: geckoProfile.meta.toolkit,
     version: geckoProfile.meta.version,
     preprocessedProfileVersion: CURRENT_VERSION,
+    appBuildID: geckoProfile.meta.appBuildID,
+    sourceURL: geckoProfile.meta.sourceURL,
   };
 
   const result = {

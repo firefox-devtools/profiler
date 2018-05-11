@@ -4,6 +4,7 @@ exports[`snapshots of selectors/profile-view matches the last stored run of getP
 Object {
   "meta": Object {
     "abi": "",
+    "appBuildID": "",
     "extensions": Object {
       "baseURL": Array [],
       "id": Array [],
@@ -17,6 +18,7 @@ Object {
     "preprocessedProfileVersion": 10,
     "processType": 0,
     "product": "Firefox",
+    "sourceURL": "",
     "stackwalk": 0,
     "startTime": 0,
     "toolkit": "",
