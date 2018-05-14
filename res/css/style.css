@@ -784,6 +784,8 @@ body, #root, .profileViewer {
 
 .react-contextmenu.react-contextmenu--visible {
   display: block;
+  max-height: 450px;
+  overflow-y: auto;
 }
 
 .react-contextmenu-item {
