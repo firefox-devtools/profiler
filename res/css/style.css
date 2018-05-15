@@ -228,11 +228,11 @@ body, #root, .profileViewer {
   background-position: -16px 0;
 }
 
-.treeViewBody:focus .treeViewBodyInner .treeViewRow.selected > .focusCallstackButton {
+.treeViewBody:focus .treeViewRow.selected > .focusCallstackButton {
   background-position: -32px 0;
 }
 
-.treeViewBody:focus .treeViewBodyInner .treeViewRow.selected > .focusCallstackButton:active:hover {
+.treeViewBody:focus .treeViewRow.selected > .focusCallstackButton:active:hover {
   background-position: -48px 0;
 }
 
@@ -258,11 +258,11 @@ body, #root, .profileViewer {
   color: var(--grey-60);
 }
 
-.treeViewBody:focus .treeViewBodyInner .treeViewRow.selected > .treeRowToggleButton {
+.treeViewBody:focus .treeViewRow.selected > .treeRowToggleButton {
   color: #FFF;
 }
 
-.treeViewBody:focus .treeViewBodyInner .treeViewRow.selected > .treeRowToggleButton:active:hover {
+.treeViewBody:focus .treeViewRow.selected > .treeRowToggleButton:active:hover {
   color: rgba(255, 255, 255, 0.7);
 }
 
