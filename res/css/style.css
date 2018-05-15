@@ -237,21 +237,22 @@ body, #root, .profileViewer {
 }
 
 
-.treeRowToggleButton {
-  height: 0;
-  width: 0;
-  color: #888;
-  border-left: 8px solid;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-right: 3px solid transparent;
-  margin-left: 5px;
-  margin-right: 5px;
-}
-
 .treeRowToggleButton.expanded {
-  transform: rotate(90deg);
-  margin-top: 5px;
+    border-top: 8px solid;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 4px solid transparent;
+}
+.treeRowToggleButton {
+    height: 0;
+    width: 0;
+    color: #888;
+    border-left: 8px solid;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-right: 4px solid transparent;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 .treeRowToggleButton:active:hover {
