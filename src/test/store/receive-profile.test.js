@@ -23,6 +23,7 @@ import getGeckoProfile from '../fixtures/profiles/gecko-profile';
 import { getEmptyProfile } from '../../profile-logic/profile-data';
 import JSZip from 'jszip';
 import { serializeProfile } from '../../profile-logic/process-profile';
+import { getThreadWithMarkers } from '../fixtures/profiles/make-profile';
 
 // Mocking SymbolStoreDB
 import exampleSymbolTable from '../fixtures/example-symbol-table';
@@ -70,6 +71,40 @@ describe('actions/receive-profile', function() {
       expect(ProfileViewSelectors.getProfile(store.getState())).toBe(
         emptyProfile
       );
+    });
+
+    it('will hide content threads with no RefreshDriverTick markers', function() {
+      const store = blankStore();
+
+      expect(() => {
+        ProfileViewSelectors.getProfile(store.getState());
+      }).toThrow();
+
+      const initialProfile = ProfileViewSelectors.getProfileOrNull(
+        store.getState()
+      );
+      expect(initialProfile).toBeNull();
+      const profile = getEmptyProfile();
+      profile.threads.push(getThreadWithMarkers([]));
+      profile.threads.push(
+        getThreadWithMarkers([
+          [
+            'RefreshDriverTick',
+            0,
+            { type: 'tracing', category: 'Paint', interval: 'start' },
+          ],
+        ])
+      );
+      profile.threads.push(getThreadWithMarkers([]));
+      profile.threads.forEach(thread => {
+        thread.name = 'GeckoMain';
+        thread.processType = 'tab';
+      });
+      store.dispatch(viewProfile(profile));
+      expect(UrlStateSelectors.getHiddenThreads(store.getState())).toEqual([
+        0,
+        2,
+      ]);
     });
   });
 
