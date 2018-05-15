@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="410" height="328" viewBox="0 0 410 328">
+  <defs>
+    <rect id="simple-stacks-self-time-a" width="61" height="24" x="50" y="181" rx="8"/>
+    <rect id="simple-stacks-self-time-b" width="61" height="24" x="117" y="181" rx="8"/>
+    <rect id="simple-stacks-self-time-c" width="61" height="24" x="184" y="181" rx="8"/>
+  </defs>
+  <g fill="none" fill-rule="evenodd" transform="translate(56 64)">
+    <use fill="#D8D8D8" xlink:href="#simple-stacks-self-time-a"/>
+    <rect width="60" height="23" x="50.5" y="181.5" stroke="#979797" rx="8"/>
+    <use fill="#D8D8D8" xlink:href="#simple-stacks-self-time-b"/>
+    <rect width="60" height="23" x="117.5" y="181.5" stroke="#979797" rx="8"/>
+    <g>
+      <use fill="#D8D8D8" xlink:href="#simple-stacks-self-time-c"/>
+      <rect width="60" height="23" x="184.5" y="181.5" stroke="#979797" rx="8"/>
+    </g>
+    <g>
+      <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M81.5 97.4166667L81.5 126.583333M81.5 126.583333L84.5 115.783333 78.5 115.783333 81.5 126.583333zM148.5 97.4166667L148.5 126.583333M148.5 126.583333L151.5 115.783333 145.5 115.783333 148.5 126.583333zM215.5 97.4166667L215.5 126.583333M215.5 126.583333L218.5 115.783333 212.5 115.783333 215.5 126.583333zM81.5 150.416667L81.5 179.583333M81.5 179.583333L84.5 168.783333 78.5 168.783333 81.5 179.583333zM148.5 150.416667L148.5 179.583333M148.5 179.583333L151.5 168.783333 145.5 168.783333 148.5 179.583333zM215.5 150.416667L215.5 179.583333M215.5 179.583333L218.5 168.783333 212.5 168.783333 215.5 179.583333zM13.5 44.4166667L13.5 73.5833333M13.5 73.5833333L16.5 62.7833333 10.5 62.7833333 13.5 73.5833333zM81.5 44.4166667L81.5 73.5833333M81.5 73.5833333L84.5 62.7833333 78.5 62.7833333 81.5 73.5833333zM148.5 44.4166667L148.5 73.5833333M148.5 73.5833333L151.5 62.7833333 145.5 62.7833333 148.5 73.5833333zM215.5 44.4166667L215.5 73.5833333M215.5 73.5833333L218.5 62.7833333 212.5 62.7833333 215.5 73.5833333zM281.5 44.4166667L281.5 73.5833333M281.5 73.5833333L284.5 62.7833333 278.5 62.7833333 281.5 73.5833333z"/>
+      <circle cx="14" cy="34" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="82" cy="34" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="149" cy="34" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="216" cy="34" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="282" cy="34" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="14" cy="87" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="82" cy="87" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="149" cy="87" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="216" cy="87" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="282" cy="87" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="83" cy="140" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="150" cy="140" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="217" cy="140" r="12" fill="#D7D7DB" stroke="#737373"/>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="8" y="39">A</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="76" y="39">A</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="143" y="39">A</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="210" y="39">A</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="276" y="39">A</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="8" y="93">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="76" y="93">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="143" y="93">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="210" y="93">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="276" y="93">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="77" y="146">C</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="144" y="146">C</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="211" y="146">C</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="14">
+        <tspan x="57.506" y="198">doWork</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="14">
+        <tspan x="124.506" y="198">doWork</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="14">
+        <tspan x="191.506" y="198">doWork</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="12">
+        <tspan x="1.165" y="11">1ms</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="12">
+        <tspan x="71.165" y="11">2ms</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="12">
+        <tspan x="137.165" y="11">3ms</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="12">
+        <tspan x="205.165" y="11">4ms</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="12">
+        <tspan x="270.165" y="11">5ms</tspan>
+      </text>
+    </g>
+  </g>
+</svg>

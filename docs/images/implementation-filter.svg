@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="410" height="328" viewBox="0 0 410 328">
+  <defs>
+    <rect id="implementation-filter-a" width="87" height="21" x="53" y="82" rx="10.5"/>
+    <rect id="implementation-filter-b" width="117" height="21" x="94" y="173" rx="10.5"/>
+    <rect id="implementation-filter-c" width="54" height="21" x="69" y="127" rx="10.5"/>
+    <rect id="implementation-filter-d" width="54" height="21" x="307" y="83" rx="10.5"/>
+    <rect id="implementation-filter-e" width="23" height="21" x="48" y="174" rx="10.5"/>
+    <rect id="implementation-filter-f" width="23" height="21" x="322" y="130" rx="10.5"/>
+    <rect id="implementation-filter-g" width="23" height="21" x="138" y="221" rx="10.5"/>
+    <rect id="implementation-filter-h" width="23" height="21" x="48" y="221" rx="10.5"/>
+    <rect id="implementation-filter-i" width="23" height="21" x="322" y="177" rx="10.5"/>
+    <rect id="implementation-filter-j" width="23" height="21" x="138" y="268" rx="10.5"/>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <text fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold">
+      <tspan x="190.835" y="53">Filter to</tspan> <tspan x="190.349" y="73">JS Only</tspan>
+    </text>
+    <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" stroke-width=".9" d="M95.5 102.384425L95.5 126.553571M95.5 126.553571L98.5 115.753571 92.5 115.753571 95.5 126.553571zM59.5 195.384425L59.5 219.553571M59.5 219.553571L62.5 208.753571 56.5 208.753571 59.5 219.553571zM333.5 151.384425L333.5 175.553571M333.5 175.553571L336.5 164.753571 330.5 164.753571 333.5 175.553571zM149.5 194.384425L149.5 218.553571M149.5 218.553571L152.5 207.753571 146.5 207.753571 149.5 218.553571zM149.5 242.384425L149.5 266.553571M149.5 266.553571L152.5 255.753571 146.5 255.753571 149.5 266.553571zM102.55 138.38955L67.45 175.547619M67.45 175.547619L77.04709 169.756603 72.6853784 165.636473 67.45 175.547619zM333.45 95.5L333.45 128.547619M333.45 128.547619L336.45 117.747619 330.45 117.747619 333.45 128.547619zM95.453125 138.386396L123.546875 172.551282M123.546875 172.551282L119.004544 162.303979 114.370166 166.114823 123.546875 172.551282z"/>
+    <use fill="#D7D7DB" xlink:href="#implementation-filter-a"/>
+    <rect width="86.1" height="20.1" x="53.45" y="82.45" stroke="#4A4A4A" stroke-width=".9" rx="10.05"/>
+    <use fill="#D7D7DB" xlink:href="#implementation-filter-b"/>
+    <rect width="116.1" height="20.1" x="94.45" y="173.45" stroke="#4A4A4A" stroke-width=".9" rx="10.05"/>
+    <use fill="#0A84FF" xlink:href="#implementation-filter-c"/>
+    <rect width="53.1" height="20.1" x="69.45" y="127.45" stroke="#5A0002" stroke-width=".9" rx="10.05"/>
+    <use fill="#0A84FF" xlink:href="#implementation-filter-d"/>
+    <rect width="53.1" height="20.1" x="307.45" y="83.45" stroke="#5A0002" stroke-width=".9" rx="10.05"/>
+    <use fill="#0A84FF" xlink:href="#implementation-filter-e"/>
+    <rect width="22.1" height="20.1" x="48.45" y="174.45" stroke="#5A0002" stroke-width=".9" rx="10.05"/>
+    <use fill="#0A84FF" xlink:href="#implementation-filter-f"/>
+    <rect width="22.1" height="20.1" x="322.45" y="130.45" stroke="#5A0002" stroke-width=".9" rx="10.05"/>
+    <use fill="#0A84FF" xlink:href="#implementation-filter-g"/>
+    <rect width="22.1" height="20.1" x="138.45" y="221.45" stroke="#5A0002" stroke-width=".9" rx="10.05"/>
+    <use fill="#0A84FF" xlink:href="#implementation-filter-h"/>
+    <rect width="22.1" height="20.1" x="48.45" y="221.45" stroke="#5A0002" stroke-width=".9" rx="10.05"/>
+    <use fill="#0A84FF" xlink:href="#implementation-filter-i"/>
+    <rect width="22.1" height="20.1" x="322.45" y="177.45" stroke="#5A0002" stroke-width=".9" rx="10.05"/>
+    <use fill="#0A84FF" xlink:href="#implementation-filter-j"/>
+    <rect width="22.1" height="20.1" x="138.45" y="268.45" stroke="#5A0002" stroke-width=".9" rx="10.05"/>
+    <text fill="#000" font-family="Helvetica" font-size="12.6">
+      <tspan x="58.486" y="96">JS::RunScript</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="12.6">
+      <tspan x="107.073" y="188">js::jit::IonCannon</tspan>
+    </text>
+    <text fill="#FFF" font-family="Helvetica" font-size="12.6">
+      <tspan x="75.977" y="142">onLoad</tspan>
+    </text>
+    <text fill="#FFF" font-family="Helvetica" font-size="12.6">
+      <tspan x="313.977" y="98">onLoad</tspan>
+    </text>
+    <text fill="#FFF" font-family="Helvetica" font-size="12.6">
+      <tspan x="55.298" y="189">A</tspan>
+    </text>
+    <text fill="#FFF" font-family="Helvetica" font-size="12.6">
+      <tspan x="329.298" y="145">A</tspan>
+    </text>
+    <text fill="#FFF" font-family="Helvetica" font-size="12.6">
+      <tspan x="145.298" y="236">A</tspan>
+    </text>
+    <text fill="#FFF" font-family="Helvetica" font-size="12.6">
+      <tspan x="55.298" y="236">B</tspan>
+    </text>
+    <text fill="#FFF" font-family="Helvetica" font-size="12.6">
+      <tspan x="329.298" y="192">B</tspan>
+    </text>
+    <text fill="#FFF" font-family="Helvetica" font-size="12.6">
+      <tspan x="145.298" y="283">B</tspan>
+    </text>
+    <text fill="#9B9B9B" font-family="Helvetica" font-size="12.6">
+      <tspan x="24.092" y="96">C++</tspan>
+    </text>
+    <text fill="#9B9B9B" font-family="Helvetica" font-size="12.6">
+      <tspan x="215.092" y="188">C++</tspan>
+    </text>
+    <text fill="#4A90E2" font-family="Helvetica" font-size="12.6">
+      <tspan x="128.148" y="142">JS</tspan>
+    </text>
+    <text fill="#4A90E2" font-family="Helvetica" font-size="12.6">
+      <tspan x="28.148" y="190">JS</tspan>
+    </text>
+    <text fill="#4A90E2" font-family="Helvetica" font-size="12.6">
+      <tspan x="351.148" y="146">JS</tspan>
+    </text>
+    <text fill="#4A90E2" font-family="Helvetica" font-size="12.6">
+      <tspan x="367.148" y="98">JS</tspan>
+    </text>
+    <text fill="#4A90E2" font-family="Helvetica" font-size="12.6">
+      <tspan x="119.148" y="236">JS</tspan>
+    </text>
+    <text fill="#4A90E2" font-family="Helvetica" font-size="12.6">
+      <tspan x="29.148" y="236">JS</tspan>
+    </text>
+    <text fill="#4A90E2" font-family="Helvetica" font-size="12.6">
+      <tspan x="352.148" y="192">JS</tspan>
+    </text>
+    <text fill="#4A90E2" font-family="Helvetica" font-size="12.6">
+      <tspan x="119.148" y="282">JS</tspan>
+    </text>
+    <path fill="#0A84FF" stroke="#0A84FF" stroke-linecap="square" stroke-width="3" d="M184.5 92.5L258.5 92.5M258.5 92.5L247.7 89.5 247.7 95.5 258.5 92.5z"/>
+  </g>
+</svg>

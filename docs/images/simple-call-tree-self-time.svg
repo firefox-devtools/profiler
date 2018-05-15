@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="410" height="328" viewBox="0 0 410 328">
+  <defs>
+    <rect id="simple-call-tree-self-time-a" width="61" height="24" y="159" rx="8"/>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <g transform="translate(68 74)">
+      <use fill="#D8D8D8" xlink:href="#simple-call-tree-self-time-a"/>
+      <rect width="60" height="23" x=".5" y="159.5" stroke="#979797" rx="8"/>
+      <g transform="translate(3)">
+        <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M28.5 75.4166667L28.5 104.583333M28.5 104.583333L31.5 93.7833333 25.5 93.7833333 28.5 104.583333zM28.5 128.416667L28.5 157.583333M28.5 157.583333L31.5 146.783333 25.5 146.783333 28.5 157.583333zM28.5 22.4166667L28.5 51.5833333M28.5 51.5833333L31.5 40.7833333 25.5 40.7833333 28.5 51.5833333z"/>
+        <circle cx="29" cy="12" r="12" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="29" cy="65" r="12" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="30" cy="118" r="12" fill="#D7D7DB" stroke="#737373"/>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="23" y="17">A</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="23" y="71">B</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="24" y="124">C</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="14">
+          <tspan x="4.506" y="176">doWork</tspan>
+        </text>
+      </g>
+    </g>
+    <text font-family="Helvetica" font-size="11">
+      <tspan x="128.215" y="88" fill="#000">(Running time: </tspan> <tspan x="202.803" y="88" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">5ms</tspan> <tspan x="224.82" y="88" fill="#000">) (Self time: </tspan> <tspan x="284.106" y="88" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">0ms</tspan> <tspan x="306.122" y="88" fill="#000">)</tspan>
+    </text>
+    <text font-family="Helvetica" font-size="11">
+      <tspan x="129.215" y="142" fill="#000">(Running time: </tspan> <tspan x="203.803" y="142" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">5ms</tspan> <tspan x="225.82" y="142" fill="#000">) (Self time: </tspan> <tspan x="285.106" y="142" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">2ms</tspan> <tspan x="307.122" y="142" fill="#000">)</tspan>
+    </text>
+    <text font-family="Helvetica" font-size="11">
+      <tspan x="128.215" y="196" fill="#000">(Running time: </tspan> <tspan x="202.803" y="196" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">3ms</tspan> <tspan x="224.82" y="196" fill="#000">) (Self time: </tspan> <tspan x="284.106" y="196" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">0ms</tspan> <tspan x="306.122" y="196" fill="#000">)</tspan>
+    </text>
+    <text font-family="Helvetica" font-size="11">
+      <tspan x="147.215" y="249" fill="#000">(Running time: </tspan> <tspan x="221.803" y="249" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">3ms</tspan> <tspan x="243.82" y="249" fill="#000">) (Self time: </tspan> <tspan x="303.106" y="249" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">3ms</tspan> <tspan x="325.122" y="249" fill="#000">)</tspan>
+    </text>
+  </g>
+</svg>

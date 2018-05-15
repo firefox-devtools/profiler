@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="410" height="328" viewBox="0 0 410 328">
+  <g fill="none" fill-rule="evenodd">
+    <g transform="translate(42 30)">
+      <ellipse cx="19" cy="77.5" stroke="#0A84FF" stroke-width="3" rx="19" ry="19.5"/>
+      <ellipse cx="75" cy="142.5" stroke="#0A84FF" stroke-width="3" rx="19" ry="19.5"/>
+      <g fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" transform="translate(17 11)">
+        <path d="M1.5 80.5L1.5 115.5M1.5 115.5L4.5 104.7-1.5 104.7 1.5 115.5zM58.5 143.5L58.5 178.5M58.5 178.5L61.5 167.7 55.5 167.7 58.5 178.5zM1.5 143.5L1.5 178.5M1.5 178.5L4.5 167.7-1.5 167.7 1.5 178.5zM58.5 206.5L58.5 241.5M58.5 241.5L61.5 230.7 55.5 230.7 58.5 241.5zM58.5 80.5L58.5 115.5M58.5 115.5L61.5 104.7 55.5 104.7 58.5 115.5zM30.5.5L8.5 52.5M8.5 52.5L15.4710137 43.7224737 9.94521015 41.3846337 8.5 52.5z"/>
+        <path d="M51.5,0.5 L29.5,52.5" transform="matrix(-1 0 0 1 81 0)"/>
+        <path d="M29.5,52.5 L36.4710137,43.7224737 L30.9452101,41.3846337 L29.5,52.5 Z"/>
+      </g>
+      <g transform="translate(5)">
+        <circle cx="42" cy="14" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="14" cy="78" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="70" cy="78" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="70" cy="142" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="14" cy="142" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="71" cy="205" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="14" cy="205" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="71" cy="268" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="35.831" y="19">A</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="7.831" y="83">B</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="63.831" y="83">E</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="64.331" y="147">B</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="7.862" y="147">C</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="65.808" y="210">F</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="7.862" y="210">D</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="64.388" y="273">G</tspan>
+        </text>
+      </g>
+      <text fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold">
+        <tspan x="127.223" y="37">Focus on</tspan> <tspan x="120.62" y="57">Function B</tspan>
+      </text>
+    </g>
+    <g transform="translate(285 22)">
+      <ellipse cx="42" cy="19.5" stroke="#0A84FF" stroke-width="3" rx="19" ry="19.5"/>
+      <g fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" transform="translate(13 17)">
+        <path d="M57.5 80.5L57.5 115.5M57.5 115.5L60.5 104.7 54.5 104.7 57.5 115.5zM1.5 80.5L1.5 115.5M1.5 115.5L4.5 104.7-1.5 104.7 1.5 115.5zM29.5.5L7.5 52.5M7.5 52.5L14.4710137 43.7224737 8.94521015 41.3846337 7.5 52.5z"/>
+        <path d="M50.5,0.5 L28.5,52.5" transform="matrix(-1 0 0 1 79 0)"/>
+        <path d="M28.5,52.5 L35.4710137,43.7224737 L29.9452101,41.3846337 L28.5,52.5 Z"/>
+      </g>
+      <g transform="translate(0 6)">
+        <circle cx="42" cy="14" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="14" cy="78" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="70" cy="78" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="70" cy="142" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <circle cx="14" cy="142" r="14" fill="#D7D7DB" stroke="#737373"/>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="35.831" y="19">B</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="7.362" y="83">C</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="64.308" y="83">F</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="63.388" y="147">G</tspan>
+        </text>
+        <text fill="#000" font-family="Helvetica" font-size="17">
+          <tspan x="7.862" y="147">D</tspan>
+        </text>
+      </g>
+    </g>
+    <path fill="#0A84FF" stroke="#0A84FF" stroke-linecap="square" stroke-width="3" d="M168.5 37.5L243.506666 37.5M243.506666 37.5L232.706666 34.5 232.706666 40.5 243.506666 37.5z"/>
+  </g>
+</svg>

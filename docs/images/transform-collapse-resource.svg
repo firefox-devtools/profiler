@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="410" height="328" viewBox="0 0 410 328">
+  <g fill="none" fill-rule="evenodd">
+    <g transform="translate(49 38)">
+      <g fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" transform="translate(12 12)">
+        <path d="M1.5 178.5L1.5 213.5M1.5 213.5L4.5 202.7-1.5 202.7 1.5 213.5zM42.5.5L10.5 52.5M10.5 52.5L18.7152271 44.8743825 13.6052772 41.7297979 10.5 52.5zM2.5 78.5L2.5 133.5M2.5 133.5L5.5 122.7-.5 122.7 2.5 133.5zM79.5 78.5L79.5 133.5M79.5 133.5L82.5 122.7 76.5 122.7 79.5 133.5zM271.5 14.5L271.5 48.5M271.5 48.5L274.5 37.7 268.5 37.7 271.5 48.5z"/>
+        <path d="M72.5,0.5 L41.5,53.5" transform="matrix(-1 0 0 1 114 0)"/>
+        <path d="M41.5,53.5 L49.5423026,45.6922238 L44.363177,42.6629239 L41.5,53.5 Z"/>
+      </g>
+      <circle cx="54" cy="14" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="14" cy="78" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="14" cy="161" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="91" cy="161" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="14" cy="241" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="92" cy="78" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="284" cy="14" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="48.331" y="19">A</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="8.331" y="83">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="8.362" y="166">C</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="86.308" y="166">F</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="7.862" y="246">D</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="86.331" y="83">E</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="278.331" y="19">A</tspan>
+      </text>
+      <text fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold">
+        <tspan x="140.572" y="39">Collapse</tspan> <tspan x="137.26" y="59">Resource</tspan> <tspan x="139.601" y="79">&quot;Firefox&quot;</tspan>
+      </text>
+    </g>
+    <g transform="translate(291 100)">
+      <g fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" transform="translate(20 11)">
+        <path d="M22.5.5L.5 52.5M.5 52.5L7.47101365 43.7224737 1.94521015 41.3846337.5 52.5z"/>
+        <path d="M43.5,0.5 L21.5,52.5" transform="matrix(-1 0 0 1 65 0)"/>
+        <path d="M21.5,52.5 L28.4710137,43.7224737 L22.9452101,41.3846337 L21.5,52.5 Z"/>
+      </g>
+      <circle cx="42" cy="14" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="14" cy="78" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="70" cy="78" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="8.362" y="83">D</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="65.308" y="83">F</tspan>
+      </text>
+    </g>
+    <path fill="#0A84FF" stroke="#0A84FF" stroke-linecap="square" stroke-width="3" d="M187.5 47.5L262.506666 47.5M262.506666 47.5L251.706666 44.5 251.706666 50.5 262.506666 47.5z"/>
+    <g transform="translate(34 131)">
+      <rect width="59" height="16" fill="#0A84FF" rx="8"/>
+      <text fill="#FFF" font-family="Helvetica-Bold, Helvetica" font-size="11" font-weight="bold">
+        <tspan x="6.166" y="12">FIREFOX</tspan>
+      </text>
+    </g>
+    <g transform="translate(304 106)">
+      <rect width="59" height="16" fill="#0A84FF" rx="8"/>
+      <text fill="#FFF" font-family="Helvetica-Bold, Helvetica" font-size="11" font-weight="bold">
+        <tspan x="6.166" y="12">FIREFOX</tspan>
+      </text>
+    </g>
+    <g transform="translate(111 131)">
+      <rect width="59" height="16" fill="#0A84FF" rx="8"/>
+      <text fill="#FFF" font-family="Helvetica-Bold, Helvetica" font-size="11" font-weight="bold">
+        <tspan x="6.166" y="12">FIREFOX</tspan>
+      </text>
+    </g>
+    <g transform="translate(34 214)">
+      <rect width="59" height="16" fill="#0A84FF" rx="8"/>
+      <text fill="#FFF" font-family="Helvetica-Bold, Helvetica" font-size="11" font-weight="bold">
+        <tspan x="6.166" y="12">FIREFOX</tspan>
+      </text>
+    </g>
+  </g>
+</svg>

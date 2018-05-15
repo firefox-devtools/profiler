@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="410" height="328" viewBox="0 0 410 328">
+  <g fill="none" fill-rule="evenodd">
+    <path fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" d="M106.5 78.4305556L106.5 108.569444M106.5 108.569444L109.5 97.7694444 103.5 97.7694444 106.5 108.569444zM310.5 78.4305556L310.5 108.569444M310.5 108.569444L313.5 97.7694444 307.5 97.7694444 310.5 108.569444zM57.5 243.430556L57.5 273.569444M57.5 273.569444L60.5 262.769444 54.5 262.769444 57.5 273.569444zM285.5 243.430556L285.5 273.569444M285.5 273.569444L288.5 262.769444 282.5 262.769444 285.5 273.569444zM107.5 243.430556L107.5 273.569444M107.5 273.569444L110.5 262.769444 104.5 262.769444 107.5 273.569444zM335.5 243.430556L335.5 273.569444M335.5 273.569444L338.5 262.769444 332.5 262.769444 335.5 273.569444zM153.5 243.430556L153.5 273.569444M153.5 273.569444L156.5 262.769444 150.5 262.769444 153.5 273.569444zM107.565217 120.433962L88.4347826 165.566038M88.4347826 165.566038L95.4117472 156.793241 89.8875303 154.451654 88.4347826 165.566038zM311.565217 120.433962L311.565217 159.5M311.565217 159.5L314.565217 148.7 308.565217 148.7 311.565217 159.5zM107.565217 120.433962L129.5 164.5M129.5 164.5L127.373016 153.494731 122.001672 156.168429 129.5 164.5zM130.565217 174.433962L152.5 218.5M152.5 218.5L150.373016 207.494731 145.001672 210.168429 152.5 218.5zM80.5652174 175.433962L102.5 219.5M102.5 219.5L100.373016 208.494731 95.0016717 211.168429 102.5 219.5zM308.565217 175.433962L330.5 219.5M330.5 219.5L328.373016 208.494731 323.001672 211.168429 330.5 219.5zM83.5652174 174.433962L64.4347826 219.566038M64.4347826 219.566038L71.4117472 210.793241 65.8875303 208.451654 64.4347826 219.566038zM311.565217 174.433962L292.434783 219.566038M292.434783 219.566038L299.411747 210.793241 293.88753 208.451654 292.434783 219.566038z"/>
+    <ellipse cx="107.5" cy="67" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <rect width="36" height="35" x="294" y="160" fill="#4A90E2" rx="17.5"/>
+    <ellipse cx="311.5" cy="67" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="107.5" cy="122" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="311.5" cy="122" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="83.5" cy="177" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="311.5" cy="177" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="58.5" cy="232" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="286.5" cy="232" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="107.5" cy="232" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="335.5" cy="232" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="153.5" cy="232" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="107.5" cy="287" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="335.5" cy="287" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="153.5" cy="287" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="58.5" cy="287" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="286.5" cy="287" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <ellipse cx="132.5" cy="177" fill="#D7D7DB" stroke="#737373" rx="12.5" ry="12"/>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="102" y="74">A</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="306" y="74">A</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="102" y="129">B</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="306" y="129">B</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="77" y="184">C</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="306" y="184">C</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="53" y="239">D</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="281" y="239">D</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="103" y="239">F</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="331" y="239">F</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="149" y="238">F</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="101" y="294">G</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="329" y="294">G</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="147" y="294">G</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="53" y="294">E</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="281" y="294">E</tspan>
+    </text>
+    <text fill="#000" font-family="Helvetica" font-size="17">
+      <tspan x="126" y="184">H</tspan>
+    </text>
+    <text fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold">
+      <tspan x="161.957" y="71">Search for</tspan> <tspan x="189.802" y="91">&quot;C&quot;</tspan>
+    </text>
+    <path fill="#0A84FF" stroke="#0A84FF" stroke-linecap="square" stroke-width="3" d="M166.5 110.5L240.5 110.5M240.5 110.5L229.7 107.5 229.7 113.5 240.5 110.5z"/>
+  </g>
+</svg>
