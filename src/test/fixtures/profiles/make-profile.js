@@ -19,22 +19,13 @@ type TestDefinedMarkers = Array<[MarkerName, MarkerTime, DataPayload]>;
 
 export { getEmptyProfile } from '../../../profile-logic/profile-data';
 
-export function addMarkersToProfileReplacingSamples(
-  markers: TestDefinedMarkers,
-  profile: Profile
+export function addMarkersToThreadReplacingSamples(
+  thread: Thread,
+  markers: TestDefinedMarkers
 ) {
-  const thread = profile.threads[0];
   const stringTable = thread.stringTable;
   const markersTable = thread.markers;
-  const samples = {
-    time: [],
-    responsiveness: [],
-    stack: [],
-    rss: [],
-    uss: [],
-    length: 0,
-  };
-  thread.samples = samples;
+  const samples = thread.samples;
 
   markers.forEach(([name, time, data]) => {
     if (data && !data.type) {
@@ -61,10 +52,19 @@ export function addMarkersToProfileReplacingSamples(
   samples.time.sort();
 }
 
-export function getProfileWithMarkers(markers: TestDefinedMarkers): Profile {
+export function getThreadWithMarkers(markers: TestDefinedMarkers) {
+  const thread = getEmptyThread();
+  addMarkersToThreadReplacingSamples(thread, markers);
+  return thread;
+}
+
+export function getProfileWithMarkers(
+  ...markersPerThread: TestDefinedMarkers[]
+): Profile {
   const profile = getEmptyProfile();
-  profile.threads.push(getEmptyThread());
-  addMarkersToProfileReplacingSamples(markers, profile);
+  profile.threads = markersPerThread.map(testDefinedMarkers =>
+    getThreadWithMarkers(testDefinedMarkers)
+  );
   return profile;
 }
 
@@ -82,7 +82,6 @@ export function getEmptyThread(overrides: ?Object): Thread {
       pid: 0,
       tid: 0,
       samples: {
-        frameNumber: [],
         responsiveness: [],
         stack: [],
         time: [],
