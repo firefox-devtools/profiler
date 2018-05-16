@@ -1,6 +1,6 @@
 # perf.html - End user documentation
 
-* [User Guide](README.md)
+* [User Guide](/)
   * [Profiler Fundamentals](./guide-profiler-fundamentals.md)
   * [Stack samples and call trees](./guide-stack-samples-and-call-trees.md)
   * [Filtering call trees](./guide-filtering-call-trees.md)
