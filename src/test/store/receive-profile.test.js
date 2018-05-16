@@ -19,7 +19,6 @@ import {
   _fetchProfile,
 } from '../../actions/receive-profile';
 
-import preprocessedProfile from '../fixtures/profiles/profile-2d-canvas.json';
 import getGeckoProfile from '../fixtures/profiles/gecko-profile';
 import { getEmptyProfile } from '../../profile-logic/profile-data';
 import JSZip from 'jszip';
@@ -66,9 +65,10 @@ describe('actions/receive-profile', function() {
         store.getState()
       );
       expect(initialProfile).toBeNull();
-      store.dispatch(viewProfile(preprocessedProfile));
+      const emptyProfile = getEmptyProfile();
+      store.dispatch(viewProfile(emptyProfile));
       expect(ProfileViewSelectors.getProfile(store.getState())).toBe(
-        preprocessedProfile
+        emptyProfile
       );
     });
   });
