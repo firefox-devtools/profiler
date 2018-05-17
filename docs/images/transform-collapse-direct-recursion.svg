@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="410" height="328" viewBox="0 0 410 328">
+  <g fill="none" fill-rule="evenodd">
+    <rect width="37" height="163" x="68.5" y="85.5" stroke="#0A84FF" stroke-width="3" rx="18.5"/>
+    <g transform="translate(73 26)">
+      <ellipse cx="257" cy="79.5" stroke="#0A84FF" stroke-width="3" rx="19" ry="19.5"/>
+      <g fill="#4A4A4A" stroke="#4A4A4A" stroke-linecap="square" transform="translate(12 27)">
+        <path d="M1.5 63.5L1.5 98.5M1.5 98.5L4.5 87.7-1.5 87.7 1.5 98.5zM245.5 64.5L245.5 99.5M245.5 99.5L248.5 88.7 242.5 88.7 245.5 99.5zM1.5 126.5L1.5 161.5M1.5 161.5L4.5 150.7-1.5 150.7 1.5 161.5zM2.5 189.5L2.5 224.5M2.5 224.5L5.5 213.7-.5 213.7 2.5 224.5zM2.5.5L2.5 35.5M2.5 35.5L5.5 24.7-.5 24.7 2.5 35.5zM245.5 1.5L245.5 36.5M245.5 36.5L248.5 25.7 242.5 25.7 245.5 36.5z"/>
+      </g>
+      <circle cx="14" cy="14" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="257" cy="15" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="14" cy="78" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="257" cy="79" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="14" cy="141" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="14" cy="204" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="15" cy="267" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <circle cx="258" cy="142" r="14" fill="#D7D7DB" stroke="#737373"/>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="8.331" y="19">A</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="251.331" y="20">A</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="8.331" y="83">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="251.331" y="84">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="8.331" y="147">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="8.331" y="209">B</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="9.362" y="272">C</tspan>
+      </text>
+      <text fill="#000" font-family="Helvetica" font-size="17">
+        <tspan x="251.362" y="147">C</tspan>
+      </text>
+      <text fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold">
+        <tspan x="72.118" y="60">Collapse Direct</tspan> <tspan x="71.188" y="80">Recursion on B</tspan>
+      </text>
+    </g>
+    <path fill="#0A84FF" stroke="#0A84FF" stroke-linecap="square" stroke-width="3" d="M168.5 56.5L243.506666 56.5M243.506666 56.5L232.706666 53.5 232.706666 59.5 243.506666 56.5z"/>
+  </g>
+</svg>

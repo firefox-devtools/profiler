@@ -7,7 +7,7 @@ import { render } from 'react-dom';
 import Root from './components/app/Root';
 import createStore from './create-store';
 import 'photon-colors/photon-colors.css';
-import '../res/style.css';
+import '../res/css/style.css';
 import {
   addDataToWindowObject,
   logFriendlyPreamble,

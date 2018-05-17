@@ -64,7 +64,7 @@ const config = {
     new HtmlWebpackPlugin({
       title: 'perf.html',
       template: 'res/index.html',
-      favicon: 'res/favicon.png',
+      favicon: 'res/img/favicon.png',
     }),
     new CopyWebpackPlugin([
       { from: 'res/_headers' },
@@ -106,6 +106,9 @@ if (process.env.NODE_ENV === 'production') {
         events: true,
       },
       externals: ['/zee-worker.js', '/worker.js', '/analytics.js'],
+      /* Exclude the files used but not served by netlify. When trying to fetch
+       * them we get a 404, and so the SW registration fails. */
+      excludes: ['_headers', '_redirects'],
       cacheMaps: [
         {
           requestTypes: null,

@@ -12,19 +12,19 @@
 }
 
 .callNodeContextMenuIconMerge {
-  background: url(../../../res/merge-icon.svg) center center no-repeat;
+  background: url(../../../res/img/svg/merge-icon.svg) center center no-repeat;
 }
 
 .callNodeContextMenuIconCollapse {
-  background: url(../../../res/collapse-icon.svg) center center no-repeat;
+  background: url(../../../res/img/svg/collapse-icon.svg) center center no-repeat;
 }
 
 .callNodeContextMenuIconFocus {
-  background: url(../../../res/focus-icon.svg) center center no-repeat;
+  background: url(../../../res/img/svg/focus-icon.svg) center center no-repeat;
 }
 
 .callNodeContextMenuIconDrop {
-  background: url(../../../res/drop-icon.svg) center center no-repeat;
+  background: url(../../../res/img/svg/drop-icon.svg) center center no-repeat;
 }
 
 .callNodeContextMenuLabel {
