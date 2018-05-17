@@ -263,7 +263,9 @@ class IntervalMarkerOverview extends React.PureComponent<Props, State> {
     intervalMarkers.forEach(marker => {
       const { start, dur, name } = marker;
       const pos = (start - rangeStart) / (rangeEnd - rangeStart) * width;
-      const itemWidth = dur / (rangeEnd - rangeStart) * width;
+      const itemWidth = Number.isFinite(dur)
+        ? dur / (rangeEnd - rangeStart) * width
+        : Number.MAX_SAFE_INTEGER;
       const style = name in styles ? styles[name] : styles.default;
       ctx.fillStyle = style.background;
       if (style.squareCorners) {
