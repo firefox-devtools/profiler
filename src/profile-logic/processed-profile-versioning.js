@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 11; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 12; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -524,6 +524,74 @@ const _upgraders = {
         }
 
         thread.markers = newMarkers;
+      }
+    }
+  },
+  [12]: profile => {
+    // profile.meta has a new property called "categories", which contains a
+    // list of categories, which are objects with "name" and "color" properties.
+    // The "category" column in the frameTable now refers to elements in this
+    // list.
+    //
+    // Old category list:
+    // https://searchfox.org/mozilla-central/rev/5a744713370ec47969595e369fd5125f123e6d24/js/public/ProfilingStack.h#193-201
+    // New category list:
+    // [To be inserted once the Gecko change lands in mozilla-central]
+    profile.meta.categories = [
+      {
+        name: 'Idle',
+        color: 'transparent',
+      },
+      {
+        name: 'Other',
+        color: 'grey',
+      },
+      {
+        name: 'JavaScript',
+        color: 'yellow',
+      },
+      {
+        name: 'Layout',
+        color: 'purple',
+      },
+      {
+        name: 'Graphics',
+        color: 'green',
+      },
+      {
+        name: 'DOM',
+        color: 'blue',
+      },
+      {
+        name: 'GC / CC',
+        color: 'orange',
+      },
+      {
+        name: 'Network',
+        color: 'lightblue',
+      },
+    ];
+    const oldCategoryToNewCategory = {
+      [1 << 4 /* OTHER */]: 1 /* Other */,
+      [1 << 5 /* CSS */]: 3 /* Layout */,
+      [1 << 6 /* JS */]: 2 /* JavaScript */,
+      [1 << 7 /* GC */]: 6 /* GC / CC */,
+      [1 << 8 /* CC */]: 6 /* GC / CC */,
+      [1 << 9 /* NETWORK */]: 7 /* Network */,
+      [1 << 10 /* GRAPHICS */]: 4 /* Graphics */,
+      [1 << 11 /* STORAGE */]: 1 /* Other */,
+      [1 << 12 /* EVENTS */]: 1 /* Other */,
+    };
+    for (const thread of profile.threads) {
+      for (let i = 0; i < thread.frameTable.length; i++) {
+        const oldCategory = thread.frameTable.category[i];
+        if (oldCategory !== null) {
+          const newCategory =
+            oldCategory in oldCategoryToNewCategory
+              ? oldCategoryToNewCategory[oldCategory]
+              : 1 /* Other */;
+          thread.frameTable.category[i] = newCategory;
+        }
       }
     }
   },
