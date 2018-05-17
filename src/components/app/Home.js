@@ -7,8 +7,8 @@
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
-import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2018-01-18.png';
-import PerfScreenshot from '../../../res/perf-screenshot-2017-09-08.jpg';
+import AddonScreenshot from '../../../res/img/png/gecko-profiler-screenshot-2018-01-18.png';
+import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2017-09-08.jpg';
 import { retrieveProfileFromFile } from '../../actions/receive-profile';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import type {
