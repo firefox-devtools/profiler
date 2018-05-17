@@ -2,6 +2,7 @@
 
 * [User Guide](/)
   * [Profiler Fundamentals](./guide-profiler-fundamentals.md)
+  * [UI Tour](./guide-ui-tour.md)
   * [Stack samples and call trees](./guide-stack-samples-and-call-trees.md)
   * [Filtering call trees](./guide-filtering-call-trees.md)
 * [Video Tutorials](./videos.md)
