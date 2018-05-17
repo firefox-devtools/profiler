@@ -17,7 +17,7 @@ import {
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 
-export const CURRENT_VERSION = 10; // The current version of the Gecko profile format.
+export const CURRENT_VERSION = 11; // The current version of the Gecko profile format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -330,6 +330,84 @@ const _upgraders = {
       }
     }
     convertToVersionTenRecursive(profile);
+  },
+  [11]: profile => {
+    // profile.meta has a new property called "categories", which contains a
+    // list of categories, which are objects with "name" and "color" properties.
+    // The "category" column in the frameTable now refers to elements in this
+    // list.
+    //
+    // Old category list:
+    // https://searchfox.org/mozilla-central/rev/5a744713370ec47969595e369fd5125f123e6d24/js/public/ProfilingStack.h#193-201
+    // New category list:
+    // [To be inserted once the Gecko change lands in mozilla-central]
+    const categories = [
+      {
+        name: 'Idle',
+        color: 'transparent',
+      },
+      {
+        name: 'Other',
+        color: 'grey',
+      },
+      {
+        name: 'JavaScript',
+        color: 'yellow',
+      },
+      {
+        name: 'Layout',
+        color: 'purple',
+      },
+      {
+        name: 'Graphics',
+        color: 'green',
+      },
+      {
+        name: 'DOM',
+        color: 'blue',
+      },
+      {
+        name: 'GC / CC',
+        color: 'orange',
+      },
+      {
+        name: 'Network',
+        color: 'lightblue',
+      },
+    ];
+    const oldCategoryToNewCategory = {
+      [1 << 4 /* OTHER */]: 1 /* Other */,
+      [1 << 5 /* CSS */]: 3 /* Layout */,
+      [1 << 6 /* JS */]: 2 /* JavaScript */,
+      [1 << 7 /* GC */]: 6 /* GC / CC */,
+      [1 << 8 /* CC */]: 6 /* GC / CC */,
+      [1 << 9 /* NETWORK */]: 7 /* Network */,
+      [1 << 10 /* GRAPHICS */]: 4 /* Graphics */,
+      [1 << 11 /* STORAGE */]: 1 /* Other */,
+      [1 << 12 /* EVENTS */]: 1 /* Other */,
+    };
+    function convertToVersionElevenRecursive(p) {
+      p.meta.categories = categories;
+      for (const thread of p.threads) {
+        const schemaIndexCategory = thread.frameTable.schema.category;
+        for (const frame of thread.frameTable.data) {
+          if (schemaIndexCategory in frame) {
+            if (frame[schemaIndexCategory] !== null) {
+              if (frame[schemaIndexCategory] in oldCategoryToNewCategory) {
+                frame[schemaIndexCategory] =
+                  oldCategoryToNewCategory[frame[schemaIndexCategory]];
+              } else {
+                frame[schemaIndexCategory] = 1 /* Other*/;
+              }
+            }
+          }
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersionElevenRecursive(subprocessProfile);
+      }
+    }
+    convertToVersionElevenRecursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */

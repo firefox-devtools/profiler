@@ -134,6 +134,13 @@ export type Lib = {
   breakpadId: string, // e.g. "E54D3AF274383256B9F6144F83F3F7510"
 };
 
+export type Category = {
+  name: string,
+  color: string,
+};
+
+export type CategoryList = Array<Category>;
+
 /**
  * Information about a period of time during which no samples were collected.
  */
