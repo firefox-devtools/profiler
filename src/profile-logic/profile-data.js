@@ -9,6 +9,7 @@ import type {
   SamplesTable,
   StackTable,
   ExtensionTable,
+  CategoryList,
   FrameTable,
   FuncTable,
   MarkersTable,
@@ -58,6 +59,8 @@ export const emptyExtensions: ExtensionTable = Object.freeze({
   baseURL: Object.freeze([]),
   length: 0,
 });
+
+export const emptyCategories: CategoryList = Object.freeze([]);
 
 /**
  * Generate the CallNodeInfo which contains the CallNodeTable, and a map to convert
@@ -1245,6 +1248,7 @@ export function getEmptyProfile(): Profile {
       platform: '',
       processType: 0,
       extensions: emptyExtensions,
+      categories: emptyCategories,
       product: 'Firefox',
       stackwalk: 0,
       toolkit: '',
