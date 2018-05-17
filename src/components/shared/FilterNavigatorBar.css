@@ -72,7 +72,7 @@
 }
 
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem)::after {
-  background-image: url(../../../res/scope-bar-separator.svg);
+  background-image: url(../../../res/img/svg/scope-bar-separator.svg);
   background-repeat: no-repeat;
   background-position: -18px -12px;
   background-size: 24px 24px;
