@@ -815,6 +815,7 @@ export function processProfile(
     stackwalk: geckoProfile.meta.stackwalk,
     toolkit: geckoProfile.meta.toolkit,
     version: geckoProfile.meta.version,
+    categories: geckoProfile.meta.categories,
     preprocessedProfileVersion: CURRENT_VERSION,
   };
 

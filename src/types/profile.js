@@ -200,6 +200,7 @@ export type ProfileMeta = {|
   // The extensions property landed in Firefox 60, and is only optional because older
   // processed profile versions may not have it. No upgrader was written for this change.
   extensions?: ExtensionTable,
+  categories: CategoryList,
   product: string,
   stackwalk: number,
   toolkit: string,
