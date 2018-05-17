@@ -64,7 +64,7 @@ const config = {
     new HtmlWebpackPlugin({
       title: 'perf.html',
       template: 'res/index.html',
-      favicon: 'res/favicon.png',
+      favicon: 'res/img/favicon.png',
     }),
     new CopyWebpackPlugin([
       { from: 'res/_headers' },

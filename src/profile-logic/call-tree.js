@@ -24,7 +24,7 @@ import type {
   CallNodeDisplayData,
 } from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
-import ExtensionIcon from '../../res/extension.svg';
+import ExtensionIcon from '../../res/img/svg/extension.svg';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeTimes = {
