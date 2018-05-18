@@ -19,7 +19,7 @@ jobs:
       - run: yarn lint
       - run: yarn flow --quiet
       - run: yarn flow stop # stop flow to recover some memory
-      - run: yarn test --coverage --runInBand
+      - run: yarn test --coverage
       - run: yarn build-prod:quiet
       - run: bash <(curl -s https://codecov.io/bash)
 
