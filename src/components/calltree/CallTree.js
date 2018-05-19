@@ -71,7 +71,6 @@ class CallTreeComponent extends PureComponent<Props> {
   _fixedColumns: Column[];
   _mainColumn: Column;
   _appendageColumn: Column;
-  _appendageButtons: string[];
   _treeView: TreeView<IndexIntoCallNodeTable, CallNodeDisplayData> | null;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
@@ -85,15 +84,11 @@ class CallTreeComponent extends PureComponent<Props> {
     ];
     this._mainColumn = { propName: 'name', title: '' };
     this._appendageColumn = { propName: 'lib', title: '' };
-    this._appendageButtons = ['focusCallstackButton'];
     this._treeView = null;
     (this: any)._onSelectedCallNodeChange = this._onSelectedCallNodeChange.bind(
       this
     );
     (this: any)._onExpandedCallNodesChange = this._onExpandedCallNodesChange.bind(
-      this
-    );
-    (this: any)._onAppendageButtonClick = this._onAppendageButtonClick.bind(
       this
     );
   }
@@ -146,26 +141,6 @@ class CallTreeComponent extends PureComponent<Props> {
     );
   }
 
-  _onAppendageButtonClick(callNodeIndex: IndexIntoCallNodeTable | null) {
-    const {
-      callNodeInfo,
-      threadIndex,
-      addTransformToStack,
-      implementationFilter: implementation,
-      invertCallstack,
-    } = this.props;
-    const callNodePath = getCallNodePathFromIndex(
-      callNodeIndex,
-      callNodeInfo.callNodeTable
-    );
-    addTransformToStack(threadIndex, {
-      type: 'focus-subtree',
-      callNodePath,
-      implementation,
-      inverted: invertCallstack,
-    });
-  }
-
   procureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame
     // at that depth.
@@ -214,8 +189,6 @@ class CallTreeComponent extends PureComponent<Props> {
         expandedNodeIds={expandedCallNodeIndexes}
         highlightRegExp={searchStringsRegExp}
         disableOverscan={disableOverscan}
-        appendageButtons={this._appendageButtons}
-        onAppendageButtonClick={this._onAppendageButtonClick}
         ref={this._takeTreeViewRef}
         contextMenuId={'CallNodeContextMenu'}
         maxNodeDepth={callNodeMaxDepth}
