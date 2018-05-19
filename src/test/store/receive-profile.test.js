@@ -28,7 +28,7 @@ import exampleSymbolTable from '../fixtures/example-symbol-table';
 import SymbolStoreDB from '../../profile-logic/symbol-store-db';
 jest.mock('../../profile-logic/symbol-store-db');
 
-import { TextDecoder } from 'text-encoding';
+import { TextDecoder } from 'util';
 
 describe('actions/receive-profile', function() {
   /**

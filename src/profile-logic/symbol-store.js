@@ -6,6 +6,7 @@
 import SymbolStoreDB from './symbol-store-db';
 import { SymbolsNotFoundError } from './errors';
 import bisection from 'bisection';
+import { TextDecoder } from 'util';
 
 import type { SymbolTableAsTuple } from './symbol-store-db';
 

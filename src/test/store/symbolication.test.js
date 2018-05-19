@@ -18,7 +18,7 @@ import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
 import fakeIndexedDB from 'fake-indexeddb';
 import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
-import { TextDecoder } from 'text-encoding';
+import { TextDecoder } from 'util';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
 /**

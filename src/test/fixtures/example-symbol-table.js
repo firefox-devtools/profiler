@@ -3,8 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-
-import { TextEncoder } from 'text-encoding';
+import { TextEncoder } from 'util';
 import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 
 const syms = {
