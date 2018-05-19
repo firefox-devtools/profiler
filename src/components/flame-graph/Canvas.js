@@ -37,6 +37,7 @@ export type OwnProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
   +disableTooltips: boolean,
+  +scrollToSelectionGeneration: number,
 |};
 
 type Props = {|
@@ -216,6 +217,59 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     (this: any)._drawCanvas = this._drawCanvas.bind(this);
     (this: any)._hitTest = this._hitTest.bind(this);
   }
+
+  componentDidUpdate(prevProps) {
+    // If the stack depth changes (say, when changing the time range
+    // selection or applying a transform), move the viewport
+    // vertically so that its offset from the base of the flame graph
+    // is maintained.
+    if (prevProps.maxStackDepth !== this.props.maxStackDepth) {
+      this.props.viewport.moveViewport(
+        0,
+        (prevProps.maxStackDepth - this.props.maxStackDepth) * ROW_HEIGHT
+      );
+    }
+
+    // We want to scroll the selection into view when this component
+    // is mounted, but using componentDidMount won't work here as the
+    // viewport will not have completed setting its size by
+    // then. Instead, look for when the viewport's isSizeSet prop
+    // changes to true.
+    const viewportDidMount =
+      !prevProps.viewport.isSizeSet && this.props.viewport.isSizeSet;
+
+    if (
+      viewportDidMount ||
+      this.props.scrollToSelectionGeneration >
+        prevProps.scrollToSelectionGeneration
+    ) {
+      this._scrollSelectionIntoView();
+    }
+  }
+
+  _scrollSelectionIntoView = () => {
+    const {
+      selectedCallNodeIndex,
+      maxStackDepth,
+      callNodeInfo: { callNodeTable },
+    } = this.props;
+
+    if (selectedCallNodeIndex === null) {
+      return;
+    }
+
+    const depth = callNodeTable.depth[selectedCallNodeIndex];
+    const y = (maxStackDepth - depth - 1) * ROW_HEIGHT;
+
+    if (y < this.props.viewport.viewportTop) {
+      this.props.viewport.moveViewport(0, this.props.viewport.viewportTop - y);
+    } else if (y + ROW_HEIGHT > this.props.viewport.viewportBottom) {
+      this.props.viewport.moveViewport(
+        0,
+        this.props.viewport.viewportBottom - (y + ROW_HEIGHT)
+      );
+    }
+  };
 
   _drawCanvas(
     ctx: CanvasRenderingContext2D,
