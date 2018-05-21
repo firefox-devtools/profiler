@@ -6,4 +6,4 @@ For instance the [`marker-timing.js`](./marker-timing.js) file takes the list of
 
 ## Profile processing
 
-The profile processing functions live here, and are documented in [Upgrading Profiles](../../docs/upgrading-profiles.md) in the [`/docs`](../../docs) folder.
+The profile processing functions live here, and are documented in [Upgrading Profiles](../../docs-developer/upgrading-profiles.md) in the [`/docs-developer`](../../docs-developer) folder.

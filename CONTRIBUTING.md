@@ -89,4 +89,4 @@ For PRs to be accepted, they go through a review process. Generally there is a f
 
 ## Learning more
 
-Make sure and check out the [docs](./docs) for reading up on how this project works. In addition, most folders in the [`/src`](./src) directory contain a `README.md` explaining what the folder contains. Please file an issue if something is not clear and we'll write something up so the next person who comes along can figure things out easier, or even better submit a PR with your own docs!
+Make sure and check out the [docs](./docs-developer) for reading up on how this project works. In addition, most folders in the [`/src`](./src) directory contain a `README.md` explaining what the folder contains. Please file an issue if something is not clear and we'll write something up so the next person who comes along can figure things out easier, or even better submit a PR with your own docs!
