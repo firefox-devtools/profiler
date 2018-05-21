@@ -632,7 +632,7 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
 }
 
 /**
- * Convert the given thread into processed form. See docs/gecko-profile-format for more
+ * Convert the given thread into processed form. See docs-developer/gecko-profile-format for more
  * information.
  */
 function _processThread(
@@ -749,7 +749,7 @@ function _adjustMarkerTimestamps(
 /**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
- * For a description of the processed format, look at docs/gecko-profile-format.md
+ * For a description of the processed format, look at docs-developer/gecko-profile-format.md
  */
 export function processProfile(
   rawProfile: GeckoProfile | { profile: GeckoProfile }

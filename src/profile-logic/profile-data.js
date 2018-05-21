@@ -66,7 +66,7 @@ export const emptyExtensions: ExtensionTable = Object.freeze({
  * function.
  *
  * See `src/types/profile-derived.js` for the type definitions.
- * See `docs/call-trees.md` for a detailed explanation of CallNodes.
+ * See `docs-developer/call-trees.md` for a detailed explanation of CallNodes.
  */
 export function getCallNodeInfo(
   stackTable: StackTable,

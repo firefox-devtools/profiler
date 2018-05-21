@@ -69,6 +69,7 @@ const config = {
     new CopyWebpackPlugin([
       { from: 'res/_headers' },
       { from: 'res/_redirects' },
+      { from: 'docs-user', to: 'docs' },
     ]),
   ],
   entry: ['./src/index'],
