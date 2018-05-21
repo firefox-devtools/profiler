@@ -4,7 +4,7 @@
 
 import 'babel-polyfill';
 import { SymbolStore } from '../../profile-logic/symbol-store';
-import { TextDecoder } from 'text-encoding';
+import { TextDecoder } from 'util';
 import exampleSymbolTable from '../fixtures/example-symbol-table';
 import fakeIndexedDB from 'fake-indexeddb';
 import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
