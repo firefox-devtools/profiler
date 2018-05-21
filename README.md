@@ -6,7 +6,7 @@
 
 [Mozilla] develops this tool to help make [Firefox] silky smooth and fast for millions of its users, and to help make sites and apps faster across the web.
 
-![](./screenshot.png?raw=true)
+![Screenshot of perf.html](./docs-user/screenshot.png?raw=true)
 
 _This project was previously called [Cleopatra]._
 
@@ -44,7 +44,7 @@ For more detailed information on getting started contributing. We have plenty of
 | ---- | --- |
 |[Contributing](./CONTRIBUTING.md)| Find out in detail how to get started and get your local development environment configured. |
 |[Code of Conduct](./CODE_OF_CONDUCT.md)| We want to create an open and inclusive community, we have a few guidelines to help us out. |
-|[Documentation](./docs)| Want to know how this whole thing works? Get started here. |
+|[Developer Documentation](./docs-developer)| Want to know how this whole thing works? Get started here. |
 |[Roadmap](./ROADMAP.md)| Get more information about why we are building this tool, and what we have planned. |
 |[Source Files](./src)| Dive into the inner workings of the code. Most folders have a `README.md` providing more information.
 |[Gecko Profiler Addon][Gecko Profiler]| perf.html can record profiles directly in the browser using an add-on, development takes place in another repo. |
