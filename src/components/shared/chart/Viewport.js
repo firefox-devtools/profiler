@@ -286,9 +286,12 @@ export const withChartViewport: WithChartViewport<*, *> =
       }
 
       _mouseWheelListener(event: SyntheticWheelEvent<>) {
+        // We handle the wheel event, so disable the browser's handling, such
+        // as back/forward swiping or scrolling.
+        event.preventDefault();
+
         const { disableHorizontalMovement } = this.props.viewportProps;
         if (event.shiftKey) {
-          event.preventDefault();
           if (!disableHorizontalMovement) {
             this.zoomRangeSelection(event);
           }
