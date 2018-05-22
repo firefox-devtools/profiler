@@ -1310,12 +1310,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -1348,12 +1342,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -1386,12 +1374,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -1424,12 +1406,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -1462,12 +1438,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -1500,12 +1470,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -1538,12 +1502,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -1576,12 +1534,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -1614,12 +1566,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -1652,12 +1598,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -1690,12 +1630,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -1728,12 +1662,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -1766,12 +1694,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -1804,12 +1726,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -1842,12 +1758,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -1880,12 +1790,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
             </div>
             <div
@@ -1922,12 +1826,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd selected "
@@ -1960,12 +1858,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -1998,12 +1890,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
             </div>
           </div>
@@ -2504,12 +2390,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -2542,12 +2422,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -2580,12 +2454,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -2618,12 +2486,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even selected "
@@ -2656,12 +2518,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -2694,12 +2550,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -2732,12 +2582,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
             </div>
           </div>
@@ -3238,12 +3082,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -3276,12 +3114,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -3314,12 +3146,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -3352,12 +3178,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even selected "
@@ -3390,12 +3210,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -3428,12 +3242,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -3466,12 +3274,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
             </div>
           </div>
@@ -3972,12 +3774,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -4010,12 +3806,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -4048,12 +3838,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -4086,12 +3870,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even selected "
@@ -4124,12 +3902,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -4162,12 +3934,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -4200,12 +3966,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
             </div>
           </div>
@@ -4669,12 +4429,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -4707,12 +4461,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -4751,12 +4499,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -4789,12 +4531,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even selected "
@@ -4827,12 +4563,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -4865,12 +4595,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
             </div>
           </div>
@@ -5334,12 +5058,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -5372,12 +5090,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -5416,12 +5128,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -5454,12 +5160,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even selected "
@@ -5492,12 +5192,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -5530,12 +5224,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
             </div>
           </div>
@@ -5925,12 +5613,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -5963,12 +5645,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -6007,12 +5683,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -6051,12 +5721,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
             </div>
           </div>
@@ -6446,12 +6110,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -6484,12 +6142,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -6528,12 +6180,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -6572,12 +6218,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
             </div>
           </div>
@@ -7041,12 +6681,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -7079,12 +6713,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even  "
@@ -7123,12 +6751,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -7161,12 +6783,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns even selected "
@@ -7205,12 +6821,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
               <div
                 className="treeViewRow treeViewRowScrolledColumns odd  "
@@ -7243,12 +6853,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 >
                   
                 </span>
-                <input
-                  className="treeViewRowAppendageButton focusCallstackButton"
-                  data-appendage-button-name="focusCallstackButton"
-                  type="button"
-                  value=""
-                />
               </div>
             </div>
           </div>

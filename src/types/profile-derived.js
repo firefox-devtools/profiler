@@ -30,8 +30,8 @@ export type IndexIntoCallNodeTable = number;
  *         v                  V                         V                 V
  *    stack6 (funcE)     stack7 (funcF)       callNode5 (funcE)     callNode6 (funcF)
  *
- * For a detailed explanation of callNodes see `docs/call-tree.md` and
- * `docs/call-nodes-in-cpp.md`.
+ * For a detailed explanation of callNodes see `docs-developer/call-tree.md` and
+ * `docs-developer/call-nodes-in-cpp.md`.
  */
 export type CallNodeTable = {
   prefix: Int32Array,

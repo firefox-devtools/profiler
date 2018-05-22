@@ -1,6 +1,6 @@
 # perf.html `/src`
 
-Welcome to the perf.html source code. Each main folder has a `README.md` file describing the contents of the folder. For higher level documentation on profile formats and other things, check out the [`/docs`](../docs) folder.
+Welcome to the perf.html source code. Each main folder has a `README.md` file describing the contents of the folder. For higher level documentation on profile formats and other things, check out the [`/docs-developer`](../docs-developer) folder.
 
 | Folder                                  | Description                                            |
 | --------------------------------------- | ------------------------------------------------------ |
