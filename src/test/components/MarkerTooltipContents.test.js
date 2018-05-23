@@ -9,7 +9,7 @@ import MarkersTooltipContents from '../../components/shared/MarkerTooltipContent
 import renderer from 'react-test-renderer';
 import { storeWithProfile } from '../fixtures/stores';
 import {
-  addMarkersToThreadReplacingSamples,
+  addMarkersToThreadWithCorrespondingSamples,
   getProfileFromTextSamples,
 } from '../fixtures/profiles/make-profile';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
@@ -53,7 +53,7 @@ describe('MarkerTooltipContents', function() {
 
     // Now add some markers to the profile.
     // Enumerate through all of the switch arms of the tooltip for coverage.
-    addMarkersToThreadReplacingSamples(profile.threads[0], [
+    addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
       [
         'DOMEvent',
         10.5,

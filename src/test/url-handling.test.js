@@ -20,6 +20,7 @@ import { viewProfile } from '../actions/receive-profile';
 import { selectedThreadSelectors } from '../reducers/profile-view';
 import type { Profile } from '../types/profile';
 import getProfile from './fixtures/profiles/call-nodes';
+import queryString from 'query-string';
 
 function _getStoreWithURL(
   settings: {
@@ -40,13 +41,23 @@ function _getStoreWithURL(
     settings
   );
 
-  const searchWithVersion =
-    v === false ? search : `${search ? search + '&' : '?'}v=${v}`;
+  // Provide some defaults to the search string as needed.
+  const query = Object.assign(
+    {
+      // Ensure that the URL has a version.
+      v,
+      // Ensure there is a thread index.
+      thread: 0,
+    },
+    queryString.parse(search.substr(1))
+  );
+
   const newUrlState = stateFromLocation({
     pathname,
-    search: searchWithVersion,
+    search: '?' + queryString.stringify(query),
     hash,
   });
+
   const store = blankStore();
   store.dispatch({
     type: 'UPDATE_URL_STATE',
@@ -103,7 +114,7 @@ describe('threadOrder and hiddenThreads', function() {
 
   it('can reorder the threads ', function() {
     const { getState } = _getStoreWithURL(
-      { search: '?threadOrder=1-2-0&thread=0' },
+      { search: '?threadOrder=1-2-0' },
       profileWithThreads
     );
     expect(urlStateReducers.getThreadOrder(getState())).toEqual([1, 2, 0]);
@@ -112,7 +123,7 @@ describe('threadOrder and hiddenThreads', function() {
 
   it('can hide the threads', function() {
     const { getState } = _getStoreWithURL(
-      { search: '?hiddenThreads=1-2&thread=0' },
+      { search: '?hiddenThreads=1-2' },
       profileWithThreads
     );
     expect(urlStateReducers.getThreadOrder(getState())).toEqual([0, 2, 1]);
@@ -121,7 +132,7 @@ describe('threadOrder and hiddenThreads', function() {
 
   it('will not accept invalid threads in the thread order', function() {
     const { getState } = _getStoreWithURL(
-      { search: '?threadOrder=0-8-2-a-1&thread=0' },
+      { search: '?threadOrder=0-8-2-a-1' },
       profileWithThreads
     );
     expect(urlStateReducers.getThreadOrder(getState())).toEqual([0, 2, 1]);
@@ -169,7 +180,7 @@ describe('url upgrading', function() {
     it('can upgrade callTreeFilters to transforms', function() {
       const { getState } = _getStoreWithURL({
         search:
-          '?callTreeFilters=prefix-012~prefixjs-123~postfix-234~postfixjs-345&thread=0',
+          '?callTreeFilters=prefix-012~prefixjs-123~postfix-234~postfixjs-345',
         v: false,
       });
       const transforms = selectedThreadSelectors.getTransformStack(getState());
@@ -256,7 +267,7 @@ describe('URL serialization of the transform stack', function() {
     'f-combined-012~mcn-combined-234~f-js-345-i~mf-6~ff-7~cr-combined-8-9~' +
     'rec-combined-10~df-11~cfs-12';
   const { getState } = _getStoreWithURL({
-    search: '?thread=0&transforms=' + transformString,
+    search: '?transforms=' + transformString,
   });
 
   it('deserializes focus subtree transforms', function() {
