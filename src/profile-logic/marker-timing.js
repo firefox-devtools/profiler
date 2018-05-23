@@ -120,8 +120,11 @@ function computeMarkerLabel(data: MarkerPayload): string {
     switch (data.type) {
       case 'UserTiming':
         return (data: UserTimingMarkerPayload).name;
-      case 'DOMEvent':
-        return (data: DOMEventMarkerPayload).eventType;
+      case 'tracing':
+        if (data.category === 'DOMEvent') {
+          return (data: DOMEventMarkerPayload).eventType;
+        }
+        break;
       default:
     }
   }
