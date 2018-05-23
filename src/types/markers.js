@@ -306,10 +306,10 @@ export type UserTimingMarkerPayload = {
 };
 
 export type DOMEventMarkerPayload = {
-  type: 'DOMEvent',
+  type: 'tracing',
+  category: 'DOMEvent',
   timeStamp?: Milliseconds,
-  startTime: Milliseconds,
-  endTime: Milliseconds,
+  interval: 'start' | 'end',
   eventType: string,
   phase: 0 | 1 | 2 | 3,
 };

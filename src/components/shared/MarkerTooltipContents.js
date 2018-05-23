@@ -26,6 +26,7 @@ import type { NotVoidOrNull } from '../../types/utils';
 import type { ImplementationFilter } from '../../types/actions';
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type {
+  DOMEventMarkerPayload,
   PaintProfilerMarkerTracing,
   StyleMarkerPayload,
 } from '../../types/markers';
@@ -79,10 +80,22 @@ function _markerDetailDeltaTimeNullable(
 
 function _markerBacktrace(
   marker: TracingMarker,
-  data: StyleMarkerPayload | PaintProfilerMarkerTracing,
+  data: StyleMarkerPayload | PaintProfilerMarkerTracing | DOMEventMarkerPayload,
   thread: Thread,
   implementationFilter: ImplementationFilter
 ): React.Node {
+  if (data.category === 'DOMEvent') {
+    const latency =
+      data.timeStamp === undefined
+        ? null
+        : formatMilliseconds(marker.start - data.timeStamp);
+    return (
+      <div className="tooltipDetails">
+        {_markerDetail('type', 'Type', data.eventType)}
+        {latency === null ? null : _markerDetail('latency', 'Latency', latency)}
+      </div>
+    );
+  }
   if ('cause' in data && data.cause) {
     const { cause } = data;
     const causeAge = marker.start - cause.time;
@@ -114,20 +127,6 @@ function getMarkerDetails(
         return (
           <div className="tooltipDetails">
             {_markerDetail('name', 'Name', data.name)}
-          </div>
-        );
-      }
-      case 'DOMEvent': {
-        const latency =
-          data.timeStamp === undefined
-            ? null
-            : formatMilliseconds(data.startTime - data.timeStamp);
-        return (
-          <div className="tooltipDetails">
-            {_markerDetail('type', 'Type', data.eventType)}
-            {latency === null
-              ? null
-              : _markerDetail('latency', 'Latency', latency)}
           </div>
         );
       }
