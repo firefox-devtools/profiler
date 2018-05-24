@@ -59,7 +59,7 @@ const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
-const MARKER_LABEL_MAX_LENGTH = 30;
+const MARKER_LABEL_MAX_LENGTH = 150;
 
 class MarkerChartCanvas extends React.PureComponent<Props, State> {
   _textMeasurement: null | TextMeasurement;
