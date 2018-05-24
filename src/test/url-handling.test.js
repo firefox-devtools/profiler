@@ -20,6 +20,7 @@ import { viewProfile } from '../actions/receive-profile';
 import { selectedThreadSelectors } from '../reducers/profile-view';
 import type { Profile } from '../types/profile';
 import getProfile from './fixtures/profiles/call-nodes';
+import queryString from 'query-string';
 
 function _getStoreWithURL(
   settings: {
@@ -40,13 +41,23 @@ function _getStoreWithURL(
     settings
   );
 
-  const searchWithVersion =
-    v === false ? search : `${search ? search + '&' : '?'}v=${v}`;
+  // Provide some defaults to the search string as needed.
+  const query = Object.assign(
+    {
+      // Ensure that the URL has a version.
+      v,
+      // Ensure there is a thread index.
+      thread: 0,
+    },
+    queryString.parse(search.substr(1))
+  );
+
   const newUrlState = stateFromLocation({
     pathname,
-    search: searchWithVersion,
+    search: '?' + queryString.stringify(query),
     hash,
   });
+
   const store = blankStore();
   store.dispatch({
     type: 'UPDATE_URL_STATE',
@@ -130,7 +141,7 @@ describe('threadOrder and hiddenThreads', function() {
 
   it('will not accept invalid hidden threads', function() {
     const { getState } = _getStoreWithURL(
-      { search: '?hiddenThreads=0-8-2-a' },
+      { search: '?hiddenThreads=0-8-2-a&thread=1' },
       profileWithThreads
     );
     expect(urlStateReducers.getThreadOrder(getState())).toEqual([0, 2, 1]);

@@ -128,7 +128,13 @@ type ReceiveProfileAction =
     }
   | { type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_STORE', error: Error }
   | { type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_URL', error: Error }
-  | {| +type: 'VIEW_PROFILE', +profile: Profile, +pathInZipFile?: string |}
+  | {|
+      +type: 'VIEW_PROFILE',
+      +profile: Profile,
+      +hiddenThreadIndexes: ThreadIndex[],
+      +selectedThreadIndex: ThreadIndex | null,
+      +pathInZipFile: ?string,
+    |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
   | {| +type: 'PROCESS_PROFILE_FROM_ZIP_FILE', +pathInZipFile: string |}
   | {| +type: 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE', error: any |}

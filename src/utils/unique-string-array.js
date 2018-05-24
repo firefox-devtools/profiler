@@ -24,6 +24,10 @@ export class UniqueStringArray {
     return this._array[index];
   }
 
+  hasString(s: string): boolean {
+    return this._stringToIndex.has(s);
+  }
+
   indexForString(s: string): IndexIntoStringTable {
     let index = this._stringToIndex.get(s);
     if (index === undefined) {

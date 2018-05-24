@@ -81,33 +81,11 @@ function selectedThread(
   state: ThreadIndex | null = null,
   action: Action
 ): ThreadIndex | null {
-  function findDefaultThreadIndex(threads) {
-    if (threads.length === 0) {
-      // Tests may have no threads.
-      return null;
-    }
-    const contentThreadId = threads.findIndex(
-      thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
-    );
-    return contentThreadId !== -1
-      ? contentThreadId
-      : defaultThreadOrder(threads)[0];
-  }
-
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
       return action.selectedThread;
     case 'VIEW_PROFILE':
-      // The thread index could be set from the URL, so ensure that it is within a valid
-      // range.
-      if (state !== null && state < action.profile.threads.length) {
-        return state;
-      }
-      // When loading in a brand new profile, select either the GeckoMain [tab] thread,
-      // or the first thread in the thread order. For profiles from the Web, the
-      // selectedThread has already been initialized from the URL and does not require
-      // looking at the profile.
-      return findDefaultThreadIndex(action.profile.threads);
+      return action.selectedThreadIndex;
     case 'ISOLATE_THREAD':
       return action.isolatedThreadIndex;
     case 'HIDE_THREAD': {
@@ -213,12 +191,7 @@ function threadOrder(state: ThreadIndex[] = [], action: Action) {
 function hiddenThreads(state: ThreadIndex[] = [], action: Action) {
   switch (action.type) {
     case 'VIEW_PROFILE': {
-      // When receiving a new profile, try to use the hidden threads specified in the URL,
-      // but ensure that the IDs are correct.
-      const threads = action.profile.threads.map(
-        (_, threadIndex) => threadIndex
-      );
-      return state.filter(index => threads.includes(index));
+      return action.hiddenThreadIndexes;
     }
     case 'HIDE_THREAD':
       return [...state, action.threadIndex];
@@ -349,10 +322,11 @@ export const getSearchStringsAsRegExp = createSelector(
 );
 export const getMarkersSearchString = (state: State) =>
   getProfileSpecificState(state).markersSearchString;
-
 export const getSelectedTab = (state: State) => getUrlState(state).selectedTab;
+export const getSelectedThreadIndexOrNull = (state: State) =>
+  getProfileSpecificState(state).selectedThread;
 export const getSelectedThreadIndex = (state: State) => {
-  const threadIndex = getProfileSpecificState(state).selectedThread;
+  const threadIndex = getSelectedThreadIndexOrNull(state);
   if (threadIndex === null) {
     throw new Error(
       'Attempted to get a thread index before a profile was loaded.'
