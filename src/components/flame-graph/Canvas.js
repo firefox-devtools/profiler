@@ -436,18 +436,12 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     return (
       <div className="flameGraphCanvasTooltip">
         <div className="tooltipHeader">
-          <div className="tooltipOneLine">
-            <div className="tooltipTiming">{(100 * duration).toFixed(2)}%</div>
-            <div className="tooltipTitle">{funcName}</div>
+          <div className="tooltipTiming">{(100 * duration).toFixed(2)}%</div>
+          <div className="tooltipTitle">{funcName}</div>
+          <div className="tooltipIcon">
+            {displayData.icon ? <NodeIcon displayData={displayData} /> : null}
           </div>
-          <div className="tooltipOneLine">
-            {displayData.icon ? (
-              <div className="tooltipIcon">
-                <NodeIcon displayData={displayData} />
-              </div>
-            ) : null}
-            <span className="tooltipLib">{displayData.lib}</span>
-          </div>
+          <div className="tooltipLib">{displayData.lib}</div>
         </div>
         <div className="tooltipDetails">
           <div className="tooltipLabel">Stack Type:</div>

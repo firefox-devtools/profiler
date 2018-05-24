@@ -28,8 +28,6 @@ type State<HoveredItem> = {
   hoveredItem: HoveredItem | null,
   pageX: CssPixels,
   pageY: CssPixels,
-  offsetX: CssPixels,
-  offsetY: CssPixels,
 };
 
 require('./Canvas.css');
@@ -41,18 +39,20 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
   State<HoveredItem>
 > {
   _devicePixelRatio: number;
+  _offsetX: CssPixels;
+  _offsetY: CssPixels;
   _ctx: CanvasRenderingContext2D;
   _canvas: HTMLCanvasElement | null;
 
   constructor(props: Props<HoveredItem>) {
     super(props);
     this._devicePixelRatio = 1;
+    this._offsetX = 0;
+    this._offsetY = 0;
     this.state = {
       hoveredItem: null,
       pageX: 0,
       pageY: 0,
-      offsetX: 0,
-      offsetY: 0,
     };
 
     (this: any)._setCanvasRef = this._setCanvasRef.bind(this);
@@ -111,25 +111,20 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     }
   }
 
-  _onMouseMove(event: SyntheticMouseEvent<>) {
+  _onMouseMove(event: { nativeEvent: MouseEvent } & SyntheticMouseEvent<>) {
     if (!this._canvas) {
       return;
     }
 
-    // These offsets seem to be identical to
-    // `event.nativeEvent.offsetX/Y`, albeit not recognized by flow.
-    const rect = this._canvas.getBoundingClientRect();
-    const offsetX: CssPixels = event.pageX - rect.left;
-    const offsetY: CssPixels = event.pageY - rect.top;
-    const maybeHoveredItem = this.props.hitTest(offsetX, offsetY);
+    this._offsetX = event.nativeEvent.offsetX;
+    this._offsetY = event.nativeEvent.offsetY;
+    const maybeHoveredItem = this.props.hitTest(this._offsetX, this._offsetY);
 
     if (maybeHoveredItem !== null) {
       this.setState({
         hoveredItem: maybeHoveredItem,
         pageX: event.pageX,
         pageY: event.pageY,
-        offsetX,
-        offsetY,
       });
     } else if (this.state.hoveredItem !== null) {
       this.setState({
@@ -164,10 +159,13 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     // It is possible that the data backing the chart has been
     // changed, for instance after symbolication. Clear the
     // hoveredItem if the mouse no longer hovers over it.
-    const { hoveredItem, offsetX, offsetY } = this.state;
+    const { hoveredItem } = this.state;
     if (
       hoveredItem !== null &&
-      !hoveredItemsAreEqual(this.props.hitTest(offsetX, offsetY), hoveredItem)
+      !hoveredItemsAreEqual(
+        this.props.hitTest(this._offsetX, this._offsetY),
+        hoveredItem
+      )
     ) {
       this.setState({ hoveredItem: null });
     }

@@ -48,13 +48,16 @@
 }
 
 .tooltipIcon {
-  width: 14px;
-  height: 14px;
   display: inline-block;
   margin-right: 3px;
   align-self: flex-end;
 }
 
+.tooltipIcon > .nodeIcon {
+  width: 14px;
+  margin-left: auto;
+  padding-right: 0.5em;
+}
 .tooltipHeader {
   padding-bottom: 5px;
   margin-bottom: 5px;
