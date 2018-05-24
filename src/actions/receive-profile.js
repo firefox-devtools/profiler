@@ -14,6 +14,11 @@ import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication
 import { decompress } from '../utils/gz';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
+import {
+  getHiddenThreads,
+  getSelectedThreadIndexOrNull,
+} from '../reducers/url-state';
+import { defaultThreadOrder } from '../profile-logic/profile-data';
 
 import type {
   FunctionsUpdatePerThread,
@@ -23,6 +28,7 @@ import type {
 import type { Action, ThunkAction, Dispatch } from '../types/store';
 import type {
   Profile,
+  Thread,
   ThreadIndex,
   IndexIntoFuncTable,
 } from '../types/profile';
@@ -38,11 +44,114 @@ export function waitingForProfileFromAddon(): Action {
   };
 }
 
-export function viewProfile(profile: Profile): Action {
-  return {
-    type: 'VIEW_PROFILE',
-    profile,
+export function viewProfile(
+  profile: Profile,
+  pathInZipFile: ?string
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const threadIndexes = profile.threads.map((_, threadIndex) => threadIndex);
+    let hiddenThreadIndexes;
+    let selectedThreadIndex = getSelectedThreadIndexOrNull(getState());
+
+    if (selectedThreadIndex === null) {
+      // This is a new profile, it has no selected thread index.
+      hiddenThreadIndexes = _hideIdleThreads(profile);
+    } else {
+      // Pull the existing data that was URL encoded.
+      hiddenThreadIndexes = getHiddenThreads(getState())
+        // Try to use the hidden threads specified in the URL, but ensure that the indexes
+        // are correct by filtering out invalid ones.
+        .filter(index => threadIndexes.includes(index));
+    }
+
+    // Don't trust the selectedThreadIndex value to make sense or exists here. If it's not in the
+    // thread indexes, or is listed in the hidden threads, then compute a new
+    // selectedThreadIndex.
+    if (
+      selectedThreadIndex === null ||
+      !threadIndexes.includes(selectedThreadIndex) ||
+      hiddenThreadIndexes.includes(selectedThreadIndex)
+    ) {
+      const visibleThreads = threadIndexes
+        .filter(threadIndex => !hiddenThreadIndexes.includes(threadIndex))
+        .map(threadIndex => profile.threads[threadIndex]);
+
+      // Select either the GeckoMain [tab] thread, or the first thread in the thread
+      // order.
+      selectedThreadIndex = profile.threads.indexOf(
+        _findDefaultThread(visibleThreads)
+      );
+
+      if (selectedThreadIndex === -1) {
+        selectedThreadIndex = null;
+      }
+    }
+
+    dispatch({
+      type: 'VIEW_PROFILE',
+      profile,
+      hiddenThreadIndexes,
+      selectedThreadIndex,
+      pathInZipFile,
+    });
   };
+}
+
+/**
+ * Find idle threads to hide. It is really annoying for an end user to load a profile
+ * full of empty threads. It can be helpful to hide certain threads that appear to
+ * be idle. This function attempts to find and hide idle threads.
+ */
+function _hideIdleThreads(profile: Profile): ThreadIndex[] {
+  const hiddenThreadIndexes = [];
+  // Go through each thread.
+  for (
+    let threadIndex = 0;
+    threadIndex < profile.threads.length;
+    threadIndex++
+  ) {
+    // Hide content threads with no RefreshDriverTick. This indicates they were
+    // not painted to, and most likely idle. This is just a heuristic to help users.
+    const thread = profile.threads[threadIndex];
+    if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
+      let isPaintMarkerFound = false;
+      if (thread.stringTable.hasString('RefreshDriverTick')) {
+        const paintStringIndex = thread.stringTable.indexForString(
+          'RefreshDriverTick'
+        );
+
+        for (
+          let markerIndex = 0;
+          markerIndex < thread.markers.length;
+          markerIndex++
+        ) {
+          if (paintStringIndex === thread.markers.name[markerIndex]) {
+            isPaintMarkerFound = true;
+            break;
+          }
+        }
+      }
+      if (!isPaintMarkerFound) {
+        hiddenThreadIndexes.push(threadIndex);
+      }
+    }
+  }
+
+  return hiddenThreadIndexes;
+}
+
+function _findDefaultThread(threads: Thread[]): Thread | null {
+  if (threads.length === 0) {
+    // Tests may have no threads.
+    return null;
+  }
+  const contentThreadId = threads.findIndex(
+    thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
+  );
+  const defaultThreadIndex =
+    contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(threads)[0];
+
+  return threads[defaultThreadIndex];
 }
 
 export function requestingSymbolTable(requestedLib: RequestedLib): Action {
