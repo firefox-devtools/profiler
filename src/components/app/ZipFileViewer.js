@@ -207,12 +207,6 @@ class ZipFileViewer extends React.PureComponent<Props> {
     }
   }
 
-  _onAppendageButtonClick = (zipFileIndex: IndexIntoZipFileTable | null) => {
-    if (zipFileIndex !== null) {
-      this.props.viewProfileFromZip(zipFileIndex);
-    }
-  };
-
   _renderMessage(message: React.Node) {
     return (
       <section className="zipFileViewer">
@@ -285,7 +279,6 @@ class ZipFileViewer extends React.PureComponent<Props> {
                 onExpandedNodesChange={changeExpandedZipFile}
                 selectedNodeId={selectedZipFileIndex}
                 expandedNodeIds={expandedZipFileIndexes}
-                onAppendageButtonClick={this._onAppendageButtonClick}
                 ref={this._takeTreeViewRef}
                 contextMenuId={'MarkersContextMenu'}
                 rowHeight={30}
