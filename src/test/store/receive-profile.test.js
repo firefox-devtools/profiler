@@ -666,9 +666,14 @@ describe('actions/receive-profile', function() {
       zip.file('profile.json', serializeProfile(getEmptyProfile()));
       const array = await zip.generateAsync({ type: 'uint8array' });
 
+      // Create a new ArrayBuffer instance and copy the data into it, in order
+      // to work around https://github.com/facebook/jest/issues/6248
+      const bufferCopy = new ArrayBuffer(array.buffer.byteLength);
+      new Uint8Array(bufferCopy).set(new Uint8Array(array.buffer));
+
       const { getState, view } = await setupTestWithFile({
         type: 'application/zip',
-        payload: array.buffer,
+        payload: bufferCopy,
       });
       expect(view.phase).toBe('DATA_LOADED');
       const zipInStore = ZippedProfilesSelectors.getZipFile(getState());
