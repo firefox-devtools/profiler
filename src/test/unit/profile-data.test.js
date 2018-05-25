@@ -203,9 +203,8 @@ describe('process-profile', function() {
       expect(thread0.markers.time[3]).toEqual(4);
       expect(thread0.markers.time[4]).toEqual(5);
 
-      let data = thread0.markers.data[6];
-      expect(data && data.startTime ? data.startTime : null).toEqual(9);
-      expect(data && data.endTime ? data.endTime : null).toEqual(10);
+      expect(thread0.markers.time[6]).toEqual(9);
+      expect(thread0.markers.time[7]).toEqual(10);
 
       // 1 second later than the same markers in the main process.
       expect(thread2.markers.time[0]).toEqual(1001);
@@ -214,12 +213,21 @@ describe('process-profile', function() {
       expect(thread2.markers.time[3]).toEqual(1004);
       expect(thread2.markers.time[4]).toEqual(1005);
 
-      data = thread2.markers.data[6];
-      expect(data && data.startTime ? data.startTime : null).toEqual(1009);
-      expect(data && data.endTime ? data.endTime : null).toEqual(1010);
+      expect(thread2.markers.time[6]).toEqual(1009);
+      expect(thread2.markers.time[7]).toEqual(1010);
+
       expect(
-        thread2.markers.data[6] && thread2.markers.data[6].type === 'DOMEvent'
+        thread2.markers.data[6] &&
+        thread2.markers.data[6].type === 'tracing' &&
+        thread2.markers.data[6].category === 'DOMEvent'
           ? thread2.markers.data[6].timeStamp
+          : null
+      ).toEqual(1001);
+      expect(
+        thread2.markers.data[7] &&
+        thread2.markers.data[7].type === 'tracing' &&
+        thread2.markers.data[7].category === 'DOMEvent'
+          ? thread2.markers.data[7].timeStamp
           : null
       ).toEqual(1001);
       // TODO: also shift the samples inside marker callstacks
@@ -745,7 +753,7 @@ describe('upgrades', function() {
     expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
   }
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-8.json')
+    require('../fixtures/upgrades/processed-10.json')
   );
 
   // Uncomment this to output your next ./upgrades/processed-X.json
@@ -822,16 +830,22 @@ describe('upgrades', function() {
     );
     compareProcessedProfiles(upgradedProfile8, afterUpgradeReference);
 
-    // This last test is to make sure we properly upgrade the json
-    // file to same version
     const serializedOldProcessedProfile9 = require('../fixtures/upgrades/processed-9.json');
     const upgradedProfile9 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile9
     );
     compareProcessedProfiles(upgradedProfile9, afterUpgradeReference);
+
+    // This last test is to make sure we properly upgrade the json
+    // file to same version
+    const serializedOldProcessedProfile10 = require('../fixtures/upgrades/processed-10.json');
+    const upgradedProfile10 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile10
+    );
+    compareProcessedProfiles(upgradedProfile10, afterUpgradeReference);
   });
   it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function() {
-    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-9.json');
+    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-10.json');
     // Uncomment this to output your next ./upgrades/gecko-X.json
     // upgradeGeckoProfileToCurrentVersion(afterUpgradeGeckoReference);
     // console.log(JSON.stringify(afterUpgradeGeckoReference));
@@ -865,11 +879,15 @@ describe('upgrades', function() {
     upgradeGeckoProfileToCurrentVersion(geckoProfile8);
     expect(geckoProfile8).toEqual(afterUpgradeGeckoReference);
 
-    // This last test is to make sure we properly upgrade the json
-    // file to same version
     const geckoProfile9 = require('../fixtures/upgrades/gecko-9.json');
     upgradeGeckoProfileToCurrentVersion(geckoProfile9);
     expect(geckoProfile9).toEqual(afterUpgradeGeckoReference);
+
+    // This last test is to make sure we properly upgrade the json
+    // file to same version
+    const geckoProfile10 = require('../fixtures/upgrades/gecko-10.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile10);
+    expect(geckoProfile10).toEqual(afterUpgradeGeckoReference);
   });
 });
 
