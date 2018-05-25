@@ -19,7 +19,7 @@ type TestDefinedMarkers = Array<[MarkerName, MarkerTime, DataPayload]>;
 
 export { getEmptyProfile } from '../../../profile-logic/profile-data';
 
-export function addMarkersToThreadWithCorrespondingSamples(
+export function addMarkersToThreadReplacingSamples(
   thread: Thread,
   markers: TestDefinedMarkers
 ) {
@@ -54,7 +54,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
 
 export function getThreadWithMarkers(markers: TestDefinedMarkers) {
   const thread = getEmptyThread();
-  addMarkersToThreadWithCorrespondingSamples(thread, markers);
+  addMarkersToThreadReplacingSamples(thread, markers);
   return thread;
 }
 

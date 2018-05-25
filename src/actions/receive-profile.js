@@ -64,12 +64,10 @@ export function viewProfile(
         .filter(index => threadIndexes.includes(index));
     }
 
-    // Don't trust the selectedThreadIndex value to make sense or exists here. If it's not in the
-    // thread indexes, or is listed in the hidden threads, then compute a new
-    // selectedThreadIndex.
     if (
-      selectedThreadIndex === null ||
+      // Make sure the thread index actually exists.
       !threadIndexes.includes(selectedThreadIndex) ||
+      // And that it's not hidden.
       hiddenThreadIndexes.includes(selectedThreadIndex)
     ) {
       const visibleThreads = threadIndexes
@@ -81,10 +79,6 @@ export function viewProfile(
       selectedThreadIndex = profile.threads.indexOf(
         _findDefaultThread(visibleThreads)
       );
-
-      if (selectedThreadIndex === -1) {
-        selectedThreadIndex = null;
-      }
     }
 
     dispatch({
@@ -103,6 +97,7 @@ export function viewProfile(
  * be idle. This function attempts to find and hide idle threads.
  */
 function _hideIdleThreads(profile: Profile): ThreadIndex[] {
+  let contentThreadsCount = 0;
   const hiddenThreadIndexes = [];
   // Go through each thread.
   for (
@@ -114,6 +109,7 @@ function _hideIdleThreads(profile: Profile): ThreadIndex[] {
     // not painted to, and most likely idle. This is just a heuristic to help users.
     const thread = profile.threads[threadIndex];
     if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
+      contentThreadsCount++;
       let isPaintMarkerFound = false;
       if (thread.stringTable.hasString('RefreshDriverTick')) {
         const paintStringIndex = thread.stringTable.indexForString(
@@ -137,7 +133,11 @@ function _hideIdleThreads(profile: Profile): ThreadIndex[] {
     }
   }
 
-  return hiddenThreadIndexes;
+  return contentThreadsCount === hiddenThreadIndexes.length
+    ? // Don't hide anything if all the content threads would be hidden.
+      []
+    : // Return the hidden threads.
+      hiddenThreadIndexes;
 }
 
 function _findDefaultThread(threads: Thread[]): Thread | null {
