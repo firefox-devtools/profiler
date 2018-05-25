@@ -285,16 +285,17 @@ const _upgraders = {
     // DOMEvent.
     function convertToVersionTenRecursive(p) {
       for (const thread of p.threads) {
+        const { markers } = thread;
         const stringTable = new UniqueStringArray(thread.stringTable);
-        const nameIndex = thread.markers.schema.name;
-        const dataIndex = thread.markers.schema.data;
-        const timeIndex = thread.markers.schema.time;
-        const markersToAdd = {};
-        for (let i = 0; i < thread.markers.data.length; i++) {
-          const name = stringTable.getString(thread.markers.data[i][nameIndex]);
-          const data = thread.markers.data[i][dataIndex];
+        const nameIndex = markers.schema.name;
+        const dataIndex = markers.schema.data;
+        const timeIndex = markers.schema.time;
+        const extraMarkers = [];
+        for (let i = 0; i < markers.data.length; i++) {
+          const marker = markers.data[i];
+          const name = stringTable.getString(marker[nameIndex]);
+          const data = marker[dataIndex];
           if (name === 'DOMEvent' && data.type !== 'tracing') {
-            thread.markers.data[i][timeIndex] = data.startTime;
             const endMarker = [];
             endMarker[dataIndex] = {
               type: 'tracing',
@@ -305,11 +306,11 @@ const _upgraders = {
               phase: data.phase,
             };
             endMarker[timeIndex] = data.endTime;
-            endMarker[nameIndex] = thread.markers.data[i][nameIndex];
-            markersToAdd[i] = endMarker;
+            endMarker[nameIndex] = marker[nameIndex];
+            extraMarkers.push(endMarker);
 
-            thread.markers.data[i][timeIndex] = data.startTime;
-            thread.markers.data[i][dataIndex] = {
+            marker[timeIndex] = data.startTime;
+            marker[dataIndex] = {
               type: 'tracing',
               category: 'DOMEvent',
               timeStamp: data.timeStamp,
@@ -320,17 +321,9 @@ const _upgraders = {
           }
         }
 
-        // Adding the `end` markers that we created to appropriate indices.
-        for (const i in markersToAdd) {
-          let index = parseInt(i);
-          while (
-            thread.markers.data.length > index &&
-            markersToAdd[i][timeIndex] >= thread.markers.data[index][timeIndex]
-          ) {
-            index++;
-          }
-          thread.markers.data.splice(index, 0, markersToAdd[i]);
-        }
+        // Add all extraMarkers to the end of the markers array. In the Gecko
+        // profile format, markers don't need to be sorted by time.
+        markers.data = markers.data.concat(extraMarkers);
       }
       for (const subprocessProfile of p.processes) {
         convertToVersionTenRecursive(subprocessProfile);
