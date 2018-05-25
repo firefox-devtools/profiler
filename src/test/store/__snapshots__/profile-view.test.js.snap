@@ -14,13 +14,13 @@ Object {
     "misc": "",
     "oscpu": "",
     "platform": "",
-    "preprocessedProfileVersion": 10,
+    "preprocessedProfileVersion": 11,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 0,
     "startTime": 0,
     "toolkit": "",
-    "version": 9,
+    "version": 10,
   },
   "threads": Array [
     Object {
