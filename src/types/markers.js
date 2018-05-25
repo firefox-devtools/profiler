@@ -312,7 +312,6 @@ export type DOMEventMarkerPayload = {
   interval: 'start' | 'end',
   eventType: string,
   phase: 0 | 1 | 2 | 3,
-  cause?: CauseBacktrace,
 };
 
 type StyleMarkerPayload_Shared = {
