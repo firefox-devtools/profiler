@@ -203,6 +203,7 @@ Object {
         "type": Array [],
       },
       "samples": Object {
+        "frameNumber": Array [],
         "length": 9,
         "responsiveness": Array [
           0,
@@ -602,6 +603,7 @@ Array [
       "type": Array [],
     },
     "samples": Object {
+      "frameNumber": Array [],
       "length": 9,
       "responsiveness": Array [
         0,
@@ -1699,6 +1701,7 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "frameNumber": Array [],
     "length": 9,
     "responsiveness": Array [
       0,
