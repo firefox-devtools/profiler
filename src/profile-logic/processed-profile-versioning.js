@@ -441,14 +441,17 @@ const _upgraders = {
     // DOMEvent.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
+      if (markers.length === 0) {
+        continue;
+      }
+
       const stringTable = new UniqueStringArray(stringArray);
-      const newDataArray = [];
-      const markersToAdd = {};
+      const extraMarkers = [];
       for (let i = 0; i < markers.length; i++) {
         const name = stringTable.getString(markers.name[i]);
         const data = markers.data[i];
         if (name === 'DOMEvent') {
-          newDataArray[i] = {
+          markers.data[i] = {
             type: 'tracing',
             category: 'DOMEvent',
             timeStamp: data.timeStamp,
@@ -457,7 +460,7 @@ const _upgraders = {
             phase: data.phase,
           };
 
-          markersToAdd[i] = {
+          extraMarkers.push({
             data: {
               type: 'tracing',
               category: 'DOMEvent',
@@ -468,27 +471,59 @@ const _upgraders = {
             },
             time: data.endTime,
             name: markers.name[i],
-          };
-        } else {
-          newDataArray[i] = data;
+          });
         }
       }
-      thread.markers.data = newDataArray;
 
-      // Adding the `end` markers that we created to appropriate indices.
-      // Markers need to be sorted by time.
-      for (const i in markersToAdd) {
-        let index = parseInt(i);
+      if (extraMarkers.length > 0) {
+        extraMarkers.sort((a, b) => a.time - b.time);
+
+        // Create a new markers table that includes both the old markers and
+        // the markers from extraMarkers, sorted by time.
+        const newMarkers = {
+          length: 0,
+          name: [],
+          time: [],
+          data: [],
+        };
+
+        // We compute the new markers list by doing one forward pass. Both the
+        // old markers (stored in |markers|) and the extra markers are already
+        // sorted by time.
+
+        let nextOldMarkerIndex = 0;
+        let nextOldMarkerTime = markers.time[0];
+        let nextExtraMarkerIndex = 0;
+        let nextExtraMarkerTime = extraMarkers[0].time;
         while (
-          thread.markers.time.length > index &&
-          markersToAdd[i].time >= thread.markers.time[index]
+          nextOldMarkerIndex < markers.length ||
+          nextExtraMarkerIndex < extraMarkers.length
         ) {
-          index++;
+          // Pick the next marker based on its timestamp.
+          if (nextOldMarkerTime <= nextExtraMarkerTime) {
+            newMarkers.name.push(markers.name[nextOldMarkerIndex]);
+            newMarkers.time.push(markers.time[nextOldMarkerIndex]);
+            newMarkers.data.push(markers.data[nextOldMarkerIndex]);
+            newMarkers.length++;
+            nextOldMarkerIndex++;
+            nextOldMarkerTime =
+              nextOldMarkerIndex < markers.length
+                ? markers.time[nextOldMarkerIndex]
+                : Infinity;
+          } else {
+            newMarkers.name.push(extraMarkers[nextExtraMarkerIndex].name);
+            newMarkers.time.push(extraMarkers[nextExtraMarkerIndex].time);
+            newMarkers.data.push(extraMarkers[nextExtraMarkerIndex].data);
+            newMarkers.length++;
+            nextExtraMarkerIndex++;
+            nextExtraMarkerTime =
+              nextExtraMarkerIndex < extraMarkers.length
+                ? extraMarkers[nextExtraMarkerIndex].time
+                : Infinity;
+          }
         }
 
-        thread.markers.data.splice(index, 0, markersToAdd[i].data);
-        thread.markers.time.splice(index, 0, markersToAdd[i].time);
-        thread.markers.name.splice(index, 0, markersToAdd[i].name);
+        thread.markers = newMarkers;
       }
     }
   },
