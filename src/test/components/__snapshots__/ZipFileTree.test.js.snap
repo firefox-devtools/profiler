@@ -386,7 +386,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
               }
             }
             maxNodeDepth={2}
-            onAppendageButtonClick={[Function]}
             onEnterKey={[Function]}
             onExpandedNodesChange={[Function]}
             onSelectionChange={[Function]}
@@ -1095,7 +1094,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                                         }
                                       }
                                       nodeId={0}
-                                      onAppendageButtonClick={[Function]}
                                       onClick={[Function]}
                                       onToggle={[Function]}
                                       rowHeightStyle={
@@ -1196,7 +1194,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                                         }
                                       }
                                       nodeId={1}
-                                      onAppendageButtonClick={[Function]}
                                       onClick={[Function]}
                                       onToggle={[Function]}
                                       rowHeightStyle={
@@ -1297,7 +1294,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                                         }
                                       }
                                       nodeId={2}
-                                      onAppendageButtonClick={[Function]}
                                       onClick={[Function]}
                                       onToggle={[Function]}
                                       rowHeightStyle={
@@ -1403,7 +1399,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                                         }
                                       }
                                       nodeId={3}
-                                      onAppendageButtonClick={[Function]}
                                       onClick={[Function]}
                                       onToggle={[Function]}
                                       rowHeightStyle={
@@ -1509,7 +1504,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                                         }
                                       }
                                       nodeId={4}
-                                      onAppendageButtonClick={[Function]}
                                       onClick={[Function]}
                                       onToggle={[Function]}
                                       rowHeightStyle={
@@ -1610,7 +1604,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                                         }
                                       }
                                       nodeId={5}
-                                      onAppendageButtonClick={[Function]}
                                       onClick={[Function]}
                                       onToggle={[Function]}
                                       rowHeightStyle={
