@@ -334,10 +334,7 @@ const profile = {
   libs: [parentProcessBinary].concat(extraBinaries),
   threads: [
     Object.assign({ name: 'GeckoMain', processType: 'default' }, thread),
-    Object.assign(
-      { name: 'Compositor', processType: 'default' },
-      cloneDeep(thread)
-    ),
+    Object.assign({ name: 'Compositor', processType: 'default' }, thread),
   ],
   processes: [contentProcessProfile],
 };
