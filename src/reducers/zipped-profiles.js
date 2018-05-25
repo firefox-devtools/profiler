@@ -33,24 +33,6 @@ function zipFile(
   action: Action
 ): ZipFileState {
   switch (action.type) {
-    case 'UPDATE_URL_STATE': {
-      if (
-        action.newUrlState.pathInZipFile === null &&
-        state.phase === 'VIEW_PROFILE_IN_ZIP_FILE'
-      ) {
-        // When the back button is hit on the browser, the UrlState can update, but
-        // the state of the zip file viewer can be out of date. In this case, make
-        // sure and revert the state back to LIST_FILES_IN_ZIP_FILE rather than
-        // VIEW_PROFILE_IN_ZIP_FILE. Otherwise the zip file viewer will try and
-        // display a profile that does not exist.
-        return _validateStateTransition(state, {
-          phase: 'LIST_FILES_IN_ZIP_FILE',
-          zip: state.zip,
-          pathInZipFile: null,
-        });
-      }
-      return state;
-    }
     case 'RECEIVE_ZIP_FILE':
       return _validateStateTransition(state, {
         phase: 'LIST_FILES_IN_ZIP_FILE',
