@@ -658,64 +658,37 @@ function _fileReader(input) {
   };
 }
 
-/**
- * Multiple file formats are supported. Look at the file type and try and
- * parse the contents according to its type.
- */
 export function retrieveProfileFromFile(
   file: File
 ): ThunkAction<Promise<void>> {
   return async dispatch => {
-    // Notify the UI that we are loading and parsing a profile. This can take
-    // a little bit of time.
     dispatch(waitingForProfileFromFile());
 
     try {
-      switch (file.type) {
-        case 'application/json':
-          // Parse JSON serialized profiles.
-          {
-            const text = await _fileReader(file).asText();
-            const profile = unserializeProfileOfArbitraryFormat(text);
-            if (profile === undefined) {
-              throw new Error('Unable to parse the profile.');
-            }
-
-            dispatch(viewProfile(profile));
-          }
-          break;
-        case 'application/gzip':
-        case 'application/x-gzip':
-          // Parse a single profile that has been gzipped.
-          {
-            const buffer = await _fileReader(file).asArrayBuffer();
-            const arrayBuffer = new Uint8Array(buffer);
-            const decompressedArrayBuffer = await decompress(arrayBuffer);
-            const textDecoder = new TextDecoder();
-            const text = await textDecoder.decode(decompressedArrayBuffer);
-            const profile = unserializeProfileOfArbitraryFormat(text);
-            if (profile === undefined) {
-              throw new Error('Unable to parse the profile.');
-            }
-
-            dispatch(viewProfile(profile));
-          }
-          break;
-        case 'application/zip':
-          // Open a zip file in the zip file viewer
-          {
-            const buffer = await _fileReader(file).asArrayBuffer();
-            const zip = await JSZip.loadAsync(buffer);
-            dispatch(receiveZipFile(zip));
-          }
-          break;
-        default:
-          dispatch(
-            errorReceivingProfileFromFile(
-              new Error(`Unable to load a file of type "${file.type}"`)
-            )
-          );
+      const text = await _fileReader(file).asText();
+      const profile = unserializeProfileOfArbitraryFormat(text);
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
       }
+
+      dispatch(viewProfile(profile));
+      return;
+    } catch (e) {
+      // continuing the function normally, as we return in the try block above;
+    }
+
+    try {
+      const buffer = await _fileReader(file).asArrayBuffer();
+      const arrayBuffer = new Uint8Array(buffer);
+      const decompressedArrayBuffer = await decompress(arrayBuffer);
+      const textDecoder = new TextDecoder();
+      const text = await textDecoder.decode(decompressedArrayBuffer);
+      const profile = unserializeProfileOfArbitraryFormat(text);
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+
+      dispatch(viewProfile(profile));
     } catch (error) {
       dispatch(errorReceivingProfileFromFile(error));
     }
