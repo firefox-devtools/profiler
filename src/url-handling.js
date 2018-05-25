@@ -188,7 +188,7 @@ export function stateFromLocation(location: Location): UrlState {
 
   const pathParts = pathname.split('/').filter(d => d);
   const dataSource = getDataSourceFromPathParts(pathParts);
-  const selectedThread = query.thread !== undefined ? +query.thread : null;
+  const selectedThread = query.thread !== undefined ? +query.thread : 0;
 
   // https://perf-html.io/public/{hash}/calltree/
   const hasProfileHash = ['local', 'public'].includes(dataSource);
@@ -204,13 +204,6 @@ export function stateFromLocation(location: Location): UrlState {
   // to known values.
   if (query.implementation === 'js' || query.implementation === 'cpp') {
     implementation = query.implementation;
-  }
-
-  const transforms = {};
-  if (selectedThread !== null) {
-    transforms[selectedThread] = query.transforms
-      ? parseTransforms(query.transforms)
-      : [];
   }
 
   return {
@@ -232,7 +225,11 @@ export function stateFromLocation(location: Location): UrlState {
         ? query.hiddenThreads.split('-').map(index => Number(index))
         : [],
       markersSearchString: query.markerSearch || '',
-      transforms,
+      transforms: {
+        [selectedThread]: query.transforms
+          ? parseTransforms(query.transforms)
+          : [],
+      },
     },
   };
 }
