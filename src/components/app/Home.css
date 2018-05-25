@@ -109,18 +109,20 @@
   box-shadow: 0 2px 4px #ddd;
 }
 
-.homeSectionInstallButton {
-  display: inline-block;
-  padding: 0.7em;
+.homeSectionButton {
+  padding: 0.5em;
+  margin: 15px 0;
+  display: block;
   border: 2px solid var(--blue-50);
   color: var(--blue-50);
   text-decoration: none;
   transition: background-color 300ms;
   font-weight: bold;
   font-size: 16px;
+  text-align: center;
 }
 
-.homeSectionInstallButton:hover {
+.homeSectionButton:hover {
   color: #fff;
   background-color: var(--blue-50);
 }
@@ -132,6 +134,21 @@
   top: 2px;
   padding-right: 12px;
   padding-left: 5px;
+}
+
+.homeSectionDocsIcon {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  margin: 0 10px -4px 3px;
+  background: url(../../../res/img/svg/help-blue.svg);
+  background-size: 100% 100%;
+  display: inline-block;
+}
+
+.homeSectionButton:hover .homeSectionDocsIcon {
+  /* Make the icon white */
+  filter: grayscale(1) brightness(3);
 }
 
 .homeSectionPerfScreenshot {
@@ -203,4 +220,5 @@
     padding-left: 1em;
     padding-right: 1em;
   }
+
 }
