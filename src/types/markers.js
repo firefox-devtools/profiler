@@ -259,18 +259,11 @@ export type InvalidationPayload = {
 };
 
 /**
- * Network http/https loads - one marker for each load that reaches the
- * STOP state that occurs, plus one for the initial START of the load, with
- * the URI and the status.  A unique ID is included to allow these to be linked.
+ * Network http/https loads - one marker for each notification of network
+ * state that occurs, plus one for the initial START of the load, with the URI
+ * and the status.  A unique ID is included to allow these to be linked.
  * Note that the 'name' field currently also has the id ("Load N") so that
- * marker.js will not merge separate loads of the same URI.  Note also that
- * URI is not necessarily included in later network markers for a specific
- * load to avoid having to use cycles during collection to access, allocate
- * and copy the URI.  Markers using the same ID are all for the same load.
- *
- * Most of the fields only are included on STOP, and not all of them may
- * be included depending on what states happen during the load.  Also note
- * that redirects are logged as well.
+ * marker.js will not merge separate loads.
  */
 export type NetworkPayload = {
   type: 'Network',
@@ -278,7 +271,7 @@ export type NetworkPayload = {
   RedirectURI?: string,
   id: number,
   pri: number,
-  count?: number, // Total size of transfer, if any
+  count?: number,
   status: string,
   startTime: Milliseconds,
   endTime: Milliseconds,
