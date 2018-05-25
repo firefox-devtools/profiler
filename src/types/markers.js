@@ -277,7 +277,7 @@ export type NetworkPayload = {
   URI?: string,
   RedirectURI?: string,
   id: number,
-  pri: number, // priority of the load; always included as it can change
+  pri: number,
   count?: number, // Total size of transfer, if any
   status: string,
   startTime: Milliseconds,
