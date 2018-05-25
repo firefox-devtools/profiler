@@ -8,14 +8,12 @@ import sinon from 'sinon';
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
-import * as ZippedProfilesSelectors from '../../reducers/zipped-profiles';
 import { getView } from '../../reducers/app';
 import {
   viewProfile,
   retrieveProfileFromAddon,
   retrieveProfileFromStore,
   retrieveProfileOrZipFromUrl,
-  retrieveProfileFromFile,
   _fetchProfile,
 } from '../../actions/receive-profile';
 
@@ -590,104 +588,6 @@ describe('actions/receive-profile', function() {
       expect(userFacingError).toMatchSnapshot();
       expect(reportError.mock.calls.length).toBeGreaterThan(0);
       expect(reportError.mock.calls).toMatchSnapshot();
-    });
-  });
-
-  describe('retrieveProfileFromFile', function() {
-    /**
-     * Bypass all of Flow's checks, and mock out the file interface.
-     */
-    function mockFile({ type, payload }): File {
-      const file = {
-        type,
-        _payload: payload,
-      };
-      return (file: any);
-    }
-
-    /**
-     * Bypass all of Flow's checks, and mock out the file reader.
-     */
-    function mockFileReader(mockFile: File) {
-      const payload = (mockFile: any)._payload;
-      return {
-        asText: () => Promise.resolve((payload: string)),
-        asArrayBuffer: () => Promise.resolve((payload: ArrayBuffer)),
-      };
-    }
-
-    async function setupTestWithFile(mockFileOptions) {
-      const file = mockFile(mockFileOptions);
-      const { dispatch, getState } = blankStore();
-      await dispatch(retrieveProfileFromFile(file, mockFileReader));
-      const view = getView(getState());
-      return { getState, dispatch, view };
-    }
-
-    it('can load json', async function() {
-      const profile = getEmptyProfile();
-      profile.meta.product = 'JSON Test';
-
-      const { getState, view } = await setupTestWithFile({
-        type: 'application/json',
-        payload: serializeProfile(profile),
-      });
-      expect(view.phase).toBe('DATA_LOADED');
-      expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
-        'JSON Test'
-      );
-    });
-
-    it('will give an error when unable to parse json', async function() {
-      const { view } = await setupTestWithFile({
-        type: 'application/json',
-        payload: '{}',
-      });
-      expect(view.phase).toBe('FATAL_ERROR');
-
-      expect(
-        // Coerce into the object to access the error property.
-        (view: Object).error
-      ).toMatchSnapshot();
-    });
-
-    xit('can load gzipped json', async function() {
-      // TODO - See issue #1023. The zee-worker is failing to compress/decompress
-      // the profile.
-    });
-
-    xit('will give an error when unable to parse gzipped profiles', async function() {
-      // TODO - See issue #1023. The zee-worker is failing to compress/decompress
-      // the profile.
-    });
-
-    it('can load a zipped profile', async function() {
-      const zip = new JSZip();
-      zip.file('profile.json', serializeProfile(getEmptyProfile()));
-      const array = await zip.generateAsync({ type: 'uint8array' });
-
-      const { getState, view } = await setupTestWithFile({
-        type: 'application/zip',
-        payload: array.buffer,
-      });
-      expect(view.phase).toBe('DATA_LOADED');
-      const zipInStore = ZippedProfilesSelectors.getZipFile(getState());
-      if (zipInStore === null) {
-        throw new Error('Expected zipInStore to exist.');
-      }
-      expect(zipInStore.files['profile.json']).toBeTruthy();
-    });
-
-    it('will give an error when unable to decompress a zipped profile', async function() {
-      const { view } = await setupTestWithFile({
-        type: 'application/zip',
-        payload: new ArrayBuffer(10),
-      });
-      expect(view.phase).toBe('FATAL_ERROR');
-      expect(
-        // Coerce into the object to access the error property.
-        (view: Object).error
-      ).toMatchSnapshot();
     });
   });
 });
