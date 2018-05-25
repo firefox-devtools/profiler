@@ -149,6 +149,56 @@ Array [
         <div
           className="tooltipTiming"
         >
+          101ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          Load 1234
+        </div>
+      </div>
+      <div
+        className="tooltipDetails"
+      >
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
+      </div>
+    </div>
+    <div
+      className="tooltipDetails"
+    >
+      <div
+        className="tooltipLabel"
+      >
+        URL
+        :
+      </div>
+      https:/example.org/help-me.js
+      <div
+        className="tooltipLabel"
+      >
+        Status
+        :
+      </div>
+      STATUS_START
+    </div>
+  </div>,
+  <div
+    className="tooltipMarker propClass"
+  >
+    <div
+      className="tooltipHeader"
+    >
+      <div
+        className="tooltipOneLine"
+      >
+        <div
+          className="tooltipTiming"
+        >
           0.80ms
         </div>
         <div
@@ -178,63 +228,6 @@ Array [
         :
       </div>
       commandupdate
-    </div>
-  </div>,
-  <div
-    className="tooltipMarker propClass"
-  >
-    <div
-      className="tooltipHeader"
-    >
-      <div
-        className="tooltipOneLine"
-      >
-        <div
-          className="tooltipTiming"
-        >
-          101ms
-        </div>
-        <div
-          className="tooltipTitle"
-        >
-          Load 31: http://wikia.com/
-        </div>
-      </div>
-      <div
-        className="tooltipDetails"
-      >
-        <div
-          className="tooltipLabel"
-        >
-          Thread:
-        </div>
-        Main Thread
-      </div>
-    </div>
-    <div
-      className="tooltipDetails"
-    >
-      <div
-        className="tooltipLabel"
-      >
-        URL
-        :
-      </div>
-      http://wikia.com/
-      <div
-        className="tooltipLabel"
-      >
-        pri
-        :
-      </div>
-      8
-      <div
-        className="tooltipLabel"
-      >
-        Status
-        :
-      </div>
-      STATUS_START
     </div>
   </div>,
   <div
@@ -1183,7 +1176,7 @@ Array [
         <div
           className="tooltipTitle"
         >
-          Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+          Load 1234
         </div>
       </div>
       <div
@@ -1200,13 +1193,6 @@ Array [
     <div
       className="tooltipDetails"
     >
-      <div
-        className="tooltipLabel"
-      >
-        pri
-        :
-      </div>
-      8
       <div
         className="tooltipLabel"
       >
@@ -1214,155 +1200,6 @@ Array [
         :
       </div>
       STATUS_READING
-    </div>
-  </div>,
-  <div
-    className="tooltipMarker propClass"
-  >
-    <div
-      className="tooltipHeader"
-    >
-      <div
-        className="tooltipOneLine"
-      >
-        <div
-          className="tooltipTiming"
-        >
-          205ms
-        </div>
-        <div
-          className="tooltipTitle"
-        >
-          Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
-        </div>
-      </div>
-      <div
-        className="tooltipDetails"
-      >
-        <div
-          className="tooltipLabel"
-        >
-          Thread:
-        </div>
-        Main Thread
-      </div>
-    </div>
-    <div
-      className="tooltipDetails"
-    >
-      <div
-        className="tooltipLabel"
-      >
-        Status
-        :
-      </div>
-      STATUS_STOP
-      <div
-        className="tooltipLabel"
-      >
-        URL
-        :
-      </div>
-      https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
-      <div
-        className="tooltipLabel"
-      >
-        pri
-        :
-      </div>
-      8
-      <div
-        className="tooltipLabel"
-      >
-        count
-        :
-      </div>
-      47027
-      <div
-        className="tooltipLabel"
-      >
-        requestStart @
-        :
-      </div>
-      -2239.159199062502
-      <div
-        className="tooltipLabel"
-      >
-        response
-        :
-      </div>
-      3.514498000000458
-    </div>
-  </div>,
-  <div
-    className="tooltipMarker propClass"
-  >
-    <div
-      className="tooltipHeader"
-    >
-      <div
-        className="tooltipOneLine"
-      >
-        <div
-          className="tooltipTiming"
-        >
-          66ms
-        </div>
-        <div
-          className="tooltipTitle"
-        >
-          Load 31: http://wikia.com/
-        </div>
-      </div>
-      <div
-        className="tooltipDetails"
-      >
-        <div
-          className="tooltipLabel"
-        >
-          Thread:
-        </div>
-        Main Thread
-      </div>
-    </div>
-    <div
-      className="tooltipDetails"
-    >
-      <div
-        className="tooltipLabel"
-      >
-        Status
-        :
-      </div>
-      STATUS_REDIRECT
-      <div
-        className="tooltipLabel"
-      >
-        URL
-        :
-      </div>
-      http://www.wikia.com/
-      <div
-        className="tooltipLabel"
-      >
-        Redirect URL
-        :
-      </div>
-      Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
-      <div
-        className="tooltipLabel"
-      >
-        pri
-        :
-      </div>
-      -20
-      <div
-        className="tooltipLabel"
-      >
-        count
-        :
-      </div>
-      0
     </div>
   </div>,
 ]

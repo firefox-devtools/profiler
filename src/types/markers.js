@@ -268,22 +268,10 @@ export type InvalidationPayload = {
 export type NetworkPayload = {
   type: 'Network',
   URI?: string,
-  RedirectURI?: string,
   id: number,
-  pri: number,
-  count?: number,
   status: string,
   startTime: Milliseconds,
   endTime: Milliseconds,
-  domainLookupStart?: Milliseconds,
-  domainLookupEnd?: Milliseconds,
-  connectStart?: Milliseconds,
-  tcpConnectEnd?: Milliseconds,
-  secureConnectionStart?: Milliseconds,
-  connectEnd?: Milliseconds,
-  requestStart?: Milliseconds,
-  responseStart?: Milliseconds,
-  responseEnd?: Milliseconds,
 };
 
 /**
@@ -359,7 +347,6 @@ export type MarkerPayload =
 
 export type MarkerPayload_Gecko =
   | GPUMarkerPayload
-  | NetworkPayload
   | UserTimingMarkerPayload
   | PaintProfilerMarkerTracing_Gecko
   | DOMEventMarkerPayload

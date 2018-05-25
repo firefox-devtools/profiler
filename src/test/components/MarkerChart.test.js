@@ -44,7 +44,7 @@ it('renders MarkerChart correctly', () => {
     ['Marker B', 0, { startTime: 0, endTime: 10 }],
     ['Marker C', 5, { startTime: 5, endTime: 15 }],
     [
-      'Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D',
+      'Very very very very very very long Marker D',
       6,
       { startTime: 5, endTime: 15 },
     ],

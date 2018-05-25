@@ -48,35 +48,6 @@ function _markerDetail<T: NotVoidOrNull>(
   ];
 }
 
-function _markerDetailNullable<T: NotVoidOrNull>(
-  key: string,
-  label: string,
-  value: T | void | null,
-  fn: T => string = String
-): React.Node {
-  if (value === undefined || value === null) {
-    return null;
-  }
-  return _markerDetail(key, label, value, fn);
-}
-
-function _markerDetailDeltaTimeNullable(
-  key: string,
-  label: string,
-  value1?: number,
-  value2?: number
-): React.Node {
-  if (
-    value1 === undefined ||
-    value2 === undefined ||
-    value1 === null ||
-    value2 === null
-  ) {
-    return null;
-  }
-  return _markerDetail(key, label, value1 - value2);
-}
-
 function _markerBacktrace(
   marker: TracingMarker,
   data: StyleMarkerPayload | PaintProfilerMarkerTracing,
@@ -348,68 +319,14 @@ function getMarkerDetails(
         );
       }
       case 'Network': {
-        if (
-          data.status !== 'STATUS_STOP' &&
-          data.status !== 'STATUS_REDIRECT'
-        ) {
-          return (
-            <div className="tooltipDetails">
-              {_markerDetailNullable('url', 'URL', data.URI)}
-              {_markerDetail('pri', 'pri', data.pri)}
-              {_markerDetailNullable('count', 'count', data.count)}
-              {_markerDetail('status', 'Status', data.status)}
-            </div>
-          );
-        } else {
-          return (
-            <div className="tooltipDetails">
-              {_markerDetail('status', 'Status', data.status)}
-              {_markerDetailNullable('url', 'URL', data.URI)}
-              {_markerDetailNullable(
-                'redirect_url',
-                'Redirect URL',
-                data.RedirectURI
-              )}
-              {_markerDetail('pri', 'pri', data.pri)}
-              {_markerDetailNullable('count', 'count', data.count)}
-              {_markerDetailDeltaTimeNullable(
-                'domainLookup',
-                'domainLookup',
-                data.domainLookupEnd,
-                data.domainLookupStart
-              )}
-              {_markerDetailDeltaTimeNullable(
-                'tcpConnect',
-                'tcpConnect',
-                data.tcpConnectEnd,
-                data.connectStart
-              )}
-              {_markerDetailNullable(
-                'secureConnectionStart',
-                'secureConnectionStart',
-                data.secureConnectionStart
-              )}
-              {_markerDetailDeltaTimeNullable(
-                'connect',
-                'connect',
-                data.connectEnd,
-                data.connectStart
-              )}
-              {_markerDetailDeltaTimeNullable(
-                'requestStart',
-                'requestStart @',
-                data.requestStart,
-                data.startTime
-              )}
-              {_markerDetailDeltaTimeNullable(
-                'response',
-                'response',
-                data.responseEnd,
-                data.responseStart
-              )}
-            </div>
-          );
-        }
+        return (
+          <div className="tooltipDetails">
+            {data.URI === undefined
+              ? null
+              : _markerDetail('url', 'URL', data.URI)}
+            {_markerDetail('status', 'Status', data.status)}
+          </div>
+        );
       }
       case 'Styles': {
         return [
