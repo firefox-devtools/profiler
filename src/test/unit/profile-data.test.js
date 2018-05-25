@@ -845,7 +845,7 @@ describe('upgrades', function() {
     compareProcessedProfiles(upgradedProfile10, afterUpgradeReference);
   });
   it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function() {
-    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-10.json');
+    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-11.json');
     // Uncomment this to output your next ./upgrades/gecko-X.json
     // upgradeGeckoProfileToCurrentVersion(afterUpgradeGeckoReference);
     // console.log(JSON.stringify(afterUpgradeGeckoReference));
@@ -883,11 +883,15 @@ describe('upgrades', function() {
     upgradeGeckoProfileToCurrentVersion(geckoProfile9);
     expect(geckoProfile9).toEqual(afterUpgradeGeckoReference);
 
-    // This last test is to make sure we properly upgrade the json
-    // file to same version
     const geckoProfile10 = require('../fixtures/upgrades/gecko-10.json');
     upgradeGeckoProfileToCurrentVersion(geckoProfile10);
     expect(geckoProfile10).toEqual(afterUpgradeGeckoReference);
+
+    // This last test is to make sure we properly upgrade the json
+    // file to same version
+    const geckoProfile11 = require('../fixtures/upgrades/gecko-11.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile11);
+    expect(geckoProfile11).toEqual(afterUpgradeGeckoReference);
   });
 });
 
