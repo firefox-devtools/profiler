@@ -13,6 +13,7 @@ import {
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { changeSelectedMarker } from '../../actions/profile-view';
+import { formatNumber } from '../../utils/format-numbers';
 import Settings from './Settings';
 
 import './index.css';
@@ -110,6 +111,14 @@ class MarkerTree {
           case 'UserTiming':
             name = `${name} [${data.name}]`;
             break;
+
+          case 'DOMEvent': {
+            category = 'DOMEvent';
+            const duration = data.endTime - data.startTime;
+            name = `[${formatNumber(duration)}ms] ${data.eventType}`;
+            break;
+          }
+
           default:
         }
       }

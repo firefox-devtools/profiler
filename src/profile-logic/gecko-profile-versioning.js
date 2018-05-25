@@ -17,7 +17,7 @@ import {
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 
-export const CURRENT_VERSION = 10; // The current version of the Gecko profile format.
+export const CURRENT_VERSION = 9; // The current version of the Gecko profile format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -276,67 +276,6 @@ const _upgraders = {
       }
     }
     convertToVersionNineRecursive(profile);
-  },
-  [10]: profile => {
-    // Removed the startDate and endDate from DOMEventMarkerPayload and
-    // made it a tracing marker instead. DOMEventMarkerPayload is no longer a
-    // single marker, it requires a start and an end marker. Therefore, we have
-    // to change the old DOMEvent marker and also create an end marker for each
-    // DOMEvent.
-    function convertToVersionTenRecursive(p) {
-      for (const thread of p.threads) {
-        const stringTable = new UniqueStringArray(thread.stringTable);
-        const nameIndex = thread.markers.schema.name;
-        const dataIndex = thread.markers.schema.data;
-        const timeIndex = thread.markers.schema.time;
-        const markersToAdd = {};
-        for (let i = 0; i < thread.markers.data.length; i++) {
-          const name = stringTable.getString(thread.markers.data[i][nameIndex]);
-          const data = thread.markers.data[i][dataIndex];
-          if (name === 'DOMEvent' && data.type !== 'tracing') {
-            thread.markers.data[i][timeIndex] = data.startTime;
-            const endMarker = [];
-            endMarker[dataIndex] = {
-              type: 'tracing',
-              category: 'DOMEvent',
-              timeStamp: data.timeStamp,
-              interval: 'end',
-              eventType: data.eventType,
-              phase: data.phase,
-            };
-            endMarker[timeIndex] = data.endTime;
-            endMarker[nameIndex] = thread.markers.data[i][nameIndex];
-            markersToAdd[i] = endMarker;
-
-            thread.markers.data[i][timeIndex] = data.startTime;
-            thread.markers.data[i][dataIndex] = {
-              type: 'tracing',
-              category: 'DOMEvent',
-              timeStamp: data.timeStamp,
-              interval: 'start',
-              eventType: data.eventType,
-              phase: data.phase,
-            };
-          }
-        }
-
-        // Adding the `end` markers that we created to appropriate indices.
-        for (const i in markersToAdd) {
-          let index = parseInt(i);
-          while (
-            thread.markers.data.length > index &&
-            markersToAdd[i][timeIndex] >= thread.markers.data[index][timeIndex]
-          ) {
-            index++;
-          }
-          thread.markers.data.splice(index, 0, markersToAdd[i]);
-        }
-      }
-      for (const subprocessProfile of p.processes) {
-        convertToVersionTenRecursive(subprocessProfile);
-      }
-    }
-    convertToVersionTenRecursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */

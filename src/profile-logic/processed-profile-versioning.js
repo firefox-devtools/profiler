@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 11; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 10; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -430,65 +430,6 @@ const _upgraders = {
           }
           delete marker.stack;
         }
-      }
-    }
-  },
-  [11]: profile => {
-    // Removed the startTime and endTime from DOMEventMarkerPayload and
-    // made it a tracing marker instead. DOMEventMarkerPayload is no longer a
-    // single marker, it requires a start and an end marker. Therefore, we have
-    // to change the old DOMEvent marker and also create an end marker for each
-    // DOMEvent.
-    for (const thread of profile.threads) {
-      const { stringArray, markers } = thread;
-      const stringTable = new UniqueStringArray(stringArray);
-      const newDataArray = [];
-      const markersToAdd = {};
-      for (let i = 0; i < markers.length; i++) {
-        const name = stringTable.getString(markers.name[i]);
-        const data = markers.data[i];
-        if (name === 'DOMEvent') {
-          newDataArray[i] = {
-            type: 'tracing',
-            category: 'DOMEvent',
-            timeStamp: data.timeStamp,
-            interval: 'start',
-            eventType: data.eventType,
-            phase: data.phase,
-          };
-
-          markersToAdd[i] = {
-            data: {
-              type: 'tracing',
-              category: 'DOMEvent',
-              timeStamp: data.timeStamp,
-              interval: 'end',
-              eventType: data.eventType,
-              phase: data.phase,
-            },
-            time: data.endTime,
-            name: markers.name[i],
-          };
-        } else {
-          newDataArray[i] = data;
-        }
-      }
-      thread.markers.data = newDataArray;
-
-      // Adding the `end` markers that we created to appropriate indices.
-      // Markers need to be sorted by time.
-      for (const i in markersToAdd) {
-        let index = parseInt(i);
-        while (
-          thread.markers.time.length > index &&
-          markersToAdd[i].time >= thread.markers.time[index]
-        ) {
-          index++;
-        }
-
-        thread.markers.data.splice(index, 0, markersToAdd[i].data);
-        thread.markers.time.splice(index, 0, markersToAdd[i].time);
-        thread.markers.name.splice(index, 0, markersToAdd[i].name);
       }
     }
   },

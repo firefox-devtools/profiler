@@ -44,7 +44,6 @@ import type {
   GeckoStackStruct,
 } from '../types/gecko-profile';
 import type {
-  DOMEventMarkerPayload,
   MarkerPayload,
   MarkerPayload_Gecko,
   PaintProfilerMarkerTracing,
@@ -600,13 +599,10 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
             return result;
           }
           case 'tracing': {
-            const newData = immutableUpdate(m);
+            const newData = Object.assign({}, m);
             _convertStackToCause(newData);
-            // We had to use any here because _convertStackToCause is not
-            // providing the type system with information how it's operating
-            return newData.category === 'DOMEvent'
-              ? ((newData: any): DOMEventMarkerPayload)
-              : ((newData: any): PaintProfilerMarkerTracing);
+            const result: PaintProfilerMarkerTracing = newData;
+            return result;
           }
           default:
             return m;
@@ -737,12 +733,12 @@ function _adjustMarkerTimestamps(
       if (typeof newData.endTime === 'number') {
         newData.endTime += delta;
       }
+      if (newData.type === 'DOMEvent' && 'timeStamp' in newData) {
+        newData.timeStamp += delta;
+      }
       if (newData.type === 'tracing' || newData.type === 'Styles') {
         if (newData.cause) {
           newData.cause.time += delta;
-        }
-        if (newData.category === 'DOMEvent' && 'timeStamp' in newData) {
-          newData.timeStamp += delta;
         }
       }
       return newData;
