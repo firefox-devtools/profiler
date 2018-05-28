@@ -11,7 +11,17 @@
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
     "version": 4,
-    "preprocessedProfileVersion": 11
+    "preprocessedProfileVersion": 12,
+    "categories": [
+      { "name": "Idle", "color": "transparent" },
+      { "name": "Other", "color": "grey" },
+      { "name": "JavaScript", "color": "yellow" },
+      { "name": "Layout", "color": "purple" },
+      { "name": "Graphics", "color": "green" },
+      { "name": "DOM", "color": "blue" },
+      { "name": "GC / CC", "color": "orange" },
+      { "name": "Network", "color": "lightblue" }
+    ]
   },
   "threads": [
     {
@@ -59,7 +69,7 @@
         "implementation": [null, null, null, null, 6],
         "optimizations": [null, null, null, null, null],
         "line": [null, null, null, 4391, 34],
-        "category": [null, null, null, 16, null],
+        "category": [null, null, null, 1, null],
         "func": [0, 1, 2, 3, 4],
         "address": [-1, 3972, 6725, -1, -1]
       },
@@ -188,7 +198,7 @@
         "implementation": [null, null, null, null, 6],
         "optimizations": [null, null, null, null, null],
         "line": [null, null, null, 4391, 34],
-        "category": [null, null, null, 16, null],
+        "category": [null, null, null, 1, null],
         "func": [0, 1, 2, 3, 4],
         "address": [-1, 3972, 6725, -1, -1]
       },
@@ -318,7 +328,7 @@
         "implementation": [null, null, null, null, 6],
         "optimizations": [null, null, null, null, null],
         "line": [null, null, null, 4391, 34],
-        "category": [null, null, null, 16, null],
+        "category": [null, null, null, 1, null],
         "func": [0, 1, 2, 3, 4],
         "address": [-1, 3972, 6725, -1, -1]
       },

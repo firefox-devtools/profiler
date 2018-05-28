@@ -753,7 +753,7 @@ describe('upgrades', function() {
     expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
   }
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-10.json')
+    require('../fixtures/upgrades/processed-12.json')
   );
 
   // Uncomment this to output your next ./upgrades/processed-X.json
@@ -836,19 +836,19 @@ describe('upgrades', function() {
     );
     compareProcessedProfiles(upgradedProfile9, afterUpgradeReference);
 
-    const serializedOldProcessedProfile10 = require('../fixtures/upgrades/processed-10.json');
-    const upgradedProfile10 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile10
-    );
-    compareProcessedProfiles(upgradedProfile10, afterUpgradeReference);
-
-    // This last test is to make sure we properly upgrade the json
-    // file to same version
     const serializedOldProcessedProfile11 = require('../fixtures/upgrades/processed-11.json');
     const upgradedProfile11 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile11
     );
     compareProcessedProfiles(upgradedProfile11, afterUpgradeReference);
+
+    // This last test is to make sure we properly upgrade the json
+    // file to same version
+    const serializedOldProcessedProfile12 = require('../fixtures/upgrades/processed-12.json');
+    const upgradedProfile12 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile12
+    );
+    compareProcessedProfiles(upgradedProfile12, afterUpgradeReference);
   });
   it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function() {
     const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-11.json');
