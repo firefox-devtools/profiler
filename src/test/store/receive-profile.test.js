@@ -660,12 +660,26 @@ describe('actions/receive-profile', function() {
       return { getState, dispatch, view };
     }
 
-    it('can load json', async function() {
+    it('can load json with a good mime type', async function() {
       const profile = getEmptyProfile();
       profile.meta.product = 'JSON Test';
 
       const { getState, view } = await setupTestWithFile({
         type: 'application/json',
+        payload: serializeProfile(profile),
+      });
+      expect(view.phase).toBe('DATA_LOADED');
+      expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
+        'JSON Test'
+      );
+    });
+
+    it('can load json with an empty mime type', async function() {
+      const profile = getEmptyProfile();
+      profile.meta.product = 'JSON Test';
+
+      const { getState, view } = await setupTestWithFile({
+        type: '',
         payload: serializeProfile(profile),
       });
       expect(view.phase).toBe('DATA_LOADED');
