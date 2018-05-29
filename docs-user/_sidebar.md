@@ -12,3 +12,6 @@
   * [Call Tree (Part 2) - Real recording](./videos-call-tree-2.md)
   * [Call Tree (Part 3) - Branching](./videos-call-tree-3.md)
   * [Multiple threads and async code](./videos-threads.md)
+* [Case Studies](./case-studies.md)
+  * [2D canvas and worker messaging](./bunny.md)
+  * [Harnessing parallelism](./bunny-2.md)

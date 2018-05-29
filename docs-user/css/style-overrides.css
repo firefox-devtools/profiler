@@ -102,6 +102,13 @@ body {
   border-radius: 3px;
 }
 
+/* Code blocks in headers are sized weird. Use em rather than rem to make the sizing
+ * relative to the context. */
+.markdown-section code {
+  /* Override: font-size: 0.8rem; */
+  font-size: 0.8em;
+}
+
 @media screen and (max-width:768px) {
   /* Make the sidebar toggle not block the text, and be at the top of the screen */
   .sidebar-toggle {
