@@ -813,6 +813,7 @@ export function processProfile(
     version: geckoProfile.meta.version,
     preprocessedProfileVersion: CURRENT_VERSION,
     appBuildID: geckoProfile.meta.appBuildID,
+    // A link to the source code revision for this build.
     sourceURL: geckoProfile.meta.sourceURL,
   };
 
