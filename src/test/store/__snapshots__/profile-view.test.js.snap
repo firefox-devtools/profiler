@@ -374,7 +374,7 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "length": 6,
+        "length": 12,
         "responsiveness": Array [],
         "rss": Array [],
         "stack": Array [],
@@ -773,7 +773,7 @@ Array [
       "type": Array [],
     },
     "samples": Object {
-      "length": 6,
+      "length": 12,
       "responsiveness": Array [],
       "rss": Array [],
       "stack": Array [],
