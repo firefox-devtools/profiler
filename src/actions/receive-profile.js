@@ -783,18 +783,6 @@ export function retrieveProfileFromFile(
 
     try {
       switch (file.type) {
-        case 'application/json':
-          // Parse JSON serialized profiles.
-          {
-            const text = await fileReader(file).asText();
-            const profile = unserializeProfileOfArbitraryFormat(text);
-            if (profile === undefined) {
-              throw new Error('Unable to parse the profile.');
-            }
-
-            dispatch(viewProfile(profile));
-          }
-          break;
         case 'application/gzip':
         case 'application/x-gzip':
           // Parse a single profile that has been gzipped.
@@ -820,12 +808,19 @@ export function retrieveProfileFromFile(
             dispatch(receiveZipFile(zip));
           }
           break;
-        default:
-          dispatch(
-            errorReceivingProfileFromFile(
-              new Error(`Unable to load a file of type "${file.type}"`)
-            )
-          );
+        default: {
+          // Plain uncompressed profile files can have file names with uncommon
+          // extensions (eg .profile). So we can't rely on the mime type to
+          // decide how to handle them. We'll try to parse them as a plain JSON
+          // file.
+          const text = await fileReader(file).asText();
+          const profile = unserializeProfileOfArbitraryFormat(text);
+          if (profile === undefined) {
+            throw new Error('Unable to parse the profile.');
+          }
+
+          dispatch(viewProfile(profile));
+        }
       }
     } catch (error) {
       dispatch(errorReceivingProfileFromFile(error));
