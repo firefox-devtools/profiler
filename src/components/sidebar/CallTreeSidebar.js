@@ -10,12 +10,12 @@ import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { getFunctionName } from '../../profile-logic/function-info';
 
 import type { ExplicitConnectOptions } from '../../utils/connect';
-import type { CallTree } from '../../profile-logic/call-tree';
+import type { CallTree, CallNodeIndex } from '../../profile-logic/call-tree';
 import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
 
 type StateProps = {|
   +tree: CallTree,
-  +selectedNodeIndex: IndexIntoCallNodeTable | null,
+  +selectedNodeIndex: CallNodeIndex | null,
 |};
 
 type SidebarDetailProps = {|

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import type { CallTree } from '../../profile-logic/call-tree';
+import type { CallTree, CallNodeIndex } from '../../profile-logic/call-tree';
 import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
 import type { Store, State } from '../../types/store';
 
@@ -41,7 +41,7 @@ export function getBoundingBox(width: number, height: number) {
  */
 export function formatTree(
   callTree: CallTree,
-  children: IndexIntoCallNodeTable[] = callTree.getRoots(),
+  children: CallNodeIndex[] = callTree.getRoots(),
   depth: number = 0,
   lines: string[] = []
 ): string[] {

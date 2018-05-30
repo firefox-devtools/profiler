@@ -36,6 +36,7 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
+import type { CallNodeIndex } from '../../profile-logic/call-tree';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
@@ -52,7 +53,7 @@ type StateProps = {|
   +threadName: string,
   +processDetails: string,
   +callNodeInfo: CallNodeInfo,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +selectedCallNodeIndex: CallNodeIndex | null,
   +isSelected: boolean,
   +unfilteredSamplesRange: StartEndRange | null,
 |};
@@ -255,7 +256,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       selectedCallNodeIndex:
         threadIndex === selectedThread
           ? selectors.getSelectedCallNodeIndex(state)
-          : -1,
+          : null,
       isSelected: threadIndex === selectedThread,
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
     };

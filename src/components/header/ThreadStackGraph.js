@@ -16,6 +16,7 @@ import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
+import type { CallNodeIndex } from '../../profile-logic/call-tree';
 
 type Props = {|
   +thread: Thread,
@@ -23,7 +24,7 @@ type Props = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +callNodeInfo: CallNodeInfo,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +selectedCallNodeIndex: CallNodeIndex | null,
   +className: string,
   +onStackClick: (time: Milliseconds) => void,
 |};
@@ -104,23 +105,25 @@ class ThreadStackGraph extends PureComponent<Props> {
       0.8,
       trueIntervalPixelWidth * multiplier
     );
-    let selectedCallNodeDepth = 0;
-    if (selectedCallNodeIndex !== -1 && selectedCallNodeIndex !== null) {
-      selectedCallNodeDepth = callNodeTable.depth[selectedCallNodeIndex];
-    }
+    // TODO
+    // let selectedCallNodeDepth = 0;
+    // if (selectedCallNodeIndex !== -1 && selectedCallNodeIndex !== null) {
+    //   selectedCallNodeDepth = callNodeTable.depth[selectedCallNodeIndex];
+    // }
     function hasSelectedCallNodePrefix(callNodePrefix) {
       let callNodeIndex = callNodePrefix;
       if (callNodeIndex === null) {
         return false;
       }
-      for (
-        let depth = callNodeTable.depth[callNodeIndex];
-        depth > selectedCallNodeDepth;
-        depth--
-      ) {
-        callNodeIndex = callNodeTable.prefix[callNodeIndex];
-      }
-      return callNodeIndex === selectedCallNodeIndex;
+      // for (
+      //   let depth = callNodeTable.depth[callNodeIndex];
+      //   depth > selectedCallNodeDepth;
+      //   depth--
+      // ) {
+      //   callNodeIndex = callNodeTable.prefix[callNodeIndex];
+      // }
+      // return callNodeIndex === selectedCallNodeIndex;
+      return true;
     }
 
     const firstDrawnSampleTime = range[0] - drawnIntervalWidth / xPixelsPerMs;

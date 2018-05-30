@@ -188,7 +188,8 @@ export function expandAllCallNodeDescendants(
     const nodeIndex = tree.getNodeIndexFromCallNodePath(callNodePath);
 
     // Create a set with the selected call node and its descendants
-    const descendants = nodeIndex !== null ? tree.getAllDescendants(nodeIndex) : new Set();
+    const descendants =
+      nodeIndex !== null ? tree.getAllDescendants(nodeIndex) : new Set();
     if (nodeIndex !== null) {
       descendants.add(nodeIndex);
     }

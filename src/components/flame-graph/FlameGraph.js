@@ -31,6 +31,7 @@ import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
+import type { CallNodeIndex } from '../../profile-logic/call-tree';
 
 import type {
   ExplicitConnectOptions,
@@ -51,7 +52,7 @@ type StateProps = {|
   +processDetails: string,
   +callNodeInfo: CallNodeInfo,
   +threadIndex: number,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +selectedCallNodeIndex: CallNodeIndex | null,
   +isCallNodeContextMenuVisible: boolean,
   +invertCallstack: boolean,
   +scrollToSelectionGeneration: number,
@@ -64,13 +65,14 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class FlameGraph extends React.PureComponent<Props> {
   _onSelectedCallNodeChange = (
-    callNodeIndex: IndexIntoCallNodeTable | null
+    callNodeIndex: CallNodeIndex | null
   ) => {
-    const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
-    changeSelectedCallNode(
-      threadIndex,
-      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
-    );
+    // TODO
+    // const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
+    // changeSelectedCallNode(
+    //   threadIndex,
+    //   getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+    // );
   };
 
   _onSwithToNormalCallstackClick = () => {

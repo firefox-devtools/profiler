@@ -35,6 +35,7 @@ import type {
   IndexIntoCallNodeTable,
   MarkerTimingRows,
 } from '../types/profile-derived';
+import type { CallNodeIndex } from '../profile-logic/call-tree';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type { Action, ProfileSelection } from '../types/actions';
 import type {
@@ -544,9 +545,9 @@ export type SelectorsForThread = {
   getCallNodeInfo: State => CallNodeInfo,
   getCallNodeMaxDepth: State => number,
   getSelectedCallNodePath: State => CallNodePath,
-  getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
+  getSelectedCallNodeIndex: State => CallNodeIndex | null,
   getExpandedCallNodePaths: State => PathSet,
-  getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
+  getExpandedCallNodeIndexes: State => Array<CallNodeIndex | null>,
   getCallTree: State => CallTree.CallTree,
   getStackTimingByDepth: State => StackTiming.StackTimingByDepth,
   getCallNodeMaxDepthForFlameGraph: State => number,
@@ -759,14 +760,14 @@ export const selectorsForThread = (
     const getSelectedCallNodeIndex = createSelector(
       getSelectedCallNodePath,
       getCallTree,
-      (callNodePath, callTree): IndexIntoCallNodeTable | null => {
+      (callNodePath, callTree): CallNodeIndex | null => {
         return callTree.getNodeIndexFromCallNodePath(callNodePath);
       }
     );
     const getExpandedCallNodeIndexes = createSelector(
       getCallTree,
       getExpandedCallNodePaths,
-      (callTree, callNodePaths): Array<IndexIntoCallNodeTable | null> =>
+      (callTree, callNodePaths): Array<CallNodeIndex | null> =>
         callTree.getNodeIndicesFromCallNodePaths(Array.from(callNodePaths))
     );
     const getStackTimingByDepth = createSelector(

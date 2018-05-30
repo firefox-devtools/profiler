@@ -31,7 +31,7 @@ import type { Tree } from '../components/shared/TreeView.js';
 import type { Milliseconds } from '../types/units';
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 
-export type CallNodeIndex = number;
+export type CallNodeIndex = string;
 
 type CallNodeChildren = CallNodeIndex[];
 type CallNodeTimes = {
@@ -45,7 +45,7 @@ type CallTreeCountsAndTimings = {
   rootTotalTime: number,
 };
 
-export type CallTree = Tree<number, CallNodeDisplayData> & {
+export type CallTree = Tree<CallNodeIndex, CallNodeDisplayData> & {
   preloadChildrenCache(): void,
   getNodeData(node: CallNodeIndex): CallNodeData,
   getTimingDisplayData(callNodeIndex: CallNodeIndex): Object,
@@ -80,7 +80,7 @@ export class CallTreeRegular {
   _rootTotalTime: number;
   _rootCount: number;
   _displayDataByIndex: Map<CallNodeIndex, CallNodeDisplayData>;
-  _children: Map<CallNodeIndex, CallNodeChildren>;
+  _children: Map<CallNodeIndex | -1, CallNodeChildren>;
   _isChildrenCachePreloaded: boolean;
   _jsOnly: boolean;
   _isIntegerInterval: boolean;
@@ -111,7 +111,7 @@ export class CallTreeRegular {
   }
 
   getRoots() {
-    return this.getChildren(-1);
+    return this._getChildren(-1);
   }
 
   /**
@@ -124,7 +124,7 @@ export class CallTreeRegular {
   preloadChildrenCache() {
     if (!this._isChildrenCachePreloaded) {
       this._children.clear();
-      this._children.set(-1, []); // -1 is the parent of the roots
+      this._children.set("-1", []); // -1 is the parent of the roots
       for (
         let callNodeIndex = 0;
         callNodeIndex < this._callNodeTable.length;
@@ -135,14 +135,14 @@ export class CallTreeRegular {
         // its children to be an empty array. Then we always have an
         // array to append to when any call node acts as a parent
         // through the prefix.
-        this._children.set(callNodeIndex, []);
+        this._children.set(callNodeIndex + "", []);
 
         if (this._callNodeTimes.totalTime[callNodeIndex] === 0) {
           continue;
         }
 
         const siblings = this._children.get(
-          this._callNodeTable.prefix[callNodeIndex]
+          this._callNodeTable.prefix[callNodeIndex] + ""
         );
         if (siblings === undefined) {
           // We should definitely have created a children array for
@@ -152,10 +152,10 @@ export class CallTreeRegular {
             "Failed to retrieve array of children. This shouldn't happen."
           );
         }
-        siblings.push(callNodeIndex);
+        siblings.push(callNodeIndex + "");
         siblings.sort(
           (a, b) =>
-            this._callNodeTimes.totalTime[b] - this._callNodeTimes.totalTime[a]
+            this._callNodeTimes.totalTime[+b] - this._callNodeTimes.totalTime[+a]
         );
       }
       this._isChildrenCachePreloaded = true;
@@ -165,22 +165,27 @@ export class CallTreeRegular {
   getCallNodePathFromNodeIndex(
     callNodeIndex: CallNodeIndex | null
   ): CallNodePath {
-    return getCallNodePathFromIndex(callNodeIndex, this._callNodeTable);
+    return getCallNodePathFromIndex(+callNodeIndex, this._callNodeTable);
   }
 
   getNodeIndexFromCallNodePath(
     callNodePath: CallNodePath
   ): CallNodeIndex | null {
-    return getCallNodeIndexFromPath(callNodePath, this._callNodeTable);
+    const index = getCallNodeIndexFromPath(callNodePath, this._callNodeTable);
+    return index === null ? null : index + "";
   }
 
   getNodeIndicesFromCallNodePaths(
     callNodePaths: Array<CallNodePath>
   ): Array<CallNodeIndex | null> {
-    return getCallNodeIndicesFromPaths(callNodePaths, this._callNodeTable);
+    return getCallNodeIndicesFromPaths(callNodePaths, this._callNodeTable).map(index => index === null ? null : index + "");
   }
 
-  getChildren(callNodeIndex: IndexIntoCallNodeTable | -1): CallNodeChildren {
+  getChildren(callNodeIndex: CallNodeIndex): CallNodeChildren {
+    return this._getChildren(callNodeIndex);
+  }
+
+  _getChildren(callNodeIndex: CallNodeIndex | -1): CallNodeChildren {
     let children = this._children.get(callNodeIndex);
     if (children === undefined) {
       if (this._isChildrenCachePreloaded) {
@@ -191,24 +196,24 @@ export class CallTreeRegular {
       const childCount =
         callNodeIndex === -1
           ? this._rootCount
-          : this._callNodeChildCount[callNodeIndex];
+          : this._callNodeChildCount[+callNodeIndex];
       children = [];
       for (
-        let childCallNodeIndex = callNodeIndex + 1;
+        let childCallNodeIndex = +callNodeIndex + 1;
         childCallNodeIndex < this._callNodeTable.length &&
         children.length < childCount;
         childCallNodeIndex++
       ) {
         if (
-          this._callNodeTable.prefix[childCallNodeIndex] === callNodeIndex &&
+          this._callNodeTable.prefix[childCallNodeIndex] === +callNodeIndex &&
           this._callNodeTimes.totalTime[childCallNodeIndex] !== 0
         ) {
-          children.push(childCallNodeIndex);
+          children.push(childCallNodeIndex + "");
         }
       }
       children.sort(
         (a, b) =>
-          this._callNodeTimes.totalTime[b] - this._callNodeTimes.totalTime[a]
+          this._callNodeTimes.totalTime[+b] - this._callNodeTimes.totalTime[+a]
       );
       this._children.set(callNodeIndex, children);
     }
@@ -235,22 +240,23 @@ export class CallTreeRegular {
     return result;
   }
 
-  getParent(callNodeIndex: CallNodeIndex): CallNodeIndex | -1 {
-    return this._callNodeTable.prefix[callNodeIndex];
+  getParent(callNodeIndex: CallNodeIndex): CallNodeIndex | null {
+    const index = this._callNodeTable.prefix[+callNodeIndex];
+    return index === -1 ? null : index + "";
   }
 
   getDepth(callNodeIndex: CallNodeIndex): number {
-    return this._callNodeTable.depth[callNodeIndex];
+    return this._callNodeTable.depth[+callNodeIndex];
   }
 
   getNodeData(callNodeIndex: CallNodeIndex): CallNodeData {
-    const funcIndex = this._callNodeTable.func[callNodeIndex];
+    const funcIndex = this._callNodeTable.func[+callNodeIndex];
     const funcName = this._stringTable.getString(
       this._funcTable.name[funcIndex]
     );
-    const totalTime = this._callNodeTimes.totalTime[callNodeIndex];
+    const totalTime = this._callNodeTimes.totalTime[+callNodeIndex];
     const totalTimeRelative = totalTime / this._rootTotalTime;
-    const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
+    const selfTime = this._callNodeTimes.selfTime[+callNodeIndex];
     const selfTimeRelative = selfTime / this._rootTotalTime;
 
     return {
@@ -263,8 +269,8 @@ export class CallTreeRegular {
   }
 
   getTimingDisplayData(callNodeIndex: CallNodeIndex) {
-    const totalTime = this._callNodeTimes.totalTime[callNodeIndex];
-    const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
+    const totalTime = this._callNodeTimes.totalTime[+callNodeIndex];
+    const selfTime = this._callNodeTimes.selfTime[+callNodeIndex];
     const formatNumber = this._isIntegerInterval
       ? _formatIntegerNumber
       : _formatDecimalNumber;
@@ -278,7 +284,7 @@ export class CallTreeRegular {
     let displayData = this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
       const { funcName, totalTimeRelative } = this.getNodeData(callNodeIndex);
-      const funcIndex = this._callNodeTable.func[callNodeIndex];
+      const funcIndex = this._callNodeTable.func[+callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
@@ -420,7 +426,7 @@ export class CallTreeInverted {
   _rootNodes: Array<CallNodeIndex>;
   _displayDataByIndex: Map<CallNodeIndex, CallNodeDisplayData>;
   _nodeInfo: Map<CallNodeIndex, Object>;
-  _children: Map<CallNodeIndex, CallNodeChildren>;
+  _children: Map<CallNodeIndex | -1, CallNodeChildren>;
   _parentCache: Map<CallNodeIndex, CallNodeIndex | null>;
   _pathToIndexCache: Map<string, CallNodeIndex | null>;
   _isIntegerInterval: boolean;
@@ -443,9 +449,16 @@ export class CallTreeInverted {
     this._rootTotalTime = rootTotalTime;
     this._pathToIndexCache = new Map();
     this._parentCache = new Map();
-    const firstCallNodeForRootFunc = Array.from(Array(funcTable.length), () => null);
+    const firstCallNodeForRootFunc = Array.from(
+      Array(funcTable.length),
+      () => null
+    );
 
-    for (let callNodeIndex = 0; callNodeIndex < callNodeTable.length; callNodeIndex++) {
+    for (
+      let callNodeIndex = 0;
+      callNodeIndex < callNodeTable.length;
+      callNodeIndex++
+    ) {
       const func = callNodeTable.func[callNodeIndex];
       if (firstCallNodeForRootFunc[func] === null) {
         firstCallNodeForRootFunc[func] = callNodeIndex;
@@ -522,10 +535,7 @@ export class CallTreeInverted {
     return nodeInfo;
   }
 
-  getChildren(nodeIndex: CallNodeIndex | -1): CallNodeChildren {
-    if (nodeIndex === -1) {
-      return this.getRoots();
-    }
+  getChildren(nodeIndex: CallNodeIndex): CallNodeChildren {
     let children = this._children.get(nodeIndex);
     if (children === undefined) {
       const { callNodes, callNodePath } = this._getNodeInfo(nodeIndex);
@@ -561,7 +571,7 @@ export class CallTreeInverted {
     return children;
   }
 
-  hasChildren(nodeIndex: CallNodeIndex | -1): boolean {
+  hasChildren(nodeIndex: CallNodeIndex): boolean {
     return this.getChildren(nodeIndex).length !== 0;
   }
 
@@ -581,7 +591,7 @@ export class CallTreeInverted {
     return result;
   }
 
-  getParent(nodeIndex: CallNodeIndex): CallNodeIndex | -1 {
+  getParent(nodeIndex: CallNodeIndex): CallNodeIndex | null {
     let parentIndex = this._parentCache.get(nodeIndex);
     if (parentIndex === undefined) {
       const callNodePath = this.getCallNodePathFromNodeIndex(nodeIndex);
@@ -589,7 +599,7 @@ export class CallTreeInverted {
       parentIndex = this.getNodeIndexFromCallNodePath(parentCallNodePath);
       this._parentCache.set(nodeIndex, parentIndex);
     }
-    return parentIndex === null ? -1 : parentIndex;
+    return parentIndex;
   }
 
   getDepth(nodeIndex: CallNodeIndex): number {
@@ -707,7 +717,7 @@ export class CallTreeInverted {
       return result;
     }
 
-    let indexInPath = 0;
+    const indexInPath = 0;
     const callNodeTable = this._callNodeTable;
     for (
       let callNodeIndex = potentialChildUnpackedIndex.rootCallNodeIndex + 1;
@@ -756,17 +766,17 @@ export class CallTreeInverted {
     nodeCallNodeIndex,
     rootCallNodeIndex,
   }: UnpackedInvertedCallTreeNodeIndex): CallNodeIndex {
-    return this._callNodeTable.length * nodeCallNodeIndex + rootCallNodeIndex;
+    return this._callNodeTable.length * nodeCallNodeIndex + rootCallNodeIndex + "";
   }
 
   _unpackNodeIndex(
     nodeIndex: CallNodeIndex
   ): UnpackedInvertedCallTreeNodeIndex {
     const nodeCallNodeIndex = Math.floor(
-      nodeIndex / this._callNodeTable.length
+      +nodeIndex / this._callNodeTable.length
     );
     const rootCallNodeIndex =
-      nodeIndex - nodeCallNodeIndex * this._callNodeTable.length;
+      +nodeIndex - nodeCallNodeIndex * this._callNodeTable.length;
     return { nodeCallNodeIndex, rootCallNodeIndex };
   }
 
@@ -889,7 +899,7 @@ function computeCallTreeCountsAndTimingsInverted(
     }
     rootTotalTime += nodeTime;
     const func = callNodeTable.func[callNodeIndex];
-    let rootNode = rootNodeMap.get(func);
+    const rootNode = rootNodeMap.get(func);
     if (rootNode === undefined) {
       rootNodeMap.set(func, {
         callNodePath: [func],

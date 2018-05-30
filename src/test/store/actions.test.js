@@ -141,7 +141,7 @@ describe('selectors/getFlameGraphTiming', function() {
       const lines = [];
       for (let i = 0; i < length; i++) {
         const callNodeIndex = callNode[i];
-        const funcIndex = callNodeTable.func[callNodeIndex];
+        const funcIndex = callNodeTable.func[+callNodeIndex]; // TODO
         const funcName = funcNames[funcIndex];
         lines.push(
           `${funcName} (${parseFloat(start[i].toFixed(2))}:${parseFloat(
@@ -172,7 +172,7 @@ describe('selectors/getFlameGraphTiming', function() {
         const lines = [];
         for (let i = 0; i < length; i++) {
           const callNodeIndex = callNode[i];
-          const funcIndex = callNodeTable.func[callNodeIndex];
+          const funcIndex = callNodeTable.func[+callNodeIndex]; // TODO
           const funcName = funcNames[funcIndex];
           const { totalTime, selfTime } = display[i];
           lines.push(

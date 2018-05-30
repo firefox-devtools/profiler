@@ -27,6 +27,7 @@ import type {
   StackType,
 } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
+import type { CallNodeIndex } from '../../profile-logic/call-tree';
 
 export type OwnProps = {|
   +thread: Thread,
@@ -34,8 +35,8 @@ export type OwnProps = {|
   +flameGraphTiming: FlameGraphTiming,
   +callNodeInfo: CallNodeInfo,
   +stackFrameHeight: CssPixels,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
+  +selectedCallNodeIndex: CallNodeIndex | null,
+  +onSelectionChange: (CallNodeIndex | null) => void,
   +disableTooltips: boolean,
   +scrollToSelectionGeneration: number,
 |};
@@ -258,7 +259,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       return;
     }
 
-    const depth = callNodeTable.depth[selectedCallNodeIndex];
+    const depth = callNodeTable.depth[+selectedCallNodeIndex]; // TODO
     const y = (maxStackDepth - depth - 1) * ROW_HEIGHT;
 
     if (y < this.props.viewport.viewportTop) {
@@ -330,7 +331,8 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         }
 
         const callNodeIndex = stackTiming.callNode[i];
-        const funcIndex = callNodeTable.func[callNodeIndex];
+        // TODO: get func for callNodeIndex
+        const funcIndex = callNodeTable.func[+callNodeIndex];
         const funcName = thread.stringTable.getString(
           thread.funcTable.name[funcIndex]
         );
@@ -401,7 +403,8 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       stackTiming.start[flameGraphTimingIndex];
 
     const callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
-    const funcIndex = callNodeTable.func[callNodeIndex];
+    // TODO: get func for callNodeIndex
+    const funcIndex = callNodeTable.func[+callNodeIndex];
     const funcName = thread.stringTable.getString(
       thread.funcTable.name[funcIndex]
     );
@@ -462,7 +465,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       const stackTiming = flameGraphTiming[depth];
       callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
     }
-    this.props.onSelectionChange(callNodeIndex);
+    this.props.onSelectionChange(callNodeIndex === null ? null : callNodeIndex + ""); // TODO
   };
 
   _hitTest(x: CssPixels, y: CssPixels): HoveredStackTiming | null {

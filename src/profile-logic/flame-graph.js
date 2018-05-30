@@ -7,6 +7,7 @@ import type { UnitIntervalOfProfileRange } from '../types/units';
 import type { IndexIntoCallNodeTable } from '../types/profile-derived';
 
 import * as CallTree from './call-tree';
+import type {CallNodeIndex} from './call-tree';
 
 export type FlameGraphDepth = number;
 export type IndexIntoFlameGraphTiming = number;
@@ -35,13 +36,13 @@ export type FlameGraphTiming = Array<{
   end: UnitIntervalOfProfileRange[],
   selfTimeRelative: Array<number>,
   display: Array<{ totalTime: string, selfTime: string }>,
-  callNode: IndexIntoCallNodeTable[],
+  callNode: CallNodeIndex[],
   length: number,
 }>;
 
 type Stack = Array<{
   depth: number,
-  nodeIndex: IndexIntoCallNodeTable,
+  nodeIndex: CallNodeIndex,
 }>;
 
 /**
@@ -55,8 +56,7 @@ export function getFlameGraphTiming(
   const timing = [];
   // Array of call nodes to recursively process in the loop below.
   // Start with the roots of the call tree.
-  const stack: Stack = callTree
-    .getRoots()
+  const stack: Stack = callTree.getRoots()
     .map(nodeIndex => ({ nodeIndex, depth: 0 }));
 
   // Keep track of time offset by depth level.

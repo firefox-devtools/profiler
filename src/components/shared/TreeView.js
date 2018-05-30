@@ -86,7 +86,7 @@ function reactStringWithHighlightedSubstrings(
   return highlighted;
 }
 
-type TreeViewRowFixedColumnsProps<NodeIndex: number, DisplayData: Object> = {|
+type TreeViewRowFixedColumnsProps<NodeIndex: number | string, DisplayData: Object> = {|
   +displayData: DisplayData,
   +nodeId: NodeIndex,
   +columns: Column[],
@@ -98,7 +98,7 @@ type TreeViewRowFixedColumnsProps<NodeIndex: number, DisplayData: Object> = {|
 |};
 
 class TreeViewRowFixedColumns<
-  NodeIndex: number,
+  NodeIndex: number | string,
   DisplayData: Object
 > extends React.PureComponent<
   TreeViewRowFixedColumnsProps<NodeIndex, DisplayData>
@@ -161,7 +161,7 @@ class TreeViewRowFixedColumns<
 }
 
 type TreeViewRowScrolledColumnsProps<
-  NodeIndex: number,
+  NodeIndex: number | string,
   DisplayData: Object
 > = {|
   +displayData: DisplayData,
@@ -183,7 +183,7 @@ type TreeViewRowScrolledColumnsProps<
 |};
 
 class TreeViewRowScrolledColumns<
-  NodeIndex: number,
+  NodeIndex: number | string,
   DisplayData: Object
 > extends React.PureComponent<
   TreeViewRowScrolledColumnsProps<NodeIndex, DisplayData>
@@ -277,7 +277,7 @@ export interface Tree<NodeIndex: number | string, DisplayData: Object> {
   getDepth(NodeIndex): number;
   getRoots(): NodeIndex[];
   getDisplayData(NodeIndex): DisplayData;
-  getParent(NodeIndex): NodeIndex;
+  getParent(NodeIndex): NodeIndex | null;
   getChildren(NodeIndex): NodeIndex[];
   hasChildren(NodeIndex): boolean;
   getAllDescendants(NodeIndex): Set<NodeIndex>;
@@ -304,7 +304,7 @@ type TreeViewProps<NodeIndex, DisplayData> = {|
 |};
 
 class TreeView<
-  NodeIndex: number,
+  NodeIndex: number | string,
   DisplayData: Object
 > extends React.PureComponent<TreeViewProps<NodeIndex, DisplayData>> {
   _specialItems: (NodeIndex | null)[];
@@ -521,7 +521,7 @@ class TreeView<
               this._toggle(selected);
             } else {
               const parent = this.props.tree.getParent(selected);
-              if (parent !== -1) {
+              if (parent !== null) {
                 this._select(parent);
               }
             }

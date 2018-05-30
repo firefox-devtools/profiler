@@ -7,9 +7,7 @@ import {
   getCallTree,
   computeCallTreeCountsAndTimings,
 } from '../../profile-logic/call-tree';
-import type {
-  CallTree,
-} from '../../profile-logic/call-tree';
+import type { CallTree } from '../../profile-logic/call-tree';
 import {
   getCallNodeInfo,
   invertCallstack,
@@ -23,8 +21,9 @@ import type { Profile } from '../../types/profile';
 
 describe('unfiltered call tree', function() {
   // These values are hoisted at the top for the ease of access. In the profile fixture
-  // for the unfiltered call tree, the indexes for funcs, frames, stacks, and callNodes
+  // for the unfiltered call tree, the indexes for funcs, frames, and stacks
   // all happen to share the same indexes as there is a 1 to 1 relationship between them.
+  // The callNodes have string indexes and need different variables.
   const A = 0;
   const B = 1;
   const C = 2;
@@ -34,6 +33,15 @@ describe('unfiltered call tree', function() {
   const G = 6;
   const H = 7;
   const I = 8;
+  const cn_A = "0";
+  const cn_B = "1";
+  const cn_C = "2";
+  const cn_D = "3";
+  const cn_E = "4";
+  const cn_F = "5";
+  const cn_G = "6";
+  const cn_H = "7";
+  const cn_I = "8";
 
   function getProfile() {
     return getProfileFromTextSamples(`
@@ -165,14 +173,14 @@ describe('unfiltered call tree', function() {
 
     describe('getRoots()', function() {
       it('returns an array with the root indexes', function() {
-        expect(callTree.getRoots()).toEqual([A]);
+        expect(callTree.getRoots()).toEqual([cn_A]);
       });
     });
 
     describe('getChildren()', function() {
       it('returns an array with the children indexes', function() {
-        expect(callTree.getChildren(C)).toEqual([D, F]);
-        expect(callTree.getChildren(E)).toEqual([]);
+        expect(callTree.getChildren(cn_C)).toEqual([cn_D, cn_F]);
+        expect(callTree.getChildren(cn_E)).toEqual([]);
       });
     });
 
@@ -180,42 +188,42 @@ describe('unfiltered call tree', function() {
       it('returns an array with the children indexes', function() {
         const callTree = callTreeFromProfile(profile);
         callTree.preloadChildrenCache();
-        expect(callTree.getChildren(C)).toEqual([D, F]);
-        expect(callTree.getChildren(E)).toEqual([]);
+        expect(callTree.getChildren(cn_C)).toEqual([cn_D, cn_F]);
+        expect(callTree.getChildren(cn_E)).toEqual([]);
       });
     });
 
     describe('hasChildren()', function() {
       it('determines if nodes have children', function() {
-        expect(callTree.hasChildren(C)).toEqual(true);
-        expect(callTree.hasChildren(E)).toEqual(false);
+        expect(callTree.hasChildren(cn_C)).toEqual(true);
+        expect(callTree.hasChildren(cn_E)).toEqual(false);
       });
     });
 
     describe('getAllDescendants()', function() {
       it('returns a set with the descendant indexes', function() {
-        expect(callTree.getAllDescendants(C)).toEqual(new Set([D, E, F, G]));
-        expect(callTree.getAllDescendants(E)).toEqual(new Set([]));
+        expect(callTree.getAllDescendants(cn_C)).toEqual(new Set([cn_D, cn_E, cn_F, cn_G]));
+        expect(callTree.getAllDescendants(cn_E)).toEqual(new Set([]));
       });
     });
 
     describe('getParent()', function() {
       it("finds a callNode's parent", function() {
-        expect(callTree.getParent(A)).toBe(-1);
-        expect(callTree.getParent(B)).toBe(A);
+        expect(callTree.getParent(cn_A)).toBe(-1);
+        expect(callTree.getParent(cn_B)).toBe(cn_A);
       });
     });
 
     describe('getDepth()', function() {
       it('returns the depth of callNodes in the tree', function() {
-        expect(callTree.getDepth(A)).toBe(0);
-        expect(callTree.getDepth(B)).toBe(1);
+        expect(callTree.getDepth(cn_A)).toBe(0);
+        expect(callTree.getDepth(cn_B)).toBe(1);
       });
     });
 
     describe('getNodeData()', function() {
       it('gets a node for a given callNodeIndex', function() {
-        expect(callTree.getNodeData(A)).toEqual({
+        expect(callTree.getNodeData(cn_A)).toEqual({
           funcName: 'A',
           totalTime: 3,
           totalTimeRelative: 1,
@@ -227,7 +235,7 @@ describe('unfiltered call tree', function() {
 
     describe('getDisplayData()', function() {
       it('gets a node for a given callNodeIndex', function() {
-        expect(callTree.getDisplayData(A)).toEqual({
+        expect(callTree.getDisplayData(cn_A)).toEqual({
           dim: false,
           icon: null,
           lib: '',
@@ -253,7 +261,7 @@ describe('unfiltered call tree', function() {
         // Hijack the string table to provide the proper host name
         thread.stringTable._array[hostStringIndex] = 'http://example.com';
 
-        expect(callTree.getDisplayData(A).icon).toEqual(
+        expect(callTree.getDisplayData(cn_A).icon).toEqual(
           'https://example.com/favicon.ico'
         );
       });
@@ -261,7 +269,7 @@ describe('unfiltered call tree', function() {
 
     describe('getTimingDisplayData()', function() {
       it('gets formatted timing data for a given callNodeIndex', function() {
-        expect(callTree.getTimingDisplayData(D)).toEqual({
+        expect(callTree.getTimingDisplayData(cn_D)).toEqual({
           selfTime: '—',
           totalTime: '1',
         });

@@ -38,6 +38,7 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
+import type { CallNodeIndex } from '../../profile-logic/call-tree';
 
 type OwnProps = {|
   forceOpenForTests?: boolean,
@@ -50,7 +51,7 @@ type StateProps = {|
   +implementation: ImplementationFilter,
   +inverted: boolean,
   +selectedCallNodePath: CallNodePath,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +selectedCallNodeIndex: CallNodeIndex | null,
   +selectedTab: TabSlug,
 |};
 
@@ -87,24 +88,26 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
   };
 
   _getFunctionName(): string {
-    const {
-      selectedCallNodeIndex,
-      thread: { stringTable, funcTable },
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    return "";
+    // TODO: Add selectedFunc property
+    // const {
+    //   selectedCallNodeIndex,
+    //   thread: { stringTable, funcTable },
+    //   callNodeInfo: { callNodeTable },
+    // } = this.props;
 
-    if (selectedCallNodeIndex === null) {
-      throw new Error(
-        "The context menu assumes there is a selected call node and there wasn't one."
-      );
-    }
+    // if (selectedCallNodeIndex === null) {
+    //   throw new Error(
+    //     "The context menu assumes there is a selected call node and there wasn't one."
+    //   );
+    // }
 
-    const funcIndex = callNodeTable.func[selectedCallNodeIndex];
-    const isJS = funcTable.isJS[funcIndex];
-    const stringIndex = funcTable.name[funcIndex];
-    const functionCall = stringTable.getString(stringIndex);
-    const name = isJS ? functionCall : getFunctionName(functionCall);
-    return name;
+    // const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+    // const isJS = funcTable.isJS[funcIndex];
+    // const stringIndex = funcTable.name[funcIndex];
+    // const functionCall = stringTable.getString(stringIndex);
+    // const name = isJS ? functionCall : getFunctionName(functionCall);
+    // return name;
   }
 
   lookupFunctionOnSearchfox(): void {
@@ -122,50 +125,51 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
   }
 
   copyUrl(): void {
-    const {
-      selectedCallNodeIndex,
-      thread: { stringTable, funcTable },
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    // const {
+    //   selectedCallNodeIndex,
+    //   thread: { stringTable, funcTable },
+    //   callNodeInfo: { callNodeTable },
+    // } = this.props;
 
-    if (selectedCallNodeIndex === null) {
-      throw new Error(
-        "The context menu assumes there is a selected call node and there wasn't one."
-      );
-    }
+    // if (selectedCallNodeIndex === null) {
+    //   throw new Error(
+    //     "The context menu assumes there is a selected call node and there wasn't one."
+    //   );
+    // }
 
-    const funcIndex = callNodeTable.func[selectedCallNodeIndex];
-    const stringIndex = funcTable.fileName[funcIndex];
-    if (stringIndex !== null) {
-      const fileName = stringTable.getString(stringIndex);
-      copy(fileName);
-    }
+    // const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+    // const stringIndex = funcTable.fileName[funcIndex];
+    // if (stringIndex !== null) {
+    //   const fileName = stringTable.getString(stringIndex);
+    //   copy(fileName);
+    // }
   }
 
   copyStack(): void {
-    const {
-      selectedCallNodeIndex,
-      thread: { stringTable, funcTable },
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    // TODO: add selectedCallPath prop
+    // const {
+    //   selectedCallNodeIndex,
+    //   thread: { stringTable, funcTable },
+    //   callNodeInfo: { callNodeTable },
+    // } = this.props;
 
-    if (selectedCallNodeIndex === null) {
-      throw new Error(
-        "The context menu assumes there is a selected call node and there wasn't one."
-      );
-    }
+    // if (selectedCallNodeIndex === null) {
+    //   throw new Error(
+    //     "The context menu assumes there is a selected call node and there wasn't one."
+    //   );
+    // }
 
-    let stack = '';
-    let callNodeIndex = selectedCallNodeIndex;
+    // let stack = '';
+    // let callNodeIndex = selectedCallNodeIndex;
 
-    do {
-      const funcIndex = callNodeTable.func[callNodeIndex];
-      const stringIndex = funcTable.name[funcIndex];
-      stack += stringTable.getString(stringIndex) + '\n';
-      callNodeIndex = callNodeTable.prefix[callNodeIndex];
-    } while (callNodeIndex !== -1);
+    // do {
+    //   const funcIndex = callNodeTable.func[callNodeIndex];
+    //   const stringIndex = funcTable.name[funcIndex];
+    //   stack += stringTable.getString(stringIndex) + '\n';
+    //   callNodeIndex = callNodeTable.prefix[callNodeIndex];
+    // } while (callNodeIndex !== -1);
 
-    copy(stack);
+    // copy(stack);
   }
 
   _handleClick = (event: SyntheticEvent<>, data: { type: string }): void => {
@@ -370,8 +374,9 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
       return <div />;
     }
 
-    const funcIndex = callNodeTable.func[selectedCallNodeIndex];
-    const isJS = funcTable.isJS[funcIndex];
+    // TODO: add selectedFunc
+    // const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+    const isJS = false; // funcTable.isJS[funcIndex];
     // This could be the C++ library, or the JS filename.
     const nameForResource = this.getNameForSelectedResource();
     const showExpandAll = selectedTab === 'calltree';

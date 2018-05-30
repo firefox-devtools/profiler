@@ -120,7 +120,12 @@ class CallTreeComponent extends PureComponent<Props> {
   }
 
   _onSelectedCallNodeChange(newSelectedCallNode: CallNodeIndex) {
-    const { callNodeInfo, threadIndex, changeSelectedCallNode, tree } = this.props;
+    const {
+      callNodeInfo,
+      threadIndex,
+      changeSelectedCallNode,
+      tree,
+    } = this.props;
     changeSelectedCallNode(
       threadIndex,
       tree.getCallNodePathFromNodeIndex(newSelectedCallNode)
@@ -130,7 +135,12 @@ class CallTreeComponent extends PureComponent<Props> {
   _onExpandedCallNodesChange(
     newExpandedCallNodeIndexes: Array<CallNodeIndex | null>
   ) {
-    const { callNodeInfo, threadIndex, changeExpandedCallNodes, tree } = this.props;
+    const {
+      callNodeInfo,
+      threadIndex,
+      changeExpandedCallNodes,
+      tree,
+    } = this.props;
     changeExpandedCallNodes(
       threadIndex,
       newExpandedCallNodeIndexes.map(callNodeIndex =>

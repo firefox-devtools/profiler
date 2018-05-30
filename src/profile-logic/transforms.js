@@ -516,6 +516,7 @@ export function invertCallNodePath(
   callTree: CallTree,
   callNodeTable: CallNodeTable
 ): CallNodePath {
+  // TODO: FIX ALL OF THIS
   let callNodeIndex = getCallNodeIndexFromPath(path, callNodeTable);
   if (callNodeIndex === null) {
     // No path was found, return an empty CallNodePath.
@@ -528,13 +529,13 @@ export function invertCallNodePath(
     // be the heaviest branch of the tree.
     callNodeIndex = children[0];
     pathToLeaf.push(callNodeIndex);
-    children = callTree.getChildren(callNodeIndex);
+    children = callTree.getChildren(callNodeIndex + "");
   } while (children && children.length > 0);
 
   return (
     pathToLeaf
       // Map the CallNodeIndex to FuncIndex.
-      .map(index => callNodeTable.func[index])
+      .map(index => callNodeTable.func[+index])
       // Reverse it so that it's in the proper inverted order.
       .reverse()
   );
