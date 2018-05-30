@@ -13,7 +13,7 @@ import type {
 } from './actions';
 import type { Milliseconds, StartEndRange } from './units';
 import type { IndexIntoMarkersTable, Profile, ThreadIndex } from './profile';
-import type { CallNodePath } from './profile-derived';
+import type { CallNodePath, ThreadsInProcess } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { GetLabel } from '../profile-logic/labeling-strategies';
 import type { GetCategory } from '../profile-logic/color-categories';
@@ -124,7 +124,7 @@ export type UrlState = {|
     rangeFilters: RangeFilterState[],
     selectedThread: ThreadIndex | null,
     callTreeSearchString: string,
-    threadOrder: ThreadIndex[],
+    threadOrder: ThreadsInProcess[],
     hiddenThreads: ThreadIndex[],
     markersSearchString: string,
     transforms: TransformStacksPerThread,

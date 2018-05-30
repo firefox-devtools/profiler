@@ -149,7 +149,9 @@ function _findDefaultThread(threads: Thread[]): Thread | null {
     thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
   );
   const defaultThreadIndex =
-    contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(threads)[0];
+    contentThreadId !== -1
+      ? contentThreadId
+      : defaultThreadOrder(threads)[0].threads[0];
 
   return threads[defaultThreadIndex];
 }

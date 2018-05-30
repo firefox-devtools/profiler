@@ -10,6 +10,7 @@ import Reorderable from '../shared/Reorderable';
 import TimeSelectionScrubber from './TimeSelectionScrubber';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import explicitConnect from '../../utils/connect';
+import { ensureExists } from '../../utils/flow';
 import {
   getProfile,
   getProfileViewOptions,
@@ -25,6 +26,7 @@ import {
 } from '../../actions/profile-view';
 
 import type { Profile, ThreadIndex } from '../../types/profile';
+import type { ThreadsInProcess } from '../../types/profile-derived';
 import type { ProfileSelection } from '../../types/actions';
 import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
@@ -35,7 +37,7 @@ import type {
 type StateProps = {|
   +profile: Profile,
   +selection: ProfileSelection,
-  +threadOrder: ThreadIndex[],
+  +threadOrder: ThreadsInProcess[],
   +hiddenThreads: ThreadIndex[],
   +timeRange: StartEndRange,
   +zeroAt: Milliseconds,
@@ -50,9 +52,21 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class ProfileViewerHeader extends PureComponent<Props> {
+  pidToChangeThreadOrderFn = new Map();
+
   constructor(props: Props) {
     super(props);
     (this: any)._onZoomButtonClick = this._onZoomButtonClick.bind(this);
+
+    // Work around using an arrow function in the render method:
+    // "JSX props should not use arrow functions  react/jsx-no-bind"
+    // changeThreadOrder needs the pid, so pre-allocate the needed
+    // functions with the pid already set.
+    for (const { pid } of this.props.threadOrder) {
+      const changeThreadOrderFn = threadIndexes =>
+        this.props.changeThreadOrder(pid, threadIndexes);
+      this.pidToChangeThreadOrderFn.set(pid, changeThreadOrderFn);
+    }
   }
 
   _onZoomButtonClick(start: Milliseconds, end: Milliseconds) {
@@ -64,7 +78,6 @@ class ProfileViewerHeader extends PureComponent<Props> {
     const {
       profile,
       threadOrder,
-      changeThreadOrder,
       selection,
       timeRange,
       zeroAt,
@@ -85,13 +98,17 @@ class ProfileViewerHeader extends PureComponent<Props> {
         onZoomButtonClick={this._onZoomButtonClick}
       >
         <OverflowEdgeIndicator className="profileViewerHeaderOverflowEdgeIndicator">
-          {
+          {threadOrder.map(({ pid, threads: threadIndexes }) => (
             <Reorderable
+              key={pid}
               tagName="ol"
               className="profileViewerHeaderThreadList"
-              order={threadOrder}
+              order={threadIndexes}
               orient="vertical"
-              onChangeOrder={changeThreadOrder}
+              onChangeOrder={ensureExists(
+                this.pidToChangeThreadOrderFn.get(pid),
+                'Could not find the changeThreadOrder function for a pid'
+              )}
             >
               {threads.map((thread, threadIndex) => (
                 <ProfileThreadHeaderBar
@@ -100,12 +117,15 @@ class ProfileViewerHeader extends PureComponent<Props> {
                   interval={profile.meta.interval}
                   rangeStart={timeRange.start}
                   rangeEnd={timeRange.end}
-                  isHidden={hiddenThreads.includes(threadIndex)}
+                  isHidden={
+                    hiddenThreads.includes(threadIndex) ||
+                    !threadIndexes.includes(threadIndex)
+                  }
                   isModifyingSelection={selection.isModifying}
                 />
               ))}
             </Reorderable>
-          }
+          ))}
         </OverflowEdgeIndicator>
       </TimeSelectionScrubber>
     );

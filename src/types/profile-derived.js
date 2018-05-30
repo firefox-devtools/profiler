@@ -5,7 +5,7 @@
 // @flow
 import type { Milliseconds } from './units';
 import type { MarkerPayload } from './markers';
-import type { IndexIntoFuncTable } from './profile';
+import type { IndexIntoFuncTable, ThreadIndex } from './profile';
 export type IndexIntoCallNodeTable = number;
 
 /**
@@ -107,3 +107,5 @@ export type MarkerTiming = {
 export type MarkerTimingRows = Array<MarkerTiming>;
 
 export type StackType = 'js' | 'native' | 'unsymbolicated';
+
+export type ThreadsInProcess = { pid: number | void, threads: ThreadIndex[] };

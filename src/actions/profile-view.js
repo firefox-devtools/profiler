@@ -73,7 +73,10 @@ export function setCallNodeContextMenuVisibility(isVisible: boolean): Action {
   };
 }
 
-export function changeThreadOrder(threadOrder: ThreadIndex[]): Action {
+export function changeThreadOrder(
+  pid: void | number,
+  threadOrder: ThreadIndex[]
+): Action {
   sendAnalytics({
     hitType: 'event',
     eventCategory: 'profile',
@@ -81,6 +84,7 @@ export function changeThreadOrder(threadOrder: ThreadIndex[]): Action {
   });
   return {
     type: 'CHANGE_THREAD_ORDER',
+    pid,
     threadOrder,
   };
 }

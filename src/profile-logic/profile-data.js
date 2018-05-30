@@ -27,6 +27,7 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
   TracingMarker,
+  ThreadsInProcess,
 } from '../types/profile-derived';
 import type { BailoutPayload } from '../types/markers';
 import { CURRENT_VERSION as GECKO_PROFILE_VERSION } from './gecko-profile-versioning';
@@ -175,7 +176,7 @@ export function getTimeRangeIncludingAllThreads(
   return completeRange;
 }
 
-export function defaultThreadOrder(threads: Thread[]): ThreadIndex[] {
+export function defaultThreadOrder(threads: Thread[]): ThreadsInProcess[] {
   // Put the compositor/renderer thread last.
   const threadOrder = threads.map((thread, i) => i);
   threadOrder.sort((a, b) => {
@@ -186,7 +187,28 @@ export function defaultThreadOrder(threads: Thread[]): ThreadIndex[] {
     }
     return nameA === 'Compositor' || nameA === 'Renderer' ? 1 : -1;
   });
-  return threadOrder;
+
+  return threadIndexesToThreadsInProcesses(threads, threadOrder);
+}
+
+function threadIndexesToThreadsInProcesses(
+  threads: Thread[],
+  threadOrder: ThreadIndex[]
+): ThreadsInProcess[] {
+  const threadsInProcesses = [];
+  const pidToProcess = new Map();
+  for (let i = 0; i < threadOrder.length; i++) {
+    const threadIndex = threadOrder[i];
+    const { pid } = threads[threadIndex];
+    let threadsInProcess = pidToProcess.get(pid);
+    if (threadsInProcess === undefined) {
+      threadsInProcess = { pid, threads: [] };
+      pidToProcess.set(pid, threadsInProcess);
+      threadsInProcesses.push(threadsInProcess);
+    }
+    threadsInProcess.threads.push(threadIndex);
+  }
+  return threadsInProcesses;
 }
 
 export function toValidImplementationFilter(

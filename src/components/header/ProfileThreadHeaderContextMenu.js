@@ -20,6 +20,7 @@ import { getFriendlyThreadName } from '../../profile-logic/profile-data';
 import classNames from 'classnames';
 
 import type { Thread, ThreadIndex } from '../../types/profile';
+import type { ThreadsInProcess } from '../../types/profile-derived';
 import type { State } from '../../types/reducers';
 import type {
   ExplicitConnectOptions,
@@ -28,7 +29,7 @@ import type {
 
 type StateProps = {|
   +threads: Thread[],
-  +threadOrder: ThreadIndex[],
+  +threadOrder: ThreadsInProcess[],
   +hiddenThreads: ThreadIndex[],
   +rightClickedThreadIndex: ThreadIndex,
 |};
@@ -96,22 +97,27 @@ class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
             <div className="react-contextmenu-separator" />
           </div>
         )}
-        {threadOrder.map(threadIndex => {
-          const isHidden = hiddenThreads.includes(threadIndex);
-          return (
-            <MenuItem
-              key={threadIndex}
-              preventClose={true}
-              data={{ threadIndex, isHidden }}
-              onClick={this._toggleThreadVisibility}
-              attributes={{
-                className: classNames({ checkable: true, checked: !isHidden }),
-              }}
-            >
-              {getFriendlyThreadName(threads, threads[threadIndex])}
-            </MenuItem>
-          );
-        })}
+        {threadOrder.map(({ threads: threadIndexes }) =>
+          threadIndexes.map(threadIndex => {
+            const isHidden = hiddenThreads.includes(threadIndex);
+            return (
+              <MenuItem
+                key={threadIndex}
+                preventClose={true}
+                data={{ threadIndex, isHidden }}
+                onClick={this._toggleThreadVisibility}
+                attributes={{
+                  className: classNames({
+                    checkable: true,
+                    checked: !isHidden,
+                  }),
+                }}
+              >
+                {getFriendlyThreadName(threads, threads[threadIndex])}
+              </MenuItem>
+            );
+          })
+        )}
       </ContextMenu>
     );
   }
