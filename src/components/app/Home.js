@@ -7,8 +7,8 @@
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
-import AddonScreenshot from '../../../res/gecko-profiler-screenshot-2018-01-18.png';
-import PerfScreenshot from '../../../res/perf-screenshot-2017-09-08.jpg';
+import AddonScreenshot from '../../../res/img/png/gecko-profiler-screenshot-2018-01-18.png';
+import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2017-09-08.jpg';
 import { retrieveProfileFromFile } from '../../actions/receive-profile';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import type {
@@ -75,6 +75,14 @@ class UploadButton extends React.PureComponent<UploadButtonProps> {
       this.props.retrieveProfileFromFile(this._input.files[0]);
     }
   }
+}
+
+function DocsButton() {
+  return (
+    <a href="/docs/" className="homeSectionButton">
+      <span className="homeSectionDocsIcon" />Documentation
+    </a>
+  );
 }
 
 function InstructionTransition(props: {}) {
@@ -199,19 +207,19 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             </div>
           </div>
           <div className="homeInstructionsRight">
-            <h2>Getting started</h2>
-            <p>
-              Install the Gecko Profiler Add-on to start recording a performance
-              profile in Firefox, then analyze it and share it with perf.html.
-            </p>
             <InstallButton
               name="Gecko Profiler"
-              className="homeSectionInstallButton"
+              className="homeSectionButton"
               xpiUrl={ADDON_URL}
             >
               <span className="homeSectionPlus">+</span>
               Install add-on
             </InstallButton>
+            <DocsButton />
+            <p>
+              Install the Gecko Profiler Add-on to start recording a performance
+              profile in Firefox, then analyze it and share it with perf.html.
+            </p>
             <p>
               You can also analyze a local profile by either dragging and
               dropping it here or selecting it using the button below.
@@ -233,7 +241,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             </p>
           </div>
           <div className="homeInstructionsRight">
-            <h2>Recording profiles</h2>
+            <DocsButton />
             <p>
               To start profiling, click on the profiling button, or use the
               keyboard shortcuts. The icon is blue when a profile is recording.
@@ -262,7 +270,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             </div>
           </div>
           <div className="homeInstructionsRight">
-            <h2>Recording profiles</h2>
+            <DocsButton />
             <p>
               To start recording a performance profile in Firefox, first install
               the{' '}
@@ -295,6 +303,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             </div>
           </div>
           <div className="homeInstructionsRight">
+            <DocsButton />
             <h2>How to view and record profiles</h2>
             <p>
               Recording performance profiles requires{' '}

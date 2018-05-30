@@ -259,19 +259,38 @@ export type InvalidationPayload = {
 };
 
 /**
- * Network http/https loads - one marker for each notification of network
- * state that occurs, plus one for the initial START of the load, with the URI
- * and the status.  A unique ID is included to allow these to be linked.
+ * Network http/https loads - one marker for each load that reaches the
+ * STOP state that occurs, plus one for the initial START of the load, with
+ * the URI and the status.  A unique ID is included to allow these to be linked.
  * Note that the 'name' field currently also has the id ("Load N") so that
- * marker.js will not merge separate loads.
+ * marker.js will not merge separate loads of the same URI.  Note also that
+ * URI is not necessarily included in later network markers for a specific
+ * load to avoid having to use cycles during collection to access, allocate
+ * and copy the URI.  Markers using the same ID are all for the same load.
+ *
+ * Most of the fields only are included on STOP, and not all of them may
+ * be included depending on what states happen during the load.  Also note
+ * that redirects are logged as well.
  */
 export type NetworkPayload = {
   type: 'Network',
   URI?: string,
+  RedirectURI?: string,
   id: number,
+  pri: number, // priority of the load; always included as it can change
+  count?: number, // Total size of transfer, if any
   status: string,
   startTime: Milliseconds,
   endTime: Milliseconds,
+  domainLookupStart?: Milliseconds,
+  domainLookupEnd?: Milliseconds,
+  connectStart?: Milliseconds,
+  tcpConnectEnd?: Milliseconds,
+  secureConnectionStart?: Milliseconds,
+  connectEnd?: Milliseconds,
+  requestStart?: Milliseconds,
+  responseStart?: Milliseconds,
+  responseEnd?: Milliseconds,
 };
 
 /**
@@ -287,12 +306,13 @@ export type UserTimingMarkerPayload = {
 };
 
 export type DOMEventMarkerPayload = {
-  type: 'DOMEvent',
+  type: 'tracing',
+  category: 'DOMEvent',
   timeStamp?: Milliseconds,
-  startTime: Milliseconds,
-  endTime: Milliseconds,
+  interval: 'start' | 'end',
   eventType: string,
   phase: 0 | 1 | 2 | 3,
+  cause?: CauseBacktrace,
 };
 
 type StyleMarkerPayload_Shared = {
@@ -347,6 +367,7 @@ export type MarkerPayload =
 
 export type MarkerPayload_Gecko =
   | GPUMarkerPayload
+  | NetworkPayload
   | UserTimingMarkerPayload
   | PaintProfilerMarkerTracing_Gecko
   | DOMEventMarkerPayload

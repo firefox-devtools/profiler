@@ -26,6 +26,7 @@ import type { NotVoidOrNull } from '../../types/utils';
 import type { ImplementationFilter } from '../../types/actions';
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type {
+  DOMEventMarkerPayload,
   PaintProfilerMarkerTracing,
   StyleMarkerPayload,
 } from '../../types/markers';
@@ -48,12 +49,53 @@ function _markerDetail<T: NotVoidOrNull>(
   ];
 }
 
+function _markerDetailNullable<T: NotVoidOrNull>(
+  key: string,
+  label: string,
+  value: T | void | null,
+  fn: T => string = String
+): React.Node {
+  if (value === undefined || value === null) {
+    return null;
+  }
+  return _markerDetail(key, label, value, fn);
+}
+
+function _markerDetailDeltaTimeNullable(
+  key: string,
+  label: string,
+  value1?: number,
+  value2?: number
+): React.Node {
+  if (
+    value1 === undefined ||
+    value2 === undefined ||
+    value1 === null ||
+    value2 === null
+  ) {
+    return null;
+  }
+  return _markerDetail(key, label, value1 - value2);
+}
+
 function _markerBacktrace(
   marker: TracingMarker,
-  data: StyleMarkerPayload | PaintProfilerMarkerTracing,
+  data: StyleMarkerPayload | PaintProfilerMarkerTracing | DOMEventMarkerPayload,
   thread: Thread,
   implementationFilter: ImplementationFilter
 ): React.Node {
+  if (data.category === 'DOMEvent') {
+    const latency =
+      data.timeStamp === undefined
+        ? null
+        : formatMilliseconds(marker.start - data.timeStamp);
+    return (
+      <div className="tooltipDetails">
+        {_markerDetail('type', 'Type', data.eventType)}
+        {latency === null ? null : _markerDetail('latency', 'Latency', latency)}
+      </div>
+    );
+  }
   if ('cause' in data && data.cause) {
     const { cause } = data;
     const causeAge = marker.start - cause.time;
@@ -85,20 +127,6 @@ function getMarkerDetails(
         return (
           <div className="tooltipDetails">
             {_markerDetail('name', 'Name', data.name)}
-          </div>
-        );
-      }
-      case 'DOMEvent': {
-        const latency =
-          data.timeStamp === undefined
-            ? null
-            : formatMilliseconds(data.startTime - data.timeStamp);
-        return (
-          <div className="tooltipDetails">
-            {_markerDetail('type', 'Type', data.eventType)}
-            {latency === null
-              ? null
-              : _markerDetail('latency', 'Latency', latency)}
           </div>
         );
       }
@@ -319,14 +347,68 @@ function getMarkerDetails(
         );
       }
       case 'Network': {
-        return (
-          <div className="tooltipDetails">
-            {data.URI === undefined
-              ? null
-              : _markerDetail('url', 'URL', data.URI)}
-            {_markerDetail('status', 'Status', data.status)}
-          </div>
-        );
+        if (
+          data.status !== 'STATUS_STOP' &&
+          data.status !== 'STATUS_REDIRECT'
+        ) {
+          return (
+            <div className="tooltipDetails">
+              {_markerDetailNullable('url', 'URL', data.URI)}
+              {_markerDetail('pri', 'pri', data.pri)}
+              {_markerDetailNullable('count', 'count', data.count)}
+              {_markerDetail('status', 'Status', data.status)}
+            </div>
+          );
+        } else {
+          return (
+            <div className="tooltipDetails">
+              {_markerDetail('status', 'Status', data.status)}
+              {_markerDetailNullable('url', 'URL', data.URI)}
+              {_markerDetailNullable(
+                'redirect_url',
+                'Redirect URL',
+                data.RedirectURI
+              )}
+              {_markerDetail('pri', 'pri', data.pri)}
+              {_markerDetailNullable('count', 'count', data.count)}
+              {_markerDetailDeltaTimeNullable(
+                'domainLookup',
+                'domainLookup',
+                data.domainLookupEnd,
+                data.domainLookupStart
+              )}
+              {_markerDetailDeltaTimeNullable(
+                'tcpConnect',
+                'tcpConnect',
+                data.tcpConnectEnd,
+                data.connectStart
+              )}
+              {_markerDetailNullable(
+                'secureConnectionStart',
+                'secureConnectionStart',
+                data.secureConnectionStart
+              )}
+              {_markerDetailDeltaTimeNullable(
+                'connect',
+                'connect',
+                data.connectEnd,
+                data.connectStart
+              )}
+              {_markerDetailDeltaTimeNullable(
+                'requestStart',
+                'requestStart @',
+                data.requestStart,
+                data.startTime
+              )}
+              {_markerDetailDeltaTimeNullable(
+                'response',
+                'response',
+                data.responseEnd,
+                data.responseStart
+              )}
+            </div>
+          );
+        }
       }
       case 'Styles': {
         return [

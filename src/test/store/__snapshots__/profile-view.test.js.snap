@@ -5,6 +5,7 @@ Object {
   "meta": Object {
     "abi": "",
     "appBuildID": "",
+    "categories": Array [],
     "extensions": Object {
       "baseURL": Array [],
       "id": Array [],
@@ -15,14 +16,14 @@ Object {
     "misc": "",
     "oscpu": "",
     "platform": "",
-    "preprocessedProfileVersion": 10,
+    "preprocessedProfileVersion": 12,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
     "stackwalk": 0,
     "startTime": 0,
     "toolkit": "",
-    "version": 9,
+    "version": 11,
   },
   "threads": Array [
     Object {
@@ -205,7 +206,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "frameNumber": Array [],
         "length": 9,
         "responsiveness": Array [
           0,
@@ -605,7 +605,6 @@ Array [
       "type": Array [],
     },
     "samples": Object {
-      "frameNumber": Array [],
       "length": 9,
       "responsiveness": Array [
         0,
@@ -1703,7 +1702,6 @@ Object {
     "type": Array [],
   },
   "samples": Object {
-    "frameNumber": Array [],
     "length": 9,
     "responsiveness": Array [
       0,

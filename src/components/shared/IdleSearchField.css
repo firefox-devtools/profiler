@@ -19,7 +19,7 @@
   padding: 0 18px 0 17px; /* right padding for the reset button, left padding for the search icon */
   border-radius: 2px;
   box-shadow: inset 0 0 0.5px rgba(0,0,0,0.15), 0 0 0.5px rgba(0,0,0,0.1);
-  background: url(../../../res/searchfield-icon.svg) 3px center no-repeat white;
+  background: url(../../../res/img/svg/searchfield-icon.svg) 3px center no-repeat white;
   background-size: 11px 11px;
 }
 
@@ -30,7 +30,7 @@
   height: 11px;
 
   overflow: hidden;
-  background: url(../../../res/searchfield-cancel.svg) top left no-repeat;
+  background: url(../../../res/img/svg/searchfield-cancel.svg) top left no-repeat;
   background-size: contain;
   border: 0;
   padding: 0;

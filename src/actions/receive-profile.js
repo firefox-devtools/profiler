@@ -14,6 +14,11 @@ import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication
 import { decompress } from '../utils/gz';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
+import {
+  getHiddenThreads,
+  getSelectedThreadIndexOrNull,
+} from '../reducers/url-state';
+import { defaultThreadOrder } from '../profile-logic/profile-data';
 
 import type {
   FunctionsUpdatePerThread,
@@ -23,6 +28,7 @@ import type {
 import type { Action, ThunkAction, Dispatch } from '../types/store';
 import type {
   Profile,
+  Thread,
   ThreadIndex,
   IndexIntoFuncTable,
 } from '../types/profile';
@@ -38,11 +44,114 @@ export function waitingForProfileFromAddon(): Action {
   };
 }
 
-export function viewProfile(profile: Profile): Action {
-  return {
-    type: 'VIEW_PROFILE',
-    profile,
+export function viewProfile(
+  profile: Profile,
+  pathInZipFile: ?string
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const threadIndexes = profile.threads.map((_, threadIndex) => threadIndex);
+    let hiddenThreadIndexes;
+    let selectedThreadIndex = getSelectedThreadIndexOrNull(getState());
+
+    if (selectedThreadIndex === null) {
+      // This is a new profile, it has no selected thread index.
+      hiddenThreadIndexes = _hideIdleThreads(profile);
+    } else {
+      // Pull the existing data that was URL encoded.
+      hiddenThreadIndexes = getHiddenThreads(getState())
+        // Try to use the hidden threads specified in the URL, but ensure that the indexes
+        // are correct by filtering out invalid ones.
+        .filter(index => threadIndexes.includes(index));
+    }
+
+    // Don't trust the selectedThreadIndex value to make sense or exists here. If it's not in the
+    // thread indexes, or is listed in the hidden threads, then compute a new
+    // selectedThreadIndex.
+    if (
+      selectedThreadIndex === null ||
+      !threadIndexes.includes(selectedThreadIndex) ||
+      hiddenThreadIndexes.includes(selectedThreadIndex)
+    ) {
+      const visibleThreads = threadIndexes
+        .filter(threadIndex => !hiddenThreadIndexes.includes(threadIndex))
+        .map(threadIndex => profile.threads[threadIndex]);
+
+      // Select either the GeckoMain [tab] thread, or the first thread in the thread
+      // order.
+      selectedThreadIndex = profile.threads.indexOf(
+        _findDefaultThread(visibleThreads)
+      );
+
+      if (selectedThreadIndex === -1) {
+        selectedThreadIndex = null;
+      }
+    }
+
+    dispatch({
+      type: 'VIEW_PROFILE',
+      profile,
+      hiddenThreadIndexes,
+      selectedThreadIndex,
+      pathInZipFile,
+    });
   };
+}
+
+/**
+ * Find idle threads to hide. It is really annoying for an end user to load a profile
+ * full of empty threads. It can be helpful to hide certain threads that appear to
+ * be idle. This function attempts to find and hide idle threads.
+ */
+function _hideIdleThreads(profile: Profile): ThreadIndex[] {
+  const hiddenThreadIndexes = [];
+  // Go through each thread.
+  for (
+    let threadIndex = 0;
+    threadIndex < profile.threads.length;
+    threadIndex++
+  ) {
+    // Hide content threads with no RefreshDriverTick. This indicates they were
+    // not painted to, and most likely idle. This is just a heuristic to help users.
+    const thread = profile.threads[threadIndex];
+    if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
+      let isPaintMarkerFound = false;
+      if (thread.stringTable.hasString('RefreshDriverTick')) {
+        const paintStringIndex = thread.stringTable.indexForString(
+          'RefreshDriverTick'
+        );
+
+        for (
+          let markerIndex = 0;
+          markerIndex < thread.markers.length;
+          markerIndex++
+        ) {
+          if (paintStringIndex === thread.markers.name[markerIndex]) {
+            isPaintMarkerFound = true;
+            break;
+          }
+        }
+      }
+      if (!isPaintMarkerFound) {
+        hiddenThreadIndexes.push(threadIndex);
+      }
+    }
+  }
+
+  return hiddenThreadIndexes;
+}
+
+function _findDefaultThread(threads: Thread[]): Thread | null {
+  if (threads.length === 0) {
+    // Tests may have no threads.
+    return null;
+  }
+  const contentThreadId = threads.findIndex(
+    thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
+  );
+  const defaultThreadIndex =
+    contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(threads)[0];
+
+  return threads[defaultThreadIndex];
 }
 
 export function requestingSymbolTable(requestedLib: RequestedLib): Action {
@@ -634,7 +743,7 @@ export function errorReceivingProfileFromFile(error: Error): Action {
   };
 }
 
-function _fileReader(input) {
+function _fileReader(input: File): * {
   const reader = new FileReader();
   const promise = new Promise((resolve, reject) => {
     // Flow's definition for FileReader doesn't handle the polymorphic nature of
@@ -658,37 +767,61 @@ function _fileReader(input) {
   };
 }
 
+/**
+ * Multiple file formats are supported. Look at the file type and try and
+ * parse the contents according to its type.
+ */
 export function retrieveProfileFromFile(
-  file: File
+  file: File,
+  // Allow tests to inject a custom file reader to bypass the DOM APIs.
+  fileReader: typeof _fileReader = _fileReader
 ): ThunkAction<Promise<void>> {
   return async dispatch => {
+    // Notify the UI that we are loading and parsing a profile. This can take
+    // a little bit of time.
     dispatch(waitingForProfileFromFile());
 
     try {
-      const text = await _fileReader(file).asText();
-      const profile = unserializeProfileOfArbitraryFormat(text);
-      if (profile === undefined) {
-        throw new Error('Unable to parse the profile.');
+      switch (file.type) {
+        case 'application/gzip':
+        case 'application/x-gzip':
+          // Parse a single profile that has been gzipped.
+          {
+            const buffer = await fileReader(file).asArrayBuffer();
+            const arrayBuffer = new Uint8Array(buffer);
+            const decompressedArrayBuffer = await decompress(arrayBuffer);
+            const textDecoder = new TextDecoder();
+            const text = await textDecoder.decode(decompressedArrayBuffer);
+            const profile = unserializeProfileOfArbitraryFormat(text);
+            if (profile === undefined) {
+              throw new Error('Unable to parse the profile.');
+            }
+
+            dispatch(viewProfile(profile));
+          }
+          break;
+        case 'application/zip':
+          // Open a zip file in the zip file viewer
+          {
+            const buffer = await fileReader(file).asArrayBuffer();
+            const zip = await JSZip.loadAsync(buffer);
+            dispatch(receiveZipFile(zip));
+          }
+          break;
+        default: {
+          // Plain uncompressed profile files can have file names with uncommon
+          // extensions (eg .profile). So we can't rely on the mime type to
+          // decide how to handle them. We'll try to parse them as a plain JSON
+          // file.
+          const text = await fileReader(file).asText();
+          const profile = unserializeProfileOfArbitraryFormat(text);
+          if (profile === undefined) {
+            throw new Error('Unable to parse the profile.');
+          }
+
+          dispatch(viewProfile(profile));
+        }
       }
-
-      dispatch(viewProfile(profile));
-      return;
-    } catch (e) {
-      // continuing the function normally, as we return in the try block above;
-    }
-
-    try {
-      const buffer = await _fileReader(file).asArrayBuffer();
-      const arrayBuffer = new Uint8Array(buffer);
-      const decompressedArrayBuffer = await decompress(arrayBuffer);
-      const textDecoder = new TextDecoder();
-      const text = await textDecoder.decode(decompressedArrayBuffer);
-      const profile = unserializeProfileOfArbitraryFormat(text);
-      if (profile === undefined) {
-        throw new Error('Unable to parse the profile.');
-      }
-
-      dispatch(viewProfile(profile));
     } catch (error) {
       dispatch(errorReceivingProfileFromFile(error));
     }

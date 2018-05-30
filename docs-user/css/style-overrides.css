@@ -1,0 +1,138 @@
+body {
+  font-family: sans-serif;
+  color: #0c0c0d;
+}
+
+/* Match the black font on text headers. */
+.anchor span {
+  color: #0c0c0d;
+}
+
+.sidebar {
+  background-color: #f9f9fa;
+}
+
+/* The general sidebar link color. */
+.sidebar ul li a {
+  color: #0c0c0d;
+}
+
+/**
+ * Add an underline to the current selected article by adding another pseudo-element. The
+ * border property is not enough, as there is margin on the list elements.
+ */
+.sidebar ul li.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #0a84ff;
+  z-index: 0;
+  margin-top: 30px;
+}
+
+/* The active sidebar link. */
+.sidebar ul li.active > a {
+  border-right: none;
+  border-bottom: 2px;
+  font-weight: normal;
+  color: #003eaa;
+}
+
+/* The first level of links in the sidebar. */
+.sidebar-nav > ul > li > a {
+  margin-top: 25px;
+  font-size: 18px;
+  font-weight: bold !important; /* Override the .active class */
+}
+
+/* Modify the perf.html title in the sidebar. */
+.sidebar > h1 {
+  margin-left: 15px;
+  margin-bottom: 30px;
+  text-align: left;
+  font-weight: bold;
+}
+
+.sidebar > h1 a {
+  color: #0c0c0d;
+}
+
+/* Add the favicon image. */
+.sidebar > h1::before {
+  content: "";
+  position: relative;
+  top: 7px;
+  width: 30px;
+  height: 30px;
+  display: inline-block;
+  margin-right: 8px;
+  background-image: url(../images/favicon.png);
+  background-position: 0;
+  background-size: 100%;
+}
+
+/* Make it so that YouTube videos are responsive and full width. */
+.youtube {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.66%;
+}
+
+.youtube iframe {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+/* The markdown tables felt a little too tight. */
+.markdown-section td,
+.markdown-section th {
+  padding: 8px 15px;
+  line-height: 1.3;
+}
+
+/* Make the inline code blocks the same style as GitHub */
+.markdown-section code,
+.markdown-section pre {
+  color: #0c0c0d;
+  background-color: rgba(27, 31, 35, 0.05);
+  border-radius: 3px;
+}
+
+/* Code blocks in headers are sized weird. Use em rather than rem to make the sizing
+ * relative to the context. */
+.markdown-section code {
+  /* Override: font-size: 0.8rem; */
+  font-size: 0.8em;
+}
+
+@media screen and (max-width:768px) {
+  /* Make the sidebar toggle not block the text, and be at the top of the screen */
+  .sidebar-toggle {
+    top: 0;
+    bottom: auto;
+    padding: 17px;
+    background-color: rgba(255, 255, 255, 0.8);
+  }
+
+  body.close .sidebar-toggle {
+    padding: 17px;
+    background-color: transparent;
+  }
+
+  /* The search bar needs to accomodate the sidebar toggle */
+  .search > .input-wrap {
+    margin-left: 40px;
+  }
+
+  .app-nav li {
+    margin: 0 0.25rem;
+  }
+
+  .app-nav a {
+    font-size: 12px;
+  }
+}

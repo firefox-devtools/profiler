@@ -54,8 +54,8 @@ const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
     ? new WheelEvent('mouse')
     : { DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2 };
 
-// These viewport values are computed dynamically by the HOC, and then passed into
-// the props of the wrapped component.
+// These viewport values (most of which are computed dynamically by
+// the HOC) are passed into the props of the wrapped component.
 export type Viewport = {|
   +containerWidth: CssPixels,
   +containerHeight: CssPixels,
@@ -64,6 +64,8 @@ export type Viewport = {|
   +viewportTop: CssPixels,
   +viewportBottom: CssPixels,
   +isDragging: boolean,
+  +moveViewport: (CssPixels, CssPixels) => boolean,
+  +isSizeSet: boolean,
 |};
 
 type ViewportStateProps = {|
@@ -112,6 +114,7 @@ type State = {|
   dragY: CssPixels,
   isDragging: boolean,
   isShiftScrollHintVisible: boolean,
+  isSizeSet: boolean,
 |};
 
 require('./Viewport.css');
@@ -161,6 +164,7 @@ export const withChartViewport: WithChartViewport<*, *> =
 
       constructor(props: ViewportProps) {
         super(props);
+        (this: any).moveViewport = this.moveViewport.bind(this);
         (this: any)._mouseWheelListener = this._mouseWheelListener.bind(this);
         (this: any)._mouseDownListener = this._mouseDownListener.bind(this);
         (this: any)._mouseMoveListener = this._mouseMoveListener.bind(this);
@@ -210,6 +214,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           dragY: 0,
           isDragging: false,
           isShiftScrollHintVisible: false,
+          isSizeSet: false,
         };
       }
 
@@ -270,6 +275,7 @@ export const withChartViewport: WithChartViewport<*, *> =
               viewportTop: startsAtBottom
                 ? prevState.viewportBottom - rect.height
                 : prevState.viewportTop,
+              isSizeSet: true,
             }));
           }
         }
@@ -280,9 +286,12 @@ export const withChartViewport: WithChartViewport<*, *> =
       }
 
       _mouseWheelListener(event: SyntheticWheelEvent<>) {
+        // We handle the wheel event, so disable the browser's handling, such
+        // as back/forward swiping or scrolling.
+        event.preventDefault();
+
         const { disableHorizontalMovement } = this.props.viewportProps;
         if (event.shiftKey) {
-          event.preventDefault();
           if (!disableHorizontalMovement) {
             this.zoomRangeSelection(event);
           }
@@ -537,6 +546,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           viewportRight,
           isDragging,
           isShiftScrollHintVisible,
+          isSizeSet,
         } = this.state;
 
         const viewportClassName = classNames({
@@ -557,6 +567,8 @@ export const withChartViewport: WithChartViewport<*, *> =
           viewportTop,
           viewportBottom,
           isDragging,
+          moveViewport: this.moveViewport,
+          isSizeSet,
         };
 
         return (

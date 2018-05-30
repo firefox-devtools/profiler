@@ -36,7 +36,7 @@ export type TransformDefinitions = {
    * FocusSubtree transform represents the operation of focusing on a subtree in a call tree.
    * The subtree is referenced by a callNodePath (a list of functions to a particular node),
    * and an implementation filter to filter out certain stacks and nodes that we don't care
-   * about. For more details read `docs/call-tree.md`.
+   * about. For more details read `docs-developer/call-tree.md`.
    *
    * Here is a typical case of focusing on the subtree at CallNodePath [A, B, C]
    *

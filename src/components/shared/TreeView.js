@@ -5,7 +5,6 @@
 // @flow
 
 import * as React from 'react';
-import classNames from 'classnames';
 import VirtualList from './VirtualList';
 import { BackgroundImageStyleDef } from './StyleDef';
 
@@ -170,14 +169,12 @@ type TreeViewRowScrolledColumnsProps<
   +depth: number,
   +mainColumn: Column,
   +appendageColumn?: Column,
-  +appendageButtons?: string[],
   +index: number,
   +canBeExpanded: boolean,
   +isExpanded: boolean,
   +selected: boolean,
   +onToggle: (NodeIndex, boolean, boolean) => mixed,
   +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
-  +onAppendageButtonClick?: ((NodeIndex | null, string) => mixed) | null,
   +highlightRegExp: RegExp | null,
   // React converts height into 'px' values, while lineHeight is valid in
   // non-'px' units.
@@ -201,22 +198,9 @@ class TreeViewRowScrolledColumns<
    * `target` instead of `currentTarget`.
    */
   _onClick(event: { target: Element } & SyntheticMouseEvent<Element>) {
-    const {
-      nodeId,
-      isExpanded,
-      onToggle,
-      onClick,
-      onAppendageButtonClick,
-    } = this.props;
+    const { nodeId, isExpanded, onToggle, onClick } = this.props;
     if (event.target.classList.contains('treeRowToggleButton')) {
       onToggle(nodeId, !isExpanded, event.altKey === true);
-    } else if (event.target.classList.contains('treeViewRowAppendageButton')) {
-      if (onAppendageButtonClick) {
-        onAppendageButtonClick(
-          nodeId,
-          event.target.getAttribute('data-appendage-button-name') || ''
-        );
-      }
     } else {
       onClick(nodeId, event);
     }
@@ -233,7 +217,6 @@ class TreeViewRowScrolledColumns<
       isExpanded,
       selected,
       highlightRegExp,
-      appendageButtons,
       rowHeightStyle,
       indentWidth,
     } = this.props;
@@ -285,17 +268,6 @@ class TreeViewRowScrolledColumns<
             )}
           </span>
         ) : null}
-        {appendageButtons
-          ? appendageButtons.map(buttonName => (
-              <input
-                className={classNames('treeViewRowAppendageButton', buttonName)}
-                type="button"
-                key={buttonName}
-                data-appendage-button-name={buttonName}
-                value=""
-              />
-            ))
-          : null}
       </div>
     );
   }
@@ -320,13 +292,11 @@ type TreeViewProps<NodeIndex, DisplayData> = {|
   +onExpandedNodesChange: (Array<NodeIndex | null>) => mixed,
   +highlightRegExp?: RegExp | null,
   +appendageColumn?: Column,
-  +appendageButtons?: string[],
   +disableOverscan?: boolean,
   +icons?: IconWithClassName[],
   +contextMenu?: React.Element<any>,
   +contextMenuId?: string,
   +maxNodeDepth: number,
-  +onAppendageButtonClick?: ((NodeIndex | null, string) => mixed) | null,
   +onSelectionChange: NodeIndex => mixed,
   +onEnterKey?: NodeIndex => mixed,
   +rowHeight: CssPixels,
@@ -387,8 +357,6 @@ class TreeView<
       appendageColumn,
       selectedNodeId,
       highlightRegExp,
-      appendageButtons,
-      onAppendageButtonClick,
       rowHeight,
       indentWidth,
     } = this.props;
@@ -419,7 +387,6 @@ class TreeView<
         displayData={displayData}
         mainColumn={mainColumn}
         appendageColumn={appendageColumn}
-        appendageButtons={appendageButtons}
         depth={tree.getDepth(nodeId)}
         nodeId={nodeId}
         index={index}
@@ -428,7 +395,6 @@ class TreeView<
         onToggle={this._toggle}
         selected={nodeId === selectedNodeId}
         onClick={this._onRowClicked}
-        onAppendageButtonClick={onAppendageButtonClick}
         highlightRegExp={highlightRegExp || null}
         indentWidth={indentWidth}
       />

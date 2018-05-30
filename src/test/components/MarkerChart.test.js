@@ -44,7 +44,7 @@ it('renders MarkerChart correctly', () => {
     ['Marker B', 0, { startTime: 0, endTime: 10 }],
     ['Marker C', 5, { startTime: 5, endTime: 15 }],
     [
-      'Very very very very very very long Marker D',
+      'Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D',
       6,
       { startTime: 5, endTime: 15 },
     ],
@@ -54,10 +54,21 @@ it('renders MarkerChart correctly', () => {
       'Marker G type DOMEvent',
       5,
       {
-        startTime: 5,
-        endTime: 10,
-        type: 'DOMEvent',
+        type: 'tracing',
+        category: 'DOMEvent',
         eventType: 'click',
+        interval: 'start',
+        phase: 2,
+      },
+    ],
+    [
+      'Marker G type DOMEvent',
+      10,
+      {
+        type: 'tracing',
+        category: 'DOMEvent',
+        eventType: 'click',
+        interval: 'end',
         phase: 2,
       },
     ],

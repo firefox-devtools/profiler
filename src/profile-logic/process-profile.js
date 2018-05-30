@@ -44,6 +44,7 @@ import type {
   GeckoStackStruct,
 } from '../types/gecko-profile';
 import type {
+  DOMEventMarkerPayload,
   MarkerPayload,
   MarkerPayload_Gecko,
   PaintProfilerMarkerTracing,
@@ -599,10 +600,13 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
             return result;
           }
           case 'tracing': {
-            const newData = Object.assign({}, m);
+            const newData = immutableUpdate(m);
             _convertStackToCause(newData);
-            const result: PaintProfilerMarkerTracing = newData;
-            return result;
+            // We had to use any here because _convertStackToCause is not
+            // providing the type system with information how it's operating
+            return newData.category === 'DOMEvent'
+              ? ((newData: any): DOMEventMarkerPayload)
+              : ((newData: any): PaintProfilerMarkerTracing);
           }
           default:
             return m;
@@ -632,7 +636,7 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
 }
 
 /**
- * Convert the given thread into processed form. See docs/gecko-profile-format for more
+ * Convert the given thread into processed form. See docs-developer/gecko-profile-format for more
  * information.
  */
 function _processThread(
@@ -733,12 +737,12 @@ function _adjustMarkerTimestamps(
       if (typeof newData.endTime === 'number') {
         newData.endTime += delta;
       }
-      if (newData.type === 'DOMEvent' && 'timeStamp' in newData) {
-        newData.timeStamp += delta;
-      }
       if (newData.type === 'tracing' || newData.type === 'Styles') {
         if (newData.cause) {
           newData.cause.time += delta;
+        }
+        if (newData.category === 'DOMEvent' && 'timeStamp' in newData) {
+          newData.timeStamp += delta;
         }
       }
       return newData;
@@ -749,7 +753,7 @@ function _adjustMarkerTimestamps(
 /**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
- * For a description of the processed format, look at docs/gecko-profile-format.md
+ * For a description of the processed format, look at docs-developer/gecko-profile-format.md
  */
 export function processProfile(
   rawProfile: GeckoProfile | { profile: GeckoProfile }
@@ -811,6 +815,7 @@ export function processProfile(
     stackwalk: geckoProfile.meta.stackwalk,
     toolkit: geckoProfile.meta.toolkit,
     version: geckoProfile.meta.version,
+    categories: geckoProfile.meta.categories,
     preprocessedProfileVersion: CURRENT_VERSION,
     appBuildID: geckoProfile.meta.appBuildID,
     // A link to the source code revision for this build.

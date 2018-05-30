@@ -3,7 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Lib, IndexIntoStringTable, PausedRange } from './profile';
+import type {
+  Lib,
+  IndexIntoStringTable,
+  PausedRange,
+  CategoryList,
+} from './profile';
 import type { MarkerPayload_Gecko } from './markers';
 import type { Milliseconds } from './units';
 
@@ -159,6 +164,7 @@ export type GeckoProfile = {|
     // The extensions property landed in Firefox 60, and is only optional because
     // older profile versions may not have it. No upgrader was written for this change.
     extensions?: GeckoExtensionMeta,
+    categories: CategoryList,
     misc: string,
     oscpu: string,
     platform: string,

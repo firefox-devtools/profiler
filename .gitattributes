@@ -1,0 +1,4 @@
+# The following are not technically binary, but this makes it so that git does not try
+# and treat them like normal text.
+*.min.js binary
+*.min.css binary

@@ -17,17 +17,6 @@ describe('MarkerTable', function() {
     const profile = getProfileWithMarkers(
       [
         [
-          'DOMEvent',
-          10.5,
-          {
-            type: 'DOMEvent',
-            startTime: 10.5,
-            endTime: 11.3,
-            eventType: 'commandupdate',
-            phase: 2,
-          },
-        ],
-        [
           'UserTiming',
           12.5,
           {

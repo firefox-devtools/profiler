@@ -9,6 +9,7 @@ import type {
   SamplesTable,
   StackTable,
   ExtensionTable,
+  CategoryList,
   FrameTable,
   FuncTable,
   MarkersTable,
@@ -59,6 +60,8 @@ export const emptyExtensions: ExtensionTable = Object.freeze({
   length: 0,
 });
 
+export const emptyCategories: CategoryList = Object.freeze([]);
+
 /**
  * Generate the CallNodeInfo which contains the CallNodeTable, and a map to convert
  * an IndexIntoStackTable to a IndexIntoCallNodeTable. This function runs through
@@ -66,7 +69,7 @@ export const emptyExtensions: ExtensionTable = Object.freeze({
  * function.
  *
  * See `src/types/profile-derived.js` for the type definitions.
- * See `docs/call-trees.md` for a detailed explanation of CallNodes.
+ * See `docs-developer/call-trees.md` for a detailed explanation of CallNodes.
  */
 export function getCallNodeInfo(
   stackTable: StackTable,
@@ -1245,6 +1248,7 @@ export function getEmptyProfile(): Profile {
       platform: '',
       processType: 0,
       extensions: emptyExtensions,
+      categories: emptyCategories,
       product: 'Firefox',
       stackwalk: 0,
       toolkit: '',

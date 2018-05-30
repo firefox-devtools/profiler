@@ -206,8 +206,6 @@ body, #root, .profileViewer {
   box-shadow: 0 0 0 0.5px rgba(0,0,0,0.05), 0 1px 1px rgba(0,0,0,.3);
 }
 
-
-.treeRowToggleButton,
 .focusCallstackButton {
   background: none 0 0 no-repeat transparent;
   flex-shrink: 0;
@@ -220,45 +218,55 @@ body, #root, .profileViewer {
   color: transparent;
 }
 
-.treeRowToggleButton {
-  background-image: url(./treetwisty.svg);
-}
-
 .focusCallstackButton {
-  background-image: url(./circlearrow.svg);
+  background-image: url(../img/svg/circlearrow.svg);
   margin-left: 5px;
   visibility: hidden;
 }
 
-.treeRowToggleButton:active:hover,
 .focusCallstackButton:active:hover {
   background-position: -16px 0;
 }
 
-.treeRowToggleButton.collapsed {
-  background-position: 0 -16px;
-}
-
-.treeRowToggleButton.collapsed:active:hover {
-  background-position: -16px -16px;
-}
-
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeRowToggleButton,
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .focusCallstackButton {
+.treeViewBody:focus .treeViewRow.selected > .focusCallstackButton {
   background-position: -32px 0;
 }
 
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeRowToggleButton.collapsed {
-  background-position: -32px -16px;
-}
-
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeRowToggleButton:active:hover,
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .focusCallstackButton:active:hover {
+.treeViewBody:focus .treeViewRow.selected > .focusCallstackButton:active:hover {
   background-position: -48px 0;
 }
 
-.treeViewBody:focus > * > * > * > .treeViewRow.selected > .treeRowToggleButton.collapsed:active:hover {
-  background-position: -48px -16px;
+.treeRowToggleButton {
+    height: 0;
+    width: 0;
+    color: #888;
+    border-top: 5px solid transparent;   
+    border-right: 4px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 8px solid;
+    margin-left: 8px;
+}
+
+.treeRowToggleButton.expanded {
+    border-top: 8px solid;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-bottom: 4px solid transparent;
+    margin-top: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.treeRowToggleButton:active:hover {
+  color: var(--grey-60);
+}
+
+.treeViewBody:focus .treeViewRow.selected > .treeRowToggleButton {
+  color: #FFF;
+}
+
+.treeViewBody:focus .treeViewRow.selected > .treeRowToggleButton:active:hover {
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .treeRowToggleButton.leaf {
@@ -566,7 +574,7 @@ body, #root, .profileViewer {
   margin: -15px;
   position: relative;
   border: 1px solid rgba(0, 0, 0, 0.2);
-  background: url(./zoom-icon.svg) center center no-repeat rgba(255, 255, 255, 0.6);
+  background: url(../img/svg/zoom-icon.svg) center center no-repeat rgba(255, 255, 255, 0.6);
   transition: opacity 200ms ease-in-out;
   will-change: opacity;
   opacity: 0.5;
@@ -776,6 +784,9 @@ body, #root, .profileViewer {
 
 .react-contextmenu.react-contextmenu--visible {
   display: block;
+  max-height: 43.5vh;
+  padding-right: 9px;
+  overflow-y: auto;
 }
 
 .react-contextmenu-item {
