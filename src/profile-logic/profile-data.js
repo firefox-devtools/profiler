@@ -1254,6 +1254,8 @@ export function getEmptyProfile(): Profile {
       toolkit: '',
       version: GECKO_PROFILE_VERSION,
       preprocessedProfileVersion: PROCESSED_PROFILE_VERSION,
+      appBuildID: '',
+      sourceURL: '',
     },
     threads: [],
   };
