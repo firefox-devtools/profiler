@@ -6,6 +6,8 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import {
   getCallTree,
   computeCallTreeCountsAndTimings,
+} from '../../profile-logic/call-tree';
+import type {
   CallTree,
 } from '../../profile-logic/call-tree';
 import {
@@ -72,8 +74,7 @@ describe('unfiltered call tree', function() {
         computeCallTreeCountsAndTimings(
           thread,
           callNodeInfo,
-          profile.meta.interval,
-          false
+          profile.meta.interval
         )
       ).toEqual({
         rootCount: 1,
@@ -209,18 +210,6 @@ describe('unfiltered call tree', function() {
       it('returns the depth of callNodes in the tree', function() {
         expect(callTree.getDepth(A)).toBe(0);
         expect(callTree.getDepth(B)).toBe(1);
-      });
-    });
-
-    describe('hasSameNodeIds()', function() {
-      it('determines if the node IDs are the same between two trees', function() {
-        // This is tested through strict equality, so re-generating callNodes is
-        // the only thing this method expects.
-        const otherTree = callTreeFromProfile(
-          getProfileFromTextSamples('A').profile
-        );
-        expect(callTree.hasSameNodeIds(callTree)).toBe(true);
-        expect(callTree.hasSameNodeIds(otherTree)).toBe(false);
       });
     });
 

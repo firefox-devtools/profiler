@@ -662,15 +662,7 @@ export const selectorsForThread = (
         return ProfileData.filterThreadToSearchStrings(thread, searchStrings);
       }
     );
-    const getFilteredThread = createSelector(
-      _getImplementationAndSearchFilteredThread,
-      UrlState.getInvertCallstack,
-      (thread, shouldInvertCallstack): Thread => {
-        return shouldInvertCallstack
-          ? ProfileData.invertCallstack(thread)
-          : thread;
-      }
-    );
+    const getFilteredThread = _getImplementationAndSearchFilteredThread;
     const getRangeSelectionFilteredThread = createSelector(
       getFilteredThread,
       getSelection,
@@ -752,31 +744,9 @@ export const selectorsForThread = (
       (threadViewOptions): CallNodePath =>
         threadViewOptions.selectedCallNodePath
     );
-    const getSelectedCallNodeIndex = createSelector(
-      getCallNodeInfo,
-      getSelectedCallNodePath,
-      (callNodeInfo, callNodePath): IndexIntoCallNodeTable | null => {
-        return ProfileData.getCallNodeIndexFromPath(
-          callNodePath,
-          callNodeInfo.callNodeTable
-        );
-      }
-    );
     const getExpandedCallNodePaths = createSelector(
       getViewOptions,
       (threadViewOptions): PathSet => threadViewOptions.expandedCallNodePaths
-    );
-    const getExpandedCallNodeIndexes = createSelector(
-      getCallNodeInfo,
-      getExpandedCallNodePaths,
-      (
-        { callNodeTable },
-        callNodePaths
-      ): Array<IndexIntoCallNodeTable | null> =>
-        ProfileData.getCallNodeIndicesFromPaths(
-          Array.from(callNodePaths),
-          callNodeTable
-        )
     );
     const getCallTree = createSelector(
       getRangeSelectionFilteredThread,
@@ -785,6 +755,19 @@ export const selectorsForThread = (
       UrlState.getImplementationFilter,
       UrlState.getInvertCallstack,
       CallTree.getCallTree
+    );
+    const getSelectedCallNodeIndex = createSelector(
+      getSelectedCallNodePath,
+      getCallTree,
+      (callNodePath, callTree): IndexIntoCallNodeTable | null => {
+        return callTree.getNodeIndexFromCallNodePath(callNodePath);
+      }
+    );
+    const getExpandedCallNodeIndexes = createSelector(
+      getCallTree,
+      getExpandedCallNodePaths,
+      (callTree, callNodePaths): Array<IndexIntoCallNodeTable | null> =>
+        callTree.getNodeIndicesFromCallNodePaths(Array.from(callNodePaths))
     );
     const getStackTimingByDepth = createSelector(
       getFilteredThread,

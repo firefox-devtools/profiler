@@ -273,7 +273,7 @@ class TreeViewRowScrolledColumns<
   }
 }
 
-interface Tree<NodeIndex: number, DisplayData: Object> {
+export interface Tree<NodeIndex: number | string, DisplayData: Object> {
   getDepth(NodeIndex): number;
   getRoots(): NodeIndex[];
   getDisplayData(NodeIndex): DisplayData;

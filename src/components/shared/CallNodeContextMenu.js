@@ -281,10 +281,10 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
     const {
       expandAllCallNodeDescendants,
       threadIndex,
-      selectedCallNodeIndex,
+      selectedCallNodePath,
       callNodeInfo,
     } = this.props;
-    if (selectedCallNodeIndex === null) {
+    if (selectedCallNodePath.length === 0) {
       throw new Error(
         "The context menu assumes there is a selected call node and there wasn't one."
       );
@@ -292,7 +292,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
 
     expandAllCallNodeDescendants(
       threadIndex,
-      selectedCallNodeIndex,
+      selectedCallNodePath,
       callNodeInfo
     );
   }

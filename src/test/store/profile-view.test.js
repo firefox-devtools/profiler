@@ -337,7 +337,7 @@ describe('actions/ProfileView', function() {
       dispatch(
         ProfileView.expandAllCallNodeDescendants(
           threadIndex,
-          0, // A
+          [A], // A
           callNodeInfo
         )
       );
@@ -375,7 +375,7 @@ describe('actions/ProfileView', function() {
       dispatch(
         ProfileView.expandAllCallNodeDescendants(
           threadIndex,
-          1, // B
+          [B], // B
           callNodeInfo
         )
       );

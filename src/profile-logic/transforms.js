@@ -13,7 +13,7 @@ import {
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
-import { CallTree } from '../profile-logic/call-tree';
+import type { CallTree } from '../profile-logic/call-tree';
 
 import type {
   Thread,

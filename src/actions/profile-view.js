@@ -177,29 +177,33 @@ export function changeCallTreeSearchString(searchString: string): Action {
 
 export function expandAllCallNodeDescendants(
   threadIndex: ThreadIndex,
-  callNodeIndex: IndexIntoCallNodeTable,
+  callNodePath: CallNodePath,
   callNodeInfo: CallNodeInfo
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const expandedCallNodeIndexes = selectedThreadSelectors.getExpandedCallNodeIndexes(
+    const expandedCallNodePaths = selectedThreadSelectors.getExpandedCallNodePaths(
       getState()
     );
     const tree = selectedThreadSelectors.getCallTree(getState());
+    const nodeIndex = tree.getNodeIndexFromCallNodePath(callNodePath);
 
     // Create a set with the selected call node and its descendants
-    const descendants = tree.getAllDescendants(callNodeIndex);
-    descendants.add(callNodeIndex);
+    const descendants = nodeIndex !== null ? tree.getAllDescendants(nodeIndex) : new Set();
+    if (nodeIndex !== null) {
+      descendants.add(nodeIndex);
+    }
     // And also add all the call nodes that already were expanded
-    expandedCallNodeIndexes.forEach(callNodeIndex => {
-      if (callNodeIndex !== null) {
-        descendants.add(callNodeIndex);
+    expandedCallNodePaths.forEach(callNodePath => {
+      const nodeIndex = tree.getNodeIndexFromCallNodePath(callNodePath);
+      if (nodeIndex !== null) {
+        descendants.add(nodeIndex);
       }
     });
 
-    const expandedCallNodePaths = [...descendants].map(callNodeIndex =>
-      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+    const newExpandedCallNodePaths = [...descendants].map(callNodeIndex =>
+      tree.getCallNodePathFromNodeIndex(callNodeIndex)
     );
-    dispatch(changeExpandedCallNodes(threadIndex, expandedCallNodePaths));
+    dispatch(changeExpandedCallNodes(threadIndex, newExpandedCallNodePaths));
   };
 }
 

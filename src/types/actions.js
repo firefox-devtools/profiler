@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { CallTree } from '../profile-logic/call-tree';
+import type { CallTree } from '../profile-logic/call-tree';
 import type JSZip from 'jszip';
 import type {
   Profile,

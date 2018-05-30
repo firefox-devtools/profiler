@@ -8,7 +8,6 @@ import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import EmptyReasons from './EmptyReasons';
 import NodeIcon from './NodeIcon';
-import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
@@ -29,15 +28,14 @@ import {
 } from '../../actions/profile-view';
 
 import type { IconWithClassName, State } from '../../types/reducers';
-import type { CallTree } from '../../profile-logic/call-tree';
+import type { CallTree, CallNodeIndex } from '../../profile-logic/call-tree';
 import type { ImplementationFilter } from '../../types/actions';
 import type { ThreadIndex } from '../../types/profile';
 import type {
   CallNodeInfo,
-  IndexIntoCallNodeTable,
   CallNodeDisplayData,
 } from '../../types/profile-derived';
-import type { Column } from '../shared/TreeView';
+import type { Tree, Column } from '../shared/TreeView';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
@@ -49,8 +47,8 @@ type StateProps = {|
   +focusCallTreeGeneration: number,
   +tree: CallTree,
   +callNodeInfo: CallNodeInfo,
-  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
+  +selectedCallNodeIndex: CallNodeIndex | null,
+  +expandedCallNodeIndexes: Array<CallNodeIndex | null>,
   +searchStringsRegExp: RegExp | null,
   +disableOverscan: boolean,
   +invertCallstack: boolean,
@@ -71,7 +69,7 @@ class CallTreeComponent extends PureComponent<Props> {
   _fixedColumns: Column[];
   _mainColumn: Column;
   _appendageColumn: Column;
-  _treeView: TreeView<IndexIntoCallNodeTable, CallNodeDisplayData> | null;
+  _treeView: TreeView<CallNodeIndex, CallNodeDisplayData> | null;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
   constructor(props: Props) {
@@ -121,22 +119,22 @@ class CallTreeComponent extends PureComponent<Props> {
     }
   }
 
-  _onSelectedCallNodeChange(newSelectedCallNode: IndexIntoCallNodeTable) {
-    const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
+  _onSelectedCallNodeChange(newSelectedCallNode: CallNodeIndex) {
+    const { callNodeInfo, threadIndex, changeSelectedCallNode, tree } = this.props;
     changeSelectedCallNode(
       threadIndex,
-      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
+      tree.getCallNodePathFromNodeIndex(newSelectedCallNode)
     );
   }
 
   _onExpandedCallNodesChange(
-    newExpandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>
+    newExpandedCallNodeIndexes: Array<CallNodeIndex | null>
   ) {
-    const { callNodeInfo, threadIndex, changeExpandedCallNodes } = this.props;
+    const { callNodeInfo, threadIndex, changeExpandedCallNodes, tree } = this.props;
     changeExpandedCallNodes(
       threadIndex,
       newExpandedCallNodeIndexes.map(callNodeIndex =>
-        getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+        tree.getCallNodePathFromNodeIndex(callNodeIndex)
       )
     );
   }
