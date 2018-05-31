@@ -1309,12 +1309,6 @@ Array [
     "callNode": Array [
       0,
     ],
-    "display": Array [
-      Object {
-        "selfTime": "—",
-        "totalTime": "4",
-      },
-    ],
     "end": Array [
       1,
     ],
@@ -1329,12 +1323,6 @@ Array [
   Object {
     "callNode": Array [
       1,
-    ],
-    "display": Array [
-      Object {
-        "selfTime": "—",
-        "totalTime": "4",
-      },
     ],
     "end": Array [
       1,
@@ -1351,16 +1339,6 @@ Array [
     "callNode": Array [
       4,
       6,
-    ],
-    "display": Array [
-      Object {
-        "selfTime": "—",
-        "totalTime": "3",
-      },
-      Object {
-        "selfTime": "—",
-        "totalTime": "1",
-      },
     ],
     "end": Array [
       0.75,
@@ -1380,16 +1358,6 @@ Array [
     "callNode": Array [
       5,
       7,
-    ],
-    "display": Array [
-      Object {
-        "selfTime": "3",
-        "totalTime": "3",
-      },
-      Object {
-        "selfTime": "1",
-        "totalTime": "1",
-      },
     ],
     "end": Array [
       0.75,
