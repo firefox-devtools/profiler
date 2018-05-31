@@ -303,6 +303,19 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a blank context me
             ],
           },
           "stackTable": Object {
+            "category": Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
             "frame": Array [
               0,
               1,
@@ -697,6 +710,19 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
             ],
           },
           "stackTable": Object {
+            "category": Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
             "frame": Array [
               0,
               1,

@@ -5,7 +5,12 @@ Object {
   "meta": Object {
     "abi": "",
     "appBuildID": "",
-    "categories": Array [],
+    "categories": Array [
+      Object {
+        "color": "grey",
+        "name": "Other",
+      },
+    ],
     "extensions": Object {
       "baseURL": Array [],
       "id": Array [],
@@ -266,6 +271,17 @@ Object {
         ],
       },
       "stackTable": Object {
+        "category": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
         "frame": Array [
           0,
           1,
@@ -397,6 +413,7 @@ Object {
         "uss": Array [],
       },
       "stackTable": Object {
+        "category": Array [],
         "frame": Array [],
         "length": 0,
         "prefix": Array [],
@@ -665,6 +682,17 @@ Array [
       ],
     },
     "stackTable": Object {
+      "category": Array [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ],
       "frame": Array [
         0,
         1,
@@ -796,6 +824,7 @@ Array [
       "uss": Array [],
     },
     "stackTable": Object {
+      "category": Array [],
       "frame": Array [],
       "length": 0,
       "prefix": Array [],
@@ -1255,6 +1284,16 @@ Object {
     ],
   },
   "stackTable": Object {
+    "category": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "frame": Array [
       0,
       1,
@@ -1730,6 +1769,17 @@ Object {
     ],
   },
   "stackTable": Object {
+    "category": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "frame": Array [
       0,
       1,
@@ -1991,6 +2041,16 @@ Object {
     ],
   },
   "stackTable": Object {
+    "category": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "frame": Array [
       0,
       1,
@@ -2246,6 +2306,17 @@ Object {
     ],
   },
   "stackTable": Object {
+    "category": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "frame": Array [
       0,
       1,
@@ -2503,6 +2574,16 @@ Object {
     ],
   },
   "stackTable": Object {
+    "category": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "frame": Array [
       0,
       1,

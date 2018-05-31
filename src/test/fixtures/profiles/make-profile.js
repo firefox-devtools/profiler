@@ -5,7 +5,7 @@
 // @flow
 import { getEmptyProfile } from '../../../profile-logic/profile-data';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
-import type { Profile, Thread } from '../../../types/profile';
+import type { Profile, Thread, CategoryList } from '../../../types/profile';
 import type { MarkerPayload } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
 
@@ -98,6 +98,7 @@ export function getEmptyThread(overrides: ?Object): Thread {
       stackTable: {
         frame: [],
         prefix: [],
+        category: [],
         length: 0,
       },
       frameTable: {
@@ -201,7 +202,11 @@ export function getProfileFromTextSamples(
     funcNamesDictPerThread.push(funcNamesDict);
 
     // Turn this into a real thread.
-    return _buildThreadFromTextOnlyStacks(textOnlyStacks, funcNames);
+    return _buildThreadFromTextOnlyStacks(
+      textOnlyStacks,
+      funcNames,
+      profile.meta.categories
+    );
   });
 
   return { profile, funcNamesPerThread, funcNamesDictPerThread };
@@ -294,7 +299,8 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
 
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
-  funcNames: string[]
+  funcNames: string[],
+  categories: CategoryList
 ): Thread {
   const thread = getEmptyThread();
 
@@ -356,6 +362,8 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.resource.push(resourceIndex);
   });
 
+  const categoryOther = categories.findIndex(c => c.name === 'Other');
+
   // Create the samples, stacks, and frames.
   textOnlyStacks.forEach((column, columnIndex) => {
     let prefix = null;
@@ -388,6 +396,7 @@ function _buildThreadFromTextOnlyStacks(
 
         stackTable.frame.push(frameIndex);
         stackTable.prefix.push(prefix);
+        stackTable.category.push(categoryOther);
         stackIndex = stackTable.length++;
       }
 
