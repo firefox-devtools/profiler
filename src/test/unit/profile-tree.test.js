@@ -45,13 +45,20 @@ describe('unfiltered call tree', function() {
 
   function callTreeFromProfile(profile: Profile): CallTree {
     const [thread] = profile.threads;
-    const { interval } = profile.meta;
+    const { interval, categories } = profile.meta;
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
       thread.funcTable
     );
-    return getCallTree(thread, interval, callNodeInfo, 'combined', false);
+    return getCallTree(
+      thread,
+      interval,
+      callNodeInfo,
+      categories,
+      'combined',
+      false
+    );
   }
 
   /**
@@ -327,7 +334,7 @@ describe('inverted call tree', function() {
           Z
     `).profile;
     const invertedThread = invertCallstack(profile.threads[0]);
-    const { interval } = profile.meta;
+    const { interval, categories } = profile.meta;
     const callNodeInfo = getCallNodeInfo(
       invertedThread.stackTable,
       invertedThread.frameTable,
@@ -338,6 +345,7 @@ describe('inverted call tree', function() {
       invertedThread,
       interval,
       callNodeInfo,
+      categories,
       'combined',
       true
     );

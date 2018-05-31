@@ -23,6 +23,7 @@ import { arePathsEqual, PathSet } from '../utils/path';
 
 import type {
   Profile,
+  CategoryList,
   Thread,
   ThreadIndex,
   SamplesTable,
@@ -518,6 +519,8 @@ export const getProfile = (state: State): Profile =>
   );
 export const getProfileInterval = (state: State): Milliseconds =>
   getProfile(state).meta.interval;
+export const getCategories = (state: State): CategoryList =>
+  getProfile(state).meta.categories;
 export const getThreads = (state: State): Thread[] => getProfile(state).threads;
 export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
@@ -782,6 +785,7 @@ export const selectorsForThread = (
       getRangeSelectionFilteredThread,
       getProfileInterval,
       getCallNodeInfo,
+      getCategories,
       UrlState.getImplementationFilter,
       UrlState.getInvertCallstack,
       CallTree.getCallTree
