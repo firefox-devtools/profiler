@@ -90,6 +90,8 @@ export type CallNodeDisplayData = {
   name: string,
   lib: string,
   dim: boolean,
+  categoryName: string,
+  categoryColor: string,
   icon: string | null,
 };
 

@@ -270,6 +270,7 @@ export class CallTree {
         // Dim platform pseudo-stacks.
         dim: !isJS && this._jsOnly,
         categoryName: this._categories[categoryIndex].name,
+        categoryColor: this._categories[categoryIndex].color,
         icon,
       };
       this._displayDataByIndex.set(callNodeIndex, displayData);
