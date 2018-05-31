@@ -6,13 +6,13 @@
 import * as React from 'react';
 import StackSettings from '../shared/StackSettings';
 import TransformNavigator from '../shared/TransformNavigator';
-import FlameGraph from './FlameGraph';
+import MaybeFlameGraph from './MaybeFlameGraph';
 
 const FlameGraphView = () => (
   <div className="flameGraph">
     <StackSettings hideInvertCallstack={true} />
     <TransformNavigator />
-    <FlameGraph />
+    <MaybeFlameGraph />
   </div>
 );
 
