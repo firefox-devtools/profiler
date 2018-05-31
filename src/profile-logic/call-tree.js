@@ -257,8 +257,8 @@ export class CallTree {
         : _formatDecimalNumber;
 
       displayData = {
-        totalTime: `${formatNumber(totalTime)}`,
-        selfTime: selfTime === 0 ? '—' : `${formatNumber(selfTime)}`,
+        totalTime: formatNumber(totalTime),
+        selfTime: selfTime === 0 ? '—' : formatNumber(selfTime),
         totalTimePercent: `${(100 * totalTimeRelative).toFixed(precision)}%`,
         name: funcName,
         lib: libName,
