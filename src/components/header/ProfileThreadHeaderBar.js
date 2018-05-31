@@ -5,6 +5,7 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import classNames from 'classnames';
 import explicitConnect from '../../utils/connect';
 import ThreadStackGraph from './ThreadStackGraph';
 import { selectorsForThread } from '../../reducers/profile-view';
@@ -44,6 +45,7 @@ type OwnProps = {|
   +rangeEnd: Milliseconds,
   +isHidden: boolean,
   +isModifyingSelection: boolean,
+  +isMainThread: boolean,
   +style?: Object /* This is used by Reorderable */,
 |};
 
@@ -161,6 +163,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
       isHidden,
       isModifyingSelection,
       unfilteredSamplesRange,
+      isMainThread,
       style,
     } = this.props;
 
@@ -181,7 +184,11 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
 
     return (
       <li
-        className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')}
+        className={classNames({
+          profileThreadHeaderBar: true,
+          selected: isSelected,
+          profileThreadHeaderBarMainThread: isMainThread,
+        })}
         onClick={this._onLineClick}
         style={style}
       >

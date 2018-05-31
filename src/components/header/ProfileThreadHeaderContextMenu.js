@@ -84,6 +84,14 @@ class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
       threads[rightClickedThreadIndex]
     );
 
+    const threadIndexes = [];
+    for (const { mainThread, threads } of threadOrder) {
+      if (mainThread) {
+        threadIndexes.push(mainThread);
+      }
+      threadIndexes.push(...threads);
+    }
+
     return (
       <ContextMenu id={'ProfileThreadHeaderContextMenu'}>
         {threads.length <= 1 ? null : (
@@ -97,27 +105,25 @@ class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
             <div className="react-contextmenu-separator" />
           </div>
         )}
-        {threadOrder.map(({ threads: threadIndexes }) =>
-          threadIndexes.map(threadIndex => {
-            const isHidden = hiddenThreads.includes(threadIndex);
-            return (
-              <MenuItem
-                key={threadIndex}
-                preventClose={true}
-                data={{ threadIndex, isHidden }}
-                onClick={this._toggleThreadVisibility}
-                attributes={{
-                  className: classNames({
-                    checkable: true,
-                    checked: !isHidden,
-                  }),
-                }}
-              >
-                {getFriendlyThreadName(threads, threads[threadIndex])}
-              </MenuItem>
-            );
-          })
-        )}
+        {threadIndexes.map(threadIndex => {
+          const isHidden = hiddenThreads.includes(threadIndex);
+          return (
+            <MenuItem
+              key={threadIndex}
+              preventClose={true}
+              data={{ threadIndex, isHidden }}
+              onClick={this._toggleThreadVisibility}
+              attributes={{
+                className: classNames({
+                  checkable: true,
+                  checked: !isHidden,
+                }),
+              }}
+            >
+              {getFriendlyThreadName(threads, threads[threadIndex])}
+            </MenuItem>
+          );
+        })}
       </ContextMenu>
     );
   }

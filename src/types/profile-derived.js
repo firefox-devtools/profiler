@@ -108,4 +108,8 @@ export type MarkerTimingRows = Array<MarkerTiming>;
 
 export type StackType = 'js' | 'native' | 'unsymbolicated';
 
-export type ThreadsInProcess = { pid: number | void, threads: ThreadIndex[] };
+export type ThreadsInProcess = {|
+  pid: number | void,
+  mainThread: ThreadIndex | null,
+  threads: ThreadIndex[],
+|};

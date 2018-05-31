@@ -199,14 +199,22 @@ function threadIndexesToThreadsInProcesses(
   const pidToProcess = new Map();
   for (let i = 0; i < threadOrder.length; i++) {
     const threadIndex = threadOrder[i];
-    const { pid } = threads[threadIndex];
+    const { pid, name } = threads[threadIndex];
     let threadsInProcess = pidToProcess.get(pid);
     if (threadsInProcess === undefined) {
-      threadsInProcess = { pid, threads: [] };
+      threadsInProcess = ({
+        pid,
+        mainThread: null,
+        threads: [],
+      }: ThreadsInProcess);
       pidToProcess.set(pid, threadsInProcess);
       threadsInProcesses.push(threadsInProcess);
     }
-    threadsInProcess.threads.push(threadIndex);
+    if (name === 'GeckoMain') {
+      threadsInProcess.mainThread = threadIndex;
+    } else {
+      threadsInProcess.threads.push(threadIndex);
+    }
   }
   return threadsInProcesses;
 }

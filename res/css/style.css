@@ -240,7 +240,7 @@ body, #root, .profileViewer {
     height: 0;
     width: 0;
     color: #888;
-    border-top: 5px solid transparent;   
+    border-top: 5px solid transparent;
     border-right: 4px solid transparent;
     border-bottom: 5px solid transparent;
     border-left: 8px solid;
@@ -295,7 +295,6 @@ body, #root, .profileViewer {
 .profileViewerHeader {
   position: relative;
   margin-left: 149px;
-  border-left: 1px solid var(--grey-30);
   -moz-user-focus: ignore;
 }
 
@@ -356,7 +355,7 @@ body, #root, .profileViewer {
 .profileViewerHeaderOverflowEdgeIndicatorScrollbox {
   margin: 0 0 0 -150px;
   padding-left: 150px;
-  max-height: 250px;
+  max-height: 350px;
   overflow: auto;
 }
 
@@ -389,11 +388,22 @@ body, #root, .profileViewer {
   height: 100%;
 }
 
-.profileViewerHeaderThreadList {
-  list-style: none;
+.profileViewerHeaderProcess {
   margin: 0 0 0 -150px;
+  background-color: var(--grey-20);
+  padding-bottom: 15px;
+}
+
+.profileViewerHeaderThreadList,
+.profileViewerMainThread {
+  margin: 0;
+  list-style: none;
   padding: 0;
-  box-shadow: inset 0 1px var(--grey-30);
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profileViewerHeaderThreadList {
+  margin-left: 15px;
 }
 
 .profileThreadHeaderBarHidden {
@@ -408,6 +418,11 @@ body, #root, .profileViewer {
   flex-flow: row nowrap;
   border-top: 1px solid var(--grey-30);
   box-shadow: 0 1px var(--grey-30);
+  background-color: #fff;
+}
+
+.profileThreadHeaderBarMainThread {
+  margin-left: 0;
 }
 
 .profileThreadHeaderBar.selected {
@@ -416,13 +431,20 @@ body, #root, .profileViewer {
 
 .profileThreadHeaderBarThreadLabel {
   box-sizing: border-box;
-  width: 150px;
   border-right: 1px solid var(--grey-30);
   padding-left: 14px;
   cursor: default;
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
+  width: 135px;
+  border-left: 1px solid var(--grey-30);
+  color: var(--grey-60);
+}
+
+.profileThreadHeaderBarMainThread > .profileThreadHeaderBarThreadLabel {
+  width: 150px;
+  color: inherit;
 }
 
 .profileThreadHeaderBarThreadName {

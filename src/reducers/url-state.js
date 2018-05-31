@@ -203,6 +203,7 @@ function threadOrder(state: ThreadsInProcess[] = [], action: Action) {
         ...state.slice(0, index),
         {
           pid: pid,
+          mainThread: state[index].mainThread,
           threads: threadOrder,
         },
         ...state.slice(index + 1),

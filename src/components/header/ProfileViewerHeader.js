@@ -6,11 +6,9 @@
 
 import React, { PureComponent } from 'react';
 import ProfileThreadHeaderBar from './ProfileThreadHeaderBar';
-import Reorderable from '../shared/Reorderable';
 import TimeSelectionScrubber from './TimeSelectionScrubber';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import explicitConnect from '../../utils/connect';
-import { ensureExists } from '../../utils/flow';
 import {
   getProfile,
   getProfileViewOptions,
@@ -74,6 +72,38 @@ class ProfileViewerHeader extends PureComponent<Props> {
     addRangeFilterAndUnsetSelection(start - zeroAt, end - zeroAt);
   }
 
+  /**
+   * Flow didn't like using array mapping, so abstract this into some imperative logic
+   * and inside of a function.
+   */
+  renderThreadsForProcess(threadIndexes: ThreadIndex[]) {
+    const { threads } = this.props.profile;
+    const elements = [];
+    for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
+      if (threadIndexes.includes(threadIndex)) {
+        elements.push(this.renderThread(threadIndex, false));
+      }
+    }
+    return elements;
+  }
+
+  renderThread(threadIndex: ThreadIndex, isMainThread: boolean) {
+    const { profile, timeRange, hiddenThreads, selection } = this.props;
+
+    return (
+      <ProfileThreadHeaderBar
+        key={threadIndex}
+        threadIndex={threadIndex}
+        interval={profile.meta.interval}
+        rangeStart={timeRange.start}
+        rangeEnd={timeRange.end}
+        isHidden={hiddenThreads.includes(threadIndex)}
+        isModifyingSelection={selection.isModifying}
+        isMainThread={isMainThread}
+      />
+    );
+  }
+
   render() {
     const {
       profile,
@@ -81,11 +111,11 @@ class ProfileViewerHeader extends PureComponent<Props> {
       selection,
       timeRange,
       zeroAt,
-      hiddenThreads,
       updateProfileSelection,
+      hiddenThreads,
     } = this.props;
-    const threads = profile.threads;
 
+    console.log('!!! threadOrder', threadOrder);
     return (
       <TimeSelectionScrubber
         className="profileViewerHeader"
@@ -98,34 +128,24 @@ class ProfileViewerHeader extends PureComponent<Props> {
         onZoomButtonClick={this._onZoomButtonClick}
       >
         <OverflowEdgeIndicator className="profileViewerHeaderOverflowEdgeIndicator">
-          {threadOrder.map(({ pid, threads: threadIndexes }) => (
-            <Reorderable
-              key={pid}
-              tagName="ol"
-              className="profileViewerHeaderThreadList"
-              order={threadIndexes}
-              orient="vertical"
-              onChangeOrder={ensureExists(
-                this.pidToChangeThreadOrderFn.get(pid),
-                'Could not find the changeThreadOrder function for a pid'
-              )}
-            >
-              {threads.map((thread, threadIndex) => (
-                <ProfileThreadHeaderBar
-                  key={threadIndex}
-                  threadIndex={threadIndex}
-                  interval={profile.meta.interval}
-                  rangeStart={timeRange.start}
-                  rangeEnd={timeRange.end}
-                  isHidden={
-                    hiddenThreads.includes(threadIndex) ||
-                    !threadIndexes.includes(threadIndex)
-                  }
-                  isModifyingSelection={selection.isModifying}
-                />
-              ))}
-            </Reorderable>
-          ))}
+          {threadOrder.map(
+            ({ pid, mainThread, threads: threadIndexes }) =>
+              // There is a non-hidden main thread.
+              (mainThread && !hiddenThreads.includes(mainThread)) ||
+              // Or there are non-hidden threads to show.
+              threadIndexes.some(index => !hiddenThreads.includes(index)) ? (
+                <div key={pid} className="profileViewerHeaderProcess">
+                  {mainThread === null ? null : (
+                    <ol className="profileViewerMainThread">
+                      {this.renderThread(mainThread, true)}
+                    </ol>
+                  )}
+                  <ol className="profileViewerHeaderThreadList">
+                    {this.renderThreadsForProcess(threadIndexes)}
+                  </ol>
+                </div>
+              ) : null
+          )}
         </OverflowEdgeIndicator>
       </TimeSelectionScrubber>
     );
