@@ -30,6 +30,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             0,
           ],
           "_callNodeTable": Object {
+            "category": Int32Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
             "depth": Array [
               0,
               1,
@@ -89,6 +100,12 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               1,
             ],
           },
+          "_categories": Array [
+            Object {
+              "color": "grey",
+              "name": "Other",
+            },
+          ],
           "_children": Map {},
           "_displayDataByIndex": Map {},
           "_funcTable": Object {
@@ -233,6 +250,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             0,
           ],
           "_callNodeTable": Object {
+            "category": Int32Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
             "depth": Array [
               0,
               1,
@@ -292,9 +320,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               1,
             ],
           },
+          "_categories": Array [
+            Object {
+              "color": "grey",
+              "name": "Other",
+            },
+          ],
           "_children": Map {},
           "_displayDataByIndex": Map {
             2 => Object {
+              "categoryColor": "grey",
+              "categoryName": "Other",
               "dim": false,
               "icon": null,
               "lib": "",
@@ -484,6 +520,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             0,
           ],
           "_callNodeTable": Object {
+            "category": Int32Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
             "depth": Array [
               0,
               1,
@@ -543,9 +590,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               1,
             ],
           },
+          "_categories": Array [
+            Object {
+              "color": "grey",
+              "name": "Other",
+            },
+          ],
           "_children": Map {},
           "_displayDataByIndex": Map {
             2 => Object {
+              "categoryColor": "grey",
+              "categoryName": "Other",
               "dim": false,
               "icon": null,
               "lib": "",
@@ -555,6 +610,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               "totalTimePercent": "67%",
             },
             3 => Object {
+              "categoryColor": "grey",
+              "categoryName": "Other",
               "dim": false,
               "icon": null,
               "lib": "",
@@ -744,6 +801,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             0,
           ],
           "_callNodeTable": Object {
+            "category": Int32Array [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ],
             "depth": Array [
               0,
               1,
@@ -803,9 +871,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               1,
             ],
           },
+          "_categories": Array [
+            Object {
+              "color": "grey",
+              "name": "Other",
+            },
+          ],
           "_children": Map {},
           "_displayDataByIndex": Map {
             2 => Object {
+              "categoryColor": "grey",
+              "categoryName": "Other",
               "dim": false,
               "icon": null,
               "lib": "",
@@ -815,6 +891,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               "totalTimePercent": "67%",
             },
             3 => Object {
+              "categoryColor": "grey",
+              "categoryName": "Other",
               "dim": false,
               "icon": null,
               "lib": "",
@@ -824,6 +902,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               "totalTimePercent": "33%",
             },
             7 => Object {
+              "categoryColor": "grey",
+              "categoryName": "Other",
               "dim": false,
               "icon": null,
               "lib": "",

@@ -253,6 +253,8 @@ describe('unfiltered call tree', function() {
           selfTime: '—',
           totalTime: '3',
           totalTimePercent: '100%',
+          categoryColor: 'grey',
+          categoryName: 'Other',
         });
       });
     });
