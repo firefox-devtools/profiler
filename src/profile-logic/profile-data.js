@@ -14,6 +14,7 @@ import type {
   FuncTable,
   MarkersTable,
   ResourceTable,
+  IndexIntoCategoryList,
   IndexIntoFuncTable,
   IndexIntoStringTable,
   IndexIntoSamplesTable,
@@ -37,7 +38,7 @@ import { timeCode } from '../utils/time-code';
 import { hashPath } from '../utils/path';
 import type { ImplementationFilter } from '../types/actions';
 import bisection from 'bisection';
-import type { UniqueStringArray } from '../utils/unique-string-array';
+import { UniqueStringArray } from '../utils/unique-string-array';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -88,16 +89,19 @@ export function getCallNodeInfo(
     // The callNodeTable components.
     const prefix: Array<IndexIntoCallNodeTable> = [];
     const func: Array<IndexIntoFuncTable> = [];
+    const category: Array<IndexIntoCategoryList> = [];
     const depth: Array<number> = [];
     let length = 0;
 
     function addCallNode(
       prefixIndex: IndexIntoCallNodeTable,
-      funcIndex: IndexIntoFuncTable
+      funcIndex: IndexIntoFuncTable,
+      categoryIndex: IndexIntoCategoryList
     ) {
       const index = length++;
       prefix[index] = prefixIndex;
       func[index] = funcIndex;
+      category[index] = categoryIndex;
       if (prefixIndex === -1) {
         depth[index] = 0;
       } else {
@@ -114,6 +118,7 @@ export function getCallNodeInfo(
       const prefixCallNode =
         prefixStack === null ? -1 : stackIndexToCallNodeIndex[prefixStack];
       const frameIndex = stackTable.frame[stackIndex];
+      const categoryIndex = stackTable.category[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
       const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
       let callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
@@ -121,7 +126,7 @@ export function getCallNodeInfo(
       );
       if (callNodeIndex === undefined) {
         callNodeIndex = length;
-        addCallNode(prefixCallNode, funcIndex);
+        addCallNode(prefixCallNode, funcIndex, categoryIndex);
         prefixCallNodeAndFuncToCallNodeMap.set(
           prefixCallNodeAndFuncIndex,
           callNodeIndex
@@ -133,6 +138,7 @@ export function getCallNodeInfo(
     const callNodeTable: CallNodeTable = {
       prefix: new Int32Array(prefix),
       func: new Int32Array(func),
+      category: new Int32Array(category),
       depth,
       length,
     };
