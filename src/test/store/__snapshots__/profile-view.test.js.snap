@@ -885,6 +885,16 @@ Object {
 exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getCallNodeInfo 1`] = `
 Object {
   "callNodeTable": Object {
+    "category": Int32Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "depth": Array [
       0,
       1,
@@ -943,6 +953,16 @@ CallTree {
     0,
   ],
   "_callNodeTable": Object {
+    "category": Int32Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "depth": Array [
       0,
       1,
@@ -997,6 +1017,12 @@ CallTree {
       1,
     ],
   },
+  "_categories": Array [
+    Object {
+      "color": "grey",
+      "name": "Other",
+    },
+  ],
   "_children": Array [],
   "_displayDataByIndex": Map {},
   "_funcTable": Object {
