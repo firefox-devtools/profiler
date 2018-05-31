@@ -39,6 +39,10 @@ export default function getProfile(): Profile {
     name => thread.stringTable.indexForString(name)
   );
 
+  const categoryOther = profile.meta.categories.findIndex(
+    c => c.name === 'Other'
+  );
+
   // Be explicit about table creation so flow errors are really readable.
   const funcTable: FuncTable = {
     name: funcNames,
@@ -82,29 +86,31 @@ export default function getProfile(): Profile {
 
   const stackTable: StackTable = {
     frame: [],
+    category: [],
     prefix: [],
     length: 0,
-    depth: [],
+    depth: [], // ??? depth?
   };
 
   // Provide a utility function for readability.
-  function addToStackTable(frame, prefix) {
+  function addToStackTable(frame, prefix, category) {
     stackTable.frame.push(frame);
     stackTable.prefix.push(prefix);
+    stackTable.category.push(category);
     stackTable.length++;
   }
   // Shared root stacks.
-  addToStackTable(funcAFrame, null);
-  addToStackTable(funcBFrame, 0);
-  addToStackTable(funcCFrame, 1);
+  addToStackTable(funcAFrame, null, categoryOther);
+  addToStackTable(funcBFrame, 0, categoryOther);
+  addToStackTable(funcCFrame, 1, categoryOther);
 
   // Branch 1.
-  addToStackTable(funcDFrame, 2);
-  addToStackTable(funcEFrame, 3);
+  addToStackTable(funcDFrame, 2, categoryOther);
+  addToStackTable(funcEFrame, 3, categoryOther);
 
   // Branch 2.
-  addToStackTable(funcDFrameDuplicate, 2);
-  addToStackTable(funcFFrame, 5);
+  addToStackTable(funcDFrameDuplicate, 2, categoryOther);
+  addToStackTable(funcFFrame, 5, categoryOther);
 
   // Have the first sample pointing to the first branch, and the second sample to
   // the second branch of the stack.

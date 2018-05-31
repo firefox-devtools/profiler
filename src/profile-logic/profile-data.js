@@ -61,7 +61,9 @@ export const emptyExtensions: ExtensionTable = Object.freeze({
   length: 0,
 });
 
-export const emptyCategories: CategoryList = Object.freeze([]);
+export const emptyCategories: CategoryList = Object.freeze([
+  { name: 'Other', color: 'grey' },
+]);
 
 /**
  * Generate the CallNodeInfo which contains the CallNodeTable, and a map to convert
@@ -509,6 +511,7 @@ function _filterThreadByFunc(
       length: 0,
       frame: [],
       prefix: [],
+      category: [],
     };
 
     const oldStackToNewStack = new Map();
@@ -533,6 +536,7 @@ function _filterThreadByFunc(
             newStack = newStackTable.length++;
             newStackTable.prefix[newStack] = prefixNewStack;
             newStackTable.frame[newStack] = frameIndex;
+            newStackTable.category[newStack] = stackTable.category[stackIndex];
           }
           oldStackToNewStack.set(stackIndex, newStack);
           prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
@@ -579,6 +583,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
     const newStackTable: StackTable = {
       length: 0,
       frame: [],
+      category: [],
       prefix: [],
     };
     const newFrameTable: FrameTable = {
@@ -640,6 +645,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
           if (newStack === undefined) {
             newStack = newStackTable.length++;
             newStackTable.prefix[newStack] = newStackPrefix;
+            newStackTable.category[newStack] = stackTable.category[oldStack];
             if (oldStackIsPlatform) {
               // Create a new platform frame
               const newFuncIndex = newFuncTable.length++;
@@ -1072,6 +1078,7 @@ export function invertCallstack(thread: Thread): Thread {
     const newStackTable = {
       length: 0,
       frame: [],
+      category: [],
       prefix: [],
     };
     // Create a Map that keys off of two values, both the prefix and frame combination
@@ -1082,7 +1089,7 @@ export function invertCallstack(thread: Thread): Thread {
     // Returns the stackIndex for a specific frame (that is, a function and its
     // context), and a specific prefix. If it doesn't exist yet it will create
     // a new stack entry and return its index.
-    function stackFor(prefix, frame) {
+    function stackFor(prefix, frame, category) {
       const prefixAndFrameIndex =
         (prefix === null ? -1 : prefix) * frameCount + frame;
       let stackIndex = prefixAndFrameToStack.get(prefixAndFrameIndex);
@@ -1090,6 +1097,7 @@ export function invertCallstack(thread: Thread): Thread {
         stackIndex = newStackTable.length++;
         newStackTable.prefix[stackIndex] = prefix;
         newStackTable.frame[stackIndex] = frame;
+        newStackTable.category[stackIndex] = category;
         prefixAndFrameToStack.set(prefixAndFrameIndex, stackIndex);
       }
       return stackIndex;
@@ -1113,7 +1121,11 @@ export function invertCallstack(thread: Thread): Thread {
         ) {
           // Notice how we reuse the previous stack as the prefix. This is what
           // effectively inverts the call tree.
-          newStack = stackFor(newStack, stackTable.frame[currentStack]);
+          newStack = stackFor(
+            newStack,
+            stackTable.frame[currentStack],
+            stackTable.category[currentStack]
+          );
         }
         oldStackToNewStack.set(stackIndex, newStack);
       }

@@ -15,7 +15,7 @@ export type IndexIntoStringTable = number;
 export type IndexIntoFuncTable = number;
 export type IndexIntoResourceTable = number;
 export type IndexIntoLibs = number;
-export type categoryBitMask = number;
+export type IndexIntoCategoryList = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
 
@@ -26,6 +26,7 @@ export type ThreadIndex = number;
  */
 export type StackTable = {
   frame: IndexIntoFrameTable[],
+  category: IndexIntoCategoryList[],
   prefix: Array<IndexIntoStackTable | null>,
   length: number,
 };
@@ -77,7 +78,7 @@ export type MarkersTable = {
  */
 export type FrameTable = {
   address: IndexIntoStringTable[],
-  category: (categoryBitMask | null)[],
+  category: (IndexIntoCategoryList | null)[],
   func: IndexIntoFuncTable[],
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],

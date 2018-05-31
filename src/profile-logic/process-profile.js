@@ -22,6 +22,7 @@ import type {
   Profile,
   Thread,
   ExtensionTable,
+  CategoryList,
   FrameTable,
   SamplesTable,
   StackTable,
@@ -506,9 +507,34 @@ function _processFrameTable(
 /**
  * Explicitly recreate the stack table here to help enforce our assumptions about types.
  */
-function _processStackTable(geckoStackTable: GeckoStackStruct): StackTable {
+function _processStackTable(
+  geckoStackTable: GeckoStackStruct,
+  frameTable: FrameTable,
+  categories: CategoryList
+): StackTable {
+  // Compute a non-null category for every stack
+  const greyCategory = categories.findIndex(c => c.color === 'grey') || 0;
+  const categoryColumn = [];
+  for (let stackIndex = 0; stackIndex < geckoStackTable.length; stackIndex++) {
+    const frameCategory =
+      frameTable.category[geckoStackTable.frame[stackIndex]];
+    let stackCategory;
+    if (frameCategory !== null) {
+      stackCategory = frameCategory;
+    } else {
+      const prefix = geckoStackTable.prefix[stackIndex];
+      if (prefix !== null) {
+        stackCategory = categoryColumn[prefix];
+      } else {
+        stackCategory = greyCategory;
+      }
+    }
+    categoryColumn.push(stackCategory);
+  }
+
   return {
     frame: geckoStackTable.frame,
+    category: categoryColumn,
     prefix: geckoStackTable.prefix,
     length: geckoStackTable.length,
   };
@@ -655,7 +681,7 @@ function _processThread(
   );
 
   const { libs, pausedRanges, meta } = processProfile;
-  const { shutdownTime } = meta;
+  const { categories, shutdownTime } = meta;
 
   const stringTable = new UniqueStringArray(thread.stringTable);
   const [
@@ -673,7 +699,11 @@ function _processThread(
     funcTable,
     frameFuncs
   );
-  const stackTable = _processStackTable(geckoStackTable);
+  const stackTable = _processStackTable(
+    geckoStackTable,
+    frameTable,
+    categories
+  );
   const markers = _processMarkers(geckoMarkers);
   const samples = _processSamples(geckoSamples);
 
