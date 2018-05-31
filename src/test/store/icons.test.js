@@ -41,6 +41,8 @@ describe('actions/icons', function() {
       name: 'icon',
       lib: 'icon',
       dim: false,
+      categoryName: 'Other',
+      categoryColor: 'grey',
       icon,
     };
   }
