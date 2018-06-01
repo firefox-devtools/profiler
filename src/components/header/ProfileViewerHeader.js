@@ -9,6 +9,8 @@ import ProfileThreadHeaderBar from './ProfileThreadHeaderBar';
 import TimeSelectionScrubber from './TimeSelectionScrubber';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import Screenshots from './Screenshots';
+import Network from './Network';
+
 import explicitConnect from '../../utils/connect';
 import {
   getProfile,
@@ -167,6 +169,9 @@ class ProfileViewerHeader extends PureComponent<Props> {
                     </ol>
                   )}
                   <ol className="profileViewerHeaderThreadList">
+                    {mainThread === null ? null : (
+                      <Network threadIndex={mainThread} />
+                    )}
                     {this.optionallyRenderScreenshots(
                       mainThread,
                       threadIndexes
