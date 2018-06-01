@@ -739,13 +739,10 @@ export function getCallNodePathFromIndex(
   callNodeIndex: IndexIntoCallNodeTable | null,
   callNodeTable: CallNodeTable
 ): CallNodePath {
-  if (callNodeIndex === null) {
+  if (callNodeIndex === null || callNodeIndex === -1) {
     return [];
   }
-  if (callNodeIndex * 1 !== callNodeIndex) {
-    console.log('bad callNodeIndex in getCallNodePath:', callNodeIndex);
-    return [];
-  }
+
   const callNodePath = [];
   let fs = callNodeIndex;
   while (fs !== -1) {
