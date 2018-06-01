@@ -32,7 +32,7 @@ import type { BailoutPayload } from '../types/markers';
 import { CURRENT_VERSION as GECKO_PROFILE_VERSION } from './gecko-profile-versioning';
 import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profile-versioning';
 
-import type { StartEndRange } from '../types/units';
+import type { Milliseconds, StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
 import { hashPath } from '../utils/path';
 import type { ImplementationFilter } from '../types/actions';
@@ -148,6 +148,167 @@ export function getSampleCallNodes(
   return samples.stack.map(stack => {
     return stack === null ? null : stackIndexToCallNodeIndex[stack];
   });
+}
+
+// This function assumes that the path isn't empty
+export function getFuncIndex(path: CallNodePath): IndexIntoFuncTable {
+  return path[path.length - 1];
+}
+
+// Returns the JS information for a specific stack
+export function getJsInformationForStack(
+  stackIndex: IndexIntoStackTable,
+  { stackTable, frameTable, stringTable }: Thread
+): string {
+  const frameIndex = stackTable.frame[stackIndex];
+  const jsEngineInformationStrIndex = frameTable.implementation[frameIndex];
+  const jsInformation =
+    jsEngineInformationStrIndex === null
+      ? 'interpreter'
+      : stringTable.getString(jsEngineInformationStrIndex);
+
+  return jsInformation;
+}
+
+type TimingsForSpecificPath = {|
+  selfTime: Milliseconds, // time spent in this path excluding children
+  totalTime: Milliseconds, // time spent in this path including children
+  // information about the JavaScript engine used for this path
+  jsEngineInformations: { [key: string]: Milliseconds } | null,
+|};
+
+export type TimingsForPath = {|
+  forPath: TimingsForSpecificPath,
+  forFunc: {|
+    selfTime: Milliseconds, // time spent in this function accross the tree, excluding children
+    totalTime: Milliseconds, // time spent in this function accross the tree, including children
+  |},
+  rootTime: Milliseconds, // time for all the samples in the current tree
+|};
+
+// Returns the timings for a specific path. The algorithm is adjusted when
+// the call tree is inverted.
+export function getTimingsForPath(
+  path: CallNodePath,
+  { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
+  interval: number,
+  isInvertedTree: boolean,
+  thread: Thread
+): TimingsForPath {
+  const { samples, funcTable } = thread;
+  const nodeIndex = getCallNodeIndexFromPath(path, callNodeTable);
+  const funcIndex = getFuncIndex(path);
+
+  const forPath: TimingsForSpecificPath = {
+    selfTime: 0,
+    totalTime: 0,
+    jsEngineInformations: null,
+  };
+  const forFunc = {
+    selfTime: 0,
+    totalTime: 0,
+  };
+  let rootTime = 0;
+
+  function contributeJsInformation(information: string): void {
+    if (forPath.jsEngineInformations === null) {
+      forPath.jsEngineInformations = {};
+    }
+    if (forPath.jsEngineInformations[information] === undefined) {
+      forPath.jsEngineInformations[information] = 0;
+    }
+    forPath.jsEngineInformations[information] += interval;
+  }
+
+  // Looping over the samples' stacks
+  for (const stackIndex of samples.stack) {
+    if (stackIndex === null) {
+      continue;
+    }
+
+    rootTime += interval;
+
+    const thisNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+    const thisFunc = callNodeTable.func[thisNodeIndex];
+
+    // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
+    if (!isInvertedTree) {
+      if (thisNodeIndex === nodeIndex) {
+        forPath.selfTime += interval;
+
+        if (funcTable.isJS[thisFunc]) {
+          const jsInformation = getJsInformationForStack(stackIndex, thread);
+          contributeJsInformation(jsInformation);
+        }
+      }
+
+      if (thisFunc === funcIndex) {
+        forFunc.selfTime += interval;
+      }
+    }
+
+    // Using the callNodeTable to build up the call node path and get various
+    // measurements.
+    // We don't use getCallNodePathFromIndex because we don't need the result
+    // itself, and it's costly to get.
+    let funcFound = false;
+    let pathFound = false;
+    let nextIndex;
+    for (
+      let currentIndex = thisNodeIndex;
+      currentIndex !== -1;
+      currentIndex = nextIndex
+    ) {
+      const currentFunc = callNodeTable.func[currentIndex];
+      nextIndex = callNodeTable.prefix[currentIndex];
+
+      // One of the parents is the exact passed path
+      if (currentIndex === nodeIndex) {
+        forPath.totalTime += interval;
+        pathFound = true;
+      }
+
+      // One of the parents' func is the same function as the passed path
+      // Note we could have the same function several times, so we need a
+      // boolean variable to prevent adding it more than once.
+      if (!funcFound && currentFunc === funcIndex) {
+        forFunc.totalTime += interval;
+        funcFound = true;
+      }
+
+      // When the tree isn't inverted, we don't need to move further up the call
+      // node if we already found all the data.
+      if (!isInvertedTree && funcFound && pathFound) {
+        break;
+      }
+
+      // But for inverted trees, the selfTime needs to be counted on the root
+      // node. This is the root node if nextIndex is -1.
+      if (isInvertedTree && nextIndex === -1) {
+        // If the root node is the passed path
+        if (currentIndex === nodeIndex) {
+          forPath.selfTime += interval;
+        }
+
+        // If the root node is the same function as the passed path
+        if (currentFunc === funcIndex) {
+          forFunc.selfTime += interval;
+        }
+
+        // Contributing the JS engine information if the passed path was found
+        // in this stack _and_ if the root node (the one actually holding the
+        // self time) is a JS frame.
+        // This allows to see how the JS engine information is spread among
+        // callers.
+        if (pathFound && funcTable.isJS[currentFunc]) {
+          const jsInformation = getJsInformationForStack(stackIndex, thread);
+          contributeJsInformation(jsInformation);
+        }
+      }
+    }
+  }
+
+  return { forPath, forFunc, rootTime };
 }
 
 function _getTimeRangeForThread(

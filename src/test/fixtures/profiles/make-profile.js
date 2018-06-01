@@ -292,6 +292,8 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
   });
 }
 
+const JS_IMPLEMENTATIONS = [null, 'ion', 'baseline'];
+
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
   funcNames: string[]
@@ -379,10 +381,23 @@ function _buildThreadFromTextOnlyStacks(
       // If we couldn't find a stack, go ahead and create a stack and frame.
       if (stackIndex === undefined) {
         const frameIndex = frameTable.length++;
+
+        // First let's decide a jsImplementation.
+        let jsImplementationIndex = null;
+        if (funcTable.isJS[funcIndex]) {
+          const jsImplementation =
+            JS_IMPLEMENTATIONS[frameIndex % JS_IMPLEMENTATIONS.length];
+          if (jsImplementation) {
+            jsImplementationIndex = stringTable.indexForString(
+              jsImplementation
+            );
+          }
+        }
+
         frameTable.func.push(funcIndex);
         frameTable.address.push(0);
         frameTable.category.push(null);
-        frameTable.implementation.push(null);
+        frameTable.implementation.push(jsImplementationIndex);
         frameTable.line.push(null);
         frameTable.optimizations.push(null);
 
