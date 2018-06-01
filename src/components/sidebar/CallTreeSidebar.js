@@ -5,18 +5,26 @@
 // @flow
 
 import * as React from 'react';
+
 import explicitConnect from '../../utils/connect';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import {
+  selectedThreadSelectors,
+  selectedNodeSelectors,
+} from '../../reducers/profile-view';
+import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { getFunctionName } from '../../profile-logic/function-info';
 
-import type { ExplicitConnectOptions } from '../../utils/connect';
-import type { CallTree } from '../../profile-logic/call-tree';
-import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
-
-type StateProps = {|
-  +tree: CallTree,
-  +selectedNodeIndex: IndexIntoCallNodeTable | null,
-|};
+import type {
+  ConnectedProps,
+  ExplicitConnectOptions,
+} from '../../utils/connect';
+import type { ThreadIndex } from '../../types/profile';
+import type {
+  CallNodeTable,
+  IndexIntoCallNodeTable,
+} from '../../types/profile-derived';
+import type { Milliseconds } from '../../types/units';
+import type { TimingsForPath } from '../../profile-logic/profile-data';
 
 type SidebarDetailProps = {|
   +label: string,
@@ -32,9 +40,53 @@ function SidebarDetail({ label, children }: SidebarDetailProps) {
   );
 }
 
-class CallTreeSidebar extends React.PureComponent<StateProps> {
+type BreakdownProps = {|
+  +data: { [mode: string]: Milliseconds },
+|};
+
+// This stateless component is responsible for displaying the implementation
+// breakdown. It also computes the percentage from the total time.
+function Breakdown({ data }: BreakdownProps) {
+  const dataArray = Object.keys(data)
+    .sort()
+    .map(implementation => ({ implementation, value: data[implementation] }));
+  const totalTime = dataArray.reduce((result, item) => result + item.value, 0);
+
+  return (
+    <div className="sidebar-details">
+      {dataArray.map(({ implementation, value }) => {
+        const percentage = Math.round(value / totalTime * 100);
+
+        return (
+          <SidebarDetail label={implementation} key={implementation}>
+            {value}ms ({percentage}%)
+          </SidebarDetail>
+        );
+      })}
+    </div>
+  );
+}
+
+type StateProps = {|
+  +selectedNodeIndex: IndexIntoCallNodeTable | null,
+  +callNodeTable: CallNodeTable,
+  +selectedThreadIndex: ThreadIndex,
+  +name: string,
+  +lib: string,
+  +timings: TimingsForPath,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, {||}>;
+
+class CallTreeSidebar extends React.PureComponent<Props> {
   render() {
-    const { tree, selectedNodeIndex } = this.props;
+    const { selectedNodeIndex, name, lib, timings } = this.props;
+    const {
+      forPath: { selfTime, totalTime },
+      forFunc: { selfTime: selfTimeForFunc, totalTime: totalTimeForFunc },
+      rootTime,
+    } = timings;
+
     if (selectedNodeIndex === null) {
       return (
         <div className="sidebar sidebar-calltree">
@@ -43,26 +95,46 @@ class CallTreeSidebar extends React.PureComponent<StateProps> {
       );
     }
 
-    const data = tree.getDisplayData(selectedNodeIndex);
-    // `data.selfTime` is a string, containing either a number or, if the value
-    // is 0, is '—'. So we we use isNaN on purpose (instead of Number.isNaN), to
-    // force a conversion and decide whether we should add the unit or keep the
-    // character '—'.
-    // We don't compare against '—' to avoid hardcoded values. In the future we
-    // should have a dedicated method in `tree` to recover the values we need in
-    // the format we need.
-    const selfTime = isNaN(data.selfTime)
-      ? data.selfTime
-      : data.selfTime + 'ms';
+    const totalTimePercent = Math.round(totalTime.value / rootTime * 100);
+    const selfTimePercent = Math.round(selfTime.value / rootTime * 100);
+    const totalTimeForFuncPercent = Math.round(
+      totalTimeForFunc.value / rootTime * 100
+    );
+    const selfTimeForFuncPercent = Math.round(
+      selfTimeForFunc.value / rootTime * 100
+    );
+
     return (
       <aside className="sidebar sidebar-calltree">
         <header className="sidebar-titlegroup">
-          <h2 className="sidebar-title">{getFunctionName(data.name)}</h2>
-          <p className="sidebar-subtitle">{data.lib}</p>
+          <h2 className="sidebar-title">{name}</h2>
+          {lib ? <p className="sidebar-subtitle">{lib}</p> : null}
         </header>
+        <h3 className="sidebar-title2">About the selected path</h3>
         <div className="sidebar-details">
-          <SidebarDetail label="Running Time">{data.totalTime}ms</SidebarDetail>
-          <SidebarDetail label="Self Time">{selfTime}</SidebarDetail>
+          <SidebarDetail label="Running Time">
+            {totalTime.value}ms ({totalTimePercent}%)
+          </SidebarDetail>
+          <SidebarDetail label="Self Time">
+            {selfTime.value ? `${selfTime.value}ms (${selfTimePercent}%)` : '—'}
+          </SidebarDetail>
+        </div>
+        {selfTime.breakdownByImplementation ? (
+          <React.Fragment>
+            <h4 className="sidebar-title3">Breakdown by implementation</h4>
+            <Breakdown data={selfTime.breakdownByImplementation} />
+          </React.Fragment>
+        ) : null}
+        <h3 className="sidebar-title2">This function across the entire tree</h3>
+        <div className="sidebar-details">
+          <SidebarDetail label="Running Time">
+            {totalTimeForFunc.value}ms ({totalTimeForFuncPercent}%)
+          </SidebarDetail>
+          <SidebarDetail label="Self Time">
+            {selfTimeForFunc.value
+              ? `${selfTimeForFunc.value}ms (${selfTimeForFuncPercent}%)`
+              : '—'}
+          </SidebarDetail>
         </div>
       </aside>
     );
@@ -71,9 +143,14 @@ class CallTreeSidebar extends React.PureComponent<StateProps> {
 
 const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
   mapStateToProps: state => ({
-    tree: selectedThreadSelectors.getCallTree(state),
     selectedNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(state),
+    callNodeTable: selectedThreadSelectors.getCallNodeInfo(state).callNodeTable,
+    selectedThreadIndex: getSelectedThreadIndex(state),
+    name: getFunctionName(selectedNodeSelectors.getName(state)),
+    lib: selectedNodeSelectors.getLib(state),
+    timings: selectedNodeSelectors.getTimingsForSidebar(state),
   }),
   component: CallTreeSidebar,
 };
+
 export default explicitConnect(options);
