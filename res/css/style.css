@@ -30,6 +30,13 @@ body, #root, .profileViewer {
   z-index: 0;
 }
 
+.nodeIcon {
+  min-width: 14px;
+  min-height: 14px;
+  height: 100%;
+  background: center / contain no-repeat;
+}
+
 .treeView {
   display: flex;
   flex-flow: column nowrap;
@@ -93,13 +100,6 @@ body, #root, .profileViewer {
   flex-flow: row nowrap;
   justify-content: flex-start;
   align-items: center;
-}
-
-.treeRowIcon {
-  min-width: 14px;
-  min-height: 14px;
-  height: 100%;
-  background: center / contain no-repeat;
 }
 
 .treeViewHeaderColumn {

@@ -47,6 +47,17 @@
   margin-right: 3px;
 }
 
+.tooltipIcon {
+  display: inline-block;
+  margin-right: 3px;
+  align-self: flex-end;
+}
+
+.tooltipIcon > .nodeIcon {
+  width: 14px;
+  margin-left: auto;
+  padding-right: 0.5em;
+}
 .tooltipHeader {
   padding-bottom: 5px;
   margin-bottom: 5px;
@@ -76,4 +87,10 @@
   padding-top: 5px;
   margin-top: 5px;
   border-top: 1px solid var(--grey-40);
+}
+
+.tooltipLib {
+  color: var(--grey-50);
+  white-space: nowrap;
+  align-self: flex-end;
 }

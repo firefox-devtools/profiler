@@ -7,7 +7,7 @@ import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import EmptyReasons from './EmptyReasons';
-import NodeIcon from './NodeIcon';
+import NodeIcon from '../shared/NodeIcon';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   getInvertCallstack,

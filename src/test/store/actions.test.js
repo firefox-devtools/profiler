@@ -157,7 +157,7 @@ describe('selectors/getFlameGraphTiming', function() {
    * Map the flameGraphTiming data structure into a human readable format where
    * each line takes the form:
    *
-   * "FunctionName1 (TotalTime:SelfTime:SelfTimeRelative) | ..."
+   * "FunctionName1 (SelfTimeRelative) | ..."
    */
   function getHumanReadableFlameGraphTimings(store, funcNames) {
     const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
@@ -167,21 +167,16 @@ describe('selectors/getFlameGraphTiming', function() {
       store.getState()
     );
 
-    return flameGraphTiming.map(
-      ({ selfTimeRelative, display, callNode, length }) => {
-        const lines = [];
-        for (let i = 0; i < length; i++) {
-          const callNodeIndex = callNode[i];
-          const funcIndex = callNodeTable.func[callNodeIndex];
-          const funcName = funcNames[funcIndex];
-          const { totalTime, selfTime } = display[i];
-          lines.push(
-            `${funcName} (${totalTime}:${selfTime}:${selfTimeRelative[i]})`
-          );
-        }
-        return lines.join(' | ');
+    return flameGraphTiming.map(({ selfTimeRelative, callNode, length }) => {
+      const lines = [];
+      for (let i = 0; i < length; i++) {
+        const callNodeIndex = callNode[i];
+        const funcIndex = callNodeTable.func[callNodeIndex];
+        const funcName = funcNames[funcIndex];
+        lines.push(`${funcName} (${selfTimeRelative[i]})`);
       }
-    );
+      return lines.join(' | ');
+    });
   }
 
   it('computes a basic example', function() {
@@ -261,9 +256,9 @@ describe('selectors/getFlameGraphTiming', function() {
 
     const store = storeWithProfile(profile);
     expect(getHumanReadableFlameGraphTimings(store, funcNames)).toEqual([
-      'A (4:3:0.75)',
-      'B (1:—:0)',
-      'C (1:1:0.25)',
+      'A (0.75)',
+      'B (0)',
+      'C (0.25)',
     ]);
   });
 });
