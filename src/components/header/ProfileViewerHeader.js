@@ -8,6 +8,7 @@ import React, { PureComponent } from 'react';
 import ProfileThreadHeaderBar from './ProfileThreadHeaderBar';
 import TimeSelectionScrubber from './TimeSelectionScrubber';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
+import Screenshots from './Screenshots';
 import explicitConnect from '../../utils/connect';
 import {
   getProfile,
@@ -104,6 +105,32 @@ class ProfileViewerHeader extends PureComponent<Props> {
     );
   }
 
+  optionallyRenderScreenshots(
+    mainThreadIndex: ThreadIndex | null,
+    threadIndexes: ThreadIndex[]
+  ) {
+    const { profile: { threads } } = this.props;
+    if (mainThreadIndex === null) {
+      return null;
+    }
+    const mainThread = threads[mainThreadIndex];
+
+    if (
+      mainThread.name === 'GeckoMain' &&
+      mainThread.processType === 'default'
+    ) {
+      // This is the main thread of the parent process, check for a compositor process.
+      for (let i = 0; i < threadIndexes.length; i++) {
+        const threadIndex = threadIndexes[i];
+        if (threads[threadIndex].name === 'Compositor') {
+          // Found the compositor thread.
+          return <Screenshots threadIndex={threadIndex} />;
+        }
+      }
+    }
+    return null;
+  }
+
   render() {
     const {
       profile,
@@ -115,7 +142,6 @@ class ProfileViewerHeader extends PureComponent<Props> {
       hiddenThreads,
     } = this.props;
 
-    console.log('!!! threadOrder', threadOrder);
     return (
       <TimeSelectionScrubber
         className="profileViewerHeader"
@@ -141,6 +167,10 @@ class ProfileViewerHeader extends PureComponent<Props> {
                     </ol>
                   )}
                   <ol className="profileViewerHeaderThreadList">
+                    {this.optionallyRenderScreenshots(
+                      mainThread,
+                      threadIndexes
+                    )}
                     {this.renderThreadsForProcess(threadIndexes)}
                   </ol>
                 </div>
