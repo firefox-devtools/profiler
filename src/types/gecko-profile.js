@@ -175,6 +175,8 @@ export type GeckoProfile = {|
     version: number,
     appBuildID?: string,
     sourceURL?: string,
+    physicalCPUs?: number,
+    logicalCPUs?: number,
   |},
   libs: Lib[],
   threads: GeckoThread[],

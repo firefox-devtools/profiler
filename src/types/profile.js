@@ -208,6 +208,8 @@ export type ProfileMeta = {|
   preprocessedProfileVersion: number,
   appBuildID?: string,
   sourceURL?: string,
+  physicalCPUs?: number,
+  logicalCPUs?: number,
 |};
 
 /**
