@@ -78,7 +78,8 @@ export const emptyCategories: CategoryList = Object.freeze([
 export function getCallNodeInfo(
   stackTable: StackTable,
   frameTable: FrameTable,
-  funcTable: FuncTable
+  funcTable: FuncTable,
+  defaultCategory: IndexIntoCategoryList
 ): CallNodeInfo {
   return timeCode('getCallNodeInfo', () => {
     const stackIndexToCallNodeIndex = new Uint32Array(stackTable.length);
@@ -132,6 +133,8 @@ export function getCallNodeInfo(
           prefixCallNodeAndFuncIndex,
           callNodeIndex
         );
+      } else if (category[callNodeIndex] !== categoryIndex) {
+        category[callNodeIndex] = defaultCategory;
       }
       stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
     }
@@ -475,31 +478,39 @@ export function toValidImplementationFilter(
 
 export function filterThreadByImplementation(
   thread: Thread,
-  implementation: string
+  implementation: string,
+  defaultCategory: IndexIntoCategoryList
 ): Thread {
   const { funcTable, stringTable } = thread;
 
   switch (implementation) {
     case 'cpp':
-      return _filterThreadByFunc(thread, funcIndex => {
-        // Return quickly if this is a JS frame.
-        if (funcTable.isJS[funcIndex]) {
-          return false;
-        }
-        // Regular C++ functions are associated with a resource that describes the
-        // shared library that these C++ functions were loaded from. Jitcode is not
-        // loaded from shared libraries but instead generated at runtime, so Jitcode
-        // frames are not associated with a shared library and thus have no resource
-        const locationString = stringTable.getString(funcTable.name[funcIndex]);
-        const isProbablyJitCode =
-          funcTable.resource[funcIndex] === -1 &&
-          locationString.startsWith('0x');
-        return !isProbablyJitCode;
-      });
+      return _filterThreadByFunc(
+        thread,
+        funcIndex => {
+          // Return quickly if this is a JS frame.
+          if (funcTable.isJS[funcIndex]) {
+            return false;
+          }
+          // Regular C++ functions are associated with a resource that describes the
+          // shared library that these C++ functions were loaded from. Jitcode is not
+          // loaded from shared libraries but instead generated at runtime, so Jitcode
+          // frames are not associated with a shared library and thus have no resource
+          const locationString = stringTable.getString(
+            funcTable.name[funcIndex]
+          );
+          const isProbablyJitCode =
+            funcTable.resource[funcIndex] === -1 &&
+            locationString.startsWith('0x');
+          return !isProbablyJitCode;
+        },
+        defaultCategory
+      );
     case 'js':
       return _filterThreadByFunc(
         thread,
-        funcIndex => funcTable.isJS[funcIndex]
+        funcIndex => funcTable.isJS[funcIndex],
+        defaultCategory
       );
     default:
       return thread;
@@ -508,7 +519,8 @@ export function filterThreadByImplementation(
 
 function _filterThreadByFunc(
   thread: Thread,
-  filter: IndexIntoFuncTable => boolean
+  filter: IndexIntoFuncTable => boolean,
+  defaultCategory: IndexIntoCallNodeTable
 ): Thread {
   return timeCode('filterThread', () => {
     const { stackTable, frameTable, samples } = thread;
@@ -543,6 +555,10 @@ function _filterThreadByFunc(
             newStackTable.prefix[newStack] = prefixNewStack;
             newStackTable.frame[newStack] = frameIndex;
             newStackTable.category[newStack] = stackTable.category[stackIndex];
+          } else if (
+            newStackTable.category[newStack] !== stackTable.category[stackIndex]
+          ) {
+            newStackTable.category[newStack] = defaultCategory;
           }
           oldStackToNewStack.set(stackIndex, newStack);
           prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
@@ -1077,7 +1093,10 @@ export function computeCallNodeMaxDepth(
   return maxDepth;
 }
 
-export function invertCallstack(thread: Thread): Thread {
+export function invertCallstack(
+  thread: Thread,
+  defaultCategory: IndexIntoCategoryList
+): Thread {
   return timeCode('invertCallstack', () => {
     const { stackTable, frameTable, samples } = thread;
 
@@ -1105,6 +1124,12 @@ export function invertCallstack(thread: Thread): Thread {
         newStackTable.frame[stackIndex] = frame;
         newStackTable.category[stackIndex] = category;
         prefixAndFrameToStack.set(prefixAndFrameIndex, stackIndex);
+      } else if (newStackTable.category[stackIndex] !== category) {
+        // If two stack nodes from the non-inverted stack tree with different
+        // categories happen to collapse into the same stack node in the
+        // inverted tree, discard their category and set the category to the
+        // default category.
+        newStackTable.category[stackIndex] = defaultCategory;
       }
       return stackIndex;
     }
