@@ -20,6 +20,7 @@ import type {
   FrameTable,
   StackTable,
   FuncTable,
+  IndexIntoCategoryList,
   IndexIntoFuncTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
@@ -748,7 +749,8 @@ export function dropFunction(
 export function collapseResource(
   thread: Thread,
   resourceIndexToCollapse: IndexIntoResourceTable,
-  implementation: ImplementationFilter
+  implementation: ImplementationFilter,
+  defaultCategory: IndexIntoCategoryList
 ): Thread {
   const { stackTable, funcTable, frameTable, resourceTable, samples } = thread;
   const resourceNameIndex = resourceTable.name[resourceIndexToCollapse];
@@ -858,6 +860,9 @@ export function collapseResource(
             throw new Error('existingCollapsedStack cannot be null');
           }
           oldStackToNewStack.set(stackIndex, existingCollapsedStack);
+          if (newStackTable.category[existingCollapsedStack] !== category) {
+            newStackTable.category[existingCollapsedStack] = defaultCategory;
+          }
         }
       } else {
         // The prefix was already collapsed, use that one.
@@ -1015,7 +1020,8 @@ const FUNC_MATCHES = {
 
 export function collapseFunctionSubtree(
   thread: Thread,
-  funcToCollapse: IndexIntoFuncTable
+  funcToCollapse: IndexIntoFuncTable,
+  defaultCategory: IndexIntoCategoryList
 ): Thread {
   const { stackTable, frameTable, samples } = thread;
   const oldStackToNewStack: Map<
@@ -1049,6 +1055,15 @@ export function collapseFunctionSubtree(
       // stacks. This is what actually "collapses" a stack.
       oldStackToNewStack.set(stackIndex, newPrefixStackIndex);
       collapsedStacks.add(stackIndex);
+
+      // Fall back to the default category when stack categories conflict.
+      if (
+        newPrefixStackIndex !== null &&
+        newStackTable.category[newPrefixStackIndex] !==
+          stackTable.category[stackIndex]
+      ) {
+        newStackTable.category[newPrefixStackIndex] = defaultCategory;
+      }
     } else {
       // Add this stack.
       const newStackIndex = newStackTable.length++;

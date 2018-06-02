@@ -46,10 +46,12 @@ describe('unfiltered call tree', function() {
   function callTreeFromProfile(profile: Profile): CallTree {
     const [thread] = profile.threads;
     const { interval, categories } = profile.meta;
+    const defaultCategory = categories.findIndex(c => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable
+      thread.funcTable,
+      defaultCategory
     );
     return getCallTree(
       thread,
@@ -68,10 +70,14 @@ describe('unfiltered call tree', function() {
   describe('computed counts and timings', function() {
     const profile = getProfile();
     const [thread] = profile.threads;
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable
+      thread.funcTable,
+      defaultCategory
     );
 
     it('does', function() {
@@ -287,10 +293,14 @@ describe('unfiltered call tree', function() {
   describe('getCallNodeIndexFromPath', function() {
     const profile = getProfile();
     const [thread] = profile.threads;
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable
+      thread.funcTable,
+      defaultCategory
     );
 
     // Helper to make the assertions a little less verbose.
@@ -335,12 +345,14 @@ describe('inverted call tree', function() {
       E Z Y
           Z
     `).profile;
-    const invertedThread = invertCallstack(profile.threads[0]);
     const { interval, categories } = profile.meta;
+    const defaultCategory = categories.findIndex(c => c.color === 'grey');
+    const invertedThread = invertCallstack(profile.threads[0], defaultCategory);
     const callNodeInfo = getCallNodeInfo(
       invertedThread.stackTable,
       invertedThread.frameTable,
-      invertedThread.funcTable
+      invertedThread.funcTable,
+      defaultCategory
     );
 
     const callTree = getCallTree(
