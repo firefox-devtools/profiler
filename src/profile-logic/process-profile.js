@@ -22,6 +22,10 @@ import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
 } from './perf-script-profile-format';
+import {
+  isActivityMonitorFormat,
+  convertActivityMonitorProfile,
+} from './activity-monitor-profile-format';
 import { convertPhaseTimes } from './convert-markers';
 import type {
   Profile,
@@ -885,6 +889,8 @@ export function unserializeProfileOfArbitraryFormat(
         // The string is not json. It might be the output from `perf script`.
         if (isPerfScriptFormat(stringOrObject)) {
           profile = convertPerfScriptProfile(stringOrObject);
+        } else if (isActivityMonitorFormat(stringOrObject)) {
+          profile = convertActivityMonitorProfile(stringOrObject);
         } else {
           throw e;
         }
