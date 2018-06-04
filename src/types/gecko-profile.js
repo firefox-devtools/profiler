@@ -173,8 +173,13 @@ export type GeckoProfile = {|
     stackwalk: number,
     toolkit: string,
     version: number,
+    // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed
+    // in Firefox 62, and are only optional because older processed profile
+    // versions may not have them. No upgrader was written for this change.
     appBuildID?: string,
     sourceURL?: string,
+    physicalCPUs?: number,
+    logicalCPUs?: number,
   |},
   libs: Lib[],
   threads: GeckoThread[],

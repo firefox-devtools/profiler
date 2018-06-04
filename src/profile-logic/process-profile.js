@@ -820,6 +820,8 @@ export function processProfile(
     appBuildID: geckoProfile.meta.appBuildID,
     // A link to the source code revision for this build.
     sourceURL: geckoProfile.meta.sourceURL,
+    physicalCPUs: geckoProfile.meta.physicalCPUs,
+    logicalCPUs: geckoProfile.meta.logicalCPUs,
   };
 
   const result = {
