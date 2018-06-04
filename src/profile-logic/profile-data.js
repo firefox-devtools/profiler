@@ -1256,6 +1256,8 @@ export function getEmptyProfile(): Profile {
       preprocessedProfileVersion: PROCESSED_PROFILE_VERSION,
       appBuildID: '',
       sourceURL: '',
+      physicalCPUs: 0,
+      logicalCPUs: 0,
     },
     threads: [],
   };
