@@ -25,7 +25,7 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MaybeFlameGraph extends React.PureComponent<Props> {
-  _onSwithToNormalCallstackClick = () => {
+  _onSwitchToNormalCallstackClick = () => {
     this.props.changeInvertCallstack(false);
   };
 
@@ -35,7 +35,10 @@ class MaybeFlameGraph extends React.PureComponent<Props> {
         <div className="flameGraphDisabledMessage">
           <h3>The Flame Graph is not available for inverted call stacks</h3>
           <p>
-            <button type="button" onClick={this._onSwithToNormalCallstackClick}>
+            <button
+              type="button"
+              onClick={this._onSwitchToNormalCallstackClick}
+            >
               Switch to the normal call stack
             </button>{' '}
             to show the Flame Graph.
