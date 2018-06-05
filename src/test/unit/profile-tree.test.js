@@ -15,7 +15,7 @@ import {
   getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
 } from '../../profile-logic/profile-data';
-import { formatTree } from '../fixtures/utils';
+import { formatTree, formatTreeIncludeCategories } from '../fixtures/utils';
 
 import type { Profile } from '../../types/profile';
 
@@ -156,6 +156,37 @@ describe('unfiltered call tree', function() {
         '        - G (total: 1, self: 1)',
         '    - H (total: 1, self: —)',
         '      - I (total: 1, self: 1)',
+      ]);
+    });
+  });
+
+  /**
+   * The same as the previous test, but with categories
+   */
+  describe('computed structure with categories', function() {
+    /**
+     * Test that the category of a frame gets inherited down into its subtree
+     * of the call tree, until reaching a frame that has an explicit category.
+     */
+    const { profile } = getProfileFromTextSamples(`
+      A        A             A
+      B [DOM]  B [DOM]       B [DOM]
+      C        C             H
+      D        F [Graphics]  I [Other]
+      E        G
+    `);
+    const callTree = callTreeFromProfile(profile);
+    it('computes an unfiltered call tree', function() {
+      expect(formatTreeIncludeCategories(callTree)).toEqual([
+        '- A [Other] (total: 3, self: —)',
+        '  - B [DOM] (total: 3, self: —)',
+        '    - C [DOM] (total: 2, self: —)',
+        '      - D [DOM] (total: 1, self: —)',
+        '        - E [DOM] (total: 1, self: 1)',
+        '      - F [Graphics] (total: 1, self: —)',
+        '        - G [Graphics] (total: 1, self: 1)',
+        '    - H [DOM] (total: 1, self: —)',
+        '      - I [Other] (total: 1, self: 1)',
       ]);
     });
   });
@@ -338,27 +369,60 @@ describe('inverted call tree', function() {
    */
   describe('computed structure', function() {
     const profile = getProfileFromTextSamples(`
-      A  A  A
-      B  B  B
-      C  X  C
-      D  Y  X
-      E  Z  Y
-            Z
+      A             A        A
+      B [DOM]       B [DOM]  B [DOM]
+      C [Graphics]  X        C [Graphics]
+      D [Other]     Y        X
+      E             Z        Y
+                             Z
     `).profile;
     const { interval, categories } = profile.meta;
     const defaultCategory = categories.findIndex(c => c.color === 'grey');
-    const invertedThread = invertCallstack(profile.threads[0], defaultCategory);
+
+    // Check the non-inverted tree first.
+    const thread = profile.threads[0];
     const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+    const callTree = getCallTree(
+      thread,
+      interval,
+      callNodeInfo,
+      categories,
+      'combined',
+      true
+    );
+    it('computes an non-inverted call tree', function() {
+      expect(formatTreeIncludeCategories(callTree)).toEqual([
+        '- A [Other] (total: 3, self: 3)',
+        '  - B [DOM] (total: 3, self: —)',
+        '    - C [Graphics] (total: 2, self: —)',
+        '      - D [Other] (total: 1, self: —)',
+        '        - E [Other] (total: 1, self: —)',
+        '      - X [Graphics] (total: 1, self: —)',
+        '        - Y [Graphics] (total: 1, self: —)',
+        '          - Z [Graphics] (total: 1, self: —)',
+        '    - X [DOM] (total: 1, self: —)',
+        '      - Y [DOM] (total: 1, self: —)',
+        '        - Z [DOM] (total: 1, self: —)',
+      ]);
+    });
+
+    // Now compute the inverted tree and check it.
+    const invertedThread = invertCallstack(thread, defaultCategory);
+    const invertedCallNodeInfo = getCallNodeInfo(
       invertedThread.stackTable,
       invertedThread.frameTable,
       invertedThread.funcTable,
       defaultCategory
     );
-
-    const callTree = getCallTree(
+    const invertedCallTree = getCallTree(
       invertedThread,
       interval,
-      callNodeInfo,
+      invertedCallNodeInfo,
       categories,
       'combined',
       true
@@ -387,22 +451,30 @@ describe('inverted call tree', function() {
      *      ^         ^         ^
      *      |         |         |
      *      L         M         R   <- Label the branches. (left, middle, right)
+     *
+     * This test also checks that stacks of conflicting categories end up with
+     * the "Other" category. In this test, in the non-inverted tree, the nodes
+     * for the functions X, Y, and Z have different categories depending on
+     * which subtree they are in: They have category "Graphics" in the subtree
+     * under C, and the category "DOM" in the subtree that's directly attached
+     * to B. In the inverted tree, those nodes collapse into each other, and
+     * their category should be set to "Other".
      */
     it('computes an inverted call tree', function() {
-      expect(formatTree(callTree)).toEqual([
-        '- Z (total: 2, self: 2)',
-        '  - Y (total: 2, self: —)',
-        '    - X (total: 2, self: —)',
-        '      - B (total: 1, self: —)',
-        '        - A (total: 1, self: —)',
-        '      - C (total: 1, self: —)',
-        '        - B (total: 1, self: —)',
-        '          - A (total: 1, self: —)',
-        '- E (total: 1, self: 1)',
-        '  - D (total: 1, self: —)',
-        '    - C (total: 1, self: —)',
-        '      - B (total: 1, self: —)',
-        '        - A (total: 1, self: —)',
+      expect(formatTreeIncludeCategories(invertedCallTree)).toEqual([
+        '- Z [Other] (total: 2, self: 2)',
+        '  - Y [Other] (total: 2, self: —)',
+        '    - X [Other] (total: 2, self: —)',
+        '      - B [DOM] (total: 1, self: —)',
+        '        - A [Other] (total: 1, self: —)',
+        '      - C [Graphics] (total: 1, self: —)',
+        '        - B [DOM] (total: 1, self: —)',
+        '          - A [Other] (total: 1, self: —)',
+        '- E [Other] (total: 1, self: 1)',
+        '  - D [Other] (total: 1, self: —)',
+        '    - C [Graphics] (total: 1, self: —)',
+        '      - B [DOM] (total: 1, self: —)',
+        '        - A [Other] (total: 1, self: —)',
       ]);
     });
   });
