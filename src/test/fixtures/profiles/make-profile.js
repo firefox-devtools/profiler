@@ -144,17 +144,21 @@ export function getEmptyThread(overrides: ?Object): Thread {
  *
  * ```
  * const { profile } = getProfileFromTextSamples(`
- *   A       A        A     A
- *   B.js    B.js     F     F
- *   C.js    C.js     G     G
- *   D       D              H
- *   E       E
+ *   A          A         A             A
+ *   B.js       B.js      F [Graphics]  F
+ *   C.js       C.js      G             G
+ *   D          D                       H [DOM]
+ *   E [Other]  E [Other]
  * `);
  * ```
  *
  * The function names are aligned vertically on the left. This would produce 4 samples
  * with the stacks based off of those functions listed, with A being the root. Single
  * spaces within a column are permitted, surrounding whitespace is trimmed.
+ *
+ * Functions ending in "js" are marked as JS functions in the funcTable's isJS
+ * column. Functions that have a category name in square brackets after them
+ * are annotated with that category in the frameTable's category column.
  *
  * The function returns more information as well, that is:
  * * an array mapping the func indices (IndexIntoFuncTable) to their names
@@ -166,11 +170,11 @@ export function getEmptyThread(overrides: ?Object): Thread {
  *   profile,
  *   funcNamesDictPerThread: [{ A, B, C, D }],
  * } = getProfileFromTextSamples(`
- *    A  A
- *    B  B
- *    C  C
- *    D  D
- *    E  F
+ *    A        A
+ *    B        B
+ *    C        C
+ *    D [DOM]  D [DOM]
+ *    E        F
  *  `);
  * ```
  * Now the variables named A B C D directly refer to the func indices and can be
@@ -184,33 +188,56 @@ export function getProfileFromTextSamples(
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
 } {
   const profile = getEmptyProfile();
+  const categories = profile.meta.categories;
+
   const funcNamesPerThread = [];
   const funcNamesDictPerThread = [];
 
   profile.threads = allTextSamples.map(textSamples => {
     // Process the text.
     const textOnlyStacks = _parseTextSamples(textSamples);
-    const funcNames = textOnlyStacks
+    const funcs = textOnlyStacks
       // Flatten the arrays.
       .reduce((memo, row) => [...memo, ...row], [])
       // Make the list unique.
-      .filter((item, index, array) => array.indexOf(item) === index);
-    const funcNamesDict = funcNames.reduce((result, item, index) => {
-      result[item] = index;
+      .filter((item, index, array) => array.indexOf(item) === index)
+      // Parse strings into function name and category.
+      .map(funcStr => _getFuncNameAndCategory(funcStr, categories));
+
+    const funcNamesDict = funcs.reduce((result, func, index) => {
+      result[func.funcName] = index;
       return result;
     }, {});
-    funcNamesPerThread.push(funcNames);
+
+    funcNamesPerThread.push(funcs.map(({ funcName }) => funcName));
     funcNamesDictPerThread.push(funcNamesDict);
 
     // Turn this into a real thread.
-    return _buildThreadFromTextOnlyStacks(
-      textOnlyStacks,
-      funcNames,
-      profile.meta.categories
-    );
+    return _buildThreadFromTextOnlyStacks(textOnlyStacks, funcs, categories);
   });
 
   return { profile, funcNamesPerThread, funcNamesDictPerThread };
+}
+
+// Parse strings of the form "functionName [category name]".
+function _getFuncNameAndCategory(
+  str,
+  categories
+): {| funcName: string, category: number | null |} {
+  const match = /(.*) \[(.+)\]/.exec(str);
+  if (match === null) {
+    return {
+      funcName: str,
+      category: null,
+    };
+  }
+
+  const [, funcName, categoryName] = match;
+  const category = categories.findIndex(c => c.name === categoryName);
+  return {
+    funcName: funcName.trim(),
+    category: category !== -1 ? category : null,
+  };
 }
 
 function _getAllMatchRanges(regex, str): Array<{ start: number, end: number }> {
@@ -285,7 +312,7 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
 
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
-  funcNames: string[],
+  funcs: Array<{| funcName: string, category: number | null |}>,
   categories: CategoryList
 ): Thread {
   const thread = getEmptyThread();
@@ -303,7 +330,7 @@ function _buildThreadFromTextOnlyStacks(
   const resourceIndexCache = {};
 
   // Create the FrameTable and the FuncTable.
-  funcNames.forEach(funcName => {
+  funcs.forEach(({ funcName, category }) => {
     funcTable.name.push(stringTable.indexForString(funcName));
     funcTable.address.push(
       funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : 0
@@ -317,7 +344,7 @@ function _buildThreadFromTextOnlyStacks(
 
     frameTable.func.push(funcIndex);
     frameTable.address.push(0);
-    frameTable.category.push(null);
+    frameTable.category.push(category);
     frameTable.implementation.push(null);
     frameTable.line.push(null);
     frameTable.optimizations.push(null);
@@ -331,7 +358,7 @@ function _buildThreadFromTextOnlyStacks(
   });
 
   // Go back through and create resources as needed.
-  funcNames.forEach(funcName => {
+  funcs.forEach(({ funcName }) => {
     // See if this sample has a resource like "funcName:libraryName".
     const [, libraryName] = funcName.match(/\w+:(\w+)/) || [];
     let resourceIndex = resourceIndexCache[libraryName];
@@ -368,7 +395,9 @@ function _buildThreadFromTextOnlyStacks(
   // Create the samples, stacks, and frames.
   textOnlyStacks.forEach((column, columnIndex) => {
     let prefix = null;
-    column.forEach(funcName => {
+    column.forEach(funcStr => {
+      const { funcName } = _getFuncNameAndCategory(funcStr, categories);
+
       // There is a one-to-one relationship between strings and funcIndexes here, so
       // the indexes can double as both string indexes and func indexes.
       const funcIndex = stringTable.indexForString(funcName);
@@ -388,10 +417,15 @@ function _buildThreadFromTextOnlyStacks(
       // If we couldn't find a stack, go ahead and create it.
       if (stackIndex === undefined) {
         const frameIndex = funcIndex;
+        const frameCategory = frameTable.category[frameIndex];
+        const prefixCategory =
+          prefix === null ? categoryOther : stackTable.category[prefix];
+        const stackCategory =
+          frameCategory === null ? prefixCategory : frameCategory;
 
         stackTable.frame.push(frameIndex);
         stackTable.prefix.push(prefix);
-        stackTable.category.push(categoryOther);
+        stackTable.category.push(stackCategory);
         stackIndex = stackTable.length++;
       }
 
