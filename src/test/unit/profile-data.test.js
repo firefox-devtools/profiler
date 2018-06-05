@@ -994,7 +994,7 @@ describe('get-sample-index-closest-to-time', function() {
     const { profile } = getProfileFromTextSamples(
       Array(10)
         .fill('A')
-        .join(' ')
+        .join('  ')
     );
     const defaultCategory = profile.meta.categories.findIndex(
       c => c.name === 'Other'
@@ -1060,9 +1060,9 @@ describe('convertStackToCallNodePath', function() {
 describe('getTimingsForPath in a non-inverted tree', function() {
   function setup() {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A                  A             A             A A
-      B                  B             B             B B
-      Cjs                Cjs           Cjs           H H
+      A                  A             A             A  A
+      B                  B             B             B  B
+      Cjs                Cjs           Cjs           H  H
       D                  D             F             I
       Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
     `);
@@ -1176,9 +1176,9 @@ describe('getTimingsForPath in a non-inverted tree', function() {
 describe('getTimingsForPath for an inverted tree', function() {
   function setup() {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A                  A             A             A A
-      B                  B             B             B B
-      Cjs                Cjs           Cjs           H H
+      A                  A             A             A  A
+      B                  B             B             B  B
+      Cjs                Cjs           Cjs           H  H
       D                  D             F             I
       Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
     `);

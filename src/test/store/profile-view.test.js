@@ -311,9 +311,9 @@ describe('actions/ProfileView', function() {
         profile,
         funcNamesPerThread: [funcNames],
       } = getProfileFromTextSamples(`
-        A A A
-        B B E
-        C D
+        A  A  A
+        B  B  E
+        C  D
       `);
       const threadIndex = 0;
       const A = funcNames.indexOf('A');
@@ -719,11 +719,11 @@ describe('snapshots of selectors/profile-view', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A A A A A A A A
-      B B B B B B B B B
-      C C C C C C H H H
-      D D D F F F I I I
-      E E E G G G
+      A  A  A  A  A  A  A  A  A
+      B  B  B  B  B  B  B  B  B
+      C  C  C  C  C  C  H  H  H
+      D  D  D  F  F  F  I  I  I
+      E  E  E  G  G  G
     `);
     const A = funcNames.indexOf('A');
     const B = funcNames.indexOf('B');

@@ -35,11 +35,11 @@ describe('unfiltered call tree', function() {
 
   function getProfile() {
     return getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E G
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  G
     `).profile;
   }
 
@@ -138,11 +138,11 @@ describe('unfiltered call tree', function() {
      *  E:1,1       G:1,1
      */
     const { profile } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E G
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  G
     `);
     const callTree = callTreeFromProfile(profile);
     it('computes an unfiltered call tree', function() {
@@ -167,11 +167,11 @@ describe('unfiltered call tree', function() {
    */
   describe('CallTree methods', function() {
     const { profile } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E G
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  G
     `);
     const callTree = callTreeFromProfile(profile);
 
@@ -338,12 +338,12 @@ describe('inverted call tree', function() {
    */
   describe('computed structure', function() {
     const profile = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C X C
-      D Y X
-      E Z Y
-          Z
+      A  A  A
+      B  B  B
+      C  X  C
+      D  Y  X
+      E  Z  Y
+            Z
     `).profile;
     const { interval, categories } = profile.meta;
     const defaultCategory = categories.findIndex(c => c.color === 'grey');
