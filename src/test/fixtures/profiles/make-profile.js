@@ -302,7 +302,7 @@ function _buildThreadFromTextOnlyStacks(
 
   const resourceIndexCache = {};
 
-  // Create the FuncTable.
+  // Create the FrameTable and the FuncTable.
   funcNames.forEach(funcName => {
     funcTable.name.push(stringTable.indexForString(funcName));
     funcTable.address.push(
@@ -312,7 +312,22 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.isJS.push(funcName.endsWith('js'));
     funcTable.lineNumber.push(null);
     // Ignore resources for now, this way funcNames have really nice string indexes.
-    funcTable.length++;
+    // The resource column will be filled in the loop below.
+    const funcIndex = funcTable.length++;
+
+    frameTable.func.push(funcIndex);
+    frameTable.address.push(0);
+    frameTable.category.push(null);
+    frameTable.implementation.push(null);
+    frameTable.line.push(null);
+    frameTable.optimizations.push(null);
+    const frameIndex = frameTable.length++;
+
+    if (frameIndex !== funcIndex) {
+      throw new Error(
+        'something went wrong - frameIndex and funcIndex should always match'
+      );
+    }
   });
 
   // Go back through and create resources as needed.
@@ -370,15 +385,9 @@ function _buildThreadFromTextOnlyStacks(
         }
       }
 
-      // If we couldn't find a stack, go ahead and create a stack and frame.
+      // If we couldn't find a stack, go ahead and create it.
       if (stackIndex === undefined) {
-        const frameIndex = frameTable.length++;
-        frameTable.func.push(funcIndex);
-        frameTable.address.push(0);
-        frameTable.category.push(null);
-        frameTable.implementation.push(null);
-        frameTable.line.push(null);
-        frameTable.optimizations.push(null);
+        const frameIndex = funcIndex;
 
         stackTable.frame.push(frameIndex);
         stackTable.prefix.push(prefix);
