@@ -992,7 +992,7 @@ describe('get-sample-index-closest-to-time', function() {
     const { profile } = getProfileFromTextSamples(
       Array(10)
         .fill('A')
-        .join(' ')
+        .join('  ')
     );
     const defaultCategory = profile.meta.categories.findIndex(
       c => c.name === 'Other'

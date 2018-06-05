@@ -138,6 +138,7 @@ export function getEmptyThread(overrides: ?Object): Thread {
 /**
  * Create a profile from text representation of samples. Each column in the text provided
  * represents a sample. Each sample is made up of a list of functions.
+ * Each column needs to be separated by at least two spaces.
  *
  * Example usage:
  *
@@ -152,8 +153,8 @@ export function getEmptyThread(overrides: ?Object): Thread {
  * ```
  *
  * The function names are aligned vertically on the left. This would produce 4 samples
- * with the stacks based off of those functions listed, with A being the root. Whitespace
- * is trimmed.
+ * with the stacks based off of those functions listed, with A being the root. Single
+ * spaces within a column are permitted, surrounding whitespace is trimmed.
  *
  * The function returns more information as well, that is:
  * * an array mapping the func indices (IndexIntoFuncTable) to their names
@@ -165,11 +166,11 @@ export function getEmptyThread(overrides: ?Object): Thread {
  *   profile,
  *   funcNamesDictPerThread: [{ A, B, C, D }],
  * } = getProfileFromTextSamples(`
- *    A A
- *    B B
- *    C C
- *    D D
- *    E F
+ *    A  A
+ *    B  B
+ *    C  C
+ *    D  D
+ *    E  F
  *  `);
  * ```
  * Now the variables named A B C D directly refer to the func indices and can be
@@ -212,6 +213,25 @@ export function getProfileFromTextSamples(
   return { profile, funcNamesPerThread, funcNamesDictPerThread };
 }
 
+function _getAllMatchRanges(regex, str): Array<{ start: number, end: number }> {
+  const ranges = [];
+  let match;
+  while ((match = regex.exec(str)) !== null) {
+    ranges.push({ start: match.index, end: match.index + match[0].length });
+  }
+  return ranges;
+}
+
+function _getColumnPositions(line): number[] {
+  const lineWithoutIndent = line.trimLeft();
+  const indent = line.length - lineWithoutIndent.length;
+  const trimmedLine = line.trim();
+
+  // Find the start and end positions of all consecutive runs of two spaces or more.
+  const columnSeparatorRanges = _getAllMatchRanges(/ {2,}/g, trimmedLine);
+  return [indent, ...columnSeparatorRanges.map(range => range.end + indent)];
+}
+
 /**
  * Turn a text blob into a list of stacks.
  *
@@ -235,56 +255,22 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
     // Filter out empty lines
     t => t
   );
-
-  // Compute the index of where the columns start in the string. String.prototype.split
-  // can't be used here because it would put functions on the wrong sample. In the example
-  // usage from the function comment above, the third sample would have the stack
-  // [A, F, G, H] if splitting was used, misaligning the function H.
-  const columnIndexes = [];
-  {
-    const firstLine = lines[0];
-    if (!firstLine) {
-      throw new Error('Empty text data was sent');
-    }
-    let searchWhitespace = true;
-    for (let i = 0; i < firstLine.length; i++) {
-      const isSpace = firstLine[i] === ' ';
-      if (searchWhitespace) {
-        if (!isSpace) {
-          columnIndexes.push(i);
-          searchWhitespace = false;
-        }
-      } else {
-        if (isSpace) {
-          searchWhitespace = true;
-        }
-      }
-    }
+  if (lines.length === 0) {
+    throw new Error('Empty text data was sent');
   }
 
-  // Split up each line into rows of characters
-  const rows = lines.map(line => {
-    return columnIndexes.map(columnIndex => {
-      let funcName = '';
-      for (let i = columnIndex; i < line.length; i++) {
-        const char = line[i];
-        if (char === ' ') {
-          break;
-        } else {
-          funcName += char;
-        }
-      }
-      return funcName;
-    });
-  });
+  // Compute the index of where the columns start in the string.
+  const columnPositions = _getColumnPositions(lines[0]);
 
-  const firstRow = rows[0];
-  if (!firstRow) {
-    throw new Error('No valid data.');
-  }
+  // Create a table of string cells. Empty cells contain the empty string.
+  const rows = lines.map(line =>
+    columnPositions.map((pos, columnIndex) =>
+      line.substring(pos, columnPositions[columnIndex + 1]).trim()
+    )
+  );
 
-  // Go from rows to columns
-  return firstRow.map((_, columnIndex) => {
+  // Transpose the table to go from rows to columns.
+  return columnPositions.map((_, columnIndex) => {
     const column = [];
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       const value = rows[rowIndex][columnIndex];

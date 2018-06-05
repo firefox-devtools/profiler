@@ -18,11 +18,11 @@ import type { CallNodePath } from '../../types/profile-derived';
 describe('CallTreeSidebar', function() {
   function setup() {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E E
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  E
     `);
 
     const store = storeWithProfile(profile);
