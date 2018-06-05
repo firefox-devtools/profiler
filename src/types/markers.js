@@ -340,6 +340,12 @@ export type StyleMarkerPayload = StyleMarkerPayload_Shared & {
   cause?: CauseBacktrace,
 };
 
+export type BHRMarkerPayload = {
+  type: 'BHR-detected hang',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+};
+
 export type DummyForTestsMarkerPayload = {
   type: 'DummyForTests',
   startTime: Milliseconds,
@@ -362,6 +368,7 @@ export type MarkerPayload =
   | GCMajorMarkerPayload
   | GCSliceMarkerPayload
   | StyleMarkerPayload
+  | BHRMarkerPayload
   | DummyForTestsMarkerPayload
   | null;
 

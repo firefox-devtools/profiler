@@ -4,9 +4,12 @@
 
 // @flow
 import * as React from 'react';
-import MarkerChart from '../../components/marker-chart';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
+
+import MarkerChart from '../../components/marker-chart';
+import { changeSelectedTab } from '../../actions/app';
+
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
@@ -72,10 +75,26 @@ it('renders MarkerChart correctly', () => {
         phase: 2,
       },
     ],
+    [
+      'Load event',
+      11,
+      {
+        type: 'Network',
+        startTime: 11,
+        endTime: 12,
+        id: 31666793873480,
+        status: 'STATUS_START',
+        pri: 0,
+        URI: 'https://tiles.services.mozilla.com/v3/links/ping-centre',
+      },
+    ],
   ]);
 
+  const store = storeWithProfile(profile);
+  store.dispatch(changeSelectedTab('marker-chart'));
+
   const markerChart = renderer.create(
-    <Provider store={storeWithProfile(profile)}>
+    <Provider store={store}>
       <MarkerChart />
     </Provider>,
     { createNodeMock }
@@ -83,10 +102,15 @@ it('renders MarkerChart correctly', () => {
 
   flushRafCalls();
 
-  const tree = markerChart.toJSON();
-  const drawCalls = ctx.__flushDrawLog();
+  let drawCalls = ctx.__flushDrawLog();
+  expect(markerChart).toMatchSnapshot();
+  expect(drawCalls).toMatchSnapshot();
 
-  expect(tree).toMatchSnapshot();
+  store.dispatch(changeSelectedTab('network-chart'));
+
+  flushRafCalls();
+  drawCalls = ctx.__flushDrawLog();
+  expect(markerChart).toMatchSnapshot();
   expect(drawCalls).toMatchSnapshot();
 
   delete window.devicePixelRatio;
