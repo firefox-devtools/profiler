@@ -61,8 +61,10 @@ export const emptyExtensions: ExtensionTable = Object.freeze({
   length: 0,
 });
 
-export const emptyCategories: CategoryList = Object.freeze([
+export const defaultCategories: CategoryList = Object.freeze([
   { name: 'Other', color: 'grey' },
+  { name: 'Graphics', color: 'green' },
+  { name: 'DOM', color: 'blue' },
 ]);
 
 /**
@@ -1298,7 +1300,7 @@ export function getEmptyProfile(): Profile {
       platform: '',
       processType: 0,
       extensions: emptyExtensions,
-      categories: emptyCategories,
+      categories: defaultCategories,
       product: 'Firefox',
       stackwalk: 0,
       toolkit: '',

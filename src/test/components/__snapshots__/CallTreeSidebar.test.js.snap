@@ -105,6 +105,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               "color": "grey",
               "name": "Other",
             },
+            Object {
+              "color": "green",
+              "name": "Graphics",
+            },
+            Object {
+              "color": "blue",
+              "name": "DOM",
+            },
           ],
           "_children": Map {},
           "_displayDataByIndex": Map {},
@@ -324,6 +332,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             Object {
               "color": "grey",
               "name": "Other",
+            },
+            Object {
+              "color": "green",
+              "name": "Graphics",
+            },
+            Object {
+              "color": "blue",
+              "name": "DOM",
             },
           ],
           "_children": Map {},
@@ -594,6 +610,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             Object {
               "color": "grey",
               "name": "Other",
+            },
+            Object {
+              "color": "green",
+              "name": "Graphics",
+            },
+            Object {
+              "color": "blue",
+              "name": "DOM",
             },
           ],
           "_children": Map {},
@@ -875,6 +899,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             Object {
               "color": "grey",
               "name": "Other",
+            },
+            Object {
+              "color": "green",
+              "name": "Graphics",
+            },
+            Object {
+              "color": "blue",
+              "name": "DOM",
             },
           ],
           "_children": Map {},
