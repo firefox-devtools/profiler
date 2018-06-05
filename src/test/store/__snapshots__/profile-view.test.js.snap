@@ -10,6 +10,14 @@ Object {
         "color": "grey",
         "name": "Other",
       },
+      Object {
+        "color": "green",
+        "name": "Graphics",
+      },
+      Object {
+        "color": "blue",
+        "name": "DOM",
+      },
     ],
     "extensions": Object {
       "baseURL": Array [],
@@ -1021,6 +1029,14 @@ CallTree {
     Object {
       "color": "grey",
       "name": "Other",
+    },
+    Object {
+      "color": "green",
+      "name": "Graphics",
+    },
+    Object {
+      "color": "blue",
+      "name": "DOM",
     },
   ],
   "_children": Array [],
