@@ -5,7 +5,12 @@
 // @flow
 import { getEmptyProfile } from '../../../profile-logic/profile-data';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
-import type { Profile, Thread, CategoryList } from '../../../types/profile';
+import type {
+  Profile,
+  Thread,
+  IndexIntoCategoryList,
+  CategoryList,
+} from '../../../types/profile';
 import type { MarkerPayload } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
 
@@ -150,17 +155,21 @@ export function getEmptyThread(overrides: ?Object): Thread {
  *
  * ```
  * const { profile } = getProfileFromTextSamples(`
- *   A       A        A     A
- *   B.js    B.js     F     F
- *   C.js    C.js     G     G
- *   D       D              H
- *   E       E
+ *   A             A             A                A
+ *   B.js          B.js          F[cat:Graphics]  F
+ *   C.js          C.js          G                G
+ *   D             D                              H[cat:GC / CC]
+ *   E[cat:Other]  E [cat:Other]
  * `);
  * ```
  *
  * The function names are aligned vertically on the left. This would produce 4 samples
  * with the stacks based off of those functions listed, with A being the root. Single
  * spaces within a column are permitted, surrounding whitespace is trimmed.
+ *
+ * Functions ending in "js" are marked as JS functions in the funcTable's isJS
+ * column. Functions with categories using the notation "functionName[cat:categoryName]"
+ * are annotated with that category in the frameTable's category column.
  *
  * The function returns more information as well, that is:
  * * an array mapping the func indices (IndexIntoFuncTable) to their names
@@ -171,7 +180,7 @@ export function getEmptyThread(overrides: ?Object): Thread {
  * this: [jit:baseline] or [jit:ion], right after the function name (see below
  * for an example). The default is no JIT.
  *
- * This can be useful when using it like this:
+ * The funcNamesDictPerThread array can be useful when using it like this:
  * ```
  * const {
  *   profile,
@@ -180,7 +189,7 @@ export function getEmptyThread(overrides: ?Object): Thread {
  *    A             A
  *    B             B
  *    Cjs[jit:ion]  Cjs[jit:baseline]
- *    D             D
+ *    D[cat:DOM]    D[cat:DOM]
  *    E             F
  *  `);
  * ```
@@ -195,6 +204,8 @@ export function getProfileFromTextSamples(
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
 } {
   const profile = getEmptyProfile();
+  const categories = profile.meta.categories;
+
   const funcNamesPerThread = [];
   const funcNamesDictPerThread = [];
 
@@ -221,7 +232,7 @@ export function getProfileFromTextSamples(
     return _buildThreadFromTextOnlyStacks(
       textOnlyStacks,
       funcNames,
-      profile.meta.categories
+      categories
     );
   });
 
@@ -300,8 +311,7 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
 
 const JIT_IMPLEMENTATIONS = ['ion', 'baseline'];
 
-function findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
-  const jitTypeIndex = null;
+function _findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
   const findJitTypeResult = /\[jit:([^\]]+)\]/.exec(funcNameWithModifier);
   let jitType = null;
   if (findJitTypeResult) {
@@ -312,12 +322,28 @@ function findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
     return jitType;
   }
 
-  return jitTypeIndex;
+  return null;
+}
+
+function _findCategoryFromFuncName(
+  funcNameWithModifier: string,
+  categories: CategoryList
+): IndexIntoCategoryList | null {
+  const findCategoryResult = /\[cat:([^\]]+)\]/.exec(funcNameWithModifier);
+  if (findCategoryResult) {
+    const categoryName = findCategoryResult[1];
+    const category = categories.findIndex(c => c.name === categoryName);
+    if (category !== -1) {
+      return category;
+    }
+  }
+
+  return null;
 }
 
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
-  funcNames: string[],
+  funcNames: Array<string>,
   categories: CategoryList
 ): Thread {
   const thread = getEmptyThread();
@@ -394,15 +420,21 @@ function _buildThreadFromTextOnlyStacks(
       const funcIndex = stringTable.indexForString(funcName);
 
       // Find the wanted jit type from the function name
-      const jitType = findJitTypeFromFuncName(funcNameWithModifier);
+      const jitType = _findJitTypeFromFuncName(funcNameWithModifier);
       const jitTypeIndex = jitType ? stringTable.indexForString(jitType) : null;
+      const category = _findCategoryFromFuncName(
+        funcNameWithModifier,
+        categories
+      );
 
-      // Attempt to find a frame that satisfies the given funcIndex and jit type.
+      // Attempt to find a frame that satisfies the given funcIndex, jit type
+      // and category..
       let frameIndex;
       for (let i = 0; i < frameTable.length; i++) {
         if (
           funcIndex === frameTable.func[i] &&
-          jitTypeIndex === frameTable.implementation[i]
+          jitTypeIndex === frameTable.implementation[i] &&
+          category === frameTable.category[i]
         ) {
           frameIndex = i;
           break;
@@ -412,7 +444,7 @@ function _buildThreadFromTextOnlyStacks(
       if (frameIndex === undefined) {
         frameTable.func.push(funcIndex);
         frameTable.address.push(0);
-        frameTable.category.push(null);
+        frameTable.category.push(category);
         frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(null);
         frameTable.optimizations.push(null);
@@ -433,9 +465,15 @@ function _buildThreadFromTextOnlyStacks(
 
       // If we couldn't find a stack, go ahead and create it.
       if (stackIndex === undefined) {
+        const frameCategory = frameTable.category[frameIndex];
+        const prefixCategory =
+          prefix === null ? categoryOther : stackTable.category[prefix];
+        const stackCategory =
+          frameCategory === null ? prefixCategory : frameCategory;
+
         stackTable.frame.push(frameIndex);
         stackTable.prefix.push(prefix);
-        stackTable.category.push(categoryOther);
+        stackTable.category.push(stackCategory);
         stackIndex = stackTable.length++;
       }
 
