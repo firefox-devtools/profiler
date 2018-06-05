@@ -344,6 +344,7 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.isJS.push(funcName.endsWith('js'));
     funcTable.lineNumber.push(null);
     // Ignore resources for now, this way funcNames have really nice string indexes.
+    // The resource column will be filled in the loop below.
     funcTable.length++;
   });
 
@@ -396,33 +397,42 @@ function _buildThreadFromTextOnlyStacks(
       const jitType = findJitTypeFromFuncName(funcNameWithModifier);
       const jitTypeIndex = jitType ? stringTable.indexForString(jitType) : null;
 
-      // Attempt to find a stack that satisfies the given funcIndex, prefix and
-      // jit type.
-      let stackIndex;
-      for (let i = 0; i < stackTable.length; i++) {
-        if (stackTable.prefix[i] === prefix) {
-          const frameIndex = stackTable.frame[i];
-          if (
-            funcIndex === frameTable.func[frameIndex] &&
-            jitTypeIndex === frameTable.optimizations[frameIndex]
-          ) {
-            stackIndex = i;
-            break;
-          }
+      // Attempt to find a frame that satisfies the given funcIndex and jit type.
+      let frameIndex;
+      for (let i = 0; i < frameTable.length; i++) {
+        if (
+          funcIndex === frameTable.func[i] &&
+          jitTypeIndex === frameTable.implementation[i]
+        ) {
+          frameIndex = i;
+          break;
         }
       }
 
-      // If we couldn't find a stack, go ahead and create a stack and frame.
-      if (stackIndex === undefined) {
-        const frameIndex = frameTable.length++;
-
+      if (frameIndex === undefined) {
         frameTable.func.push(funcIndex);
         frameTable.address.push(0);
         frameTable.category.push(null);
         frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(null);
         frameTable.optimizations.push(null);
+        frameIndex = frameTable.length++;
+      }
 
+      // Attempt to find a stack that satisfies the given frameIndex and prefix.
+      let stackIndex;
+      for (let i = 0; i < stackTable.length; i++) {
+        if (
+          stackTable.prefix[i] === prefix &&
+          stackTable.frame[i] === frameIndex
+        ) {
+          stackIndex = i;
+          break;
+        }
+      }
+
+      // If we couldn't find a stack, go ahead and create it.
+      if (stackIndex === undefined) {
         stackTable.frame.push(frameIndex);
         stackTable.prefix.push(prefix);
         stackTable.category.push(categoryOther);
