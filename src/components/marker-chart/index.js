@@ -6,6 +6,8 @@
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import MarkerChartCanvas from './Canvas';
+import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
+
 import {
   selectedThreadSelectors,
   getDisplayRange,
@@ -73,6 +75,10 @@ class MarkerChart extends React.PureComponent<Props> {
       updateProfileSelection,
     } = this.props;
 
+    if (!markers.length) {
+      return <MarkerChartEmptyReasons />;
+    }
+
     // The viewport needs to know about the height of what it's drawing, calculate
     // that here at the top level component.
     const maxViewportHeight = maxMarkerRows * ROW_HEIGHT;
@@ -116,7 +122,7 @@ function viewportNeedsUpdate(
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
-    const markers = selectedThreadSelectors.getTracingMarkers(state);
+    const markers = selectedThreadSelectors.getTracingMarkersForView(state);
     const markerTimingRows = selectedThreadSelectors.getMarkerTiming(state);
     const threadName = selectedThreadSelectors.getFriendlyThreadName(state);
 

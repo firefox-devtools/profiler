@@ -1,5 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Empty Reasons shows a reason when a profil has no network markers 1`] = `
+<div
+  className="EmptyReasons"
+>
+  <h3>
+    The 
+    network chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    This thread has no network markers.
+  </p>
+</div>
+`;
+
+exports[`Empty Reasons shows a reason when a profile has no marker 1`] = `
+<div
+  className="EmptyReasons"
+>
+  <h3>
+    The 
+    marker chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    This thread contains no markers.
+  </p>
+</div>
+`;
+
 exports[`renders MarkerChart correctly 1`] = `
 <div
   className="markerChart"

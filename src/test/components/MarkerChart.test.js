@@ -16,9 +16,59 @@ import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
-it('renders MarkerChart correctly', () => {
+const MARKERS = [
+  ['Marker A', 0, { startTime: 0, endTime: 10 }],
+  ['Marker B', 0, { startTime: 0, endTime: 10 }],
+  ['Marker C', 5, { startTime: 5, endTime: 15 }],
+  [
+    'Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D',
+    6,
+    { startTime: 5, endTime: 15 },
+  ],
+  ['Dot marker E', 4, { startTime: 4, endTime: 4 }],
+  ['Non-interval marker F without data', 7, null],
+  [
+    'Marker G type DOMEvent',
+    5,
+    {
+      type: 'tracing',
+      category: 'DOMEvent',
+      eventType: 'click',
+      interval: 'start',
+      phase: 2,
+    },
+  ],
+  [
+    'Marker G type DOMEvent',
+    10,
+    {
+      type: 'tracing',
+      category: 'DOMEvent',
+      eventType: 'click',
+      interval: 'end',
+      phase: 2,
+    },
+  ],
+];
+
+const NETWORK_MARKERS = [
+  [
+    'Load event',
+    11,
+    {
+      type: 'Network',
+      startTime: 11,
+      endTime: 12,
+      id: 31666793873480,
+      status: 'STATUS_START',
+      pri: 0,
+      URI: 'https://tiles.services.mozilla.com/v3/links/ping-centre',
+    },
+  ],
+];
+
+function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
-  window.devicePixelRatio = 1;
   const ctx = mockCanvasContext();
 
   /**
@@ -42,54 +92,6 @@ it('renders MarkerChart correctly', () => {
     return null;
   }
 
-  const profile = getProfileWithMarkers([
-    ['Marker A', 0, { startTime: 0, endTime: 10 }],
-    ['Marker B', 0, { startTime: 0, endTime: 10 }],
-    ['Marker C', 5, { startTime: 5, endTime: 15 }],
-    [
-      'Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D',
-      6,
-      { startTime: 5, endTime: 15 },
-    ],
-    ['Dot marker E', 4, { startTime: 4, endTime: 4 }],
-    ['Non-interval marker F without data', 7, null],
-    [
-      'Marker G type DOMEvent',
-      5,
-      {
-        type: 'tracing',
-        category: 'DOMEvent',
-        eventType: 'click',
-        interval: 'start',
-        phase: 2,
-      },
-    ],
-    [
-      'Marker G type DOMEvent',
-      10,
-      {
-        type: 'tracing',
-        category: 'DOMEvent',
-        eventType: 'click',
-        interval: 'end',
-        phase: 2,
-      },
-    ],
-    [
-      'Load event',
-      11,
-      {
-        type: 'Network',
-        startTime: 11,
-        endTime: 12,
-        id: 31666793873480,
-        status: 'STATUS_START',
-        pri: 0,
-        URI: 'https://tiles.services.mozilla.com/v3/links/ping-centre',
-      },
-    ],
-  ]);
-
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('marker-chart'));
 
@@ -100,18 +102,53 @@ it('renders MarkerChart correctly', () => {
     { createNodeMock }
   );
 
+  return {
+    markerChart,
+    flushRafCalls,
+    store,
+    flushDrawLog: () => ctx.__flushDrawLog(),
+  };
+}
+
+it('renders MarkerChart correctly', () => {
+  window.devicePixelRatio = 1;
+
+  const profile = getProfileWithMarkers([...MARKERS, ...NETWORK_MARKERS]);
+  const { flushRafCalls, store, markerChart, flushDrawLog } = setupWithProfile(
+    profile
+  );
+
+  store.dispatch(changeSelectedTab('marker-chart'));
   flushRafCalls();
 
-  let drawCalls = ctx.__flushDrawLog();
+  let drawCalls = flushDrawLog();
   expect(markerChart).toMatchSnapshot();
   expect(drawCalls).toMatchSnapshot();
 
   store.dispatch(changeSelectedTab('network-chart'));
-
   flushRafCalls();
-  drawCalls = ctx.__flushDrawLog();
+
+  drawCalls = flushDrawLog();
   expect(markerChart).toMatchSnapshot();
   expect(drawCalls).toMatchSnapshot();
 
   delete window.devicePixelRatio;
+});
+
+describe('Empty Reasons', () => {
+  it('shows a reason when a profile has no marker', () => {
+    const profile = getProfileWithMarkers([]);
+    const { store, markerChart } = setupWithProfile(profile);
+
+    store.dispatch(changeSelectedTab('marker-chart'));
+    expect(markerChart).toMatchSnapshot();
+  });
+
+  it('shows a reason when a profil has no network markers', () => {
+    const profile = getProfileWithMarkers(MARKERS);
+    const { store, markerChart } = setupWithProfile(profile);
+
+    store.dispatch(changeSelectedTab('network-chart'));
+    expect(markerChart).toMatchSnapshot();
+  });
 });
