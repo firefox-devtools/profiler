@@ -12,16 +12,10 @@ import {
   getProfileViewOptions,
   getScrollToSelectionGeneration,
 } from '../../reducers/profile-view';
-import {
-  getSelectedThreadIndex,
-  getInvertCallstack,
-} from '../../reducers/url-state';
+import { getSelectedThreadIndex } from '../../reducers/url-state';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
-import {
-  changeSelectedCallNode,
-  changeInvertCallstack,
-} from '../../actions/profile-view';
+import { changeSelectedCallNode } from '../../actions/profile-view';
 import { getIconsWithClassNames } from '../../reducers/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
@@ -58,13 +52,11 @@ type StateProps = {|
   +threadIndex: number,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +isCallNodeContextMenuVisible: boolean,
-  +invertCallstack: boolean,
   +scrollToSelectionGeneration: number,
   +icons: IconWithClassName[],
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
-  +changeInvertCallstack: typeof changeInvertCallstack,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
@@ -77,10 +69,6 @@ class FlameGraph extends React.PureComponent<Props> {
       threadIndex,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
-  };
-
-  _onSwithToNormalCallstackClick = () => {
-    this.props.changeInvertCallstack(false);
   };
 
   render() {
@@ -97,24 +85,9 @@ class FlameGraph extends React.PureComponent<Props> {
       processDetails,
       selectedCallNodeIndex,
       isCallNodeContextMenuVisible,
-      invertCallstack,
       scrollToSelectionGeneration,
       icons,
     } = this.props;
-
-    if (invertCallstack) {
-      return (
-        <div className="flameGraphDisabledMessage">
-          <h3>The Flame Graph is not available for inverted call stacks</h3>
-          <p>
-            <button type="button" onClick={this._onSwithToNormalCallstackClick}>
-              Switch to the normal call stack
-            </button>{' '}
-            to show the Flame Graph.
-          </p>
-        </div>
-      );
-    }
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
@@ -196,14 +169,12 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       ),
       isCallNodeContextMenuVisible: getProfileViewOptions(state)
         .isCallNodeContextMenuVisible,
-      invertCallstack: getInvertCallstack(state),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       icons: getIconsWithClassNames(state),
     };
   },
   mapDispatchToProps: {
     changeSelectedCallNode,
-    changeInvertCallstack,
   },
   component: FlameGraph,
 };
