@@ -163,6 +163,37 @@ export function getSampleCallNodes(
   });
 }
 
+export function getSelectedSamples(
+  callNodeTable: CallNodeTable,
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  selectedCallNodeIndex: IndexIntoCallNodeTable | null
+): boolean[] {
+  const result = new Array(sampleCallNodes.length);
+
+  let selectedCallNodeDepth = 0;
+  if (selectedCallNodeIndex !== -1 && selectedCallNodeIndex !== null) {
+    selectedCallNodeDepth = callNodeTable.depth[selectedCallNodeIndex];
+  }
+  function hasSelectedCallNodePrefix(callNodePrefix) {
+    let callNodeIndex = callNodePrefix;
+    if (callNodeIndex === null) {
+      return false;
+    }
+    for (
+      let depth = callNodeTable.depth[callNodeIndex];
+      depth > selectedCallNodeDepth;
+      depth--
+    ) {
+      callNodeIndex = callNodeTable.prefix[callNodeIndex];
+    }
+    return callNodeIndex === selectedCallNodeIndex;
+  }
+  for (let sampleIndex = 0; sampleIndex < sampleCallNodes.length; sampleIndex++) {
+    result[sampleIndex] = hasSelectedCallNodePrefix(sampleCallNodes[sampleIndex]);
+  }
+  return result;
+}
+
 function _getTimeRangeForThread(
   thread: Thread,
   interval: number

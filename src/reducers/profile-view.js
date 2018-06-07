@@ -529,7 +529,7 @@ export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
 export const getRightClickedThreadIndex = (state: State) =>
   getProfileViewOptions(state).rightClickedThread;
-export const getSelection = (state: State) =>
+export const getSelection: State => ProfileSelection = (state: State) =>
   getProfileViewOptions(state).selection;
 
 const _getDefaultCategoryWrappedInObject = createSelector(
@@ -556,6 +556,7 @@ export type SelectorsForThread = {
   getCallNodeMaxDepth: State => number,
   getSelectedCallNodePath: State => CallNodePath,
   getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
+  getSelectedSamplesInFilteredThread: State => boolean[],
   getExpandedCallNodePaths: State => PathSet,
   getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
   getCallTree: State => CallTree.CallTree,
@@ -726,10 +727,8 @@ export const selectorsForThread = (
       getTransformStack,
       Transforms.getTransformLabels
     );
-    const _getRangeFilteredThreadSamples = createSelector(
-      getRangeFilteredThread,
-      (thread): SamplesTable => thread.samples
-    );
+    const _getRangeFilteredThreadSamples = state =>
+      getRangeFilteredThread(state).samples;
     const getJankInstances = createSelector(
       _getRangeFilteredThreadSamples,
       (samples): TracingMarker[] => ProfileData.getJankInstances(samples, 50)
@@ -791,6 +790,15 @@ export const selectorsForThread = (
           callNodePath,
           callNodeInfo.callNodeTable
         );
+      }
+    );
+    const getSelectedSamplesInFilteredThread = createSelector(
+      getFilteredThread,
+      getCallNodeInfo,
+      getSelectedCallNodeIndex,
+      (thread, {callNodeTable, stackIndexToCallNodeIndex}, selectedCallNode) => {
+        const sampleCallNodes = ProfileData.getSampleCallNodes(thread.samples, stackIndexToCallNodeIndex);
+        return ProfileData.getSelectedSamples(callNodeTable, sampleCallNodes, selectedCallNode);
       }
     );
     const getExpandedCallNodePaths = createSelector(
@@ -874,6 +882,7 @@ export const selectorsForThread = (
       getCallNodeMaxDepth,
       getSelectedCallNodePath,
       getSelectedCallNodeIndex,
+      getSelectedSamplesInFilteredThread,
       getExpandedCallNodePaths,
       getExpandedCallNodeIndexes,
       getCallTree,

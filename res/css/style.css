@@ -487,10 +487,21 @@ body, #root, .profileViewer {
   height: 25px;
 }
 
-.threadStackGraphCanvas {
+.threadActivityGraph {
+  height: 20px;
+}
+
+.threadStackGraphCanvas,
+.threadActivityGraphCanvas {
   display: block;
-  height: 25px;
+  height: 100%;
   width: 100%;
+}
+
+.selectedThreadActivityGraph,
+.selectedThreadStackGraph {
+  height: 30px;
+  -moz-user-focus: ignore;
 }
 
 .timeSelectionScrubberHoverIndicator {

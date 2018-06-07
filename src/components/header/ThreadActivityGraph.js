@@ -37,7 +37,8 @@ function createDiagonalRepeatGradient(ctx, color) {
 }
 
 type Props = {|
-  +thread: Thread,
+  +fullThread: Thread,
+  +filteredThread?: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -46,6 +47,7 @@ type Props = {|
   +className: string,
   +onStackClick: (time: Milliseconds) => void,
   +categories: CategoryList,
+  +selectedSamples?: boolean[],
 |};
 
 class ThreadActivityGraph extends PureComponent<Props> {
@@ -89,14 +91,15 @@ class ThreadActivityGraph extends PureComponent<Props> {
   drawCanvas(canvas: HTMLCanvasElement) {
     const {
       categories,
-      thread,
+      fullThread,
       interval,
       rangeStart,
       rangeEnd,
+      selectedSamples,
       // callNodeInfo,
       // selectedCallNodeIndex,
     } = this.props;
-    const { samples, stackTable } = thread;
+    const { samples, stackTable } = fullThread;
 
     const rangeLength = rangeEnd - rangeStart;
 
@@ -162,8 +165,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
       const intPixelStart = pixelStart | 0;
       const intPixelEnd = pixelEnd | 0;
 
-      const thisSampleWasFilteredOut = false;
-      //filteredSampleStacks[sampleIndex] === null;
+      const thisSampleWasFilteredOut = selectedSamples && !selectedSamples[sampleIndex];
       const categoryArray = thisSampleWasFilteredOut
         ? categoryInfo.inactivePercentageAtPixel
         : categoryInfo.activePercentageAtPixel;
@@ -250,10 +252,12 @@ class ThreadActivityGraph extends PureComponent<Props> {
       ...categoryInfos.map(categoryInfo => [
         {
           fillStyle: categoryInfo.activeFillStyle,
+          opacity: 1.0,
           array: gaussianBlur1D(categoryInfo.activePercentageAtPixel),
         },
         {
-          fillStyle: categoryInfo.inactiveFillStyle,
+          fillStyle: categoryInfo.activeFillStyle,
+          opacity: 0.5,
           array: gaussianBlur1D(categoryInfo.inactivePercentageAtPixel),
         },
       ])
@@ -272,8 +276,9 @@ class ThreadActivityGraph extends PureComponent<Props> {
     // lighter === OP_ADD
     ctx.globalCompositeOperation = 'lighter';
     lastCumulativeArray = new Float32Array(pixelWidth);
-    for (const { fillStyle, array } of individualBuckets) {
+    for (const { fillStyle, opacity, array } of individualBuckets) {
       const cumulativeArray = array;
+      ctx.globalAlpha = opacity;
       ctx.fillStyle = fillStyle;
       ctx.beginPath();
       ctx.moveTo(0, (1 - lastCumulativeArray[0]) * pixelHeight);
@@ -308,7 +313,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
         <canvas
           className={classNames(
             `${this.props.className}Canvas`,
-            'threadStackGraphCanvas'
+            'threadActivityGraphCanvas'
           )}
           ref={this._takeCanvasRef}
           onMouseUp={this._onMouseUp}

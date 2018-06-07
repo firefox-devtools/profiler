@@ -223,8 +223,8 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
           ) : null}
           <ThreadActivityGraph
             interval={interval}
-            thread={thread}
-            className="ThreadActivityGraph"
+            fullThread={thread}
+            className="threadActivityGraph"
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
@@ -251,7 +251,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     const selectors = selectorsForThread(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
     return {
-      thread: selectors.getFilteredThread(state),
+      thread: selectors.getRangeFilteredThread(state),
       threadName: selectors.getFriendlyThreadName(state),
       processDetails: selectors.getThreadProcessDetails(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
