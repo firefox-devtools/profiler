@@ -1189,6 +1189,10 @@ export function filterTracingMarkersToRange(
   );
 }
 
+export function isNetworkMarker(marker: TracingMarker): boolean {
+  return !!(marker.data && marker.data.type === 'Network');
+}
+
 export function getFriendlyThreadName(
   threads: Thread[],
   thread: Thread

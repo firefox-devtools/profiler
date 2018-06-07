@@ -2,17 +2,19 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
+
 import React, { PureComponent } from 'react';
+
+import EmptyReasons from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { oneLine } from 'common-tags';
 import explicitConnect, {
   type ExplicitConnectOptions,
   type ConnectedProps,
 } from '../../utils/connect';
+
 import type { Thread } from '../../types/profile';
 import type { State } from '../../types/store';
-
-import './EmptyReasons.css';
 
 type StateProps = {|
   threadName: string,
@@ -26,7 +28,7 @@ type Props = ConnectedProps<{||}, StateProps, {||}>;
  * This component attempts to tell why exactly a call tree is empty with no samples
  * and display a friendly message to the end user.
  */
-class EmptyReasons extends PureComponent<Props> {
+class CallTreeEmptyReasons extends PureComponent<Props> {
   render() {
     const { thread, rangeFilteredThread, threadName } = this.props;
     let reason;
@@ -43,10 +45,11 @@ class EmptyReasons extends PureComponent<Props> {
     }
 
     return (
-      <div className="CallTreeEmptyReasons">
-        <h3>The call tree is empty for “{threadName}”</h3>
-        <p>{reason}</p>
-      </div>
+      <EmptyReasons
+        threadName={threadName}
+        reason={reason}
+        viewName="call tree"
+      />
     );
   }
 }
@@ -57,7 +60,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
     thread: selectedThreadSelectors.getThread(state),
     rangeFilteredThread: selectedThreadSelectors.getRangeFilteredThread(state),
   }),
-  component: EmptyReasons,
+  component: CallTreeEmptyReasons,
 };
 
 export default explicitConnect(options);

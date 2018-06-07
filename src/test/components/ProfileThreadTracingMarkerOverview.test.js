@@ -51,6 +51,11 @@ describe('ProfileThreadTracingMarkerOverview', function() {
       ['Marker A', 0, { startTime: 0, endTime: 10 }],
       ['Marker B', 0, { startTime: 0, endTime: 10 }],
       ['Marker C', 5, { startTime: 5, endTime: 15 }],
+      [
+        'BHR-detected hang',
+        5,
+        { type: 'BHR-detected hang', startTime: 2, endTime: 13 },
+      ],
     ]);
 
     const overview = renderer.create(

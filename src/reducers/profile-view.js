@@ -392,7 +392,7 @@ function zeroAt(state: Milliseconds = 0, action: Action) {
   }
 }
 
-function tabOrder(state: number[] = [0, 1, 2, 3, 4], action: Action) {
+function tabOrder(state: number[] = [0, 1, 2, 3, 4, 5], action: Action) {
   switch (action.type) {
     case 'CHANGE_TAB_ORDER':
       return action.tabOrder;
@@ -536,6 +536,7 @@ export type SelectorsForThread = {
   getJankInstances: State => TracingMarker[],
   getProcessedMarkersThread: State => Thread,
   getTracingMarkers: State => TracingMarker[],
+  getTracingMarkersForView: State => TracingMarker[],
   getMarkerTiming: State => MarkerTimingRows,
   getRangeSelectionFilteredTracingMarkers: State => TracingMarker[],
   getRangeSelectionFilteredTracingMarkersForHeader: State => TracingMarker[],
@@ -720,8 +721,27 @@ export const selectorsForThread = (
       getProcessedMarkersThread,
       ProfileData.getTracingMarkers
     );
-    const getMarkerTiming = createSelector(
+    const getTracingMarkersForNetworkChart = createSelector(
       getTracingMarkers,
+      markers => markers.filter(ProfileData.isNetworkMarker)
+    );
+    const getTracingMarkersForMarkerChart = createSelector(
+      getTracingMarkers,
+      markers => markers.filter(marker => !ProfileData.isNetworkMarker(marker))
+    );
+    const getTracingMarkersForView = state => {
+      const selectedTab = UrlState.getSelectedTab(state);
+      switch (selectedTab) {
+        case 'marker-chart':
+          return getTracingMarkersForMarkerChart(state);
+        case 'network-chart':
+          return getTracingMarkersForNetworkChart(state);
+        default:
+          return getTracingMarkers(state);
+      }
+    };
+    const getMarkerTiming = createSelector(
+      getTracingMarkersForView,
       MarkerTiming.getMarkerTiming
     );
     const getRangeSelectionFilteredTracingMarkers = createSelector(
@@ -734,7 +754,13 @@ export const selectorsForThread = (
     );
     const getRangeSelectionFilteredTracingMarkersForHeader = createSelector(
       getRangeSelectionFilteredTracingMarkers,
-      (markers): TracingMarker[] => markers.filter(tm => tm.name !== 'GCMajor')
+      (markers): TracingMarker[] =>
+        markers.filter(
+          tm =>
+            tm.name !== 'GCMajor' &&
+            tm.name !== 'BHR-detected hang' &&
+            !ProfileData.isNetworkMarker(tm)
+        )
     );
     const getCallNodeInfo = createSelector(
       getFilteredThread,
@@ -833,6 +859,7 @@ export const selectorsForThread = (
       getJankInstances,
       getProcessedMarkersThread,
       getTracingMarkers,
+      getTracingMarkersForView,
       getMarkerTiming,
       getRangeSelectionFilteredTracingMarkers,
       getRangeSelectionFilteredTracingMarkersForHeader,
