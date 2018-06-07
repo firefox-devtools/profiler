@@ -12,7 +12,11 @@ import type {
   IndexIntoMarkersTable,
   IndexIntoFuncTable,
 } from './profile';
-import type { CallNodePath, CallNodeTable } from './profile-derived';
+import type {
+  CallNodePath,
+  CallNodeTable,
+  ThreadsInProcess,
+} from './profile-derived';
 import type { GetLabel } from '../profile-logic/labeling-strategies';
 import type { GetCategory } from '../profile-logic/color-categories';
 import type { TemporaryError } from '../utils/errors';
@@ -55,12 +59,16 @@ export type TabSlug =
 
 type ProfileAction =
   | { type: 'ROUTE_NOT_FOUND', url: string }
-  | { type: 'CHANGE_THREAD_ORDER', threadOrder: ThreadIndex[] }
+  | {
+      type: 'CHANGE_THREAD_ORDER',
+      pid: number | void,
+      threadOrder: ThreadIndex[],
+    }
   | {
       type: 'HIDE_THREAD',
       threadIndex: ThreadIndex,
       hiddenThreads: ThreadIndex[],
-      threadOrder: ThreadIndex[],
+      threadOrder: ThreadsInProcess[],
     }
   | { type: 'SHOW_THREAD', threadIndex: ThreadIndex }
   | {

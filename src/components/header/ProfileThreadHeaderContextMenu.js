@@ -20,6 +20,7 @@ import { getFriendlyThreadName } from '../../profile-logic/profile-data';
 import classNames from 'classnames';
 
 import type { Thread, ThreadIndex } from '../../types/profile';
+import type { ThreadsInProcess } from '../../types/profile-derived';
 import type { State } from '../../types/reducers';
 import type {
   ExplicitConnectOptions,
@@ -28,7 +29,7 @@ import type {
 
 type StateProps = {|
   +threads: Thread[],
-  +threadOrder: ThreadIndex[],
+  +threadOrder: ThreadsInProcess[],
   +hiddenThreads: ThreadIndex[],
   +rightClickedThreadIndex: ThreadIndex,
 |};
@@ -83,6 +84,14 @@ class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
       threads[rightClickedThreadIndex]
     );
 
+    const threadIndexes = [];
+    for (const { mainThread, threads } of threadOrder) {
+      if (mainThread) {
+        threadIndexes.push(mainThread);
+      }
+      threadIndexes.push(...threads);
+    }
+
     return (
       <ContextMenu id={'ProfileThreadHeaderContextMenu'}>
         {threads.length <= 1 ? null : (
@@ -96,7 +105,7 @@ class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
             <div className="react-contextmenu-separator" />
           </div>
         )}
-        {threadOrder.map(threadIndex => {
+        {threadIndexes.map(threadIndex => {
           const isHidden = hiddenThreads.includes(threadIndex);
           return (
             <MenuItem
@@ -105,7 +114,10 @@ class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
               data={{ threadIndex, isHidden }}
               onClick={this._toggleThreadVisibility}
               attributes={{
-                className: classNames({ checkable: true, checked: !isHidden }),
+                className: classNames({
+                  checkable: true,
+                  checked: !isHidden,
+                }),
               }}
             >
               {getFriendlyThreadName(threads, threads[threadIndex])}

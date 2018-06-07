@@ -27,7 +27,9 @@ import type {
   ThreadIndex,
   SamplesTable,
   MarkersTable,
+  MarkersTableWithPayload,
 } from '../types/profile';
+import type { ScreenshotPayload } from '../types/markers';
 import type {
   TracingMarker,
   CallNodeInfo,
@@ -536,6 +538,12 @@ export type SelectorsForThread = {
   getJankInstances: State => TracingMarker[],
   getProcessedMarkersThread: State => Thread,
   getTracingMarkers: State => TracingMarker[],
+  getScreenshotMarkers: State => Map<
+    string,
+    MarkersTableWithPayload<ScreenshotPayload>
+  >,
+  getNetworkTracingMarkers: State => TracingMarker[],
+  getNetworkTiming: State => MarkerTimingRows,
   getMarkerTiming: State => MarkerTimingRows,
   getRangeSelectionFilteredTracingMarkers: State => TracingMarker[],
   getRangeSelectionFilteredTracingMarkersForHeader: State => TracingMarker[],
@@ -720,6 +728,38 @@ export const selectorsForThread = (
       getProcessedMarkersThread,
       ProfileData.getTracingMarkers
     );
+    const getScreenshotMarkers = createSelector(
+      getRangeFilteredThread,
+      thread => {
+        const { markers, stringTable } = thread;
+        const idToScreenshotMarkers = new Map();
+        const nameIndex = stringTable.indexForString('CompositorScreenshot');
+        for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+          if (markers.name[markerIndex] === nameIndex) {
+            // Coerce the payload to a screenshot one. Don't do a runtime check that
+            // this is correct.
+            const data: ScreenshotPayload = (markers.data[markerIndex]: any);
+            let screenshotMarkerTable = idToScreenshotMarkers.get(
+              data.windowID
+            );
+            if (screenshotMarkerTable === undefined) {
+              screenshotMarkerTable = {
+                time: [],
+                data: [],
+                name: [],
+                length: 0,
+              };
+              idToScreenshotMarkers.set(data.windowID, screenshotMarkerTable);
+            }
+            screenshotMarkerTable.time.push(markers.time[markerIndex]);
+            screenshotMarkerTable.data.push(data);
+            screenshotMarkerTable.name.push(nameIndex);
+            screenshotMarkerTable.length++;
+          }
+        }
+        return idToScreenshotMarkers;
+      }
+    );
     const getMarkerTiming = createSelector(
       getTracingMarkers,
       MarkerTiming.getMarkerTiming
@@ -735,6 +775,17 @@ export const selectorsForThread = (
     const getRangeSelectionFilteredTracingMarkersForHeader = createSelector(
       getRangeSelectionFilteredTracingMarkers,
       (markers): TracingMarker[] => markers.filter(tm => tm.name !== 'GCMajor')
+    );
+    const getNetworkTracingMarkers = createSelector(
+      getRangeSelectionFilteredTracingMarkers,
+      tracingMarkers =>
+        tracingMarkers.filter(
+          marker => marker.data && marker.data.type === 'Network'
+        )
+    );
+    const getNetworkTiming = createSelector(
+      getNetworkTracingMarkers,
+      MarkerTiming.getMarkerTiming
     );
     const getCallNodeInfo = createSelector(
       getFilteredThread,
@@ -833,6 +884,9 @@ export const selectorsForThread = (
       getJankInstances,
       getProcessedMarkersThread,
       getTracingMarkers,
+      getScreenshotMarkers,
+      getNetworkTracingMarkers,
+      getNetworkTiming,
       getMarkerTiming,
       getRangeSelectionFilteredTracingMarkers,
       getRangeSelectionFilteredTracingMarkersForHeader,

@@ -12,6 +12,7 @@ import { urlFromState } from '../url-handling';
 import * as RangeFilters from '../profile-logic/range-filters';
 
 import type { ThreadIndex } from '../types/profile';
+import type { ThreadsInProcess } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type {
   TransformStacksPerThread,
@@ -92,9 +93,16 @@ function selectedThread(
       const { threadIndex, hiddenThreads, threadOrder } = action;
       // If the currently selected thread is being hidden, then re-select a new one.
       if (state === threadIndex) {
-        const index = threadOrder.find(index => {
-          return index !== threadIndex && !hiddenThreads.includes(index);
-        });
+        let index;
+        for (let i = 0; i < threadOrder.length; i++) {
+          const threadsInProcess = threadOrder[i];
+          index = threadsInProcess.threads.find(index => {
+            return index !== threadIndex && !hiddenThreads.includes(index);
+          });
+          if (index !== undefined) {
+            break;
+          }
+        }
         if (index === undefined) {
           throw new Error('A new thread index must be found');
         }
@@ -171,7 +179,7 @@ function invertCallstack(state: boolean = false, action: Action) {
   }
 }
 
-function threadOrder(state: ThreadIndex[] = [], action: Action) {
+function threadOrder(state: ThreadsInProcess[] = [], action: Action) {
   switch (action.type) {
     case 'VIEW_PROFILE': {
       // When receiving a new profile, try to use the thread order specified in the URL,
@@ -181,8 +189,26 @@ function threadOrder(state: ThreadIndex[] = [], action: Action) {
       const missingThreads = threads.filter(index => !state.includes(index));
       return validUrlThreads.concat(missingThreads);
     }
-    case 'CHANGE_THREAD_ORDER':
-      return action.threadOrder;
+    case 'CHANGE_THREAD_ORDER': {
+      const { pid, threadOrder } = action;
+      const index = state.findIndex(
+        threadsInProcess => threadsInProcess.pid === pid
+      );
+      if (index === -1) {
+        throw new Error(
+          'Unable to find the process when changing the thread order.'
+        );
+      }
+      return [
+        ...state.slice(0, index),
+        {
+          pid: pid,
+          mainThread: state[index].mainThread,
+          threads: threadOrder,
+        },
+        ...state.slice(index + 1),
+      ];
+    }
     default:
       return state;
   }
