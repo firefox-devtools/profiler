@@ -5,6 +5,7 @@
 import { storeWithProfile } from '../fixtures/stores';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
+import { addRangeFilter } from '../../actions/profile-view';
 
 describe('selectors/getMarkerTiming', function() {
   function getMarkerTiming(testMarkers) {
@@ -116,6 +117,33 @@ describe('selectors/getMarkerTiming', function() {
           length: 1,
         },
       ]);
+    });
+  });
+
+  describe('with range selection', function() {
+    function initStore() {
+      return storeWithProfile(
+        getProfileWithMarkers([
+          ['Rasterize', 1, null],
+          ['Rasterize', 2, null],
+          ['Rasterize', 3, null],
+          ['Rasterize', 4, null],
+          ['Rasterize', 5, null],
+        ])
+      );
+    }
+
+    it('includes all markers when at full range', function() {
+      const { getState } = initStore();
+      const [timing] = selectedThreadSelectors.getMarkerTiming(getState());
+      expect(timing.length).toEqual(5);
+    });
+
+    it('includes only some markers when at a zoomed in range', function() {
+      const { dispatch, getState } = initStore();
+      dispatch(addRangeFilter(0, 3));
+      const [timing] = selectedThreadSelectors.getMarkerTiming(getState());
+      expect(timing.length).toEqual(3);
     });
   });
 });

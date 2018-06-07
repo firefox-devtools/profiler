@@ -46,7 +46,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
     const endTime =
       data && typeof data.endTime === 'number' ? data.endTime : time;
     samples.time.push(startTime, endTime);
-    samples.length++;
+    samples.length += 2;
   });
 
   samples.time.sort();

@@ -720,10 +720,6 @@ export const selectorsForThread = (
       getProcessedMarkersThread,
       ProfileData.getTracingMarkers
     );
-    const getMarkerTiming = createSelector(
-      getTracingMarkers,
-      MarkerTiming.getMarkerTiming
-    );
     const getRangeSelectionFilteredTracingMarkers = createSelector(
       getTracingMarkers,
       getDisplayRange,
@@ -735,6 +731,10 @@ export const selectorsForThread = (
     const getRangeSelectionFilteredTracingMarkersForHeader = createSelector(
       getRangeSelectionFilteredTracingMarkers,
       (markers): TracingMarker[] => markers.filter(tm => tm.name !== 'GCMajor')
+    );
+    const getMarkerTiming = createSelector(
+      getRangeSelectionFilteredTracingMarkers,
+      MarkerTiming.getMarkerTiming
     );
     const getCallNodeInfo = createSelector(
       getFilteredThread,
