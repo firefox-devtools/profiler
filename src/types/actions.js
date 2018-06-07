@@ -50,6 +50,7 @@ export type TabSlug =
   | 'calltree'
   | 'stack-chart'
   | 'marker-chart'
+  | 'network-chart'
   | 'marker-table'
   | 'flame-graph';
 
