@@ -229,22 +229,15 @@ export class CallTree {
     };
   }
 
-  getTimingDisplayData(callNodeIndex: IndexIntoCallNodeTable) {
-    const totalTime = this._callNodeTimes.totalTime[callNodeIndex];
-    const selfTime = this._callNodeTimes.selfTime[callNodeIndex];
-    const formatNumber = this._isIntegerInterval
-      ? _formatIntegerNumber
-      : _formatDecimalNumber;
-    return {
-      totalTime: `${formatNumber(totalTime)}`,
-      selfTime: selfTime === 0 ? '—' : `${formatNumber(selfTime)}`,
-    };
-  }
-
   getDisplayData(callNodeIndex: IndexIntoCallNodeTable): CallNodeDisplayData {
     let displayData = this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
-      const { funcName, totalTimeRelative } = this.getNodeData(callNodeIndex);
+      const {
+        funcName,
+        totalTime,
+        totalTimeRelative,
+        selfTime,
+      } = this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeTable.func[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
@@ -259,8 +252,13 @@ export class CallTree {
         icon = ExtensionIcon;
       }
 
+      const formatNumber = this._isIntegerInterval
+        ? _formatIntegerNumber
+        : _formatDecimalNumber;
+
       displayData = {
-        ...this.getTimingDisplayData(callNodeIndex),
+        totalTime: formatNumber(totalTime),
+        selfTime: selfTime === 0 ? '—' : formatNumber(selfTime),
         totalTimePercent: `${(100 * totalTimeRelative).toFixed(precision)}%`,
         name: funcName,
         lib: libName,
@@ -289,7 +287,12 @@ function _getInvertedStackSelfTimes(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   interval: Milliseconds
 ): {
+  // In an inverted profile, all the self time is accounted to the root nodes.
+  // So `callNodeSelfTime` will be 0 for all non-root nodes.
   callNodeSelfTime: Float32Array,
+  // This property stores the time spent in the stacks' leaf nodes.
+  // Later these values will make it possible to compute the running times for
+  // all nodes by summing up the values up the tree.
   callNodeLeafTime: Float32Array,
 } {
   // Compute an array that maps the callNodeIndex to its root.
@@ -300,10 +303,18 @@ function _getInvertedStackSelfTimes(
     callNodeIndex++
   ) {
     const prefixCallNode = callNodeTable.prefix[callNodeIndex];
-    if (prefixCallNode !== -1) {
-      callNodeToRoot[callNodeIndex] = callNodeToRoot[prefixCallNode];
-    } else {
+    if (prefixCallNode === -1) {
+      // callNodeIndex is a root node
       callNodeToRoot[callNodeIndex] = callNodeIndex;
+    } else {
+      // The callNodeTable guarantees that a callNode's prefix always comes
+      // before the callNode; prefix references are always to lower callNode
+      // indexes and never to higher indexes.
+      // We are iterating the callNodeTable in forwards direction (starting at
+      // index 0) so we know that we have already visited the current call
+      // node's prefix call node and can reuse its stored root node, which
+      // recursively is the value we're looking for.
+      callNodeToRoot[callNodeIndex] = callNodeToRoot[prefixCallNode];
     }
   }
 
@@ -384,6 +395,8 @@ export function computeCallTreeCountsAndTimings(
   let rootTotalTime = 0;
   let rootCount = 0;
 
+  // We loop the call node table in reverse, so that we find the children
+  // before their parents.
   for (
     let callNodeIndex = callNodeTable.length - 1;
     callNodeIndex >= 0;

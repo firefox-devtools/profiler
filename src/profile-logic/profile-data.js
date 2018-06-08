@@ -818,6 +818,9 @@ export function invertCallstack(thread: Thread): Thread {
     const prefixAndFrameToStack = new Map();
     const frameCount = frameTable.length;
 
+    // Returns the stackIndex for a specific frame (that is, a function and its
+    // context), and a specific prefix. If it doesn't exist yet it will create
+    // a new stack entry and return its index.
     function stackFor(prefix, frame) {
       const prefixAndFrameIndex =
         (prefix === null ? -1 : prefix) * frameCount + frame;
@@ -833,6 +836,8 @@ export function invertCallstack(thread: Thread): Thread {
 
     const oldStackToNewStack = new Map();
 
+    // For one specific stack, this will ensure that stacks are created for all
+    // of its ancestors, by walking its prefix chain up to the root.
     function convertStack(stackIndex) {
       if (stackIndex === null) {
         return null;
@@ -845,6 +850,8 @@ export function invertCallstack(thread: Thread): Thread {
           currentStack !== null;
           currentStack = stackTable.prefix[currentStack]
         ) {
+          // Notice how we reuse the previous stack as the prefix. This is what
+          // effectively inverts the call tree.
           newStack = stackFor(newStack, stackTable.frame[currentStack]);
         }
         oldStackToNewStack.set(stackIndex, newStack);
@@ -1182,6 +1189,10 @@ export function filterTracingMarkersToRange(
   );
 }
 
+export function isNetworkMarker(marker: TracingMarker): boolean {
+  return !!(marker.data && marker.data.type === 'Network');
+}
+
 export function getFriendlyThreadName(
   threads: Thread[],
   thread: Thread
@@ -1256,6 +1267,8 @@ export function getEmptyProfile(): Profile {
       preprocessedProfileVersion: PROCESSED_PROFILE_VERSION,
       appBuildID: '',
       sourceURL: '',
+      physicalCPUs: 0,
+      logicalCPUs: 0,
     },
     threads: [],
   };

@@ -20,6 +20,7 @@ export default function selectSidebar(
     'marker-table': null,
     'stack-chart': null,
     'marker-chart': null,
+    'network-chart': null,
     'flame-graph': null,
   }[selectedTab];
 }

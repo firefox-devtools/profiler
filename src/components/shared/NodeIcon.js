@@ -45,7 +45,7 @@ class NodeIcon extends PureComponent<Props> {
   }
 
   render() {
-    return <div className={`treeRowIcon ${this.props.className}`} />;
+    return <div className={`nodeIcon ${this.props.className}`} />;
   }
 }
 

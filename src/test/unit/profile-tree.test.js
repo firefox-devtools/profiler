@@ -269,15 +269,6 @@ describe('unfiltered call tree', function() {
         );
       });
     });
-
-    describe('getTimingDisplayData()', function() {
-      it('gets formatted timing data for a given callNodeIndex', function() {
-        expect(callTree.getTimingDisplayData(D)).toEqual({
-          selfTime: '—',
-          totalTime: '1',
-        });
-      });
-    });
   });
 
   /**

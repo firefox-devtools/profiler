@@ -1,5 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Empty Reasons shows a reason when a profil has no network markers 1`] = `
+<div
+  className="EmptyReasons"
+>
+  <h3>
+    The 
+    network chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    This thread has no network markers.
+  </p>
+</div>
+`;
+
+exports[`Empty Reasons shows a reason when a profile has no marker 1`] = `
+<div
+  className="EmptyReasons"
+>
+  <h3>
+    The 
+    marker chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    This thread contains no markers.
+  </p>
+</div>
+`;
+
 exports[`renders MarkerChart correctly 1`] = `
 <div
   className="markerChart"
@@ -450,6 +484,249 @@ Array [
     "Non-interval marker F without data",
     5,
     107,
+  ],
+]
+`;
+
+exports[`renders MarkerChart correctly 3`] = `
+<div
+  className="markerChart"
+>
+  <div
+    className="markerChartLabels grippy"
+    title="thread: \\"Empty\\" (0)
+process: \\"default\\" (0)"
+  >
+    <span
+      className="markerChartLabelsName"
+    >
+      Empty
+    </span>
+  </div>
+  <div
+    className="chartViewport"
+    onMouseDown={[Function]}
+    onWheel={[Function]}
+  >
+    <div>
+      <canvas
+        className="chartCanvas markerChartCanvas"
+        onDoubleClick={[Function]}
+        onMouseDown={[Function]}
+        onMouseMove={[Function]}
+        onMouseOut={[Function]}
+      />
+    </div>
+    <div
+      className="chartViewportShiftScroll hidden"
+    >
+      Zoom Chart:
+      <kbd
+        className="chartViewportShiftScrollKbd"
+      >
+        Shift
+      </kbd>
+      <kbd
+        className="chartViewportShiftScrollKbd"
+      >
+        Scroll
+      </kbd>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders MarkerChart correctly 4`] = `
+Array [
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "arc",
+    143.75,
+    7.5,
+    3.75,
+    0,
+    6.283185307179586,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#eee",
+  ],
+  Array [
+    "fillRect",
+    0,
+    15,
+    200,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    150,
+    0,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "rgba(255, 255, 255, 0.8)",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "rgba(255, 255, 255, 0.0)",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "rgba(255, 255, 255, 0.8)",
+          ],
+          Array [
+            1,
+            "rgba(255, 255, 255, 0.0)",
+          ],
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    150,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Load event",
+    5,
+    11,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "arc",
+    143.75,
+    7.5,
+    3.75,
+    0,
+    6.283185307179586,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#eee",
+  ],
+  Array [
+    "fillRect",
+    0,
+    15,
+    200,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    150,
+    0,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "rgba(255, 255, 255, 0.8)",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "rgba(255, 255, 255, 0.0)",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "rgba(255, 255, 255, 0.8)",
+          ],
+          Array [
+            1,
+            "rgba(255, 255, 255, 0.0)",
+          ],
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    150,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Load event",
+    5,
+    11,
   ],
 ]
 `;

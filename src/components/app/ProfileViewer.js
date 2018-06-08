@@ -78,6 +78,10 @@ class ProfileViewer extends PureComponent<Props> {
         name: 'marker-table',
         title: 'Marker Table',
       },
+      {
+        name: 'network-chart',
+        title: 'Network',
+      },
     ];
   }
 
@@ -130,6 +134,7 @@ class ProfileViewer extends PureComponent<Props> {
             'marker-table': <MarkerTable />,
             'stack-chart': <StackChart />,
             'marker-chart': <MarkerChart />,
+            'network-chart': <MarkerChart />,
             'flame-graph': <FlameGraph />,
           }[selectedTab]
         }

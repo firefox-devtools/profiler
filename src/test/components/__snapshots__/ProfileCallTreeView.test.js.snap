@@ -110,10 +110,12 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
     </li>
   </ol>
   <div
-    className="CallTreeEmptyReasons"
+    className="EmptyReasons"
   >
     <h3>
-      The call tree is empty for “
+      The 
+      call tree
+       is empty for “
       Empty Thread
       ”
     </h3>
@@ -234,10 +236,12 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
     </li>
   </ol>
   <div
-    className="CallTreeEmptyReasons"
+    className="EmptyReasons"
   >
     <h3>
-      The call tree is empty for “
+      The 
+      call tree
+       is empty for “
       Thread with samples
       ”
     </h3>
@@ -358,10 +362,12 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
     </li>
   </ol>
   <div
-    className="CallTreeEmptyReasons"
+    className="EmptyReasons"
   >
     <h3>
-      The call tree is empty for “
+      The 
+      call tree
+       is empty for “
       Thread with samples
       ”
     </h3>
@@ -583,7 +589,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -620,7 +626,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -657,7 +663,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -694,7 +700,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -731,7 +737,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -768,7 +774,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -805,7 +811,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -842,7 +848,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -879,7 +885,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -916,7 +922,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -953,7 +959,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -990,7 +996,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -1027,7 +1033,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -1064,7 +1070,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -1101,7 +1107,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -1138,7 +1144,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -1179,7 +1185,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -1216,7 +1222,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -1253,7 +1259,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2111,7 +2117,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2148,7 +2154,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2185,7 +2191,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2222,7 +2228,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2259,7 +2265,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2296,7 +2302,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2333,7 +2339,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2803,7 +2809,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2840,7 +2846,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2877,7 +2883,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2914,7 +2920,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2951,7 +2957,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -2988,7 +2994,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -3025,7 +3031,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -3495,7 +3501,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -3532,7 +3538,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -3569,7 +3575,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -3606,7 +3612,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -3643,7 +3649,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -3680,7 +3686,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -3717,7 +3723,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -4187,7 +4193,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -4224,7 +4230,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -4261,7 +4267,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -4298,7 +4304,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -4335,7 +4341,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -4372,7 +4378,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -4816,7 +4822,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -4853,7 +4859,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -4890,7 +4896,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -4927,7 +4933,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -4964,7 +4970,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -5001,7 +5007,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -5445,7 +5451,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -5482,7 +5488,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -5519,7 +5525,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -5556,7 +5562,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -5942,7 +5948,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -5979,7 +5985,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -6016,7 +6022,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -6053,7 +6059,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -6439,7 +6445,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -6476,7 +6482,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -6513,7 +6519,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -6550,7 +6556,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -6587,7 +6593,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>
@@ -6624,7 +6630,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                   title=""
                 >
                   <div
-                    className="treeRowIcon "
+                    className="nodeIcon "
                   />
                 </span>
               </div>

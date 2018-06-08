@@ -12,16 +12,12 @@ import {
   getProfileViewOptions,
   getScrollToSelectionGeneration,
 } from '../../reducers/profile-view';
-import {
-  getSelectedThreadIndex,
-  getInvertCallstack,
-} from '../../reducers/url-state';
+import { getSelectedThreadIndex } from '../../reducers/url-state';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
-import {
-  changeSelectedCallNode,
-  changeInvertCallstack,
-} from '../../actions/profile-view';
+import { changeSelectedCallNode } from '../../actions/profile-view';
+import { getIconsWithClassNames } from '../../reducers/icons';
+import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
 import type { Thread } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
@@ -31,6 +27,8 @@ import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
+import type { CallTree } from '../../profile-logic/call-tree';
+import type { IconWithClassName } from '../../types/reducers';
 
 import type {
   ExplicitConnectOptions,
@@ -49,16 +47,16 @@ type StateProps = {|
   +flameGraphTiming: FlameGraphTiming,
   +threadName: string,
   +processDetails: string,
+  +callTree: CallTree,
   +callNodeInfo: CallNodeInfo,
   +threadIndex: number,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +isCallNodeContextMenuVisible: boolean,
-  +invertCallstack: boolean,
   +scrollToSelectionGeneration: number,
+  +icons: IconWithClassName[],
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
-  +changeInvertCallstack: typeof changeInvertCallstack,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
@@ -73,16 +71,13 @@ class FlameGraph extends React.PureComponent<Props> {
     );
   };
 
-  _onSwithToNormalCallstackClick = () => {
-    this.props.changeInvertCallstack(false);
-  };
-
   render() {
     const {
       thread,
       threadIndex,
       maxStackDepth,
       flameGraphTiming,
+      callTree,
       callNodeInfo,
       timeRange,
       selection,
@@ -90,28 +85,21 @@ class FlameGraph extends React.PureComponent<Props> {
       processDetails,
       selectedCallNodeIndex,
       isCallNodeContextMenuVisible,
-      invertCallstack,
       scrollToSelectionGeneration,
+      icons,
     } = this.props;
-
-    if (invertCallstack) {
-      return (
-        <div className="flameGraphDisabledMessage">
-          <h3>The Flame Graph is not available for inverted call stacks</h3>
-          <p>
-            <button type="button" onClick={this._onSwithToNormalCallstackClick}>
-              Switch to the normal call stack
-            </button>{' '}
-            to show the Flame Graph.
-          </p>
-        </div>
-      );
-    }
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
       <div className="flameGraphContent">
+        {icons.map(({ className, icon }) => (
+          <BackgroundImageStyleDef
+            className={className}
+            url={icon}
+            key={className}
+          />
+        ))}
         <div title={processDetails} className="flameGraphLabels grippy">
           <span>{threadName}</span>
         </div>
@@ -138,6 +126,7 @@ class FlameGraph extends React.PureComponent<Props> {
               thread,
               maxStackDepth,
               flameGraphTiming,
+              callTree,
               callNodeInfo,
               selectedCallNodeIndex,
               scrollToSelectionGeneration,
@@ -168,6 +157,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
         state
       ),
       flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
+      callTree: selectedThreadSelectors.getCallTree(state),
       timeRange: getDisplayRange(state),
       selection: getProfileViewOptions(state).selection,
       threadName: selectedThreadSelectors.getFriendlyThreadName(state),
@@ -179,13 +169,12 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       ),
       isCallNodeContextMenuVisible: getProfileViewOptions(state)
         .isCallNodeContextMenuVisible,
-      invertCallstack: getInvertCallstack(state),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
+      icons: getIconsWithClassNames(state),
     };
   },
   mapDispatchToProps: {
     changeSelectedCallNode,
-    changeInvertCallstack,
   },
   component: FlameGraph,
 };
