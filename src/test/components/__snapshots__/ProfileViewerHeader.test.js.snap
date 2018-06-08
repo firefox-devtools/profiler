@@ -147,10 +147,10 @@ process: \\"default\\" (0)"
                 />
               </div>
               <div
-                className="threadStackGraph"
+                className="threadActivityGraph"
               >
                 <canvas
-                  className="threadStackGraphCanvas threadStackGraphCanvas"
+                  className="threadActivityGraphCanvas threadActivityGraphCanvas"
                   onMouseUp={[Function]}
                 />
               </div>
@@ -196,10 +196,10 @@ process: \\"default\\" (0)"
                 />
               </div>
               <div
-                className="threadStackGraph"
+                className="threadActivityGraph"
               >
                 <canvas
-                  className="threadStackGraphCanvas threadStackGraphCanvas"
+                  className="threadActivityGraphCanvas threadActivityGraphCanvas"
                   onMouseUp={[Function]}
                 />
               </div>
@@ -279,10 +279,10 @@ process: \\"default\\" (0)"
                 />
               </div>
               <div
-                className="threadStackGraph"
+                className="threadActivityGraph"
               >
                 <canvas
-                  className="threadStackGraphCanvas threadStackGraphCanvas"
+                  className="threadActivityGraphCanvas threadActivityGraphCanvas"
                   onMouseUp={[Function]}
                 />
               </div>
@@ -344,133 +344,340 @@ process: \\"default\\" (0)"
 exports[`calltree/ProfileViewerHeader renders the header 2`] = `
 Array [
   Array [
-    "set fillStyle",
-    "#45a1ff",
+    "set globalCompositeOperation",
+    "lighter",
   ],
   Array [
-    "fillRect",
+    "set fillStyle",
+    "#b1b1b3",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
     0,
-    NaN,
-    22.22222222222222,
-    NaN,
-  ],
-  Array [
-    "fillRect",
-    22.22222222222222,
-    NaN,
-    22.22222222222222,
-    NaN,
-  ],
-  Array [
-    "fillRect",
-    44.44444444444444,
-    NaN,
-    22.22222222222222,
-    NaN,
-  ],
-  Array [
-    "fillRect",
-    66.66666666666666,
-    NaN,
-    22.22222222222222,
-    NaN,
-  ],
-  Array [
-    "fillRect",
-    88.88888888888889,
-    NaN,
-    22.22222222222222,
-    NaN,
-  ],
-  Array [
-    "fillRect",
-    111.11111111111111,
-    NaN,
-    22.22222222222222,
-    NaN,
-  ],
-  Array [
-    "fillRect",
-    133.33333333333331,
-    NaN,
-    22.22222222222222,
-    NaN,
-  ],
-  Array [
-    "fillRect",
-    155.55555555555554,
-    NaN,
-    22.22222222222222,
-    NaN,
-  ],
-  Array [
-    "fillRect",
-    177.77777777777777,
-    NaN,
-    22.22222222222222,
-    NaN,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
-    "fillRect",
-    88.88888888888889,
-    0,
-    22.22222222222222,
     300,
   ],
   Array [
-    "fillRect",
-    111.11111111111111,
-    0,
-    22.22222222222222,
-    300,
+    "closePath",
   ],
   Array [
-    "fillRect",
-    133.33333333333331,
-    75,
-    22.22222222222222,
-    225,
+    "fill",
   ],
   Array [
     "set fillStyle",
-    "#003eaa",
+    "#b1b1b380",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    186.85713708400726,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
+    "#12bc00",
   ],
   Array [
-    "fillRect",
-    88.88888888888889,
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
     0,
-    22.22222222222222,
-    300,
+    186.85713708400726,
   ],
   Array [
-    "fillRect",
-    111.11111111111111,
-    0,
-    22.22222222222222,
-    300,
+    "closePath",
   ],
   Array [
-    "fillRect",
-    133.33333333333331,
-    75,
-    22.22222222222222,
-    225,
+    "fill",
   ],
   Array [
     "set fillStyle",
-    "#003eaa",
+    "#12bc0080",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    186.85713708400726,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    186.85713708400726,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df80",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    186.85713708400726,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b3",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    300,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b380",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    300,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    300,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0080",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    300,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    300,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df80",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    300,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set globalCompositeOperation",
+    "lighter",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b3",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    300,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#b1b1b380",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    300,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc00",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    300,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0080",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    300,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    300,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df80",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    300,
+  ],
+  Array [
+    "closePath",
+  ],
+  Array [
+    "fill",
   ],
   Array [
     "clearRect",

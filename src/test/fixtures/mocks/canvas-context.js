@@ -32,6 +32,8 @@ export default function mockCanvasContext() {
       fillText: spyLog('fillText'),
       clearRect: spyLog('clearRect'),
       beginPath: spyLog('beginPath'),
+      moveTo: spyLog('moveTo'),
+      lineTo: () => {}, // don't spyLog lineTo because we execute thousands of them
       closePath: spyLog('closePath'),
       arc: spyLog('arc'),
       measureText: spyLog('measureText', text => ({ width: text.length * 5 })),
