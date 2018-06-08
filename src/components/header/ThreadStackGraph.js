@@ -10,10 +10,11 @@ import { timeCode } from '../../utils/time-code';
 import {
   getSampleCallNodes,
   getSelectedSamples,
+  getSampleIndexClosestToTime,
 } from '../../profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 
-import type { Thread } from '../../types/profile';
+import type { Thread, IndexIntoSamplesTable } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type {
   CallNodeInfo,
@@ -29,7 +30,7 @@ type Props = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +className: string,
-  +onStackClick: (time: Milliseconds) => void,
+  +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
 |};
 
 class ThreadStackGraph extends PureComponent<Props> {
@@ -184,12 +185,19 @@ class ThreadStackGraph extends PureComponent<Props> {
   _onMouseUp = (e: SyntheticMouseEvent<>) => {
     const canvas = this._canvas;
     if (canvas) {
-      const { rangeStart, rangeEnd } = this.props;
+      const { rangeStart, rangeEnd, thread, interval } = this.props;
       const r = canvas.getBoundingClientRect();
 
       const x = e.pageX - r.left;
       const time = rangeStart + x / r.width * (rangeEnd - rangeStart);
-      this.props.onStackClick(time);
+
+      const sampleIndex = getSampleIndexClosestToTime(
+        thread.samples,
+        time,
+        interval
+      );
+
+      this.props.onSampleClick(sampleIndex);
     }
   };
 

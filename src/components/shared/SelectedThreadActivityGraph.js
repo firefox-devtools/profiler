@@ -15,10 +15,7 @@ import {
   getDisplayRange,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
-import {
-  getSampleIndexClosestToTime,
-  getCallNodePathFromIndex,
-} from '../../profile-logic/profile-data';
+import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   focusCallTree,
@@ -30,6 +27,7 @@ import type {
   CategoryList,
   StackTable,
   IndexIntoStackTable,
+  IndexIntoSamplesTable,
 } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type {
@@ -84,22 +82,17 @@ function findLastCategoryChangeInStack(
 class SelectedThreadActivityGraph extends PureComponent<Props> {
   constructor(props) {
     super(props);
-    (this: any)._onStackClick = this._onStackClick.bind(this);
+    (this: any)._onSampleClick = this._onSampleClick.bind(this);
   }
 
-  _onStackClick(time: number) {
-    const { selectedThreadIndex, interval } = this.props;
+  _onSampleClick(sampleIndex: IndexIntoSamplesTable) {
     const {
       thread,
       callNodeInfo,
+      selectedThreadIndex,
       changeSelectedCallNode,
       focusCallTree,
     } = this.props;
-    const sampleIndex = getSampleIndexClosestToTime(
-      thread.samples,
-      time,
-      interval
-    );
     const sampleStack = thread.samples.stack[sampleIndex];
     let newSelectedCallNode = -1;
     if (sampleStack !== null) {
@@ -152,7 +145,7 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
           rangeEnd={rangeEnd}
           callNodeInfo={callNodeInfo}
           selectedCallNodeIndex={selectedCallNodeIndex}
-          onStackClick={this._onStackClick}
+          onSampleClick={this._onSampleClick}
           categories={categories}
           selectedSamples={selectedSamples}
         />
@@ -164,7 +157,7 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
           rangeEnd={rangeEnd}
           callNodeInfo={callNodeInfo}
           selectedCallNodeIndex={selectedCallNodeIndex}
-          onStackClick={this._onStackClick}
+          onSampleClick={this._onSampleClick}
           upsideDown={true}
         />
       </div>

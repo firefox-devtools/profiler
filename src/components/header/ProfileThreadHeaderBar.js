@@ -9,10 +9,7 @@ import explicitConnect from '../../utils/connect';
 import ThreadActivityGraph from './ThreadActivityGraph';
 import { selectorsForThread, getProfile } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
-import {
-  getSampleIndexClosestToTime,
-  getCallNodePathFromIndex,
-} from '../../profile-logic/profile-data';
+import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import ProfileThreadJankOverview from './ProfileThreadJankOverview';
 import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOverview';
@@ -25,7 +22,12 @@ import {
 } from '../../actions/profile-view';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 
-import type { Thread, ThreadIndex, CategoryList } from '../../types/profile';
+import type {
+  Thread,
+  ThreadIndex,
+  CategoryList,
+  IndexIntoSamplesTable,
+} from '../../types/profile';
 import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
   CallNodeInfo,
@@ -72,7 +74,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
   constructor(props) {
     super(props);
     (this: any)._onLabelMouseDown = this._onLabelMouseDown.bind(this);
-    (this: any)._onStackClick = this._onStackClick.bind(this);
+    (this: any)._onSampleClick = this._onSampleClick.bind(this);
     (this: any)._onLineClick = this._onLineClick.bind(this);
     (this: any)._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(
       this
@@ -102,19 +104,15 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
     changeSelectedThread(threadIndex);
   }
 
-  _onStackClick(time: number) {
-    const { threadIndex, interval } = this.props;
+  _onSampleClick(sampleIndex: IndexIntoSamplesTable) {
     const {
       thread,
+      threadIndex,
       callNodeInfo,
       changeSelectedCallNode,
       focusCallTree,
     } = this.props;
-    const sampleIndex = getSampleIndexClosestToTime(
-      thread.samples,
-      time,
-      interval
-    );
+
     const newSelectedStack = thread.samples.stack[sampleIndex];
     const newSelectedCallNode =
       newSelectedStack === null
@@ -229,7 +227,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
             selectedCallNodeIndex={selectedCallNodeIndex}
-            onStackClick={this._onStackClick}
+            onSampleClick={this._onSampleClick}
             categories={categories}
           />
           <EmptyThreadIndicator

@@ -8,7 +8,12 @@ import classNames from 'classnames';
 import { timeCode } from '../../utils/time-code';
 import photonColors from 'photon-colors';
 
-import type { Thread, CategoryList } from '../../types/profile';
+import type {
+  Thread,
+  CategoryList,
+  IndexIntoSamplesTable,
+} from '../../types/profile';
+import { getSampleIndexClosestToTime } from '../../profile-logic/profile-data';
 import type { Milliseconds } from '../../types/units';
 import type {
   CallNodeInfo,
@@ -24,7 +29,7 @@ type Props = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +className: string,
-  +onStackClick: (time: Milliseconds) => void,
+  +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
   +categories: CategoryList,
   +selectedSamples?: boolean[],
 |};
@@ -317,7 +322,16 @@ class ThreadActivityGraph extends PureComponent<Props> {
 
       const x = e.pageX - r.left;
       const time = rangeStart + x / r.width * (rangeEnd - rangeStart);
-      this.props.onStackClick(time);
+
+      const { fullThread, interval } = this.props;
+
+      const sampleIndex = getSampleIndexClosestToTime(
+        fullThread.samples,
+        time,
+        interval
+      );
+
+      this.props.onSampleClick(sampleIndex);
     }
   };
 
