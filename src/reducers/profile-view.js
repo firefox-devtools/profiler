@@ -27,7 +27,6 @@ import type {
   IndexIntoCategoryList,
   Thread,
   ThreadIndex,
-  SamplesTable,
   MarkersTable,
 } from '../types/profile';
 import type {

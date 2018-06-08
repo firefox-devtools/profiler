@@ -18,29 +18,20 @@ import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
   getSampleIndexClosestToTime,
   getCallNodePathFromIndex,
-  getSelectedSamples,
 } from '../../profile-logic/profile-data';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
-import ProfileThreadJankOverview from '../header/ProfileThreadJankOverview';
-import ProfileThreadTracingMarkerOverview from '../header/ProfileThreadTracingMarkerOverview';
 import {
-  changeSelectedThread,
-  updateProfileSelection,
-  changeRightClickedThread,
   changeSelectedCallNode,
   focusCallTree,
 } from '../../actions/profile-view';
-import EmptyThreadIndicator from '../header/EmptyThreadIndicator';
 
 import type {
   Thread,
   ThreadIndex,
   CategoryList,
   StackTable,
-  IndexIntoFrameTable,
   IndexIntoStackTable,
 } from '../../types/profile';
-import type { Milliseconds, StartEndRange } from '../../types/units';
+import type { Milliseconds } from '../../types/units';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -59,11 +50,8 @@ type StateProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +thread: Thread,
-  +threadName: string,
-  +processDetails: string,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +unfilteredSamplesRange: StartEndRange | null,
   +categories: CategoryList,
   +selectedSamples: boolean[],
 |};
@@ -150,9 +138,6 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
       rangeEnd,
       callNodeInfo,
       selectedCallNodeIndex,
-      threadName,
-      processDetails,
-      unfilteredSamplesRange,
       categories,
       selectedSamples,
     } = this.props;
@@ -201,15 +186,10 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       interval: getProfile(state).meta.interval,
       selectedThreadIndex: getSelectedThreadIndex(state),
       thread: selectedThreadSelectors.getRangeFilteredThread(state),
-      threadName: selectedThreadSelectors.getFriendlyThreadName(state),
-      processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
       rangeStart,
       rangeEnd,
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-        state
-      ),
-      unfilteredSamplesRange: selectedThreadSelectors.unfilteredSamplesRange(
         state
       ),
       categories: getProfile(state).meta.categories,
