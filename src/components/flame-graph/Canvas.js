@@ -5,10 +5,7 @@
 // @flow
 import * as React from 'react';
 import colors from 'photon-colors';
-import {
-  withChartViewport,
-  type WithChartViewport,
-} from '../shared/chart/Viewport';
+import { withChartViewport } from '../shared/chart/Viewport';
 import NodeIcon from '../shared/NodeIcon';
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
@@ -520,6 +517,4 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
   }
 }
 
-export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
-  FlameGraphCanvas
-);
+export default withChartViewport(FlameGraphCanvas);

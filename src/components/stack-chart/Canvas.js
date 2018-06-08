@@ -4,10 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import {
-  withChartViewport,
-  type WithChartViewport,
-} from '../shared/chart/Viewport';
+import { withChartViewport } from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatNumber } from '../../utils/format-numbers';
@@ -327,6 +324,4 @@ class StackChartCanvas extends React.PureComponent<Props> {
 }
 
 //
-export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
-  StackChartCanvas
-);
+export default withChartViewport(StackChartCanvas);

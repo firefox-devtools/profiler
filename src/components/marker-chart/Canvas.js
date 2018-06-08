@@ -6,7 +6,6 @@
 import * as React from 'react';
 import {
   withChartViewport,
-  type WithChartViewport,
 } from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
@@ -377,6 +376,4 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
   }
 }
 
-export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
-  MarkerChartCanvas
-);
+export default withChartViewport(MarkerChartCanvas);
