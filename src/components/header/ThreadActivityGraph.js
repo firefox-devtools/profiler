@@ -15,27 +15,6 @@ import type {
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 
-function createDiagonalRepeatGradient(ctx, color) {
-  const c = document.createElement('canvas');
-  const dpr = Math.round(window.devicePixelRatio);
-  c.width = 4 * dpr;
-  c.height = 4 * dpr;
-  const cctx = c.getContext('2d');
-  cctx.scale(dpr, dpr);
-  const linear = cctx.createLinearGradient(0, 0, 4, 4);
-  linear.addColorStop(0, color);
-  linear.addColorStop(0.25, color);
-  linear.addColorStop(0.25, 'transparent');
-  linear.addColorStop(0.5, 'transparent');
-  linear.addColorStop(0.5, color);
-  linear.addColorStop(0.75, color);
-  linear.addColorStop(0.75, 'transparent');
-  linear.addColorStop(1, 'transparent');
-  cctx.fillStyle = linear;
-  cctx.fillRect(0, 0, 4, 4);
-  return ctx.createPattern(c, 'repeat');
-}
-
 type Props = {|
   +fullThread: Thread,
   +filteredThread?: Thread,
@@ -115,23 +94,61 @@ class ThreadActivityGraph extends PureComponent<Props> {
     const xPixelsPerMs = pixelWidth / rangeLength;
 
     const colorMap = {
-      transparent: { fillStyle: 'transparent', gravity: 0 },
-      purple: { fillStyle: photonColors.PURPLE_50, gravity: 5 },
-      green: { fillStyle: photonColors.GREEN_60, gravity: 4 },
-      orange: { fillStyle: photonColors.ORANGE_60, gravity: 2 },
-      yellow: { fillStyle: photonColors.YELLOW_60, gravity: 6 },
-      lightblue: { fillStyle: photonColors.BLUE_40, gravity: 1 },
-      grey: { fillStyle: photonColors.GREY_40, gravity: 8 },
-      blue: { fillStyle: photonColors.BLUE_60, gravity: 3 },
-      brown: { fillStyle: photonColors.MAGENTA_60, gravity: 7 },
+      transparent: {
+        activeFillStyle: 'transparent',
+        inactiveFillStyle: 'transparent',
+        gravity: 0,
+      },
+      purple: {
+        activeFillStyle: photonColors.PURPLE_50,
+        inactiveFillStyle: photonColors.PURPLE_50 + '80',
+        gravity: 5,
+      },
+      green: {
+        activeFillStyle: photonColors.GREEN_60,
+        inactiveFillStyle: photonColors.GREEN_60 + '80',
+        gravity: 4,
+      },
+      orange: {
+        activeFillStyle: photonColors.ORANGE_60,
+        inactiveFillStyle: photonColors.ORANGE_60 + '80',
+        gravity: 2,
+      },
+      yellow: {
+        activeFillStyle: photonColors.YELLOW_60,
+        inactiveFillStyle: photonColors.YELLOW_60 + '80',
+        gravity: 6,
+      },
+      lightblue: {
+        activeFillStyle: photonColors.BLUE_40,
+        inactiveFillStyle: photonColors.BLUE_40 + '80',
+        gravity: 1,
+      },
+      grey: {
+        activeFillStyle: photonColors.GREY_40,
+        inactiveFillStyle: photonColors.GREY_40 + '80',
+        gravity: 8,
+      },
+      blue: {
+        activeFillStyle: photonColors.BLUE_60,
+        inactiveFillStyle: photonColors.BLUE_60 + '80',
+        gravity: 3,
+      },
+      brown: {
+        activeFillStyle: photonColors.MAGENTA_60,
+        inactiveFillStyle: photonColors.MAGENTA_60 + '80',
+        gravity: 7,
+      },
     };
 
     const categoryInfos = categories.map(({ color: colorName }) => {
-      const { fillStyle, gravity } = colorMap[colorName];
+      const { activeFillStyle, inactiveFillStyle, gravity } = colorMap[
+        colorName
+      ];
       return {
         gravity,
-        activeFillStyle: fillStyle,
-        inactiveFillStyle: createDiagonalRepeatGradient(ctx, fillStyle),
+        activeFillStyle,
+        inactiveFillStyle,
         activePercentageAtPixel: new Float32Array(pixelWidth),
         inactivePercentageAtPixel: new Float32Array(pixelWidth),
       };
@@ -253,12 +270,10 @@ class ThreadActivityGraph extends PureComponent<Props> {
       ...categoryInfos.map(categoryInfo => [
         {
           fillStyle: categoryInfo.activeFillStyle,
-          opacity: 1.0,
           array: gaussianBlur1D(categoryInfo.activePercentageAtPixel),
         },
         {
-          fillStyle: categoryInfo.activeFillStyle,
-          opacity: 0.5,
+          fillStyle: categoryInfo.inactiveFillStyle,
           array: gaussianBlur1D(categoryInfo.inactivePercentageAtPixel),
         },
       ])
@@ -277,9 +292,8 @@ class ThreadActivityGraph extends PureComponent<Props> {
     // lighter === OP_ADD
     ctx.globalCompositeOperation = 'lighter';
     lastCumulativeArray = new Float32Array(pixelWidth);
-    for (const { fillStyle, opacity, array } of individualBuckets) {
+    for (const { fillStyle, array } of individualBuckets) {
       const cumulativeArray = array;
-      ctx.globalAlpha = opacity;
       ctx.fillStyle = fillStyle;
       ctx.beginPath();
       ctx.moveTo(0, (1 - lastCumulativeArray[0]) * pixelHeight);
