@@ -4,9 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import {
-  withChartViewport,
-} from '../shared/chart/Viewport';
+import { withChartViewport } from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import TextMeasurement from '../../utils/text-measurement';

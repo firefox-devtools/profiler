@@ -796,9 +796,20 @@ export const selectorsForThread = (
       getFilteredThread,
       getCallNodeInfo,
       getSelectedCallNodeIndex,
-      (thread, {callNodeTable, stackIndexToCallNodeIndex}, selectedCallNode) => {
-        const sampleCallNodes = ProfileData.getSampleCallNodes(thread.samples, stackIndexToCallNodeIndex);
-        return ProfileData.getSelectedSamples(callNodeTable, sampleCallNodes, selectedCallNode);
+      (
+        thread,
+        { callNodeTable, stackIndexToCallNodeIndex },
+        selectedCallNode
+      ) => {
+        const sampleCallNodes = ProfileData.getSampleCallNodes(
+          thread.samples,
+          stackIndexToCallNodeIndex
+        );
+        return ProfileData.getSelectedSamples(
+          callNodeTable,
+          sampleCallNodes,
+          selectedCallNode
+        );
       }
     );
     const getExpandedCallNodePaths = createSelector(

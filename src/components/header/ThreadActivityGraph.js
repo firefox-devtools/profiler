@@ -165,7 +165,8 @@ class ThreadActivityGraph extends PureComponent<Props> {
       const intPixelStart = pixelStart | 0;
       const intPixelEnd = pixelEnd | 0;
 
-      const thisSampleWasFilteredOut = selectedSamples && !selectedSamples[sampleIndex];
+      const thisSampleWasFilteredOut =
+        selectedSamples && !selectedSamples[sampleIndex];
       const categoryArray = thisSampleWasFilteredOut
         ? categoryInfo.inactivePercentageAtPixel
         : categoryInfo.activePercentageAtPixel;

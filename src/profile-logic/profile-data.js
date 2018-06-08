@@ -188,8 +188,14 @@ export function getSelectedSamples(
     }
     return callNodeIndex === selectedCallNodeIndex;
   }
-  for (let sampleIndex = 0; sampleIndex < sampleCallNodes.length; sampleIndex++) {
-    result[sampleIndex] = hasSelectedCallNodePrefix(sampleCallNodes[sampleIndex]);
+  for (
+    let sampleIndex = 0;
+    sampleIndex < sampleCallNodes.length;
+    sampleIndex++
+  ) {
+    result[sampleIndex] = hasSelectedCallNodePrefix(
+      sampleCallNodes[sampleIndex]
+    );
   }
   return result;
 }
