@@ -116,14 +116,14 @@ class ThreadActivityGraph extends PureComponent<Props> {
 
     const colorMap = {
       transparent: { fillStyle: 'transparent', gravity: 0 },
-      purple: { fillStyle: photonColors.PURPLE_50, gravity: 5 },
+      purple: { fillStyle: photonColors.TEAL_70, gravity: 5 },
       green: { fillStyle: photonColors.GREEN_60, gravity: 4 },
-      orange: { fillStyle: photonColors.ORANGE_60, gravity: 2 },
-      yellow: { fillStyle: photonColors.YELLOW_60, gravity: 6 },
+      orange: { fillStyle: photonColors.ORANGE_50, gravity: 2 },
+      yellow: { fillStyle: photonColors.YELLOW_50, gravity: 6 },
       lightblue: { fillStyle: photonColors.BLUE_40, gravity: 1 },
-      grey: { fillStyle: photonColors.GREY_40, gravity: 8 },
+      grey: { fillStyle: photonColors.GREY_30, gravity: 8 },
       blue: { fillStyle: photonColors.BLUE_60, gravity: 3 },
-      brown: { fillStyle: photonColors.MAGENTA_60, gravity: 7 },
+      magenta: { fillStyle: photonColors.MAGENTA_60, gravity: 7 },
     };
 
     const categoryInfos = categories.map(({ color: colorName }) => {
@@ -165,7 +165,8 @@ class ThreadActivityGraph extends PureComponent<Props> {
       const intPixelStart = pixelStart | 0;
       const intPixelEnd = pixelEnd | 0;
 
-      const thisSampleWasFilteredOut = selectedSamples && !selectedSamples[sampleIndex];
+      const thisSampleWasFilteredOut =
+        selectedSamples && !selectedSamples[sampleIndex];
       const categoryArray = thisSampleWasFilteredOut
         ? categoryInfo.inactivePercentageAtPixel
         : categoryInfo.activePercentageAtPixel;
@@ -301,7 +302,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
       const r = canvas.getBoundingClientRect();
 
       const x = e.pageX - r.left;
-      const time = rangeStart + x / r.width * (rangeEnd - rangeStart);
+      const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
       this.props.onStackClick(time);
     }
   };
