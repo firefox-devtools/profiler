@@ -206,22 +206,22 @@ body, #root, .profileViewer {
   background-color: transparent;
 }
 .treeViewCategoryKnob.purple {
-  background-color: var(--purple-50);
+  background-color: var(--teal-70);
 }
 .treeViewCategoryKnob.green {
   background-color: var(--green-60);
 }
 .treeViewCategoryKnob.orange {
-  background-color: var(--orange-60);
+  background-color: var(--orange-50);
 }
 .treeViewCategoryKnob.yellow {
-  background-color: var(--yellow-60);
+  background-color: var(--yellow-50);
 }
 .treeViewCategoryKnob.lightblue {
   background-color: var(--blue-40);
 }
 .treeViewCategoryKnob.grey {
-  background-color: var(--grey-40);
+  background-color: var(--grey-30);
 }
 .treeViewCategoryKnob.blue {
   background-color: var(--blue-60);
