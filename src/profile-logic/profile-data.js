@@ -975,6 +975,55 @@ export function getSampleIndexClosestToTime(
   return distanceToThis < distanceToLast ? index : index - 1;
 }
 
+export function getSampleIndexClosestToTimeMatchingFilterFunction(
+  samples: SamplesTable,
+  time: number,
+  interval: number,
+  filterCallback: IndexIntoSamplesTable => boolean
+): IndexIntoSamplesTable | null {
+  const startIndex = getSampleIndexClosestToTime(samples, time, interval);
+
+  if (filterCallback(startIndex)) {
+    return startIndex;
+  }
+
+  const samplesTime = samples.time;
+
+  let left = startIndex - 1;
+  let right = startIndex + 1;
+  while (left >= 0 && right < samples.length) {
+    const distanceToLeft = time - samplesTime[left];
+    const distanceToRight = samplesTime[right] - time;
+    if (distanceToLeft <= distanceToRight) {
+      if (filterCallback(left)) {
+        return left;
+      }
+      left--;
+    } else {
+      if (filterCallback(right)) {
+        return right;
+      }
+      right++;
+    }
+  }
+
+  while (left >= 0) {
+    if (filterCallback(left)) {
+      return left;
+    }
+    left--;
+  }
+
+  while (right < samples.length) {
+    if (filterCallback(right)) {
+      return right;
+    }
+    right++;
+  }
+
+  return null;
+}
+
 export function getJankInstances(
   samples: SamplesTable,
   thresholdInMs: number

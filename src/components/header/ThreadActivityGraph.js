@@ -12,8 +12,12 @@ import type {
   Thread,
   CategoryList,
   IndexIntoSamplesTable,
+  IndexIntoCategoryList,
 } from '../../types/profile';
-import { getSampleIndexClosestToTime } from '../../profile-logic/profile-data';
+import {
+  getSampleIndexClosestToTime,
+  getSampleIndexClosestToTimeMatchingFilterFunction,
+} from '../../profile-logic/profile-data';
 import type { Milliseconds } from '../../types/units';
 import type {
   CallNodeInfo,
@@ -33,8 +37,22 @@ type Props = {|
   +selectedSamples?: boolean[],
 |};
 
+type Bucket = {|
+  category: IndexIntoCategoryList,
+  array: Float32Array,
+  fillStyle: string,
+|};
+
+type PaintSettings = {|
+  buckets: Bucket[],
+  pixelWidth: number,
+  pixelHeight: number,
+  devicePixelRatio: number,
+|};
+
 class ThreadActivityGraph extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement;
+  _lastPaintSettings: PaintSettings | null;
   _requestedAnimationFrame: boolean;
   _resizeListener: () => void;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
@@ -45,6 +63,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
     this._resizeListener = () => this.forceUpdate();
     this._requestedAnimationFrame = false;
     this._canvas = null;
+    this._lastPaintSettings = null;
   }
 
   _scheduleDraw() {
@@ -145,11 +164,12 @@ class ThreadActivityGraph extends PureComponent<Props> {
       },
     };
 
-    const categoryInfos = categories.map(({ color: colorName }) => {
+    const categoryInfos = categories.map(({ color: colorName }, category) => {
       const { activeFillStyle, inactiveFillStyle, gravity } = colorMap[
         colorName
       ];
       return {
+        category,
         gravity,
         activeFillStyle,
         inactiveFillStyle,
@@ -273,10 +293,12 @@ class ThreadActivityGraph extends PureComponent<Props> {
     const individualBuckets = [].concat(
       ...categoryInfos.map(categoryInfo => [
         {
+          category: categoryInfo.category,
           fillStyle: categoryInfo.activeFillStyle,
           array: gaussianBlur1D(categoryInfo.activePercentageAtPixel),
         },
         {
+          category: categoryInfo.category,
           fillStyle: categoryInfo.inactiveFillStyle,
           array: gaussianBlur1D(categoryInfo.inactivePercentageAtPixel),
         },
@@ -311,6 +333,50 @@ class ThreadActivityGraph extends PureComponent<Props> {
       ctx.fill();
       lastCumulativeArray = cumulativeArray;
     }
+
+    this._lastPaintSettings = {
+      buckets: individualBuckets,
+      pixelWidth,
+      pixelHeight,
+      devicePixelRatio,
+    };
+  }
+
+  _categoryAtPixel(x: number, y: number): IndexIntoCategoryList | null {
+    const lastPaintSettings = this._lastPaintSettings;
+    if (lastPaintSettings === null) {
+      return null;
+    }
+
+    const {
+      buckets,
+      pixelWidth,
+      pixelHeight,
+      devicePixelRatio,
+    } = lastPaintSettings;
+
+    const deviceX = Math.round(x * devicePixelRatio);
+    const deviceY = Math.round(y * devicePixelRatio);
+
+    if (
+      !buckets ||
+      deviceX < 0 ||
+      deviceX >= pixelWidth ||
+      deviceY < 0 ||
+      deviceY >= pixelHeight
+    ) {
+      return null;
+    }
+
+    const valueToFind = 1 - deviceY / pixelHeight;
+    for (const { category, array } of buckets) {
+      const thisBucketCumulativeValue = array[deviceX];
+      if (thisBucketCumulativeValue >= valueToFind) {
+        return category;
+      }
+    }
+
+    return null;
   }
 
   _onMouseUp = (e: SyntheticMouseEvent<>) => {
@@ -320,16 +386,33 @@ class ThreadActivityGraph extends PureComponent<Props> {
       const r = canvas.getBoundingClientRect();
 
       const x = e.pageX - r.left;
+      const y = e.pageY - r.top;
       const time = rangeStart + x / r.width * (rangeEnd - rangeStart);
+
+      const clickedCategory = this._categoryAtPixel(x, y);
 
       const { fullThread, interval } = this.props;
 
-      const sampleIndex = getSampleIndexClosestToTime(
+      let sampleIndex = getSampleIndexClosestToTimeMatchingFilterFunction(
         fullThread.samples,
         time,
-        interval
+        interval,
+        sampleIndex => {
+          const stackIndex = fullThread.samples.stack[sampleIndex];
+          return (
+            stackIndex !== null &&
+            fullThread.stackTable.category[stackIndex] === clickedCategory
+          );
+        }
       );
 
+      if (sampleIndex === null) {
+        sampleIndex = getSampleIndexClosestToTime(
+          fullThread.samples,
+          time,
+          interval
+        );
+      }
       this.props.onSampleClick(sampleIndex);
     }
   };
