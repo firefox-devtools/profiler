@@ -114,6 +114,8 @@ class ThreadActivityGraph extends PureComponent<Props> {
     const ctx = canvas.getContext('2d');
     const xPixelsPerMs = pixelWidth / rangeLength;
 
+    // Category color names come from https://searchfox.org/mozilla-central/source/tools/profiler/core/platform.cpp#1569-1600
+    // and can not be changed here without an additional change in the core
     const colorMap = {
       transparent: { fillStyle: 'transparent', gravity: 0 },
       purple: { fillStyle: photonColors.TEAL_70, gravity: 5 },
@@ -123,7 +125,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
       lightblue: { fillStyle: photonColors.BLUE_40, gravity: 1 },
       grey: { fillStyle: photonColors.GREY_30, gravity: 8 },
       blue: { fillStyle: photonColors.BLUE_60, gravity: 3 },
-      magenta: { fillStyle: photonColors.MAGENTA_60, gravity: 7 },
+      brown: { fillStyle: photonColors.MAGENTA_60, gravity: 7 },
     };
 
     const categoryInfos = categories.map(({ color: colorName }) => {
