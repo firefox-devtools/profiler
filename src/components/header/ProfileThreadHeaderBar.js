@@ -50,7 +50,8 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +thread: Thread,
+  +fullThread: Thread,
+  +filteredThread: Thread,
   +threadName: string,
   +processDetails: string,
   +callNodeInfo: CallNodeInfo,
@@ -106,14 +107,14 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
 
   _onSampleClick(sampleIndex: IndexIntoSamplesTable) {
     const {
-      thread,
+      filteredThread,
       threadIndex,
       callNodeInfo,
       changeSelectedCallNode,
       focusCallTree,
     } = this.props;
 
-    const newSelectedStack = thread.samples.stack[sampleIndex];
+    const newSelectedStack = filteredThread.samples.stack[sampleIndex];
     const newSelectedCallNode =
       newSelectedStack === null
         ? -1
@@ -147,7 +148,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
 
   render() {
     const {
-      thread,
+      fullThread: thread,
       threadIndex,
       interval,
       rangeStart,
@@ -249,7 +250,8 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     const selectors = selectorsForThread(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
     return {
-      thread: selectors.getRangeFilteredThread(state),
+      fullThread: selectors.getRangeFilteredThread(state),
+      filteredThread: selectors.getFilteredThread(state),
       threadName: selectors.getFriendlyThreadName(state),
       processDetails: selectors.getThreadProcessDetails(state),
       callNodeInfo: selectors.getCallNodeInfo(state),

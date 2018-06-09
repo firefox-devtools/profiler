@@ -22,7 +22,6 @@ import type {
 
 type Props = {|
   +fullThread: Thread,
-  +filteredThread?: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,

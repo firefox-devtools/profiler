@@ -47,7 +47,8 @@ type StateProps = {|
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +thread: Thread,
+  +fullThread: Thread,
+  +filteredThread: Thread,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
@@ -87,27 +88,29 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
 
   _onSampleClick(sampleIndex: IndexIntoSamplesTable) {
     const {
-      thread,
+      fullThread,
+      filteredThread,
       callNodeInfo,
       selectedThreadIndex,
       changeSelectedCallNode,
       focusCallTree,
     } = this.props;
-    const sampleStack = thread.samples.stack[sampleIndex];
+    const unfilteredStack = fullThread.samples.stack[sampleIndex];
+    const filteredStack = filteredThread.samples.stack[sampleIndex];
     let newSelectedCallNode = -1;
-    if (sampleStack !== null) {
+    if (unfilteredStack !== null && filteredStack !== null) {
       const categoryEntranceStack = findLastCategoryChangeInStack(
-        sampleStack,
-        thread.stackTable
+        filteredStack,
+        filteredThread.stackTable
       );
       const newSelectedStack =
-        categoryEntranceStack !== null ? categoryEntranceStack : sampleStack;
+        categoryEntranceStack !== null ? categoryEntranceStack : filteredStack;
       newSelectedCallNode =
         callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
       changeSelectedCallNode(
         selectedThreadIndex,
         getCallNodePathFromIndex(
-          callNodeInfo.stackIndexToCallNodeIndex[sampleStack],
+          callNodeInfo.stackIndexToCallNodeIndex[filteredStack],
           callNodeInfo.callNodeTable
         )
       );
@@ -125,7 +128,8 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
   }
   render() {
     const {
-      thread,
+      fullThread,
+      filteredThread,
       interval,
       rangeStart,
       rangeEnd,
@@ -139,7 +143,7 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
       <div>
         <ThreadActivityGraph
           interval={interval}
-          fullThread={thread}
+          fullThread={fullThread}
           className="selectedThreadActivityGraph"
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
@@ -151,7 +155,7 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
         />
         <ThreadStackGraph
           interval={interval}
-          thread={thread}
+          thread={filteredThread}
           className="selectedThreadStackGraph"
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
@@ -178,7 +182,8 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     return {
       interval: getProfile(state).meta.interval,
       selectedThreadIndex: getSelectedThreadIndex(state),
-      thread: selectedThreadSelectors.getRangeFilteredThread(state),
+      fullThread: selectedThreadSelectors.getRangeFilteredThread(state),
+      filteredThread: selectedThreadSelectors.getFilteredThread(state),
       rangeStart,
       rangeEnd,
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
