@@ -104,13 +104,14 @@ class CallTreeSidebar extends React.PureComponent<Props> {
       totalTimeForFunc / rootTime * 100
     );
     const selfTimeForFuncPercent = Math.round(selfTimeForFunc / rootTime * 100);
+
     const barSelfTimePercent = {
-      width: selfTimePercent / totalTimePercent * 0.9 + '%',
+      width: Math.round(selfTime / totalTime * 90) + '%',
     };
+
     const circleSelfTimeForFuncPercent = {
-      width: selfTimeForFuncPercent / totalTimeForFuncPercent * 30 * 0.9 + 'vh',
-      height:
-        selfTimeForFuncPercent / totalTimeForFuncPercent * 30 * 0.9 + 'vh',
+      width: Math.round(selfTimeForFunc / totalTimeForFunc * 30) + 'vh',
+      height: Math.round(selfTimeForFunc / totalTimeForFunc * 30) + 'vh',
     };
 
     return (
