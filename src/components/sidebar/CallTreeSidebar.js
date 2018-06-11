@@ -104,6 +104,9 @@ class CallTreeSidebar extends React.PureComponent<Props> {
       totalTimeForFunc / rootTime * 100
     );
     const selfTimeForFuncPercent = Math.round(selfTimeForFunc / rootTime * 100);
+    const barSelfTimePercent = {
+      width: selfTimePercent / totalTimePercent * 0.9 + '%',
+    };
     const circleSelfTimeForFuncPercent = {
       width: selfTimeForFuncPercent / totalTimeForFuncPercent * 30 * 0.9 + 'vh',
       height:
@@ -117,6 +120,8 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           {lib ? <p className="sidebar-subtitle">{lib}</p> : null}
         </header>
         <h3 className="sidebar-title2">About the selected path</h3>
+        <div className="sidebar-bar" />
+        <div className="sidebar-bar-overlay" style={barSelfTimePercent} />
         <div className="sidebar-details">
           <SidebarDetail label="Running Time">
             {totalTime}ms ({totalTimePercent}%)
