@@ -53,7 +53,6 @@ type PaintSettings = {|
 class ThreadActivityGraph extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement;
   _lastPaintSettings: PaintSettings | null;
-  _requestedAnimationFrame: boolean;
   _resizeListener: () => void;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
     (this._canvas = canvas);
@@ -61,22 +60,15 @@ class ThreadActivityGraph extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     this._resizeListener = () => this.forceUpdate();
-    this._requestedAnimationFrame = false;
     this._canvas = null;
     this._lastPaintSettings = null;
   }
 
-  _scheduleDraw() {
-    if (!this._requestedAnimationFrame) {
-      this._requestedAnimationFrame = true;
-      window.requestAnimationFrame(() => {
-        this._requestedAnimationFrame = false;
-        const canvas = this._canvas;
-        if (canvas) {
-          timeCode('ThreadActivityGraph render', () => {
-            this.drawCanvas(canvas);
-          });
-        }
+  _renderCanvas() {
+    const canvas = this._canvas;
+    if (canvas !== null) {
+      timeCode('ThreadActivityGraph render', () => {
+        this.drawCanvas(canvas);
       });
     }
   }
@@ -418,7 +410,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
   };
 
   render() {
-    this._scheduleDraw();
+    this._renderCanvas();
     return (
       <div className={this.props.className}>
         <canvas
