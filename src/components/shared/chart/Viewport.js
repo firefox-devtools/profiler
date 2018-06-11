@@ -361,7 +361,7 @@ export function withChartViewport<
           const mouseCenter = (mouseX - containerLeft) / containerWidth;
 
           const viewportLength = viewportRight - viewportLeft;
-          const zoomFactor = Math.pow(1.0009, -deltaY);
+          const zoomFactor = Math.pow(1.0009, deltaY);
           const newViewportLength = clamp(
             maximumZoom,
             1,
