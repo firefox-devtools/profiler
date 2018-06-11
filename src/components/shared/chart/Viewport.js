@@ -325,24 +325,24 @@ export function withChartViewport<
           } = this.state;
           const mouseCenter = (mouseX - containerLeft) / containerWidth;
 
-          const viewportLength: CssPixels = viewportRight - viewportLeft;
-          const scale = viewportLength - viewportLength / (1 + deltaY * 0.001);
-          let newViewportLeft: UnitIntervalOfProfileRange = clamp(
-            0,
+          const viewportLength = viewportRight - viewportLeft;
+          const zoomFactor = Math.pow(1.0009, -deltaY);
+          const newViewportLength = clamp(
+            maximumZoom,
             1,
-            viewportLeft - scale * mouseCenter
+            viewportLength * zoomFactor
           );
-          let newViewportRight: UnitIntervalOfProfileRange = clamp(
+          const deltaViewportLength = newViewportLength - viewportLength;
+          const newViewportLeft = clamp(
             0,
-            1,
-            viewportRight + scale * (1 - mouseCenter)
+            1 - newViewportLength,
+            viewportLeft - deltaViewportLength * mouseCenter
           );
-
-          if (newViewportRight - newViewportLeft < maximumZoom) {
-            const newViewportMiddle = (viewportLeft + viewportRight) * 0.5;
-            newViewportLeft = newViewportMiddle - maximumZoom * 0.5;
-            newViewportRight = newViewportMiddle + maximumZoom * 0.5;
-          }
+          const newViewportRight = clamp(
+            newViewportLength,
+            1,
+            viewportRight + deltaViewportLength * (1 - mouseCenter)
+          );
 
           const {
             updateProfileSelection,
