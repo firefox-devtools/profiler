@@ -618,6 +618,7 @@ const _upgraders = {
       ['nsLayoutUtils::GetFrameForPoint', LAYOUT],
       ['nsAppShell::ProcessGeckoEvents', OTHER],
       ['PollWrapper(_GPollFD*, unsigned int, int)', IDLE],
+      ['mozilla::image::DecodePoolImpl::PopWorkLocked(bool)', IDLE],
       ['g_main_context_dispatch', OTHER],
       ['nsContentSink::StartLayout(bool)', LAYOUT],
     ]);
