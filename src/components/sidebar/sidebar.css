@@ -48,3 +48,33 @@
   white-space: nowrap;
   text-align: right;
 }
+
+/*---------- chartt for sidebar --------------------- */
+
+
+/* version 1 */
+.circle-box {
+  position: relative;
+  width: 30vh;
+  height: 30vh;
+}
+
+.circle {
+  margin: auto;
+  position: absolute;
+  max-width: 70%;
+  max-height: 70%;
+  border-radius: 50%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.bg-circle {
+  background: #45a1ff;
+}
+
+.data-circle-1 {
+  background: #ffe900;
+}

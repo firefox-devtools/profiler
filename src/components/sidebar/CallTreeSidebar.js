@@ -104,6 +104,11 @@ class CallTreeSidebar extends React.PureComponent<Props> {
       totalTimeForFunc / rootTime * 100
     );
     const selfTimeForFuncPercent = Math.round(selfTimeForFunc / rootTime * 100);
+    const circleSelfTimeForFuncPercent = {
+      width: selfTimeForFuncPercent / totalTimeForFuncPercent * 30 * 0.9 + 'vh',
+      height:
+        selfTimeForFuncPercent / totalTimeForFuncPercent * 30 * 0.9 + 'vh',
+    };
 
     return (
       <aside className="sidebar sidebar-calltree">
@@ -127,6 +132,13 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           </React.Fragment>
         ) : null}
         <h3 className="sidebar-title2">This function in the tree</h3>
+        <div className="circle-box">
+          <div className="circle bg-circle">&nbsp;</div>
+          <div
+            className="circle data-circle-1"
+            style={circleSelfTimeForFuncPercent}
+          />
+        </div>
         <div className="sidebar-details">
           <SidebarDetail label="Running Time">
             {totalTimeForFunc}ms ({totalTimeForFuncPercent}%)
