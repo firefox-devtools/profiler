@@ -102,14 +102,18 @@ type ViewportOwnProps<ChartProps> = {|
   +chartProps: ChartProps,
 |};
 
+type HorizontalViewport = {|
+  viewportLeft: UnitIntervalOfProfileRange,
+  viewportRight: UnitIntervalOfProfileRange,
+|};
+
 type State = {|
   containerWidth: CssPixels,
   containerHeight: CssPixels,
   containerLeft: CssPixels,
   viewportTop: CssPixels,
   viewportBottom: CssPixels,
-  viewportLeft: UnitIntervalOfProfileRange,
-  viewportRight: UnitIntervalOfProfileRange,
+  horizontalViewport: HorizontalViewport,
   dragX: CssPixels,
   dragY: CssPixels,
   isDragging: boolean,
@@ -177,7 +181,7 @@ export function withChartViewport<
     }
 
     getDefaultState(props: ViewportProps) {
-      const { viewportLeft, viewportRight } = this.getHorizontalViewport(props);
+      const horizontalViewport = this.getHorizontalViewport(props);
       const { startsAtBottom, maxViewportHeight } = props.viewportProps;
       return {
         containerWidth: 0,
@@ -185,8 +189,7 @@ export function withChartViewport<
         containerLeft: 0,
         viewportTop: 0,
         viewportBottom: startsAtBottom ? maxViewportHeight : 0,
-        viewportLeft,
-        viewportRight,
+        horizontalViewport,
         dragX: 0,
         dragY: 0,
         isDragging: false,
@@ -229,7 +232,9 @@ export function withChartViewport<
           newProps.viewportProps.selection ||
         this.props.viewportProps.timeRange !== newProps.viewportProps.timeRange
       ) {
-        this.setState(this.getHorizontalViewport(newProps));
+        this.setState({
+          horizontalViewport: this.getHorizontalViewport(newProps),
+        });
       }
     }
 
@@ -287,6 +292,14 @@ export function withChartViewport<
       );
     }
 
+    _updateProfileSelectionFromHorizontalViewport(
+      callback: HorizontalViewport => ProfileSelection
+    ) {
+      this.props.updateProfileSelection(
+        callback(this.state.horizontalViewport)
+      );
+    }
+
     zoomRangeSelection(event: SyntheticWheelEvent<>) {
       const { hasZoomedViaMousewheel, setHasZoomedViaMousewheel } = this.props;
       if (!hasZoomedViaMousewheel && setHasZoomedViaMousewheel) {
@@ -315,59 +328,51 @@ export function withChartViewport<
           const deltaY = this.zoomRangeSelectionScrollDelta;
           this.zoomRangeSelectionScrollDelta = 0;
           this.zoomRangeSelectionScheduled = false;
+          const { containerLeft, containerWidth } = this.state;
 
           const { maximumZoom } = this.props.viewportProps;
-          const {
-            containerLeft,
-            containerWidth,
-            viewportLeft,
-            viewportRight,
-          } = this.state;
-          const mouseCenter = (mouseX - containerLeft) / containerWidth;
 
-          const viewportLength = viewportRight - viewportLeft;
-          const zoomFactor = Math.pow(1.0009, -deltaY);
-          const newViewportLength = clamp(
-            maximumZoom,
-            1,
-            viewportLength * zoomFactor
-          );
-          const deltaViewportLength = newViewportLength - viewportLength;
-          const newViewportLeft = clamp(
-            0,
-            1 - newViewportLength,
-            viewportLeft - deltaViewportLength * mouseCenter
-          );
-          const newViewportRight = clamp(
-            newViewportLength,
-            1,
-            viewportRight + deltaViewportLength * (1 - mouseCenter)
-          );
+          this._updateProfileSelectionFromHorizontalViewport(
+            ({ viewportLeft, viewportRight }) => {
+              const mouseCenter = (mouseX - containerLeft) / containerWidth;
 
-          const {
-            updateProfileSelection,
-            viewportProps: { timeRange },
-          } = this.props;
-          if (newViewportLeft === 0 && newViewportRight === 1) {
-            if (viewportLeft === 0 && viewportRight === 1) {
-              // Do not update if at the maximum bounds.
-              return;
+              const viewportLength = viewportRight - viewportLeft;
+              const zoomFactor = Math.pow(1.0009, -deltaY);
+              const newViewportLength = clamp(
+                maximumZoom,
+                1,
+                viewportLength * zoomFactor
+              );
+              const deltaViewportLength = newViewportLength - viewportLength;
+              const newViewportLeft = clamp(
+                0,
+                1 - newViewportLength,
+                viewportLeft - deltaViewportLength * mouseCenter
+              );
+              const newViewportRight = clamp(
+                newViewportLength,
+                1,
+                viewportRight + deltaViewportLength * (1 - mouseCenter)
+              );
+
+              const { viewportProps: { timeRange } } = this.props;
+              if (newViewportLeft === 0 && newViewportRight === 1) {
+                return {
+                  hasSelection: false,
+                  isModifying: false,
+                };
+              }
+              const timeRangeLength = timeRange.end - timeRange.start;
+              return {
+                hasSelection: true,
+                isModifying: false,
+                selectionStart:
+                  timeRange.start + timeRangeLength * newViewportLeft,
+                selectionEnd:
+                  timeRange.start + timeRangeLength * newViewportRight,
+              };
             }
-            updateProfileSelection({
-              hasSelection: false,
-              isModifying: false,
-            });
-          } else {
-            const timeRangeLength = timeRange.end - timeRange.start;
-            updateProfileSelection({
-              hasSelection: true,
-              isModifying: false,
-              selectionStart:
-                timeRange.start + timeRangeLength * newViewportLeft,
-              selectionEnd:
-                timeRange.start + timeRangeLength * newViewportRight,
-            });
-          }
+          );
         });
       }
     }
@@ -416,8 +421,7 @@ export function withChartViewport<
         containerWidth,
         containerHeight,
         viewportTop,
-        viewportLeft,
-        viewportRight,
+        horizontalViewport: { viewportLeft, viewportRight },
       } = this.state;
 
       // Calculate left and right in terms of the unit interval of the profile range.
@@ -514,8 +518,7 @@ export function withChartViewport<
         containerHeight,
         viewportTop,
         viewportBottom,
-        viewportLeft,
-        viewportRight,
+        horizontalViewport: { viewportLeft, viewportRight },
         isDragging,
         isShiftScrollHintVisible,
         isSizeSet,
