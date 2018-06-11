@@ -212,6 +212,7 @@ const options: ExplicitConnectOptions<*, *, *> = {
         selection: profileSelection,
         startsAtBottom: true,
         disableHorizontalMovement: false,
+        className: 'selectedThreadActivityGraphViewport',
         viewportNeedsUpdate,
       },
     };

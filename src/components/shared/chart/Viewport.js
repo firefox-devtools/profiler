@@ -87,6 +87,7 @@ type ViewportOwnProps<ChartProps> = {|
     +maximumZoom: UnitIntervalOfProfileRange,
     +selection: ProfileSelection,
     +disableHorizontalMovement?: boolean,
+    +className?: string,
     // These props are defined by the generic variables passed into to the type
     // WithChartViewport when calling withChartViewport. This is how the relationship
     // is guaranteed. e.g. here with OwnProps:
@@ -531,7 +532,11 @@ export function withChartViewport<
     }
 
     render() {
-      const { chartProps, hasZoomedViaMousewheel } = this.props;
+      const {
+        chartProps,
+        hasZoomedViaMousewheel,
+        viewportProps: { className },
+      } = this.props;
 
       const {
         containerWidth,
@@ -547,6 +552,7 @@ export function withChartViewport<
       const viewportClassName = classNames({
         chartViewport: true,
         dragging: isDragging,
+        ...(className ? { [className]: true } : {}),
       });
 
       const shiftScrollClassName = classNames({

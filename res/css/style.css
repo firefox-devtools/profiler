@@ -498,6 +498,10 @@ body, #root, .profileViewer {
   width: 100%;
 }
 
+.selectedThreadActivityGraphViewport {
+  flex: auto 0 0;
+}
+
 .selectedThreadActivityGraph,
 .selectedThreadStackGraph {
   height: 30px;
