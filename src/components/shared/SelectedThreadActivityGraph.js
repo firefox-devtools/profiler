@@ -8,6 +8,7 @@ import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import ThreadActivityGraph from '../header/ThreadActivityGraph';
 import ThreadStackGraph from '../header/ThreadStackGraph';
+import { withChartViewport } from '../shared/chart/Viewport';
 import {
   selectedThreadSelectors,
   getSelection,
@@ -169,7 +170,15 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+function viewportNeedsUpdate() {
+  // By always returning false we prevent the viewport from being
+  // reset and scrolled all the way to the bottom when doing
+  // operations like changing the time selection or applying a
+  // transform.
+  return false;
+}
+
+const options: ExplicitConnectOptions<*, *, *> = {
   mapStateToProps: (state: State) => {
     const displayRange = getDisplayRange(state);
     const profileSelection = getSelection(state);
@@ -180,26 +189,37 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       ? profileSelection.selectionEnd
       : displayRange.end;
     return {
-      interval: getProfile(state).meta.interval,
-      selectedThreadIndex: getSelectedThreadIndex(state),
-      fullThread: selectedThreadSelectors.getRangeFilteredThread(state),
-      filteredThread: selectedThreadSelectors.getFilteredThread(state),
-      rangeStart,
-      rangeEnd,
-      callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-      selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-        state
-      ),
-      categories: getProfile(state).meta.categories,
-      selectedSamples: selectedThreadSelectors.getSelectedSamplesInFilteredThread(
-        state
-      ),
+      chartProps: {
+        interval: getProfile(state).meta.interval,
+        selectedThreadIndex: getSelectedThreadIndex(state),
+        fullThread: selectedThreadSelectors.getRangeFilteredThread(state),
+        filteredThread: selectedThreadSelectors.getFilteredThread(state),
+        rangeStart,
+        rangeEnd,
+        callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+        selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
+          state
+        ),
+        categories: getProfile(state).meta.categories,
+        selectedSamples: selectedThreadSelectors.getSelectedSamplesInFilteredThread(
+          state
+        ),
+      },
+      viewportProps: {
+        timeRange: getDisplayRange(state),
+        maxViewportHeight: 0,
+        maximumZoom: 0.0001,
+        selection: profileSelection,
+        startsAtBottom: true,
+        disableHorizontalMovement: false,
+        viewportNeedsUpdate,
+      },
     };
   },
   mapDispatchToProps: {
     changeSelectedCallNode,
     focusCallTree,
   },
-  component: SelectedThreadActivityGraph,
+  component: withChartViewport(SelectedThreadActivityGraph),
 };
 export default explicitConnect(options);
