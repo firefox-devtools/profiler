@@ -64,7 +64,7 @@ export type Viewport = {|
   +viewportTop: CssPixels,
   +viewportBottom: CssPixels,
   +isDragging: boolean,
-  +moveViewport: (CssPixels, CssPixels) => boolean,
+  +moveViewport: (CssPixels, CssPixels) => void,
   +isSizeSet: boolean,
 |};
 
@@ -140,8 +140,9 @@ export function withChartViewport<
 
   class ChartViewport extends React.PureComponent<ViewportProps, State> {
     shiftScrollId: number;
-    zoomRangeSelectionScheduled: boolean;
-    zoomRangeSelectionScrollDelta: number;
+    _pendingProfileSelectionUpdates: Array<
+      (HorizontalViewport) => ProfileSelection
+    > = [];
     _container: HTMLElement | null;
     _takeContainerRef = container => (this._container = container);
 
@@ -157,15 +158,15 @@ export function withChartViewport<
       (this: any)._setSizeNextFrame = this._setSizeNextFrame.bind(this);
 
       this.shiftScrollId = 0;
-      this.zoomRangeSelectionScheduled = false;
-      this.zoomRangeSelectionScrollDelta = 0;
       this._container = null;
 
       this.state = this.getDefaultState(props);
     }
 
-    getHorizontalViewport(props: ViewportProps) {
-      const { selection, timeRange } = props.viewportProps;
+    getHorizontalViewport(
+      selection: ProfileSelection,
+      timeRange: StartEndRange
+    ) {
       if (selection.hasSelection) {
         const { selectionStart, selectionEnd } = selection;
         const timeRangeLength = timeRange.end - timeRange.start;
@@ -181,7 +182,11 @@ export function withChartViewport<
     }
 
     getDefaultState(props: ViewportProps) {
-      const horizontalViewport = this.getHorizontalViewport(props);
+      const { selection, timeRange } = props.viewportProps;
+      const horizontalViewport = this.getHorizontalViewport(
+        selection,
+        timeRange
+      );
       const { startsAtBottom, maxViewportHeight } = props.viewportProps;
       return {
         containerWidth: 0,
@@ -232,8 +237,13 @@ export function withChartViewport<
           newProps.viewportProps.selection ||
         this.props.viewportProps.timeRange !== newProps.viewportProps.timeRange
       ) {
+        const { selection, timeRange } = newProps.viewportProps;
+        const horizontalViewport = this.getHorizontalViewport(
+          selection,
+          timeRange
+        );
         this.setState({
-          horizontalViewport: this.getHorizontalViewport(newProps),
+          horizontalViewport,
         });
       }
     }
@@ -292,12 +302,35 @@ export function withChartViewport<
       );
     }
 
-    _updateProfileSelectionFromHorizontalViewport(
+    _updateProfileSelectionFromHorizontalViewportAsync(
       callback: HorizontalViewport => ProfileSelection
     ) {
-      this.props.updateProfileSelection(
-        callback(this.state.horizontalViewport)
-      );
+      if (this._pendingProfileSelectionUpdates.length === 0) {
+        requestAnimationFrame(() =>
+          this._flushPendingProfileSelectionUpdates()
+        );
+      }
+      this._pendingProfileSelectionUpdates.push(callback);
+    }
+
+    _flushPendingProfileSelectionUpdates() {
+      if (this._pendingProfileSelectionUpdates.length !== 0) {
+        const pendingUpdates = this._pendingProfileSelectionUpdates;
+        this._pendingProfileSelectionUpdates = [];
+        const {
+          updateProfileSelection,
+          viewportProps: { selection, timeRange },
+        } = this.props;
+        let profileSelection = selection;
+        for (const callback of pendingUpdates) {
+          const horizontalViewport = this.getHorizontalViewport(
+            profileSelection,
+            timeRange
+          );
+          profileSelection = callback(horizontalViewport);
+        }
+        updateProfileSelection(profileSelection);
+      }
     }
 
     zoomRangeSelection(event: SyntheticWheelEvent<>) {
@@ -312,69 +345,56 @@ export function withChartViewport<
 
       // Accumulate the scroll delta here. Only apply it once per frame to avoid
       // spamming the Redux store with updates.
-      this.zoomRangeSelectionScrollDelta += getNormalizedScrollDelta(
+      const deltaY = getNormalizedScrollDelta(
         event,
         this.state.containerHeight,
         deltaKey
       );
 
-      // See if an update needs to be scheduled.
-      if (!this.zoomRangeSelectionScheduled) {
-        const mouseX = event.clientX;
-        this.zoomRangeSelectionScheduled = true;
-        requestAnimationFrame(() => {
-          // Grab and reset the scroll delta accumulated up until this frame.
-          // Let another frame be scheduled.
-          const deltaY = this.zoomRangeSelectionScrollDelta;
-          this.zoomRangeSelectionScrollDelta = 0;
-          this.zoomRangeSelectionScheduled = false;
-          const { containerLeft, containerWidth } = this.state;
+      const mouseX = event.clientX;
+      const { containerLeft, containerWidth } = this.state;
 
-          const { maximumZoom } = this.props.viewportProps;
+      const { maximumZoom } = this.props.viewportProps;
 
-          this._updateProfileSelectionFromHorizontalViewport(
-            ({ viewportLeft, viewportRight }) => {
-              const mouseCenter = (mouseX - containerLeft) / containerWidth;
+      this._updateProfileSelectionFromHorizontalViewportAsync(
+        ({ viewportLeft, viewportRight }) => {
+          const mouseCenter = (mouseX - containerLeft) / containerWidth;
 
-              const viewportLength = viewportRight - viewportLeft;
-              const zoomFactor = Math.pow(1.0009, -deltaY);
-              const newViewportLength = clamp(
-                maximumZoom,
-                1,
-                viewportLength * zoomFactor
-              );
-              const deltaViewportLength = newViewportLength - viewportLength;
-              const newViewportLeft = clamp(
-                0,
-                1 - newViewportLength,
-                viewportLeft - deltaViewportLength * mouseCenter
-              );
-              const newViewportRight = clamp(
-                newViewportLength,
-                1,
-                viewportRight + deltaViewportLength * (1 - mouseCenter)
-              );
-
-              const { viewportProps: { timeRange } } = this.props;
-              if (newViewportLeft === 0 && newViewportRight === 1) {
-                return {
-                  hasSelection: false,
-                  isModifying: false,
-                };
-              }
-              const timeRangeLength = timeRange.end - timeRange.start;
-              return {
-                hasSelection: true,
-                isModifying: false,
-                selectionStart:
-                  timeRange.start + timeRangeLength * newViewportLeft,
-                selectionEnd:
-                  timeRange.start + timeRangeLength * newViewportRight,
-              };
-            }
+          const viewportLength = viewportRight - viewportLeft;
+          const zoomFactor = Math.pow(1.0009, -deltaY);
+          const newViewportLength = clamp(
+            maximumZoom,
+            1,
+            viewportLength * zoomFactor
           );
-        });
-      }
+          const deltaViewportLength = newViewportLength - viewportLength;
+          const newViewportLeft = clamp(
+            0,
+            1 - newViewportLength,
+            viewportLeft - deltaViewportLength * mouseCenter
+          );
+          const newViewportRight = clamp(
+            newViewportLength,
+            1,
+            viewportRight + deltaViewportLength * (1 - mouseCenter)
+          );
+
+          const { viewportProps: { timeRange } } = this.props;
+          if (newViewportLeft === 0 && newViewportRight === 1) {
+            return {
+              hasSelection: false,
+              isModifying: false,
+            };
+          }
+          const timeRangeLength = timeRange.end - timeRange.start;
+          return {
+            hasSelection: true,
+            isModifying: false,
+            selectionStart: timeRange.start + timeRangeLength * newViewportLeft,
+            selectionEnd: timeRange.start + timeRangeLength * newViewportRight,
+          };
+        }
+      );
     }
 
     _mouseDownListener(event: SyntheticMouseEvent<>) {
@@ -407,9 +427,8 @@ export function withChartViewport<
       this.moveViewport(offsetX, offsetY);
     }
 
-    moveViewport(offsetX: CssPixels, offsetY: CssPixels): boolean {
+    moveViewport(offsetX: CssPixels, offsetY: CssPixels): void {
       const {
-        updateProfileSelection,
         viewportProps: {
           maxViewportHeight,
           timeRange,
@@ -417,27 +436,7 @@ export function withChartViewport<
           disableHorizontalMovement,
         },
       } = this.props;
-      const {
-        containerWidth,
-        containerHeight,
-        viewportTop,
-        horizontalViewport: { viewportLeft, viewportRight },
-      } = this.state;
-
-      // Calculate left and right in terms of the unit interval of the profile range.
-      const viewportLength: CssPixels = viewportRight - viewportLeft;
-      const unitOffsetX: UnitIntervalOfProfileRange =
-        viewportLength * offsetX / containerWidth;
-      let newViewportLeft: CssPixels = viewportLeft - unitOffsetX;
-      let newViewportRight: CssPixels = viewportRight - unitOffsetX;
-      if (newViewportLeft < 0) {
-        newViewportLeft = 0;
-        newViewportRight = viewportLength;
-      }
-      if (newViewportRight > 1) {
-        newViewportLeft = 1 - viewportLength;
-        newViewportRight = 1;
-      }
+      const { containerWidth, containerHeight, viewportTop } = this.state;
 
       // Calculate top and bottom in terms of pixels.
       let newViewportTop: CssPixels = viewportTop - offsetY;
@@ -462,27 +461,48 @@ export function withChartViewport<
         newViewportBottom = containerHeight;
       }
 
-      const timeRangeLength = timeRange.end - timeRange.start;
-      const viewportHorizontalChanged = newViewportLeft !== viewportLeft;
-      const viewportVerticalChanged = newViewportTop !== viewportTop;
-
-      if (viewportHorizontalChanged && !disableHorizontalMovement) {
-        updateProfileSelection({
-          hasSelection: true,
-          isModifying: false,
-          selectionStart: timeRange.start + timeRangeLength * newViewportLeft,
-          selectionEnd: timeRange.start + timeRangeLength * newViewportRight,
-        });
-      }
-
-      if (viewportVerticalChanged) {
+      if (newViewportTop !== viewportTop) {
         this.setState({
           viewportTop: newViewportTop,
           viewportBottom: newViewportBottom,
         });
       }
 
-      return viewportVerticalChanged || viewportHorizontalChanged;
+      if (!disableHorizontalMovement) {
+        this._updateProfileSelectionFromHorizontalViewportAsync(
+          ({ viewportLeft, viewportRight }) => {
+            // Calculate left and right in terms of the unit interval of the profile range.
+            const viewportLength = viewportRight - viewportLeft;
+            if (viewportLength >= 1) {
+              return {
+                hasSelection: false,
+                isModifying: false,
+              };
+            }
+            const unitOffsetX = viewportLength * offsetX / containerWidth;
+            let newViewportLeft = viewportLeft - unitOffsetX;
+            let newViewportRight = viewportRight - unitOffsetX;
+            if (newViewportLeft < 0) {
+              newViewportLeft = 0;
+              newViewportRight = viewportLength;
+            }
+            if (newViewportRight > 1) {
+              newViewportLeft = 1 - viewportLength;
+              newViewportRight = 1;
+            }
+
+            const timeRangeLength = timeRange.end - timeRange.start;
+            return {
+              hasSelection: true,
+              isModifying: false,
+              selectionStart:
+                timeRange.start + timeRangeLength * newViewportLeft,
+              selectionEnd:
+                timeRange.start + timeRangeLength * newViewportRight,
+            };
+          }
+        );
+      }
     }
 
     _mouseUpListener(event: MouseEvent) {
