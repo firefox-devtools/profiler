@@ -206,7 +206,7 @@ body, #root, .profileViewer {
   background-color: transparent;
 }
 .treeViewCategoryKnob.purple {
-  background-color: var(--teal-70);
+  background-color: var(--purple-70);
 }
 .treeViewCategoryKnob.green {
   background-color: var(--green-60);
