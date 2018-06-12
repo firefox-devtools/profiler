@@ -399,7 +399,6 @@ export function withChartViewport<
     }
 
     _mouseDownListener(event: SyntheticMouseEvent<>) {
-      event.stopPropagation();
       event.preventDefault();
 
       window.addEventListener('mousemove', this._mouseMoveListener, true);
@@ -407,7 +406,6 @@ export function withChartViewport<
     }
 
     _mouseMoveListener(event: MouseEvent) {
-      event.stopPropagation();
       event.preventDefault();
 
       let { dragX, dragY } = this.state;
@@ -507,7 +505,6 @@ export function withChartViewport<
     }
 
     _mouseUpListener(event: MouseEvent) {
-      event.stopPropagation();
       event.preventDefault();
       window.removeEventListener('mousemove', this._mouseMoveListener, true);
       window.removeEventListener('mouseup', this._mouseUpListener, true);

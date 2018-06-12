@@ -81,7 +81,7 @@ function findLastCategoryChangeInStack(
   return null;
 }
 
-class SelectedThreadActivityGraph extends PureComponent<Props> {
+class SelectedThreadActivityGraphCanvas extends PureComponent<Props> {
   constructor(props) {
     super(props);
     (this: any)._onSampleClick = this._onSampleClick.bind(this);
@@ -170,12 +170,65 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
   }
 }
 
+const SelectedThreadActivityGraphCanvasWithViewport = withChartViewport(
+  SelectedThreadActivityGraphCanvas
+);
+
 function viewportNeedsUpdate() {
   // By always returning false we prevent the viewport from being
   // reset and scrolled all the way to the bottom when doing
   // operations like changing the time selection or applying a
   // transform.
   return false;
+}
+
+class SelectedThreadActivityGraph extends PureComponent<*> {
+  render() {
+    const {
+      interval,
+      selectedThreadIndex,
+      fullThread,
+      filteredThread,
+      rangeStart,
+      rangeEnd,
+      callNodeInfo,
+      selectedCallNodeIndex,
+      categories,
+      selectedSamples,
+      selection,
+      changeSelectedCallNode,
+      focusCallTree,
+      timeRange,
+    } = this.props;
+    return (
+      <SelectedThreadActivityGraphCanvasWithViewport
+        chartProps={{
+          interval,
+          selectedThreadIndex,
+          fullThread,
+          filteredThread,
+          rangeStart,
+          rangeEnd,
+          callNodeInfo,
+          selectedCallNodeIndex,
+          categories,
+          selectedSamples,
+          changeSelectedCallNode,
+          focusCallTree,
+        }}
+        viewportProps={{
+          timeRange: timeRange,
+          maxViewportHeight: 0,
+          maximumZoom: 0.0001,
+          selection: selection,
+          startsAtBottom: true,
+          disableHorizontalMovement: false,
+          className: 'selectedThreadActivityGraphViewport',
+          viewportNeedsUpdate,
+        }}
+      />
+    );
+  }
 }
 
 const options: ExplicitConnectOptions<*, *, *> = {
@@ -189,38 +242,28 @@ const options: ExplicitConnectOptions<*, *, *> = {
       ? profileSelection.selectionEnd
       : displayRange.end;
     return {
-      chartProps: {
-        interval: getProfile(state).meta.interval,
-        selectedThreadIndex: getSelectedThreadIndex(state),
-        fullThread: selectedThreadSelectors.getRangeFilteredThread(state),
-        filteredThread: selectedThreadSelectors.getFilteredThread(state),
-        rangeStart,
-        rangeEnd,
-        callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-        selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-          state
-        ),
-        categories: getProfile(state).meta.categories,
-        selectedSamples: selectedThreadSelectors.getSelectedSamplesInFilteredThread(
-          state
-        ),
-      },
-      viewportProps: {
-        timeRange: getDisplayRange(state),
-        maxViewportHeight: 0,
-        maximumZoom: 0.0001,
-        selection: profileSelection,
-        startsAtBottom: true,
-        disableHorizontalMovement: false,
-        className: 'selectedThreadActivityGraphViewport',
-        viewportNeedsUpdate,
-      },
+      interval: getProfile(state).meta.interval,
+      selectedThreadIndex: getSelectedThreadIndex(state),
+      fullThread: selectedThreadSelectors.getRangeFilteredThread(state),
+      filteredThread: selectedThreadSelectors.getFilteredThread(state),
+      rangeStart,
+      rangeEnd,
+      callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+      selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
+        state
+      ),
+      categories: getProfile(state).meta.categories,
+      selectedSamples: selectedThreadSelectors.getSelectedSamplesInFilteredThread(
+        state
+      ),
+      timeRange: getDisplayRange(state),
+      selection: profileSelection,
     };
   },
   mapDispatchToProps: {
     changeSelectedCallNode,
     focusCallTree,
   },
-  component: withChartViewport(SelectedThreadActivityGraph),
+  component: SelectedThreadActivityGraph,
 };
 export default explicitConnect(options);
