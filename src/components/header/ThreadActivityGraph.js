@@ -118,7 +118,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
     // and can not be changed here without an additional change in the core
     const colorMap = {
       transparent: { fillStyle: 'transparent', gravity: 0 },
-      purple: { fillStyle: photonColors.TEAL_70, gravity: 5 },
+      purple: { fillStyle: photonColors.PURPLE_70, gravity: 5 },
       green: { fillStyle: photonColors.GREEN_60, gravity: 4 },
       orange: { fillStyle: photonColors.ORANGE_50, gravity: 2 },
       yellow: { fillStyle: photonColors.YELLOW_50, gravity: 6 },
@@ -304,7 +304,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
       const r = canvas.getBoundingClientRect();
 
       const x = e.pageX - r.left;
-      const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
+      const time = rangeStart + x / r.width * (rangeEnd - rangeStart);
       this.props.onStackClick(time);
     }
   };
