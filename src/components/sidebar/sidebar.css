@@ -54,16 +54,17 @@
 /* version 1 */
 .sidebar-bar {
   width: 90%;
-  height: 20px;
+  height: 1px;
   background: #45a1ff;
   margin-bottom: 5px;
 }
 
 .sidebar-bar-overlay {
-  height: 20px;
-  background: #ffe900;
+  height: 1px;
+  background: #ff9400;
   margin-bottom: 5px;
 }
+
 
 /* version 2 */
 .circle-box {
