@@ -116,42 +116,42 @@ class ThreadActivityGraph extends PureComponent<Props> {
       },
       purple: {
         activeFillStyle: photonColors.PURPLE_50,
-        inactiveFillStyle: photonColors.PURPLE_50 + '80',
+        inactiveFillStyle: photonColors.PURPLE_50 + '60',
         gravity: 5,
       },
       green: {
         activeFillStyle: photonColors.GREEN_60,
-        inactiveFillStyle: photonColors.GREEN_60 + '80',
+        inactiveFillStyle: photonColors.GREEN_60 + '60',
         gravity: 4,
       },
       orange: {
         activeFillStyle: photonColors.ORANGE_60,
-        inactiveFillStyle: photonColors.ORANGE_60 + '80',
+        inactiveFillStyle: photonColors.ORANGE_60 + '60',
         gravity: 2,
       },
       yellow: {
         activeFillStyle: photonColors.YELLOW_60,
-        inactiveFillStyle: photonColors.YELLOW_60 + '80',
+        inactiveFillStyle: photonColors.YELLOW_60 + '60',
         gravity: 6,
       },
       lightblue: {
         activeFillStyle: photonColors.BLUE_40,
-        inactiveFillStyle: photonColors.BLUE_40 + '80',
+        inactiveFillStyle: photonColors.BLUE_40 + '60',
         gravity: 1,
       },
       grey: {
         activeFillStyle: photonColors.GREY_40,
-        inactiveFillStyle: photonColors.GREY_40 + '80',
+        inactiveFillStyle: photonColors.GREY_40 + '60',
         gravity: 8,
       },
       blue: {
         activeFillStyle: photonColors.BLUE_60,
-        inactiveFillStyle: photonColors.BLUE_60 + '80',
+        inactiveFillStyle: photonColors.BLUE_60 + '60',
         gravity: 3,
       },
       brown: {
         activeFillStyle: photonColors.MAGENTA_60,
-        inactiveFillStyle: photonColors.MAGENTA_60 + '80',
+        inactiveFillStyle: photonColors.MAGENTA_60 + '60',
         gravity: 7,
       },
     };
