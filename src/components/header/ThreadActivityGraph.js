@@ -305,6 +305,15 @@ class ThreadActivityGraph extends PureComponent<Props> {
       lastCumulativeArray = array;
     }
 
+    function findNextDifferentIndex(arr1, arr2, startIndex) {
+      for (let i = startIndex; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) {
+          return i;
+        }
+      }
+      return arr1.length;
+    }
+
     // Draw adjacent filled paths using Operator ADD and disjoint paths.
     // This avoids any bleeding and seams.
     // lighter === OP_ADD
@@ -313,16 +322,43 @@ class ThreadActivityGraph extends PureComponent<Props> {
     for (const { fillStyle, array } of individualBuckets) {
       const cumulativeArray = array;
       ctx.fillStyle = fillStyle;
-      ctx.beginPath();
-      ctx.moveTo(0, (1 - lastCumulativeArray[0]) * pixelHeight);
-      for (let i = 1; i < pixelWidth; i++) {
-        ctx.lineTo(i, (1 - lastCumulativeArray[i]) * pixelHeight);
+      let lastNonZeroRangeEnd = 0;
+      while (lastNonZeroRangeEnd < pixelWidth) {
+        const currentNonZeroRangeStart = findNextDifferentIndex(
+          cumulativeArray,
+          lastCumulativeArray,
+          lastNonZeroRangeEnd
+        );
+        if (currentNonZeroRangeStart >= pixelWidth) {
+          break;
+        }
+        let currentNonZeroRangeEnd = pixelWidth;
+        ctx.beginPath();
+        ctx.moveTo(
+          currentNonZeroRangeStart,
+          (1 - lastCumulativeArray[currentNonZeroRangeStart]) * pixelHeight
+        );
+        for (let i = currentNonZeroRangeStart + 1; i < pixelWidth; i++) {
+          const lastVal = lastCumulativeArray[i];
+          const thisVal = cumulativeArray[i];
+          ctx.lineTo(i, (1 - lastVal) * pixelHeight);
+          if (lastVal === thisVal) {
+            currentNonZeroRangeEnd = i;
+            break;
+          }
+        }
+        for (
+          let i = currentNonZeroRangeEnd - 1;
+          i >= currentNonZeroRangeStart;
+          i--
+        ) {
+          ctx.lineTo(i, (1 - cumulativeArray[i]) * pixelHeight);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        lastNonZeroRangeEnd = currentNonZeroRangeEnd;
       }
-      for (let i = pixelWidth - 1; i >= 0; i--) {
-        ctx.lineTo(i, (1 - cumulativeArray[i]) * pixelHeight);
-      }
-      ctx.closePath();
-      ctx.fill();
       lastCumulativeArray = cumulativeArray;
     }
 
