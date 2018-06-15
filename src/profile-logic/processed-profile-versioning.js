@@ -619,6 +619,10 @@ const _upgraders = {
       ['nsAppShell::ProcessGeckoEvents', OTHER],
       ['PollWrapper(_GPollFD*, unsigned int, int)', IDLE],
       ['mozilla::image::DecodePoolImpl::PopWorkLocked(bool)', IDLE],
+      [
+        'nsCCUncollectableMarker::Observe(nsISupports*, char const*, char16_t const*)',
+        GCCC,
+      ],
       ['g_main_context_dispatch', OTHER],
       ['nsContentSink::StartLayout(bool)', LAYOUT],
     ]);
