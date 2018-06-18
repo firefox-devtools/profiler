@@ -26,6 +26,7 @@ import type {
 
 type Props = {|
   +fullThread: Thread,
+  +filteredThread?: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -40,7 +41,7 @@ type Props = {|
 type Bucket = {|
   category: IndexIntoCategoryList,
   array: Float32Array,
-  fillStyle: string,
+  fillStyle: string | CanvasPattern,
 |};
 
 type PaintSettings = {|
@@ -49,6 +50,27 @@ type PaintSettings = {|
   pixelHeight: number,
   devicePixelRatio: number,
 |};
+
+function createDiagonalStripePattern(ctx, color) {
+  const c = document.createElement('canvas');
+  const dpr = Math.round(window.devicePixelRatio);
+  c.width = 4 * dpr;
+  c.height = 4 * dpr;
+  const cctx = c.getContext('2d');
+  cctx.scale(dpr, dpr);
+  const linear = cctx.createLinearGradient(0, 0, 4, 4);
+  linear.addColorStop(0, color);
+  linear.addColorStop(0.25, color);
+  linear.addColorStop(0.25, 'transparent');
+  linear.addColorStop(0.5, 'transparent');
+  linear.addColorStop(0.5, color);
+  linear.addColorStop(0.75, color);
+  linear.addColorStop(0.75, 'transparent');
+  linear.addColorStop(1, 'transparent');
+  cctx.fillStyle = linear;
+  cctx.fillRect(0, 0, 4, 4);
+  return ctx.createPattern(c, 'repeat');
+}
 
 class ThreadActivityGraph extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement;
@@ -86,6 +108,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
     const {
       categories,
       fullThread,
+      filteredThread,
       interval,
       rangeStart,
       rangeEnd,
@@ -160,15 +183,46 @@ class ThreadActivityGraph extends PureComponent<Props> {
       const { activeFillStyle, inactiveFillStyle, gravity } = colorMap[
         colorName
       ];
+      const filteredOutFillStyle = createDiagonalStripePattern(
+        ctx,
+        inactiveFillStyle
+      );
       return {
         category,
         gravity,
         activeFillStyle,
         inactiveFillStyle,
+        filteredOutFillStyle,
         activePercentageAtPixel: new Float32Array(pixelWidth),
         inactivePercentageAtPixel: new Float32Array(pixelWidth),
+        filteredOutPercentageAtPixel: new Float32Array(pixelWidth),
       };
     });
+
+    function pickActivePercentage(categoryInfo, _sampleIndex) {
+      return categoryInfo.activePercentageAtPixel;
+    }
+
+    function pickCategoryArrayWhenHaveFilteredThread(
+      categoryInfo,
+      sampleIndex
+    ) {
+      if (selectedSamples && selectedSamples[sampleIndex]) {
+        return categoryInfo.activePercentageAtPixel;
+      }
+      if (
+        filteredThread &&
+        filteredThread.samples.stack[sampleIndex] !== null
+      ) {
+        return categoryInfo.inactivePercentageAtPixel;
+      }
+      return categoryInfo.filteredOutPercentageAtPixel;
+    }
+
+    const pickCategoryArray =
+      filteredThread && selectedSamples
+        ? pickCategoryArrayWhenHaveFilteredThread
+        : pickActivePercentage;
 
     const greyCategoryIndex =
       categories.findIndex(c => c.color === 'grey') || 0;
@@ -198,11 +252,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
       const intPixelStart = pixelStart | 0;
       const intPixelEnd = pixelEnd | 0;
 
-      const thisSampleWasFilteredOut =
-        selectedSamples && !selectedSamples[sampleIndex];
-      const categoryArray = thisSampleWasFilteredOut
-        ? categoryInfo.inactivePercentageAtPixel
-        : categoryInfo.activePercentageAtPixel;
+      const categoryArray = pickCategoryArray(categoryInfo, sampleIndex);
       for (let i = intPixelStart; i <= intPixelEnd; i++) {
         categoryArray[i] += 1;
       }
@@ -293,6 +343,11 @@ class ThreadActivityGraph extends PureComponent<Props> {
           category: categoryInfo.category,
           fillStyle: categoryInfo.inactiveFillStyle,
           array: gaussianBlur1D(categoryInfo.inactivePercentageAtPixel),
+        },
+        {
+          category: categoryInfo.category,
+          fillStyle: categoryInfo.filteredOutFillStyle,
+          array: gaussianBlur1D(categoryInfo.filteredOutPercentageAtPixel),
         },
       ])
     );
