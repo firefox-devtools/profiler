@@ -145,7 +145,6 @@ class SelectedThreadActivityGraphCanvas extends PureComponent<Props> {
         <ThreadActivityGraph
           interval={interval}
           fullThread={fullThread}
-          filteredThread={filteredThread}
           className="selectedThreadActivityGraph"
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}

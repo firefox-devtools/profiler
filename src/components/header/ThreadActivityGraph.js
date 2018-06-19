@@ -17,6 +17,10 @@ import type {
 import {
   getSampleIndexClosestToTime,
   getSampleIndexClosestToTimeMatchingFilterFunction,
+  FILTERED_OUT,
+  BEFORE_SELECTED,
+  SELECTED,
+  AFTER_SELECTED,
 } from '../../profile-logic/profile-data';
 import type { Milliseconds } from '../../types/units';
 import type {
@@ -26,7 +30,6 @@ import type {
 
 type Props = {|
   +fullThread: Thread,
-  +filteredThread?: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -108,7 +111,6 @@ class ThreadActivityGraph extends PureComponent<Props> {
     const {
       categories,
       fullThread,
-      filteredThread,
       interval,
       rangeStart,
       rangeEnd,
@@ -133,96 +135,101 @@ class ThreadActivityGraph extends PureComponent<Props> {
 
     const colorMap = {
       transparent: {
-        activeFillStyle: 'transparent',
-        inactiveFillStyle: 'transparent',
+        selectedFillStyle: 'transparent',
+        unselectedFillStyle: 'transparent',
         gravity: 0,
       },
       purple: {
-        activeFillStyle: photonColors.PURPLE_50,
-        inactiveFillStyle: photonColors.PURPLE_50 + '60',
+        selectedFillStyle: photonColors.PURPLE_50,
+        unselectedFillStyle: photonColors.PURPLE_50 + '60',
         gravity: 5,
       },
       green: {
-        activeFillStyle: photonColors.GREEN_60,
-        inactiveFillStyle: photonColors.GREEN_60 + '60',
+        selectedFillStyle: photonColors.GREEN_60,
+        unselectedFillStyle: photonColors.GREEN_60 + '60',
         gravity: 4,
       },
       orange: {
-        activeFillStyle: photonColors.ORANGE_60,
-        inactiveFillStyle: photonColors.ORANGE_60 + '60',
+        selectedFillStyle: photonColors.ORANGE_60,
+        unselectedFillStyle: photonColors.ORANGE_60 + '60',
         gravity: 2,
       },
       yellow: {
-        activeFillStyle: photonColors.YELLOW_60,
-        inactiveFillStyle: photonColors.YELLOW_60 + '60',
+        selectedFillStyle: photonColors.YELLOW_60,
+        unselectedFillStyle: photonColors.YELLOW_60 + '60',
         gravity: 6,
       },
       lightblue: {
-        activeFillStyle: photonColors.BLUE_40,
-        inactiveFillStyle: photonColors.BLUE_40 + '60',
+        selectedFillStyle: photonColors.BLUE_40,
+        unselectedFillStyle: photonColors.BLUE_40 + '60',
         gravity: 1,
       },
       grey: {
-        activeFillStyle: photonColors.GREY_40,
-        inactiveFillStyle: photonColors.GREY_40 + '60',
+        selectedFillStyle: photonColors.GREY_40,
+        unselectedFillStyle: photonColors.GREY_40 + '60',
         gravity: 8,
       },
       blue: {
-        activeFillStyle: photonColors.BLUE_60,
-        inactiveFillStyle: photonColors.BLUE_60 + '60',
+        selectedFillStyle: photonColors.BLUE_60,
+        unselectedFillStyle: photonColors.BLUE_60 + '60',
         gravity: 3,
       },
       brown: {
-        activeFillStyle: photonColors.MAGENTA_60,
-        inactiveFillStyle: photonColors.MAGENTA_60 + '60',
+        selectedFillStyle: photonColors.MAGENTA_60,
+        unselectedFillStyle: photonColors.MAGENTA_60 + '60',
         gravity: 7,
       },
     };
 
     const categoryInfos = categories.map(({ color: colorName }, category) => {
-      const { activeFillStyle, inactiveFillStyle, gravity } = colorMap[
+      const { selectedFillStyle, unselectedFillStyle, gravity } = colorMap[
         colorName
       ];
       const filteredOutFillStyle = createDiagonalStripePattern(
         ctx,
-        inactiveFillStyle
+        unselectedFillStyle
       );
       return {
         category,
         gravity,
-        activeFillStyle,
-        inactiveFillStyle,
+        selectedFillStyle,
+        unselectedFillStyle,
         filteredOutFillStyle,
-        activePercentageAtPixel: new Float32Array(pixelWidth),
-        inactivePercentageAtPixel: new Float32Array(pixelWidth),
+        beforeSelectedPercentageAtPixel: new Float32Array(pixelWidth),
+        selectedPercentageAtPixel: new Float32Array(pixelWidth),
+        afterSelectedPercentageAtPixel: new Float32Array(pixelWidth),
         filteredOutPercentageAtPixel: new Float32Array(pixelWidth),
       };
     });
 
-    function pickActivePercentage(categoryInfo, _sampleIndex) {
-      return categoryInfo.activePercentageAtPixel;
+    function pickselectedPercentage(categoryInfo, _sampleIndex) {
+      return categoryInfo.selectedPercentageAtPixel;
     }
 
-    function pickCategoryArrayWhenHaveFilteredThread(
+    function pickCategoryArrayWhenHaveSelectedSamples(
       categoryInfo,
       sampleIndex
     ) {
-      if (selectedSamples && selectedSamples[sampleIndex]) {
-        return categoryInfo.activePercentageAtPixel;
+      if (!selectedSamples) {
+        return categoryInfo.selectedPercentageAtPixel;
       }
-      if (
-        filteredThread &&
-        filteredThread.samples.stack[sampleIndex] !== null
-      ) {
-        return categoryInfo.inactivePercentageAtPixel;
+      switch (selectedSamples[sampleIndex]) {
+        case FILTERED_OUT:
+          return categoryInfo.filteredOutPercentageAtPixel;
+        case BEFORE_SELECTED:
+          return categoryInfo.beforeSelectedPercentageAtPixel;
+        case SELECTED:
+          return categoryInfo.selectedPercentageAtPixel;
+        case AFTER_SELECTED:
+          return categoryInfo.afterSelectedPercentageAtPixel;
+        default:
+          throw new Error('Unexpected selectedSamples value');
       }
-      return categoryInfo.filteredOutPercentageAtPixel;
     }
 
-    const pickCategoryArray =
-      filteredThread && selectedSamples
-        ? pickCategoryArrayWhenHaveFilteredThread
-        : pickActivePercentage;
+    const pickCategoryArray = selectedSamples
+      ? pickCategoryArrayWhenHaveSelectedSamples
+      : pickselectedPercentage;
 
     const greyCategoryIndex =
       categories.findIndex(c => c.color === 'grey') || 0;
@@ -239,7 +246,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
       }
 
       const categoryInfo = categoryInfos[category];
-      if (categoryInfo.activeFillStyle === 'transparent') {
+      if (categoryInfo.selectedFillStyle === 'transparent') {
         return;
       }
 
@@ -336,13 +343,18 @@ class ThreadActivityGraph extends PureComponent<Props> {
       ...categoryInfos.map(categoryInfo => [
         {
           category: categoryInfo.category,
-          fillStyle: categoryInfo.activeFillStyle,
-          array: gaussianBlur1D(categoryInfo.activePercentageAtPixel),
+          fillStyle: categoryInfo.unselectedFillStyle,
+          array: gaussianBlur1D(categoryInfo.beforeSelectedPercentageAtPixel),
         },
         {
           category: categoryInfo.category,
-          fillStyle: categoryInfo.inactiveFillStyle,
-          array: gaussianBlur1D(categoryInfo.inactivePercentageAtPixel),
+          fillStyle: categoryInfo.selectedFillStyle,
+          array: gaussianBlur1D(categoryInfo.selectedPercentageAtPixel),
+        },
+        {
+          category: categoryInfo.category,
+          fillStyle: categoryInfo.unselectedFillStyle,
+          array: gaussianBlur1D(categoryInfo.afterSelectedPercentageAtPixel),
         },
         {
           category: categoryInfo.category,

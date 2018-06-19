@@ -163,21 +163,35 @@ export function getSampleCallNodes(
   });
 }
 
+export const FILTERED_OUT = 0;
+export const BEFORE_SELECTED = 1;
+export const SELECTED = 2;
+export const AFTER_SELECTED = 3;
+
 export function getSelectedSamples(
   callNodeTable: CallNodeTable,
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null
-): boolean[] {
+): number[] {
   const result = new Array(sampleCallNodes.length);
 
   let selectedCallNodeDepth = 0;
   if (selectedCallNodeIndex !== -1 && selectedCallNodeIndex !== null) {
     selectedCallNodeDepth = callNodeTable.depth[selectedCallNodeIndex];
   }
-  function hasSelectedCallNodePrefix(callNodePrefix) {
-    let callNodeIndex = callNodePrefix;
+  const selectedCallNodeAtDepth = new Array(selectedCallNodeDepth);
+  for (
+    let callNodeIndex = selectedCallNodeIndex, depth = selectedCallNodeDepth;
+    depth >= 0 && callNodeIndex !== null;
+    depth--, callNodeIndex = callNodeTable.prefix[callNodeIndex]
+  ) {
+    selectedCallNodeAtDepth[depth] = callNodeIndex;
+  }
+
+  function getSampleValue(callNode) {
+    let callNodeIndex = callNode;
     if (callNodeIndex === null) {
-      return false;
+      return FILTERED_OUT;
     }
     for (
       let depth = callNodeTable.depth[callNodeIndex];
@@ -186,16 +200,39 @@ export function getSelectedSamples(
     ) {
       callNodeIndex = callNodeTable.prefix[callNodeIndex];
     }
-    return callNodeIndex === selectedCallNodeIndex;
+    if (callNodeIndex === selectedCallNodeIndex) {
+      return SELECTED;
+    }
+
+    let depth = Math.min(
+      selectedCallNodeDepth,
+      callNodeTable.depth[callNodeIndex]
+    );
+    while (true) {
+      const prevCallNodeIndex = callNodeIndex;
+      depth--;
+      callNodeIndex = callNodeTable.prefix[callNodeIndex];
+      if (
+        callNodeIndex === -1 ||
+        callNodeIndex === selectedCallNodeAtDepth[depth]
+      ) {
+        return prevCallNodeIndex <= selectedCallNodeAtDepth[depth + 1]
+          ? BEFORE_SELECTED
+          : AFTER_SELECTED;
+      }
+    }
+    // This code is unreachable, but Flow doesn't know that and thinks this
+    // function could return undefined. So throw an error.
+    /* eslint-disable no-unreachable */
+    throw new Error('unreachable');
+    /* eslint-enable no-unreachable */
   }
   for (
     let sampleIndex = 0;
     sampleIndex < sampleCallNodes.length;
     sampleIndex++
   ) {
-    result[sampleIndex] = hasSelectedCallNodePrefix(
-      sampleCallNodes[sampleIndex]
-    );
+    result[sampleIndex] = getSampleValue(sampleCallNodes[sampleIndex]);
   }
   return result;
 }
