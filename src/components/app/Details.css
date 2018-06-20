@@ -1,0 +1,6 @@
+.Details {
+  display: flex;
+  flex-direction: column;
+
+  flex: auto;
+}
