@@ -6,7 +6,7 @@
 import React from 'react';
 import SplitterLayout from 'react-splitter-layout';
 
-import ProfileViewer from './ProfileViewer';
+import Details from './Details';
 import selectSidebar from '../sidebar';
 
 import { getSelectedTab } from '../../reducers/url-state';
@@ -15,7 +15,7 @@ import explicitConnect from '../../utils/connect';
 import type { TabSlug } from '../../types/actions';
 import type { ExplicitConnectOptions } from '../../utils/connect';
 
-import './ProfileViewerContainer.css';
+import './DetailsContainer.css';
 
 function dispatchResizeEvent() {
   const event = new UIEvent('resize', { view: window });
@@ -26,22 +26,17 @@ type StateProps = {|
   +selectedTab: TabSlug,
 |};
 
-function ProfileViewerContainer({ selectedTab }: StateProps) {
+function DetailsContainer({ selectedTab }: StateProps) {
   const Sidebar = selectSidebar(selectedTab);
 
-  /* Note: we use `primaryMinSize` to control the display of the sidebar, instead
-   * of `secondaryInitialSize`, because the component SplitterLayout doesn't react
-   * to changes to `secondaryInitialSize`.
-   * See https://github.com/zesik/react-splitter-layout/issues/14
-   */
   return (
     <SplitterLayout
-      customClassName="ProfileViewerContainer"
+      customClassName="DetailsContainer"
       percentage
       secondaryInitialSize={20}
       onDragEnd={dispatchResizeEvent}
     >
-      <ProfileViewer />
+      <Details />
       {Sidebar && <Sidebar />}
     </SplitterLayout>
   );
@@ -51,7 +46,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
   mapStateToProps: state => ({
     selectedTab: getSelectedTab(state),
   }),
-  component: ProfileViewerContainer,
+  component: DetailsContainer,
 };
 
 export default explicitConnect(options);
