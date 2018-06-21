@@ -57,7 +57,7 @@ export class CallTree {
   _rootTotalTime: number;
   _rootCount: number;
   _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
-  _children: Map<IndexIntoCallNodeTable, CallNodeChildren>;
+  _children: Array<CallNodeChildren>;
   _isChildrenCachePreloaded: boolean;
   _jsOnly: boolean;
   _isIntegerInterval: boolean;
@@ -81,7 +81,7 @@ export class CallTree {
     this._rootTotalTime = rootTotalTime;
     this._rootCount = rootCount;
     this._displayDataByIndex = new Map();
-    this._children = new Map();
+    this._children = new Array(callNodeTable.length);
     this._isChildrenCachePreloaded = false;
     this._jsOnly = jsOnly;
     this._isIntegerInterval = isIntegerInterval;
@@ -100,8 +100,7 @@ export class CallTree {
    */
   preloadChildrenCache() {
     if (!this._isChildrenCachePreloaded) {
-      this._children.clear();
-      this._children.set(-1, []); // -1 is the parent of the roots
+      this._children[-1] = []; // -1 is the parent of the roots
       for (
         let callNodeIndex = 0;
         callNodeIndex < this._callNodeTable.length;
@@ -112,15 +111,15 @@ export class CallTree {
         // its children to be an empty array. Then we always have an
         // array to append to when any call node acts as a parent
         // through the prefix.
-        this._children.set(callNodeIndex, []);
+        this._children[callNodeIndex] = [];
 
         if (this._callNodeTimes.totalTime[callNodeIndex] === 0) {
           continue;
         }
 
-        const siblings = this._children.get(
+        const siblings = this._children[
           this._callNodeTable.prefix[callNodeIndex]
-        );
+        ];
         if (siblings === undefined) {
           // We should definitely have created a children array for
           // the parent in an earlier iteration of this loop. Add this
@@ -140,7 +139,7 @@ export class CallTree {
   }
 
   getChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
-    let children = this._children.get(callNodeIndex);
+    let children = this._children[callNodeIndex];
     if (children === undefined) {
       if (this._isChildrenCachePreloaded) {
         console.error(
@@ -169,7 +168,7 @@ export class CallTree {
         (a, b) =>
           this._callNodeTimes.totalTime[b] - this._callNodeTimes.totalTime[a]
       );
-      this._children.set(callNodeIndex, children);
+      this._children[callNodeIndex] = children;
     }
     return children;
   }
