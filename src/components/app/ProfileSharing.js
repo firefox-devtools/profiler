@@ -42,15 +42,18 @@ const PrivacyNotice = () => (
     >{`You’re about to upload your profile publicly where anyone will be able to access it.
       To better diagnose performance problems profiles include the following information:`}</p>
     <ul>
-      <li>
-        {'The URLs of all network requests, painted tabs, and running scripts.'}
-      </li>
+      <li>{'The URLs of all painted tabs, and running scripts.'}</li>
       <li>{'The metadata of all your add-ons to identify slow add-ons.'}</li>
       <li>{'Firefox build and runtime configuration.'}</li>
     </ul>
     <p
     >{`To view all the information you can download the full profile to a file and open the
       json structure with a text editor.`}</p>
+    <p>
+      {`By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:`}
+    </p>
   </section>
 );
 
@@ -80,6 +83,7 @@ type ProfileSharingCompositeButtonState = {
   error: Error | null,
   fullUrl: string,
   shortUrl: string,
+  shareNetworkUrls: boolean,
 };
 
 class ProfileSharingCompositeButton extends PureComponent<
@@ -102,9 +106,13 @@ class ProfileSharingCompositeButton extends PureComponent<
       error: null,
       fullUrl: window.location.href,
       shortUrl: window.location.href,
+      shareNetworkUrls: false,
     };
 
     (this: any)._attemptToShare = this._attemptToShare.bind(this);
+    (this: any)._onChangeShareNetworkUrls = this._onChangeShareNetworkUrls.bind(
+      this
+    );
     (this: any)._onPermalinkPanelOpen = this._onPermalinkPanelOpen.bind(this);
     (this: any)._onPermalinkPanelClose = this._onPermalinkPanelClose.bind(this);
     this._permalinkButtonCreated = (elem: ButtonWithPanel | null) => {
@@ -175,7 +183,7 @@ class ProfileSharingCompositeButton extends PureComponent<
       if (!profile) {
         throw new Error('profile is null');
       }
-      const jsonString = serializeProfile(profile);
+      const jsonString = serializeProfile(profile, this.state.shareNetworkUrls);
       if (!jsonString) {
         throw new Error('profile serialization failed');
       }
@@ -248,6 +256,12 @@ class ProfileSharingCompositeButton extends PureComponent<
       });
   }
 
+  _onChangeShareNetworkUrls(event: SyntheticEvent<HTMLInputElement>) {
+    this.setState({
+      shareNetworkUrls: event.currentTarget.checked,
+    });
+  }
+
   render() {
     const { state, uploadProgress, error, shortUrl } = this.state;
     const { symbolicationStatus } = this.props;
@@ -277,6 +291,17 @@ class ProfileSharingCompositeButton extends PureComponent<
               onOkButtonClick={this._attemptToShare}
             >
               <PrivacyNotice />
+              <p className="profileSharingShareNetworkUrlsContainer">
+                <label>
+                  <input
+                    type="checkbox"
+                    className="profileSharingShareNetworkUrlsCheckbox"
+                    onChange={this._onChangeShareNetworkUrls}
+                    checked={this.state.shareNetworkUrls}
+                  />
+                  Share the URLs of all network requests
+                </label>
+              </p>
             </ArrowPanel>
           }
         />
