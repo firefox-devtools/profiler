@@ -89,16 +89,17 @@ export function getFlameGraphTiming(
     timeOffset[depth + 1] = timeOffset[depth];
     timeOffset[depth] += totalTimeRelative;
 
-    let children = callTree.getChildren(nodeIndex).slice();
+    const children = callTree.getChildren(nodeIndex).slice();
     children.sort(
       (a, b) =>
         callTree.getNodeData(a).funcName < callTree.getNodeData(b).funcName
           ? 1
           : -1
     );
-    children = children.map(nodeIndex => ({ nodeIndex, depth: depth + 1 }));
 
-    stack.push(...children);
+    for (let i = 0; i < children.length; i++) {
+      stack.push({ nodeIndex: children[i], depth: depth + 1 });
+    }
   }
   return timing;
 }
