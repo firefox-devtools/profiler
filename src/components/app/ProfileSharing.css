@@ -110,3 +110,15 @@
   width: 14em;
   margin: 5px -5px;
 }
+
+.profileSharingShareNetworkUrlsContainer {
+  margin: 20px 0;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.profileSharingShareNetworkUrlsCheckbox {
+  vertical-align: middle;
+  position: relative;
+  bottom: 1px;
+}
