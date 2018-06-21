@@ -13,6 +13,7 @@ import {
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { getFunctionName } from '../../profile-logic/function-info';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type {
   ConnectedProps,
@@ -24,7 +25,11 @@ import type {
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
-import type { TimingsForPath } from '../../profile-logic/profile-data';
+import type {
+  BreakdownByImplementation,
+  StackImplementation,
+  TimingsForPath,
+} from '../../profile-logic/profile-data';
 
 type SidebarDetailProps = {|
   +label: string,
@@ -40,26 +45,76 @@ function SidebarDetail({ label, children }: SidebarDetailProps) {
   );
 }
 
+type ImplementationBreakdownProps = {|
+  +breakdown: BreakdownByImplementation,
+|};
+
+// This component is responsible for displaying the breakdown data specific to
+// the JavaScript engine and native code implementation.
+class ImplementationBreakdown extends React.PureComponent<
+  ImplementationBreakdownProps
+> {
+  _orderedImplementations: $ReadOnlyArray<StackImplementation> = [
+    'native',
+    'interpreter',
+    'baseline',
+    'ion',
+    'unknown',
+  ];
+
+  _labelizeImplementation(implementation: StackImplementation): string {
+    switch (implementation) {
+      case 'ion':
+      case 'baseline':
+        return `JavaScript JIT (${implementation})`;
+      case 'interpreter':
+        return 'JavaScript interpreter';
+      case 'native':
+        return 'Native code';
+      case 'unknown':
+        return implementation;
+      default:
+        throw assertExhaustiveCheck(implementation);
+    }
+  }
+
+  render() {
+    const { breakdown } = this.props;
+    const data = [];
+
+    for (const implementation of this._orderedImplementations) {
+      const value = breakdown[implementation];
+      if (!value && implementation === 'unknown') {
+        continue;
+      }
+
+      data.push({
+        group: this._labelizeImplementation(implementation),
+        value: value || 0,
+      });
+    }
+
+    return <Breakdown data={data} />;
+  }
+}
+
 type BreakdownProps = {|
-  +data: $ReadOnly<{ [mode: string]: Milliseconds }>,
+  +data: $ReadOnlyArray<{| group: string, value: Milliseconds |}>,
 |};
 
 // This stateless component is responsible for displaying the implementation
 // breakdown. It also computes the percentage from the total time.
 function Breakdown({ data }: BreakdownProps) {
-  const dataArray = Object.keys(data)
-    .sort()
-    .map(implementation => ({ implementation, value: data[implementation] }));
-  const totalTime = dataArray.reduce((result, item) => result + item.value, 0);
+  const totalTime = data.reduce((result, item) => result + item.value, 0);
 
   return (
     <div className="sidebar-details">
-      {dataArray.map(({ implementation, value }) => {
+      {data.map(({ group, value }) => {
         const percentage = Math.round(value / totalTime * 100);
 
         return (
-          <SidebarDetail label={implementation} key={implementation}>
-            {value}ms ({percentage}%)
+          <SidebarDetail label={group} key={group}>
+            {value ? `${value}ms (${percentage}%)` : '—'}
           </SidebarDetail>
         );
       })}
@@ -110,7 +165,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           <h2 className="sidebar-title">{name}</h2>
           {lib ? <p className="sidebar-subtitle">{lib}</p> : null}
         </header>
-        <h3 className="sidebar-title2">About the selected path</h3>
+        <h3 className="sidebar-title2">This selected path</h3>
         <div className="sidebar-details">
           <SidebarDetail label="Running Time">
             {totalTime.value}ms ({totalTimePercent}%)
@@ -119,10 +174,20 @@ class CallTreeSidebar extends React.PureComponent<Props> {
             {selfTime.value ? `${selfTime.value}ms (${selfTimePercent}%)` : '—'}
           </SidebarDetail>
         </div>
+        {totalTime.breakdownByImplementation ? (
+          <React.Fragment>
+            <h4 className="sidebar-title3">Running time implementations</h4>
+            <ImplementationBreakdown
+              breakdown={totalTime.breakdownByImplementation}
+            />
+          </React.Fragment>
+        ) : null}
         {selfTime.breakdownByImplementation ? (
           <React.Fragment>
-            <h4 className="sidebar-title3">Breakdown by implementation</h4>
-            <Breakdown data={selfTime.breakdownByImplementation} />
+            <h4 className="sidebar-title3">Self time implementations</h4>
+            <ImplementationBreakdown
+              breakdown={selfTime.breakdownByImplementation}
+            />
           </React.Fragment>
         ) : null}
         <h3 className="sidebar-title2">This function across the entire tree</h3>
@@ -136,6 +201,22 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               : '—'}
           </SidebarDetail>
         </div>
+        {totalTimeForFunc.breakdownByImplementation ? (
+          <React.Fragment>
+            <h4 className="sidebar-title3">Running time implementations</h4>
+            <ImplementationBreakdown
+              breakdown={totalTimeForFunc.breakdownByImplementation}
+            />
+          </React.Fragment>
+        ) : null}
+        {selfTimeForFunc.breakdownByImplementation ? (
+          <React.Fragment>
+            <h4 className="sidebar-title3">Self time implementations</h4>
+            <ImplementationBreakdown
+              breakdown={selfTimeForFunc.breakdownByImplementation}
+            />
+          </React.Fragment>
+        ) : null}
       </aside>
     );
   }

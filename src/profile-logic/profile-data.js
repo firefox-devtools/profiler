@@ -163,9 +163,9 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
   return path[path.length - 1];
 }
 
-type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
-type StackImplementation = 'native' | JsImplementation;
-type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
+export type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
+export type StackImplementation = 'native' | JsImplementation;
+export type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
 type ItemTimings = {|
   selfTime: {|
     // time spent excluding children
@@ -254,6 +254,23 @@ export function getTimingsForPath(
   };
   let rootTime = 0;
 
+  function accumulateToTimings(
+    timings: {
+      breakdownByImplementation: BreakdownByImplementation | null,
+      value: number,
+    },
+    stackIndex: IndexIntoStackTable,
+    funcIndex: IndexIntoFuncTable
+  ): void {
+    timings.value += interval;
+
+    let implementation = 'native';
+    if (funcTable.isJS[funcIndex]) {
+      implementation = getJsImplementationForStack(stackIndex, thread);
+    }
+    accumulateDataToBreakdown(timings, implementation);
+  }
+
   /**
    * This is a small utility function to more easily add data to breakdowns.
    */
@@ -285,17 +302,11 @@ export function getTimingsForPath(
     if (!isInvertedTree) {
       // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
       if (thisNodeIndex === needleNodeIndex) {
-        pathTimings.selfTime.value += interval;
-
-        let implementation = 'native';
-        if (funcTable.isJS[thisFunc]) {
-          implementation = getJsImplementationForStack(thisStackIndex, thread);
-        }
-        accumulateDataToBreakdown(pathTimings.selfTime, implementation);
+        accumulateToTimings(pathTimings.selfTime, thisStackIndex, thisFunc);
       }
 
       if (thisFunc === needleFuncIndex) {
-        funcTimings.selfTime.value += interval;
+        accumulateToTimings(funcTimings.selfTime, thisStackIndex, thisFunc);
       }
     }
 
@@ -318,15 +329,26 @@ export function getTimingsForPath(
 
       if (currentNodeIndex === needleNodeIndex) {
         // One of the parents is the exact passed path.
-        pathTimings.totalTime.value += interval;
+        // For non-inverted trees, we can contribute the data to the
+        // implementation breakdown now.
+        // Note that for inverted trees, we need to traverse up to the root node
+        // first, see below for this.
+        if (!isInvertedTree) {
+          accumulateToTimings(pathTimings.totalTime, thisStackIndex, thisFunc);
+        }
+
         pathFound = true;
       }
 
       if (!funcFound && currentFuncIndex === needleFuncIndex) {
-        // One of the parents' func is the same function as the passed path
+        // One of the parents' func is the same function as the passed path.
         // Note we could have the same function several times in the stack, so
         // we need a boolean variable to prevent adding it more than once.
-        funcTimings.totalTime.value += interval;
+        // The boolean variable will also be used to accumulate timings for
+        // inverted trees below.
+        if (!isInvertedTree) {
+          accumulateToTimings(funcTimings.totalTime, thisStackIndex, thisFunc);
+        }
         funcFound = true;
       }
 
@@ -346,33 +368,37 @@ export function getTimingsForPath(
         // prefix is `null`.
         if (currentNodeIndex === needleNodeIndex) {
           // This root node matches the passed call node path.
+          // This is the only place where we don't accumulate timings, mainly
+          // because this would be the same as for the total time.
           pathTimings.selfTime.value += interval;
         }
 
         if (currentFuncIndex === needleFuncIndex) {
           // This root node is the same function as the passed call node path.
-          funcTimings.selfTime.value += interval;
+          accumulateToTimings(
+            funcTimings.selfTime,
+            currentStackIndex,
+            currentFuncIndex
+          );
         }
 
         if (pathFound) {
           // We contribute the implementation information if the passed path was
           // found in this stack earlier.
-          // If the root node (the one actually holding the self time) is a JS
-          // frame, we get its specific implementation too.
-          // This allows to see how the implementation timings is spread among
-          // callers.
-          let implementation = 'native';
-          if (funcTable.isJS[currentFuncIndex]) {
-            implementation = getJsImplementationForStack(
-              currentStackIndex,
-              thread
-            );
-          }
-          accumulateDataToBreakdown(
-            // TODO: I believe this should be totalTime here instead, but due to
-            // how we display them in the current code we use selfTime for now.
-            pathTimings.selfTime,
-            implementation
+          accumulateToTimings(
+            pathTimings.totalTime,
+            currentStackIndex,
+            currentFuncIndex
+          );
+        }
+
+        if (funcFound) {
+          // We contribute the implementation information if the leaf function
+          // of the passed path was found in this stack earlier.
+          accumulateToTimings(
+            funcTimings.totalTime,
+            currentStackIndex,
+            currentFuncIndex
           );
         }
       }

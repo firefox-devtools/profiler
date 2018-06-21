@@ -158,7 +158,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               "value": 0,
             },
             "totalTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "interpreter": 2,
+              },
               "value": 2,
             },
           },
@@ -168,7 +170,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               "value": 0,
             },
             "totalTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "interpreter": 2,
+              },
               "value": 2,
             },
           },
@@ -191,7 +195,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          About the selected path
+          This selected path
         </h3>
         <div
           className="sidebar-details"
@@ -222,6 +226,94 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             —
           </SidebarDetail>
         </div>
+        <h4
+          className="sidebar-title3"
+        >
+          Running time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "interpreter": 2,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                2ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
         <h3
           className="sidebar-title2"
         >
@@ -256,6 +348,94 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             —
           </SidebarDetail>
         </div>
+        <h4
+          className="sidebar-title3"
+        >
+          Running time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "interpreter": 2,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                2ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
       </aside>
     </CallTreeSidebar>
   </Connect(CallTreeSidebar)>
@@ -327,7 +507,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               "value": 0,
             },
             "totalTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "interpreter": 1,
+              },
               "value": 1,
             },
           },
@@ -337,7 +519,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               "value": 0,
             },
             "totalTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "interpreter": 1,
+              },
               "value": 1,
             },
           },
@@ -360,7 +544,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          About the selected path
+          This selected path
         </h3>
         <div
           className="sidebar-details"
@@ -391,6 +575,94 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             —
           </SidebarDetail>
         </div>
+        <h4
+          className="sidebar-title3"
+        >
+          Running time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "interpreter": 1,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 1,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                1ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
         <h3
           className="sidebar-title2"
         >
@@ -425,6 +697,94 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             —
           </SidebarDetail>
         </div>
+        <h4
+          className="sidebar-title3"
+        >
+          Running time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "interpreter": 1,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 1,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                1ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
       </aside>
     </CallTreeSidebar>
   </Connect(CallTreeSidebar)>
@@ -492,11 +852,15 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Object {
           "forFunc": Object {
             "selfTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "native": 1,
+              },
               "value": 1,
             },
             "totalTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "native": 2,
+              },
               "value": 2,
             },
           },
@@ -508,7 +872,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               "value": 1,
             },
             "totalTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "native": 2,
+              },
               "value": 2,
             },
           },
@@ -531,7 +897,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          About the selected path
+          This selected path
         </h3>
         <div
           className="sidebar-details"
@@ -565,35 +931,179 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Breakdown by implementation
+          Running time implementations
         </h4>
-        <Breakdown
-          data={
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "native": 2,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                2ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
+        <h4
+          className="sidebar-title3"
+        >
+          Self time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
             Object {
               "native": 1,
             }
           }
         >
-          <div
-            className="sidebar-details"
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 1,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
           >
-            <SidebarDetail
-              key="native"
-              label="native"
+            <div
+              className="sidebar-details"
             >
-              <div
-                className="sidebar-label"
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
               >
-                native
-                :
-              </div>
-              1
-              ms (
-              100
-              %)
-            </SidebarDetail>
-          </div>
-        </Breakdown>
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                1ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
         <h3
           className="sidebar-title2"
         >
@@ -628,6 +1138,182 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             1ms (25%)
           </SidebarDetail>
         </div>
+        <h4
+          className="sidebar-title3"
+        >
+          Running time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "native": 2,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                2ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
+        <h4
+          className="sidebar-title3"
+        >
+          Self time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "native": 1,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 1,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                1ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
       </aside>
     </CallTreeSidebar>
   </Connect(CallTreeSidebar)>
@@ -695,11 +1381,15 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Object {
           "forFunc": Object {
             "selfTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "interpreter": 2,
+              },
               "value": 2,
             },
             "totalTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "interpreter": 2,
+              },
               "value": 2,
             },
           },
@@ -711,7 +1401,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               "value": 1,
             },
             "totalTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "interpreter": 1,
+              },
               "value": 1,
             },
           },
@@ -734,7 +1426,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          About the selected path
+          This selected path
         </h3>
         <div
           className="sidebar-details"
@@ -768,35 +1460,179 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Breakdown by implementation
+          Running time implementations
         </h4>
-        <Breakdown
-          data={
+        <ImplementationBreakdown
+          breakdown={
             Object {
               "interpreter": 1,
             }
           }
         >
-          <div
-            className="sidebar-details"
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 1,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
           >
-            <SidebarDetail
-              key="interpreter"
-              label="interpreter"
+            <div
+              className="sidebar-details"
             >
-              <div
-                className="sidebar-label"
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
               >
-                interpreter
-                :
-              </div>
-              1
-              ms (
-              100
-              %)
-            </SidebarDetail>
-          </div>
-        </Breakdown>
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                1ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
+        <h4
+          className="sidebar-title3"
+        >
+          Self time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "interpreter": 1,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 1,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                1ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
         <h3
           className="sidebar-title2"
         >
@@ -831,6 +1667,182 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             2ms (50%)
           </SidebarDetail>
         </div>
+        <h4
+          className="sidebar-title3"
+        >
+          Running time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "interpreter": 2,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                2ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
+        <h4
+          className="sidebar-title3"
+        >
+          Self time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "interpreter": 2,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                2ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
       </aside>
     </CallTreeSidebar>
   </Connect(CallTreeSidebar)>
@@ -1033,23 +2045,27 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Object {
           "forFunc": Object {
             "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 2,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": null,
-              "value": 2,
-            },
-          },
-          "forPath": Object {
-            "selfTime": Object {
               "breakdownByImplementation": Object {
                 "interpreter": 2,
               },
               "value": 2,
             },
             "totalTime": Object {
+              "breakdownByImplementation": Object {
+                "interpreter": 2,
+              },
+              "value": 2,
+            },
+          },
+          "forPath": Object {
+            "selfTime": Object {
               "breakdownByImplementation": null,
+              "value": 2,
+            },
+            "totalTime": Object {
+              "breakdownByImplementation": Object {
+                "interpreter": 2,
+              },
               "value": 2,
             },
           },
@@ -1072,7 +2088,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          About the selected path
+          This selected path
         </h3>
         <div
           className="sidebar-details"
@@ -1106,35 +2122,91 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Breakdown by implementation
+          Running time implementations
         </h4>
-        <Breakdown
-          data={
+        <ImplementationBreakdown
+          breakdown={
             Object {
               "interpreter": 2,
             }
           }
         >
-          <div
-            className="sidebar-details"
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
           >
-            <SidebarDetail
-              key="interpreter"
-              label="interpreter"
+            <div
+              className="sidebar-details"
             >
-              <div
-                className="sidebar-label"
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
               >
-                interpreter
-                :
-              </div>
-              2
-              ms (
-              100
-              %)
-            </SidebarDetail>
-          </div>
-        </Breakdown>
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                2ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
         <h3
           className="sidebar-title2"
         >
@@ -1169,6 +2241,182 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             2ms (50%)
           </SidebarDetail>
         </div>
+        <h4
+          className="sidebar-title3"
+        >
+          Running time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "interpreter": 2,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                2ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
+        <h4
+          className="sidebar-title3"
+        >
+          Self time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "interpreter": 2,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                2ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
       </aside>
     </CallTreeSidebar>
   </Connect(CallTreeSidebar)>
@@ -1257,23 +2505,27 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Object {
           "forFunc": Object {
             "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 1,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": null,
-              "value": 2,
-            },
-          },
-          "forPath": Object {
-            "selfTime": Object {
               "breakdownByImplementation": Object {
                 "native": 1,
               },
               "value": 1,
             },
             "totalTime": Object {
+              "breakdownByImplementation": Object {
+                "native": 2,
+              },
+              "value": 2,
+            },
+          },
+          "forPath": Object {
+            "selfTime": Object {
               "breakdownByImplementation": null,
+              "value": 1,
+            },
+            "totalTime": Object {
+              "breakdownByImplementation": Object {
+                "native": 1,
+              },
               "value": 1,
             },
           },
@@ -1296,7 +2548,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          About the selected path
+          This selected path
         </h3>
         <div
           className="sidebar-details"
@@ -1330,35 +2582,91 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Breakdown by implementation
+          Running time implementations
         </h4>
-        <Breakdown
-          data={
+        <ImplementationBreakdown
+          breakdown={
             Object {
               "native": 1,
             }
           }
         >
-          <div
-            className="sidebar-details"
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 1,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
           >
-            <SidebarDetail
-              key="native"
-              label="native"
+            <div
+              className="sidebar-details"
             >
-              <div
-                className="sidebar-label"
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
               >
-                native
-                :
-              </div>
-              1
-              ms (
-              100
-              %)
-            </SidebarDetail>
-          </div>
-        </Breakdown>
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                1ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
         <h3
           className="sidebar-title2"
         >
@@ -1393,6 +2701,182 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             1ms (25%)
           </SidebarDetail>
         </div>
+        <h4
+          className="sidebar-title3"
+        >
+          Running time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "native": 2,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                2ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
+        <h4
+          className="sidebar-title3"
+        >
+          Self time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "native": 1,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 1,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                1ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
       </aside>
     </CallTreeSidebar>
   </Connect(CallTreeSidebar)>
@@ -1481,23 +2965,27 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Object {
           "forFunc": Object {
             "selfTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "native": 1,
+              },
               "value": 1,
             },
             "totalTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "native": 2,
+              },
               "value": 2,
             },
           },
           "forPath": Object {
             "selfTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 1,
-              },
+              "breakdownByImplementation": null,
               "value": 0,
             },
             "totalTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "native": 1,
+              },
               "value": 1,
             },
           },
@@ -1520,7 +3008,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          About the selected path
+          This selected path
         </h3>
         <div
           className="sidebar-details"
@@ -1554,35 +3042,91 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Breakdown by implementation
+          Running time implementations
         </h4>
-        <Breakdown
-          data={
+        <ImplementationBreakdown
+          breakdown={
             Object {
               "native": 1,
             }
           }
         >
-          <div
-            className="sidebar-details"
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 1,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
           >
-            <SidebarDetail
-              key="native"
-              label="native"
+            <div
+              className="sidebar-details"
             >
-              <div
-                className="sidebar-label"
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
               >
-                native
-                :
-              </div>
-              1
-              ms (
-              100
-              %)
-            </SidebarDetail>
-          </div>
-        </Breakdown>
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                1ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
         <h3
           className="sidebar-title2"
         >
@@ -1617,6 +3161,182 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             1ms (25%)
           </SidebarDetail>
         </div>
+        <h4
+          className="sidebar-title3"
+        >
+          Running time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "native": 2,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                2ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
+        <h4
+          className="sidebar-title3"
+        >
+          Self time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "native": 1,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 1,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                1ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
       </aside>
     </CallTreeSidebar>
   </Connect(CallTreeSidebar)>
@@ -1709,19 +3429,22 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               "value": 0,
             },
             "totalTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "interpreter": 2,
+                "native": 2,
+              },
               "value": 4,
             },
           },
           "forPath": Object {
             "selfTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 1,
-              },
+              "breakdownByImplementation": null,
               "value": 0,
             },
             "totalTime": Object {
-              "breakdownByImplementation": null,
+              "breakdownByImplementation": Object {
+                "native": 1,
+              },
               "value": 1,
             },
           },
@@ -1744,7 +3467,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          About the selected path
+          This selected path
         </h3>
         <div
           className="sidebar-details"
@@ -1778,35 +3501,91 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Breakdown by implementation
+          Running time implementations
         </h4>
-        <Breakdown
-          data={
+        <ImplementationBreakdown
+          breakdown={
             Object {
               "native": 1,
             }
           }
         >
-          <div
-            className="sidebar-details"
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 1,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
           >
-            <SidebarDetail
-              key="native"
-              label="native"
+            <div
+              className="sidebar-details"
             >
-              <div
-                className="sidebar-label"
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
               >
-                native
-                :
-              </div>
-              1
-              ms (
-              100
-              %)
-            </SidebarDetail>
-          </div>
-        </Breakdown>
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                1ms (100%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
         <h3
           className="sidebar-title2"
         >
@@ -1841,6 +3620,95 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
             —
           </SidebarDetail>
         </div>
+        <h4
+          className="sidebar-title3"
+        >
+          Running time implementations
+        </h4>
+        <ImplementationBreakdown
+          breakdown={
+            Object {
+              "interpreter": 2,
+              "native": 2,
+            }
+          }
+        >
+          <Breakdown
+            data={
+              Array [
+                Object {
+                  "group": "Native code",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript interpreter",
+                  "value": 2,
+                },
+                Object {
+                  "group": "JavaScript JIT (baseline)",
+                  "value": 0,
+                },
+                Object {
+                  "group": "JavaScript JIT (ion)",
+                  "value": 0,
+                },
+              ]
+            }
+          >
+            <div
+              className="sidebar-details"
+            >
+              <SidebarDetail
+                key="Native code"
+                label="Native code"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  Native code
+                  :
+                </div>
+                2ms (50%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript interpreter"
+                label="JavaScript interpreter"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript interpreter
+                  :
+                </div>
+                2ms (50%)
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (baseline)"
+                label="JavaScript JIT (baseline)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (baseline)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+              <SidebarDetail
+                key="JavaScript JIT (ion)"
+                label="JavaScript JIT (ion)"
+              >
+                <div
+                  className="sidebar-label"
+                >
+                  JavaScript JIT (ion)
+                  :
+                </div>
+                —
+              </SidebarDetail>
+            </div>
+          </Breakdown>
+        </ImplementationBreakdown>
       </aside>
     </CallTreeSidebar>
   </Connect(CallTreeSidebar)>
