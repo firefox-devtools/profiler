@@ -30,10 +30,12 @@ type Props = SizeProps & {|
     selectionEnd: Milliseconds
   ) => *,
   +children: React.Node,
+  +renderHoverIndicator: Milliseconds => React.Node,
 |};
 
 type State = {|
   hoverLocation: null | CssPixels,
+  hoverTime: null | Milliseconds,
 |};
 
 class TimeSelectionScrubberImpl extends React.PureComponent<Props, State> {
@@ -46,6 +48,7 @@ class TimeSelectionScrubberImpl extends React.PureComponent<Props, State> {
 
   state = {
     hoverLocation: null,
+    hoverTime: null,
   };
 
   _containerCreated = (element: HTMLElement | null) => {
@@ -184,9 +187,17 @@ class TimeSelectionScrubberImpl extends React.PureComponent<Props, State> {
       event.pageY < rect.top ||
       event.pageY >= rect.bottom
     ) {
-      this.setState({ hoverLocation: null });
+      this.setState({ hoverLocation: null, hoverTime: null });
     } else {
-      this.setState({ hoverLocation: event.pageX - rect.left });
+      const { rangeStart, rangeEnd } = this.props;
+      const hoverLocation = event.pageX - rect.left;
+      const hoverTime = clamp(
+        hoverLocation / rect.width * (rangeEnd - rangeStart) + rangeStart,
+        rangeStart,
+        rangeEnd
+      );
+
+      this.setState({ hoverLocation, hoverTime });
     }
   };
 
@@ -201,9 +212,10 @@ class TimeSelectionScrubberImpl extends React.PureComponent<Props, State> {
       width,
       onSelectionChange,
       onZoomButtonClick,
+      renderHoverIndicator,
     } = this.props;
 
-    const { hoverLocation } = this.state;
+    const { hoverLocation, hoverTime } = this.state;
 
     return (
       <div
@@ -241,7 +253,9 @@ class TimeSelectionScrubberImpl extends React.PureComponent<Props, State> {
                 : undefined,
             left: hoverLocation === null ? '0' : `${hoverLocation}px`,
           }}
-        />
+        >
+          {hoverTime ? renderHoverIndicator(hoverTime) : null}
+        </div>
       </div>
     );
   }
