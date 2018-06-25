@@ -95,7 +95,11 @@ class CallTreeComponent extends PureComponent<Props> {
 
   componentDidMount() {
     this.focus();
-    this.procureInterestingInitialSelection();
+    if (this.props.selectedCallNodeIndex === null) {
+      this.procureInterestingInitialSelection();
+    } else if (this._treeView) {
+      this._treeView.scrollSelectionIntoView();
+    }
   }
 
   componentDidUpdate(prevProps) {
