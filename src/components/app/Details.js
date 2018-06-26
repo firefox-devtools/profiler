@@ -93,11 +93,11 @@ class ProfileViewer extends PureComponent<Props> {
         {
           {
             calltree: <ProfileCallTreeView />,
-            'marker-table': <MarkerTable />,
+            'flame-graph': <FlameGraph />,
             'stack-chart': <StackChart />,
             'marker-chart': <MarkerChart />,
+            'marker-table': <MarkerTable />,
             'network-chart': <MarkerChart />,
-            'flame-graph': <FlameGraph />,
           }[selectedTab]
         }
         <CallNodeContextMenu />
