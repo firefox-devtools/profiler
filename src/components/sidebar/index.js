@@ -5,7 +5,7 @@
 
 // Disabling the call tree's sidebar until it's useful
 // https://github.com/devtools-html/perf.html/issues/914
-// import CallTreeSidebar from './CallTreeSidebar';
+import CallTreeSidebar from './CallTreeSidebar';
 
 import type { TabSlug } from '../../types/actions';
 
@@ -15,8 +15,8 @@ export default function selectSidebar(
   selectedTab: TabSlug
 ): React.ComponentType<{||}> | null {
   return {
-    // calltree: CallTreeSidebar,
-    calltree: null,
+    calltree: CallTreeSidebar,
+    //calltree: null,
     'marker-table': null,
     'stack-chart': null,
     'marker-chart': null,

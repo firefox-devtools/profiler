@@ -1,0 +1,27 @@
+.DetailsContainer .layout-pane > * {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+}
+
+.DetailsContainer .layout-pane:not(.layout-pane-primary) {
+  max-width: 250px;
+}
+
+/* overriding defaults from splitter-layout */
+.DetailsContainer {
+  /* SplitterLayout injects position: absolute, this conflicts with our using
+   * Flex Layout. */
+  position: unset;
+}
+
+.DetailsContainer .layout-splitter {
+  background: var(--grey-10); /* Same background as sidebars */
+  border-left: 1px solid var(--grey-40);
+}
+
+.DetailsContainer .layout-splitter:hover {
+  background: var(--grey-40); /* same as the border above */
+}
+
+
