@@ -602,6 +602,8 @@ body, #root, .profileViewer {
 .tabBarContainer {
   display: flex;
   flex-flow: row nowrap;
+  justify-content: space-between; /* This pushes the sidebar button to the right */
+  align-items: center;
   background: var(--grey-10);
   position: relative;
   border: solid var(--grey-30);
@@ -609,13 +611,12 @@ body, #root, .profileViewer {
 }
 
 .tabBarTabWrapper {
-  margin: 0;
   padding: 0 0.5px;
   list-style: none;
   display: flex;
   flex-flow: row nowrap;
   margin: 0 -1px;
-  max-width: 100%;
+  min-width: 0; /* This makes the tab container actually shrinkable below min-content */
 }
 
 .tabBarTab {

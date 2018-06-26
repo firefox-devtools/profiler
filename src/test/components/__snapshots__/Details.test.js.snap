@@ -5,6 +5,7 @@ exports[`app/DetailsContainer renders an initial view with the right panel 1`] =
   className="Details"
 >
   <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -59,6 +60,7 @@ exports[`app/DetailsContainer renders an initial view with the right panel for t
   className="Details"
 >
   <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -113,6 +115,7 @@ exports[`app/DetailsContainer renders an initial view with the right panel for t
   className="Details"
 >
   <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="flame-graph"
@@ -167,6 +170,7 @@ exports[`app/DetailsContainer renders an initial view with the right panel for t
   className="Details"
 >
   <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="marker-chart"
@@ -221,6 +225,7 @@ exports[`app/DetailsContainer renders an initial view with the right panel for t
   className="Details"
 >
   <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="marker-table"
@@ -275,6 +280,7 @@ exports[`app/DetailsContainer renders an initial view with the right panel for t
   className="Details"
 >
   <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="network-chart"
@@ -329,6 +335,7 @@ exports[`app/DetailsContainer renders an initial view with the right panel for t
   className="Details"
 >
   <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="stack-chart"
