@@ -100,11 +100,14 @@ export type ZipFileState =
       +pathInZipFile: string,
     |};
 
-export type AppState = {
-  view: AppViewState,
-  isUrlSetupDone: boolean,
-  hasZoomedViaMousewheel: boolean,
-};
+export type IsSidebarOpenPerPanelState = { [TabSlug]: boolean };
+
+export type AppState = {|
+  +view: AppViewState,
+  +isUrlSetupDone: boolean,
+  +hasZoomedViaMousewheel: boolean,
+  +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
+|};
 
 export type ZippedProfilesState = {
   zipFile: ZipFileState,

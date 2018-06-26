@@ -198,9 +198,16 @@ type IconsAction =
   | { type: 'ICON_HAS_LOADED', icon: string }
   | { type: 'ICON_IN_ERROR', icon: string };
 
+type SidebarAction = {|
+  type: 'CHANGE_SIDEBAR_OPEN_STATE',
+  tab: TabSlug,
+  isOpen: boolean,
+|};
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
+  | SidebarAction
   | StackChartAction
   | UrlEnhancerAction
   | UrlStateAction
