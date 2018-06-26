@@ -18,6 +18,7 @@
 .DetailsContainer .layout-splitter {
   background: var(--grey-10); /* Same background as sidebars */
   border-left: 1px solid var(--grey-40);
+  border-top: 1px solid var(--grey-30);
 }
 
 .DetailsContainer .layout-splitter:hover {
