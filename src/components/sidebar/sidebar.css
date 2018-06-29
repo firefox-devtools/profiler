@@ -4,6 +4,7 @@
 
   font-size: 11px;
   background: var(--grey-10);
+  border-top: 1px solid var(--grey-30);
 }
 
 .sidebar-titlegroup {
