@@ -14,6 +14,7 @@ html, body {
 body, #root, .profileViewer {
   display: flex;
   flex: 1;
+  min-width: 0; /* This allows Flexible Layout to shrink this further than its min-content */
 }
 
 .profileViewer {
@@ -634,6 +635,8 @@ body, #root, .profileViewer {
   position: relative;
   border: solid transparent;
   border-width: 0 1px 0 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .tabBarTab.selected {
   background: #fff;
