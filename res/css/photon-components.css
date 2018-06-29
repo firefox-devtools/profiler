@@ -1,0 +1,49 @@
+.photon-button {
+  /* reset default styles */
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+
+  /* photon styles */
+  background-color: var(--grey-90-a10);
+  padding: 0 8px;
+  border-radius: 2px;
+}
+
+.photon-button:hover {
+  background-color: var(--grey-90-a20);
+}
+
+.photon-button:hover:active {
+  background-color: var(--grey-90-a30);
+}
+
+/* This is a Firefox-specific style because Firefox adds a focusring at a bad
+ * position. We're adding our own below. */
+.photon-button::-moz-focus-inner {
+  border: none;
+}
+
+/* Using -moz-focusring to target Firefox only, as a result of the style above */
+.photon-button:-moz-focusring {
+  outline: 1px dotted black;
+
+  /* This should be eventually the default behavior.
+   * See https://bugzilla.mozilla.org/show_bug.cgi?id=315209 */
+  -moz-outline-radius: 2px;
+}
+
+.photon-button-ghost {
+  background-color: transparent;
+  height: 32px;
+  width: 32px;
+}
+
+.photon-button-ghost:hover {
+  background-color: var(--grey-90-a10);
+}
+
+.photon-button-ghost:hover:active {
+  background-color: var(--grey-90-a20);
+}
