@@ -7,7 +7,10 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import bisection from 'bisection';
 import { timeCode } from '../../utils/time-code';
-import { getSampleCallNodes } from '../../profile-logic/profile-data';
+import {
+  getSampleCallNodes,
+  getSelectedSamples,
+} from '../../profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 
 import type { Thread } from '../../types/profile';
@@ -22,6 +25,7 @@ type Props = {|
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
+  +upsideDown: boolean,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +className: string,
@@ -74,6 +78,7 @@ class ThreadStackGraph extends PureComponent<Props> {
       rangeEnd,
       callNodeInfo,
       selectedCallNodeIndex,
+      upsideDown,
     } = this.props;
 
     const devicePixelRatio = canvas.ownerDocument
@@ -88,6 +93,11 @@ class ThreadStackGraph extends PureComponent<Props> {
     const sampleCallNodes = getSampleCallNodes(
       thread.samples,
       stackIndexToCallNodeIndex
+    );
+    const selectedSamples = getSelectedSamples(
+      callNodeTable,
+      sampleCallNodes,
+      selectedCallNodeIndex
     );
     for (let i = 0; i < callNodeTable.depth.length; i++) {
       if (callNodeTable.depth[i] > maxDepth) {
@@ -104,24 +114,6 @@ class ThreadStackGraph extends PureComponent<Props> {
       0.8,
       trueIntervalPixelWidth * multiplier
     );
-    let selectedCallNodeDepth = 0;
-    if (selectedCallNodeIndex !== -1 && selectedCallNodeIndex !== null) {
-      selectedCallNodeDepth = callNodeTable.depth[selectedCallNodeIndex];
-    }
-    function hasSelectedCallNodePrefix(callNodePrefix) {
-      let callNodeIndex = callNodePrefix;
-      if (callNodeIndex === null) {
-        return false;
-      }
-      for (
-        let depth = callNodeTable.depth[callNodeIndex];
-        depth > selectedCallNodeDepth;
-        depth--
-      ) {
-        callNodeIndex = callNodeTable.prefix[callNodeIndex];
-      }
-      return callNodeIndex === selectedCallNodeIndex;
-    }
 
     const firstDrawnSampleTime = range[0] - drawnIntervalWidth / xPixelsPerMs;
     const lastDrawnSampleTime = range[1];
@@ -160,7 +152,7 @@ class ThreadStackGraph extends PureComponent<Props> {
       }
       const height = callNodeTable.depth[callNodeIndex] * yPixelsPerDepth;
       const xPos = (sampleTime - range[0]) * xPixelsPerMs;
-      if (hasSelectedCallNodePrefix(callNodeIndex)) {
+      if (selectedSamples[i]) {
         highlightedSamples.height.push(height);
         highlightedSamples.xPos.push(xPos);
       } else {
@@ -176,14 +168,14 @@ class ThreadStackGraph extends PureComponent<Props> {
     ctx.fillStyle = BLUE_40;
     for (let i = 0; i < regularSamples.height.length; i++) {
       const height = regularSamples.height[i];
-      const startY = canvas.height - height;
+      const startY = upsideDown ? 0 : canvas.height - height;
       const xPos = regularSamples.xPos[i];
       ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
     }
     ctx.fillStyle = BLUE_70;
     for (let i = 0; i < highlightedSamples.height.length; i++) {
       const height = highlightedSamples.height[i];
-      const startY = canvas.height - height;
+      const startY = upsideDown ? 0 : canvas.height - height;
       const xPos = highlightedSamples.xPos[i];
       ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
     }

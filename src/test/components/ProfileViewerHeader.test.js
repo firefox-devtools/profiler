@@ -19,16 +19,16 @@ import type { Profile } from '../../types/profile';
 function _getProfileWithDroppedSamples(): Profile {
   const { profile } = getProfileFromTextSamples(
     // The base thread is 9 samples long.
-    '1 2 3 4 5 6 7 8 9',
+    '1  2  3  4  5  6  7  8  9',
     // Create a second thread where `x` is when the thread wasn't yet initialized
     // and where e is an empty sample. The profile fixture will be mutated below
     // to follow this.
     `
-      x x e e A A A x x
-              B B B
-              C C H
-              D F I
-              E G
+      x  x  e  e  A  A  A  x  x
+                  B  B  B
+                  C  C  H
+                  D  F  I
+                  E  G
     `
   );
 

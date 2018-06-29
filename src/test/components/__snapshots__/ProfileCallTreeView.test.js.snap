@@ -1309,6 +1309,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1341,6 +1345,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1373,6 +1381,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1405,6 +1417,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1437,6 +1453,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1469,6 +1489,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1501,6 +1525,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1533,6 +1561,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1565,6 +1597,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1597,6 +1633,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1629,6 +1669,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1661,6 +1705,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1693,6 +1741,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1725,6 +1777,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1757,6 +1813,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1789,6 +1849,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1825,6 +1889,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1857,6 +1925,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -1889,6 +1961,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   name
                 </span>
                 <span
@@ -2389,6 +2465,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   Z
                 </span>
                 <span
@@ -2421,6 +2501,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   Y
                 </span>
                 <span
@@ -2453,6 +2537,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   X
                 </span>
                 <span
@@ -2485,6 +2573,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   B
                 </span>
                 <span
@@ -2517,6 +2609,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   A
                 </span>
                 <span
@@ -2549,6 +2645,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   C
                 </span>
                 <span
@@ -2581,6 +2681,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   E
                 </span>
                 <span
@@ -3081,6 +3185,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   A
                 </span>
                 <span
@@ -3113,6 +3221,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   B
                 </span>
                 <span
@@ -3145,6 +3257,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   C
                 </span>
                 <span
@@ -3177,6 +3293,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   D
                 </span>
                 <span
@@ -3209,6 +3329,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   E
                 </span>
                 <span
@@ -3241,6 +3365,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   F
                 </span>
                 <span
@@ -3273,6 +3401,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   H
                 </span>
                 <span
@@ -3773,6 +3905,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   A
                 </span>
                 <span
@@ -3805,6 +3941,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   B
                 </span>
                 <span
@@ -3837,6 +3977,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   C
                 </span>
                 <span
@@ -3869,6 +4013,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   D
                 </span>
                 <span
@@ -3901,6 +4049,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   E
                 </span>
                 <span
@@ -3933,6 +4085,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   F
                 </span>
                 <span
@@ -3965,6 +4121,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   H
                 </span>
                 <span
@@ -4428,6 +4588,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   A
                 </span>
                 <span
@@ -4460,6 +4624,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   B
                 </span>
                 <span
@@ -4492,6 +4660,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   
                   <span
                     className="treeViewHighlighting"
@@ -4530,6 +4702,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   D
                 </span>
                 <span
@@ -4562,6 +4738,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   E
                 </span>
                 <span
@@ -4594,6 +4774,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   F
                 </span>
                 <span
@@ -5057,6 +5241,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   A
                 </span>
                 <span
@@ -5089,6 +5277,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   B
                 </span>
                 <span
@@ -5121,6 +5313,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   
                   <span
                     className="treeViewHighlighting"
@@ -5159,6 +5355,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   D
                 </span>
                 <span
@@ -5191,6 +5391,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   E
                 </span>
                 <span
@@ -5223,6 +5427,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   F
                 </span>
                 <span
@@ -5612,6 +5820,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   A
                 </span>
                 <span
@@ -5644,6 +5856,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   B
                 </span>
                 <span
@@ -5676,6 +5892,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   
                   <span
                     className="treeViewHighlighting"
@@ -5714,6 +5934,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   
                   <span
                     className="treeViewHighlighting"
@@ -6109,6 +6333,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   A
                 </span>
                 <span
@@ -6141,6 +6369,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   B
                 </span>
                 <span
@@ -6173,6 +6405,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   
                   <span
                     className="treeViewHighlighting"
@@ -6211,6 +6447,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   
                   <span
                     className="treeViewHighlighting"
@@ -6680,6 +6920,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   A
                 </span>
                 <span
@@ -6712,6 +6956,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   B
                 </span>
                 <span
@@ -6744,6 +6992,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   
                   <span
                     className="treeViewHighlighting"
@@ -6782,6 +7034,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   D
                 </span>
                 <span
@@ -6814,6 +7070,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   
                   <span
                     className="treeViewHighlighting"
@@ -6852,6 +7112,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
+                  <span
+                    className="treeViewCategoryKnob grey"
+                    title="Other"
+                  />
                   F
                 </span>
                 <span

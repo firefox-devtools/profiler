@@ -23,6 +23,8 @@ import { arePathsEqual, PathSet } from '../utils/path';
 
 import type {
   Profile,
+  CategoryList,
+  IndexIntoCategoryList,
   Thread,
   ThreadIndex,
   SamplesTable,
@@ -518,13 +520,22 @@ export const getProfile = (state: State): Profile =>
   );
 export const getProfileInterval = (state: State): Milliseconds =>
   getProfile(state).meta.interval;
+export const getCategories = (state: State): CategoryList =>
+  getProfile(state).meta.categories;
+export const getDefaultCategory = (state: State): IndexIntoCategoryList =>
+  getCategories(state).findIndex(c => c.color === 'grey');
 export const getThreads = (state: State): Thread[] => getProfile(state).threads;
 export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
 export const getRightClickedThreadIndex = (state: State) =>
   getProfileViewOptions(state).rightClickedThread;
-export const getSelection = (state: State) =>
+export const getSelection: State => ProfileSelection = (state: State) =>
   getProfileViewOptions(state).selection;
+
+const _getDefaultCategoryWrappedInObject = createSelector(
+  getDefaultCategory,
+  defaultCategory => ({ value: defaultCategory })
+);
 
 export type SelectorsForThread = {
   getThread: State => Thread,
@@ -546,6 +557,7 @@ export type SelectorsForThread = {
   getCallNodeMaxDepth: State => number,
   getSelectedCallNodePath: State => CallNodePath,
   getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
+  getSelectedSamplesInFilteredThread: State => boolean[],
   getExpandedCallNodePaths: State => PathSet,
   getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
   getCallTree: State => CallTree.CallTree,
@@ -585,7 +597,12 @@ export const selectorsForThread = (
         return ProfileData.filterThreadToRange(thread, start, end);
       }
     );
-    const applyTransform = (thread: Thread, transform: Transform) => {
+    const applyTransform = (
+      thread: Thread,
+      transform: Transform,
+      defaultCategoryWrappedInObj: { value: IndexIntoCategoryList }
+    ) => {
+      const defaultCategory = defaultCategoryWrappedInObj.value;
       switch (transform.type) {
         case 'focus-subtree':
           return transform.inverted
@@ -615,7 +632,8 @@ export const selectorsForThread = (
           return Transforms.collapseResource(
             thread,
             transform.resourceIndex,
-            transform.implementation
+            transform.implementation,
+            defaultCategory
           );
         case 'collapse-direct-recursion':
           return Transforms.collapseDirectRecursion(
@@ -626,7 +644,8 @@ export const selectorsForThread = (
         case 'collapse-function-subtree':
           return Transforms.collapseFunctionSubtree(
             thread,
-            transform.funcIndex
+            transform.funcIndex,
+            defaultCategory
           );
         default:
           throw assertExhaustiveCheck(transform);
@@ -644,16 +663,19 @@ export const selectorsForThread = (
     const getRangeAndTransformFilteredThread = createSelector(
       getRangeFilteredThread,
       getTransformStack,
-      (startingThread, transforms): Thread =>
+      _getDefaultCategoryWrappedInObject,
+      (startingThread, transforms, defaultCategoryObj): Thread =>
         transforms.reduce(
           // Apply the reducer using an arrow function to ensure correct memoization.
-          (thread, transform) => applyTransformMemoized(thread, transform),
+          (thread, transform) =>
+            applyTransformMemoized(thread, transform, defaultCategoryObj),
           startingThread
         )
     );
     const _getImplementationFilteredThread = createSelector(
       getRangeAndTransformFilteredThread,
       UrlState.getImplementationFilter,
+      getDefaultCategory,
       ProfileData.filterThreadByImplementation
     );
     const _getImplementationAndSearchFilteredThread = createSelector(
@@ -666,9 +688,10 @@ export const selectorsForThread = (
     const getFilteredThread = createSelector(
       _getImplementationAndSearchFilteredThread,
       UrlState.getInvertCallstack,
-      (thread, shouldInvertCallstack): Thread => {
+      getDefaultCategory,
+      (thread, shouldInvertCallstack, defaultCategory): Thread => {
         return shouldInvertCallstack
-          ? ProfileData.invertCallstack(thread)
+          ? ProfileData.invertCallstack(thread, defaultCategory)
           : thread;
       }
     );
@@ -705,10 +728,8 @@ export const selectorsForThread = (
       getTransformStack,
       Transforms.getTransformLabels
     );
-    const _getRangeFilteredThreadSamples = createSelector(
-      getRangeFilteredThread,
-      (thread): SamplesTable => thread.samples
-    );
+    const _getRangeFilteredThreadSamples = state =>
+      getRangeFilteredThread(state).samples;
     const getJankInstances = createSelector(
       _getRangeFilteredThreadSamples,
       (samples): TracingMarker[] => ProfileData.getJankInstances(samples, 50)
@@ -764,8 +785,17 @@ export const selectorsForThread = (
     );
     const getCallNodeInfo = createSelector(
       getFilteredThread,
-      ({ stackTable, frameTable, funcTable }: Thread): CallNodeInfo => {
-        return ProfileData.getCallNodeInfo(stackTable, frameTable, funcTable);
+      getDefaultCategory,
+      (
+        { stackTable, frameTable, funcTable }: Thread,
+        defaultCategory: IndexIntoCategoryList
+      ): CallNodeInfo => {
+        return ProfileData.getCallNodeInfo(
+          stackTable,
+          frameTable,
+          funcTable,
+          defaultCategory
+        );
       }
     );
     const getCallNodeMaxDepth = createSelector(
@@ -788,6 +818,15 @@ export const selectorsForThread = (
         );
       }
     );
+    const getSelectedSamplesInFilteredThread = createSelector(
+      getFilteredThread,
+      getCallNodeInfo,
+      getSelectedCallNodeIndex,
+      (thread, {callNodeTable, stackIndexToCallNodeIndex}, selectedCallNode) => {
+        const sampleCallNodes = ProfileData.getSampleCallNodes(thread.samples, stackIndexToCallNodeIndex);
+        return ProfileData.getSelectedSamples(callNodeTable, sampleCallNodes, selectedCallNode);
+      }
+    );
     const getExpandedCallNodePaths = createSelector(
       getViewOptions,
       (threadViewOptions): PathSet => threadViewOptions.expandedCallNodePaths
@@ -808,6 +847,7 @@ export const selectorsForThread = (
       getRangeSelectionFilteredThread,
       getProfileInterval,
       getCallNodeInfo,
+      getCategories,
       UrlState.getImplementationFilter,
       UrlState.getInvertCallstack,
       CallTree.getCallTree
@@ -869,6 +909,7 @@ export const selectorsForThread = (
       getCallNodeMaxDepth,
       getSelectedCallNodePath,
       getSelectedCallNodeIndex,
+      getSelectedSamplesInFilteredThread,
       getExpandedCallNodePaths,
       getExpandedCallNodeIndexes,
       getCallTree,

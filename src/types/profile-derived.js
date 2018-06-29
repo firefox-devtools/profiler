@@ -36,6 +36,7 @@ export type IndexIntoCallNodeTable = number;
 export type CallNodeTable = {
   prefix: Int32Array,
   func: Int32Array,
+  category: Int32Array,
   depth: number[],
   length: number,
 };
@@ -89,6 +90,8 @@ export type CallNodeDisplayData = {
   name: string,
   lib: string,
   dim: boolean,
+  categoryName: string,
+  categoryColor: string,
   icon: string | null,
 };
 

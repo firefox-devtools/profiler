@@ -40,11 +40,11 @@ describe('"focus-subtree" transform', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E G
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  G
     `);
     const { dispatch, getState } = storeWithProfile(profile);
     const originalCallTree = selectedThreadSelectors.getCallTree(getState());
@@ -137,12 +137,12 @@ describe('"focus-subtree" transform', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C X C
-      D Y X
-      E Z Y
-          Z
+      A  A  A
+      B  B  B
+      C  X  C
+      D  Y  X
+      E  Z  Y
+            Z
     `);
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeInvertCallstack(true));
@@ -228,11 +228,11 @@ describe('"merge-call-node" transform', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E G
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  G
     `);
     const { dispatch, getState } = storeWithProfile(profile);
     const originalCallTree = selectedThreadSelectors.getCallTree(getState());
@@ -438,11 +438,11 @@ describe('"merge-function" transform', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F C
-      E G
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  C
+      E  G
     `);
     const threadIndex = 0;
     const C = funcNames.indexOf('C');
@@ -491,10 +491,10 @@ describe('"drop-function" transform', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A A A
-      B B C B
-      C C   E
-        D
+      A  A  A  A
+      B  B  C  B
+      C  C     E
+         D
     `);
     const threadIndex = 0;
     const C = funcNames.indexOf('C');
@@ -559,13 +559,13 @@ describe('"focus-function" transform', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A A
-      X B B
-      Y X X
-      C Y Y
-        X X
-        Y Y
-        D D
+      A  A  A
+      X  B  B
+      Y  X  X
+      C  Y  Y
+         X  X
+         Y  Y
+         D  D
     `);
 
     const threadIndex = 0;
@@ -829,11 +829,11 @@ describe('"collapse-function-subtree" transform', function() {
     profile,
     funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
-    A A A A
-    B B B B
-    C C H H
-    D F C C
-    E G I J
+    A  A  A  A
+    B  B  B  B
+    C  C  H  H
+    D  F  C  C
+    E  G  I  J
   `);
   const threadIndex = 0;
   const collapseTransform = {
@@ -953,10 +953,10 @@ describe('"collapse-direct-recursion" transform', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A A A
-      B B B F
-      B B E
-      B D
+      A  A  A  A
+      B  B  B  F
+      B  B  E
+      B  D
       C
     `);
     const B = funcNames.indexOf('B');

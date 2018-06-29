@@ -22,13 +22,13 @@ describe('calltree/CallNodeContextMenu', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A         A         A
-      B:library B:library B:library
-      B:library B:library B:library
-      B:library B:library B:library
-      C         C         H
-      D         F         I
-      E         E
+      A          A          A
+      B:library  B:library  B:library
+      B:library  B:library  B:library
+      B:library  B:library  B:library
+      C          C          H
+      D          F          I
+      E          E
     `);
     const store = storeWithProfile(profile);
     store.dispatch(

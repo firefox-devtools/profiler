@@ -5,7 +5,7 @@
 // @flow
 import { getEmptyProfile } from '../../../profile-logic/profile-data';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
-import type { Profile, Thread } from '../../../types/profile';
+import type { Profile, Thread, CategoryList } from '../../../types/profile';
 import type { MarkerPayload } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
 
@@ -98,6 +98,7 @@ export function getEmptyThread(overrides: ?Object): Thread {
       stackTable: {
         frame: [],
         prefix: [],
+        category: [],
         length: 0,
       },
       frameTable: {
@@ -137,22 +138,27 @@ export function getEmptyThread(overrides: ?Object): Thread {
 /**
  * Create a profile from text representation of samples. Each column in the text provided
  * represents a sample. Each sample is made up of a list of functions.
+ * Each column needs to be separated by at least two spaces.
  *
  * Example usage:
  *
  * ```
  * const { profile } = getProfileFromTextSamples(`
- *   A       A        A     A
- *   B.js    B.js     F     F
- *   C.js    C.js     G     G
- *   D       D              H
- *   E       E
+ *   A          A         A             A
+ *   B.js       B.js      F [Graphics]  F
+ *   C.js       C.js      G             G
+ *   D          D                       H [DOM]
+ *   E [Other]  E [Other]
  * `);
  * ```
  *
  * The function names are aligned vertically on the left. This would produce 4 samples
- * with the stacks based off of those functions listed, with A being the root. Whitespace
- * is trimmed.
+ * with the stacks based off of those functions listed, with A being the root. Single
+ * spaces within a column are permitted, surrounding whitespace is trimmed.
+ *
+ * Functions ending in "js" are marked as JS functions in the funcTable's isJS
+ * column. Functions that have a category name in square brackets after them
+ * are annotated with that category in the frameTable's category column.
  *
  * The function returns more information as well, that is:
  * * an array mapping the func indices (IndexIntoFuncTable) to their names
@@ -164,11 +170,11 @@ export function getEmptyThread(overrides: ?Object): Thread {
  *   profile,
  *   funcNamesDictPerThread: [{ A, B, C, D }],
  * } = getProfileFromTextSamples(`
- *    A A
- *    B B
- *    C C
- *    D D
- *    E F
+ *    A        A
+ *    B        B
+ *    C        C
+ *    D [DOM]  D [DOM]
+ *    E        F
  *  `);
  * ```
  * Now the variables named A B C D directly refer to the func indices and can be
@@ -182,29 +188,75 @@ export function getProfileFromTextSamples(
   funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
 } {
   const profile = getEmptyProfile();
+  const categories = profile.meta.categories;
+
   const funcNamesPerThread = [];
   const funcNamesDictPerThread = [];
 
   profile.threads = allTextSamples.map(textSamples => {
     // Process the text.
     const textOnlyStacks = _parseTextSamples(textSamples);
-    const funcNames = textOnlyStacks
+    const funcs = textOnlyStacks
       // Flatten the arrays.
       .reduce((memo, row) => [...memo, ...row], [])
       // Make the list unique.
-      .filter((item, index, array) => array.indexOf(item) === index);
-    const funcNamesDict = funcNames.reduce((result, item, index) => {
-      result[item] = index;
+      .filter((item, index, array) => array.indexOf(item) === index)
+      // Parse strings into function name and category.
+      .map(funcStr => _getFuncNameAndCategory(funcStr, categories));
+
+    const funcNamesDict = funcs.reduce((result, func, index) => {
+      result[func.funcName] = index;
       return result;
     }, {});
-    funcNamesPerThread.push(funcNames);
+
+    funcNamesPerThread.push(funcs.map(({ funcName }) => funcName));
     funcNamesDictPerThread.push(funcNamesDict);
 
     // Turn this into a real thread.
-    return _buildThreadFromTextOnlyStacks(textOnlyStacks, funcNames);
+    return _buildThreadFromTextOnlyStacks(textOnlyStacks, funcs, categories);
   });
 
   return { profile, funcNamesPerThread, funcNamesDictPerThread };
+}
+
+// Parse strings of the form "functionName [category name]".
+function _getFuncNameAndCategory(
+  str,
+  categories
+): {| funcName: string, category: number | null |} {
+  const match = /(.*) \[(.+)\]/.exec(str);
+  if (match === null) {
+    return {
+      funcName: str,
+      category: null,
+    };
+  }
+
+  const [, funcName, categoryName] = match;
+  const category = categories.findIndex(c => c.name === categoryName);
+  return {
+    funcName: funcName.trim(),
+    category: category !== -1 ? category : null,
+  };
+}
+
+function _getAllMatchRanges(regex, str): Array<{ start: number, end: number }> {
+  const ranges = [];
+  let match;
+  while ((match = regex.exec(str)) !== null) {
+    ranges.push({ start: match.index, end: match.index + match[0].length });
+  }
+  return ranges;
+}
+
+function _getColumnPositions(line): number[] {
+  const lineWithoutIndent = line.trimLeft();
+  const indent = line.length - lineWithoutIndent.length;
+  const trimmedLine = line.trim();
+
+  // Find the start and end positions of all consecutive runs of two spaces or more.
+  const columnSeparatorRanges = _getAllMatchRanges(/ {2,}/g, trimmedLine);
+  return [indent, ...columnSeparatorRanges.map(range => range.end + indent)];
 }
 
 /**
@@ -230,56 +282,22 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
     // Filter out empty lines
     t => t
   );
-
-  // Compute the index of where the columns start in the string. String.prototype.split
-  // can't be used here because it would put functions on the wrong sample. In the example
-  // usage from the function comment above, the third sample would have the stack
-  // [A, F, G, H] if splitting was used, misaligning the function H.
-  const columnIndexes = [];
-  {
-    const firstLine = lines[0];
-    if (!firstLine) {
-      throw new Error('Empty text data was sent');
-    }
-    let searchWhitespace = true;
-    for (let i = 0; i < firstLine.length; i++) {
-      const isSpace = firstLine[i] === ' ';
-      if (searchWhitespace) {
-        if (!isSpace) {
-          columnIndexes.push(i);
-          searchWhitespace = false;
-        }
-      } else {
-        if (isSpace) {
-          searchWhitespace = true;
-        }
-      }
-    }
+  if (lines.length === 0) {
+    throw new Error('Empty text data was sent');
   }
 
-  // Split up each line into rows of characters
-  const rows = lines.map(line => {
-    return columnIndexes.map(columnIndex => {
-      let funcName = '';
-      for (let i = columnIndex; i < line.length; i++) {
-        const char = line[i];
-        if (char === ' ') {
-          break;
-        } else {
-          funcName += char;
-        }
-      }
-      return funcName;
-    });
-  });
+  // Compute the index of where the columns start in the string.
+  const columnPositions = _getColumnPositions(lines[0]);
 
-  const firstRow = rows[0];
-  if (!firstRow) {
-    throw new Error('No valid data.');
-  }
+  // Create a table of string cells. Empty cells contain the empty string.
+  const rows = lines.map(line =>
+    columnPositions.map((pos, columnIndex) =>
+      line.substring(pos, columnPositions[columnIndex + 1]).trim()
+    )
+  );
 
-  // Go from rows to columns
-  return firstRow.map((_, columnIndex) => {
+  // Transpose the table to go from rows to columns.
+  return columnPositions.map((_, columnIndex) => {
     const column = [];
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       const value = rows[rowIndex][columnIndex];
@@ -294,7 +312,8 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
 
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
-  funcNames: string[]
+  funcs: Array<{| funcName: string, category: number | null |}>,
+  categories: CategoryList
 ): Thread {
   const thread = getEmptyThread();
 
@@ -310,8 +329,8 @@ function _buildThreadFromTextOnlyStacks(
 
   const resourceIndexCache = {};
 
-  // Create the FuncTable.
-  funcNames.forEach(funcName => {
+  // Create the FrameTable and the FuncTable.
+  funcs.forEach(({ funcName, category }) => {
     funcTable.name.push(stringTable.indexForString(funcName));
     funcTable.address.push(
       funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : 0
@@ -320,11 +339,26 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.isJS.push(funcName.endsWith('js'));
     funcTable.lineNumber.push(null);
     // Ignore resources for now, this way funcNames have really nice string indexes.
-    funcTable.length++;
+    // The resource column will be filled in the loop below.
+    const funcIndex = funcTable.length++;
+
+    frameTable.func.push(funcIndex);
+    frameTable.address.push(0);
+    frameTable.category.push(category);
+    frameTable.implementation.push(null);
+    frameTable.line.push(null);
+    frameTable.optimizations.push(null);
+    const frameIndex = frameTable.length++;
+
+    if (frameIndex !== funcIndex) {
+      throw new Error(
+        'something went wrong - frameIndex and funcIndex should always match'
+      );
+    }
   });
 
   // Go back through and create resources as needed.
-  funcNames.forEach(funcName => {
+  funcs.forEach(({ funcName }) => {
     // See if this sample has a resource like "funcName:libraryName".
     const [, libraryName] = funcName.match(/\w+:(\w+)/) || [];
     let resourceIndex = resourceIndexCache[libraryName];
@@ -356,10 +390,14 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.resource.push(resourceIndex);
   });
 
+  const categoryOther = categories.findIndex(c => c.name === 'Other');
+
   // Create the samples, stacks, and frames.
   textOnlyStacks.forEach((column, columnIndex) => {
     let prefix = null;
-    column.forEach(funcName => {
+    column.forEach(funcStr => {
+      const { funcName } = _getFuncNameAndCategory(funcStr, categories);
+
       // There is a one-to-one relationship between strings and funcIndexes here, so
       // the indexes can double as both string indexes and func indexes.
       const funcIndex = stringTable.indexForString(funcName);
@@ -376,18 +414,18 @@ function _buildThreadFromTextOnlyStacks(
         }
       }
 
-      // If we couldn't find a stack, go ahead and create a stack and frame.
+      // If we couldn't find a stack, go ahead and create it.
       if (stackIndex === undefined) {
-        const frameIndex = frameTable.length++;
-        frameTable.func.push(funcIndex);
-        frameTable.address.push(0);
-        frameTable.category.push(null);
-        frameTable.implementation.push(null);
-        frameTable.line.push(null);
-        frameTable.optimizations.push(null);
+        const frameIndex = funcIndex;
+        const frameCategory = frameTable.category[frameIndex];
+        const prefixCategory =
+          prefix === null ? categoryOther : stackTable.category[prefix];
+        const stackCategory =
+          frameCategory === null ? prefixCategory : frameCategory;
 
         stackTable.frame.push(frameIndex);
         stackTable.prefix.push(prefix);
+        stackTable.category.push(stackCategory);
         stackIndex = stackTable.length++;
       }
 

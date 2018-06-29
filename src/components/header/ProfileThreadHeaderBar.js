@@ -6,8 +6,8 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
-import ThreadStackGraph from './ThreadStackGraph';
-import { selectorsForThread } from '../../reducers/profile-view';
+import ThreadActivityGraph from './ThreadActivityGraph';
+import { selectorsForThread, getProfile } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
   getSampleIndexClosestToTime,
@@ -25,7 +25,7 @@ import {
 } from '../../actions/profile-view';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 
-import type { Thread, ThreadIndex } from '../../types/profile';
+import type { Thread, ThreadIndex, CategoryList } from '../../types/profile';
 import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
   CallNodeInfo,
@@ -55,6 +55,7 @@ type StateProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +isSelected: boolean,
   +unfilteredSamplesRange: StartEndRange | null,
+  +categories: CategoryList,
 |};
 
 type DispatchProps = {|
@@ -162,6 +163,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
       isModifyingSelection,
       unfilteredSamplesRange,
       style,
+      categories,
     } = this.props;
 
     if (isHidden) {
@@ -219,15 +221,16 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
               isModifyingSelection={isModifyingSelection}
             />
           ) : null}
-          <ThreadStackGraph
+          <ThreadActivityGraph
             interval={interval}
-            thread={thread}
-            className="threadStackGraph"
+            fullThread={thread}
+            className="threadActivityGraph"
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
             selectedCallNodeIndex={selectedCallNodeIndex}
             onStackClick={this._onStackClick}
+            categories={categories}
           />
           <EmptyThreadIndicator
             thread={thread}
@@ -248,7 +251,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     const selectors = selectorsForThread(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
     return {
-      thread: selectors.getFilteredThread(state),
+      thread: selectors.getRangeFilteredThread(state),
       threadName: selectors.getFriendlyThreadName(state),
       processDetails: selectors.getThreadProcessDetails(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
@@ -258,6 +261,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
           : -1,
       isSelected: threadIndex === selectedThread,
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
+      categories: getProfile(state).meta.categories,
     };
   },
   mapDispatchToProps: {
