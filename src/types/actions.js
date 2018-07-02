@@ -19,7 +19,7 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState } from '../types/reducers';
+import type { ProfileSharingStatus, UrlState } from '../types/reducers';
 
 export type DataSource =
   | 'none'
@@ -99,7 +99,11 @@ type ProfileAction =
   | {|
       +type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
-    |};
+    |}
+  | {
+      type: 'SET_PROFILE_SHARING_STATUS',
+      profileSharingStatus: ProfileSharingStatus,
+    };
 
 type ReceiveProfileAction =
   | {

@@ -73,6 +73,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
                 <input
                   checked={false}
                   className="profileSharingShareNetworkUrlsCheckbox"
+                  disabled={false}
                   onChange={[Function]}
                   type="checkbox"
                 />
@@ -202,6 +203,99 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
               onClick={[Function]}
               type="button"
               value="Try Again"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel profileSharingSecondaryShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton profileSharingSecondaryShareButtonButton"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+          value="Share without URLs"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="profileSharingShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="profileSharingShareNetworkUrlsCheckbox"
+                  disabled={true}
+                  onChange={undefined}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
             />
           </div>
         </div>
@@ -320,6 +414,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
                 <input
                   checked={false}
                   className="profileSharingShareNetworkUrlsCheckbox"
+                  disabled={false}
                   onChange={[Function]}
                   type="checkbox"
                 />
@@ -449,6 +544,99 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
               onClick={[Function]}
               type="button"
               value="Try Again"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel profileSharingSecondaryShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton profileSharingSecondaryShareButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Share without URLs"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="profileSharingShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="profileSharingShareNetworkUrlsCheckbox"
+                  disabled={true}
+                  onChange={undefined}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
             />
           </div>
         </div>

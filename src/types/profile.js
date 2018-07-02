@@ -213,6 +213,7 @@ export type ProfileMeta = {|
   sourceURL?: string,
   physicalCPUs?: number,
   logicalCPUs?: number,
+  networkURLsRemoved?: boolean,
 |};
 
 /**
