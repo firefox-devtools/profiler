@@ -158,34 +158,19 @@ export function getFuncIndex(path: CallNodePath): IndexIntoFuncTable {
   return path[path.length - 1];
 }
 
-/**
- * This function Returns the JS implementation information for a specific stack.
- */
-export function getJsImplementationForStack(
-  stackIndex: IndexIntoStackTable,
-  { stackTable, frameTable, stringTable }: Thread
-): string {
-  const frameIndex = stackTable.frame[stackIndex];
-  const jsImplementationStrIndex = frameTable.implementation[frameIndex];
-  const jsImplementation =
-    jsImplementationStrIndex === null
-      ? 'interpreter'
-      : stringTable.getString(jsImplementationStrIndex);
-
-  return jsImplementation;
-}
-
-type Breakdown = { [key: string]: Milliseconds } | null;
+type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
+type StackImplementation = 'native' | JsImplementation;
+type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
 type ItemTimings = {|
   selfTime: {|
     // time spent excluding children
     value: Milliseconds,
-    breakdownByImplementation: Breakdown,
+    breakdownByImplementation: BreakdownByImplementation | null,
   |},
   totalTime: {|
     // time spent including children
     value: Milliseconds,
-    breakdownByImplementation: Breakdown,
+    breakdownByImplementation: BreakdownByImplementation | null,
   |},
 |};
 
@@ -196,6 +181,31 @@ export type TimingsForPath = {|
   forFunc: ItemTimings,
   rootTime: Milliseconds, // time for all the samples in the current tree
 |};
+
+/**
+ * This function Returns the JS implementation information for a specific stack.
+ */
+export function getJsImplementationForStack(
+  stackIndex: IndexIntoStackTable,
+  { stackTable, frameTable, stringTable }: Thread
+): JsImplementation {
+  const frameIndex = stackTable.frame[stackIndex];
+  const jsImplementationStrIndex = frameTable.implementation[frameIndex];
+
+  if (jsImplementationStrIndex === null) {
+    return 'interpreter';
+  }
+
+  const jsImplementation = stringTable.getString(jsImplementationStrIndex);
+
+  switch (jsImplementation) {
+    case 'baseline':
+    case 'ion':
+      return jsImplementation;
+    default:
+      return 'unknown';
+  }
+}
 
 /**
  * This function returns the timings for a specific path. The algorithm is
@@ -226,8 +236,8 @@ export function getTimingsForPath(
    * This is a small utility function to more easily add data to breakdowns.
    */
   function accumulateDataToBreakdown(
-    timings: { breakdownByImplementation: Breakdown },
-    implementation: string
+    timings: { breakdownByImplementation: BreakdownByImplementation | null },
+    implementation: StackImplementation
   ): void {
     if (timings.breakdownByImplementation === null) {
       timings.breakdownByImplementation = {};

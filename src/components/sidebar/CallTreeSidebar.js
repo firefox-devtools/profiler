@@ -41,7 +41,7 @@ function SidebarDetail({ label, children }: SidebarDetailProps) {
 }
 
 type BreakdownProps = {|
-  +data: { [mode: string]: Milliseconds },
+  +data: $ReadOnly<{ [mode: string]: Milliseconds }>,
 |};
 
 // This stateless component is responsible for displaying the implementation
