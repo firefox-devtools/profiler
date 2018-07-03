@@ -46,6 +46,7 @@ import type {
   ThreadViewOptions,
 } from '../types/reducers';
 import type { Transform, TransformStack } from '../types/transforms';
+import type { TimingsForPath } from '../profile-logic/profile-data';
 
 function profile(state: Profile | null = null, action: Action): Profile | null {
   switch (action.type) {
@@ -893,4 +894,86 @@ export const selectedThreadSelectors: SelectorsForThread = (() => {
   }
   const result2: SelectorsForThread = result;
   return result2;
+})();
+
+export type SelectorsForNode = {
+  getName: State => string,
+  getIsJS: State => boolean,
+  getLib: State => string,
+  getTimingsForSidebar: State => TimingsForPath,
+};
+
+export const selectedNodeSelectors: SelectorsForNode = (() => {
+  const getName = createSelector(
+    selectedThreadSelectors.getSelectedCallNodePath,
+    selectedThreadSelectors.getFilteredThread,
+    (selectedPath, { stringTable, funcTable }) => {
+      if (!selectedPath.length) {
+        return '';
+      }
+
+      const funcIndex = ProfileData.getLeafFuncIndex(selectedPath);
+      return stringTable.getString(funcTable.name[funcIndex]);
+    }
+  );
+
+  const getIsJS = createSelector(
+    selectedThreadSelectors.getSelectedCallNodePath,
+    selectedThreadSelectors.getFilteredThread,
+    (selectedPath, { funcTable }) => {
+      if (!selectedPath.length) {
+        return false;
+      }
+
+      const funcIndex = ProfileData.getLeafFuncIndex(selectedPath);
+      return funcTable.isJS[funcIndex];
+    }
+  );
+
+  const getLib = createSelector(
+    selectedThreadSelectors.getSelectedCallNodePath,
+    selectedThreadSelectors.getFilteredThread,
+    (selectedPath, { stringTable, funcTable, resourceTable }) => {
+      if (!selectedPath.length) {
+        return '';
+      }
+
+      return ProfileData.getOriginAnnotationForFunc(
+        ProfileData.getLeafFuncIndex(selectedPath),
+        funcTable,
+        resourceTable,
+        stringTable
+      );
+    }
+  );
+
+  const getTimingsForSidebar = createSelector(
+    selectedThreadSelectors.getSelectedCallNodePath,
+    selectedThreadSelectors.getCallNodeInfo,
+    getProfileInterval,
+    UrlState.getInvertCallstack,
+    selectedThreadSelectors.getFilteredThread,
+    (
+      selectedPath,
+      callNodeInfo,
+      interval,
+      isInvertedTree,
+      thread
+    ): TimingsForPath => {
+      return ProfileData.getTimingsForPath(
+        selectedPath,
+        callNodeInfo,
+        interval,
+        isInvertedTree,
+        thread
+      );
+    }
+  );
+
+  return {
+    getName,
+    getIsJS,
+    getLib,
+    getTimingsForSidebar,
+  };
 })();
