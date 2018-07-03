@@ -30,6 +30,7 @@ import type {
   ThreadIndex,
   SamplesTable,
   MarkersTable,
+  Pid,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -37,6 +38,8 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
   MarkerTimingRows,
+  LocalTrack,
+  GlobalTrack,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type { Action, ProfileSelection, RequestedLib } from '../types/actions';
@@ -82,6 +85,36 @@ function profile(state: Profile | null = null, action: Action): Profile | null {
       });
       return Object.assign({}, state, { threads });
     }
+    default:
+      return state;
+  }
+}
+
+/**
+ * This information is stored, rather than derived via selectors, since the coalesced
+ * function update would force it to be recomputed on every symbolication update
+ * pass. It is valid for the lifetime of the profile.
+ */
+function globalTracks(state: GlobalTrack[] = [], action: Action) {
+  switch (action.type) {
+    case 'VIEW_PROFILE':
+      return action.globalTracks;
+    default:
+      return state;
+  }
+}
+
+/**
+ * This can be derived like the globalTracks information, but is stored in the state
+ * for the same reason.
+ */
+function localTracksByPid(
+  state: Map<Pid, LocalTrack[]> = new Map(),
+  action: Action
+) {
+  switch (action.type) {
+    case 'VIEW_PROFILE':
+      return action.localTracksByPid;
     default:
       return state;
   }
@@ -359,7 +392,7 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
     case 'CHANGE_INVERT_CALLSTACK':
     case 'CHANGE_SELECTED_CALL_NODE':
     case 'CHANGE_SELECTED_THREAD':
-    case 'HIDE_THREAD':
+    case 'HIDE_GLOBAL_TRACK':
       return state + 1;
     default:
       return state;
@@ -487,6 +520,8 @@ export default wrapReducerInResetter(
       isCallNodeContextMenuVisible,
       profileSharingStatus,
     }),
+    globalTracks,
+    localTracksByPid,
     profile,
   })
 );
@@ -563,6 +598,33 @@ export const getRightClickedThreadIndex = (state: State) =>
   getProfileViewOptions(state).rightClickedThread;
 export const getSelection = (state: State) =>
   getProfileViewOptions(state).selection;
+
+/**
+ * Tracks
+ */
+export const getGlobalTracks = (state: State) =>
+  getProfileView(state).globalTracks;
+export const getGlobalTrackAndIndexByPid = (state: State, pid: Pid) => {
+  const globalTracks = getGlobalTracks(state);
+  const globalTrackIndex = globalTracks.findIndex(
+    track => track.type === 'process' && track.pid === pid
+  );
+  if (globalTrackIndex === -1) {
+    throw new Error('Unable to find the track index for the given pid.');
+  }
+  const globalTrack = globalTracks[globalTrackIndex];
+  if (globalTrack.type !== 'process') {
+    throw new Error('The globalTrack must be a process type.');
+  }
+  return { globalTrackIndex, globalTrack };
+};
+export const getLocalTracksByPid = (state: State) =>
+  getProfileView(state).localTracksByPid;
+export const getLocalTracks = (state: State, pid: Pid) =>
+  ensureExists(
+    getProfileView(state).localTracksByPid.get(pid),
+    'Unable to get the tracks for the given pid.'
+  );
 
 const _getDefaultCategoryWrappedInObject = createSelector(
   getDefaultCategory,
