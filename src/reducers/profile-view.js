@@ -912,7 +912,7 @@ export const selectedNodeSelectors: SelectorsForNode = (() => {
         return '';
       }
 
-      const funcIndex = ProfileData.getFuncIndex(selectedPath);
+      const funcIndex = ProfileData.getLeafFuncIndex(selectedPath);
       return stringTable.getString(funcTable.name[funcIndex]);
     }
   );
@@ -925,7 +925,7 @@ export const selectedNodeSelectors: SelectorsForNode = (() => {
         return false;
       }
 
-      const funcIndex = ProfileData.getFuncIndex(selectedPath);
+      const funcIndex = ProfileData.getLeafFuncIndex(selectedPath);
       return funcTable.isJS[funcIndex];
     }
   );
@@ -939,7 +939,7 @@ export const selectedNodeSelectors: SelectorsForNode = (() => {
       }
 
       return ProfileData.getOriginAnnotationForFunc(
-        ProfileData.getFuncIndex(selectedPath),
+        ProfileData.getLeafFuncIndex(selectedPath),
         funcTable,
         resourceTable,
         stringTable

@@ -154,9 +154,9 @@ export function getSampleCallNodes(
  * This function returns the function index for a specific call node path. This
  * is the last element of this path, or the leaf element of the path.
  */
-export function getFuncIndex(path: CallNodePath): IndexIntoFuncTable {
+export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
   if (path.length === 0) {
-    throw new Error("getFuncIndex assumes that the path isn't empty.");
+    throw new Error("getLeafFuncIndex assumes that the path isn't empty.");
   }
 
   return path[path.length - 1];
@@ -241,7 +241,7 @@ export function getTimingsForPath(
 
   const { samples, stackTable, funcTable } = thread;
   const nodeIndex = getCallNodeIndexFromPath(path, callNodeTable);
-  const funcIndex = getFuncIndex(path);
+  const funcIndex = getLeafFuncIndex(path);
 
   const pathTimings: ItemTimings = {
     selfTime: { value: 0, breakdownByImplementation: null },
