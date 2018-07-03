@@ -155,6 +155,10 @@ export function getSampleCallNodes(
  * is the last element of this path, or the leaf element of the path.
  */
 export function getFuncIndex(path: CallNodePath): IndexIntoFuncTable {
+  if (path.length === 0) {
+    throw new Error("getFuncIndex assumes that the path isn't empty.");
+  }
+
   return path[path.length - 1];
 }
 
@@ -218,6 +222,23 @@ export function getTimingsForPath(
   isInvertedTree: boolean,
   thread: Thread
 ): TimingsForPath {
+  if (!path.length) {
+    // If the path is empty, which shouldn't usually happen, we return an empty
+    // structure right away.
+    // The rest of this function's code assumes a non-empty path.
+    return {
+      forPath: {
+        selfTime: { value: 0, breakdownByImplementation: null },
+        totalTime: { value: 0, breakdownByImplementation: null },
+      },
+      forFunc: {
+        selfTime: { value: 0, breakdownByImplementation: null },
+        totalTime: { value: 0, breakdownByImplementation: null },
+      },
+      rootTime: 0,
+    };
+  }
+
   const { samples, stackTable, funcTable } = thread;
   const nodeIndex = getCallNodeIndexFromPath(path, callNodeTable);
   const funcIndex = getFuncIndex(path);

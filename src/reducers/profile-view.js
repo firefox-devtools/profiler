@@ -960,20 +960,6 @@ export const selectedNodeSelectors: SelectorsForNode = (() => {
       isInvertedTree,
       thread
     ): TimingsForPath => {
-      if (!selectedPath.length) {
-        return {
-          forPath: {
-            selfTime: { value: 0, breakdownByImplementation: null },
-            totalTime: { value: 0, breakdownByImplementation: null },
-          },
-          forFunc: {
-            selfTime: { value: 0, breakdownByImplementation: null },
-            totalTime: { value: 0, breakdownByImplementation: null },
-          },
-          rootTime: 0,
-        };
-      }
-
       return ProfileData.getTimingsForPath(
         selectedPath,
         callNodeInfo,
