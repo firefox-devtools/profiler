@@ -150,12 +150,17 @@ export function getSampleCallNodes(
   });
 }
 
-// This function assumes that the path isn't empty
+/**
+ * This function returns the function index for a specific call node path. This
+ * is the last element of this path, or the leaf element of the path.
+ */
 export function getFuncIndex(path: CallNodePath): IndexIntoFuncTable {
   return path[path.length - 1];
 }
 
-// Returns the JS implementation information for a specific stack
+/**
+ * This function Returns the JS implementation information for a specific stack.
+ */
 export function getJsImplementationForStack(
   stackIndex: IndexIntoStackTable,
   { stackTable, frameTable, stringTable }: Thread
@@ -192,8 +197,10 @@ export type TimingsForPath = {|
   rootTime: Milliseconds, // time for all the samples in the current tree
 |};
 
-// Returns the timings for a specific path. The algorithm is adjusted when
-// the call tree is inverted.
+/**
+ * This function returns the timings for a specific path. The algorithm is
+ * adjusted when the call tree is inverted.
+ */
 export function getTimingsForPath(
   path: CallNodePath,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
@@ -215,7 +222,9 @@ export function getTimingsForPath(
   };
   let rootTime = 0;
 
-  // Utility function to more easily add data to breakdowns
+  /**
+   * This is a small utility function to more easily add data to breakdowns.
+   */
   function accumulateDataToBreakdown(
     timings: { breakdownByImplementation: Breakdown },
     implementation: string
@@ -229,7 +238,8 @@ export function getTimingsForPath(
     timings.breakdownByImplementation[implementation] += interval;
   }
 
-  // Looping over the samples' stacks
+  // Loop over each sample and accumulate the self time, running time, and
+  // the implementation breakdown.
   for (const stackIndex of samples.stack) {
     if (stackIndex === null) {
       continue;
@@ -240,8 +250,8 @@ export function getTimingsForPath(
     const thisNodeIndex = stackIndexToCallNodeIndex[stackIndex];
     const thisFunc = callNodeTable.func[thisNodeIndex];
 
-    // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
     if (!isInvertedTree) {
+      // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
       if (thisNodeIndex === nodeIndex) {
         pathTimings.selfTime.value += interval;
 
@@ -260,7 +270,8 @@ export function getTimingsForPath(
     // Use the stackTable to traverse the call node path and get various
     // measurements.
     // We don't use getCallNodePathFromIndex because we don't need the result
-    // itself, and it's costly to get.
+    // itself, and it's costly to get. Moreover we can break out of the loop
+    // early if necessary.
     let funcFound = false;
     let pathFound = false;
     let nextIndex;
@@ -273,52 +284,58 @@ export function getTimingsForPath(
       const currentFunc = callNodeTable.func[currentNodeIndex];
       nextIndex = stackTable.prefix[currentIndex];
 
-      // One of the parents is the exact passed path
       if (currentNodeIndex === nodeIndex) {
+        // One of the parents is the exact passed path.
         pathTimings.totalTime.value += interval;
         pathFound = true;
       }
 
-      // One of the parents' func is the same function as the passed path
-      // Note we could have the same function several times, so we need a
-      // boolean variable to prevent adding it more than once.
       if (!funcFound && currentFunc === funcIndex) {
+        // One of the parents' func is the same function as the passed path
+        // Note we could have the same function several times in the stack, so
+        // we need a boolean variable to prevent adding it more than once.
         funcTimings.totalTime.value += interval;
         funcFound = true;
       }
 
       // When the tree isn't inverted, we don't need to move further up the call
       // node if we already found all the data.
+      // But for inverted trees, the selfTime is counted on the root node so we
+      // need to go on looping the stack until we find it.
+
       if (!isInvertedTree && funcFound && pathFound) {
+        // As explained above, for non-inverted trees, we can break here if we
+        // found everything already.
         break;
       }
 
-      // But for inverted trees, the selfTime needs to be counted on the root
-      // node. This is the root node if nextIndex is -1.
       if (isInvertedTree && nextIndex === null) {
-        // If the root node is the passed path
+        // This is an inverted tree, and we're at the root node because its
+        // prefix is `null`.
         if (currentNodeIndex === nodeIndex) {
+          // This root node matches the passed call node path.
           pathTimings.selfTime.value += interval;
         }
 
-        // If the root node is the same function as the passed path
         if (currentFunc === funcIndex) {
+          // This root node is the same function as the passed call node path.
           funcTimings.selfTime.value += interval;
         }
 
-        // Contributing the implementation information if the passed path was
-        // found in this stack _and_ if the root node (the one actually holding
-        // the self time) is a JS frame.
-        // This allows to see how the implementation timings is spread among
-        // callers.
         if (pathFound) {
+          // We contribute the implementation information if the passed path was
+          // found in this stack earlier.
+          // If the root node (the one actually holding the self time) is a JS
+          // frame, we get its specific implementation too.
+          // This allows to see how the implementation timings is spread among
+          // callers.
           let implementation = 'native';
           if (funcTable.isJS[currentFunc]) {
             implementation = getJsImplementationForStack(currentIndex, thread);
           }
           accumulateDataToBreakdown(
             // TODO: I believe this should be totalTime here instead, but due to
-            // how we display them for now we use selfTime instead for now.
+            // how we display them in the current code we use selfTime for now.
             pathTimings.selfTime,
             implementation
           );
