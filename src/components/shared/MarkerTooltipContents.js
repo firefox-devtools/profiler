@@ -144,32 +144,34 @@ function _treeInsert(
   const component = path.shift();
   if (component === undefined) {
     // This path is not a leaf, it can be ignored.
-  } else {
-    const node = tree.get(component);
-    if (node) {
-      if (node.value) {
-        // Is a leaf
-        if (path.length > 0) {
-          // There are more path components, we need to convert this node
-          // into a branch and keep going.  We delete the value to change
-          // this node from a leaf to a branch.
-          delete node.value;
-        } else {
-          // Duplicate leaves.
-          throw new Error('Duplicate phases');
-        }
-      }
-      _treeInsert(node.branches, path, phase);
-    } else {
-      if (path.length === 0) {
-        const leafNode = { value: phase, branches: new Map() };
-        tree.set(component, leafNode);
-      } else {
-        const branchNode = { branches: new Map() };
-        tree.set(component, branchNode);
-        _treeInsert(branchNode.branches, path, phase);
-      }
+    return;
+  }
+
+  let node = tree.get(component);
+  if (!node) {
+    // Make a new node and grow the tree in this direction.
+    node = { branches: new Map() };
+
+    tree.set(component, node);
+  }
+
+  if (path.length > 0) {
+    // There are more path components.  This node should be a branch if it
+    // isn't one already.
+    if (node.value) {
+      // We delete the value to change this node from a leaf to a branch.
+      delete node.value;
     }
+    _treeInsert(node.branches, path, phase);
+  } else {
+    // Make the new node leaf node.
+    if (node.value) {
+      console.error(
+        'Duplicate phases in _treeInsert in MarkerTooltipContents.js'
+      );
+      return;
+    }
+    node.value = phase;
   }
 }
 
