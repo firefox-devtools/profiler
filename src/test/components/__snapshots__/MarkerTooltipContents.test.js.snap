@@ -370,6 +370,13 @@ Array [
       <div
         className="tooltipLabel"
       >
+        Tenure rate (bytes/sec)
+        :
+      </div>
+      190MB/s
+      <div
+        className="tooltipLabel"
+      >
         Phase ClearNursery
         :
       </div>

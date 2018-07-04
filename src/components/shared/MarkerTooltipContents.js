@@ -238,6 +238,15 @@ function _filterInterestingPhaseTimes(
   return phaseTimes.filter(pt => pt.time > threshold);
 }
 
+function _sumMaybeEntries(
+  entries: PhaseTimes<Microseconds>,
+  selectEntries: Array<string>
+): Microseconds {
+  return selectEntries
+    .map(name => (entries[name] ? entries[name] : 0))
+    .reduce((a, x) => a + x, 0);
+}
+
 function _markerBacktrace(
   marker: TracingMarker,
   data: StyleMarkerPayload | PaintProfilerMarkerTracing | DOMEventMarkerPayload,
@@ -296,6 +305,23 @@ function getMarkerDetails(
           const nursery = data.nursery;
           switch (nursery.status) {
             case 'complete': {
+              // Don't bother adding up the eviction time without the
+              // CollectToFP phase since that's the main phase.  If it's
+              // missing then there's something wrong with the profile and
+              // we'd only get bogus data.  All these times are in
+              // Milliseconds
+              const evictTimeMS = nursery.phase_times.CollectToFP
+                ? _sumMaybeEntries(nursery.phase_times, [
+                    'TraceValues',
+                    'TraceCells',
+                    'TraceSlots',
+                    'TraceWholeCells',
+                    'TraceGenericEntries',
+                    'MarkRuntime',
+                    'MarkDebugger',
+                    'CollectToFP',
+                  ])
+                : undefined;
               return (
                 <div className="tooltipDetails">
                   {_markerDetail('gcreason', 'Reason', nursery.reason)}
@@ -333,6 +359,15 @@ function getMarkerDetails(
                         'Lazy-allocated size',
                         nursery.lazy_capacity,
                         formatBytes
+                      )
+                    : null}
+                  {evictTimeMS
+                    ? _markerDetail(
+                        'gctenurerate',
+                        'Tenure rate (bytes/sec)',
+                        // evictTimeMS is in milliseconds.
+                        nursery.bytes_tenured / (evictTimeMS / 1000000),
+                        x => formatBytes(x) + '/s'
                       )
                     : null}
                   {nursery.chunk_alloc_us
