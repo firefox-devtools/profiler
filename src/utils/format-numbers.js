@@ -64,6 +64,18 @@ export function formatBytes(bytes: number): string {
   }
 }
 
+export function formatSI(num: number): string {
+  if (num < 10000) {
+    return formatNumber(num);
+  } else if (num < 10000000) {
+    return formatNumber(num / 1000) + 'K';
+  } else if (num < 10000000000) {
+    return formatNumber(num / 1000000) + 'M';
+  } else {
+    return formatNumber(num / 1000000000) + 'G';
+  }
+}
+
 export function formatMicroseconds(
   time: Microseconds,
   significantDigits: number = 2,

@@ -363,6 +363,13 @@ Array [
       <div
         className="tooltipLabel"
       >
+        Cells tenured
+        :
+      </div>
+      16K
+      <div
+        className="tooltipLabel"
+      >
         Bytes used
         :
       </div>
@@ -374,6 +381,13 @@ Array [
         :
       </div>
       190MB/s
+      <div
+        className="tooltipLabel"
+      >
+        Tenure rate (cells/sec)
+        :
+      </div>
+      23M/s
       <div
         className="tooltipLabel"
       >

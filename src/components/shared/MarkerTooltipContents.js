@@ -10,6 +10,7 @@ import {
   formatNumber,
   formatPercent,
   formatBytes,
+  formatSI,
   formatMicroseconds,
   formatMilliseconds,
   formatValueTotal,
@@ -334,6 +335,13 @@ function getMarkerDetails(
                       formatBytes
                     )
                   )}
+                  {nursery.cells_tenured
+                    ? _markerDetail(
+                        'gcpromotioncells',
+                        'Cells tenured',
+                        formatSI(nursery.cells_tenured)
+                      )
+                    : null}
                   {nursery.cur_capacity
                     ? _markerDetail(
                         'gcnurseryusage',
@@ -368,6 +376,14 @@ function getMarkerDetails(
                         // evictTimeMS is in milliseconds.
                         nursery.bytes_tenured / (evictTimeMS / 1000000),
                         x => formatBytes(x) + '/s'
+                      )
+                    : null}
+                  {evictTimeMS && nursery.cells_tenured
+                    ? _markerDetail(
+                        'gctenurereatecells',
+                        'Tenure rate (cells/sec)',
+                        nursery.cells_tenured / (evictTimeMS / 10000000),
+                        x => formatSI(x) + '/s'
                       )
                     : null}
                   {nursery.chunk_alloc_us
