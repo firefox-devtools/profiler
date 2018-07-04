@@ -41,14 +41,14 @@ type Props = {|
   +selectedSamples?: boolean[],
 |};
 
-type Bucket = {|
+type CategoryFill = {|
   category: IndexIntoCategoryList,
-  array: Float32Array,
+  perPixelContribution: Float32Array,
   fillStyle: string | CanvasPattern,
 |};
 
 type PaintSettings = {|
-  buckets: Bucket[],
+  categoryFills: CategoryFill[],
   pixelWidth: number,
   pixelHeight: number,
   devicePixelRatio: number,
@@ -202,7 +202,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
       };
     });
 
-    function pickselectedPercentage(categoryInfo, _sampleIndex) {
+    function pickSelectedPercentage(categoryInfo, _sampleIndex) {
       return categoryInfo.selectedPercentageAtPixel;
     }
 
@@ -229,7 +229,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
 
     const pickCategoryArray = selectedSamples
       ? pickCategoryArrayWhenHaveSelectedSamples
-      : pickselectedPercentage;
+      : pickSelectedPercentage;
 
     const greyCategoryIndex =
       categories.findIndex(c => c.color === 'grey') || 0;
@@ -327,49 +327,62 @@ class ThreadActivityGraph extends PureComponent<Props> {
       }
     }
 
+    const boxBlurRadii = [3, 2, 2];
+
     let scratchArray = new Float32Array(pixelWidth);
     function gaussianBlur1D(srcArray) {
-      const destArray = scratchArray;
-      boxBlur1D(srcArray, destArray, 3);
-      boxBlur1D(destArray, srcArray, 2);
-      boxBlur1D(srcArray, destArray, 2);
-      scratchArray = srcArray;
-      return destArray;
+      let destArray = scratchArray;
+      for (const radius of boxBlurRadii) {
+        boxBlur1D(srcArray, destArray, radius);
+        [destArray, srcArray] = [srcArray, destArray];
+      }
+      scratchArray = destArray;
+      return srcArray;
     }
 
     categoryInfos.sort((a, b) => b.gravity - a.gravity);
 
-    const individualBuckets = [].concat(
-      ...categoryInfos.map(categoryInfo => [
-        {
-          category: categoryInfo.category,
-          fillStyle: categoryInfo.unselectedFillStyle,
-          array: gaussianBlur1D(categoryInfo.beforeSelectedPercentageAtPixel),
-        },
-        {
-          category: categoryInfo.category,
-          fillStyle: categoryInfo.selectedFillStyle,
-          array: gaussianBlur1D(categoryInfo.selectedPercentageAtPixel),
-        },
-        {
-          category: categoryInfo.category,
-          fillStyle: categoryInfo.unselectedFillStyle,
-          array: gaussianBlur1D(categoryInfo.afterSelectedPercentageAtPixel),
-        },
-        {
-          category: categoryInfo.category,
-          fillStyle: categoryInfo.filteredOutFillStyle,
-          array: gaussianBlur1D(categoryInfo.filteredOutPercentageAtPixel),
-        },
-      ])
+    const fills: CategoryFill[] = [].concat(
+      ...categoryInfos.map(categoryInfo => {
+        // For every category we draw four fills, for the four selection kinds:
+        // BEFORE_SELECTED, SELECTED, AFTER_SELECTED, FILTERED_OUT
+        return [
+          {
+            category: categoryInfo.category,
+            fillStyle: categoryInfo.unselectedFillStyle,
+            perPixelContribution: categoryInfo.beforeSelectedPercentageAtPixel,
+          },
+          {
+            category: categoryInfo.category,
+            fillStyle: categoryInfo.selectedFillStyle,
+            perPixelContribution: categoryInfo.selectedPercentageAtPixel,
+          },
+          {
+            category: categoryInfo.category,
+            fillStyle: categoryInfo.unselectedFillStyle,
+            perPixelContribution: categoryInfo.afterSelectedPercentageAtPixel,
+          },
+          {
+            category: categoryInfo.category,
+            fillStyle: categoryInfo.filteredOutFillStyle,
+            perPixelContribution: categoryInfo.filteredOutPercentageAtPixel,
+          },
+        ];
+      })
     );
 
-    let lastCumulativeArray = individualBuckets[0].array;
-    for (const { array } of individualBuckets.slice(1)) {
+    // Smooth the graphs by applying a 1D gaussian blur to the per-pixel
+    // contribution of each fill.
+    for (const fill of fills) {
+      fill.perPixelContribution = gaussianBlur1D(fill.perPixelContribution);
+    }
+
+    let lastCumulativeArray = fills[0].perPixelContribution;
+    for (const { perPixelContribution } of fills.slice(1)) {
       for (let i = 0; i < pixelWidth; i++) {
-        array[i] += lastCumulativeArray[i];
+        perPixelContribution[i] += lastCumulativeArray[i];
       }
-      lastCumulativeArray = array;
+      lastCumulativeArray = perPixelContribution;
     }
 
     function findNextDifferentIndex(arr1, arr2, startIndex) {
@@ -386,8 +399,8 @@ class ThreadActivityGraph extends PureComponent<Props> {
     // lighter === OP_ADD
     ctx.globalCompositeOperation = 'lighter';
     lastCumulativeArray = new Float32Array(pixelWidth);
-    for (const { fillStyle, array } of individualBuckets) {
-      const cumulativeArray = array;
+    for (const { fillStyle, perPixelContribution } of fills) {
+      const cumulativeArray = perPixelContribution;
       ctx.fillStyle = fillStyle;
       let lastNonZeroRangeEnd = 0;
       while (lastNonZeroRangeEnd < pixelWidth) {
@@ -430,7 +443,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
     }
 
     this._lastPaintSettings = {
-      buckets: individualBuckets,
+      categoryFills: fills,
       pixelWidth,
       pixelHeight,
       devicePixelRatio,
@@ -444,7 +457,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
     }
 
     const {
-      buckets,
+      categoryFills,
       pixelWidth,
       pixelHeight,
       devicePixelRatio,
@@ -454,7 +467,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
     const deviceY = Math.round(y * devicePixelRatio);
 
     if (
-      !buckets ||
+      !categoryFills ||
       deviceX < 0 ||
       deviceX >= pixelWidth ||
       deviceY < 0 ||
@@ -464,8 +477,8 @@ class ThreadActivityGraph extends PureComponent<Props> {
     }
 
     const valueToFind = 1 - deviceY / pixelHeight;
-    for (const { category, array } of buckets) {
-      const thisBucketCumulativeValue = array[deviceX];
+    for (const { category, perPixelContribution } of categoryFills) {
+      const thisBucketCumulativeValue = perPixelContribution[deviceX];
       if (thisBucketCumulativeValue >= valueToFind) {
         return category;
       }
