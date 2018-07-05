@@ -75,7 +75,8 @@ function _markerDetailDeltaTimeNullable(
   ) {
     return null;
   }
-  return _markerDetail(key, label, value1 - value2);
+  const valueResult = value1 - value2;
+  return _markerDetail(key, label, formatMilliseconds(valueResult));
 }
 
 function _markerBacktrace(
@@ -383,10 +384,11 @@ function getMarkerDetails(
                 data.tcpConnectEnd,
                 data.connectStart
               )}
-              {_markerDetailNullable(
+              {_markerDetailDeltaTimeNullable(
                 'secureConnectionStart',
                 'secureConnectionStart',
-                data.secureConnectionStart
+                data.secureConnectionStart,
+                data.tcpConnectEnd
               )}
               {_markerDetailDeltaTimeNullable(
                 'connect',
@@ -397,8 +399,8 @@ function getMarkerDetails(
               {_markerDetailDeltaTimeNullable(
                 'requestStart',
                 'requestStart @',
-                data.requestStart,
-                data.startTime
+                data.startTime,
+                data.requestStart
               )}
               {_markerDetailDeltaTimeNullable(
                 'response',
