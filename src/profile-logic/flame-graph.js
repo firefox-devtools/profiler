@@ -93,11 +93,14 @@ export function getFlameGraphTiming(
     children.sort(
       (a, b) =>
         callTree.getNodeData(a).funcName < callTree.getNodeData(b).funcName
-          ? 1
-          : -1
+          ? -1
+          : 1
     );
 
-    for (let i = 0; i < children.length; i++) {
+    // Since we're popping the stack at the top of the while loop, put
+    // in the children in reverse order here to retain the ascending
+    // order when processing them.
+    for (let i = children.length - 1; i >= 0; i--) {
       stack.push({ nodeIndex: children[i], depth: depth + 1 });
     }
   }

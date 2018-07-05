@@ -57,6 +57,8 @@ export class CallTree {
   _rootTotalTime: number;
   _rootCount: number;
   _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
+  // _children is indexed by IndexIntoCallNodeTable. Since they are
+  // integers, using an array directly is faster than going through a Map.
   _children: Array<CallNodeChildren>;
   _isChildrenCachePreloaded: boolean;
   _jsOnly: boolean;
@@ -81,7 +83,7 @@ export class CallTree {
     this._rootTotalTime = rootTotalTime;
     this._rootCount = rootCount;
     this._displayDataByIndex = new Map();
-    this._children = new Array(callNodeTable.length);
+    this._children = [];
     this._isChildrenCachePreloaded = false;
     this._jsOnly = jsOnly;
     this._isIntegerInterval = isIntegerInterval;
@@ -100,7 +102,12 @@ export class CallTree {
    */
   preloadChildrenCache() {
     if (!this._isChildrenCachePreloaded) {
-      this._children[-1] = []; // -1 is the parent of the roots
+      this._children = new Array(this._callNodeTable.length);
+      // -1 is the parent of the roots. This one negative number will
+      // be converted to a string and added as an extra property to
+      // the array.
+      this._children[-1] = [];
+
       for (
         let callNodeIndex = 0;
         callNodeIndex < this._callNodeTable.length;

@@ -938,16 +938,7 @@ CallTree {
       1,
     ],
   },
-  "_children": Array [
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-    undefined,
-  ],
+  "_children": Array [],
   "_displayDataByIndex": Map {},
   "_funcTable": Object {
     "address": Array [
