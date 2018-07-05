@@ -34,7 +34,7 @@ export type IndexIntoCallNodeTable = number;
  * `docs-developer/call-nodes-in-cpp.md`.
  */
 export type CallNodeTable = {
-  prefix: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable
+  prefix: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
   func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
   depth: number[],
   length: number,
