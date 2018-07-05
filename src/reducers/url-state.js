@@ -21,9 +21,9 @@ import type {
   Action,
   DataSource,
   ImplementationFilter,
-  TabSlug,
 } from '../types/actions';
 import type { State, UrlState, Reducer } from '../types/reducers';
+import type { TabSlug } from '../app-logic/tabs-handling';
 
 // Pre-allocate an array to help with strict equality tests in the selectors.
 const EMPTY_TRANSFORM_STACK = [];

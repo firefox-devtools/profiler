@@ -11,7 +11,8 @@ import { changeSelectedTab } from '../../actions/app';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 
-import type { TabSlug } from '../../types/actions';
+import { tabSlugs } from '../../app-logic/tabs-handling';
+import type { TabSlug } from '../../app-logic/tabs-handling';
 
 describe('app/DetailsContainer', function() {
   const { profile } = getProfileFromTextSamples(`
@@ -21,14 +22,6 @@ describe('app/DetailsContainer', function() {
     D F I
     E E
   `);
-
-  const tabSlugs: TabSlug[] = [
-    'stack-chart',
-    'marker-chart',
-    'flame-graph',
-    'marker-table',
-    'calltree', // 'calltree' not first on purpose
-  ];
 
   it('renders an initial view with or without a sidebar', () => {
     const store = storeWithProfile(profile);

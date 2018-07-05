@@ -8,21 +8,17 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import Reorderable from '../shared/Reorderable';
 
-import type { Action, TabSlug } from '../../types/actions';
+import type { Action } from '../../types/actions';
+import type { TabWithTitle } from '../../app-logic/tabs-handling';
 
-export type Tab = {
-  name: TabSlug,
-  title: string,
-};
-
-type Props = {
-  className?: string,
-  tabs: Tab[],
-  selectedTabName: string,
-  tabOrder: number[],
-  onSelectTab: string => void,
-  onChangeTabOrder: (number[]) => Action,
-};
+type Props = {|
+  +className?: string,
+  +tabs: $ReadOnlyArray<TabWithTitle>,
+  +selectedTabName: string,
+  +tabOrder: number[],
+  +onSelectTab: string => void,
+  +onChangeTabOrder: (number[]) => Action,
+|};
 
 class TabBar extends PureComponent<Props> {
   constructor(props: Props) {
