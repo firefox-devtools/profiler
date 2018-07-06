@@ -5,6 +5,7 @@ Welcome to the perf.html source code. Each main folder has a `README.md` file de
 | Folder                                  | Description                                            |
 | --------------------------------------- | ------------------------------------------------------ |
 | [`/src/actions`](./actions)             | The collection of [Redux](http://redux.js.org/) action creators. |
+| [`/src/app-logic`](./app-logic)         | Files that deal with some of the application main logic. |
 | [`/src/components`](./components)       | The React components |
 | [`/src/profile-logic`](./profile-logic) | All of the files that deal with modifying and analyzing profiles. |
 | [`/src/reducers`](./reducers)           | The Redux reducers |

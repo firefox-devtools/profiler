@@ -5,7 +5,7 @@
 import React from 'react';
 import { render } from 'react-dom';
 import Root from './components/app/Root';
-import createStore from './create-store';
+import createStore from './app-logic/create-store';
 import 'photon-colors/photon-colors.css';
 import '../res/css/style.css';
 import {

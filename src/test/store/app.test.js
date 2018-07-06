@@ -7,7 +7,7 @@ import { storeWithSimpleProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
 import * as AppSelectors from '../../reducers/app';
-import createStore from '../../create-store';
+import createStore from '../../app-logic/create-store';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 
 import * as AppActions from '../../actions/app';

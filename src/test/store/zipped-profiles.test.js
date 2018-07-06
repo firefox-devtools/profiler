@@ -11,7 +11,7 @@ import { procureInitialInterestingExpandedNodes } from '../../profile-logic/zip-
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as ZippedProfilesSelectors from '../../reducers/zipped-profiles';
 import * as UrlStateSelectors from '../../reducers/url-state';
-import createStore from '../../create-store';
+import createStore from '../../app-logic/create-store';
 import { ensureExists } from '../../utils/flow';
 import JSZip from 'jszip';
 
