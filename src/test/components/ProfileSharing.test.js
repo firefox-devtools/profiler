@@ -12,24 +12,65 @@ import {
   startSymbolicating,
   doneSymbolicating,
 } from '../../actions/receive-profile';
+import exampleProfile from '../fixtures/profiles/timings-with-js';
+import { processProfile } from '../../profile-logic/process-profile';
 
 describe('app/ProfileSharing', function() {
-  it('renders the ProfileSharing buttons', () => {
-    /**
-     * Mock out any created refs for the components with relevant information.
-     */
-    function createNodeMock(element) {
-      if (element.type === 'input') {
-        return {
-          focus() {},
-          select() {},
-          blur() {},
-        };
-      }
-      return null;
+  /**
+   * Mock out any created refs for the components with relevant information.
+   */
+  function createNodeMock(element) {
+    if (element.type === 'input') {
+      return {
+        focus() {},
+        select() {},
+        blur() {},
+      };
     }
+    return null;
+  }
 
+  // profile.meta.networkURLsRemoved flag is set to false as a default.
+  it('renders the ProfileSharing buttons', () => {
     const store = storeWithProfile();
+    store.dispatch(startSymbolicating());
+
+    const profileSharing = renderer.create(
+      <Provider store={store}>
+        <ProfileSharing />
+      </Provider>,
+      { createNodeMock }
+    );
+
+    expect(profileSharing).toMatchSnapshot();
+
+    store.dispatch(doneSymbolicating());
+    expect(profileSharing).toMatchSnapshot();
+  });
+
+  it('renders the ProfileSharing buttons with profile.meta.networkURLsRemoved set to true', () => {
+    const profile = processProfile(exampleProfile());
+    profile.meta.networkURLsRemoved = true;
+    const store = storeWithProfile(profile);
+    store.dispatch(startSymbolicating());
+
+    const profileSharing = renderer.create(
+      <Provider store={store}>
+        <ProfileSharing />
+      </Provider>,
+      { createNodeMock }
+    );
+
+    expect(profileSharing).toMatchSnapshot();
+
+    store.dispatch(doneSymbolicating());
+    expect(profileSharing).toMatchSnapshot();
+  });
+
+  it('renders the ProfileSharing buttons with profile.meta.networkURLsRemoved set to undefined', () => {
+    const profile = processProfile(exampleProfile());
+    profile.meta.networkURLsRemoved = undefined;
+    const store = storeWithProfile(profile);
     store.dispatch(startSymbolicating());
 
     const profileSharing = renderer.create(

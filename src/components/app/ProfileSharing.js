@@ -73,27 +73,27 @@ const UploadingStatus = ({ progress }: { progress: number }) => (
   </div>
 );
 
+type ProfileSharingButtonProps = {|
+  +buttonClassName: string,
+  +shareLabel: string,
+  +symbolicationStatus: string,
+  +okButtonClickEvent: () => void,
+  +panelOpenEvent?: () => void,
+  +shareNetworkUrlCheckboxChecked: boolean,
+  +shareNetworkUrlCheckboxOnChange?: (SyntheticEvent<HTMLInputElement>) => void,
+  +checkboxDisabled: boolean,
+|};
+
 const ProfileSharingButton = ({
   buttonClassName,
   shareLabel,
   symbolicationStatus,
   okButtonClickEvent,
   panelOpenEvent,
-  shareNetworkUrlChecboxChecked,
-  shareNetworkUrlChecboxOnChange,
+  shareNetworkUrlCheckboxChecked,
+  shareNetworkUrlCheckboxOnChange,
   checkboxDisabled,
-}: {
-  buttonClassName: string,
-  shareLabel: string,
-  symbolicationStatus: string,
-  okButtonClickEvent: () => void,
-  panelOpenEvent: (() => void) | null,
-  shareNetworkUrlChecboxChecked: boolean,
-  shareNetworkUrlChecboxOnChange:
-    | ((SyntheticEvent<HTMLInputElement>) => void)
-    | null,
-  checkboxDisabled: boolean,
-}) => (
+}: ProfileSharingButtonProps) => (
   <ButtonWithPanel
     className={buttonClassName}
     label={shareLabel}
@@ -113,12 +113,8 @@ const ProfileSharingButton = ({
             <input
               type="checkbox"
               className="profileSharingShareNetworkUrlsCheckbox"
-              checked={shareNetworkUrlChecboxChecked}
-              onChange={
-                shareNetworkUrlChecboxOnChange
-                  ? shareNetworkUrlChecboxOnChange
-                  : undefined
-              }
+              checked={shareNetworkUrlCheckboxChecked}
+              onChange={shareNetworkUrlCheckboxOnChange}
               disabled={checkboxDisabled}
             />
             Share the URLs of all network requests
@@ -241,14 +237,17 @@ class ProfileSharingCompositeButton extends PureComponent<
     });
   }
 
-  // Takes an optional argument that indicates if the share attempt
-  // is being made for the second time. We have two share buttons now,
-  // one for sharing for the first time, and one for sharing
-  // after the initial share depending on the previous URL share status.
-  // People can decide to remove the URLs from the profile after sharing
-  // with URLs or they can decide to add the URLs after sharing without
-  // them. We check the current state before attempting to share depending
-  // on that flag.
+  /**
+   * This function starts the profile sharing process.
+   * Takes an optional argument that indicates if the share attempt
+   * is being made for the second time. We have two share buttons,
+   * one for sharing for the first time, and one for sharing
+   * after the initial share depending on the previous URL share status.
+   * People can decide to remove the URLs from the profile after sharing
+   * with URLs or they can decide to add the URLs after sharing without
+   * them. We check the current state before attempting to share depending
+   * on that flag.
+   */
   _attemptToShare(isSecondaryShare: boolean = false) {
     if (
       ((!isSecondaryShare && this.state.state !== 'local') ||
@@ -354,6 +353,8 @@ class ProfileSharingCompositeButton extends PureComponent<
 
   _onSecondarySharePanelOpen() {
     const { profileSharingStatus } = this.props;
+    // Even if the sharedWitouthUrls is true, we force it to share
+    // without URLs if `profileSharingStatus.sharedWithUrls` is true.
     this.setState({
       shareNetworkUrls: !profileSharingStatus.sharedWithUrls,
     });
@@ -368,14 +369,20 @@ class ProfileSharingCompositeButton extends PureComponent<
         ? 'Share...'
         : 'Sharing will be enabled once symbolication is complete';
 
-    const secondaryShareButtonVisibility =
-      // It must have been shared before
-      state === 'public' &&
-      // If it's been shared both with and without URLs, do not show anymore
-      (!profileSharingStatus.sharedWithUrls ||
-        !profileSharingStatus.sharedWithoutUrls) &&
-      // If profile is shared without network URLs and they are removed from the profile, do not show.
-      (profileSharingStatus.sharedWithUrls || !profile.meta.networkURLsRemoved);
+    // We don't show the secondary button if any of these conditions is true:
+    // 1. If we loaded a profile from a file or the public store that got its network URLs removed before.
+    //    Note that profiles captured from the add-on have this property set to false.
+    // 2. If it's been shared in both modes already; in that case we show no button at all.
+    const wontSecondaryShareProfile =
+      profile.meta.networkURLsRemoved ||
+      (profileSharingStatus.sharedWithUrls &&
+        profileSharingStatus.sharedWithoutUrls);
+
+    // Additionally we show it only when the profile is already shared
+    // (either loaded from a public store or previously shared), because otherwise
+    // we show the primary button (or errors).
+    const isSecondaryShareButtonVisible =
+      state === 'public' && !wontSecondaryShareProfile;
 
     const secondaryShareLabel = profileSharingStatus.sharedWithUrls
       ? 'Share without URLs'
@@ -388,7 +395,7 @@ class ProfileSharingCompositeButton extends PureComponent<
           currentButtonIsUploadingButton: state === 'uploading',
           currentButtonIsPermalinkButton: state === 'public',
           currentButtonIsUploadErrorButton: state === 'error',
-          currentButtonIsSecondaryShareButton: secondaryShareButtonVisibility,
+          currentButtonIsSecondaryShareButton: isSecondaryShareButtonVisible,
         })}
       >
         <ProfileSharingButton
@@ -396,9 +403,8 @@ class ProfileSharingCompositeButton extends PureComponent<
           shareLabel={shareLabel}
           symbolicationStatus={symbolicationStatus}
           okButtonClickEvent={this._attemptToShare}
-          panelOpenEvent={null}
-          shareNetworkUrlChecboxChecked={this.state.shareNetworkUrls}
-          shareNetworkUrlChecboxOnChange={this._onChangeShareNetworkUrls}
+          shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
+          shareNetworkUrlCheckboxOnChange={this._onChangeShareNetworkUrls}
           checkboxDisabled={false}
         />
         <UploadingStatus progress={uploadProgress} />
@@ -445,8 +451,7 @@ class ProfileSharingCompositeButton extends PureComponent<
           symbolicationStatus={symbolicationStatus}
           okButtonClickEvent={this._attemptToSecondaryShare}
           panelOpenEvent={this._onSecondarySharePanelOpen}
-          shareNetworkUrlChecboxChecked={this.state.shareNetworkUrls}
-          shareNetworkUrlChecboxOnChange={null}
+          shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
           checkboxDisabled={true}
         />
       </div>

@@ -842,39 +842,36 @@ export function serializeProfile(
   includeNetworkUrls: boolean = true
 ): string {
   // stringTable -> stringArray
-  const newProfile = Object.assign(
-    {},
-    { meta: { ...profile.meta, networkURLsRemoved: !includeNetworkUrls } },
-    {
-      threads: profile.threads.map(thread => {
-        const stringArray = thread.stringTable.serializeToArray();
-        const newThread = Object.assign({}, thread);
-        delete newThread.stringTable;
-        if (includeNetworkUrls === false) {
-          for (let i = 0; i < newThread.markers.length; i++) {
-            const currentMarker = newThread.markers.data[i];
-            if (
-              currentMarker &&
-              currentMarker.type &&
-              currentMarker.type === 'Network'
-            ) {
-              // Remove the URI fields from marker payload.
-              currentMarker.URI = '';
-              currentMarker.RedirectURI = '';
-              // Strip the URL from the marker name
-              const stringIndex = newThread.markers.name[i];
-              stringArray[stringIndex] = stringArray[stringIndex].replace(
-                /:.*/,
-                ''
-              );
-            }
+  const newProfile = Object.assign({}, profile, {
+    meta: { ...profile.meta, networkURLsRemoved: !includeNetworkUrls },
+    threads: profile.threads.map(thread => {
+      const stringArray = thread.stringTable.serializeToArray();
+      const newThread = Object.assign({}, thread);
+      delete newThread.stringTable;
+      if (includeNetworkUrls === false) {
+        for (let i = 0; i < newThread.markers.length; i++) {
+          const currentMarker = newThread.markers.data[i];
+          if (
+            currentMarker &&
+            currentMarker.type &&
+            currentMarker.type === 'Network'
+          ) {
+            // Remove the URI fields from marker payload.
+            currentMarker.URI = '';
+            currentMarker.RedirectURI = '';
+            // Strip the URL from the marker name
+            const stringIndex = newThread.markers.name[i];
+            stringArray[stringIndex] = stringArray[stringIndex].replace(
+              /:.*/,
+              ''
+            );
           }
         }
-        newThread.stringArray = stringArray;
-        return newThread;
-      }),
-    }
-  );
+      }
+      newThread.stringArray = stringArray;
+      return newThread;
+    }),
+  });
   return JSON.stringify(newProfile);
 }
 

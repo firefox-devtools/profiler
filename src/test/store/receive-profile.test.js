@@ -263,7 +263,6 @@ describe('actions/receive-profile', function() {
           },
         },
         { phase: 'DATA_LOADED' },
-        { phase: 'DATA_LOADED' },
       ]);
 
       const state = store.getState();
@@ -378,7 +377,6 @@ describe('actions/receive-profile', function() {
             message: errorMessage,
           },
         },
-        { phase: 'DATA_LOADED' },
         { phase: 'DATA_LOADED' },
       ]);
 

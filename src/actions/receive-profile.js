@@ -19,7 +19,6 @@ import {
   getSelectedThreadIndexOrNull,
 } from '../reducers/url-state';
 import { defaultThreadOrder } from '../profile-logic/profile-data';
-import { setProfileSharingStatus } from './app';
 
 import type {
   FunctionsUpdatePerThread,
@@ -95,16 +94,6 @@ export function viewProfile(
       selectedThreadIndex,
       pathInZipFile,
     });
-
-    // Update ProfileSharingStatus from profile metadata.
-    // If the profiler is not published before, networkURLsRemoved
-    // will be undefined.
-    dispatch(
-      setProfileSharingStatus({
-        sharedWithUrls: profile.meta.networkURLsRemoved === false,
-        sharedWithoutUrls: profile.meta.networkURLsRemoved === true,
-      })
-    );
   };
 }
 

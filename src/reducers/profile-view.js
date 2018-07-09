@@ -432,6 +432,11 @@ function profileSharingStatus(
   switch (action.type) {
     case 'SET_PROFILE_SHARING_STATUS':
       return action.profileSharingStatus;
+    case 'VIEW_PROFILE':
+      return {
+        sharedWithUrls: action.profile.meta.networkURLsRemoved === false,
+        sharedWithoutUrls: action.profile.meta.networkURLsRemoved === true,
+      };
     default:
       return state;
   }
