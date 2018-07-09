@@ -8,7 +8,7 @@ import escapeStringRegexp from 'escape-string-regexp';
 import { createSelector } from 'reselect';
 
 import { defaultThreadOrder } from '../profile-logic/profile-data';
-import { urlFromState } from '../url-handling';
+import { urlFromState } from '../app-logic/url-handling';
 import * as RangeFilters from '../profile-logic/range-filters';
 
 import type { ThreadIndex } from '../types/profile';
