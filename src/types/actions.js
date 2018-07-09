@@ -18,6 +18,7 @@ import type { GetCategory } from '../profile-logic/color-categories';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
+import type { TabSlug } from '../app-logic/tabs-handling';
 import type { UrlState } from '../types/reducers';
 
 export type DataSource =
@@ -46,13 +47,6 @@ export type FunctionsUpdatePerThread = {
 
 export type RequestedLib = { debugName: string, breakpadId: string };
 export type ImplementationFilter = 'combined' | 'js' | 'cpp';
-export type TabSlug =
-  | 'calltree'
-  | 'stack-chart'
-  | 'marker-chart'
-  | 'network-chart'
-  | 'marker-table'
-  | 'flame-graph';
 
 type ProfileAction =
   | { type: 'ROUTE_NOT_FOUND', url: string }

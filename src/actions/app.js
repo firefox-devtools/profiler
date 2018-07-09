@@ -6,7 +6,7 @@
 import { getSelectedTab, getDataSource } from '../reducers/url-state';
 import { sendAnalytics } from '../utils/analytics';
 import type { Action, ThunkAction } from '../types/store';
-import type { TabSlug } from '../types/actions';
+import type { TabSlug } from '../app-logic/tabs-handling';
 import type { UrlState } from '../types/reducers';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {

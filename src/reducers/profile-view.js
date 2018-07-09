@@ -20,6 +20,7 @@ import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import { arePathsEqual, PathSet } from '../utils/path';
+import { getInitialTabOrder } from '../app-logic/tabs-handling';
 
 import type {
   Profile,
@@ -393,7 +394,7 @@ function zeroAt(state: Milliseconds = 0, action: Action) {
   }
 }
 
-function tabOrder(state: number[] = [0, 1, 2, 3, 4, 5], action: Action) {
+function tabOrder(state: number[] = getInitialTabOrder(), action: Action) {
   switch (action.type) {
     case 'CHANGE_TAB_ORDER':
       return action.tabOrder;

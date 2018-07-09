@@ -15,7 +15,7 @@ import explicitConnect, {
 } from '../../utils/connect';
 
 import type { State } from '../../types/store';
-import type { TabSlug } from '../../types/actions';
+import type { TabSlug } from '../../app-logic/tabs-handling';
 import type { Thread } from '../../types/profile';
 
 type StateProps = {|

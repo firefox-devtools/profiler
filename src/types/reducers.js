@@ -9,8 +9,8 @@ import type {
   DataSource,
   ProfileSelection,
   ImplementationFilter,
-  TabSlug,
 } from './actions';
+import type { TabSlug } from '../app-logic/tabs-handling';
 import type { Milliseconds, StartEndRange } from './units';
 import type { IndexIntoMarkersTable, Profile, ThreadIndex } from './profile';
 import type { CallNodePath } from './profile-derived';

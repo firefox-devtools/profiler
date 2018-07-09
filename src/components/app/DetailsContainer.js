@@ -12,7 +12,7 @@ import selectSidebar from '../sidebar';
 import { getSelectedTab } from '../../reducers/url-state';
 import explicitConnect from '../../utils/connect';
 
-import type { TabSlug } from '../../types/actions';
+import type { TabSlug } from '../../app-logic/tabs-handling';
 import type { ExplicitConnectOptions } from '../../utils/connect';
 
 import './DetailsContainer.css';
