@@ -61,6 +61,17 @@ function _markerDetailNullable<T: NotVoidOrNull>(
   return _markerDetail(key, label, value, fn);
 }
 
+function _markerDetailBytesNullable<T: NotVoidOrNull>(
+  key: string,
+  label: string,
+  value: T | void | null
+): React.Node {
+  if (value === undefined || value === null) {
+    return null;
+  }
+  return _markerDetail(key, label, formatBytes(value));
+}
+
 function _markerDetailDeltaTimeNullable(
   key: string,
   label: string,
@@ -356,7 +367,7 @@ function getMarkerDetails(
             <div className="tooltipDetails">
               {_markerDetailNullable('url', 'URL', data.URI)}
               {_markerDetail('pri', 'pri', data.pri)}
-              {_markerDetailNullable('count', 'count', data.count)}
+              {_markerDetailBytesNullable('count', 'Req bites', data.count)}
               {_markerDetail('status', 'Status', data.status)}
             </div>
           );
@@ -371,7 +382,7 @@ function getMarkerDetails(
                 data.RedirectURI
               )}
               {_markerDetail('pri', 'pri', data.pri)}
-              {_markerDetailNullable('count', 'count', data.count)}
+              {_markerDetailBytesNullable('count', 'Req bites', data.count)}
               {_markerDetailDeltaTimeNullable(
                 'domainLookup',
                 'domainLookup',
@@ -469,7 +480,6 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       implementationFilter,
     } = this.props;
     const details = getMarkerDetails(marker, thread, implementationFilter);
-
     return (
       <div className={classNames('tooltipMarker', className)}>
         <div className={classNames({ tooltipHeader: details })}>
