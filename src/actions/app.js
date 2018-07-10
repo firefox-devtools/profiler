@@ -7,7 +7,7 @@ import { getSelectedTab, getDataSource } from '../reducers/url-state';
 import { sendAnalytics } from '../utils/analytics';
 import type { Action, ThunkAction } from '../types/store';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState } from '../types/reducers';
+import type { ProfileSharingStatus, UrlState } from '../types/reducers';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -29,6 +29,15 @@ export function profilePublished(hash: string): Action {
   return {
     type: 'PROFILE_PUBLISHED',
     hash,
+  };
+}
+
+export function setProfileSharingStatus(
+  profileSharingStatus: ProfileSharingStatus
+): Action {
+  return {
+    type: 'SET_PROFILE_SHARING_STATUS',
+    profileSharingStatus,
   };
 }
 

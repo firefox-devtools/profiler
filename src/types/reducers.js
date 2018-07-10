@@ -31,6 +31,12 @@ export type ThreadViewOptions = {
   expandedCallNodePaths: PathSet,
   selectedMarker: IndexIntoMarkersTable | -1,
 };
+
+export type ProfileSharingStatus = {
+  sharedWithUrls: boolean,
+  sharedWithoutUrls: boolean,
+};
+
 export type ProfileViewState = {
   viewOptions: {
     perThread: ThreadViewOptions[],
@@ -44,6 +50,7 @@ export type ProfileViewState = {
     tabOrder: number[],
     rightClickedThread: ThreadIndex,
     isCallNodeContextMenuVisible: boolean,
+    profileSharingStatus: ProfileSharingStatus,
   },
   profile: Profile | null,
 };

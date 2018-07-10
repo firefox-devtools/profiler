@@ -42,6 +42,7 @@ import type {
   State,
   Reducer,
   ProfileViewState,
+  ProfileSharingStatus,
   RequestedLib,
   SymbolicationStatus,
   ThreadViewOptions,
@@ -421,6 +422,33 @@ function isCallNodeContextMenuVisible(state: boolean = false, action: Action) {
   }
 }
 
+function profileSharingStatus(
+  state: ProfileSharingStatus = {
+    sharedWithUrls: false,
+    sharedWithoutUrls: false,
+  },
+  action: Action
+): ProfileSharingStatus {
+  switch (action.type) {
+    case 'SET_PROFILE_SHARING_STATUS':
+      return action.profileSharingStatus;
+    case 'VIEW_PROFILE':
+      // Here are the possible cases:
+      // - older shared profiles, newly captured profiles, and profiles from a file don't
+      //   have the property `networkURLsRemoved`. We use the `dataSource` value
+      //   to distinguish between these cases.
+      // - newer profiles that have been shared do have this property.
+      return {
+        sharedWithUrls:
+          !action.profile.meta.networkURLsRemoved &&
+          action.dataSource === 'public',
+        sharedWithoutUrls: action.profile.meta.networkURLsRemoved === true,
+      };
+    default:
+      return state;
+  }
+}
+
 /**
  * Provide a mechanism to wrap the reducer in a special function that can reset
  * the state to the default values. This is useful when viewing multiple profiles
@@ -456,6 +484,7 @@ export default wrapReducerInResetter(
       tabOrder,
       rightClickedThread,
       isCallNodeContextMenuVisible,
+      profileSharingStatus,
     }),
     profile,
   })
@@ -473,6 +502,8 @@ export const getProfileRootRange = (state: State) =>
   getProfileViewOptions(state).rootRange;
 export const getSymbolicationStatus = (state: State) =>
   getProfileViewOptions(state).symbolicationStatus;
+export const getProfileSharingStatus = (state: State) =>
+  getProfileViewOptions(state).profileSharingStatus;
 export const getScrollToSelectionGeneration = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.scrollToSelectionGeneration
