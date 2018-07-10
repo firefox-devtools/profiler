@@ -353,8 +353,10 @@ class ProfileSharingCompositeButton extends PureComponent<
 
   _onSecondarySharePanelOpen() {
     const { profileSharingStatus } = this.props;
-    // Even if the sharedWitouthUrls is true, we force it to share
-    // without URLs if `profileSharingStatus.sharedWithUrls` is true.
+    // In the secondary sharing panel, we disable the URL sharing checkbox and
+    // force it to the value we haven't used yet.
+    // Note that we can't have both sharedWithUrls and sharedWithoutUrls set to
+    // true here because we don't show the secondary panel when that's the case.
     this.setState({
       shareNetworkUrls: !profileSharingStatus.sharedWithUrls,
     });
@@ -373,7 +375,7 @@ class ProfileSharingCompositeButton extends PureComponent<
     // 1. If we loaded a profile from a file or the public store that got its network URLs removed before.
     //    Note that profiles captured from the add-on have this property set to false.
     // 2. If it's been shared in both modes already; in that case we show no button at all.
-    const wontSecondaryShareProfile =
+    const disableSecondaryShareProfile =
       profile.meta.networkURLsRemoved ||
       (profileSharingStatus.sharedWithUrls &&
         profileSharingStatus.sharedWithoutUrls);
@@ -382,7 +384,7 @@ class ProfileSharingCompositeButton extends PureComponent<
     // (either loaded from a public store or previously shared), because otherwise
     // we show the primary button (or errors).
     const isSecondaryShareButtonVisible =
-      state === 'public' && !wontSecondaryShareProfile;
+      state === 'public' && !disableSecondaryShareProfile;
 
     const secondaryShareLabel = profileSharingStatus.sharedWithUrls
       ? 'Share without URLs'

@@ -133,6 +133,7 @@ type ReceiveProfileAction =
       +hiddenThreadIndexes: ThreadIndex[],
       +selectedThreadIndex: ThreadIndex | null,
       +pathInZipFile: ?string,
+      +dataSource: DataSource,
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
   | {| +type: 'PROCESS_PROFILE_FROM_ZIP_FILE', +pathInZipFile: string |}

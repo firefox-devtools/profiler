@@ -219,7 +219,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
           disabled={true}
           onClick={[Function]}
           type="button"
-          value="Share without URLs"
+          value="Share with URLs"
         />
       </div>
       <div
@@ -560,7 +560,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
           disabled={false}
           onClick={[Function]}
           type="button"
-          value="Share without URLs"
+          value="Share with URLs"
         />
       </div>
       <div

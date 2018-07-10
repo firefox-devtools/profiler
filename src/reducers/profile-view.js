@@ -433,8 +433,15 @@ function profileSharingStatus(
     case 'SET_PROFILE_SHARING_STATUS':
       return action.profileSharingStatus;
     case 'VIEW_PROFILE':
+      // Here are the possible cases:
+      // - older shared profiles, newly captured profiles, and profiles from a file don't
+      //   have the property `networkURLsRemoved`. We use the `dataSource` value
+      //   to distinguish between these cases.
+      // - newer profiles that have been shared do have this property.
       return {
-        sharedWithUrls: action.profile.meta.networkURLsRemoved === false,
+        sharedWithUrls:
+          !action.profile.meta.networkURLsRemoved &&
+          action.dataSource === 'public',
         sharedWithoutUrls: action.profile.meta.networkURLsRemoved === true,
       };
     default:

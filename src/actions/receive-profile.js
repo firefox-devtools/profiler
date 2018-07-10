@@ -15,6 +15,7 @@ import { decompress } from '../utils/gz';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
 import {
+  getDataSource,
   getHiddenThreads,
   getSelectedThreadIndexOrNull,
 } from '../reducers/url-state';
@@ -50,6 +51,7 @@ export function viewProfile(
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadIndexes = profile.threads.map((_, threadIndex) => threadIndex);
+    const dataSource = getDataSource(getState());
     let hiddenThreadIndexes;
     let selectedThreadIndex = getSelectedThreadIndexOrNull(getState());
 
@@ -93,6 +95,7 @@ export function viewProfile(
       hiddenThreadIndexes,
       selectedThreadIndex,
       pathInZipFile,
+      dataSource,
     });
   };
 }
