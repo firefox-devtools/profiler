@@ -365,10 +365,10 @@ function getMarkerDetails(
         ) {
           return (
             <div className="tooltipDetails">
+              {_markerDetail('status', 'Status', data.status)}
               {_markerDetailNullable('url', 'URL', data.URI)}
               {_markerDetail('pri', 'pri', data.pri)}
               {_markerDetailBytesNullable('count', 'Req bites', data.count)}
-              {_markerDetail('status', 'Status', data.status)}
             </div>
           );
         } else {
