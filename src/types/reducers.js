@@ -9,6 +9,7 @@ import type {
   DataSource,
   ProfileSelection,
   ImplementationFilter,
+  RequestedLib,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { Milliseconds, StartEndRange } from './units';
@@ -24,7 +25,6 @@ import type { PathSet } from '../utils/path.js';
 
 export type Reducer<T> = (T | void, Action) => T;
 
-export type RequestedLib = { debugName: string, breakpadId: string };
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {
   selectedCallNodePath: CallNodePath,

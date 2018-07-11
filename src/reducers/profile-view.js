@@ -37,13 +37,12 @@ import type {
   MarkerTimingRows,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
-import type { Action, ProfileSelection } from '../types/actions';
+import type { Action, ProfileSelection, RequestedLib } from '../types/actions';
 import type {
   State,
   Reducer,
   ProfileViewState,
   ProfileSharingStatus,
-  RequestedLib,
   SymbolicationStatus,
   ThreadViewOptions,
 } from '../types/reducers';
