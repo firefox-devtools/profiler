@@ -20,6 +20,7 @@ declare class Window extends EventTarget {
   ga?: GoogleAnalytics;
   // perf.html and Gecko Profiler Addon
   geckoProfilerPromise: Promise<GeckoProfiler>;
+  connectToGeckoProfiler: GeckoProfiler => void;
   geckoProfilerAddonInstalled?: () => void;
   isGeckoProfilerAddonInstalled?: boolean;
   InstallTrigger?: {

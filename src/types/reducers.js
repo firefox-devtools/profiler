@@ -117,11 +117,6 @@ export type ZippedProfilesState = {
   expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
 };
 
-export type RangeFilterState = {
-  start: number,
-  end: number,
-};
-
 export type UrlState = {|
   dataSource: DataSource,
   hash: string,
@@ -131,7 +126,7 @@ export type UrlState = {|
   profileSpecific: {|
     implementation: ImplementationFilter,
     invertCallstack: boolean,
-    rangeFilters: RangeFilterState[],
+    rangeFilters: StartEndRange[],
     selectedThread: ThreadIndex | null,
     callTreeSearchString: string,
     threadOrder: ThreadIndex[],
