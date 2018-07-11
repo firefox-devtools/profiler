@@ -120,10 +120,10 @@ export type GeckoFrameStruct = {
 
 export type GeckoStackTable = {
   schema: {
-    frame: 0,
-    prefix: 1,
+    prefix: 0,
+    frame: 1,
   },
-  data: Array<[IndexIntoGeckoFrameTable, IndexIntoGeckoStackTable | null]>,
+  data: Array<[IndexIntoGeckoStackTable | null, IndexIntoGeckoFrameTable]>,
 };
 
 export type GeckoStackStruct = {
@@ -155,32 +155,34 @@ export type GeckoExtensionMeta = {|
   data: Array<[string, string, string]>,
 |};
 
+export type GeckoProfileMeta = {|
+  interval: Milliseconds,
+  startTime: Milliseconds,
+  shutdownTime: Milliseconds | null,
+  abi: string,
+  // The extensions property landed in Firefox 60, and is only optional because
+  // older profile versions may not have it. No upgrader was written for this change.
+  extensions?: GeckoExtensionMeta,
+  categories: CategoryList,
+  misc: string,
+  oscpu: string,
+  platform: string,
+  processType: number,
+  product: string,
+  stackwalk: number,
+  toolkit: string,
+  version: number,
+  // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed
+  // in Firefox 62, and are only optional because older processed profile
+  // versions may not have them. No upgrader was written for this change.
+  appBuildID?: string,
+  sourceURL?: string,
+  physicalCPUs?: number,
+  logicalCPUs?: number,
+|};
+
 export type GeckoProfile = {|
-  meta: {|
-    interval: Milliseconds,
-    startTime: Milliseconds,
-    shutdownTime: Milliseconds | null,
-    abi: string,
-    // The extensions property landed in Firefox 60, and is only optional because
-    // older profile versions may not have it. No upgrader was written for this change.
-    extensions?: GeckoExtensionMeta,
-    categories: CategoryList,
-    misc: string,
-    oscpu: string,
-    platform: string,
-    processType: number,
-    product: string,
-    stackwalk: number,
-    toolkit: string,
-    version: number,
-    // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed
-    // in Firefox 62, and are only optional because older processed profile
-    // versions may not have them. No upgrader was written for this change.
-    appBuildID?: string,
-    sourceURL?: string,
-    physicalCPUs?: number,
-    logicalCPUs?: number,
-  |},
+  meta: GeckoProfileMeta,
   libs: Lib[],
   threads: GeckoThread[],
   pausedRanges: PausedRange[],

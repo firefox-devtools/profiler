@@ -5,6 +5,7 @@
 // @flow
 import { getEmptyProfile } from '../../../profile-logic/profile-data';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
+import { ensureIsNumber } from '../../../utils/flow';
 import type { Profile, Thread } from '../../../types/profile';
 import type { MarkerPayload } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
@@ -31,8 +32,8 @@ export function addMarkersToThreadWithCorrespondingSamples(
     if (data && !data.type) {
       data = {
         type: 'DummyForTests',
-        startTime: data.startTime,
-        endTime: data.endTime,
+        startTime: ensureIsNumber((data: Object).startTime),
+        endTime: ensureIsNumber((data: Object).endTime),
       };
     }
     markersTable.name.push(stringTable.indexForString(name));

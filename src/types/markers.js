@@ -329,6 +329,13 @@ type StyleMarkerPayload_Shared = {
   stylesReused: number,
 };
 
+type VsyncTimestampPayload = {|
+  // The "type" property doesn't exist, but is required to make Flow typing work.
+  type: void,
+  category: 'VsyncTimestamp',
+  vsync: 0,
+|};
+
 /**
  * The payload for Styles.
  */
@@ -369,6 +376,7 @@ export type MarkerPayload =
   | GCSliceMarkerPayload
   | StyleMarkerPayload
   | BHRMarkerPayload
+  | VsyncTimestampPayload
   | DummyForTestsMarkerPayload
   | null;
 
@@ -383,4 +391,5 @@ export type MarkerPayload_Gecko =
   | GCSliceMarkerPayload_Gecko
   | StyleMarkerPayload_Gecko
   | DummyForTestsMarkerPayload
+  | VsyncTimestampPayload
   | null;
