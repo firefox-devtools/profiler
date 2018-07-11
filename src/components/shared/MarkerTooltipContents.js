@@ -367,7 +367,7 @@ function getMarkerDetails(
             <div className="tooltipDetails">
               {_markerDetail('status', 'Status', data.status)}
               {_markerDetailNullable('url', 'URL', data.URI)}
-              {_markerDetail('pri', 'pri', data.pri)}
+              {_markerDetail('pri', 'Prio', data.pri)}
               {_markerDetailBytesNullable('count', 'Req bites', data.count)}
             </div>
           );
@@ -381,7 +381,7 @@ function getMarkerDetails(
                 'Redirect URL',
                 data.RedirectURI
               )}
-              {_markerDetail('pri', 'pri', data.pri)}
+              {_markerDetail('pri', 'Prio', data.pri)}
               {_markerDetailBytesNullable('count', 'Req bites', data.count)}
               {_markerDetailDeltaTimeNullable(
                 'domainLookup',
