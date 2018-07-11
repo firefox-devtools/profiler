@@ -281,7 +281,7 @@ class ProfileSharingCompositeButton extends PureComponent<
       resolve(jsonString);
     })
       .then((s: string) => new TextEncoder().encode(s))
-      .then((typedArray: $TypedArray) => {
+      .then((typedArray: Uint8Array) => {
         return Promise.all([compress(typedArray.slice(0)), sha1(typedArray)]);
       })
       .then(([gzipData, hash]: [string, string]) => {

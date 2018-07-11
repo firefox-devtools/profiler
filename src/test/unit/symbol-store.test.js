@@ -1,6 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
 
 import 'babel-polyfill';
 import { SymbolStore } from '../../profile-logic/symbol-store';
@@ -9,6 +10,7 @@ import exampleSymbolTable from '../fixtures/example-symbol-table';
 import fakeIndexedDB from 'fake-indexeddb';
 import FDBKeyRange from 'fake-indexeddb/lib/FDBKeyRange';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
+import { ensureExists } from '../../utils/flow';
 
 describe('SymbolStore', function() {
   let symbolProvider, symbolStore;
@@ -57,7 +59,7 @@ describe('SymbolStore', function() {
     expect(symbolProvider.requestSymbolTableFromAddon).not.toHaveBeenCalled();
 
     const lib1 = { debugName: 'firefox', breakpadId: 'dont-care' };
-    let secondAndThirdSymbol;
+    let secondAndThirdSymbol = new Map();
     await symbolStore.getSymbols(
       [{ lib: lib1, addresses: new Set([0xf01, 0x1a50]) }],
       (request, results) => {
@@ -77,7 +79,7 @@ describe('SymbolStore', function() {
     });
 
     const lib2 = { debugName: 'firefox2', breakpadId: 'dont-care2' };
-    let firstAndLastSymbol;
+    let firstAndLastSymbol = new Map();
     await symbolStore.getSymbols(
       [{ lib: lib2, addresses: new Set([0x33, 0x2000]) }],
       (request, results) => {
@@ -196,19 +198,21 @@ describe('SymbolStore', function() {
     // requestSymbolTableFromAddon should have been called for it, once.
     expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
 
-    expect(symbolsPerLibrary.get(lib1).get(0xf01)).toEqual({
+    const lib1Symbols = ensureExists(symbolsPerLibrary.get(lib1));
+    const lib2Symbols = ensureExists(symbolsPerLibrary.get(lib2));
+    expect(lib1Symbols.get(0xf01)).toEqual({
       name: 'second symbol',
       functionOffset: 1,
     });
-    expect(symbolsPerLibrary.get(lib1).get(0x1a50)).toEqual({
+    expect(lib1Symbols.get(0x1a50)).toEqual({
       name: 'third symbol',
       functionOffset: 0x50,
     });
-    expect(symbolsPerLibrary.get(lib2).get(0x33)).toEqual({
+    expect(lib2Symbols.get(0x33)).toEqual({
       name: 'first symbol',
       functionOffset: 0x33,
     });
-    expect(symbolsPerLibrary.get(lib2).get(0x2000)).toEqual({
+    expect(lib2Symbols.get(0x2000)).toEqual({
       name: 'last symbol',
       functionOffset: 0,
     });

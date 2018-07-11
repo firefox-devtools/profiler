@@ -1,19 +1,33 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
 
 import Worker from './worker-factory';
 
 const zeeWorker = new Worker('zee-worker');
 const zeeCallbacks = [];
 
-zeeWorker.onmessage = function(msg) {
-  zeeCallbacks[msg.data.callbackID][msg.data.type](msg.data.data);
-  zeeCallbacks[msg.data.callbackID] = null;
+type ZeeWorkerData = {
+  callbackID: number,
+  type: 'success' | 'error',
+  data: any,
+};
+
+zeeWorker.onmessage = function(msg: MessageEvent) {
+  const data = ((msg.data: any): ZeeWorkerData);
+  const callbacks = zeeCallbacks[data.callbackID];
+  if (callbacks) {
+    callbacks[data.type](data.data);
+    zeeCallbacks[data.callbackID] = null;
+  }
 };
 
 // Neuters data's buffer, if data is a typed array.
-export function compress(data, compressionLevel) {
+export function compress(
+  data: string | Uint8Array,
+  compressionLevel?: number
+): Promise<string> {
   const arrayData =
     typeof data === 'string' ? new TextEncoder().encode(data) : data;
   return new Promise(function(resolve, reject) {
@@ -34,7 +48,7 @@ export function compress(data, compressionLevel) {
 }
 
 // Neuters data's buffer, if data is a typed array.
-export function decompress(data) {
+export function decompress(data: Uint8Array): Promise<Uint8Array> {
   return new Promise(function(resolve, reject) {
     zeeWorker.postMessage(
       {

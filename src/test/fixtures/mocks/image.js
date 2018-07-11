@@ -4,9 +4,9 @@
 
 // @flow
 export function createImageMock() {
-  function Image() {
+  function ImageMock() {
     instances.push(this);
   }
-  const instances = [];
-  return { instances, Image };
+  const instances: Image[] = [];
+  return { instances, Image: ImageMock };
 }

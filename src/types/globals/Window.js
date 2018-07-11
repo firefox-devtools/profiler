@@ -34,6 +34,13 @@ declare class Window extends EventTarget {
   ) => CSSStyleDeclaration;
   TextDecoder: typeof TextDecoder;
   setTimeout: typeof setTimeout;
+  crypto: {
+    // This is a definition of only the methods we use.
+    // https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
+    subtle: {
+      digest: (string, Uint8Array) => Promise<ArrayBuffer>,
+    },
+  };
   fetch: typeof fetch;
   DOMRect: typeof DOMRect;
   requestIdleCallback: typeof requestIdleCallback;
