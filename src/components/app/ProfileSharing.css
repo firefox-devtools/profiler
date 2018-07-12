@@ -21,7 +21,8 @@
 .profileSharingShareButton,
 .profileSharingUploadingButton,
 .profileSharingPermalinkButton,
-.profileSharingUploadErrorButton {
+.profileSharingUploadErrorButton,
+.profileSharingSecondaryShareButton {
   height: 24px;
   margin-bottom: -24px;
 }
@@ -61,7 +62,8 @@
   background: var(--internal-uploading-progress-fill-color);
 }
 
-.profileSharingShareButtonButton:not([disabled]) {
+.profileSharingShareButtonButton:not([disabled]),
+.profileSharingSecondaryShareButtonButton:not([disabled]) {
   background-color: var(--internal-share-button-background-color);
   color: white;
 }
@@ -69,20 +71,23 @@
 .profileSharingCompositeButtonContainer:not(.currentButtonIsShareButton) > .profileSharingShareButton,
 .profileSharingCompositeButtonContainer:not(.currentButtonIsUploadingButton) > .profileSharingUploadingButton,
 .profileSharingCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .profileSharingPermalinkButton,
-.profileSharingCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .profileSharingUploadErrorButton {
+.profileSharingCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .profileSharingUploadErrorButton,
+.profileSharingCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton) > .profileSharingSecondaryShareButton {
   pointer-events: none;
 }
 
 .profileSharingShareButtonButton,
 .profileSharingUploadingButtonInner,
 .profileSharingPermalinkButtonButton,
-.profileSharingUploadErrorButtonButton {
-  transition: transform 200ms ease-in-out;
+.profileSharingUploadErrorButtonButton,
+.profileSharingSecondaryShareButtonButton {
+  transition: transform 200ms ease-in-out, margin-left 200ms ease-in-out;
 }
 
 .profileSharingCompositeButtonContainer:not(.currentButtonIsShareButton) > .profileSharingShareButton > .buttonWithPanelButtonWrapper > .profileSharingShareButtonButton,
 .profileSharingCompositeButtonContainer.currentButtonIsPermalinkButton > .profileSharingUploadingButton > .profileSharingUploadingButtonInner,
-.profileSharingCompositeButtonContainer.currentButtonIsUploadErrorButton > .profileSharingUploadingButton > .profileSharingUploadingButtonInner {
+.profileSharingCompositeButtonContainer.currentButtonIsUploadErrorButton > .profileSharingUploadingButton > .profileSharingUploadingButtonInner,
+.profileSharingCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton) .profileSharingSecondaryShareButtonButton {
   transform: translateY(-24px);
 }
 
@@ -90,6 +95,14 @@
 .profileSharingCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .profileSharingPermalinkButton > .buttonWithPanelButtonWrapper > .profileSharingPermalinkButtonButton,
 .profileSharingCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .profileSharingUploadErrorButton > .buttonWithPanelButtonWrapper > .profileSharingUploadErrorButtonButton {
   transform: translateY(24px);
+}
+
+.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .profileSharingPermalinkButton {
+  width: 112px;
+}
+
+.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .profileSharingSecondaryShareButton {
+  margin-left: 112px;
 }
 
 .profileSharingPrivacyPanel,

@@ -21,6 +21,7 @@ import { getImplementationFilter } from '../../reducers/url-state';
 import Backtrace from './Backtrace';
 
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
+import type { Microseconds } from '../../types/units';
 import type { TracingMarker } from '../../types/profile-derived';
 import type { NotVoidOrNull } from '../../types/utils';
 import type { ImplementationFilter } from '../../types/actions';
@@ -28,6 +29,7 @@ import type { Thread, ThreadIndex } from '../../types/profile';
 import type {
   DOMEventMarkerPayload,
   PaintProfilerMarkerTracing,
+  PhaseTimes,
   StyleMarkerPayload,
 } from '../../types/markers';
 import type {
@@ -42,7 +44,7 @@ function _markerDetail<T: NotVoidOrNull>(
   fn: T => string = String
 ): React.Node {
   return [
-    <div className="tooltipLabel" key="{key}">
+    <div className="tooltipLabel" key={key}>
       {label}:
     </div>,
     fn(value),
@@ -90,6 +92,152 @@ function _markerDetailDeltaTimeNullable(
   return _markerDetail(key, label, formatMilliseconds(valueResult));
 }
 
+type PhaseTimeTuple = {| name: string, time: Microseconds |};
+
+function _markerDetailPhase(p: PhaseTimeTuple): React.Node {
+  return _markerDetail(
+    'gcphase' + p.name,
+    'Phase ' + p.name,
+    p.time,
+    t => formatNumber(t / 1000) + 'ms'
+  );
+}
+
+function _makePhaseTimesArray(
+  phases: PhaseTimes<Microseconds>
+): Array<PhaseTimeTuple> {
+  const array = [];
+  for (const phase in phases) {
+    /*
+     * The "Total" entry is the total of all phases, it's not needed because
+     * the total time is displayed on the marker tooltip (and available in
+     * the marker data) directly.
+     */
+    if (phase !== 'Total') {
+      array.push({ name: phase, time: phases[phase] });
+    }
+  }
+  return array;
+}
+
+/*
+ * Return true if the phase 'phaseName' is a leaf phase among the whole
+ * array of phases.
+ *
+ * A leaf phase is a phase with no sub-phases.
+ *
+ * If the following are phases:
+ * marking.mark_roots
+ * marking.mark_heap
+ * marking.mark_heap.a
+ * sweeping.sweep
+ *
+ * Then marking.mark_roots, marking.mark_heap.a, sweeping.sweep are the only
+ * leaves.  We select these since they will give the person looking at the
+ * profile the best clue about which (sub-)phases are taking the longest.
+ * For example, it isn't useful to say "sweeping took 200ms" but it is
+ * useful to say "sweeping.compacting took 20ms" (if compacting has no
+ * sub-phases.
+ *
+ * We find leaf phases by constructing a tree of phase times and then
+ * reading its leaves.
+ */
+
+type PhaseTreeNode = {|
+  value?: PhaseTimeTuple,
+  branches: Map<string, PhaseTreeNode>,
+|};
+
+function _treeInsert(
+  tree: Map<string, PhaseTreeNode>,
+  path: Array<string>,
+  phase: PhaseTimeTuple
+) {
+  const component = path.shift();
+  if (component === undefined) {
+    // This path is not a leaf, it can be ignored.
+    return;
+  }
+
+  let node = tree.get(component);
+  if (!node) {
+    // Make a new node and grow the tree in this direction.
+    node = { branches: new Map() };
+
+    tree.set(component, node);
+  }
+
+  if (path.length > 0) {
+    // There are more path components.  This node should be a branch if it
+    // isn't one already.
+    if (node.value) {
+      // We delete the value to change this node from a leaf to a branch.
+      delete node.value;
+    }
+    _treeInsert(node.branches, path, phase);
+  } else {
+    // Make the new node leaf node.
+    if (node.value) {
+      console.error(
+        'Duplicate phases in _treeInsert in MarkerTooltipContents.js'
+      );
+      return;
+    }
+    node.value = phase;
+  }
+}
+
+function _treeGetLeaves(
+  tree: Map<string, PhaseTreeNode>
+): Array<PhaseTimeTuple> {
+  const leaves = [];
+  for (const node of tree.values()) {
+    if (node.value) {
+      leaves.push(node.value);
+    } else {
+      leaves.push(..._treeGetLeaves(node.branches));
+    }
+  }
+  return leaves;
+}
+
+function _filterInterestingPhaseTimes(
+  rawPhases: PhaseTimes<Microseconds>,
+  numSelect: number
+): Array<PhaseTimeTuple> {
+  let phaseTimes = _makePhaseTimesArray(rawPhases);
+
+  /*
+   * Select only the leaf phases.
+   */
+  const tree = new Map();
+  for (const phase of phaseTimes) {
+    const components = phase.name.split('.');
+    _treeInsert(tree, components, phase);
+  }
+  phaseTimes = _treeGetLeaves(tree);
+
+  /*
+   * Of those N leaf phases, select the M most interesting phases by
+   * determining the threshold we want to stop including phases at.
+   *
+   * Calculate the threshold by sorting the list of times in asscending
+   * order, then slicing off all the low items and looking at the first
+   * item.
+   */
+  const sortedPhaseTimes = phaseTimes
+    .map(pt => pt.time)
+    // Descending order
+    .sort((a, b) => b - a);
+  const threshold = sortedPhaseTimes[numSelect];
+
+  /*
+   * And then filtering the original list, which is in execution order which
+   * we'd like to preserve, using the threshold.
+   */
+  return phaseTimes.filter(pt => pt.time > threshold);
+}
+
 function _markerBacktrace(
   marker: TracingMarker,
   data: StyleMarkerPayload | PaintProfilerMarkerTracing | DOMEventMarkerPayload,
@@ -133,6 +281,7 @@ function getMarkerDetails(
   implementationFilter: ImplementationFilter
 ): React.Node {
   const data = marker.data;
+
   if (data) {
     switch (data.type) {
       case 'UserTiming': {
@@ -194,6 +343,16 @@ function getMarkerDetails(
                         nursery.chunk_alloc_us,
                         formatMicroseconds
                       )}
+                  {_makePhaseTimesArray(nursery.phase_times)
+                    /*
+                     * Nursery collection should usually be very quick.  1ms
+                     * is good and beyond 5ms and we could cause some
+                     * animation to drop frames.  250us is about where
+                     * things start to get interesting for a phase of a
+                     * nursery collection.
+                     */
+                    .filter(pt => pt.time > 250) // 250us
+                    .map(_markerDetailPhase)}
                 </div>
               );
             }
@@ -237,6 +396,10 @@ function getMarkerDetails(
                 timings.nonincremental_reason
               );
             }
+            const phase_times = _filterInterestingPhaseTimes(
+              timings.phase_times,
+              6
+            );
             return (
               <div className="tooltipDetails">
                 {_markerDetail('gcreason', 'Reason', timings.reason)}
@@ -297,6 +460,7 @@ function getMarkerDetails(
                   'Compartments',
                   timings.total_compartments
                 )}
+                {phase_times.map(_markerDetailPhase)}
               </div>
             );
           }
@@ -319,6 +483,10 @@ function getMarkerDetails(
             )
           );
         }
+        const phase_times = _filterInterestingPhaseTimes(
+          timings.phase_times,
+          6
+        );
         return (
           <div className="tooltipDetails">
             {_markerDetail('gcreason', 'Reason', timings.reason)}
@@ -332,6 +500,7 @@ function getMarkerDetails(
             {timings.page_faults === undefined
               ? null
               : _markerDetail('gcfaults', 'Page faults', timings.page_faults)}
+            {phase_times.map(_markerDetailPhase)}
           </div>
         );
       }
