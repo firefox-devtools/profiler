@@ -15,7 +15,7 @@ import {
 import exampleProfile from '../fixtures/profiles/timings-with-js';
 import { processProfile } from '../../profile-logic/process-profile';
 
-describe('app/ProfileSharing', function() {
+describe('app/MenuButtons', function() {
   /**
    * Mock out any created refs for the components with relevant information.
    */
@@ -31,7 +31,7 @@ describe('app/ProfileSharing', function() {
   }
 
   // profile.meta.networkURLsRemoved flag is set to false as a default.
-  it('renders the ProfileSharing buttons', () => {
+  it('renders the MenuButtons buttons', () => {
     const store = storeWithProfile();
     store.dispatch(startSymbolicating());
 
@@ -48,7 +48,7 @@ describe('app/ProfileSharing', function() {
     expect(profileSharing).toMatchSnapshot();
   });
 
-  it('renders the ProfileSharing buttons with profile.meta.networkURLsRemoved set to true', () => {
+  it('renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to true', () => {
     const profile = processProfile(exampleProfile());
     profile.meta.networkURLsRemoved = true;
     const store = storeWithProfile(profile);
@@ -67,7 +67,7 @@ describe('app/ProfileSharing', function() {
     expect(profileSharing).toMatchSnapshot();
   });
 
-  it('renders the ProfileSharing buttons with profile.meta.networkURLsRemoved set to undefined', () => {
+  it('renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to undefined', () => {
     const profile = processProfile(exampleProfile());
     profile.meta.networkURLsRemoved = undefined;
     const store = storeWithProfile(profile);

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
+exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
 <div
   className="menuButtons"
 >
@@ -341,7 +341,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
 </div>
 `;
 
-exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
+exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
 <div
   className="menuButtons"
 >
@@ -682,7 +682,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
 </div>
 `;
 
-exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta.networkURLsRemoved set to true 1`] = `
+exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to true 1`] = `
 <div
   className="menuButtons"
 >
@@ -1023,7 +1023,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
 </div>
 `;
 
-exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta.networkURLsRemoved set to true 2`] = `
+exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to true 2`] = `
 <div
   className="menuButtons"
 >
@@ -1364,7 +1364,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
 </div>
 `;
 
-exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta.networkURLsRemoved set to undefined 1`] = `
+exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to undefined 1`] = `
 <div
   className="menuButtons"
 >
@@ -1705,7 +1705,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
 </div>
 `;
 
-exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta.networkURLsRemoved set to undefined 2`] = `
+exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to undefined 2`] = `
 <div
   className="menuButtons"
 >
