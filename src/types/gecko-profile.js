@@ -23,7 +23,8 @@ export type GeckoMarkers = {
 /**
  * These structs aren't very DRY, but it is a simple and complete approach.
  * These structs are the initial transformation of the Gecko data to the
- * processed format.
+ * processed format. See `docs-developer/gecko-profile-format.md` for more
+ * information.
  */
 export type GeckoMarkerStruct = {
   name: IndexIntoStringTable[],

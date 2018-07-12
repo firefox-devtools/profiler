@@ -5,7 +5,7 @@
 
 export function uploadBinaryProfileData(
   data: string,
-  progressChangeCallback?: number => void
+  progressChangeCallback?: number => mixed
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();

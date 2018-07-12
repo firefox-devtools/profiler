@@ -143,13 +143,6 @@ export function ensureExists<T>(item: ?T, message: ?string): T {
   return item;
 }
 
-export function ensureIsNumber<T>(item: T): number {
-  if (typeof item !== 'number') {
-    throw new Error(`Expected a number, instead received "${typeof item}".`);
-  }
-  return item;
-}
-
 /**
  * Flow doesn't want us to access potentitally non-existent properties on unions of
  * of objects. This function creates a safe interface to access number properties
