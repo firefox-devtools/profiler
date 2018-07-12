@@ -370,7 +370,7 @@ function getMarkerDetails(
               {_markerDetail('pri', 'Priority', data.pri)}
               {_markerDetailBytesNullable(
                 'count',
-                'Reqested bytes',
+                'Requested bytes',
                 data.count
               )}
             </div>
@@ -388,7 +388,7 @@ function getMarkerDetails(
               {_markerDetail('pri', 'Priority', data.pri)}
               {_markerDetailBytesNullable(
                 'count',
-                'Reqested bytes',
+                'Requested bytes',
                 data.count
               )}
               {_markerDetailDeltaTimeNullable(
