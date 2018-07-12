@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { TabSlug } from '../types/actions';
+import type { TabSlug } from '../app-logic/tabs-handling';
 import type { TransformType } from '../types/transforms';
 
 /**

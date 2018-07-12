@@ -17,12 +17,12 @@
 
 .DetailsContainer .layout-splitter {
   background: var(--grey-10); /* Same background as sidebars */
-  border-left: 1px solid var(--grey-40);
+  border-left: 1px solid var(--grey-30);
   border-top: 1px solid var(--grey-30);
 }
 
 .DetailsContainer .layout-splitter:hover {
-  background: var(--grey-40); /* same as the border above */
+  background: var(--grey-30); /* same as the border above */
 }
 
 

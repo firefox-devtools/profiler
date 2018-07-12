@@ -19,13 +19,13 @@ import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
 import { toValidTabSlug } from '../../utils/flow';
+import { tabsWithTitleArray } from '../../app-logic/tabs-handling';
 
-import type { Tab } from './TabBar';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
-import type { TabSlug } from '../../types/actions';
+import type { TabSlug } from '../../app-logic/tabs-handling';
 
 require('./Details.css');
 
@@ -42,34 +42,6 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class ProfileViewer extends PureComponent<Props> {
-  // If updating this list, make sure and update the tabOrder reducer with another index.
-  _tabs: Tab[] = [
-    {
-      name: 'calltree',
-      title: 'Call Tree',
-    },
-    {
-      name: 'flame-graph',
-      title: 'Flame Graph',
-    },
-    {
-      name: 'stack-chart',
-      title: 'Stack Chart',
-    },
-    {
-      name: 'marker-chart',
-      title: 'Marker Chart',
-    },
-    {
-      name: 'marker-table',
-      title: 'Marker Table',
-    },
-    {
-      name: 'network-chart',
-      title: 'Network',
-    },
-  ];
-
   _onSelectTab = (selectedTab: string) => {
     const { changeSelectedTab } = this.props;
     const tabSlug = toValidTabSlug(selectedTab);
@@ -84,7 +56,7 @@ class ProfileViewer extends PureComponent<Props> {
     return (
       <div className="Details">
         <TabBar
-          tabs={this._tabs}
+          tabs={tabsWithTitleArray}
           selectedTabName={selectedTab}
           tabOrder={tabOrder}
           onSelectTab={this._onSelectTab}

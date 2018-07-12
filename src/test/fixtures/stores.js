@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import createStore from '../../create-store';
+import createStore from '../../app-logic/create-store';
 import { viewProfile } from '../../actions/receive-profile';
 import exampleProfile from './profiles/timings-with-js';
 import { processProfile } from '../../profile-logic/process-profile';

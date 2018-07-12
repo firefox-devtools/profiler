@@ -270,6 +270,60 @@ exports[`app/DetailsContainer renders an initial view with the right panel for t
 </div>
 `;
 
+exports[`app/DetailsContainer renders an initial view with the right panel for tab network-chart 1`] = `
+<div
+  className="Details"
+>
+  <TabBar
+    onChangeTabOrder={[Function]}
+    onSelectTab={[Function]}
+    selectedTabName="network-chart"
+    tabOrder={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+      ]
+    }
+    tabs={
+      Array [
+        Object {
+          "name": "calltree",
+          "title": "Call Tree",
+        },
+        Object {
+          "name": "flame-graph",
+          "title": "Flame Graph",
+        },
+        Object {
+          "name": "stack-chart",
+          "title": "Stack Chart",
+        },
+        Object {
+          "name": "marker-chart",
+          "title": "Marker Chart",
+        },
+        Object {
+          "name": "marker-table",
+          "title": "Marker Table",
+        },
+        Object {
+          "name": "network-chart",
+          "title": "Network",
+        },
+      ]
+    }
+  />
+  <Connect(MarkerChart) />
+  <Connect(CallNodeContextMenu) />
+  <Connect(MarkersContextMenu) />
+  <Connect(ProfileThreadHeaderContextMenu) />
+</div>
+`;
+
 exports[`app/DetailsContainer renders an initial view with the right panel for tab stack-chart 1`] = `
 <div
   className="Details"

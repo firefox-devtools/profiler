@@ -822,6 +822,8 @@ export function processProfile(
     sourceURL: geckoProfile.meta.sourceURL,
     physicalCPUs: geckoProfile.meta.physicalCPUs,
     logicalCPUs: geckoProfile.meta.logicalCPUs,
+    // Gecko always sends the profile with URLs.
+    networkURLsRemoved: false,
   };
 
   const result = {
@@ -841,6 +843,7 @@ export function serializeProfile(
 ): string {
   // stringTable -> stringArray
   const newProfile = Object.assign({}, profile, {
+    meta: { ...profile.meta, networkURLsRemoved: !includeNetworkUrls },
     threads: profile.threads.map(thread => {
       const stringArray = thread.stringTable.serializeToArray();
       const newThread = Object.assign({}, thread);
