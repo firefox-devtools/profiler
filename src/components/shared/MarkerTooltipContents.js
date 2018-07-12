@@ -367,8 +367,12 @@ function getMarkerDetails(
             <div className="tooltipDetails">
               {_markerDetail('status', 'Status', data.status)}
               {_markerDetailNullable('url', 'URL', data.URI)}
-              {_markerDetail('pri', 'Prio', data.pri)}
-              {_markerDetailBytesNullable('count', 'Req bites', data.count)}
+              {_markerDetail('pri', 'Priority', data.pri)}
+              {_markerDetailBytesNullable(
+                'count',
+                'Reqested bytes',
+                data.count
+              )}
             </div>
           );
         } else {
@@ -381,41 +385,45 @@ function getMarkerDetails(
                 'Redirect URL',
                 data.RedirectURI
               )}
-              {_markerDetail('pri', 'Prio', data.pri)}
-              {_markerDetailBytesNullable('count', 'Req bites', data.count)}
+              {_markerDetail('pri', 'Priority', data.pri)}
+              {_markerDetailBytesNullable(
+                'count',
+                'Reqested bytes',
+                data.count
+              )}
               {_markerDetailDeltaTimeNullable(
                 'domainLookup',
-                'domainLookup',
+                'Domain lookup in total',
                 data.domainLookupEnd,
                 data.domainLookupStart
               )}
               {_markerDetailDeltaTimeNullable(
+                'connect',
+                'Connection in total',
+                data.connectEnd,
+                data.connectStart
+              )}
+              {_markerDetailDeltaTimeNullable(
                 'tcpConnect',
-                'tcpConnect',
+                'TCP connection in total',
                 data.tcpConnectEnd,
                 data.connectStart
               )}
               {_markerDetailDeltaTimeNullable(
                 'secureConnectionStart',
-                'secureConnectionStart',
+                'Start of secure connection at',
                 data.secureConnectionStart,
                 data.tcpConnectEnd
               )}
               {_markerDetailDeltaTimeNullable(
-                'connect',
-                'connect',
-                data.connectEnd,
+                'requestStart',
+                'Start of request at',
+                data.requestStart,
                 data.connectStart
               )}
               {_markerDetailDeltaTimeNullable(
-                'requestStart',
-                'requestStart @',
-                data.startTime,
-                data.requestStart
-              )}
-              {_markerDetailDeltaTimeNullable(
                 'response',
-                'response',
+                'Response time',
                 data.responseEnd,
                 data.responseStart
               )}
