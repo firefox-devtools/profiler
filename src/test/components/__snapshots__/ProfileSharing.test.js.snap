@@ -2,19 +2,19 @@
 
 exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
 <div
-  className="profileSharing"
+  className="menuButtons"
 >
   <div
-    className="profileSharingCompositeButtonContainer currentButtonIsShareButton"
+    className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
   >
     <div
-      className="buttonWithPanel profileSharingShareButton"
+      className="buttonWithPanel menuButtonsShareButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingShareButtonButton"
+          className="buttonWithPanelButton menuButtonsShareButtonButton"
           disabled={true}
           onClick={[Function]}
           type="button"
@@ -25,7 +25,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -67,12 +67,12 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
               </p>
             </section>
             <p
-              className="profileSharingShareNetworkUrlsContainer"
+              className="menuButtonsShareNetworkUrlsContainer"
             >
               <label>
                 <input
                   checked={false}
-                  className="profileSharingShareNetworkUrlsCheckbox"
+                  className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={false}
                   onChange={[Function]}
                   type="checkbox"
@@ -101,30 +101,30 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
       </div>
     </div>
     <div
-      className="profileSharingUploadingButton"
+      className="menuButtonsUploadingButton"
     >
       <div
-        className="profileSharingUploadingButtonInner"
+        className="menuButtonsUploadingButtonInner"
       >
         <progress
-          className="profileSharingUploadingButtonProgress"
+          className="menuButtonsUploadingButtonProgress"
           value={0}
         />
         <div
-          className="profileSharingUploadingButtonLabel"
+          className="menuButtonsUploadingButtonLabel"
         >
           Uploading...
         </div>
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingPermalinkButton"
+      className="buttonWithPanel menuButtonsPermalinkButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingPermalinkButtonButton"
+          className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -135,7 +135,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel profileSharingPermalinkPanel"
+          className="arrowPanel menuButtonsPermalinkPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -144,7 +144,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
             className="arrowPanelContent"
           >
             <input
-              className="profileSharingPermalinkTextField"
+              className="menuButtonsPermalinkTextField"
               readOnly="readOnly"
               type="text"
               value="about:blank"
@@ -154,13 +154,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingUploadErrorButton"
+      className="buttonWithPanel menuButtonsUploadErrorButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingUploadErrorButtonButton"
+          className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -171,7 +171,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingUploadErrorPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -209,13 +209,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingSecondaryShareButton"
+      className="buttonWithPanel menuButtonsSecondaryShareButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingSecondaryShareButtonButton"
+          className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
           disabled={true}
           onClick={[Function]}
           type="button"
@@ -226,7 +226,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -268,12 +268,12 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
               </p>
             </section>
             <p
-              className="profileSharingShareNetworkUrlsContainer"
+              className="menuButtonsShareNetworkUrlsContainer"
             >
               <label>
                 <input
                   checked={false}
-                  className="profileSharingShareNetworkUrlsCheckbox"
+                  className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={true}
                   onChange={undefined}
                   type="checkbox"
@@ -303,13 +303,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
     </div>
   </div>
   <div
-    className="buttonWithPanel profileSharingProfileDownloadButton"
+    className="buttonWithPanel menuButtonsProfileDownloadButton"
   >
     <div
       className="buttonWithPanelButtonWrapper"
     >
       <input
-        className="buttonWithPanelButton profileSharingProfileDownloadButtonButton"
+        className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
         disabled={false}
         onClick={[Function]}
         type="button"
@@ -320,7 +320,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
       className="arrowPanelAnchor"
     >
       <div
-        className="arrowPanel hasTitle profileSharingProfileDownloadPanel"
+        className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
       >
         <div
           className="arrowPanelArrow"
@@ -343,19 +343,19 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 1`] = `
 
 exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
 <div
-  className="profileSharing"
+  className="menuButtons"
 >
   <div
-    className="profileSharingCompositeButtonContainer currentButtonIsShareButton"
+    className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
   >
     <div
-      className="buttonWithPanel profileSharingShareButton"
+      className="buttonWithPanel menuButtonsShareButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingShareButtonButton"
+          className="buttonWithPanelButton menuButtonsShareButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -366,7 +366,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -408,12 +408,12 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
               </p>
             </section>
             <p
-              className="profileSharingShareNetworkUrlsContainer"
+              className="menuButtonsShareNetworkUrlsContainer"
             >
               <label>
                 <input
                   checked={false}
-                  className="profileSharingShareNetworkUrlsCheckbox"
+                  className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={false}
                   onChange={[Function]}
                   type="checkbox"
@@ -442,30 +442,30 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
       </div>
     </div>
     <div
-      className="profileSharingUploadingButton"
+      className="menuButtonsUploadingButton"
     >
       <div
-        className="profileSharingUploadingButtonInner"
+        className="menuButtonsUploadingButtonInner"
       >
         <progress
-          className="profileSharingUploadingButtonProgress"
+          className="menuButtonsUploadingButtonProgress"
           value={0}
         />
         <div
-          className="profileSharingUploadingButtonLabel"
+          className="menuButtonsUploadingButtonLabel"
         >
           Uploading...
         </div>
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingPermalinkButton"
+      className="buttonWithPanel menuButtonsPermalinkButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingPermalinkButtonButton"
+          className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -476,7 +476,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel profileSharingPermalinkPanel"
+          className="arrowPanel menuButtonsPermalinkPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -485,7 +485,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
             className="arrowPanelContent"
           >
             <input
-              className="profileSharingPermalinkTextField"
+              className="menuButtonsPermalinkTextField"
               readOnly="readOnly"
               type="text"
               value="about:blank"
@@ -495,13 +495,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingUploadErrorButton"
+      className="buttonWithPanel menuButtonsUploadErrorButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingUploadErrorButtonButton"
+          className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -512,7 +512,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingUploadErrorPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -550,13 +550,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingSecondaryShareButton"
+      className="buttonWithPanel menuButtonsSecondaryShareButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingSecondaryShareButtonButton"
+          className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -567,7 +567,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -609,12 +609,12 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
               </p>
             </section>
             <p
-              className="profileSharingShareNetworkUrlsContainer"
+              className="menuButtonsShareNetworkUrlsContainer"
             >
               <label>
                 <input
                   checked={false}
-                  className="profileSharingShareNetworkUrlsCheckbox"
+                  className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={true}
                   onChange={undefined}
                   type="checkbox"
@@ -644,13 +644,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
     </div>
   </div>
   <div
-    className="buttonWithPanel profileSharingProfileDownloadButton"
+    className="buttonWithPanel menuButtonsProfileDownloadButton"
   >
     <div
       className="buttonWithPanelButtonWrapper"
     >
       <input
-        className="buttonWithPanelButton profileSharingProfileDownloadButtonButton"
+        className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
         disabled={false}
         onClick={[Function]}
         type="button"
@@ -661,7 +661,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
       className="arrowPanelAnchor"
     >
       <div
-        className="arrowPanel hasTitle profileSharingProfileDownloadPanel"
+        className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
       >
         <div
           className="arrowPanelArrow"
@@ -684,19 +684,19 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons 2`] = `
 
 exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta.networkURLsRemoved set to true 1`] = `
 <div
-  className="profileSharing"
+  className="menuButtons"
 >
   <div
-    className="profileSharingCompositeButtonContainer currentButtonIsShareButton"
+    className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
   >
     <div
-      className="buttonWithPanel profileSharingShareButton"
+      className="buttonWithPanel menuButtonsShareButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingShareButtonButton"
+          className="buttonWithPanelButton menuButtonsShareButtonButton"
           disabled={true}
           onClick={[Function]}
           type="button"
@@ -707,7 +707,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -749,12 +749,12 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
               </p>
             </section>
             <p
-              className="profileSharingShareNetworkUrlsContainer"
+              className="menuButtonsShareNetworkUrlsContainer"
             >
               <label>
                 <input
                   checked={false}
-                  className="profileSharingShareNetworkUrlsCheckbox"
+                  className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={false}
                   onChange={[Function]}
                   type="checkbox"
@@ -783,30 +783,30 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       </div>
     </div>
     <div
-      className="profileSharingUploadingButton"
+      className="menuButtonsUploadingButton"
     >
       <div
-        className="profileSharingUploadingButtonInner"
+        className="menuButtonsUploadingButtonInner"
       >
         <progress
-          className="profileSharingUploadingButtonProgress"
+          className="menuButtonsUploadingButtonProgress"
           value={0}
         />
         <div
-          className="profileSharingUploadingButtonLabel"
+          className="menuButtonsUploadingButtonLabel"
         >
           Uploading...
         </div>
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingPermalinkButton"
+      className="buttonWithPanel menuButtonsPermalinkButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingPermalinkButtonButton"
+          className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -817,7 +817,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel profileSharingPermalinkPanel"
+          className="arrowPanel menuButtonsPermalinkPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -826,7 +826,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
             className="arrowPanelContent"
           >
             <input
-              className="profileSharingPermalinkTextField"
+              className="menuButtonsPermalinkTextField"
               readOnly="readOnly"
               type="text"
               value="about:blank"
@@ -836,13 +836,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingUploadErrorButton"
+      className="buttonWithPanel menuButtonsUploadErrorButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingUploadErrorButtonButton"
+          className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -853,7 +853,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingUploadErrorPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -891,13 +891,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingSecondaryShareButton"
+      className="buttonWithPanel menuButtonsSecondaryShareButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingSecondaryShareButtonButton"
+          className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
           disabled={true}
           onClick={[Function]}
           type="button"
@@ -908,7 +908,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -950,12 +950,12 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
               </p>
             </section>
             <p
-              className="profileSharingShareNetworkUrlsContainer"
+              className="menuButtonsShareNetworkUrlsContainer"
             >
               <label>
                 <input
                   checked={false}
-                  className="profileSharingShareNetworkUrlsCheckbox"
+                  className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={true}
                   onChange={undefined}
                   type="checkbox"
@@ -985,13 +985,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
     </div>
   </div>
   <div
-    className="buttonWithPanel profileSharingProfileDownloadButton"
+    className="buttonWithPanel menuButtonsProfileDownloadButton"
   >
     <div
       className="buttonWithPanelButtonWrapper"
     >
       <input
-        className="buttonWithPanelButton profileSharingProfileDownloadButtonButton"
+        className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
         disabled={false}
         onClick={[Function]}
         type="button"
@@ -1002,7 +1002,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       className="arrowPanelAnchor"
     >
       <div
-        className="arrowPanel hasTitle profileSharingProfileDownloadPanel"
+        className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
       >
         <div
           className="arrowPanelArrow"
@@ -1025,19 +1025,19 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
 
 exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta.networkURLsRemoved set to true 2`] = `
 <div
-  className="profileSharing"
+  className="menuButtons"
 >
   <div
-    className="profileSharingCompositeButtonContainer currentButtonIsShareButton"
+    className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
   >
     <div
-      className="buttonWithPanel profileSharingShareButton"
+      className="buttonWithPanel menuButtonsShareButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingShareButtonButton"
+          className="buttonWithPanelButton menuButtonsShareButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -1048,7 +1048,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -1090,12 +1090,12 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
               </p>
             </section>
             <p
-              className="profileSharingShareNetworkUrlsContainer"
+              className="menuButtonsShareNetworkUrlsContainer"
             >
               <label>
                 <input
                   checked={false}
-                  className="profileSharingShareNetworkUrlsCheckbox"
+                  className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={false}
                   onChange={[Function]}
                   type="checkbox"
@@ -1124,30 +1124,30 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       </div>
     </div>
     <div
-      className="profileSharingUploadingButton"
+      className="menuButtonsUploadingButton"
     >
       <div
-        className="profileSharingUploadingButtonInner"
+        className="menuButtonsUploadingButtonInner"
       >
         <progress
-          className="profileSharingUploadingButtonProgress"
+          className="menuButtonsUploadingButtonProgress"
           value={0}
         />
         <div
-          className="profileSharingUploadingButtonLabel"
+          className="menuButtonsUploadingButtonLabel"
         >
           Uploading...
         </div>
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingPermalinkButton"
+      className="buttonWithPanel menuButtonsPermalinkButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingPermalinkButtonButton"
+          className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -1158,7 +1158,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel profileSharingPermalinkPanel"
+          className="arrowPanel menuButtonsPermalinkPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -1167,7 +1167,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
             className="arrowPanelContent"
           >
             <input
-              className="profileSharingPermalinkTextField"
+              className="menuButtonsPermalinkTextField"
               readOnly="readOnly"
               type="text"
               value="about:blank"
@@ -1177,13 +1177,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingUploadErrorButton"
+      className="buttonWithPanel menuButtonsUploadErrorButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingUploadErrorButtonButton"
+          className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -1194,7 +1194,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingUploadErrorPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -1232,13 +1232,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingSecondaryShareButton"
+      className="buttonWithPanel menuButtonsSecondaryShareButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingSecondaryShareButtonButton"
+          className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -1249,7 +1249,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -1291,12 +1291,12 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
               </p>
             </section>
             <p
-              className="profileSharingShareNetworkUrlsContainer"
+              className="menuButtonsShareNetworkUrlsContainer"
             >
               <label>
                 <input
                   checked={false}
-                  className="profileSharingShareNetworkUrlsCheckbox"
+                  className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={true}
                   onChange={undefined}
                   type="checkbox"
@@ -1326,13 +1326,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
     </div>
   </div>
   <div
-    className="buttonWithPanel profileSharingProfileDownloadButton"
+    className="buttonWithPanel menuButtonsProfileDownloadButton"
   >
     <div
       className="buttonWithPanelButtonWrapper"
     >
       <input
-        className="buttonWithPanelButton profileSharingProfileDownloadButtonButton"
+        className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
         disabled={false}
         onClick={[Function]}
         type="button"
@@ -1343,7 +1343,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       className="arrowPanelAnchor"
     >
       <div
-        className="arrowPanel hasTitle profileSharingProfileDownloadPanel"
+        className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
       >
         <div
           className="arrowPanelArrow"
@@ -1366,19 +1366,19 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
 
 exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta.networkURLsRemoved set to undefined 1`] = `
 <div
-  className="profileSharing"
+  className="menuButtons"
 >
   <div
-    className="profileSharingCompositeButtonContainer currentButtonIsShareButton"
+    className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
   >
     <div
-      className="buttonWithPanel profileSharingShareButton"
+      className="buttonWithPanel menuButtonsShareButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingShareButtonButton"
+          className="buttonWithPanelButton menuButtonsShareButtonButton"
           disabled={true}
           onClick={[Function]}
           type="button"
@@ -1389,7 +1389,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -1431,12 +1431,12 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
               </p>
             </section>
             <p
-              className="profileSharingShareNetworkUrlsContainer"
+              className="menuButtonsShareNetworkUrlsContainer"
             >
               <label>
                 <input
                   checked={false}
-                  className="profileSharingShareNetworkUrlsCheckbox"
+                  className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={false}
                   onChange={[Function]}
                   type="checkbox"
@@ -1465,30 +1465,30 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       </div>
     </div>
     <div
-      className="profileSharingUploadingButton"
+      className="menuButtonsUploadingButton"
     >
       <div
-        className="profileSharingUploadingButtonInner"
+        className="menuButtonsUploadingButtonInner"
       >
         <progress
-          className="profileSharingUploadingButtonProgress"
+          className="menuButtonsUploadingButtonProgress"
           value={0}
         />
         <div
-          className="profileSharingUploadingButtonLabel"
+          className="menuButtonsUploadingButtonLabel"
         >
           Uploading...
         </div>
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingPermalinkButton"
+      className="buttonWithPanel menuButtonsPermalinkButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingPermalinkButtonButton"
+          className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -1499,7 +1499,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel profileSharingPermalinkPanel"
+          className="arrowPanel menuButtonsPermalinkPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -1508,7 +1508,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
             className="arrowPanelContent"
           >
             <input
-              className="profileSharingPermalinkTextField"
+              className="menuButtonsPermalinkTextField"
               readOnly="readOnly"
               type="text"
               value="about:blank"
@@ -1518,13 +1518,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingUploadErrorButton"
+      className="buttonWithPanel menuButtonsUploadErrorButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingUploadErrorButtonButton"
+          className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -1535,7 +1535,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingUploadErrorPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -1573,13 +1573,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingSecondaryShareButton"
+      className="buttonWithPanel menuButtonsSecondaryShareButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingSecondaryShareButtonButton"
+          className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
           disabled={true}
           onClick={[Function]}
           type="button"
@@ -1590,7 +1590,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -1632,12 +1632,12 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
               </p>
             </section>
             <p
-              className="profileSharingShareNetworkUrlsContainer"
+              className="menuButtonsShareNetworkUrlsContainer"
             >
               <label>
                 <input
                   checked={false}
-                  className="profileSharingShareNetworkUrlsCheckbox"
+                  className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={true}
                   onChange={undefined}
                   type="checkbox"
@@ -1667,13 +1667,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
     </div>
   </div>
   <div
-    className="buttonWithPanel profileSharingProfileDownloadButton"
+    className="buttonWithPanel menuButtonsProfileDownloadButton"
   >
     <div
       className="buttonWithPanelButtonWrapper"
     >
       <input
-        className="buttonWithPanelButton profileSharingProfileDownloadButtonButton"
+        className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
         disabled={false}
         onClick={[Function]}
         type="button"
@@ -1684,7 +1684,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       className="arrowPanelAnchor"
     >
       <div
-        className="arrowPanel hasTitle profileSharingProfileDownloadPanel"
+        className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
       >
         <div
           className="arrowPanelArrow"
@@ -1707,19 +1707,19 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
 
 exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta.networkURLsRemoved set to undefined 2`] = `
 <div
-  className="profileSharing"
+  className="menuButtons"
 >
   <div
-    className="profileSharingCompositeButtonContainer currentButtonIsShareButton"
+    className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
   >
     <div
-      className="buttonWithPanel profileSharingShareButton"
+      className="buttonWithPanel menuButtonsShareButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingShareButtonButton"
+          className="buttonWithPanelButton menuButtonsShareButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -1730,7 +1730,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -1772,12 +1772,12 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
               </p>
             </section>
             <p
-              className="profileSharingShareNetworkUrlsContainer"
+              className="menuButtonsShareNetworkUrlsContainer"
             >
               <label>
                 <input
                   checked={false}
-                  className="profileSharingShareNetworkUrlsCheckbox"
+                  className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={false}
                   onChange={[Function]}
                   type="checkbox"
@@ -1806,30 +1806,30 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       </div>
     </div>
     <div
-      className="profileSharingUploadingButton"
+      className="menuButtonsUploadingButton"
     >
       <div
-        className="profileSharingUploadingButtonInner"
+        className="menuButtonsUploadingButtonInner"
       >
         <progress
-          className="profileSharingUploadingButtonProgress"
+          className="menuButtonsUploadingButtonProgress"
           value={0}
         />
         <div
-          className="profileSharingUploadingButtonLabel"
+          className="menuButtonsUploadingButtonLabel"
         >
           Uploading...
         </div>
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingPermalinkButton"
+      className="buttonWithPanel menuButtonsPermalinkButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingPermalinkButtonButton"
+          className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -1840,7 +1840,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel profileSharingPermalinkPanel"
+          className="arrowPanel menuButtonsPermalinkPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -1849,7 +1849,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
             className="arrowPanelContent"
           >
             <input
-              className="profileSharingPermalinkTextField"
+              className="menuButtonsPermalinkTextField"
               readOnly="readOnly"
               type="text"
               value="about:blank"
@@ -1859,13 +1859,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingUploadErrorButton"
+      className="buttonWithPanel menuButtonsUploadErrorButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingUploadErrorButtonButton"
+          className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -1876,7 +1876,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingUploadErrorPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -1914,13 +1914,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       </div>
     </div>
     <div
-      className="buttonWithPanel profileSharingSecondaryShareButton"
+      className="buttonWithPanel menuButtonsSecondaryShareButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton profileSharingSecondaryShareButtonButton"
+          className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -1931,7 +1931,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle hasButtons profileSharingPrivacyPanel"
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
         >
           <div
             className="arrowPanelArrow"
@@ -1973,12 +1973,12 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
               </p>
             </section>
             <p
-              className="profileSharingShareNetworkUrlsContainer"
+              className="menuButtonsShareNetworkUrlsContainer"
             >
               <label>
                 <input
                   checked={false}
-                  className="profileSharingShareNetworkUrlsCheckbox"
+                  className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={true}
                   onChange={undefined}
                   type="checkbox"
@@ -2008,13 +2008,13 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
     </div>
   </div>
   <div
-    className="buttonWithPanel profileSharingProfileDownloadButton"
+    className="buttonWithPanel menuButtonsProfileDownloadButton"
   >
     <div
       className="buttonWithPanelButtonWrapper"
     >
       <input
-        className="buttonWithPanelButton profileSharingProfileDownloadButtonButton"
+        className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
         disabled={false}
         onClick={[Function]}
         type="button"
@@ -2025,7 +2025,7 @@ exports[`app/ProfileSharing renders the ProfileSharing buttons with profile.meta
       className="arrowPanelAnchor"
     >
       <div
-        className="arrowPanel hasTitle profileSharingProfileDownloadPanel"
+        className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
       >
         <div
           className="arrowPanelArrow"

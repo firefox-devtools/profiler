@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import ProfileSharing from '../../components/app/ProfileSharing';
+import MenuButtons from '../../components/app/MenuButtons';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
@@ -37,7 +37,7 @@ describe('app/ProfileSharing', function() {
 
     const profileSharing = renderer.create(
       <Provider store={store}>
-        <ProfileSharing />
+        <MenuButtons />
       </Provider>,
       { createNodeMock }
     );
@@ -56,7 +56,7 @@ describe('app/ProfileSharing', function() {
 
     const profileSharing = renderer.create(
       <Provider store={store}>
-        <ProfileSharing />
+        <MenuButtons />
       </Provider>,
       { createNodeMock }
     );
@@ -75,7 +75,7 @@ describe('app/ProfileSharing', function() {
 
     const profileSharing = renderer.create(
       <Provider store={store}>
-        <ProfileSharing />
+        <MenuButtons />
       </Provider>,
       { createNodeMock }
     );
