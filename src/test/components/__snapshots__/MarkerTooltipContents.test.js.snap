@@ -366,7 +366,7 @@ Array [
         Cells tenured
         :
       </div>
-      16K
+      16K / 42K (37%)
       <div
         className="tooltipLabel"
       >
@@ -374,6 +374,13 @@ Array [
         :
       </div>
       2013KB / 16MB (12%)
+      <div
+        className="tooltipLabel"
+      >
+        Nursery allocations since last minor GC
+        :
+      </div>
+      27K / 39K (69%)
       <div
         className="tooltipLabel"
       >

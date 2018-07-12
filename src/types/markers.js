@@ -180,6 +180,13 @@ export type GCMinorCompletedData = {
   // https://bugzilla.mozilla.org/show_bug.cgi?id=1473213)
   cells_tenured?: number,
 
+  // The numbers of cells allocated since the previous minor GC.
+  // These were added in
+  // https://bugzilla.mozilla.org/show_bug.cgi?id=1473213 and are only
+  // present in Nightly builds.
+  cells_allocated_nursery?: number,
+  cells_allocated_tenured?: number,
+
   // The total amount of data that was allocated in the nursery.
   bytes_used: number,
 
