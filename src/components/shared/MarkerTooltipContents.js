@@ -61,12 +61,12 @@ function _markerDetailNullable<T: NotVoidOrNull>(
   return _markerDetail(key, label, value, fn);
 }
 
-function _markerDetailBytesNullable<T: NotVoidOrNull>(
+function _markerDetailBytesNullable(
   key: string,
   label: string,
-  value: T | void | null
+  value: ?number
 ): React.Node {
-  if (value === undefined || value === null) {
+  if (typeof value !== 'number') {
     return null;
   }
   return _markerDetail(key, label, formatBytes(value));
