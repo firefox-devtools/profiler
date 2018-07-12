@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import DetailsContainer from './DetailsContainer';
 import ProfileFilterNavigator from './ProfileFilterNavigator';
-import ProfileSharing from './ProfileSharing';
+import MenuButtons from './MenuButtons';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import { returnToZipFileList } from '../../actions/zipped-profiles';
 import { getProfileName } from '../../reducers/url-state';
@@ -51,7 +51,7 @@ class ProfileViewer extends PureComponent<Props> {
             <div className="profileViewerName">{profileName}</div>
           ) : null}
           <ProfileFilterNavigator />
-          <ProfileSharing />
+          <MenuButtons />
         </div>
         <ProfileViewerHeader />
         <DetailsContainer />
