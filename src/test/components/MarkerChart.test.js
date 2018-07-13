@@ -127,6 +127,41 @@ it('renders MarkerChart correctly', () => {
   delete window.devicePixelRatio;
 });
 
+it('renders the hoveredItem markers properly', () => {
+  window.devicePixelRatio = 1;
+
+  const profile = getProfileWithMarkers(MARKERS);
+  const {
+    flushRafCalls,
+    dispatch,
+    markerChart,
+    flushDrawLog,
+  } = setupWithProfile(profile);
+
+  dispatch(changeSelectedTab('marker-chart'));
+  markerChart.update();
+  flushRafCalls();
+  flushDrawLog();
+
+  // No tooltip displayed yet
+  expect(markerChart.find('Tooltip').exists()).toEqual(false);
+
+  // Move the mouse on top of an item.
+  markerChart.find('canvas').simulate('mousemove', {
+    nativeEvent: { offsetX: 50, offsetY: 5 },
+    pageX: 50,
+    pageY: 5,
+  });
+  markerChart.update();
+  flushRafCalls();
+
+  const drawCalls = flushDrawLog();
+  expect(drawCalls).toMatchSnapshot();
+
+  // The tooltip should be displayed
+  expect(markerChart.find('Tooltip').exists()).toEqual(true);
+});
+
 describe('Empty Reasons', () => {
   it('shows a reason when a profile has no marker', () => {
     const profile = getProfileWithMarkers([]);

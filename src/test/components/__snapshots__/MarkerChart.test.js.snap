@@ -726,3 +726,366 @@ Array [
   ],
 ]
 `;
+
+exports[`renders the hoveredItem markers properly 1`] = `
+Array [
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    138.5,
+    1,
+    48,
+    1,
+  ],
+  Array [
+    "fillRect",
+    137.5,
+    2,
+    50,
+    11,
+  ],
+  Array [
+    "fillRect",
+    138.5,
+    13,
+    48,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "Highlight",
+  ],
+  Array [
+    "fillRect",
+    1,
+    1,
+    123,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    2,
+    125,
+    11,
+  ],
+  Array [
+    "fillRect",
+    1,
+    13,
+    123,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    1,
+    17,
+    123,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    18,
+    125,
+    11,
+  ],
+  Array [
+    "fillRect",
+    1,
+    29,
+    123,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "arc",
+    55,
+    39.5,
+    3.75,
+    0,
+    6.283185307179586,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    63.5,
+    49,
+    123,
+    1,
+  ],
+  Array [
+    "fillRect",
+    62.5,
+    50,
+    125,
+    11,
+  ],
+  Array [
+    "fillRect",
+    63.5,
+    61,
+    123,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    63.5,
+    65,
+    60.5,
+    1,
+  ],
+  Array [
+    "fillRect",
+    62.5,
+    66,
+    62.5,
+    11,
+  ],
+  Array [
+    "fillRect",
+    63.5,
+    77,
+    60.5,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "white",
+  ],
+  Array [
+    "fillText",
+    "click",
+    65.5,
+    75,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "arc",
+    92.5,
+    87.5,
+    3.75,
+    0,
+    6.283185307179586,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#eee",
+  ],
+  Array [
+    "fillRect",
+    0,
+    15,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    31,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    47,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    63,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    79,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    95,
+    200,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    150,
+    0,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "rgba(255, 255, 255, 0.8)",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "rgba(255, 255, 255, 0.0)",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "rgba(255, 255, 255, 0.8)",
+          ],
+          Array [
+            1,
+            "rgba(255, 255, 255, 0.0)",
+          ],
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    32,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    48,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    64,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    80,
+    150,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Marker A",
+    5,
+    11,
+  ],
+  Array [
+    "fillText",
+    "Dot marker E",
+    5,
+    43,
+  ],
+  Array [
+    "fillText",
+    "Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very …",
+    5,
+    59,
+  ],
+  Array [
+    "fillText",
+    "Marker G type DOMEvent",
+    5,
+    75,
+  ],
+  Array [
+    "fillText",
+    "Non-interval marker F without data",
+    5,
+    91,
+  ],
+]
+`;
