@@ -71,6 +71,10 @@ export function show404(url: string): Action {
   return { type: 'ROUTE_NOT_FOUND', url };
 }
 
+export function changeSidebarOpenState(tab: TabSlug, isOpen: boolean): Action {
+  return { type: 'CHANGE_SIDEBAR_OPEN_STATE', tab, isOpen };
+}
+
 /**
  * This function is called when a browser navigation event happens. A new UrlState
  * is generated when the window.location is serialized, or the state is pulled out of

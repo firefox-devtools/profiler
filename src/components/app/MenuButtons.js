@@ -38,7 +38,7 @@ import type {
   ConnectedProps,
 } from '../../utils/connect';
 
-require('./ProfileSharing.css');
+require('./MenuButtons.css');
 
 const PrivacyNotice = () => (
   <section className="privacyNotice">
@@ -62,13 +62,13 @@ const PrivacyNotice = () => (
 );
 
 const UploadingStatus = ({ progress }: { progress: number }) => (
-  <div className="profileSharingUploadingButton">
-    <div className="profileSharingUploadingButtonInner">
+  <div className="menuButtonsUploadingButton">
+    <div className="menuButtonsUploadingButtonInner">
       <progress
-        className="profileSharingUploadingButtonProgress"
+        className="menuButtonsUploadingButtonProgress"
         value={progress}
       />
-      <div className="profileSharingUploadingButtonLabel">Uploading...</div>
+      <div className="menuButtonsUploadingButtonLabel">Uploading...</div>
     </div>
   </div>
 );
@@ -100,7 +100,7 @@ const ProfileSharingButton = ({
     disabled={symbolicationStatus !== 'DONE'}
     panel={
       <ArrowPanel
-        className="profileSharingPrivacyPanel"
+        className="menuButtonsPrivacyPanel"
         title={'Upload Profile – Privacy Notice'}
         okButtonText="Share"
         cancelButtonText="Cancel"
@@ -108,11 +108,11 @@ const ProfileSharingButton = ({
         onOpen={panelOpenEvent ? panelOpenEvent : undefined}
       >
         <PrivacyNotice />
-        <p className="profileSharingShareNetworkUrlsContainer">
+        <p className="menuButtonsShareNetworkUrlsContainer">
           <label>
             <input
               type="checkbox"
-              className="profileSharingShareNetworkUrlsCheckbox"
+              className="menuButtonsShareNetworkUrlsCheckbox"
               checked={shareNetworkUrlCheckboxChecked}
               onChange={shareNetworkUrlCheckboxOnChange}
               disabled={checkboxDisabled}
@@ -392,7 +392,7 @@ class ProfileSharingCompositeButton extends PureComponent<
 
     return (
       <div
-        className={classNames('profileSharingCompositeButtonContainer', {
+        className={classNames('menuButtonsCompositeButtonContainer', {
           currentButtonIsShareButton: state === 'local',
           currentButtonIsUploadingButton: state === 'uploading',
           currentButtonIsPermalinkButton: state === 'public',
@@ -401,7 +401,7 @@ class ProfileSharingCompositeButton extends PureComponent<
         })}
       >
         <ProfileSharingButton
-          buttonClassName="profileSharingShareButton"
+          buttonClassName="menuButtonsShareButton"
           shareLabel={shareLabel}
           symbolicationStatus={symbolicationStatus}
           okButtonClickEvent={this._attemptToShare}
@@ -411,18 +411,18 @@ class ProfileSharingCompositeButton extends PureComponent<
         />
         <UploadingStatus progress={uploadProgress} />
         <ButtonWithPanel
-          className="profileSharingPermalinkButton"
+          className="menuButtonsPermalinkButton"
           ref={this._permalinkButtonCreated}
           label="Permalink"
           panel={
             <ArrowPanel
-              className="profileSharingPermalinkPanel"
+              className="menuButtonsPermalinkPanel"
               onOpen={this._onPermalinkPanelOpen}
               onClose={this._onPermalinkPanelClose}
             >
               <input
                 type="text"
-                className="profileSharingPermalinkTextField"
+                className="menuButtonsPermalinkTextField"
                 value={shortUrl}
                 readOnly="readOnly"
                 ref={this._permalinkTextFieldCreated}
@@ -431,12 +431,12 @@ class ProfileSharingCompositeButton extends PureComponent<
           }
         />
         <ButtonWithPanel
-          className="profileSharingUploadErrorButton"
+          className="menuButtonsUploadErrorButton"
           ref={this._uploadErrorButtonCreated}
           label="Upload Error"
           panel={
             <ArrowPanel
-              className="profileSharingUploadErrorPanel"
+              className="menuButtonsUploadErrorPanel"
               title={'Upload Error'}
               okButtonText="Try Again"
               cancelButtonText="Cancel"
@@ -448,7 +448,7 @@ class ProfileSharingCompositeButton extends PureComponent<
           }
         />
         <ProfileSharingButton
-          buttonClassName="profileSharingSecondaryShareButton"
+          buttonClassName="menuButtonsSecondaryShareButton"
           shareLabel={secondaryShareLabel}
           symbolicationStatus={symbolicationStatus}
           okButtonClickEvent={this._attemptToSecondaryShare}
@@ -537,11 +537,11 @@ class ProfileDownloadButton extends PureComponent<
     } = this.state;
     return (
       <ButtonWithPanel
-        className="profileSharingProfileDownloadButton"
-        label="Save as file..."
+        className="menuButtonsProfileDownloadButton"
+        label="Save as file…"
         panel={
           <ArrowPanel
-            className="profileSharingProfileDownloadPanel"
+            className="menuButtonsProfileDownloadPanel"
             title={'Save Profile to a Local File'}
             onOpen={this._onPanelOpen}
           >
@@ -549,7 +549,7 @@ class ProfileDownloadButton extends PureComponent<
               {uncompressedBlobUrl ? (
                 <p>
                   <a
-                    className="profileSharingDownloadLink"
+                    className="menuButtonsDownloadLink"
                     href={uncompressedBlobUrl}
                     download={filename}
                   >
@@ -560,7 +560,7 @@ class ProfileDownloadButton extends PureComponent<
               {compressedBlobUrl ? (
                 <p>
                   <a
-                    className="profileSharingDownloadLink"
+                    className="menuButtonsDownloadLink"
                     href={compressedBlobUrl}
                     download={`${filename}.gz`}
                   >
@@ -576,7 +576,7 @@ class ProfileDownloadButton extends PureComponent<
   }
 }
 
-type ProfileSharingStateProps = {|
+type MenuButtonsStateProps = {|
   +profile: Profile,
   +rootRange: StartEndRange,
   +dataSource: DataSource,
@@ -585,18 +585,18 @@ type ProfileSharingStateProps = {|
   +predictUrl: (Action | Action[]) => string,
 |};
 
-type ProfileSharingDispatchProps = {|
+type MenuButtonsDispatchProps = {|
   +profilePublished: typeof actions.profilePublished,
   +setProfileSharingStatus: typeof actions.setProfileSharingStatus,
 |};
 
-type ProfileSharingProps = ConnectedProps<
+type MenuButtonsProps = ConnectedProps<
   {||},
-  ProfileSharingStateProps,
-  ProfileSharingDispatchProps
+  MenuButtonsStateProps,
+  MenuButtonsDispatchProps
 >;
 
-const ProfileSharing = ({
+const MenuButtons = ({
   profile,
   rootRange,
   dataSource,
@@ -605,8 +605,8 @@ const ProfileSharing = ({
   profileSharingStatus,
   setProfileSharingStatus,
   predictUrl,
-}: ProfileSharingProps) => (
-  <div className="profileSharing">
+}: MenuButtonsProps) => (
+  <div className="menuButtons">
     <ProfileSharingCompositeButton
       profile={profile}
       dataSource={dataSource}
@@ -617,13 +617,21 @@ const ProfileSharing = ({
       predictUrl={predictUrl}
     />
     <ProfileDownloadButton profile={profile} rootRange={rootRange} />
+    <a
+      href="/docs/"
+      target="_blank"
+      className="menuButtonsLink"
+      title="Open the documentation in a new window"
+    >
+      Docs…
+    </a>
   </div>
 );
 
 const options: ExplicitConnectOptions<
   {||},
-  ProfileSharingStateProps,
-  ProfileSharingDispatchProps
+  MenuButtonsStateProps,
+  MenuButtonsDispatchProps
 > = {
   mapStateToProps: state => ({
     profile: getProfile(state),
@@ -637,6 +645,6 @@ const options: ExplicitConnectOptions<
     profilePublished: actions.profilePublished,
     setProfileSharingStatus: actions.setProfileSharingStatus,
   },
-  component: ProfileSharing,
+  component: MenuButtons,
 };
 export default explicitConnect(options);

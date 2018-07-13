@@ -126,6 +126,21 @@ describe('app actions', function() {
     });
   });
 
+  describe('isSidebarOpen', function() {
+    it('can change the state of the sidebar', function() {
+      const { dispatch, getState } = storeWithSimpleProfile();
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(false);
+      dispatch(AppActions.changeSidebarOpenState('calltree', true));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(true);
+      dispatch(AppActions.changeSelectedTab('flame-graph'));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(false);
+      dispatch(AppActions.changeSidebarOpenState('flame-graph', true));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(true);
+      dispatch(AppActions.changeSidebarOpenState('calltree', false));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(true);
+    });
+  });
+
   describe('updateUrlState', function() {
     it('can swap out to a different URL state', function() {
       const { dispatch, getState } = storeWithSimpleProfile();
