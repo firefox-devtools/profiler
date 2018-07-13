@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import renderer from 'react-test-renderer';
+import { mount } from 'enzyme';
 import { Provider } from 'react-redux';
 
 import MarkerChart from '../../components/marker-chart';
@@ -70,36 +70,23 @@ const NETWORK_MARKERS = [
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
   const ctx = mockCanvasContext();
+  jest
+    .spyOn(HTMLCanvasElement.prototype, 'getContext')
+    .mockImplementation(() => ctx);
 
-  /**
-   * Mock out any created refs for the components with relevant information.
-   */
-  function createNodeMock(element) {
-    // <ChartCanvas><canvas /></ChartCanvas>
-    if (element.type === 'canvas') {
-      return {
-        getBoundingClientRect: () => getBoundingBox(200, 300),
-        getContext: () => ctx,
-        style: {},
-      };
-    }
-    // <ChartViewport />
-    if (element.props.className.split(' ').includes('chartViewport')) {
-      return {
-        getBoundingClientRect: () => getBoundingBox(200, 300),
-      };
-    }
-    return null;
-  }
+  // Ideally we'd want this only on the Canvas and on ChartViewport, but this is
+  // a lot easier to mock this everywhere.
+  jest
+    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+    .mockImplementation(() => getBoundingBox(200, 300));
 
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('marker-chart'));
 
-  const markerChart = renderer.create(
+  const markerChart = mount(
     <Provider store={store}>
       <MarkerChart />
-    </Provider>,
-    { createNodeMock }
+    </Provider>
   );
 
   return {
@@ -119,6 +106,7 @@ it('renders MarkerChart correctly', () => {
   );
 
   store.dispatch(changeSelectedTab('marker-chart'));
+  markerChart.update();
   flushRafCalls();
 
   let drawCalls = flushDrawLog();
@@ -126,6 +114,7 @@ it('renders MarkerChart correctly', () => {
   expect(drawCalls).toMatchSnapshot();
 
   store.dispatch(changeSelectedTab('network-chart'));
+  markerChart.update();
   flushRafCalls();
 
   drawCalls = flushDrawLog();
@@ -141,6 +130,7 @@ describe('Empty Reasons', () => {
     const { store, markerChart } = setupWithProfile(profile);
 
     store.dispatch(changeSelectedTab('marker-chart'));
+    markerChart.update();
     expect(markerChart).toMatchSnapshot();
   });
 
@@ -149,6 +139,7 @@ describe('Empty Reasons', () => {
     const { store, markerChart } = setupWithProfile(profile);
 
     store.dispatch(changeSelectedTab('network-chart'));
+    markerChart.update();
     expect(markerChart).toMatchSnapshot();
   });
 });
