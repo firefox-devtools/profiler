@@ -393,6 +393,7 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
     case 'CHANGE_SELECTED_CALL_NODE':
     case 'CHANGE_SELECTED_THREAD':
     case 'HIDE_GLOBAL_TRACK':
+    case 'HIDE_LOCAL_TRACK':
       return state + 1;
     default:
       return state;
@@ -604,6 +605,9 @@ export const getSelection = (state: State) =>
  */
 export const getGlobalTracks = (state: State) =>
   getProfileView(state).globalTracks;
+
+// Warning: this selector returns a new object on every call, and will not properly
+// work with a PureComponent.
 export const getGlobalTrackAndIndexByPid = (state: State, pid: Pid) => {
   const globalTracks = getGlobalTracks(state);
   const globalTrackIndex = globalTracks.findIndex(
