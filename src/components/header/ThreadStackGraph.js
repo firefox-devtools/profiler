@@ -11,6 +11,7 @@ import {
   getSampleCallNodes,
   getSelectedSamples,
   getSampleIndexClosestToTime,
+  SELECTED,
 } from '../../profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 
@@ -145,7 +146,7 @@ class ThreadStackGraph extends PureComponent<Props> {
       }
       const height = callNodeTable.depth[callNodeIndex] * yPixelsPerDepth;
       const xPos = (sampleTime - range[0]) * xPixelsPerMs;
-      if (selectedSamples[i]) {
+      if (selectedSamples[i] === SELECTED) {
         highlightedSamples.height.push(height);
         highlightedSamples.xPos.push(xPos);
       } else {
