@@ -92,7 +92,7 @@ function setupWithProfile(profile) {
   return {
     markerChart,
     flushRafCalls,
-    store,
+    dispatch: store.dispatch,
     flushDrawLog: () => ctx.__flushDrawLog(),
   };
 }
@@ -101,11 +101,14 @@ it('renders MarkerChart correctly', () => {
   window.devicePixelRatio = 1;
 
   const profile = getProfileWithMarkers([...MARKERS, ...NETWORK_MARKERS]);
-  const { flushRafCalls, store, markerChart, flushDrawLog } = setupWithProfile(
-    profile
-  );
+  const {
+    flushRafCalls,
+    dispatch,
+    markerChart,
+    flushDrawLog,
+  } = setupWithProfile(profile);
 
-  store.dispatch(changeSelectedTab('marker-chart'));
+  dispatch(changeSelectedTab('marker-chart'));
   markerChart.update();
   flushRafCalls();
 
@@ -113,7 +116,7 @@ it('renders MarkerChart correctly', () => {
   expect(markerChart).toMatchSnapshot();
   expect(drawCalls).toMatchSnapshot();
 
-  store.dispatch(changeSelectedTab('network-chart'));
+  dispatch(changeSelectedTab('network-chart'));
   markerChart.update();
   flushRafCalls();
 
@@ -127,18 +130,18 @@ it('renders MarkerChart correctly', () => {
 describe('Empty Reasons', () => {
   it('shows a reason when a profile has no marker', () => {
     const profile = getProfileWithMarkers([]);
-    const { store, markerChart } = setupWithProfile(profile);
+    const { dispatch, markerChart } = setupWithProfile(profile);
 
-    store.dispatch(changeSelectedTab('marker-chart'));
+    dispatch(changeSelectedTab('marker-chart'));
     markerChart.update();
     expect(markerChart).toMatchSnapshot();
   });
 
   it('shows a reason when a profil has no network markers', () => {
     const profile = getProfileWithMarkers(MARKERS);
-    const { store, markerChart } = setupWithProfile(profile);
+    const { dispatch, markerChart } = setupWithProfile(profile);
 
-    store.dispatch(changeSelectedTab('network-chart'));
+    dispatch(changeSelectedTab('network-chart'));
     markerChart.update();
     expect(markerChart).toMatchSnapshot();
   });
