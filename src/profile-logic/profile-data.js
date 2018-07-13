@@ -193,25 +193,19 @@ export function getSelectedSamples(
     if (callNodeIndex === null) {
       return FILTERED_OUT;
     }
-    for (
-      let depth = callNodeTable.depth[callNodeIndex];
-      depth > selectedCallNodeDepth;
-      depth--
-    ) {
+    let depth = callNodeTable.depth[callNodeIndex];
+    while (depth > selectedCallNodeDepth) {
       callNodeIndex = callNodeTable.prefix[callNodeIndex];
+      depth--;
     }
     if (callNodeIndex === selectedCallNodeIndex) {
       return SELECTED;
     }
 
-    let depth = Math.min(
-      selectedCallNodeDepth,
-      callNodeTable.depth[callNodeIndex]
-    );
     while (true) {
       const prevCallNodeIndex = callNodeIndex;
-      depth--;
       callNodeIndex = callNodeTable.prefix[callNodeIndex];
+      depth--;
       if (
         callNodeIndex === -1 ||
         callNodeIndex === selectedCallNodeAtDepth[depth]
@@ -235,6 +229,62 @@ export function getSelectedSamples(
     result[sampleIndex] = getSampleValue(sampleCallNodes[sampleIndex]);
   }
   return result;
+}
+
+export function getTreeOrderComparator(
+  callNodeTable: CallNodeTable,
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>
+): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
+  function compareCallNodes(
+    callNodeA: IndexIntoCallNodeTable,
+    callNodeB: IndexIntoCallNodeTable
+  ): number {
+    const initialDepthA = callNodeTable.depth[callNodeA];
+    const initialDepthB = callNodeTable.depth[callNodeB];
+    let depthA = initialDepthA;
+    let depthB = initialDepthB;
+    while (depthA > depthB) {
+      callNodeA = callNodeTable.prefix[callNodeA];
+      depthA--;
+    }
+    while (depthB > depthA) {
+      callNodeB = callNodeTable.prefix[callNodeB];
+      depthB--;
+    }
+
+    if (callNodeA === callNodeB) {
+      return initialDepthA - initialDepthB;
+    }
+
+    while (true) {
+      const parentNodeA = callNodeTable.prefix[callNodeA];
+      const parentNodeB = callNodeTable.prefix[callNodeB];
+      if (parentNodeA === parentNodeB) {
+        break;
+      }
+      callNodeA = parentNodeA;
+      callNodeB = parentNodeB;
+    }
+
+    return callNodeA - callNodeB;
+  }
+  return function treeOrderComparator(
+    sampleA: IndexIntoSamplesTable,
+    sampleB: IndexIntoSamplesTable
+  ): number {
+    const callNodeA = sampleCallNodes[sampleA];
+    const callNodeB = sampleCallNodes[sampleB];
+    if (callNodeA === null) {
+      if (callNodeB === null) {
+        return 0;
+      }
+      return -1;
+    }
+    if (callNodeB === null) {
+      return 1;
+    }
+    return compareCallNodes(callNodeA, callNodeB);
+  };
 }
 
 function _getTimeRangeForThread(

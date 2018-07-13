@@ -153,8 +153,6 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
       interval,
       rangeStart,
       rangeEnd,
-      callNodeInfo,
-      selectedCallNodeIndex,
       isSelected,
       threadName,
       processDetails,
@@ -226,8 +224,6 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
             className="threadActivityGraph"
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
-            callNodeInfo={callNodeInfo}
-            selectedCallNodeIndex={selectedCallNodeIndex}
             onSampleClick={this._onSampleClick}
             categories={categories}
           />

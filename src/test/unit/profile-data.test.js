@@ -17,11 +17,18 @@ import {
 import {
   resourceTypes,
   getCallNodeInfo,
+  getSampleCallNodes,
   getTracingMarkers,
   filterThreadByImplementation,
   getCallNodePathFromIndex,
   getSampleIndexClosestToTime,
   convertStackToCallNodePath,
+  getSelectedSamples,
+  getTreeOrderComparator,
+  getCallNodeIndexFromPath,
+  BEFORE_SELECTED,
+  SELECTED,
+  AFTER_SELECTED,
 } from '../../profile-logic/profile-data';
 import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
@@ -1058,5 +1065,67 @@ describe('convertStackToCallNodePath', function() {
     expect(callNodePath).toEqual([4, 3, 2, 1, 0]);
     callNodePath = convertStackToCallNodePath(thread, stack2);
     expect(callNodePath).toEqual([5, 3, 2, 1, 0]);
+  });
+});
+
+describe('getSelectedSamples', function() {
+  it('correctly does things', function() {
+    const {
+      profile,
+      funcNamesDictPerThread: [{ A, B, C, D, E, F, G }],
+    } = getProfileFromTextSamples(`
+       A  A  A  A  A
+       B  B  E  E  E
+       C  D  F  G
+    `);
+    const thread = profile.threads[0];
+    const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      0
+    );
+    const sampleCallNodes = getSampleCallNodes(
+      thread.samples,
+      stackIndexToCallNodeIndex
+    );
+    expect(getCallNodeIndexFromPath([A], callNodeTable)).toBe(A);
+    expect(getCallNodeIndexFromPath([A, B], callNodeTable)).toBe(B);
+    expect(getCallNodeIndexFromPath([A, B, C], callNodeTable)).toBe(C);
+    expect(getCallNodeIndexFromPath([A, E], callNodeTable)).toBe(E);
+    expect(getCallNodeIndexFromPath([A, E, F], callNodeTable)).toBe(F);
+    expect(getCallNodeIndexFromPath([A, E, G], callNodeTable)).toBe(G);
+
+    expect(getSelectedSamples(callNodeTable, sampleCallNodes, B)).toEqual([
+      SELECTED,
+      SELECTED,
+      AFTER_SELECTED,
+      AFTER_SELECTED,
+      AFTER_SELECTED,
+    ]);
+    expect(getSelectedSamples(callNodeTable, sampleCallNodes, E)).toEqual([
+      BEFORE_SELECTED,
+      BEFORE_SELECTED,
+      SELECTED,
+      SELECTED,
+      SELECTED,
+    ]);
+    expect(getSelectedSamples(callNodeTable, sampleCallNodes, D)).toEqual([
+      BEFORE_SELECTED,
+      SELECTED,
+      AFTER_SELECTED,
+      AFTER_SELECTED,
+      AFTER_SELECTED,
+    ]);
+
+    const comparator = getTreeOrderComparator(callNodeTable, sampleCallNodes);
+    const samples = [4, 2, 3, 0, 1]; // some random order
+    samples.sort(comparator);
+    expect(samples).toEqual([0, 1, 4, 2, 3]);
+    expect(comparator(0, 0)).toBe(0);
+    expect(comparator(2, 2)).toBe(0);
+    expect(comparator(4, 4)).toBe(0);
+    expect(comparator(0, 1)).toBe(-1);
+    expect(comparator(1, 0)).toBe(1);
   });
 });

@@ -16,7 +16,10 @@ import {
   getDisplayRange,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
-import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
+import {
+  getCallNodePathFromIndex,
+  getSampleCallNodes,
+} from '../../profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   focusCallTree,
@@ -27,8 +30,9 @@ import type {
   ThreadIndex,
   CategoryList,
   StackTable,
-  IndexIntoStackTable,
+  SamplesTable,
   IndexIntoSamplesTable,
+  IndexIntoCategoryList,
 } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type {
@@ -54,6 +58,10 @@ type StateProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
   +selectedSamples: boolean[],
+  +treeOrderSampleComparator: (
+    IndexIntoSamplesTable,
+    IndexIntoSamplesTable
+  ) => number,
 |};
 
 type DispatchProps = {|
@@ -63,22 +71,80 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-function findLastCategoryChangeInStack(
-  stackIndex: IndexIntoStackTable,
-  stackTable: StackTable
-): IndexIntoStackTable | null {
-  const stackCategory = stackTable.category[stackIndex];
-  for (
-    let previousStack = stackIndex,
-      currentStack = stackTable.prefix[stackIndex];
-    currentStack !== null;
-    previousStack = currentStack, currentStack = stackTable.prefix[currentStack]
-  ) {
-    if (stackTable.category[currentStack] !== stackCategory) {
-      return previousStack;
+function findBestCallNode(
+  callNodeInfo: CallNodeInfo,
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  sampleCategories: Array<IndexIntoCategoryList | null>,
+  clickedCallNode: IndexIntoCallNodeTable,
+  clickedCategory: IndexIntoCategoryList
+): IndexIntoCallNodeTable {
+  const { callNodeTable } = callNodeInfo;
+  if (callNodeTable.category[clickedCallNode] !== clickedCategory) {
+    return clickedCallNode;
+  }
+
+  const clickedDepth = callNodeTable.depth[clickedCallNode];
+  const callNodesOnSameCategoryPath = [clickedCallNode];
+  let callNode = clickedCallNode;
+  while (true) {
+    const parentCallNode = callNodeTable.prefix[callNode];
+    if (parentCallNode === -1) {
+      // The entire call path is just clickedCategory.
+      return clickedCallNode; // TODO: is this a useful behavior?
+    }
+    if (callNodeTable.category[parentCallNode] !== clickedCategory) {
+      break;
+    }
+    callNodesOnSameCategoryPath.push(parentCallNode);
+    callNode = parentCallNode;
+  }
+
+  // Now find the callNode in callNodesOnSameCategoryPath with the lowest depth
+  // such that selecting it will not highlight any samples whose unfiltered
+  // category is different from clickedCategory. If no such callNode exists,
+  // return clickedCallNode.
+
+  const handledCallNodes = new Uint8Array(callNodeTable.length);
+  function limitSameCategoryPathToCommonAncestor(callNode) {
+    const walkUpToDepth =
+      clickedDepth - (callNodesOnSameCategoryPath.length - 1);
+    let depth = callNodeTable.depth[callNode];
+    while (depth >= walkUpToDepth) {
+      if (handledCallNodes[callNode]) {
+        return;
+      }
+      handledCallNodes[callNode] = 1;
+      if (depth <= clickedDepth) {
+        if (callNode === callNodesOnSameCategoryPath[clickedDepth - depth]) {
+          callNodesOnSameCategoryPath.length = clickedDepth - depth;
+          return;
+        }
+      }
+      callNode = callNodeTable.prefix[callNode];
+      depth--;
     }
   }
-  return null;
+
+  for (let sample = 0; sample < sampleCallNodes.length; sample++) {
+    if (
+      sampleCategories[sample] !== clickedCategory &&
+      sampleCallNodes[sample] !== null
+    ) {
+      limitSameCategoryPathToCommonAncestor(sampleCallNodes[sample]);
+    }
+  }
+
+  if (callNodesOnSameCategoryPath.length > 0) {
+    return callNodesOnSameCategoryPath[callNodesOnSameCategoryPath.length - 1];
+  }
+  return clickedCallNode;
+}
+
+function getSampleCategories(
+  samples: SamplesTable,
+  stackTable: StackTable
+): Array<IndexIntoSamplesTable | null> {
+  return samples.stack.map(s => (s !== null ? stackTable.category[s] : null));
 }
 
 class SelectedThreadActivityGraphCanvas extends PureComponent<Props> {
@@ -97,34 +163,43 @@ class SelectedThreadActivityGraphCanvas extends PureComponent<Props> {
       focusCallTree,
     } = this.props;
     const unfilteredStack = fullThread.samples.stack[sampleIndex];
-    const filteredStack = filteredThread.samples.stack[sampleIndex];
-    let newSelectedCallNode = -1;
-    if (unfilteredStack !== null && filteredStack !== null) {
-      const categoryEntranceStack = findLastCategoryChangeInStack(
-        filteredStack,
-        filteredThread.stackTable
-      );
-      const newSelectedStack =
-        categoryEntranceStack !== null ? categoryEntranceStack : filteredStack;
-      newSelectedCallNode =
-        callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
-      changeSelectedCallNode(
-        selectedThreadIndex,
-        getCallNodePathFromIndex(
-          callNodeInfo.stackIndexToCallNodeIndex[filteredStack],
-          callNodeInfo.callNodeTable
-        )
-      );
-      changeSelectedCallNode(
-        selectedThreadIndex,
-        getCallNodePathFromIndex(
-          newSelectedCallNode,
-          callNodeInfo.callNodeTable
-        )
-      );
-    } else {
-      changeSelectedCallNode(selectedThreadIndex, []);
+    if (unfilteredStack === null) {
+      return;
     }
+
+    const clickedCategory = fullThread.stackTable.category[unfilteredStack];
+    const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
+    const sampleCallNodes = getSampleCallNodes(
+      filteredThread.samples,
+      stackIndexToCallNodeIndex
+    );
+    const clickedCallNode = sampleCallNodes[sampleIndex];
+    if (clickedCallNode === null) {
+      return;
+    }
+
+    const sampleCategories = getSampleCategories(
+      fullThread.samples,
+      fullThread.stackTable
+    );
+    const chosenCallNode = findBestCallNode(
+      callNodeInfo,
+      sampleCallNodes,
+      sampleCategories,
+      clickedCallNode,
+      clickedCategory
+    );
+    // Change selection twice: First, to clickedCallNode, in order to expand
+    // the whole call path. Then, to chosenCallNode, to get the large-area
+    // graph highlighting.
+    changeSelectedCallNode(
+      selectedThreadIndex,
+      getCallNodePathFromIndex(clickedCallNode, callNodeTable)
+    );
+    changeSelectedCallNode(
+      selectedThreadIndex,
+      getCallNodePathFromIndex(chosenCallNode, callNodeTable)
+    );
     focusCallTree();
   }
   render() {
@@ -138,6 +213,7 @@ class SelectedThreadActivityGraphCanvas extends PureComponent<Props> {
       selectedCallNodeIndex,
       categories,
       selectedSamples,
+      treeOrderSampleComparator,
     } = this.props;
 
     return (
@@ -148,11 +224,10 @@ class SelectedThreadActivityGraphCanvas extends PureComponent<Props> {
           className="selectedThreadActivityGraph"
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
-          callNodeInfo={callNodeInfo}
-          selectedCallNodeIndex={selectedCallNodeIndex}
           onSampleClick={this._onSampleClick}
           categories={categories}
           selectedSamples={selectedSamples}
+          treeOrderSampleComparator={treeOrderSampleComparator}
         />
         <ThreadStackGraph
           interval={interval}
@@ -195,6 +270,7 @@ class SelectedThreadActivityGraph extends PureComponent<*> {
       selectedCallNodeIndex,
       categories,
       selectedSamples,
+      treeOrderSampleComparator,
       selection,
       changeSelectedCallNode,
       focusCallTree,
@@ -213,6 +289,7 @@ class SelectedThreadActivityGraph extends PureComponent<*> {
           selectedCallNodeIndex,
           categories,
           selectedSamples,
+          treeOrderSampleComparator,
           changeSelectedCallNode,
           focusCallTree,
         }}
@@ -254,6 +331,9 @@ const options: ExplicitConnectOptions<*, *, *> = {
       ),
       categories: getProfile(state).meta.categories,
       selectedSamples: selectedThreadSelectors.getSelectedSamplesInFilteredThread(
+        state
+      ),
+      treeOrderSampleComparator: selectedThreadSelectors.getTreeOrderComparatorInFilteredThread(
         state
       ),
       timeRange: getDisplayRange(state),

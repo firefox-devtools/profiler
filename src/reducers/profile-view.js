@@ -25,6 +25,7 @@ import type {
   Profile,
   CategoryList,
   IndexIntoCategoryList,
+  IndexIntoSamplesTable,
   Thread,
   ThreadIndex,
   MarkersTable,
@@ -556,6 +557,10 @@ export type SelectorsForThread = {
   getSelectedCallNodePath: State => CallNodePath,
   getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
   getSelectedSamplesInFilteredThread: State => number[],
+  getTreeOrderComparatorInFilteredThread: State => (
+    IndexIntoSamplesTable,
+    IndexIntoSamplesTable
+  ) => number,
   getExpandedCallNodePaths: State => PathSet,
   getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
   getCallTree: State => CallTree.CallTree,
@@ -811,6 +816,20 @@ export const selectorsForThread = (
         );
       }
     );
+    const getTreeOrderComparatorInFilteredThread = createSelector(
+      getFilteredThread,
+      getCallNodeInfo,
+      (thread, { callNodeTable, stackIndexToCallNodeIndex }) => {
+        const sampleCallNodes = ProfileData.getSampleCallNodes(
+          thread.samples,
+          stackIndexToCallNodeIndex
+        );
+        return ProfileData.getTreeOrderComparator(
+          callNodeTable,
+          sampleCallNodes
+        );
+      }
+    );
     const getExpandedCallNodePaths = createSelector(
       getViewOptions,
       (threadViewOptions): PathSet => threadViewOptions.expandedCallNodePaths
@@ -893,6 +912,7 @@ export const selectorsForThread = (
       getSelectedCallNodePath,
       getSelectedCallNodeIndex,
       getSelectedSamplesInFilteredThread,
+      getTreeOrderComparatorInFilteredThread,
       getExpandedCallNodePaths,
       getExpandedCallNodeIndexes,
       getCallTree,
