@@ -98,6 +98,26 @@ describe('ordering and hiding', function() {
     };
   }
 
+  /**
+   * This profile is a variant of getProfileWithNiceTracks, but there is no main
+   * thread of the second process.
+   *
+   *  getHumanReadableTracks produces:
+   *  [
+   *    'show [thread GeckoMain process] SELECTED',
+   *    'show [process]',                             // <- No main thread
+   *    '  - show [thread DOM Worker]',
+   *    '  - show [thread Style]'
+   *  ]
+   */
+  function getProfileWithoutAProcessMainThread() {
+    const profile = getProfileWithNiceTracks();
+    profile.threads = profile.threads.filter(
+      thread => !(thread.name === 'GeckoMain' && thread.processType === 'tab')
+    );
+    return profile;
+  }
+
   describe('global tracks', function() {
     it('starts out with the initial sorting', function() {
       const { getState } = init();
@@ -195,7 +215,19 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('reselects the selectedThreadIndex when the selected global track is hidden', function() {
+    it('keeps the selected local track when isolating a global track', function() {
+      const { getState, dispatch, tabTrackIndex, styleThreadIndex } = init();
+      dispatch(changeSelectedThread(styleThreadIndex));
+      dispatch(isolateGlobalTrack(tabTrackIndex));
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style] SELECTED',
+      ]);
+    });
+
+    it('finds a good selectedThreadIndex when a selected global track is hidden', function() {
       const {
         getState,
         dispatch,
@@ -230,10 +262,7 @@ describe('ordering and hiding', function() {
     });
 
     it('will reselect a local thread track when no global track is available', function() {
-      const profile = getProfileWithNiceTracks();
-      profile.threads = profile.threads.filter(
-        thread => !(thread.name === 'GeckoMain' && thread.processType === 'tab')
-      );
+      const profile = getProfileWithoutAProcessMainThread();
       const { getState, dispatch, parentTrackIndex, parentThreadIndex } = init(
         profile
       );
@@ -268,10 +297,7 @@ describe('ordering and hiding', function() {
     });
 
     it('will hide the global track if hiding the last visible thread', function() {
-      const profile = getProfileWithNiceTracks();
-      profile.threads = profile.threads.filter(
-        thread => !(thread.name === 'GeckoMain' && thread.processType === 'tab')
-      );
+      const profile = getProfileWithoutAProcessMainThread();
       const {
         getState,
         dispatch,
@@ -318,6 +344,24 @@ describe('ordering and hiding', function() {
       ]);
     });
 
+    it('will reselect a sibling thread index when a track is hidden 2', function() {
+      const {
+        getState,
+        dispatch,
+        tabPid,
+        styleTrackIndex,
+        styleThreadIndex,
+      } = init();
+      dispatch(changeSelectedThread(styleThreadIndex));
+      dispatch(hideLocalTrack(tabPid, styleTrackIndex));
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        'show [thread GeckoMain tab]',
+        '  - show [thread DOM Worker] SELECTED',
+        '  - hide [thread Style]',
+      ]);
+    });
+
     it('will reselect the main thread index when all local tracks are hidden', function() {
       const {
         getState,
@@ -339,10 +383,7 @@ describe('ordering and hiding', function() {
     });
 
     it('will not hide the last visible thread', function() {
-      const profile = getProfileWithNiceTracks();
-      profile.threads = profile.threads.filter(
-        thread => !(thread.name === 'GeckoMain' && thread.processType === 'tab')
-      );
+      const profile = getProfileWithoutAProcessMainThread();
       const {
         getState,
         dispatch,
@@ -359,6 +400,27 @@ describe('ordering and hiding', function() {
         'show [process]',
         '  - hide [thread DOM Worker]',
         '  - show [thread Style] SELECTED',
+      ]);
+    });
+
+    it('will not hide the last visible thread 2', function() {
+      const profile = getProfileWithoutAProcessMainThread();
+      const {
+        getState,
+        dispatch,
+        workerTrackIndex,
+        parentTrackIndex,
+        tabPid,
+        styleTrackIndex,
+      } = init(profile);
+      dispatch(hideGlobalTrack(parentTrackIndex));
+      dispatch(hideLocalTrack(tabPid, styleTrackIndex));
+      dispatch(hideLocalTrack(tabPid, workerTrackIndex));
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        'show [process]',
+        '  - show [thread DOM Worker] SELECTED',
+        '  - hide [thread Style]',
       ]);
     });
 
@@ -418,7 +480,7 @@ describe('ordering and hiding', function() {
       ]);
     });
 
-    it('can selects the isolated track', function() {
+    it('can select the isolated track', function() {
       const {
         getState,
         dispatch,

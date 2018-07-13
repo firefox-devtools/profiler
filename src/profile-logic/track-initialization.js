@@ -10,6 +10,7 @@ import type {
   TrackIndex,
 } from '../types/profile-derived';
 import { defaultThreadOrder } from './profile-data';
+import { ensureExists } from '../utils/flow';
 
 /**
  * This file collects all the logic that goes into validating URL-encoded view options.
@@ -29,6 +30,7 @@ export function initializeLocalTrackOrderByPid(
     let trackOrder = tracks.map((_, index) => index);
 
     if (urlTrackOrderByPid !== null) {
+      // Sanitize the track information provided by the URL, and ensure it is valid.
       const urlTrackOrder = urlTrackOrderByPid.get(pid);
       if (
         urlTrackOrder !== undefined &&
@@ -84,7 +86,9 @@ export function initializeHiddenLocalTracksByPid(
   return hiddenTracksByPid;
 }
 
-export function computeTracksByPid(profile: Profile): Map<Pid, LocalTrack[]> {
+export function computeLocalTracksByPid(
+  profile: Profile
+): Map<Pid, LocalTrack[]> {
   const localTracksByPid = new Map();
 
   for (
@@ -114,7 +118,8 @@ export function computeTracksByPid(profile: Profile): Map<Pid, LocalTrack[]> {
 
 export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
   // Defining this ProcessTrack type here helps flow understand the intent of
-  // the internals of this function.
+  // the internals of this function, otherwise each GlobalTrack usage would need
+  // to check that it's a process type.
   type ProcessTrack = {
     type: 'process',
     pid: Pid,
@@ -247,15 +252,19 @@ export function getVisibleThreads(
       ) {
         visibleThreads.push(mainThreadIndex);
       }
-      const tracks = localTracksByPid.get(pid);
-      const hiddenTracks = hiddenTracksByPid.get(pid);
-      if (tracks !== undefined && hiddenTracks !== undefined) {
-        for (const track of tracks) {
-          if (track.type === 'thread') {
-            const { threadIndex } = track;
-            if (!hiddenTracks.has(threadIndex)) {
-              visibleThreads.push(threadIndex);
-            }
+      const tracks = ensureExists(
+        localTracksByPid.get(pid),
+        'A local track was expected to exist for the given pid.'
+      );
+      const hiddenTracks = ensureExists(
+        hiddenTracksByPid.get(pid),
+        'Hidden tracks were expected to exists for the given pid.'
+      );
+      for (const track of tracks) {
+        if (track.type === 'thread') {
+          const { threadIndex } = track;
+          if (!hiddenTracks.has(threadIndex)) {
+            visibleThreads.push(threadIndex);
           }
         }
       }

@@ -6,9 +6,34 @@
 import * as profileViewSelectors from '../../../reducers/profile-view';
 import * as urlStateReducers from '../../../reducers/url-state';
 import { getProfileFromTextSamples } from './make-profile';
+import { oneLine } from 'common-tags';
+
 import type { Profile } from '../../../types/profile';
 import type { State } from '../../../types/reducers';
 
+/**
+ * This function takes the current timeline tracks, and generates a human readable result
+ * that makes it easy to assert the shape and structure of the tracks in tests.
+ *
+ * Usage:
+ *
+ * expect(getHumanReadableTracks(getState())).toEqual([
+ *  'show [thread GeckoMain process]',
+ *  'show [thread GeckoMain tab] SELECTED',
+ *  '  - show [thread DOM Worker]',
+ *  '  - show [thread Style]',
+ * ]);
+ *
+ * Format:
+ *
+ * Global tracks - These are presented with no indentation as one line.
+ * Local tracks - These are indented with `  - `
+ * Hidden tracks - Each line starts with `show` and `hide` to indicate whether the track
+ *                 is shown or hidden.
+ * Selected thread - The thread track ends in SELECTED when selected.
+ * Global Track naming - `[thread ThreadName ProcessType]` | `[TrackType]`
+ * Local Track naming - `[thread ThreadName]` | `[TrackType]`
+ */
 export function getHumanReadableTracks(state: State): string[] {
   const threads = profileViewSelectors.getThreads(state);
   const globalTracks = profileViewSelectors.getGlobalTracks(state);
@@ -28,9 +53,13 @@ export function getHumanReadableTracks(state: State): string[] {
         globalTrack.mainThreadIndex === selectedThreadIndex ? ' SELECTED' : '';
       const thread = threads[globalTrack.mainThreadIndex];
       text.push(
-        `${globalHiddenText} [thread ${thread.name} ${
-          thread.processType
-        }]${selected}`
+        // This is broken up into multiple lines to make it easier to read, but it is
+        // in fact one line.
+        /// Example: 'hide [thread GeckoMain default] SELECTED'
+        oneLine`
+          ${globalHiddenText}
+          [thread ${thread.name} ${thread.processType}]${selected}
+        `
       );
     } else {
       text.push(`${globalHiddenText} [${globalTrack.type}]`);

@@ -72,8 +72,9 @@ type StackChartQuery = {|
   implementation?: string,
 |};
 
-// Be very permissive in how the Query object is defined. Otherwise we would have to
-// refine the type down to the individual query types when working with them.
+// Use object type spread in the definition of Query rather than unions, so that they
+// are really easy to manipulate. This permissive definition makes it easy to not have
+// to refine the type down to the individual query types when working with them.
 type Query = {
   ...CallTreeQuery,
   ...MarkersQuery,
@@ -111,12 +112,9 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
 
   // Add the parameter hiddenGlobalTracks only when needed.
   if (urlState.profileSpecific.hiddenGlobalTracks.size > 0) {
-    query.hiddenGlobalTracks = '';
-    for (const trackIndex of urlState.profileSpecific.hiddenGlobalTracks) {
-      query.hiddenGlobalTracks += `${trackIndex}-`;
-    }
-    // Slice off the trailing '-';
-    query.hiddenGlobalTracks = query.hiddenGlobalTracks.slice(0, -1);
+    query.hiddenGlobalTracks = [
+      ...urlState.profileSpecific.hiddenGlobalTracks,
+    ].join('-');
   }
 
   let hiddenLocalTracksByPid = '';
@@ -126,7 +124,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     }
   }
   if (hiddenLocalTracksByPid.length > 0) {
-    // Ony add to the query string if something was actually hidden.
+    // Only add to the query string if something was actually hidden.
     // Also, slice off the last '~'.
     query.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
   }
@@ -278,7 +276,7 @@ export function stateFromLocation(location: Location): UrlState {
         ? parseHiddenTracks(query.hiddenLocalTracksByPid)
         : new Map(),
       localTrackOrderByPid: query.localTrackOrderByPid
-        ? parseTrackOrder(query.localTrackOrderByPid)
+        ? parseLocalTrackOrder(query.localTrackOrderByPid)
         : new Map(),
       markersSearchString: query.markerSearch || '',
       transforms,
@@ -309,12 +307,20 @@ function parseHiddenTracks(rawText: string): Map<Pid, Set<TrackIndex>> {
   return hiddenLocalTracksByPid;
 }
 
-function parseTrackOrder(rawText: string): Map<Pid, TrackIndex[]> {
+/**
+ * Local tracks must have their track order associated by PID.
+ *
+ * Syntax: Pid-TrackIndex-TrackIndex~Pid-TrackIndex
+ * Example: 124553-0-3~124554-1
+ */
+function parseLocalTrackOrder(rawText: string): Map<Pid, TrackIndex[]> {
   const localTrackOrderByPid = new Map();
 
   for (const stringPart of rawText.split('~')) {
     const [pidString, ...indexStrings] = stringPart.split('-');
-    if (indexStrings.length === 1) {
+    if (indexStrings.length <= 1) {
+      // There is no order to determine, let the URL validation create the
+      // default value.
       continue;
     }
     const pid = Number(pidString);
