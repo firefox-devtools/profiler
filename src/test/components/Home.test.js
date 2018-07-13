@@ -7,7 +7,7 @@ import * as React from 'react';
 import Home from '../../components/app/Home';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
-import createStore from '../../create-store';
+import createStore from '../../app-logic/create-store';
 
 // Provide a mechanism to overwrite the navigator.userAgent, which can't be set.
 const FIREFOX_WEBEXT =

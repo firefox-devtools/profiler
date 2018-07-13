@@ -18,7 +18,8 @@ import type { GetCategory } from '../profile-logic/color-categories';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
-import type { UrlState } from '../types/reducers';
+import type { TabSlug } from '../app-logic/tabs-handling';
+import type { ProfileSharingStatus, UrlState } from '../types/reducers';
 
 export type DataSource =
   | 'none'
@@ -46,13 +47,6 @@ export type FunctionsUpdatePerThread = {
 
 export type RequestedLib = { debugName: string, breakpadId: string };
 export type ImplementationFilter = 'combined' | 'js' | 'cpp';
-export type TabSlug =
-  | 'calltree'
-  | 'stack-chart'
-  | 'marker-chart'
-  | 'network-chart'
-  | 'marker-table'
-  | 'flame-graph';
 
 type ProfileAction =
   | { type: 'ROUTE_NOT_FOUND', url: string }
@@ -105,7 +99,11 @@ type ProfileAction =
   | {|
       +type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
-    |};
+    |}
+  | {
+      type: 'SET_PROFILE_SHARING_STATUS',
+      profileSharingStatus: ProfileSharingStatus,
+    };
 
 type ReceiveProfileAction =
   | {
@@ -135,6 +133,7 @@ type ReceiveProfileAction =
       +hiddenThreadIndexes: ThreadIndex[],
       +selectedThreadIndex: ThreadIndex | null,
       +pathInZipFile: ?string,
+      +dataSource: DataSource,
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
   | {| +type: 'PROCESS_PROFILE_FROM_ZIP_FILE', +pathInZipFile: string |}
@@ -199,9 +198,16 @@ type IconsAction =
   | { type: 'ICON_HAS_LOADED', icon: string }
   | { type: 'ICON_IN_ERROR', icon: string };
 
+type SidebarAction = {|
+  type: 'CHANGE_SIDEBAR_OPEN_STATE',
+  tab: TabSlug,
+  isOpen: boolean,
+|};
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
+  | SidebarAction
   | StackChartAction
   | UrlEnhancerAction
   | UrlStateAction

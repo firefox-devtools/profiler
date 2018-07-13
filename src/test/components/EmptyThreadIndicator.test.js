@@ -6,14 +6,17 @@
 jest.mock('react-dom');
 
 import * as React from 'react';
+import ReactDOM from 'react-dom';
+import renderer from 'react-test-renderer';
+
 import EmptyThreadIndicator, {
   getIndicatorPositions,
 } from '../../components/header/EmptyThreadIndicator';
-import renderer from 'react-test-renderer';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { getBoundingBox } from '../fixtures/utils';
+import mockRaf from '../fixtures/mocks/request-animation-frame';
+
 import type { StartEndRange } from '../../types/units';
-import ReactDOM from 'react-dom';
 
 describe('EmptyThreadIndicator', function() {
   beforeEach(() => {
@@ -57,35 +60,40 @@ describe('EmptyThreadIndicator', function() {
   describe('rendering', function() {
     it('matches the snapshot when rendering all three types of indicators', () => {
       const props = propsFromViewportRange({ start: 0, end: 10 });
-      expect(
-        renderer.create(
-          // The props have to be passed in manually to avoid adding the SizeProps.
-          <EmptyThreadIndicator
-            rangeStart={props.rangeStart}
-            rangeEnd={props.rangeEnd}
-            thread={props.thread}
-            interval={props.interval}
-            unfilteredSamplesRange={props.unfilteredSamplesRange}
-          />
-        )
-      ).toMatchSnapshot();
+
+      const flushRafCalls = mockRaf(); // WithSize uses requestAnimationFrame
+      const component = renderer.create(
+        // The props have to be passed in manually to avoid adding the SizeProps.
+        <EmptyThreadIndicator
+          rangeStart={props.rangeStart}
+          rangeEnd={props.rangeEnd}
+          thread={props.thread}
+          interval={props.interval}
+          unfilteredSamplesRange={props.unfilteredSamplesRange}
+        />
+      );
+      flushRafCalls();
+
+      expect(component).toMatchSnapshot();
     });
 
     it('matches the snapshot when rendering no indicators', () => {
       // This range has samples throughout it.
       const props = propsFromViewportRange({ start: 5.5, end: 6.5 });
-      expect(
-        renderer.create(
-          // The props have to be passed in manually to avoid adding the SizeProps.
-          <EmptyThreadIndicator
-            rangeStart={props.rangeStart}
-            rangeEnd={props.rangeEnd}
-            thread={props.thread}
-            interval={props.interval}
-            unfilteredSamplesRange={props.unfilteredSamplesRange}
-          />
-        )
-      ).toMatchSnapshot();
+
+      const flushRafCalls = mockRaf(); // WithSize uses requestAnimationFrame
+      const component = renderer.create(
+        // The props have to be passed in manually to avoid adding the SizeProps.
+        <EmptyThreadIndicator
+          rangeStart={props.rangeStart}
+          rangeEnd={props.rangeEnd}
+          thread={props.thread}
+          interval={props.interval}
+          unfilteredSamplesRange={props.unfilteredSamplesRange}
+        />
+      );
+      flushRafCalls();
+      expect(component).toMatchSnapshot();
     });
   });
 

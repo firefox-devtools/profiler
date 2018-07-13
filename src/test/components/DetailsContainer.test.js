@@ -7,31 +7,33 @@ import * as React from 'react';
 import { shallowWithStore } from '../fixtures/enzyme';
 
 import DetailsContainer from '../../components/app/DetailsContainer';
-import { changeSelectedTab } from '../../actions/app';
+import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 
-import type { TabSlug } from '../../types/actions';
+import { tabSlugs } from '../../app-logic/tabs-handling';
+import type { TabSlug } from '../../app-logic/tabs-handling';
 
 describe('app/DetailsContainer', function() {
-  const { profile } = getProfileFromTextSamples(`
-    A A A
-    B B B
-    C C H
-    D F I
-    E E
-  `);
+  function setup() {
+    const { profile } = getProfileFromTextSamples(`
+      A A A
+      B B B
+      C C H
+      D F I
+      E E
+    `);
 
-  const tabSlugs: TabSlug[] = [
-    'stack-chart',
-    'marker-chart',
-    'flame-graph',
-    'marker-table',
-    'calltree', // 'calltree' not first on purpose
-  ];
+    const store = storeWithProfile(profile);
+    // Make sure the sidebar is visible in all tabs
+    tabSlugs.forEach(tabSlug =>
+      store.dispatch(changeSidebarOpenState(tabSlug, true))
+    );
+    return { store };
+  }
 
   it('renders an initial view with or without a sidebar', () => {
-    const store = storeWithProfile(profile);
+    const { store } = setup();
     // dive() will shallow-render the wrapped component
     const view = shallowWithStore(<DetailsContainer />, store);
     expect(view.dive()).toMatchSnapshot();
@@ -39,7 +41,7 @@ describe('app/DetailsContainer', function() {
 
   tabSlugs.forEach((tabSlug: TabSlug) => {
     it(`renders an initial view with or without a sidebar for tab ${tabSlug}`, () => {
-      const store = storeWithProfile(profile);
+      const { store } = setup();
       store.dispatch(changeSelectedTab(tabSlug));
 
       const view = shallowWithStore(<DetailsContainer />, store);

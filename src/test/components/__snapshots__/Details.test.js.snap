@@ -1,10 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/DetailsContainer renders an initial view with the right panel 1`] = `
+exports[`app/Details renders an initial view with the right panel 1`] = `
 <div
   className="Details"
 >
   <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -54,11 +55,12 @@ exports[`app/DetailsContainer renders an initial view with the right panel 1`] =
 </div>
 `;
 
-exports[`app/DetailsContainer renders an initial view with the right panel for tab calltree 1`] = `
+exports[`app/Details renders an initial view with the right panel for tab calltree 1`] = `
 <div
   className="Details"
 >
   <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -108,11 +110,12 @@ exports[`app/DetailsContainer renders an initial view with the right panel for t
 </div>
 `;
 
-exports[`app/DetailsContainer renders an initial view with the right panel for tab flame-graph 1`] = `
+exports[`app/Details renders an initial view with the right panel for tab flame-graph 1`] = `
 <div
   className="Details"
 >
   <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="flame-graph"
@@ -162,11 +165,12 @@ exports[`app/DetailsContainer renders an initial view with the right panel for t
 </div>
 `;
 
-exports[`app/DetailsContainer renders an initial view with the right panel for tab marker-chart 1`] = `
+exports[`app/Details renders an initial view with the right panel for tab marker-chart 1`] = `
 <div
   className="Details"
 >
   <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="marker-chart"
@@ -216,11 +220,12 @@ exports[`app/DetailsContainer renders an initial view with the right panel for t
 </div>
 `;
 
-exports[`app/DetailsContainer renders an initial view with the right panel for tab marker-table 1`] = `
+exports[`app/Details renders an initial view with the right panel for tab marker-table 1`] = `
 <div
   className="Details"
 >
   <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="marker-table"
@@ -270,11 +275,67 @@ exports[`app/DetailsContainer renders an initial view with the right panel for t
 </div>
 `;
 
-exports[`app/DetailsContainer renders an initial view with the right panel for tab stack-chart 1`] = `
+exports[`app/Details renders an initial view with the right panel for tab network-chart 1`] = `
 <div
   className="Details"
 >
   <TabBar
+    extraElements={false}
+    onChangeTabOrder={[Function]}
+    onSelectTab={[Function]}
+    selectedTabName="network-chart"
+    tabOrder={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+      ]
+    }
+    tabs={
+      Array [
+        Object {
+          "name": "calltree",
+          "title": "Call Tree",
+        },
+        Object {
+          "name": "flame-graph",
+          "title": "Flame Graph",
+        },
+        Object {
+          "name": "stack-chart",
+          "title": "Stack Chart",
+        },
+        Object {
+          "name": "marker-chart",
+          "title": "Marker Chart",
+        },
+        Object {
+          "name": "marker-table",
+          "title": "Marker Table",
+        },
+        Object {
+          "name": "network-chart",
+          "title": "Network",
+        },
+      ]
+    }
+  />
+  <Connect(MarkerChart) />
+  <Connect(CallNodeContextMenu) />
+  <Connect(MarkersContextMenu) />
+  <Connect(ProfileThreadHeaderContextMenu) />
+</div>
+`;
+
+exports[`app/Details renders an initial view with the right panel for tab stack-chart 1`] = `
+<div
+  className="Details"
+>
+  <TabBar
+    extraElements={false}
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="stack-chart"
@@ -318,6 +379,226 @@ exports[`app/DetailsContainer renders an initial view with the right panel for t
     }
   />
   <Connect(StackChartGraph) />
+  <Connect(CallNodeContextMenu) />
+  <Connect(MarkersContextMenu) />
+  <Connect(ProfileThreadHeaderContextMenu) />
+</div>
+`;
+
+exports[`app/Details show the correct state for the sidebar open button 1`] = `
+<div
+  className="Details"
+>
+  <TabBar
+    extraElements={false}
+    onChangeTabOrder={[Function]}
+    onSelectTab={[Function]}
+    selectedTabName="calltree"
+    tabOrder={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+      ]
+    }
+    tabs={
+      Array [
+        Object {
+          "name": "calltree",
+          "title": "Call Tree",
+        },
+        Object {
+          "name": "flame-graph",
+          "title": "Flame Graph",
+        },
+        Object {
+          "name": "stack-chart",
+          "title": "Stack Chart",
+        },
+        Object {
+          "name": "marker-chart",
+          "title": "Marker Chart",
+        },
+        Object {
+          "name": "marker-table",
+          "title": "Marker Table",
+        },
+        Object {
+          "name": "network-chart",
+          "title": "Network",
+        },
+      ]
+    }
+  />
+  <ProfileCallTreeView />
+  <Connect(CallNodeContextMenu) />
+  <Connect(MarkersContextMenu) />
+  <Connect(ProfileThreadHeaderContextMenu) />
+</div>
+`;
+
+exports[`app/Details show the correct state for the sidebar open button 2`] = `
+<div
+  className="Details"
+>
+  <TabBar
+    extraElements={false}
+    onChangeTabOrder={[Function]}
+    onSelectTab={[Function]}
+    selectedTabName="calltree"
+    tabOrder={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+      ]
+    }
+    tabs={
+      Array [
+        Object {
+          "name": "calltree",
+          "title": "Call Tree",
+        },
+        Object {
+          "name": "flame-graph",
+          "title": "Flame Graph",
+        },
+        Object {
+          "name": "stack-chart",
+          "title": "Stack Chart",
+        },
+        Object {
+          "name": "marker-chart",
+          "title": "Marker Chart",
+        },
+        Object {
+          "name": "marker-table",
+          "title": "Marker Table",
+        },
+        Object {
+          "name": "network-chart",
+          "title": "Network",
+        },
+      ]
+    }
+  />
+  <ProfileCallTreeView />
+  <Connect(CallNodeContextMenu) />
+  <Connect(MarkersContextMenu) />
+  <Connect(ProfileThreadHeaderContextMenu) />
+</div>
+`;
+
+exports[`app/Details show the correct state for the sidebar open button 3`] = `
+<div
+  className="Details"
+>
+  <TabBar
+    extraElements={false}
+    onChangeTabOrder={[Function]}
+    onSelectTab={[Function]}
+    selectedTabName="calltree"
+    tabOrder={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+      ]
+    }
+    tabs={
+      Array [
+        Object {
+          "name": "calltree",
+          "title": "Call Tree",
+        },
+        Object {
+          "name": "flame-graph",
+          "title": "Flame Graph",
+        },
+        Object {
+          "name": "stack-chart",
+          "title": "Stack Chart",
+        },
+        Object {
+          "name": "marker-chart",
+          "title": "Marker Chart",
+        },
+        Object {
+          "name": "marker-table",
+          "title": "Marker Table",
+        },
+        Object {
+          "name": "network-chart",
+          "title": "Network",
+        },
+      ]
+    }
+  />
+  <ProfileCallTreeView />
+  <Connect(CallNodeContextMenu) />
+  <Connect(MarkersContextMenu) />
+  <Connect(ProfileThreadHeaderContextMenu) />
+</div>
+`;
+
+exports[`app/Details show the correct state for the sidebar open button 4`] = `
+<div
+  className="Details"
+>
+  <TabBar
+    extraElements={false}
+    onChangeTabOrder={[Function]}
+    onSelectTab={[Function]}
+    selectedTabName="calltree"
+    tabOrder={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+      ]
+    }
+    tabs={
+      Array [
+        Object {
+          "name": "calltree",
+          "title": "Call Tree",
+        },
+        Object {
+          "name": "flame-graph",
+          "title": "Flame Graph",
+        },
+        Object {
+          "name": "stack-chart",
+          "title": "Stack Chart",
+        },
+        Object {
+          "name": "marker-chart",
+          "title": "Marker Chart",
+        },
+        Object {
+          "name": "marker-table",
+          "title": "Marker Table",
+        },
+        Object {
+          "name": "network-chart",
+          "title": "Network",
+        },
+      ]
+    }
+  />
+  <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
   <Connect(ProfileThreadHeaderContextMenu) />

@@ -1,0 +1,2095 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
+<div
+  className="menuButtons"
+>
+  <div
+    className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
+  >
+    <div
+      className="buttonWithPanel menuButtonsShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsShareButtonButton"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+          value="Sharing will be enabled once symbolication is complete"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="menuButtonsShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="menuButtonsShareNetworkUrlsCheckbox"
+                  disabled={false}
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="menuButtonsUploadingButton"
+    >
+      <div
+        className="menuButtonsUploadingButtonInner"
+      >
+        <progress
+          className="menuButtonsUploadingButtonProgress"
+          value={0}
+        />
+        <div
+          className="menuButtonsUploadingButtonLabel"
+        >
+          Uploading...
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsPermalinkButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Permalink"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel menuButtonsPermalinkPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <div
+            className="arrowPanelContent"
+          >
+            <input
+              className="menuButtonsPermalinkTextField"
+              readOnly="readOnly"
+              type="text"
+              value="about:blank"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsUploadErrorButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Upload Error"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Error
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <p>
+              An error occurred during upload:
+            </p>
+            <pre />
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Try Again"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsSecondaryShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+          value="Share with URLs"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="menuButtonsShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="menuButtonsShareNetworkUrlsCheckbox"
+                  disabled={true}
+                  onChange={undefined}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="buttonWithPanel menuButtonsProfileDownloadButton"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+        value="Save as file…"
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <h1
+          className="arrowPanelTitle"
+        >
+          Save Profile to a Local File
+        </h1>
+        <div
+          className="arrowPanelContent"
+        >
+          <section />
+        </div>
+      </div>
+    </div>
+  </div>
+  <a
+    className="menuButtonsLink"
+    href="/docs/"
+    target="_blank"
+    title="Open the documentation in a new window"
+  >
+    Docs…
+  </a>
+</div>
+`;
+
+exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
+<div
+  className="menuButtons"
+>
+  <div
+    className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
+  >
+    <div
+      className="buttonWithPanel menuButtonsShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsShareButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Share..."
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="menuButtonsShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="menuButtonsShareNetworkUrlsCheckbox"
+                  disabled={false}
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="menuButtonsUploadingButton"
+    >
+      <div
+        className="menuButtonsUploadingButtonInner"
+      >
+        <progress
+          className="menuButtonsUploadingButtonProgress"
+          value={0}
+        />
+        <div
+          className="menuButtonsUploadingButtonLabel"
+        >
+          Uploading...
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsPermalinkButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Permalink"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel menuButtonsPermalinkPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <div
+            className="arrowPanelContent"
+          >
+            <input
+              className="menuButtonsPermalinkTextField"
+              readOnly="readOnly"
+              type="text"
+              value="about:blank"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsUploadErrorButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Upload Error"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Error
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <p>
+              An error occurred during upload:
+            </p>
+            <pre />
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Try Again"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsSecondaryShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Share with URLs"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="menuButtonsShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="menuButtonsShareNetworkUrlsCheckbox"
+                  disabled={true}
+                  onChange={undefined}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="buttonWithPanel menuButtonsProfileDownloadButton"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+        value="Save as file…"
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <h1
+          className="arrowPanelTitle"
+        >
+          Save Profile to a Local File
+        </h1>
+        <div
+          className="arrowPanelContent"
+        >
+          <section />
+        </div>
+      </div>
+    </div>
+  </div>
+  <a
+    className="menuButtonsLink"
+    href="/docs/"
+    target="_blank"
+    title="Open the documentation in a new window"
+  >
+    Docs…
+  </a>
+</div>
+`;
+
+exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to true 1`] = `
+<div
+  className="menuButtons"
+>
+  <div
+    className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
+  >
+    <div
+      className="buttonWithPanel menuButtonsShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsShareButtonButton"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+          value="Sharing will be enabled once symbolication is complete"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="menuButtonsShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="menuButtonsShareNetworkUrlsCheckbox"
+                  disabled={false}
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="menuButtonsUploadingButton"
+    >
+      <div
+        className="menuButtonsUploadingButtonInner"
+      >
+        <progress
+          className="menuButtonsUploadingButtonProgress"
+          value={0}
+        />
+        <div
+          className="menuButtonsUploadingButtonLabel"
+        >
+          Uploading...
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsPermalinkButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Permalink"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel menuButtonsPermalinkPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <div
+            className="arrowPanelContent"
+          >
+            <input
+              className="menuButtonsPermalinkTextField"
+              readOnly="readOnly"
+              type="text"
+              value="about:blank"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsUploadErrorButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Upload Error"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Error
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <p>
+              An error occurred during upload:
+            </p>
+            <pre />
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Try Again"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsSecondaryShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+          value="Share with URLs"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="menuButtonsShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="menuButtonsShareNetworkUrlsCheckbox"
+                  disabled={true}
+                  onChange={undefined}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="buttonWithPanel menuButtonsProfileDownloadButton"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+        value="Save as file…"
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <h1
+          className="arrowPanelTitle"
+        >
+          Save Profile to a Local File
+        </h1>
+        <div
+          className="arrowPanelContent"
+        >
+          <section />
+        </div>
+      </div>
+    </div>
+  </div>
+  <a
+    className="menuButtonsLink"
+    href="/docs/"
+    target="_blank"
+    title="Open the documentation in a new window"
+  >
+    Docs…
+  </a>
+</div>
+`;
+
+exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to true 2`] = `
+<div
+  className="menuButtons"
+>
+  <div
+    className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
+  >
+    <div
+      className="buttonWithPanel menuButtonsShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsShareButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Share..."
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="menuButtonsShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="menuButtonsShareNetworkUrlsCheckbox"
+                  disabled={false}
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="menuButtonsUploadingButton"
+    >
+      <div
+        className="menuButtonsUploadingButtonInner"
+      >
+        <progress
+          className="menuButtonsUploadingButtonProgress"
+          value={0}
+        />
+        <div
+          className="menuButtonsUploadingButtonLabel"
+        >
+          Uploading...
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsPermalinkButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Permalink"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel menuButtonsPermalinkPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <div
+            className="arrowPanelContent"
+          >
+            <input
+              className="menuButtonsPermalinkTextField"
+              readOnly="readOnly"
+              type="text"
+              value="about:blank"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsUploadErrorButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Upload Error"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Error
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <p>
+              An error occurred during upload:
+            </p>
+            <pre />
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Try Again"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsSecondaryShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Share with URLs"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="menuButtonsShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="menuButtonsShareNetworkUrlsCheckbox"
+                  disabled={true}
+                  onChange={undefined}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="buttonWithPanel menuButtonsProfileDownloadButton"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+        value="Save as file…"
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <h1
+          className="arrowPanelTitle"
+        >
+          Save Profile to a Local File
+        </h1>
+        <div
+          className="arrowPanelContent"
+        >
+          <section />
+        </div>
+      </div>
+    </div>
+  </div>
+  <a
+    className="menuButtonsLink"
+    href="/docs/"
+    target="_blank"
+    title="Open the documentation in a new window"
+  >
+    Docs…
+  </a>
+</div>
+`;
+
+exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to undefined 1`] = `
+<div
+  className="menuButtons"
+>
+  <div
+    className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
+  >
+    <div
+      className="buttonWithPanel menuButtonsShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsShareButtonButton"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+          value="Sharing will be enabled once symbolication is complete"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="menuButtonsShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="menuButtonsShareNetworkUrlsCheckbox"
+                  disabled={false}
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="menuButtonsUploadingButton"
+    >
+      <div
+        className="menuButtonsUploadingButtonInner"
+      >
+        <progress
+          className="menuButtonsUploadingButtonProgress"
+          value={0}
+        />
+        <div
+          className="menuButtonsUploadingButtonLabel"
+        >
+          Uploading...
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsPermalinkButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Permalink"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel menuButtonsPermalinkPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <div
+            className="arrowPanelContent"
+          >
+            <input
+              className="menuButtonsPermalinkTextField"
+              readOnly="readOnly"
+              type="text"
+              value="about:blank"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsUploadErrorButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Upload Error"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Error
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <p>
+              An error occurred during upload:
+            </p>
+            <pre />
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Try Again"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsSecondaryShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+          value="Share with URLs"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="menuButtonsShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="menuButtonsShareNetworkUrlsCheckbox"
+                  disabled={true}
+                  onChange={undefined}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="buttonWithPanel menuButtonsProfileDownloadButton"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+        value="Save as file…"
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <h1
+          className="arrowPanelTitle"
+        >
+          Save Profile to a Local File
+        </h1>
+        <div
+          className="arrowPanelContent"
+        >
+          <section />
+        </div>
+      </div>
+    </div>
+  </div>
+  <a
+    className="menuButtonsLink"
+    href="/docs/"
+    target="_blank"
+    title="Open the documentation in a new window"
+  >
+    Docs…
+  </a>
+</div>
+`;
+
+exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to undefined 2`] = `
+<div
+  className="menuButtons"
+>
+  <div
+    className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
+  >
+    <div
+      className="buttonWithPanel menuButtonsShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsShareButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Share..."
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="menuButtonsShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="menuButtonsShareNetworkUrlsCheckbox"
+                  disabled={false}
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="menuButtonsUploadingButton"
+    >
+      <div
+        className="menuButtonsUploadingButtonInner"
+      >
+        <progress
+          className="menuButtonsUploadingButtonProgress"
+          value={0}
+        />
+        <div
+          className="menuButtonsUploadingButtonLabel"
+        >
+          Uploading...
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsPermalinkButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Permalink"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel menuButtonsPermalinkPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <div
+            className="arrowPanelContent"
+          >
+            <input
+              className="menuButtonsPermalinkTextField"
+              readOnly="readOnly"
+              type="text"
+              value="about:blank"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsUploadErrorButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Upload Error"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Error
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <p>
+              An error occurred during upload:
+            </p>
+            <pre />
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Try Again"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="buttonWithPanel menuButtonsSecondaryShareButton"
+    >
+      <div
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value="Share with URLs"
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
+      >
+        <div
+          className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+        >
+          <div
+            className="arrowPanelArrow"
+          />
+          <h1
+            className="arrowPanelTitle"
+          >
+            Upload Profile – Privacy Notice
+          </h1>
+          <div
+            className="arrowPanelContent"
+          >
+            <section
+              className="privacyNotice"
+            >
+              <p>
+                You’re about to upload your profile publicly where anyone will be able to access it.
+      To better diagnose performance problems profiles include the following information:
+              </p>
+              <ul>
+                <li>
+                  The URLs of all painted tabs, and running scripts.
+                </li>
+                <li>
+                  The metadata of all your add-ons to identify slow add-ons.
+                </li>
+                <li>
+                  Firefox build and runtime configuration.
+                </li>
+              </ul>
+              <p>
+                To view all the information you can download the full profile to a file and open the
+      json structure with a text editor.
+              </p>
+              <p>
+                By default, the URLs of all network requests will be removed while sharing the profile
+        but keeping the URLs may help to identify the problems. Please select the checkbox
+        below to share the URLs of the network requests:
+              </p>
+            </section>
+            <p
+              className="menuButtonsShareNetworkUrlsContainer"
+            >
+              <label>
+                <input
+                  checked={false}
+                  className="menuButtonsShareNetworkUrlsCheckbox"
+                  disabled={true}
+                  onChange={undefined}
+                  type="checkbox"
+                />
+                Share the URLs of all network requests
+              </label>
+            </p>
+          </div>
+          <div
+            className="arrowPanelButtons"
+          >
+            <input
+              className="arrowPanelCancelButton"
+              onClick={[Function]}
+              type="button"
+              value="Cancel"
+            />
+            <input
+              className="arrowPanelOkButton"
+              onClick={[Function]}
+              type="button"
+              value="Share"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="buttonWithPanel menuButtonsProfileDownloadButton"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+        value="Save as file…"
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <h1
+          className="arrowPanelTitle"
+        >
+          Save Profile to a Local File
+        </h1>
+        <div
+          className="arrowPanelContent"
+        >
+          <section />
+        </div>
+      </div>
+    </div>
+  </div>
+  <a
+    className="menuButtonsLink"
+    href="/docs/"
+    target="_blank"
+    title="Open the documentation in a new window"
+  >
+    Docs…
+  </a>
+</div>
+`;

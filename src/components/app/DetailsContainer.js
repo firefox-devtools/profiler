@@ -10,9 +10,10 @@ import Details from './Details';
 import selectSidebar from '../sidebar';
 
 import { getSelectedTab } from '../../reducers/url-state';
+import { getIsSidebarOpen } from '../../reducers/app';
 import explicitConnect from '../../utils/connect';
 
-import type { TabSlug } from '../../types/actions';
+import type { TabSlug } from '../../app-logic/tabs-handling';
 import type { ExplicitConnectOptions } from '../../utils/connect';
 
 import './DetailsContainer.css';
@@ -24,10 +25,11 @@ function dispatchResizeEvent() {
 
 type StateProps = {|
   +selectedTab: TabSlug,
+  +isSidebarOpen: boolean,
 |};
 
-function DetailsContainer({ selectedTab }: StateProps) {
-  const Sidebar = selectSidebar(selectedTab);
+function DetailsContainer({ selectedTab, isSidebarOpen }: StateProps) {
+  const Sidebar = isSidebarOpen && selectSidebar(selectedTab);
 
   return (
     <SplitterLayout
@@ -45,6 +47,7 @@ function DetailsContainer({ selectedTab }: StateProps) {
 const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
   mapStateToProps: state => ({
     selectedTab: getSelectedTab(state),
+    isSidebarOpen: getIsSidebarOpen(state),
   }),
   component: DetailsContainer,
 };

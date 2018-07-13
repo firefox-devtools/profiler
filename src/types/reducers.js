@@ -9,8 +9,8 @@ import type {
   DataSource,
   ProfileSelection,
   ImplementationFilter,
-  TabSlug,
 } from './actions';
+import type { TabSlug } from '../app-logic/tabs-handling';
 import type { Milliseconds, StartEndRange } from './units';
 import type { IndexIntoMarkersTable, Profile, ThreadIndex } from './profile';
 import type { CallNodePath } from './profile-derived';
@@ -31,6 +31,12 @@ export type ThreadViewOptions = {
   expandedCallNodePaths: PathSet,
   selectedMarker: IndexIntoMarkersTable | -1,
 };
+
+export type ProfileSharingStatus = {
+  sharedWithUrls: boolean,
+  sharedWithoutUrls: boolean,
+};
+
 export type ProfileViewState = {
   viewOptions: {
     perThread: ThreadViewOptions[],
@@ -44,6 +50,7 @@ export type ProfileViewState = {
     tabOrder: number[],
     rightClickedThread: ThreadIndex,
     isCallNodeContextMenuVisible: boolean,
+    profileSharingStatus: ProfileSharingStatus,
   },
   profile: Profile | null,
 };
@@ -93,11 +100,14 @@ export type ZipFileState =
       +pathInZipFile: string,
     |};
 
-export type AppState = {
-  view: AppViewState,
-  isUrlSetupDone: boolean,
-  hasZoomedViaMousewheel: boolean,
-};
+export type IsSidebarOpenPerPanelState = { [TabSlug]: boolean };
+
+export type AppState = {|
+  +view: AppViewState,
+  +isUrlSetupDone: boolean,
+  +hasZoomedViaMousewheel: boolean,
+  +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
+|};
 
 export type ZippedProfilesState = {
   zipFile: ZipFileState,
