@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import Reorderable from '../shared/Reorderable';
 
@@ -18,9 +18,10 @@ type Props = {|
   +tabOrder: number[],
   +onSelectTab: string => void,
   +onChangeTabOrder: (number[]) => Action,
+  +extraElements?: React.Node,
 |};
 
-class TabBar extends PureComponent<Props> {
+class TabBar extends React.PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._mouseDownListener = this._mouseDownListener.bind(this);
@@ -40,6 +41,7 @@ class TabBar extends PureComponent<Props> {
       selectedTabName,
       tabOrder,
       onChangeTabOrder,
+      extraElements,
     } = this.props;
     return (
       <div className={classNames('tabBarContainer', className)}>
@@ -63,6 +65,7 @@ class TabBar extends PureComponent<Props> {
             </li>
           ))}
         </Reorderable>
+        {extraElements}
       </div>
     );
   }
