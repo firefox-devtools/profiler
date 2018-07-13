@@ -63,6 +63,17 @@ function _markerDetailNullable<T: NotVoidOrNull>(
   return _markerDetail(key, label, value, fn);
 }
 
+function _markerDetailBytesNullable(
+  key: string,
+  label: string,
+  value: ?number
+): React.Node {
+  if (typeof value !== 'number') {
+    return null;
+  }
+  return _markerDetail(key, label, formatBytes(value));
+}
+
 function _markerDetailDeltaTimeNullable(
   key: string,
   label: string,
@@ -77,7 +88,8 @@ function _markerDetailDeltaTimeNullable(
   ) {
     return null;
   }
-  return _markerDetail(key, label, value1 - value2);
+  const valueResult = value1 - value2;
+  return _markerDetail(key, label, formatMilliseconds(valueResult));
 }
 
 type PhaseTimeTuple = {| name: string, time: Microseconds |};
@@ -522,10 +534,14 @@ function getMarkerDetails(
         ) {
           return (
             <div className="tooltipDetails">
-              {_markerDetailNullable('url', 'URL', data.URI)}
-              {_markerDetail('pri', 'pri', data.pri)}
-              {_markerDetailNullable('count', 'count', data.count)}
               {_markerDetail('status', 'Status', data.status)}
+              {_markerDetailNullable('url', 'URL', data.URI)}
+              {_markerDetail('pri', 'Priority', data.pri)}
+              {_markerDetailBytesNullable(
+                'count',
+                'Requested bytes',
+                data.count
+              )}
             </div>
           );
         } else {
@@ -538,40 +554,45 @@ function getMarkerDetails(
                 'Redirect URL',
                 data.RedirectURI
               )}
-              {_markerDetail('pri', 'pri', data.pri)}
-              {_markerDetailNullable('count', 'count', data.count)}
+              {_markerDetail('pri', 'Priority', data.pri)}
+              {_markerDetailBytesNullable(
+                'count',
+                'Requested bytes',
+                data.count
+              )}
               {_markerDetailDeltaTimeNullable(
                 'domainLookup',
-                'domainLookup',
+                'Domain lookup in total',
                 data.domainLookupEnd,
                 data.domainLookupStart
               )}
               {_markerDetailDeltaTimeNullable(
-                'tcpConnect',
-                'tcpConnect',
-                data.tcpConnectEnd,
-                data.connectStart
-              )}
-              {_markerDetailNullable(
-                'secureConnectionStart',
-                'secureConnectionStart',
-                data.secureConnectionStart
-              )}
-              {_markerDetailDeltaTimeNullable(
                 'connect',
-                'connect',
+                'Connection in total',
                 data.connectEnd,
                 data.connectStart
               )}
               {_markerDetailDeltaTimeNullable(
+                'tcpConnect',
+                'TCP connection in total',
+                data.tcpConnectEnd,
+                data.connectStart
+              )}
+              {_markerDetailDeltaTimeNullable(
+                'secureConnectionStart',
+                'Start of secure connection at',
+                data.secureConnectionStart,
+                data.tcpConnectEnd
+              )}
+              {_markerDetailDeltaTimeNullable(
                 'requestStart',
-                'requestStart @',
+                'Start of request at',
                 data.requestStart,
-                data.startTime
+                data.connectStart
               )}
               {_markerDetailDeltaTimeNullable(
                 'response',
-                'response',
+                'Response time',
                 data.responseEnd,
                 data.responseStart
               )}
@@ -636,7 +657,6 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       implementationFilter,
     } = this.props;
     const details = getMarkerDetails(marker, thread, implementationFilter);
-
     return (
       <div className={classNames('tooltipMarker', className)}>
         <div className={classNames({ tooltipHeader: details })}>

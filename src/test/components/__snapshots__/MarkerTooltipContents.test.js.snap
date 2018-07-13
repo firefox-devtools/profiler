@@ -217,6 +217,13 @@ Array [
       <div
         className="tooltipLabel"
       >
+        Status
+        :
+      </div>
+      STATUS_START
+      <div
+        className="tooltipLabel"
+      >
         URL
         :
       </div>
@@ -224,17 +231,10 @@ Array [
       <div
         className="tooltipLabel"
       >
-        pri
+        Priority
         :
       </div>
       8
-      <div
-        className="tooltipLabel"
-      >
-        Status
-        :
-      </div>
-      STATUS_START
     </div>
   </div>,
   <div
@@ -1203,17 +1203,17 @@ Array [
       <div
         className="tooltipLabel"
       >
-        pri
-        :
-      </div>
-      8
-      <div
-        className="tooltipLabel"
-      >
         Status
         :
       </div>
       STATUS_READING
+      <div
+        className="tooltipLabel"
+      >
+        Priority
+        :
+      </div>
+      8
     </div>
   </div>,
   <div
@@ -1267,31 +1267,24 @@ Array [
       <div
         className="tooltipLabel"
       >
-        pri
+        Priority
         :
       </div>
       8
       <div
         className="tooltipLabel"
       >
-        count
+        Requested bytes
         :
       </div>
-      47027
+      46KB
       <div
         className="tooltipLabel"
       >
-        requestStart @
+        Response time
         :
       </div>
-      -2239.159199062502
-      <div
-        className="tooltipLabel"
-      >
-        response
-        :
-      </div>
-      3.514498000000458
+      3.5ms
     </div>
   </div>,
   <div
@@ -1352,17 +1345,17 @@ Array [
       <div
         className="tooltipLabel"
       >
-        pri
+        Priority
         :
       </div>
       -20
       <div
         className="tooltipLabel"
       >
-        count
+        Requested bytes
         :
       </div>
-      0
+      0.000B
     </div>
   </div>,
 ]
