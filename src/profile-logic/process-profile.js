@@ -6,7 +6,6 @@
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes, emptyExtensions } from './profile-data';
-import { provideHostSide } from '../utils/promise-worker';
 import { immutableUpdate } from '../utils/flow';
 import {
   CURRENT_VERSION,
@@ -688,7 +687,7 @@ function _processThread(
     tid: thread.tid,
     pid: thread.pid,
     libs,
-    pausedRanges,
+    pausedRanges: pausedRanges || [],
     frameTable,
     funcTable,
     resourceTable,
@@ -926,8 +925,3 @@ export class ProfileProcessor {
     });
   }
 }
-
-export const ProfileProcessorThreaded = provideHostSide(
-  'profile-processor-worker.js',
-  ['processProfile']
-);

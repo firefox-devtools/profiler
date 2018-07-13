@@ -1,22 +1,49 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import Worker from './worker-factory';
+// @flow
 
-export function provideHostSide(workerFilename, methods) {
-  return function HostClass(...constructorArguments) {
-    const worker = new Worker(workerFilename);
+// This worker is imported as WebWorker since it's conflicting with the Worker
+// global type.
+import WebWorker from './worker-factory';
+import { ensureExists } from './flow';
+
+type WorkerMessage =
+  | {|
+      +msgID: number,
+      +type: 'error',
+      +error: mixed,
+    |}
+  | {|
+      +msgID: number,
+      +type: 'success',
+      +result: mixed,
+    |};
+
+export function provideHostSide<T: Object>(workerFilename: string, methods: T) {
+  return function HostClass(...constructorArguments: mixed[]) {
+    const worker = new WebWorker(workerFilename);
     const callbacks = new Map(); // msgID -> { resolve, reject }
     let nextMessageID = 0;
 
     worker.onmessage = ({ data }) => {
-      const { msgID, type } = data;
-      const { resolve, reject } = callbacks.get(msgID);
+      const message = ((data: any): WorkerMessage);
+      const { msgID } = message;
+      const { resolve, reject } = ensureExists(
+        callbacks.get(msgID),
+        'Could not find a callback for a worker'
+      );
       callbacks.delete(msgID);
-      if (type === 'success') {
-        resolve(data.result);
-      } else if (type === 'error') {
-        reject(data.error);
+
+      switch (message.type) {
+        case 'success':
+          resolve(message.result);
+          return;
+        case 'error':
+          reject(message.error);
+          return;
+        default:
+          throw new Error(`Unhandled message case ${(message: empty)}.`);
       }
     };
 
@@ -38,13 +65,14 @@ export function provideHostSide(workerFilename, methods) {
   };
 }
 
-export function provideWorkerSide(workerGlobal, theClass) {
-  let theObject = null;
+export function provideWorkerSide(workerGlobal: Worker, theClass: Function) {
+  let theObject = {};
   workerGlobal.onmessage = ({ data }) => {
-    if (data.type === 'constructor') {
-      theObject = new theClass(...data.constructorArguments);
-    } else if (data.type === 'method') {
-      const { msgID, method, paramArray } = data;
+    const message = ((data: any): WorkerMessage);
+    if (message.type === 'constructor') {
+      theObject = new theClass(...message.constructorArguments);
+    } else if (message.type === 'method') {
+      const { msgID, method, paramArray } = message;
       theObject[method](...paramArray).then(
         result => {
           workerGlobal.postMessage({ msgID, type: 'success', result });

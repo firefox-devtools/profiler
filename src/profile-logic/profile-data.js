@@ -31,6 +31,7 @@ import type {
 import type { BailoutPayload } from '../types/markers';
 import { CURRENT_VERSION as GECKO_PROFILE_VERSION } from './gecko-profile-versioning';
 import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profile-versioning';
+import { getNumberPropertyOrNull } from '../utils/flow';
 
 import type { Milliseconds, StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
@@ -1379,9 +1380,15 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
         }
         tracingMarkers.push(marker);
       }
-    } else if ('startTime' in data && 'endTime' in data) {
-      const { startTime, endTime } = data;
-      if (typeof startTime === 'number' && typeof endTime === 'number') {
+    } else {
+      // `data` here is a union of different shaped objects, that may or not have
+      // certain properties. Flow doesn't like us arbitrarily accessing properties
+      // that may not exist, so use a utility function to generically get the data out.
+      const startTime = getNumberPropertyOrNull(data, 'startTime');
+      const endTime = getNumberPropertyOrNull(data, 'endTime');
+
+      // Now construct a tracing marker if these properties existed.
+      if (startTime !== null && endTime !== null) {
         const name = stringTable.getString(markers.name[i]);
         const duration = endTime - startTime;
         tracingMarkers.push({

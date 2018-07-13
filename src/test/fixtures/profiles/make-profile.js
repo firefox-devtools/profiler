@@ -29,6 +29,12 @@ export function addMarkersToThreadWithCorrespondingSamples(
 
   markers.forEach(([name, time, data]) => {
     if (data && !data.type) {
+      if (
+        typeof data.startTime !== 'number' ||
+        typeof data.endTime !== 'number'
+      ) {
+        throw new Error('Expected a startTime and endTime for the marker.');
+      }
       data = {
         type: 'DummyForTests',
         startTime: data.startTime,
