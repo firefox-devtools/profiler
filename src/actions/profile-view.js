@@ -7,7 +7,6 @@ import {
   selectorsForThread,
   selectedThreadSelectors,
   getGlobalTracks,
-  getLocalTracksByPid,
   getGlobalTrackAndIndexByPid,
   getLocalTracks,
 } from '../reducers/profile-view';
@@ -92,6 +91,12 @@ export function changeGlobalTrackOrder(globalTrackOrder: TrackIndex[]): Action {
 
 export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   return (dispatch, getState) => {
+    const hiddenGlobalTracks = getHiddenGlobalTracks(getState());
+    if (hiddenGlobalTracks.has(trackIndex)) {
+      // This track is already hidden, don't do anything.
+      return;
+    }
+
     const globalTrackToHide = getGlobalTracks(getState())[trackIndex];
     let selectedThreadIndex = getSelectedThreadIndex(getState());
 
@@ -170,19 +175,32 @@ export function isolateGlobalTrack(
       return;
     }
 
-    let selectedThreadIndex = track.mainThreadIndex;
-    if (selectedThreadIndex === null) {
-      // Try and isolate this process.
-      const tracks = ensureExists(
-        getLocalTracksByPid(getState()).get(track.pid),
-        'A track must exist for that pid.'
-      );
+    let selectedThreadIndex = getSelectedThreadIndex(getState());
+    const localTracks = getLocalTracks(getState(), track.pid);
+    const isSelectedThreadInLocalTracks = localTracks.some(
+      track =>
+        track.type === 'thread' || track.threadIndex === selectedThreadIndex
+    );
 
-      for (const track of tracks) {
-        if (track.type === 'thread') {
-          selectedThreadIndex = track.threadIndex;
+    // Check to see if this selectedThreadIndex will be hidden.
+    if (
+      selectedThreadIndex !== track.mainThreadIndex &&
+      !isSelectedThreadInLocalTracks
+    ) {
+      // The selectedThreadIndex will be hidden, reselect another one.
+      if (track.mainThreadIndex === null) {
+        // Try and select a thread in the local tracks.
+        for (const track of localTracks) {
+          if (track.type === 'thread') {
+            selectedThreadIndex = track.threadIndex;
+            break;
+          }
         }
+      } else {
+        // Select the main thread.
+        selectedThreadIndex = track.mainThreadIndex;
       }
+
       if (selectedThreadIndex === null) {
         // No thread could be found, so do not isolate this process.
         return;
@@ -222,6 +240,15 @@ export function changeLocalTrackOrder(
   };
 }
 
+/**
+ * This function walks the current global and local tracks and attempts to find another
+ * visible thread to show. If it can't then it returns null. There is a bit of
+ * complexity to this function because it's shared between the action creators
+ * that both hide that global tracks, and local tracks. When hiding a global track,
+ * then it will not have a local track to ignore. When hiding local track, it will
+ * need to ignore the local track index that's being hidden, AND the global track
+ * that it's attached to, as it's already been checked.
+ */
 function _findOtherVisibleThread(
   getState: () => State,
   // Either this global track is already hidden, or it has been taken into account.
@@ -230,13 +257,10 @@ function _findOtherVisibleThread(
   localTrackIndexToIgnore?: TrackIndex
 ): ThreadIndex | null {
   const globalTracks = getGlobalTracks(getState());
+  const globalTrackOrder = getGlobalTrackOrder(getState());
   const globalHiddenTracks = getHiddenGlobalTracks(getState());
 
-  for (
-    let globalTrackIndex = 0;
-    globalTrackIndex < globalTracks.length;
-    globalTrackIndex++
-  ) {
+  for (const globalTrackIndex of globalTrackOrder) {
     const globalTrack = globalTracks[globalTrackIndex];
     if (
       // This track has already been accounted for.
@@ -254,9 +278,10 @@ function _findOtherVisibleThread(
     }
 
     const localTracks = getLocalTracks(getState(), globalTrack.pid);
+    const localTrackOrder = getLocalTrackOrder(getState(), globalTrack.pid);
     const hiddenLocalTracks = getHiddenLocalTracks(getState(), globalTrack.pid);
 
-    for (let trackIndex = 0; trackIndex < localTracks.length; trackIndex++) {
+    for (const trackIndex of localTrackOrder) {
       const track = localTracks[trackIndex];
       if (!hiddenLocalTracks.has(trackIndex)) {
         // This track is visible.
@@ -278,11 +303,11 @@ export function hideLocalTrack(
   return (dispatch, getState) => {
     const localTracks = getLocalTracks(getState(), pid);
     const hiddenLocalTracks = getHiddenLocalTracks(getState(), pid);
-    const localTrack = localTracks[trackIndexToHide];
+    const localTrackToHide = localTracks[trackIndexToHide];
     const selectedThreadIndex = getSelectedThreadIndex(getState());
     let nextSelectedThreadIndex: ThreadIndex | null =
-      localTrack.type === 'thread' &&
-      localTrack.threadIndex === selectedThreadIndex
+      localTrackToHide.type === 'thread' &&
+      localTrackToHide.threadIndex === selectedThreadIndex
         ? null
         : selectedThreadIndex;
 
@@ -329,27 +354,31 @@ export function hideLocalTrack(
           // This track is visible.
           if (track.type === 'thread' && trackIndex !== trackIndexToHide) {
             nextSelectedThreadIndex = track.threadIndex;
+            break;
           }
         }
       }
 
-      // Case 2:
+      if (
+        nextSelectedThreadIndex === null &&
+        globalTrack.mainThreadIndex !== null
+      ) {
+        // Case 2a: Use the current process's main thread.
+        nextSelectedThreadIndex = globalTrack.mainThreadIndex;
+      }
+
       if (nextSelectedThreadIndex === null) {
-        if (globalTrack.mainThreadIndex !== null) {
-          // Case 2a: Use the current process's main thread.
-          nextSelectedThreadIndex = globalTrack.mainThreadIndex;
-        } else {
-          // Case 2b: Try and find another threadIndex.
-          nextSelectedThreadIndex = _findOtherVisibleThread(
-            getState,
-            globalTrackIndex,
-            trackIndexToHide
-          );
-          if (nextSelectedThreadIndex === null) {
-            // Case 2c: No more visible threads exist, bail out.
-            return;
-          }
-        }
+        // Case 2b: Try and find another threadIndex.
+        nextSelectedThreadIndex = _findOtherVisibleThread(
+          getState,
+          globalTrackIndex,
+          trackIndexToHide
+        );
+      }
+
+      if (nextSelectedThreadIndex === null) {
+        // Case 2c: No more visible threads exist, bail out.
+        return;
       }
     }
 

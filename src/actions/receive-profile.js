@@ -25,7 +25,7 @@ import {
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,
-  computeTracksByPid,
+  computeLocalTracksByPid,
   computeGlobalTracks,
   initializeGlobalTrackOrder,
   initializeSelectedThreadIndex,
@@ -86,7 +86,7 @@ export function viewProfile(
       globalTrackOrder,
       hasUrlInfo ? getHiddenGlobalTracks(getState()) : null
     );
-    const localTracksByPid = computeTracksByPid(profile);
+    const localTracksByPid = computeLocalTracksByPid(profile);
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       hasUrlInfo ? getLocalTrackOrderByPid(getState()) : null,
       localTracksByPid
@@ -103,8 +103,8 @@ export function viewProfile(
       hiddenLocalTracksByPid
     );
 
-    // This validity check needs to be inline, as it will rewrite the hidden track
-    // information.
+    // This validity check can't be extracted into a separate function, as it needs
+    // to update a lot of the local variables in this function.
     if (visibleThreadIndexes.length === 0) {
       // All threads are hidden, since this can't happen normally, revert them all.
       visibleThreadIndexes = profile.threads.map(
