@@ -254,7 +254,12 @@ export function getTimingsForPath(
   };
   let rootTime = 0;
 
-  function accumulateToTimings(
+  /**
+   * This is a small utility function to more easily add data to breakdowns.
+   * The funcIndex could be computed from the stackIndex but is provided as an
+   * argument because it's been already computed when this function is called.
+   */
+  function accumulateDataToTimings(
     timings: {
       breakdownByImplementation: BreakdownByImplementation | null,
       value: number,
@@ -262,22 +267,15 @@ export function getTimingsForPath(
     stackIndex: IndexIntoStackTable,
     funcIndex: IndexIntoFuncTable
   ): void {
+    // Step 1: increment the total value
     timings.value += interval;
 
-    let implementation = 'native';
-    if (funcTable.isJS[funcIndex]) {
-      implementation = getJsImplementationForStack(stackIndex, thread);
-    }
-    accumulateDataToBreakdown(timings, implementation);
-  }
+    // Step 2: find the implementation value for this stack
+    const implementation = funcTable.isJS[funcIndex]
+      ? getJsImplementationForStack(stackIndex, thread)
+      : 'native';
 
-  /**
-   * This is a small utility function to more easily add data to breakdowns.
-   */
-  function accumulateDataToBreakdown(
-    timings: { breakdownByImplementation: BreakdownByImplementation | null },
-    implementation: StackImplementation
-  ): void {
+    // Step 3: increment the right value in the implementation breakdown
     if (timings.breakdownByImplementation === null) {
       timings.breakdownByImplementation = {};
     }
@@ -302,11 +300,11 @@ export function getTimingsForPath(
     if (!isInvertedTree) {
       // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
       if (thisNodeIndex === needleNodeIndex) {
-        accumulateToTimings(pathTimings.selfTime, thisStackIndex, thisFunc);
+        accumulateDataToTimings(pathTimings.selfTime, thisStackIndex, thisFunc);
       }
 
       if (thisFunc === needleFuncIndex) {
-        accumulateToTimings(funcTimings.selfTime, thisStackIndex, thisFunc);
+        accumulateDataToTimings(funcTimings.selfTime, thisStackIndex, thisFunc);
       }
     }
 
@@ -334,7 +332,11 @@ export function getTimingsForPath(
         // Note that for inverted trees, we need to traverse up to the root node
         // first, see below for this.
         if (!isInvertedTree) {
-          accumulateToTimings(pathTimings.totalTime, thisStackIndex, thisFunc);
+          accumulateDataToTimings(
+            pathTimings.totalTime,
+            thisStackIndex,
+            thisFunc
+          );
         }
 
         pathFound = true;
@@ -347,7 +349,11 @@ export function getTimingsForPath(
         // The boolean variable will also be used to accumulate timings for
         // inverted trees below.
         if (!isInvertedTree) {
-          accumulateToTimings(funcTimings.totalTime, thisStackIndex, thisFunc);
+          accumulateDataToTimings(
+            funcTimings.totalTime,
+            thisStackIndex,
+            thisFunc
+          );
         }
         funcFound = true;
       }
@@ -375,7 +381,7 @@ export function getTimingsForPath(
 
         if (currentFuncIndex === needleFuncIndex) {
           // This root node is the same function as the passed call node path.
-          accumulateToTimings(
+          accumulateDataToTimings(
             funcTimings.selfTime,
             currentStackIndex,
             currentFuncIndex
@@ -385,7 +391,7 @@ export function getTimingsForPath(
         if (pathFound) {
           // We contribute the implementation information if the passed path was
           // found in this stack earlier.
-          accumulateToTimings(
+          accumulateDataToTimings(
             pathTimings.totalTime,
             currentStackIndex,
             currentFuncIndex
@@ -395,7 +401,7 @@ export function getTimingsForPath(
         if (funcFound) {
           // We contribute the implementation information if the leaf function
           // of the passed path was found in this stack earlier.
-          accumulateToTimings(
+          accumulateDataToTimings(
             funcTimings.totalTime,
             currentStackIndex,
             currentFuncIndex
