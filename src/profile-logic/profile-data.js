@@ -39,7 +39,7 @@ import { timeCode } from '../utils/time-code';
 import { hashPath } from '../utils/path';
 import type { ImplementationFilter } from '../types/actions';
 import bisection from 'bisection';
-import { UniqueStringArray } from '../utils/unique-string-array';
+import type { UniqueStringArray } from '../utils/unique-string-array';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
