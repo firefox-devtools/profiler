@@ -525,6 +525,8 @@ function _processStackTable(
     } else {
       const prefix = geckoStackTable.prefix[stackIndex];
       if (prefix !== null) {
+        // Because of the structure of the stack table, prefix < stackIndex.
+        // So we've already computed the category for the prefix.
         stackCategory = categoryColumn[prefix];
       } else {
         stackCategory = defaultCategory;
