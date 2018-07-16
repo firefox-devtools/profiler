@@ -27,14 +27,12 @@ import type {
   Thread,
   ThreadIndex,
   SamplesTable,
-  MarkersTable,
 } from '../types/profile';
 import type {
   TracingMarker,
   CallNodeInfo,
   CallNodePath,
   IndexIntoCallNodeTable,
-  MarkerTimingRows,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type { Action, ProfileSelection } from '../types/actions';
@@ -559,43 +557,23 @@ export const getRightClickedThreadIndex = (state: State) =>
 export const getSelection = (state: State) =>
   getProfileViewOptions(state).selection;
 
-export type SelectorsForThread = {
-  getThread: State => Thread,
-  getViewOptions: State => ThreadViewOptions,
-  getTransformStack: State => TransformStack,
-  getTransformLabels: State => string[],
-  getRangeFilteredThread: State => Thread,
-  getRangeAndTransformFilteredThread: State => Thread,
-  getJankInstances: State => TracingMarker[],
-  getProcessedMarkersThread: State => Thread,
-  getTracingMarkers: State => TracingMarker[],
-  getTracingMarkersForView: State => TracingMarker[],
-  getMarkerTiming: State => MarkerTimingRows,
-  getRangeSelectionFilteredTracingMarkers: State => TracingMarker[],
-  getRangeSelectionFilteredTracingMarkersForHeader: State => TracingMarker[],
-  getFilteredThread: State => Thread,
-  getRangeSelectionFilteredThread: State => Thread,
-  getCallNodeInfo: State => CallNodeInfo,
-  getCallNodeMaxDepth: State => number,
-  getSelectedCallNodePath: State => CallNodePath,
-  getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
-  getExpandedCallNodePaths: State => PathSet,
-  getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
-  getCallTree: State => CallTree.CallTree,
-  getStackTimingByDepth: State => StackTiming.StackTimingByDepth,
-  getCallNodeMaxDepthForFlameGraph: State => number,
-  getFlameGraphTiming: State => FlameGraph.FlameGraphTiming,
-  getFriendlyThreadName: State => string,
-  getThreadProcessDetails: State => string,
-  getSearchFilteredMarkers: State => MarkersTable,
-  unfilteredSamplesRange: State => StartEndRange | null,
-};
+const selectorsForThreads: { [key: ThreadIndex]: * } = {};
 
-const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
-
-export const selectorsForThread = (
-  threadIndex: ThreadIndex
-): SelectorsForThread => {
+/**
+ * These selectors operate on a per-thread basis. They can be used with a specific
+ * thread index, or alternately can be used with the `selectedThreadSelectors`
+ * interface.
+ *
+ * Usage:
+ *
+ *  const threadIndex = 1;
+ *  const thread = selectorsForThread(threadIndex).getThread();
+ *
+ * Or:
+ *
+ *  const thread = selectedThreadSelectors.getThread();
+ */
+export const selectorsForThread = (threadIndex: ThreadIndex): * => {
   if (!(threadIndex in selectorsForThreads)) {
     /**
      * The first per-thread selectors filter out and transform a thread based on user's
@@ -917,15 +895,17 @@ export const selectorsForThread = (
   return selectorsForThreads[threadIndex];
 };
 
-export const selectedThreadSelectors: SelectorsForThread = (() => {
-  const anyThreadSelectors: SelectorsForThread = selectorsForThread(0);
-  const result: { [key: string]: (State) => any } = {};
+/**
+ * Create the thread selectors for the currently selected thread.
+ */
+export const selectedThreadSelectors = (() => {
+  const anyThreadSelectors = selectorsForThread(0);
+  const result: Object = {};
   for (const key in anyThreadSelectors) {
     result[key] = (state: State) =>
       selectorsForThread(UrlState.getSelectedThreadIndex(state))[key](state);
   }
-  const result2: SelectorsForThread = result;
-  return result2;
+  return (result: typeof anyThreadSelectors);
 })();
 
 export type SelectorsForNode = {
