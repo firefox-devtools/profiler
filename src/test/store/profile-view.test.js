@@ -959,16 +959,8 @@ describe('snapshots of selectors/profile-view', function() {
 
   it('matches the last stored run of selectedNodeSelectors.getTimingsForSidebar', () => {
     const { getState } = setupStore();
-    expect(selectedNodeSelectors.getTimingsForSidebar(getState())).toEqual({
-      forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 4, breakdownByImplementation: null },
-      },
-      forFunc: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 4, breakdownByImplementation: null },
-      },
-      rootTime: 4,
-    });
+    expect(
+      selectedNodeSelectors.getTimingsForSidebar(getState())
+    ).toMatchSnapshot();
   });
 });

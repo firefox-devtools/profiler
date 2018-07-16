@@ -1070,11 +1070,17 @@ describe('getTimingsForPath in a non-inverted tree', function() {
     expect(timings).toEqual({
       forPath: {
         selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 5, breakdownByImplementation: null },
+        totalTime: {
+          value: 5,
+          breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
+        },
       },
       forFunc: {
         selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 5, breakdownByImplementation: null },
+        totalTime: {
+          value: 5,
+          breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
+        },
       },
       rootTime: 5,
     });
@@ -1098,11 +1104,20 @@ describe('getTimingsForPath in a non-inverted tree', function() {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
         },
-        totalTime: { value: 2, breakdownByImplementation: null },
+        totalTime: {
+          value: 2,
+          breakdownByImplementation: { ion: 1, baseline: 1 },
+        },
       },
       forFunc: {
-        selfTime: { value: 3, breakdownByImplementation: null },
-        totalTime: { value: 3, breakdownByImplementation: null },
+        selfTime: {
+          value: 3,
+          breakdownByImplementation: { ion: 2, baseline: 1 },
+        },
+        totalTime: {
+          value: 3,
+          breakdownByImplementation: { ion: 2, baseline: 1 },
+        },
       },
       rootTime: 5,
     });
@@ -1117,11 +1132,11 @@ describe('getTimingsForPath in a non-inverted tree', function() {
     expect(timings).toEqual({
       forPath: {
         selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
-        totalTime: { value: 2, breakdownByImplementation: null },
+        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
       },
       forFunc: {
-        selfTime: { value: 1, breakdownByImplementation: null },
-        totalTime: { value: 2, breakdownByImplementation: null },
+        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
       },
       rootTime: 5,
     });
@@ -1171,16 +1186,21 @@ describe('getTimingsForPath for an inverted tree', function() {
     const timings = getTimingsForPath([Ejs]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: {
+        selfTime: { value: 3, breakdownByImplementation: null },
+        totalTime: {
           value: 3,
-          // TODO it should be accounted in totalTime
           breakdownByImplementation: { ion: 2, baseline: 1 },
         },
-        totalTime: { value: 3, breakdownByImplementation: null },
       },
       forFunc: {
-        selfTime: { value: 3, breakdownByImplementation: null },
-        totalTime: { value: 3, breakdownByImplementation: null },
+        selfTime: {
+          value: 3,
+          breakdownByImplementation: { ion: 2, baseline: 1 },
+        },
+        totalTime: {
+          value: 3,
+          breakdownByImplementation: { ion: 2, baseline: 1 },
+        },
       },
       rootTime: 5,
     });
@@ -1191,16 +1211,22 @@ describe('getTimingsForPath for an inverted tree', function() {
     const timings = getTimingsForPath([Ejs, D, Cjs, B]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: {
-          value: 0,
-          // TODO it should be accounted in totalTime
+        selfTime: { value: 0, breakdownByImplementation: null },
+        totalTime: {
+          value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
         },
-        totalTime: { value: 2, breakdownByImplementation: null },
       },
       forFunc: {
         selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 5, breakdownByImplementation: null },
+        totalTime: {
+          value: 5,
+          breakdownByImplementation: {
+            ion: 2,
+            baseline: 1,
+            native: 2,
+          },
+        },
       },
       rootTime: 5,
     });
@@ -1213,13 +1239,12 @@ describe('getTimingsForPath for an inverted tree', function() {
     let timings = getTimingsForPath([H]);
     expect(timings).toEqual({
       forPath: {
-        // TODO it should be accounted in totalTime
-        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
-        totalTime: { value: 1, breakdownByImplementation: null },
+        selfTime: { value: 1, breakdownByImplementation: null },
+        totalTime: { value: 1, breakdownByImplementation: { native: 1 } },
       },
       forFunc: {
-        selfTime: { value: 1, breakdownByImplementation: null },
-        totalTime: { value: 2, breakdownByImplementation: null },
+        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
       },
       rootTime: 5,
     });
@@ -1228,13 +1253,12 @@ describe('getTimingsForPath for an inverted tree', function() {
     timings = getTimingsForPath([I, H]);
     expect(timings).toEqual({
       forPath: {
-        // TODO it should be accounted in totalTime
-        selfTime: { value: 0, breakdownByImplementation: { native: 1 } },
-        totalTime: { value: 1, breakdownByImplementation: null },
+        selfTime: { value: 0, breakdownByImplementation: null },
+        totalTime: { value: 1, breakdownByImplementation: { native: 1 } },
       },
       forFunc: {
-        selfTime: { value: 1, breakdownByImplementation: null },
-        totalTime: { value: 2, breakdownByImplementation: null },
+        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
       },
       rootTime: 5,
     });
@@ -1245,13 +1269,15 @@ describe('getTimingsForPath for an inverted tree', function() {
     const timings = getTimingsForPath([H, B, A]);
     expect(timings).toEqual({
       forPath: {
-        // TODO it should be accounted in totalTime
-        selfTime: { value: 0, breakdownByImplementation: { native: 1 } },
-        totalTime: { value: 1, breakdownByImplementation: null },
+        selfTime: { value: 0, breakdownByImplementation: null },
+        totalTime: { value: 1, breakdownByImplementation: { native: 1 } },
       },
       forFunc: {
         selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 5, breakdownByImplementation: null },
+        totalTime: {
+          value: 5,
+          breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
+        },
       },
       rootTime: 5,
     });

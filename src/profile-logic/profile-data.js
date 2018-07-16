@@ -163,9 +163,9 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
   return path[path.length - 1];
 }
 
-type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
-type StackImplementation = 'native' | JsImplementation;
-type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
+export type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
+export type StackImplementation = 'native' | JsImplementation;
+export type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
 type ItemTimings = {|
   selfTime: {|
     // time spent excluding children
@@ -256,11 +256,26 @@ export function getTimingsForPath(
 
   /**
    * This is a small utility function to more easily add data to breakdowns.
+   * The funcIndex could be computed from the stackIndex but is provided as an
+   * argument because it's been already computed when this function is called.
    */
-  function accumulateDataToBreakdown(
-    timings: { breakdownByImplementation: BreakdownByImplementation | null },
-    implementation: StackImplementation
+  function accumulateDataToTimings(
+    timings: {
+      breakdownByImplementation: BreakdownByImplementation | null,
+      value: number,
+    },
+    stackIndex: IndexIntoStackTable,
+    funcIndex: IndexIntoFuncTable
   ): void {
+    // Step 1: increment the total value
+    timings.value += interval;
+
+    // Step 2: find the implementation value for this stack
+    const implementation = funcTable.isJS[funcIndex]
+      ? getJsImplementationForStack(stackIndex, thread)
+      : 'native';
+
+    // Step 3: increment the right value in the implementation breakdown
     if (timings.breakdownByImplementation === null) {
       timings.breakdownByImplementation = {};
     }
@@ -285,17 +300,11 @@ export function getTimingsForPath(
     if (!isInvertedTree) {
       // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
       if (thisNodeIndex === needleNodeIndex) {
-        pathTimings.selfTime.value += interval;
-
-        let implementation = 'native';
-        if (funcTable.isJS[thisFunc]) {
-          implementation = getJsImplementationForStack(thisStackIndex, thread);
-        }
-        accumulateDataToBreakdown(pathTimings.selfTime, implementation);
+        accumulateDataToTimings(pathTimings.selfTime, thisStackIndex, thisFunc);
       }
 
       if (thisFunc === needleFuncIndex) {
-        funcTimings.selfTime.value += interval;
+        accumulateDataToTimings(funcTimings.selfTime, thisStackIndex, thisFunc);
       }
     }
 
@@ -318,15 +327,34 @@ export function getTimingsForPath(
 
       if (currentNodeIndex === needleNodeIndex) {
         // One of the parents is the exact passed path.
-        pathTimings.totalTime.value += interval;
+        // For non-inverted trees, we can contribute the data to the
+        // implementation breakdown now.
+        // Note that for inverted trees, we need to traverse up to the root node
+        // first, see below for this.
+        if (!isInvertedTree) {
+          accumulateDataToTimings(
+            pathTimings.totalTime,
+            thisStackIndex,
+            thisFunc
+          );
+        }
+
         pathFound = true;
       }
 
       if (!funcFound && currentFuncIndex === needleFuncIndex) {
-        // One of the parents' func is the same function as the passed path
+        // One of the parents' func is the same function as the passed path.
         // Note we could have the same function several times in the stack, so
         // we need a boolean variable to prevent adding it more than once.
-        funcTimings.totalTime.value += interval;
+        // The boolean variable will also be used to accumulate timings for
+        // inverted trees below.
+        if (!isInvertedTree) {
+          accumulateDataToTimings(
+            funcTimings.totalTime,
+            thisStackIndex,
+            thisFunc
+          );
+        }
         funcFound = true;
       }
 
@@ -346,33 +374,37 @@ export function getTimingsForPath(
         // prefix is `null`.
         if (currentNodeIndex === needleNodeIndex) {
           // This root node matches the passed call node path.
+          // This is the only place where we don't accumulate timings, mainly
+          // because this would be the same as for the total time.
           pathTimings.selfTime.value += interval;
         }
 
         if (currentFuncIndex === needleFuncIndex) {
           // This root node is the same function as the passed call node path.
-          funcTimings.selfTime.value += interval;
+          accumulateDataToTimings(
+            funcTimings.selfTime,
+            currentStackIndex,
+            currentFuncIndex
+          );
         }
 
         if (pathFound) {
           // We contribute the implementation information if the passed path was
           // found in this stack earlier.
-          // If the root node (the one actually holding the self time) is a JS
-          // frame, we get its specific implementation too.
-          // This allows to see how the implementation timings is spread among
-          // callers.
-          let implementation = 'native';
-          if (funcTable.isJS[currentFuncIndex]) {
-            implementation = getJsImplementationForStack(
-              currentStackIndex,
-              thread
-            );
-          }
-          accumulateDataToBreakdown(
-            // TODO: I believe this should be totalTime here instead, but due to
-            // how we display them in the current code we use selfTime for now.
-            pathTimings.selfTime,
-            implementation
+          accumulateDataToTimings(
+            pathTimings.totalTime,
+            currentStackIndex,
+            currentFuncIndex
+          );
+        }
+
+        if (funcFound) {
+          // We contribute the implementation information if the leaf function
+          // of the passed path was found in this stack earlier.
+          accumulateDataToTimings(
+            funcTimings.totalTime,
+            currentStackIndex,
+            currentFuncIndex
           );
         }
       }
