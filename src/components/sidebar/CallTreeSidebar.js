@@ -109,12 +109,12 @@ function Breakdown({ data }: BreakdownProps) {
 
   return (
     <div className="sidebar-details">
-      {data.map(({ group, value }) => {
+      {data.filter(({ value }) => value).map(({ group, value }) => {
         const percentage = Math.round(value / totalTime * 100);
 
         return (
           <SidebarDetail label={group} key={group}>
-            {value ? `${value}ms (${percentage}%)` : '—'}
+            {value}ms ({percentage}%)
           </SidebarDetail>
         );
       })}
@@ -165,7 +165,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           <h2 className="sidebar-title">{name}</h2>
           {lib ? <p className="sidebar-subtitle">{lib}</p> : null}
         </header>
-        <h3 className="sidebar-title2">This selected path</h3>
+        <h3 className="sidebar-title2">This selected call node</h3>
         <div className="sidebar-details">
           <SidebarDetail label="Running Time">
             {totalTime.value}ms ({totalTimePercent}%)
@@ -176,7 +176,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
         </div>
         {totalTime.breakdownByImplementation ? (
           <React.Fragment>
-            <h4 className="sidebar-title3">Running time implementations</h4>
+            <h4 className="sidebar-title3">Implementation – running time</h4>
             <ImplementationBreakdown
               breakdown={totalTime.breakdownByImplementation}
             />
@@ -184,7 +184,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
         ) : null}
         {selfTime.breakdownByImplementation ? (
           <React.Fragment>
-            <h4 className="sidebar-title3">Self time implementations</h4>
+            <h4 className="sidebar-title3">Implementation – self time</h4>
             <ImplementationBreakdown
               breakdown={selfTime.breakdownByImplementation}
             />
@@ -203,7 +203,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
         </div>
         {totalTimeForFunc.breakdownByImplementation ? (
           <React.Fragment>
-            <h4 className="sidebar-title3">Running time implementations</h4>
+            <h4 className="sidebar-title3">Implementation – running time</h4>
             <ImplementationBreakdown
               breakdown={totalTimeForFunc.breakdownByImplementation}
             />
@@ -211,7 +211,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
         ) : null}
         {selfTimeForFunc.breakdownByImplementation ? (
           <React.Fragment>
-            <h4 className="sidebar-title3">Self time implementations</h4>
+            <h4 className="sidebar-title3">Implementation – self time</h4>
             <ImplementationBreakdown
               breakdown={selfTimeForFunc.breakdownByImplementation}
             />

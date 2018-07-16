@@ -195,7 +195,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          This selected path
+          This selected call node
         </h3>
         <div
           className="sidebar-details"
@@ -229,7 +229,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -264,18 +264,6 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               className="sidebar-details"
             >
               <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
                 key="JavaScript interpreter"
                 label="JavaScript interpreter"
               >
@@ -285,31 +273,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   JavaScript interpreter
                   :
                 </div>
-                2ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                2
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -351,7 +318,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -386,18 +353,6 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               className="sidebar-details"
             >
               <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
                 key="JavaScript interpreter"
                 label="JavaScript interpreter"
               >
@@ -407,31 +362,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   JavaScript interpreter
                   :
                 </div>
-                2ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                2
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -544,7 +478,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          This selected path
+          This selected call node
         </h3>
         <div
           className="sidebar-details"
@@ -578,7 +512,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -613,18 +547,6 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               className="sidebar-details"
             >
               <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
                 key="JavaScript interpreter"
                 label="JavaScript interpreter"
               >
@@ -634,31 +556,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   JavaScript interpreter
                   :
                 </div>
-                1ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                1
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -700,7 +601,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -735,18 +636,6 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               className="sidebar-details"
             >
               <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
                 key="JavaScript interpreter"
                 label="JavaScript interpreter"
               >
@@ -756,31 +645,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   JavaScript interpreter
                   :
                 </div>
-                1ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                1
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -897,7 +765,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          This selected path
+          This selected call node
         </h3>
         <div
           className="sidebar-details"
@@ -931,7 +799,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -975,43 +843,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   Native code
                   :
                 </div>
-                2ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                2
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -1019,7 +854,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Self time implementations
+          Implementation – self time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -1063,43 +898,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   Native code
                   :
                 </div>
-                1ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                1
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -1141,7 +943,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -1185,43 +987,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   Native code
                   :
                 </div>
-                2ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                2
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -1229,7 +998,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Self time implementations
+          Implementation – self time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -1273,43 +1042,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   Native code
                   :
                 </div>
-                1ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                1
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -1426,7 +1162,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          This selected path
+          This selected call node
         </h3>
         <div
           className="sidebar-details"
@@ -1460,7 +1196,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -1495,18 +1231,6 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               className="sidebar-details"
             >
               <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
                 key="JavaScript interpreter"
                 label="JavaScript interpreter"
               >
@@ -1516,31 +1240,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   JavaScript interpreter
                   :
                 </div>
-                1ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                1
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -1548,7 +1251,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Self time implementations
+          Implementation – self time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -1583,18 +1286,6 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               className="sidebar-details"
             >
               <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
                 key="JavaScript interpreter"
                 label="JavaScript interpreter"
               >
@@ -1604,31 +1295,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   JavaScript interpreter
                   :
                 </div>
-                1ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                1
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -1670,7 +1340,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -1705,18 +1375,6 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               className="sidebar-details"
             >
               <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
                 key="JavaScript interpreter"
                 label="JavaScript interpreter"
               >
@@ -1726,31 +1384,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   JavaScript interpreter
                   :
                 </div>
-                2ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                2
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -1758,7 +1395,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Self time implementations
+          Implementation – self time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -1793,18 +1430,6 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               className="sidebar-details"
             >
               <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
                 key="JavaScript interpreter"
                 label="JavaScript interpreter"
               >
@@ -1814,31 +1439,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   JavaScript interpreter
                   :
                 </div>
-                2ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                2
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -2088,7 +1692,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          This selected path
+          This selected call node
         </h3>
         <div
           className="sidebar-details"
@@ -2122,7 +1726,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -2157,18 +1761,6 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               className="sidebar-details"
             >
               <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
                 key="JavaScript interpreter"
                 label="JavaScript interpreter"
               >
@@ -2178,31 +1770,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   JavaScript interpreter
                   :
                 </div>
-                2ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                2
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -2244,7 +1815,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -2279,18 +1850,6 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               className="sidebar-details"
             >
               <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
                 key="JavaScript interpreter"
                 label="JavaScript interpreter"
               >
@@ -2300,31 +1859,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   JavaScript interpreter
                   :
                 </div>
-                2ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                2
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -2332,7 +1870,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Self time implementations
+          Implementation – self time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -2367,18 +1905,6 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
               className="sidebar-details"
             >
               <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
                 key="JavaScript interpreter"
                 label="JavaScript interpreter"
               >
@@ -2388,31 +1914,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   JavaScript interpreter
                   :
                 </div>
-                2ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                2
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -2548,7 +2053,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          This selected path
+          This selected call node
         </h3>
         <div
           className="sidebar-details"
@@ -2582,7 +2087,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -2626,43 +2131,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   Native code
                   :
                 </div>
-                1ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                1
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -2704,7 +2176,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -2748,43 +2220,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   Native code
                   :
                 </div>
-                2ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                2
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -2792,7 +2231,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Self time implementations
+          Implementation – self time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -2836,43 +2275,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   Native code
                   :
                 </div>
-                1ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                1
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -3008,7 +2414,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          This selected path
+          This selected call node
         </h3>
         <div
           className="sidebar-details"
@@ -3042,7 +2448,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -3086,43 +2492,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   Native code
                   :
                 </div>
-                1ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                1
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -3164,7 +2537,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -3208,43 +2581,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   Native code
                   :
                 </div>
-                2ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                2
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -3252,7 +2592,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Self time implementations
+          Implementation – self time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -3296,43 +2636,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   Native code
                   :
                 </div>
-                1ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                1
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -3467,7 +2774,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h3
           className="sidebar-title2"
         >
-          This selected path
+          This selected call node
         </h3>
         <div
           className="sidebar-details"
@@ -3501,7 +2808,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -3545,43 +2852,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   Native code
                   :
                 </div>
-                1ms (100%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                1
+                ms (
+                100
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
@@ -3623,7 +2897,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         <h4
           className="sidebar-title3"
         >
-          Running time implementations
+          Implementation – running time
         </h4>
         <ImplementationBreakdown
           breakdown={
@@ -3668,7 +2942,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   Native code
                   :
                 </div>
-                2ms (50%)
+                2
+                ms (
+                50
+                %)
               </SidebarDetail>
               <SidebarDetail
                 key="JavaScript interpreter"
@@ -3680,31 +2957,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
                   JavaScript interpreter
                   :
                 </div>
-                2ms (50%)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (baseline)"
-                label="JavaScript JIT (baseline)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (baseline)
-                  :
-                </div>
-                —
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript JIT (ion)"
-                label="JavaScript JIT (ion)"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript JIT (ion)
-                  :
-                </div>
-                —
+                2
+                ms (
+                50
+                %)
               </SidebarDetail>
             </div>
           </Breakdown>
