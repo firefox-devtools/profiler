@@ -197,37 +197,36 @@ body, #root, .profileViewer {
 .treeViewCategoryKnob {
   display: inline-block;
   box-sizing: border-box;
-  margin-right: 3px;
   width: 9px;
   height: 9px;
   border: 0.5px solid rgba(0, 0, 0, 0.1);
-  background-color: var(--grey-40);
+  margin-right: 3px;
 }
-.treeViewCategoryKnob.transparent {
+.treeViewCategoryKnob.category-color-transparent {
   background-color: transparent;
 }
-.treeViewCategoryKnob.purple {
+.treeViewCategoryKnob.category-color-purple {
   background-color: var(--purple-50);
 }
-.treeViewCategoryKnob.green {
+.treeViewCategoryKnob.category-color-green {
   background-color: var(--green-60);
 }
-.treeViewCategoryKnob.orange {
+.treeViewCategoryKnob.category-color-orange {
   background-color: var(--orange-60);
 }
-.treeViewCategoryKnob.yellow {
+.treeViewCategoryKnob.category-color-yellow {
   background-color: var(--yellow-60);
 }
-.treeViewCategoryKnob.lightblue {
+.treeViewCategoryKnob.category-color-lightblue {
   background-color: var(--blue-40);
 }
-.treeViewCategoryKnob.grey {
+.treeViewCategoryKnob.category-color-grey {
   background-color: var(--grey-40);
 }
-.treeViewCategoryKnob.blue {
+.treeViewCategoryKnob.category-color-blue {
   background-color: var(--blue-60);
 }
-.treeViewCategoryKnob.brown {
+.treeViewCategoryKnob.category-color-brown {
   background-color: var(--magenta-60);
 }
 
