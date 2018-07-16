@@ -111,12 +111,12 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
           onMouseDown={[Function]}
         >
           <li
-            className="profileThreadHeaderBar selected"
+            className="timelineThread selected"
             onClick={[Function]}
             style={undefined}
           >
             <div
-              className="react-contextmenu-wrapper grippy profileThreadHeaderBarThreadLabel"
+              className="react-contextmenu-wrapper grippy timelineThreadLabel"
               onContextMenu={[Function]}
               onMouseDown={[Function]}
               onMouseOut={[Function]}
@@ -127,19 +127,19 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
 process: \\"default\\" (0)"
             >
               <h1
-                className="profileThreadHeaderBarThreadName"
+                className="timelineThreadName"
               >
                 Main Thread
               </h1>
             </div>
             <div
-              className="profileThreadHeaderBarThreadDetails"
+              className="timelineThreadDetails"
             >
               <div
-                className="profileThreadHeaderBarIntervalMarkerOverview profileThreadHeaderBarIntervalMarkerOverviewJank selected"
+                className="timelineThreadIntervalMarkerOverview selected"
               >
                 <canvas
-                  className="profileThreadHeaderBarIntervalMarkerOverviewCanvas profileThreadHeaderBarIntervalMarkerOverviewJankCanvas intervalMarkerTimelineCanvas"
+                  className="timelineThreadIntervalMarkerOverviewCanvas intervalMarkerTimelineCanvas"
                   onMouseDown={[Function]}
                   onMouseMove={[Function]}
                   onMouseOut={[Function]}
@@ -150,7 +150,7 @@ process: \\"default\\" (0)"
                 className="threadStackGraph"
               >
                 <canvas
-                  className="threadStackGraphCanvas threadStackGraphCanvas"
+                  className="threadStackGraphCanvas"
                   onMouseUp={[Function]}
                 />
               </div>
@@ -160,12 +160,12 @@ process: \\"default\\" (0)"
             </div>
           </li>
           <li
-            className="profileThreadHeaderBar"
+            className="timelineThread"
             onClick={[Function]}
             style={undefined}
           >
             <div
-              className="react-contextmenu-wrapper grippy profileThreadHeaderBarThreadLabel"
+              className="react-contextmenu-wrapper grippy timelineThreadLabel"
               onContextMenu={[Function]}
               onMouseDown={[Function]}
               onMouseOut={[Function]}
@@ -176,19 +176,19 @@ process: \\"default\\" (0)"
 process: \\"default\\" (0)"
             >
               <h1
-                className="profileThreadHeaderBarThreadName"
+                className="timelineThreadName"
               >
                 Thread with dropped samples
               </h1>
             </div>
             <div
-              className="profileThreadHeaderBarThreadDetails"
+              className="timelineThreadDetails"
             >
               <div
-                className="profileThreadHeaderBarIntervalMarkerOverview profileThreadHeaderBarIntervalMarkerOverviewJank"
+                className="timelineThreadIntervalMarkerOverview"
               >
                 <canvas
-                  className="profileThreadHeaderBarIntervalMarkerOverviewCanvas profileThreadHeaderBarIntervalMarkerOverviewJankCanvas intervalMarkerTimelineCanvas"
+                  className="timelineThreadIntervalMarkerOverviewCanvas intervalMarkerTimelineCanvas"
                   onMouseDown={[Function]}
                   onMouseMove={[Function]}
                   onMouseOut={[Function]}
@@ -199,7 +199,7 @@ process: \\"default\\" (0)"
                 className="threadStackGraph"
               >
                 <canvas
-                  className="threadStackGraphCanvas threadStackGraphCanvas"
+                  className="threadStackGraphCanvas"
                   onMouseUp={[Function]}
                 />
               </div>
@@ -243,12 +243,12 @@ process: \\"default\\" (0)"
             </div>
           </li>
           <li
-            className="profileThreadHeaderBar"
+            className="timelineThread"
             onClick={[Function]}
             style={undefined}
           >
             <div
-              className="react-contextmenu-wrapper grippy profileThreadHeaderBarThreadLabel"
+              className="react-contextmenu-wrapper grippy timelineThreadLabel"
               onContextMenu={[Function]}
               onMouseDown={[Function]}
               onMouseOut={[Function]}
@@ -259,19 +259,19 @@ process: \\"default\\" (0)"
 process: \\"default\\" (0)"
             >
               <h1
-                className="profileThreadHeaderBarThreadName"
+                className="timelineThreadName"
               >
                 Thread with dropped samples
               </h1>
             </div>
             <div
-              className="profileThreadHeaderBarThreadDetails"
+              className="timelineThreadDetails"
             >
               <div
-                className="profileThreadHeaderBarIntervalMarkerOverview profileThreadHeaderBarIntervalMarkerOverviewJank"
+                className="timelineThreadIntervalMarkerOverview"
               >
                 <canvas
-                  className="profileThreadHeaderBarIntervalMarkerOverviewCanvas profileThreadHeaderBarIntervalMarkerOverviewJankCanvas intervalMarkerTimelineCanvas"
+                  className="timelineThreadIntervalMarkerOverviewCanvas intervalMarkerTimelineCanvas"
                   onMouseDown={[Function]}
                   onMouseMove={[Function]}
                   onMouseOut={[Function]}
@@ -282,7 +282,7 @@ process: \\"default\\" (0)"
                 className="threadStackGraph"
               >
                 <canvas
-                  className="threadStackGraphCanvas threadStackGraphCanvas"
+                  className="threadStackGraphCanvas"
                   onMouseUp={[Function]}
                 />
               </div>

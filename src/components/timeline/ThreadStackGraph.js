@@ -4,7 +4,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import classNames from 'classnames';
 import bisection from 'bisection';
 import { timeCode } from '../../utils/time-code';
 import { getSampleCallNodes } from '../../profile-logic/profile-data';
@@ -24,7 +23,6 @@ type Props = {|
   +rangeEnd: Milliseconds,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +className: string,
   +onStackClick: (time: Milliseconds) => void,
 |};
 
@@ -204,12 +202,9 @@ class ThreadStackGraph extends PureComponent<Props> {
   render() {
     this._scheduleDraw();
     return (
-      <div className={this.props.className}>
+      <div className="threadStackGraph">
         <canvas
-          className={classNames(
-            `${this.props.className}Canvas`,
-            'threadStackGraphCanvas'
-          )}
+          className="threadStackGraphCanvas"
           ref={this._takeCanvasRef}
           onMouseUp={this._onMouseUp}
         />

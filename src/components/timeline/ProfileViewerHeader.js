@@ -5,7 +5,7 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import ProfileThreadHeaderBar from './ProfileThreadHeaderBar';
+import TimelineThread from './Thread';
 import Reorderable from '../shared/Reorderable';
 import TimeSelectionScrubber from './TimeSelectionScrubber';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
@@ -94,7 +94,7 @@ class ProfileViewerHeader extends PureComponent<Props> {
               onChangeOrder={changeThreadOrder}
             >
               {threads.map((thread, threadIndex) => (
-                <ProfileThreadHeaderBar
+                <TimelineThread
                   key={threadIndex}
                   threadIndex={threadIndex}
                   interval={profile.meta.interval}

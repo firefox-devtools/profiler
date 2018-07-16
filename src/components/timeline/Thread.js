@@ -24,6 +24,7 @@ import {
   focusCallTree,
 } from '../../actions/profile-view';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
+import './Thread.css';
 
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type { Milliseconds, StartEndRange } from '../../types/units';
@@ -67,7 +68,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class ProfileThreadHeaderBar extends PureComponent<Props> {
+class TimelineThread extends PureComponent<Props> {
   constructor(props) {
     super(props);
     (this: any)._onLabelMouseDown = this._onLabelMouseDown.bind(this);
@@ -167,7 +168,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
     if (isHidden) {
       // If this thread is hidden, render out a stub element so that the Reorderable
       // Component still works across all the threads.
-      return <li className="profileThreadHeaderBarHidden" />;
+      return <li className="timelineThreadHidden" />;
     }
 
     const processType = thread.processType;
@@ -177,11 +178,10 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
         thread.name === 'Compositor' ||
         thread.name === 'Renderer') &&
       processType !== 'plugin';
-    const className = 'profileThreadHeaderBar';
 
     return (
       <li
-        className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')}
+        className={'timelineThread' + (isSelected ? ' selected' : '')}
         onClick={this._onLineClick}
         style={style}
       >
@@ -190,16 +190,16 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
           renderTag="div"
           attributes={{
             title: processDetails,
-            className: 'grippy profileThreadHeaderBarThreadLabel',
+            className: 'grippy timelineThreadLabel',
             onMouseDown: this._onLabelMouseDown,
           }}
         >
-          <h1 className="profileThreadHeaderBarThreadName">{threadName}</h1>
+          <h1 className="timelineThreadName">{threadName}</h1>
         </ContextMenuTrigger>
-        <div className="profileThreadHeaderBarThreadDetails">
+        <div className="timelineThreadDetails">
           {displayJank ? (
             <ProfileThreadJankOverview
-              className={`${className}IntervalMarkerOverview ${className}IntervalMarkerOverviewJank`}
+              className="timelineThreadIntervalMarkerOverview"
               rangeStart={rangeStart}
               rangeEnd={rangeEnd}
               threadIndex={threadIndex}
@@ -209,9 +209,14 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
           ) : null}
           {displayTracingMarkers ? (
             <ProfileThreadTracingMarkerOverview
-              className={`${className}IntervalMarkerOverview ${className}IntervalMarkerOverviewGfx ${className}IntervalMarkerOverviewThread${
-                thread.name
-              }`}
+              // Feed in the thread name to the class. This is used for conditional
+              // sizing rules, for instance with GeckoMain threads.
+              // TODO - This seems kind of brittle, and should probably done through
+              // JavaScript and props instead.
+              className={`
+                timelineThreadIntervalMarkerOverview
+                timelineThreadIntervalMarkerOverviewThread${thread.name}
+              `}
               rangeStart={rangeStart}
               rangeEnd={rangeEnd}
               threadIndex={threadIndex}
@@ -222,7 +227,6 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
           <ThreadStackGraph
             interval={interval}
             thread={thread}
-            className="threadStackGraph"
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
@@ -267,6 +271,6 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     changeSelectedCallNode,
     focusCallTree,
   },
-  component: ProfileThreadHeaderBar,
+  component: TimelineThread,
 };
 export default explicitConnect(options);
