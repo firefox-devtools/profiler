@@ -506,6 +506,7 @@ function _processFrameTable(
 
 /**
  * Explicitly recreate the stack table here to help enforce our assumptions about types.
+ * Also add a category column.
  */
 function _processStackTable(
   geckoStackTable: GeckoStackStruct,
@@ -513,8 +514,8 @@ function _processStackTable(
   categories: CategoryList
 ): StackTable {
   // Compute a non-null category for every stack
-  const greyCategory = categories.findIndex(c => c.color === 'grey') || 0;
-  const categoryColumn = [];
+  const defaultCategory = categories.findIndex(c => c.color === 'grey') || 0;
+  const categoryColumn = new Array(geckoStackTable.length);
   for (let stackIndex = 0; stackIndex < geckoStackTable.length; stackIndex++) {
     const frameCategory =
       frameTable.category[geckoStackTable.frame[stackIndex]];
@@ -526,10 +527,10 @@ function _processStackTable(
       if (prefix !== null) {
         stackCategory = categoryColumn[prefix];
       } else {
-        stackCategory = greyCategory;
+        stackCategory = defaultCategory;
       }
     }
-    categoryColumn.push(stackCategory);
+    categoryColumn[stackIndex] = stackCategory;
   }
 
   return {
