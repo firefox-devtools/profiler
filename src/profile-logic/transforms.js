@@ -889,6 +889,7 @@ export function collapseResource(
       const newStackIndex = newStackTable.length++;
       newStackTable.prefix.push(newStackPrefix);
       newStackTable.frame.push(frameIndex);
+      newStackTable.category.push(category);
       oldStackToNewStack.set(stackIndex, newStackIndex);
     }
   }
