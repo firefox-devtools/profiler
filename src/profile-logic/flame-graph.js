@@ -45,8 +45,7 @@ type Stack = Array<{
 export function getFlameGraphTiming(
   callTree: CallTree.CallTree
 ): FlameGraphTiming {
-  callTree.preloadChildrenCache();
-
+  const [children, pointers, lengths] = callTree.getAllChildren();
   const timing = [];
   // Array of call nodes to recursively process in the loop below.
   // Start with the roots of the call tree.
@@ -89,19 +88,13 @@ export function getFlameGraphTiming(
     timeOffset[depth + 1] = timeOffset[depth];
     timeOffset[depth] += totalTimeRelative;
 
-    const children = callTree.getChildren(nodeIndex).slice();
-    children.sort(
-      (a, b) =>
-        callTree.getNodeData(a).funcName < callTree.getNodeData(b).funcName
-          ? -1
-          : 1
-    );
-
     // Since we're popping the stack at the top of the while loop, put
     // in the children in reverse order here to retain the ascending
     // order when processing them.
-    for (let i = children.length - 1; i >= 0; i--) {
-      stack.push({ nodeIndex: children[i], depth: depth + 1 });
+    let length = lengths[nodeIndex];
+    let i = pointers[nodeIndex];
+    while (length--) {
+      stack.push({ nodeIndex: children[i++], depth: depth + 1 });
     }
   }
   return timing;
