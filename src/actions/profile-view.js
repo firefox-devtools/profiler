@@ -85,6 +85,11 @@ export function changeThreadOrder(threadOrder: ThreadIndex[]): Action {
   };
 }
 
+function dispatchResizeEvent() {
+  const event = new UIEvent('resize', { view: window });
+  window.dispatchEvent(event);
+}
+
 export function hideThread(threadIndex: ThreadIndex): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadOrder = getThreadOrder(getState());
@@ -112,6 +117,7 @@ export function hideThread(threadIndex: ThreadIndex): ThunkAction<void> {
         hiddenThreads,
       }: Action)
     );
+    dispatchResizeEvent();
   };
 }
 
@@ -130,6 +136,7 @@ export function showThread(threadIndex: ThreadIndex): ThunkAction<void> {
       type: 'SHOW_THREAD',
       threadIndex,
     });
+    dispatchResizeEvent();
   };
 }
 
@@ -154,6 +161,7 @@ export function isolateThread(
       ),
       isolatedThreadIndex,
     });
+    dispatchResizeEvent();
   };
 }
 
