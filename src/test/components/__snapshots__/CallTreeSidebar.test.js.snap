@@ -1,2972 +1,1120 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 1`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<div
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      callNodeTable={
-        Object {
-          "depth": Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            3,
-            4,
-            2,
-            3,
-          ],
-          "func": Int32Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            4,
-            6,
-            7,
-          ],
-          "length": 9,
-          "prefix": Int32Array [
-            -1,
-            0,
-            1,
-            2,
-            3,
-            2,
-            5,
-            1,
-            7,
-          ],
-        }
-      }
-      dispatch={[Function]}
-      lib=""
-      name=""
-      selectedNodeIndex={null}
-      selectedThreadIndex={0}
-      timings={
-        Object {
-          "forFunc": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-          },
-          "forPath": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-          },
-          "rootTime": 0,
-        }
-      }
-    >
-      <div
-        className="sidebar sidebar-calltree"
-      >
-        Select a node to display some information about it.
-      </div>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+  Select a node to display some information about it.
+</div>
 `;
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 2`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<aside
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      callNodeTable={
-        Object {
-          "depth": Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            3,
-            4,
-            2,
-            3,
-          ],
-          "func": Int32Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            4,
-            6,
-            7,
-          ],
-          "length": 9,
-          "prefix": Int32Array [
-            -1,
-            0,
-            1,
-            2,
-            3,
-            2,
-            5,
-            1,
-            7,
-          ],
-        }
-      }
-      dispatch={[Function]}
-      lib=""
-      name="Cjs"
-      selectedNodeIndex={2}
-      selectedThreadIndex={0}
-      timings={
-        Object {
-          "forFunc": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "interpreter": 2,
-              },
-              "value": 2,
-            },
-          },
-          "forPath": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "interpreter": 2,
-              },
-              "value": 2,
-            },
-          },
-          "rootTime": 4,
-        }
-      }
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
     >
-      <aside
-        className="sidebar sidebar-calltree"
+      Cjs
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
       >
-        <header
-          className="sidebar-titlegroup"
-        >
-          <h2
-            className="sidebar-title"
-          >
-            Cjs
-          </h2>
-        </header>
-        <h3
-          className="sidebar-title2"
-        >
-          This selected call node
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            2
-            ms (
-            50
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            —
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "interpreter": 2,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                2
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h3
-          className="sidebar-title2"
-        >
-          This function across the entire tree
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            2
-            ms (
-            50
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            —
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "interpreter": 2,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                2
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-      </aside>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
 `;
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 3`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<aside
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      callNodeTable={
-        Object {
-          "depth": Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            3,
-            4,
-            2,
-            3,
-          ],
-          "func": Int32Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            4,
-            6,
-            7,
-          ],
-          "length": 9,
-          "prefix": Int32Array [
-            -1,
-            0,
-            1,
-            2,
-            3,
-            2,
-            5,
-            1,
-            7,
-          ],
-        }
-      }
-      dispatch={[Function]}
-      lib=""
-      name="D"
-      selectedNodeIndex={3}
-      selectedThreadIndex={0}
-      timings={
-        Object {
-          "forFunc": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "interpreter": 1,
-              },
-              "value": 1,
-            },
-          },
-          "forPath": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "interpreter": 1,
-              },
-              "value": 1,
-            },
-          },
-          "rootTime": 4,
-        }
-      }
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
     >
-      <aside
-        className="sidebar sidebar-calltree"
+      D
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
       >
-        <header
-          className="sidebar-titlegroup"
-        >
-          <h2
-            className="sidebar-title"
-          >
-            D
-          </h2>
-        </header>
-        <h3
-          className="sidebar-title2"
-        >
-          This selected call node
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            1
-            ms (
-            25
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            —
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "interpreter": 1,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 1,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                1
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h3
-          className="sidebar-title2"
-        >
-          This function across the entire tree
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            1
-            ms (
-            25
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            —
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "interpreter": 1,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 1,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                1
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-      </aside>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+        Running Time
+        :
+      </div>,
+      "1",
+      "ms (",
+      "25",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "1",
+      "ms (",
+      "25",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
 `;
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 4`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<aside
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      callNodeTable={
-        Object {
-          "depth": Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            3,
-            4,
-            2,
-            3,
-          ],
-          "func": Int32Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            4,
-            6,
-            7,
-          ],
-          "length": 9,
-          "prefix": Int32Array [
-            -1,
-            0,
-            1,
-            2,
-            3,
-            2,
-            5,
-            1,
-            7,
-          ],
-        }
-      }
-      dispatch={[Function]}
-      lib=""
-      name="H"
-      selectedNodeIndex={7}
-      selectedThreadIndex={0}
-      timings={
-        Object {
-          "forFunc": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 1,
-              },
-              "value": 1,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 2,
-              },
-              "value": 2,
-            },
-          },
-          "forPath": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 1,
-              },
-              "value": 1,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 2,
-              },
-              "value": 2,
-            },
-          },
-          "rootTime": 4,
-        }
-      }
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
     >
-      <aside
-        className="sidebar sidebar-calltree"
+      H
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
       >
-        <header
-          className="sidebar-titlegroup"
-        >
-          <h2
-            className="sidebar-title"
-          >
-            H
-          </h2>
-        </header>
-        <h3
-          className="sidebar-title2"
-        >
-          This selected call node
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            2
-            ms (
-            50
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            1ms (25%)
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "native": 2,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                2
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – self time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "native": 1,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 1,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                1
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h3
-          className="sidebar-title2"
-        >
-          This function across the entire tree
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            2
-            ms (
-            50
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            1ms (25%)
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "native": 2,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                2
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – self time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "native": 1,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 1,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                1
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-      </aside>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "1ms (25%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "1ms (25%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
 `;
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 5`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<aside
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      callNodeTable={
-        Object {
-          "depth": Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            3,
-            4,
-            2,
-            3,
-          ],
-          "func": Int32Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            4,
-            6,
-            7,
-          ],
-          "length": 9,
-          "prefix": Int32Array [
-            -1,
-            0,
-            1,
-            2,
-            3,
-            2,
-            5,
-            1,
-            7,
-          ],
-        }
-      }
-      dispatch={[Function]}
-      lib=""
-      name="Ejs"
-      selectedNodeIndex={4}
-      selectedThreadIndex={0}
-      timings={
-        Object {
-          "forFunc": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": Object {
-                "interpreter": 2,
-              },
-              "value": 2,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "interpreter": 2,
-              },
-              "value": 2,
-            },
-          },
-          "forPath": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": Object {
-                "interpreter": 1,
-              },
-              "value": 1,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "interpreter": 1,
-              },
-              "value": 1,
-            },
-          },
-          "rootTime": 4,
-        }
-      }
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
     >
-      <aside
-        className="sidebar sidebar-calltree"
+      Ejs
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
       >
-        <header
-          className="sidebar-titlegroup"
-        >
-          <h2
-            className="sidebar-title"
-          >
-            Ejs
-          </h2>
-        </header>
-        <h3
-          className="sidebar-title2"
-        >
-          This selected call node
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            1
-            ms (
-            25
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            1ms (25%)
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "interpreter": 1,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 1,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                1
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – self time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "interpreter": 1,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 1,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                1
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h3
-          className="sidebar-title2"
-        >
-          This function across the entire tree
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            2
-            ms (
-            50
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            2ms (50%)
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "interpreter": 2,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                2
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – self time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "interpreter": 2,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                2
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-      </aside>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+        Running Time
+        :
+      </div>,
+      "1",
+      "ms (",
+      "25",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "1ms (25%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "2ms (50%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
 `;
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node in an inverted tree 1`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<div
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      callNodeTable={
-        Object {
-          "depth": Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            1,
-            2,
-            3,
-            4,
-            0,
-            1,
-            2,
-            3,
-            0,
-            1,
-            2,
-          ],
-          "func": Int32Array [
-            4,
-            3,
-            2,
-            1,
-            0,
-            5,
-            2,
-            1,
-            0,
-            7,
-            6,
-            1,
-            0,
-            6,
-            1,
-            0,
-          ],
-          "length": 16,
-          "prefix": Int32Array [
-            -1,
-            0,
-            1,
-            2,
-            3,
-            0,
-            5,
-            6,
-            7,
-            -1,
-            9,
-            10,
-            11,
-            -1,
-            13,
-            14,
-          ],
-        }
-      }
-      dispatch={[Function]}
-      lib=""
-      name=""
-      selectedNodeIndex={null}
-      selectedThreadIndex={0}
-      timings={
-        Object {
-          "forFunc": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-          },
-          "forPath": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-          },
-          "rootTime": 0,
-        }
-      }
-    >
-      <div
-        className="sidebar sidebar-calltree"
-      >
-        Select a node to display some information about it.
-      </div>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+  Select a node to display some information about it.
+</div>
 `;
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node in an inverted tree 2`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<aside
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      callNodeTable={
-        Object {
-          "depth": Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            1,
-            2,
-            3,
-            4,
-            0,
-            1,
-            2,
-            3,
-            0,
-            1,
-            2,
-          ],
-          "func": Int32Array [
-            4,
-            3,
-            2,
-            1,
-            0,
-            5,
-            2,
-            1,
-            0,
-            7,
-            6,
-            1,
-            0,
-            6,
-            1,
-            0,
-          ],
-          "length": 16,
-          "prefix": Int32Array [
-            -1,
-            0,
-            1,
-            2,
-            3,
-            0,
-            5,
-            6,
-            7,
-            -1,
-            9,
-            10,
-            11,
-            -1,
-            13,
-            14,
-          ],
-        }
-      }
-      dispatch={[Function]}
-      lib=""
-      name="Ejs"
-      selectedNodeIndex={0}
-      selectedThreadIndex={0}
-      timings={
-        Object {
-          "forFunc": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": Object {
-                "interpreter": 2,
-              },
-              "value": 2,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "interpreter": 2,
-              },
-              "value": 2,
-            },
-          },
-          "forPath": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 2,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "interpreter": 2,
-              },
-              "value": 2,
-            },
-          },
-          "rootTime": 4,
-        }
-      }
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
     >
-      <aside
-        className="sidebar sidebar-calltree"
+      Ejs
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
       >
-        <header
-          className="sidebar-titlegroup"
-        >
-          <h2
-            className="sidebar-title"
-          >
-            Ejs
-          </h2>
-        </header>
-        <h3
-          className="sidebar-title2"
-        >
-          This selected call node
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            2
-            ms (
-            50
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            2ms (50%)
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "interpreter": 2,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                2
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h3
-          className="sidebar-title2"
-        >
-          This function across the entire tree
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            2
-            ms (
-            50
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            2ms (50%)
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "interpreter": 2,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                2
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – self time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "interpreter": 2,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                2
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-      </aside>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "2ms (50%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "2ms (50%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
 `;
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node in an inverted tree 3`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<aside
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      callNodeTable={
-        Object {
-          "depth": Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            1,
-            2,
-            3,
-            4,
-            0,
-            1,
-            2,
-            3,
-            0,
-            1,
-            2,
-          ],
-          "func": Int32Array [
-            4,
-            3,
-            2,
-            1,
-            0,
-            5,
-            2,
-            1,
-            0,
-            7,
-            6,
-            1,
-            0,
-            6,
-            1,
-            0,
-          ],
-          "length": 16,
-          "prefix": Int32Array [
-            -1,
-            0,
-            1,
-            2,
-            3,
-            0,
-            5,
-            6,
-            7,
-            -1,
-            9,
-            10,
-            11,
-            -1,
-            13,
-            14,
-          ],
-        }
-      }
-      dispatch={[Function]}
-      lib=""
-      name="H"
-      selectedNodeIndex={13}
-      selectedThreadIndex={0}
-      timings={
-        Object {
-          "forFunc": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 1,
-              },
-              "value": 1,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 2,
-              },
-              "value": 2,
-            },
-          },
-          "forPath": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 1,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 1,
-              },
-              "value": 1,
-            },
-          },
-          "rootTime": 4,
-        }
-      }
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
     >
-      <aside
-        className="sidebar sidebar-calltree"
+      H
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
       >
-        <header
-          className="sidebar-titlegroup"
-        >
-          <h2
-            className="sidebar-title"
-          >
-            H
-          </h2>
-        </header>
-        <h3
-          className="sidebar-title2"
-        >
-          This selected call node
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            1
-            ms (
-            25
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            1ms (25%)
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "native": 1,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 1,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                1
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h3
-          className="sidebar-title2"
-        >
-          This function across the entire tree
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            2
-            ms (
-            50
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            1ms (25%)
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "native": 2,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                2
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – self time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "native": 1,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 1,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                1
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-      </aside>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+        Running Time
+        :
+      </div>,
+      "1",
+      "ms (",
+      "25",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "1ms (25%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "1ms (25%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
 `;
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node in an inverted tree 4`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<aside
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      callNodeTable={
-        Object {
-          "depth": Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            1,
-            2,
-            3,
-            4,
-            0,
-            1,
-            2,
-            3,
-            0,
-            1,
-            2,
-          ],
-          "func": Int32Array [
-            4,
-            3,
-            2,
-            1,
-            0,
-            5,
-            2,
-            1,
-            0,
-            7,
-            6,
-            1,
-            0,
-            6,
-            1,
-            0,
-          ],
-          "length": 16,
-          "prefix": Int32Array [
-            -1,
-            0,
-            1,
-            2,
-            3,
-            0,
-            5,
-            6,
-            7,
-            -1,
-            9,
-            10,
-            11,
-            -1,
-            13,
-            14,
-          ],
-        }
-      }
-      dispatch={[Function]}
-      lib=""
-      name="H"
-      selectedNodeIndex={10}
-      selectedThreadIndex={0}
-      timings={
-        Object {
-          "forFunc": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 1,
-              },
-              "value": 1,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 2,
-              },
-              "value": 2,
-            },
-          },
-          "forPath": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 1,
-              },
-              "value": 1,
-            },
-          },
-          "rootTime": 4,
-        }
-      }
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
     >
-      <aside
-        className="sidebar sidebar-calltree"
+      H
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
       >
-        <header
-          className="sidebar-titlegroup"
-        >
-          <h2
-            className="sidebar-title"
-          >
-            H
-          </h2>
-        </header>
-        <h3
-          className="sidebar-title2"
-        >
-          This selected call node
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            1
-            ms (
-            25
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            —
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "native": 1,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 1,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                1
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h3
-          className="sidebar-title2"
-        >
-          This function across the entire tree
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            2
-            ms (
-            50
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            1ms (25%)
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "native": 2,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                2
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – self time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "native": 1,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 1,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                1
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-      </aside>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+        Running Time
+        :
+      </div>,
+      "1",
+      "ms (",
+      "25",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "1ms (25%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
 `;
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node in an inverted tree 5`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<aside
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      callNodeTable={
-        Object {
-          "depth": Array [
-            0,
-            1,
-            2,
-            3,
-            4,
-            1,
-            2,
-            3,
-            4,
-            0,
-            1,
-            2,
-            3,
-            0,
-            1,
-            2,
-          ],
-          "func": Int32Array [
-            4,
-            3,
-            2,
-            1,
-            0,
-            5,
-            2,
-            1,
-            0,
-            7,
-            6,
-            1,
-            0,
-            6,
-            1,
-            0,
-          ],
-          "length": 16,
-          "prefix": Int32Array [
-            -1,
-            0,
-            1,
-            2,
-            3,
-            0,
-            5,
-            6,
-            7,
-            -1,
-            9,
-            10,
-            11,
-            -1,
-            13,
-            14,
-          ],
-        }
-      }
-      dispatch={[Function]}
-      lib=""
-      name="A"
-      selectedNodeIndex={15}
-      selectedThreadIndex={0}
-      timings={
-        Object {
-          "forFunc": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "interpreter": 2,
-                "native": 2,
-              },
-              "value": 4,
-            },
-          },
-          "forPath": Object {
-            "selfTime": Object {
-              "breakdownByImplementation": null,
-              "value": 0,
-            },
-            "totalTime": Object {
-              "breakdownByImplementation": Object {
-                "native": 1,
-              },
-              "value": 1,
-            },
-          },
-          "rootTime": 4,
-        }
-      }
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
     >
-      <aside
-        className="sidebar sidebar-calltree"
+      A
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
       >
-        <header
-          className="sidebar-titlegroup"
-        >
-          <h2
-            className="sidebar-title"
-          >
-            A
-          </h2>
-        </header>
-        <h3
-          className="sidebar-title2"
-        >
-          This selected call node
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            1
-            ms (
-            25
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            —
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "native": 1,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 1,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                1
-                ms (
-                100
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-        <h3
-          className="sidebar-title2"
-        >
-          This function across the entire tree
-        </h3>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            4
-            ms (
-            100
-            %)
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            —
-          </SidebarDetail>
-        </div>
-        <h4
-          className="sidebar-title3"
-        >
-          Implementation – running time
-        </h4>
-        <ImplementationBreakdown
-          breakdown={
-            Object {
-              "interpreter": 2,
-              "native": 2,
-            }
-          }
-        >
-          <Breakdown
-            data={
-              Array [
-                Object {
-                  "group": "Native code",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript interpreter",
-                  "value": 2,
-                },
-                Object {
-                  "group": "JavaScript JIT (baseline)",
-                  "value": 0,
-                },
-                Object {
-                  "group": "JavaScript JIT (ion)",
-                  "value": 0,
-                },
-              ]
-            }
-          >
-            <div
-              className="sidebar-details"
-            >
-              <SidebarDetail
-                key="Native code"
-                label="Native code"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  Native code
-                  :
-                </div>
-                2
-                ms (
-                50
-                %)
-              </SidebarDetail>
-              <SidebarDetail
-                key="JavaScript interpreter"
-                label="JavaScript interpreter"
-              >
-                <div
-                  className="sidebar-label"
-                >
-                  JavaScript interpreter
-                  :
-                </div>
-                2
-                ms (
-                50
-                %)
-              </SidebarDetail>
-            </div>
-          </Breakdown>
-        </ImplementationBreakdown>
-      </aside>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+        Running Time
+        :
+      </div>,
+      "1",
+      "ms (",
+      "25",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "4",
+      "ms (",
+      "100",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+  </div>
+</aside>
 `;
