@@ -10,7 +10,7 @@ import {
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import memoize from 'memoize-immutable';
-import WeakTupleMap from 'weaktuplemap';
+import MixedTupleMap from 'mixedtuplemap';
 import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
@@ -631,9 +631,8 @@ export const selectorsForThread = (
     const applyTransform = (
       thread: Thread,
       transform: Transform,
-      defaultCategoryWrappedInObj: { value: IndexIntoCategoryList }
+      defaultCategory: IndexIntoCategoryList
     ) => {
-      const defaultCategory = defaultCategoryWrappedInObj.value;
       switch (transform.type) {
         case 'focus-subtree':
           return transform.inverted
@@ -687,7 +686,7 @@ export const selectorsForThread = (
     // memoize each step individually so that they transform stack can be pushed and
     // popped frequently and easily.
     const applyTransformMemoized = memoize(applyTransform, {
-      cache: new WeakTupleMap(),
+      cache: new MixedTupleMap(),
     });
     const getTransformStack = (state: State): TransformStack =>
       UrlState.getTransformStack(state, threadIndex);
