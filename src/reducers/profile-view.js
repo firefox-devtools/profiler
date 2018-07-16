@@ -888,7 +888,10 @@ export const selectorsForThread = (
       ProfileData.computeCallNodeMaxDepth
     );
     const getFlameGraphTiming = createSelector(
-      getCallTree,
+      getRangeSelectionFilteredThread,
+      getProfileInterval,
+      getCallNodeInfo,
+      UrlState.getInvertCallstack,
       FlameGraph.getFlameGraphTiming
     );
     const getSearchFilteredMarkers = createSelector(
