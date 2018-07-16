@@ -26,7 +26,7 @@ import { getSelectedTab } from '../../reducers/url-state';
 import { getIsSidebarOpen } from '../../reducers/app';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
-import ProfileThreadHeaderContextMenu from '../header/ProfileThreadHeaderContextMenu';
+import ProfileThreadHeaderContextMenu from '../timeline/ProfileThreadHeaderContextMenu';
 import { toValidTabSlug } from '../../utils/flow';
 import { tabsWithTitleArray } from '../../app-logic/tabs-handling';
 

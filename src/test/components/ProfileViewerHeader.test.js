@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import ProfileViewerHeader from '../../components/header/ProfileViewerHeader';
+import ProfileViewerHeader from '../../components/timeline/ProfileViewerHeader';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';

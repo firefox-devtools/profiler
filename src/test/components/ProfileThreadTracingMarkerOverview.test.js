@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import ProfileThreadTrackingMarkerOverview from '../../components/header/ProfileThreadTracingMarkerOverview';
+import ProfileThreadTrackingMarkerOverview from '../../components/timeline/ProfileThreadTracingMarkerOverview';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';

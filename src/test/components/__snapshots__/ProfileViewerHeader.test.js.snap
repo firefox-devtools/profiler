@@ -155,7 +155,7 @@ process: \\"default\\" (0)"
                 />
               </div>
               <div
-                className="headerEmptyThreadIndicator"
+                className="timelineEmptyThreadIndicator"
               />
             </div>
           </li>
@@ -204,10 +204,10 @@ process: \\"default\\" (0)"
                 />
               </div>
               <div
-                className="headerEmptyThreadIndicator"
+                className="timelineEmptyThreadIndicator"
               >
                 <div
-                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorStartup"
+                  className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
                   onMouseEnter={[Function]}
                   onMouseLeave={[Function]}
                   style={
@@ -218,7 +218,7 @@ process: \\"default\\" (0)"
                   }
                 />
                 <div
-                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorShutdown"
+                  className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
                   onMouseEnter={[Function]}
                   onMouseLeave={[Function]}
                   style={
@@ -229,7 +229,7 @@ process: \\"default\\" (0)"
                   }
                 />
                 <div
-                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorEmptyBuffer"
+                  className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
                   onMouseEnter={[Function]}
                   onMouseLeave={[Function]}
                   style={
@@ -287,10 +287,10 @@ process: \\"default\\" (0)"
                 />
               </div>
               <div
-                className="headerEmptyThreadIndicator"
+                className="timelineEmptyThreadIndicator"
               >
                 <div
-                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorStartup"
+                  className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
                   onMouseEnter={[Function]}
                   onMouseLeave={[Function]}
                   style={
@@ -301,7 +301,7 @@ process: \\"default\\" (0)"
                   }
                 />
                 <div
-                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorShutdown"
+                  className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
                   onMouseEnter={[Function]}
                   onMouseLeave={[Function]}
                   style={
@@ -312,7 +312,7 @@ process: \\"default\\" (0)"
                   }
                 />
                 <div
-                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorEmptyBuffer"
+                  className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
                   onMouseEnter={[Function]}
                   onMouseLeave={[Function]}
                   style={

@@ -12,7 +12,7 @@ import MenuButtons from './MenuButtons';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import { returnToZipFileList } from '../../actions/zipped-profiles';
 import { getProfileName } from '../../reducers/url-state';
-import ProfileViewerHeader from '../header/ProfileViewerHeader';
+import ProfileViewerHeader from '../timeline/ProfileViewerHeader';
 import { getHasZipFile } from '../../reducers/zipped-profiles';
 
 import type {
