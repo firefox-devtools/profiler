@@ -217,18 +217,18 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
             this.drawOneMarker(ctx, x, y, w, h, text);
           }
         }
-        if (hoveredElement) {
-          this.drawOneMarker(
-            ctx,
-            hoveredElement.x,
-            hoveredElement.y,
-            hoveredElement.w,
-            hoveredElement.h,
-            hoveredElement.text,
-            'Highlight', //    background color
-            'HighlightText' // foreground color
-          );
-        }
+      }
+      if (hoveredElement) {
+        this.drawOneMarker(
+          ctx,
+          hoveredElement.x,
+          hoveredElement.y,
+          hoveredElement.w,
+          hoveredElement.h,
+          hoveredElement.text,
+          'Highlight', //    background color
+          'HighlightText' // foreground color
+        );
       }
     }
   }
