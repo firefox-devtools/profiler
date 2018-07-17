@@ -71,17 +71,7 @@ type DispatchProps = {|
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class TimelineThread extends PureComponent<Props> {
-  constructor(props) {
-    super(props);
-    (this: any)._onLabelMouseDown = this._onLabelMouseDown.bind(this);
-    (this: any)._onStackClick = this._onStackClick.bind(this);
-    (this: any)._onLineClick = this._onLineClick.bind(this);
-    (this: any)._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(
-      this
-    );
-  }
-
-  _onLabelMouseDown(event: MouseEvent) {
+  _onLabelMouseDown = (event: MouseEvent) => {
     const {
       changeSelectedThread,
       changeRightClickedThread,
@@ -97,14 +87,14 @@ class TimelineThread extends PureComponent<Props> {
       // actually changing the current selection.
       changeRightClickedThread(threadIndex);
     }
-  }
+  };
 
-  _onLineClick() {
+  _onLineClick = () => {
     const { threadIndex, changeSelectedThread } = this.props;
     changeSelectedThread(threadIndex);
-  }
+  };
 
-  _onStackClick(time: number) {
+  _onStackClick = (time: number) => {
     const { threadIndex, interval } = this.props;
     const {
       thread,
@@ -127,13 +117,13 @@ class TimelineThread extends PureComponent<Props> {
       getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
     focusCallTree();
-  }
+  };
 
-  _onIntervalMarkerSelect(
+  _onIntervalMarkerSelect = (
     threadIndex: ThreadIndex,
     start: Milliseconds,
     end: Milliseconds
-  ) {
+  ) => {
     const {
       rangeStart,
       rangeEnd,
@@ -147,7 +137,7 @@ class TimelineThread extends PureComponent<Props> {
       selectionEnd: Math.min(rangeEnd, end),
     });
     changeSelectedThread(threadIndex);
-  }
+  };
 
   render() {
     const {

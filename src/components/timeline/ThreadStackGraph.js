@@ -27,18 +27,12 @@ type Props = {|
 |};
 
 class ThreadStackGraph extends PureComponent<Props> {
-  _canvas: null | HTMLCanvasElement;
-  _requestedAnimationFrame: boolean;
+  _canvas: null | HTMLCanvasElement = null;
+  _requestedAnimationFrame: boolean = false;
   _resizeListener: () => void;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
     (this._canvas = canvas);
-
-  constructor(props: Props) {
-    super(props);
-    this._resizeListener = () => this.forceUpdate();
-    this._requestedAnimationFrame = false;
-    this._canvas = null;
-  }
+  _resizeListener = () => this.forceUpdate();
 
   _scheduleDraw() {
     if (!this._requestedAnimationFrame) {

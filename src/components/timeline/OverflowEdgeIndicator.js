@@ -24,31 +24,27 @@ type State = {
 };
 
 class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
-  _containerCreated: (elem: HTMLDivElement | null) => void;
-  _container: HTMLDivElement | null;
-  _contentsWrapperCreated: (elem: HTMLDivElement | null) => void;
-  _contentsWrapper: HTMLDivElement | null;
+  _container: HTMLDivElement | null = null;
+  _contentsWrapper: HTMLDivElement | null = null;
 
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      overflowsOnTop: false,
-      overflowsOnRight: false,
-      overflowsOnBottom: false,
-      overflowsOnLeft: false,
-    };
-    (this: any)._onScroll = this._onScroll.bind(this);
-    this._containerCreated = elem => {
-      this._container = elem;
-    };
-    this._contentsWrapperCreated = elem => {
-      this._contentsWrapper = elem;
-    };
-  }
+  state = {
+    overflowsOnTop: false,
+    overflowsOnRight: false,
+    overflowsOnBottom: false,
+    overflowsOnLeft: false,
+  };
 
-  _onScroll() {
+  _takeContainerRef = (element: HTMLDivElement | null) => {
+    this._container = element;
+  };
+
+  _takeContainerWrapperRef = (element: HTMLDivElement | null) => {
+    this._contentsWrapper = element;
+  };
+
+  _onScroll = () => {
     this._updateIndicatorStatus();
-  }
+  };
 
   componentDidMount() {
     this._updateIndicatorStatus();
@@ -93,11 +89,11 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
             `${className}Scrollbox`
           )}
           onScroll={this._onScroll}
-          ref={this._containerCreated}
+          ref={this._takeContainerRef}
         >
           <div
             className="overflowEdgeIndicatorContentsWrapper"
-            ref={this._contentsWrapperCreated}
+            ref={this._takeContainerWrapperRef}
           >
             {children}
           </div>

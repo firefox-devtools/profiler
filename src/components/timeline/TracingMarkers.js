@@ -83,28 +83,18 @@ class TimelineTracingMarkersImplementation extends React.PureComponent<
   Props,
   State
 > {
-  _canvas: HTMLCanvasElement | null;
-  _requestedAnimationFrame: boolean | null;
+  _canvas: HTMLCanvasElement | null = null;
+  _requestedAnimationFrame: boolean = false;
+  state = {
+    hoveredItem: null,
+    mouseDownItem: null,
+    mouseX: 0,
+    mouseY: 0,
+  };
 
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      hoveredItem: null,
-      mouseDownItem: null,
-      mouseX: 0,
-      mouseY: 0,
-    };
-    (this: any)._onMouseDown = this._onMouseDown.bind(this);
-    (this: any)._onMouseMove = this._onMouseMove.bind(this);
-    (this: any)._onMouseUp = this._onMouseUp.bind(this);
-    (this: any)._onMouseOut = this._onMouseOut.bind(this);
-    (this: any)._takeCanvasRef = this._takeCanvasRef.bind(this);
-    this._canvas = null;
-  }
-
-  _takeCanvasRef(c: HTMLCanvasElement | null) {
+  _takeCanvasRef = (c: HTMLCanvasElement | null) => {
     this._canvas = c;
-  }
+  };
 
   _scheduleDraw() {
     window.requestAnimationFrame(() => {
@@ -146,7 +136,7 @@ class TimelineTracingMarkersImplementation extends React.PureComponent<
     return null;
   }
 
-  _onMouseMove(event: SyntheticMouseEvent<>) {
+  _onMouseMove = (event: SyntheticMouseEvent<>) => {
     const hoveredItem = this._hitTest(event);
     if (hoveredItem !== null) {
       this.setState({
@@ -159,9 +149,9 @@ class TimelineTracingMarkersImplementation extends React.PureComponent<
         hoveredItem: null,
       });
     }
-  }
+  };
 
-  _onMouseDown(e) {
+  _onMouseDown = e => {
     const mouseDownItem = this._hitTest(e);
     this.setState({ mouseDownItem });
     if (mouseDownItem !== null) {
@@ -170,9 +160,9 @@ class TimelineTracingMarkersImplementation extends React.PureComponent<
       }
       e.stopPropagation();
     }
-  }
+  };
 
-  _onMouseUp(e) {
+  _onMouseUp = e => {
     const { mouseDownItem } = this.state;
     if (mouseDownItem !== null) {
       const mouseUpItem = this._hitTest(e);
@@ -193,13 +183,13 @@ class TimelineTracingMarkersImplementation extends React.PureComponent<
         mouseDownItem: null,
       });
     }
-  }
+  };
 
-  _onMouseOut() {
+  _onMouseOut = () => {
     this.setState({
       hoveredItem: null,
     });
-  }
+  };
 
   componentDidUpdate(prevProps: Props, prevState: State) {
     if (
