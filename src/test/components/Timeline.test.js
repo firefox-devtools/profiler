@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import ProfileViewerHeader from '../../components/timeline/ProfileViewerHeader';
+import Timeline from '../../components/timeline';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
@@ -63,7 +63,7 @@ function _getProfileWithDroppedSamples(): Profile {
   return profile;
 }
 
-describe('calltree/ProfileViewerHeader', function() {
+describe('Timeline', function() {
   beforeEach(() => {
     jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
       // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
@@ -97,7 +97,7 @@ describe('calltree/ProfileViewerHeader', function() {
 
     const header = renderer.create(
       <Provider store={storeWithProfile(profile)}>
-        <ProfileViewerHeader />
+        <Timeline />
       </Provider>,
       { createNodeMock }
     );

@@ -49,7 +49,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class ProfileViewerHeader extends PureComponent<Props> {
+class Timeline extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._onZoomButtonClick = this._onZoomButtonClick.bind(this);
@@ -75,7 +75,7 @@ class ProfileViewerHeader extends PureComponent<Props> {
 
     return (
       <TimeSelectionScrubber
-        className="profileViewerHeader"
+        className="timeline"
         zeroAt={zeroAt}
         rangeStart={timeRange.start}
         rangeEnd={timeRange.end}
@@ -84,11 +84,11 @@ class ProfileViewerHeader extends PureComponent<Props> {
         onSelectionChange={updateProfileSelection}
         onZoomButtonClick={this._onZoomButtonClick}
       >
-        <OverflowEdgeIndicator className="profileViewerHeaderOverflowEdgeIndicator">
+        <OverflowEdgeIndicator className="timelineOverflowEdgeIndicator">
           {
             <Reorderable
               tagName="ol"
-              className="profileViewerHeaderThreadList"
+              className="timelineThreadList"
               order={threadOrder}
               orient="vertical"
               onChangeOrder={changeThreadOrder}
@@ -126,7 +126,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     updateProfileSelection,
     addRangeFilterAndUnsetSelection,
   },
-  component: ProfileViewerHeader,
+  component: Timeline,
 };
 
 export default explicitConnect(options);

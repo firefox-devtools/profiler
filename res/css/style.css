@@ -329,13 +329,6 @@ body, #root, .profileViewer {
   flex: 1;
 }
 
-.profileViewerHeader {
-  position: relative;
-  margin-left: 149px;
-  border-left: 1px solid var(--grey-30);
-  -moz-user-focus: ignore;
-}
-
 .profileViewerHeaderTimeRuler {
   height: 20px;
   overflow: hidden;
@@ -390,20 +383,6 @@ body, #root, .profileViewer {
   padding-right: 5px;
 }
 
-.profileViewerHeaderOverflowEdgeIndicatorScrollbox {
-  margin: 0 0 0 -150px;
-  padding-left: 150px;
-  max-height: 250px;
-  overflow: auto;
-}
-
-.profileViewerHeaderThreadList {
-  list-style: none;
-  margin: 0 0 0 -150px;
-  padding: 0;
-  box-shadow: inset 0 1px var(--grey-30);
-}
-
 .threadStackGraph {
   height: 25px;
 }
@@ -423,10 +402,6 @@ body, #root, .profileViewer {
   width: 1px;
   background: rgba(0,0,0,0.4);
   z-index: 1;
-}
-
-.profileViewerHeader:hover > .timeSelectionScrubberHoverIndicator {
-  visibility: visible;
 }
 
 .overlay {
@@ -544,7 +519,7 @@ body, #root, .profileViewer {
   transition: unset;
 }
 
-.profileViewerHeader:hover .selectionScrubberZoomButton,
+.timeline:hover .selectionScrubberZoomButton,
 .selectionScrubberZoomButton:active {
   opacity: 1.0;
 }

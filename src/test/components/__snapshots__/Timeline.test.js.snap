@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`calltree/ProfileViewerHeader renders the header 1`] = `
+exports[`Timeline renders the header 1`] = `
 <div
-  className="profileViewerHeader"
+  className="timeline"
   onMouseDown={[Function]}
   onMouseMove={[Function]}
 >
   <div
-    className="profileViewerHeaderTimeRuler"
+    className="timelineTimeRuler"
   >
     <ol
       className="timeRulerContainer"
@@ -85,7 +85,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
     </ol>
   </div>
   <div
-    className="overflowEdgeIndicator profileViewerHeaderOverflowEdgeIndicator"
+    className="overflowEdgeIndicator timelineOverflowEdgeIndicator"
   >
     <div
       className="overflowEdgeIndicatorEdge topEdge"
@@ -100,14 +100,14 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
       className="overflowEdgeIndicatorEdge leftEdge"
     />
     <div
-      className="overflowEdgeIndicatorScrollbox profileViewerHeaderOverflowEdgeIndicatorScrollbox"
+      className="overflowEdgeIndicatorScrollbox timelineOverflowEdgeIndicatorScrollbox"
       onScroll={[Function]}
     >
       <div
         className="overflowEdgeIndicatorContentsWrapper"
       >
         <ol
-          className="profileViewerHeaderThreadList"
+          className="timelineThreadList"
           onMouseDown={[Function]}
         >
           <li
@@ -341,7 +341,7 @@ process: \\"default\\" (0)"
 </div>
 `;
 
-exports[`calltree/ProfileViewerHeader renders the header 2`] = `
+exports[`Timeline renders the header 2`] = `
 Array [
   Array [
     "set fillStyle",
