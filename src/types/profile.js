@@ -50,6 +50,17 @@ export type ThreadIndex = number;
  * such doesn't need to be stored in the profile itself. This is true, but
  * storing this information in the stack table makes it a lot easier to carry
  * it through various transforms that we apply to threads.
+ * For example, here's a case where a stack's category is not recoverable from
+ * any other information in the transformed thread:
+ * In the call path
+ *   someJSFunction [JS] -> Node.insertBefore [DOM] -> nsAttrAndChildArray::InsertChildAt,
+ * the stack node for nsAttrAndChildArray::InsertChildAt should inherit the
+ * category DOM from its "Node.insertBefore" prefix stack. And it should keep
+ * the DOM category even if you apply the "Merge node into calling function"
+ * transform to Node.insertBefore. This transform removes the stack node
+ * "Node.insertBefore" from the stackTable, so the information about the DOM
+ * category would be lost if it wasn't inherited into the
+ * nsAttrAndChildArray::InsertChildAt stack before transforms are applied.
  */
 export type StackTable = {
   frame: IndexIntoFrameTable[],
