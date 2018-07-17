@@ -102,6 +102,10 @@
   border-color: rgba(0, 0, 0, 0.2);
 }
 
+.filterNavigatorBarUncommittedItem {
+  opacity: 0.65;
+}
+
 /* Animation */
 
 .filterNavigatorBarTransition-enter {
