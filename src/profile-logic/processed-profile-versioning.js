@@ -608,7 +608,7 @@ const _upgraders = {
 
     for (const thread of threads) {
       const { stackTable, frameTable } = thread;
-      stackTable.category = [];
+      stackTable.category = new Array(stackTable.length);
       for (let i = 0; i < stackTable.length; i++) {
         const frameIndex = stackTable.frame[i];
         const frameCategory = frameTable.category[frameIndex];
