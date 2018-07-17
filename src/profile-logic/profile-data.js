@@ -136,6 +136,7 @@ export function getCallNodeInfo(
           callNodeIndex
         );
       } else if (category[callNodeIndex] !== categoryIndex) {
+        // Conflicting origin stack categories -> default category.
         category[callNodeIndex] = defaultCategory;
       }
       stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
@@ -560,6 +561,7 @@ function _filterThreadByFunc(
           } else if (
             newStackTable.category[newStack] !== stackTable.category[stackIndex]
           ) {
+            // Conflicting origin stack categories -> default category.
             newStackTable.category[newStack] = defaultCategory;
           }
           oldStackToNewStack.set(stackIndex, newStack);

@@ -861,6 +861,7 @@ export function collapseResource(
           }
           oldStackToNewStack.set(stackIndex, existingCollapsedStack);
           if (newStackTable.category[existingCollapsedStack] !== category) {
+            // Conflicting origin stack categories -> default category.
             newStackTable.category[existingCollapsedStack] = defaultCategory;
           }
         }
