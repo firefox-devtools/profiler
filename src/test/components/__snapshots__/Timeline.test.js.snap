@@ -2,7 +2,7 @@
 
 exports[`Timeline renders the header 1`] = `
 <div
-  className="timeline"
+  className="timelineSelection"
   onMouseDown={[Function]}
   onMouseMove={[Function]}
 >
@@ -330,7 +330,7 @@ process: \\"default\\" (0)"
     </div>
   </div>
   <div
-    className="timeSelectionScrubberHoverIndicator"
+    className="timelineSelectionHoverLine"
     style={
       Object {
         "left": "0",

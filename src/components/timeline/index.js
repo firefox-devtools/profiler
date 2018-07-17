@@ -7,7 +7,7 @@
 import React, { PureComponent } from 'react';
 import TimelineThread from './Thread';
 import Reorderable from '../shared/Reorderable';
-import TimeSelectionScrubber from './TimeSelectionScrubber';
+import TimelineSelection from './Selection';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import explicitConnect from '../../utils/connect';
 import {
@@ -17,6 +17,11 @@ import {
   getZeroAt,
 } from '../../reducers/profile-view';
 import { getHiddenThreads, getThreadOrder } from '../../reducers/url-state';
+import { withSize } from '../shared/WithSize';
+import TimeRuler from './TimeRuler';
+import './index.css';
+
+import type { SizeProps } from '../shared/WithSize';
 
 import {
   changeThreadOrder,
@@ -32,8 +37,11 @@ import type {
   ConnectedProps,
 } from '../../utils/connect';
 
+type OwnProps = SizeProps;
+
 type StateProps = {|
   +profile: Profile,
+  +displayRange: StartEndRange,
   +selection: ProfileSelection,
   +threadOrder: ThreadIndex[],
   +hiddenThreads: ThreadIndex[],
@@ -47,19 +55,9 @@ type DispatchProps = {|
   +updateProfileSelection: typeof updateProfileSelection,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class Timeline extends PureComponent<Props> {
-  constructor(props: Props) {
-    super(props);
-    (this: any)._onZoomButtonClick = this._onZoomButtonClick.bind(this);
-  }
-
-  _onZoomButtonClick(start: Milliseconds, end: Milliseconds) {
-    const { addRangeFilterAndUnsetSelection, zeroAt } = this.props;
-    addRangeFilterAndUnsetSelection(start - zeroAt, end - zeroAt);
-  }
-
   render() {
     const {
       profile,
@@ -67,23 +65,21 @@ class Timeline extends PureComponent<Props> {
       changeThreadOrder,
       selection,
       timeRange,
-      zeroAt,
       hiddenThreads,
-      updateProfileSelection,
+      displayRange,
+      zeroAt,
+      width,
     } = this.props;
     const threads = profile.threads;
-
     return (
-      <TimeSelectionScrubber
-        className="timeline"
-        zeroAt={zeroAt}
-        rangeStart={timeRange.start}
-        rangeEnd={timeRange.end}
-        minSelectionStartWidth={profile.meta.interval}
-        selection={selection}
-        onSelectionChange={updateProfileSelection}
-        onZoomButtonClick={this._onZoomButtonClick}
-      >
+      <TimelineSelection width={width}>
+        <TimeRuler
+          className="timelineTimeRuler"
+          zeroAt={zeroAt}
+          rangeStart={displayRange.start}
+          rangeEnd={displayRange.end}
+          width={width}
+        />
         <OverflowEdgeIndicator className="timelineOverflowEdgeIndicator">
           {
             <Reorderable
@@ -107,18 +103,19 @@ class Timeline extends PureComponent<Props> {
             </Reorderable>
           }
         </OverflowEdgeIndicator>
-      </TimeSelectionScrubber>
+      </TimelineSelection>
     );
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     profile: getProfile(state),
     selection: getProfileViewOptions(state).selection,
     threadOrder: getThreadOrder(state),
     hiddenThreads: getHiddenThreads(state),
     timeRange: getDisplayRange(state),
+    displayRange: getDisplayRange(state),
     zeroAt: getZeroAt(state),
   }),
   mapDispatchToProps: {
@@ -128,5 +125,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   },
   component: Timeline,
 };
-
-export default explicitConnect(options);
+export default withSize(explicitConnect(options));
