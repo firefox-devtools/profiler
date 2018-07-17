@@ -48,9 +48,7 @@ module.exports = {
       { ignorePureComponents: true },
     ],
     'react/jsx-no-bind': 'error',
-    // We still have too many files without the file annotation. Let's enable it
-    // once we flow-type everything.
-    // 'flowtype/require-valid-file-annotation': [ 'error', 'always', { annotationStyle: 'line' } ],
+    'flowtype/require-valid-file-annotation': [ 'error', 'always', { annotationStyle: 'line' } ],
     // no-dupe-keys crashes with recent eslint. See
     // https://github.com/gajus/eslint-plugin-flowtype/pull/266 and
     // https://github.com/gajus/eslint-plugin-flowtype/pull/302

@@ -1,3 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
+
 import Worker from 'workerjs';
 
 const workerFiles = {
@@ -8,14 +13,17 @@ const workerFiles = {
 const workerInstances = [];
 
 export default class {
-  constructor(file) {
+  constructor(file: string) {
     const worker = new Worker(workerFiles[file]);
     workerInstances.push(worker);
     return worker;
   }
 }
 
-export function shutdownWorkers() {
+/**
+ * This function allows for stopping the workers, and is only part of the mock.
+ */
+export function __shutdownWorkers() {
   workerInstances.forEach(worker => worker.terminate());
   workerInstances.length = 0;
 }

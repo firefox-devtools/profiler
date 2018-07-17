@@ -110,10 +110,12 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
     </li>
   </ol>
   <div
-    className="CallTreeEmptyReasons"
+    className="EmptyReasons"
   >
     <h3>
-      The call tree is empty for “
+      The 
+      call tree
+       is empty for “
       Empty Thread
       ”
     </h3>
@@ -234,10 +236,12 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
     </li>
   </ol>
   <div
-    className="CallTreeEmptyReasons"
+    className="EmptyReasons"
   >
     <h3>
-      The call tree is empty for “
+      The 
+      call tree
+       is empty for “
       Thread with samples
       ”
     </h3>
@@ -358,10 +362,12 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
     </li>
   </ol>
   <div
-    className="CallTreeEmptyReasons"
+    className="EmptyReasons"
   >
     <h3>
-      The call tree is empty for “
+      The 
+      call tree
+       is empty for “
       Thread with samples
       ”
     </h3>

@@ -6,7 +6,6 @@
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes, emptyExtensions } from './profile-data';
-import { provideHostSide } from '../utils/promise-worker';
 import { immutableUpdate } from '../utils/flow';
 import {
   CURRENT_VERSION,
@@ -688,7 +687,7 @@ function _processThread(
     tid: thread.tid,
     pid: thread.pid,
     libs,
-    pausedRanges,
+    pausedRanges: pausedRanges || [],
     frameTable,
     funcTable,
     resourceTable,
@@ -822,6 +821,8 @@ export function processProfile(
     sourceURL: geckoProfile.meta.sourceURL,
     physicalCPUs: geckoProfile.meta.physicalCPUs,
     logicalCPUs: geckoProfile.meta.logicalCPUs,
+    // Gecko always sends the profile with URLs.
+    networkURLsRemoved: false,
   };
 
   const result = {
@@ -835,14 +836,38 @@ export function processProfile(
  * Take a processed profile and remove any non-serializable classes such as the
  * StringTable class.
  */
-export function serializeProfile(profile: Profile): string {
+export function serializeProfile(
+  profile: Profile,
+  includeNetworkUrls: boolean = true
+): string {
   // stringTable -> stringArray
   const newProfile = Object.assign({}, profile, {
+    meta: { ...profile.meta, networkURLsRemoved: !includeNetworkUrls },
     threads: profile.threads.map(thread => {
-      const stringTable = thread.stringTable;
+      const stringArray = thread.stringTable.serializeToArray();
       const newThread = Object.assign({}, thread);
       delete newThread.stringTable;
-      newThread.stringArray = stringTable.serializeToArray();
+      if (includeNetworkUrls === false) {
+        for (let i = 0; i < newThread.markers.length; i++) {
+          const currentMarker = newThread.markers.data[i];
+          if (
+            currentMarker &&
+            currentMarker.type &&
+            currentMarker.type === 'Network'
+          ) {
+            // Remove the URI fields from marker payload.
+            currentMarker.URI = '';
+            currentMarker.RedirectURI = '';
+            // Strip the URL from the marker name
+            const stringIndex = newThread.markers.name[i];
+            stringArray[stringIndex] = stringArray[stringIndex].replace(
+              /:.*/,
+              ''
+            );
+          }
+        }
+      }
+      newThread.stringArray = stringArray;
       return newThread;
     }),
   });
@@ -900,8 +925,3 @@ export class ProfileProcessor {
     });
   }
 }
-
-export const ProfileProcessorThreaded = provideHostSide(
-  'profile-processor-worker.js',
-  ['processProfile']
-);

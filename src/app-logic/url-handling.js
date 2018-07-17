@@ -7,15 +7,15 @@ import queryString from 'query-string';
 import {
   stringifyRangeFilters,
   parseRangeFilters,
-} from './profile-logic/range-filters';
+} from '../profile-logic/range-filters';
 import {
   stringifyTransforms,
   parseTransforms,
-} from './profile-logic/transforms';
-import { assertExhaustiveCheck, toValidTabSlug } from './utils/flow';
+} from '../profile-logic/transforms';
+import { assertExhaustiveCheck, toValidTabSlug } from '../utils/flow';
 import { oneLine } from 'common-tags';
-import type { UrlState } from './types/reducers';
-import type { DataSource } from './types/actions';
+import type { UrlState } from '../types/reducers';
+import type { DataSource } from '../types/actions';
 
 export const CURRENT_URL_VERSION = 3;
 
@@ -133,6 +133,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       query.markerSearch = urlState.profileSpecific.markersSearchString;
       break;
     case 'marker-chart':
+    case 'network-chart':
       break;
     default:
       assertExhaustiveCheck(selectedTab);

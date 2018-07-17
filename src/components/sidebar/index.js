@@ -7,7 +7,7 @@
 // https://github.com/devtools-html/perf.html/issues/914
 // import CallTreeSidebar from './CallTreeSidebar';
 
-import type { TabSlug } from '../../types/actions';
+import type { TabSlug } from '../../app-logic/tabs-handling';
 
 import './sidebar.css';
 
@@ -15,11 +15,12 @@ export default function selectSidebar(
   selectedTab: TabSlug
 ): React.ComponentType<{||}> | null {
   return {
-    // calltree: CallTreeSidebar,
+    //calltree: CallTreeSidebar,
     calltree: null,
-    'marker-table': null,
+    'flame-graph': null,
     'stack-chart': null,
     'marker-chart': null,
-    'flame-graph': null,
+    'marker-table': null,
+    'network-chart': null,
   }[selectedTab];
 }

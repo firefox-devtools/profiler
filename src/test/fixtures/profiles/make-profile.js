@@ -29,6 +29,12 @@ export function addMarkersToThreadWithCorrespondingSamples(
 
   markers.forEach(([name, time, data]) => {
     if (data && !data.type) {
+      if (
+        typeof data.startTime !== 'number' ||
+        typeof data.endTime !== 'number'
+      ) {
+        throw new Error('Expected a startTime and endTime for the marker.');
+      }
       data = {
         type: 'DummyForTests',
         startTime: data.startTime,
@@ -158,17 +164,22 @@ export function getEmptyThread(overrides: ?Object): Thread {
  * * an array mapping the func indices (IndexIntoFuncTable) to their names
  * * an array mapping the func names to their indices
  *
+ * Functions ending in "js" are marked as JS functions in the funcTable's isJS
+ * column. It's possible to specify a JIT type by specifying in brackets like
+ * this: [jit:baseline] or [jit:ion], right after the function name (see below
+ * for an example). The default is no JIT.
+ *
  * This can be useful when using it like this:
  * ```
  * const {
  *   profile,
- *   funcNamesDictPerThread: [{ A, B, C, D }],
+ *   funcNamesDictPerThread: [{ A, B, Cjs, D }],
  * } = getProfileFromTextSamples(`
- *    A A
- *    B B
- *    C C
- *    D D
- *    E F
+ *    A             A
+ *    B             B
+ *    Cjs[jit:ion]  Cjs[jit:baseline]
+ *    D             D
+ *    E             F
  *  `);
  * ```
  * Now the variables named A B C D directly refer to the func indices and can be
@@ -191,12 +202,16 @@ export function getProfileFromTextSamples(
     const funcNames = textOnlyStacks
       // Flatten the arrays.
       .reduce((memo, row) => [...memo, ...row], [])
+      // remove modifiers
+      .map(func => func.replace(/\[.*/, ''))
       // Make the list unique.
       .filter((item, index, array) => array.indexOf(item) === index);
+
     const funcNamesDict = funcNames.reduce((result, item, index) => {
       result[item] = index;
       return result;
     }, {});
+
     funcNamesPerThread.push(funcNames);
     funcNamesDictPerThread.push(funcNamesDict);
 
@@ -292,6 +307,23 @@ function _parseTextSamples(textSamples: string): Array<string[]> {
   });
 }
 
+const JIT_IMPLEMENTATIONS = ['ion', 'baseline'];
+
+function findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
+  const jitTypeIndex = null;
+  const findJitTypeResult = /\[jit:([^\]]+)\]/.exec(funcNameWithModifier);
+  let jitType = null;
+  if (findJitTypeResult) {
+    jitType = findJitTypeResult[1];
+  }
+
+  if (jitType && JIT_IMPLEMENTATIONS.includes(jitType)) {
+    return jitType;
+  }
+
+  return jitTypeIndex;
+}
+
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
   funcNames: string[]
@@ -359,17 +391,27 @@ function _buildThreadFromTextOnlyStacks(
   // Create the samples, stacks, and frames.
   textOnlyStacks.forEach((column, columnIndex) => {
     let prefix = null;
-    column.forEach(funcName => {
+    column.forEach(funcNameWithModifier => {
+      const funcName = funcNameWithModifier.replace(/\[.*/, '');
+
       // There is a one-to-one relationship between strings and funcIndexes here, so
       // the indexes can double as both string indexes and func indexes.
       const funcIndex = stringTable.indexForString(funcName);
 
-      // Attempt to find a stack that satisfies the given funcIndex and prefix.
+      // Find the wanted jit type from the function name
+      const jitType = findJitTypeFromFuncName(funcNameWithModifier);
+      const jitTypeIndex = jitType ? stringTable.indexForString(jitType) : null;
+
+      // Attempt to find a stack that satisfies the given funcIndex, prefix and
+      // jit type.
       let stackIndex;
       for (let i = 0; i < stackTable.length; i++) {
         if (stackTable.prefix[i] === prefix) {
           const frameIndex = stackTable.frame[i];
-          if (funcIndex === frameTable.func[frameIndex]) {
+          if (
+            funcIndex === frameTable.func[frameIndex] &&
+            jitTypeIndex === frameTable.optimizations[frameIndex]
+          ) {
             stackIndex = i;
             break;
           }
@@ -379,10 +421,11 @@ function _buildThreadFromTextOnlyStacks(
       // If we couldn't find a stack, go ahead and create a stack and frame.
       if (stackIndex === undefined) {
         const frameIndex = frameTable.length++;
+
         frameTable.func.push(funcIndex);
         frameTable.address.push(0);
         frameTable.category.push(null);
-        frameTable.implementation.push(null);
+        frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(null);
         frameTable.optimizations.push(null);
 

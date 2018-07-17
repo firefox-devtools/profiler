@@ -1,984 +1,1120 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 1`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<div
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      dispatch={[Function]}
-      selectedNodeIndex={null}
-      tree={
-        CallTree {
-          "_callNodeChildCount": Uint32Array [
-            1,
-            2,
-            2,
-            1,
-            0,
-            1,
-            0,
-            1,
-            0,
-          ],
-          "_callNodeTable": Object {
-            "depth": Array [
-              0,
-              1,
-              2,
-              3,
-              4,
-              3,
-              4,
-              2,
-              3,
-            ],
-            "func": Int32Array [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              4,
-              6,
-              7,
-            ],
-            "length": 9,
-            "prefix": Int32Array [
-              -1,
-              0,
-              1,
-              2,
-              3,
-              2,
-              5,
-              1,
-              7,
-            ],
-          },
-          "_callNodeTimes": Object {
-            "selfTime": Float32Array [
-              0,
-              0,
-              0,
-              0,
-              1,
-              0,
-              1,
-              0,
-              1,
-            ],
-            "totalTime": Float32Array [
-              3,
-              3,
-              2,
-              1,
-              1,
-              1,
-              1,
-              1,
-              1,
-            ],
-          },
-          "_children": Map {},
-          "_displayDataByIndex": Map {},
-          "_funcTable": Object {
-            "address": Array [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ],
-            "fileName": Array [
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-            ],
-            "isJS": Array [
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-            ],
-            "length": 8,
-            "lineNumber": Array [
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-            ],
-            "name": Array [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-            ],
-            "resource": Array [
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-            ],
-          },
-          "_isChildrenCachePreloaded": false,
-          "_isIntegerInterval": true,
-          "_jsOnly": false,
-          "_resourceTable": Object {
-            "addonId": Array [],
-            "host": Array [],
-            "icon": Array [],
-            "length": 0,
-            "lib": Array [],
-            "name": Array [],
-            "type": Array [],
-          },
-          "_rootCount": 1,
-          "_rootTotalTime": 3,
-          "_stringTable": UniqueStringArray {
-            "_array": Array [
-              "A",
-              "B",
-              "C",
-              "D",
-              "E",
-              "F",
-              "H",
-              "I",
-            ],
-            "_stringToIndex": Map {
-              "A" => 0,
-              "B" => 1,
-              "C" => 2,
-              "D" => 3,
-              "E" => 4,
-              "F" => 5,
-              "H" => 6,
-              "I" => 7,
-            },
-          },
-        }
-      }
-    >
-      <div
-        className="sidebar sidebar-calltree"
-      >
-        Select a node to display some information about it.
-      </div>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+  Select a node to display some information about it.
+</div>
 `;
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 2`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<aside
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      dispatch={[Function]}
-      selectedNodeIndex={2}
-      tree={
-        CallTree {
-          "_callNodeChildCount": Uint32Array [
-            1,
-            2,
-            2,
-            1,
-            0,
-            1,
-            0,
-            1,
-            0,
-          ],
-          "_callNodeTable": Object {
-            "depth": Array [
-              0,
-              1,
-              2,
-              3,
-              4,
-              3,
-              4,
-              2,
-              3,
-            ],
-            "func": Int32Array [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              4,
-              6,
-              7,
-            ],
-            "length": 9,
-            "prefix": Int32Array [
-              -1,
-              0,
-              1,
-              2,
-              3,
-              2,
-              5,
-              1,
-              7,
-            ],
-          },
-          "_callNodeTimes": Object {
-            "selfTime": Float32Array [
-              0,
-              0,
-              0,
-              0,
-              1,
-              0,
-              1,
-              0,
-              1,
-            ],
-            "totalTime": Float32Array [
-              3,
-              3,
-              2,
-              1,
-              1,
-              1,
-              1,
-              1,
-              1,
-            ],
-          },
-          "_children": Map {},
-          "_displayDataByIndex": Map {
-            2 => Object {
-              "dim": false,
-              "icon": null,
-              "lib": "",
-              "name": "C",
-              "selfTime": "—",
-              "totalTime": "2",
-              "totalTimePercent": "67%",
-            },
-          },
-          "_funcTable": Object {
-            "address": Array [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ],
-            "fileName": Array [
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-            ],
-            "isJS": Array [
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-            ],
-            "length": 8,
-            "lineNumber": Array [
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-            ],
-            "name": Array [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-            ],
-            "resource": Array [
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-            ],
-          },
-          "_isChildrenCachePreloaded": false,
-          "_isIntegerInterval": true,
-          "_jsOnly": false,
-          "_resourceTable": Object {
-            "addonId": Array [],
-            "host": Array [],
-            "icon": Array [],
-            "length": 0,
-            "lib": Array [],
-            "name": Array [],
-            "type": Array [],
-          },
-          "_rootCount": 1,
-          "_rootTotalTime": 3,
-          "_stringTable": UniqueStringArray {
-            "_array": Array [
-              "A",
-              "B",
-              "C",
-              "D",
-              "E",
-              "F",
-              "H",
-              "I",
-            ],
-            "_stringToIndex": Map {
-              "A" => 0,
-              "B" => 1,
-              "C" => 2,
-              "D" => 3,
-              "E" => 4,
-              "F" => 5,
-              "H" => 6,
-              "I" => 7,
-            },
-          },
-        }
-      }
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
     >
-      <aside
-        className="sidebar sidebar-calltree"
+      Cjs
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
       >
-        <header
-          className="sidebar-titlegroup"
-        >
-          <h2
-            className="sidebar-title"
-          >
-            C
-          </h2>
-          <p
-            className="sidebar-subtitle"
-          />
-        </header>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            2
-            ms
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            —
-          </SidebarDetail>
-        </div>
-      </aside>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
 `;
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 3`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<aside
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      dispatch={[Function]}
-      selectedNodeIndex={3}
-      tree={
-        CallTree {
-          "_callNodeChildCount": Uint32Array [
-            1,
-            2,
-            2,
-            1,
-            0,
-            1,
-            0,
-            1,
-            0,
-          ],
-          "_callNodeTable": Object {
-            "depth": Array [
-              0,
-              1,
-              2,
-              3,
-              4,
-              3,
-              4,
-              2,
-              3,
-            ],
-            "func": Int32Array [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              4,
-              6,
-              7,
-            ],
-            "length": 9,
-            "prefix": Int32Array [
-              -1,
-              0,
-              1,
-              2,
-              3,
-              2,
-              5,
-              1,
-              7,
-            ],
-          },
-          "_callNodeTimes": Object {
-            "selfTime": Float32Array [
-              0,
-              0,
-              0,
-              0,
-              1,
-              0,
-              1,
-              0,
-              1,
-            ],
-            "totalTime": Float32Array [
-              3,
-              3,
-              2,
-              1,
-              1,
-              1,
-              1,
-              1,
-              1,
-            ],
-          },
-          "_children": Map {},
-          "_displayDataByIndex": Map {
-            2 => Object {
-              "dim": false,
-              "icon": null,
-              "lib": "",
-              "name": "C",
-              "selfTime": "—",
-              "totalTime": "2",
-              "totalTimePercent": "67%",
-            },
-            3 => Object {
-              "dim": false,
-              "icon": null,
-              "lib": "",
-              "name": "D",
-              "selfTime": "—",
-              "totalTime": "1",
-              "totalTimePercent": "33%",
-            },
-          },
-          "_funcTable": Object {
-            "address": Array [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ],
-            "fileName": Array [
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-            ],
-            "isJS": Array [
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-            ],
-            "length": 8,
-            "lineNumber": Array [
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-            ],
-            "name": Array [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-            ],
-            "resource": Array [
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-            ],
-          },
-          "_isChildrenCachePreloaded": false,
-          "_isIntegerInterval": true,
-          "_jsOnly": false,
-          "_resourceTable": Object {
-            "addonId": Array [],
-            "host": Array [],
-            "icon": Array [],
-            "length": 0,
-            "lib": Array [],
-            "name": Array [],
-            "type": Array [],
-          },
-          "_rootCount": 1,
-          "_rootTotalTime": 3,
-          "_stringTable": UniqueStringArray {
-            "_array": Array [
-              "A",
-              "B",
-              "C",
-              "D",
-              "E",
-              "F",
-              "H",
-              "I",
-            ],
-            "_stringToIndex": Map {
-              "A" => 0,
-              "B" => 1,
-              "C" => 2,
-              "D" => 3,
-              "E" => 4,
-              "F" => 5,
-              "H" => 6,
-              "I" => 7,
-            },
-          },
-        }
-      }
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
     >
-      <aside
-        className="sidebar sidebar-calltree"
+      D
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
       >
-        <header
-          className="sidebar-titlegroup"
-        >
-          <h2
-            className="sidebar-title"
-          >
-            D
-          </h2>
-          <p
-            className="sidebar-subtitle"
-          />
-        </header>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            1
-            ms
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            —
-          </SidebarDetail>
-        </div>
-      </aside>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+        Running Time
+        :
+      </div>,
+      "1",
+      "ms (",
+      "25",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "1",
+      "ms (",
+      "25",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
 `;
 
 exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 4`] = `
-<Provider
-  store={
-    Object {
-      "dispatch": [Function],
-      "getState": [Function],
-      "replaceReducer": [Function],
-      "subscribe": [Function],
-      Symbol(observable): [Function],
-    }
-  }
+<aside
+  className="sidebar sidebar-calltree"
 >
-  <Connect(CallTreeSidebar)>
-    <CallTreeSidebar
-      dispatch={[Function]}
-      selectedNodeIndex={7}
-      tree={
-        CallTree {
-          "_callNodeChildCount": Uint32Array [
-            1,
-            2,
-            2,
-            1,
-            0,
-            1,
-            0,
-            1,
-            0,
-          ],
-          "_callNodeTable": Object {
-            "depth": Array [
-              0,
-              1,
-              2,
-              3,
-              4,
-              3,
-              4,
-              2,
-              3,
-            ],
-            "func": Int32Array [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              4,
-              6,
-              7,
-            ],
-            "length": 9,
-            "prefix": Int32Array [
-              -1,
-              0,
-              1,
-              2,
-              3,
-              2,
-              5,
-              1,
-              7,
-            ],
-          },
-          "_callNodeTimes": Object {
-            "selfTime": Float32Array [
-              0,
-              0,
-              0,
-              0,
-              1,
-              0,
-              1,
-              0,
-              1,
-            ],
-            "totalTime": Float32Array [
-              3,
-              3,
-              2,
-              1,
-              1,
-              1,
-              1,
-              1,
-              1,
-            ],
-          },
-          "_children": Map {},
-          "_displayDataByIndex": Map {
-            2 => Object {
-              "dim": false,
-              "icon": null,
-              "lib": "",
-              "name": "C",
-              "selfTime": "—",
-              "totalTime": "2",
-              "totalTimePercent": "67%",
-            },
-            3 => Object {
-              "dim": false,
-              "icon": null,
-              "lib": "",
-              "name": "D",
-              "selfTime": "—",
-              "totalTime": "1",
-              "totalTimePercent": "33%",
-            },
-            7 => Object {
-              "dim": false,
-              "icon": null,
-              "lib": "",
-              "name": "H",
-              "selfTime": "—",
-              "totalTime": "1",
-              "totalTimePercent": "33%",
-            },
-          },
-          "_funcTable": Object {
-            "address": Array [
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ],
-            "fileName": Array [
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-            ],
-            "isJS": Array [
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-              false,
-            ],
-            "length": 8,
-            "lineNumber": Array [
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-              null,
-            ],
-            "name": Array [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5,
-              6,
-              7,
-            ],
-            "resource": Array [
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-              -1,
-            ],
-          },
-          "_isChildrenCachePreloaded": false,
-          "_isIntegerInterval": true,
-          "_jsOnly": false,
-          "_resourceTable": Object {
-            "addonId": Array [],
-            "host": Array [],
-            "icon": Array [],
-            "length": 0,
-            "lib": Array [],
-            "name": Array [],
-            "type": Array [],
-          },
-          "_rootCount": 1,
-          "_rootTotalTime": 3,
-          "_stringTable": UniqueStringArray {
-            "_array": Array [
-              "A",
-              "B",
-              "C",
-              "D",
-              "E",
-              "F",
-              "H",
-              "I",
-            ],
-            "_stringToIndex": Map {
-              "A" => 0,
-              "B" => 1,
-              "C" => 2,
-              "D" => 3,
-              "E" => 4,
-              "F" => 5,
-              "H" => 6,
-              "I" => 7,
-            },
-          },
-        }
-      }
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
     >
-      <aside
-        className="sidebar sidebar-calltree"
+      H
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
       >
-        <header
-          className="sidebar-titlegroup"
-        >
-          <h2
-            className="sidebar-title"
-          >
-            H
-          </h2>
-          <p
-            className="sidebar-subtitle"
-          />
-        </header>
-        <div
-          className="sidebar-details"
-        >
-          <SidebarDetail
-            label="Running Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Running Time
-              :
-            </div>
-            1
-            ms
-          </SidebarDetail>
-          <SidebarDetail
-            label="Self Time"
-          >
-            <div
-              className="sidebar-label"
-            >
-              Self Time
-              :
-            </div>
-            —
-          </SidebarDetail>
-        </div>
-      </aside>
-    </CallTreeSidebar>
-  </Connect(CallTreeSidebar)>
-</Provider>
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "1ms (25%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "1ms (25%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
+`;
+
+exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node 5`] = `
+<aside
+  className="sidebar sidebar-calltree"
+>
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
+    >
+      Ejs
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "1",
+      "ms (",
+      "25",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "1ms (25%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "2ms (50%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
+`;
+
+exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node in an inverted tree 1`] = `
+<div
+  className="sidebar sidebar-calltree"
+>
+  Select a node to display some information about it.
+</div>
+`;
+
+exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node in an inverted tree 2`] = `
+<aside
+  className="sidebar sidebar-calltree"
+>
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
+    >
+      Ejs
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "2ms (50%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "2ms (50%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
+`;
+
+exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node in an inverted tree 3`] = `
+<aside
+  className="sidebar sidebar-calltree"
+>
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
+    >
+      H
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "1",
+      "ms (",
+      "25",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "1ms (25%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "1ms (25%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
+`;
+
+exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node in an inverted tree 4`] = `
+<aside
+  className="sidebar sidebar-calltree"
+>
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
+    >
+      H
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "1",
+      "ms (",
+      "25",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "1ms (25%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "2",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – self time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+</aside>
+`;
+
+exports[`CallTreeSidebar matches the snapshots when displaying data about the currently selected node in an inverted tree 5`] = `
+<aside
+  className="sidebar sidebar-calltree"
+>
+  <header
+    className="sidebar-titlegroup"
+  >
+    <h2
+      className="sidebar-title"
+    >
+      A
+    </h2>
+  </header>
+  <h3
+    className="sidebar-title2"
+  >
+    This selected call node
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "1",
+      "ms (",
+      "25",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "1",
+      "ms (",
+      "100",
+      "%)",
+    ]
+  </div>
+  <h3
+    className="sidebar-title2"
+  >
+    This function across the entire tree
+  </h3>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Running Time
+        :
+      </div>,
+      "4",
+      "ms (",
+      "100",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Self Time
+        :
+      </div>,
+      "—",
+    ]
+  </div>
+  <h4
+    className="sidebar-title3"
+  >
+    Implementation – running time
+  </h4>
+  <div
+    className="sidebar-details"
+  >
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Native code
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        JavaScript interpreter
+        :
+      </div>,
+      "2",
+      "ms (",
+      "50",
+      "%)",
+    ]
+  </div>
+</aside>
 `;

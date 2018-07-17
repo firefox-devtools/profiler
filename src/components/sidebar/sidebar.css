@@ -4,11 +4,13 @@
 
   font-size: 11px;
   background: var(--grey-10);
+  border-top: 1px solid var(--grey-30);
 }
 
 .sidebar-titlegroup {
   margin: 0 0 1em 0;
   line-height: 1.2;
+  min-height: 8em; /* This allows for a more stable sidebar when navigating the call tree */
 }
 
 .sidebar-title, .sidebar-subtitle {
@@ -24,6 +26,10 @@
   margin-bottom: .3em;
 }
 
+.sidebar-title2, .sidebar-title3 {
+  font-weight: normal;
+}
+
 .sidebar-subtitle {
   font-size: inherit; /* reset browser styles */
   color: var(--grey-50);
@@ -31,7 +37,7 @@
 
 .sidebar-details {
   display: grid;
-  grid-template-columns: min-content min-content;
+  grid-template-columns: min-content auto;
   grid-gap: 2px 5px;
   justify-content: center;
 

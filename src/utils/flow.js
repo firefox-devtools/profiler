@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { TabSlug } from '../types/actions';
+import type { TabSlug } from '../app-logic/tabs-handling';
 import type { TransformType } from '../types/transforms';
 
 /**
@@ -42,6 +42,7 @@ export function toValidTabSlug(tabSlug: any): TabSlug | null {
     case 'calltree':
     case 'stack-chart':
     case 'marker-chart':
+    case 'network-chart':
     case 'marker-table':
     case 'flame-graph':
       return coercedTabSlug;
@@ -140,4 +141,17 @@ export function ensureExists<T>(item: ?T, message: ?string): T {
     );
   }
   return item;
+}
+
+/**
+ * Flow doesn't want us to access potentitally non-existent properties on unions of
+ * of objects. This function creates a safe interface to access number properties
+ * if they might exist.
+ */
+export function getNumberPropertyOrNull<T: Object>(
+  data: T,
+  property: string
+): number | null {
+  const maybeNumber = (data: Object)[property];
+  return typeof maybeNumber === 'number' ? maybeNumber : null;
 }

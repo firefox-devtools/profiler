@@ -4,15 +4,15 @@
 
 // @flow
 
-import type { Library } from './symbol-store';
+import type { RequestedLib } from '../types/actions';
 
 // Used during the symbolication process to express that we couldn't find
 // symbols for a specific library
 export class SymbolsNotFoundError extends Error {
-  library: Library;
+  library: RequestedLib;
   error: ?Error;
 
-  constructor(message: string, library: Library, error?: Error) {
+  constructor(message: string, library: RequestedLib, error?: Error) {
     super(message);
     // Workaround for a babel issue when extending Errors
     (this: any).__proto__ = SymbolsNotFoundError.prototype;

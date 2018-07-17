@@ -20,6 +20,7 @@ import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import { arePathsEqual, PathSet } from '../utils/path';
+import { getInitialTabOrder } from '../app-logic/tabs-handling';
 
 import type {
   Profile,
@@ -36,16 +37,17 @@ import type {
   MarkerTimingRows,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
-import type { Action, ProfileSelection } from '../types/actions';
+import type { Action, ProfileSelection, RequestedLib } from '../types/actions';
 import type {
   State,
   Reducer,
   ProfileViewState,
-  RequestedLib,
+  ProfileSharingStatus,
   SymbolicationStatus,
   ThreadViewOptions,
 } from '../types/reducers';
 import type { Transform, TransformStack } from '../types/transforms';
+import type { TimingsForPath } from '../profile-logic/profile-data';
 
 function profile(state: Profile | null = null, action: Action): Profile | null {
   switch (action.type) {
@@ -392,7 +394,7 @@ function zeroAt(state: Milliseconds = 0, action: Action) {
   }
 }
 
-function tabOrder(state: number[] = [0, 1, 2, 3, 4], action: Action) {
+function tabOrder(state: number[] = getInitialTabOrder(), action: Action) {
   switch (action.type) {
     case 'CHANGE_TAB_ORDER':
       return action.tabOrder;
@@ -414,6 +416,33 @@ function isCallNodeContextMenuVisible(state: boolean = false, action: Action) {
   switch (action.type) {
     case 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY':
       return action.isVisible;
+    default:
+      return state;
+  }
+}
+
+function profileSharingStatus(
+  state: ProfileSharingStatus = {
+    sharedWithUrls: false,
+    sharedWithoutUrls: false,
+  },
+  action: Action
+): ProfileSharingStatus {
+  switch (action.type) {
+    case 'SET_PROFILE_SHARING_STATUS':
+      return action.profileSharingStatus;
+    case 'VIEW_PROFILE':
+      // Here are the possible cases:
+      // - older shared profiles, newly captured profiles, and profiles from a file don't
+      //   have the property `networkURLsRemoved`. We use the `dataSource` value
+      //   to distinguish between these cases.
+      // - newer profiles that have been shared do have this property.
+      return {
+        sharedWithUrls:
+          !action.profile.meta.networkURLsRemoved &&
+          action.dataSource === 'public',
+        sharedWithoutUrls: action.profile.meta.networkURLsRemoved === true,
+      };
     default:
       return state;
   }
@@ -454,6 +483,7 @@ export default wrapReducerInResetter(
       tabOrder,
       rightClickedThread,
       isCallNodeContextMenuVisible,
+      profileSharingStatus,
     }),
     profile,
   })
@@ -471,6 +501,8 @@ export const getProfileRootRange = (state: State) =>
   getProfileViewOptions(state).rootRange;
 export const getSymbolicationStatus = (state: State) =>
   getProfileViewOptions(state).symbolicationStatus;
+export const getProfileSharingStatus = (state: State) =>
+  getProfileViewOptions(state).profileSharingStatus;
 export const getScrollToSelectionGeneration = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.scrollToSelectionGeneration
@@ -536,6 +568,7 @@ export type SelectorsForThread = {
   getJankInstances: State => TracingMarker[],
   getProcessedMarkersThread: State => Thread,
   getTracingMarkers: State => TracingMarker[],
+  getTracingMarkersForView: State => TracingMarker[],
   getMarkerTiming: State => MarkerTimingRows,
   getRangeSelectionFilteredTracingMarkers: State => TracingMarker[],
   getRangeSelectionFilteredTracingMarkersForHeader: State => TracingMarker[],
@@ -720,8 +753,27 @@ export const selectorsForThread = (
       getProcessedMarkersThread,
       ProfileData.getTracingMarkers
     );
-    const getMarkerTiming = createSelector(
+    const getTracingMarkersForNetworkChart = createSelector(
       getTracingMarkers,
+      markers => markers.filter(ProfileData.isNetworkMarker)
+    );
+    const getTracingMarkersForMarkerChart = createSelector(
+      getTracingMarkers,
+      markers => markers.filter(marker => !ProfileData.isNetworkMarker(marker))
+    );
+    const getTracingMarkersForView = state => {
+      const selectedTab = UrlState.getSelectedTab(state);
+      switch (selectedTab) {
+        case 'marker-chart':
+          return getTracingMarkersForMarkerChart(state);
+        case 'network-chart':
+          return getTracingMarkersForNetworkChart(state);
+        default:
+          return getTracingMarkers(state);
+      }
+    };
+    const getMarkerTiming = createSelector(
+      getTracingMarkersForView,
       MarkerTiming.getMarkerTiming
     );
     const getRangeSelectionFilteredTracingMarkers = createSelector(
@@ -734,7 +786,13 @@ export const selectorsForThread = (
     );
     const getRangeSelectionFilteredTracingMarkersForHeader = createSelector(
       getRangeSelectionFilteredTracingMarkers,
-      (markers): TracingMarker[] => markers.filter(tm => tm.name !== 'GCMajor')
+      (markers): TracingMarker[] =>
+        markers.filter(
+          tm =>
+            tm.name !== 'GCMajor' &&
+            tm.name !== 'BHR-detected hang' &&
+            !ProfileData.isNetworkMarker(tm)
+        )
     );
     const getCallNodeInfo = createSelector(
       getFilteredThread,
@@ -833,6 +891,7 @@ export const selectorsForThread = (
       getJankInstances,
       getProcessedMarkersThread,
       getTracingMarkers,
+      getTracingMarkersForView,
       getMarkerTiming,
       getRangeSelectionFilteredTracingMarkers,
       getRangeSelectionFilteredTracingMarkersForHeader,
@@ -866,4 +925,86 @@ export const selectedThreadSelectors: SelectorsForThread = (() => {
   }
   const result2: SelectorsForThread = result;
   return result2;
+})();
+
+export type SelectorsForNode = {
+  getName: State => string,
+  getIsJS: State => boolean,
+  getLib: State => string,
+  getTimingsForSidebar: State => TimingsForPath,
+};
+
+export const selectedNodeSelectors: SelectorsForNode = (() => {
+  const getName = createSelector(
+    selectedThreadSelectors.getSelectedCallNodePath,
+    selectedThreadSelectors.getFilteredThread,
+    (selectedPath, { stringTable, funcTable }) => {
+      if (!selectedPath.length) {
+        return '';
+      }
+
+      const funcIndex = ProfileData.getLeafFuncIndex(selectedPath);
+      return stringTable.getString(funcTable.name[funcIndex]);
+    }
+  );
+
+  const getIsJS = createSelector(
+    selectedThreadSelectors.getSelectedCallNodePath,
+    selectedThreadSelectors.getFilteredThread,
+    (selectedPath, { funcTable }) => {
+      if (!selectedPath.length) {
+        return false;
+      }
+
+      const funcIndex = ProfileData.getLeafFuncIndex(selectedPath);
+      return funcTable.isJS[funcIndex];
+    }
+  );
+
+  const getLib = createSelector(
+    selectedThreadSelectors.getSelectedCallNodePath,
+    selectedThreadSelectors.getFilteredThread,
+    (selectedPath, { stringTable, funcTable, resourceTable }) => {
+      if (!selectedPath.length) {
+        return '';
+      }
+
+      return ProfileData.getOriginAnnotationForFunc(
+        ProfileData.getLeafFuncIndex(selectedPath),
+        funcTable,
+        resourceTable,
+        stringTable
+      );
+    }
+  );
+
+  const getTimingsForSidebar = createSelector(
+    selectedThreadSelectors.getSelectedCallNodePath,
+    selectedThreadSelectors.getCallNodeInfo,
+    getProfileInterval,
+    UrlState.getInvertCallstack,
+    selectedThreadSelectors.getFilteredThread,
+    (
+      selectedPath,
+      callNodeInfo,
+      interval,
+      isInvertedTree,
+      thread
+    ): TimingsForPath => {
+      return ProfileData.getTimingsForPath(
+        selectedPath,
+        callNodeInfo,
+        interval,
+        isInvertedTree,
+        thread
+      );
+    }
+  );
+
+  return {
+    getName,
+    getIsJS,
+    getLib,
+    getTimingsForSidebar,
+  };
 })();

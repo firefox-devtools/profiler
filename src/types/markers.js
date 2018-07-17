@@ -329,6 +329,13 @@ type StyleMarkerPayload_Shared = {
   stylesReused: number,
 };
 
+type VsyncTimestampPayload = {|
+  // The "type" property doesn't exist, but is required to make Flow typing work.
+  type: void,
+  category: 'VsyncTimestamp',
+  vsync: 0,
+|};
+
 /**
  * The payload for Styles.
  */
@@ -338,6 +345,12 @@ export type StyleMarkerPayload_Gecko = StyleMarkerPayload_Shared & {
 
 export type StyleMarkerPayload = StyleMarkerPayload_Shared & {
   cause?: CauseBacktrace,
+};
+
+export type BHRMarkerPayload = {
+  type: 'BHR-detected hang',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
 };
 
 export type DummyForTestsMarkerPayload = {
@@ -362,6 +375,8 @@ export type MarkerPayload =
   | GCMajorMarkerPayload
   | GCSliceMarkerPayload
   | StyleMarkerPayload
+  | BHRMarkerPayload
+  | VsyncTimestampPayload
   | DummyForTestsMarkerPayload
   | null;
 
@@ -376,4 +391,5 @@ export type MarkerPayload_Gecko =
   | GCSliceMarkerPayload_Gecko
   | StyleMarkerPayload_Gecko
   | DummyForTestsMarkerPayload
+  | VsyncTimestampPayload
   | null;

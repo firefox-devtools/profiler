@@ -12,7 +12,7 @@ import {
   urlStateToUrlObject,
   urlFromState,
   CURRENT_URL_VERSION,
-} from '../url-handling';
+} from '../app-logic/url-handling';
 import { blankStore } from './fixtures/stores';
 import getGeckoProfile from './fixtures/profiles/gecko-profile';
 import { processProfile } from '../profile-logic/process-profile';

@@ -9,8 +9,9 @@ import type {
   DataSource,
   ProfileSelection,
   ImplementationFilter,
-  TabSlug,
+  RequestedLib,
 } from './actions';
+import type { TabSlug } from '../app-logic/tabs-handling';
 import type { Milliseconds, StartEndRange } from './units';
 import type { IndexIntoMarkersTable, Profile, ThreadIndex } from './profile';
 import type { CallNodePath } from './profile-derived';
@@ -24,13 +25,18 @@ import type { PathSet } from '../utils/path.js';
 
 export type Reducer<T> = (T | void, Action) => T;
 
-export type RequestedLib = { debugName: string, breakpadId: string };
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {
   selectedCallNodePath: CallNodePath,
   expandedCallNodePaths: PathSet,
   selectedMarker: IndexIntoMarkersTable | -1,
 };
+
+export type ProfileSharingStatus = {
+  sharedWithUrls: boolean,
+  sharedWithoutUrls: boolean,
+};
+
 export type ProfileViewState = {
   viewOptions: {
     perThread: ThreadViewOptions[],
@@ -44,6 +50,7 @@ export type ProfileViewState = {
     tabOrder: number[],
     rightClickedThread: ThreadIndex,
     isCallNodeContextMenuVisible: boolean,
+    profileSharingStatus: ProfileSharingStatus,
   },
   profile: Profile | null,
 };
@@ -93,11 +100,14 @@ export type ZipFileState =
       +pathInZipFile: string,
     |};
 
-export type AppState = {
-  view: AppViewState,
-  isUrlSetupDone: boolean,
-  hasZoomedViaMousewheel: boolean,
-};
+export type IsSidebarOpenPerPanelState = { [TabSlug]: boolean };
+
+export type AppState = {|
+  +view: AppViewState,
+  +isUrlSetupDone: boolean,
+  +hasZoomedViaMousewheel: boolean,
+  +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
+|};
 
 export type ZippedProfilesState = {
   zipFile: ZipFileState,
@@ -105,11 +115,6 @@ export type ZippedProfilesState = {
   // In practice this should never contain null, but needs to support the
   // TreeView interface.
   expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
-};
-
-export type RangeFilterState = {
-  start: number,
-  end: number,
 };
 
 export type UrlState = {|
@@ -121,7 +126,7 @@ export type UrlState = {|
   profileSpecific: {|
     implementation: ImplementationFilter,
     invertCallstack: boolean,
-    rangeFilters: RangeFilterState[],
+    rangeFilters: StartEndRange[],
     selectedThread: ThreadIndex | null,
     callTreeSearchString: string,
     threadOrder: ThreadIndex[],

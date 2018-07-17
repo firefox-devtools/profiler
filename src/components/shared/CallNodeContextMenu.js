@@ -27,7 +27,8 @@ import {
 } from '../../utils/flow';
 
 import type { TransformType } from '../../types/transforms';
-import type { ImplementationFilter, TabSlug } from '../../types/actions';
+import type { ImplementationFilter } from '../../types/actions';
+import type { TabSlug } from '../../app-logic/tabs-handling';
 import type {
   IndexIntoCallNodeTable,
   CallNodeInfo,

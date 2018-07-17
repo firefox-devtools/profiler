@@ -1,0 +1,25 @@
+.Details {
+  flex: auto;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-open-close-button {
+  flex: none;
+
+  height: 24px;
+  width: 24px;
+  margin: 4px;
+
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.sidebar-open-close-button-isopen {
+  background-image: url(../../../res/img/svg/pane-collapse.svg);
+}
+
+.sidebar-open-close-button-isclosed {
+  background-image: url(../../../res/img/svg/pane-expand.svg);
+}

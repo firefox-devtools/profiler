@@ -9,7 +9,10 @@ import { Provider } from 'react-redux';
 import { mount } from 'enzyme';
 
 import CallTreeSidebar from '../../components/sidebar/CallTreeSidebar';
-import { changeSelectedCallNode } from '../../actions/profile-view';
+import {
+  changeSelectedCallNode,
+  changeInvertCallstack,
+} from '../../actions/profile-view';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 
@@ -18,11 +21,11 @@ import type { CallNodePath } from '../../types/profile-derived';
 describe('CallTreeSidebar', function() {
   function setup() {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E E
+      A    A    A A
+      B    B    B B
+      Cjs  Cjs  H H
+      D    F    I
+      Ejs  Ejs
     `);
 
     const store = storeWithProfile(profile);
@@ -31,28 +34,75 @@ describe('CallTreeSidebar', function() {
       store.dispatch(changeSelectedCallNode(0, nodePath));
     };
 
-    return { store, funcNamesDict: funcNamesDictPerThread[0], selectNode };
-  }
-
-  it('matches the snapshots when displaying data about the currently selected node', () => {
-    const { store, selectNode, funcNamesDict: { A, B, C, D, H } } = setup();
+    const invertCallstack = () => store.dispatch(changeInvertCallstack(true));
 
     const view = mount(
       <Provider store={store}>
         <CallTreeSidebar />
       </Provider>
     );
+    return {
+      store,
+      funcNamesDict: funcNamesDictPerThread[0],
+      selectNode,
+      invertCallstack,
+      view,
+    };
+  }
+
+  it('matches the snapshots when displaying data about the currently selected node', () => {
+    const {
+      selectNode,
+      funcNamesDict: { A, B, Cjs, D, H, Ejs },
+      view,
+    } = setup();
+
     expect(view).toMatchSnapshot();
 
-    selectNode([A, B, C]);
+    // Cjs is a JS node, but has no self time, so we shouldn't see the
+    // implementation information.
+    selectNode([A, B, Cjs]);
     view.update();
     expect(view).toMatchSnapshot();
 
-    selectNode([A, B, C, D]);
+    selectNode([A, B, Cjs, D]);
     view.update();
     expect(view).toMatchSnapshot();
 
     selectNode([A, B, H]);
+    view.update();
+    expect(view).toMatchSnapshot();
+
+    selectNode([A, B, Cjs, D, Ejs]);
+    view.update();
+    expect(view).toMatchSnapshot();
+  });
+
+  it('matches the snapshots when displaying data about the currently selected node in an inverted tree', () => {
+    const {
+      selectNode,
+      invertCallstack,
+      funcNamesDict: { A, B, H, Ejs, I },
+      view,
+    } = setup();
+
+    invertCallstack();
+    view.update();
+    expect(view).toMatchSnapshot();
+
+    selectNode([Ejs]);
+    view.update();
+    expect(view).toMatchSnapshot();
+
+    selectNode([H]);
+    view.update();
+    expect(view).toMatchSnapshot();
+
+    selectNode([I, H]);
+    view.update();
+    expect(view).toMatchSnapshot();
+
+    selectNode([H, B, A]);
     view.update();
     expect(view).toMatchSnapshot();
   });

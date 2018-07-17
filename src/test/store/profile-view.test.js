@@ -15,7 +15,7 @@ import * as ProfileView from '../../actions/profile-view';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
 
-const { selectedThreadSelectors } = ProfileViewSelectors;
+const { selectedThreadSelectors, selectedNodeSelectors } = ProfileViewSelectors;
 
 describe('call node paths on implementation filter change', function() {
   const {
@@ -754,7 +754,7 @@ describe('snapshots of selectors/profile-view', function() {
     dispatch(ProfileView.changeExpandedCallNodes(0, [[A], [A, B]]));
     dispatch(ProfileView.changeSelectedCallNode(0, [A, B]));
     dispatch(ProfileView.changeSelectedMarker(0, 1));
-    dispatch(ProfileView.addRangeFilter(3, 7));
+    dispatch(ProfileView.addRangeFilter(3, 7)); // Reminder: upper bound "7" is exclusive.
     return { getState, dispatch, samplesThread, mergeFunction, A, B, C };
   }
   it('matches the last stored run of getProfile', function() {
@@ -940,5 +940,27 @@ describe('snapshots of selectors/profile-view', function() {
       end: 9,
       start: 0,
     });
+  });
+
+  it('matches the last stored run of selectedNodeSelectors.getName', () => {
+    const { getState } = setupStore();
+    expect(selectedNodeSelectors.getName(getState())).toEqual('B');
+  });
+
+  it('matches the last stored run of selectedNodeSelectors.getIsJS', () => {
+    const { getState } = setupStore();
+    expect(selectedNodeSelectors.getIsJS(getState())).toEqual(false);
+  });
+
+  it('matches the last stored run of selectedNodeSelectors.getLib', () => {
+    const { getState } = setupStore();
+    expect(selectedNodeSelectors.getLib(getState())).toEqual('');
+  });
+
+  it('matches the last stored run of selectedNodeSelectors.getTimingsForSidebar', () => {
+    const { getState } = setupStore();
+    expect(
+      selectedNodeSelectors.getTimingsForSidebar(getState())
+    ).toMatchSnapshot();
   });
 });

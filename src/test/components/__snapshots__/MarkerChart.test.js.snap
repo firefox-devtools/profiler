@@ -1,5 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Empty Reasons shows a reason when a profil has no network markers 1`] = `
+<div
+  className="EmptyReasons"
+>
+  <h3>
+    The 
+    network chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    This thread has no network markers.
+  </p>
+</div>
+`;
+
+exports[`Empty Reasons shows a reason when a profile has no marker 1`] = `
+<div
+  className="EmptyReasons"
+>
+  <h3>
+    The 
+    marker chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    This thread contains no markers.
+  </p>
+</div>
+`;
+
 exports[`renders MarkerChart correctly 1`] = `
 <div
   className="markerChart"
@@ -81,6 +115,667 @@ Array [
   Array [
     "measureText",
     "…",
+  ],
+  Array [
+    "fillRect",
+    1,
+    1,
+    151.84615384615387,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    2,
+    153.84615384615387,
+    11,
+  ],
+  Array [
+    "fillRect",
+    1,
+    13,
+    151.84615384615387,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    170.23076923076923,
+    1,
+    59.53846153846152,
+    1,
+  ],
+  Array [
+    "fillRect",
+    169.23076923076923,
+    2,
+    61.53846153846152,
+    11,
+  ],
+  Array [
+    "fillRect",
+    170.23076923076923,
+    13,
+    59.53846153846152,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    1,
+    17,
+    151.84615384615387,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    18,
+    153.84615384615387,
+    11,
+  ],
+  Array [
+    "fillRect",
+    1,
+    29,
+    151.84615384615387,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "arc",
+    66.53846153846155,
+    39.5,
+    3.75,
+    0,
+    6.283185307179586,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    77.92307692307693,
+    49,
+    151.84615384615384,
+    1,
+  ],
+  Array [
+    "fillRect",
+    76.92307692307693,
+    50,
+    153.84615384615384,
+    11,
+  ],
+  Array [
+    "fillRect",
+    77.92307692307693,
+    61,
+    151.84615384615384,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    77.92307692307693,
+    65,
+    74.92307692307693,
+    1,
+  ],
+  Array [
+    "fillRect",
+    76.92307692307693,
+    66,
+    76.92307692307693,
+    11,
+  ],
+  Array [
+    "fillRect",
+    77.92307692307693,
+    77,
+    74.92307692307693,
+    1,
+  ],
+  Array [
+    "measureText",
+    "click",
+  ],
+  Array [
+    "set fillStyle",
+    "white",
+  ],
+  Array [
+    "fillText",
+    "click",
+    79.92307692307693,
+    75,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "arc",
+    112.6923076923077,
+    87.5,
+    3.75,
+    0,
+    6.283185307179586,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#eee",
+  ],
+  Array [
+    "fillRect",
+    0,
+    15,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    31,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    47,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    63,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    79,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    95,
+    200,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    150,
+    0,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "rgba(255, 255, 255, 0.8)",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "rgba(255, 255, 255, 0.0)",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "rgba(255, 255, 255, 0.8)",
+          ],
+          Array [
+            1,
+            "rgba(255, 255, 255, 0.0)",
+          ],
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    32,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    48,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    64,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    80,
+    150,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Marker A",
+    5,
+    11,
+  ],
+  Array [
+    "fillText",
+    "Dot marker E",
+    5,
+    43,
+  ],
+  Array [
+    "fillText",
+    "Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very …",
+    5,
+    59,
+  ],
+  Array [
+    "fillText",
+    "Marker G type DOMEvent",
+    5,
+    75,
+  ],
+  Array [
+    "fillText",
+    "Non-interval marker F without data",
+    5,
+    91,
+  ],
+]
+`;
+
+exports[`renders MarkerChart correctly 3`] = `
+<div
+  className="markerChart"
+>
+  <div
+    className="markerChartLabels grippy"
+    title="thread: \\"Empty\\" (0)
+process: \\"default\\" (0)"
+  >
+    <span
+      className="markerChartLabelsName"
+    >
+      Empty
+    </span>
+  </div>
+  <div
+    className="chartViewport"
+    onMouseDown={[Function]}
+    onWheel={[Function]}
+  >
+    <div>
+      <canvas
+        className="chartCanvas markerChartCanvas"
+        onDoubleClick={[Function]}
+        onMouseDown={[Function]}
+        onMouseMove={[Function]}
+        onMouseOut={[Function]}
+      />
+    </div>
+    <div
+      className="chartViewportShiftScroll hidden"
+    >
+      Zoom Chart:
+      <kbd
+        className="chartViewportShiftScrollKbd"
+      >
+        Shift
+      </kbd>
+      <kbd
+        className="chartViewportShiftScrollKbd"
+      >
+        Scroll
+      </kbd>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders MarkerChart correctly 4`] = `
+Array [
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    170.23076923076923,
+    1,
+    13.384615384615397,
+    1,
+  ],
+  Array [
+    "fillRect",
+    169.23076923076923,
+    2,
+    15.384615384615397,
+    11,
+  ],
+  Array [
+    "fillRect",
+    170.23076923076923,
+    13,
+    13.384615384615397,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#eee",
+  ],
+  Array [
+    "fillRect",
+    0,
+    15,
+    200,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    150,
+    0,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "rgba(255, 255, 255, 0.8)",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "rgba(255, 255, 255, 0.0)",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "rgba(255, 255, 255, 0.8)",
+          ],
+          Array [
+            1,
+            "rgba(255, 255, 255, 0.0)",
+          ],
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    150,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Load event",
+    5,
+    11,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    170.23076923076923,
+    1,
+    13.384615384615397,
+    1,
+  ],
+  Array [
+    "fillRect",
+    169.23076923076923,
+    2,
+    15.384615384615397,
+    11,
+  ],
+  Array [
+    "fillRect",
+    170.23076923076923,
+    13,
+    13.384615384615397,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#eee",
+  ],
+  Array [
+    "fillRect",
+    0,
+    15,
+    200,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    150,
+    0,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "rgba(255, 255, 255, 0.8)",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "rgba(255, 255, 255, 0.0)",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "rgba(255, 255, 255, 0.8)",
+          ],
+          Array [
+            1,
+            "rgba(255, 255, 255, 0.0)",
+          ],
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    150,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Load event",
+    5,
+    11,
+  ],
+]
+`;
+
+exports[`renders the hoveredItem markers properly 1`] = `
+Array [
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    138.5,
+    1,
+    48,
+    1,
+  ],
+  Array [
+    "fillRect",
+    137.5,
+    2,
+    50,
+    11,
+  ],
+  Array [
+    "fillRect",
+    138.5,
+    13,
+    48,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "Highlight",
   ],
   Array [
     "fillRect",
@@ -191,55 +886,22 @@ Array [
     "fillRect",
     63.5,
     65,
-    123,
+    60.5,
     1,
   ],
   Array [
     "fillRect",
     62.5,
     66,
-    125,
+    62.5,
     11,
   ],
   Array [
     "fillRect",
     63.5,
     77,
-    123,
-    1,
-  ],
-  Array [
-    "measureText",
-    "",
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
-    "fillRect",
-    63.5,
-    81,
     60.5,
     1,
-  ],
-  Array [
-    "fillRect",
-    62.5,
-    82,
-    62.5,
-    11,
-  ],
-  Array [
-    "fillRect",
-    63.5,
-    93,
-    60.5,
-    1,
-  ],
-  Array [
-    "measureText",
-    "click",
   ],
   Array [
     "set fillStyle",
@@ -249,7 +911,7 @@ Array [
     "fillText",
     "click",
     65.5,
-    91,
+    75,
   ],
   Array [
     "set fillStyle",
@@ -261,7 +923,7 @@ Array [
   Array [
     "arc",
     92.5,
-    103.5,
+    87.5,
     3.75,
     0,
     6.283185307179586,
@@ -312,13 +974,6 @@ Array [
     "fillRect",
     0,
     95,
-    200,
-    1,
-  ],
-  Array [
-    "fillRect",
-    0,
-    111,
     200,
     1,
   ],
@@ -399,13 +1054,6 @@ Array [
     15,
   ],
   Array [
-    "fillRect",
-    0,
-    96,
-    150,
-    15,
-  ],
-  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -417,39 +1065,27 @@ Array [
   ],
   Array [
     "fillText",
-    "Marker B",
-    5,
-    27,
-  ],
-  Array [
-    "fillText",
     "Dot marker E",
     5,
     43,
   ],
   Array [
     "fillText",
-    "Marker C",
+    "Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very …",
     5,
     59,
   ],
   Array [
     "fillText",
-    "Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very …",
+    "Marker G type DOMEvent",
     5,
     75,
   ],
   Array [
     "fillText",
-    "Marker G type DOMEvent",
-    5,
-    91,
-  ],
-  Array [
-    "fillText",
     "Non-interval marker F without data",
     5,
-    107,
+    91,
   ],
 ]
 `;

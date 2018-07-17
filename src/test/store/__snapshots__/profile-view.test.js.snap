@@ -823,6 +823,36 @@ Array [
 ]
 `;
 
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedNodeSelectors.getTimingsForSidebar 1`] = `
+Object {
+  "forFunc": Object {
+    "selfTime": Object {
+      "breakdownByImplementation": null,
+      "value": 0,
+    },
+    "totalTime": Object {
+      "breakdownByImplementation": Object {
+        "native": 4,
+      },
+      "value": 4,
+    },
+  },
+  "forPath": Object {
+    "selfTime": Object {
+      "breakdownByImplementation": null,
+      "value": 0,
+    },
+    "totalTime": Object {
+      "breakdownByImplementation": Object {
+        "native": 4,
+      },
+      "value": 4,
+    },
+  },
+  "rootTime": 4,
+}
+`;
+
 exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getCallNodeInfo 1`] = `
 Object {
   "callNodeTable": Object {
@@ -938,7 +968,7 @@ CallTree {
       1,
     ],
   },
-  "_children": Map {},
+  "_children": Array [],
   "_displayDataByIndex": Map {},
   "_funcTable": Object {
     "address": Array [
