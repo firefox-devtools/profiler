@@ -7,13 +7,13 @@ exports[`Timeline renders the header 1`] = `
   onMouseMove={[Function]}
 >
   <div
-    className="timelineTimeRuler"
+    className="timelineRuler"
   >
     <ol
-      className="timeRulerContainer"
+      className="timelineRulerContainer"
     >
       <li
-        className="timeRulerNotch"
+        className="timelineRulerNotch"
         style={
           Object {
             "left": "0px",
@@ -21,13 +21,13 @@ exports[`Timeline renders the header 1`] = `
         }
       >
         <span
-          className="timeRulerNotchText"
+          className="timelineRulerNotchText"
         >
           0.000s
         </span>
       </li>
       <li
-        className="timeRulerNotch"
+        className="timelineRulerNotch"
         style={
           Object {
             "left": "66.66666666666667px",
@@ -35,13 +35,13 @@ exports[`Timeline renders the header 1`] = `
         }
       >
         <span
-          className="timeRulerNotchText"
+          className="timelineRulerNotchText"
         >
           0.002s
         </span>
       </li>
       <li
-        className="timeRulerNotch"
+        className="timelineRulerNotch"
         style={
           Object {
             "left": "133.33333333333334px",
@@ -49,13 +49,13 @@ exports[`Timeline renders the header 1`] = `
         }
       >
         <span
-          className="timeRulerNotchText"
+          className="timelineRulerNotchText"
         >
           0.004s
         </span>
       </li>
       <li
-        className="timeRulerNotch"
+        className="timelineRulerNotch"
         style={
           Object {
             "left": "200px",
@@ -63,13 +63,13 @@ exports[`Timeline renders the header 1`] = `
         }
       >
         <span
-          className="timeRulerNotchText"
+          className="timelineRulerNotchText"
         >
           0.006s
         </span>
       </li>
       <li
-        className="timeRulerNotch"
+        className="timelineRulerNotch"
         style={
           Object {
             "left": "266.6666666666667px",
@@ -77,7 +77,7 @@ exports[`Timeline renders the header 1`] = `
         }
       >
         <span
-          className="timeRulerNotchText"
+          className="timelineRulerNotchText"
         >
           0.008s
         </span>

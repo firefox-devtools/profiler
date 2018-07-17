@@ -5,18 +5,18 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import './Ruler.css';
 
 import type { Milliseconds, CssPixels } from '../../types/units';
 
 type Props = {|
-  +className: string,
   +zeroAt: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +width: CssPixels,
 |};
 
-class TimeRuler extends PureComponent<Props> {
+class TimelineRuler extends PureComponent<Props> {
   _findNiceNumberGreaterOrEqualTo(uglyNumber: number) {
     // Write uglyNumber as a * 10^b, with 1 <= a < 10.
     // Return the lowest of 2 * 10^b, 5 * 10^b, 10 * 10^b that is greater or equal to uglyNumber.
@@ -57,14 +57,17 @@ class TimeRuler extends PureComponent<Props> {
   }
 
   render() {
-    const { className } = this.props;
     const { notches, decimalPlaces } = this._getNotches();
     return (
-      <div className={className}>
-        <ol className="timeRulerContainer">
+      <div className="timelineRuler">
+        <ol className="timelineRulerContainer">
           {notches.map(({ time, pos }, i) => (
-            <li className="timeRulerNotch" key={i} style={{ left: `${pos}px` }}>
-              <span className="timeRulerNotchText">{`${time.toFixed(
+            <li
+              className="timelineRulerNotch"
+              key={i}
+              style={{ left: `${pos}px` }}
+            >
+              <span className="timelineRulerNotchText">{`${time.toFixed(
                 decimalPlaces
               )}s`}</span>
             </li>
@@ -75,4 +78,4 @@ class TimeRuler extends PureComponent<Props> {
   }
 }
 
-export default TimeRuler;
+export default TimelineRuler;

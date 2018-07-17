@@ -329,60 +329,6 @@ body, #root, .profileViewer {
   flex: 1;
 }
 
-.timelineTimeRuler {
-  height: 20px;
-  overflow: hidden;
-}
-
-.timelineTimeRuler::after {
-  content: '';
-  position: absolute;
-  top: 20px;
-  left: -150px;
-  right: 0;
-  height: 1px;
-  background: var(--grey-30);
-  z-index: 3;
-}
-
-.timeRulerContainer {
-  overflow: hidden;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  -moz-user-select: none;
-  user-select: none;
-  line-height: 20px;
-  font-size: 9px;
-  color: #888;
-  cursor: default;
-  z-index: 1; /* between .timelineThread background and .timelineThreadThreadDetails */
-}
-
-.timeRulerNotch {
-  display: block;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  margin-left: -1px;
-  white-space: nowrap;
-  text-align: right;
-  background: linear-gradient(transparent, var(--grey-30) 19px, var(--grey-30) 20px, #d7d7db66 0);
-}
-
-.timeRulerNotchText {
-  position: absolute;
-  right: 0;
-  padding-right: 5px;
-}
-
 .threadStackGraph {
   height: 25px;
 }

@@ -18,7 +18,7 @@ import {
 } from '../../reducers/profile-view';
 import { getHiddenThreads, getThreadOrder } from '../../reducers/url-state';
 import { withSize } from '../shared/WithSize';
-import TimeRuler from './TimeRuler';
+import TimelineRuler from './Ruler';
 import './index.css';
 
 import type { SizeProps } from '../shared/WithSize';
@@ -73,8 +73,7 @@ class Timeline extends PureComponent<Props> {
     const threads = profile.threads;
     return (
       <TimelineSelection width={width}>
-        <TimeRuler
-          className="timelineTimeRuler"
+        <TimelineRuler
           zeroAt={zeroAt}
           rangeStart={displayRange.start}
           rangeEnd={displayRange.end}
