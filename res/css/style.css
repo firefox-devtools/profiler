@@ -397,12 +397,6 @@ body, #root, .profileViewer {
   overflow: auto;
 }
 
-.intervalMarkerTimelineCanvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
 .profileViewerHeaderThreadList {
   list-style: none;
   margin: 0 0 0 -150px;

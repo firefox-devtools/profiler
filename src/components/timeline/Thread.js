@@ -14,8 +14,10 @@ import {
   getCallNodePathFromIndex,
 } from '../../profile-logic/profile-data';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
-import ProfileThreadJankOverview from './ProfileThreadJankOverview';
-import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOverview';
+import {
+  TimelineTracingMarkersJank,
+  TimelineTracingMarkersOverview,
+} from './TracingMarkers';
 import {
   changeSelectedThread,
   updateProfileSelection,
@@ -198,7 +200,7 @@ class TimelineThread extends PureComponent<Props> {
         </ContextMenuTrigger>
         <div className="timelineThreadDetails">
           {displayJank ? (
-            <ProfileThreadJankOverview
+            <TimelineTracingMarkersJank
               className="timelineThreadIntervalMarkerOverview"
               rangeStart={rangeStart}
               rangeEnd={rangeEnd}
@@ -208,7 +210,7 @@ class TimelineThread extends PureComponent<Props> {
             />
           ) : null}
           {displayTracingMarkers ? (
-            <ProfileThreadTracingMarkerOverview
+            <TimelineTracingMarkersOverview
               // Feed in the thread name to the class. This is used for conditional
               // sizing rules, for instance with GeckoMain threads.
               // TODO - This seems kind of brittle, and should probably done through

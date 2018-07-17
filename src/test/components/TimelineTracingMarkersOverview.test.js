@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import ProfileThreadTrackingMarkerOverview from '../../components/timeline/ProfileThreadTracingMarkerOverview';
+import { TimelineTracingMarkersOverview } from '../../components/timeline/TracingMarkers';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -14,7 +14,7 @@ import ReactDOM from 'react-dom';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
-describe('ProfileThreadTracingMarkerOverview', function() {
+describe('TimelineTracingMarkersOverview', function() {
   beforeEach(() => {
     jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
       // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
@@ -60,8 +60,8 @@ describe('ProfileThreadTracingMarkerOverview', function() {
 
     const overview = renderer.create(
       <Provider store={storeWithProfile(profile)}>
-        <ProfileThreadTrackingMarkerOverview
-          className="profileThreadTrackingMarkerOverview"
+        <TimelineTracingMarkersOverview
+          className="timelineTracingMarkersOverview"
           rangeStart={0}
           rangeEnd={15}
           threadIndex={0}

@@ -139,7 +139,7 @@ process: \\"default\\" (0)"
                 className="timelineThreadIntervalMarkerOverview selected"
               >
                 <canvas
-                  className="timelineThreadIntervalMarkerOverviewCanvas intervalMarkerTimelineCanvas"
+                  className="timelineTracingMarkersCanvas"
                   onMouseDown={[Function]}
                   onMouseMove={[Function]}
                   onMouseOut={[Function]}
@@ -188,7 +188,7 @@ process: \\"default\\" (0)"
                 className="timelineThreadIntervalMarkerOverview"
               >
                 <canvas
-                  className="timelineThreadIntervalMarkerOverviewCanvas intervalMarkerTimelineCanvas"
+                  className="timelineTracingMarkersCanvas"
                   onMouseDown={[Function]}
                   onMouseMove={[Function]}
                   onMouseOut={[Function]}
@@ -271,7 +271,7 @@ process: \\"default\\" (0)"
                 className="timelineThreadIntervalMarkerOverview"
               >
                 <canvas
-                  className="timelineThreadIntervalMarkerOverviewCanvas intervalMarkerTimelineCanvas"
+                  className="timelineTracingMarkersCanvas"
                   onMouseDown={[Function]}
                   onMouseMove={[Function]}
                   onMouseOut={[Function]}
