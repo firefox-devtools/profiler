@@ -9,6 +9,7 @@ import { mount } from 'enzyme';
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
+import { getBoundingBox } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
   getEmptyThread,
@@ -101,6 +102,60 @@ describe('calltree/ProfileCallTreeView', function() {
     );
 
     expect(calltree).toMatchSnapshot();
+  });
+
+  it('reacts properly to up/down navigation keys', () => {
+    function setup() {
+      // This makes the bounding box large enough so that we don't trigger
+      // VirtualList's virtualization.
+      jest
+        .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+        .mockImplementation(() => getBoundingBox(1000, 2000));
+
+      // This generates a profile where function "name<i + 1>" is present
+      // <length - i> times, which means it will have a self time of <length - i>
+      // ms. This is a good way to control the order we'll get in the call tree
+      // view: function "name1" will be first, etc.
+      const profileString = Array.from({ length: 100 }).reduce(
+        (result, func, i, array) => {
+          const funcName = `name${i + 1}  `;
+          result += funcName.repeat(array.length - i);
+          return result;
+        },
+        ''
+      );
+
+      const { profile } = getProfileFromTextSamples(profileString);
+      const store = storeWithProfile(profile);
+      const calltree = mount(
+        <Provider store={store}>
+          <ProfileCallTreeView />
+        </Provider>
+      );
+
+      return {
+        simulateKey: (key: string) =>
+          calltree.find('div.treeViewBody').simulate('keydown', { key }),
+        selectedText: () =>
+          calltree.find('.treeViewRowScrolledColumns.selected').text(),
+      };
+    }
+
+    const { simulateKey, selectedText } = setup();
+
+    expect(selectedText()).toBe('name1');
+    simulateKey('ArrowDown');
+    expect(selectedText()).toBe('name2');
+    simulateKey('PageDown');
+    expect(selectedText()).toBe('name17'); // 15 rows below
+    simulateKey('End');
+    expect(selectedText()).toBe('name100');
+    simulateKey('ArrowUp');
+    expect(selectedText()).toBe('name99');
+    simulateKey('PageUp');
+    expect(selectedText()).toBe('name84'); // 15 rows above
+    simulateKey('Home');
+    expect(selectedText()).toBe('name1');
   });
 });
 
