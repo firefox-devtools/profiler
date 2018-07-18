@@ -7,6 +7,11 @@ import type { Store as ReduxStore } from 'redux'; // eslint-disable-line import/
 import type { Action as ActionsRef } from './actions';
 import type { State as StateRef } from './reducers';
 
+// For some reason eslint is having trouble pulling this from our libdefs, but
+// Flow is able to use it just fine.
+// eslint-disable-next-line import/named
+import type { Selector as ReselectSelector } from 'reselect';
+
 // Re-export these here so they are easily available from wherever and avoids
 // circular dependencies.
 export type Action = ActionsRef;
@@ -22,3 +27,5 @@ export type ThunkAction<R> = (dispatch: Dispatch, GetState) => R;
 // allows to type the return value as well.
 export type Dispatch = PlainDispatch & ThunkDispatch;
 export type Store = ReduxStore<State, Action, Dispatch>;
+// Make a selector type that already knows about our State.
+export type Selector<Returns> = ReselectSelector<State, *, Returns>;

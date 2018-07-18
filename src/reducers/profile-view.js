@@ -45,6 +45,7 @@ import type {
   SymbolicationStatus,
   ThreadViewOptions,
 } from '../types/reducers';
+import type { Selector } from '../types/store';
 import type { Transform, TransformStack } from '../types/transforms';
 import type { TimingsForPath } from '../profile-logic/profile-data';
 
@@ -650,9 +651,9 @@ export const selectorsForThread = (threadIndex: ThreadIndex): * => {
     const applyTransformMemoized = memoize(applyTransform, {
       cache: new WeakTupleMap(),
     });
-    const getTransformStack = (state: State): TransformStack =>
+    const getTransformStack: Selector<TransformStack> = (state: State) =>
       UrlState.getTransformStack(state, threadIndex);
-    const getRangeAndTransformFilteredThread = createSelector(
+    const getRangeAndTransformFilteredThread: Selector<Thread> = createSelector(
       getRangeFilteredThread,
       getTransformStack,
       (startingThread, transforms): Thread =>
@@ -662,19 +663,21 @@ export const selectorsForThread = (threadIndex: ThreadIndex): * => {
           startingThread
         )
     );
-    const _getImplementationFilteredThread = createSelector(
+    const _getImplementationFilteredThread: Selector<Thread> = createSelector(
       getRangeAndTransformFilteredThread,
       UrlState.getImplementationFilter,
       ProfileData.filterThreadByImplementation
     );
-    const _getImplementationAndSearchFilteredThread = createSelector(
+    const _getImplementationAndSearchFilteredThread: Selector<
+      Thread
+    > = createSelector(
       _getImplementationFilteredThread,
       UrlState.getSearchStrings,
       (thread: Thread, searchStrings: string[] | null): Thread => {
         return ProfileData.filterThreadToSearchStrings(thread, searchStrings);
       }
     );
-    const getFilteredThread = createSelector(
+    const getFilteredThread: Selector<Thread> = createSelector(
       _getImplementationAndSearchFilteredThread,
       UrlState.getInvertCallstack,
       (thread, shouldInvertCallstack): Thread => {
@@ -683,7 +686,7 @@ export const selectorsForThread = (threadIndex: ThreadIndex): * => {
           : thread;
       }
     );
-    const getRangeSelectionFilteredThread = createSelector(
+    const getRangeSelectionFilteredThread: Selector<Thread> = createSelector(
       getFilteredThread,
       getSelection,
       (thread, selection): Thread => {
@@ -699,9 +702,9 @@ export const selectorsForThread = (threadIndex: ThreadIndex): * => {
       }
     );
 
-    const getViewOptions = (state: State): ThreadViewOptions =>
+    const getViewOptions: Selector<ThreadViewOptions> = (state: State) =>
       getProfileViewOptions(state).perThread[threadIndex];
-    const getFriendlyThreadName = createSelector(
+    const getFriendlyThreadName: Selector<string> = createSelector(
       getThreads,
       getThread,
       ProfileData.getFriendlyThreadName
