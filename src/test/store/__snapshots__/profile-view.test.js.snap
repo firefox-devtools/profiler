@@ -869,9 +869,9 @@ Object {
     },
     "totalTime": Object {
       "breakdownByImplementation": Object {
-        "native": 4,
+        "native": 2,
       },
-      "value": 4,
+      "value": 2,
     },
   },
   "forPath": Object {
@@ -881,12 +881,12 @@ Object {
     },
     "totalTime": Object {
       "breakdownByImplementation": Object {
-        "native": 4,
+        "native": 2,
       },
-      "value": 4,
+      "value": 2,
     },
   },
-  "rootTime": 4,
+  "rootTime": 2,
 }
 `;
 
@@ -952,12 +952,12 @@ exports[`snapshots of selectors/profile-view matches the last stored run of sele
 CallTree {
   "_callNodeChildCount": Uint32Array [
     1,
-    2,
+    1,
     0,
     0,
     1,
     0,
-    1,
+    0,
     0,
   ],
   "_callNodeTable": Object {
@@ -1010,19 +1010,19 @@ CallTree {
       0,
       0,
       0,
-      3,
+      2,
       0,
-      1,
+      0,
     ],
     "totalTime": Float32Array [
-      4,
-      4,
+      2,
+      2,
       0,
       0,
-      3,
-      3,
-      1,
-      1,
+      2,
+      2,
+      0,
+      0,
     ],
   },
   "_categories": Array [
@@ -1123,7 +1123,7 @@ CallTree {
     "type": Array [],
   },
   "_rootCount": 1,
-  "_rootTotalTime": 4,
+  "_rootTotalTime": 2,
   "_stringTable": UniqueStringArray {
     "_array": Array [
       "A",
@@ -1451,39 +1451,31 @@ Array [
   Object {
     "callNode": Array [
       4,
-      6,
     ],
     "end": Array [
-      0.75,
       1,
     ],
-    "length": 2,
+    "length": 1,
     "selfTimeRelative": Array [
-      0,
       0,
     ],
     "start": Array [
       0,
-      0.75,
     ],
   },
   Object {
     "callNode": Array [
       5,
-      7,
     ],
     "end": Array [
-      0.75,
       1,
     ],
-    "length": 2,
+    "length": 1,
     "selfTimeRelative": Array [
-      0.75,
-      0.25,
+      1,
     ],
     "start": Array [
       0,
-      0.75,
     ],
   },
 ]
@@ -2586,16 +2578,13 @@ Object {
     "data": Array [
       null,
       null,
-      null,
     ],
-    "length": 3,
+    "length": 2,
     "name": Array [
-      3,
       4,
       5,
     ],
     "time": Array [
-      3,
       4,
       5,
     ],
@@ -2613,34 +2602,24 @@ Object {
     "type": Array [],
   },
   "samples": Object {
-    "length": 4,
+    "length": 2,
     "responsiveness": Array [
-      0,
       100,
-      0,
       0,
     ],
     "rss": Array [
-      null,
-      null,
       null,
       null,
     ],
     "stack": Array [
       5,
       5,
-      5,
-      7,
     ],
     "time": Array [
-      3,
       4,
       5,
-      6,
     ],
     "uss": Array [
-      null,
-      null,
       null,
       null,
     ],
@@ -2763,16 +2742,13 @@ Object {
   "data": Array [
     null,
     null,
-    null,
   ],
-  "length": 3,
+  "length": 2,
   "name": Array [
-    3,
     4,
     5,
   ],
   "time": Array [
-    3,
     4,
     5,
   ],
