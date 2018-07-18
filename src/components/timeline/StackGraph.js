@@ -8,6 +8,7 @@ import bisection from 'bisection';
 import { timeCode } from '../../utils/time-code';
 import { getSampleCallNodes } from '../../profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
+import './StackGraph.css';
 
 import type { Thread } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
@@ -26,7 +27,7 @@ type Props = {|
   +onStackClick: (time: Milliseconds) => void,
 |};
 
-class ThreadStackGraph extends PureComponent<Props> {
+class StackGraph extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement = null;
   _requestedAnimationFrame: boolean = false;
   _resizeListener: () => void;
@@ -41,7 +42,7 @@ class ThreadStackGraph extends PureComponent<Props> {
         this._requestedAnimationFrame = false;
         const canvas = this._canvas;
         if (canvas) {
-          timeCode('ThreadStackGraph render', () => {
+          timeCode('StackGraph render', () => {
             this.drawCanvas(canvas);
           });
         }
@@ -196,9 +197,9 @@ class ThreadStackGraph extends PureComponent<Props> {
   render() {
     this._scheduleDraw();
     return (
-      <div className="threadStackGraph">
+      <div className="timelineStackGraph">
         <canvas
-          className="threadStackGraphCanvas"
+          className="timelineStackGraphCanvas"
           ref={this._takeCanvasRef}
           onMouseUp={this._onMouseUp}
         />
@@ -207,4 +208,4 @@ class ThreadStackGraph extends PureComponent<Props> {
   }
 }
 
-export default ThreadStackGraph;
+export default StackGraph;

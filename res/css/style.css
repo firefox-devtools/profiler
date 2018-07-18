@@ -329,16 +329,6 @@ body, #root, .profileViewer {
   flex: 1;
 }
 
-.threadStackGraph {
-  height: 25px;
-}
-
-.threadStackGraphCanvas {
-  display: block;
-  height: 25px;
-  width: 100%;
-}
-
 .tabBarContainer {
   display: flex;
   flex-flow: row nowrap;

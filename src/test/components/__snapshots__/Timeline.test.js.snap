@@ -147,10 +147,10 @@ process: \\"default\\" (0)"
                 />
               </div>
               <div
-                className="threadStackGraph"
+                className="timelineStackGraph"
               >
                 <canvas
-                  className="threadStackGraphCanvas"
+                  className="timelineStackGraphCanvas"
                   onMouseUp={[Function]}
                 />
               </div>
@@ -196,10 +196,10 @@ process: \\"default\\" (0)"
                 />
               </div>
               <div
-                className="threadStackGraph"
+                className="timelineStackGraph"
               >
                 <canvas
-                  className="threadStackGraphCanvas"
+                  className="timelineStackGraphCanvas"
                   onMouseUp={[Function]}
                 />
               </div>
@@ -279,10 +279,10 @@ process: \\"default\\" (0)"
                 />
               </div>
               <div
-                className="threadStackGraph"
+                className="timelineStackGraph"
               >
                 <canvas
-                  className="threadStackGraphCanvas"
+                  className="timelineStackGraphCanvas"
                   onMouseUp={[Function]}
                 />
               </div>

@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
-import ThreadStackGraph from './ThreadStackGraph';
+import StackGraph from './StackGraph';
 import { selectorsForThread } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
@@ -216,7 +216,7 @@ class TimelineThread extends PureComponent<Props> {
               isModifyingSelection={isModifyingSelection}
             />
           ) : null}
-          <ThreadStackGraph
+          <StackGraph
             interval={interval}
             thread={thread}
             rangeStart={rangeStart}
