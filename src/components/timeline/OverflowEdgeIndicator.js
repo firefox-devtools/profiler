@@ -3,8 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-/* eslint-disable react/no-unused-state */
-// (See https://github.com/yannickcr/eslint-plugin-react/issues/1572)
 
 import * as React from 'react';
 import classNames from 'classnames';
