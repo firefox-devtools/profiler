@@ -4,8 +4,9 @@
 
 // @flow
 import * as React from 'react';
+import { mount } from 'enzyme';
+
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
-import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -19,7 +20,6 @@ import {
   changeInvertCallstack,
   addRangeFilter,
 } from '../../actions/profile-view';
-import { getBoundingBox } from '../fixtures/utils';
 
 describe('calltree/ProfileCallTreeView', function() {
   const { profile } = getProfileFromTextSamples(`
@@ -31,14 +31,13 @@ describe('calltree/ProfileCallTreeView', function() {
   `);
 
   it('renders an unfiltered call tree', () => {
-    const calltree = renderer.create(
+    const calltree = mount(
       <Provider store={storeWithProfile(profile)}>
         <ProfileCallTreeView />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
-    expect(calltree.toJSON()).toMatchSnapshot();
+    expect(calltree).toMatchSnapshot();
   });
 
   it('renders an inverted call tree', () => {
@@ -53,41 +52,39 @@ describe('calltree/ProfileCallTreeView', function() {
     const store = storeWithProfile(profileForInvertedTree);
     store.dispatch(changeInvertCallstack(true));
 
-    const calltree = renderer.create(
+    const calltree = mount(
       <Provider store={store}>
         <ProfileCallTreeView />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
-    expect(calltree.toJSON()).toMatchSnapshot();
+    expect(calltree).toMatchSnapshot();
   });
 
   it('renders call tree with some search strings', () => {
     const store = storeWithProfile(profile);
-    const calltree = renderer.create(
+    const calltree = mount(
       <Provider store={store}>
         <ProfileCallTreeView />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
     expect(calltree).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString('C'));
-    expect(calltree).toMatchSnapshot();
+    expect(calltree.update()).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString('C,'));
-    expect(calltree).toMatchSnapshot();
+    expect(calltree.update()).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString('C, F'));
-    expect(calltree).toMatchSnapshot();
+    expect(calltree.update()).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString('C, F,E'));
-    expect(calltree).toMatchSnapshot();
+    expect(calltree.update()).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString(' C , E   '));
-    expect(calltree).toMatchSnapshot();
+    expect(calltree.update()).toMatchSnapshot();
   });
 
   it('computes a width for a call tree of a really deep stack', () => {
@@ -97,11 +94,10 @@ describe('calltree/ProfileCallTreeView', function() {
         .join('\n')
     );
     const store = storeWithProfile(profile);
-    const calltree = renderer.create(
+    const calltree = mount(
       <Provider store={store}>
         <ProfileCallTreeView />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
     expect(calltree).toMatchSnapshot();
@@ -119,11 +115,10 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
   profile.threads[0].name = 'Thread with samples';
 
   function renderWithStore(store) {
-    return renderer.create(
+    return mount(
       <Provider store={store}>
         <ProfileCallTreeView />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
   }
 
@@ -149,24 +144,3 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
     expect(renderWithStore(store)).toMatchSnapshot();
   });
 });
-
-/**
- * Mock out any created refs for the call tree components with relevant information.
- */
-function createNodeMock(element) {
-  const classNameParts = element.props.className.split(' ');
-  if (
-    // <VirtualList />
-    classNameParts.includes('treeViewBody') ||
-    // <VirtualListInner />
-    classNameParts.includes('treeViewBodyInner')
-  ) {
-    return {
-      addEventListener: () => {},
-      // Set an arbitrary size that will not kick in any virtualization behavior.
-      getBoundingClientRect: () => getBoundingBox(2000, 1000),
-      focus: () => {},
-    };
-  }
-  return null;
-}
