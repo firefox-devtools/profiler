@@ -5,7 +5,20 @@ Object {
   "meta": Object {
     "abi": "",
     "appBuildID": "",
-    "categories": Array [],
+    "categories": Array [
+      Object {
+        "color": "grey",
+        "name": "Other",
+      },
+      Object {
+        "color": "green",
+        "name": "Graphics",
+      },
+      Object {
+        "color": "blue",
+        "name": "DOM",
+      },
+    ],
     "extensions": Object {
       "baseURL": Array [],
       "id": Array [],
@@ -18,7 +31,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 12,
+    "preprocessedProfileVersion": 13,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -266,6 +279,17 @@ Object {
         ],
       },
       "stackTable": Object {
+        "category": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
         "frame": Array [
           0,
           1,
@@ -397,6 +421,7 @@ Object {
         "uss": Array [],
       },
       "stackTable": Object {
+        "category": Array [],
         "frame": Array [],
         "length": 0,
         "prefix": Array [],
@@ -665,6 +690,17 @@ Array [
       ],
     },
     "stackTable": Object {
+      "category": Array [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ],
       "frame": Array [
         0,
         1,
@@ -796,6 +832,7 @@ Array [
       "uss": Array [],
     },
     "stackTable": Object {
+      "category": Array [],
       "frame": Array [],
       "length": 0,
       "prefix": Array [],
@@ -856,6 +893,16 @@ Object {
 exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getCallNodeInfo 1`] = `
 Object {
   "callNodeTable": Object {
+    "category": Int32Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "depth": Array [
       0,
       1,
@@ -914,6 +961,16 @@ CallTree {
     0,
   ],
   "_callNodeTable": Object {
+    "category": Int32Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "depth": Array [
       0,
       1,
@@ -968,6 +1025,20 @@ CallTree {
       1,
     ],
   },
+  "_categories": Array [
+    Object {
+      "color": "grey",
+      "name": "Other",
+    },
+    Object {
+      "color": "green",
+      "name": "Graphics",
+    },
+    Object {
+      "color": "blue",
+      "name": "DOM",
+    },
+  ],
   "_children": Array [],
   "_displayDataByIndex": Map {},
   "_funcTable": Object {
@@ -1285,6 +1356,16 @@ Object {
     ],
   },
   "stackTable": Object {
+    "category": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "frame": Array [
       0,
       1,
@@ -1760,6 +1841,17 @@ Object {
     ],
   },
   "stackTable": Object {
+    "category": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "frame": Array [
       0,
       1,
@@ -2021,6 +2113,16 @@ Object {
     ],
   },
   "stackTable": Object {
+    "category": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "frame": Array [
       0,
       1,
@@ -2276,6 +2378,17 @@ Object {
     ],
   },
   "stackTable": Object {
+    "category": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "frame": Array [
       0,
       1,
@@ -2533,6 +2646,16 @@ Object {
     ],
   },
   "stackTable": Object {
+    "category": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "frame": Array [
       0,
       1,

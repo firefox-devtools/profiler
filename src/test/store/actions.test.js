@@ -184,11 +184,11 @@ describe('selectors/getFlameGraphTiming', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E G
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  G
     `);
 
     const store = storeWithProfile(profile);
@@ -206,11 +206,11 @@ describe('selectors/getFlameGraphTiming', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A X A
-      B B   B
-      C C   H
-      D F   I
-      E G
+      A  A  X  A
+      B  B     B
+      C  C     H
+      D  F     I
+      E  G
     `);
 
     // Remove the X sample by setting it's stack to null.
@@ -231,9 +231,9 @@ describe('selectors/getFlameGraphTiming', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      D D A D
-      E F B F
-          C G
+      D  D  A  D
+      E  F  B  F
+            C  G
     `);
 
     const store = storeWithProfile(profile);
@@ -249,7 +249,7 @@ describe('selectors/getFlameGraphTiming', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A A A
+      A  A  A  A
       B
       C
     `);
@@ -266,9 +266,9 @@ describe('selectors/getFlameGraphTiming', function() {
 describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
   it('calculates the max call node depth', function() {
     const { profile } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C
+      A  A  A
+      B  B  B
+      C  C
       D
     `);
 
@@ -343,11 +343,11 @@ describe('actions/changeInvertCallstack', function() {
     profile,
     funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
-      A A A A A
-      B E B B B
-      C F I I I
-      D G J J J
-        H
+      A  A  A  A  A
+      B  E  B  B  B
+      C  F  I  I  I
+      D  G  J  J  J
+         H
     `);
   const toFuncIndex = funcName => funcNames.indexOf(funcName);
   const threadIndex = 0;

@@ -41,11 +41,11 @@ it('renders StackChartGraph correctly', () => {
   }
 
   const { profile } = getProfileFromTextSamples(`
-    A A A
-    B B B
-    C C H
-    D F I
-    E G
+    A  A  A
+    B  B  B
+    C  C  H
+    D  F  I
+    E  G
   `);
 
   const store = storeWithProfile(profile);

@@ -245,6 +245,14 @@ class TreeViewRowScrolledColumns<
             mainColumn.propName
           }`}
         >
+          {displayData.categoryColor && displayData.categoryName ? (
+            <span
+              className={`treeViewCategoryKnob category-color-${
+                displayData.categoryColor
+              }`}
+              title={displayData.categoryName}
+            />
+          ) : null}
           {RenderComponent ? (
             <RenderComponent displayData={displayData} />
           ) : (

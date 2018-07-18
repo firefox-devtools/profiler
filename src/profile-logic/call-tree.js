@@ -11,6 +11,7 @@ import {
 } from './profile-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import type {
+  CategoryList,
   Thread,
   FuncTable,
   ResourceTable,
@@ -48,6 +49,7 @@ function extractFaviconFromLibname(libname: string): string | null {
 }
 
 export class CallTree {
+  _categories: CategoryList;
   _callNodeTable: CallNodeTable;
   _callNodeTimes: CallNodeTimes;
   _callNodeChildCount: Uint32Array; // A table column matching the callNodeTable
@@ -66,6 +68,7 @@ export class CallTree {
 
   constructor(
     { funcTable, resourceTable, stringTable }: Thread,
+    categories: CategoryList,
     callNodeTable: CallNodeTable,
     callNodeTimes: CallNodeTimes,
     callNodeChildCount: Uint32Array,
@@ -74,6 +77,7 @@ export class CallTree {
     jsOnly: boolean,
     isIntegerInterval: boolean
   ) {
+    this._categories = categories;
     this._callNodeTable = callNodeTable;
     this._callNodeTimes = callNodeTimes;
     this._callNodeChildCount = callNodeChildCount;
@@ -245,6 +249,7 @@ export class CallTree {
         selfTime,
       } = this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeTable.func[callNodeIndex];
+      const categoryIndex = this._callNodeTable.category[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
@@ -270,6 +275,8 @@ export class CallTree {
         lib: libName,
         // Dim platform pseudo-stacks.
         dim: !isJS && this._jsOnly,
+        categoryName: this._categories[categoryIndex].name,
+        categoryColor: this._categories[categoryIndex].color,
         icon,
       };
       this._displayDataByIndex.set(callNodeIndex, displayData);
@@ -442,6 +449,7 @@ export function getCallTree(
   thread: Thread,
   interval: Milliseconds,
   callNodeInfo: CallNodeInfo,
+  categories: CategoryList,
   implementationFilter: string,
   invertCallstack: boolean
 ): CallTree {
@@ -463,6 +471,7 @@ export function getCallTree(
 
     return new CallTree(
       thread,
+      categories,
       callNodeInfo.callNodeTable,
       callNodeTimes,
       callNodeChildCount,

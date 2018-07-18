@@ -14,6 +14,7 @@ import type {
   FuncTable,
   MarkersTable,
   ResourceTable,
+  IndexIntoCategoryList,
   IndexIntoFuncTable,
   IndexIntoStringTable,
   IndexIntoSamplesTable,
@@ -61,7 +62,11 @@ export const emptyExtensions: ExtensionTable = Object.freeze({
   length: 0,
 });
 
-export const emptyCategories: CategoryList = Object.freeze([]);
+export const defaultCategories: CategoryList = Object.freeze([
+  { name: 'Other', color: 'grey' },
+  { name: 'Graphics', color: 'green' },
+  { name: 'DOM', color: 'blue' },
+]);
 
 /**
  * Generate the CallNodeInfo which contains the CallNodeTable, and a map to convert
@@ -75,7 +80,8 @@ export const emptyCategories: CategoryList = Object.freeze([]);
 export function getCallNodeInfo(
   stackTable: StackTable,
   frameTable: FrameTable,
-  funcTable: FuncTable
+  funcTable: FuncTable,
+  defaultCategory: IndexIntoCategoryList
 ): CallNodeInfo {
   return timeCode('getCallNodeInfo', () => {
     const stackIndexToCallNodeIndex = new Uint32Array(stackTable.length);
@@ -87,16 +93,19 @@ export function getCallNodeInfo(
     // The callNodeTable components.
     const prefix: Array<IndexIntoCallNodeTable> = [];
     const func: Array<IndexIntoFuncTable> = [];
+    const category: Array<IndexIntoCategoryList> = [];
     const depth: Array<number> = [];
     let length = 0;
 
     function addCallNode(
       prefixIndex: IndexIntoCallNodeTable,
-      funcIndex: IndexIntoFuncTable
+      funcIndex: IndexIntoFuncTable,
+      categoryIndex: IndexIntoCategoryList
     ) {
       const index = length++;
       prefix[index] = prefixIndex;
       func[index] = funcIndex;
+      category[index] = categoryIndex;
       if (prefixIndex === -1) {
         depth[index] = 0;
       } else {
@@ -113,6 +122,7 @@ export function getCallNodeInfo(
       const prefixCallNode =
         prefixStack === null ? -1 : stackIndexToCallNodeIndex[prefixStack];
       const frameIndex = stackTable.frame[stackIndex];
+      const categoryIndex = stackTable.category[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
       const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
       let callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
@@ -120,11 +130,14 @@ export function getCallNodeInfo(
       );
       if (callNodeIndex === undefined) {
         callNodeIndex = length;
-        addCallNode(prefixCallNode, funcIndex);
+        addCallNode(prefixCallNode, funcIndex, categoryIndex);
         prefixCallNodeAndFuncToCallNodeMap.set(
           prefixCallNodeAndFuncIndex,
           callNodeIndex
         );
+      } else if (category[callNodeIndex] !== categoryIndex) {
+        // Conflicting origin stack categories -> default category.
+        category[callNodeIndex] = defaultCategory;
       }
       stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
     }
@@ -132,6 +145,7 @@ export function getCallNodeInfo(
     const callNodeTable: CallNodeTable = {
       prefix: new Int32Array(prefix),
       func: new Int32Array(func),
+      category: new Int32Array(category),
       depth,
       length,
     };
@@ -467,31 +481,39 @@ export function toValidImplementationFilter(
 
 export function filterThreadByImplementation(
   thread: Thread,
-  implementation: string
+  implementation: string,
+  defaultCategory: IndexIntoCategoryList
 ): Thread {
   const { funcTable, stringTable } = thread;
 
   switch (implementation) {
     case 'cpp':
-      return _filterThreadByFunc(thread, funcIndex => {
-        // Return quickly if this is a JS frame.
-        if (funcTable.isJS[funcIndex]) {
-          return false;
-        }
-        // Regular C++ functions are associated with a resource that describes the
-        // shared library that these C++ functions were loaded from. Jitcode is not
-        // loaded from shared libraries but instead generated at runtime, so Jitcode
-        // frames are not associated with a shared library and thus have no resource
-        const locationString = stringTable.getString(funcTable.name[funcIndex]);
-        const isProbablyJitCode =
-          funcTable.resource[funcIndex] === -1 &&
-          locationString.startsWith('0x');
-        return !isProbablyJitCode;
-      });
+      return _filterThreadByFunc(
+        thread,
+        funcIndex => {
+          // Return quickly if this is a JS frame.
+          if (funcTable.isJS[funcIndex]) {
+            return false;
+          }
+          // Regular C++ functions are associated with a resource that describes the
+          // shared library that these C++ functions were loaded from. Jitcode is not
+          // loaded from shared libraries but instead generated at runtime, so Jitcode
+          // frames are not associated with a shared library and thus have no resource
+          const locationString = stringTable.getString(
+            funcTable.name[funcIndex]
+          );
+          const isProbablyJitCode =
+            funcTable.resource[funcIndex] === -1 &&
+            locationString.startsWith('0x');
+          return !isProbablyJitCode;
+        },
+        defaultCategory
+      );
     case 'js':
       return _filterThreadByFunc(
         thread,
-        funcIndex => funcTable.isJS[funcIndex]
+        funcIndex => funcTable.isJS[funcIndex],
+        defaultCategory
       );
     default:
       return thread;
@@ -500,7 +522,8 @@ export function filterThreadByImplementation(
 
 function _filterThreadByFunc(
   thread: Thread,
-  filter: IndexIntoFuncTable => boolean
+  filter: IndexIntoFuncTable => boolean,
+  defaultCategory: IndexIntoCallNodeTable
 ): Thread {
   return timeCode('filterThread', () => {
     const { stackTable, frameTable, samples } = thread;
@@ -509,6 +532,7 @@ function _filterThreadByFunc(
       length: 0,
       frame: [],
       prefix: [],
+      category: [],
     };
 
     const oldStackToNewStack = new Map();
@@ -533,6 +557,12 @@ function _filterThreadByFunc(
             newStack = newStackTable.length++;
             newStackTable.prefix[newStack] = prefixNewStack;
             newStackTable.frame[newStack] = frameIndex;
+            newStackTable.category[newStack] = stackTable.category[stackIndex];
+          } else if (
+            newStackTable.category[newStack] !== stackTable.category[stackIndex]
+          ) {
+            // Conflicting origin stack categories -> default category.
+            newStackTable.category[newStack] = defaultCategory;
           }
           oldStackToNewStack.set(stackIndex, newStack);
           prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
@@ -579,6 +609,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
     const newStackTable: StackTable = {
       length: 0,
       frame: [],
+      category: [],
       prefix: [],
     };
     const newFrameTable: FrameTable = {
@@ -640,6 +671,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
           if (newStack === undefined) {
             newStack = newStackTable.length++;
             newStackTable.prefix[newStack] = newStackPrefix;
+            newStackTable.category[newStack] = stackTable.category[oldStack];
             if (oldStackIsPlatform) {
               // Create a new platform frame
               const newFuncIndex = newFuncTable.length++;
@@ -1065,13 +1097,17 @@ export function computeCallNodeMaxDepth(
   return maxDepth;
 }
 
-export function invertCallstack(thread: Thread): Thread {
+export function invertCallstack(
+  thread: Thread,
+  defaultCategory: IndexIntoCategoryList
+): Thread {
   return timeCode('invertCallstack', () => {
     const { stackTable, frameTable, samples } = thread;
 
     const newStackTable = {
       length: 0,
       frame: [],
+      category: [],
       prefix: [],
     };
     // Create a Map that keys off of two values, both the prefix and frame combination
@@ -1082,7 +1118,7 @@ export function invertCallstack(thread: Thread): Thread {
     // Returns the stackIndex for a specific frame (that is, a function and its
     // context), and a specific prefix. If it doesn't exist yet it will create
     // a new stack entry and return its index.
-    function stackFor(prefix, frame) {
+    function stackFor(prefix, frame, category) {
       const prefixAndFrameIndex =
         (prefix === null ? -1 : prefix) * frameCount + frame;
       let stackIndex = prefixAndFrameToStack.get(prefixAndFrameIndex);
@@ -1090,7 +1126,14 @@ export function invertCallstack(thread: Thread): Thread {
         stackIndex = newStackTable.length++;
         newStackTable.prefix[stackIndex] = prefix;
         newStackTable.frame[stackIndex] = frame;
+        newStackTable.category[stackIndex] = category;
         prefixAndFrameToStack.set(prefixAndFrameIndex, stackIndex);
+      } else if (newStackTable.category[stackIndex] !== category) {
+        // If two stack nodes from the non-inverted stack tree with different
+        // categories happen to collapse into the same stack node in the
+        // inverted tree, discard their category and set the category to the
+        // default category.
+        newStackTable.category[stackIndex] = defaultCategory;
       }
       return stackIndex;
     }
@@ -1113,7 +1156,11 @@ export function invertCallstack(thread: Thread): Thread {
         ) {
           // Notice how we reuse the previous stack as the prefix. This is what
           // effectively inverts the call tree.
-          newStack = stackFor(newStack, stackTable.frame[currentStack]);
+          newStack = stackFor(
+            newStack,
+            stackTable.frame[currentStack],
+            stackTable.category[currentStack]
+          );
         }
         oldStackToNewStack.set(stackIndex, newStack);
       }
@@ -1526,7 +1573,7 @@ export function getEmptyProfile(): Profile {
       platform: '',
       processType: 0,
       extensions: emptyExtensions,
-      categories: emptyCategories,
+      categories: defaultCategories,
       product: 'Firefox',
       stackwalk: 0,
       toolkit: '',

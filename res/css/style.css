@@ -194,6 +194,42 @@ body, #root, .profileViewer {
   color: highlighttext;
 }
 
+.treeViewCategoryKnob {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 9px;
+  height: 9px;
+  border: 0.5px solid rgba(0, 0, 0, 0.1);
+  margin-right: 3px;
+}
+.treeViewCategoryKnob.category-color-transparent {
+  background-color: transparent;
+}
+.treeViewCategoryKnob.category-color-purple {
+  background-color: var(--purple-70);
+}
+.treeViewCategoryKnob.category-color-green {
+  background-color: var(--green-60);
+}
+.treeViewCategoryKnob.category-color-orange {
+  background-color: var(--orange-50);
+}
+.treeViewCategoryKnob.category-color-yellow {
+  background-color: var(--yellow-50);
+}
+.treeViewCategoryKnob.category-color-lightblue {
+  background-color: var(--blue-40);
+}
+.treeViewCategoryKnob.category-color-grey {
+  background-color: var(--grey-30);
+}
+.treeViewCategoryKnob.category-color-blue {
+  background-color: var(--blue-60);
+}
+.treeViewCategoryKnob.category-color-brown {
+  background-color: var(--magenta-60);
+}
+
 .treeViewHighlighting {
   /* This negative margin enlarges the background to the top, so that it fully
    * covers the underlying background. There's an underlying background when the

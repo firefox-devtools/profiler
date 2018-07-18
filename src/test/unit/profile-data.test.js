@@ -355,11 +355,15 @@ describe('process-profile', function() {
 describe('profile-data', function() {
   describe('createCallNodeTableAndFixupSamples', function() {
     const profile = processProfile(getGeckoProfile());
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
     const thread = profile.threads[0];
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable
+      thread.funcTable,
+      defaultCategory
     );
     it('should create one callNode per stack', function() {
       expect(thread.stackTable.length).toEqual(5);
@@ -395,11 +399,13 @@ describe('profile-data', function() {
   }
 
   describe('getCallNodeInfo', function() {
-    const { threads: [thread] } = getCallNodeProfile();
+    const { meta, threads: [thread] } = getCallNodeProfile();
+    const defaultCategory = meta.categories.findIndex(c => c.name === 'Other');
     const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable
+      thread.funcTable,
+      defaultCategory
     );
     const stack0 = thread.samples.stack[0];
     const stack1 = thread.samples.stack[1];
@@ -755,7 +761,7 @@ describe('upgrades', function() {
     expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
   }
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-12.json')
+    require('../fixtures/upgrades/processed-13.json')
   );
 
   // Uncomment this to output your next ./upgrades/processed-X.json
@@ -844,13 +850,19 @@ describe('upgrades', function() {
     );
     compareProcessedProfiles(upgradedProfile11, afterUpgradeReference);
 
-    // This last test is to make sure we properly upgrade the json
-    // file to same version
     const serializedOldProcessedProfile12 = require('../fixtures/upgrades/processed-12.json');
     const upgradedProfile12 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile12
     );
     compareProcessedProfiles(upgradedProfile12, afterUpgradeReference);
+
+    // This last test is to make sure we properly upgrade the json
+    // file to same version
+    const serializedOldProcessedProfile13 = require('../fixtures/upgrades/processed-13.json');
+    const upgradedProfile13 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile13
+    );
+    compareProcessedProfiles(upgradedProfile13, afterUpgradeReference);
   });
   it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function() {
     const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-11.json');
@@ -928,6 +940,9 @@ describe('color-categories', function() {
 
 describe('filter-by-implementation', function() {
   const profile = processProfile(profileWithJS());
+  const defaultCategory = profile.meta.categories.findIndex(
+    c => c.name === 'Other'
+  );
   const thread = profile.threads[0];
 
   function stackIsJS(filteredThread, stackIndex) {
@@ -940,11 +955,17 @@ describe('filter-by-implementation', function() {
   }
 
   it('will return the same thread if filtering to "all"', function() {
-    expect(filterThreadByImplementation(thread, 'combined')).toEqual(thread);
+    expect(
+      filterThreadByImplementation(thread, 'combined', defaultCategory)
+    ).toEqual(thread);
   });
 
   it('will return only JS samples if filtering to "js"', function() {
-    const jsOnlyThread = filterThreadByImplementation(thread, 'js');
+    const jsOnlyThread = filterThreadByImplementation(
+      thread,
+      'js',
+      defaultCategory
+    );
     const nonNullSampleStacks = jsOnlyThread.samples.stack.filter(
       stack => stack !== null
     );
@@ -957,7 +978,11 @@ describe('filter-by-implementation', function() {
   });
 
   it('will return only C++ samples if filtering to "cpp"', function() {
-    const cppOnlyThread = filterThreadByImplementation(thread, 'cpp');
+    const cppOnlyThread = filterThreadByImplementation(
+      thread,
+      'cpp',
+      defaultCategory
+    );
     const nonNullSampleStacks = cppOnlyThread.samples.stack.filter(
       stack => stack !== null
     );
@@ -975,10 +1000,17 @@ describe('get-sample-index-closest-to-time', function() {
     const { profile } = getProfileFromTextSamples(
       Array(10)
         .fill('A')
-        .join(' ')
+        .join('  ')
+    );
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
     );
     const thread = profile.threads[0];
-    const { samples } = filterThreadByImplementation(thread, 'js');
+    const { samples } = filterThreadByImplementation(
+      thread,
+      'js',
+      defaultCategory
+    );
 
     // getProfileFromTextSamples will generate a profile with samples
     // with 1ms of interval
@@ -1034,18 +1066,22 @@ describe('convertStackToCallNodePath', function() {
 describe('getTimingsForPath in a non-inverted tree', function() {
   function setup() {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A                  A             A             A A
-      B                  B             B             B B
-      Cjs                Cjs           Cjs           H H
+      A                  A             A             A  A
+      B                  B             B             B  B
+      Cjs                Cjs           Cjs           H  H
       D                  D             F             I
       Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
     `);
 
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
     const thread = profile.threads[0];
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable
+      thread.funcTable,
+      defaultCategory
     );
     const curriedGetTimingsForPath = path =>
       getTimingsForPath(
@@ -1146,13 +1182,16 @@ describe('getTimingsForPath in a non-inverted tree', function() {
 describe('getTimingsForPath for an inverted tree', function() {
   function setup() {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A                  A             A             A A
-      B                  B             B             B B
-      Cjs                Cjs           Cjs           H H
+      A                  A             A             A  A
+      B                  B             B             B  B
+      Cjs                Cjs           Cjs           H  H
       D                  D             F             I
       Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
     `);
-    const thread = invertCallstack(profile.threads[0]);
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
+    const thread = invertCallstack(profile.threads[0], defaultCategory);
     // Now the profile should look like this:
     //
     // Ejs  Ejs  Ejs  I H
@@ -1164,7 +1203,8 @@ describe('getTimingsForPath for an inverted tree', function() {
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable
+      thread.funcTable,
+      defaultCategory
     );
     const curriedGetTimingsForPath = path =>
       getTimingsForPath(
