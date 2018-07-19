@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ProfileThreadTracingMarkerOverview renders correctly 1`] = `
+exports[`TimelineTracingMarkersOverview renders correctly 1`] = `
 <div
-  className="profileThreadTrackingMarkerOverview selected"
+  className="timelineTracingMarkersOverview selected"
 >
   <canvas
-    className="profileThreadTrackingMarkerOverviewCanvas intervalMarkerTimelineCanvas"
+    className="timelineTracingMarkersCanvas"
     onMouseDown={[Function]}
     onMouseMove={[Function]}
     onMouseOut={[Function]}
@@ -14,7 +14,7 @@ exports[`ProfileThreadTracingMarkerOverview renders correctly 1`] = `
 </div>
 `;
 
-exports[`ProfileThreadTracingMarkerOverview renders correctly 2`] = `
+exports[`TimelineTracingMarkersOverview renders correctly 2`] = `
 Array [
   Array [
     "clearRect",

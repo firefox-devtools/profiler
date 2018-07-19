@@ -12,7 +12,7 @@ import MenuButtons from './MenuButtons';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import { returnToZipFileList } from '../../actions/zipped-profiles';
 import { getProfileName } from '../../reducers/url-state';
-import ProfileViewerHeader from '../header/ProfileViewerHeader';
+import Timeline from '../timeline';
 import { getHasZipFile } from '../../reducers/zipped-profiles';
 
 import type {
@@ -53,7 +53,7 @@ class ProfileViewer extends PureComponent<Props> {
           <ProfileFilterNavigator />
           <MenuButtons />
         </div>
-        <ProfileViewerHeader />
+        <Timeline />
         <DetailsContainer />
         <SymbolicationStatusOverlay />
       </div>

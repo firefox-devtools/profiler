@@ -1,19 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`calltree/ProfileViewerHeader renders the header 1`] = `
+exports[`Timeline renders the header 1`] = `
 <div
-  className="profileViewerHeader"
+  className="timelineSelection"
   onMouseDown={[Function]}
   onMouseMove={[Function]}
 >
   <div
-    className="profileViewerHeaderTimeRuler"
+    className="timelineRuler"
   >
     <ol
-      className="timeRulerContainer"
+      className="timelineRulerContainer"
     >
       <li
-        className="timeRulerNotch"
+        className="timelineRulerNotch"
         style={
           Object {
             "left": "0px",
@@ -21,13 +21,13 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
         }
       >
         <span
-          className="timeRulerNotchText"
+          className="timelineRulerNotchText"
         >
           0.000s
         </span>
       </li>
       <li
-        className="timeRulerNotch"
+        className="timelineRulerNotch"
         style={
           Object {
             "left": "66.66666666666667px",
@@ -35,13 +35,13 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
         }
       >
         <span
-          className="timeRulerNotchText"
+          className="timelineRulerNotchText"
         >
           0.002s
         </span>
       </li>
       <li
-        className="timeRulerNotch"
+        className="timelineRulerNotch"
         style={
           Object {
             "left": "133.33333333333334px",
@@ -49,13 +49,13 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
         }
       >
         <span
-          className="timeRulerNotchText"
+          className="timelineRulerNotchText"
         >
           0.004s
         </span>
       </li>
       <li
-        className="timeRulerNotch"
+        className="timelineRulerNotch"
         style={
           Object {
             "left": "200px",
@@ -63,13 +63,13 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
         }
       >
         <span
-          className="timeRulerNotchText"
+          className="timelineRulerNotchText"
         >
           0.006s
         </span>
       </li>
       <li
-        className="timeRulerNotch"
+        className="timelineRulerNotch"
         style={
           Object {
             "left": "266.6666666666667px",
@@ -77,7 +77,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
         }
       >
         <span
-          className="timeRulerNotchText"
+          className="timelineRulerNotchText"
         >
           0.008s
         </span>
@@ -85,7 +85,7 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
     </ol>
   </div>
   <div
-    className="overflowEdgeIndicator profileViewerHeaderOverflowEdgeIndicator"
+    className="overflowEdgeIndicator timelineOverflowEdgeIndicator"
   >
     <div
       className="overflowEdgeIndicatorEdge topEdge"
@@ -100,23 +100,23 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
       className="overflowEdgeIndicatorEdge leftEdge"
     />
     <div
-      className="overflowEdgeIndicatorScrollbox profileViewerHeaderOverflowEdgeIndicatorScrollbox"
+      className="overflowEdgeIndicatorScrollbox timelineOverflowEdgeIndicatorScrollbox"
       onScroll={[Function]}
     >
       <div
         className="overflowEdgeIndicatorContentsWrapper"
       >
         <ol
-          className="profileViewerHeaderThreadList"
+          className="timelineThreadList"
           onMouseDown={[Function]}
         >
           <li
-            className="profileThreadHeaderBar selected"
+            className="timelineThread selected"
             onClick={[Function]}
             style={undefined}
           >
             <div
-              className="react-contextmenu-wrapper grippy profileThreadHeaderBarThreadLabel"
+              className="react-contextmenu-wrapper grippy timelineThreadLabel"
               onContextMenu={[Function]}
               onMouseDown={[Function]}
               onMouseOut={[Function]}
@@ -127,19 +127,19 @@ exports[`calltree/ProfileViewerHeader renders the header 1`] = `
 process: \\"default\\" (0)"
             >
               <h1
-                className="profileThreadHeaderBarThreadName"
+                className="timelineThreadName"
               >
                 Main Thread
               </h1>
             </div>
             <div
-              className="profileThreadHeaderBarThreadDetails"
+              className="timelineThreadDetails"
             >
               <div
-                className="profileThreadHeaderBarIntervalMarkerOverview profileThreadHeaderBarIntervalMarkerOverviewJank selected"
+                className="timelineThreadIntervalMarkerOverview selected"
               >
                 <canvas
-                  className="profileThreadHeaderBarIntervalMarkerOverviewCanvas profileThreadHeaderBarIntervalMarkerOverviewJankCanvas intervalMarkerTimelineCanvas"
+                  className="timelineTracingMarkersCanvas"
                   onMouseDown={[Function]}
                   onMouseMove={[Function]}
                   onMouseOut={[Function]}
@@ -147,25 +147,25 @@ process: \\"default\\" (0)"
                 />
               </div>
               <div
-                className="threadStackGraph"
+                className="timelineStackGraph"
               >
                 <canvas
-                  className="threadStackGraphCanvas threadStackGraphCanvas"
+                  className="timelineStackGraphCanvas"
                   onMouseUp={[Function]}
                 />
               </div>
               <div
-                className="headerEmptyThreadIndicator"
+                className="timelineEmptyThreadIndicator"
               />
             </div>
           </li>
           <li
-            className="profileThreadHeaderBar"
+            className="timelineThread"
             onClick={[Function]}
             style={undefined}
           >
             <div
-              className="react-contextmenu-wrapper grippy profileThreadHeaderBarThreadLabel"
+              className="react-contextmenu-wrapper grippy timelineThreadLabel"
               onContextMenu={[Function]}
               onMouseDown={[Function]}
               onMouseOut={[Function]}
@@ -176,19 +176,19 @@ process: \\"default\\" (0)"
 process: \\"default\\" (0)"
             >
               <h1
-                className="profileThreadHeaderBarThreadName"
+                className="timelineThreadName"
               >
                 Thread with dropped samples
               </h1>
             </div>
             <div
-              className="profileThreadHeaderBarThreadDetails"
+              className="timelineThreadDetails"
             >
               <div
-                className="profileThreadHeaderBarIntervalMarkerOverview profileThreadHeaderBarIntervalMarkerOverviewJank"
+                className="timelineThreadIntervalMarkerOverview"
               >
                 <canvas
-                  className="profileThreadHeaderBarIntervalMarkerOverviewCanvas profileThreadHeaderBarIntervalMarkerOverviewJankCanvas intervalMarkerTimelineCanvas"
+                  className="timelineTracingMarkersCanvas"
                   onMouseDown={[Function]}
                   onMouseMove={[Function]}
                   onMouseOut={[Function]}
@@ -196,18 +196,18 @@ process: \\"default\\" (0)"
                 />
               </div>
               <div
-                className="threadStackGraph"
+                className="timelineStackGraph"
               >
                 <canvas
-                  className="threadStackGraphCanvas threadStackGraphCanvas"
+                  className="timelineStackGraphCanvas"
                   onMouseUp={[Function]}
                 />
               </div>
               <div
-                className="headerEmptyThreadIndicator"
+                className="timelineEmptyThreadIndicator"
               >
                 <div
-                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorStartup"
+                  className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
                   onMouseEnter={[Function]}
                   onMouseLeave={[Function]}
                   style={
@@ -218,7 +218,7 @@ process: \\"default\\" (0)"
                   }
                 />
                 <div
-                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorShutdown"
+                  className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
                   onMouseEnter={[Function]}
                   onMouseLeave={[Function]}
                   style={
@@ -229,7 +229,7 @@ process: \\"default\\" (0)"
                   }
                 />
                 <div
-                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorEmptyBuffer"
+                  className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
                   onMouseEnter={[Function]}
                   onMouseLeave={[Function]}
                   style={
@@ -243,12 +243,12 @@ process: \\"default\\" (0)"
             </div>
           </li>
           <li
-            className="profileThreadHeaderBar"
+            className="timelineThread"
             onClick={[Function]}
             style={undefined}
           >
             <div
-              className="react-contextmenu-wrapper grippy profileThreadHeaderBarThreadLabel"
+              className="react-contextmenu-wrapper grippy timelineThreadLabel"
               onContextMenu={[Function]}
               onMouseDown={[Function]}
               onMouseOut={[Function]}
@@ -259,19 +259,19 @@ process: \\"default\\" (0)"
 process: \\"default\\" (0)"
             >
               <h1
-                className="profileThreadHeaderBarThreadName"
+                className="timelineThreadName"
               >
                 Thread with dropped samples
               </h1>
             </div>
             <div
-              className="profileThreadHeaderBarThreadDetails"
+              className="timelineThreadDetails"
             >
               <div
-                className="profileThreadHeaderBarIntervalMarkerOverview profileThreadHeaderBarIntervalMarkerOverviewJank"
+                className="timelineThreadIntervalMarkerOverview"
               >
                 <canvas
-                  className="profileThreadHeaderBarIntervalMarkerOverviewCanvas profileThreadHeaderBarIntervalMarkerOverviewJankCanvas intervalMarkerTimelineCanvas"
+                  className="timelineTracingMarkersCanvas"
                   onMouseDown={[Function]}
                   onMouseMove={[Function]}
                   onMouseOut={[Function]}
@@ -279,18 +279,18 @@ process: \\"default\\" (0)"
                 />
               </div>
               <div
-                className="threadStackGraph"
+                className="timelineStackGraph"
               >
                 <canvas
-                  className="threadStackGraphCanvas threadStackGraphCanvas"
+                  className="timelineStackGraphCanvas"
                   onMouseUp={[Function]}
                 />
               </div>
               <div
-                className="headerEmptyThreadIndicator"
+                className="timelineEmptyThreadIndicator"
               >
                 <div
-                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorStartup"
+                  className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
                   onMouseEnter={[Function]}
                   onMouseLeave={[Function]}
                   style={
@@ -301,7 +301,7 @@ process: \\"default\\" (0)"
                   }
                 />
                 <div
-                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorShutdown"
+                  className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
                   onMouseEnter={[Function]}
                   onMouseLeave={[Function]}
                   style={
@@ -312,7 +312,7 @@ process: \\"default\\" (0)"
                   }
                 />
                 <div
-                  className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorEmptyBuffer"
+                  className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
                   onMouseEnter={[Function]}
                   onMouseLeave={[Function]}
                   style={
@@ -330,7 +330,7 @@ process: \\"default\\" (0)"
     </div>
   </div>
   <div
-    className="timeSelectionScrubberHoverIndicator"
+    className="timelineSelectionHoverLine"
     style={
       Object {
         "left": "0",
@@ -341,7 +341,7 @@ process: \\"default\\" (0)"
 </div>
 `;
 
-exports[`calltree/ProfileViewerHeader renders the header 2`] = `
+exports[`Timeline renders the header 2`] = `
 Array [
   Array [
     "set fillStyle",

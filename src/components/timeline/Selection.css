@@ -1,0 +1,154 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.timelineSelection {
+  position: relative;
+  margin-left: 149px;
+  border-left: 1px solid var(--grey-30);
+  -moz-user-focus: ignore;
+}
+
+.timelineSelectionHoverLine {
+  position: absolute;
+  pointer-events: none;
+  visibility: hidden;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(0,0,0,0.4);
+  z-index: 1;
+}
+
+.timelineSelection:hover > .timelineSelectionHoverLine {
+  visibility: visible;
+}
+
+.timelineSelectionOverlay {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-flow: row nowrap;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  margin-left: -5px;
+  padding-left: 5px;
+  overflow: hidden;
+}
+
+.timelineSelectionDimmerBefore,
+.timelineSelectionDimmerAfter {
+  background: rgba(12, 12, 13, .1);
+  flex-shrink: 0;
+}
+
+.timelineSelectionDimmerAfter {
+  flex: 1;
+}
+
+.timelineSelectionOverlayWrapper {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.timelineSelectionGrippy {
+  height: 20px;
+  pointer-events: auto;
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+.timelineSelectionGrippyRangeStart,
+.timelineSelectionGrippyRangeEnd {
+  width: 0px;
+  padding: 3px;
+  background: #AAA;
+  border: 1px solid white;
+  margin: 0 -4px;
+  cursor: ew-resize;
+  border-radius: 5px;
+  position: relative;
+  z-index: 3;
+}
+
+.timelineSelectionGrippyRangeStart:hover,
+.timelineSelectionGrippyRangeStart.dragging,
+.timelineSelectionGrippyRangeEnd:hover,
+.timelineSelectionGrippyRangeEnd.dragging {
+  background: #888;
+}
+
+.timelineSelectionGrippyMoveRange {
+  flex: 1;
+  cursor: -webkit-grab;
+  cursor: grab;
+}
+
+.timelineSelectionGrippyMoveRange.dragging {
+  cursor: -webkit-grabbing;
+  cursor: grabbing;
+}
+
+
+.timelineSelectionOverlayInner {
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+
+.timelineSelectionOverlayRange {
+  top: 20px;
+  position: absolute;
+  padding: 4px 8px;
+  color: #fff;
+  background-color: var(--blue-50);
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 200ms;
+}
+
+.timelineSelectionOverlayRange.hidden {
+  opacity: 0;
+}
+
+.timelineSelectionOverlayZoomButton {
+  width: 30px;
+  height: 30px;
+  pointer-events: auto;
+  box-sizing: border-box;
+  border-radius: 100%;
+  margin: -15px;
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: url(../../../res/img/svg/zoom-icon.svg) center center no-repeat rgba(255, 255, 255, 0.6);
+  transition: opacity 200ms ease-in-out;
+  will-change: opacity;
+  opacity: 0.5;
+}
+
+.timelineSelectionOverlayZoomButton.hidden {
+  opacity: 0.0 !important;
+  pointer-events: none;
+  transition: unset;
+}
+
+.timelineSelection:hover .timelineSelectionOverlayZoomButton,
+.timelineSelectionOverlayZoomButton:active {
+  opacity: 1.0;
+}
+
+.timelineSelectionOverlayZoomButton:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.timelineSelectionOverlayZoomButton:active:hover {
+  background-color: rgba(160, 160, 160, 0.6);
+}

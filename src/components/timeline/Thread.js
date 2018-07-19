@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
-import ThreadStackGraph from './ThreadStackGraph';
+import StackGraph from './StackGraph';
 import { selectorsForThread } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
@@ -14,8 +14,10 @@ import {
   getCallNodePathFromIndex,
 } from '../../profile-logic/profile-data';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
-import ProfileThreadJankOverview from './ProfileThreadJankOverview';
-import ProfileThreadTracingMarkerOverview from './ProfileThreadTracingMarkerOverview';
+import {
+  TimelineTracingMarkersJank,
+  TimelineTracingMarkersOverview,
+} from './TracingMarkers';
 import {
   changeSelectedThread,
   updateProfileSelection,
@@ -24,6 +26,7 @@ import {
   focusCallTree,
 } from '../../actions/profile-view';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
+import './Thread.css';
 
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type { Milliseconds, StartEndRange } from '../../types/units';
@@ -67,18 +70,8 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class ProfileThreadHeaderBar extends PureComponent<Props> {
-  constructor(props) {
-    super(props);
-    (this: any)._onLabelMouseDown = this._onLabelMouseDown.bind(this);
-    (this: any)._onStackClick = this._onStackClick.bind(this);
-    (this: any)._onLineClick = this._onLineClick.bind(this);
-    (this: any)._onIntervalMarkerSelect = this._onIntervalMarkerSelect.bind(
-      this
-    );
-  }
-
-  _onLabelMouseDown(event: MouseEvent) {
+class TimelineThread extends PureComponent<Props> {
+  _onLabelMouseDown = (event: MouseEvent) => {
     const {
       changeSelectedThread,
       changeRightClickedThread,
@@ -94,14 +87,14 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
       // actually changing the current selection.
       changeRightClickedThread(threadIndex);
     }
-  }
+  };
 
-  _onLineClick() {
+  _onLineClick = () => {
     const { threadIndex, changeSelectedThread } = this.props;
     changeSelectedThread(threadIndex);
-  }
+  };
 
-  _onStackClick(time: number) {
+  _onStackClick = (time: number) => {
     const { threadIndex, interval } = this.props;
     const {
       thread,
@@ -124,13 +117,13 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
       getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
     focusCallTree();
-  }
+  };
 
-  _onIntervalMarkerSelect(
+  _onIntervalMarkerSelect = (
     threadIndex: ThreadIndex,
     start: Milliseconds,
     end: Milliseconds
-  ) {
+  ) => {
     const {
       rangeStart,
       rangeEnd,
@@ -144,7 +137,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
       selectionEnd: Math.min(rangeEnd, end),
     });
     changeSelectedThread(threadIndex);
-  }
+  };
 
   render() {
     const {
@@ -167,7 +160,7 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
     if (isHidden) {
       // If this thread is hidden, render out a stub element so that the Reorderable
       // Component still works across all the threads.
-      return <li className="profileThreadHeaderBarHidden" />;
+      return <li className="timelineThreadHidden" />;
     }
 
     const processType = thread.processType;
@@ -177,29 +170,28 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
         thread.name === 'Compositor' ||
         thread.name === 'Renderer') &&
       processType !== 'plugin';
-    const className = 'profileThreadHeaderBar';
 
     return (
       <li
-        className={'profileThreadHeaderBar' + (isSelected ? ' selected' : '')}
+        className={'timelineThread' + (isSelected ? ' selected' : '')}
         onClick={this._onLineClick}
         style={style}
       >
         <ContextMenuTrigger
-          id={'ProfileThreadHeaderContextMenu'}
+          id={'TimelineThreadContextMenu'}
           renderTag="div"
           attributes={{
             title: processDetails,
-            className: 'grippy profileThreadHeaderBarThreadLabel',
+            className: 'grippy timelineThreadLabel',
             onMouseDown: this._onLabelMouseDown,
           }}
         >
-          <h1 className="profileThreadHeaderBarThreadName">{threadName}</h1>
+          <h1 className="timelineThreadName">{threadName}</h1>
         </ContextMenuTrigger>
-        <div className="profileThreadHeaderBarThreadDetails">
+        <div className="timelineThreadDetails">
           {displayJank ? (
-            <ProfileThreadJankOverview
-              className={`${className}IntervalMarkerOverview ${className}IntervalMarkerOverviewJank`}
+            <TimelineTracingMarkersJank
+              className="timelineThreadIntervalMarkerOverview"
               rangeStart={rangeStart}
               rangeEnd={rangeEnd}
               threadIndex={threadIndex}
@@ -208,10 +200,15 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
             />
           ) : null}
           {displayTracingMarkers ? (
-            <ProfileThreadTracingMarkerOverview
-              className={`${className}IntervalMarkerOverview ${className}IntervalMarkerOverviewGfx ${className}IntervalMarkerOverviewThread${
-                thread.name
-              }`}
+            <TimelineTracingMarkersOverview
+              // Feed in the thread name to the class. This is used for conditional
+              // sizing rules, for instance with GeckoMain threads.
+              // TODO - This seems kind of brittle, and should probably done through
+              // JavaScript and props instead.
+              className={`
+                timelineThreadIntervalMarkerOverview
+                timelineThreadIntervalMarkerOverviewThread${thread.name}
+              `}
               rangeStart={rangeStart}
               rangeEnd={rangeEnd}
               threadIndex={threadIndex}
@@ -219,10 +216,9 @@ class ProfileThreadHeaderBar extends PureComponent<Props> {
               isModifyingSelection={isModifyingSelection}
             />
           ) : null}
-          <ThreadStackGraph
+          <StackGraph
             interval={interval}
             thread={thread}
-            className="threadStackGraph"
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
@@ -267,6 +263,6 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     changeSelectedCallNode,
     focusCallTree,
   },
-  component: ProfileThreadHeaderBar,
+  component: TimelineThread,
 };
 export default explicitConnect(options);

@@ -4,11 +4,11 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import classNames from 'classnames';
 import bisection from 'bisection';
 import { timeCode } from '../../utils/time-code';
 import { getSampleCallNodes } from '../../profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
+import './StackGraph.css';
 
 import type { Thread } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
@@ -24,23 +24,16 @@ type Props = {|
   +rangeEnd: Milliseconds,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +className: string,
   +onStackClick: (time: Milliseconds) => void,
 |};
 
-class ThreadStackGraph extends PureComponent<Props> {
-  _canvas: null | HTMLCanvasElement;
-  _requestedAnimationFrame: boolean;
+class StackGraph extends PureComponent<Props> {
+  _canvas: null | HTMLCanvasElement = null;
+  _requestedAnimationFrame: boolean = false;
   _resizeListener: () => void;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
     (this._canvas = canvas);
-
-  constructor(props: Props) {
-    super(props);
-    this._resizeListener = () => this.forceUpdate();
-    this._requestedAnimationFrame = false;
-    this._canvas = null;
-  }
+  _resizeListener = () => this.forceUpdate();
 
   _scheduleDraw() {
     if (!this._requestedAnimationFrame) {
@@ -49,7 +42,7 @@ class ThreadStackGraph extends PureComponent<Props> {
         this._requestedAnimationFrame = false;
         const canvas = this._canvas;
         if (canvas) {
-          timeCode('ThreadStackGraph render', () => {
+          timeCode('StackGraph render', () => {
             this.drawCanvas(canvas);
           });
         }
@@ -204,12 +197,9 @@ class ThreadStackGraph extends PureComponent<Props> {
   render() {
     this._scheduleDraw();
     return (
-      <div className={this.props.className}>
+      <div className="timelineStackGraph">
         <canvas
-          className={classNames(
-            `${this.props.className}Canvas`,
-            'threadStackGraphCanvas'
-          )}
+          className="timelineStackGraphCanvas"
           ref={this._takeCanvasRef}
           onMouseUp={this._onMouseUp}
         />
@@ -218,4 +208,4 @@ class ThreadStackGraph extends PureComponent<Props> {
   }
 }
 
-export default ThreadStackGraph;
+export default StackGraph;
