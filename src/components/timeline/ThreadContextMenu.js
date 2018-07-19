@@ -84,7 +84,7 @@ class TimelineThreadContextMenu extends PureComponent<Props> {
     );
 
     return (
-      <ContextMenu id={'TimelineThreadContextMenu'}>
+      <ContextMenu id="TimelineThreadContextMenu">
         {threads.length <= 1 ? null : (
           <div>
             <MenuItem

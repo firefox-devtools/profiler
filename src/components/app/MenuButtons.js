@@ -42,17 +42,20 @@ require('./MenuButtons.css');
 
 const PrivacyNotice = () => (
   <section className="privacyNotice">
-    <p
-    >{`You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:`}</p>
+    <p>
+      You’re about to upload your profile publicly where anyone will be able to
+      access it. To better diagnose performance problems profiles include the
+      following information:
+    </p>
     <ul>
-      <li>{'The URLs of all painted tabs, and running scripts.'}</li>
-      <li>{'The metadata of all your add-ons to identify slow add-ons.'}</li>
-      <li>{'Firefox build and runtime configuration.'}</li>
+      <li>The URLs of all painted tabs, and running scripts.</li>
+      <li>The metadata of all your add-ons to identify slow add-ons.</li>
+      <li>Firefox build and runtime configuration.</li>
     </ul>
-    <p
-    >{`To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.`}</p>
+    <p>
+      To view all the information you can download the full profile to a file
+      and open the json structure with a text editor.
+    </p>
     <p>
       {`By default, the URLs of all network requests will be removed while sharing the profile
         but keeping the URLs may help to identify the problems. Please select the checkbox
@@ -101,7 +104,7 @@ const ProfileSharingButton = ({
     panel={
       <ArrowPanel
         className="menuButtonsPrivacyPanel"
-        title={'Upload Profile – Privacy Notice'}
+        title="Upload Profile – Privacy Notice"
         okButtonText="Share"
         cancelButtonText="Cancel"
         onOkButtonClick={okButtonClickEvent}
@@ -437,7 +440,7 @@ class ProfileSharingCompositeButton extends PureComponent<
           panel={
             <ArrowPanel
               className="menuButtonsUploadErrorPanel"
-              title={'Upload Error'}
+              title="Upload Error"
               okButtonText="Try Again"
               cancelButtonText="Cancel"
               onOkButtonClick={this._attemptToShare}
@@ -542,7 +545,7 @@ class ProfileDownloadButton extends PureComponent<
         panel={
           <ArrowPanel
             className="menuButtonsProfileDownloadPanel"
-            title={'Save Profile to a Local File'}
+            title="Save Profile to a Local File"
             onOpen={this._onPanelOpen}
           >
             <section>

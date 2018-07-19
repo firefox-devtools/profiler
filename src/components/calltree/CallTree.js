@@ -194,7 +194,7 @@ class CallTreeComponent extends PureComponent<Props> {
         highlightRegExp={searchStringsRegExp}
         disableOverscan={disableOverscan}
         ref={this._takeTreeViewRef}
-        contextMenuId={'CallNodeContextMenu'}
+        contextMenuId="CallNodeContextMenu"
         maxNodeDepth={callNodeMaxDepth}
         icons={this.props.icons}
         rowHeight={16}

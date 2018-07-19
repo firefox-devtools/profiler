@@ -178,7 +178,7 @@ class TimelineThread extends PureComponent<Props> {
         style={style}
       >
         <ContextMenuTrigger
-          id={'TimelineThreadContextMenu'}
+          id="TimelineThreadContextMenu"
           renderTag="div"
           attributes={{
             title: processDetails,

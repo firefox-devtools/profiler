@@ -471,7 +471,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
 
     return (
       <ContextMenu
-        id={'CallNodeContextMenu'}
+        id="CallNodeContextMenu"
         onShow={this._showMenu}
         onHide={this._hideMenu}
       >

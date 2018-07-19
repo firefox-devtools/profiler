@@ -104,7 +104,7 @@ class FlameGraph extends React.PureComponent<Props> {
           <span>{threadName}</span>
         </div>
         <ContextMenuTrigger
-          id={'CallNodeContextMenu'}
+          id="CallNodeContextMenu"
           attributes={{
             className: 'treeViewContextMenu',
           }}
