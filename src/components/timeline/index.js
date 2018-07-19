@@ -6,9 +6,11 @@
 
 import React, { PureComponent } from 'react';
 import TimelineThread from './Thread';
-import Reorderable from '../shared/Reorderable';
+import TimelineRuler from './Ruler';
 import TimelineSelection from './Selection';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
+import Reorderable from '../shared/Reorderable';
+import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
 import {
   getProfile,
@@ -17,8 +19,6 @@ import {
   getZeroAt,
 } from '../../reducers/profile-view';
 import { getHiddenThreads, getThreadOrder } from '../../reducers/url-state';
-import { withSize } from '../shared/WithSize';
-import TimelineRuler from './Ruler';
 import './index.css';
 
 import type { SizeProps } from '../shared/WithSize';

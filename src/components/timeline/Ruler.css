@@ -35,7 +35,7 @@
   font-size: 9px;
   color: #888;
   cursor: default;
-  z-index: 1; /* between .timelineThread background and .timelineThreadThreadDetails */
+  z-index: 1; /* between .timelineThread background and .timelineThreadDetails */
 }
 
 .timelineRulerNotch {

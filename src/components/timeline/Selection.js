@@ -277,11 +277,12 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     }
   };
 
-  renderSelectionOverlay() {
-    const { displayRange, selection, width } = this.props;
-    if (!selection.hasSelection) {
-      return null;
-    }
+  renderSelectionOverlay(selection: {
+    +selectionStart: number,
+    +selectionEnd: number,
+    +isModifying: boolean,
+  }) {
+    const { displayRange, width } = this.props;
     const { selectionStart, selectionEnd } = selection;
 
     const beforeWidth =
@@ -355,7 +356,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         onMouseMove={this._onMouseMove}
       >
         {children}
-        {this.renderSelectionOverlay()}
+        {selection.hasSelection ? this.renderSelectionOverlay(selection) : null}
         <div
           className="timelineSelectionHoverLine"
           style={{

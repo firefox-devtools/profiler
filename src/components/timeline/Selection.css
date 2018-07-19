@@ -140,7 +140,7 @@
   transition: unset;
 }
 
-.timeline:hover .timelineSelectionOverlayZoomButton,
+.timelineSelection:hover .timelineSelectionOverlayZoomButton,
 .timelineSelectionOverlayZoomButton:active {
   opacity: 1.0;
 }
