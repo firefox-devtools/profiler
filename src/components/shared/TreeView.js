@@ -13,6 +13,14 @@ import ContextMenuTrigger from './ContextMenuTrigger';
 import type { IconWithClassName } from '../../types/reducers';
 import type { CssPixels } from '../../types/units';
 
+/**
+ * This number is used to decide how many lines the selection moves when the
+ * user presses PageUp or PageDown.
+ * It's big enough to be useful, but small enough to always be less than one
+ * window. Of course the correct number should depend on the height of the
+ * viewport, but this is more complex, and an hardcoded number is good enough in
+ * this case.
+ */
 const PAGE_KEYS_DELTA = 15;
 
 // This is used for the result of RegExp.prototype.exec because Flow doesn't do it.
