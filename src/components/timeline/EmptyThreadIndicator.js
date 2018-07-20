@@ -40,27 +40,27 @@ class EmptyThreadIndicator extends PureComponent<Props> {
   render() {
     const style = getIndicatorPositions(this.props);
     return (
-      <div className="headerEmptyThreadIndicator">
+      <div className="timelineEmptyThreadIndicator">
         {style.startup ? (
           <DivWithTooltip
             style={style.startup}
-            className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorStartup"
+            className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
             tooltip="This thread hasn't started yet"
           />
         ) : null}
         {style.shutdown ? (
           <DivWithTooltip
             style={style.shutdown}
-            className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorShutdown"
+            className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
             tooltip="This thread has shut down here"
           />
         ) : null}
         {style.emptyBufferStart ? (
           <DivWithTooltip
             style={style.emptyBufferStart}
-            className="headerEmptyThreadIndicatorBlock headerEmptyThreadIndicatorEmptyBuffer"
+            className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
             tooltip={
-              <span className="headerEmptyThreadIndicatorLongTooltip">
+              <span className="timelineEmptyThreadIndicatorLongTooltip">
                 {oneLine`
                     This buffer was empty. Either the profiler was still initializing for
                     a new thread, or the profiling buffer was full. Increase your buffer

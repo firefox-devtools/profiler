@@ -23,11 +23,11 @@ import { getBoundingBox } from '../fixtures/utils';
 
 describe('calltree/ProfileCallTreeView', function() {
   const { profile } = getProfileFromTextSamples(`
-    A A A
-    B B B
-    C C H
-    D F I
-    E E
+    A  A  A
+    B  B  B
+    C  C  H
+    D  F  I
+    E  E
   `);
 
   it('renders an unfiltered call tree', () => {
@@ -43,12 +43,12 @@ describe('calltree/ProfileCallTreeView', function() {
 
   it('renders an inverted call tree', () => {
     const profileForInvertedTree = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C X C
-      D Y X
-      E Z Y
-          Z
+      A  A  A
+      B  B  B
+      C  X  C
+      D  Y  X
+      E  Z  Y
+            Z
     `).profile;
     const store = storeWithProfile(profileForInvertedTree);
     store.dispatch(changeInvertCallstack(true));
@@ -110,11 +110,11 @@ describe('calltree/ProfileCallTreeView', function() {
 
 describe('calltree/ProfileCallTreeView EmptyReasons', function() {
   const { profile } = getProfileFromTextSamples(`
-    A A A
-    B B B
-    C C H
-    D F I
-    E E
+    A  A  A
+    B  B  B
+    C  C  H
+    D  F  I
+    E  E
   `);
   profile.threads[0].name = 'Thread with samples';
 

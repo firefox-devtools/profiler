@@ -41,7 +41,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
+class TimelineThreadContextMenu extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._toggleThreadVisibility = this._toggleThreadVisibility.bind(
@@ -84,7 +84,7 @@ class ProfileThreadHeaderContextMenu extends PureComponent<Props> {
     );
 
     return (
-      <ContextMenu id={'ProfileThreadHeaderContextMenu'}>
+      <ContextMenu id="TimelineThreadContextMenu">
         {threads.length <= 1 ? null : (
           <div>
             <MenuItem
@@ -125,6 +125,6 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     rightClickedThreadIndex: getRightClickedThreadIndex(state),
   }),
   mapDispatchToProps: { hideThread, showThread, isolateThread },
-  component: ProfileThreadHeaderContextMenu,
+  component: TimelineThreadContextMenu,
 };
 export default explicitConnect(options);

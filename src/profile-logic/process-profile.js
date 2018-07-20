@@ -6,7 +6,6 @@
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes, emptyExtensions } from './profile-data';
-import { provideHostSide } from '../utils/promise-worker';
 import { immutableUpdate } from '../utils/flow';
 import {
   CURRENT_VERSION,
@@ -23,6 +22,7 @@ import type {
   Profile,
   Thread,
   ExtensionTable,
+  CategoryList,
   FrameTable,
   SamplesTable,
   StackTable,
@@ -506,10 +506,38 @@ function _processFrameTable(
 
 /**
  * Explicitly recreate the stack table here to help enforce our assumptions about types.
+ * Also add a category column.
  */
-function _processStackTable(geckoStackTable: GeckoStackStruct): StackTable {
+function _processStackTable(
+  geckoStackTable: GeckoStackStruct,
+  frameTable: FrameTable,
+  categories: CategoryList
+): StackTable {
+  // Compute a non-null category for every stack
+  const defaultCategory = categories.findIndex(c => c.color === 'grey') || 0;
+  const categoryColumn = new Array(geckoStackTable.length);
+  for (let stackIndex = 0; stackIndex < geckoStackTable.length; stackIndex++) {
+    const frameCategory =
+      frameTable.category[geckoStackTable.frame[stackIndex]];
+    let stackCategory;
+    if (frameCategory !== null) {
+      stackCategory = frameCategory;
+    } else {
+      const prefix = geckoStackTable.prefix[stackIndex];
+      if (prefix !== null) {
+        // Because of the structure of the stack table, prefix < stackIndex.
+        // So we've already computed the category for the prefix.
+        stackCategory = categoryColumn[prefix];
+      } else {
+        stackCategory = defaultCategory;
+      }
+    }
+    categoryColumn[stackIndex] = stackCategory;
+  }
+
   return {
     frame: geckoStackTable.frame,
+    category: categoryColumn,
     prefix: geckoStackTable.prefix,
     length: geckoStackTable.length,
   };
@@ -656,7 +684,7 @@ function _processThread(
   );
 
   const { libs, pausedRanges, meta } = processProfile;
-  const { shutdownTime } = meta;
+  const { categories, shutdownTime } = meta;
 
   const stringTable = new UniqueStringArray(thread.stringTable);
   const [
@@ -674,7 +702,11 @@ function _processThread(
     funcTable,
     frameFuncs
   );
-  const stackTable = _processStackTable(geckoStackTable);
+  const stackTable = _processStackTable(
+    geckoStackTable,
+    frameTable,
+    categories
+  );
   const markers = _processMarkers(geckoMarkers);
   const samples = _processSamples(geckoSamples);
 
@@ -688,7 +720,7 @@ function _processThread(
     tid: thread.tid,
     pid: thread.pid,
     libs,
-    pausedRanges,
+    pausedRanges: pausedRanges || [],
     frameTable,
     funcTable,
     resourceTable,
@@ -926,8 +958,3 @@ export class ProfileProcessor {
     });
   }
 }
-
-export const ProfileProcessorThreaded = provideHostSide(
-  'profile-processor-worker.js',
-  ['processProfile']
-);

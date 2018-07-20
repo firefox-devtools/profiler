@@ -10,7 +10,7 @@ import {
 import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import memoize from 'memoize-immutable';
-import WeakTupleMap from 'weaktuplemap';
+import MixedTupleMap from 'mixedtuplemap';
 import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
@@ -24,6 +24,8 @@ import { getInitialTabOrder } from '../app-logic/tabs-handling';
 
 import type {
   Profile,
+  CategoryList,
+  IndexIntoCategoryList,
   Thread,
   ThreadIndex,
   SamplesTable,
@@ -37,13 +39,12 @@ import type {
   MarkerTimingRows,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
-import type { Action, ProfileSelection } from '../types/actions';
+import type { Action, ProfileSelection, RequestedLib } from '../types/actions';
 import type {
   State,
   Reducer,
   ProfileViewState,
   ProfileSharingStatus,
-  RequestedLib,
   SymbolicationStatus,
   ThreadViewOptions,
 } from '../types/reducers';
@@ -551,6 +552,10 @@ export const getProfile = (state: State): Profile =>
   );
 export const getProfileInterval = (state: State): Milliseconds =>
   getProfile(state).meta.interval;
+export const getCategories = (state: State): CategoryList =>
+  getProfile(state).meta.categories;
+export const getDefaultCategory = (state: State): IndexIntoCategoryList =>
+  getCategories(state).findIndex(c => c.color === 'grey');
 export const getThreads = (state: State): Thread[] => getProfile(state).threads;
 export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
@@ -558,6 +563,11 @@ export const getRightClickedThreadIndex = (state: State) =>
   getProfileViewOptions(state).rightClickedThread;
 export const getSelection = (state: State) =>
   getProfileViewOptions(state).selection;
+
+const _getDefaultCategoryWrappedInObject = createSelector(
+  getDefaultCategory,
+  defaultCategory => ({ value: defaultCategory })
+);
 
 export type SelectorsForThread = {
   getThread: State => Thread,
@@ -618,7 +628,11 @@ export const selectorsForThread = (
         return ProfileData.filterThreadToRange(thread, start, end);
       }
     );
-    const applyTransform = (thread: Thread, transform: Transform) => {
+    const applyTransform = (
+      thread: Thread,
+      transform: Transform,
+      defaultCategory: IndexIntoCategoryList
+    ) => {
       switch (transform.type) {
         case 'focus-subtree':
           return transform.inverted
@@ -648,7 +662,8 @@ export const selectorsForThread = (
           return Transforms.collapseResource(
             thread,
             transform.resourceIndex,
-            transform.implementation
+            transform.implementation,
+            defaultCategory
           );
         case 'collapse-direct-recursion':
           return Transforms.collapseDirectRecursion(
@@ -659,7 +674,8 @@ export const selectorsForThread = (
         case 'collapse-function-subtree':
           return Transforms.collapseFunctionSubtree(
             thread,
-            transform.funcIndex
+            transform.funcIndex,
+            defaultCategory
           );
         default:
           throw assertExhaustiveCheck(transform);
@@ -670,23 +686,26 @@ export const selectorsForThread = (
     // memoize each step individually so that they transform stack can be pushed and
     // popped frequently and easily.
     const applyTransformMemoized = memoize(applyTransform, {
-      cache: new WeakTupleMap(),
+      cache: new MixedTupleMap(),
     });
     const getTransformStack = (state: State): TransformStack =>
       UrlState.getTransformStack(state, threadIndex);
     const getRangeAndTransformFilteredThread = createSelector(
       getRangeFilteredThread,
       getTransformStack,
-      (startingThread, transforms): Thread =>
+      _getDefaultCategoryWrappedInObject,
+      (startingThread, transforms, defaultCategoryObj): Thread =>
         transforms.reduce(
           // Apply the reducer using an arrow function to ensure correct memoization.
-          (thread, transform) => applyTransformMemoized(thread, transform),
+          (thread, transform) =>
+            applyTransformMemoized(thread, transform, defaultCategoryObj),
           startingThread
         )
     );
     const _getImplementationFilteredThread = createSelector(
       getRangeAndTransformFilteredThread,
       UrlState.getImplementationFilter,
+      getDefaultCategory,
       ProfileData.filterThreadByImplementation
     );
     const _getImplementationAndSearchFilteredThread = createSelector(
@@ -699,9 +718,10 @@ export const selectorsForThread = (
     const getFilteredThread = createSelector(
       _getImplementationAndSearchFilteredThread,
       UrlState.getInvertCallstack,
-      (thread, shouldInvertCallstack): Thread => {
+      getDefaultCategory,
+      (thread, shouldInvertCallstack, defaultCategory): Thread => {
         return shouldInvertCallstack
-          ? ProfileData.invertCallstack(thread)
+          ? ProfileData.invertCallstack(thread, defaultCategory)
           : thread;
       }
     );
@@ -797,8 +817,17 @@ export const selectorsForThread = (
     );
     const getCallNodeInfo = createSelector(
       getFilteredThread,
-      ({ stackTable, frameTable, funcTable }: Thread): CallNodeInfo => {
-        return ProfileData.getCallNodeInfo(stackTable, frameTable, funcTable);
+      getDefaultCategory,
+      (
+        { stackTable, frameTable, funcTable }: Thread,
+        defaultCategory: IndexIntoCategoryList
+      ): CallNodeInfo => {
+        return ProfileData.getCallNodeInfo(
+          stackTable,
+          frameTable,
+          funcTable,
+          defaultCategory
+        );
       }
     );
     const getCallNodeMaxDepth = createSelector(
@@ -841,6 +870,7 @@ export const selectorsForThread = (
       getRangeSelectionFilteredThread,
       getProfileInterval,
       getCallNodeInfo,
+      getCategories,
       UrlState.getImplementationFilter,
       UrlState.getInvertCallstack,
       CallTree.getCallTree
@@ -984,7 +1014,7 @@ export const selectedNodeSelectors: SelectorsForNode = (() => {
     selectedThreadSelectors.getCallNodeInfo,
     getProfileInterval,
     UrlState.getInvertCallstack,
-    selectedThreadSelectors.getFilteredThread,
+    selectedThreadSelectors.getRangeSelectionFilteredThread,
     (
       selectedPath,
       callNodeInfo,

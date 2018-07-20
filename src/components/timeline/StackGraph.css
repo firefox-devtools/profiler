@@ -2,7 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { ProfileProcessor } from './process-profile';
-import { provideWorkerSide } from '../utils/promise-worker';
+.timelineStackGraph {
+  height: 25px;
+}
 
-provideWorkerSide(self, ProfileProcessor);
+.timelineStackGraphCanvas {
+  display: block;
+  height: 25px;
+  width: 100%;
+}

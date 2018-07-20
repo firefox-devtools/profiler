@@ -36,6 +36,7 @@ export type IndexIntoCallNodeTable = number;
 export type CallNodeTable = {
   prefix: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
   func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
+  category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   depth: number[],
   length: number,
 };
@@ -82,15 +83,19 @@ export type CallNodeData = {
   selfTimeRelative: number,
 };
 
-export type CallNodeDisplayData = {
-  totalTime: string,
-  totalTimePercent: string,
-  selfTime: string,
-  name: string,
-  lib: string,
-  dim: boolean,
-  icon: string | null,
-};
+export type CallNodeDisplayData = $Exact<
+  $ReadOnly<{
+    totalTime: string,
+    totalTimePercent: string,
+    selfTime: string,
+    name: string,
+    lib: string,
+    dim: boolean,
+    categoryName: string,
+    categoryColor: string,
+    icon: string | null,
+  }>
+>;
 
 export type IndexIntoMarkerTiming = number;
 

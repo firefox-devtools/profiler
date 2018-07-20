@@ -14,6 +14,7 @@ import type {
   FuncTable,
   MarkersTable,
   ResourceTable,
+  IndexIntoCategoryList,
   IndexIntoFuncTable,
   IndexIntoStringTable,
   IndexIntoSamplesTable,
@@ -31,6 +32,7 @@ import type {
 import type { BailoutPayload } from '../types/markers';
 import { CURRENT_VERSION as GECKO_PROFILE_VERSION } from './gecko-profile-versioning';
 import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profile-versioning';
+import { getNumberPropertyOrNull } from '../utils/flow';
 
 import type { Milliseconds, StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
@@ -60,7 +62,11 @@ export const emptyExtensions: ExtensionTable = Object.freeze({
   length: 0,
 });
 
-export const emptyCategories: CategoryList = Object.freeze([]);
+export const defaultCategories: CategoryList = Object.freeze([
+  { name: 'Other', color: 'grey' },
+  { name: 'Graphics', color: 'green' },
+  { name: 'DOM', color: 'blue' },
+]);
 
 /**
  * Generate the CallNodeInfo which contains the CallNodeTable, and a map to convert
@@ -74,7 +80,8 @@ export const emptyCategories: CategoryList = Object.freeze([]);
 export function getCallNodeInfo(
   stackTable: StackTable,
   frameTable: FrameTable,
-  funcTable: FuncTable
+  funcTable: FuncTable,
+  defaultCategory: IndexIntoCategoryList
 ): CallNodeInfo {
   return timeCode('getCallNodeInfo', () => {
     const stackIndexToCallNodeIndex = new Uint32Array(stackTable.length);
@@ -86,16 +93,19 @@ export function getCallNodeInfo(
     // The callNodeTable components.
     const prefix: Array<IndexIntoCallNodeTable> = [];
     const func: Array<IndexIntoFuncTable> = [];
+    const category: Array<IndexIntoCategoryList> = [];
     const depth: Array<number> = [];
     let length = 0;
 
     function addCallNode(
       prefixIndex: IndexIntoCallNodeTable,
-      funcIndex: IndexIntoFuncTable
+      funcIndex: IndexIntoFuncTable,
+      categoryIndex: IndexIntoCategoryList
     ) {
       const index = length++;
       prefix[index] = prefixIndex;
       func[index] = funcIndex;
+      category[index] = categoryIndex;
       if (prefixIndex === -1) {
         depth[index] = 0;
       } else {
@@ -112,6 +122,7 @@ export function getCallNodeInfo(
       const prefixCallNode =
         prefixStack === null ? -1 : stackIndexToCallNodeIndex[prefixStack];
       const frameIndex = stackTable.frame[stackIndex];
+      const categoryIndex = stackTable.category[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
       const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
       let callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
@@ -119,11 +130,14 @@ export function getCallNodeInfo(
       );
       if (callNodeIndex === undefined) {
         callNodeIndex = length;
-        addCallNode(prefixCallNode, funcIndex);
+        addCallNode(prefixCallNode, funcIndex, categoryIndex);
         prefixCallNodeAndFuncToCallNodeMap.set(
           prefixCallNodeAndFuncIndex,
           callNodeIndex
         );
+      } else if (category[callNodeIndex] !== categoryIndex) {
+        // Conflicting origin stack categories -> default category.
+        category[callNodeIndex] = defaultCategory;
       }
       stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
     }
@@ -131,6 +145,7 @@ export function getCallNodeInfo(
     const callNodeTable: CallNodeTable = {
       prefix: new Int32Array(prefix),
       func: new Int32Array(func),
+      category: new Int32Array(category),
       depth,
       length,
     };
@@ -162,9 +177,9 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
   return path[path.length - 1];
 }
 
-type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
-type StackImplementation = 'native' | JsImplementation;
-type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
+export type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
+export type StackImplementation = 'native' | JsImplementation;
+export type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
 type ItemTimings = {|
   selfTime: {|
     // time spent excluding children
@@ -255,11 +270,26 @@ export function getTimingsForPath(
 
   /**
    * This is a small utility function to more easily add data to breakdowns.
+   * The funcIndex could be computed from the stackIndex but is provided as an
+   * argument because it's been already computed when this function is called.
    */
-  function accumulateDataToBreakdown(
-    timings: { breakdownByImplementation: BreakdownByImplementation | null },
-    implementation: StackImplementation
+  function accumulateDataToTimings(
+    timings: {
+      breakdownByImplementation: BreakdownByImplementation | null,
+      value: number,
+    },
+    stackIndex: IndexIntoStackTable,
+    funcIndex: IndexIntoFuncTable
   ): void {
+    // Step 1: increment the total value
+    timings.value += interval;
+
+    // Step 2: find the implementation value for this stack
+    const implementation = funcTable.isJS[funcIndex]
+      ? getJsImplementationForStack(stackIndex, thread)
+      : 'native';
+
+    // Step 3: increment the right value in the implementation breakdown
     if (timings.breakdownByImplementation === null) {
       timings.breakdownByImplementation = {};
     }
@@ -284,17 +314,11 @@ export function getTimingsForPath(
     if (!isInvertedTree) {
       // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
       if (thisNodeIndex === needleNodeIndex) {
-        pathTimings.selfTime.value += interval;
-
-        let implementation = 'native';
-        if (funcTable.isJS[thisFunc]) {
-          implementation = getJsImplementationForStack(thisStackIndex, thread);
-        }
-        accumulateDataToBreakdown(pathTimings.selfTime, implementation);
+        accumulateDataToTimings(pathTimings.selfTime, thisStackIndex, thisFunc);
       }
 
       if (thisFunc === needleFuncIndex) {
-        funcTimings.selfTime.value += interval;
+        accumulateDataToTimings(funcTimings.selfTime, thisStackIndex, thisFunc);
       }
     }
 
@@ -317,15 +341,34 @@ export function getTimingsForPath(
 
       if (currentNodeIndex === needleNodeIndex) {
         // One of the parents is the exact passed path.
-        pathTimings.totalTime.value += interval;
+        // For non-inverted trees, we can contribute the data to the
+        // implementation breakdown now.
+        // Note that for inverted trees, we need to traverse up to the root node
+        // first, see below for this.
+        if (!isInvertedTree) {
+          accumulateDataToTimings(
+            pathTimings.totalTime,
+            thisStackIndex,
+            thisFunc
+          );
+        }
+
         pathFound = true;
       }
 
       if (!funcFound && currentFuncIndex === needleFuncIndex) {
-        // One of the parents' func is the same function as the passed path
+        // One of the parents' func is the same function as the passed path.
         // Note we could have the same function several times in the stack, so
         // we need a boolean variable to prevent adding it more than once.
-        funcTimings.totalTime.value += interval;
+        // The boolean variable will also be used to accumulate timings for
+        // inverted trees below.
+        if (!isInvertedTree) {
+          accumulateDataToTimings(
+            funcTimings.totalTime,
+            thisStackIndex,
+            thisFunc
+          );
+        }
         funcFound = true;
       }
 
@@ -345,33 +388,37 @@ export function getTimingsForPath(
         // prefix is `null`.
         if (currentNodeIndex === needleNodeIndex) {
           // This root node matches the passed call node path.
+          // This is the only place where we don't accumulate timings, mainly
+          // because this would be the same as for the total time.
           pathTimings.selfTime.value += interval;
         }
 
         if (currentFuncIndex === needleFuncIndex) {
           // This root node is the same function as the passed call node path.
-          funcTimings.selfTime.value += interval;
+          accumulateDataToTimings(
+            funcTimings.selfTime,
+            currentStackIndex,
+            currentFuncIndex
+          );
         }
 
         if (pathFound) {
           // We contribute the implementation information if the passed path was
           // found in this stack earlier.
-          // If the root node (the one actually holding the self time) is a JS
-          // frame, we get its specific implementation too.
-          // This allows to see how the implementation timings is spread among
-          // callers.
-          let implementation = 'native';
-          if (funcTable.isJS[currentFuncIndex]) {
-            implementation = getJsImplementationForStack(
-              currentStackIndex,
-              thread
-            );
-          }
-          accumulateDataToBreakdown(
-            // TODO: I believe this should be totalTime here instead, but due to
-            // how we display them in the current code we use selfTime for now.
-            pathTimings.selfTime,
-            implementation
+          accumulateDataToTimings(
+            pathTimings.totalTime,
+            currentStackIndex,
+            currentFuncIndex
+          );
+        }
+
+        if (funcFound) {
+          // We contribute the implementation information if the leaf function
+          // of the passed path was found in this stack earlier.
+          accumulateDataToTimings(
+            funcTimings.totalTime,
+            currentStackIndex,
+            currentFuncIndex
           );
         }
       }
@@ -434,31 +481,39 @@ export function toValidImplementationFilter(
 
 export function filterThreadByImplementation(
   thread: Thread,
-  implementation: string
+  implementation: string,
+  defaultCategory: IndexIntoCategoryList
 ): Thread {
   const { funcTable, stringTable } = thread;
 
   switch (implementation) {
     case 'cpp':
-      return _filterThreadByFunc(thread, funcIndex => {
-        // Return quickly if this is a JS frame.
-        if (funcTable.isJS[funcIndex]) {
-          return false;
-        }
-        // Regular C++ functions are associated with a resource that describes the
-        // shared library that these C++ functions were loaded from. Jitcode is not
-        // loaded from shared libraries but instead generated at runtime, so Jitcode
-        // frames are not associated with a shared library and thus have no resource
-        const locationString = stringTable.getString(funcTable.name[funcIndex]);
-        const isProbablyJitCode =
-          funcTable.resource[funcIndex] === -1 &&
-          locationString.startsWith('0x');
-        return !isProbablyJitCode;
-      });
+      return _filterThreadByFunc(
+        thread,
+        funcIndex => {
+          // Return quickly if this is a JS frame.
+          if (funcTable.isJS[funcIndex]) {
+            return false;
+          }
+          // Regular C++ functions are associated with a resource that describes the
+          // shared library that these C++ functions were loaded from. Jitcode is not
+          // loaded from shared libraries but instead generated at runtime, so Jitcode
+          // frames are not associated with a shared library and thus have no resource
+          const locationString = stringTable.getString(
+            funcTable.name[funcIndex]
+          );
+          const isProbablyJitCode =
+            funcTable.resource[funcIndex] === -1 &&
+            locationString.startsWith('0x');
+          return !isProbablyJitCode;
+        },
+        defaultCategory
+      );
     case 'js':
       return _filterThreadByFunc(
         thread,
-        funcIndex => funcTable.isJS[funcIndex]
+        funcIndex => funcTable.isJS[funcIndex],
+        defaultCategory
       );
     default:
       return thread;
@@ -467,7 +522,8 @@ export function filterThreadByImplementation(
 
 function _filterThreadByFunc(
   thread: Thread,
-  filter: IndexIntoFuncTable => boolean
+  filter: IndexIntoFuncTable => boolean,
+  defaultCategory: IndexIntoCallNodeTable
 ): Thread {
   return timeCode('filterThread', () => {
     const { stackTable, frameTable, samples } = thread;
@@ -476,6 +532,7 @@ function _filterThreadByFunc(
       length: 0,
       frame: [],
       prefix: [],
+      category: [],
     };
 
     const oldStackToNewStack = new Map();
@@ -500,6 +557,12 @@ function _filterThreadByFunc(
             newStack = newStackTable.length++;
             newStackTable.prefix[newStack] = prefixNewStack;
             newStackTable.frame[newStack] = frameIndex;
+            newStackTable.category[newStack] = stackTable.category[stackIndex];
+          } else if (
+            newStackTable.category[newStack] !== stackTable.category[stackIndex]
+          ) {
+            // Conflicting origin stack categories -> default category.
+            newStackTable.category[newStack] = defaultCategory;
           }
           oldStackToNewStack.set(stackIndex, newStack);
           prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
@@ -546,6 +609,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
     const newStackTable: StackTable = {
       length: 0,
       frame: [],
+      category: [],
       prefix: [],
     };
     const newFrameTable: FrameTable = {
@@ -607,6 +671,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
           if (newStack === undefined) {
             newStack = newStackTable.length++;
             newStackTable.prefix[newStack] = newStackPrefix;
+            newStackTable.category[newStack] = stackTable.category[oldStack];
             if (oldStackIsPlatform) {
               // Create a new platform frame
               const newFuncIndex = newFuncTable.length++;
@@ -1032,13 +1097,17 @@ export function computeCallNodeMaxDepth(
   return maxDepth;
 }
 
-export function invertCallstack(thread: Thread): Thread {
+export function invertCallstack(
+  thread: Thread,
+  defaultCategory: IndexIntoCategoryList
+): Thread {
   return timeCode('invertCallstack', () => {
     const { stackTable, frameTable, samples } = thread;
 
     const newStackTable = {
       length: 0,
       frame: [],
+      category: [],
       prefix: [],
     };
     // Create a Map that keys off of two values, both the prefix and frame combination
@@ -1049,7 +1118,7 @@ export function invertCallstack(thread: Thread): Thread {
     // Returns the stackIndex for a specific frame (that is, a function and its
     // context), and a specific prefix. If it doesn't exist yet it will create
     // a new stack entry and return its index.
-    function stackFor(prefix, frame) {
+    function stackFor(prefix, frame, category) {
       const prefixAndFrameIndex =
         (prefix === null ? -1 : prefix) * frameCount + frame;
       let stackIndex = prefixAndFrameToStack.get(prefixAndFrameIndex);
@@ -1057,7 +1126,14 @@ export function invertCallstack(thread: Thread): Thread {
         stackIndex = newStackTable.length++;
         newStackTable.prefix[stackIndex] = prefix;
         newStackTable.frame[stackIndex] = frame;
+        newStackTable.category[stackIndex] = category;
         prefixAndFrameToStack.set(prefixAndFrameIndex, stackIndex);
+      } else if (newStackTable.category[stackIndex] !== category) {
+        // If two stack nodes from the non-inverted stack tree with different
+        // categories happen to collapse into the same stack node in the
+        // inverted tree, discard their category and set the category to the
+        // default category.
+        newStackTable.category[stackIndex] = defaultCategory;
       }
       return stackIndex;
     }
@@ -1080,7 +1156,11 @@ export function invertCallstack(thread: Thread): Thread {
         ) {
           // Notice how we reuse the previous stack as the prefix. This is what
           // effectively inverts the call tree.
-          newStack = stackFor(newStack, stackTable.frame[currentStack]);
+          newStack = stackFor(
+            newStack,
+            stackTable.frame[currentStack],
+            stackTable.category[currentStack]
+          );
         }
         oldStackToNewStack.set(stackIndex, newStack);
       }
@@ -1379,9 +1459,15 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
         }
         tracingMarkers.push(marker);
       }
-    } else if ('startTime' in data && 'endTime' in data) {
-      const { startTime, endTime } = data;
-      if (typeof startTime === 'number' && typeof endTime === 'number') {
+    } else {
+      // `data` here is a union of different shaped objects, that may or not have
+      // certain properties. Flow doesn't like us arbitrarily accessing properties
+      // that may not exist, so use a utility function to generically get the data out.
+      const startTime = getNumberPropertyOrNull(data, 'startTime');
+      const endTime = getNumberPropertyOrNull(data, 'endTime');
+
+      // Now construct a tracing marker if these properties existed.
+      if (startTime !== null && endTime !== null) {
         const name = stringTable.getString(markers.name[i]);
         const duration = endTime - startTime;
         tracingMarkers.push({
@@ -1487,7 +1573,7 @@ export function getEmptyProfile(): Profile {
       platform: '',
       processType: 0,
       extensions: emptyExtensions,
-      categories: emptyCategories,
+      categories: defaultCategories,
       product: 'Firefox',
       stackwalk: 0,
       toolkit: '',

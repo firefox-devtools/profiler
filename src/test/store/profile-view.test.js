@@ -311,9 +311,9 @@ describe('actions/ProfileView', function() {
         profile,
         funcNamesPerThread: [funcNames],
       } = getProfileFromTextSamples(`
-        A A A
-        B B E
-        C D
+        A  A  A
+        B  B  E
+        C  D
       `);
       const threadIndex = 0;
       const A = funcNames.indexOf('A');
@@ -719,11 +719,11 @@ describe('snapshots of selectors/profile-view', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A A A A A A A A
-      B B B B B B B B B
-      C C C C C C H H H
-      D D D F F F I I I
-      E E E G G G
+      A  A  A  A  A  A  A  A  A
+      B  B  B  B  B  B  B  B  B
+      C  C  C  C  C  C  H  H  H
+      D  D  D  F  F  F  I  I  I
+      E  E  E  G  G  G
     `);
     const A = funcNames.indexOf('A');
     const B = funcNames.indexOf('B');
@@ -755,6 +755,14 @@ describe('snapshots of selectors/profile-view', function() {
     dispatch(ProfileView.changeSelectedCallNode(0, [A, B]));
     dispatch(ProfileView.changeSelectedMarker(0, 1));
     dispatch(ProfileView.addRangeFilter(3, 7)); // Reminder: upper bound "7" is exclusive.
+    dispatch(
+      ProfileView.updateProfileSelection({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 4,
+        selectionEnd: 6,
+      })
+    );
     return { getState, dispatch, samplesThread, mergeFunction, A, B, C };
   }
   it('matches the last stored run of getProfile', function() {
@@ -959,16 +967,8 @@ describe('snapshots of selectors/profile-view', function() {
 
   it('matches the last stored run of selectedNodeSelectors.getTimingsForSidebar', () => {
     const { getState } = setupStore();
-    expect(selectedNodeSelectors.getTimingsForSidebar(getState())).toEqual({
-      forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 4, breakdownByImplementation: null },
-      },
-      forFunc: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 4, breakdownByImplementation: null },
-      },
-      rootTime: 4,
-    });
+    expect(
+      selectedNodeSelectors.getTimingsForSidebar(getState())
+    ).toMatchSnapshot();
   });
 });

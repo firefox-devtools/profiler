@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import renderer from 'react-test-renderer';
+import { mount } from 'enzyme';
 import { Provider } from 'react-redux';
 
 import MarkerChart from '../../components/marker-chart';
@@ -18,8 +18,8 @@ import mockRaf from '../fixtures/mocks/request-animation-frame';
 
 const MARKERS = [
   ['Marker A', 0, { startTime: 0, endTime: 10 }],
-  ['Marker B', 0, { startTime: 0, endTime: 10 }],
-  ['Marker C', 5, { startTime: 5, endTime: 15 }],
+  ['Marker A', 0, { startTime: 0, endTime: 10 }],
+  ['Marker A', 11, { startTime: 11, endTime: 15 }],
   [
     'Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D',
     6,
@@ -70,42 +70,29 @@ const NETWORK_MARKERS = [
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
   const ctx = mockCanvasContext();
+  jest
+    .spyOn(HTMLCanvasElement.prototype, 'getContext')
+    .mockImplementation(() => ctx);
 
-  /**
-   * Mock out any created refs for the components with relevant information.
-   */
-  function createNodeMock(element) {
-    // <ChartCanvas><canvas /></ChartCanvas>
-    if (element.type === 'canvas') {
-      return {
-        getBoundingClientRect: () => getBoundingBox(200, 300),
-        getContext: () => ctx,
-        style: {},
-      };
-    }
-    // <ChartViewport />
-    if (element.props.className.split(' ').includes('chartViewport')) {
-      return {
-        getBoundingClientRect: () => getBoundingBox(200, 300),
-      };
-    }
-    return null;
-  }
+  // Ideally we'd want this only on the Canvas and on ChartViewport, but this is
+  // a lot easier to mock this everywhere.
+  jest
+    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+    .mockImplementation(() => getBoundingBox(200, 300));
 
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('marker-chart'));
 
-  const markerChart = renderer.create(
+  const markerChart = mount(
     <Provider store={store}>
       <MarkerChart />
-    </Provider>,
-    { createNodeMock }
+    </Provider>
   );
 
   return {
     markerChart,
     flushRafCalls,
-    store,
+    dispatch: store.dispatch,
     flushDrawLog: () => ctx.__flushDrawLog(),
   };
 }
@@ -114,18 +101,23 @@ it('renders MarkerChart correctly', () => {
   window.devicePixelRatio = 1;
 
   const profile = getProfileWithMarkers([...MARKERS, ...NETWORK_MARKERS]);
-  const { flushRafCalls, store, markerChart, flushDrawLog } = setupWithProfile(
-    profile
-  );
+  const {
+    flushRafCalls,
+    dispatch,
+    markerChart,
+    flushDrawLog,
+  } = setupWithProfile(profile);
 
-  store.dispatch(changeSelectedTab('marker-chart'));
+  dispatch(changeSelectedTab('marker-chart'));
+  markerChart.update();
   flushRafCalls();
 
   let drawCalls = flushDrawLog();
   expect(markerChart).toMatchSnapshot();
   expect(drawCalls).toMatchSnapshot();
 
-  store.dispatch(changeSelectedTab('network-chart'));
+  dispatch(changeSelectedTab('network-chart'));
+  markerChart.update();
   flushRafCalls();
 
   drawCalls = flushDrawLog();
@@ -135,20 +127,57 @@ it('renders MarkerChart correctly', () => {
   delete window.devicePixelRatio;
 });
 
+it('renders the hoveredItem markers properly', () => {
+  window.devicePixelRatio = 1;
+
+  const profile = getProfileWithMarkers(MARKERS);
+  const {
+    flushRafCalls,
+    dispatch,
+    markerChart,
+    flushDrawLog,
+  } = setupWithProfile(profile);
+
+  dispatch(changeSelectedTab('marker-chart'));
+  markerChart.update();
+  flushRafCalls();
+  flushDrawLog();
+
+  // No tooltip displayed yet
+  expect(markerChart.find('Tooltip').exists()).toEqual(false);
+
+  // Move the mouse on top of an item.
+  markerChart.find('canvas').simulate('mousemove', {
+    nativeEvent: { offsetX: 50, offsetY: 5 },
+    pageX: 50,
+    pageY: 5,
+  });
+  markerChart.update();
+  flushRafCalls();
+
+  const drawCalls = flushDrawLog();
+  expect(drawCalls).toMatchSnapshot();
+
+  // The tooltip should be displayed
+  expect(markerChart.find('Tooltip').exists()).toEqual(true);
+});
+
 describe('Empty Reasons', () => {
   it('shows a reason when a profile has no marker', () => {
     const profile = getProfileWithMarkers([]);
-    const { store, markerChart } = setupWithProfile(profile);
+    const { dispatch, markerChart } = setupWithProfile(profile);
 
-    store.dispatch(changeSelectedTab('marker-chart'));
+    dispatch(changeSelectedTab('marker-chart'));
+    markerChart.update();
     expect(markerChart).toMatchSnapshot();
   });
 
   it('shows a reason when a profil has no network markers', () => {
     const profile = getProfileWithMarkers(MARKERS);
-    const { store, markerChart } = setupWithProfile(profile);
+    const { dispatch, markerChart } = setupWithProfile(profile);
 
-    store.dispatch(changeSelectedTab('network-chart'));
+    dispatch(changeSelectedTab('network-chart'));
+    markerChart.update();
     expect(markerChart).toMatchSnapshot();
   });
 });

@@ -42,8 +42,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
               className="privacyNotice"
             >
               <p>
-                You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:
+                You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -57,8 +56,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 </li>
               </ul>
               <p>
-                To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.
+                To view all the information you can download the full profile to a file and open the json structure with a text editor.
               </p>
               <p>
                 By default, the URLs of all network requests will be removed while sharing the profile
@@ -243,8 +241,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
               className="privacyNotice"
             >
               <p>
-                You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:
+                You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -258,8 +255,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 </li>
               </ul>
               <p>
-                To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.
+                To view all the information you can download the full profile to a file and open the json structure with a text editor.
               </p>
               <p>
                 By default, the URLs of all network requests will be removed while sharing the profile
@@ -391,8 +387,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
               className="privacyNotice"
             >
               <p>
-                You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:
+                You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -406,8 +401,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 </li>
               </ul>
               <p>
-                To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.
+                To view all the information you can download the full profile to a file and open the json structure with a text editor.
               </p>
               <p>
                 By default, the URLs of all network requests will be removed while sharing the profile
@@ -592,8 +586,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
               className="privacyNotice"
             >
               <p>
-                You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:
+                You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -607,8 +600,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 </li>
               </ul>
               <p>
-                To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.
+                To view all the information you can download the full profile to a file and open the json structure with a text editor.
               </p>
               <p>
                 By default, the URLs of all network requests will be removed while sharing the profile
@@ -740,8 +732,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               className="privacyNotice"
             >
               <p>
-                You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:
+                You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -755,8 +746,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </li>
               </ul>
               <p>
-                To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.
+                To view all the information you can download the full profile to a file and open the json structure with a text editor.
               </p>
               <p>
                 By default, the URLs of all network requests will be removed while sharing the profile
@@ -941,8 +931,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               className="privacyNotice"
             >
               <p>
-                You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:
+                You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -956,8 +945,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </li>
               </ul>
               <p>
-                To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.
+                To view all the information you can download the full profile to a file and open the json structure with a text editor.
               </p>
               <p>
                 By default, the URLs of all network requests will be removed while sharing the profile
@@ -1089,8 +1077,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               className="privacyNotice"
             >
               <p>
-                You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:
+                You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -1104,8 +1091,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </li>
               </ul>
               <p>
-                To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.
+                To view all the information you can download the full profile to a file and open the json structure with a text editor.
               </p>
               <p>
                 By default, the URLs of all network requests will be removed while sharing the profile
@@ -1290,8 +1276,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               className="privacyNotice"
             >
               <p>
-                You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:
+                You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -1305,8 +1290,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </li>
               </ul>
               <p>
-                To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.
+                To view all the information you can download the full profile to a file and open the json structure with a text editor.
               </p>
               <p>
                 By default, the URLs of all network requests will be removed while sharing the profile
@@ -1438,8 +1422,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               className="privacyNotice"
             >
               <p>
-                You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:
+                You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -1453,8 +1436,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </li>
               </ul>
               <p>
-                To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.
+                To view all the information you can download the full profile to a file and open the json structure with a text editor.
               </p>
               <p>
                 By default, the URLs of all network requests will be removed while sharing the profile
@@ -1639,8 +1621,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               className="privacyNotice"
             >
               <p>
-                You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:
+                You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -1654,8 +1635,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </li>
               </ul>
               <p>
-                To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.
+                To view all the information you can download the full profile to a file and open the json structure with a text editor.
               </p>
               <p>
                 By default, the URLs of all network requests will be removed while sharing the profile
@@ -1787,8 +1767,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               className="privacyNotice"
             >
               <p>
-                You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:
+                You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -1802,8 +1781,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </li>
               </ul>
               <p>
-                To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.
+                To view all the information you can download the full profile to a file and open the json structure with a text editor.
               </p>
               <p>
                 By default, the URLs of all network requests will be removed while sharing the profile
@@ -1988,8 +1966,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               className="privacyNotice"
             >
               <p>
-                You’re about to upload your profile publicly where anyone will be able to access it.
-      To better diagnose performance problems profiles include the following information:
+                You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
               </p>
               <ul>
                 <li>
@@ -2003,8 +1980,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </li>
               </ul>
               <p>
-                To view all the information you can download the full profile to a file and open the
-      json structure with a text editor.
+                To view all the information you can download the full profile to a file and open the json structure with a text editor.
               </p>
               <p>
                 By default, the URLs of all network requests will be removed while sharing the profile

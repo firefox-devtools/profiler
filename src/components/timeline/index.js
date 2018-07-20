@@ -5,10 +5,12 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import ProfileThreadHeaderBar from './ProfileThreadHeaderBar';
-import Reorderable from '../shared/Reorderable';
-import TimeSelectionScrubber from './TimeSelectionScrubber';
+import TimelineThread from './Thread';
+import TimelineRuler from './Ruler';
+import TimelineSelection from './Selection';
 import OverflowEdgeIndicator from './OverflowEdgeIndicator';
+import Reorderable from '../shared/Reorderable';
+import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
 import {
   getProfile,
@@ -17,6 +19,9 @@ import {
   getZeroAt,
 } from '../../reducers/profile-view';
 import { getHiddenThreads, getThreadOrder } from '../../reducers/url-state';
+import './index.css';
+
+import type { SizeProps } from '../shared/WithSize';
 
 import {
   changeThreadOrder,
@@ -32,8 +37,11 @@ import type {
   ConnectedProps,
 } from '../../utils/connect';
 
+type OwnProps = SizeProps;
+
 type StateProps = {|
   +profile: Profile,
+  +displayRange: StartEndRange,
   +selection: ProfileSelection,
   +threadOrder: ThreadIndex[],
   +hiddenThreads: ThreadIndex[],
@@ -47,19 +55,9 @@ type DispatchProps = {|
   +updateProfileSelection: typeof updateProfileSelection,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class ProfileViewerHeader extends PureComponent<Props> {
-  constructor(props: Props) {
-    super(props);
-    (this: any)._onZoomButtonClick = this._onZoomButtonClick.bind(this);
-  }
-
-  _onZoomButtonClick(start: Milliseconds, end: Milliseconds) {
-    const { addRangeFilterAndUnsetSelection, zeroAt } = this.props;
-    addRangeFilterAndUnsetSelection(start - zeroAt, end - zeroAt);
-  }
-
+class Timeline extends PureComponent<Props> {
   render() {
     const {
       profile,
@@ -67,34 +65,31 @@ class ProfileViewerHeader extends PureComponent<Props> {
       changeThreadOrder,
       selection,
       timeRange,
-      zeroAt,
       hiddenThreads,
-      updateProfileSelection,
+      displayRange,
+      zeroAt,
+      width,
     } = this.props;
     const threads = profile.threads;
-
     return (
-      <TimeSelectionScrubber
-        className="profileViewerHeader"
-        zeroAt={zeroAt}
-        rangeStart={timeRange.start}
-        rangeEnd={timeRange.end}
-        minSelectionStartWidth={profile.meta.interval}
-        selection={selection}
-        onSelectionChange={updateProfileSelection}
-        onZoomButtonClick={this._onZoomButtonClick}
-      >
-        <OverflowEdgeIndicator className="profileViewerHeaderOverflowEdgeIndicator">
+      <TimelineSelection width={width}>
+        <TimelineRuler
+          zeroAt={zeroAt}
+          rangeStart={displayRange.start}
+          rangeEnd={displayRange.end}
+          width={width}
+        />
+        <OverflowEdgeIndicator className="timelineOverflowEdgeIndicator">
           {
             <Reorderable
               tagName="ol"
-              className="profileViewerHeaderThreadList"
+              className="timelineThreadList"
               order={threadOrder}
               orient="vertical"
               onChangeOrder={changeThreadOrder}
             >
               {threads.map((thread, threadIndex) => (
-                <ProfileThreadHeaderBar
+                <TimelineThread
                   key={threadIndex}
                   threadIndex={threadIndex}
                   interval={profile.meta.interval}
@@ -107,18 +102,19 @@ class ProfileViewerHeader extends PureComponent<Props> {
             </Reorderable>
           }
         </OverflowEdgeIndicator>
-      </TimeSelectionScrubber>
+      </TimelineSelection>
     );
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     profile: getProfile(state),
     selection: getProfileViewOptions(state).selection,
     threadOrder: getThreadOrder(state),
     hiddenThreads: getHiddenThreads(state),
     timeRange: getDisplayRange(state),
+    displayRange: getDisplayRange(state),
     zeroAt: getZeroAt(state),
   }),
   mapDispatchToProps: {
@@ -126,7 +122,6 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     updateProfileSelection,
     addRangeFilterAndUnsetSelection,
   },
-  component: ProfileViewerHeader,
+  component: Timeline,
 };
-
-export default explicitConnect(options);
+export default withSize(explicitConnect(options));

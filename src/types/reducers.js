@@ -9,6 +9,7 @@ import type {
   DataSource,
   ProfileSelection,
   ImplementationFilter,
+  RequestedLib,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { Milliseconds, StartEndRange } from './units';
@@ -24,7 +25,6 @@ import type { PathSet } from '../utils/path.js';
 
 export type Reducer<T> = (T | void, Action) => T;
 
-export type RequestedLib = { debugName: string, breakpadId: string };
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {
   selectedCallNodePath: CallNodePath,
@@ -117,11 +117,6 @@ export type ZippedProfilesState = {
   expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
 };
 
-export type RangeFilterState = {
-  start: number,
-  end: number,
-};
-
 export type UrlState = {|
   dataSource: DataSource,
   hash: string,
@@ -131,7 +126,7 @@ export type UrlState = {|
   profileSpecific: {|
     implementation: ImplementationFilter,
     invertCallstack: boolean,
-    rangeFilters: RangeFilterState[],
+    rangeFilters: StartEndRange[],
     selectedThread: ThreadIndex | null,
     callTreeSearchString: string,
     threadOrder: ThreadIndex[],

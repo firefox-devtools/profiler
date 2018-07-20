@@ -15,17 +15,56 @@ export type IndexIntoStringTable = number;
 export type IndexIntoFuncTable = number;
 export type IndexIntoResourceTable = number;
 export type IndexIntoLibs = number;
-export type categoryBitMask = number;
+export type IndexIntoCategoryList = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
 
 /**
- * The stack table is the minimal representation of a call stack. Each stack entry
- * consists of the frame at the top of the stack, and the prefix for the stack that
- * came before it. Stacks can be shared between samples.
+ * The stack table stores the tree of stack nodes of a thread.
+ * The shape of the tree is encoded in the prefix column: Root stack nodes have
+ * null as their prefix, and every non-root stack has the stack index of its
+ * "caller" / "parent" as its prefix.
+ * Every stack node also has a frame and a category.
+ * A "call stack" is a list of frames. Every stack index in the stack table
+ * represents such a call stack; the "list of frames" is obtained by walking
+ * the path in the tree from the root to the given stack node.
+ *
+ * Stacks are used in the thread's samples; each sample refers to a stack index.
+ * Stacks can be shared between samples.
+ *
+ * With this representation, every sample only needs to store a single integer
+ * to identify the sample's stack.
+ * We take advantage of the fact that many call stacks in the profile have a
+ * shared prefix; storing these stacks as a tree saves a lot of space compared
+ * to storing them as actual lists of frames.
+ *
+ * The category of a stack node is always non-null and is derived from a stack's
+ * frame and its prefix. Frames can have null categories, stacks cannot. If a
+ * stack's frame has a null category, the stack inherits the category of its
+ * prefix stack. Root stacks whose frame has a null stack have their category
+ * set to the "default category". (The default category is currently defined as
+ * the category in the profile's category list whose color is "grey", and such
+ * a category is required to be present.)
+ *
+ * You could argue that the stack table's category column is derived data and as
+ * such doesn't need to be stored in the profile itself. This is true, but
+ * storing this information in the stack table makes it a lot easier to carry
+ * it through various transforms that we apply to threads.
+ * For example, here's a case where a stack's category is not recoverable from
+ * any other information in the transformed thread:
+ * In the call path
+ *   someJSFunction [JS] -> Node.insertBefore [DOM] -> nsAttrAndChildArray::InsertChildAt,
+ * the stack node for nsAttrAndChildArray::InsertChildAt should inherit the
+ * category DOM from its "Node.insertBefore" prefix stack. And it should keep
+ * the DOM category even if you apply the "Merge node into calling function"
+ * transform to Node.insertBefore. This transform removes the stack node
+ * "Node.insertBefore" from the stackTable, so the information about the DOM
+ * category would be lost if it wasn't inherited into the
+ * nsAttrAndChildArray::InsertChildAt stack before transforms are applied.
  */
 export type StackTable = {
   frame: IndexIntoFrameTable[],
+  category: IndexIntoCategoryList[],
   prefix: Array<IndexIntoStackTable | null>,
   length: number,
 };
@@ -77,7 +116,7 @@ export type MarkersTable = {
  */
 export type FrameTable = {
   address: IndexIntoStringTable[],
-  category: (categoryBitMask | null)[],
+  category: (IndexIntoCategoryList | null)[],
   func: IndexIntoFuncTable[],
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],

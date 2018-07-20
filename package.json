@@ -51,6 +51,7 @@
     "escape-string-regexp": "^1.0.5",
     "jszip": "^3.1.5",
     "memoize-immutable": "^3.0.0",
+    "mixedtuplemap": "^1.0.0",
     "offline-plugin": "^4.9.0",
     "photon-colors": "2.0.1",
     "prop-types": "^15.6.0",
@@ -108,7 +109,6 @@
     "json-loader": "^0.5.7",
     "lint-staged": "^6.1.0",
     "local-web-server": "^2.4.0",
-    "lodash.clonedeep": "^4.5.0",
     "mkdirp": "^0.5.1",
     "npm-run-all": "^4.1.2",
     "prettier": "^1.10.2",
@@ -140,9 +140,6 @@
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/test/fixtures/mocks/file-mock.js",
       "\\.(css|less)$": "<rootDir>/src/test/fixtures/mocks/style-mock.js"
     },
-    "snapshotSerializers": [
-      "enzyme-to-json/serializer"
-    ],
     "restoreMocks": true,
     "resetMocks": true,
     "setupTestFrameworkScriptFile": "./src/test/setup.js",

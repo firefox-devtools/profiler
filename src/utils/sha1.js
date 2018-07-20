@@ -1,10 +1,11 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
 
 // Copied and adapted from https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
 
-function hex(buffer) {
+function hex(buffer: ArrayBuffer): string {
   const hexCodes = [];
   const view = new DataView(buffer);
   for (let i = 0; i < view.byteLength; i += 4) {
@@ -22,7 +23,7 @@ function hex(buffer) {
   return hexCodes.join('');
 }
 
-export default function sha1(data) {
+export default function sha1(data: string | Uint8Array): Promise<string> {
   const arrayData =
     typeof data === 'string' ? new TextEncoder().encode(data) : data;
   return window.crypto.subtle.digest('SHA-1', arrayData).then(hex);

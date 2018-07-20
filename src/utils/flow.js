@@ -142,3 +142,16 @@ export function ensureExists<T>(item: ?T, message: ?string): T {
   }
   return item;
 }
+
+/**
+ * Flow doesn't want us to access potentitally non-existent properties on unions of
+ * of objects. This function creates a safe interface to access number properties
+ * if they might exist.
+ */
+export function getNumberPropertyOrNull<T: Object>(
+  data: T,
+  property: string
+): number | null {
+  const maybeNumber = (data: Object)[property];
+  return typeof maybeNumber === 'number' ? maybeNumber : null;
+}

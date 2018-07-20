@@ -20,6 +20,7 @@ import type {
   FrameTable,
   StackTable,
   FuncTable,
+  IndexIntoCategoryList,
   IndexIntoFuncTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
@@ -565,6 +566,7 @@ export function mergeCallNode(
       length: 0,
       prefix: [],
       frame: [],
+      category: [],
     };
     // Provide two arrays to efficiently cache values for the algorithm. This probably
     // could be refactored to use only one array here.
@@ -574,6 +576,7 @@ export function mergeCallNode(
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
       const frameIndex = stackTable.frame[stackIndex];
+      const category = stackTable.category[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
 
       const doesPrefixMatch = prefix === null ? true : stackMatches[prefix];
@@ -624,6 +627,7 @@ export function mergeCallNode(
         newStackTable.prefix[newStackIndex] =
           newStackPrefix === undefined ? null : newStackPrefix;
         newStackTable.frame[newStackIndex] = frameIndex;
+        newStackTable.category[newStackIndex] = category;
         oldStackToNewStack.set(stackIndex, newStackIndex);
       }
     }
@@ -652,7 +656,7 @@ export function mergeCallNode(
 export function mergeFunction(
   thread: Thread,
   funcIndexToMerge: IndexIntoFuncTable
-) {
+): Thread {
   const { stackTable, frameTable, samples } = thread;
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
@@ -665,10 +669,12 @@ export function mergeFunction(
     length: 0,
     prefix: [],
     frame: [],
+    category: [],
   };
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
+    const category = stackTable.category[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
 
     if (funcIndex === funcIndexToMerge) {
@@ -683,6 +689,7 @@ export function mergeFunction(
       newStackTable.prefix[newStackIndex] =
         newStackPrefix === undefined ? null : newStackPrefix;
       newStackTable.frame[newStackIndex] = frameIndex;
+      newStackTable.category[newStackIndex] = category;
       oldStackToNewStack.set(stackIndex, newStackIndex);
     }
   }
@@ -742,7 +749,8 @@ export function dropFunction(
 export function collapseResource(
   thread: Thread,
   resourceIndexToCollapse: IndexIntoResourceTable,
-  implementation: ImplementationFilter
+  implementation: ImplementationFilter,
+  defaultCategory: IndexIntoCategoryList
 ): Thread {
   const { stackTable, funcTable, frameTable, resourceTable, samples } = thread;
   const resourceNameIndex = resourceTable.name[resourceIndexToCollapse];
@@ -768,6 +776,7 @@ export function collapseResource(
     length: 0,
     prefix: [],
     frame: [],
+    category: [],
   };
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
@@ -791,6 +800,7 @@ export function collapseResource(
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
+    const category = stackTable.category[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const resourceIndex = funcTable.resource[funcIndex];
     const newStackPrefix = oldStackToNewStack.get(prefix);
@@ -843,12 +853,17 @@ export function collapseResource(
           // Add the new stack.
           newStackTable.prefix.push(newStackPrefix);
           newStackTable.frame.push(collapsedFrameIndex);
+          newStackTable.category.push(category);
         } else {
           // A collapsed stack at this level already exists, use that one.
           if (existingCollapsedStack === null) {
             throw new Error('existingCollapsedStack cannot be null');
           }
           oldStackToNewStack.set(stackIndex, existingCollapsedStack);
+          if (newStackTable.category[existingCollapsedStack] !== category) {
+            // Conflicting origin stack categories -> default category.
+            newStackTable.category[existingCollapsedStack] = defaultCategory;
+          }
         }
       } else {
         // The prefix was already collapsed, use that one.
@@ -875,6 +890,7 @@ export function collapseResource(
       const newStackIndex = newStackTable.length++;
       newStackTable.prefix.push(newStackPrefix);
       newStackTable.frame.push(frameIndex);
+      newStackTable.category.push(category);
       oldStackToNewStack.set(stackIndex, newStackIndex);
     }
   }
@@ -917,12 +933,14 @@ export function collapseDirectRecursion(
     length: 0,
     prefix: [],
     frame: [],
+    category: [],
   };
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
+    const category = stackTable.category[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
 
     if (
@@ -955,6 +973,7 @@ export function collapseDirectRecursion(
       }
       newStackTable.prefix[newStackIndex] = newStackPrefix;
       newStackTable.frame[newStackIndex] = frameIndex;
+      newStackTable.category[newStackIndex] = category;
       oldStackToNewStack.set(stackIndex, newStackIndex);
 
       if (funcToCollapse === funcIndex) {
@@ -1003,7 +1022,8 @@ const FUNC_MATCHES = {
 
 export function collapseFunctionSubtree(
   thread: Thread,
-  funcToCollapse: IndexIntoFuncTable
+  funcToCollapse: IndexIntoFuncTable,
+  defaultCategory: IndexIntoCategoryList
 ): Thread {
   const { stackTable, frameTable, samples } = thread;
   const oldStackToNewStack: Map<
@@ -1018,6 +1038,7 @@ export function collapseFunctionSubtree(
     length: 0,
     prefix: [],
     frame: [],
+    category: [],
   };
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
@@ -1036,6 +1057,15 @@ export function collapseFunctionSubtree(
       // stacks. This is what actually "collapses" a stack.
       oldStackToNewStack.set(stackIndex, newPrefixStackIndex);
       collapsedStacks.add(stackIndex);
+
+      // Fall back to the default category when stack categories conflict.
+      if (
+        newPrefixStackIndex !== null &&
+        newStackTable.category[newPrefixStackIndex] !==
+          stackTable.category[stackIndex]
+      ) {
+        newStackTable.category[newPrefixStackIndex] = defaultCategory;
+      }
     } else {
       // Add this stack.
       const newStackIndex = newStackTable.length++;
@@ -1047,8 +1077,10 @@ export function collapseFunctionSubtree(
       }
 
       const frameIndex = stackTable.frame[stackIndex];
+      const category = stackTable.category[stackIndex];
       newStackTable.prefix[newStackIndex] = newStackPrefix;
       newStackTable.frame[newStackIndex] = frameIndex;
+      newStackTable.category[newStackIndex] = category;
       oldStackToNewStack.set(stackIndex, newStackIndex);
 
       // If this is the function to collapse, keep the stack, but note that its children
@@ -1102,6 +1134,7 @@ export function focusSubtree(
       length: 0,
       prefix: [],
       frame: [],
+      category: [],
     };
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
@@ -1109,6 +1142,7 @@ export function focusSubtree(
       let stackMatchesUpTo = -1;
       if (prefixMatchesUpTo !== -1) {
         const frame = stackTable.frame[stackIndex];
+        const category = stackTable.category[stackIndex];
         if (prefixMatchesUpTo === prefixDepth) {
           stackMatchesUpTo = prefixDepth;
         } else {
@@ -1125,6 +1159,7 @@ export function focusSubtree(
           newStackTable.prefix[newStackIndex] =
             newStackPrefix !== undefined ? newStackPrefix : null;
           newStackTable.frame[newStackIndex] = frame;
+          newStackTable.category[newStackIndex] = category;
           oldStackToNewStack.set(stackIndex, newStackIndex);
         }
       }
@@ -1218,10 +1253,12 @@ export function focusFunction(
       length: 0,
       prefix: [],
       frame: [],
+      category: [],
     };
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
       const frameIndex = stackTable.frame[stackIndex];
+      const category = stackTable.category[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
       const matchesFocusFunc = funcIndex === funcIndexToFocus;
 
@@ -1234,6 +1271,7 @@ export function focusFunction(
         const newStackIndex = newStackTable.length++;
         newStackTable.prefix[newStackIndex] = newPrefix;
         newStackTable.frame[newStackIndex] = frameIndex;
+        newStackTable.category[newStackIndex] = category;
         oldStackToNewStack.set(stackIndex, newStackIndex);
       } else {
         oldStackToNewStack.set(stackIndex, null);

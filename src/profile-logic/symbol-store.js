@@ -7,15 +7,11 @@ import SymbolStoreDB from './symbol-store-db';
 import { SymbolsNotFoundError } from './errors';
 import bisection from 'bisection';
 
+import type { RequestedLib } from '../types/actions';
 import type { SymbolTableAsTuple } from './symbol-store-db';
 
-export type Library = {
-  debugName: string,
-  breakpadId: string,
-};
-
 export type LibSymbolicationRequest = {
-  lib: Library,
+  lib: RequestedLib,
   addresses: Set<number>,
 };
 
@@ -33,7 +29,7 @@ interface SymbolProvider {
   ): Promise<Map<number, AddressResult>>[];
 
   // Expensive, should be called if requestSymbolsFromServer was unsuccessful.
-  requestSymbolTableFromAddon(lib: Library): Promise<SymbolTableAsTuple>;
+  requestSymbolTableFromAddon(lib: RequestedLib): Promise<SymbolTableAsTuple>;
 }
 
 export interface AbstractSymbolStore {
@@ -97,7 +93,7 @@ export class SymbolStore {
   // only contain the symbols we requested and not all the symbols of a given
   // library.
   _storeSymbolTableInDB(
-    lib: Library,
+    lib: RequestedLib,
     symbolTable: SymbolTableAsTuple
   ): Promise<void> {
     return this._db
