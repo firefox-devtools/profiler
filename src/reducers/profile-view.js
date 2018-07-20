@@ -1014,7 +1014,7 @@ export const selectedNodeSelectors: SelectorsForNode = (() => {
     selectedThreadSelectors.getCallNodeInfo,
     getProfileInterval,
     UrlState.getInvertCallstack,
-    selectedThreadSelectors.getFilteredThread,
+    selectedThreadSelectors.getRangeSelectionFilteredThread,
     (
       selectedPath,
       callNodeInfo,

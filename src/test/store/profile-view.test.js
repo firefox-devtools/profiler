@@ -755,6 +755,14 @@ describe('snapshots of selectors/profile-view', function() {
     dispatch(ProfileView.changeSelectedCallNode(0, [A, B]));
     dispatch(ProfileView.changeSelectedMarker(0, 1));
     dispatch(ProfileView.addRangeFilter(3, 7)); // Reminder: upper bound "7" is exclusive.
+    dispatch(
+      ProfileView.updateProfileSelection({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 4,
+        selectionEnd: 6,
+      })
+    );
     return { getState, dispatch, samplesThread, mergeFunction, A, B, C };
   }
   it('matches the last stored run of getProfile', function() {
