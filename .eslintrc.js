@@ -37,6 +37,7 @@ module.exports = {
     'react/no-redundant-should-component-update': 'error',
     'react/no-this-in-sfc': 'error',
     'react/no-typos': 'error',
+    "react/jsx-curly-brace-presence": ['error', { "props": 'never', "children": 'never' }],
     // `no-unused-prop-types` is buggy when we use destructuring parameters in
     // functions as it misunderstands them as functional components.
     // See https://github.com/yannickcr/eslint-plugin-react/issues/1561

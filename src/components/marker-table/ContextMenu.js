@@ -123,7 +123,7 @@ class MarkersContextMenu extends PureComponent<Props> {
 
   render() {
     return (
-      <ContextMenu id={'MarkersContextMenu'}>
+      <ContextMenu id="MarkersContextMenu">
         <MenuItem onClick={this.handleClick} data={{ type: 'setStartRange' }}>
           Set selection start time here
         </MenuItem>
