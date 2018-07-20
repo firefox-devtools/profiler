@@ -103,60 +103,6 @@ describe('calltree/ProfileCallTreeView', function() {
 
     expect(calltree).toMatchSnapshot();
   });
-
-  it('reacts properly to up/down navigation keys', () => {
-    function setup() {
-      // This makes the bounding box large enough so that we don't trigger
-      // VirtualList's virtualization.
-      jest
-        .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-        .mockImplementation(() => getBoundingBox(1000, 2000));
-
-      // This generates a profile where function "name<i + 1>" is present
-      // <length - i> times, which means it will have a self time of <length - i>
-      // ms. This is a good way to control the order we'll get in the call tree
-      // view: function "name1" will be first, etc.
-      const profileString = Array.from({ length: 100 }).reduce(
-        (result, func, i, array) => {
-          const funcName = `name${i + 1}  `;
-          result += funcName.repeat(array.length - i);
-          return result;
-        },
-        ''
-      );
-
-      const { profile } = getProfileFromTextSamples(profileString);
-      const store = storeWithProfile(profile);
-      const calltree = mount(
-        <Provider store={store}>
-          <ProfileCallTreeView />
-        </Provider>
-      );
-
-      return {
-        simulateKey: (key: string) =>
-          calltree.find('div.treeViewBody').simulate('keydown', { key }),
-        selectedText: () =>
-          calltree.find('.treeViewRowScrolledColumns.selected').text(),
-      };
-    }
-
-    const { simulateKey, selectedText } = setup();
-
-    expect(selectedText()).toBe('name1');
-    simulateKey('ArrowDown');
-    expect(selectedText()).toBe('name2');
-    simulateKey('PageDown');
-    expect(selectedText()).toBe('name17'); // 15 rows below
-    simulateKey('End');
-    expect(selectedText()).toBe('name100');
-    simulateKey('ArrowUp');
-    expect(selectedText()).toBe('name99');
-    simulateKey('PageUp');
-    expect(selectedText()).toBe('name84'); // 15 rows above
-    simulateKey('Home');
-    expect(selectedText()).toBe('name1');
-  });
 });
 
 describe('calltree/ProfileCallTreeView EmptyReasons', function() {
@@ -197,5 +143,68 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
     const store = storeWithProfile(profile);
     store.dispatch(changeImplementationFilter('js'));
     expect(renderWithStore(store)).toMatchSnapshot();
+  });
+});
+
+describe.only('calltree/ProfileCallTreeView navigation keys', () => {
+  function setup(profileString: string) {
+    // This makes the bounding box large enough so that we don't trigger
+    // VirtualList's virtualization. We assert this above.
+    jest
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(1000, 2000));
+
+    const { profile } = getProfileFromTextSamples(profileString);
+    const store = storeWithProfile(profile);
+    const callTree = mount(
+      <Provider store={store}>
+        <ProfileCallTreeView />
+      </Provider>
+    );
+
+    // Assert that we used a large enough bounding box to include all children.
+    const renderedRows = callTree.find(
+      '.treeViewRow.treeViewRowScrolledColumns'
+    );
+    const expectedRows = callTree.find('VirtualList').prop('items');
+    expect(renderedRows.length).toBe(expectedRows.length);
+
+    return {
+      simulateKey: (key: string) =>
+        callTree.find('div.treeViewBody').simulate('keydown', { key }),
+      selectedText: () =>
+        callTree.find('.treeViewRowScrolledColumns.selected').text(),
+    };
+  }
+
+  it('reacts properly to up/down navigation keys', () => {
+    // This generates a profile where function "name<i + 1>" is present
+    // <length - i> times, which means it will have a self time of <length - i>
+    // ms. This is a good way to control the order we'll get in the call tree
+    // view: function "name1" will be first, etc.
+    const profileString = Array.from({ length: 100 }).reduce(
+      (result, func, i, array) => {
+        const funcName = `name${i + 1}  `;
+        result += funcName.repeat(array.length - i);
+        return result;
+      },
+      ''
+    );
+
+    const { simulateKey, selectedText } = setup(profileString);
+
+    expect(selectedText()).toBe('name1');
+    simulateKey('ArrowDown');
+    expect(selectedText()).toBe('name2');
+    simulateKey('PageDown');
+    expect(selectedText()).toBe('name17'); // 15 rows below
+    simulateKey('End');
+    expect(selectedText()).toBe('name100');
+    simulateKey('ArrowUp');
+    expect(selectedText()).toBe('name99');
+    simulateKey('PageUp');
+    expect(selectedText()).toBe('name84'); // 15 rows above
+    simulateKey('Home');
+    expect(selectedText()).toBe('name1');
   });
 });
