@@ -308,9 +308,8 @@ function getMarkerDetails(
                       formatBytes
                     )
                   )}
-                  {nursery.cur_capacity === undefined
-                    ? null
-                    : _markerDetail(
+                  {nursery.cur_capacity
+                    ? _markerDetail(
                         'gcnurseryusage',
                         'Bytes used',
                         formatValueTotal(
@@ -318,31 +317,32 @@ function getMarkerDetails(
                           nursery.cur_capacity,
                           formatBytes
                         )
-                      )}
-                  {nursery.new_capacity === undefined
-                    ? null
-                    : _markerDetail(
+                      )
+                    : null}
+                  {nursery.new_capacity
+                    ? _markerDetail(
                         'gcnewnurserysize',
                         'New nursery size',
                         nursery.new_capacity,
                         formatBytes
-                      )}
-                  {nursery.lazy_capacity === undefined
-                    ? null
-                    : _markerDetail(
+                      )
+                    : null}
+                  {nursery.lazy_capacity
+                    ? _markerDetail(
                         'gclazynurserysize',
                         'Lazy-allocated size',
                         nursery.lazy_capacity,
                         formatBytes
-                      )}
-                  {nursery.chunk_alloc_us === undefined
-                    ? null
-                    : _markerDetail(
+                      )
+                    : null}
+                  {nursery.chunk_alloc_us
+                    ? _markerDetail(
                         'gctimeinchunkalloc',
                         'Time spent allocating chunks in mutator',
                         nursery.chunk_alloc_us,
                         formatMicroseconds
-                      )}
+                      )
+                    : null}
                   {_makePhaseTimesArray(nursery.phase_times)
                     /*
                      * Nursery collection should usually be very quick.  1ms
@@ -497,9 +497,9 @@ function getMarkerDetails(
               timings.initial_state + ' – ' + timings.final_state
             )}
             {triggers}
-            {timings.page_faults === undefined
-              ? null
-              : _markerDetail('gcfaults', 'Page faults', timings.page_faults)}
+            {timings.page_faults
+              ? _markerDetail('gcfaults', 'Page faults', timings.page_faults)
+              : null}
             {phase_times.map(_markerDetailPhase)}
           </div>
         );
