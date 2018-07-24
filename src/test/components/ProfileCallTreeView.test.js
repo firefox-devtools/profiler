@@ -170,8 +170,12 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     expect(renderedRows.length).toBe(expectedRows.length);
 
     return {
-      simulateKey: (key: string) =>
-        callTree.find('div.treeViewBody').simulate('keydown', { key }),
+      // take either a key as a string, or a full event if we need more
+      // information like modifier keys.
+      simulateKey: (param: string | { key: string }) =>
+        callTree
+          .find('div.treeViewBody')
+          .simulate('keydown', param.key ? param : { key: param }),
       selectedText: () =>
         callTree.find('.treeViewRowScrolledColumns.selected').text(),
     };
@@ -205,6 +209,12 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     simulateKey('PageUp');
     expect(selectedText()).toBe('name84'); // 15 rows above
     simulateKey('Home');
+    expect(selectedText()).toBe('name1');
+
+    // These are MacOS shortcuts.
+    simulateKey({ key: 'ArrowDown', metaKey: true });
+    expect(selectedText()).toBe('name100');
+    simulateKey({ key: 'ArrowUp', metaKey: true });
     expect(selectedText()).toBe('name1');
   });
 });

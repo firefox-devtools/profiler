@@ -506,7 +506,7 @@ class TreeView<
   }
 
   _onKeyDown(event: KeyboardEvent) {
-    const hasModifier = event.ctrlKey || event.altKey || event.metaKey;
+    const hasModifier = event.ctrlKey || event.altKey;
     const isNavigationKey =
       event.key.startsWith('Arrow') ||
       event.key.startsWith('Page') ||
@@ -536,21 +536,27 @@ class TreeView<
 
     if (isNavigationKey) {
       switch (event.key) {
-        case 'ArrowLeft': {
-          const isCollapsed = this._isCollapsed(selected);
-          if (!isCollapsed) {
-            this._toggle(selected);
-          } else {
-            const parent = this.props.tree.getParent(selected);
-            if (parent !== -1) {
-              this._select(parent);
-            }
+        case 'ArrowUp': {
+          if (event.metaKey) {
+            // On MacOS this is a common shortcut for the Home gesture
+            this._select(visibleRows[0]);
+            break;
+          }
+
+          if (selectedRowIndex > 0) {
+            this._select(visibleRows[selectedRowIndex - 1]);
           }
           break;
         }
-        case 'ArrowUp': {
-          if (selectedRowIndex > 0) {
-            this._select(visibleRows[selectedRowIndex - 1]);
+        case 'ArrowDown': {
+          if (event.metaKey) {
+            // On MacOS this is a common shortcut for the End gesture
+            this._select(visibleRows[visibleRows.length - 1]);
+            break;
+          }
+
+          if (selectedRowIndex < visibleRows.length - 1) {
+            this._select(visibleRows[selectedRowIndex + 1]);
           }
           break;
         }
@@ -561,8 +567,34 @@ class TreeView<
           }
           break;
         }
+        case 'PageDown': {
+          if (selectedRowIndex < visibleRows.length - 1) {
+            const nextRow = Math.min(
+              visibleRows.length - 1,
+              selectedRowIndex + PAGE_KEYS_DELTA
+            );
+            this._select(visibleRows[nextRow]);
+          }
+          break;
+        }
         case 'Home': {
           this._select(visibleRows[0]);
+          break;
+        }
+        case 'End': {
+          this._select(visibleRows[visibleRows.length - 1]);
+          break;
+        }
+        case 'ArrowLeft': {
+          const isCollapsed = this._isCollapsed(selected);
+          if (!isCollapsed) {
+            this._toggle(selected);
+          } else {
+            const parent = this.props.tree.getParent(selected);
+            if (parent !== -1) {
+              this._select(parent);
+            }
+          }
           break;
         }
         case 'ArrowRight': {
@@ -577,28 +609,8 @@ class TreeView<
           }
           break;
         }
-        case 'ArrowDown': {
-          if (selectedRowIndex < visibleRows.length - 1) {
-            this._select(visibleRows[selectedRowIndex + 1]);
-          }
-          break;
-        }
-        case 'PageDown': {
-          if (selectedRowIndex < visibleRows.length - 1) {
-            const nextRow = Math.min(
-              visibleRows.length - 1,
-              selectedRowIndex + PAGE_KEYS_DELTA
-            );
-            this._select(visibleRows[nextRow]);
-          }
-          break;
-        }
-        case 'End': {
-          this._select(visibleRows[visibleRows.length - 1]);
-          break;
-        }
         default:
-          throw new Error('Unhandled arrow key.');
+          throw new Error('Unhandled navigation key.');
       }
     }
 
