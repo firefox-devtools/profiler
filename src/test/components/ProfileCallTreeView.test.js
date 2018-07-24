@@ -146,7 +146,7 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
   });
 });
 
-describe.only('calltree/ProfileCallTreeView navigation keys', () => {
+describe('calltree/ProfileCallTreeView navigation keys', () => {
   function setup(profileString: string) {
     // This makes the bounding box large enough so that we don't trigger
     // VirtualList's virtualization. We assert this above.
