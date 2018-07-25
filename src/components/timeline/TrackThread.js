@@ -7,13 +7,17 @@
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import StackGraph from './StackGraph';
-import { selectorsForThread } from '../../reducers/profile-view';
+import {
+  selectorsForThread,
+  getProfileInterval,
+  getDisplayRange,
+  getSelection,
+} from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
   getSampleIndexClosestToTime,
   getCallNodePathFromIndex,
 } from '../../profile-logic/profile-data';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
   TimelineTracingMarkersJank,
   TimelineTracingMarkersOverview,
@@ -21,12 +25,12 @@ import {
 import {
   changeSelectedThread,
   updateProfileSelection,
-  changeRightClickedThread,
+  changeRightClickedTrack,
   changeSelectedCallNode,
   focusCallTree,
 } from '../../actions/profile-view';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
-import './Thread.css';
+import './TrackThread.css';
 
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type { Milliseconds, StartEndRange } from '../../types/units';
@@ -42,12 +46,6 @@ import type {
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
-  +interval: Milliseconds,
-  +rangeStart: Milliseconds,
-  +rangeEnd: Milliseconds,
-  +isHidden: boolean,
-  +isModifyingSelection: boolean,
-  +style?: Object /* This is used by Reorderable */,
 |};
 
 type StateProps = {|
@@ -58,11 +56,15 @@ type StateProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +isSelected: boolean,
   +unfilteredSamplesRange: StartEndRange | null,
+  +interval: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +isModifyingSelection: boolean,
 |};
 
 type DispatchProps = {|
   +changeSelectedThread: typeof changeSelectedThread,
-  +changeRightClickedThread: typeof changeRightClickedThread,
+  +changeRightClickedTrack: typeof changeRightClickedTrack,
   +updateProfileSelection: typeof updateProfileSelection,
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
@@ -70,30 +72,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class TimelineThread extends PureComponent<Props> {
-  _onLabelMouseDown = (event: MouseEvent) => {
-    const {
-      changeSelectedThread,
-      changeRightClickedThread,
-      threadIndex,
-    } = this.props;
-    if (event.button === 0) {
-      changeSelectedThread(threadIndex);
-
-      // Don't allow clicks on the threads list to steal focus from the tree view.
-      event.preventDefault();
-    } else if (event.button === 2) {
-      // This is needed to allow the context menu to know what was right clicked without
-      // actually changing the current selection.
-      changeRightClickedThread(threadIndex);
-    }
-  };
-
-  _onLineClick = () => {
-    const { threadIndex, changeSelectedThread } = this.props;
-    changeSelectedThread(threadIndex);
-  };
-
+class TimelineTrackThread extends PureComponent<Props> {
   _onStackClick = (time: number) => {
     const { threadIndex, interval } = this.props;
     const {
@@ -148,20 +127,9 @@ class TimelineThread extends PureComponent<Props> {
       rangeEnd,
       callNodeInfo,
       selectedCallNodeIndex,
-      isSelected,
-      threadName,
-      processDetails,
-      isHidden,
       isModifyingSelection,
       unfilteredSamplesRange,
-      style,
     } = this.props;
-
-    if (isHidden) {
-      // If this thread is hidden, render out a stub element so that the Reorderable
-      // Component still works across all the threads.
-      return <li className="timelineThreadHidden" />;
-    }
 
     const processType = thread.processType;
     const displayJank = processType !== 'plugin';
@@ -172,68 +140,51 @@ class TimelineThread extends PureComponent<Props> {
       processType !== 'plugin';
 
     return (
-      <li
-        className={'timelineThread' + (isSelected ? ' selected' : '')}
-        onClick={this._onLineClick}
-        style={style}
-      >
-        <ContextMenuTrigger
-          id="TimelineThreadContextMenu"
-          renderTag="div"
-          attributes={{
-            title: processDetails,
-            className: 'grippy timelineThreadLabel',
-            onMouseDown: this._onLabelMouseDown,
-          }}
-        >
-          <h1 className="timelineThreadName">{threadName}</h1>
-        </ContextMenuTrigger>
-        <div className="timelineThreadDetails">
-          {displayJank ? (
-            <TimelineTracingMarkersJank
-              className="timelineThreadIntervalMarkerOverview"
-              rangeStart={rangeStart}
-              rangeEnd={rangeEnd}
-              threadIndex={threadIndex}
-              onSelect={this._onIntervalMarkerSelect}
-              isModifyingSelection={isModifyingSelection}
-            />
-          ) : null}
-          {displayTracingMarkers ? (
-            <TimelineTracingMarkersOverview
-              // Feed in the thread name to the class. This is used for conditional
-              // sizing rules, for instance with GeckoMain threads.
-              // TODO - This seems kind of brittle, and should probably done through
-              // JavaScript and props instead.
-              className={`
-                timelineThreadIntervalMarkerOverview
-                timelineThreadIntervalMarkerOverviewThread${thread.name}
-              `}
-              rangeStart={rangeStart}
-              rangeEnd={rangeEnd}
-              threadIndex={threadIndex}
-              onSelect={this._onIntervalMarkerSelect}
-              isModifyingSelection={isModifyingSelection}
-            />
-          ) : null}
-          <StackGraph
-            interval={interval}
-            thread={thread}
+      <div className="timelineTrackThread">
+        {displayJank ? (
+          <TimelineTracingMarkersJank
+            className="timelineTrackThreadIntervalMarkerOverview"
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
-            callNodeInfo={callNodeInfo}
-            selectedCallNodeIndex={selectedCallNodeIndex}
-            onStackClick={this._onStackClick}
+            threadIndex={threadIndex}
+            onSelect={this._onIntervalMarkerSelect}
+            isModifyingSelection={isModifyingSelection}
           />
-          <EmptyThreadIndicator
-            thread={thread}
-            interval={interval}
+        ) : null}
+        {displayTracingMarkers ? (
+          <TimelineTracingMarkersOverview
+            // Feed in the thread name to the class. This is used for conditional
+            // sizing rules, for instance with GeckoMain threads.
+            // TODO - This seems kind of brittle, and should probably done through
+            // JavaScript and props instead.
+            className={`
+              timelineTrackThreadIntervalMarkerOverview
+              timelineTrackThreadIntervalMarkerOverviewThread${thread.name}
+            `}
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
-            unfilteredSamplesRange={unfilteredSamplesRange}
+            threadIndex={threadIndex}
+            onSelect={this._onIntervalMarkerSelect}
+            isModifyingSelection={isModifyingSelection}
           />
-        </div>
-      </li>
+        ) : null}
+        <StackGraph
+          interval={interval}
+          thread={thread}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          callNodeInfo={callNodeInfo}
+          selectedCallNodeIndex={selectedCallNodeIndex}
+          onStackClick={this._onStackClick}
+        />
+        <EmptyThreadIndicator
+          thread={thread}
+          interval={interval}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          unfilteredSamplesRange={unfilteredSamplesRange}
+        />
+      </div>
     );
   }
 }
@@ -243,6 +194,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     const { threadIndex } = ownProps;
     const selectors = selectorsForThread(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
+    const displayRange = getDisplayRange(state);
     return {
       thread: selectors.getFilteredThread(state),
       threadName: selectors.getFriendlyThreadName(state),
@@ -254,15 +206,19 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
           : -1,
       isSelected: threadIndex === selectedThread,
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
+      interval: getProfileInterval(state),
+      rangeStart: displayRange.start,
+      rangeEnd: displayRange.end,
+      isModifyingSelection: getSelection(state).isModifying,
     };
   },
   mapDispatchToProps: {
     changeSelectedThread,
     updateProfileSelection,
-    changeRightClickedThread,
+    changeRightClickedTrack,
     changeSelectedCallNode,
     focusCallTree,
   },
-  component: TimelineThread,
+  component: TimelineTrackThread,
 };
 export default explicitConnect(options);

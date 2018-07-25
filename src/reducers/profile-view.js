@@ -42,7 +42,12 @@ import type {
   GlobalTrack,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
-import type { Action, ProfileSelection, RequestedLib } from '../types/actions';
+import type {
+  Action,
+  ProfileSelection,
+  RequestedLib,
+  TrackReference,
+} from '../types/actions';
 import type {
   State,
   Reducer,
@@ -439,10 +444,16 @@ function tabOrder(state: number[] = getInitialTabOrder(), action: Action) {
   }
 }
 
-function rightClickedThread(state: ThreadIndex = 0, action: Action) {
+function rightClickedTrack(
+  // Make the initial value the first global track, which is assumed to exists.
+  // This makes the track reference always exist, which in turn makes it so that
+  // we do not have to check for a null TrackReference.
+  state: TrackReference = { type: 'global', trackIndex: 0 },
+  action: Action
+) {
   switch (action.type) {
-    case 'CHANGE_RIGHT_CLICKED_THREAD':
-      return action.selectedThread;
+    case 'CHANGE_RIGHT_CLICKED_TRACK':
+      return action.trackReference;
     default:
       return state;
   }
@@ -517,7 +528,7 @@ export default wrapReducerInResetter(
       rootRange,
       zeroAt,
       tabOrder,
-      rightClickedThread,
+      rightClickedTrack,
       isCallNodeContextMenuVisible,
       profileSharingStatus,
     }),
@@ -595,8 +606,8 @@ export const getDefaultCategory = (state: State): IndexIntoCategoryList =>
 export const getThreads = (state: State): Thread[] => getProfile(state).threads;
 export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
-export const getRightClickedThreadIndex = (state: State) =>
-  getProfileViewOptions(state).rightClickedThread;
+export const getRightClickedTrack = (state: State) =>
+  getProfileViewOptions(state).rightClickedTrack;
 export const getSelection = (state: State) =>
   getProfileViewOptions(state).selection;
 
@@ -605,6 +616,14 @@ export const getSelection = (state: State) =>
  */
 export const getGlobalTracks = (state: State) =>
   getProfileView(state).globalTracks;
+export const getGlobalTrackReferences = createSelector(
+  getGlobalTracks,
+  (globalTracks): TrackReference[] =>
+    globalTracks.map((globalTrack, trackIndex) => ({
+      type: 'global',
+      trackIndex,
+    }))
+);
 
 // Warning: this selector returns a new object on every call, and will not properly
 // work with a PureComponent.

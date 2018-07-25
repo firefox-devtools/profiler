@@ -31,7 +31,7 @@ import {
   initializeSelectedThreadIndex,
   initializeHiddenGlobalTracks,
   getVisibleThreads,
-} from '../profile-logic/track-initialization';
+} from '../profile-logic/tracks';
 
 import type {
   FunctionsUpdatePerThread,
@@ -62,7 +62,8 @@ export function waitingForProfileFromAddon(): Action {
  * URL, such as hiding and sorting information, and it will validate it against the
  * profile. If there is no pre-existing view information, this function will compute the
  * defaults. There is a decent amount of complexity to making all of these decisions,
- * which has been collected in a bunch of functions in the track-initialization.js file.
+ * which has been collected in a bunch of functions in the src/profile-logic/tracks.js
+ * file.
  */
 export function viewProfile(
   profile: Profile,
