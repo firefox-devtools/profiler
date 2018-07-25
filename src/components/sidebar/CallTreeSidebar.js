@@ -40,7 +40,7 @@ function SidebarDetail({ label, children }: SidebarDetailProps) {
   return (
     <React.Fragment>
       <div className="sidebar-label">{label}:</div>
-      {children}
+      <div className="sidebar-value">{children}</div>
     </React.Fragment>
   );
 }
@@ -107,19 +107,15 @@ type BreakdownProps = {|
 function Breakdown({ data }: BreakdownProps) {
   const totalTime = data.reduce((result, item) => result + item.value, 0);
 
-  return (
-    <div className="sidebar-details">
-      {data.filter(({ value }) => value).map(({ group, value }) => {
-        const percentage = Math.round(value / totalTime * 100);
+  return data.filter(({ value }) => value).map(({ group, value }) => {
+    const percentage = Math.round(value / totalTime * 100);
 
-        return (
-          <SidebarDetail label={group} key={group}>
-            {value}ms ({percentage}%)
-          </SidebarDetail>
-        );
-      })}
-    </div>
-  );
+    return (
+      <SidebarDetail label={group} key={group}>
+        {value}ms ({percentage}%)
+      </SidebarDetail>
+    );
+  });
 }
 
 type StateProps = {|
@@ -166,14 +162,12 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           {lib ? <p className="sidebar-subtitle">{lib}</p> : null}
         </header>
         <h3 className="sidebar-title2">This selected call node</h3>
-        <div className="sidebar-details">
-          <SidebarDetail label="Running Time">
-            {totalTime.value}ms ({totalTimePercent}%)
-          </SidebarDetail>
-          <SidebarDetail label="Self Time">
-            {selfTime.value ? `${selfTime.value}ms (${selfTimePercent}%)` : '—'}
-          </SidebarDetail>
-        </div>
+        <SidebarDetail label="Running Time">
+          {totalTime.value}ms ({totalTimePercent}%)
+        </SidebarDetail>
+        <SidebarDetail label="Self Time">
+          {selfTime.value ? `${selfTime.value}ms (${selfTimePercent}%)` : '—'}
+        </SidebarDetail>
         {totalTime.breakdownByImplementation ? (
           <React.Fragment>
             <h4 className="sidebar-title3">Implementation – running time</h4>
@@ -191,16 +185,14 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           </React.Fragment>
         ) : null}
         <h3 className="sidebar-title2">This function across the entire tree</h3>
-        <div className="sidebar-details">
-          <SidebarDetail label="Running Time">
-            {totalTimeForFunc.value}ms ({totalTimeForFuncPercent}%)
-          </SidebarDetail>
-          <SidebarDetail label="Self Time">
-            {selfTimeForFunc.value
-              ? `${selfTimeForFunc.value}ms (${selfTimeForFuncPercent}%)`
-              : '—'}
-          </SidebarDetail>
-        </div>
+        <SidebarDetail label="Running Time">
+          {totalTimeForFunc.value}ms ({totalTimeForFuncPercent}%)
+        </SidebarDetail>
+        <SidebarDetail label="Self Time">
+          {selfTimeForFunc.value
+            ? `${selfTimeForFunc.value}ms (${selfTimeForFuncPercent}%)`
+            : '—'}
+        </SidebarDetail>
         {totalTimeForFunc.breakdownByImplementation ? (
           <React.Fragment>
             <h4 className="sidebar-title3">Implementation – running time</h4>
