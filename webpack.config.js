@@ -3,7 +3,6 @@ const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OfflinePlugin = require('offline-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
 
@@ -83,6 +82,7 @@ const config = {
 };
 
 if (process.env.NODE_ENV === 'development') {
+  config.mode = 'development';
   config.devtool = 'source-map';
   config.entry = ['webpack-dev-server/client?http://localhost:4242'].concat(
     config.entry
@@ -90,16 +90,9 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 if (process.env.NODE_ENV === 'production') {
+  config.mode = 'production';
+
   config.plugins.push(
-    new webpack.optimize.ModuleConcatenationPlugin(),
-    new UglifyJsPlugin({
-      sourceMap: true,
-      parallel: true,
-      cache: true,
-      uglifyOptions: process.env.UGLIFY_OPTIONS
-        ? JSON.parse(process.env.UGLIFY_OPTIONS)
-        : undefined,
-    }),
     new OfflinePlugin({
       relativePaths: false,
       AppCache: false,
