@@ -5,7 +5,14 @@ exports[`app/Details renders an initial view with the right panel 1`] = `
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -60,7 +67,14 @@ exports[`app/Details renders an initial view with the right panel for tab calltr
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -115,7 +129,14 @@ exports[`app/Details renders an initial view with the right panel for tab flame-
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="flame-graph"
@@ -390,7 +411,14 @@ exports[`app/Details show the correct state for the sidebar open button 1`] = `
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -445,7 +473,14 @@ exports[`app/Details show the correct state for the sidebar open button 2`] = `
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -500,7 +535,14 @@ exports[`app/Details show the correct state for the sidebar open button 3`] = `
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -555,7 +597,14 @@ exports[`app/Details show the correct state for the sidebar open button 4`] = `
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
