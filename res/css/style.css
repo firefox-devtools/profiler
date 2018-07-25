@@ -573,15 +573,19 @@ body, #root, .profileViewer {
 
 
 .react-contextmenu-item.checkable {
-  padding-left: 21px;
+  padding-right: 21px;
   position: relative;
 }
 
-.react-contextmenu-item.checked::before {
+.react-contextmenu-item.indented {
+  padding-left: 35px;
+}
+
+.react-contextmenu-item.checked:not(.react-contextmenu-item--disabled)::before {
   content: '';
   display: block;
   position: absolute;
-  left: 8px;
+  right: 8px;
   top: 6px;
   width: 3px;
   height: 6px;
