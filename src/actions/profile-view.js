@@ -22,7 +22,11 @@ import { getCallNodePathFromIndex } from '../profile-logic/profile-data';
 import { ensureExists } from '../utils/flow';
 import { sendAnalytics } from '../utils/analytics';
 
-import type { ProfileSelection, ImplementationFilter } from '../types/actions';
+import type {
+  ProfileSelection,
+  ImplementationFilter,
+  TrackReference,
+} from '../types/actions';
 import type { State } from '../types/reducers';
 import type { Action, ThunkAction } from '../types/store';
 import type { ThreadIndex, IndexIntoMarkersTable, Pid } from '../types/profile';
@@ -63,10 +67,12 @@ export function focusCallTree(): Action {
   };
 }
 
-export function changeRightClickedThread(selectedThread: ThreadIndex): Action {
+export function changeRightClickedTrack(
+  trackReference: TrackReference
+): Action {
   return {
-    type: 'CHANGE_RIGHT_CLICKED_THREAD',
-    selectedThread,
+    type: 'CHANGE_RIGHT_CLICKED_TRACK',
+    trackReference,
   };
 }
 

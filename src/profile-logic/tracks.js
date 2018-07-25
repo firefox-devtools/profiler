@@ -9,7 +9,7 @@ import type {
   LocalTrack,
   TrackIndex,
 } from '../types/profile-derived';
-import { defaultThreadOrder } from './profile-data';
+import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
 import { ensureExists } from '../utils/flow';
 
 /**
@@ -271,6 +271,48 @@ export function getVisibleThreads(
     }
   }
   return visibleThreads;
+}
+
+export function getGlobalTrackName(
+  globalTrack: GlobalTrack,
+  threads: Thread[]
+): string {
+  switch (globalTrack.type) {
+    case 'process': {
+      // Look up the thread information for the process if it exists.
+      if (globalTrack.mainThreadIndex === null) {
+        return typeof globalTrack.pid === 'string'
+          ? // The pid is a unique string label, use that.
+            globalTrack.pid
+          : // The pid is a number, make a label for it.
+            `Process ${globalTrack.pid}`;
+      }
+      return getFriendlyThreadName(
+        threads,
+        threads[globalTrack.mainThreadIndex]
+      );
+    }
+    case 'screenshots':
+      return 'Screenshots';
+    default:
+      throw new Error(`Unhandled GlobalTrack type ${(globalTrack: empty)}`);
+  }
+}
+
+export function getLocalTrackName(
+  localTrack: LocalTrack,
+  threads: Thread[]
+): string {
+  switch (localTrack.type) {
+    case 'thread':
+      return getFriendlyThreadName(threads, threads[localTrack.threadIndex]);
+    case 'network':
+      return 'Network';
+    case 'memory':
+      return 'Memory';
+    default:
+      throw new Error(`Unhandled LocalTrack type ${(localTrack: empty)}`);
+  }
 }
 
 /**
