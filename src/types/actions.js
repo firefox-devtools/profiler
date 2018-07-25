@@ -51,7 +51,10 @@ export type FunctionsUpdatePerThread = {
     funcNames: string[],
   |},
 };
-
+// Provide a type that can reference any track, whether local or global.
+export type TrackReference =
+  | {| +type: 'global', +trackIndex: TrackIndex |}
+  | {| +type: 'local', +trackIndex: TrackIndex, +pid: Pid |};
 export type RequestedLib = {|
   +debugName: string,
   +breakpadId: string,
@@ -230,8 +233,8 @@ type UrlStateAction =
   | {| +type: 'CHANGE_SELECTED_TAB', +selectedTab: TabSlug |}
   | {| +type: 'ADD_RANGE_FILTER', +start: number, +end: number |}
   | {| +type: 'POP_RANGE_FILTERS', +firstRemovedFilterIndex: number |}
-  | {| +type: 'CHANGE_SELECTED_THREAD', +selectedThread: ThreadIndex |}
-  | {| +type: 'CHANGE_RIGHT_CLICKED_THREAD', +selectedThread: ThreadIndex |}
+  | {| +type: 'CHANGE_SELECTED_THREAD', +selectedThreadIndex: ThreadIndex |}
+  | {| +type: 'CHANGE_RIGHT_CLICKED_TRACK', +trackReference: TrackReference |}
   | {| +type: 'CHANGE_CALL_TREE_SEARCH_STRING', +searchString: string |}
   | {|
       +type: 'ADD_TRANSFORM_TO_STACK',

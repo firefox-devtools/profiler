@@ -10,6 +10,7 @@ import type {
   ProfileSelection,
   ImplementationFilter,
   RequestedLib,
+  TrackReference,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { Milliseconds, StartEndRange } from './units';
@@ -58,7 +59,7 @@ export type ProfileViewState = {
     rootRange: StartEndRange,
     zeroAt: Milliseconds,
     tabOrder: number[],
-    rightClickedThread: ThreadIndex,
+    rightClickedTrack: TrackReference,
     isCallNodeContextMenuVisible: boolean,
     profileSharingStatus: ProfileSharingStatus,
   },
