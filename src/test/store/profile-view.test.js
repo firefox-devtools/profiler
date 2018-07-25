@@ -182,18 +182,22 @@ describe('actions/ProfileView', function() {
     });
   });
 
-  describe('changeRightClickedThread', function() {
+  describe('changeRightClickedTrack', function() {
     it('changes the right clicked thread index', function() {
       const { profile } = getProfileFromTextSamples('A', 'B');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(
-        ProfileViewSelectors.getRightClickedThreadIndex(getState())
-      ).toEqual(0);
-      dispatch(ProfileView.changeRightClickedThread(1));
-      expect(
-        ProfileViewSelectors.getRightClickedThreadIndex(getState())
-      ).toEqual(1);
+      expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual({
+        trackIndex: 0,
+        type: 'global',
+      });
+      dispatch(
+        ProfileView.changeRightClickedTrack({ trackIndex: 1, type: 'global' })
+      );
+      expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual({
+        trackIndex: 1,
+        type: 'global',
+      });
     });
   });
 
@@ -695,11 +699,12 @@ describe('snapshots of selectors/profile-view', function() {
       'Thread with markers',
     ]);
   });
-  it('matches the last stored run of getRightClickedThreadIndex', function() {
+  it('matches the last stored run of getRightClickedTrack', function() {
     const { getState } = setupStore();
-    expect(ProfileViewSelectors.getRightClickedThreadIndex(getState())).toEqual(
-      0
-    );
+    expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual({
+      trackIndex: 0,
+      type: 'global',
+    });
   });
   it('matches the last stored run of selectedThreadSelector.getThread', function() {
     const { getState, samplesThread } = setupStore();
