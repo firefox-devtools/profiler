@@ -4,10 +4,12 @@
 
 // @flow
 import * as React from 'react';
+import { mount } from 'enzyme';
+
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
-import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
+import { getBoundingBox } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
   getEmptyThread,
@@ -19,7 +21,6 @@ import {
   changeInvertCallstack,
   addRangeFilter,
 } from '../../actions/profile-view';
-import { getBoundingBox } from '../fixtures/utils';
 
 describe('calltree/ProfileCallTreeView', function() {
   const { profile } = getProfileFromTextSamples(`
@@ -31,14 +32,13 @@ describe('calltree/ProfileCallTreeView', function() {
   `);
 
   it('renders an unfiltered call tree', () => {
-    const calltree = renderer.create(
+    const calltree = mount(
       <Provider store={storeWithProfile(profile)}>
         <ProfileCallTreeView />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
-    expect(calltree.toJSON()).toMatchSnapshot();
+    expect(calltree).toMatchSnapshot();
   });
 
   it('renders an inverted call tree', () => {
@@ -53,41 +53,39 @@ describe('calltree/ProfileCallTreeView', function() {
     const store = storeWithProfile(profileForInvertedTree);
     store.dispatch(changeInvertCallstack(true));
 
-    const calltree = renderer.create(
+    const calltree = mount(
       <Provider store={store}>
         <ProfileCallTreeView />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
-    expect(calltree.toJSON()).toMatchSnapshot();
+    expect(calltree).toMatchSnapshot();
   });
 
   it('renders call tree with some search strings', () => {
     const store = storeWithProfile(profile);
-    const calltree = renderer.create(
+    const calltree = mount(
       <Provider store={store}>
         <ProfileCallTreeView />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
     expect(calltree).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString('C'));
-    expect(calltree).toMatchSnapshot();
+    expect(calltree.update()).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString('C,'));
-    expect(calltree).toMatchSnapshot();
+    expect(calltree.update()).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString('C, F'));
-    expect(calltree).toMatchSnapshot();
+    expect(calltree.update()).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString('C, F,E'));
-    expect(calltree).toMatchSnapshot();
+    expect(calltree.update()).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString(' C , E   '));
-    expect(calltree).toMatchSnapshot();
+    expect(calltree.update()).toMatchSnapshot();
   });
 
   it('computes a width for a call tree of a really deep stack', () => {
@@ -97,11 +95,10 @@ describe('calltree/ProfileCallTreeView', function() {
         .join('\n')
     );
     const store = storeWithProfile(profile);
-    const calltree = renderer.create(
+    const calltree = mount(
       <Provider store={store}>
         <ProfileCallTreeView />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
     expect(calltree).toMatchSnapshot();
@@ -119,11 +116,10 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
   profile.threads[0].name = 'Thread with samples';
 
   function renderWithStore(store) {
-    return renderer.create(
+    return mount(
       <Provider store={store}>
         <ProfileCallTreeView />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
   }
 
@@ -150,23 +146,75 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
   });
 });
 
-/**
- * Mock out any created refs for the call tree components with relevant information.
- */
-function createNodeMock(element) {
-  const classNameParts = element.props.className.split(' ');
-  if (
-    // <VirtualList />
-    classNameParts.includes('treeViewBody') ||
-    // <VirtualListInner />
-    classNameParts.includes('treeViewBodyInner')
-  ) {
+describe('calltree/ProfileCallTreeView navigation keys', () => {
+  function setup(profileString: string) {
+    // This makes the bounding box large enough so that we don't trigger
+    // VirtualList's virtualization. We assert this above.
+    jest
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(1000, 2000));
+
+    const { profile } = getProfileFromTextSamples(profileString);
+    const store = storeWithProfile(profile);
+    const callTree = mount(
+      <Provider store={store}>
+        <ProfileCallTreeView />
+      </Provider>
+    );
+
+    // Assert that we used a large enough bounding box to include all children.
+    const renderedRows = callTree.find(
+      '.treeViewRow.treeViewRowScrolledColumns'
+    );
+    const expectedRows = callTree.find('VirtualList').prop('items');
+    expect(renderedRows.length).toBe(expectedRows.length);
+
     return {
-      addEventListener: () => {},
-      // Set an arbitrary size that will not kick in any virtualization behavior.
-      getBoundingClientRect: () => getBoundingBox(2000, 1000),
-      focus: () => {},
+      // take either a key as a string, or a full event if we need more
+      // information like modifier keys.
+      simulateKey: (param: string | { key: string }) =>
+        callTree
+          .find('div.treeViewBody')
+          .simulate('keydown', param.key ? param : { key: param }),
+      selectedText: () =>
+        callTree.find('.treeViewRowScrolledColumns.selected').text(),
     };
   }
-  return null;
-}
+
+  it('reacts properly to up/down navigation keys', () => {
+    // This generates a profile where function "name<i + 1>" is present
+    // <length - i> times, which means it will have a self time of <length - i>
+    // ms. This is a good way to control the order we'll get in the call tree
+    // view: function "name1" will be first, etc.
+    const profileString = Array.from({ length: 100 }).reduce(
+      (result, func, i, array) => {
+        const funcName = `name${i + 1}  `;
+        result += funcName.repeat(array.length - i);
+        return result;
+      },
+      ''
+    );
+
+    const { simulateKey, selectedText } = setup(profileString);
+
+    expect(selectedText()).toBe('name1');
+    simulateKey('ArrowDown');
+    expect(selectedText()).toBe('name2');
+    simulateKey('PageDown');
+    expect(selectedText()).toBe('name17'); // 15 rows below
+    simulateKey('End');
+    expect(selectedText()).toBe('name100');
+    simulateKey('ArrowUp');
+    expect(selectedText()).toBe('name99');
+    simulateKey('PageUp');
+    expect(selectedText()).toBe('name84'); // 15 rows above
+    simulateKey('Home');
+    expect(selectedText()).toBe('name1');
+
+    // These are MacOS shortcuts.
+    simulateKey({ key: 'ArrowDown', metaKey: true });
+    expect(selectedText()).toBe('name100');
+    simulateKey({ key: 'ArrowUp', metaKey: true });
+    expect(selectedText()).toBe('name1');
+  });
+});
