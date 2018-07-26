@@ -10,13 +10,17 @@ import {
   changeSelectedThread,
   changeRightClickedTrack,
 } from '../../actions/profile-view';
+import { assertExhaustiveCheck } from '../../utils/flow';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
   getSelectedThreadIndex,
   getHiddenLocalTracks,
 } from '../../reducers/url-state';
 import explicitConnect from '../../utils/connect';
-import { selectorsForThread } from '../../reducers/profile-view';
+import {
+  selectorsForThread,
+  getLocalTrackName,
+} from '../../reducers/profile-view';
 import TrackThread from './TrackThread';
 import type { TrackReference } from '../../types/actions';
 import type { ThreadIndex, Pid } from '../../types/profile';
@@ -88,7 +92,7 @@ class LocalTrackComponent extends PureComponent<Props> {
       case 'network':
       case 'memory':
         // TODO: Add support for these track types.
-        return <div />;
+        return null;
       default:
         console.error('Unhandled localTrack type', (localTrack: empty));
         return null;
@@ -138,33 +142,27 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     let threadIndex = null;
     let isSelected = false;
     let titleText = null;
-    let trackName;
 
     // Run different selectors based on the track type.
     switch (localTrack.type) {
-      case 'thread':
-        {
-          // Look up the thread information for the process if it exists.
-          threadIndex = localTrack.threadIndex;
-          const selectors = selectorsForThread(threadIndex);
-          isSelected = threadIndex === getSelectedThreadIndex(state);
-          trackName = selectors.getFriendlyThreadName(state);
-          titleText = selectors.getThreadProcessDetails(state);
-        }
+      case 'thread': {
+        // Look up the thread information for the process if it exists.
+        threadIndex = localTrack.threadIndex;
+        const selectors = selectorsForThread(threadIndex);
+        isSelected = threadIndex === getSelectedThreadIndex(state);
+        titleText = selectors.getThreadProcessDetails(state);
         break;
+      }
       case 'memory':
-        trackName = 'Memory';
-        break;
       case 'network':
-        trackName = 'Network';
         break;
       default:
-        throw new Error(`Unhandled LocalTrack type ${(localTrack: empty)}`);
+        throw assertExhaustiveCheck(localTrack, `Unhandled LocalTrack type.`);
     }
 
     return {
       threadIndex,
-      trackName,
+      trackName: getLocalTrackName(state, pid, trackIndex),
       titleText,
       isSelected,
       isHidden: getHiddenLocalTracks(state, pid).has(trackIndex),

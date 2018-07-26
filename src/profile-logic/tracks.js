@@ -10,7 +10,7 @@ import type {
   TrackIndex,
 } from '../types/profile-derived';
 import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
-import { ensureExists } from '../utils/flow';
+import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
 /**
  * This file collects all the logic that goes into validating URL-encoded view options.
@@ -281,6 +281,10 @@ export function getGlobalTrackName(
     case 'process': {
       // Look up the thread information for the process if it exists.
       if (globalTrack.mainThreadIndex === null) {
+        // No main thread was found for process track, so it is empty. This can
+        // happen for instance when recording "DOM Worker" but not "GeckoMain". The
+        // "DOM Worker" thread will be captured, but not the main thread, thus leaving
+        // a process track with no main thread.
         return typeof globalTrack.pid === 'string'
           ? // The pid is a unique string label, use that.
             globalTrack.pid
@@ -295,7 +299,7 @@ export function getGlobalTrackName(
     case 'screenshots':
       return 'Screenshots';
     default:
-      throw new Error(`Unhandled GlobalTrack type ${(globalTrack: empty)}`);
+      throw assertExhaustiveCheck(globalTrack, 'Unhandled GlobalTrack type.');
   }
 }
 
@@ -311,7 +315,7 @@ export function getLocalTrackName(
     case 'memory':
       return 'Memory';
     default:
-      throw new Error(`Unhandled LocalTrack type ${(localTrack: empty)}`);
+      throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }
 }
 
