@@ -11,6 +11,7 @@ import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
+import * as Tracks from '../profile-logic/tracks';
 import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
@@ -40,6 +41,7 @@ import type {
   MarkerTimingRows,
   LocalTrack,
   GlobalTrack,
+  TrackIndex,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
@@ -648,6 +650,63 @@ export const getLocalTracks = (state: State, pid: Pid) =>
     getProfileView(state).localTracksByPid.get(pid),
     'Unable to get the tracks for the given pid.'
   );
+export const getRightClickedThreadIndex = createSelector(
+  getRightClickedTrack,
+  getGlobalTracks,
+  getLocalTracksByPid,
+  (rightClickedTrack, globalTracks, localTracksByPid): null | ThreadIndex => {
+    if (rightClickedTrack.type === 'global') {
+      const track = globalTracks[rightClickedTrack.trackIndex];
+      return track.type === 'process' ? track.mainThreadIndex : null;
+    } else {
+      const { pid, trackIndex } = rightClickedTrack;
+      const localTracks = ensureExists(
+        localTracksByPid.get(pid),
+        'No local tracks found at that pid.'
+      );
+      const track = localTracks[trackIndex];
+
+      return track.type === 'thread' ? track.threadIndex : null;
+    }
+  }
+);
+export const getGlobalTrackNames = createSelector(
+  getGlobalTracks,
+  getThreads,
+  (globalTracks, threads): string[] =>
+    globalTracks.map(globalTrack =>
+      Tracks.getGlobalTrackName(globalTrack, threads)
+    )
+);
+export const getGlobalTrackName = (
+  state: State,
+  trackIndex: TrackIndex
+): string => getGlobalTrackNames(state)[trackIndex];
+export const getLocalTrackNamesByPid = createSelector(
+  getLocalTracksByPid,
+  getThreads,
+  (localTracksByPid, threads): Map<Pid, string[]> => {
+    const localTrackNamesByPid = new Map();
+    for (const [pid, localTracks] of localTracksByPid) {
+      localTrackNamesByPid.set(
+        pid,
+        localTracks.map(localTrack =>
+          Tracks.getLocalTrackName(localTrack, threads)
+        )
+      );
+    }
+    return localTrackNamesByPid;
+  }
+);
+export const getLocalTrackName = (
+  state: State,
+  pid: Pid,
+  trackIndex: TrackIndex
+): string =>
+  ensureExists(
+    getLocalTrackNamesByPid(state).get(pid),
+    'Could not find the track names from the given pid'
+  )[trackIndex];
 
 const _getDefaultCategoryWrappedInObject = createSelector(
   getDefaultCategory,

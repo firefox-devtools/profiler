@@ -14,7 +14,7 @@ import {
   overlayFills,
 } from '../../profile-logic/interval-marker-styles';
 import explicitConnect from '../../utils/connect';
-import { selectorsForThread } from '../../reducers/profile-view';
+import { selectorsForThread, getSelection } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import './TracingMarkers.css';
 
@@ -57,7 +57,6 @@ export type OwnProps = {|
   +rangeEnd: Milliseconds,
   +threadIndex: ThreadIndex,
   +onSelect: any,
-  +isModifyingSelection: boolean,
 |};
 
 export type StateProps = {|
@@ -68,6 +67,7 @@ export type StateProps = {|
     +HOVERED: string,
     +PRESSED: string,
   },
+  +isModifyingSelection: boolean,
 |};
 
 type Props = ConnectedProps<SizeProps, OwnProps, StateProps>;
@@ -363,6 +363,7 @@ const jankOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
       isSelected: threadIndex === selectedThread,
       styles: styles,
       overlayFills: overlayFills,
+      isModifyingSelection: getSelection(state).isModifying,
     };
   },
   component: TimelineTracingMarkers,
@@ -386,6 +387,7 @@ const tracingOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
       isSelected: threadIndex === selectedThread,
       styles,
       overlayFills,
+      isModifyingSelection: getSelection(state).isModifying,
     };
   },
   component: TimelineTracingMarkers,

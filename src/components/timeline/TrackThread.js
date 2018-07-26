@@ -11,7 +11,6 @@ import {
   selectorsForThread,
   getProfileInterval,
   getDisplayRange,
-  getSelection,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
@@ -50,16 +49,12 @@ type OwnProps = {|
 
 type StateProps = {|
   +thread: Thread,
-  +threadName: string,
-  +processDetails: string,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +isSelected: boolean,
   +unfilteredSamplesRange: StartEndRange | null,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +isModifyingSelection: boolean,
 |};
 
 type DispatchProps = {|
@@ -127,7 +122,6 @@ class TimelineTrackThread extends PureComponent<Props> {
       rangeEnd,
       callNodeInfo,
       selectedCallNodeIndex,
-      isModifyingSelection,
       unfilteredSamplesRange,
     } = this.props;
 
@@ -148,7 +142,6 @@ class TimelineTrackThread extends PureComponent<Props> {
             rangeEnd={rangeEnd}
             threadIndex={threadIndex}
             onSelect={this._onIntervalMarkerSelect}
-            isModifyingSelection={isModifyingSelection}
           />
         ) : null}
         {displayTracingMarkers ? (
@@ -165,7 +158,6 @@ class TimelineTrackThread extends PureComponent<Props> {
             rangeEnd={rangeEnd}
             threadIndex={threadIndex}
             onSelect={this._onIntervalMarkerSelect}
-            isModifyingSelection={isModifyingSelection}
           />
         ) : null}
         <StackGraph
@@ -197,19 +189,15 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     const displayRange = getDisplayRange(state);
     return {
       thread: selectors.getFilteredThread(state),
-      threadName: selectors.getFriendlyThreadName(state),
-      processDetails: selectors.getThreadProcessDetails(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
       selectedCallNodeIndex:
         threadIndex === selectedThread
           ? selectors.getSelectedCallNodeIndex(state)
           : -1,
-      isSelected: threadIndex === selectedThread,
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       interval: getProfileInterval(state),
       rangeStart: displayRange.start,
       rangeEnd: displayRange.end,
-      isModifyingSelection: getSelection(state).isModifying,
     };
   },
   mapDispatchToProps: {
