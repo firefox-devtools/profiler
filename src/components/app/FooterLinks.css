@@ -1,12 +1,10 @@
 .appFooterLinks {
   position: fixed;
-  bottom: 0;
   right: 0;
-
+  bottom: 0;
+  padding: 0 3px;
   border-top: 1px solid var(--grey-40);
   border-left: 1px solid var(--grey-40);
-  padding: 0px 3px;
-
   background-color: var(--grey-20);
 }
 
@@ -18,17 +16,17 @@
   text-decoration: none;
 }
 
-.appFooterLinksLink:hover,
-.appFooterLinksClose:hover {
-  text-decoration: underline;
-}
-
 .appFooterLinksClose {
   border: none;
   margin: 0;
-  font: inherit;
   background: none;
   cursor: pointer;
+  font: inherit;
+}
+
+.appFooterLinksLink:hover,
+.appFooterLinksClose:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 767px) {

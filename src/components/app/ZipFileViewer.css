@@ -3,34 +3,32 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .zipFileViewer {
-  width: 100%;
   display: flex;
-  justify-content: center;
+  width: 100%;
   min-height: 100vh;
   align-items: center;
+  justify-content: center;
   line-height: 1.5;
 }
 
 .zipFileViewerHeader {
-  font-size: 130%;
   padding: 0 20px;
+  font-size: 130%;
 }
 
 .zipFileViewerSection {
   position: relative;
-  width: 75vw;
-  height: 75vh;
-  max-width: 1200px;
-
   display: flex;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-
-  flex-direction: column;
-  box-shadow: 0 5px 25px #0b1f50;
-  background-color: #fff;
   overflow: hidden;
+  width: 75vw;
+  max-width: 1200px;
+  height: 75vh;
+  box-sizing: border-box;
+  flex-direction: column;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 3px;
+  box-shadow: 0 5px 25px #0b1f50;
 }
 
 .zipFileViewerSection > .treeView {
@@ -44,10 +42,9 @@
 .zipFileViewerMessage {
   display: flex;
   flex: 1;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
-
   border-top: 1px solid var(--grey-30);
   background-color: #f5f5f5;
   font-size: 14px;
@@ -58,16 +55,17 @@
 }
 
 .zipFileViewerUntrustedFilePath {
+  display: inline-block;
+  overflow: hidden;
+
   /**
    * Make the max width 50% so that some random user can't spam a bunch of misleading
    * content into an error message on perf.html.
    */
   max-width: 70%;
-  background-color: var(--grey-30);
   padding: 0 5px;
-  display: inline-block;
-  font-family: monospace;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  background-color: var(--grey-30);
   border-radius: 3px;
+  font-family: monospace;
+  text-overflow: ellipsis;
 }

@@ -1,23 +1,22 @@
 .tooltipMount {
-  pointer-events: none;
   /* Stack the tooltip mounting point above the #root element. */
   z-index: 1;
+  pointer-events: none;
 }
 
 .tooltip {
   position: fixed;
+  display: inline-block;
+  overflow: hidden;
   max-width: 100%;
   box-sizing: border-box;
-  display: inline-block;
   padding: 5px;
   border: 1px solid #ccc;
   background-color: var(--grey-10);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   text-align: left;
-  overflow: hidden;
   text-overflow: ellipsis;
   transition: opacity 250ms;
-  box-sizing: border-box;
 }
 
 .tooltipTiming {
@@ -29,68 +28,68 @@
 .tooltipOneLine {
   display: flex;
   max-width: 100%;
-  white-space: nowrap;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .tooltipTitle {
+  overflow: hidden;
   flex: 1;
   text-overflow: ellipsis;
-  overflow: hidden;
 }
 
 .tooltipSwatch {
+  display: inline-block;
   width: 10px;
   height: 10px;
-  display: inline-block;
   border: 1px solid #888;
   margin-right: 3px;
 }
 
 .tooltipIcon {
   display: inline-block;
-  margin-right: 3px;
   align-self: flex-end;
+  margin-right: 3px;
 }
 
 .tooltipIcon > .nodeIcon {
   width: 14px;
-  margin-left: auto;
   padding-right: 0.5em;
+  margin-left: auto;
 }
 .tooltipHeader {
   padding-bottom: 5px;
-  margin-bottom: 5px;
   border-bottom: 1px solid var(--grey-40);
+  margin-bottom: 5px;
 }
 
 .tooltipDetails {
   display: grid;
-  grid-template-columns: min-content auto;
   grid-gap: 2px 5px;
+  grid-template-columns: min-content auto;
 }
 
 .tooltipLabel {
   color: var(--grey-50);
-  white-space: nowrap;
   text-align: right;
+  white-space: nowrap;
 }
 
 .tooltipBackTraceTitle {
-  color: var(--grey-50);
-  font-weight: normal;
   margin: 0;
+  color: var(--grey-50);
   font-size: 100%;
+  font-weight: normal;
 }
 
 .tooltipDetails + .tooltipDetailsBackTrace {
   padding-top: 5px;
-  margin-top: 5px;
   border-top: 1px solid var(--grey-40);
+  margin-top: 5px;
 }
 
 .tooltipLib {
+  align-self: flex-end;
   color: var(--grey-50);
   white-space: nowrap;
-  align-self: flex-end;
 }

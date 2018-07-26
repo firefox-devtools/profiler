@@ -10,8 +10,14 @@
     "build-prod:quiet": "yarn build:clean && env NODE_ENV=production webpack",
     "build-prod": "yarn build-prod:quiet --progress",
     "build-prod-readable": "env UGLIFY_OPTIONS='{ \"mangle\": false }' yarn build-prod",
-    "lint": "eslint *.js bin src",
-    "lint-fix": "yarn lint --fix",
+    "lint": "run-s lint-js lint-css",
+    "lint-js": "eslint *.js bin src",
+    "lint-fix-js": "yarn lint-js --fix",
+    "lint-css": "stylelint \"src/**/*.css\"",
+    "lint-fix-css-stylelint": "yarn lint-css --fix",
+    "lint-fix-css-prettier": "prettier \"src/**/*.css\" --write",
+    "lint-fix-css": "run-s lint-fix-css-prettier lint-fix-css-stylelint",
+    "lint": "run-s lint-js lint-css",
     "flow": "flow",
     "flow-coverage": "flow-coverage-report -i 'src/**/*.js' -t html -t text",
     "flow-generate-libdefs": "flow-typed install --libdefDir src/types/libdef",
@@ -117,7 +123,11 @@
     "rimraf": "^2.6.2",
     "sinon": "^4.3.0",
     "style-loader": "^0.20.1",
+    "stylelint": "^9.4.0",
+    "stylelint-config-idiomatic-order": "^5.0.0",
+    "stylelint-config-standard": "^18.2.0",
     "uglifyjs-webpack-plugin": "^1.2.3",
+    "stylelint-config-prettier": "^3.3.0",
     "webpack": "^3.11.0",
     "webpack-dev-server": "^2.11.1",
     "workerjs": "github:jasonLaster/workerjs"
@@ -146,6 +156,11 @@
     "verbose": true
   },
   "lint-staged": {
+    "src/**/*.css": [
+      "prettier --write",
+      "stylelint --fix",
+      "git add"
+    ],
     "*.js": [
       "eslint --fix",
       "git add"

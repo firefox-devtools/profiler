@@ -4,41 +4,42 @@
 
 .filterNavigatorBar {
   --internal-selected-color: var(--selected-color, var(--blue-60));
-  height: 24px;
-  margin: 0;
-  padding: 0;
-  flex-shrink: 0;
+
   display: flex;
-  flex-flow: row nowrap;
-  -moz-user-select: none;
-  cursor: default;
   overflow: hidden;
+  height: 24px;
+  flex-flow: row nowrap;
+  flex-shrink: 0;
+  padding: 0;
+  margin: 0;
+  cursor: default;
+  -moz-user-select: none;
 }
 
 .filterNavigatorBarItem {
-  display: flex;
-  flex-flow: row nowrap;
-  min-width: 0;
   position: relative;
-  height: 24px;
-  line-height: 24px;
-  border: solid transparent;
-  border-width: 0 8px 0 6px;
-  border-right-color: transparent !important;
-  padding: 0 6px 0 8px;
-  background-clip: padding-box;
+  display: flex;
+  min-width: 0;
   max-width: 20%;
+  height: 24px;
+  flex-flow: row nowrap;
+  padding: 0 6px 0 8px;
+  border: solid transparent;
+  background-clip: padding-box;
+  border-right-color: transparent !important;
+  border-width: 0 8px 0 6px;
+  line-height: 24px;
 }
 
 .filterNavigatorBarRootItem {
-  margin-left: -8px;
   flex-shrink: 0;
+  margin-left: -8px;
 }
 
 .filterNavigatorBarItemContent {
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .filterNavigatorBarLeafItem {
@@ -48,14 +49,14 @@
 
 .filterNavigatorBarItem::before,
 .filterNavigatorBarItem::after {
-  content: '';
-  display: block;
   position: absolute;
   top: 0;
   bottom: 0;
+  display: block;
   width: 0;
   border: 12px solid transparent;
   border-right-width: 2px;
+  content: '';
   pointer-events: none;
 }
 
@@ -66,15 +67,15 @@
 
 .filterNavigatorBarItem::after {
   right: -14px;
-  border-top-color: transparent !important;
-  border-right-color: transparent !important;
   border-bottom-color: transparent !important;
+  border-right-color: transparent !important;
+  border-top-color: transparent !important;
 }
 
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem)::after {
   background-image: url(../../../res/img/svg/scope-bar-separator.svg);
-  background-repeat: no-repeat;
   background-position: -18px -12px;
+  background-repeat: no-repeat;
   background-size: 24px 24px;
 }
 
@@ -109,9 +110,9 @@
 /* Animation */
 
 .filterNavigatorBarTransition-enter {
+  z-index: 0;
   opacity: 0.1;
   transform: translateX(-100%);
-  z-index:0;
 }
 
 .filterNavigatorBarTransition-enter.filterNavigatorBarTransition-enter-active {

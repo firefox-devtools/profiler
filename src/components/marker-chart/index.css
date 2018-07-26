@@ -4,13 +4,13 @@
 
 .markerChart {
   display: flex;
-  flex-direction: row;
   flex: 1;
+  flex-direction: row;
 }
 
 .markerChartLabels {
-  width: 135px;
   display: flex;
+  width: 135px;
   padding: 9px 0 9px 14px;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -19,9 +19,9 @@
 }
 
 .markerChartLabelsName {
+  overflow: hidden;
   flex: 1;
   cursor: default;
-  white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }

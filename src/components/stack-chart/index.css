@@ -3,16 +3,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .stackChart {
-  flex: 1;
   display: flex;
-  flex-flow: column;
   overflow: hidden;
+  flex: 1;
+  flex-flow: column;
 }
 
 .stackChartGraph {
   display: flex;
-  flex-direction: row;
   flex: 1;
+  flex-direction: row;
   border-top: 1px solid var(--grey-30);
 }
 
@@ -26,9 +26,9 @@
 }
 
 .stackChartLabels > span {
+  overflow: hidden;
   flex: 1;
   cursor: default;
-  white-space: nowrap;
-  overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }

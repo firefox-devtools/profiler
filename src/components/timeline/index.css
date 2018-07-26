@@ -2,17 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-
 .timelineOverflowEdgeIndicatorScrollbox {
-  margin: 0 0 0 -150px;
-  padding-left: 150px;
-  max-height: 250px;
   overflow: auto;
+  max-height: 250px;
+  padding-left: 150px;
+  margin: 0 0 0 -150px;
 }
 
 .timelineThreadList {
-  list-style: none;
-  margin: 0 0 0 -150px;
   padding: 0;
+  margin: 0 0 0 -150px;
   box-shadow: inset 0 1px var(--grey-30);
+  list-style: none;
 }

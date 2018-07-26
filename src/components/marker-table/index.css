@@ -4,10 +4,10 @@
 
 .markerTable {
   display: flex;
-  flex-flow: column nowrap;
   flex: 1;
+  flex-flow: column nowrap;
+  cursor: default;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-  cursor: default;
 }

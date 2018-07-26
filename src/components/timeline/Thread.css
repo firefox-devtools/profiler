@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .timelineThread {
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-flow: row nowrap;
+  padding: 0;
   border-top: 1px solid var(--grey-30);
+  margin: 0;
   box-shadow: 0 1px var(--grey-30);
 }
 
@@ -21,44 +21,44 @@
 }
 
 .timelineThreadLabel {
-  box-sizing: border-box;
-  width: 150px;
-  border-right: 1px solid var(--grey-30);
-  padding-left: 14px;
-  cursor: default;
   display: flex;
+  width: 150px;
+  box-sizing: border-box;
   flex-flow: row nowrap;
   align-items: center;
+  padding-left: 14px;
+  border-right: 1px solid var(--grey-30);
+  cursor: default;
 }
 
 .timelineThreadName {
-  font-weight: normal;
-  font: message-box;
-  font-size: 100%;
-  margin: 0;
-  white-space: nowrap;
   overflow: hidden;
+  margin: 0;
+  font: message-box; /* stylelint-disable-line */
+  font-size: 100%;
+  font-weight: normal;
   text-overflow: ellipsis;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
+  white-space: nowrap;
 }
 
 .timelineThreadDetails {
-  flex: 1;
   position: relative;
   z-index: 1;
   display: flex;
+  flex: 1;
   flex-flow: column nowrap;
 }
 
 .timelineThreadIntervalMarkerOverview {
-  list-style: none;
-  display: block;
-  margin: 0;
-  height: 6px;
   position: relative;
+  display: block;
   overflow: hidden;
+  height: 6px;
+  margin: 0;
+  list-style: none;
   opacity: 0.75;
 }
 

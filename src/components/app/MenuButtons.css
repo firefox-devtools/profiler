@@ -3,23 +3,33 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .menuButtons {
-  --internal-share-button-background-color: var(--share-button-background-color, hsl(137,81%,44%));
-  --internal-uploading-button-background-color: var(--uploading-button-background-color, #38445f);
-  --internal-uploading-progress-fill-color: var(--uploading-progress-fill-color, #7990c8);
-  height: 100%;
+  --internal-share-button-background-color: var(
+    --share-button-background-color,
+    hsl(137, 81%, 44%)
+  );
+  --internal-uploading-button-background-color: var(
+    --uploading-button-background-color,
+    #38445f
+  );
+  --internal-uploading-progress-fill-color: var(
+    --uploading-progress-fill-color,
+    #7990c8
+  );
+
   display: flex;
+  height: 100%;
   flex-flow: row nowrap;
 }
 
 .menuButtonsLink {
-  height: 24px;
   position: relative;
+  height: 24px;
   padding: 0 10px;
   border-left: 1px solid var(--grey-30);
-  text-decoration: none;
-  line-height: 24px;
-  cursor: default;
   color: var(--grey-90);
+  cursor: default;
+  line-height: 24px;
+  text-decoration: none;
 }
 
 .menuButtonsLink:hover {
@@ -29,8 +39,8 @@
 .menuButtonsCompositeButtonContainer {
   display: flex;
   flex-flow: column nowrap;
-  border-left: 1px solid var(--grey-30);
   border-right: 1px solid var(--grey-30);
+  border-left: 1px solid var(--grey-30);
 }
 
 .menuButtonsShareButton,
@@ -48,28 +58,28 @@
 
 .menuButtonsUploadingButtonInner {
   display: flex;
+  overflow: hidden;
+  height: 100%;
   flex-flow: column nowrap;
   align-items: stretch;
-  height: 100%;
-  overflow: hidden;
 }
 
 .menuButtonsUploadingButtonLabel {
+  position: relative;
   padding: 0 10px;
+  color: hsla(0, 0%, 100%, 0.7);
+  cursor: default;
   line-height: 24px;
   text-align: center;
-  color: hsla(0,0%,100%,0.7);
-  position: relative;
   -moz-user-select: none;
-  cursor: default;
 }
 
 .menuButtonsUploadingButtonProgress {
-  height: 24px;
-  margin-bottom: -24px;
   width: 100%;
-  background: var(--internal-uploading-button-background-color);
+  height: 24px;
   border: 0;
+  margin-bottom: -24px;
+  background: var(--internal-uploading-button-background-color);
   transform-origin: bottom left;
 }
 
@@ -77,17 +87,16 @@
   background: var(--internal-uploading-progress-fill-color);
 }
 
-.menuButtonsShareButtonButton:not([disabled]),
-.menuButtonsSecondaryShareButtonButton:not([disabled]) {
-  background-color: var(--internal-share-button-background-color);
-  color: white;
-}
-
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton) > .menuButtonsShareButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadingButton) > .menuButtonsUploadingButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .menuButtonsPermalinkButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .menuButtonsUploadErrorButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton) > .menuButtonsSecondaryShareButton {
+.menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton)
+  > .menuButtonsShareButton,
+.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadingButton)
+  > .menuButtonsUploadingButton,
+.menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton)
+  > .menuButtonsPermalinkButton,
+.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadErrorButton)
+  > .menuButtonsUploadErrorButton,
+.menuButtonsCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton)
+  > .menuButtonsSecondaryShareButton {
   pointer-events: none;
 }
 
@@ -99,24 +108,48 @@
   transition: transform 200ms ease-in-out, margin-left 200ms ease-in-out;
 }
 
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton) > .menuButtonsShareButton > .buttonWithPanelButtonWrapper > .menuButtonsShareButtonButton,
-.menuButtonsCompositeButtonContainer.currentButtonIsPermalinkButton > .menuButtonsUploadingButton > .menuButtonsUploadingButtonInner,
-.menuButtonsCompositeButtonContainer.currentButtonIsUploadErrorButton > .menuButtonsUploadingButton > .menuButtonsUploadingButtonInner,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton) .menuButtonsSecondaryShareButtonButton {
+.menuButtonsShareButtonButton:not([disabled]),
+.menuButtonsSecondaryShareButtonButton:not([disabled]) {
+  background-color: var(--internal-share-button-background-color);
+  color: white;
+}
+
+.menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton)
+  > .menuButtonsShareButton
+  > .buttonWithPanelButtonWrapper
+  > .menuButtonsShareButtonButton,
+.menuButtonsCompositeButtonContainer.currentButtonIsPermalinkButton
+  > .menuButtonsUploadingButton
+  > .menuButtonsUploadingButtonInner,
+.menuButtonsCompositeButtonContainer.currentButtonIsUploadErrorButton
+  > .menuButtonsUploadingButton
+  > .menuButtonsUploadingButtonInner,
+.menuButtonsCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton)
+  .menuButtonsSecondaryShareButtonButton {
   transform: translateY(-24px);
 }
 
-.menuButtonsCompositeButtonContainer.currentButtonIsShareButton > .menuButtonsUploadingButton > .menuButtonsUploadingButtonInner,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .menuButtonsPermalinkButton > .buttonWithPanelButtonWrapper > .menuButtonsPermalinkButtonButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .menuButtonsUploadErrorButton > .buttonWithPanelButtonWrapper > .menuButtonsUploadErrorButtonButton {
+.menuButtonsCompositeButtonContainer.currentButtonIsShareButton
+  > .menuButtonsUploadingButton
+  > .menuButtonsUploadingButtonInner,
+.menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton)
+  > .menuButtonsPermalinkButton
+  > .buttonWithPanelButtonWrapper
+  > .menuButtonsPermalinkButtonButton,
+.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadErrorButton)
+  > .menuButtonsUploadErrorButton
+  > .buttonWithPanelButtonWrapper
+  > .menuButtonsUploadErrorButtonButton {
   transform: translateY(24px);
 }
 
-.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .menuButtonsPermalinkButton {
+.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton
+  .menuButtonsPermalinkButton {
   width: 112px;
 }
 
-.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .menuButtonsSecondaryShareButton {
+.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton
+  .menuButtonsSecondaryShareButton {
   margin-left: 112px;
 }
 
@@ -146,7 +179,7 @@
 }
 
 .menuButtonsShareNetworkUrlsCheckbox {
-  vertical-align: middle;
   position: relative;
   bottom: 1px;
+  vertical-align: middle;
 }

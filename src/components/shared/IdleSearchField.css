@@ -3,40 +3,41 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .idleSearchField {
-  display: inline-flex;
   position: relative; /* to properly position the button */
+  display: inline-flex;
   flex-flow: row nowrap;
   align-items: center;
 }
 
 .idleSearchFieldInput {
-  flex: 1;
-  height: 19px;
   position: relative;
-  -moz-appearance: none;
-  border: 0.5px solid #AAA;
-  margin: 0;
+  height: 19px;
+  flex: 1;
   padding: 0 18px 0 17px; /* right padding for the reset button, left padding for the search icon */
-  border-radius: 2px;
-  box-shadow: inset 0 0 0.5px rgba(0,0,0,0.15), 0 0 0.5px rgba(0,0,0,0.1);
-  background: url(../../../res/img/svg/searchfield-icon.svg) 3px center no-repeat white;
+  border: 0.5px solid #aaa;
+  margin: 0;
+  -moz-appearance: none;
+  background: url(../../../res/img/svg/searchfield-icon.svg) 3px center
+    no-repeat white;
   background-size: 11px 11px;
+  border-radius: 2px;
+  box-shadow: inset 0 0 0.5px rgba(0, 0, 0, 0.15), 0 0 0.5px rgba(0, 0, 0, 0.1);
 }
 
 .idleSearchFieldButton {
   position: absolute;
   right: 5px;
+  overflow: hidden;
   width: 11px;
   height: 11px;
-
-  overflow: hidden;
-  background: url(../../../res/img/svg/searchfield-cancel.svg) top left no-repeat;
-  background-size: contain;
-  border: 0;
   padding: 0;
-  vertical-align: middle;
+  border: 0;
+  background: url(../../../res/img/svg/searchfield-cancel.svg) top left
+    no-repeat;
+  background-size: contain;
   color: transparent;
   -moz-user-focus: ignore;
+  vertical-align: middle;
 }
 
 .idleSearchFieldInput:invalid + .idleSearchFieldButton {

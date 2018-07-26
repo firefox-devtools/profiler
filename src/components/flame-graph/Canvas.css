@@ -18,11 +18,11 @@
 
 .flameGraphCanvasTooltip > .tooltipHeader {
   display: grid;
-  grid-template-columns: min-content auto;
   grid-gap: 2px 0;
+  grid-template-columns: min-content auto;
 }
 
 .flameGraphCanvasTooltip .tooltipTitle {
-  white-space: nowrap;
   overflow: visible;
+  white-space: nowrap;
 }
