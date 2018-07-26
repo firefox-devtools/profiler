@@ -28,6 +28,7 @@ import type { ImplementationFilter } from '../../types/actions';
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type {
   DOMEventMarkerPayload,
+  FrameConstructionMarkerPayload,
   PaintProfilerMarkerTracing,
   PhaseTimes,
   StyleMarkerPayload,
@@ -240,21 +241,37 @@ function _filterInterestingPhaseTimes(
 
 function _markerBacktrace(
   marker: TracingMarker,
-  data: StyleMarkerPayload | PaintProfilerMarkerTracing | DOMEventMarkerPayload,
+  data:
+    | StyleMarkerPayload
+    | PaintProfilerMarkerTracing
+    | DOMEventMarkerPayload
+    | FrameConstructionMarkerPayload,
   thread: Thread,
   implementationFilter: ImplementationFilter
 ): React.Node {
-  if (data.category === 'DOMEvent') {
-    const latency =
-      data.timeStamp === undefined
-        ? null
-        : formatMilliseconds(marker.start - data.timeStamp);
-    return (
-      <div className="tooltipDetails">
-        {_markerDetail('type', 'Type', data.eventType)}
-        {latency === null ? null : _markerDetail('latency', 'Latency', latency)}
-      </div>
-    );
+  switch (data.category) {
+    case 'DOMEvent': {
+      const latency =
+        data.timeStamp === undefined
+          ? null
+          : formatMilliseconds(marker.start - data.timeStamp);
+      return (
+        <div className="tooltipDetails">
+          {_markerDetail('type', 'Type', data.eventType)}
+          {latency === null
+            ? null
+            : _markerDetail('latency', 'Latency', latency)}
+        </div>
+      );
+    }
+    case 'Frame Construction':
+      return (
+        <div className="tooltipDetails">
+          {_markerDetail('category', 'Category', data.category)}
+        </div>
+      );
+    default:
+      break;
   }
   if ('cause' in data && data.cause) {
     const { cause } = data;
