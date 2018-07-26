@@ -13,17 +13,15 @@ import {
   hideLocalTrack,
   showLocalTrack,
 } from '../../actions/profile-view';
-import {
-  getGlobalTrackName,
-  getLocalTrackName,
-} from '../../profile-logic/tracks';
 import explicitConnect from '../../utils/connect';
 import { ensureExists } from '../../utils/flow';
 import {
   getThreads,
   getRightClickedTrack,
   getGlobalTracks,
-  getLocalTracksByPid,
+  getRightClickedThreadIndex,
+  getLocalTrackNamesByPid,
+  getGlobalTrackNames,
 } from '../../reducers/profile-view';
 import {
   getGlobalTrackOrder,
@@ -31,15 +29,10 @@ import {
   getHiddenLocalTracksByPid,
   getLocalTrackOrderByPid,
 } from '../../reducers/url-state';
-import { getFriendlyThreadName } from '../../profile-logic/profile-data';
 import classNames from 'classnames';
 
 import type { Thread, ThreadIndex, Pid } from '../../types/profile';
-import type {
-  TrackIndex,
-  GlobalTrack,
-  LocalTrack,
-} from '../../types/profile-derived';
+import type { TrackIndex, GlobalTrack } from '../../types/profile-derived';
 import type { State } from '../../types/reducers';
 import type { TrackReference } from '../../types/actions';
 
@@ -56,7 +49,9 @@ type StateProps = {|
   +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
   +rightClickedTrack: TrackReference,
   +globalTracks: GlobalTrack[],
-  +localTracksByPid: Map<Pid, LocalTrack[]>,
+  +rightClickedThreadIndex: ThreadIndex | null,
+  +globalTrackNames: string[],
+  +localTrackNamesByPid: Map<Pid, string[]>,
 |};
 
 type DispatchProps = {|
@@ -119,27 +114,9 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     }
   };
 
-  getRightClickedThreadIndex(): ThreadIndex | null {
-    const { rightClickedTrack, globalTracks, localTracksByPid } = this.props;
-    if (rightClickedTrack.type === 'global') {
-      const track = globalTracks[rightClickedTrack.trackIndex];
-      return track.type === 'process' ? track.mainThreadIndex : null;
-    } else {
-      const { pid, trackIndex } = rightClickedTrack;
-      const localTracks = ensureExists(
-        localTracksByPid.get(pid),
-        'No local tracks found at that pid.'
-      );
-      const track = localTracks[trackIndex];
-
-      return track.type === 'thread' ? track.threadIndex : null;
-    }
-  }
-
   renderGlobalTrack(trackIndex: TrackIndex) {
-    const { hiddenGlobalTracks, globalTracks, threads } = this.props;
+    const { hiddenGlobalTracks, globalTrackNames } = this.props;
     const isHidden = hiddenGlobalTracks.has(trackIndex);
-    const globalTrack = globalTracks[trackIndex];
 
     return (
       <MenuItem
@@ -151,29 +128,28 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
           className: classNames({ checkable: true, checked: !isHidden }),
         }}
       >
-        {getGlobalTrackName(globalTrack, threads)}
+        {globalTrackNames[trackIndex]}
       </MenuItem>
     );
   }
 
   renderLocalTracks(globalTrackIndex: TrackIndex, pid: Pid) {
     const {
-      localTracksByPid,
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
-      threads,
+      localTrackNamesByPid,
       hiddenGlobalTracks,
     } = this.props;
 
     const isGlobalTrackHidden = hiddenGlobalTracks.has(globalTrackIndex);
-    const localTracks = localTracksByPid.get(pid);
     const localTrackOrder = localTrackOrderByPid.get(pid);
     const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
+    const localTrackNames = localTrackNamesByPid.get(pid);
 
     if (
-      localTracks === undefined ||
       localTrackOrder === undefined ||
-      hiddenLocalTracks === undefined
+      hiddenLocalTracks === undefined ||
+      localTrackNames === undefined
     ) {
       console.error(
         'Unable to find local track information for the given pid:',
@@ -182,25 +158,41 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       return null;
     }
 
-    return localTrackOrder.map(trackIndex => {
-      const isHidden = hiddenLocalTracks.has(trackIndex);
-      const localTrack = localTracks[trackIndex];
+    return localTrackOrder.map(trackIndex => (
+      <MenuItem
+        disabled={isGlobalTrackHidden}
+        key={trackIndex}
+        preventClose={true}
+        data={{ pid, trackIndex }}
+        onClick={this._toggleLocalTrackVisibility}
+        attributes={{
+          className: classNames('checkable indented', {
+            checked: !hiddenLocalTracks.has(trackIndex),
+          }),
+        }}
+      >
+        {localTrackNames[trackIndex]}
+      </MenuItem>
+    ));
+  }
 
-      return (
-        <MenuItem
-          disabled={isGlobalTrackHidden}
-          key={trackIndex}
-          preventClose={true}
-          data={{ pid, trackIndex }}
-          onClick={this._toggleLocalTrackVisibility}
-          attributes={{
-            className: classNames('checkable indented', { checked: !isHidden }),
-          }}
-        >
-          {getLocalTrackName(localTrack, threads)}
-        </MenuItem>
-      );
-    });
+  getRightClickedTrackName() {
+    const {
+      globalTrackNames,
+      localTrackNamesByPid,
+      rightClickedTrack,
+    } = this.props;
+
+    if (rightClickedTrack.type === 'global') {
+      return globalTrackNames[rightClickedTrack.trackIndex];
+    } else {
+      const localTrackNames = localTrackNamesByPid.get(rightClickedTrack.pid);
+      if (localTrackNames === undefined) {
+        console.error('Expected to find a local track name for the given pid.');
+        return 'Unknown Track';
+      }
+      return localTrackNames[rightClickedTrack.trackIndex];
+    }
   }
 
   render() {
@@ -209,23 +201,18 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       globalTrackOrder,
       hiddenGlobalTracks,
       globalTracks,
+      rightClickedThreadIndex,
     } = this.props;
-
-    const rightClickedThreadIndex = this.getRightClickedThreadIndex();
-    const clickedThreadName =
-      rightClickedThreadIndex === null
-        ? null
-        : getFriendlyThreadName(threads, threads[rightClickedThreadIndex]);
 
     return (
       <ContextMenu id="TimelineTrackContextMenu">
-        {threads.length > 1 && clickedThreadName !== null ? (
+        {threads.length > 1 && rightClickedThreadIndex !== null ? (
           <div>
             <MenuItem
               onClick={this._isolateTrack}
               disabled={hiddenGlobalTracks.size === globalTrackOrder.length - 1}
             >
-              Only show: {`"${clickedThreadName}"`}
+              Only show: {`"${this.getRightClickedTrackName()}"`}
             </MenuItem>
             <div className="react-contextmenu-separator" />
           </div>
@@ -253,9 +240,11 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     hiddenGlobalTracks: getHiddenGlobalTracks(state),
     rightClickedTrack: getRightClickedTrack(state),
     globalTracks: getGlobalTracks(state),
-    localTracksByPid: getLocalTracksByPid(state),
     hiddenLocalTracksByPid: getHiddenLocalTracksByPid(state),
     localTrackOrderByPid: getLocalTrackOrderByPid(state),
+    rightClickedThreadIndex: getRightClickedThreadIndex(state),
+    globalTrackNames: getGlobalTrackNames(state),
+    localTrackNamesByPid: getLocalTrackNamesByPid(state),
   }),
   mapDispatchToProps: {
     hideGlobalTrack,

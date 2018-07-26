@@ -70,12 +70,18 @@
   background: var(--grey-20);
 }
 
+/**
+ * Local tracks are indented 15px. This rule adds an inset shadow overlay over the
+ * entire local tracks area, including the indented space. This is why it is shifted
+ * to the left, and slightly larger than 100%.
+ */
 .timelineTrackLocalTracks::before {
+
   content: "";
   position: absolute;
+  left: -15px;
   width: calc(100% + 15px);
   height: 100%;
-  left: -15px;
   box-shadow: inset 0 1px 5px rgba(0,0,0,.2);
   pointer-events: none;
   /* Place it above the Reorderable component, which has a z-index of 2. */

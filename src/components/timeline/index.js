@@ -13,8 +13,6 @@ import Reorderable from '../shared/Reorderable';
 import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
 import {
-  getProfile,
-  getProfileViewOptions,
   getDisplayRange,
   getZeroAt,
   getGlobalTracks,
@@ -31,9 +29,8 @@ import {
   addRangeFilterAndUnsetSelection,
 } from '../../actions/profile-view';
 
-import type { Profile } from '../../types/profile';
 import type { TrackIndex, GlobalTrack } from '../../types/profile-derived';
-import type { ProfileSelection, TrackReference } from '../../types/actions';
+import type { TrackReference } from '../../types/actions';
 import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
   ExplicitConnectOptions,
@@ -43,9 +40,7 @@ import type {
 type OwnProps = SizeProps;
 
 type StateProps = {|
-  +profile: Profile,
   +displayRange: StartEndRange,
-  +selection: ProfileSelection,
   +globalTracks: GlobalTrack[],
   +globalTrackOrder: TrackIndex[],
   +globalTrackReferences: TrackReference[],
@@ -108,8 +103,6 @@ class Timeline extends PureComponent<Props> {
 
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
-    profile: getProfile(state),
-    selection: getProfileViewOptions(state).selection,
     globalTracks: getGlobalTracks(state),
     globalTrackOrder: getGlobalTrackOrder(state),
     globalTrackReferences: getGlobalTrackReferences(state),
