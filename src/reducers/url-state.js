@@ -271,6 +271,12 @@ const profileSpecific = combineReducers({
   callTreeSearchString,
   markersSearchString,
   transforms,
+  // The timeline tracks used to be hidden and sorted by thread indexes, rather than
+  // track indexes. The only way to migrate this information to tracks-based data is to
+  // first retrieve the profile, so they can't be upgraded by the normal url upgrading
+  // process. These value are only set by the locationToState function.
+  legacyThreadOrder: (state: ThreadIndex[] | null = null) => state,
+  legacyHiddenThreads: (state: ThreadIndex[] | null = null) => state,
 });
 
 /**
@@ -379,6 +385,10 @@ export const getTransformStack = (
   );
 };
 
+export const getLegacyThreadOrder = (state: State) =>
+  getProfileSpecificState(state).legacyThreadOrder;
+export const getLegacyHiddenThreads = (state: State) =>
+  getProfileSpecificState(state).legacyHiddenThreads;
 export const getGlobalTrackOrder = (state: State) =>
   getProfileSpecificState(state).globalTrackOrder;
 export const getHiddenGlobalTracks = (state: State) =>

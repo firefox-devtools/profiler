@@ -20,27 +20,51 @@ import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
 export function initializeLocalTrackOrderByPid(
   urlTrackOrderByPid: Map<Pid, TrackIndex[]> | null,
-  localTracksByPid: Map<Pid, LocalTrack[]>
+  localTracksByPid: Map<Pid, LocalTrack[]>,
+  legacyThreadOrder: ThreadIndex[] | null
 ): Map<Pid, TrackIndex[]> {
   const trackOrderByPid = new Map();
 
-  // Go through each set of tracks, determine the sort order.
-  for (const [pid, tracks] of localTracksByPid) {
-    // Create the default trackOrder.
-    let trackOrder = tracks.map((_, index) => index);
+  if (legacyThreadOrder === null) {
+    // Go through each set of tracks, determine the sort order.
+    for (const [pid, tracks] of localTracksByPid) {
+      // Create the default trackOrder.
+      let trackOrder = tracks.map((_, index) => index);
 
-    if (urlTrackOrderByPid !== null) {
-      // Sanitize the track information provided by the URL, and ensure it is valid.
-      const urlTrackOrder = urlTrackOrderByPid.get(pid);
-      if (
-        urlTrackOrder !== undefined &&
-        _indexesAreValid(tracks.length, urlTrackOrder)
-      ) {
-        trackOrder = urlTrackOrder;
+      if (urlTrackOrderByPid !== null) {
+        // Sanitize the track information provided by the URL, and ensure it is valid.
+        const urlTrackOrder = urlTrackOrderByPid.get(pid);
+        if (
+          urlTrackOrder !== undefined &&
+          _indexesAreValid(tracks.length, urlTrackOrder)
+        ) {
+          trackOrder = urlTrackOrder;
+        }
       }
-    }
 
-    trackOrderByPid.set(pid, trackOrder);
+      trackOrderByPid.set(pid, trackOrder);
+    }
+  } else {
+    // Convert the legacy thread order into the current track order.
+    for (const [pid, tracks] of localTracksByPid) {
+      const trackOrder = [];
+      // Go through the legacy thread order and pair it with the correct track.
+      for (const threadIndex of legacyThreadOrder) {
+        const trackIndex = tracks.findIndex(
+          track => track.type === 'thread' && track.threadIndex === threadIndex
+        );
+        if (trackIndex !== -1) {
+          trackOrder.push(trackIndex);
+        }
+      }
+      // Complete the list of track indexes by adding them to the end.
+      for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
+        if (!trackOrder.includes(trackIndex)) {
+          trackOrder.push(trackIndex);
+        }
+      }
+      trackOrderByPid.set(pid, trackOrder);
+    }
   }
 
   return trackOrderByPid;
@@ -49,7 +73,8 @@ export function initializeLocalTrackOrderByPid(
 export function initializeHiddenLocalTracksByPid(
   urlHiddenTracksByPid: Map<Pid, Set<TrackIndex>> | null,
   localTracksByPid: Map<Pid, LocalTrack[]>,
-  threads: Thread[]
+  threads: Thread[],
+  legacyHiddenThreads: ThreadIndex[] | null
 ): Map<Pid, Set<TrackIndex>> {
   const hiddenTracksByPid = new Map();
 
@@ -57,7 +82,16 @@ export function initializeHiddenLocalTracksByPid(
   for (const [pid, tracks] of localTracksByPid) {
     const hiddenTracks = new Set();
 
-    if (urlHiddenTracksByPid === null) {
+    if (legacyHiddenThreads !== null) {
+      for (const threadIndex of legacyHiddenThreads) {
+        const trackIndex = tracks.findIndex(
+          track => track.type === 'thread' && track.threadIndex === threadIndex
+        );
+        if (trackIndex !== -1) {
+          hiddenTracks.add(trackIndex);
+        }
+      }
+    } else if (urlHiddenTracksByPid === null) {
       for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
         const track = tracks[trackIndex];
         if (
@@ -173,8 +207,35 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
 
 export function initializeGlobalTrackOrder(
   globalTracks: GlobalTrack[],
-  urlGlobalTrackOrder: TrackIndex[] | null
+  urlGlobalTrackOrder: TrackIndex[] | null,
+  legacyThreadOrder: ThreadIndex[] | null
 ): TrackIndex[] {
+  if (legacyThreadOrder !== null) {
+    // Upgrade an older URL value based on the thread index to the track index based
+    // ordering. Don't trust that the thread indexes are actually valid.
+    const trackOrder = [];
+
+    // Convert the thread index to a track index, if it's valid.
+    for (const threadIndex of legacyThreadOrder) {
+      const trackIndex = globalTracks.findIndex(
+        globalTrack =>
+          globalTrack.type === 'process' &&
+          globalTrack.mainThreadIndex === threadIndex
+      );
+      if (trackIndex !== -1) {
+        trackOrder.push(trackIndex);
+      }
+    }
+
+    // Add the remaining track indexes.
+    for (let trackIndex = 0; trackIndex < globalTracks.length; trackIndex++) {
+      if (!trackOrder.includes(trackIndex)) {
+        trackOrder.push(trackIndex);
+      }
+    }
+    return trackOrder;
+  }
+
   return urlGlobalTrackOrder !== null &&
     _indexesAreValid(globalTracks.length, urlGlobalTrackOrder)
     ? urlGlobalTrackOrder
@@ -209,9 +270,22 @@ export function initializeHiddenGlobalTracks(
   globalTracks: GlobalTrack[],
   threads: Thread[],
   validTrackIndexes: TrackIndex[],
-  urlHiddenGlobalTracks: Set<TrackIndex> | null
+  urlHiddenGlobalTracks: Set<TrackIndex> | null,
+  legacyHiddenThreads: ThreadIndex[] | null
 ): Set<TrackIndex> {
   const hiddenGlobalTracks = new Set();
+
+  if (legacyHiddenThreads !== null) {
+    for (const threadIndex of legacyHiddenThreads) {
+      const trackIndex = globalTracks.findIndex(
+        track =>
+          track.type === 'process' && track.mainThreadIndex === threadIndex
+      );
+      if (trackIndex !== -1) {
+        hiddenGlobalTracks.add(trackIndex);
+      }
+    }
+  }
 
   if (urlHiddenGlobalTracks === null) {
     // No hidden global tracks exist, generate the default Set.
