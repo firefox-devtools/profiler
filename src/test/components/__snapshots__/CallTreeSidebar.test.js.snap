@@ -26,103 +26,111 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
   >
     This selected call node
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "2",
-      "ms (",
-      "50",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "—",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      50
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      —
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        JavaScript interpreter
-        :
-      </div>,
-      "2",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      JavaScript interpreter
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h3
     className="sidebar-title2"
   >
     This function across the entire tree
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "2",
-      "ms (",
-      "50",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "—",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      50
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      —
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        JavaScript interpreter
-        :
-      </div>,
-      "2",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      JavaScript interpreter
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      100
+      %)
+    </div>,
+  ]
 </aside>
 `;
 
@@ -144,103 +152,111 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
   >
     This selected call node
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "1",
-      "ms (",
-      "25",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "—",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      25
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      —
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        JavaScript interpreter
-        :
-      </div>,
-      "1",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      JavaScript interpreter
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h3
     className="sidebar-title2"
   >
     This function across the entire tree
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "1",
-      "ms (",
-      "25",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "—",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      25
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      —
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        JavaScript interpreter
-        :
-      </div>,
-      "1",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      JavaScript interpreter
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      100
+      %)
+    </div>,
+  ]
 </aside>
 `;
 
@@ -262,145 +278,153 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
   >
     This selected call node
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "2",
-      "ms (",
-      "50",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "1ms (25%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      50
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1ms (25%)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Native code
-        :
-      </div>,
-      "2",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Native code
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – self time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Native code
-        :
-      </div>,
-      "1",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Native code
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h3
     className="sidebar-title2"
   >
     This function across the entire tree
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "2",
-      "ms (",
-      "50",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "1ms (25%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      50
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1ms (25%)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Native code
-        :
-      </div>,
-      "2",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Native code
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – self time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Native code
-        :
-      </div>,
-      "1",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Native code
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      100
+      %)
+    </div>,
+  ]
 </aside>
 `;
 
@@ -422,145 +446,153 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
   >
     This selected call node
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "1",
-      "ms (",
-      "25",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "1ms (25%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      25
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1ms (25%)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        JavaScript interpreter
-        :
-      </div>,
-      "1",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      JavaScript interpreter
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – self time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        JavaScript interpreter
-        :
-      </div>,
-      "1",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      JavaScript interpreter
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h3
     className="sidebar-title2"
   >
     This function across the entire tree
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "2",
-      "ms (",
-      "50",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "2ms (50%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      50
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2ms (50%)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        JavaScript interpreter
-        :
-      </div>,
-      "2",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      JavaScript interpreter
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – self time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        JavaScript interpreter
-        :
-      </div>,
-      "2",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      JavaScript interpreter
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      100
+      %)
+    </div>,
+  ]
 </aside>
 `;
 
@@ -590,124 +622,132 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
   >
     This selected call node
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "2",
-      "ms (",
-      "50",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "2ms (50%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      50
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2ms (50%)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        JavaScript interpreter
-        :
-      </div>,
-      "2",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      JavaScript interpreter
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h3
     className="sidebar-title2"
   >
     This function across the entire tree
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "2",
-      "ms (",
-      "50",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "2ms (50%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      50
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2ms (50%)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        JavaScript interpreter
-        :
-      </div>,
-      "2",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      JavaScript interpreter
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – self time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        JavaScript interpreter
-        :
-      </div>,
-      "2",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      JavaScript interpreter
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      100
+      %)
+    </div>,
+  ]
 </aside>
 `;
 
@@ -729,124 +769,132 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
   >
     This selected call node
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "1",
-      "ms (",
-      "25",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "1ms (25%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      25
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1ms (25%)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Native code
-        :
-      </div>,
-      "1",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Native code
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h3
     className="sidebar-title2"
   >
     This function across the entire tree
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "2",
-      "ms (",
-      "50",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "1ms (25%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      50
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1ms (25%)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Native code
-        :
-      </div>,
-      "2",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Native code
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – self time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Native code
-        :
-      </div>,
-      "1",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Native code
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      100
+      %)
+    </div>,
+  ]
 </aside>
 `;
 
@@ -868,124 +916,132 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
   >
     This selected call node
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "1",
-      "ms (",
-      "25",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "—",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      25
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      —
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Native code
-        :
-      </div>,
-      "1",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Native code
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h3
     className="sidebar-title2"
   >
     This function across the entire tree
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "2",
-      "ms (",
-      "50",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "1ms (25%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      50
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1ms (25%)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Native code
-        :
-      </div>,
-      "2",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Native code
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      2
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – self time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Native code
-        :
-      </div>,
-      "1",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Native code
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      100
+      %)
+    </div>,
+  ]
 </aside>
 `;
 
@@ -1007,90 +1063,96 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
   >
     This selected call node
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "1",
-      "ms (",
-      "25",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "—",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      25
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      —
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Native code
-        :
-      </div>,
-      "1",
-      "ms (",
-      "100",
-      "%)",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Native code
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      1
+      ms (
+      100
+      %)
+    </div>,
+  ]
   <h3
     className="sidebar-title2"
   >
     This function across the entire tree
   </h3>
-  <div
-    className="sidebar-details"
-  >
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Running Time
-        :
-      </div>,
-      "4",
-      "ms (",
-      "100",
-      "%)",
-    ]
-    Array [
-      <div
-        className="sidebar-label"
-      >
-        Self Time
-        :
-      </div>,
-      "—",
-    ]
-  </div>
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Running Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      4
+      ms (
+      100
+      %)
+    </div>,
+  ]
+  Array [
+    <div
+      className="sidebar-label"
+    >
+      Self Time
+      :
+    </div>,
+    <div
+      className="sidebar-value"
+    >
+      —
+    </div>,
+  ]
   <h4
     className="sidebar-title3"
   >
     Implementation – running time
   </h4>
-  <div
-    className="sidebar-details"
-  >
+  Array [
     Array [
       <div
         className="sidebar-label"
@@ -1098,11 +1160,15 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         Native code
         :
       </div>,
-      "2",
-      "ms (",
-      "50",
-      "%)",
-    ]
+      <div
+        className="sidebar-value"
+      >
+        2
+        ms (
+        50
+        %)
+      </div>,
+    ],
     Array [
       <div
         className="sidebar-label"
@@ -1110,11 +1176,15 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         JavaScript interpreter
         :
       </div>,
-      "2",
-      "ms (",
-      "50",
-      "%)",
-    ]
-  </div>
+      <div
+        className="sidebar-value"
+      >
+        2
+        ms (
+        50
+        %)
+      </div>,
+    ],
+  ]
 </aside>
 `;
