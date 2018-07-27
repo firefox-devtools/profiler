@@ -33,6 +33,7 @@ import type {
   IndexIntoFuncTable,
   IndexIntoStringTable,
   IndexIntoResourceTable,
+  ThreadIndex,
 } from '../types/profile';
 import type { Milliseconds } from '../types/units';
 import type {
@@ -670,7 +671,8 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
 function _processThread(
   thread: GeckoThread,
   processProfile: GeckoProfile,
-  extensions: ExtensionTable
+  extensions: ExtensionTable,
+  threadIndex: ThreadIndex
 ): Thread {
   const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
     thread.frameTable
@@ -710,6 +712,14 @@ function _processThread(
   const markers = _processMarkers(geckoMarkers);
   const samples = _processSamples(geckoSamples);
 
+  // Processed threads are required to have a PID in order to group the threads by
+  // process into the timeline tracks. However, older Gecko formats may not have
+  // the pid.
+  const pid =
+    thread.pid === null || thread.pid === undefined
+      ? `Unknown Process ${threadIndex + 1}`
+      : thread.pid;
+
   return {
     name: thread.name,
     processType: thread.processType,
@@ -718,7 +728,7 @@ function _processThread(
     registerTime: thread.registerTime,
     unregisterTime: thread.unregisterTime,
     tid: thread.tid,
-    pid: thread.pid,
+    pid: pid,
     libs,
     pausedRanges: pausedRanges || [],
     frameTable,
@@ -803,8 +813,11 @@ export function processProfile(
     ? _toStructOfArrays(geckoProfile.meta.extensions)
     : emptyExtensions;
 
+  let threadIndex = 0;
+
   for (const thread of geckoProfile.threads) {
-    threads.push(_processThread(thread, geckoProfile, extensions));
+    threads.push(_processThread(thread, geckoProfile, extensions, threadIndex));
+    threadIndex++;
   }
 
   for (const subprocessProfile of geckoProfile.processes) {
@@ -812,7 +825,13 @@ export function processProfile(
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
     threads = threads.concat(
       subprocessProfile.threads.map(thread => {
-        const newThread = _processThread(thread, subprocessProfile, extensions);
+        const newThread = _processThread(
+          thread,
+          subprocessProfile,
+          extensions,
+          threadIndex
+        );
+        threadIndex++;
         newThread.samples = _adjustSampleTimestamps(
           newThread.samples,
           adjustTimestampsBy
