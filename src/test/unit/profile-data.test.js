@@ -264,6 +264,15 @@ describe('process-profile', function() {
       expect(thread.stringTable.getString(name0)).toEqual('firefox');
       expect(thread.stringTable.getString(name1)).toEqual('chrome://blargh');
     });
+    it('should preserve pids for threads that have them', function() {
+      expect(profile.threads[0].pid).toEqual(2222);
+    });
+    it('should create a string label for unknown thread pids', function() {
+      const geckoProfile = getGeckoProfile();
+      delete geckoProfile.threads[0].pid;
+      const profileWithNoPids = processProfile(geckoProfile);
+      expect(profileWithNoPids.threads[0].pid).toEqual('Unknown Process 1');
+    });
   });
   describe('DevTools profiles', function() {
     it('should process correctly', function() {
