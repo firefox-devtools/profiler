@@ -5,6 +5,7 @@
 // @flow
 
 import * as React from 'react';
+import classNames from 'classnames';
 
 import explicitConnect from '../../utils/connect';
 import {
@@ -30,6 +31,55 @@ import type {
   StackImplementation,
   TimingsForPath,
 } from '../../profile-logic/profile-data';
+
+type CanCopyContentProps = {|
+  +tagName?: string,
+  +content: string,
+  +className?: string,
+|};
+type CanCopyContentState = {|
+  justCopied: boolean,
+|};
+
+class CanCopyContent extends React.PureComponent<
+  CanCopyContentProps,
+  CanCopyContentState
+> {
+  state = { justCopied: false };
+
+  _copyContent = (e: SyntheticMouseEvent<HTMLElement>) => {
+    const title = e.currentTarget;
+    const selection = document.getSelection();
+    if (!selection) {
+      return;
+    }
+    selection.selectAllChildren(title);
+    document.execCommand('copy');
+    selection.removeAllRanges();
+
+    // Display the "copied" text
+    this.setState({
+      justCopied: true,
+    });
+    setTimeout(() => this.setState({ justCopied: false }), 2000);
+  };
+
+  render() {
+    const { tagName, content, className } = this.props;
+    const TagName = tagName || 'div';
+
+    return (
+      <TagName
+        className={classNames(className, 'can-copy-content')}
+        title={`${content}\n(click to copy)`}
+        onClick={this._copyContent}
+      >
+        {this.state.justCopied && 'copied! '}
+        {content}
+      </TagName>
+    );
+  }
+}
 
 type SidebarDetailProps = {|
   +label: string,
@@ -158,8 +208,18 @@ class CallTreeSidebar extends React.PureComponent<Props> {
     return (
       <aside className="sidebar sidebar-calltree">
         <header className="sidebar-titlegroup">
-          <h2 className="sidebar-title">{name}</h2>
-          {lib ? <p className="sidebar-subtitle">{lib}</p> : null}
+          <CanCopyContent
+            tagName="h2"
+            className="sidebar-title"
+            content={name}
+          />
+          {lib ? (
+            <CanCopyContent
+              tagName="p"
+              className="sidebar-subtitle"
+              content={lib}
+            />
+          ) : null}
         </header>
         <h3 className="sidebar-title2">This selected call node</h3>
         <SidebarDetail label="Running Time">

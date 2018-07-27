@@ -16,7 +16,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title"
+      className="sidebar-title can-copy-content"
+      onClick={[Function]}
+      title="Cjs
+(click to copy)"
     >
       Cjs
     </h2>
@@ -142,7 +145,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title"
+      className="sidebar-title can-copy-content"
+      onClick={[Function]}
+      title="D
+(click to copy)"
     >
       D
     </h2>
@@ -268,7 +274,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title"
+      className="sidebar-title can-copy-content"
+      onClick={[Function]}
+      title="H
+(click to copy)"
     >
       H
     </h2>
@@ -436,7 +445,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title"
+      className="sidebar-title can-copy-content"
+      onClick={[Function]}
+      title="Ejs
+(click to copy)"
     >
       Ejs
     </h2>
@@ -612,7 +624,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title"
+      className="sidebar-title can-copy-content"
+      onClick={[Function]}
+      title="Ejs
+(click to copy)"
     >
       Ejs
     </h2>
@@ -759,7 +774,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title"
+      className="sidebar-title can-copy-content"
+      onClick={[Function]}
+      title="H
+(click to copy)"
     >
       H
     </h2>
@@ -906,7 +924,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title"
+      className="sidebar-title can-copy-content"
+      onClick={[Function]}
+      title="H
+(click to copy)"
     >
       H
     </h2>
@@ -1053,7 +1074,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title"
+      className="sidebar-title can-copy-content"
+      onClick={[Function]}
+      title="A
+(click to copy)"
     >
       A
     </h2>

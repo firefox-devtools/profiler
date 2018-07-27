@@ -29,10 +29,22 @@
   padding: 0;
   font-weight: normal;
 
-  overflow: auto;
-  max-height: 3.7em; /* ~2.5 lines */
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
 
-  overflow-wrap: break-word;
+/* This is used on the sidebar title and subtitle */
+.can-copy-content {
+  border-radius: 2px;
+}
+
+.can-copy-content:active {
+  background: var(--grey-30);
+}
+
+.can-copy-content:not(:active) {
+  transition: background 250ms;
 }
 
 .sidebar-title {
