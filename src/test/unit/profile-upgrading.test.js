@@ -108,7 +108,7 @@ describe('upgrading processed profiles', function() {
     expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
   }
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-13.json')
+    require('../fixtures/upgrades/processed-14.json')
   );
 
   // Uncomment this to output your next ./upgrades/processed-X.json
@@ -215,12 +215,21 @@ describe('upgrading processed profiles', function() {
     );
     compareProcessedProfiles(upgradedProfile12, afterUpgradeReference);
   });
-  it('should still process a profile of the current version with no issues', function() {
+  it('should upgrade version 13', function() {
+    // This last test is to make sure we properly upgrade the json
+    // file to same version
     const serializedOldProcessedProfile13 = require('../fixtures/upgrades/processed-13.json');
     const upgradedProfile13 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile14
+      serializedOldProcessedProfile13
     );
     compareProcessedProfiles(upgradedProfile13, afterUpgradeReference);
+  });
+  it('should still process a profile of the current version with no issues', function() {
+    const serializedOldProcessedProfile14 = require('../fixtures/upgrades/processed-14.json');
+    const upgradedProfile14 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile14
+    );
+    compareProcessedProfiles(upgradedProfile14, afterUpgradeReference);
   });
 });
 
