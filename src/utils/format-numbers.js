@@ -53,26 +53,28 @@ export function formatPercent(value: number): string {
 }
 
 export function formatBytes(bytes: number): string {
-  if (bytes < 4 * 1024) {
+  if (bytes < 10000) {
+    // Use singles up to 10,000.  I think 9,360B looks nicer than 9.36KB.
     return formatNumber(bytes) + 'B';
-  } else if (bytes < 4 * 1024 * 1024) {
-    return formatNumber(bytes / 1024) + 'KB';
-  } else if (bytes < 4 * 1024 * 1024 * 1024) {
-    return formatNumber(bytes / (1024 * 1024)) + 'MB';
+  } else if (bytes < 1024 * 1024) {
+    return formatNumber(bytes / 1024, 3, 2) + 'KB';
+  } else if (bytes < 1024 * 1024 * 1024) {
+    return formatNumber(bytes / (1024 * 1024), 3, 2) + 'MB';
   } else {
-    return formatNumber(bytes / (1024 * 1024 * 1024)) + 'GB';
+    return formatNumber(bytes / (1024 * 1024 * 1024), 3, 2) + 'GB';
   }
 }
 
 export function formatSI(num: number): string {
   if (num < 10000) {
+    // Use singles up to 10,000.  I think 9,360 looks nicer than 9.36K.
     return formatNumber(num);
-  } else if (num < 10000000) {
-    return formatNumber(num / 1000) + 'K';
-  } else if (num < 10000000000) {
-    return formatNumber(num / 1000000) + 'M';
+  } else if (num < 1000 * 1000) {
+    return formatNumber(num / 1000, 3, 2) + 'K';
+  } else if (num < 1000 * 1000 * 1000) {
+    return formatNumber(num / (1000 * 1000), 3, 2) + 'M';
   } else {
-    return formatNumber(num / 1000000000) + 'G';
+    return formatNumber(num / (1000 * 1000 * 1000), 3, 2) + 'G';
   }
 }
 

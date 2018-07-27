@@ -359,28 +359,28 @@ Array [
         Bytes tenured
         :
       </div>
-      1334KB / 2013KB (66%)
+      1.30MB / 1.97MB (66%)
       <div
         className="tooltipLabel"
       >
         Cells tenured
         :
       </div>
-      16K / 42K (37%)
+      15.9K / 26.6K (60%)
       <div
         className="tooltipLabel"
       >
         Bytes used
         :
       </div>
-      2013KB / 16MB (12%)
+      1.97MB / 16.0MB (12%)
       <div
         className="tooltipLabel"
       >
         Nursery allocations since last minor GC
         :
       </div>
-      27K / 39K (69%)
+      26.6K / 38.8K (69%)
       <div
         className="tooltipLabel"
       >
@@ -394,7 +394,7 @@ Array [
         Tenure rate (cells/sec)
         :
       </div>
-      23M/s
+      23.1M/s
       <div
         className="tooltipLabel"
       >
@@ -500,7 +500,7 @@ Array [
         Heap usage
         :
       </div>
-      46MB
+      46.1MB
       <div
         className="tooltipLabel"
       >
@@ -1382,7 +1382,7 @@ Array [
         Requested bytes
         :
       </div>
-      46KB
+      45.9KB
       <div
         className="tooltipLabel"
       >
