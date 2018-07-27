@@ -28,23 +28,17 @@
   margin: 0;
   padding: 0;
   font-weight: normal;
+}
 
-  white-space: nowrap;
+/* This will be used on both the title and the subtitle */
+.can-select-content-input {
+  all: unset;
+  width: 100%;
   text-overflow: ellipsis;
-  overflow: hidden;
 }
 
-/* This is used on the sidebar title and subtitle */
-.can-copy-content {
-  border-radius: 2px;
-}
-
-.can-copy-content:active {
-  background: var(--grey-30);
-}
-
-.can-copy-content:not(:active) {
-  transition: background 250ms;
+.can-select-content-input:focus {
+  text-overflow: unset;
 }
 
 .sidebar-title {

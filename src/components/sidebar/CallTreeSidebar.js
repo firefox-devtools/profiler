@@ -37,32 +37,17 @@ type CanCopyContentProps = {|
   +content: string,
   +className?: string,
 |};
-type CanCopyContentState = {|
-  justCopied: boolean,
-|};
 
-class CanCopyContent extends React.PureComponent<
-  CanCopyContentProps,
-  CanCopyContentState
-> {
-  state = { justCopied: false };
+class CanSelectContent extends React.PureComponent<CanCopyContentProps> {
+  _selectContent(e: SyntheticMouseEvent<HTMLInputElement>) {
+    const input = e.currentTarget;
+    input.focus();
+    input.select();
+  }
 
-  _copyContent = (e: SyntheticMouseEvent<HTMLElement>) => {
-    const title = e.currentTarget;
-    const selection = document.getSelection();
-    if (!selection) {
-      return;
-    }
-    selection.selectAllChildren(title);
-    document.execCommand('copy');
-    selection.removeAllRanges();
-
-    // Display the "copied" text
-    this.setState({
-      justCopied: true,
-    });
-    setTimeout(() => this.setState({ justCopied: false }), 2000);
-  };
+  _unselectContent(e: SyntheticMouseEvent<HTMLInputElement>) {
+    e.currentTarget.setSelectionRange(0, 0);
+  }
 
   render() {
     const { tagName, content, className } = this.props;
@@ -70,12 +55,16 @@ class CanCopyContent extends React.PureComponent<
 
     return (
       <TagName
-        className={classNames(className, 'can-copy-content')}
-        title={`${content}\n(click to copy)`}
-        onClick={this._copyContent}
+        className={classNames(className, 'can-select-content')}
+        title={`${content}\n(click to select)`}
       >
-        {this.state.justCopied && 'copied! '}
-        {content}
+        <input
+          value={content}
+          className="can-select-content-input"
+          onFocus={this._selectContent}
+          onBlur={this._unselectContent}
+          readOnly={true}
+        />
       </TagName>
     );
   }
@@ -208,13 +197,13 @@ class CallTreeSidebar extends React.PureComponent<Props> {
     return (
       <aside className="sidebar sidebar-calltree">
         <header className="sidebar-titlegroup">
-          <CanCopyContent
+          <CanSelectContent
             tagName="h2"
             className="sidebar-title"
             content={name}
           />
           {lib ? (
-            <CanCopyContent
+            <CanSelectContent
               tagName="p"
               className="sidebar-subtitle"
               content={lib}

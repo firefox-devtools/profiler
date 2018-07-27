@@ -16,12 +16,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title can-copy-content"
-      onClick={[Function]}
+      className="sidebar-title can-select-content"
       title="Cjs
-(click to copy)"
+(click to select)"
     >
-      Cjs
+      <input
+        className="can-select-content-input"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        readOnly={true}
+        value="Cjs"
+      />
     </h2>
   </header>
   <h3
@@ -145,12 +150,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title can-copy-content"
-      onClick={[Function]}
+      className="sidebar-title can-select-content"
       title="D
-(click to copy)"
+(click to select)"
     >
-      D
+      <input
+        className="can-select-content-input"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        readOnly={true}
+        value="D"
+      />
     </h2>
   </header>
   <h3
@@ -274,12 +284,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title can-copy-content"
-      onClick={[Function]}
+      className="sidebar-title can-select-content"
       title="H
-(click to copy)"
+(click to select)"
     >
-      H
+      <input
+        className="can-select-content-input"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        readOnly={true}
+        value="H"
+      />
     </h2>
   </header>
   <h3
@@ -445,12 +460,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title can-copy-content"
-      onClick={[Function]}
+      className="sidebar-title can-select-content"
       title="Ejs
-(click to copy)"
+(click to select)"
     >
-      Ejs
+      <input
+        className="can-select-content-input"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        readOnly={true}
+        value="Ejs"
+      />
     </h2>
   </header>
   <h3
@@ -624,12 +644,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title can-copy-content"
-      onClick={[Function]}
+      className="sidebar-title can-select-content"
       title="Ejs
-(click to copy)"
+(click to select)"
     >
-      Ejs
+      <input
+        className="can-select-content-input"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        readOnly={true}
+        value="Ejs"
+      />
     </h2>
   </header>
   <h3
@@ -774,12 +799,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title can-copy-content"
-      onClick={[Function]}
+      className="sidebar-title can-select-content"
       title="H
-(click to copy)"
+(click to select)"
     >
-      H
+      <input
+        className="can-select-content-input"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        readOnly={true}
+        value="H"
+      />
     </h2>
   </header>
   <h3
@@ -924,12 +954,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title can-copy-content"
-      onClick={[Function]}
+      className="sidebar-title can-select-content"
       title="H
-(click to copy)"
+(click to select)"
     >
-      H
+      <input
+        className="can-select-content-input"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        readOnly={true}
+        value="H"
+      />
     </h2>
   </header>
   <h3
@@ -1074,12 +1109,17 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     className="sidebar-titlegroup"
   >
     <h2
-      className="sidebar-title can-copy-content"
-      onClick={[Function]}
+      className="sidebar-title can-select-content"
       title="A
-(click to copy)"
+(click to select)"
     >
-      A
+      <input
+        className="can-select-content-input"
+        onBlur={[Function]}
+        onFocus={[Function]}
+        readOnly={true}
+        value="A"
+      />
     </h2>
   </header>
   <h3
