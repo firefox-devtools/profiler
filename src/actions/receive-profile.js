@@ -21,6 +21,8 @@ import {
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getLocalTrackOrderByPid,
+  getLegacyThreadOrder,
+  getLegacyHiddenThreads,
 } from '../reducers/url-state';
 import {
   initializeLocalTrackOrderByPid,
@@ -79,23 +81,27 @@ export function viewProfile(
     const globalTracks = computeGlobalTracks(profile);
     const globalTrackOrder = initializeGlobalTrackOrder(
       globalTracks,
-      hasUrlInfo ? getGlobalTrackOrder(getState()) : null
+      hasUrlInfo ? getGlobalTrackOrder(getState()) : null,
+      getLegacyThreadOrder(getState())
     );
     let hiddenGlobalTracks = initializeHiddenGlobalTracks(
       globalTracks,
       profile.threads,
       globalTrackOrder,
-      hasUrlInfo ? getHiddenGlobalTracks(getState()) : null
+      hasUrlInfo ? getHiddenGlobalTracks(getState()) : null,
+      getLegacyHiddenThreads(getState())
     );
     const localTracksByPid = computeLocalTracksByPid(profile);
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       hasUrlInfo ? getLocalTrackOrderByPid(getState()) : null,
-      localTracksByPid
+      localTracksByPid,
+      getLegacyThreadOrder(getState())
     );
     let hiddenLocalTracksByPid = initializeHiddenLocalTracksByPid(
       hasUrlInfo ? getHiddenLocalTracksByPid(getState()) : null,
       localTracksByPid,
-      profile.threads
+      profile.threads,
+      getLegacyHiddenThreads(getState())
     );
     let visibleThreadIndexes = getVisibleThreads(
       globalTracks,

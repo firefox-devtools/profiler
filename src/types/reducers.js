@@ -148,6 +148,8 @@ export type UrlState = {|
     callTreeSearchString: string,
     markersSearchString: string,
     transforms: TransformStacksPerThread,
+    legacyThreadOrder: ThreadIndex[] | null,
+    legacyHiddenThreads: ThreadIndex[] | null,
   |},
 |};
 

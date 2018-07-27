@@ -185,6 +185,30 @@ describe('url handling tracks', function() {
       ]);
     });
   });
+
+  describe('legacy thread information', function() {
+    it('handles legacy thread ordering', function() {
+      // Flip the threads around
+      const { getState } = initWithSearchParams('?threadOrder=3-2-1-0');
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain tab]',
+        '  - show [thread Style]',
+        '  - show [thread DOM Worker]',
+        'show [thread GeckoMain process] SELECTED',
+      ]);
+    });
+
+    it('handles legacy thread hiding', function() {
+      // Flip the threads around
+      const { getState } = initWithSearchParams('?hiddenThreads=0-2');
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
+  });
 });
 
 describe('search strings', function() {

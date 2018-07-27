@@ -51,6 +51,11 @@ type BaseQuery = {|
   file?: string, // Path into a zip file.
   react_perf?: null, // Flag to activate react's UserTimings profiler.
   transforms?: string,
+  // The following values are legacy, and will be converted to track-based values. These
+  // value can't be upgraded using the typical URL upgrading process, as the full profile
+  // must be fetched to compute the tracks.
+  threadOrder?: string, // "3-2-0-1"
+  hiddenThreads?: string, // "0-1"
 |};
 
 type CallTreeQuery = {|
@@ -280,6 +285,12 @@ export function stateFromLocation(location: Location): UrlState {
         : new Map(),
       markersSearchString: query.markerSearch || '',
       transforms,
+      legacyThreadOrder: query.threadOrder
+        ? query.threadOrder.split('-').map(index => Number(index))
+        : null,
+      legacyHiddenThreads: query.hiddenThreads
+        ? query.hiddenThreads.split('-').map(index => Number(index))
+        : null,
     },
   };
 }
