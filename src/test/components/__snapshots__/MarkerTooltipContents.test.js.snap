@@ -1228,6 +1228,49 @@ Array [
         <div
           className="tooltipTiming"
         >
+          0.80ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          ConstructRootFrame
+        </div>
+      </div>
+      <div
+        className="tooltipDetails"
+      >
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
+      </div>
+    </div>
+    <div
+      className="tooltipDetails"
+    >
+      <div
+        className="tooltipLabel"
+      >
+        Category
+        :
+      </div>
+      Frame Construction
+    </div>
+  </div>,
+  <div
+    className="tooltipMarker propClass"
+  >
+    <div
+      className="tooltipHeader"
+    >
+      <div
+        className="tooltipOneLine"
+      >
+        <div
+          className="tooltipTiming"
+        >
           205ms
         </div>
         <div

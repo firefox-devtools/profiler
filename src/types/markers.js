@@ -353,6 +353,16 @@ export type BHRMarkerPayload = {
   endTime: Milliseconds,
 };
 
+/*
+ * The payload for Frame Construction.
+ */
+export type FrameConstructionMarkerPayload = {
+  type: 'tracing',
+  category: 'Frame Construction',
+  interval: 'start' | 'end',
+  cause?: CauseBacktrace,
+};
+
 export type DummyForTestsMarkerPayload = {
   type: 'DummyForTests',
   startTime: Milliseconds,
@@ -377,6 +387,7 @@ export type MarkerPayload =
   | StyleMarkerPayload
   | BHRMarkerPayload
   | VsyncTimestampPayload
+  | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | null;
 
@@ -390,6 +401,7 @@ export type MarkerPayload_Gecko =
   | GCMajorMarkerPayload_Gecko
   | GCSliceMarkerPayload_Gecko
   | StyleMarkerPayload_Gecko
+  | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | VsyncTimestampPayload
   | null;

@@ -291,6 +291,24 @@ describe('MarkerTooltipContents', function() {
           status: 'STATUS_READING',
         },
       ],
+      [
+        'ConstructRootFrame',
+        112.5,
+        {
+          type: 'tracing',
+          category: 'Frame Construction',
+          interval: 'start',
+        },
+      ],
+      [
+        'ConstructRootFrame',
+        113.3,
+        {
+          type: 'tracing',
+          category: 'Frame Construction',
+          interval: 'end',
+        },
+      ],
     ]);
     const store = storeWithProfile(profile);
     const state = store.getState();
