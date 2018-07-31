@@ -58,7 +58,7 @@ exports[`app/Details renders an initial view with the right panel 1`] = `
   <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -120,7 +120,7 @@ exports[`app/Details renders an initial view with the right panel for tab calltr
   <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -182,7 +182,7 @@ exports[`app/Details renders an initial view with the right panel for tab flame-
   <FlameGraphView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -237,7 +237,7 @@ exports[`app/Details renders an initial view with the right panel for tab marker
   <Connect(MarkerChart) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -292,7 +292,7 @@ exports[`app/Details renders an initial view with the right panel for tab marker
   <Connect(MarkerTable) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -347,7 +347,7 @@ exports[`app/Details renders an initial view with the right panel for tab networ
   <Connect(MarkerChart) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -402,7 +402,7 @@ exports[`app/Details renders an initial view with the right panel for tab stack-
   <Connect(StackChartGraph) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -464,7 +464,7 @@ exports[`app/Details show the correct state for the sidebar open button 1`] = `
   <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -526,7 +526,7 @@ exports[`app/Details show the correct state for the sidebar open button 2`] = `
   <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -588,7 +588,7 @@ exports[`app/Details show the correct state for the sidebar open button 3`] = `
   <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -650,6 +650,6 @@ exports[`app/Details show the correct state for the sidebar open button 4`] = `
   <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;

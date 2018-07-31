@@ -16,6 +16,8 @@ import { assertExhaustiveCheck, toValidTabSlug } from '../utils/flow';
 import { oneLine } from 'common-tags';
 import type { UrlState } from '../types/reducers';
 import type { DataSource } from '../types/actions';
+import type { Pid } from '../types/profile';
+import type { TrackIndex } from '../types/profile-derived';
 
 export const CURRENT_URL_VERSION = 3;
 
@@ -39,37 +41,50 @@ function dataSourceDirs(urlState: UrlState) {
 
 // "null | void" in the query objects are flags which map to true for null, and false
 // for void. False flags do not show up the URL.
-type BaseQuery = {
+type BaseQuery = {|
   range?: string, //
   thread?: string, // "3"
-  threadOrder?: string, // "3-2-0-1"
-  hiddenThreads?: string | void, // "0-1"
+  globalTrackOrder?: string, // "3-2-0-1"
+  hiddenGlobalTracks?: string, // "0-1"
+  hiddenLocalTracksByPid?: string,
+  localTrackOrderByPid?: string,
+  file?: string, // Path into a zip file.
   react_perf?: null, // Flag to activate react's UserTimings profiler.
   transforms?: string,
-};
+|};
 
-type CallTreeQuery = BaseQuery & {
+type CallTreeQuery = {|
+  ...BaseQuery,
   search?: string, // "js::RunScript"
   invertCallstack?: null | void,
   implementation?: string,
-};
+|};
 
-type MarkersQuery = BaseQuery & {
+type MarkersQuery = {|
+  ...BaseQuery,
   markerSearch?: string, // "DOMEvent"
-};
+|};
 
-type StackChartQuery = BaseQuery & {
+type StackChartQuery = {|
+  ...BaseQuery,
   search?: string, // "js::RunScript"
   invertCallstack?: null | void,
   implementation?: string,
+|};
+
+// Use object type spread in the definition of Query rather than unions, so that they
+// are really easy to manipulate. This permissive definition makes it easy to not have
+// to refine the type down to the individual query types when working with them.
+type Query = {
+  ...CallTreeQuery,
+  ...MarkersQuery,
+  ...StackChartQuery,
 };
 
-type UrlObject = {
+type UrlObject = {|
   pathParts: string[],
   query: Query,
-};
-
-type Query = BaseQuery | CallTreeQuery | MarkersQuery | StackChartQuery;
+|};
 
 /**
  * Take the UrlState and map it into a serializable UrlObject, that represents the
@@ -90,14 +105,37 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     range:
       stringifyRangeFilters(urlState.profileSpecific.rangeFilters) || undefined,
     thread: urlState.profileSpecific.selectedThread,
-    threadOrder: urlState.profileSpecific.threadOrder.join('-'),
+    globalTrackOrder: urlState.profileSpecific.globalTrackOrder.join('-'),
     file: urlState.pathInZipFile || undefined,
     v: CURRENT_URL_VERSION,
   };
 
-  // Add the parameter hiddenThreads only when needed
-  if (urlState.profileSpecific.hiddenThreads.length > 0) {
-    query.hiddenThreads = urlState.profileSpecific.hiddenThreads.join('-');
+  // Add the parameter hiddenGlobalTracks only when needed.
+  if (urlState.profileSpecific.hiddenGlobalTracks.size > 0) {
+    query.hiddenGlobalTracks = [
+      ...urlState.profileSpecific.hiddenGlobalTracks,
+    ].join('-');
+  }
+
+  let hiddenLocalTracksByPid = '';
+  for (const [pid, tracks] of urlState.profileSpecific.hiddenLocalTracksByPid) {
+    if (tracks.size > 0) {
+      hiddenLocalTracksByPid += [pid, ...tracks].join('-') + '~';
+    }
+  }
+  if (hiddenLocalTracksByPid.length > 0) {
+    // Only add to the query string if something was actually hidden.
+    // Also, slice off the last '~'.
+    query.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
+  }
+
+  query.localTrackOrderByPid = '';
+  for (const [pid, trackOrder] of urlState.profileSpecific
+    .localTrackOrderByPid) {
+    if (trackOrder.length > 0) {
+      query.localTrackOrderByPid +=
+        `${String(pid)}-` + trackOrder.join('-') + '~';
+    }
   }
 
   if (process.env.NODE_ENV === 'development') {
@@ -226,22 +264,88 @@ export function stateFromLocation(location: Location): UrlState {
       rangeFilters: query.range ? parseRangeFilters(query.range) : [],
       selectedThread: selectedThread,
       callTreeSearchString: query.search || '',
-      threadOrder: query.threadOrder
-        ? query.threadOrder.split('-').map(index => Number(index))
+      globalTrackOrder: query.globalTrackOrder
+        ? query.globalTrackOrder.split('-').map(index => Number(index))
         : [],
-      hiddenThreads: query.hiddenThreads
-        ? query.hiddenThreads.split('-').map(index => Number(index))
-        : [],
+      hiddenGlobalTracks: query.hiddenGlobalTracks
+        ? new Set(
+            query.hiddenGlobalTracks.split('-').map(index => Number(index))
+          )
+        : new Set(),
+      hiddenLocalTracksByPid: query.hiddenLocalTracksByPid
+        ? parseHiddenTracks(query.hiddenLocalTracksByPid)
+        : new Map(),
+      localTrackOrderByPid: query.localTrackOrderByPid
+        ? parseLocalTrackOrder(query.localTrackOrderByPid)
+        : new Map(),
       markersSearchString: query.markerSearch || '',
       transforms,
     },
   };
 }
 
-type ProcessedLocation = { pathname: string, hash: string, query: Object };
+/**
+ * Hidden tracks must have the track indexes plus the associated PID.
+ *
+ * Syntax: Pid-TrackIndex-TrackIndex~Pid-TrackIndex
+ * Example: 124553-0-3~124554-1
+ */
+function parseHiddenTracks(rawText: string): Map<Pid, Set<TrackIndex>> {
+  const hiddenLocalTracksByPid = new Map();
+
+  for (const stringPart of rawText.split('~')) {
+    const [pidString, ...indexStrings] = stringPart.split('-');
+    if (indexStrings.length === 0) {
+      continue;
+    }
+    const pid = Number(pidString);
+    const indexes = indexStrings.map(string => Number(string));
+    if (!isNaN(pid) && indexes.every(n => !isNaN(n))) {
+      hiddenLocalTracksByPid.set(pid, new Set(indexes));
+    }
+  }
+  return hiddenLocalTracksByPid;
+}
+
+/**
+ * Local tracks must have their track order associated by PID.
+ *
+ * Syntax: Pid-TrackIndex-TrackIndex~Pid-TrackIndex
+ * Example: 124553-0-3~124554-1
+ */
+function parseLocalTrackOrder(rawText: string): Map<Pid, TrackIndex[]> {
+  const localTrackOrderByPid = new Map();
+
+  for (const stringPart of rawText.split('~')) {
+    const [pidString, ...indexStrings] = stringPart.split('-');
+    if (indexStrings.length <= 1) {
+      // There is no order to determine, let the URL validation create the
+      // default value.
+      continue;
+    }
+    const pid = Number(pidString);
+    const indexes = indexStrings.map(string => Number(string));
+    if (!isNaN(pid) && indexes.every(n => !isNaN(n))) {
+      localTrackOrderByPid.set(pid, indexes);
+    }
+  }
+
+  return localTrackOrderByPid;
+}
+
+type ProcessedLocation = {|
+  pathname: string,
+  hash: string,
+  query: Query,
+|};
+
+type ProcessedLocationBeforeUpgrade = {|
+  ...ProcessedLocation,
+  query: Object,
+|};
 
 export function upgradeLocationToCurrentVersion(
-  processedLocation: ProcessedLocation
+  processedLocation: ProcessedLocationBeforeUpgrade
 ): ProcessedLocation {
   const urlVersion = +processedLocation.query.v || 0;
   if (urlVersion === CURRENT_URL_VERSION) {
@@ -274,7 +378,7 @@ export function upgradeLocationToCurrentVersion(
 // Every "upgrader" takes the processedLocation as its single argument and mutates it.
 /* eslint-disable no-useless-computed-key */
 const _upgraders = {
-  [0]: (processedLocation: ProcessedLocation) => {
+  [0]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
     // Version 1 is the first versioned url.
 
     // If the pathname is '/', this could be a very old URL that has its information
@@ -300,7 +404,7 @@ const _upgraders = {
       processedLocation.query.implementation = 'js';
     }
   },
-  [1]: (processedLocation: ProcessedLocation) => {
+  [1]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
     // The transform stack was added. Convert the callTreeFilters into the new
     // transforms format.
     if (processedLocation.query.callTreeFilters) {
@@ -328,7 +432,7 @@ const _upgraders = {
       delete processedLocation.query.callTreeFilters;
     }
   },
-  [2]: (processedLocation: ProcessedLocation) => {
+  [2]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
     // Map the tab "timeline" to "stack-chart".
     // Map the tab "markers" to "marker-table".
     processedLocation.pathname = processedLocation.pathname
@@ -339,7 +443,7 @@ const _upgraders = {
       // Matches:  $1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       .replace(/^(\/[^/]+\/[^/]+)\/markers\/?/, '$1/marker-table/');
   },
-  [3]: (processedLocation: ProcessedLocation) => {
+  [3]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
     const { query } = processedLocation;
     // Removed "Hide platform details" checkbox from the stack chart.
     if ('hidePlatformDetails' in query) {
