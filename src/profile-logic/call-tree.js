@@ -149,6 +149,94 @@ export class CallTree {
     }
   }
 
+  getAllChildren() {
+    /* The `children` array contains all children for all callnodes in
+     * a large, flat array. Siblings are always next to each other in
+     * contiguous slices. To find the children for a particular
+     * callnode, we need to use the arrays `pointers` and `lengths` to
+     * find out where a slice starts and how long it is,
+     * respectively. */
+    const children = new Uint32Array(this._callNodeTable.length);
+    const pointers = new Uint32Array(this._callNodeTable.length);
+    const lengths = new Uint32Array(this._callNodeTable.length);
+
+    /* For performance reasons `children` is of type Uint32Array. This
+     * means we cannot use values such as `undefined` or `null` to
+     * indicate uninitialized values, as we build up the array. But
+     * since `this._callNodeTable` is ordered is such a way that a
+     * given callnode index always comes _after_ its parent callnode
+     * index, we know that callnode index zero never can be a
+     * child. It is always a root. (Not counting the special -1 root,
+     * but we don't need it here). Hence, we are free to use the value
+     * 0 in the children array to mark elements as not initialized,
+     * since 0 is never a valid child. Since the default values of
+     * Uint32Array is 0, we conveniently get an array where all its
+     * values are uninitialized from start. */
+
+    for (
+      let callNodeIndex = 0, ptr = 0;
+      callNodeIndex < this._callNodeTable.length;
+      callNodeIndex++
+    ) {
+      pointers[callNodeIndex] = ptr;
+
+      const length = this._callNodeChildCount[callNodeIndex];
+      lengths[callNodeIndex] = length;
+      /* Now that we know how many children the current callnode has,
+       * we can prepare the pointer for the next callnode. */
+      ptr += length;
+
+      if (this._callNodeTimes.totalTime[callNodeIndex] === 0) {
+        continue;
+      }
+
+      const parent = this._callNodeTable.prefix[callNodeIndex];
+      if (parent === -1) {
+        /* This means the current callnode is a root. It will not go
+         * into the array. */
+        continue;
+      }
+
+      /* From the parent, we can now know the slice allotted for all
+       * its children. */
+      const start = pointers[parent];
+      const end = pointers[parent] + lengths[parent] - 1;
+
+      /* Find the place in `children` where this callnode should be
+       * inserted, swapping elements in the array as we go
+       * along. Continue as long as this callnode's function name is
+       * lexically smaller than the function names of the callnodes
+       * already placed in the array. This ensures that all slices
+       * have children in ascending order. Any callnode indices equal
+       * to 0 means that they are uninitialized, so just breeze
+       * through them. When we stop, when have found the right
+       * position to insert our callnode.
+       *
+       * This effectively is an insertion sort, which is O(n^2), but
+       * since n is typically small (the number of children of a given
+       * call node), it should be just fine.
+       */
+      const funcName = this._stringTable.getString(
+        this._funcTable.name[this._callNodeTable.func[callNodeIndex]]
+      );
+
+      let i = start;
+      while (
+        i < end &&
+        (children[i + 1] === 0 ||
+          funcName <
+            this._stringTable.getString(
+              this._funcTable.name[this._callNodeTable.func[children[i + 1]]]
+            ))
+      ) {
+        children[i] = children[i + 1];
+        i++;
+      }
+      children[i] = callNodeIndex;
+    }
+    return [children, pointers, lengths];
+  }
+
   getChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
     let children = this._children[callNodeIndex];
     if (children === undefined) {
