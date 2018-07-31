@@ -11,6 +11,7 @@ import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
+import * as Tracks from '../profile-logic/tracks';
 import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
@@ -30,6 +31,7 @@ import type {
   ThreadIndex,
   SamplesTable,
   MarkersTable,
+  Pid,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -37,9 +39,17 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
   MarkerTimingRows,
+  LocalTrack,
+  GlobalTrack,
+  TrackIndex,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
-import type { Action, ProfileSelection, RequestedLib } from '../types/actions';
+import type {
+  Action,
+  ProfileSelection,
+  RequestedLib,
+  TrackReference,
+} from '../types/actions';
 import type {
   State,
   Reducer,
@@ -82,6 +92,36 @@ function profile(state: Profile | null = null, action: Action): Profile | null {
       });
       return Object.assign({}, state, { threads });
     }
+    default:
+      return state;
+  }
+}
+
+/**
+ * This information is stored, rather than derived via selectors, since the coalesced
+ * function update would force it to be recomputed on every symbolication update
+ * pass. It is valid for the lifetime of the profile.
+ */
+function globalTracks(state: GlobalTrack[] = [], action: Action) {
+  switch (action.type) {
+    case 'VIEW_PROFILE':
+      return action.globalTracks;
+    default:
+      return state;
+  }
+}
+
+/**
+ * This can be derived like the globalTracks information, but is stored in the state
+ * for the same reason.
+ */
+function localTracksByPid(
+  state: Map<Pid, LocalTrack[]> = new Map(),
+  action: Action
+) {
+  switch (action.type) {
+    case 'VIEW_PROFILE':
+      return action.localTracksByPid;
     default:
       return state;
   }
@@ -359,7 +399,8 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
     case 'CHANGE_INVERT_CALLSTACK':
     case 'CHANGE_SELECTED_CALL_NODE':
     case 'CHANGE_SELECTED_THREAD':
-    case 'HIDE_THREAD':
+    case 'HIDE_GLOBAL_TRACK':
+    case 'HIDE_LOCAL_TRACK':
       return state + 1;
     default:
       return state;
@@ -405,10 +446,16 @@ function tabOrder(state: number[] = getInitialTabOrder(), action: Action) {
   }
 }
 
-function rightClickedThread(state: ThreadIndex = 0, action: Action) {
+function rightClickedTrack(
+  // Make the initial value the first global track, which is assumed to exists.
+  // This makes the track reference always exist, which in turn makes it so that
+  // we do not have to check for a null TrackReference.
+  state: TrackReference = { type: 'global', trackIndex: 0 },
+  action: Action
+) {
   switch (action.type) {
-    case 'CHANGE_RIGHT_CLICKED_THREAD':
-      return action.selectedThread;
+    case 'CHANGE_RIGHT_CLICKED_TRACK':
+      return action.trackReference;
     default:
       return state;
   }
@@ -483,10 +530,12 @@ export default wrapReducerInResetter(
       rootRange,
       zeroAt,
       tabOrder,
-      rightClickedThread,
+      rightClickedTrack,
       isCallNodeContextMenuVisible,
       profileSharingStatus,
     }),
+    globalTracks,
+    localTracksByPid,
     profile,
   })
 );
@@ -559,10 +608,105 @@ export const getDefaultCategory = (state: State): IndexIntoCategoryList =>
 export const getThreads = (state: State): Thread[] => getProfile(state).threads;
 export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
-export const getRightClickedThreadIndex = (state: State) =>
-  getProfileViewOptions(state).rightClickedThread;
+export const getRightClickedTrack = (state: State) =>
+  getProfileViewOptions(state).rightClickedTrack;
 export const getSelection = (state: State) =>
   getProfileViewOptions(state).selection;
+
+/**
+ * Tracks
+ */
+export const getGlobalTracks = (state: State) =>
+  getProfileView(state).globalTracks;
+export const getGlobalTrackReferences = createSelector(
+  getGlobalTracks,
+  (globalTracks): TrackReference[] =>
+    globalTracks.map((globalTrack, trackIndex) => ({
+      type: 'global',
+      trackIndex,
+    }))
+);
+
+// Warning: this selector returns a new object on every call, and will not properly
+// work with a PureComponent.
+export const getGlobalTrackAndIndexByPid = (state: State, pid: Pid) => {
+  const globalTracks = getGlobalTracks(state);
+  const globalTrackIndex = globalTracks.findIndex(
+    track => track.type === 'process' && track.pid === pid
+  );
+  if (globalTrackIndex === -1) {
+    throw new Error('Unable to find the track index for the given pid.');
+  }
+  const globalTrack = globalTracks[globalTrackIndex];
+  if (globalTrack.type !== 'process') {
+    throw new Error('The globalTrack must be a process type.');
+  }
+  return { globalTrackIndex, globalTrack };
+};
+export const getLocalTracksByPid = (state: State) =>
+  getProfileView(state).localTracksByPid;
+export const getLocalTracks = (state: State, pid: Pid) =>
+  ensureExists(
+    getProfileView(state).localTracksByPid.get(pid),
+    'Unable to get the tracks for the given pid.'
+  );
+export const getRightClickedThreadIndex = createSelector(
+  getRightClickedTrack,
+  getGlobalTracks,
+  getLocalTracksByPid,
+  (rightClickedTrack, globalTracks, localTracksByPid): null | ThreadIndex => {
+    if (rightClickedTrack.type === 'global') {
+      const track = globalTracks[rightClickedTrack.trackIndex];
+      return track.type === 'process' ? track.mainThreadIndex : null;
+    } else {
+      const { pid, trackIndex } = rightClickedTrack;
+      const localTracks = ensureExists(
+        localTracksByPid.get(pid),
+        'No local tracks found at that pid.'
+      );
+      const track = localTracks[trackIndex];
+
+      return track.type === 'thread' ? track.threadIndex : null;
+    }
+  }
+);
+export const getGlobalTrackNames = createSelector(
+  getGlobalTracks,
+  getThreads,
+  (globalTracks, threads): string[] =>
+    globalTracks.map(globalTrack =>
+      Tracks.getGlobalTrackName(globalTrack, threads)
+    )
+);
+export const getGlobalTrackName = (
+  state: State,
+  trackIndex: TrackIndex
+): string => getGlobalTrackNames(state)[trackIndex];
+export const getLocalTrackNamesByPid = createSelector(
+  getLocalTracksByPid,
+  getThreads,
+  (localTracksByPid, threads): Map<Pid, string[]> => {
+    const localTrackNamesByPid = new Map();
+    for (const [pid, localTracks] of localTracksByPid) {
+      localTrackNamesByPid.set(
+        pid,
+        localTracks.map(localTrack =>
+          Tracks.getLocalTrackName(localTrack, threads)
+        )
+      );
+    }
+    return localTrackNamesByPid;
+  }
+);
+export const getLocalTrackName = (
+  state: State,
+  pid: Pid,
+  trackIndex: TrackIndex
+): string =>
+  ensureExists(
+    getLocalTrackNamesByPid(state).get(pid),
+    'Could not find the track names from the given pid'
+  )[trackIndex];
 
 const _getDefaultCategoryWrappedInObject = createSelector(
   getDefaultCategory,

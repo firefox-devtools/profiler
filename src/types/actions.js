@@ -11,8 +11,15 @@ import type {
   ThreadIndex,
   IndexIntoMarkersTable,
   IndexIntoFuncTable,
+  Pid,
 } from './profile';
-import type { CallNodePath, CallNodeTable } from './profile-derived';
+import type {
+  CallNodePath,
+  CallNodeTable,
+  GlobalTrack,
+  LocalTrack,
+  TrackIndex,
+} from './profile-derived';
 import type { GetLabel } from '../profile-logic/labeling-strategies';
 import type { GetCategory } from '../profile-logic/color-categories';
 import type { TemporaryError } from '../utils/errors';
@@ -44,7 +51,10 @@ export type FunctionsUpdatePerThread = {
     funcNames: string[],
   |},
 };
-
+// Provide a type that can reference any track, whether local or global.
+export type TrackReference =
+  | {| +type: 'global', +trackIndex: TrackIndex |}
+  | {| +type: 'local', +trackIndex: TrackIndex, +pid: Pid |};
 export type RequestedLib = {|
   +debugName: string,
   +breakpadId: string,
@@ -55,25 +65,6 @@ type ProfileAction =
   | {|
       +type: 'ROUTE_NOT_FOUND',
       +url: string,
-    |}
-  | {|
-      +type: 'CHANGE_THREAD_ORDER',
-      +threadOrder: ThreadIndex[],
-    |}
-  | {|
-      +type: 'HIDE_THREAD',
-      +threadIndex: ThreadIndex,
-      +hiddenThreads: ThreadIndex[],
-      +threadOrder: ThreadIndex[],
-    |}
-  | {|
-      +type: 'SHOW_THREAD',
-      +threadIndex: ThreadIndex,
-    |}
-  | {|
-      +type: 'ISOLATE_THREAD',
-      +hiddenThreadIndexes: ThreadIndex[],
-      +isolatedThreadIndex: ThreadIndex,
     |}
   | {|
       +type: 'ASSIGN_TASK_TRACER_NAMES',
@@ -113,6 +104,48 @@ type ProfileAction =
   | {|
       +type: 'CHANGE_EXPANDED_ZIP_FILES',
       +expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
+    |}
+  | {|
+      +type: 'CHANGE_GLOBAL_TRACK_ORDER',
+      +globalTrackOrder: TrackIndex[],
+    |}
+  | {|
+      +type: 'HIDE_GLOBAL_TRACK',
+      +trackIndex: TrackIndex,
+      +selectedThreadIndex: ThreadIndex,
+    |}
+  | {|
+      +type: 'SHOW_GLOBAL_TRACK',
+      +trackIndex: TrackIndex,
+    |}
+  | {|
+      +type: 'ISOLATE_GLOBAL_TRACK',
+      +hiddenGlobalTracks: Set<TrackIndex>,
+      +isolatedTrackIndex: TrackIndex,
+      +selectedThreadIndex: ThreadIndex,
+    |}
+  | {|
+      +type: 'CHANGE_LOCAL_TRACK_ORDER',
+      +localTrackOrder: TrackIndex[],
+      +pid: Pid,
+    |}
+  | {|
+      +type: 'HIDE_LOCAL_TRACK',
+      +pid: Pid,
+      +trackIndex: TrackIndex,
+      +selectedThreadIndex: ThreadIndex,
+    |}
+  | {|
+      +type: 'SHOW_LOCAL_TRACK',
+      +pid: Pid,
+      +trackIndex: TrackIndex,
+    |}
+  | {|
+      +type: 'ISOLATE_LOCAL_TRACK',
+      +pid: Pid,
+      +hiddenGlobalTracks: Set<TrackIndex>,
+      +hiddenLocalTracks: Set<TrackIndex>,
+      +selectedThreadIndex: ThreadIndex,
     |}
   | {|
       +type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
@@ -162,8 +195,13 @@ type ReceiveProfileAction =
   | {|
       +type: 'VIEW_PROFILE',
       +profile: Profile,
-      +hiddenThreadIndexes: ThreadIndex[],
       +selectedThreadIndex: ThreadIndex | null,
+      +globalTracks: GlobalTrack[],
+      +globalTrackOrder: TrackIndex[],
+      +hiddenGlobalTracks: Set<TrackIndex>,
+      +localTracksByPid: Map<Pid, LocalTrack[]>,
+      +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+      +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
       +pathInZipFile: ?string,
       +dataSource: DataSource,
     |}
@@ -195,8 +233,8 @@ type UrlStateAction =
   | {| +type: 'CHANGE_SELECTED_TAB', +selectedTab: TabSlug |}
   | {| +type: 'ADD_RANGE_FILTER', +start: number, +end: number |}
   | {| +type: 'POP_RANGE_FILTERS', +firstRemovedFilterIndex: number |}
-  | {| +type: 'CHANGE_SELECTED_THREAD', +selectedThread: ThreadIndex |}
-  | {| +type: 'CHANGE_RIGHT_CLICKED_THREAD', +selectedThread: ThreadIndex |}
+  | {| +type: 'CHANGE_SELECTED_THREAD', +selectedThreadIndex: ThreadIndex |}
+  | {| +type: 'CHANGE_RIGHT_CLICKED_TRACK', +trackReference: TrackReference |}
   | {| +type: 'CHANGE_CALL_TREE_SEARCH_STRING', +searchString: string |}
   | {|
       +type: 'ADD_TRANSFORM_TO_STACK',
