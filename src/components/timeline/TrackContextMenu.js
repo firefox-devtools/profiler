@@ -125,6 +125,8 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         data={{ trackIndex }}
         onClick={this._toggleGlobalTrackVisibility}
         attributes={{
+          // The following id is used to select this item in tests.
+          'data-test-id': 'global-track-' + trackIndex,
           className: classNames({ checkable: true, checked: !isHidden }),
         }}
       >
@@ -166,6 +168,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         data={{ pid, trackIndex }}
         onClick={this._toggleLocalTrackVisibility}
         attributes={{
+          'data-test-id': `local-track-${pid}-${trackIndex}`,
           className: classNames('checkable indented', {
             checked: !hiddenLocalTracks.has(trackIndex),
           }),
@@ -209,6 +212,8 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         {threads.length > 1 && rightClickedThreadIndex !== null ? (
           <div>
             <MenuItem
+              // This attribute is used to identify this element in tests.
+              data-test-id="isolate-track"
               onClick={this._isolateTrack}
               disabled={hiddenGlobalTracks.size === globalTrackOrder.length - 1}
             >
