@@ -59,8 +59,9 @@ describe('timeline/GlobalTrack', function() {
       </Provider>
     );
 
-    const globalTrackLabel = view.find('.timelineTrackLabel').first();
-    const globalTrackRow = view.find('.timelineTrackGlobalRow').first();
+    const getGlobalTrackLabel = () => view.find('.timelineTrackLabel').first();
+    const getGlobalTrackRow = () =>
+      view.find('.timelineTrackGlobalRow').first();
 
     return {
       dispatch,
@@ -71,8 +72,8 @@ describe('timeline/GlobalTrack', function() {
       trackReference,
       trackIndex,
       threadIndex,
-      globalTrackLabel,
-      globalTrackRow,
+      getGlobalTrackLabel,
+      getGlobalTrackRow,
     };
   }
 
@@ -82,31 +83,48 @@ describe('timeline/GlobalTrack', function() {
   });
 
   it('has the correct selectors into useful parts of the component', function() {
-    const { globalTrackLabel, globalTrackRow } = setup();
-    expect(globalTrackLabel.text()).toBe('Content');
-    expect(globalTrackRow.exists()).toBe(true);
+    const { getGlobalTrackLabel, getGlobalTrackRow } = setup();
+    expect(getGlobalTrackLabel().text()).toBe('Content');
+    expect(getGlobalTrackRow().exists()).toBe(true);
   });
 
   it('starts out not being selected', function() {
-    const { getState, threadIndex, trackReference } = setup();
+    const {
+      getState,
+      getGlobalTrackRow,
+      threadIndex,
+      trackReference,
+    } = setup();
     expect(getRightClickedTrack(getState())).not.toEqual(trackReference);
     expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
+    expect(getGlobalTrackRow().hasClass('selected')).toBe(false);
   });
 
   it('can select a thread by clicking the label', () => {
-    const { getState, globalTrackLabel, threadIndex } = setup();
+    const {
+      getState,
+      getGlobalTrackLabel,
+      getGlobalTrackRow,
+      threadIndex,
+    } = setup();
     expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-    globalTrackLabel.simulate(
+    getGlobalTrackLabel().simulate(
       'mousedown',
       getMouseEvent({ button: LEFT_CLICK })
     );
     expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
+    expect(getGlobalTrackRow().hasClass('selected')).toBe(true);
   });
 
   it('can right click a thread', () => {
-    const { getState, globalTrackLabel, threadIndex, trackReference } = setup();
+    const {
+      getState,
+      getGlobalTrackLabel,
+      threadIndex,
+      trackReference,
+    } = setup();
 
-    globalTrackLabel.simulate(
+    getGlobalTrackLabel().simulate(
       'mousedown',
       getMouseEvent({ button: RIGHT_CLICK })
     );
@@ -115,9 +133,9 @@ describe('timeline/GlobalTrack', function() {
   });
 
   it('can select a thread by clicking the row', () => {
-    const { getState, globalTrackRow, threadIndex } = setup();
+    const { getState, getGlobalTrackRow, threadIndex } = setup();
     expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-    globalTrackRow.simulate('click');
+    getGlobalTrackRow().simulate('click');
     expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
   });
 
