@@ -198,30 +198,64 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     }
   }
 
-  render() {
+  renderIsolateTrack() {
     const {
       threads,
+      rightClickedThreadIndex,
+      rightClickedTrack,
       globalTrackOrder,
       hiddenGlobalTracks,
-      globalTracks,
-      rightClickedThreadIndex,
+      hiddenLocalTracksByPid,
+      localTrackOrderByPid,
     } = this.props;
+
+    if (threads.length === 1 || rightClickedThreadIndex === null) {
+      // This is not a valid candidate for hiding the thread. Either there are not
+      // enough threads, or the right clicked track didn't have an associated thread
+      // index.
+      return null;
+    }
+
+    let isOnlyOneTrackLeft;
+    if (rightClickedTrack.type === 'global') {
+      isOnlyOneTrackLeft =
+        hiddenGlobalTracks.size === globalTrackOrder.length - 1;
+    } else {
+      const hiddenLocalTracks = hiddenLocalTracksByPid.get(
+        rightClickedTrack.pid
+      );
+      const localTrackOrder = localTrackOrderByPid.get(rightClickedTrack.pid);
+      if (hiddenLocalTracks === undefined || localTrackOrder === undefined) {
+        console.error('Expected to find hiddenLocalTracks for the given pid.');
+        return null;
+      }
+
+      isOnlyOneTrackLeft =
+        hiddenLocalTracks.size === localTrackOrder.length - 1;
+    }
+    return (
+      <div>
+        <MenuItem
+          // This attribute is used to identify this element in tests.
+          data-test-id="isolate-track"
+          onClick={this._isolateTrack}
+          disabled={isOnlyOneTrackLeft}
+        >
+          Only show: {`"${this.getRightClickedTrackName()}"`}
+        </MenuItem>
+        <div className="react-contextmenu-separator" />
+      </div>
+    );
+  }
+
+  render() {
+    const { globalTrackOrder, globalTracks } = this.props;
 
     return (
       <ContextMenu id="TimelineTrackContextMenu">
-        {threads.length > 1 && rightClickedThreadIndex !== null ? (
-          <div>
-            <MenuItem
-              // This attribute is used to identify this element in tests.
-              data-test-id="isolate-track"
-              onClick={this._isolateTrack}
-              disabled={hiddenGlobalTracks.size === globalTrackOrder.length - 1}
-            >
-              Only show: {`"${this.getRightClickedTrackName()}"`}
-            </MenuItem>
-            <div className="react-contextmenu-separator" />
-          </div>
-        ) : null}
+        {// This may or may not render the isolate track options, depending
+        // on whether it's actually valid to do so.
+        this.renderIsolateTrack()}
         {globalTrackOrder.map(globalTrackIndex => {
           const globalTrack = globalTracks[globalTrackIndex];
           return (

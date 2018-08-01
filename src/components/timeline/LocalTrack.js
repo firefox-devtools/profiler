@@ -22,7 +22,6 @@ import {
   getLocalTrackName,
 } from '../../reducers/profile-view';
 import TrackThread from './TrackThread';
-import type { TrackReference } from '../../types/actions';
 import type { ThreadIndex, Pid } from '../../types/profile';
 import type { TrackIndex, LocalTrack } from '../../types/profile-derived';
 import type {
@@ -34,7 +33,6 @@ type OwnProps = {|
   +pid: Pid,
   +localTrack: LocalTrack,
   +trackIndex: TrackIndex,
-  +trackReference?: TrackReference,
   +style?: Object /* This is used by Reorderable */,
 |};
 
@@ -59,7 +57,8 @@ class LocalTrackComponent extends PureComponent<Props> {
       changeSelectedThread,
       changeRightClickedTrack,
       threadIndex,
-      trackReference,
+      pid,
+      trackIndex,
     } = this.props;
 
     if (event.button === 0) {
@@ -71,9 +70,7 @@ class LocalTrackComponent extends PureComponent<Props> {
     } else if (event.button === 2) {
       // This is needed to allow the context menu to know what was right clicked without
       // actually changing the current selection.
-      if (trackReference) {
-        changeRightClickedTrack(trackReference);
-      }
+      changeRightClickedTrack({ type: 'local', pid, trackIndex });
     }
   };
 

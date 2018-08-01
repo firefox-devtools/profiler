@@ -54,12 +54,7 @@ describe('timeline/LocalTrack', function() {
 
     const view = mount(
       <Provider store={store}>
-        <LocalTrack
-          pid={pid}
-          localTrack={localTrack}
-          trackIndex={trackIndex}
-          trackReference={trackReference}
-        />
+        <LocalTrack pid={pid} localTrack={localTrack} trackIndex={trackIndex} />
       </Provider>
     );
 
