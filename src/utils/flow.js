@@ -19,8 +19,11 @@ import type { TransformType } from '../types/transforms';
  * and the input to the function will be empty. This function hopefully makes that check
  * more readable.
  */
-export function assertExhaustiveCheck(notValid: empty): void {
-  throw new Error(`There was an unhandled case for the value: "${notValid}"`);
+export function assertExhaustiveCheck(
+  notValid: empty,
+  errorMessage: string = `There was an unhandled case for the value: "${notValid}"`
+): void {
+  throw new Error(errorMessage);
 }
 
 /**

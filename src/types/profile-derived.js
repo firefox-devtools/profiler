@@ -5,7 +5,7 @@
 // @flow
 import type { Milliseconds } from './units';
 import type { MarkerPayload } from './markers';
-import type { IndexIntoFuncTable } from './profile';
+import type { IndexIntoFuncTable, ThreadIndex, Pid } from './profile';
 export type IndexIntoCallNodeTable = number;
 
 /**
@@ -112,3 +112,15 @@ export type MarkerTiming = {
 export type MarkerTimingRows = Array<MarkerTiming>;
 
 export type StackType = 'js' | 'native' | 'unsymbolicated';
+
+export type GlobalTrack =
+  | {| +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null |}
+  | {| +type: 'screenshots' |};
+
+export type LocalTrack =
+  | {| +type: 'thread', +threadIndex: ThreadIndex |}
+  | {| +type: 'network', +threadIndex: ThreadIndex |}
+  | {| +type: 'memory', +threadIndex: ThreadIndex |};
+
+export type Track = GlobalTrack | LocalTrack;
+export type TrackIndex = number;

@@ -7,6 +7,7 @@
  * @jest-environment jsdom
  */
 import * as urlStateReducers from '../reducers/url-state';
+import * as profileViewSelectors from '../reducers/profile-view';
 import {
   stateFromLocation,
   urlStateToUrlObject,
@@ -17,10 +18,15 @@ import { blankStore } from './fixtures/stores';
 import getGeckoProfile from './fixtures/profiles/gecko-profile';
 import { processProfile } from '../profile-logic/process-profile';
 import { viewProfile } from '../actions/receive-profile';
-import { selectedThreadSelectors } from '../reducers/profile-view';
 import type { Profile } from '../types/profile';
 import getProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
+import {
+  getHumanReadableTracks,
+  getProfileWithNiceTracks,
+} from './fixtures/profiles/tracks';
+
+const { selectedThreadSelectors } = profileViewSelectors;
 
 function _getStoreWithURL(
   settings: {
@@ -103,49 +109,105 @@ describe('selectedThread', function() {
   });
 });
 
-describe('threadOrder and hiddenThreads', function() {
-  const profileWithThreads: Profile = processProfile(getGeckoProfile());
+describe('url handling tracks', function() {
+  function initWithSearchParams(search: string) {
+    return _getStoreWithURL({ search }, getProfileWithNiceTracks());
+  }
 
-  it('decides the threadOrder and hiddenThreads without any set parameters', function() {
-    const { getState } = _getStoreWithURL({ search: '' }, profileWithThreads);
-    expect(urlStateReducers.getThreadOrder(getState())).toEqual([0, 2, 1]);
-    expect(urlStateReducers.getHiddenThreads(getState())).toEqual([]);
+  describe('global tracks', function() {
+    it('creates tracks without any set search parameters', function() {
+      const { getState } = initWithSearchParams('');
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain tab]',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
+
+    it('can reorder global tracks ', function() {
+      const { getState } = initWithSearchParams('?globalTrackOrder=1-0');
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain tab]',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+        'show [thread GeckoMain process] SELECTED',
+      ]);
+    });
+
+    it('can hide tracks', function() {
+      const { getState } = initWithSearchParams('?hiddenGlobalTracks=1');
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'hide [thread GeckoMain tab]',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
+
+    it('will not accept invalid tracks in the thread order', function() {
+      const { getState } = initWithSearchParams('?globalTrackOrder=1-0');
+      expect(urlStateReducers.getGlobalTrackOrder(getState())).toEqual([1, 0]);
+    });
+
+    it('will not accept invalid hidden threads', function() {
+      const { getState } = initWithSearchParams(
+        '?hiddenGlobalTracks=0-8-2-a&thread=1'
+      );
+      expect(urlStateReducers.getHiddenGlobalTracks(getState())).toEqual(
+        new Set([0])
+      );
+    });
   });
 
-  it('can reorder the threads ', function() {
-    const { getState } = _getStoreWithURL(
-      { search: '?threadOrder=1-2-0' },
-      profileWithThreads
-    );
-    expect(urlStateReducers.getThreadOrder(getState())).toEqual([1, 2, 0]);
-    expect(urlStateReducers.getHiddenThreads(getState())).toEqual([]);
+  describe('local tracks', function() {
+    it('can reorder local tracks ', function() {
+      const { getState } = initWithSearchParams(
+        '?localTrackOrderByPid=222-1-0'
+      );
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain tab]',
+        '  - show [thread Style]',
+        '  - show [thread DOM Worker]',
+      ]);
+    });
+
+    it('can hide local tracks ', function() {
+      const { getState } = initWithSearchParams(
+        '?hiddenLocalTracksByPid=222-1'
+      );
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'show [thread GeckoMain tab]',
+        '  - show [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+    });
   });
 
-  it('can hide the threads', function() {
-    const { getState } = _getStoreWithURL(
-      { search: '?hiddenThreads=1-2' },
-      profileWithThreads
-    );
-    expect(urlStateReducers.getThreadOrder(getState())).toEqual([0, 2, 1]);
-    expect(urlStateReducers.getHiddenThreads(getState())).toEqual([1, 2]);
-  });
+  describe('legacy thread information', function() {
+    it('handles legacy thread ordering', function() {
+      // Flip the threads around
+      const { getState } = initWithSearchParams('?threadOrder=3-2-1-0');
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain tab]',
+        '  - show [thread Style]',
+        '  - show [thread DOM Worker]',
+        'show [thread GeckoMain process] SELECTED',
+      ]);
+    });
 
-  it('will not accept invalid threads in the thread order', function() {
-    const { getState } = _getStoreWithURL(
-      { search: '?threadOrder=0-8-2-a-1' },
-      profileWithThreads
-    );
-    expect(urlStateReducers.getThreadOrder(getState())).toEqual([0, 2, 1]);
-    expect(urlStateReducers.getHiddenThreads(getState())).toEqual([]);
-  });
-
-  it('will not accept invalid hidden threads', function() {
-    const { getState } = _getStoreWithURL(
-      { search: '?hiddenThreads=0-8-2-a&thread=1' },
-      profileWithThreads
-    );
-    expect(urlStateReducers.getThreadOrder(getState())).toEqual([0, 2, 1]);
-    expect(urlStateReducers.getHiddenThreads(getState())).toEqual([0, 2]);
+    it('handles legacy thread hiding', function() {
+      // Flip the threads around
+      const { getState } = initWithSearchParams('?hiddenThreads=0-2');
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
   });
 });
 

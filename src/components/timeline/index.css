@@ -15,4 +15,5 @@
   margin: 0 0 0 -150px;
   padding: 0;
   box-shadow: inset 0 1px var(--grey-30);
+  background-color: var(--grey-20);
 }
