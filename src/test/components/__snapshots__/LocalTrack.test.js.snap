@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`timeline/LocalTrack matches the snapshot of a local track 1`] = `
+<li
+  className="timelineTrack timelineTrackLocal"
+>
+  <div
+    className="timelineTrackRow timelineTrackLocalRow"
+    onClick={[Function]}
+  >
+    <div
+      className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+      onContextMenu={[Function]}
+      onMouseDown={[Function]}
+      onMouseOut={[Function]}
+      onMouseUp={[Function]}
+      onTouchEnd={[Function]}
+      onTouchStart={[Function]}
+      title="thread: \\"DOM Worker\\" (0)
+process: \\"tab\\" (222)"
+    >
+      <h1
+        className="timelineTrackName"
+      >
+        DOM Worker
+      </h1>
+    </div>
+    <div
+      className="timelineTrackTrack"
+    >
+      <div
+        className="timelineTrackThread"
+      >
+        <div
+          className="timelineTrackThreadIntervalMarkerOverview"
+        >
+          <canvas
+            className="timelineTracingMarkersCanvas"
+            onMouseDown={[Function]}
+            onMouseMove={[Function]}
+            onMouseOut={[Function]}
+            onMouseUp={[Function]}
+          />
+        </div>
+        <div
+          className="timelineStackGraph"
+        >
+          <canvas
+            className="timelineStackGraphCanvas"
+            onMouseUp={[Function]}
+          />
+        </div>
+        <div
+          className="timelineEmptyThreadIndicator"
+        />
+      </div>
+    </div>
+  </div>
+</li>
+`;
