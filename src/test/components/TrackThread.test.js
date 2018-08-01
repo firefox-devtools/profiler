@@ -28,6 +28,16 @@ import {
   getEmptyThread,
 } from '../fixtures/profiles/make-profile';
 
+// The graph is 400 pixels wide based on the getBoundingBox mock. Each stack is 100
+// pixels wide. Use the value 50 to click in the middle of this stack, and
+// incrementing by steps of 100 pixels to get to the next stack.
+const GRAPH_WIDTH = 400;
+const GRAPH_HEIGHT = 50;
+const STACK_1_X_POSITION = 50;
+const STACK_2_X_POSITION = 150;
+const STACK_3_X_POSITION = 250;
+const STACK_4_X_POSITION = 350;
+
 describe('timeline/TrackThread', function() {
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
@@ -62,7 +72,7 @@ describe('timeline/TrackThread', function() {
 
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(400, 50));
+      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
     const view = mount(
       <Provider store={store}>
@@ -123,16 +133,28 @@ describe('timeline/TrackThread', function() {
           thread.stringTable.getString(thread.funcTable.name[funcIndex])
         );
 
-    stackGraphCanvas.simulate('mouseup', getMouseEvent({ pageX: 50 }));
+    stackGraphCanvas.simulate(
+      'mouseup',
+      getMouseEvent({ pageX: STACK_1_X_POSITION })
+    );
     expect(getCallNodePath()).toEqual(['a', 'b', 'c']);
 
-    stackGraphCanvas.simulate('mouseup', getMouseEvent({ pageX: 150 }));
+    stackGraphCanvas.simulate(
+      'mouseup',
+      getMouseEvent({ pageX: STACK_2_X_POSITION })
+    );
     expect(getCallNodePath()).toEqual(['d', 'e', 'f']);
 
-    stackGraphCanvas.simulate('mouseup', getMouseEvent({ pageX: 250 }));
+    stackGraphCanvas.simulate(
+      'mouseup',
+      getMouseEvent({ pageX: STACK_3_X_POSITION })
+    );
     expect(getCallNodePath()).toEqual(['g', 'h', 'i']);
 
-    stackGraphCanvas.simulate('mouseup', getMouseEvent({ pageX: 350 }));
+    stackGraphCanvas.simulate(
+      'mouseup',
+      getMouseEvent({ pageX: STACK_4_X_POSITION })
+    );
     expect(getCallNodePath()).toEqual(['j', 'k', 'l']);
   });
 
@@ -145,12 +167,12 @@ describe('timeline/TrackThread', function() {
       return getSelection(getState());
     }
 
-    expect(clickAndGetMarkerName(50)).toMatchObject({
+    expect(clickAndGetMarkerName(STACK_1_X_POSITION)).toMatchObject({
       selectionStart: 0,
       selectionEnd: 1,
     });
 
-    expect(clickAndGetMarkerName(150)).toMatchObject({
+    expect(clickAndGetMarkerName(STACK_2_X_POSITION)).toMatchObject({
       selectionStart: 1,
       selectionEnd: 2,
     });
@@ -166,8 +188,14 @@ describe('timeline/TrackThread', function() {
     dispatch(changeSelectedThread(otherThread));
     expect(getSelectedThreadIndex(getState())).toBe(otherThread);
 
-    tracingMarkersCanvas.simulate('mousedown', getMouseEvent({ pageX: 50 }));
-    tracingMarkersCanvas.simulate('mouseup', getMouseEvent({ pageX: 50 }));
+    tracingMarkersCanvas.simulate(
+      'mousedown',
+      getMouseEvent({ pageX: STACK_1_X_POSITION })
+    );
+    tracingMarkersCanvas.simulate(
+      'mouseup',
+      getMouseEvent({ pageX: STACK_1_X_POSITION })
+    );
     expect(getSelectedThreadIndex(getState())).toBe(thisThread);
   });
 });

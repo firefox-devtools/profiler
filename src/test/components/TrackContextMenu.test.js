@@ -135,6 +135,9 @@ describe('timeline/TrackContextMenu', function() {
       const results = setup();
       const { view, dispatch, getState } = results;
 
+      // In getProfileWithNiceTracks, the two pids are 111 and 222 for the
+      // "GeckoMain process" and "GeckoMain tab" respectively. Use 222 since it has
+      // local tracks.
       const pid = 222;
       const trackIndex = 0;
       const trackReference = {
