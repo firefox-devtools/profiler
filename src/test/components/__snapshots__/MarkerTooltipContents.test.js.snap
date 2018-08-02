@@ -356,14 +356,14 @@ Array [
       <div
         className="tooltipLabel"
       >
-        Bytes tenured
+        Bytes evicted
         :
       </div>
       1.30MB / 1.97MB (66%)
       <div
         className="tooltipLabel"
       >
-        Cells tenured
+        Cells evicted
         :
       </div>
       15.9K / 26.6K (60%)
@@ -384,14 +384,14 @@ Array [
       <div
         className="tooltipLabel"
       >
-        Tenure rate (bytes/sec)
+        Tenuring allocation rate
         :
       </div>
       190MB/s
       <div
         className="tooltipLabel"
       >
-        Tenure rate (cells/sec)
+        Tenuring allocation rate
         :
       </div>
       23.1M/s
