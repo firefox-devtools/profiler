@@ -8,7 +8,7 @@ import { ContextMenu, MenuItem } from 'react-contextmenu';
 import {
   hideGlobalTrack,
   showGlobalTrack,
-  isolateGlobalTrack,
+  isolateProcess,
   isolateLocalTrack,
   hideLocalTrack,
   showLocalTrack,
@@ -57,7 +57,7 @@ type StateProps = {|
 type DispatchProps = {|
   +hideGlobalTrack: typeof hideGlobalTrack,
   +showGlobalTrack: typeof showGlobalTrack,
-  +isolateGlobalTrack: typeof isolateGlobalTrack,
+  +isolateProcess: typeof isolateProcess,
   +hideLocalTrack: typeof hideLocalTrack,
   +showLocalTrack: typeof showLocalTrack,
   +isolateLocalTrack: typeof isolateLocalTrack,
@@ -101,13 +101,9 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   };
 
   _isolateTrack = () => {
-    const {
-      isolateGlobalTrack,
-      isolateLocalTrack,
-      rightClickedTrack,
-    } = this.props;
+    const { isolateProcess, isolateLocalTrack, rightClickedTrack } = this.props;
     if (rightClickedTrack.type === 'global') {
-      isolateGlobalTrack(rightClickedTrack.trackIndex);
+      isolateProcess(rightClickedTrack.trackIndex);
     } else {
       const { pid, trackIndex } = rightClickedTrack;
       isolateLocalTrack(pid, trackIndex);
@@ -288,7 +284,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapDispatchToProps: {
     hideGlobalTrack,
     showGlobalTrack,
-    isolateGlobalTrack,
+    isolateProcess,
     hideLocalTrack,
     showLocalTrack,
     isolateLocalTrack,
