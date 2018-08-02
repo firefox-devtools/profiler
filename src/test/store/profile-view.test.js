@@ -182,98 +182,21 @@ describe('actions/ProfileView', function() {
     });
   });
 
-  describe('changeRightClickedThread', function() {
+  describe('changeRightClickedTrack', function() {
     it('changes the right clicked thread index', function() {
       const { profile } = getProfileFromTextSamples('A', 'B');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(
-        ProfileViewSelectors.getRightClickedThreadIndex(getState())
-      ).toEqual(0);
-      dispatch(ProfileView.changeRightClickedThread(1));
-      expect(
-        ProfileViewSelectors.getRightClickedThreadIndex(getState())
-      ).toEqual(1);
-    });
-  });
-
-  describe('changeThreadOrder', function() {
-    it('changes the thread order', function() {
-      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-      const { dispatch, getState } = storeWithProfile(profile);
-
-      expect(UrlStateSelectors.getThreadOrder(getState())).toEqual([0, 1, 2]);
-      withAnalyticsMock(() => {
-        dispatch(ProfileView.changeThreadOrder([2, 1, 0]));
-        expect(self.ga).toBeCalledWith('send', {
-          eventAction: 'change thread order',
-          eventCategory: 'profile',
-          hitType: 'event',
-        });
+      expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual({
+        trackIndex: 0,
+        type: 'global',
       });
-      expect(UrlStateSelectors.getThreadOrder(getState())).toEqual([2, 1, 0]);
-    });
-  });
-
-  describe('hideThread', function() {
-    it('hides threads', function() {
-      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-      const { dispatch, getState } = storeWithProfile(profile);
-
-      expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([]);
-      withAnalyticsMock(() => {
-        dispatch(ProfileView.hideThread(1));
-        expect(self.ga).toBeCalledWith('send', {
-          eventAction: 'hide',
-          eventCategory: 'threads',
-          eventLabel: 'Empty',
-          hitType: 'event',
-        });
-      });
-      expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([1]);
-    });
-  });
-
-  describe('showThread', function() {
-    it('shows threads', function() {
-      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-      const { dispatch, getState } = storeWithProfile(profile);
-
-      dispatch(ProfileView.hideThread(0));
-      dispatch(ProfileView.hideThread(1));
-
-      expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([0, 1]);
-
-      withAnalyticsMock(() => {
-        dispatch(ProfileView.showThread(0));
-        expect(self.ga).toBeCalledWith('send', {
-          eventAction: 'show',
-          eventCategory: 'threads',
-          eventLabel: 'Empty',
-          hitType: 'event',
-        });
-      });
-      expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([1]);
-    });
-  });
-
-  describe('isolateThread', function() {
-    it('isolates a thread', function() {
-      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-      const { dispatch, getState } = storeWithProfile(profile);
-
-      expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([]);
-
-      withAnalyticsMock(() => {
-        dispatch(ProfileView.isolateThread(1));
-
-        expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([0, 2]);
-        expect(self.ga).toBeCalledWith('send', {
-          eventAction: 'isolate',
-          eventCategory: 'threads',
-          eventLabel: 'Empty',
-          hitType: 'event',
-        });
+      dispatch(
+        ProfileView.changeRightClickedTrack({ trackIndex: 1, type: 'global' })
+      );
+      expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual({
+        trackIndex: 1,
+        type: 'global',
       });
     });
   });
@@ -784,11 +707,12 @@ describe('snapshots of selectors/profile-view', function() {
       'Thread with markers',
     ]);
   });
-  it('matches the last stored run of getRightClickedThreadIndex', function() {
+  it('matches the last stored run of getRightClickedTrack', function() {
     const { getState } = setupStore();
-    expect(ProfileViewSelectors.getRightClickedThreadIndex(getState())).toEqual(
-      0
-    );
+    expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual({
+      trackIndex: 0,
+      type: 'global',
+    });
   });
   it('matches the last stored run of selectedThreadSelector.getThread', function() {
     const { getState, samplesThread } = setupStore();
