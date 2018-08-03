@@ -17,7 +17,7 @@ import {
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 
-export const CURRENT_VERSION = 11; // The current version of the Gecko profile format.
+export const CURRENT_VERSION = 12; // The current version of the Gecko profile format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -429,6 +429,32 @@ const _upgraders = {
       }
     }
     convertToVersionElevenRecursive(profile);
+  },
+  [12]: profile => {
+    //This version will add column numbers to the JS functions and scripts.
+    //There is a new property in the frameTable called "column" that takes over
+    //the old value used by the "category" property (4).  The new value for
+    //"category" will be 5.  The upgrader needs to remap all of the old category
+    //indices to the new one, and delete the old property in each frame.
+    const oldSchemaCategoryIndex = 4;
+    const newSchemaCategoryIndex = 5;
+    function convertToVersionTwelveRecursive(p) {
+      for (const thread of p.threads) {
+        const schemaIndexCategory = thread.frameTable.schema.category;
+        for (const frame of thread.frameTable.data) {
+          if (schemaIndexCategory in frame) {
+            frame[newSchemaCategoryIndex] = frame[oldSchemaCategoryIndex];
+            delete frame[oldSchemaCategoryIndex];
+          }
+        }
+        thread.frameTable.schema.category = newSchemaCategoryIndex;
+        thread.frameTable.schema.column = oldSchemaCategoryIndex;
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersionTwelveRecursive(subprocessProfile);
+      }
+    }
+    convertToVersionTwelveRecursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */

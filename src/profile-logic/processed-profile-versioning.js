@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 14; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 15; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -634,6 +634,17 @@ const _upgraders = {
       const thread = threads[threadIndex];
       if (thread.pid === null || thread.pid === undefined) {
         thread.pid = `Unknown Process ${threadIndex + 1}`;
+      }
+    }
+  },
+  [15]: profile => {
+    // Profiles now have a column property in the frameTable
+    for (const thread of profile.threads) {
+      for (let i = 0; i < thread.frameTable.length; i++) {
+        thread.frameTable.column = new Array(thread.frameTable.length);
+        for (let j = 0; j < thread.frameTable.length; j++) {
+          thread.frameTable.column[j] = null;
+        }
       }
     }
   },
