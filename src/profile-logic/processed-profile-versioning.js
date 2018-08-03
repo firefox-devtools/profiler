@@ -640,11 +640,9 @@ const _upgraders = {
   [15]: profile => {
     // Profiles now have a column property in the frameTable
     for (const thread of profile.threads) {
+      thread.frameTable.column = new Array(thread.frameTable.length);
       for (let i = 0; i < thread.frameTable.length; i++) {
-        thread.frameTable.column = new Array(thread.frameTable.length);
-        for (let j = 0; j < thread.frameTable.length; j++) {
-          thread.frameTable.column[j] = null;
-        }
+        thread.frameTable.column[i] = null;
       }
     }
   },

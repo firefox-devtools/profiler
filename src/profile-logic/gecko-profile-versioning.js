@@ -432,10 +432,9 @@ const _upgraders = {
   },
   [12]: profile => {
     //This version will add column numbers to the JS functions and scripts.
-    //There is a new property in the frameTable called "column" that takes over
-    //the old value used by the "category" property (4).  The new value for
-    //"category" will be 5.  The upgrader needs to remap all of the old category
-    //indices to the new one, and delete the old property in each frame.
+    //There is also a new property in the frameTable called "column" which
+    //swaps positions with the "category" property.  The new value for
+    //"category" in the frameTable schema will be 5.
     const oldSchemaCategoryIndex = 4;
     const newSchemaCategoryIndex = 5;
     function convertToVersionTwelveRecursive(p) {
