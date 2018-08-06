@@ -5,6 +5,7 @@
 // @flow
 import { CallTree } from '../profile-logic/call-tree';
 import type JSZip from 'jszip';
+import type { FastPreviewSelection } from '../app-logic/fast-preview-selection';
 import type {
   Profile,
   Thread,
@@ -91,6 +92,14 @@ type ProfileAction =
     |}
   | {|
       +type: 'UPDATE_PREVIEW_SELECTION',
+      +previewSelection: PreviewSelection,
+    |}
+  | {|
+      +type: 'CREATE_FAST_PREVIEW_SELECTION',
+      +fastPreviewSelection: FastPreviewSelection,
+    |}
+  | {|
+      +type: 'REMOVE_FAST_PREVIEW_SELECTION',
       +previewSelection: PreviewSelection,
     |}
   | {|

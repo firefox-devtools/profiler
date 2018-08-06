@@ -9,7 +9,6 @@ import clamp from 'clamp';
 import { getContentRect } from '../../utils/css-geometry-tools';
 import {
   getProfileInterval,
-  getPreviewSelection,
   getCommittedRange,
   getZeroAt,
 } from '../../reducers/profile-view';
@@ -21,6 +20,7 @@ import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import Draggable from '../shared/Draggable';
 import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
+import { withFastPreviewSelection } from '../shared/WithFastPreviewSelection';
 import './Selection.css';
 
 import type { OnMove } from '../shared/Draggable';
@@ -39,7 +39,6 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
   +zeroAt: Milliseconds,
   +minSelectionStartWidth: Milliseconds,
@@ -50,7 +49,11 @@ type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
+  // The previewSelection is injected by withFastPreviewSelection.
+  +previewSelection: PreviewSelection,
+|};
 
 type State = {|
   hoverLocation: null | CssPixels,
@@ -376,7 +379,6 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
-    previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),
     minSelectionStartWidth: getProfileInterval(state),
@@ -385,7 +387,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     updatePreviewSelection,
     commitRange,
   },
-  component: TimelineRulerAndSelection,
+  component: withFastPreviewSelection(TimelineRulerAndSelection),
 };
 
 export default explicitConnect(options);

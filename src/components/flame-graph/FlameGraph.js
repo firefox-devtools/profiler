@@ -5,12 +5,12 @@
 // @flow
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
+import { withFastPreviewSelection } from '../shared/WithFastPreviewSelection';
 import FlameGraphCanvas from './Canvas';
 import {
   selectedThreadSelectors,
   getCommittedRange,
   getProfileViewOptions,
-  getPreviewSelection,
   getScrollToSelectionGeneration,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
@@ -44,7 +44,6 @@ type StateProps = {|
   +thread: Thread,
   +maxStackDepth: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
-  +previewSelection: PreviewSelection,
   +flameGraphTiming: FlameGraphTiming,
   +threadName: string,
   +processDetails: string,
@@ -59,7 +58,11 @@ type StateProps = {|
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
 |};
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = {|
+  ...ConnectedProps<{||}, StateProps, DispatchProps>,
+  // Injected by withFastPreviewSelection.
+  +previewSelection: PreviewSelection,
+|};
 
 class FlameGraph extends React.PureComponent<Props> {
   _onSelectedCallNodeChange = (
@@ -160,7 +163,6 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
       callTree: selectedThreadSelectors.getCallTree(state),
       timeRange: getCommittedRange(state),
-      previewSelection: getPreviewSelection(state),
       threadName: selectedThreadSelectors.getFriendlyThreadName(state),
       processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
@@ -177,7 +179,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapDispatchToProps: {
     changeSelectedCallNode,
   },
-  component: FlameGraph,
+  component: withFastPreviewSelection(FlameGraph),
 };
 
 export default explicitConnect(options);

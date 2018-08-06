@@ -23,6 +23,7 @@ import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import { arePathsEqual, PathSet } from '../utils/path';
 import { getInitialTabOrder } from '../app-logic/tabs-handling';
 
+import type { FastPreviewSelection } from '../app-logic/fast-preview-selection';
 import type {
   Profile,
   CategoryList,
@@ -387,11 +388,27 @@ function previewSelection(
 ): PreviewSelection {
   // TODO: Rename to timeRangeSelection
   switch (action.type) {
+    case 'REMOVE_FAST_PREVIEW_SELECTION':
     case 'UPDATE_PREVIEW_SELECTION':
       return action.previewSelection;
     case 'COMMIT_RANGE':
     case 'POP_COMMITTED_RANGES':
       return { hasSelection: false, isModifying: false };
+    default:
+      return state;
+  }
+}
+
+function fastPreviewSelection(
+  state: FastPreviewSelection | null = null,
+  action: Action
+): FastPreviewSelection | null {
+  // TODO: Rename to timeRangeSelection
+  switch (action.type) {
+    case 'CREATE_FAST_PREVIEW_SELECTION':
+      return action.fastPreviewSelection;
+    case 'REMOVE_FAST_PREVIEW_SELECTION':
+      return null;
     default:
       return state;
   }
@@ -528,6 +545,7 @@ export default wrapReducerInResetter(
       symbolicationStatus,
       waitingForLibs,
       previewSelection,
+      fastPreviewSelection,
       scrollToSelectionGeneration,
       focusCallTreeGeneration,
       rootRange,
@@ -615,6 +633,8 @@ export const getRightClickedTrack = (state: State) =>
   getProfileViewOptions(state).rightClickedTrack;
 export const getPreviewSelection = (state: State) =>
   getProfileViewOptions(state).previewSelection;
+export const getFastPreviewSelection = (state: State) =>
+  getProfileViewOptions(state).fastPreviewSelection;
 
 /**
  * Tracks

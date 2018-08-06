@@ -5,12 +5,12 @@
 // @flow
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
+import { withFastPreviewSelection } from '../shared/WithFastPreviewSelection';
 import StackChartCanvas from './Canvas';
 import {
   selectedThreadSelectors,
   getCommittedRange,
   getProfileInterval,
-  getPreviewSelection,
 } from '../../reducers/profile-view';
 import {
   getCategoryColorStrategy,
@@ -45,7 +45,6 @@ type StateProps = {|
   +interval: Milliseconds,
   +getCategory: GetCategory,
   +getLabel: GetLabel,
-  +previewSelection: PreviewSelection,
   +threadName: string,
   +processDetails: string,
 |};
@@ -54,7 +53,11 @@ type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = {|
+  ...ConnectedProps<{||}, StateProps, DispatchProps>,
+  // Injected by withFastPreviewSelection.
+  +previewSelection: PreviewSelection,
+|};
 
 class StackChartGraph extends React.PureComponent<Props> {
   /**
@@ -129,13 +132,12 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       interval: getProfileInterval(state),
       getCategory: getCategoryColorStrategy(state),
       getLabel: getLabelingStrategy(state),
-      previewSelection: getPreviewSelection(state),
       threadName: selectedThreadSelectors.getFriendlyThreadName(state),
       processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
     };
   },
   mapDispatchToProps: { updatePreviewSelection },
-  component: StackChartGraph,
+  component: withFastPreviewSelection(StackChartGraph),
 };
 export default explicitConnect(options);
 

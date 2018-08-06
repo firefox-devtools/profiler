@@ -22,6 +22,7 @@ import { getCallNodePathFromIndex } from '../profile-logic/profile-data';
 import { ensureExists } from '../utils/flow';
 import { sendAnalytics } from '../utils/analytics';
 
+import type { FastPreviewSelection } from '../app-logic/fast-preview-selection';
 import type {
   PreviewSelection,
   ImplementationFilter,
@@ -605,6 +606,24 @@ export function updatePreviewSelection(
 ): Action {
   return {
     type: 'UPDATE_PREVIEW_SELECTION',
+    previewSelection,
+  };
+}
+
+export function createFastPreviewSelection(
+  fastPreviewSelection: FastPreviewSelection
+): Action {
+  return {
+    type: 'CREATE_FAST_PREVIEW_SELECTION',
+    fastPreviewSelection,
+  };
+}
+
+export function removeFastPreviewSelection(
+  previewSelection: PreviewSelection
+): Action {
+  return {
+    type: 'REMOVE_FAST_PREVIEW_SELECTION',
     previewSelection,
   };
 }

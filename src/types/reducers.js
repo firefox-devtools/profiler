@@ -4,6 +4,7 @@
 
 // @flow
 
+import type { FastPreviewSelection } from '../app-logic/fast-preview-selection';
 import type {
   Action,
   DataSource,
@@ -55,6 +56,7 @@ export type ProfileViewState = {
     symbolicationStatus: SymbolicationStatus,
     waitingForLibs: Set<RequestedLib>,
     previewSelection: PreviewSelection,
+    fastPreviewSelection: FastPreviewSelection | null,
     scrollToSelectionGeneration: number,
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
