@@ -617,33 +617,10 @@ export function commitRange(start: number, end: number): Action {
   };
 }
 
-export function commitRangeAndUnsetSelection(
-  start: number,
-  end: number
-): ThunkAction<void> {
-  return dispatch => {
-    dispatch(commitRange(start, end));
-    dispatch(
-      updatePreviewSelection({ hasSelection: false, isModifying: false })
-    );
-  };
-}
-
 export function popCommittedRanges(firstPoppedFilterIndex: number): Action {
   return {
     type: 'POP_COMMITTED_RANGES',
     firstPoppedFilterIndex,
-  };
-}
-
-export function popCommittedRangesAndUnsetSelection(
-  firstPoppedFilterIndex: number
-): ThunkAction<void> {
-  return dispatch => {
-    dispatch(popCommittedRanges(firstPoppedFilterIndex));
-    dispatch(
-      updatePreviewSelection({ hasSelection: false, isModifying: false })
-    );
   };
 }
 

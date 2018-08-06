@@ -5,7 +5,7 @@
 // @flow
 
 import explicitConnect from '../../utils/connect';
-import { popCommittedRangesAndUnsetSelection } from '../../actions/profile-view';
+import { popCommittedRanges } from '../../actions/profile-view';
 import { getPreviewSelection } from '../../reducers/profile-view';
 import { getCommittedRangeLabels } from '../../reducers/url-state';
 import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
@@ -37,7 +37,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     };
   },
   mapDispatchToProps: {
-    onPop: popCommittedRangesAndUnsetSelection,
+    onPop: popCommittedRanges,
   },
   component: FilterNavigatorBar,
 };
