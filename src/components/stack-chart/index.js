@@ -8,7 +8,7 @@ import explicitConnect from '../../utils/connect';
 import StackChartCanvas from './Canvas';
 import {
   selectedThreadSelectors,
-  getDisplayRange,
+  getCommittedRange,
   getProfileInterval,
   getProfileViewOptions,
 } from '../../reducers/profile-view';
@@ -125,7 +125,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       thread: selectedThreadSelectors.getFilteredThread(state),
       maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
       stackTimingByDepth,
-      timeRange: getDisplayRange(state),
+      timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       getCategory: getCategoryColorStrategy(state),
       getLabel: getLabelingStrategy(state),

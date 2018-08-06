@@ -607,38 +607,38 @@ export function updateProfileSelection(selection: ProfileSelection): Action {
   };
 }
 
-export function addRangeFilter(start: number, end: number): Action {
+export function commitRange(start: number, end: number): Action {
   return {
-    type: 'ADD_RANGE_FILTER',
+    type: 'COMMIT_RANGE',
     start,
     end,
   };
 }
 
-export function addRangeFilterAndUnsetSelection(
+export function commitRangeAndUnsetSelection(
   start: number,
   end: number
 ): ThunkAction<void> {
   return dispatch => {
-    dispatch(addRangeFilter(start, end));
+    dispatch(commitRange(start, end));
     dispatch(
       updateProfileSelection({ hasSelection: false, isModifying: false })
     );
   };
 }
 
-export function popRangeFilters(firstRemovedFilterIndex: number): Action {
+export function popCommittedRanges(firstPoppedFilterIndex: number): Action {
   return {
-    type: 'POP_RANGE_FILTERS',
-    firstRemovedFilterIndex,
+    type: 'POP_COMMITTED_RANGES',
+    firstPoppedFilterIndex,
   };
 }
 
-export function popRangeFiltersAndUnsetSelection(
-  firstRemovedFilterIndex: number
+export function popCommittedRangesAndUnsetSelection(
+  firstPoppedFilterIndex: number
 ): ThunkAction<void> {
   return dispatch => {
-    dispatch(popRangeFilters(firstRemovedFilterIndex));
+    dispatch(popCommittedRanges(firstPoppedFilterIndex));
     dispatch(
       updateProfileSelection({ hasSelection: false, isModifying: false })
     );
@@ -670,14 +670,14 @@ export function addTransformToStack(
 }
 
 export function popTransformsFromStack(
-  firstRemovedFilterIndex: number
+  firstPoppedFilterIndex: number
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadIndex = getSelectedThreadIndex(getState());
     dispatch({
       type: 'POP_TRANSFORMS_FROM_STACK',
       threadIndex,
-      firstRemovedFilterIndex,
+      firstPoppedFilterIndex,
     });
   };
 }

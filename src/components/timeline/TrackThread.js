@@ -10,7 +10,7 @@ import StackGraph from './StackGraph';
 import {
   selectorsForThread,
   getProfileInterval,
-  getDisplayRange,
+  getCommittedRange,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
@@ -186,7 +186,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     const { threadIndex } = ownProps;
     const selectors = selectorsForThread(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
-    const displayRange = getDisplayRange(state);
+    const committedRange = getCommittedRange(state);
     return {
       thread: selectors.getFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
@@ -196,8 +196,8 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
           : -1,
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       interval: getProfileInterval(state),
-      rangeStart: displayRange.start,
-      rangeEnd: displayRange.end,
+      rangeStart: committedRange.start,
+      rangeEnd: committedRange.end,
     };
   },
   mapDispatchToProps: {

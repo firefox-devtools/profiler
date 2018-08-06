@@ -431,31 +431,31 @@ describe('actions/ProfileView', function() {
     });
   });
 
-  describe('addRangeFilter', function() {
-    it('adds a range filter', function() {
+  describe('commitRange', function() {
+    it('commits a range', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([]);
-      dispatch(ProfileView.addRangeFilter(0, 10));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([]);
+      dispatch(ProfileView.commitRange(0, 10));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
       ]);
 
-      dispatch(ProfileView.addRangeFilter(1, 9));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      dispatch(ProfileView.commitRange(1, 9));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
     });
   });
 
-  describe('addRangeFilterAndUnsetSelection', function() {
-    it('adds a range filter and unsets a selection', function() {
+  describe('commitRangeAndUnsetSelection', function() {
+    it('commits a range and unsets a selection', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      dispatch(ProfileView.addRangeFilter(0, 10));
+      dispatch(ProfileView.commitRange(0, 10));
       dispatch(
         ProfileView.updateProfileSelection({
           hasSelection: true,
@@ -464,7 +464,7 @@ describe('actions/ProfileView', function() {
           selectionEnd: 9,
         })
       );
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
       ]);
       expect(
@@ -476,8 +476,8 @@ describe('actions/ProfileView', function() {
         selectionStart: 1,
       });
 
-      dispatch(ProfileView.addRangeFilterAndUnsetSelection(2, 8));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      dispatch(ProfileView.commitRangeAndUnsetSelection(2, 8));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 2, end: 8 },
       ]);
@@ -490,33 +490,33 @@ describe('actions/ProfileView', function() {
     });
   });
 
-  describe('popRangeFilters', function() {
+  describe('popCommittedRanges', function() {
     function setupStore() {
       const { profile } = getProfileFromTextSamples('A');
       const store = storeWithProfile(profile);
-      store.dispatch(ProfileView.addRangeFilter(0, 10));
-      store.dispatch(ProfileView.addRangeFilter(1, 9));
-      store.dispatch(ProfileView.addRangeFilter(2, 8));
-      store.dispatch(ProfileView.addRangeFilter(3, 7));
+      store.dispatch(ProfileView.commitRange(0, 10));
+      store.dispatch(ProfileView.commitRange(1, 9));
+      store.dispatch(ProfileView.commitRange(2, 8));
+      store.dispatch(ProfileView.commitRange(3, 7));
       return store;
     }
 
-    it('pops a range filter', function() {
+    it('pops a commited range', function() {
       const { getState, dispatch } = setupStore();
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
         { start: 2, end: 8 },
         { start: 3, end: 7 },
       ]);
-      dispatch(ProfileView.popRangeFilters(2));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      dispatch(ProfileView.popCommittedRanges(2));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
     });
 
-    it('pops a range filter and unsets the selection', function() {
+    it('pops a committed range and unsets the selection', function() {
       const { getState, dispatch } = setupStore();
       dispatch(
         ProfileView.updateProfileSelection({
@@ -534,15 +534,15 @@ describe('actions/ProfileView', function() {
         selectionEnd: 9,
         selectionStart: 1,
       });
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
         { start: 2, end: 8 },
         { start: 3, end: 7 },
       ]);
 
-      dispatch(ProfileView.popRangeFiltersAndUnsetSelection(2));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      dispatch(ProfileView.popCommittedRangesAndUnsetSelection(2));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
@@ -677,7 +677,7 @@ describe('snapshots of selectors/profile-view', function() {
     dispatch(ProfileView.changeExpandedCallNodes(0, [[A], [A, B]]));
     dispatch(ProfileView.changeSelectedCallNode(0, [A, B]));
     dispatch(ProfileView.changeSelectedMarker(0, 1));
-    dispatch(ProfileView.addRangeFilter(3, 7)); // Reminder: upper bound "7" is exclusive.
+    dispatch(ProfileView.commitRange(3, 7)); // Reminder: upper bound "7" is exclusive.
     dispatch(
       ProfileView.updateProfileSelection({
         hasSelection: true,

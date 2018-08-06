@@ -10,7 +10,7 @@ import { updateProfileSelection } from '../../actions/profile-view';
 import {
   selectedThreadSelectors,
   getProfileViewOptions,
-  getDisplayRange,
+  getCommittedRange,
 } from '../../reducers/profile-view';
 import copy from 'copy-to-clipboard';
 
@@ -30,7 +30,7 @@ type StateProps = {|
   +thread: Thread,
   +markers: MarkersTable,
   +selection: ProfileSelection,
-  +displayRange: StartEndRange,
+  +committedRange: StartEndRange,
   +selectedMarker: IndexIntoMarkersTable,
 |};
 
@@ -52,12 +52,12 @@ class MarkersContextMenu extends PureComponent<Props> {
       markers,
       updateProfileSelection,
       selection,
-      displayRange,
+      committedRange,
     } = this.props;
 
     const selectionEnd = selection.hasSelection
       ? selection.selectionEnd
-      : displayRange.end;
+      : committedRange.end;
 
     updateProfileSelection({
       hasSelection: true,
@@ -72,13 +72,13 @@ class MarkersContextMenu extends PureComponent<Props> {
       selectedMarker,
       markers,
       updateProfileSelection,
-      displayRange,
+      committedRange,
       selection,
     } = this.props;
 
     const selectionStart = selection.hasSelection
       ? selection.selectionStart
-      : displayRange.start;
+      : committedRange.start;
 
     updateProfileSelection({
       hasSelection: true,
@@ -143,7 +143,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     thread: selectedThreadSelectors.getThread(state),
     markers: selectedThreadSelectors.getSearchFilteredMarkers(state),
     selection: getProfileViewOptions(state).selection,
-    displayRange: getDisplayRange(state),
+    committedRange: getCommittedRange(state),
     selectedMarker: selectedThreadSelectors.getViewOptions(state)
       .selectedMarker,
   }),

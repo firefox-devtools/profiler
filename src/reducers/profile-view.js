@@ -574,13 +574,13 @@ export const getTabOrder = createSelector(
   viewOptions => viewOptions.tabOrder
 );
 
-export const getDisplayRange = createSelector(
+export const getCommittedRange = createSelector(
   (state: State) => getProfileViewOptions(state).rootRange,
   (state: State) => getProfileViewOptions(state).zeroAt,
-  UrlState.getRangeFilters,
-  (rootRange, zeroAt, rangeFilters): StartEndRange => {
-    if (rangeFilters.length > 0) {
-      let { start, end } = rangeFilters[rangeFilters.length - 1];
+  UrlState.getAllCommittedRanges,
+  (rootRange, zeroAt, committedRanges): StartEndRange => {
+    if (committedRanges.length > 0) {
+      let { start, end } = committedRanges[committedRanges.length - 1];
       start += zeroAt;
       end += zeroAt;
       return { start, end };
@@ -756,7 +756,7 @@ export const selectorsForThread = (
      * interactions. The transforms are order dependendent.
      *
      * 1. Unfiltered - The first selector gets the unmodified original thread.
-     * 2. Range - New samples table with only samples in range.
+     * 2. Range - New samples table with only samples in the committed range.
      * 3. Transform - Apply the transform stack that modifies the stacks and samples.
      * 4. Implementation - Modify stacks and samples to only show a single implementation.
      * 5. Search - Exclude samples that don't include some text in the stack.
@@ -766,7 +766,7 @@ export const selectorsForThread = (
       getProfile(state).threads[threadIndex];
     const getRangeFilteredThread = createSelector(
       getThread,
-      getDisplayRange,
+      getCommittedRange,
       (thread, range): Thread => {
         const { start, end } = range;
         return ProfileData.filterThreadToRange(thread, start, end);
@@ -943,7 +943,7 @@ export const selectorsForThread = (
     );
     const getRangeSelectionFilteredTracingMarkers = createSelector(
       getTracingMarkers,
-      getDisplayRange,
+      getCommittedRange,
       (markers, range): TracingMarker[] => {
         const { start, end } = range;
         return ProfileData.filterTracingMarkersToRange(markers, start, end);
