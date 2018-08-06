@@ -23,7 +23,7 @@ import {
 } from './TracingMarkers';
 import {
   changeSelectedThread,
-  updateProfileSelection,
+  updatePreviewSelection,
   changeRightClickedTrack,
   changeSelectedCallNode,
   focusCallTree,
@@ -60,7 +60,7 @@ type StateProps = {|
 type DispatchProps = {|
   +changeSelectedThread: typeof changeSelectedThread,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
-  +updateProfileSelection: typeof updateProfileSelection,
+  +updatePreviewSelection: typeof updatePreviewSelection,
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
 |};
@@ -101,10 +101,10 @@ class TimelineTrackThread extends PureComponent<Props> {
     const {
       rangeStart,
       rangeEnd,
-      updateProfileSelection,
+      updatePreviewSelection,
       changeSelectedThread,
     } = this.props;
-    updateProfileSelection({
+    updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart: Math.max(rangeStart, start),
@@ -202,7 +202,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   },
   mapDispatchToProps: {
     changeSelectedThread,
-    updateProfileSelection,
+    updatePreviewSelection,
     changeRightClickedTrack,
     changeSelectedCallNode,
     focusCallTree,

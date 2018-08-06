@@ -11,7 +11,7 @@ import {
 import ChartCanvas from '../shared/chart/Canvas';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import TextMeasurement from '../../utils/text-measurement';
-import { updateProfileSelection } from '../../actions/profile-view';
+import { updatePreviewSelection } from '../../actions/profile-view';
 import { BLUE_40 } from '../../utils/colors';
 
 import type {
@@ -42,7 +42,7 @@ type OwnProps = {|
   +rowHeight: CssPixels,
   +markers: TracingMarker[],
   +threadIndex: ThreadIndex,
-  +updateProfileSelection: typeof updateProfileSelection,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
 type Props = {|
@@ -323,9 +323,9 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     if (markerIndex === null) {
       return;
     }
-    const { markers, updateProfileSelection } = this.props;
+    const { markers, updatePreviewSelection } = this.props;
     const marker = markers[markerIndex];
-    updateProfileSelection({
+    updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart: marker.start,

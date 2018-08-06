@@ -12,10 +12,10 @@ import {
   selectedThreadSelectors,
   getCommittedRange,
   getProfileInterval,
-  getProfileViewOptions,
+  getPreviewSelection,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
-import { updateProfileSelection } from '../../actions/profile-view';
+import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type {
   TracingMarker,
@@ -25,7 +25,7 @@ import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
 } from '../../types/units';
-import type { ProfileSelection } from '../../types/actions';
+import type { PreviewSelection } from '../../types/actions';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
@@ -36,7 +36,7 @@ require('./index.css');
 const ROW_HEIGHT = 16;
 
 type DispatchProps = {|
-  +updateProfileSelection: typeof updateProfileSelection,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
 type StateProps = {|
@@ -46,7 +46,7 @@ type StateProps = {|
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +interval: Milliseconds,
   +threadIndex: number,
-  +selection: ProfileSelection,
+  +previewSelection: PreviewSelection,
   +threadName: string,
   +processDetails: string,
 |};
@@ -69,10 +69,10 @@ class MarkerChart extends React.PureComponent<Props> {
       threadIndex,
       markerTimingRows,
       markers,
-      selection,
+      previewSelection,
       threadName,
       processDetails,
-      updateProfileSelection,
+      updatePreviewSelection,
     } = this.props;
 
     if (!markers.length) {
@@ -92,7 +92,7 @@ class MarkerChart extends React.PureComponent<Props> {
           key={threadIndex}
           viewportProps={{
             timeRange,
-            selection,
+            previewSelection,
             maxViewportHeight,
             viewportNeedsUpdate,
             maximumZoom: this.getMaximumZoom(),
@@ -100,7 +100,7 @@ class MarkerChart extends React.PureComponent<Props> {
           chartProps={{
             markerTimingRows,
             markers,
-            updateProfileSelection,
+            updatePreviewSelection,
             rangeStart: timeRange.start,
             rangeEnd: timeRange.end,
             rowHeight: ROW_HEIGHT,
@@ -133,12 +133,12 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
-      selection: getProfileViewOptions(state).selection,
+      previewSelection: getPreviewSelection(state),
       threadName,
       processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
     };
   },
-  mapDispatchToProps: { updateProfileSelection },
+  mapDispatchToProps: { updatePreviewSelection },
   component: MarkerChart,
 };
 export default explicitConnect(options);

@@ -7,7 +7,7 @@
 import type {
   Action,
   DataSource,
-  ProfileSelection,
+  PreviewSelection,
   ImplementationFilter,
   RequestedLib,
   TrackReference,
@@ -20,6 +20,7 @@ import type {
   ThreadIndex,
   Pid,
 } from './profile';
+
 import type {
   CallNodePath,
   GlobalTrack,
@@ -53,7 +54,7 @@ export type ProfileViewState = {
     perThread: ThreadViewOptions[],
     symbolicationStatus: SymbolicationStatus,
     waitingForLibs: Set<RequestedLib>,
-    selection: ProfileSelection,
+    previewSelection: PreviewSelection,
     scrollToSelectionGeneration: number,
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
