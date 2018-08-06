@@ -3,8 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .timelineSelection {
+  --thread-label-column-width: 150px;
+  --vertical-scrollbar-reserved-width: 15px;
+  --content-width: calc(100vw - var(--thread-label-column-width) - var(--vertical-scrollbar-reserved-width));
   position: relative;
-  margin-left: 149px;
+  width: var(--content-width);
+  margin-left: calc(var(--thread-label-column-width) - 1px);
   border-left: 1px solid var(--grey-30);
   -moz-user-focus: ignore;
 }
