@@ -47,6 +47,7 @@
     "common-tags": "^1.7.2",
     "copy-to-clipboard": "^3.0.8",
     "escape-string-regexp": "^1.0.5",
+    "events": "^3.0.0",
     "jszip": "^3.1.5",
     "memoize-immutable": "^3.0.0",
     "mixedtuplemap": "^1.0.0",
