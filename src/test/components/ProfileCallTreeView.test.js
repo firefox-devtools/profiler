@@ -19,7 +19,7 @@ import {
   changeCallTreeSearchString,
   changeImplementationFilter,
   changeInvertCallstack,
-  addRangeFilter,
+  commitRange,
 } from '../../actions/profile-view';
 
 describe('calltree/ProfileCallTreeView', function() {
@@ -135,7 +135,7 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
 
   it('shows reasons for being out of range of a threads samples', function() {
     const store = storeWithProfile(profile);
-    store.dispatch(addRangeFilter(5, 10));
+    store.dispatch(commitRange(5, 10));
     expect(renderWithStore(store)).toMatchSnapshot();
   });
 

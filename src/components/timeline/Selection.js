@@ -10,17 +10,17 @@ import { getContentRect } from '../../utils/css-geometry-tools';
 import {
   getProfileInterval,
   getProfileViewOptions,
-  getDisplayRange,
+  getCommittedRange,
   getZeroAt,
 } from '../../reducers/profile-view';
 import {
   updateProfileSelection,
-  addRangeFilterAndUnsetSelection,
+  commitRangeAndUnsetSelection,
 } from '../../actions/profile-view';
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import Draggable from '../shared/Draggable';
-import { getFormattedTimeLength } from '../../profile-logic/range-filters';
+import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
 import './Selection.css';
 
 import type { OnMove } from '../shared/Draggable';
@@ -40,13 +40,13 @@ type OwnProps = {|
 
 type StateProps = {|
   +selection: ProfileSelection,
-  +displayRange: StartEndRange,
+  +committedRange: StartEndRange,
   +zeroAt: Milliseconds,
   +minSelectionStartWidth: Milliseconds,
 |};
 
 type DispatchProps = {|
-  +addRangeFilterAndUnsetSelection: typeof addRangeFilterAndUnsetSelection,
+  +commitRangeAndUnsetSelection: typeof commitRangeAndUnsetSelection,
   +updateProfileSelection: typeof updateProfileSelection,
 |};
 
@@ -95,12 +95,12 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     // browsers.
     event.preventDefault();
 
-    const { displayRange, minSelectionStartWidth } = this.props;
+    const { committedRange, minSelectionStartWidth } = this.props;
     const mouseDownTime =
       (event.pageX - rect.left) /
         rect.width *
-        (displayRange.end - displayRange.start) +
-      displayRange.start;
+        (committedRange.end - committedRange.start) +
+      committedRange.start;
 
     let isRangeSelecting = false;
 
@@ -108,17 +108,17 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       const mouseMoveTime =
         (event.pageX - rect.left) /
           rect.width *
-          (displayRange.end - displayRange.start) +
-        displayRange.start;
+          (committedRange.end - committedRange.start) +
+        committedRange.start;
       const selectionStart = clamp(
         Math.min(mouseDownTime, mouseMoveTime),
-        displayRange.start,
-        displayRange.end
+        committedRange.start,
+        committedRange.end
       );
       const selectionEnd = clamp(
         Math.max(mouseDownTime, mouseMoveTime),
-        displayRange.start,
-        displayRange.end
+        committedRange.start,
+        committedRange.end
       );
       if (
         isRangeSelecting ||
@@ -139,17 +139,17 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         const mouseMoveTime =
           (event.pageX - rect.left) /
             rect.width *
-            (displayRange.end - displayRange.start) +
-          displayRange.start;
+            (committedRange.end - committedRange.start) +
+          committedRange.start;
         const selectionStart = clamp(
           Math.min(mouseDownTime, mouseMoveTime),
-          displayRange.start,
-          displayRange.end
+          committedRange.start,
+          committedRange.end
         );
         const selectionEnd = clamp(
           Math.max(mouseDownTime, mouseMoveTime),
-          displayRange.start,
-          displayRange.end
+          committedRange.start,
+          committedRange.end
         );
         this.props.updateProfileSelection({
           hasSelection: true,
@@ -167,8 +167,8 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         const mouseUpTime =
           (event.pageX - rect.left) /
             rect.width *
-            (displayRange.end - displayRange.start) +
-          displayRange.start;
+            (committedRange.end - committedRange.start) +
+          committedRange.start;
         const { selectionStart, selectionEnd } = selection;
         if (mouseUpTime < selectionStart || mouseUpTime >= selectionEnd) {
           // Unset selection.
@@ -227,17 +227,17 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     dy: number,
     isModifying: boolean
   ) => {
-    const { displayRange, width, updateProfileSelection } = this.props;
-    const delta = dx / width * (displayRange.end - displayRange.start);
+    const { committedRange, width, updateProfileSelection } = this.props;
+    const delta = dx / width * (committedRange.end - committedRange.start);
     const selectionDeltas = fun(delta);
     const selectionStart = Math.max(
-      displayRange.start,
+      committedRange.start,
       originalSelection.selectionStart + selectionDeltas.startDelta
     );
     const selectionEnd = clamp(
       originalSelection.selectionEnd + selectionDeltas.endDelta,
       selectionStart,
-      displayRange.end
+      committedRange.end
     );
     updateProfileSelection({
       hasSelection: true,
@@ -268,9 +268,9 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
   _zoomButtonOnClick = (e: SyntheticMouseEvent<>) => {
     e.stopPropagation();
-    const { selection, zeroAt, addRangeFilterAndUnsetSelection } = this.props;
+    const { selection, zeroAt, commitRangeAndUnsetSelection } = this.props;
     if (selection.hasSelection) {
-      addRangeFilterAndUnsetSelection(
+      commitRangeAndUnsetSelection(
         selection.selectionStart - zeroAt,
         selection.selectionEnd - zeroAt
       );
@@ -282,16 +282,16 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     +selectionEnd: number,
     +isModifying: boolean,
   }) {
-    const { displayRange, width } = this.props;
+    const { committedRange, width } = this.props;
     const { selectionStart, selectionEnd } = selection;
 
     const beforeWidth =
-      (selectionStart - displayRange.start) /
-      (displayRange.end - displayRange.start) *
+      (selectionStart - committedRange.start) /
+      (committedRange.end - committedRange.start) *
       width;
     const selectionWidth =
       (selectionEnd - selectionStart) /
-      (displayRange.end - displayRange.start) *
+      (committedRange.end - committedRange.start) *
       width;
 
     return (
@@ -375,13 +375,13 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     selection: getProfileViewOptions(state).selection,
-    displayRange: getDisplayRange(state),
+    committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),
     minSelectionStartWidth: getProfileInterval(state),
   }),
   mapDispatchToProps: {
     updateProfileSelection,
-    addRangeFilterAndUnsetSelection,
+    commitRangeAndUnsetSelection,
   },
   component: TimelineRulerAndSelection,
 };

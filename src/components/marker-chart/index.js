@@ -10,7 +10,7 @@ import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
 
 import {
   selectedThreadSelectors,
-  getDisplayRange,
+  getCommittedRange,
   getProfileInterval,
   getProfileViewOptions,
 } from '../../reducers/profile-view';
@@ -130,7 +130,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       markers,
       markerTimingRows,
       maxMarkerRows: markerTimingRows.length,
-      timeRange: getDisplayRange(state),
+      timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
       selection: getProfileViewOptions(state).selection,

@@ -231,8 +231,8 @@ type UrlStateAction =
   | {| +type: 'WAITING_FOR_PROFILE_FROM_FILE' |}
   | {| +type: 'PROFILE_PUBLISHED', +hash: string |}
   | {| +type: 'CHANGE_SELECTED_TAB', +selectedTab: TabSlug |}
-  | {| +type: 'ADD_RANGE_FILTER', +start: number, +end: number |}
-  | {| +type: 'POP_RANGE_FILTERS', +firstRemovedFilterIndex: number |}
+  | {| +type: 'COMMIT_RANGE', +start: number, +end: number |}
+  | {| +type: 'POP_COMMITTED_RANGES', +firstPoppedFilterIndex: number |}
   | {| +type: 'CHANGE_SELECTED_THREAD', +selectedThreadIndex: ThreadIndex |}
   | {| +type: 'CHANGE_RIGHT_CLICKED_TRACK', +trackReference: TrackReference |}
   | {| +type: 'CHANGE_CALL_TREE_SEARCH_STRING', +searchString: string |}
@@ -245,7 +245,7 @@ type UrlStateAction =
   | {|
       +type: 'POP_TRANSFORMS_FROM_STACK',
       +threadIndex: ThreadIndex,
-      +firstRemovedFilterIndex: number,
+      +firstPoppedFilterIndex: number,
     |}
   | {|
       +type: 'CHANGE_IMPLEMENTATION_FILTER',

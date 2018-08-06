@@ -8,7 +8,7 @@ import explicitConnect from '../../utils/connect';
 import FlameGraphCanvas from './Canvas';
 import {
   selectedThreadSelectors,
-  getDisplayRange,
+  getCommittedRange,
   getProfileViewOptions,
   getScrollToSelectionGeneration,
 } from '../../reducers/profile-view';
@@ -158,7 +158,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       ),
       flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
       callTree: selectedThreadSelectors.getCallTree(state),
-      timeRange: getDisplayRange(state),
+      timeRange: getCommittedRange(state),
       selection: getProfileViewOptions(state).selection,
       threadName: selectedThreadSelectors.getFriendlyThreadName(state),
       processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
