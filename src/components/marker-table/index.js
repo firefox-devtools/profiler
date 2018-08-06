@@ -197,7 +197,7 @@ class MarkerTable extends PureComponent<Props> {
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     threadIndex: getSelectedThreadIndex(state),
-    thread: selectedThreadSelectors.getRangeSelectionFilteredThread(state),
+    thread: selectedThreadSelectors.getPreviewFilteredThread(state),
     markers: selectedThreadSelectors.getSearchFilteredMarkers(state),
     selectedMarker: selectedThreadSelectors.getViewOptions(state)
       .selectedMarker,

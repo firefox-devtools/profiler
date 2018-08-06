@@ -223,20 +223,20 @@ describe('profile state invalidation when switching between profiles', function(
     });
 
     // It starts with no selection.
-    expect(ProfileViewSelectors.getSelection(getState())).toEqual(
+    expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual(
       getNoSelection()
     );
 
     // Add a selection.
-    dispatch(ProfileViewActions.updateProfileSelection(getSomeSelection()));
-    expect(ProfileViewSelectors.getSelection(getState())).toEqual(
+    dispatch(ProfileViewActions.updatePreviewSelection(getSomeSelection()));
+    expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual(
       getSomeSelection()
     );
     dispatch(ZippedProfilesActions.returnToZipFileList());
     viewProfile('profile2.json');
 
     // It no longer has a selection when viewing another profile.
-    expect(ProfileViewSelectors.getSelection(getState())).toEqual(
+    expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual(
       getNoSelection()
     );
   });

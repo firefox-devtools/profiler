@@ -9,12 +9,12 @@ import clamp from 'clamp';
 import { getContentRect } from '../../utils/css-geometry-tools';
 import {
   getProfileInterval,
-  getProfileViewOptions,
+  getPreviewSelection,
   getCommittedRange,
   getZeroAt,
 } from '../../reducers/profile-view';
 import {
-  updateProfileSelection,
+  updatePreviewSelection,
   commitRangeAndUnsetSelection,
 } from '../../actions/profile-view';
 import explicitConnect from '../../utils/connect';
@@ -25,7 +25,7 @@ import './Selection.css';
 
 import type { OnMove } from '../shared/Draggable';
 import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
-import type { ProfileSelection } from '../../types/actions';
+import type { PreviewSelection } from '../../types/actions';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
@@ -39,7 +39,7 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +selection: ProfileSelection,
+  +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
   +zeroAt: Milliseconds,
   +minSelectionStartWidth: Milliseconds,
@@ -47,7 +47,7 @@ type StateProps = {|
 
 type DispatchProps = {|
   +commitRangeAndUnsetSelection: typeof commitRangeAndUnsetSelection,
-  +updateProfileSelection: typeof updateProfileSelection,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -125,7 +125,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         selectionEnd - selectionStart >= minSelectionStartWidth
       ) {
         isRangeSelecting = true;
-        this.props.updateProfileSelection({
+        this.props.updatePreviewSelection({
           hasSelection: true,
           selectionStart,
           selectionEnd,
@@ -151,7 +151,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
           committedRange.start,
           committedRange.end
         );
-        this.props.updateProfileSelection({
+        this.props.updatePreviewSelection({
           hasSelection: true,
           selectionStart,
           selectionEnd,
@@ -162,17 +162,17 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         return;
       }
 
-      const { selection } = this.props;
-      if (selection.hasSelection) {
+      const { previewSelection } = this.props;
+      if (previewSelection.hasSelection) {
         const mouseUpTime =
           (event.pageX - rect.left) /
             rect.width *
             (committedRange.end - committedRange.start) +
           committedRange.start;
-        const { selectionStart, selectionEnd } = selection;
+        const { selectionStart, selectionEnd } = previewSelection;
         if (mouseUpTime < selectionStart || mouseUpTime >= selectionEnd) {
-          // Unset selection.
-          this.props.updateProfileSelection({
+          // Unset preview selection.
+          this.props.updatePreviewSelection({
             hasSelection: false,
             isModifying: false,
           });
@@ -227,7 +227,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     dy: number,
     isModifying: boolean
   ) => {
-    const { committedRange, width, updateProfileSelection } = this.props;
+    const { committedRange, width, updatePreviewSelection } = this.props;
     const delta = dx / width * (committedRange.end - committedRange.start);
     const selectionDeltas = fun(delta);
     const selectionStart = Math.max(
@@ -239,7 +239,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       selectionStart,
       committedRange.end
     );
-    updateProfileSelection({
+    updatePreviewSelection({
       hasSelection: true,
       isModifying,
       selectionStart,
@@ -268,22 +268,26 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
   _zoomButtonOnClick = (e: SyntheticMouseEvent<>) => {
     e.stopPropagation();
-    const { selection, zeroAt, commitRangeAndUnsetSelection } = this.props;
-    if (selection.hasSelection) {
+    const {
+      previewSelection,
+      zeroAt,
+      commitRangeAndUnsetSelection,
+    } = this.props;
+    if (previewSelection.hasSelection) {
       commitRangeAndUnsetSelection(
-        selection.selectionStart - zeroAt,
-        selection.selectionEnd - zeroAt
+        previewSelection.selectionStart - zeroAt,
+        previewSelection.selectionEnd - zeroAt
       );
     }
   };
 
-  renderSelectionOverlay(selection: {
+  renderSelectionOverlay(previewSelection: {
     +selectionStart: number,
     +selectionEnd: number,
     +isModifying: boolean,
   }) {
     const { committedRange, width } = this.props;
-    const { selectionStart, selectionEnd } = selection;
+    const { selectionStart, selectionEnd } = previewSelection;
 
     const beforeWidth =
       (selectionStart - committedRange.start) /
@@ -307,31 +311,31 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
           >
             <Draggable
               className="timelineSelectionGrippyRangeStart"
-              value={selection}
+              value={previewSelection}
               onMove={this._rangeStartOnMove}
             />
             <Draggable
               className="timelineSelectionGrippyMoveRange"
-              value={selection}
+              value={previewSelection}
               onMove={this._moveRangeOnMove}
             />
             <Draggable
               className="timelineSelectionGrippyRangeEnd"
-              value={selection}
+              value={previewSelection}
               onMove={this._rangeEndOnMove}
             />
           </div>
           <div className="timelineSelectionOverlayInner">
             <span
               className={classNames('timelineSelectionOverlayRange', {
-                hidden: !selection.isModifying,
+                hidden: !previewSelection.isModifying,
               })}
             >
               {getFormattedTimeLength(selectionEnd - selectionStart)}
             </span>
             <button
               className={classNames('timelineSelectionOverlayZoomButton', {
-                hidden: selection.isModifying,
+                hidden: previewSelection.isModifying,
               })}
               type="button"
               onMouseDown={this._zoomButtonOnMouseDown}
@@ -345,7 +349,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { children, selection } = this.props;
+    const { children, previewSelection } = this.props;
     const { hoverLocation } = this.state;
 
     return (
@@ -356,12 +360,14 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
         onMouseMove={this._onMouseMove}
       >
         {children}
-        {selection.hasSelection ? this.renderSelectionOverlay(selection) : null}
+        {previewSelection.hasSelection
+          ? this.renderSelectionOverlay(previewSelection)
+          : null}
         <div
           className="timelineSelectionHoverLine"
           style={{
             visibility:
-              selection.isModifying || hoverLocation === null
+              previewSelection.isModifying || hoverLocation === null
                 ? 'hidden'
                 : undefined,
             left: hoverLocation === null ? '0' : `${hoverLocation}px`,
@@ -374,13 +380,13 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
-    selection: getProfileViewOptions(state).selection,
+    previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),
     minSelectionStartWidth: getProfileInterval(state),
   }),
   mapDispatchToProps: {
-    updateProfileSelection,
+    updatePreviewSelection,
     commitRangeAndUnsetSelection,
   },
   component: TimelineRulerAndSelection,

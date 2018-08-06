@@ -46,7 +46,7 @@ import type {
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
   Action,
-  ProfileSelection,
+  PreviewSelection,
   RequestedLib,
   TrackReference,
 } from '../types/actions';
@@ -381,14 +381,14 @@ function waitingForLibs(state: Set<RequestedLib> = new Set(), action: Action) {
   }
 }
 
-function selection(
-  state: ProfileSelection = { hasSelection: false, isModifying: false },
+function previewSelection(
+  state: PreviewSelection = { hasSelection: false, isModifying: false },
   action: Action
-): ProfileSelection {
+): PreviewSelection {
   // TODO: Rename to timeRangeSelection
   switch (action.type) {
-    case 'UPDATE_PROFILE_SELECTION':
-      return action.selection;
+    case 'UPDATE_PREVIEW_SELECTION':
+      return action.previewSelection;
     default:
       return state;
   }
@@ -524,7 +524,7 @@ export default wrapReducerInResetter(
       perThread: viewOptionsPerThread,
       symbolicationStatus,
       waitingForLibs,
-      selection,
+      previewSelection,
       scrollToSelectionGeneration,
       focusCallTreeGeneration,
       rootRange,
@@ -610,8 +610,8 @@ export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
 export const getRightClickedTrack = (state: State) =>
   getProfileViewOptions(state).rightClickedTrack;
-export const getSelection = (state: State) =>
-  getProfileViewOptions(state).selection;
+export const getPreviewSelection = (state: State) =>
+  getProfileViewOptions(state).previewSelection;
 
 /**
  * Tracks
@@ -725,10 +725,10 @@ export type SelectorsForThread = {
   getTracingMarkers: State => TracingMarker[],
   getTracingMarkersForView: State => TracingMarker[],
   getMarkerTiming: State => MarkerTimingRows,
-  getRangeSelectionFilteredTracingMarkers: State => TracingMarker[],
-  getRangeSelectionFilteredTracingMarkersForHeader: State => TracingMarker[],
+  getCommittedRangeFilteredTracingMarkers: State => TracingMarker[],
+  getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
   getFilteredThread: State => Thread,
-  getRangeSelectionFilteredThread: State => Thread,
+  getPreviewFilteredThread: State => Thread,
   getCallNodeInfo: State => CallNodeInfo,
   getCallNodeMaxDepth: State => number,
   getSelectedCallNodePath: State => CallNodePath,
@@ -760,7 +760,7 @@ export const selectorsForThread = (
      * 3. Transform - Apply the transform stack that modifies the stacks and samples.
      * 4. Implementation - Modify stacks and samples to only show a single implementation.
      * 5. Search - Exclude samples that don't include some text in the stack.
-     * 6. Range selection - Only include samples that are within a user's sub-selection.
+     * 6. Preview - Only include samples that are within a user's preview range selection.
      */
     const getThread = (state: State): Thread =>
       getProfile(state).threads[threadIndex];
@@ -869,14 +869,14 @@ export const selectorsForThread = (
           : thread;
       }
     );
-    const getRangeSelectionFilteredThread = createSelector(
+    const getPreviewFilteredThread = createSelector(
       getFilteredThread,
-      getSelection,
-      (thread, selection): Thread => {
-        if (!selection.hasSelection) {
+      getPreviewSelection,
+      (thread, previewSelection): Thread => {
+        if (!previewSelection.hasSelection) {
           return thread;
         }
-        const { selectionStart, selectionEnd } = selection;
+        const { selectionStart, selectionEnd } = previewSelection;
         return ProfileData.filterThreadToRange(
           thread,
           selectionStart,
@@ -941,7 +941,7 @@ export const selectorsForThread = (
       getTracingMarkersForView,
       MarkerTiming.getMarkerTiming
     );
-    const getRangeSelectionFilteredTracingMarkers = createSelector(
+    const getCommittedRangeFilteredTracingMarkers = createSelector(
       getTracingMarkers,
       getCommittedRange,
       (markers, range): TracingMarker[] => {
@@ -949,8 +949,8 @@ export const selectorsForThread = (
         return ProfileData.filterTracingMarkersToRange(markers, start, end);
       }
     );
-    const getRangeSelectionFilteredTracingMarkersForHeader = createSelector(
-      getRangeSelectionFilteredTracingMarkers,
+    const getCommittedRangeFilteredTracingMarkersForHeader = createSelector(
+      getCommittedRangeFilteredTracingMarkers,
       (markers): TracingMarker[] =>
         markers.filter(
           tm =>
@@ -1011,7 +1011,7 @@ export const selectorsForThread = (
         )
     );
     const getCallTree = createSelector(
-      getRangeSelectionFilteredThread,
+      getPreviewFilteredThread,
       getProfileInterval,
       getCallNodeInfo,
       getCategories,
@@ -1027,7 +1027,7 @@ export const selectorsForThread = (
       StackTiming.getStackTimingByDepth
     );
     const getCallNodeMaxDepthForFlameGraph = createSelector(
-      getRangeSelectionFilteredThread,
+      getPreviewFilteredThread,
       getCallNodeInfo,
       ProfileData.computeCallNodeMaxDepth
     );
@@ -1036,7 +1036,7 @@ export const selectorsForThread = (
       FlameGraph.getFlameGraphTiming
     );
     const getSearchFilteredMarkers = createSelector(
-      getRangeSelectionFilteredThread,
+      getPreviewFilteredThread,
       UrlState.getMarkersSearchString,
       ProfileData.getSearchFilteredMarkers
     );
@@ -1068,10 +1068,10 @@ export const selectorsForThread = (
       getTracingMarkers,
       getTracingMarkersForView,
       getMarkerTiming,
-      getRangeSelectionFilteredTracingMarkers,
-      getRangeSelectionFilteredTracingMarkersForHeader,
+      getCommittedRangeFilteredTracingMarkers,
+      getCommittedRangeFilteredTracingMarkersForHeader,
       getFilteredThread,
-      getRangeSelectionFilteredThread,
+      getPreviewFilteredThread,
       getCallNodeInfo,
       getCallNodeMaxDepth,
       getSelectedCallNodePath,
@@ -1158,7 +1158,7 @@ export const selectedNodeSelectors: SelectorsForNode = (() => {
     selectedThreadSelectors.getCallNodeInfo,
     getProfileInterval,
     UrlState.getInvertCallstack,
-    selectedThreadSelectors.getRangeSelectionFilteredThread,
+    selectedThreadSelectors.getPreviewFilteredThread,
     (
       selectedPath,
       callNodeInfo,

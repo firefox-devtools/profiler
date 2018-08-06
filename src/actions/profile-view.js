@@ -23,7 +23,7 @@ import { ensureExists } from '../utils/flow';
 import { sendAnalytics } from '../utils/analytics';
 
 import type {
-  ProfileSelection,
+  PreviewSelection,
   ImplementationFilter,
   TrackReference,
 } from '../types/actions';
@@ -600,10 +600,12 @@ export function changeInvertCallstack(
   };
 }
 
-export function updateProfileSelection(selection: ProfileSelection): Action {
+export function updatePreviewSelection(
+  previewSelection: PreviewSelection
+): Action {
   return {
-    type: 'UPDATE_PROFILE_SELECTION',
-    selection,
+    type: 'UPDATE_PREVIEW_SELECTION',
+    previewSelection,
   };
 }
 
@@ -622,7 +624,7 @@ export function commitRangeAndUnsetSelection(
   return dispatch => {
     dispatch(commitRange(start, end));
     dispatch(
-      updateProfileSelection({ hasSelection: false, isModifying: false })
+      updatePreviewSelection({ hasSelection: false, isModifying: false })
     );
   };
 }
@@ -640,7 +642,7 @@ export function popCommittedRangesAndUnsetSelection(
   return dispatch => {
     dispatch(popCommittedRanges(firstPoppedFilterIndex));
     dispatch(
-      updateProfileSelection({ hasSelection: false, isModifying: false })
+      updatePreviewSelection({ hasSelection: false, isModifying: false })
     );
   };
 }

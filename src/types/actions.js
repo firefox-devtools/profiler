@@ -35,7 +35,7 @@ export type DataSource =
   | 'local'
   | 'public'
   | 'from-url';
-export type ProfileSelection =
+export type PreviewSelection =
   | {| +hasSelection: false, +isModifying: false |}
   | {|
       +hasSelection: true,
@@ -90,8 +90,8 @@ type ProfileAction =
       +selectedMarker: IndexIntoMarkersTable | -1,
     |}
   | {|
-      +type: 'UPDATE_PROFILE_SELECTION',
-      +selection: ProfileSelection,
+      +type: 'UPDATE_PREVIEW_SELECTION',
+      +previewSelection: PreviewSelection,
     |}
   | {|
       +type: 'CHANGE_TAB_ORDER',

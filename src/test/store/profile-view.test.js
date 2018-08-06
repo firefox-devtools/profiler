@@ -404,25 +404,24 @@ describe('actions/ProfileView', function() {
     });
   });
 
-  describe('updateProfileSelection', function() {
+  describe('updatePreviewSelection', function() {
     it('updates the profile selection', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({ hasSelection: false, isModifying: false });
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+        hasSelection: false,
+        isModifying: false,
+      });
       dispatch(
-        ProfileView.updateProfileSelection({
+        ProfileView.updatePreviewSelection({
           hasSelection: true,
           isModifying: false,
           selectionStart: 0,
           selectionEnd: 1,
         })
       );
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionStart: 0,
@@ -457,7 +456,7 @@ describe('actions/ProfileView', function() {
 
       dispatch(ProfileView.commitRange(0, 10));
       dispatch(
-        ProfileView.updateProfileSelection({
+        ProfileView.updatePreviewSelection({
           hasSelection: true,
           isModifying: false,
           selectionStart: 1,
@@ -467,9 +466,7 @@ describe('actions/ProfileView', function() {
       expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
       ]);
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionEnd: 9,
@@ -481,9 +478,7 @@ describe('actions/ProfileView', function() {
         { start: 0, end: 10 },
         { start: 2, end: 8 },
       ]);
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: false,
         isModifying: false,
       });
@@ -519,16 +514,14 @@ describe('actions/ProfileView', function() {
     it('pops a committed range and unsets the selection', function() {
       const { getState, dispatch } = setupStore();
       dispatch(
-        ProfileView.updateProfileSelection({
+        ProfileView.updatePreviewSelection({
           hasSelection: true,
           isModifying: false,
           selectionStart: 1,
           selectionEnd: 9,
         })
       );
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionEnd: 9,
@@ -546,9 +539,7 @@ describe('actions/ProfileView', function() {
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: false,
         isModifying: false,
       });
@@ -679,7 +670,7 @@ describe('snapshots of selectors/profile-view', function() {
     dispatch(ProfileView.changeSelectedMarker(0, 1));
     dispatch(ProfileView.commitRange(3, 7)); // Reminder: upper bound "7" is exclusive.
     dispatch(
-      ProfileView.updateProfileSelection({
+      ProfileView.updatePreviewSelection({
         hasSelection: true,
         isModifying: false,
         selectionStart: 4,
@@ -775,18 +766,18 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getMarkerTiming(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getRangeSelectionFilteredTracingMarkers', function() {
+  it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkers', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getRangeSelectionFilteredTracingMarkers(
+      selectedThreadSelectors.getCommittedRangeFilteredTracingMarkers(
         getState()
       )
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getRangeSelectionFilteredTracingMarkersForHeader', function() {
+  it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkersForHeader', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getRangeSelectionFilteredTracingMarkersForHeader(
+      selectedThreadSelectors.getCommittedRangeFilteredTracingMarkersForHeader(
         getState()
       )
     ).toMatchSnapshot();
@@ -797,10 +788,10 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getFilteredThread(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getRangeSelectionFilteredThread', function() {
+  it('matches the last stored run of selectedThreadSelector.getPreviewFilteredThread', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getRangeSelectionFilteredThread(getState())
+      selectedThreadSelectors.getPreviewFilteredThread(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getCallNodeInfo', function() {
