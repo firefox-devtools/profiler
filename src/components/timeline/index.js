@@ -26,7 +26,7 @@ import type { SizeProps } from '../shared/WithSize';
 import {
   changeGlobalTrackOrder,
   updatePreviewSelection,
-  commitRangeAndUnsetSelection,
+  commitRange,
 } from '../../actions/profile-view';
 
 import type { TrackIndex, GlobalTrack } from '../../types/profile-derived';
@@ -49,7 +49,7 @@ type StateProps = {|
 
 type DispatchProps = {|
   +changeGlobalTrackOrder: typeof changeGlobalTrackOrder,
-  +commitRangeAndUnsetSelection: typeof commitRangeAndUnsetSelection,
+  +commitRange: typeof commitRange,
   +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
@@ -111,7 +111,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapDispatchToProps: {
     changeGlobalTrackOrder,
     updatePreviewSelection,
-    commitRangeAndUnsetSelection,
+    commitRange,
   },
   component: Timeline,
 };

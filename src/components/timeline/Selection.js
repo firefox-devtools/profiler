@@ -15,7 +15,7 @@ import {
 } from '../../reducers/profile-view';
 import {
   updatePreviewSelection,
-  commitRangeAndUnsetSelection,
+  commitRange,
 } from '../../actions/profile-view';
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
@@ -46,7 +46,7 @@ type StateProps = {|
 |};
 
 type DispatchProps = {|
-  +commitRangeAndUnsetSelection: typeof commitRangeAndUnsetSelection,
+  +commitRange: typeof commitRange,
   +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
@@ -268,13 +268,9 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
   _zoomButtonOnClick = (e: SyntheticMouseEvent<>) => {
     e.stopPropagation();
-    const {
-      previewSelection,
-      zeroAt,
-      commitRangeAndUnsetSelection,
-    } = this.props;
+    const { previewSelection, zeroAt, commitRange } = this.props;
     if (previewSelection.hasSelection) {
-      commitRangeAndUnsetSelection(
+      commitRange(
         previewSelection.selectionStart - zeroAt,
         previewSelection.selectionEnd - zeroAt
       );
@@ -387,7 +383,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   }),
   mapDispatchToProps: {
     updatePreviewSelection,
-    commitRangeAndUnsetSelection,
+    commitRange,
   },
   component: TimelineRulerAndSelection,
 };

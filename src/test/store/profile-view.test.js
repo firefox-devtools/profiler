@@ -473,7 +473,7 @@ describe('actions/ProfileView', function() {
         selectionStart: 1,
       });
 
-      dispatch(ProfileView.commitRangeAndUnsetSelection(2, 8));
+      dispatch(ProfileView.commitRange(2, 8));
       expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 2, end: 8 },
@@ -496,7 +496,7 @@ describe('actions/ProfileView', function() {
       return store;
     }
 
-    it('pops a commited range', function() {
+    it('pops a committed range', function() {
       const { getState, dispatch } = setupStore();
       expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
@@ -534,7 +534,7 @@ describe('actions/ProfileView', function() {
         { start: 3, end: 7 },
       ]);
 
-      dispatch(ProfileView.popCommittedRangesAndUnsetSelection(2));
+      dispatch(ProfileView.popCommittedRanges(2));
       expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },

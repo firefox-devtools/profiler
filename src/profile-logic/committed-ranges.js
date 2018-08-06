@@ -57,9 +57,9 @@ export function getFormattedTimeLength(length: number): string {
 }
 
 export function getCommittedRangeLabels(
-  commitedRanges: StartEndRange[]
+  committedRanges: StartEndRange[]
 ): string[] {
-  const labels = commitedRanges.map(range =>
+  const labels = committedRanges.map(range =>
     getFormattedTimeLength(range.end - range.start)
   );
   labels.unshift('Full Range');

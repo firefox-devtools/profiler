@@ -389,6 +389,9 @@ function previewSelection(
   switch (action.type) {
     case 'UPDATE_PREVIEW_SELECTION':
       return action.previewSelection;
+    case 'COMMIT_RANGE':
+    case 'POP_COMMITTED_RANGES':
+      return { hasSelection: false, isModifying: false };
     default:
       return state;
   }
