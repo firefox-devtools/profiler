@@ -5,10 +5,11 @@
 // @flow
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
+import { withFastPreviewSelection } from '../shared/WithFastPreviewSelection';
 import FlameGraphCanvas from './Canvas';
 import {
   selectedThreadSelectors,
-  getDisplayRange,
+  getCommittedRange,
   getProfileViewOptions,
   getScrollToSelectionGeneration,
 } from '../../reducers/profile-view';
@@ -22,7 +23,7 @@ import { BackgroundImageStyleDef } from '../shared/StyleDef';
 import type { Thread } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
-import type { ProfileSelection } from '../../types/actions';
+import type { PreviewSelection } from '../../types/actions';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -43,7 +44,6 @@ type StateProps = {|
   +thread: Thread,
   +maxStackDepth: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
-  +selection: ProfileSelection,
   +flameGraphTiming: FlameGraphTiming,
   +threadName: string,
   +processDetails: string,
@@ -58,7 +58,11 @@ type StateProps = {|
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
 |};
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = {|
+  ...ConnectedProps<{||}, StateProps, DispatchProps>,
+  // Injected by withFastPreviewSelection.
+  +previewSelection: PreviewSelection,
+|};
 
 class FlameGraph extends React.PureComponent<Props> {
   _onSelectedCallNodeChange = (
@@ -80,7 +84,7 @@ class FlameGraph extends React.PureComponent<Props> {
       callTree,
       callNodeInfo,
       timeRange,
-      selection,
+      previewSelection,
       threadName,
       processDetails,
       selectedCallNodeIndex,
@@ -116,7 +120,7 @@ class FlameGraph extends React.PureComponent<Props> {
               timeRange,
               maxViewportHeight,
               maximumZoom: 1,
-              selection,
+              previewSelection,
               startsAtBottom: true,
               disableHorizontalMovement: true,
               viewportNeedsUpdate,
@@ -158,8 +162,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       ),
       flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
       callTree: selectedThreadSelectors.getCallTree(state),
-      timeRange: getDisplayRange(state),
-      selection: getProfileViewOptions(state).selection,
+      timeRange: getCommittedRange(state),
       threadName: selectedThreadSelectors.getFriendlyThreadName(state),
       processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
@@ -176,7 +179,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapDispatchToProps: {
     changeSelectedCallNode,
   },
-  component: FlameGraph,
+  component: withFastPreviewSelection(FlameGraph),
 };
 
 export default explicitConnect(options);

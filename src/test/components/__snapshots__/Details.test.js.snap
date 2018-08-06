@@ -399,7 +399,7 @@ exports[`app/Details renders an initial view with the right panel for tab stack-
       ]
     }
   />
-  <Connect(StackChartGraph) />
+  <Connect(Connect(WithFastPreviewWrapper)) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
   <Connect(TimelineTrackContextMenu) />

@@ -4,10 +4,11 @@
 
 // @flow
 
+import type { FastPreviewSelection } from '../app-logic/fast-preview-selection';
 import type {
   Action,
   DataSource,
-  ProfileSelection,
+  PreviewSelection,
   ImplementationFilter,
   RequestedLib,
   TrackReference,
@@ -20,6 +21,7 @@ import type {
   ThreadIndex,
   Pid,
 } from './profile';
+
 import type {
   CallNodePath,
   GlobalTrack,
@@ -53,7 +55,8 @@ export type ProfileViewState = {
     perThread: ThreadViewOptions[],
     symbolicationStatus: SymbolicationStatus,
     waitingForLibs: Set<RequestedLib>,
-    selection: ProfileSelection,
+    previewSelection: PreviewSelection,
+    fastPreviewSelection: FastPreviewSelection | null,
     scrollToSelectionGeneration: number,
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
@@ -144,7 +147,7 @@ export type UrlState = {|
     localTrackOrderByPid: Map<Pid, TrackIndex[]>,
     implementation: ImplementationFilter,
     invertCallstack: boolean,
-    rangeFilters: StartEndRange[],
+    committedRanges: StartEndRange[],
     callTreeSearchString: string,
     markersSearchString: string,
     transforms: TransformStacksPerThread,

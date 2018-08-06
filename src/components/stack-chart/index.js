@@ -5,19 +5,19 @@
 // @flow
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
+import { withFastPreviewSelection } from '../shared/WithFastPreviewSelection';
 import StackChartCanvas from './Canvas';
 import {
   selectedThreadSelectors,
-  getDisplayRange,
+  getCommittedRange,
   getProfileInterval,
-  getProfileViewOptions,
 } from '../../reducers/profile-view';
 import {
   getCategoryColorStrategy,
   getLabelingStrategy,
 } from '../../reducers/stack-chart';
 import StackSettings from '../shared/StackSettings';
-import { updateProfileSelection } from '../../actions/profile-view';
+import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { Thread } from '../../types/profile';
 import type {
@@ -27,7 +27,7 @@ import type {
 import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
 import type { GetCategory } from '../../profile-logic/color-categories';
 import type { GetLabel } from '../../profile-logic/labeling-strategies';
-import type { ProfileSelection } from '../../types/actions';
+import type { PreviewSelection } from '../../types/actions';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
@@ -45,16 +45,19 @@ type StateProps = {|
   +interval: Milliseconds,
   +getCategory: GetCategory,
   +getLabel: GetLabel,
-  +selection: ProfileSelection,
   +threadName: string,
   +processDetails: string,
 |};
 
 type DispatchProps = {|
-  +updateProfileSelection: typeof updateProfileSelection,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = {|
+  ...ConnectedProps<{||}, StateProps, DispatchProps>,
+  // Injected by withFastPreviewSelection.
+  +previewSelection: PreviewSelection,
+|};
 
 class StackChartGraph extends React.PureComponent<Props> {
   /**
@@ -74,10 +77,10 @@ class StackChartGraph extends React.PureComponent<Props> {
       interval,
       getCategory,
       getLabel,
-      selection,
+      previewSelection,
       threadName,
       processDetails,
-      updateProfileSelection,
+      updatePreviewSelection,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -91,7 +94,7 @@ class StackChartGraph extends React.PureComponent<Props> {
           </div>
           <StackChartCanvas
             viewportProps={{
-              selection,
+              previewSelection,
               timeRange,
               maxViewportHeight,
               viewportNeedsUpdate,
@@ -103,7 +106,7 @@ class StackChartGraph extends React.PureComponent<Props> {
               getCategory,
               getLabel,
               stackTimingByDepth,
-              updateProfileSelection,
+              updatePreviewSelection,
               rangeStart: timeRange.start,
               rangeEnd: timeRange.end,
               stackFrameHeight: STACK_FRAME_HEIGHT,
@@ -125,17 +128,16 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       thread: selectedThreadSelectors.getFilteredThread(state),
       maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
       stackTimingByDepth,
-      timeRange: getDisplayRange(state),
+      timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       getCategory: getCategoryColorStrategy(state),
       getLabel: getLabelingStrategy(state),
-      selection: getProfileViewOptions(state).selection,
       threadName: selectedThreadSelectors.getFriendlyThreadName(state),
       processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
     };
   },
-  mapDispatchToProps: { updateProfileSelection },
-  component: StackChartGraph,
+  mapDispatchToProps: { updatePreviewSelection },
+  component: withFastPreviewSelection(StackChartGraph),
 };
 export default explicitConnect(options);
 

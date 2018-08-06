@@ -19,7 +19,7 @@ import {
   selectedThreadSelectors,
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
-  getProfileViewOptions,
+  getPreviewSelection,
 } from '../../reducers/profile-view';
 import { getIconsWithClassNames } from '../../reducers/icons';
 import {
@@ -218,7 +218,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       state
     ),
     searchStringsRegExp: getSearchStringsAsRegExp(state),
-    disableOverscan: getProfileViewOptions(state).selection.isModifying,
+    disableOverscan: getPreviewSelection(state).isModifying,
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
     icons: getIconsWithClassNames(state),

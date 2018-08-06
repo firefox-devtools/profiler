@@ -5,17 +5,25 @@
 // @flow
 import * as React from 'react';
 import classNames from 'classnames';
+import {
+  createFastPreviewSelection,
+  removeFastPreviewSelection,
+} from '../../../actions/profile-view';
+import { FastPreviewSelection } from '../../../app-logic/fast-preview-selection';
+import {
+  getPreviewSelection,
+  getCommittedRange,
+} from '../../../reducers/profile-view';
 import explicitConnect from '../../../utils/connect';
 import { getHasZoomedViaMousewheel } from '../../../reducers/app';
 import { setHasZoomedViaMousewheel } from '../../../actions/stack-chart';
-import { updateProfileSelection } from '../../../actions/profile-view';
 
 import type {
   CssPixels,
   UnitIntervalOfProfileRange,
   StartEndRange,
 } from '../../../types/units';
-import type { ProfileSelection } from '../../../types/actions';
+import type { PreviewSelection } from '../../../types/actions';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
@@ -70,10 +78,14 @@ export type Viewport = {|
 
 type ViewportStateProps = {|
   +hasZoomedViaMousewheel?: boolean,
+  // The following are used to control the fast preview selection:
+  +slowPreviewSelection: PreviewSelection,
+  +committedRange: StartEndRange,
 |};
 
 type ViewportDispatchProps = {|
-  +updateProfileSelection: typeof updateProfileSelection,
+  +createFastPreviewSelection: typeof createFastPreviewSelection,
+  +removeFastPreviewSelection: typeof removeFastPreviewSelection,
   +setHasZoomedViaMousewheel?: typeof setHasZoomedViaMousewheel,
 |};
 
@@ -85,7 +97,7 @@ type ViewportOwnProps<ChartProps> = {|
     +maxViewportHeight: number,
     +startsAtBottom?: boolean,
     +maximumZoom: UnitIntervalOfProfileRange,
-    +selection: ProfileSelection,
+    +previewSelection: PreviewSelection,
     +disableHorizontalMovement?: boolean,
     // These props are defined by the generic variables passed into to the type
     // WithChartViewport when calling withChartViewport. This is how the relationship
@@ -159,6 +171,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       shiftScrollId: number;
       zoomRangeSelectionScheduled: boolean;
       zoomRangeSelectionScrollDelta: number;
+      _fastPreviewSelection: FastPreviewSelection;
       _container: HTMLElement | null;
       _takeContainerRef = container => (this._container = container);
 
@@ -173,6 +186,10 @@ export const withChartViewport: WithChartViewport<*, *> =
         (this: any)._setSize = this._setSize.bind(this);
         (this: any)._setSizeNextFrame = this._setSizeNextFrame.bind(this);
 
+        this._fastPreviewSelection = new FastPreviewSelection(
+          props.slowPreviewSelection
+        );
+        props.createFastPreviewSelection(this._fastPreviewSelection);
         this.shiftScrollId = 0;
         this.zoomRangeSelectionScheduled = false;
         this.zoomRangeSelectionScrollDelta = 0;
@@ -182,9 +199,9 @@ export const withChartViewport: WithChartViewport<*, *> =
       }
 
       getHorizontalViewport(props: ViewportProps) {
-        const { selection, timeRange } = props.viewportProps;
-        if (selection.hasSelection) {
-          const { selectionStart, selectionEnd } = selection;
+        const { previewSelection, timeRange } = props.viewportProps;
+        if (previewSelection.hasSelection) {
+          const { selectionStart, selectionEnd } = previewSelection;
           const timeRangeLength = timeRange.end - timeRange.start;
           return {
             viewportLeft: (selectionStart - timeRange.start) / timeRangeLength,
@@ -239,6 +256,10 @@ export const withChartViewport: WithChartViewport<*, *> =
       }
 
       componentWillReceiveProps(newProps: ViewportProps) {
+        if (this.props.slowPreviewSelection !== newProps.slowPreviewSelection) {
+          this._fastPreviewSelection.update(newProps.slowPreviewSelection);
+        }
+
         if (
           this.props.viewportProps.viewportNeedsUpdate(
             this.props.chartProps,
@@ -248,8 +269,8 @@ export const withChartViewport: WithChartViewport<*, *> =
           this.setState(this.getDefaultState(newProps));
           this._setSizeNextFrame();
         } else if (
-          this.props.viewportProps.selection !==
-            newProps.viewportProps.selection ||
+          this.props.viewportProps.previewSelection !==
+            newProps.viewportProps.previewSelection ||
           this.props.viewportProps.timeRange !==
             newProps.viewportProps.timeRange
         ) {
@@ -372,22 +393,14 @@ export const withChartViewport: WithChartViewport<*, *> =
               newViewportRight = newViewportMiddle + maximumZoom * 0.5;
             }
 
-            const {
-              updateProfileSelection,
-              viewportProps: { timeRange },
-            } = this.props;
+            const { viewportProps: { timeRange } } = this.props;
             if (newViewportLeft === 0 && newViewportRight === 1) {
               if (viewportLeft === 0 && viewportRight === 1) {
                 // Do not update if at the maximum bounds.
-                return;
               }
-              updateProfileSelection({
-                hasSelection: false,
-                isModifying: false,
-              });
             } else {
               const timeRangeLength = timeRange.end - timeRange.start;
-              updateProfileSelection({
+              this._fastPreviewSelection.update({
                 hasSelection: true,
                 isModifying: false,
                 selectionStart:
@@ -432,7 +445,6 @@ export const withChartViewport: WithChartViewport<*, *> =
 
       moveViewport(offsetX: CssPixels, offsetY: CssPixels): boolean {
         const {
-          updateProfileSelection,
           viewportProps: {
             maxViewportHeight,
             timeRange,
@@ -491,7 +503,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         const viewportVerticalChanged = newViewportTop !== viewportTop;
 
         if (viewportHorizontalChanged && !disableHorizontalMovement) {
-          updateProfileSelection({
+          this._fastPreviewSelection.update({
             hasSelection: true,
             isModifying: false,
             selectionStart: timeRange.start + timeRangeLength * newViewportLeft,
@@ -529,6 +541,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       }
 
       componentWillUnmount() {
+        this.props.removeFastPreviewSelection(this._fastPreviewSelection.get());
         window.removeEventListener('resize', this._setSizeNextFrame, false);
         window.removeEventListener('mousemove', this._mouseMoveListener, true);
         window.removeEventListener('mouseup', this._mouseUpListener, true);
@@ -597,9 +610,15 @@ export const withChartViewport: WithChartViewport<*, *> =
       ViewportDispatchProps
     > = {
       mapStateToProps: state => ({
+        slowPreviewSelection: getPreviewSelection(state),
+        committedRange: getCommittedRange(state),
         hasZoomedViaMousewheel: getHasZoomedViaMousewheel(state),
       }),
-      mapDispatchToProps: { setHasZoomedViaMousewheel, updateProfileSelection },
+      mapDispatchToProps: {
+        setHasZoomedViaMousewheel,
+        createFastPreviewSelection,
+        removeFastPreviewSelection,
+      },
       component: ChartViewport,
     };
     return explicitConnect(options);

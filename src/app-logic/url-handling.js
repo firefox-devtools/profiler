@@ -5,9 +5,9 @@
 // @flow
 import queryString from 'query-string';
 import {
-  stringifyRangeFilters,
-  parseRangeFilters,
-} from '../profile-logic/range-filters';
+  stringifyCommittedRanges,
+  parseCommittedRanges,
+} from '../profile-logic/committed-ranges';
 import {
   stringifyTransforms,
   parseTransforms,
@@ -108,7 +108,8 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   // Start with the query parameters that are shown regardless of the active tab.
   const query: Object = {
     range:
-      stringifyRangeFilters(urlState.profileSpecific.rangeFilters) || undefined,
+      stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
+      undefined,
     thread: urlState.profileSpecific.selectedThread,
     globalTrackOrder: urlState.profileSpecific.globalTrackOrder.join('-'),
     file: urlState.pathInZipFile || undefined,
@@ -266,7 +267,7 @@ export function stateFromLocation(location: Location): UrlState {
     profileSpecific: {
       implementation,
       invertCallstack: query.invertCallstack !== undefined,
-      rangeFilters: query.range ? parseRangeFilters(query.range) : [],
+      committedRanges: query.range ? parseCommittedRanges(query.range) : [],
       selectedThread: selectedThread,
       callTreeSearchString: query.search || '',
       globalTrackOrder: query.globalTrackOrder
