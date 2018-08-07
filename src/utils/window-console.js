@@ -30,9 +30,7 @@ export function addDataToWindowObject(
   defineProperty(target, 'filteredThread', {
     enumerable: true,
     get() {
-      return selectedThreadSelectors.getRangeSelectionFilteredThread(
-        getState()
-      );
+      return selectedThreadSelectors.getPreviewFilteredThread(getState());
     },
   });
 

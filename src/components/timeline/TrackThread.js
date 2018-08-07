@@ -10,7 +10,7 @@ import StackGraph from './StackGraph';
 import {
   selectorsForThread,
   getProfileInterval,
-  getDisplayRange,
+  getCommittedRange,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
@@ -23,7 +23,7 @@ import {
 } from './TracingMarkers';
 import {
   changeSelectedThread,
-  updateProfileSelection,
+  updatePreviewSelection,
   changeRightClickedTrack,
   changeSelectedCallNode,
   focusCallTree,
@@ -60,7 +60,7 @@ type StateProps = {|
 type DispatchProps = {|
   +changeSelectedThread: typeof changeSelectedThread,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
-  +updateProfileSelection: typeof updateProfileSelection,
+  +updatePreviewSelection: typeof updatePreviewSelection,
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
 |};
@@ -101,10 +101,10 @@ class TimelineTrackThread extends PureComponent<Props> {
     const {
       rangeStart,
       rangeEnd,
-      updateProfileSelection,
+      updatePreviewSelection,
       changeSelectedThread,
     } = this.props;
-    updateProfileSelection({
+    updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart: Math.max(rangeStart, start),
@@ -186,7 +186,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     const { threadIndex } = ownProps;
     const selectors = selectorsForThread(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
-    const displayRange = getDisplayRange(state);
+    const committedRange = getCommittedRange(state);
     return {
       thread: selectors.getFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
@@ -196,13 +196,13 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
           : -1,
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       interval: getProfileInterval(state),
-      rangeStart: displayRange.start,
-      rangeEnd: displayRange.end,
+      rangeStart: committedRange.start,
+      rangeEnd: committedRange.end,
     };
   },
   mapDispatchToProps: {
     changeSelectedThread,
-    updateProfileSelection,
+    updatePreviewSelection,
     changeRightClickedTrack,
     changeSelectedCallNode,
     focusCallTree,

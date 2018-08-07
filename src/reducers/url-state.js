@@ -8,7 +8,7 @@ import escapeStringRegexp from 'escape-string-regexp';
 import { createSelector } from 'reselect';
 import { ensureExists } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
-import * as RangeFilters from '../profile-logic/range-filters';
+import * as CommittedRanges from '../profile-logic/committed-ranges';
 
 import type { ThreadIndex, Pid } from '../types/profile';
 import type { TrackIndex } from '../types/profile-derived';
@@ -64,14 +64,14 @@ function selectedTab(state: TabSlug = 'calltree', action: Action) {
   }
 }
 
-function rangeFilters(state: StartEndRange[] = [], action: Action) {
+function committedRanges(state: StartEndRange[] = [], action: Action) {
   switch (action.type) {
-    case 'ADD_RANGE_FILTER': {
+    case 'COMMIT_RANGE': {
       const { start, end } = action;
       return [...state, { start, end }];
     }
-    case 'POP_RANGE_FILTERS':
-      return state.slice(0, action.firstRemovedFilterIndex);
+    case 'POP_COMMITTED_RANGES':
+      return state.slice(0, action.firstPoppedFilterIndex);
     default:
       return state;
   }
@@ -122,10 +122,10 @@ function transforms(state: TransformStacksPerThread = {}, action: Action) {
       });
     }
     case 'POP_TRANSFORMS_FROM_STACK': {
-      const { threadIndex, firstRemovedFilterIndex } = action;
+      const { threadIndex, firstPoppedFilterIndex } = action;
       const transforms = state[threadIndex] || [];
       return Object.assign({}, state, {
-        [threadIndex]: transforms.slice(0, firstRemovedFilterIndex),
+        [threadIndex]: transforms.slice(0, firstPoppedFilterIndex),
       });
     }
     default:
@@ -267,7 +267,7 @@ const profileSpecific = combineReducers({
   localTrackOrderByPid,
   implementation,
   invertCallstack,
-  rangeFilters,
+  committedRanges,
   callTreeSearchString,
   markersSearchString,
   transforms,
@@ -325,8 +325,8 @@ export const getProfileSpecificState = (state: State) =>
 export const getDataSource = (state: State) => getUrlState(state).dataSource;
 export const getHash = (state: State) => getUrlState(state).hash;
 export const getProfileUrl = (state: State) => getUrlState(state).profileUrl;
-export const getRangeFilters = (state: State) =>
-  getProfileSpecificState(state).rangeFilters;
+export const getAllCommittedRanges = (state: State) =>
+  getProfileSpecificState(state).committedRanges;
 export const getImplementationFilter = (state: State) =>
   getProfileSpecificState(state).implementation;
 export const getInvertCallstack = (state: State) =>
@@ -436,7 +436,7 @@ export const getProfileName: State => null | string = createSelector(
   }
 );
 
-export const getRangeFilterLabels = createSelector(
-  getRangeFilters,
-  RangeFilters.getRangeFilterLabels
+export const getCommittedRangeLabels = createSelector(
+  getAllCommittedRanges,
+  CommittedRanges.getCommittedRangeLabels
 );

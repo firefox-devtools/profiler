@@ -23,7 +23,7 @@ import { ensureExists } from '../utils/flow';
 import { sendAnalytics } from '../utils/analytics';
 
 import type {
-  ProfileSelection,
+  PreviewSelection,
   ImplementationFilter,
   TrackReference,
 } from '../types/actions';
@@ -600,48 +600,27 @@ export function changeInvertCallstack(
   };
 }
 
-export function updateProfileSelection(selection: ProfileSelection): Action {
+export function updatePreviewSelection(
+  previewSelection: PreviewSelection
+): Action {
   return {
-    type: 'UPDATE_PROFILE_SELECTION',
-    selection,
+    type: 'UPDATE_PREVIEW_SELECTION',
+    previewSelection,
   };
 }
 
-export function addRangeFilter(start: number, end: number): Action {
+export function commitRange(start: number, end: number): Action {
   return {
-    type: 'ADD_RANGE_FILTER',
+    type: 'COMMIT_RANGE',
     start,
     end,
   };
 }
 
-export function addRangeFilterAndUnsetSelection(
-  start: number,
-  end: number
-): ThunkAction<void> {
-  return dispatch => {
-    dispatch(addRangeFilter(start, end));
-    dispatch(
-      updateProfileSelection({ hasSelection: false, isModifying: false })
-    );
-  };
-}
-
-export function popRangeFilters(firstRemovedFilterIndex: number): Action {
+export function popCommittedRanges(firstPoppedFilterIndex: number): Action {
   return {
-    type: 'POP_RANGE_FILTERS',
-    firstRemovedFilterIndex,
-  };
-}
-
-export function popRangeFiltersAndUnsetSelection(
-  firstRemovedFilterIndex: number
-): ThunkAction<void> {
-  return dispatch => {
-    dispatch(popRangeFilters(firstRemovedFilterIndex));
-    dispatch(
-      updateProfileSelection({ hasSelection: false, isModifying: false })
-    );
+    type: 'POP_COMMITTED_RANGES',
+    firstPoppedFilterIndex,
   };
 }
 
@@ -670,14 +649,14 @@ export function addTransformToStack(
 }
 
 export function popTransformsFromStack(
-  firstRemovedFilterIndex: number
+  firstPoppedFilterIndex: number
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadIndex = getSelectedThreadIndex(getState());
     dispatch({
       type: 'POP_TRANSFORMS_FROM_STACK',
       threadIndex,
-      firstRemovedFilterIndex,
+      firstPoppedFilterIndex,
     });
   };
 }
