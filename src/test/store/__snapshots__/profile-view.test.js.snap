@@ -1120,7 +1120,6 @@ CallTree {
       -1,
     ],
   },
-  "_isChildrenCachePreloaded": false,
   "_isIntegerInterval": true,
   "_jsOnly": false,
   "_resourceTable": Object {
