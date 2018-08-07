@@ -39,10 +39,38 @@ export type FlameGraphTiming = Array<{
   length: number,
 }>;
 
-type Stack = Array<{
-  depth: number,
-  nodeIndex: IndexIntoCallNodeTable,
-}>;
+type RootsAndChildren = {
+  /**
+   * Conceptually, `children` is a collection of arrays, one for each
+   * callnode in the tree. Each array contains all immediate callnode
+   * children (with a non-zero total time) of a given callnode.
+   *
+   * To avoid heavy allocations for large call trees, the elements of
+   * this collection are not real array instances. Instead, one has to
+   * work with slices of one large array.
+   *
+   * Given a callnode `p` with callnode index `pi`, and `start` and
+   * `end` defined as:
+   * let start = children.offsets[pi];
+   * let end = children.offsets[pi + 1];
+   *
+   * then children.array.slice(start, end) is a sorted list of all
+   * callnode indices whose callnodes have `p` as their direct parent.
+   * The list is sorted in descending order with respect to the
+   * function names of the callnodes.
+   */
+  children: {
+    // Array of IndexIntoCallNodeTable. This is a concatenation of all
+    // children sub-arrays.
+    array: Uint32Array,
+    // This array maps a given IndexIntoCallNodeTable to a slice
+    // within `array` by providing start and end indices.
+    offsets: Uint32Array,
+  },
+
+  // A list of every root CallNodeIndex in the call tree.
+  roots: IndexIntoCallNodeTable[],
+};
 
 /**
  * Obtain collections of callnode indices needed for building the
@@ -57,13 +85,8 @@ export function getRootsAndChildren(
   callNodeTable: CallNodeTable,
   callNodeChildCount: Uint32Array,
   totalTime: Float32Array
-) {
+): RootsAndChildren {
   const roots = [];
-  /* All children for all callnodes will be stored in a large, flat
-   * array called, simply, `array`. In it, siblings are always next to
-   * each other in contiguous slices. To find the children for a
-   * particular callnode, we use a pair of values from `offsets` to
-   * find the right slice. */
   const array = new Uint32Array(callNodeTable.length);
   const offsets = new Uint32Array(callNodeTable.length + 1);
 
@@ -108,7 +131,7 @@ export function getRootsAndChildren(
     /* Find the place in `array` where this callnode should be
      * inserted, swapping elements in the array as we go
      * along. Continue as long as this callnode's function name is
-     * lexically greater than the function names of the callnodes
+     * lexically smaller than the function names of the callnodes
      * already placed in the array. This ensures that all slices have
      * children in descending order. Any callnode indices equal to 0
      * means that they are uninitialized, so just breeze through
@@ -120,14 +143,20 @@ export function getRootsAndChildren(
      * callnode), it should be just fine.
      */
     let i = start;
-    while (
-      i < end &&
-      (array[i + 1] === 0 ||
-        funcName <
+    while (i < end) {
+      if (
+        array[i + 1] !== 0 &&
+        funcName >
           thread.stringTable.getString(
             thread.funcTable.name[callNodeTable.func[array[i + 1]]]
-          ))
-    ) {
+          )
+      ) {
+        // We've found our spot if the next slot in the array is
+        // occupied with a callnode whose function name is less than
+        // ours.
+        break;
+      }
+
       array[i] = array[i + 1];
       i++;
     }
@@ -166,7 +195,10 @@ export function getFlameGraphTiming(
 
   // Array of call nodes to recursively process in the loop below.
   // Start with the roots of the call tree.
-  const stack: Stack = roots.map(nodeIndex => ({ nodeIndex, depth: 0 }));
+  const stack: Array<{
+    depth: number,
+    nodeIndex: IndexIntoCallNodeTable,
+  }> = roots.map(nodeIndex => ({ nodeIndex, depth: 0 }));
 
   // Keep track of time offset by depth level.
   const timeOffset = [0.0];
