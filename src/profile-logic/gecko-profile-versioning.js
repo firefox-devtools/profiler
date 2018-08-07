@@ -441,9 +441,9 @@ const _upgraders = {
       for (const thread of p.threads) {
         const schemaIndexCategory = thread.frameTable.schema.category;
         for (const frame of thread.frameTable.data) {
-          if (schemaIndexCategory in frame) {
+          if (frame.hasOwnProperty(schemaIndexCategory)) {
             frame[newSchemaCategoryIndex] = frame[oldSchemaCategoryIndex];
-            delete frame[oldSchemaCategoryIndex];
+            frame[oldSchemaCategoryIndex] = null;
           }
         }
         thread.frameTable.schema.category = newSchemaCategoryIndex;
