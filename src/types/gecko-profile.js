@@ -115,6 +115,7 @@ export type GeckoFrameStruct = {
   implementation: Array<null | IndexIntoStringTable>,
   optimizations: Array<null | Object>,
   line: Array<null | number>,
+  column: Array<null | number>,
   category: Array<null | number>,
   length: number,
 };
