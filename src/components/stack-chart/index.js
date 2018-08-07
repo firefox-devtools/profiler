@@ -46,8 +46,6 @@ type StateProps = {|
   +getCategory: GetCategory,
   +getLabel: GetLabel,
   +previewSelection: PreviewSelection,
-  +threadName: string,
-  +processDetails: string,
 |};
 
 type DispatchProps = {|
@@ -75,8 +73,6 @@ class StackChartGraph extends React.PureComponent<Props> {
       getCategory,
       getLabel,
       previewSelection,
-      threadName,
-      processDetails,
       updatePreviewSelection,
     } = this.props;
 
@@ -85,10 +81,7 @@ class StackChartGraph extends React.PureComponent<Props> {
     return (
       <div className="stackChart">
         <StackSettings />
-        <div className="stackChartGraph">
-          <div title={processDetails} className="stackChartLabels grippy">
-            <span>{threadName}</span>
-          </div>
+        <div className="stackChartContent">
           <StackChartCanvas
             viewportProps={{
               previewSelection,
@@ -130,8 +123,6 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       getCategory: getCategoryColorStrategy(state),
       getLabel: getLabelingStrategy(state),
       previewSelection: getPreviewSelection(state),
-      threadName: selectedThreadSelectors.getFriendlyThreadName(state),
-      processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
     };
   },
   mapDispatchToProps: { updatePreviewSelection },
