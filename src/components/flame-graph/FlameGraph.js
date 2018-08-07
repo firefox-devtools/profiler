@@ -46,8 +46,6 @@ type StateProps = {|
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +previewSelection: PreviewSelection,
   +flameGraphTiming: FlameGraphTiming,
-  +threadName: string,
-  +processDetails: string,
   +callTree: CallTree,
   +callNodeInfo: CallNodeInfo,
   +threadIndex: number,
@@ -82,8 +80,6 @@ class FlameGraph extends React.PureComponent<Props> {
       callNodeInfo,
       timeRange,
       previewSelection,
-      threadName,
-      processDetails,
       selectedCallNodeIndex,
       isCallNodeContextMenuVisible,
       scrollToSelectionGeneration,
@@ -101,9 +97,6 @@ class FlameGraph extends React.PureComponent<Props> {
             key={className}
           />
         ))}
-        <div title={processDetails} className="flameGraphLabels grippy">
-          <span>{threadName}</span>
-        </div>
         <ContextMenuTrigger
           id="CallNodeContextMenu"
           attributes={{
@@ -161,8 +154,6 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       callTree: selectedThreadSelectors.getCallTree(state),
       timeRange: getCommittedRange(state),
       previewSelection: getPreviewSelection(state),
-      threadName: selectedThreadSelectors.getFriendlyThreadName(state),
-      processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
       threadIndex: getSelectedThreadIndex(state),
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(

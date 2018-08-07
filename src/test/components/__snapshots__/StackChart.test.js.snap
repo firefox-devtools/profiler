@@ -94,17 +94,8 @@ exports[`renders StackChartGraph correctly 1`] = `
     </div>
   </div>
   <div
-    className="stackChartGraph"
+    className="stackChartContent"
   >
-    <div
-      className="stackChartLabels grippy"
-      title="thread: \\"Empty\\" (0)
-process: \\"default\\" (0)"
-    >
-      <span>
-        Empty
-      </span>
-    </div>
     <div
       className="chartViewport"
       onMouseDown={[Function]}

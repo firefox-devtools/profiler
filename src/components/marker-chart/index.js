@@ -47,8 +47,6 @@ type StateProps = {|
   +interval: Milliseconds,
   +threadIndex: number,
   +previewSelection: PreviewSelection,
-  +threadName: string,
-  +processDetails: string,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -70,8 +68,6 @@ class MarkerChart extends React.PureComponent<Props> {
       markerTimingRows,
       markers,
       previewSelection,
-      threadName,
-      processDetails,
       updatePreviewSelection,
     } = this.props;
 
@@ -85,9 +81,6 @@ class MarkerChart extends React.PureComponent<Props> {
 
     return (
       <div className="markerChart">
-        <div className="markerChartLabels grippy" title={processDetails}>
-          <span className="markerChartLabelsName">{threadName}</span>
-        </div>
         <MarkerChartCanvas
           key={threadIndex}
           viewportProps={{
@@ -124,7 +117,6 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
     const markers = selectedThreadSelectors.getTracingMarkersForView(state);
     const markerTimingRows = selectedThreadSelectors.getMarkerTiming(state);
-    const threadName = selectedThreadSelectors.getFriendlyThreadName(state);
 
     return {
       markers,
@@ -134,8 +126,6 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
       previewSelection: getPreviewSelection(state),
-      threadName,
-      processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
     };
   },
   mapDispatchToProps: { updatePreviewSelection },
