@@ -19,6 +19,28 @@ export function getBoundingBox(width: number, height: number) {
   };
 }
 
+export function getMouseEvent(values: Object = {}): $Shape<MouseEvent> {
+  return {
+    altKey: false,
+    button: 0,
+    buttons: 1,
+    clientX: 0,
+    clientY: 0,
+    ctrlKey: false,
+    metaKey: false,
+    movementX: 0,
+    movementY: 0,
+    offsetX: 0,
+    offsetY: 0,
+    pageX: 0,
+    pageY: 0,
+    screenX: 0,
+    screenY: 0,
+    shiftKey: false,
+    ...values,
+  };
+}
+
 /**
  * This function formats a call tree into a human readable form, to make it easy
  * to assert certain relationships about the data structure in a really terse
