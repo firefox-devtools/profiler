@@ -182,8 +182,9 @@ body, #root, .profileViewer {
 .treeViewRow.odd {
   background-color: #F5F5F5;
 }
-.treeViewRow.selected {
-  background-color: -moz-dialog;
+.treeViewRow.selected
+.treeViewRow::selection {
+  background-color: var(--grey-30);
   color: black;
 }
 .treeViewRow.dim > .treeViewMainColumn {
