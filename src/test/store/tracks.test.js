@@ -14,12 +14,13 @@ import {
   changeGlobalTrackOrder,
   hideGlobalTrack,
   showGlobalTrack,
-  isolateGlobalTrack,
+  isolateProcess,
   changeLocalTrackOrder,
   hideLocalTrack,
   changeSelectedThread,
   showLocalTrack,
   isolateLocalTrack,
+  isolateProcessMainThread,
 } from '../../actions/profile-view';
 
 describe('ordering and hiding', function() {
@@ -200,9 +201,9 @@ describe('ordering and hiding', function() {
     it('can isolate a global process track', function() {
       const { getState, dispatch, parentTrackIndex } = init();
       withAnalyticsMock(() => {
-        dispatch(isolateGlobalTrack(parentTrackIndex));
+        dispatch(isolateProcess(parentTrackIndex));
         expect(self.ga).toBeCalledWith('send', {
-          eventAction: 'isolate global track',
+          eventAction: 'isolate process',
           eventCategory: 'timeline',
           hitType: 'event',
         });
@@ -218,12 +219,30 @@ describe('ordering and hiding', function() {
     it('keeps the selected local track when isolating a global track', function() {
       const { getState, dispatch, tabTrackIndex, styleThreadIndex } = init();
       dispatch(changeSelectedThread(styleThreadIndex));
-      dispatch(isolateGlobalTrack(tabTrackIndex));
+      dispatch(isolateProcess(tabTrackIndex));
       expect(getHumanReadableTracks(getState())).toEqual([
         'hide [thread GeckoMain process]',
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
         '  - show [thread Style] SELECTED',
+      ]);
+    });
+
+    it('can isolate just the main thread of a process', function() {
+      const { getState, dispatch, tabTrackIndex } = init();
+      withAnalyticsMock(() => {
+        dispatch(isolateProcessMainThread(tabTrackIndex));
+        expect(self.ga).toBeCalledWith('send', {
+          eventAction: 'isolate process main thread',
+          eventCategory: 'timeline',
+          hitType: 'event',
+        });
+      });
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
       ]);
     });
 
@@ -255,7 +274,7 @@ describe('ordering and hiding', function() {
       expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
         tabThreadIndex
       );
-      dispatch(isolateGlobalTrack(parentTrackIndex));
+      dispatch(isolateProcess(parentTrackIndex));
       expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
         parentThreadIndex
       );

@@ -43,12 +43,14 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
   _offsetY: CssPixels;
   _ctx: CanvasRenderingContext2D;
   _canvas: HTMLCanvasElement | null;
+  _isDrawScheduled: boolean;
 
   constructor(props: Props<HoveredItem>) {
     super(props);
     this._devicePixelRatio = 1;
     this._offsetX = 0;
     this._offsetY = 0;
+    this._isDrawScheduled = false;
     this.state = {
       hoveredItem: null,
       pageX: 0,
@@ -65,7 +67,12 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
 
   _scheduleDraw() {
     const { className, drawCanvas } = this.props;
+    if (this._isDrawScheduled) {
+      return;
+    }
+    this._isDrawScheduled = true;
     window.requestAnimationFrame(() => {
+      this._isDrawScheduled = false;
       if (this._canvas) {
         timeCode(`${className} render`, () => {
           this._prepCanvas();
