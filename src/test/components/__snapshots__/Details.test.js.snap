@@ -5,7 +5,14 @@ exports[`app/Details renders an initial view with the right panel 1`] = `
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -51,7 +58,7 @@ exports[`app/Details renders an initial view with the right panel 1`] = `
   <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -60,7 +67,14 @@ exports[`app/Details renders an initial view with the right panel for tab calltr
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -106,7 +120,7 @@ exports[`app/Details renders an initial view with the right panel for tab calltr
   <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -115,7 +129,14 @@ exports[`app/Details renders an initial view with the right panel for tab flame-
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="flame-graph"
@@ -161,7 +182,7 @@ exports[`app/Details renders an initial view with the right panel for tab flame-
   <FlameGraphView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -216,7 +237,7 @@ exports[`app/Details renders an initial view with the right panel for tab marker
   <Connect(MarkerChart) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -271,7 +292,7 @@ exports[`app/Details renders an initial view with the right panel for tab marker
   <Connect(MarkerTable) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -326,7 +347,7 @@ exports[`app/Details renders an initial view with the right panel for tab networ
   <Connect(MarkerChart) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -381,7 +402,7 @@ exports[`app/Details renders an initial view with the right panel for tab stack-
   <Connect(StackChartGraph) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -390,7 +411,14 @@ exports[`app/Details show the correct state for the sidebar open button 1`] = `
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -436,7 +464,7 @@ exports[`app/Details show the correct state for the sidebar open button 1`] = `
   <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -445,7 +473,14 @@ exports[`app/Details show the correct state for the sidebar open button 2`] = `
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -491,7 +526,7 @@ exports[`app/Details show the correct state for the sidebar open button 2`] = `
   <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -500,7 +535,14 @@ exports[`app/Details show the correct state for the sidebar open button 3`] = `
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -546,7 +588,7 @@ exports[`app/Details show the correct state for the sidebar open button 3`] = `
   <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;
 
@@ -555,7 +597,14 @@ exports[`app/Details show the correct state for the sidebar open button 4`] = `
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
@@ -601,6 +650,6 @@ exports[`app/Details show the correct state for the sidebar open button 4`] = `
   <ProfileCallTreeView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
-  <Connect(TimelineThreadContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
 </div>
 `;

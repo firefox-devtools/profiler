@@ -5,7 +5,19 @@
 
 import type { StartEndRange } from '../types/units';
 
-export function parseRangeFilters(stringValue: string = ''): StartEndRange[] {
+/**
+ * Users can make preview range selections on the profile, and then can commit these
+ * to drill down into a profile. This file contains functions for working with these
+ * committed ranges.
+ */
+
+/**
+ * Parse URL encoded committed ranges with the form: "start-end~start-end", where
+ * `start` and `end` are positive or negative float numbers.
+ */
+export function parseCommittedRanges(
+  stringValue: string = ''
+): StartEndRange[] {
   if (!stringValue) {
     return [];
   }
@@ -18,7 +30,11 @@ export function parseRangeFilters(stringValue: string = ''): StartEndRange[] {
   });
 }
 
-export function stringifyRangeFilters(
+/**
+ * Stringify committed ranges into the following form: "start-end~start-end", where
+ * `start` and `end` are float numbers.
+ */
+export function stringifyCommittedRanges(
   arrayValue: StartEndRange[] = []
 ): string {
   return arrayValue
@@ -40,8 +56,10 @@ export function getFormattedTimeLength(length: number): string {
   return `${length.toFixed(0)} ms`;
 }
 
-export function getRangeFilterLabels(rangeFilters: StartEndRange[]): string[] {
-  const labels = rangeFilters.map(range =>
+export function getCommittedRangeLabels(
+  committedRanges: StartEndRange[]
+): string[] {
+  const labels = committedRanges.map(range =>
     getFormattedTimeLength(range.end - range.start)
   );
   labels.unshift('Full Range');

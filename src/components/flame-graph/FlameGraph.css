@@ -15,20 +15,3 @@
   flex: 1;
   border-top: 1px solid var(--grey-30);
 }
-
-.flameGraphLabels {
-  width: 121px;
-  padding: 9px 14px;
-  border-right: 1px solid var(--grey-30);
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-}
-
-.flameGraphLabels > span {
-  flex: 1;
-  cursor: default;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}

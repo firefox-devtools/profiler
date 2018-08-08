@@ -11,6 +11,7 @@ import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
+import * as Tracks from '../profile-logic/tracks';
 import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
@@ -30,6 +31,7 @@ import type {
   ThreadIndex,
   SamplesTable,
   MarkersTable,
+  Pid,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -37,9 +39,17 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
   MarkerTimingRows,
+  LocalTrack,
+  GlobalTrack,
+  TrackIndex,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
-import type { Action, ProfileSelection, RequestedLib } from '../types/actions';
+import type {
+  Action,
+  PreviewSelection,
+  RequestedLib,
+  TrackReference,
+} from '../types/actions';
 import type {
   State,
   Reducer,
@@ -82,6 +92,36 @@ function profile(state: Profile | null = null, action: Action): Profile | null {
       });
       return Object.assign({}, state, { threads });
     }
+    default:
+      return state;
+  }
+}
+
+/**
+ * This information is stored, rather than derived via selectors, since the coalesced
+ * function update would force it to be recomputed on every symbolication update
+ * pass. It is valid for the lifetime of the profile.
+ */
+function globalTracks(state: GlobalTrack[] = [], action: Action) {
+  switch (action.type) {
+    case 'VIEW_PROFILE':
+      return action.globalTracks;
+    default:
+      return state;
+  }
+}
+
+/**
+ * This can be derived like the globalTracks information, but is stored in the state
+ * for the same reason.
+ */
+function localTracksByPid(
+  state: Map<Pid, LocalTrack[]> = new Map(),
+  action: Action
+) {
+  switch (action.type) {
+    case 'VIEW_PROFILE':
+      return action.localTracksByPid;
     default:
       return state;
   }
@@ -341,14 +381,17 @@ function waitingForLibs(state: Set<RequestedLib> = new Set(), action: Action) {
   }
 }
 
-function selection(
-  state: ProfileSelection = { hasSelection: false, isModifying: false },
+function previewSelection(
+  state: PreviewSelection = { hasSelection: false, isModifying: false },
   action: Action
-): ProfileSelection {
+): PreviewSelection {
   // TODO: Rename to timeRangeSelection
   switch (action.type) {
-    case 'UPDATE_PROFILE_SELECTION':
-      return action.selection;
+    case 'UPDATE_PREVIEW_SELECTION':
+      return action.previewSelection;
+    case 'COMMIT_RANGE':
+    case 'POP_COMMITTED_RANGES':
+      return { hasSelection: false, isModifying: false };
     default:
       return state;
   }
@@ -359,7 +402,8 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
     case 'CHANGE_INVERT_CALLSTACK':
     case 'CHANGE_SELECTED_CALL_NODE':
     case 'CHANGE_SELECTED_THREAD':
-    case 'HIDE_THREAD':
+    case 'HIDE_GLOBAL_TRACK':
+    case 'HIDE_LOCAL_TRACK':
       return state + 1;
     default:
       return state;
@@ -405,10 +449,16 @@ function tabOrder(state: number[] = getInitialTabOrder(), action: Action) {
   }
 }
 
-function rightClickedThread(state: ThreadIndex = 0, action: Action) {
+function rightClickedTrack(
+  // Make the initial value the first global track, which is assumed to exists.
+  // This makes the track reference always exist, which in turn makes it so that
+  // we do not have to check for a null TrackReference.
+  state: TrackReference = { type: 'global', trackIndex: 0 },
+  action: Action
+) {
   switch (action.type) {
-    case 'CHANGE_RIGHT_CLICKED_THREAD':
-      return action.selectedThread;
+    case 'CHANGE_RIGHT_CLICKED_TRACK':
+      return action.trackReference;
     default:
       return state;
   }
@@ -477,16 +527,18 @@ export default wrapReducerInResetter(
       perThread: viewOptionsPerThread,
       symbolicationStatus,
       waitingForLibs,
-      selection,
+      previewSelection,
       scrollToSelectionGeneration,
       focusCallTreeGeneration,
       rootRange,
       zeroAt,
       tabOrder,
-      rightClickedThread,
+      rightClickedTrack,
       isCallNodeContextMenuVisible,
       profileSharingStatus,
     }),
+    globalTracks,
+    localTracksByPid,
     profile,
   })
 );
@@ -525,13 +577,13 @@ export const getTabOrder = createSelector(
   viewOptions => viewOptions.tabOrder
 );
 
-export const getDisplayRange = createSelector(
+export const getCommittedRange = createSelector(
   (state: State) => getProfileViewOptions(state).rootRange,
   (state: State) => getProfileViewOptions(state).zeroAt,
-  UrlState.getRangeFilters,
-  (rootRange, zeroAt, rangeFilters): StartEndRange => {
-    if (rangeFilters.length > 0) {
-      let { start, end } = rangeFilters[rangeFilters.length - 1];
+  UrlState.getAllCommittedRanges,
+  (rootRange, zeroAt, committedRanges): StartEndRange => {
+    if (committedRanges.length > 0) {
+      let { start, end } = committedRanges[committedRanges.length - 1];
       start += zeroAt;
       end += zeroAt;
       return { start, end };
@@ -559,10 +611,105 @@ export const getDefaultCategory = (state: State): IndexIntoCategoryList =>
 export const getThreads = (state: State): Thread[] => getProfile(state).threads;
 export const getThreadNames = (state: State): string[] =>
   getProfile(state).threads.map(t => t.name);
-export const getRightClickedThreadIndex = (state: State) =>
-  getProfileViewOptions(state).rightClickedThread;
-export const getSelection = (state: State) =>
-  getProfileViewOptions(state).selection;
+export const getRightClickedTrack = (state: State) =>
+  getProfileViewOptions(state).rightClickedTrack;
+export const getPreviewSelection = (state: State) =>
+  getProfileViewOptions(state).previewSelection;
+
+/**
+ * Tracks
+ */
+export const getGlobalTracks = (state: State) =>
+  getProfileView(state).globalTracks;
+export const getGlobalTrackReferences = createSelector(
+  getGlobalTracks,
+  (globalTracks): TrackReference[] =>
+    globalTracks.map((globalTrack, trackIndex) => ({
+      type: 'global',
+      trackIndex,
+    }))
+);
+
+// Warning: this selector returns a new object on every call, and will not properly
+// work with a PureComponent.
+export const getGlobalTrackAndIndexByPid = (state: State, pid: Pid) => {
+  const globalTracks = getGlobalTracks(state);
+  const globalTrackIndex = globalTracks.findIndex(
+    track => track.type === 'process' && track.pid === pid
+  );
+  if (globalTrackIndex === -1) {
+    throw new Error('Unable to find the track index for the given pid.');
+  }
+  const globalTrack = globalTracks[globalTrackIndex];
+  if (globalTrack.type !== 'process') {
+    throw new Error('The globalTrack must be a process type.');
+  }
+  return { globalTrackIndex, globalTrack };
+};
+export const getLocalTracksByPid = (state: State) =>
+  getProfileView(state).localTracksByPid;
+export const getLocalTracks = (state: State, pid: Pid) =>
+  ensureExists(
+    getProfileView(state).localTracksByPid.get(pid),
+    'Unable to get the tracks for the given pid.'
+  );
+export const getRightClickedThreadIndex = createSelector(
+  getRightClickedTrack,
+  getGlobalTracks,
+  getLocalTracksByPid,
+  (rightClickedTrack, globalTracks, localTracksByPid): null | ThreadIndex => {
+    if (rightClickedTrack.type === 'global') {
+      const track = globalTracks[rightClickedTrack.trackIndex];
+      return track.type === 'process' ? track.mainThreadIndex : null;
+    } else {
+      const { pid, trackIndex } = rightClickedTrack;
+      const localTracks = ensureExists(
+        localTracksByPid.get(pid),
+        'No local tracks found at that pid.'
+      );
+      const track = localTracks[trackIndex];
+
+      return track.type === 'thread' ? track.threadIndex : null;
+    }
+  }
+);
+export const getGlobalTrackNames = createSelector(
+  getGlobalTracks,
+  getThreads,
+  (globalTracks, threads): string[] =>
+    globalTracks.map(globalTrack =>
+      Tracks.getGlobalTrackName(globalTrack, threads)
+    )
+);
+export const getGlobalTrackName = (
+  state: State,
+  trackIndex: TrackIndex
+): string => getGlobalTrackNames(state)[trackIndex];
+export const getLocalTrackNamesByPid = createSelector(
+  getLocalTracksByPid,
+  getThreads,
+  (localTracksByPid, threads): Map<Pid, string[]> => {
+    const localTrackNamesByPid = new Map();
+    for (const [pid, localTracks] of localTracksByPid) {
+      localTrackNamesByPid.set(
+        pid,
+        localTracks.map(localTrack =>
+          Tracks.getLocalTrackName(localTrack, threads)
+        )
+      );
+    }
+    return localTrackNamesByPid;
+  }
+);
+export const getLocalTrackName = (
+  state: State,
+  pid: Pid,
+  trackIndex: TrackIndex
+): string =>
+  ensureExists(
+    getLocalTrackNamesByPid(state).get(pid),
+    'Could not find the track names from the given pid'
+  )[trackIndex];
 
 const _getDefaultCategoryWrappedInObject = createSelector(
   getDefaultCategory,
@@ -581,10 +728,10 @@ export type SelectorsForThread = {
   getTracingMarkers: State => TracingMarker[],
   getTracingMarkersForView: State => TracingMarker[],
   getMarkerTiming: State => MarkerTimingRows,
-  getRangeSelectionFilteredTracingMarkers: State => TracingMarker[],
-  getRangeSelectionFilteredTracingMarkersForHeader: State => TracingMarker[],
+  getCommittedRangeFilteredTracingMarkers: State => TracingMarker[],
+  getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
   getFilteredThread: State => Thread,
-  getRangeSelectionFilteredThread: State => Thread,
+  getPreviewFilteredThread: State => Thread,
   getCallNodeInfo: State => CallNodeInfo,
   getCallNodeMaxDepth: State => number,
   getSelectedCallNodePath: State => CallNodePath,
@@ -612,17 +759,17 @@ export const selectorsForThread = (
      * interactions. The transforms are order dependendent.
      *
      * 1. Unfiltered - The first selector gets the unmodified original thread.
-     * 2. Range - New samples table with only samples in range.
+     * 2. Range - New samples table with only samples in the committed range.
      * 3. Transform - Apply the transform stack that modifies the stacks and samples.
      * 4. Implementation - Modify stacks and samples to only show a single implementation.
      * 5. Search - Exclude samples that don't include some text in the stack.
-     * 6. Range selection - Only include samples that are within a user's sub-selection.
+     * 6. Preview - Only include samples that are within a user's preview range selection.
      */
     const getThread = (state: State): Thread =>
       getProfile(state).threads[threadIndex];
     const getRangeFilteredThread = createSelector(
       getThread,
-      getDisplayRange,
+      getCommittedRange,
       (thread, range): Thread => {
         const { start, end } = range;
         return ProfileData.filterThreadToRange(thread, start, end);
@@ -725,14 +872,14 @@ export const selectorsForThread = (
           : thread;
       }
     );
-    const getRangeSelectionFilteredThread = createSelector(
+    const getPreviewFilteredThread = createSelector(
       getFilteredThread,
-      getSelection,
-      (thread, selection): Thread => {
-        if (!selection.hasSelection) {
+      getPreviewSelection,
+      (thread, previewSelection): Thread => {
+        if (!previewSelection.hasSelection) {
           return thread;
         }
-        const { selectionStart, selectionEnd } = selection;
+        const { selectionStart, selectionEnd } = previewSelection;
         return ProfileData.filterThreadToRange(
           thread,
           selectionStart,
@@ -797,16 +944,16 @@ export const selectorsForThread = (
       getTracingMarkersForView,
       MarkerTiming.getMarkerTiming
     );
-    const getRangeSelectionFilteredTracingMarkers = createSelector(
+    const getCommittedRangeFilteredTracingMarkers = createSelector(
       getTracingMarkers,
-      getDisplayRange,
+      getCommittedRange,
       (markers, range): TracingMarker[] => {
         const { start, end } = range;
         return ProfileData.filterTracingMarkersToRange(markers, start, end);
       }
     );
-    const getRangeSelectionFilteredTracingMarkersForHeader = createSelector(
-      getRangeSelectionFilteredTracingMarkers,
+    const getCommittedRangeFilteredTracingMarkersForHeader = createSelector(
+      getCommittedRangeFilteredTracingMarkers,
       (markers): TracingMarker[] =>
         markers.filter(
           tm =>
@@ -867,7 +1014,7 @@ export const selectorsForThread = (
         )
     );
     const getCallTree = createSelector(
-      getRangeSelectionFilteredThread,
+      getPreviewFilteredThread,
       getProfileInterval,
       getCallNodeInfo,
       getCategories,
@@ -883,16 +1030,19 @@ export const selectorsForThread = (
       StackTiming.getStackTimingByDepth
     );
     const getCallNodeMaxDepthForFlameGraph = createSelector(
-      getRangeSelectionFilteredThread,
+      getPreviewFilteredThread,
       getCallNodeInfo,
       ProfileData.computeCallNodeMaxDepth
     );
     const getFlameGraphTiming = createSelector(
-      getCallTree,
+      getPreviewFilteredThread,
+      getProfileInterval,
+      getCallNodeInfo,
+      UrlState.getInvertCallstack,
       FlameGraph.getFlameGraphTiming
     );
     const getSearchFilteredMarkers = createSelector(
-      getRangeSelectionFilteredThread,
+      getPreviewFilteredThread,
       UrlState.getMarkersSearchString,
       ProfileData.getSearchFilteredMarkers
     );
@@ -924,10 +1074,10 @@ export const selectorsForThread = (
       getTracingMarkers,
       getTracingMarkersForView,
       getMarkerTiming,
-      getRangeSelectionFilteredTracingMarkers,
-      getRangeSelectionFilteredTracingMarkersForHeader,
+      getCommittedRangeFilteredTracingMarkers,
+      getCommittedRangeFilteredTracingMarkersForHeader,
       getFilteredThread,
-      getRangeSelectionFilteredThread,
+      getPreviewFilteredThread,
       getCallNodeInfo,
       getCallNodeMaxDepth,
       getSelectedCallNodePath,
@@ -1014,7 +1164,7 @@ export const selectedNodeSelectors: SelectorsForNode = (() => {
     selectedThreadSelectors.getCallNodeInfo,
     getProfileInterval,
     UrlState.getInvertCallstack,
-    selectedThreadSelectors.getRangeSelectionFilteredThread,
+    selectedThreadSelectors.getPreviewFilteredThread,
     (
       selectedPath,
       callNodeInfo,

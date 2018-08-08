@@ -48,6 +48,7 @@ class TabBar extends React.PureComponent<Props> {
         <Reorderable
           tagName="ol"
           className="tabBarTabWrapper"
+          grippyClassName="grippy"
           order={tabOrder}
           orient="horizontal"
           onChangeOrder={onChangeTabOrder}

@@ -66,7 +66,6 @@ describe('TimelineTracingMarkersOverview', function() {
           rangeEnd={15}
           threadIndex={0}
           onSelect={() => {}}
-          isModifyingSelection={false}
         />
       </Provider>,
       { createNodeMock }

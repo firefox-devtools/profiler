@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`timeline/TrackThread matches the snapshot 1`] = `
+<div
+  className="timelineTrackThread"
+>
+  <div
+    className="timelineTrackThreadIntervalMarkerOverview selected"
+  >
+    <canvas
+      className="timelineTracingMarkersCanvas"
+      onMouseDown={[Function]}
+      onMouseMove={[Function]}
+      onMouseOut={[Function]}
+      onMouseUp={[Function]}
+    />
+  </div>
+  <div
+    className="timelineStackGraph"
+  >
+    <canvas
+      className="timelineStackGraphCanvas"
+      onMouseUp={[Function]}
+    />
+  </div>
+  <div
+    className="timelineEmptyThreadIndicator"
+  />
+</div>
+`;

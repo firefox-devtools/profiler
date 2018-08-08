@@ -5,6 +5,7 @@
 // @flow
 
 import * as React from 'react';
+import classNames from 'classnames';
 
 import explicitConnect from '../../utils/connect';
 import {
@@ -31,6 +32,44 @@ import type {
   TimingsForPath,
 } from '../../profile-logic/profile-data';
 
+type CanCopyContentProps = {|
+  +tagName?: string,
+  +content: string,
+  +className?: string,
+|};
+
+class CanSelectContent extends React.PureComponent<CanCopyContentProps> {
+  _selectContent(e: SyntheticMouseEvent<HTMLInputElement>) {
+    const input = e.currentTarget;
+    input.focus();
+    input.select();
+  }
+
+  _unselectContent(e: SyntheticMouseEvent<HTMLInputElement>) {
+    e.currentTarget.setSelectionRange(0, 0);
+  }
+
+  render() {
+    const { tagName, content, className } = this.props;
+    const TagName = tagName || 'div';
+
+    return (
+      <TagName
+        className={classNames(className, 'can-select-content')}
+        title={`${content}\n(click to select)`}
+      >
+        <input
+          value={content}
+          className="can-select-content-input"
+          onFocus={this._selectContent}
+          onBlur={this._unselectContent}
+          readOnly={true}
+        />
+      </TagName>
+    );
+  }
+}
+
 type SidebarDetailProps = {|
   +label: string,
   +children: React.Node,
@@ -40,7 +79,7 @@ function SidebarDetail({ label, children }: SidebarDetailProps) {
   return (
     <React.Fragment>
       <div className="sidebar-label">{label}:</div>
-      {children}
+      <div className="sidebar-value">{children}</div>
     </React.Fragment>
   );
 }
@@ -107,19 +146,15 @@ type BreakdownProps = {|
 function Breakdown({ data }: BreakdownProps) {
   const totalTime = data.reduce((result, item) => result + item.value, 0);
 
-  return (
-    <div className="sidebar-details">
-      {data.filter(({ value }) => value).map(({ group, value }) => {
-        const percentage = Math.round(value / totalTime * 100);
+  return data.filter(({ value }) => value).map(({ group, value }) => {
+    const percentage = Math.round(value / totalTime * 100);
 
-        return (
-          <SidebarDetail label={group} key={group}>
-            {value}ms ({percentage}%)
-          </SidebarDetail>
-        );
-      })}
-    </div>
-  );
+    return (
+      <SidebarDetail label={group} key={group}>
+        {value}ms ({percentage}%)
+      </SidebarDetail>
+    );
+  });
 }
 
 type StateProps = {|
@@ -162,18 +197,26 @@ class CallTreeSidebar extends React.PureComponent<Props> {
     return (
       <aside className="sidebar sidebar-calltree">
         <header className="sidebar-titlegroup">
-          <h2 className="sidebar-title">{name}</h2>
-          {lib ? <p className="sidebar-subtitle">{lib}</p> : null}
+          <CanSelectContent
+            tagName="h2"
+            className="sidebar-title"
+            content={name}
+          />
+          {lib ? (
+            <CanSelectContent
+              tagName="p"
+              className="sidebar-subtitle"
+              content={lib}
+            />
+          ) : null}
         </header>
         <h3 className="sidebar-title2">This selected call node</h3>
-        <div className="sidebar-details">
-          <SidebarDetail label="Running Time">
-            {totalTime.value}ms ({totalTimePercent}%)
-          </SidebarDetail>
-          <SidebarDetail label="Self Time">
-            {selfTime.value ? `${selfTime.value}ms (${selfTimePercent}%)` : '—'}
-          </SidebarDetail>
-        </div>
+        <SidebarDetail label="Running Time">
+          {totalTime.value}ms ({totalTimePercent}%)
+        </SidebarDetail>
+        <SidebarDetail label="Self Time">
+          {selfTime.value ? `${selfTime.value}ms (${selfTimePercent}%)` : '—'}
+        </SidebarDetail>
         {totalTime.breakdownByImplementation ? (
           <React.Fragment>
             <h4 className="sidebar-title3">Implementation – running time</h4>
@@ -191,16 +234,14 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           </React.Fragment>
         ) : null}
         <h3 className="sidebar-title2">This function across the entire tree</h3>
-        <div className="sidebar-details">
-          <SidebarDetail label="Running Time">
-            {totalTimeForFunc.value}ms ({totalTimeForFuncPercent}%)
-          </SidebarDetail>
-          <SidebarDetail label="Self Time">
-            {selfTimeForFunc.value
-              ? `${selfTimeForFunc.value}ms (${selfTimeForFuncPercent}%)`
-              : '—'}
-          </SidebarDetail>
-        </div>
+        <SidebarDetail label="Running Time">
+          {totalTimeForFunc.value}ms ({totalTimeForFuncPercent}%)
+        </SidebarDetail>
+        <SidebarDetail label="Self Time">
+          {selfTimeForFunc.value
+            ? `${selfTimeForFunc.value}ms (${selfTimeForFuncPercent}%)`
+            : '—'}
+        </SidebarDetail>
         {totalTimeForFunc.breakdownByImplementation ? (
           <React.Fragment>
             <h4 className="sidebar-title3">Implementation – running time</h4>

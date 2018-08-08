@@ -23,7 +23,6 @@ import type JSZip from 'jszip';
  * This reducer contains all of the state that deals with loading in profiles from
  * zip files.
  */
-
 function zipFile(
   state: ZipFileState = {
     phase: 'NO_ZIP_FILE',

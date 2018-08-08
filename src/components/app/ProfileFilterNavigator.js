@@ -5,10 +5,10 @@
 // @flow
 
 import explicitConnect from '../../utils/connect';
-import { popRangeFiltersAndUnsetSelection } from '../../actions/profile-view';
-import { getSelection } from '../../reducers/profile-view';
-import { getRangeFilterLabels } from '../../reducers/url-state';
-import { getFormattedTimeLength } from '../../profile-logic/range-filters';
+import { popCommittedRanges } from '../../actions/profile-view';
+import { getPreviewSelection } from '../../reducers/profile-view';
+import { getCommittedRangeLabels } from '../../reducers/url-state';
+import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
 import FilterNavigatorBar from '../shared/FilterNavigatorBar';
 
 import type { ExplicitConnectOptions } from '../../utils/connect';
@@ -22,11 +22,11 @@ type StateProps = $ReadOnly<$Exact<$Diff<Props, DispatchProps>>>;
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
-    const items = getRangeFilterLabels(state);
-    const profileSelection = getSelection(state);
-    const uncommittedItem = profileSelection.hasSelection
+    const items = getCommittedRangeLabels(state);
+    const previewSelection = getPreviewSelection(state);
+    const uncommittedItem = previewSelection.hasSelection
       ? getFormattedTimeLength(
-          profileSelection.selectionEnd - profileSelection.selectionStart
+          previewSelection.selectionEnd - previewSelection.selectionStart
         )
       : undefined;
     return {
@@ -37,7 +37,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     };
   },
   mapDispatchToProps: {
-    onPop: popRangeFiltersAndUnsetSelection,
+    onPop: popCommittedRanges,
   },
   component: FilterNavigatorBar,
 };

@@ -26,7 +26,7 @@ import { getSelectedTab } from '../../reducers/url-state';
 import { getIsSidebarOpen } from '../../reducers/app';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
-import TimelineThreadContextMenu from '../timeline/ThreadContextMenu';
+import TimelineTrackContextMenu from '../timeline/TrackContextMenu';
 import { toValidTabSlug } from '../../utils/flow';
 import { tabsWithTitleArray } from '../../app-logic/tabs-handling';
 
@@ -110,7 +110,7 @@ class ProfileViewer extends PureComponent<Props> {
         }
         <CallNodeContextMenu />
         <MarkerTableContextMenu />
-        <TimelineThreadContextMenu />
+        <TimelineTrackContextMenu />
       </div>
     );
   }
