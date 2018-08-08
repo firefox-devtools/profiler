@@ -16,29 +16,38 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
   tabIndex="-1"
 >
   <div
-    key=".0"
+    aria-disabled="false"
+    aria-orientation={null}
+    className="react-contextmenu-item"
+    onClick={[Function]}
+    onMouseLeave={[Function]}
+    onMouseMove={[Function]}
+    onTouchEnd={[Function]}
+    role="menuitem"
+    tabIndex="-1"
   >
-    <div
-      aria-disabled="false"
-      aria-orientation={null}
-      className="react-contextmenu-item"
-      onClick={[Function]}
-      onMouseLeave={[Function]}
-      onMouseMove={[Function]}
-      onTouchEnd={[Function]}
-      role="menuitem"
-      tabIndex="-1"
-    >
-      Only show: 
-      "GeckoMain"
-    </div>
-    <div
-      className="react-contextmenu-separator"
-      key=".1"
-    />
+    Only show 
+    "Content"
   </div>
   <div
-    key=".1:$0"
+    aria-disabled="false"
+    aria-orientation={null}
+    className="react-contextmenu-item"
+    onClick={[Function]}
+    onMouseLeave={[Function]}
+    onMouseMove={[Function]}
+    onTouchEnd={[Function]}
+    role="menuitem"
+    tabIndex="-1"
+  >
+    Only show this process
+  </div>
+  <div
+    className="react-contextmenu-separator"
+    key=".3"
+  />
+  <div
+    key=".4:$0"
   >
     <div
       aria-disabled="false"
@@ -56,7 +65,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     </div>
   </div>
   <div
-    key=".1:$1"
+    key=".4:$1"
   >
     <div
       aria-disabled="false"
@@ -120,29 +129,25 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
   tabIndex="-1"
 >
   <div
-    key=".0"
+    aria-disabled="false"
+    aria-orientation={null}
+    className="react-contextmenu-item"
+    onClick={[Function]}
+    onMouseLeave={[Function]}
+    onMouseMove={[Function]}
+    onTouchEnd={[Function]}
+    role="menuitem"
+    tabIndex="-1"
   >
-    <div
-      aria-disabled="false"
-      aria-orientation={null}
-      className="react-contextmenu-item"
-      onClick={[Function]}
-      onMouseLeave={[Function]}
-      onMouseMove={[Function]}
-      onTouchEnd={[Function]}
-      role="menuitem"
-      tabIndex="-1"
-    >
-      Only show: 
-      "GeckoMain"
-    </div>
-    <div
-      className="react-contextmenu-separator"
-      key=".1"
-    />
+    Only show 
+    "DOM Worker"
   </div>
   <div
-    key=".1:$0"
+    className="react-contextmenu-separator"
+    key=".3"
+  />
+  <div
+    key=".4:$0"
   >
     <div
       aria-disabled="false"
@@ -160,7 +165,7 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
     </div>
   </div>
   <div
-    key=".1:$1"
+    key=".4:$1"
   >
     <div
       aria-disabled="false"

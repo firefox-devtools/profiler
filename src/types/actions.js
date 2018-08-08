@@ -119,10 +119,20 @@ type ProfileAction =
       +trackIndex: TrackIndex,
     |}
   | {|
-      +type: 'ISOLATE_GLOBAL_TRACK',
+      // Isolate only the process track, and not the local tracks.
+      +type: 'ISOLATE_PROCESS',
       +hiddenGlobalTracks: Set<TrackIndex>,
       +isolatedTrackIndex: TrackIndex,
       +selectedThreadIndex: ThreadIndex,
+    |}
+  | {|
+      // Isolate the process track, and hide the local tracks.
+      type: 'ISOLATE_PROCESS_MAIN_THREAD',
+      pid: Pid,
+      hiddenGlobalTracks: Set<TrackIndex>,
+      isolatedTrackIndex: TrackIndex,
+      selectedThreadIndex: ThreadIndex,
+      hiddenLocalTracks: Set<TrackIndex>,
     |}
   | {|
       +type: 'CHANGE_LOCAL_TRACK_ORDER',

@@ -33,8 +33,7 @@ describe('timeline/TrackContextMenu', function() {
    *    '  - show [thread Style]',
    *  ]
    */
-  function setup() {
-    const profile = getProfileWithNiceTracks();
+  function setup(profile = getProfileWithNiceTracks()) {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
 
@@ -54,8 +53,8 @@ describe('timeline/TrackContextMenu', function() {
   }
 
   describe('selected global track', function() {
-    function setupGlobalTrack() {
-      const results = setup();
+    function setupGlobalTrack(profile) {
+      const results = setup(profile);
       const { view, dispatch, getState } = results;
 
       const trackIndex = 1;
@@ -68,16 +67,20 @@ describe('timeline/TrackContextMenu', function() {
         throw new Error('Expected a process track.');
       }
       const threadIndex = track.mainThreadIndex;
-      if (threadIndex === null) {
-        throw new Error('Expected the track to have a thread index.');
+      if (threadIndex !== null) {
+        // Explicitly select the global thread. Tests can pass in a custom profile,
+        // so don't fail if this doesn't exist.
+        dispatch(changeSelectedThread(threadIndex));
       }
-
-      // Explicitly select the global thread.
-      dispatch(changeSelectedThread(threadIndex));
-      view.update();
       dispatch(changeRightClickedTrack(trackReference));
+      view.update();
 
-      const isolateTrackItem = view.find('[data-test-id="isolate-track"]');
+      const isolateProcessItem = view.find(
+        '[data-test-id="isolate-track-process"]'
+      );
+      const isolateProcessMainThreadItem = view.find(
+        '[data-test-id="isolate-process-main-thread"]'
+      );
       const trackItem = view.find(
         `[data-test-id="global-track-${trackIndex}"]`
       );
@@ -87,7 +90,8 @@ describe('timeline/TrackContextMenu', function() {
         trackReference,
         trackIndex,
         threadIndex,
-        isolateTrackItem,
+        isolateProcessItem,
+        isolateProcessMainThreadItem,
         trackItem,
       };
     }
@@ -98,8 +102,14 @@ describe('timeline/TrackContextMenu', function() {
     });
 
     it('has the correct selectors into useful parts of the component', function() {
-      const { isolateTrackItem, trackItem, getState } = setupGlobalTrack();
-      expect(isolateTrackItem.text()).toBe('Only show: "Content"');
+      const {
+        isolateProcessMainThreadItem,
+        isolateProcessItem,
+        trackItem,
+        getState,
+      } = setupGlobalTrack();
+      expect(isolateProcessMainThreadItem.text()).toBe('Only show "Content"');
+      expect(isolateProcessItem.text()).toBe('Only show this process');
       expect(trackItem.text()).toBe('Content');
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
@@ -109,13 +119,52 @@ describe('timeline/TrackContextMenu', function() {
       ]);
     });
 
-    it('can isolate the global track', function() {
-      const { isolateTrackItem, getState } = setupGlobalTrack();
-      isolateTrackItem.simulate('click');
+    it('can isolate the process', function() {
+      const { isolateProcessItem, getState } = setupGlobalTrack();
+      isolateProcessItem.simulate('click');
       expect(getHumanReadableTracks(getState())).toEqual([
         'hide [thread GeckoMain process]',
         'show [thread GeckoMain tab] SELECTED',
         '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+    });
+
+    it("can isolate the process's main thread", function() {
+      const { isolateProcessMainThreadItem, getState } = setupGlobalTrack();
+      isolateProcessMainThreadItem.simulate('click');
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        'show [thread GeckoMain tab] SELECTED',
+        '  - hide [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+    });
+
+    it('isolates a process track without a main thread', function() {
+      const profile = getProfileWithNiceTracks();
+      // Remove the thread [thread GeckoMain tab]
+      profile.threads.splice(1, 1);
+      const {
+        isolateProcessMainThreadItem,
+        isolateProcessItem,
+        getState,
+      } = setupGlobalTrack(profile);
+
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        'show [process]',
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      expect(isolateProcessMainThreadItem.length).toBe(0);
+      expect(isolateProcessItem.length).toBe(1);
+      isolateProcessItem.simulate('click');
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'hide [thread GeckoMain process]',
+        'show [process]',
+        '  - show [thread DOM Worker] SELECTED',
         '  - show [thread Style]',
       ]);
     });
@@ -127,6 +176,10 @@ describe('timeline/TrackContextMenu', function() {
       expect(getHiddenGlobalTracks(getState()).has(trackIndex)).toBe(true);
       trackItem.simulate('click');
       expect(getHiddenGlobalTracks(getState()).has(trackIndex)).toBe(false);
+    });
+
+    xit('can present a disabled isolate item on non-process tracks', function() {
+      // TODO - We should wait until we have some real tracks without a thread index.
     });
   });
 
@@ -154,10 +207,12 @@ describe('timeline/TrackContextMenu', function() {
 
       // Explicitly select the global thread.
       dispatch(changeSelectedThread(threadIndex));
-      view.update();
       dispatch(changeRightClickedTrack(trackReference));
+      view.update();
 
-      const isolateTrackItem = view.find('[data-test-id="isolate-track"]');
+      const isolateLocalTrackItem = view.find(
+        '[data-test-id="isolate-local-track"]'
+      );
       const trackItem = view.find(
         `[data-test-id="local-track-${pid}-${trackIndex}"]`
       );
@@ -167,7 +222,7 @@ describe('timeline/TrackContextMenu', function() {
         trackReference,
         trackIndex,
         threadIndex,
-        isolateTrackItem,
+        isolateLocalTrackItem,
         trackItem,
         pid,
       };
@@ -179,8 +234,8 @@ describe('timeline/TrackContextMenu', function() {
     });
 
     it('has the correct selectors into useful parts of the component', function() {
-      const { isolateTrackItem, trackItem, getState } = setupLocalTrack();
-      expect(isolateTrackItem.text()).toBe('Only show: "DOM Worker"');
+      const { isolateLocalTrackItem, trackItem, getState } = setupLocalTrack();
+      expect(isolateLocalTrackItem.text()).toBe('Only show "DOM Worker"');
       expect(trackItem.text()).toBe('DOM Worker');
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
@@ -191,8 +246,8 @@ describe('timeline/TrackContextMenu', function() {
     });
 
     it('can isolate the local track', function() {
-      const { isolateTrackItem, getState } = setupLocalTrack();
-      isolateTrackItem.simulate('click');
+      const { isolateLocalTrackItem, getState } = setupLocalTrack();
+      isolateLocalTrackItem.simulate('click');
       expect(getHumanReadableTracks(getState())).toEqual([
         'hide [thread GeckoMain process]',
         'show [thread GeckoMain tab]',
@@ -208,6 +263,10 @@ describe('timeline/TrackContextMenu', function() {
       expect(getHiddenLocalTracks(getState(), pid).has(trackIndex)).toBe(true);
       trackItem.simulate('click');
       expect(getHiddenLocalTracks(getState(), pid).has(trackIndex)).toBe(false);
+    });
+
+    xit('can isolate a non-thread track, as long as there process has a thread index', function() {
+      // TODO - We should wait until we have some real non-thread tracks
     });
   });
 });

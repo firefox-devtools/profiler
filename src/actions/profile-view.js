@@ -168,13 +168,15 @@ export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   };
 }
 
-export function isolateGlobalTrack(
+/**
+ * This function isolates a process global track, and leaves its local tracks visible.
+ */
+export function isolateProcess(
   isolatedTrackIndex: TrackIndex
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const track = getGlobalTracks(getState())[isolatedTrackIndex];
     const trackIndexes = getGlobalTrackOrder(getState());
-
     if (track.type !== 'process') {
       // Do not isolate a track unless it is a process, that way a thread
       // will always be visible.
@@ -185,7 +187,7 @@ export function isolateGlobalTrack(
     const localTracks = getLocalTracks(getState(), track.pid);
     const isSelectedThreadInLocalTracks = localTracks.some(
       track =>
-        track.type === 'thread' || track.threadIndex === selectedThreadIndex
+        track.type === 'thread' && track.threadIndex === selectedThreadIndex
     );
 
     // Check to see if this selectedThreadIndex will be hidden.
@@ -216,16 +218,58 @@ export function isolateGlobalTrack(
     sendAnalytics({
       hitType: 'event',
       eventCategory: 'timeline',
-      eventAction: 'isolate global track',
+      eventAction: 'isolate process',
     });
 
     dispatch({
-      type: 'ISOLATE_GLOBAL_TRACK',
+      type: 'ISOLATE_PROCESS',
       hiddenGlobalTracks: new Set(
         trackIndexes.filter(i => i !== isolatedTrackIndex)
       ),
       isolatedTrackIndex,
       selectedThreadIndex,
+    });
+  };
+}
+
+/**
+ * This function isolates a global track, and hides all of its local tracks.
+ */
+export function isolateProcessMainThread(
+  isolatedTrackIndex: TrackIndex
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const track = getGlobalTracks(getState())[isolatedTrackIndex];
+    const trackIndexes = getGlobalTrackOrder(getState());
+
+    if (track.type !== 'process') {
+      // Do not isolate a track unless it is a process track.
+      return;
+    }
+
+    const selectedThreadIndex = track.mainThreadIndex;
+    if (selectedThreadIndex === null) {
+      // Make sure that a thread really exists.
+      return;
+    }
+
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'isolate process main thread',
+    });
+
+    dispatch({
+      type: 'ISOLATE_PROCESS_MAIN_THREAD',
+      pid: track.pid,
+      hiddenGlobalTracks: new Set(
+        trackIndexes.filter(i => i !== isolatedTrackIndex)
+      ),
+      isolatedTrackIndex,
+      selectedThreadIndex,
+      // The local track order contains all of the indexes, and all should be hidden
+      // when isolating the main thread.
+      hiddenLocalTracks: new Set(getLocalTrackOrder(getState(), track.pid)),
     });
   };
 }
