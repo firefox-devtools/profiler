@@ -568,9 +568,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -609,9 +609,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -650,9 +650,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -691,9 +691,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -732,9 +732,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -773,9 +773,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -814,9 +814,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -855,9 +855,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -896,9 +896,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -937,9 +937,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -978,9 +978,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1019,9 +1019,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1060,9 +1060,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1101,9 +1101,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1142,9 +1142,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1183,9 +1183,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1228,9 +1228,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1269,9 +1269,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1310,9 +1310,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2210,9 +2210,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="67%"
+                  title="66.7%"
                 >
-                  67%
+                  66.7%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2251,9 +2251,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="67%"
+                  title="66.7%"
                 >
-                  67%
+                  66.7%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2292,9 +2292,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="67%"
+                  title="66.7%"
                 >
-                  67%
+                  66.7%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2333,9 +2333,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33%"
+                  title="33.3%"
                 >
-                  33%
+                  33.3%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2374,9 +2374,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33%"
+                  title="33.3%"
                 >
-                  33%
+                  33.3%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2415,9 +2415,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33%"
+                  title="33.3%"
                 >
-                  33%
+                  33.3%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2456,9 +2456,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33%"
+                  title="33.3%"
                 >
-                  33%
+                  33.3%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2944,9 +2944,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2985,9 +2985,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3026,9 +3026,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="67%"
+                  title="66.7%"
                 >
-                  67%
+                  66.7%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3067,9 +3067,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33%"
+                  title="33.3%"
                 >
-                  33%
+                  33.3%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3108,9 +3108,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33%"
+                  title="33.3%"
                 >
-                  33%
+                  33.3%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3149,9 +3149,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33%"
+                  title="33.3%"
                 >
-                  33%
+                  33.3%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3190,9 +3190,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33%"
+                  title="33.3%"
                 >
-                  33%
+                  33.3%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3678,9 +3678,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3719,9 +3719,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3760,9 +3760,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="67%"
+                  title="66.7%"
                 >
-                  67%
+                  66.7%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3801,9 +3801,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33%"
+                  title="33.3%"
                 >
-                  33%
+                  33.3%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3842,9 +3842,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33%"
+                  title="33.3%"
                 >
-                  33%
+                  33.3%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3883,9 +3883,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33%"
+                  title="33.3%"
                 >
-                  33%
+                  33.3%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3924,9 +3924,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33%"
+                  title="33.3%"
                 >
-                  33%
+                  33.3%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4412,9 +4412,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4453,9 +4453,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4494,9 +4494,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4535,9 +4535,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50%"
+                  title="50.0%"
                 >
-                  50%
+                  50.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4576,9 +4576,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50%"
+                  title="50.0%"
                 >
-                  50%
+                  50.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4617,9 +4617,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50%"
+                  title="50.0%"
                 >
-                  50%
+                  50.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5076,9 +5076,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5117,9 +5117,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5158,9 +5158,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5199,9 +5199,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50%"
+                  title="50.0%"
                 >
-                  50%
+                  50.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5240,9 +5240,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50%"
+                  title="50.0%"
                 >
-                  50%
+                  50.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5281,9 +5281,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50%"
+                  title="50.0%"
                 >
-                  50%
+                  50.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5740,9 +5740,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5781,9 +5781,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5822,9 +5822,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5863,9 +5863,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6259,9 +6259,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6300,9 +6300,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6341,9 +6341,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6382,9 +6382,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6778,9 +6778,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6819,9 +6819,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6860,9 +6860,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100%"
+                  title="100.0%"
                 >
-                  100%
+                  100.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6901,9 +6901,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50%"
+                  title="50.0%"
                 >
-                  50%
+                  50.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6942,9 +6942,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50%"
+                  title="50.0%"
                 >
-                  50%
+                  50.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6983,9 +6983,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50%"
+                  title="50.0%"
                 >
-                  50%
+                  50.0%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
