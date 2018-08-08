@@ -58,7 +58,7 @@ function _markerDetailNullable<T: NotVoidOrNull>(
   value: T | void | null,
   fn: T => string = String
 ): React.Node {
-  if (value === undefined || value === null) {
+  if (value === undefined || value === null || value.length === 0) {
     return null;
   }
   return _markerDetail(key, label, value, fn);
@@ -539,7 +539,7 @@ function getMarkerDetails(
       case 'Invalidation': {
         return (
           <div className="tooltipDetails">
-            {_markerDetail('url', 'URL', data.url)}
+            {_markerDetailNullable('url', 'URL', data.url)}
             {_markerDetail('line', 'Line', data.line)}
           </div>
         );
