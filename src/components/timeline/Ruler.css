@@ -12,7 +12,7 @@
   position: absolute;
   top: 20px;
   left: -150px;
-  right: 0;
+  right: calc(0px - var(--vertical-scrollbar-reserved-width));
   height: 1px;
   background: var(--grey-30);
   z-index: 3;
