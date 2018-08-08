@@ -7,7 +7,6 @@ import sinon from 'sinon';
 
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
-import * as UrlStateSelectors from '../../reducers/url-state';
 import * as ZippedProfilesSelectors from '../../reducers/zipped-profiles';
 import { getView } from '../../reducers/app';
 import {
@@ -24,6 +23,7 @@ import { getEmptyProfile } from '../../profile-logic/profile-data';
 import JSZip from 'jszip';
 import { serializeProfile } from '../../profile-logic/process-profile';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
+import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 
 // Mocking SymbolStoreDB
 import exampleSymbolTable from '../fixtures/example-symbol-table';
@@ -96,15 +96,17 @@ describe('actions/receive-profile', function() {
         []
       );
 
-      profile.threads.forEach(thread => {
+      profile.threads.forEach((thread, threadIndex) => {
         thread.name = 'GeckoMain';
         thread.processType = 'tab';
+        thread.pid = threadIndex;
       });
 
       store.dispatch(viewProfile(profile));
-      expect(UrlStateSelectors.getHiddenThreads(store.getState())).toEqual([
-        0,
-        2,
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'hide [thread GeckoMain tab]',
+        'show [thread GeckoMain tab] SELECTED',
+        'hide [thread GeckoMain tab]',
       ]);
     });
   });
@@ -150,11 +152,10 @@ describe('actions/receive-profile', function() {
 
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007,
       });
-      expect(UrlStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
 
@@ -184,11 +185,10 @@ describe('actions/receive-profile', function() {
 
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007,
       });
-      expect(UrlStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
   });
@@ -230,11 +230,10 @@ describe('actions/receive-profile', function() {
 
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007,
       });
-      expect(UrlStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
@@ -266,11 +265,10 @@ describe('actions/receive-profile', function() {
       ]);
 
       const state = store.getState();
-      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007,
       });
-      expect(UrlStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
@@ -346,11 +344,10 @@ describe('actions/receive-profile', function() {
 
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007,
       });
-      expect(UrlStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
@@ -381,11 +378,10 @@ describe('actions/receive-profile', function() {
       ]);
 
       const state = store.getState();
-      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007,
       });
-      expect(UrlStateSelectors.getThreadOrder(state)).toEqual([0, 2, 1]); // 1 is last because it's the Compositor thread
       expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 

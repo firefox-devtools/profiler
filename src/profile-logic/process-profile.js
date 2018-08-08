@@ -45,6 +45,7 @@ import type {
 } from '../types/gecko-profile';
 import type {
   DOMEventMarkerPayload,
+  FrameConstructionMarkerPayload,
   MarkerPayload,
   MarkerPayload_Gecko,
   PaintProfilerMarkerTracing,
@@ -632,9 +633,14 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
             _convertStackToCause(newData);
             // We had to use any here because _convertStackToCause is not
             // providing the type system with information how it's operating
-            return newData.category === 'DOMEvent'
-              ? ((newData: any): DOMEventMarkerPayload)
-              : ((newData: any): PaintProfilerMarkerTracing);
+            switch (newData.category) {
+              case 'DOMEvent':
+                return ((newData: any): DOMEventMarkerPayload);
+              case 'FrameConstruction':
+                return ((newData: any): FrameConstructionMarkerPayload);
+              default:
+                return ((newData: any): PaintProfilerMarkerTracing);
+            }
           }
           default:
             return m;

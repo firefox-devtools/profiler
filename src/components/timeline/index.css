@@ -4,15 +4,20 @@
 
 
 .timelineOverflowEdgeIndicatorScrollbox {
-  margin: 0 0 0 -150px;
-  padding-left: 150px;
+  margin-right: calc(0px - var(--vertical-scrollbar-reserved-width));
+  margin-left: calc(0px - var(--thread-label-column-width));
+  padding-left: var(--thread-label-column-width);
   max-height: 250px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden; /* if the platform scrollbar ends up being larger than --vertical-scrollbar-reserved-width (which is unexpected), make sure there is no horizontal scrollbar */
+  background: linear-gradient(to left, white, #EEE calc(var(--vertical-scrollbar-reserved-width) - 1px), var(--grey-30) 0, var(--grey-30) var(--vertical-scrollbar-reserved-width), transparent 0);
 }
 
 .timelineThreadList {
   list-style: none;
-  margin: 0 0 0 -150px;
+  margin: 0 0 0 calc(0px - var(--thread-label-column-width));
+  width: calc(100vw - var(--vertical-scrollbar-reserved-width));
   padding: 0;
   box-shadow: inset 0 1px var(--grey-30);
+  background-color: var(--grey-20);
 }

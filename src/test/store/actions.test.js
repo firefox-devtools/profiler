@@ -10,7 +10,7 @@ import * as UrlStateSelectors from '../../reducers/url-state';
 import {
   changeCallTreeSearchString,
   changeInvertCallstack,
-  updateProfileSelection,
+  updatePreviewSelection,
   changeImplementationFilter,
   changeSelectedCallNode,
 } from '../../actions/profile-view';
@@ -304,20 +304,20 @@ describe('actions/changeImplementationFilter', function() {
   });
 });
 
-describe('actions/updateProfileSelection', function() {
+describe('actions/updatePreviewSelection', function() {
   it('can update the selection with new values', function() {
     const store = storeWithProfile();
 
-    const initialSelection = ProfileViewSelectors.getProfileViewOptions(
+    const initialSelection = ProfileViewSelectors.getPreviewSelection(
       store.getState()
-    ).selection;
+    );
     expect(initialSelection).toEqual({
       hasSelection: false,
       isModifying: false,
     });
 
     store.dispatch(
-      updateProfileSelection({
+      updatePreviewSelection({
         hasSelection: true,
         isModifying: false,
         selectionStart: 100,
@@ -325,9 +325,9 @@ describe('actions/updateProfileSelection', function() {
       })
     );
 
-    const secondSelection = ProfileViewSelectors.getProfileViewOptions(
+    const secondSelection = ProfileViewSelectors.getPreviewSelection(
       store.getState()
-    ).selection;
+    );
     expect(secondSelection).toEqual({
       hasSelection: true,
       isModifying: false,

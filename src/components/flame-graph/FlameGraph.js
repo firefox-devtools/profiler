@@ -8,8 +8,9 @@ import explicitConnect from '../../utils/connect';
 import FlameGraphCanvas from './Canvas';
 import {
   selectedThreadSelectors,
-  getDisplayRange,
+  getCommittedRange,
   getProfileViewOptions,
+  getPreviewSelection,
   getScrollToSelectionGeneration,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
@@ -22,7 +23,7 @@ import { BackgroundImageStyleDef } from '../shared/StyleDef';
 import type { Thread } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
-import type { ProfileSelection } from '../../types/actions';
+import type { PreviewSelection } from '../../types/actions';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -43,10 +44,8 @@ type StateProps = {|
   +thread: Thread,
   +maxStackDepth: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
-  +selection: ProfileSelection,
+  +previewSelection: PreviewSelection,
   +flameGraphTiming: FlameGraphTiming,
-  +threadName: string,
-  +processDetails: string,
   +callTree: CallTree,
   +callNodeInfo: CallNodeInfo,
   +threadIndex: number,
@@ -80,9 +79,7 @@ class FlameGraph extends React.PureComponent<Props> {
       callTree,
       callNodeInfo,
       timeRange,
-      selection,
-      threadName,
-      processDetails,
+      previewSelection,
       selectedCallNodeIndex,
       isCallNodeContextMenuVisible,
       scrollToSelectionGeneration,
@@ -100,9 +97,6 @@ class FlameGraph extends React.PureComponent<Props> {
             key={className}
           />
         ))}
-        <div title={processDetails} className="flameGraphLabels grippy">
-          <span>{threadName}</span>
-        </div>
         <ContextMenuTrigger
           id="CallNodeContextMenu"
           attributes={{
@@ -116,7 +110,7 @@ class FlameGraph extends React.PureComponent<Props> {
               timeRange,
               maxViewportHeight,
               maximumZoom: 1,
-              selection,
+              previewSelection,
               startsAtBottom: true,
               disableHorizontalMovement: true,
               viewportNeedsUpdate,
@@ -158,10 +152,8 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       ),
       flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
       callTree: selectedThreadSelectors.getCallTree(state),
-      timeRange: getDisplayRange(state),
-      selection: getProfileViewOptions(state).selection,
-      threadName: selectedThreadSelectors.getFriendlyThreadName(state),
-      processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
+      timeRange: getCommittedRange(state),
+      previewSelection: getPreviewSelection(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
       threadIndex: getSelectedThreadIndex(state),
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(

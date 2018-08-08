@@ -194,18 +194,18 @@ describe('profile state invalidation when switching between profiles', function(
     viewProfile('profile1.json');
 
     // It starts out empty.
-    expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([]);
+    expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([]);
 
     // Add a url-encoded bit of state.
-    dispatch(ProfileViewActions.addRangeFilter(0, 10));
-    expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+    dispatch(ProfileViewActions.commitRange(0, 10));
+    expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
       { start: 0, end: 10 },
     ]);
 
     // It switches to another profile and invalidates.
     dispatch(ZippedProfilesActions.returnToZipFileList());
     viewProfile('profile2.json');
-    expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([]);
+    expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([]);
   });
 
   it('invalidates profile view state', async function() {
@@ -223,20 +223,20 @@ describe('profile state invalidation when switching between profiles', function(
     });
 
     // It starts with no selection.
-    expect(ProfileViewSelectors.getSelection(getState())).toEqual(
+    expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual(
       getNoSelection()
     );
 
     // Add a selection.
-    dispatch(ProfileViewActions.updateProfileSelection(getSomeSelection()));
-    expect(ProfileViewSelectors.getSelection(getState())).toEqual(
+    dispatch(ProfileViewActions.updatePreviewSelection(getSomeSelection()));
+    expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual(
       getSomeSelection()
     );
     dispatch(ZippedProfilesActions.returnToZipFileList());
     viewProfile('profile2.json');
 
     // It no longer has a selection when viewing another profile.
-    expect(ProfileViewSelectors.getSelection(getState())).toEqual(
+    expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual(
       getNoSelection()
     );
   });

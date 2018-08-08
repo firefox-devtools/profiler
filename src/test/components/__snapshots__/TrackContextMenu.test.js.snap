@@ -1,0 +1,214 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`timeline/TrackContextMenu selected global track matches the snapshot of a global track 1`] = `
+<nav
+  className="react-contextmenu"
+  onContextMenu={[Function]}
+  onMouseLeave={[Function]}
+  role="menu"
+  style={
+    Object {
+      "opacity": 0,
+      "pointerEvents": "none",
+      "position": "fixed",
+    }
+  }
+  tabIndex="-1"
+>
+  <div
+    aria-disabled="false"
+    aria-orientation={null}
+    className="react-contextmenu-item"
+    onClick={[Function]}
+    onMouseLeave={[Function]}
+    onMouseMove={[Function]}
+    onTouchEnd={[Function]}
+    role="menuitem"
+    tabIndex="-1"
+  >
+    Only show 
+    "Content"
+  </div>
+  <div
+    aria-disabled="false"
+    aria-orientation={null}
+    className="react-contextmenu-item"
+    onClick={[Function]}
+    onMouseLeave={[Function]}
+    onMouseMove={[Function]}
+    onTouchEnd={[Function]}
+    role="menuitem"
+    tabIndex="-1"
+  >
+    Only show this process
+  </div>
+  <div
+    className="react-contextmenu-separator"
+    key=".3"
+  />
+  <div
+    key=".4:$0"
+  >
+    <div
+      aria-disabled="false"
+      aria-orientation={null}
+      className="react-contextmenu-item checkable checked"
+      data-test-id="global-track-0"
+      onClick={[Function]}
+      onMouseLeave={[Function]}
+      onMouseMove={[Function]}
+      onTouchEnd={[Function]}
+      role="menuitem"
+      tabIndex="-1"
+    >
+      GeckoMain
+    </div>
+  </div>
+  <div
+    key=".4:$1"
+  >
+    <div
+      aria-disabled="false"
+      aria-orientation={null}
+      className="react-contextmenu-item checkable checked"
+      data-test-id="global-track-1"
+      onClick={[Function]}
+      onMouseLeave={[Function]}
+      onMouseMove={[Function]}
+      onTouchEnd={[Function]}
+      role="menuitem"
+      tabIndex="-1"
+    >
+      Content
+    </div>
+    <div
+      aria-disabled="false"
+      aria-orientation={null}
+      className="react-contextmenu-item checkable indented checked"
+      data-test-id="local-track-222-0"
+      onClick={[Function]}
+      onMouseLeave={[Function]}
+      onMouseMove={[Function]}
+      onTouchEnd={[Function]}
+      role="menuitem"
+      tabIndex="-1"
+    >
+      DOM Worker
+    </div>
+    <div
+      aria-disabled="false"
+      aria-orientation={null}
+      className="react-contextmenu-item checkable indented checked"
+      data-test-id="local-track-222-1"
+      onClick={[Function]}
+      onMouseLeave={[Function]}
+      onMouseMove={[Function]}
+      onTouchEnd={[Function]}
+      role="menuitem"
+      tabIndex="-1"
+    >
+      Style
+    </div>
+  </div>
+</nav>
+`;
+
+exports[`timeline/TrackContextMenu selected local track matches the snapshot of a local track 1`] = `
+<nav
+  className="react-contextmenu"
+  onContextMenu={[Function]}
+  onMouseLeave={[Function]}
+  role="menu"
+  style={
+    Object {
+      "opacity": 0,
+      "pointerEvents": "none",
+      "position": "fixed",
+    }
+  }
+  tabIndex="-1"
+>
+  <div
+    aria-disabled="false"
+    aria-orientation={null}
+    className="react-contextmenu-item"
+    onClick={[Function]}
+    onMouseLeave={[Function]}
+    onMouseMove={[Function]}
+    onTouchEnd={[Function]}
+    role="menuitem"
+    tabIndex="-1"
+  >
+    Only show 
+    "DOM Worker"
+  </div>
+  <div
+    className="react-contextmenu-separator"
+    key=".3"
+  />
+  <div
+    key=".4:$0"
+  >
+    <div
+      aria-disabled="false"
+      aria-orientation={null}
+      className="react-contextmenu-item checkable checked"
+      data-test-id="global-track-0"
+      onClick={[Function]}
+      onMouseLeave={[Function]}
+      onMouseMove={[Function]}
+      onTouchEnd={[Function]}
+      role="menuitem"
+      tabIndex="-1"
+    >
+      GeckoMain
+    </div>
+  </div>
+  <div
+    key=".4:$1"
+  >
+    <div
+      aria-disabled="false"
+      aria-orientation={null}
+      className="react-contextmenu-item checkable checked"
+      data-test-id="global-track-1"
+      onClick={[Function]}
+      onMouseLeave={[Function]}
+      onMouseMove={[Function]}
+      onTouchEnd={[Function]}
+      role="menuitem"
+      tabIndex="-1"
+    >
+      Content
+    </div>
+    <div
+      aria-disabled="false"
+      aria-orientation={null}
+      className="react-contextmenu-item checkable indented checked"
+      data-test-id="local-track-222-0"
+      onClick={[Function]}
+      onMouseLeave={[Function]}
+      onMouseMove={[Function]}
+      onTouchEnd={[Function]}
+      role="menuitem"
+      tabIndex="-1"
+    >
+      DOM Worker
+    </div>
+    <div
+      aria-disabled="false"
+      aria-orientation={null}
+      className="react-contextmenu-item checkable indented checked"
+      data-test-id="local-track-222-1"
+      onClick={[Function]}
+      onMouseLeave={[Function]}
+      onMouseMove={[Function]}
+      onTouchEnd={[Function]}
+      role="menuitem"
+      tabIndex="-1"
+    >
+      Style
+    </div>
+  </div>
+</nav>
+`;
