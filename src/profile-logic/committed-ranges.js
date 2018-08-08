@@ -26,7 +26,15 @@ export function parseCommittedRanges(
     if (!m) {
       return { start: 0, end: 1000 };
     }
-    return { start: Number(m[1]) * 1000, end: Number(m[2]) * 1000 };
+
+    const m1 = Number(m[1]);
+    let m2 = Number(m[2]);
+
+    // checking if range is set to > than 0
+    if (m2 === m1) {
+      m2 = m2 + 0.0001;
+    }
+    return { start: m1 * 1000, end: m2 * 1000 };
   });
 }
 
