@@ -84,7 +84,8 @@ function selectedThread(
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
     case 'VIEW_PROFILE':
-    case 'ISOLATE_GLOBAL_TRACK':
+    case 'ISOLATE_PROCESS':
+    case 'ISOLATE_PROCESS_MAIN_THREAD':
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
     case 'ISOLATE_LOCAL_TRACK':
@@ -175,7 +176,8 @@ function hiddenGlobalTracks(
   switch (action.type) {
     case 'VIEW_PROFILE':
     case 'ISOLATE_LOCAL_TRACK':
-    case 'ISOLATE_GLOBAL_TRACK':
+    case 'ISOLATE_PROCESS':
+    case 'ISOLATE_PROCESS_MAIN_THREAD':
       return action.hiddenGlobalTracks;
     case 'HIDE_GLOBAL_TRACK': {
       const hiddenGlobalTracks = new Set(state);
@@ -213,6 +215,7 @@ function hiddenLocalTracksByPid(
       hiddenLocalTracksByPid.set(action.pid, hiddenLocalTracks);
       return hiddenLocalTracksByPid;
     }
+    case 'ISOLATE_PROCESS_MAIN_THREAD':
     case 'ISOLATE_LOCAL_TRACK': {
       const hiddenLocalTracksByPid = new Map(state);
       hiddenLocalTracksByPid.set(action.pid, action.hiddenLocalTracks);
