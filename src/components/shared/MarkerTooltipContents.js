@@ -59,7 +59,7 @@ function _markerDetailNullable<T: NotVoidOrNull>(
   value: T | void | null,
   fn: T => string = String
 ): React.Node {
-  if (value === undefined || value === null || value.length === 0) {
+  if (value === undefined || value === null || value === '') {
     return null;
   }
   return _markerDetail(key, label, value, fn);
