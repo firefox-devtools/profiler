@@ -312,7 +312,7 @@ describe('unfiltered call tree', function() {
           name: 'A',
           selfTime: '—',
           totalTime: '3',
-          totalTimePercent: '100%',
+          totalTimePercent: '100.0%',
           categoryColor: 'grey',
           categoryName: 'Other',
         });
