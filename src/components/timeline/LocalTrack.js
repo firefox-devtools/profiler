@@ -7,14 +7,15 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import {
-  changeSelectedThread,
   changeRightClickedTrack,
+  selectTrack,
 } from '../../actions/profile-view';
 import { assertExhaustiveCheck } from '../../utils/flow';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
   getSelectedThreadIndex,
   getHiddenLocalTracks,
+  getSelectedTab,
 } from '../../reducers/url-state';
 import explicitConnect from '../../utils/connect';
 import {
@@ -23,6 +24,7 @@ import {
 } from '../../reducers/profile-view';
 import TrackThread from './TrackThread';
 import TrackNetwork from './TrackNetwork';
+import type { TrackReference } from '../../types/actions';
 import type { ThreadIndex, Pid } from '../../types/profile';
 import type { TrackIndex, LocalTrack } from '../../types/profile-derived';
 import type {
@@ -46,40 +48,32 @@ type StateProps = {|
 |};
 
 type DispatchProps = {|
-  +changeSelectedThread: typeof changeSelectedThread,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
+  +selectTrack: typeof selectTrack,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class LocalTrackComponent extends PureComponent<Props> {
   _onLabelMouseDown = (event: MouseEvent) => {
-    const {
-      changeSelectedThread,
-      changeRightClickedTrack,
-      threadIndex,
-      pid,
-      trackIndex,
-    } = this.props;
-
     if (event.button === 0) {
       // Don't allow clicks on the threads list to steal focus from the tree view.
       event.preventDefault();
-      if (threadIndex !== null) {
-        changeSelectedThread(threadIndex);
-      }
+      this._onLineClick();
     } else if (event.button === 2) {
       // This is needed to allow the context menu to know what was right clicked without
       // actually changing the current selection.
-      changeRightClickedTrack({ type: 'local', pid, trackIndex });
+      this.props.changeRightClickedTrack(this._getTrackReference());
     }
   };
 
+  _getTrackReference(): TrackReference {
+    const { pid, trackIndex } = this.props;
+    return { type: 'local', pid, trackIndex };
+  }
+
   _onLineClick = () => {
-    const { threadIndex, changeSelectedThread } = this.props;
-    if (threadIndex !== null) {
-      changeSelectedThread(threadIndex);
-    }
+    this.props.selectTrack(this._getTrackReference());
   };
 
   renderTrack() {
@@ -138,22 +132,29 @@ class LocalTrackComponent extends PureComponent<Props> {
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: (state, { pid, localTrack, trackIndex }) => {
     // These get assigned based on the track type.
-    let threadIndex = null;
-    let isSelected = false;
+    const threadIndex = localTrack.threadIndex;
+    const selectedThreadIndex = getSelectedThreadIndex(state);
+    const selectedTab = getSelectedTab(state);
     let titleText = null;
+    let isSelected = false;
 
     // Run different selectors based on the track type.
     switch (localTrack.type) {
       case 'thread': {
         // Look up the thread information for the process if it exists.
-        threadIndex = localTrack.threadIndex;
         const selectors = selectorsForThread(threadIndex);
-        isSelected = threadIndex === getSelectedThreadIndex(state);
+        isSelected =
+          threadIndex === selectedThreadIndex &&
+          selectedTab !== 'network-chart';
         titleText = selectors.getThreadProcessDetails(state);
         break;
       }
-      case 'memory':
       case 'network':
+        isSelected =
+          threadIndex === selectedThreadIndex &&
+          selectedTab === 'network-chart';
+        break;
+      case 'memory':
         break;
       default:
         throw assertExhaustiveCheck(localTrack, `Unhandled LocalTrack type.`);
@@ -168,8 +169,8 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     };
   },
   mapDispatchToProps: {
-    changeSelectedThread,
     changeRightClickedTrack,
+    selectTrack,
   },
   component: LocalTrackComponent,
 };

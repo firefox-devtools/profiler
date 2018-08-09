@@ -10,12 +10,14 @@ import {
   changeSelectedThread,
   changeRightClickedTrack,
   changeLocalTrackOrder,
+  selectTrack,
 } from '../../actions/profile-view';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
   getSelectedThreadIndex,
   getHiddenGlobalTracks,
   getLocalTrackOrder,
+  getSelectedTab,
 } from '../../reducers/url-state';
 import explicitConnect from '../../utils/connect';
 import {
@@ -28,8 +30,9 @@ import './Track.css';
 import TimelineTrackThread from './TrackThread';
 import TimelineLocalTrack from './LocalTrack';
 import Reorderable from '../shared/Reorderable';
+import type { TabSlug } from '../../app-logic/tabs-handling';
 import type { TrackReference } from '../../types/actions';
-import type { ThreadIndex, Pid } from '../../types/profile';
+import type { Pid } from '../../types/profile';
 import type {
   TrackIndex,
   GlobalTrack,
@@ -47,7 +50,6 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +threadIndex: null | ThreadIndex,
   +trackName: string,
   +globalTrack: GlobalTrack,
   +isSelected: boolean,
@@ -56,31 +58,26 @@ type StateProps = {|
   +localTrackOrder: TrackIndex[],
   +localTracks: LocalTrack[],
   +pid: Pid | null,
+  +selectedTab: TabSlug,
 |};
 
 type DispatchProps = {|
   +changeSelectedThread: typeof changeSelectedThread,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
   +changeLocalTrackOrder: typeof changeLocalTrackOrder,
+  +selectTrack: typeof selectTrack,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class GlobalTrackComponent extends PureComponent<Props> {
   _onLabelMouseDown = (event: MouseEvent) => {
-    const {
-      changeSelectedThread,
-      changeRightClickedTrack,
-      threadIndex,
-      trackReference,
-    } = this.props;
+    const { changeRightClickedTrack, trackReference } = this.props;
 
     if (event.button === 0) {
       // Don't allow clicks on the threads list to steal focus from the tree view.
       event.preventDefault();
-      if (threadIndex !== null) {
-        changeSelectedThread(threadIndex);
-      }
+      this._selectCurrentTrack();
     } else if (event.button === 2) {
       // This is needed to allow the context menu to know what was right clicked without
       // actually changing the current selection.
@@ -88,11 +85,9 @@ class GlobalTrackComponent extends PureComponent<Props> {
     }
   };
 
-  _onLineClick = () => {
-    const { threadIndex, changeSelectedThread } = this.props;
-    if (threadIndex !== null) {
-      changeSelectedThread(threadIndex);
-    }
+  _selectCurrentTrack = () => {
+    const { selectTrack, trackReference } = this.props;
+    selectTrack(trackReference);
   };
 
   renderTrack() {
@@ -168,7 +163,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
           className={classNames('timelineTrackRow timelineTrackGlobalRow', {
             selected: isSelected,
           })}
-          onClick={this._onLineClick}
+          onClick={this._selectCurrentTrack}
         >
           <ContextMenuTrigger
             id="TimelineTrackContextMenu"
@@ -199,6 +194,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: (state, { trackIndex }) => {
     const globalTracks = getGlobalTracks(state);
     const globalTrack = globalTracks[trackIndex];
+    const selectedTab = getSelectedTab(state);
 
     // These get assigned based on the track type.
     let threadIndex = null;
@@ -216,7 +212,9 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
         if (globalTrack.mainThreadIndex !== null) {
           threadIndex = globalTrack.mainThreadIndex;
           const selectors = selectorsForThread(threadIndex);
-          isSelected = threadIndex === getSelectedThreadIndex(state);
+          isSelected =
+            threadIndex === getSelectedThreadIndex(state) &&
+            selectedTab !== 'network-chart';
           titleText = selectors.getThreadProcessDetails(state);
         }
         pid = globalTrack.pid;
@@ -231,7 +229,6 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     }
 
     return {
-      threadIndex,
       trackName: getGlobalTrackName(state, trackIndex),
       titleText,
       globalTrack,
@@ -240,12 +237,14 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       localTracks,
       pid,
       isHidden: getHiddenGlobalTracks(state).has(trackIndex),
+      selectedTab,
     };
   },
   mapDispatchToProps: {
     changeSelectedThread,
     changeRightClickedTrack,
     changeLocalTrackOrder,
+    selectTrack,
   },
   component: GlobalTrackComponent,
 };
