@@ -3,14 +3,19 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import type { TrackReference } from '../../types/actions';
+
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
+  getNetworkTrackProfile,
 } from '../fixtures/profiles/make-profile';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
+import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
+import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
@@ -164,6 +169,124 @@ describe('actions/ProfileView', function() {
       expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
       dispatch(ProfileView.changeSelectedThread(1));
       expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(1);
+    });
+  });
+
+  describe('selectTrack', function() {
+    describe('with a thread tracks', function() {
+      /**
+       * Using the following tracks:
+       *  [
+       *    'show [thread GeckoMain process]',
+       *    'show [thread GeckoMain tab]',
+       *    '  - show [thread DOM Worker]',
+       *    '  - show [thread Style]',
+       *  ]
+       */
+      const parentTrackReference = { type: 'global', trackIndex: 0 };
+      const tabTrackReference = { type: 'global', trackIndex: 1 };
+      const workerTrackReference = { type: 'local', trackIndex: 0, pid: 222 };
+      function setup() {
+        const profile = getProfileWithNiceTracks();
+        const { getState, dispatch } = storeWithProfile(profile);
+        const parentTrack = ProfileViewSelectors.getGlobalTrackFromReference(
+          getState(),
+          parentTrackReference
+        );
+        const tabTrack = ProfileViewSelectors.getGlobalTrackFromReference(
+          getState(),
+          tabTrackReference
+        );
+        const workerTrack = ProfileViewSelectors.getLocalTrackFromReference(
+          getState(),
+          workerTrackReference
+        );
+        if (tabTrack.type !== 'process' || parentTrack.type !== 'process') {
+          throw new Error('Expected to get process tracks.');
+        }
+        if (workerTrack.type !== 'thread') {
+          throw new Error('Expected to get a thread tracks.');
+        }
+        return {
+          profile,
+          getState,
+          dispatch,
+          parentTrack,
+          tabTrack,
+          workerTrack,
+        };
+      }
+
+      it('starts out with the tab thread selected', function() {
+        const { getState, tabTrack } = setup();
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+          tabTrack.mainThreadIndex
+        );
+      });
+
+      it('can switch to another global track', function() {
+        const { getState, dispatch, parentTrack } = setup();
+        dispatch(ProfileView.selectTrack(parentTrackReference));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+          parentTrack.mainThreadIndex
+        );
+      });
+
+      it('can switch to a local track', function() {
+        const { getState, dispatch, workerTrack } = setup();
+        dispatch(ProfileView.selectTrack(workerTrackReference));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+          workerTrack.threadIndex
+        );
+      });
+    });
+    describe('with a network track', function() {
+      const threadTrack: TrackReference = {
+        type: 'local',
+        trackIndex: 0,
+        pid: 0,
+      };
+      const networkTrack: TrackReference = {
+        type: 'local',
+        trackIndex: 1,
+        pid: 0,
+      };
+      it('it starts out with the thread track and call tree selected', function() {
+        const profile = getNetworkTrackProfile();
+        const { getState } = storeWithProfile(profile);
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'calltree'
+        );
+      });
+      it('it can switch to the network track, which selects the network chart tab', function() {
+        const profile = getNetworkTrackProfile();
+        const { dispatch, getState } = storeWithProfile(profile);
+        dispatch(ProfileView.selectTrack(networkTrack));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'network-chart'
+        );
+      });
+      it('it can switch back to the thread, which remembers the last viewed panel', function() {
+        const profile = getNetworkTrackProfile();
+        const { dispatch, getState } = storeWithProfile(profile);
+        dispatch(App.changeSelectedTab('flame-graph'));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'flame-graph'
+        );
+        dispatch(ProfileView.selectTrack(networkTrack));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'network-chart'
+        );
+        dispatch(ProfileView.selectTrack(threadTrack));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'flame-graph'
+        );
+      });
     });
   });
 
