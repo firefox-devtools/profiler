@@ -1,0 +1,59 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`timeline/TrackNetwork matches the 2d context snapshot 1`] = `
+Array [
+  Array [
+    "clearRect",
+    0,
+    0,
+    0,
+    20,
+  ],
+  Array [
+    "set strokeStyle",
+    "rgba(0, 127, 255, 0.3)",
+  ],
+  Array [
+    "set lineCap",
+    "round",
+  ],
+  Array [
+    "set lineWidth",
+    3.75,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    400,
+    20,
+  ],
+  Array [
+    "set strokeStyle",
+    "rgba(0, 127, 255, 0.3)",
+  ],
+  Array [
+    "set lineCap",
+    "round",
+  ],
+  Array [
+    "set lineWidth",
+    3.75,
+  ],
+]
+`;
+
+exports[`timeline/TrackNetwork matches the component snapshot 1`] = `
+<div
+  className="timelineTrackNetwork"
+  style={
+    Object {
+      "height": 20,
+    }
+  }
+>
+  <canvas
+    className="timelineTrackNetworkCanvas"
+  />
+</div>
+`;
