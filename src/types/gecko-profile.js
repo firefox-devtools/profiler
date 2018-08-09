@@ -80,7 +80,8 @@ export type GeckoFrameTable = {
     implementation: 1,
     optimizations: 2,
     line: 3,
-    category: 4,
+    column: 4,
+    category: 5,
   },
   data: Array<
     [

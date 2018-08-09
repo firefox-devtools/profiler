@@ -617,6 +617,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
       implementation: frameTable.implementation.slice(),
       optimizations: frameTable.optimizations.slice(),
       line: frameTable.line.slice(),
+      column: frameTable.column.slice(),
       category: frameTable.category.slice(),
       func: frameTable.func.slice(),
       address: frameTable.address.slice(),
@@ -692,6 +693,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
               newFrameTable.implementation.push(null);
               newFrameTable.optimizations.push(null);
               newFrameTable.line.push(null);
+              newFrameTable.column.push(null);
               newFrameTable.category.push(null);
               newFrameTable.func.push(newFuncIndex);
               newFrameTable.address.push(-1);

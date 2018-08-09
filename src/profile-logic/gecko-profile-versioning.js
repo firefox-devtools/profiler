@@ -431,10 +431,10 @@ const _upgraders = {
     convertToVersionElevenRecursive(profile);
   },
   [12]: profile => {
-    //This version will add column numbers to the JS functions and scripts.
-    //There is also a new property in the frameTable called "column" which
-    //swaps positions with the "category" property.  The new value for
-    //"category" in the frameTable schema will be 5.
+    // This version will add column numbers to the JS functions and scripts.
+    // There is also a new property in the frameTable called "column" which
+    // swaps positions with the "category" property.  The new value for
+    // "category" in the frameTable schema will be 5.
     const oldSchemaCategoryIndex = 4;
     const newSchemaCategoryIndex = 5;
     function convertToVersionTwelveRecursive(p) {
