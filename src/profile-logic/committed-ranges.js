@@ -30,8 +30,8 @@ export function parseCommittedRanges(
     const m1 = Number(m[1]);
     let m2 = Number(m[2]);
 
-    // checking if range is set to > than 0
     if (m2 === m1) {
+      // Ensure that the duration of the range is non-zero.
       m2 = m2 + 0.0001;
     }
     return { start: m1 * 1000, end: m2 * 1000 };
