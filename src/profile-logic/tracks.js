@@ -289,12 +289,13 @@ export function initializeHiddenGlobalTracks(
 
   if (urlHiddenGlobalTracks === null) {
     // No hidden global tracks exist, generate the default Set.
-    for (const track of globalTracks) {
+    for (let trackIndex = 0; trackIndex < globalTracks.length; trackIndex++) {
+      const track = globalTracks[trackIndex];
       if (track.type === 'process' && track.mainThreadIndex !== null) {
         const { mainThreadIndex } = track;
         const thread = threads[mainThreadIndex];
         if (_isThreadIdle(thread)) {
-          hiddenGlobalTracks.add(mainThreadIndex);
+          hiddenGlobalTracks.add(trackIndex);
         }
       }
     }
