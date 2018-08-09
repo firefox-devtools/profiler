@@ -5,6 +5,8 @@
 .timelineRuler {
   height: 20px;
   overflow: hidden;
+  /* Don't allow this component to steal pointer events, as it can overlay the timeline */
+  pointer-events: none;
 }
 
 .timelineRuler::after {

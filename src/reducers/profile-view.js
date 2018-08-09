@@ -729,6 +729,8 @@ export type SelectorsForThread = {
   getMarkerTiming: State => MarkerTimingRows,
   getCommittedRangeFilteredTracingMarkers: State => TracingMarker[],
   getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
+  getNetworkTracingMarkers: State => TracingMarker[],
+  getNetworkTiming: State => MarkerTimingRows,
   getFilteredThread: State => Thread,
   getPreviewFilteredThread: State => Thread,
   getCallNodeInfo: State => CallNodeInfo,
@@ -961,6 +963,17 @@ export const selectorsForThread = (
             !ProfileData.isNetworkMarker(tm)
         )
     );
+    const getNetworkTracingMarkers = createSelector(
+      getCommittedRangeFilteredTracingMarkers,
+      tracingMarkers =>
+        tracingMarkers.filter(
+          marker => marker.data && marker.data.type === 'Network'
+        )
+    );
+    const getNetworkTiming = createSelector(
+      getNetworkTracingMarkers,
+      MarkerTiming.getMarkerTiming
+    );
     const getCallNodeInfo = createSelector(
       getFilteredThread,
       getDefaultCategory,
@@ -1075,6 +1088,8 @@ export const selectorsForThread = (
       getMarkerTiming,
       getCommittedRangeFilteredTracingMarkers,
       getCommittedRangeFilteredTracingMarkersForHeader,
+      getNetworkTracingMarkers,
+      getNetworkTiming,
       getFilteredThread,
       getPreviewFilteredThread,
       getCallNodeInfo,

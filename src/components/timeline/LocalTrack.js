@@ -22,6 +22,7 @@ import {
   getLocalTrackName,
 } from '../../reducers/profile-view';
 import TrackThread from './TrackThread';
+import TrackNetwork from './TrackNetwork';
 import type { ThreadIndex, Pid } from '../../types/profile';
 import type { TrackIndex, LocalTrack } from '../../types/profile-derived';
 import type {
@@ -87,6 +88,7 @@ class LocalTrackComponent extends PureComponent<Props> {
       case 'thread':
         return <TrackThread threadIndex={localTrack.threadIndex} />;
       case 'network':
+        return <TrackNetwork threadIndex={localTrack.threadIndex} />;
       case 'memory':
         // TODO: Add support for these track types.
         return null;
