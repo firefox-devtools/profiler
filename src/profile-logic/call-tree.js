@@ -195,7 +195,6 @@ export class CallTree {
       const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
       const libName = this._getOriginAnnotation(funcIndex);
-      const precision = this._isIntegerInterval ? 0 : 1;
 
       let icon = null;
       if (resourceType === resourceTypes.webhost) {
@@ -211,7 +210,7 @@ export class CallTree {
       displayData = {
         totalTime: formatNumber(totalTime),
         selfTime: selfTime === 0 ? '—' : formatNumber(selfTime),
-        totalTimePercent: `${(100 * totalTimeRelative).toFixed(precision)}%`,
+        totalTimePercent: `${(100 * totalTimeRelative).toFixed(1)}%`,
         name: funcName,
         lib: libName,
         // Dim platform pseudo-stacks.
