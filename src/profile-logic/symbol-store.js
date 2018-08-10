@@ -185,6 +185,23 @@ export class SymbolStore {
     // Option 2: Obtain symbols from the symbol server.
     // Option 3: Obtain symbol tables from the add-on.
 
+    // Check requests for validity first.
+    requests = requests.filter(request => {
+      const { debugName, breakpadId } = request.lib;
+      if (debugName === '' || breakpadId === '') {
+        errorCb(
+          request,
+          new SymbolsNotFoundError(
+            `Failed to symbolicate library ${debugName}`,
+            request.lib,
+            new Error('Invalid debugName or breakpadId')
+          )
+        );
+        return false;
+      }
+      return true;
+    });
+
     // First, try option 1 for all libraries and partition them by whether it
     // was successful.
     const requestsForNonCachedLibs = [];
