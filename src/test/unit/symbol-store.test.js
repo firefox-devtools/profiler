@@ -46,9 +46,12 @@ describe('SymbolStore', function() {
   it('should only request symbols from the symbol provider once per library', async function() {
     symbolProvider = {
       requestSymbolsFromServer: jest.fn(requests =>
-        requests.map(() =>
-          Promise.reject(new Error('this example only supports symbol tables'))
-        )
+        requests.map(request => {
+          expect(request.lib.breakpadId).not.toBe('');
+          return Promise.reject(
+            new Error('this example only supports symbol tables')
+          );
+        })
       ),
       requestSymbolTableFromAddon: jest.fn(() =>
         Promise.resolve(exampleSymbolTable)
@@ -97,6 +100,18 @@ describe('SymbolStore', function() {
       name: 'last symbol',
       functionOffset: 0,
     });
+
+    const libWithEmptyBreakpadId = {
+      debugName: 'dalvik-jit-code-cache',
+      breakpadId: '',
+    };
+    await symbolStore.getSymbols(
+      [{ lib: libWithEmptyBreakpadId, addresses: new Set([0x33, 0x2000]) }],
+      (_request, _results) => {},
+      (_request, _error) => {}
+    );
+    expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
+    expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(2);
   });
 
   it('should persist in DB', async function() {
