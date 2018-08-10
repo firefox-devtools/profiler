@@ -76,10 +76,7 @@ class CallTreeComponent extends PureComponent<Props> {
   ];
   _mainColumn: Column = { propName: 'name', title: '' };
   _appendageColumn: Column = { propName: 'lib', title: '' };
-  _treeView: TreeView<
-    IndexIntoCallNodeTable,
-    CallNodeDisplayData
-  > | null = null;
+  _treeView: TreeView<CallNodeDisplayData> | null = null;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
   componentDidMount() {
