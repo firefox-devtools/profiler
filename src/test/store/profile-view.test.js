@@ -404,25 +404,24 @@ describe('actions/ProfileView', function() {
     });
   });
 
-  describe('updateProfileSelection', function() {
+  describe('updatePreviewSelection', function() {
     it('updates the profile selection', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({ hasSelection: false, isModifying: false });
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+        hasSelection: false,
+        isModifying: false,
+      });
       dispatch(
-        ProfileView.updateProfileSelection({
+        ProfileView.updatePreviewSelection({
           hasSelection: true,
           isModifying: false,
           selectionStart: 0,
           selectionEnd: 1,
         })
       );
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionStart: 0,
@@ -431,124 +430,116 @@ describe('actions/ProfileView', function() {
     });
   });
 
-  describe('addRangeFilter', function() {
-    it('adds a range filter', function() {
+  describe('commitRange', function() {
+    it('commits a range', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([]);
-      dispatch(ProfileView.addRangeFilter(0, 10));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([]);
+      dispatch(ProfileView.commitRange(0, 10));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
       ]);
 
-      dispatch(ProfileView.addRangeFilter(1, 9));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      dispatch(ProfileView.commitRange(1, 9));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
     });
   });
 
-  describe('addRangeFilterAndUnsetSelection', function() {
-    it('adds a range filter and unsets a selection', function() {
+  describe('commitRangeAndUnsetSelection', function() {
+    it('commits a range and unsets a selection', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      dispatch(ProfileView.addRangeFilter(0, 10));
+      dispatch(ProfileView.commitRange(0, 10));
       dispatch(
-        ProfileView.updateProfileSelection({
+        ProfileView.updatePreviewSelection({
           hasSelection: true,
           isModifying: false,
           selectionStart: 1,
           selectionEnd: 9,
         })
       );
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
       ]);
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionEnd: 9,
         selectionStart: 1,
       });
 
-      dispatch(ProfileView.addRangeFilterAndUnsetSelection(2, 8));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      dispatch(ProfileView.commitRange(2, 8));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 2, end: 8 },
       ]);
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: false,
         isModifying: false,
       });
     });
   });
 
-  describe('popRangeFilters', function() {
+  describe('popCommittedRanges', function() {
     function setupStore() {
       const { profile } = getProfileFromTextSamples('A');
       const store = storeWithProfile(profile);
-      store.dispatch(ProfileView.addRangeFilter(0, 10));
-      store.dispatch(ProfileView.addRangeFilter(1, 9));
-      store.dispatch(ProfileView.addRangeFilter(2, 8));
-      store.dispatch(ProfileView.addRangeFilter(3, 7));
+      store.dispatch(ProfileView.commitRange(0, 10));
+      store.dispatch(ProfileView.commitRange(1, 9));
+      store.dispatch(ProfileView.commitRange(2, 8));
+      store.dispatch(ProfileView.commitRange(3, 7));
       return store;
     }
 
-    it('pops a range filter', function() {
+    it('pops a committed range', function() {
       const { getState, dispatch } = setupStore();
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
         { start: 2, end: 8 },
         { start: 3, end: 7 },
       ]);
-      dispatch(ProfileView.popRangeFilters(2));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      dispatch(ProfileView.popCommittedRanges(2));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
     });
 
-    it('pops a range filter and unsets the selection', function() {
+    it('pops a committed range and unsets the selection', function() {
       const { getState, dispatch } = setupStore();
       dispatch(
-        ProfileView.updateProfileSelection({
+        ProfileView.updatePreviewSelection({
           hasSelection: true,
           isModifying: false,
           selectionStart: 1,
           selectionEnd: 9,
         })
       );
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionEnd: 9,
         selectionStart: 1,
       });
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
         { start: 2, end: 8 },
         { start: 3, end: 7 },
       ]);
 
-      dispatch(ProfileView.popRangeFiltersAndUnsetSelection(2));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      dispatch(ProfileView.popCommittedRanges(2));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: false,
         isModifying: false,
       });
@@ -677,9 +668,9 @@ describe('snapshots of selectors/profile-view', function() {
     dispatch(ProfileView.changeExpandedCallNodes(0, [[A], [A, B]]));
     dispatch(ProfileView.changeSelectedCallNode(0, [A, B]));
     dispatch(ProfileView.changeSelectedMarker(0, 1));
-    dispatch(ProfileView.addRangeFilter(3, 7)); // Reminder: upper bound "7" is exclusive.
+    dispatch(ProfileView.commitRange(3, 7)); // Reminder: upper bound "7" is exclusive.
     dispatch(
-      ProfileView.updateProfileSelection({
+      ProfileView.updatePreviewSelection({
         hasSelection: true,
         isModifying: false,
         selectionStart: 4,
@@ -775,18 +766,18 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getMarkerTiming(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getRangeSelectionFilteredTracingMarkers', function() {
+  it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkers', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getRangeSelectionFilteredTracingMarkers(
+      selectedThreadSelectors.getCommittedRangeFilteredTracingMarkers(
         getState()
       )
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getRangeSelectionFilteredTracingMarkersForHeader', function() {
+  it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkersForHeader', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getRangeSelectionFilteredTracingMarkersForHeader(
+      selectedThreadSelectors.getCommittedRangeFilteredTracingMarkersForHeader(
         getState()
       )
     ).toMatchSnapshot();
@@ -797,10 +788,10 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getFilteredThread(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getRangeSelectionFilteredThread', function() {
+  it('matches the last stored run of selectedThreadSelector.getPreviewFilteredThread', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getRangeSelectionFilteredThread(getState())
+      selectedThreadSelectors.getPreviewFilteredThread(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getCallNodeInfo', function() {

@@ -10,6 +10,7 @@ import {
   formatNumber,
   formatPercent,
   formatBytes,
+  formatSI,
   formatMicroseconds,
   formatMilliseconds,
   formatValueTotal,
@@ -58,7 +59,7 @@ function _markerDetailNullable<T: NotVoidOrNull>(
   value: T | void | null,
   fn: T => string = String
 ): React.Node {
-  if (value === undefined || value === null) {
+  if (value === undefined || value === null || fn(value).length === 0) {
     return null;
   }
   return _markerDetail(key, label, value, fn);
@@ -239,6 +240,15 @@ function _filterInterestingPhaseTimes(
   return phaseTimes.filter(pt => pt.time > threshold);
 }
 
+function _sumMaybeEntries(
+  entries: PhaseTimes<Microseconds>,
+  selectEntries: Array<string>
+): Microseconds {
+  return selectEntries
+    .map(name => (entries[name] ? entries[name] : 0))
+    .reduce((a, x) => a + x, 0);
+}
+
 function _markerBacktrace(
   marker: TracingMarker,
   data:
@@ -313,21 +323,48 @@ function getMarkerDetails(
           const nursery = data.nursery;
           switch (nursery.status) {
             case 'complete': {
+              // Don't bother adding up the eviction time without the
+              // CollectToFP phase since that's the main phase.  If it's
+              // missing then there's something wrong with the profile and
+              // we'd only get bogus data.  All these times are in
+              // Milliseconds
+              const evictTimeMS = nursery.phase_times.CollectToFP
+                ? _sumMaybeEntries(nursery.phase_times, [
+                    'TraceValues',
+                    'TraceCells',
+                    'TraceSlots',
+                    'TraceWholeCells',
+                    'TraceGenericEntries',
+                    'MarkRuntime',
+                    'MarkDebugger',
+                    'CollectToFP',
+                  ])
+                : undefined;
               return (
                 <div className="tooltipDetails">
                   {_markerDetail('gcreason', 'Reason', nursery.reason)}
                   {_markerDetail(
                     'gcpromotion',
-                    'Bytes tenured',
+                    'Bytes evicted',
                     formatValueTotal(
                       nursery.bytes_tenured,
                       nursery.bytes_used,
                       formatBytes
                     )
                   )}
-                  {nursery.cur_capacity === undefined
-                    ? null
-                    : _markerDetail(
+                  {nursery.cells_tenured && nursery.cells_allocated_nursery
+                    ? _markerDetail(
+                        'gcpromotioncells',
+                        'Cells evicted',
+                        formatValueTotal(
+                          nursery.cells_tenured,
+                          nursery.cells_allocated_nursery,
+                          formatSI
+                        )
+                      )
+                    : null}
+                  {nursery.cur_capacity
+                    ? _markerDetail(
                         'gcnurseryusage',
                         'Bytes used',
                         formatValueTotal(
@@ -335,31 +372,62 @@ function getMarkerDetails(
                           nursery.cur_capacity,
                           formatBytes
                         )
-                      )}
-                  {nursery.new_capacity === undefined
-                    ? null
-                    : _markerDetail(
+                      )
+                    : null}
+                  {nursery.new_capacity
+                    ? _markerDetail(
                         'gcnewnurserysize',
                         'New nursery size',
                         nursery.new_capacity,
                         formatBytes
-                      )}
-                  {nursery.lazy_capacity === undefined
-                    ? null
-                    : _markerDetail(
+                      )
+                    : null}
+                  {nursery.lazy_capacity
+                    ? _markerDetail(
                         'gclazynurserysize',
                         'Lazy-allocated size',
                         nursery.lazy_capacity,
                         formatBytes
-                      )}
-                  {nursery.chunk_alloc_us === undefined
-                    ? null
-                    : _markerDetail(
+                      )
+                    : null}
+                  {nursery.cells_allocated_nursery &&
+                  nursery.cells_allocated_tenured
+                    ? _markerDetail(
+                        'gcnursaryallocations',
+                        'Nursery allocations since last minor GC',
+                        formatValueTotal(
+                          nursery.cells_allocated_nursery,
+                          nursery.cells_allocated_nursery +
+                            nursery.cells_allocated_tenured,
+                          formatSI
+                        )
+                      )
+                    : null}
+                  {evictTimeMS
+                    ? _markerDetail(
+                        'gctenurerate',
+                        'Tenuring allocation rate',
+                        // evictTimeMS is in milliseconds.
+                        nursery.bytes_tenured / (evictTimeMS / 1000000),
+                        x => formatBytes(x) + '/s'
+                      )
+                    : null}
+                  {evictTimeMS && nursery.cells_tenured
+                    ? _markerDetail(
+                        'gctenurereatecells',
+                        'Tenuring allocation rate',
+                        nursery.cells_tenured / (evictTimeMS / 10000000),
+                        x => formatSI(x) + '/s'
+                      )
+                    : null}
+                  {nursery.chunk_alloc_us
+                    ? _markerDetail(
                         'gctimeinchunkalloc',
                         'Time spent allocating chunks in mutator',
                         nursery.chunk_alloc_us,
                         formatMicroseconds
-                      )}
+                      )
+                    : null}
                   {_makePhaseTimesArray(nursery.phase_times)
                     /*
                      * Nursery collection should usually be very quick.  1ms
@@ -514,9 +582,9 @@ function getMarkerDetails(
               timings.initial_state + ' – ' + timings.final_state
             )}
             {triggers}
-            {timings.page_faults === undefined
-              ? null
-              : _markerDetail('gcfaults', 'Page faults', timings.page_faults)}
+            {timings.page_faults
+              ? _markerDetail('gcfaults', 'Page faults', timings.page_faults)
+              : null}
             {phase_times.map(_markerDetailPhase)}
           </div>
         );
@@ -539,7 +607,7 @@ function getMarkerDetails(
       case 'Invalidation': {
         return (
           <div className="tooltipDetails">
-            {_markerDetail('url', 'URL', data.url)}
+            {_markerDetailNullable('url', 'URL', data.url)}
             {_markerDetail('line', 'Line', data.line)}
           </div>
         );

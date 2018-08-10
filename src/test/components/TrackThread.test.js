@@ -14,7 +14,7 @@ import { changeSelectedThread } from '../../actions/profile-view';
 import TrackThread from '../../components/timeline/TrackThread';
 import {
   selectedThreadSelectors,
-  getSelection,
+  getPreviewSelection,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -164,7 +164,7 @@ describe('timeline/TrackThread', function() {
     function clickAndGetMarkerName(pageX: number) {
       tracingMarkersCanvas.simulate('mousedown', getMouseEvent({ pageX }));
       tracingMarkersCanvas.simulate('mouseup', getMouseEvent({ pageX }));
-      return getSelection(getState());
+      return getPreviewSelection(getState());
     }
 
     expect(clickAndGetMarkerName(STACK_1_X_POSITION)).toMatchObject({

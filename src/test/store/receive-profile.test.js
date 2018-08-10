@@ -152,7 +152,7 @@ describe('actions/receive-profile', function() {
 
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007,
       });
@@ -185,7 +185,7 @@ describe('actions/receive-profile', function() {
 
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007,
       });
@@ -230,7 +230,7 @@ describe('actions/receive-profile', function() {
 
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007,
       });
@@ -265,7 +265,7 @@ describe('actions/receive-profile', function() {
       ]);
 
       const state = store.getState();
-      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007,
       });
@@ -344,7 +344,7 @@ describe('actions/receive-profile', function() {
 
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007,
       });
@@ -378,7 +378,7 @@ describe('actions/receive-profile', function() {
       ]);
 
       const state = store.getState();
-      expect(ProfileViewSelectors.getDisplayRange(state)).toEqual({
+      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007,
       });

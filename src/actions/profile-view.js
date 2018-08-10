@@ -23,7 +23,7 @@ import { ensureExists } from '../utils/flow';
 import { sendAnalytics } from '../utils/analytics';
 
 import type {
-  ProfileSelection,
+  PreviewSelection,
   ImplementationFilter,
   TrackReference,
 } from '../types/actions';
@@ -168,13 +168,15 @@ export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   };
 }
 
-export function isolateGlobalTrack(
+/**
+ * This function isolates a process global track, and leaves its local tracks visible.
+ */
+export function isolateProcess(
   isolatedTrackIndex: TrackIndex
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const track = getGlobalTracks(getState())[isolatedTrackIndex];
     const trackIndexes = getGlobalTrackOrder(getState());
-
     if (track.type !== 'process') {
       // Do not isolate a track unless it is a process, that way a thread
       // will always be visible.
@@ -185,7 +187,7 @@ export function isolateGlobalTrack(
     const localTracks = getLocalTracks(getState(), track.pid);
     const isSelectedThreadInLocalTracks = localTracks.some(
       track =>
-        track.type === 'thread' || track.threadIndex === selectedThreadIndex
+        track.type === 'thread' && track.threadIndex === selectedThreadIndex
     );
 
     // Check to see if this selectedThreadIndex will be hidden.
@@ -216,16 +218,58 @@ export function isolateGlobalTrack(
     sendAnalytics({
       hitType: 'event',
       eventCategory: 'timeline',
-      eventAction: 'isolate global track',
+      eventAction: 'isolate process',
     });
 
     dispatch({
-      type: 'ISOLATE_GLOBAL_TRACK',
+      type: 'ISOLATE_PROCESS',
       hiddenGlobalTracks: new Set(
         trackIndexes.filter(i => i !== isolatedTrackIndex)
       ),
       isolatedTrackIndex,
       selectedThreadIndex,
+    });
+  };
+}
+
+/**
+ * This function isolates a global track, and hides all of its local tracks.
+ */
+export function isolateProcessMainThread(
+  isolatedTrackIndex: TrackIndex
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const track = getGlobalTracks(getState())[isolatedTrackIndex];
+    const trackIndexes = getGlobalTrackOrder(getState());
+
+    if (track.type !== 'process') {
+      // Do not isolate a track unless it is a process track.
+      return;
+    }
+
+    const selectedThreadIndex = track.mainThreadIndex;
+    if (selectedThreadIndex === null) {
+      // Make sure that a thread really exists.
+      return;
+    }
+
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'isolate process main thread',
+    });
+
+    dispatch({
+      type: 'ISOLATE_PROCESS_MAIN_THREAD',
+      pid: track.pid,
+      hiddenGlobalTracks: new Set(
+        trackIndexes.filter(i => i !== isolatedTrackIndex)
+      ),
+      isolatedTrackIndex,
+      selectedThreadIndex,
+      // The local track order contains all of the indexes, and all should be hidden
+      // when isolating the main thread.
+      hiddenLocalTracks: new Set(getLocalTrackOrder(getState(), track.pid)),
     });
   };
 }
@@ -600,48 +644,31 @@ export function changeInvertCallstack(
   };
 }
 
-export function updateProfileSelection(selection: ProfileSelection): Action {
+export function updatePreviewSelection(
+  previewSelection: PreviewSelection
+): Action {
   return {
-    type: 'UPDATE_PROFILE_SELECTION',
-    selection,
+    type: 'UPDATE_PREVIEW_SELECTION',
+    previewSelection,
   };
 }
 
-export function addRangeFilter(start: number, end: number): Action {
+export function commitRange(start: number, end: number): Action {
+  if (end === start) {
+    // Ensure that the duration of the range is non-zero.
+    end = end + 0.0001;
+  }
   return {
-    type: 'ADD_RANGE_FILTER',
+    type: 'COMMIT_RANGE',
     start,
     end,
   };
 }
 
-export function addRangeFilterAndUnsetSelection(
-  start: number,
-  end: number
-): ThunkAction<void> {
-  return dispatch => {
-    dispatch(addRangeFilter(start, end));
-    dispatch(
-      updateProfileSelection({ hasSelection: false, isModifying: false })
-    );
-  };
-}
-
-export function popRangeFilters(firstRemovedFilterIndex: number): Action {
+export function popCommittedRanges(firstPoppedFilterIndex: number): Action {
   return {
-    type: 'POP_RANGE_FILTERS',
-    firstRemovedFilterIndex,
-  };
-}
-
-export function popRangeFiltersAndUnsetSelection(
-  firstRemovedFilterIndex: number
-): ThunkAction<void> {
-  return dispatch => {
-    dispatch(popRangeFilters(firstRemovedFilterIndex));
-    dispatch(
-      updateProfileSelection({ hasSelection: false, isModifying: false })
-    );
+    type: 'POP_COMMITTED_RANGES',
+    firstPoppedFilterIndex,
   };
 }
 
@@ -670,14 +697,14 @@ export function addTransformToStack(
 }
 
 export function popTransformsFromStack(
-  firstRemovedFilterIndex: number
+  firstPoppedFilterIndex: number
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadIndex = getSelectedThreadIndex(getState());
     dispatch({
       type: 'POP_TRANSFORMS_FROM_STACK',
       threadIndex,
-      firstRemovedFilterIndex,
+      firstPoppedFilterIndex,
     });
   };
 }

@@ -13,7 +13,7 @@ import Reorderable from '../shared/Reorderable';
 import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
 import {
-  getDisplayRange,
+  getCommittedRange,
   getZeroAt,
   getGlobalTracks,
   getGlobalTrackReferences,
@@ -25,8 +25,8 @@ import type { SizeProps } from '../shared/WithSize';
 
 import {
   changeGlobalTrackOrder,
-  updateProfileSelection,
-  addRangeFilterAndUnsetSelection,
+  updatePreviewSelection,
+  commitRange,
 } from '../../actions/profile-view';
 
 import type { TrackIndex, GlobalTrack } from '../../types/profile-derived';
@@ -40,18 +40,17 @@ import type {
 type OwnProps = SizeProps;
 
 type StateProps = {|
-  +displayRange: StartEndRange,
+  +committedRange: StartEndRange,
   +globalTracks: GlobalTrack[],
   +globalTrackOrder: TrackIndex[],
   +globalTrackReferences: TrackReference[],
-  +timeRange: StartEndRange,
   +zeroAt: Milliseconds,
 |};
 
 type DispatchProps = {|
   +changeGlobalTrackOrder: typeof changeGlobalTrackOrder,
-  +addRangeFilterAndUnsetSelection: typeof addRangeFilterAndUnsetSelection,
-  +updateProfileSelection: typeof updateProfileSelection,
+  +commitRange: typeof commitRange,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -62,7 +61,7 @@ class Timeline extends PureComponent<Props> {
       globalTracks,
       globalTrackOrder,
       changeGlobalTrackOrder,
-      displayRange,
+      committedRange,
       zeroAt,
       width,
       globalTrackReferences,
@@ -72,8 +71,8 @@ class Timeline extends PureComponent<Props> {
       <TimelineSelection width={width}>
         <TimelineRuler
           zeroAt={zeroAt}
-          rangeStart={displayRange.start}
-          rangeEnd={displayRange.end}
+          rangeStart={committedRange.start}
+          rangeEnd={committedRange.end}
           width={width}
         />
         <OverflowEdgeIndicator className="timelineOverflowEdgeIndicator">
@@ -106,14 +105,13 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     globalTracks: getGlobalTracks(state),
     globalTrackOrder: getGlobalTrackOrder(state),
     globalTrackReferences: getGlobalTrackReferences(state),
-    timeRange: getDisplayRange(state),
-    displayRange: getDisplayRange(state),
+    committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
-    updateProfileSelection,
-    addRangeFilterAndUnsetSelection,
+    updatePreviewSelection,
+    commitRange,
   },
   component: Timeline,
 };

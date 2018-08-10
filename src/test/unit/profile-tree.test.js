@@ -8,6 +8,7 @@ import {
   computeCallTreeCountsAndTimings,
   CallTree,
 } from '../../profile-logic/call-tree';
+import { getRootsAndChildren } from '../../profile-logic/flame-graph';
 import {
   getCallNodeInfo,
   invertCallstack,
@@ -95,6 +96,37 @@ describe('unfiltered call tree', function() {
         callNodeTimes: {
           selfTime: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
           totalTime: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
+        },
+      });
+    });
+  });
+
+  describe('roots and children for flame graph', function() {
+    const profile = getProfile();
+    const [thread] = profile.threads;
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
+    const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+
+    it('returns roots and children', function() {
+      expect(
+        getRootsAndChildren(
+          thread,
+          callNodeInfo.callNodeTable,
+          new Uint32Array([1, 2, 2, 1, 0, 1, 0, 1, 0]),
+          new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1])
+        )
+      ).toEqual({
+        roots: [0],
+        children: {
+          array: new Uint32Array([1, 7, 2, 5, 3, 4, 6, 8, 0]),
+          offsets: new Uint32Array([0, 1, 3, 5, 6, 6, 7, 7, 8, 8]),
         },
       });
     });
@@ -219,15 +251,6 @@ describe('unfiltered call tree', function() {
       });
     });
 
-    describe('getChildren() after preloading cache', function() {
-      it('returns an array with the children indexes', function() {
-        const callTree = callTreeFromProfile(profile);
-        callTree.preloadChildrenCache();
-        expect(callTree.getChildren(C)).toEqual([D, F]);
-        expect(callTree.getChildren(E)).toEqual([]);
-      });
-    });
-
     describe('hasChildren()', function() {
       it('determines if nodes have children', function() {
         expect(callTree.hasChildren(C)).toEqual(true);
@@ -289,7 +312,7 @@ describe('unfiltered call tree', function() {
           name: 'A',
           selfTime: '—',
           totalTime: '3',
-          totalTimePercent: '100%',
+          totalTimePercent: '100.0%',
           categoryColor: 'grey',
           categoryName: 'Other',
         });
