@@ -12,22 +12,17 @@ import './FilterNavigatorBar.css';
 type Props = {|
   +className: string,
   +items: string[],
-  +onPop: number => *,
+  +onPop: number => mixed,
   +selectedItem: number,
   +uncommittedItem?: string,
 |};
 
 class FilterNavigatorBar extends PureComponent<Props> {
-  constructor(props: Props) {
-    super(props);
-    (this: any)._onLiClick = this._onLiClick.bind(this);
-  }
-
-  _onLiClick(e: SyntheticMouseEvent<HTMLLIElement>) {
+  _onLiClick = (e: SyntheticMouseEvent<HTMLLIElement>) => {
     const element = e.currentTarget;
     const index = parseInt(element.dataset.index, 10) || 0;
     this.props.onPop(index);
-  }
+  };
 
   render() {
     const { className, items, selectedItem, uncommittedItem } = this.props;

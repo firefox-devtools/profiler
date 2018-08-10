@@ -113,15 +113,10 @@ class TreeViewRowFixedColumns<
 > extends React.PureComponent<
   TreeViewRowFixedColumnsProps<NodeIndex, DisplayData>
 > {
-  constructor(props: TreeViewRowFixedColumnsProps<NodeIndex, DisplayData>) {
-    super(props);
-    (this: any)._onClick = this._onClick.bind(this);
-  }
-
-  _onClick(event: SyntheticMouseEvent<>) {
+  _onClick = (event: SyntheticMouseEvent<>) => {
     const { nodeId, onClick } = this.props;
     onClick(nodeId, event);
-  }
+  };
 
   render() {
     const {
@@ -198,23 +193,18 @@ class TreeViewRowScrolledColumns<
 > extends React.PureComponent<
   TreeViewRowScrolledColumnsProps<NodeIndex, DisplayData>
 > {
-  constructor(props: TreeViewRowScrolledColumnsProps<NodeIndex, DisplayData>) {
-    super(props);
-    (this: any)._onClick = this._onClick.bind(this);
-  }
-
   /**
    * In this mousedown handler, we use event delegation so we have to use
    * `target` instead of `currentTarget`.
    */
-  _onClick(event: { target: Element } & SyntheticMouseEvent<Element>) {
+  _onClick = (event: { target: Element } & SyntheticMouseEvent<Element>) => {
     const { nodeId, isExpanded, onToggle, onClick } = this.props;
     if (event.target.classList.contains('treeRowToggleButton')) {
       onToggle(nodeId, !isExpanded, event.altKey === true);
     } else {
       onClick(nodeId, event);
     }
-  }
+  };
 
   render() {
     const {
@@ -328,20 +318,14 @@ class TreeView<
   _specialItems: (NodeIndex | null)[];
   _visibleRows: NodeIndex[];
   _expandedNodes: Set<NodeIndex | null>;
-  _list: VirtualList | null;
+  _list: VirtualList | null = null;
   _takeListRef = (list: VirtualList | null) => (this._list = list);
 
   constructor(props: TreeViewProps<NodeIndex, DisplayData>) {
     super(props);
-    (this: any)._renderRow = this._renderRow.bind(this);
-    (this: any)._toggle = this._toggle.bind(this);
-    (this: any)._onKeyDown = this._onKeyDown.bind(this);
-    (this: any)._onCopy = this._onCopy.bind(this);
-    (this: any)._onRowClicked = this._onRowClicked.bind(this);
     this._specialItems = [props.selectedNodeId];
     this._expandedNodes = new Set(props.expandedNodeIds);
     this._visibleRows = this._getAllVisibleRows(props);
-    this._list = null;
   }
 
   scrollSelectionIntoView() {
@@ -367,7 +351,7 @@ class TreeView<
     }
   }
 
-  _renderRow(nodeId: NodeIndex, index: number, columnIndex: number) {
+  _renderRow = (nodeId: NodeIndex, index: number, columnIndex: number) => {
     const {
       tree,
       fixedColumns,
@@ -417,7 +401,7 @@ class TreeView<
         indentWidth={indentWidth}
       />
     );
-  }
+  };
 
   _addVisibleRowsFromNode(
     props: TreeViewProps<NodeIndex, DisplayData>,
@@ -450,11 +434,11 @@ class TreeView<
     return !this._expandedNodes.has(nodeId);
   }
 
-  _toggle(
+  _toggle = (
     nodeId: NodeIndex,
     newExpanded: boolean = this._isCollapsed(nodeId),
     toggleAll: * = false
-  ) {
+  ) => {
     const newSet = new Set(this._expandedNodes);
     if (newExpanded) {
       newSet.add(nodeId);
@@ -467,7 +451,7 @@ class TreeView<
       newSet.delete(nodeId);
     }
     this.props.onExpandedNodesChange(Array.from(newSet.values()));
-  }
+  };
 
   _toggleAll(
     nodeId: NodeIndex,
@@ -480,20 +464,20 @@ class TreeView<
     this.props.onSelectionChange(nodeId);
   }
 
-  _onRowClicked(nodeId: NodeIndex, event: SyntheticMouseEvent<>) {
+  _onRowClicked = (nodeId: NodeIndex, event: SyntheticMouseEvent<>) => {
     this._select(nodeId);
     if (event.detail === 2 && event.button === 0) {
       // double click
       this._toggle(nodeId);
     }
-  }
+  };
 
   /**
    * Flow doesn't yet know about Clipboard events, so infer what's going on with the
    * event.
    * See: https://github.com/facebook/flow/issues/1856
    */
-  _onCopy(event: *) {
+  _onCopy = (event: *) => {
     event.preventDefault();
     const { tree, selectedNodeId, mainColumn } = this.props;
     if (selectedNodeId) {
@@ -503,9 +487,9 @@ class TreeView<
         displayData[mainColumn.propName]
       );
     }
-  }
+  };
 
-  _onKeyDown(event: KeyboardEvent) {
+  _onKeyDown = (event: KeyboardEvent) => {
     const hasModifier = event.ctrlKey || event.altKey;
     const isNavigationKey =
       event.key.startsWith('Arrow') ||
@@ -624,7 +608,7 @@ class TreeView<
         onEnterKey(selectedNodeId);
       }
     }
-  }
+  };
 
   focus() {
     if (this._list) {

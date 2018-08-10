@@ -37,31 +37,11 @@ type State = {|
 |};
 
 class ButtonWithPanel extends React.PureComponent<Props, State> {
-  _panel: Panel | null;
-
-  _onPanelOpen: () => void;
-  _onPanelClose: () => void;
-  _panelCreated: (Panel | null) => void;
+  _panel: Panel | null = null;
 
   constructor(props: Props) {
     super(props);
     this.state = { open: !!props.open };
-    this._onPanelOpen = () => {
-      this.setState({ open: true });
-      if (this.props.panel.props.onOpen) {
-        this.props.panel.props.onOpen();
-      }
-    };
-    this._onPanelClose = () => {
-      this.setState({ open: false });
-      if (this.props.panel.props.onClose) {
-        this.props.panel.props.onClose();
-      }
-    };
-    (this: any)._onButtonClick = this._onButtonClick.bind(this);
-    this._panelCreated = (panel: Panel | null) => {
-      this._panel = panel;
-    };
   }
 
   componentWillReceiveProps(props: Props) {
@@ -70,15 +50,33 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     }
   }
 
+  _onPanelOpen = () => {
+    this.setState({ open: true });
+    if (this.props.panel.props.onOpen) {
+      this.props.panel.props.onOpen();
+    }
+  };
+
+  _onPanelClose = () => {
+    this.setState({ open: false });
+    if (this.props.panel.props.onClose) {
+      this.props.panel.props.onClose();
+    }
+  };
+
+  _takePanelRef = (panel: Panel | null) => {
+    this._panel = panel;
+  };
+
   openPanel() {
     if (this._panel) {
       this._panel.open();
     }
   }
 
-  _onButtonClick() {
+  _onButtonClick = () => {
     this.openPanel();
-  }
+  };
 
   render() {
     const { className, label, panel, disabled } = this.props;
@@ -98,7 +96,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
           />
         </div>
         {React.cloneElement(panel, {
-          ref: this._panelCreated,
+          ref: this._takePanelRef,
           onOpen: this._onPanelOpen,
           onClose: this._onPanelClose,
         })}

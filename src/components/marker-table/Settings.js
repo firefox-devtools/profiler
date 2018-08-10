@@ -28,15 +28,9 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class Settings extends PureComponent<Props> {
-  constructor(props: Props) {
-    super(props);
-    (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(
-      this
-    );
-  }
-  _onSearchFieldIdleAfterChange(value: string) {
+  _onSearchFieldIdleAfterChange = (value: string) => {
     this.props.changeMarkersSearchString(value);
-  }
+  };
 
   render() {
     const { searchString } = this.props;

@@ -30,27 +30,17 @@ type Props = {|
 |};
 
 class StackSettings extends PureComponent<Props> {
-  constructor(props: Props) {
-    super(props);
-    (this: any)._onImplementationFilterChange = this._onImplementationFilterChange.bind(
-      this
-    );
-    (this: any)._onInvertCallstackClick = this._onInvertCallstackClick.bind(
-      this
-    );
-  }
-
-  _onImplementationFilterChange(e: SyntheticEvent<HTMLSelectElement>) {
+  _onImplementationFilterChange = (e: SyntheticEvent<HTMLSelectElement>) => {
     this.props.changeImplementationFilter(
       // This function is here to satisfy Flow that we are getting a valid
       // implementation filter.
       toValidImplementationFilter(e.currentTarget.value)
     );
-  }
+  };
 
-  _onInvertCallstackClick(e: SyntheticEvent<HTMLInputElement>) {
+  _onInvertCallstackClick = (e: SyntheticEvent<HTMLInputElement>) => {
     this.props.changeInvertCallstack(e.currentTarget.checked);
-  }
+  };
 
   render() {
     const {

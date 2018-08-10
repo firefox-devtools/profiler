@@ -57,15 +57,7 @@ const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
 
 class StackChartCanvas extends React.PureComponent<Props> {
-  _textMeasurement: null | TextMeasurement;
-
-  constructor(props: Props) {
-    super(props);
-    (this: any)._onDoubleClickStack = this._onDoubleClickStack.bind(this);
-    (this: any)._getHoveredStackInfo = this._getHoveredStackInfo.bind(this);
-    (this: any)._drawCanvas = this._drawCanvas.bind(this);
-    (this: any)._hitTest = this._hitTest.bind(this);
-  }
+  _textMeasurement: null | TextMeasurement = null;
 
   /**
    * Draw the canvas.
@@ -76,10 +68,10 @@ class StackChartCanvas extends React.PureComponent<Props> {
    * src/components/shared/chart/Viewport.js for a diagram detailing the various
    * components of this set-up.
    */
-  _drawCanvas(
+  _drawCanvas = (
     ctx: CanvasRenderingContext2D,
     hoveredItem: HoveredStackTiming | null
-  ) {
+  ) => {
     const {
       thread,
       rangeStart,
@@ -192,12 +184,12 @@ class StackChartCanvas extends React.PureComponent<Props> {
         }
       }
     }
-  }
+  };
 
-  _getHoveredStackInfo({
+  _getHoveredStackInfo = ({
     depth,
     stackTableIndex,
-  }: HoveredStackTiming): React.Node {
+  }: HoveredStackTiming): React.Node => {
     const { thread, getLabel, getCategory, stackTimingByDepth } = this.props;
     const stackTiming = stackTimingByDepth[depth];
 
@@ -260,9 +252,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
         </div>
       </div>
     );
-  }
+  };
 
-  _onDoubleClickStack(hoveredItem: HoveredStackTiming | null) {
+  _onDoubleClickStack = (hoveredItem: HoveredStackTiming | null) => {
     if (hoveredItem === null) {
       return;
     }
@@ -274,9 +266,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
       selectionStart: stackTimingByDepth[depth].start[stackTableIndex],
       selectionEnd: stackTimingByDepth[depth].end[stackTableIndex],
     });
-  }
+  };
 
-  _hitTest(x: CssPixels, y: CssPixels): HoveredStackTiming | null {
+  _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
     const {
       rangeStart,
       rangeEnd,
@@ -306,7 +298,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
 
     return null;
-  }
+  };
 
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
