@@ -10,6 +10,7 @@ import {
   formatNumber,
   formatPercent,
   formatBytes,
+  formatSI,
   formatMicroseconds,
   formatMilliseconds,
   formatValueTotal,
@@ -21,13 +22,16 @@ import { getImplementationFilter } from '../../reducers/url-state';
 import Backtrace from './Backtrace';
 
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
+import type { Microseconds } from '../../types/units';
 import type { TracingMarker } from '../../types/profile-derived';
 import type { NotVoidOrNull } from '../../types/utils';
 import type { ImplementationFilter } from '../../types/actions';
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type {
   DOMEventMarkerPayload,
+  FrameConstructionMarkerPayload,
   PaintProfilerMarkerTracing,
+  PhaseTimes,
   StyleMarkerPayload,
 } from '../../types/markers';
 import type {
@@ -42,7 +46,7 @@ function _markerDetail<T: NotVoidOrNull>(
   fn: T => string = String
 ): React.Node {
   return [
-    <div className="tooltipLabel" key="{key}">
+    <div className="tooltipLabel" key={key}>
       {label}:
     </div>,
     fn(value),
@@ -55,10 +59,21 @@ function _markerDetailNullable<T: NotVoidOrNull>(
   value: T | void | null,
   fn: T => string = String
 ): React.Node {
-  if (value === undefined || value === null) {
+  if (value === undefined || value === null || fn(value).length === 0) {
     return null;
   }
   return _markerDetail(key, label, value, fn);
+}
+
+function _markerDetailBytesNullable(
+  key: string,
+  label: string,
+  value: ?number
+): React.Node {
+  if (typeof value !== 'number') {
+    return null;
+  }
+  return _markerDetail(key, label, formatBytes(value));
 }
 
 function _markerDetailDeltaTimeNullable(
@@ -75,26 +90,198 @@ function _markerDetailDeltaTimeNullable(
   ) {
     return null;
   }
-  return _markerDetail(key, label, value1 - value2);
+  const valueResult = value1 - value2;
+  return _markerDetail(key, label, formatMilliseconds(valueResult));
+}
+
+type PhaseTimeTuple = {| name: string, time: Microseconds |};
+
+function _markerDetailPhase(p: PhaseTimeTuple): React.Node {
+  return _markerDetail(
+    'gcphase' + p.name,
+    'Phase ' + p.name,
+    p.time,
+    t => formatNumber(t / 1000) + 'ms'
+  );
+}
+
+function _makePhaseTimesArray(
+  phases: PhaseTimes<Microseconds>
+): Array<PhaseTimeTuple> {
+  const array = [];
+  for (const phase in phases) {
+    /*
+     * The "Total" entry is the total of all phases, it's not needed because
+     * the total time is displayed on the marker tooltip (and available in
+     * the marker data) directly.
+     */
+    if (phase !== 'Total') {
+      array.push({ name: phase, time: phases[phase] });
+    }
+  }
+  return array;
+}
+
+/*
+ * Return true if the phase 'phaseName' is a leaf phase among the whole
+ * array of phases.
+ *
+ * A leaf phase is a phase with no sub-phases.
+ *
+ * If the following are phases:
+ * marking.mark_roots
+ * marking.mark_heap
+ * marking.mark_heap.a
+ * sweeping.sweep
+ *
+ * Then marking.mark_roots, marking.mark_heap.a, sweeping.sweep are the only
+ * leaves.  We select these since they will give the person looking at the
+ * profile the best clue about which (sub-)phases are taking the longest.
+ * For example, it isn't useful to say "sweeping took 200ms" but it is
+ * useful to say "sweeping.compacting took 20ms" (if compacting has no
+ * sub-phases.
+ *
+ * We find leaf phases by constructing a tree of phase times and then
+ * reading its leaves.
+ */
+
+type PhaseTreeNode = {|
+  value?: PhaseTimeTuple,
+  branches: Map<string, PhaseTreeNode>,
+|};
+
+function _treeInsert(
+  tree: Map<string, PhaseTreeNode>,
+  path: Array<string>,
+  phase: PhaseTimeTuple
+) {
+  const component = path.shift();
+  if (component === undefined) {
+    // This path is not a leaf, it can be ignored.
+    return;
+  }
+
+  let node = tree.get(component);
+  if (!node) {
+    // Make a new node and grow the tree in this direction.
+    node = { branches: new Map() };
+
+    tree.set(component, node);
+  }
+
+  if (path.length > 0) {
+    // There are more path components.  This node should be a branch if it
+    // isn't one already.
+    if (node.value) {
+      // We delete the value to change this node from a leaf to a branch.
+      delete node.value;
+    }
+    _treeInsert(node.branches, path, phase);
+  } else {
+    // Make the new node leaf node.
+    if (node.value) {
+      console.error(
+        'Duplicate phases in _treeInsert in MarkerTooltipContents.js'
+      );
+      return;
+    }
+    node.value = phase;
+  }
+}
+
+function _treeGetLeaves(
+  tree: Map<string, PhaseTreeNode>
+): Array<PhaseTimeTuple> {
+  const leaves = [];
+  for (const node of tree.values()) {
+    if (node.value) {
+      leaves.push(node.value);
+    } else {
+      leaves.push(..._treeGetLeaves(node.branches));
+    }
+  }
+  return leaves;
+}
+
+function _filterInterestingPhaseTimes(
+  rawPhases: PhaseTimes<Microseconds>,
+  numSelect: number
+): Array<PhaseTimeTuple> {
+  let phaseTimes = _makePhaseTimesArray(rawPhases);
+
+  /*
+   * Select only the leaf phases.
+   */
+  const tree = new Map();
+  for (const phase of phaseTimes) {
+    const components = phase.name.split('.');
+    _treeInsert(tree, components, phase);
+  }
+  phaseTimes = _treeGetLeaves(tree);
+
+  /*
+   * Of those N leaf phases, select the M most interesting phases by
+   * determining the threshold we want to stop including phases at.
+   *
+   * Calculate the threshold by sorting the list of times in asscending
+   * order, then slicing off all the low items and looking at the first
+   * item.
+   */
+  const sortedPhaseTimes = phaseTimes
+    .map(pt => pt.time)
+    // Descending order
+    .sort((a, b) => b - a);
+  const threshold = sortedPhaseTimes[numSelect];
+
+  /*
+   * And then filtering the original list, which is in execution order which
+   * we'd like to preserve, using the threshold.
+   */
+  return phaseTimes.filter(pt => pt.time > threshold);
+}
+
+function _sumMaybeEntries(
+  entries: PhaseTimes<Microseconds>,
+  selectEntries: Array<string>
+): Microseconds {
+  return selectEntries
+    .map(name => (entries[name] ? entries[name] : 0))
+    .reduce((a, x) => a + x, 0);
 }
 
 function _markerBacktrace(
   marker: TracingMarker,
-  data: StyleMarkerPayload | PaintProfilerMarkerTracing | DOMEventMarkerPayload,
+  data:
+    | StyleMarkerPayload
+    | PaintProfilerMarkerTracing
+    | DOMEventMarkerPayload
+    | FrameConstructionMarkerPayload,
   thread: Thread,
   implementationFilter: ImplementationFilter
 ): React.Node {
-  if (data.category === 'DOMEvent') {
-    const latency =
-      data.timeStamp === undefined
-        ? null
-        : formatMilliseconds(marker.start - data.timeStamp);
-    return (
-      <div className="tooltipDetails">
-        {_markerDetail('type', 'Type', data.eventType)}
-        {latency === null ? null : _markerDetail('latency', 'Latency', latency)}
-      </div>
-    );
+  switch (data.category) {
+    case 'DOMEvent': {
+      const latency =
+        data.timeStamp === undefined
+          ? null
+          : formatMilliseconds(marker.start - data.timeStamp);
+      return (
+        <div className="tooltipDetails">
+          {_markerDetail('type', 'Type', data.eventType)}
+          {latency === null
+            ? null
+            : _markerDetail('latency', 'Latency', latency)}
+        </div>
+      );
+    }
+    case 'Frame Construction':
+      return (
+        <div className="tooltipDetails">
+          {_markerDetail('category', 'Category', data.category)}
+        </div>
+      );
+    default:
+      break;
   }
   if ('cause' in data && data.cause) {
     const { cause } = data;
@@ -121,6 +308,7 @@ function getMarkerDetails(
   implementationFilter: ImplementationFilter
 ): React.Node {
   const data = marker.data;
+
   if (data) {
     switch (data.type) {
       case 'UserTiming': {
@@ -135,21 +323,48 @@ function getMarkerDetails(
           const nursery = data.nursery;
           switch (nursery.status) {
             case 'complete': {
+              // Don't bother adding up the eviction time without the
+              // CollectToFP phase since that's the main phase.  If it's
+              // missing then there's something wrong with the profile and
+              // we'd only get bogus data.  All these times are in
+              // Milliseconds
+              const evictTimeMS = nursery.phase_times.CollectToFP
+                ? _sumMaybeEntries(nursery.phase_times, [
+                    'TraceValues',
+                    'TraceCells',
+                    'TraceSlots',
+                    'TraceWholeCells',
+                    'TraceGenericEntries',
+                    'MarkRuntime',
+                    'MarkDebugger',
+                    'CollectToFP',
+                  ])
+                : undefined;
               return (
                 <div className="tooltipDetails">
                   {_markerDetail('gcreason', 'Reason', nursery.reason)}
                   {_markerDetail(
                     'gcpromotion',
-                    'Bytes tenured',
+                    'Bytes evicted',
                     formatValueTotal(
                       nursery.bytes_tenured,
                       nursery.bytes_used,
                       formatBytes
                     )
                   )}
-                  {nursery.cur_capacity === undefined
-                    ? null
-                    : _markerDetail(
+                  {nursery.cells_tenured && nursery.cells_allocated_nursery
+                    ? _markerDetail(
+                        'gcpromotioncells',
+                        'Cells evicted',
+                        formatValueTotal(
+                          nursery.cells_tenured,
+                          nursery.cells_allocated_nursery,
+                          formatSI
+                        )
+                      )
+                    : null}
+                  {nursery.cur_capacity
+                    ? _markerDetail(
                         'gcnurseryusage',
                         'Bytes used',
                         formatValueTotal(
@@ -157,31 +372,72 @@ function getMarkerDetails(
                           nursery.cur_capacity,
                           formatBytes
                         )
-                      )}
-                  {nursery.new_capacity === undefined
-                    ? null
-                    : _markerDetail(
+                      )
+                    : null}
+                  {nursery.new_capacity
+                    ? _markerDetail(
                         'gcnewnurserysize',
                         'New nursery size',
                         nursery.new_capacity,
                         formatBytes
-                      )}
-                  {nursery.lazy_capacity === undefined
-                    ? null
-                    : _markerDetail(
+                      )
+                    : null}
+                  {nursery.lazy_capacity
+                    ? _markerDetail(
                         'gclazynurserysize',
                         'Lazy-allocated size',
                         nursery.lazy_capacity,
                         formatBytes
-                      )}
-                  {nursery.chunk_alloc_us === undefined
-                    ? null
-                    : _markerDetail(
+                      )
+                    : null}
+                  {nursery.cells_allocated_nursery &&
+                  nursery.cells_allocated_tenured
+                    ? _markerDetail(
+                        'gcnursaryallocations',
+                        'Nursery allocations since last minor GC',
+                        formatValueTotal(
+                          nursery.cells_allocated_nursery,
+                          nursery.cells_allocated_nursery +
+                            nursery.cells_allocated_tenured,
+                          formatSI
+                        )
+                      )
+                    : null}
+                  {evictTimeMS
+                    ? _markerDetail(
+                        'gctenurerate',
+                        'Tenuring allocation rate',
+                        // evictTimeMS is in milliseconds.
+                        nursery.bytes_tenured / (evictTimeMS / 1000000),
+                        x => formatBytes(x) + '/s'
+                      )
+                    : null}
+                  {evictTimeMS && nursery.cells_tenured
+                    ? _markerDetail(
+                        'gctenurereatecells',
+                        'Tenuring allocation rate',
+                        nursery.cells_tenured / (evictTimeMS / 10000000),
+                        x => formatSI(x) + '/s'
+                      )
+                    : null}
+                  {nursery.chunk_alloc_us
+                    ? _markerDetail(
                         'gctimeinchunkalloc',
                         'Time spent allocating chunks in mutator',
                         nursery.chunk_alloc_us,
                         formatMicroseconds
-                      )}
+                      )
+                    : null}
+                  {_makePhaseTimesArray(nursery.phase_times)
+                    /*
+                     * Nursery collection should usually be very quick.  1ms
+                     * is good and beyond 5ms and we could cause some
+                     * animation to drop frames.  250us is about where
+                     * things start to get interesting for a phase of a
+                     * nursery collection.
+                     */
+                    .filter(pt => pt.time > 250) // 250us
+                    .map(_markerDetailPhase)}
                 </div>
               );
             }
@@ -225,6 +481,10 @@ function getMarkerDetails(
                 timings.nonincremental_reason
               );
             }
+            const phase_times = _filterInterestingPhaseTimes(
+              timings.phase_times,
+              6
+            );
             return (
               <div className="tooltipDetails">
                 {_markerDetail('gcreason', 'Reason', timings.reason)}
@@ -285,6 +545,7 @@ function getMarkerDetails(
                   'Compartments',
                   timings.total_compartments
                 )}
+                {phase_times.map(_markerDetailPhase)}
               </div>
             );
           }
@@ -307,6 +568,10 @@ function getMarkerDetails(
             )
           );
         }
+        const phase_times = _filterInterestingPhaseTimes(
+          timings.phase_times,
+          6
+        );
         return (
           <div className="tooltipDetails">
             {_markerDetail('gcreason', 'Reason', timings.reason)}
@@ -317,9 +582,10 @@ function getMarkerDetails(
               timings.initial_state + ' – ' + timings.final_state
             )}
             {triggers}
-            {timings.page_faults === undefined
-              ? null
-              : _markerDetail('gcfaults', 'Page faults', timings.page_faults)}
+            {timings.page_faults
+              ? _markerDetail('gcfaults', 'Page faults', timings.page_faults)
+              : null}
+            {phase_times.map(_markerDetailPhase)}
           </div>
         );
       }
@@ -341,7 +607,7 @@ function getMarkerDetails(
       case 'Invalidation': {
         return (
           <div className="tooltipDetails">
-            {_markerDetail('url', 'URL', data.url)}
+            {_markerDetailNullable('url', 'URL', data.url)}
             {_markerDetail('line', 'Line', data.line)}
           </div>
         );
@@ -353,10 +619,14 @@ function getMarkerDetails(
         ) {
           return (
             <div className="tooltipDetails">
-              {_markerDetailNullable('url', 'URL', data.URI)}
-              {_markerDetail('pri', 'pri', data.pri)}
-              {_markerDetailNullable('count', 'count', data.count)}
               {_markerDetail('status', 'Status', data.status)}
+              {_markerDetailNullable('url', 'URL', data.URI)}
+              {_markerDetail('pri', 'Priority', data.pri)}
+              {_markerDetailBytesNullable(
+                'count',
+                'Requested bytes',
+                data.count
+              )}
             </div>
           );
         } else {
@@ -369,40 +639,45 @@ function getMarkerDetails(
                 'Redirect URL',
                 data.RedirectURI
               )}
-              {_markerDetail('pri', 'pri', data.pri)}
-              {_markerDetailNullable('count', 'count', data.count)}
+              {_markerDetail('pri', 'Priority', data.pri)}
+              {_markerDetailBytesNullable(
+                'count',
+                'Requested bytes',
+                data.count
+              )}
               {_markerDetailDeltaTimeNullable(
                 'domainLookup',
-                'domainLookup',
+                'Domain lookup in total',
                 data.domainLookupEnd,
                 data.domainLookupStart
               )}
               {_markerDetailDeltaTimeNullable(
-                'tcpConnect',
-                'tcpConnect',
-                data.tcpConnectEnd,
-                data.connectStart
-              )}
-              {_markerDetailNullable(
-                'secureConnectionStart',
-                'secureConnectionStart',
-                data.secureConnectionStart
-              )}
-              {_markerDetailDeltaTimeNullable(
                 'connect',
-                'connect',
+                'Connection in total',
                 data.connectEnd,
                 data.connectStart
               )}
               {_markerDetailDeltaTimeNullable(
+                'tcpConnect',
+                'TCP connection in total',
+                data.tcpConnectEnd,
+                data.connectStart
+              )}
+              {_markerDetailDeltaTimeNullable(
+                'secureConnectionStart',
+                'Start of secure connection at',
+                data.secureConnectionStart,
+                data.tcpConnectEnd
+              )}
+              {_markerDetailDeltaTimeNullable(
                 'requestStart',
-                'requestStart @',
+                'Start of request at',
                 data.requestStart,
-                data.startTime
+                data.connectStart
               )}
               {_markerDetailDeltaTimeNullable(
                 'response',
-                'response',
+                'Response time',
                 data.responseEnd,
                 data.responseStart
               )}
@@ -467,7 +742,6 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       implementationFilter,
     } = this.props;
     const details = getMarkerDetails(marker, thread, implementationFilter);
-
     return (
       <div className={classNames('tooltipMarker', className)}>
         <div className={classNames({ tooltipHeader: details })}>

@@ -6,11 +6,11 @@
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
 import explicitConnect from '../../utils/connect';
-import { updateProfileSelection } from '../../actions/profile-view';
+import { updatePreviewSelection } from '../../actions/profile-view';
 import {
   selectedThreadSelectors,
-  getProfileViewOptions,
-  getDisplayRange,
+  getPreviewSelection,
+  getCommittedRange,
 } from '../../reducers/profile-view';
 import copy from 'copy-to-clipboard';
 
@@ -20,7 +20,7 @@ import type {
   IndexIntoMarkersTable,
   MarkersTable,
 } from '../../types/profile';
-import type { ProfileSelection } from '../../types/actions';
+import type { PreviewSelection } from '../../types/actions';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
@@ -29,13 +29,13 @@ import type {
 type StateProps = {|
   +thread: Thread,
   +markers: MarkersTable,
-  +selection: ProfileSelection,
-  +displayRange: StartEndRange,
+  +previewSelection: PreviewSelection,
+  +committedRange: StartEndRange,
   +selectedMarker: IndexIntoMarkersTable,
 |};
 
 type DispatchProps = {|
-  +updateProfileSelection: typeof updateProfileSelection,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -50,16 +50,16 @@ class MarkersContextMenu extends PureComponent<Props> {
     const {
       selectedMarker,
       markers,
-      updateProfileSelection,
-      selection,
-      displayRange,
+      updatePreviewSelection,
+      previewSelection,
+      committedRange,
     } = this.props;
 
-    const selectionEnd = selection.hasSelection
-      ? selection.selectionEnd
-      : displayRange.end;
+    const selectionEnd = previewSelection.hasSelection
+      ? previewSelection.selectionEnd
+      : committedRange.end;
 
-    updateProfileSelection({
+    updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart: markers.time[selectedMarker],
@@ -71,16 +71,16 @@ class MarkersContextMenu extends PureComponent<Props> {
     const {
       selectedMarker,
       markers,
-      updateProfileSelection,
-      displayRange,
-      selection,
+      updatePreviewSelection,
+      committedRange,
+      previewSelection,
     } = this.props;
 
-    const selectionStart = selection.hasSelection
-      ? selection.selectionStart
-      : displayRange.start;
+    const selectionStart = previewSelection.hasSelection
+      ? previewSelection.selectionStart
+      : committedRange.start;
 
-    updateProfileSelection({
+    updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart,
@@ -123,7 +123,7 @@ class MarkersContextMenu extends PureComponent<Props> {
 
   render() {
     return (
-      <ContextMenu id={'MarkersContextMenu'}>
+      <ContextMenu id="MarkersContextMenu">
         <MenuItem onClick={this.handleClick} data={{ type: 'setStartRange' }}>
           Set selection start time here
         </MenuItem>
@@ -142,12 +142,12 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     thread: selectedThreadSelectors.getThread(state),
     markers: selectedThreadSelectors.getSearchFilteredMarkers(state),
-    selection: getProfileViewOptions(state).selection,
-    displayRange: getDisplayRange(state),
+    previewSelection: getPreviewSelection(state),
+    committedRange: getCommittedRange(state),
     selectedMarker: selectedThreadSelectors.getViewOptions(state)
       .selectedMarker,
   }),
-  mapDispatchToProps: { updateProfileSelection },
+  mapDispatchToProps: { updatePreviewSelection },
   component: MarkersContextMenu,
 };
 export default explicitConnect(options);

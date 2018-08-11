@@ -332,6 +332,27 @@ const _upgraders = {
     convertToVersionTenRecursive(profile);
   },
   [11]: profile => {
+    // Ensure there is always a pid in the profile meta AND upgrade
+    // profile.meta categories.
+
+    // This first upgrader ensures there is always a PID. The PID has been included
+    // in the Gecko profile version for quite a while, but there has never been
+    // an upgrader ensuring that one exists. This pid upgrader is piggy-backing on
+    // version 11, but is unrelated to the actual version bump. If no pid number exists,
+    // then a unique string label is created.
+    let unknownPid = 0;
+    function ensurePidsRecursive(p) {
+      for (const thread of p.threads) {
+        if (thread.pid === null || thread.pid === undefined) {
+          thread.pid = `Unknown Process ${++unknownPid}`;
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        ensurePidsRecursive(subprocessProfile);
+      }
+    }
+    ensurePidsRecursive(profile);
+
     // profile.meta has a new property called "categories", which contains a
     // list of categories, which are objects with "name" and "color" properties.
     // The "category" column in the frameTable now refers to elements in this

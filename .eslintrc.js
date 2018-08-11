@@ -37,6 +37,7 @@ module.exports = {
     'react/no-redundant-should-component-update': 'error',
     'react/no-this-in-sfc': 'error',
     'react/no-typos': 'error',
+    "react/jsx-curly-brace-presence": ['error', { "props": 'never', "children": 'never' }],
     // `no-unused-prop-types` is buggy when we use destructuring parameters in
     // functions as it misunderstands them as functional components.
     // See https://github.com/yannickcr/eslint-plugin-react/issues/1561
@@ -48,9 +49,7 @@ module.exports = {
       { ignorePureComponents: true },
     ],
     'react/jsx-no-bind': 'error',
-    // We still have too many files without the file annotation. Let's enable it
-    // once we flow-type everything.
-    // 'flowtype/require-valid-file-annotation': [ 'error', 'always', { annotationStyle: 'line' } ],
+    'flowtype/require-valid-file-annotation': [ 'error', 'always', { annotationStyle: 'line' } ],
     // no-dupe-keys crashes with recent eslint. See
     // https://github.com/gajus/eslint-plugin-flowtype/pull/266 and
     // https://github.com/gajus/eslint-plugin-flowtype/pull/302

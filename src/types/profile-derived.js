@@ -5,7 +5,7 @@
 // @flow
 import type { Milliseconds } from './units';
 import type { MarkerPayload } from './markers';
-import type { IndexIntoFuncTable } from './profile';
+import type { IndexIntoFuncTable, ThreadIndex, Pid } from './profile';
 export type IndexIntoCallNodeTable = number;
 
 /**
@@ -34,8 +34,9 @@ export type IndexIntoCallNodeTable = number;
  * `docs-developer/call-nodes-in-cpp.md`.
  */
 export type CallNodeTable = {
-  prefix: Int32Array,
-  func: Int32Array,
+  prefix: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
+  func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
+  category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   depth: number[],
   length: number,
 };
@@ -82,15 +83,19 @@ export type CallNodeData = {
   selfTimeRelative: number,
 };
 
-export type CallNodeDisplayData = {
-  totalTime: string,
-  totalTimePercent: string,
-  selfTime: string,
-  name: string,
-  lib: string,
-  dim: boolean,
-  icon: string | null,
-};
+export type CallNodeDisplayData = $Exact<
+  $ReadOnly<{
+    totalTime: string,
+    totalTimePercent: string,
+    selfTime: string,
+    name: string,
+    lib: string,
+    dim: boolean,
+    categoryName: string,
+    categoryColor: string,
+    icon: string | null,
+  }>
+>;
 
 export type IndexIntoMarkerTiming = number;
 
@@ -107,3 +112,15 @@ export type MarkerTiming = {
 export type MarkerTimingRows = Array<MarkerTiming>;
 
 export type StackType = 'js' | 'native' | 'unsymbolicated';
+
+export type GlobalTrack =
+  | {| +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null |}
+  | {| +type: 'screenshots' |};
+
+export type LocalTrack =
+  | {| +type: 'thread', +threadIndex: ThreadIndex |}
+  | {| +type: 'network', +threadIndex: ThreadIndex |}
+  | {| +type: 'memory', +threadIndex: ThreadIndex |};
+
+export type Track = GlobalTrack | LocalTrack;
+export type TrackIndex = number;

@@ -4,27 +4,24 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import Reorderable from '../shared/Reorderable';
 
-import type { Action, TabSlug } from '../../types/actions';
+import type { Action } from '../../types/actions';
+import type { TabWithTitle } from '../../app-logic/tabs-handling';
 
-export type Tab = {
-  name: TabSlug,
-  title: string,
-};
+type Props = {|
+  +className?: string,
+  +tabs: $ReadOnlyArray<TabWithTitle>,
+  +selectedTabName: string,
+  +tabOrder: number[],
+  +onSelectTab: string => void,
+  +onChangeTabOrder: (number[]) => Action,
+  +extraElements?: React.Node,
+|};
 
-type Props = {
-  className?: string,
-  tabs: Tab[],
-  selectedTabName: string,
-  tabOrder: number[],
-  onSelectTab: string => void,
-  onChangeTabOrder: (number[]) => Action,
-};
-
-class TabBar extends PureComponent<Props> {
+class TabBar extends React.PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     (this: any)._mouseDownListener = this._mouseDownListener.bind(this);
@@ -44,12 +41,14 @@ class TabBar extends PureComponent<Props> {
       selectedTabName,
       tabOrder,
       onChangeTabOrder,
+      extraElements,
     } = this.props;
     return (
       <div className={classNames('tabBarContainer', className)}>
         <Reorderable
           tagName="ol"
           className="tabBarTabWrapper"
+          grippyClassName="grippy"
           order={tabOrder}
           orient="horizontal"
           onChangeOrder={onChangeTabOrder}
@@ -67,6 +66,7 @@ class TabBar extends PureComponent<Props> {
             </li>
           ))}
         </Reorderable>
+        {extraElements}
       </div>
     );
   }

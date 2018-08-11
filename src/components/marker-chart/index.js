@@ -6,14 +6,16 @@
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import MarkerChartCanvas from './Canvas';
+import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
+
 import {
   selectedThreadSelectors,
-  getDisplayRange,
+  getCommittedRange,
   getProfileInterval,
-  getProfileViewOptions,
+  getPreviewSelection,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
-import { updateProfileSelection } from '../../actions/profile-view';
+import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type {
   TracingMarker,
@@ -23,7 +25,7 @@ import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
 } from '../../types/units';
-import type { ProfileSelection } from '../../types/actions';
+import type { PreviewSelection } from '../../types/actions';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
@@ -34,7 +36,7 @@ require('./index.css');
 const ROW_HEIGHT = 16;
 
 type DispatchProps = {|
-  +updateProfileSelection: typeof updateProfileSelection,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
 type StateProps = {|
@@ -44,9 +46,7 @@ type StateProps = {|
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +interval: Milliseconds,
   +threadIndex: number,
-  +selection: ProfileSelection,
-  +threadName: string,
-  +processDetails: string,
+  +previewSelection: PreviewSelection,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -67,11 +67,13 @@ class MarkerChart extends React.PureComponent<Props> {
       threadIndex,
       markerTimingRows,
       markers,
-      selection,
-      threadName,
-      processDetails,
-      updateProfileSelection,
+      previewSelection,
+      updatePreviewSelection,
     } = this.props;
+
+    if (!markers.length) {
+      return <MarkerChartEmptyReasons />;
+    }
 
     // The viewport needs to know about the height of what it's drawing, calculate
     // that here at the top level component.
@@ -79,14 +81,11 @@ class MarkerChart extends React.PureComponent<Props> {
 
     return (
       <div className="markerChart">
-        <div className="markerChartLabels grippy" title={processDetails}>
-          <span className="markerChartLabelsName">{threadName}</span>
-        </div>
         <MarkerChartCanvas
           key={threadIndex}
           viewportProps={{
             timeRange,
-            selection,
+            previewSelection,
             maxViewportHeight,
             viewportNeedsUpdate,
             maximumZoom: this.getMaximumZoom(),
@@ -94,7 +93,7 @@ class MarkerChart extends React.PureComponent<Props> {
           chartProps={{
             markerTimingRows,
             markers,
-            updateProfileSelection,
+            updatePreviewSelection,
             rangeStart: timeRange.start,
             rangeEnd: timeRange.end,
             rowHeight: ROW_HEIGHT,
@@ -116,23 +115,20 @@ function viewportNeedsUpdate(
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
-    const markers = selectedThreadSelectors.getTracingMarkers(state);
+    const markers = selectedThreadSelectors.getTracingMarkersForView(state);
     const markerTimingRows = selectedThreadSelectors.getMarkerTiming(state);
-    const threadName = selectedThreadSelectors.getFriendlyThreadName(state);
 
     return {
       markers,
       markerTimingRows,
       maxMarkerRows: markerTimingRows.length,
-      timeRange: getDisplayRange(state),
+      timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
-      selection: getProfileViewOptions(state).selection,
-      threadName,
-      processDetails: selectedThreadSelectors.getThreadProcessDetails(state),
+      previewSelection: getPreviewSelection(state),
     };
   },
-  mapDispatchToProps: { updateProfileSelection },
+  mapDispatchToProps: { updatePreviewSelection },
   component: MarkerChart,
 };
 export default explicitConnect(options);

@@ -9,11 +9,7 @@ import {
   applyFunctionMerging,
   setFuncNames,
 } from '../../profile-logic/symbolication';
-import {
-  processProfile,
-  unserializeProfileOfArbitraryFormat,
-  serializeProfile,
-} from '../../profile-logic/process-profile';
+import { processProfile } from '../../profile-logic/process-profile';
 import {
   resourceTypes,
   getCallNodeInfo,
@@ -22,25 +18,14 @@ import {
   getCallNodePathFromIndex,
   getSampleIndexClosestToTime,
   convertStackToCallNodePath,
+  invertCallstack,
+  getTimingsForPath,
 } from '../../profile-logic/profile-data';
 import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { sortDataTable } from '../../utils/data-table-utils';
-import {
-  isOldCleopatraFormat,
-  convertOldCleopatraProfile,
-} from '../../profile-logic/old-cleopatra-profile-format';
-import {
-  isProcessedProfile,
-  upgradeProcessedProfileToCurrentVersion,
-  CURRENT_VERSION as CURRENT_PROCESSED_VERSION,
-} from '../../profile-logic/processed-profile-versioning';
-import {
-  upgradeGeckoProfileToCurrentVersion,
-  CURRENT_VERSION as CURRENT_GECKO_VERSION,
-} from '../../profile-logic/gecko-profile-versioning';
 import {
   getCategoryByImplementation,
   implementationCategoryMap,
@@ -279,6 +264,15 @@ describe('process-profile', function() {
       expect(thread.stringTable.getString(name0)).toEqual('firefox');
       expect(thread.stringTable.getString(name1)).toEqual('chrome://blargh');
     });
+    it('should preserve pids for threads that have them', function() {
+      expect(profile.threads[0].pid).toEqual(2222);
+    });
+    it('should create a string label for unknown thread pids', function() {
+      const geckoProfile = getGeckoProfile();
+      delete geckoProfile.threads[0].pid;
+      const profileWithNoPids = processProfile(geckoProfile);
+      expect(profileWithNoPids.threads[0].pid).toEqual('Unknown Process 1');
+    });
   });
   describe('DevTools profiles', function() {
     it('should process correctly', function() {
@@ -353,11 +347,15 @@ describe('process-profile', function() {
 describe('profile-data', function() {
   describe('createCallNodeTableAndFixupSamples', function() {
     const profile = processProfile(getGeckoProfile());
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
     const thread = profile.threads[0];
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable
+      thread.funcTable,
+      defaultCategory
     );
     it('should create one callNode per stack', function() {
       expect(thread.stackTable.length).toEqual(5);
@@ -393,11 +391,13 @@ describe('profile-data', function() {
   }
 
   describe('getCallNodeInfo', function() {
-    const { threads: [thread] } = getCallNodeProfile();
+    const { meta, threads: [thread] } = getCallNodeProfile();
+    const defaultCategory = meta.categories.findIndex(c => c.name === 'Other');
     const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable
+      thread.funcTable,
+      defaultCategory
     );
     const stack0 = thread.samples.stack[0];
     const stack1 = thread.samples.stack[1];
@@ -674,233 +674,6 @@ describe('symbolication', function() {
   // TODO: check that functions are collapsed correctly
 });
 
-describe('upgrades', function() {
-  describe('old-cleopatra-profile', function() {
-    const oldCleopatraProfile = require('../fixtures/upgrades/old-cleopatra-profile.sps.json');
-    const ancientCleopatraProfile = require('../fixtures/upgrades/ancient-cleopatra-profile.sps.json');
-
-    [oldCleopatraProfile, ancientCleopatraProfile].forEach(
-      exampleOldCleopatraProfile => {
-        it('should detect the profile as an old cleopatra profile', function() {
-          expect(isOldCleopatraFormat(exampleOldCleopatraProfile)).toBe(true);
-        });
-
-        it('should be able to convert the old cleopatra profile into a processed profile', function() {
-          const profile = convertOldCleopatraProfile(
-            exampleOldCleopatraProfile
-          );
-          expect(isProcessedProfile(profile)).toBe(true);
-          // For now, just test that upgrading doesn't throw any exceptions.
-          upgradeProcessedProfileToCurrentVersion(profile);
-          expect(profile.threads.length).toBeGreaterThanOrEqual(1);
-          expect(profile.threads[0].name).toBe('GeckoMain');
-        });
-      }
-    );
-
-    // Executing this only for oldCleopatraProfile because
-    // ancientCleopatraProfile doesn't have any causes for markers.
-    it('should be able to convert causes from old cleopatra profiles', function() {
-      const profile = unserializeProfileOfArbitraryFormat(oldCleopatraProfile);
-
-      const [thread] = profile.threads;
-      const { markers } = thread;
-
-      const markerWithCauseIndex = markers.data.findIndex(
-        marker => marker !== null && marker.type === 'tracing' && marker.cause
-      );
-
-      if (markerWithCauseIndex < -1) {
-        throw new Error('We should have found one marker with a cause!');
-      }
-
-      const markerNameIndex = markers.name[markerWithCauseIndex];
-      expect(thread.stringTable.getString(markerNameIndex)).toEqual('Styles');
-
-      const markerWithCause = markers.data[markerWithCauseIndex];
-
-      // This makes Flow happy
-      if (
-        markerWithCause === null ||
-        markerWithCause === undefined ||
-        markerWithCause.type !== 'tracing' ||
-        !markerWithCause.cause
-      ) {
-        throw new Error('This marker should have a cause!');
-      }
-
-      // This is the stack we should get
-      expect(markerWithCause).toEqual({
-        category: 'Paint',
-        cause: { stack: 10563, time: 4195720.505958 },
-        interval: 'start',
-        type: 'tracing',
-      });
-    });
-  });
-
-  function compareProcessedProfiles(lhs, rhs) {
-    // Processed profiles contain a stringTable which isn't easily comparable.
-    // Instead, serialize the profiles first, so that the stringTable becomes a
-    // stringArray, and compare the serialized versions.
-    const serializedLhsAsObject = JSON.parse(serializeProfile(lhs));
-    const serializedRhsAsObject = JSON.parse(serializeProfile(rhs));
-
-    // Don't compare the version of the Gecko profile that these profiles originated from.
-    delete serializedLhsAsObject.meta.version;
-    delete serializedRhsAsObject.meta.version;
-
-    expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
-  }
-  const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-12.json')
-  );
-
-  // Uncomment this to output your next ./upgrades/processed-X.json
-  // console.log(serializeProfile(afterUpgradeReference));
-  // Then run prettier on it with the following command:
-  //   yarn run prettier --write <file name>
-  it('should import an old profile and upgrade it to be the same as the reference processed profile', function() {
-    expect(afterUpgradeReference.meta.preprocessedProfileVersion).toEqual(
-      CURRENT_PROCESSED_VERSION
-    );
-
-    const serializedOldProcessedProfile0 = require('../fixtures/upgrades/processed-0.json');
-    const upgradedProfile0 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile0
-    );
-    compareProcessedProfiles(upgradedProfile0, afterUpgradeReference);
-
-    const serializedOldProcessedProfile1 = require('../fixtures/upgrades/processed-1.json');
-    const upgradedProfile1 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile1
-    );
-    compareProcessedProfiles(upgradedProfile1, afterUpgradeReference);
-
-    const serializedOldProcessedProfile2 = require('../fixtures/upgrades/processed-2.json');
-    const upgradedProfile2 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile2
-    );
-    compareProcessedProfiles(upgradedProfile2, afterUpgradeReference);
-
-    const serializedOldProcessedProfile3 = require('../fixtures/upgrades/processed-3.json');
-    const upgradedProfile3 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile3
-    );
-    compareProcessedProfiles(upgradedProfile3, afterUpgradeReference);
-
-    const serializedOldProcessedProfile4 = require('../fixtures/upgrades/processed-4.json');
-    const upgradedProfile4 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile4
-    );
-    compareProcessedProfiles(upgradedProfile4, afterUpgradeReference);
-
-    const serializedOldProcessedProfile5 = require('../fixtures/upgrades/processed-5.json');
-    const upgradedProfile5 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile5
-    );
-    compareProcessedProfiles(upgradedProfile5, afterUpgradeReference);
-
-    const serializedOldProcessedProfile6 = require('../fixtures/upgrades/processed-6.json');
-    const upgradedProfile6 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile6
-    );
-    compareProcessedProfiles(upgradedProfile6, afterUpgradeReference);
-
-    const serializedOldProcessedProfile7 = require('../fixtures/upgrades/processed-7.json');
-    const upgradedProfile7 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile7
-    );
-    compareProcessedProfiles(upgradedProfile7, afterUpgradeReference);
-
-    // processed-7a to processed-8a is testing that we properly
-    // upgrade the DOMEventMarkerPayload.timeStamp field.
-    const serializedOldProcessedProfile7a = require('../fixtures/upgrades/processed-7a.json');
-    const afterUpgradeReference8a = unserializeProfileOfArbitraryFormat(
-      require('../fixtures/upgrades/processed-8a.json')
-    );
-    const upgradedProfile7a = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile7a
-    );
-    compareProcessedProfiles(upgradedProfile7a, afterUpgradeReference8a);
-
-    const serializedOldProcessedProfile8 = require('../fixtures/upgrades/processed-8.json');
-    const upgradedProfile8 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile8
-    );
-    compareProcessedProfiles(upgradedProfile8, afterUpgradeReference);
-
-    const serializedOldProcessedProfile9 = require('../fixtures/upgrades/processed-9.json');
-    const upgradedProfile9 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile9
-    );
-    compareProcessedProfiles(upgradedProfile9, afterUpgradeReference);
-
-    const serializedOldProcessedProfile11 = require('../fixtures/upgrades/processed-11.json');
-    const upgradedProfile11 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile11
-    );
-    compareProcessedProfiles(upgradedProfile11, afterUpgradeReference);
-
-    // This last test is to make sure we properly upgrade the json
-    // file to same version
-    const serializedOldProcessedProfile12 = require('../fixtures/upgrades/processed-12.json');
-    const upgradedProfile12 = unserializeProfileOfArbitraryFormat(
-      serializedOldProcessedProfile12
-    );
-    compareProcessedProfiles(upgradedProfile12, afterUpgradeReference);
-  });
-  it('should import an old Gecko profile and upgrade it to be the same as the newest Gecko profile', function() {
-    const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-11.json');
-    // Uncomment this to output your next ./upgrades/gecko-X.json
-    // upgradeGeckoProfileToCurrentVersion(afterUpgradeGeckoReference);
-    // console.log(JSON.stringify(afterUpgradeGeckoReference));
-    // Then run prettier on it with the following command:
-    //   yarn run prettier --write <file name>
-    expect(afterUpgradeGeckoReference.meta.version).toEqual(
-      CURRENT_GECKO_VERSION
-    );
-
-    const geckoProfile3 = require('../fixtures/upgrades/gecko-3.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile3);
-    expect(geckoProfile3).toEqual(afterUpgradeGeckoReference);
-
-    const geckoProfile4 = require('../fixtures/upgrades/gecko-4.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile4);
-    expect(geckoProfile4).toEqual(afterUpgradeGeckoReference);
-
-    const geckoProfile5 = require('../fixtures/upgrades/gecko-5.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile5);
-    expect(geckoProfile5).toEqual(afterUpgradeGeckoReference);
-
-    const geckoProfile6 = require('../fixtures/upgrades/gecko-6.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile6);
-    expect(geckoProfile6).toEqual(afterUpgradeGeckoReference);
-
-    const geckoProfile7 = require('../fixtures/upgrades/gecko-7.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile7);
-    expect(geckoProfile7).toEqual(afterUpgradeGeckoReference);
-
-    const geckoProfile8 = require('../fixtures/upgrades/gecko-8.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile8);
-    expect(geckoProfile8).toEqual(afterUpgradeGeckoReference);
-
-    const geckoProfile9 = require('../fixtures/upgrades/gecko-9.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile9);
-    expect(geckoProfile9).toEqual(afterUpgradeGeckoReference);
-
-    const geckoProfile10 = require('../fixtures/upgrades/gecko-10.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile10);
-    expect(geckoProfile10).toEqual(afterUpgradeGeckoReference);
-
-    // This last test is to make sure we properly upgrade the json
-    // file to same version
-    const geckoProfile11 = require('../fixtures/upgrades/gecko-11.json');
-    upgradeGeckoProfileToCurrentVersion(geckoProfile11);
-    expect(geckoProfile11).toEqual(afterUpgradeGeckoReference);
-  });
-});
-
 describe('color-categories', function() {
   const profile = processProfile(getGeckoProfile());
   const [thread] = profile.threads;
@@ -926,6 +699,9 @@ describe('color-categories', function() {
 
 describe('filter-by-implementation', function() {
   const profile = processProfile(profileWithJS());
+  const defaultCategory = profile.meta.categories.findIndex(
+    c => c.name === 'Other'
+  );
   const thread = profile.threads[0];
 
   function stackIsJS(filteredThread, stackIndex) {
@@ -938,11 +714,17 @@ describe('filter-by-implementation', function() {
   }
 
   it('will return the same thread if filtering to "all"', function() {
-    expect(filterThreadByImplementation(thread, 'combined')).toEqual(thread);
+    expect(
+      filterThreadByImplementation(thread, 'combined', defaultCategory)
+    ).toEqual(thread);
   });
 
   it('will return only JS samples if filtering to "js"', function() {
-    const jsOnlyThread = filterThreadByImplementation(thread, 'js');
+    const jsOnlyThread = filterThreadByImplementation(
+      thread,
+      'js',
+      defaultCategory
+    );
     const nonNullSampleStacks = jsOnlyThread.samples.stack.filter(
       stack => stack !== null
     );
@@ -955,7 +737,11 @@ describe('filter-by-implementation', function() {
   });
 
   it('will return only C++ samples if filtering to "cpp"', function() {
-    const cppOnlyThread = filterThreadByImplementation(thread, 'cpp');
+    const cppOnlyThread = filterThreadByImplementation(
+      thread,
+      'cpp',
+      defaultCategory
+    );
     const nonNullSampleStacks = cppOnlyThread.samples.stack.filter(
       stack => stack !== null
     );
@@ -973,10 +759,17 @@ describe('get-sample-index-closest-to-time', function() {
     const { profile } = getProfileFromTextSamples(
       Array(10)
         .fill('A')
-        .join(' ')
+        .join('  ')
+    );
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
     );
     const thread = profile.threads[0];
-    const { samples } = filterThreadByImplementation(thread, 'js');
+    const { samples } = filterThreadByImplementation(
+      thread,
+      'js',
+      defaultCategory
+    );
 
     // getProfileFromTextSamples will generate a profile with samples
     // with 1ms of interval
@@ -1026,5 +819,266 @@ describe('convertStackToCallNodePath', function() {
     expect(callNodePath).toEqual([4, 3, 2, 1, 0]);
     callNodePath = convertStackToCallNodePath(thread, stack2);
     expect(callNodePath).toEqual([5, 3, 2, 1, 0]);
+  });
+});
+
+describe('getTimingsForPath in a non-inverted tree', function() {
+  function setup() {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+      A                  A             A             A  A
+      B                  B             B             B  B
+      Cjs                Cjs           Cjs           H  H
+      D                  D             F             I
+      Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
+    `);
+
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
+    const thread = profile.threads[0];
+    const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+    const curriedGetTimingsForPath = path =>
+      getTimingsForPath(
+        path,
+        callNodeInfo,
+        profile.meta.interval,
+        false,
+        thread
+      );
+
+    return {
+      getTimingsForPath: curriedGetTimingsForPath,
+      funcNamesDict: funcNamesDictPerThread[0],
+    };
+  }
+
+  it('returns good timings for a root node', () => {
+    const { getTimingsForPath, funcNamesDict: { A } } = setup();
+
+    // This is a root node: it should have no self time but all the total time.
+    const timings = getTimingsForPath([A]);
+    expect(timings).toEqual({
+      forPath: {
+        selfTime: { value: 0, breakdownByImplementation: null },
+        totalTime: {
+          value: 5,
+          breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
+        },
+      },
+      forFunc: {
+        selfTime: { value: 0, breakdownByImplementation: null },
+        totalTime: {
+          value: 5,
+          breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
+        },
+      },
+      rootTime: 5,
+    });
+  });
+
+  it('returns good timings for a leaf node, also present in other stacks', () => {
+    const { getTimingsForPath, funcNamesDict: { A, B, Cjs, D, Ejs } } = setup();
+
+    // This is a leaf node: it should have some self time and some total time
+    // holding the same value.
+    //
+    // This is also a JS node so it should have some js engine implementation
+    // implementations.
+    //
+    // The same func is also present in 2 different stacks so it should have
+    // different timings for the `forFunc` property.
+    const timings = getTimingsForPath([A, B, Cjs, D, Ejs]);
+    expect(timings).toEqual({
+      forPath: {
+        selfTime: {
+          value: 2,
+          breakdownByImplementation: { ion: 1, baseline: 1 },
+        },
+        totalTime: {
+          value: 2,
+          breakdownByImplementation: { ion: 1, baseline: 1 },
+        },
+      },
+      forFunc: {
+        selfTime: {
+          value: 3,
+          breakdownByImplementation: { ion: 2, baseline: 1 },
+        },
+        totalTime: {
+          value: 3,
+          breakdownByImplementation: { ion: 2, baseline: 1 },
+        },
+      },
+      rootTime: 5,
+    });
+  });
+
+  it('returns good timings for a node that has both children and self time', () => {
+    const { getTimingsForPath, funcNamesDict: { A, B, H } } = setup();
+
+    // This is a node that has both children and some self time. So it should
+    // have some running time that's different than the self time.
+    const timings = getTimingsForPath([A, B, H]);
+    expect(timings).toEqual({
+      forPath: {
+        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
+      },
+      forFunc: {
+        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
+      },
+      rootTime: 5,
+    });
+  });
+});
+
+describe('getTimingsForPath for an inverted tree', function() {
+  function setup() {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+      A                  A             A             A  A
+      B                  B             B             B  B
+      Cjs                Cjs           Cjs           H  H
+      D                  D             F             I
+      Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
+    `);
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
+    const thread = invertCallstack(profile.threads[0], defaultCategory);
+    // Now the profile should look like this:
+    //
+    // Ejs  Ejs  Ejs  I H
+    // D    D    F    H B
+    // Cjs  Cjs  Cjs  B A
+    // B    B    B    A
+    // A    A    A
+
+    const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+    const curriedGetTimingsForPath = path =>
+      getTimingsForPath(
+        path,
+        callNodeInfo,
+        profile.meta.interval,
+        true,
+        thread
+      );
+
+    return {
+      getTimingsForPath: curriedGetTimingsForPath,
+      funcNamesDict: funcNamesDictPerThread[0],
+    };
+  }
+
+  it('returns good timings for a root node', () => {
+    const { getTimingsForPath, funcNamesDict: { Ejs } } = setup();
+    const timings = getTimingsForPath([Ejs]);
+    expect(timings).toEqual({
+      forPath: {
+        selfTime: { value: 3, breakdownByImplementation: null },
+        totalTime: {
+          value: 3,
+          breakdownByImplementation: { ion: 2, baseline: 1 },
+        },
+      },
+      forFunc: {
+        selfTime: {
+          value: 3,
+          breakdownByImplementation: { ion: 2, baseline: 1 },
+        },
+        totalTime: {
+          value: 3,
+          breakdownByImplementation: { ion: 2, baseline: 1 },
+        },
+      },
+      rootTime: 5,
+    });
+  });
+
+  it('returns good timings for a node present in several stacks without self time', () => {
+    const { getTimingsForPath, funcNamesDict: { Ejs, D, Cjs, B } } = setup();
+    const timings = getTimingsForPath([Ejs, D, Cjs, B]);
+    expect(timings).toEqual({
+      forPath: {
+        selfTime: { value: 0, breakdownByImplementation: null },
+        totalTime: {
+          value: 2,
+          breakdownByImplementation: { ion: 1, baseline: 1 },
+        },
+      },
+      forFunc: {
+        selfTime: { value: 0, breakdownByImplementation: null },
+        totalTime: {
+          value: 5,
+          breakdownByImplementation: {
+            ion: 2,
+            baseline: 1,
+            native: 2,
+          },
+        },
+      },
+      rootTime: 5,
+    });
+  });
+
+  it('returns good timings for a node present in several stacks with self time', () => {
+    const { getTimingsForPath, funcNamesDict: { I, H } } = setup();
+
+    // Select the function as a root node
+    let timings = getTimingsForPath([H]);
+    expect(timings).toEqual({
+      forPath: {
+        selfTime: { value: 1, breakdownByImplementation: null },
+        totalTime: { value: 1, breakdownByImplementation: { native: 1 } },
+      },
+      forFunc: {
+        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
+      },
+      rootTime: 5,
+    });
+
+    // Select the same function, but this time when it's not a root node
+    timings = getTimingsForPath([I, H]);
+    expect(timings).toEqual({
+      forPath: {
+        selfTime: { value: 0, breakdownByImplementation: null },
+        totalTime: { value: 1, breakdownByImplementation: { native: 1 } },
+      },
+      forFunc: {
+        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
+      },
+      rootTime: 5,
+    });
+  });
+
+  it('returns good timings for a leaf node', () => {
+    const { getTimingsForPath, funcNamesDict: { H, B, A } } = setup();
+    const timings = getTimingsForPath([H, B, A]);
+    expect(timings).toEqual({
+      forPath: {
+        selfTime: { value: 0, breakdownByImplementation: null },
+        totalTime: { value: 1, breakdownByImplementation: { native: 1 } },
+      },
+      forFunc: {
+        selfTime: { value: 0, breakdownByImplementation: null },
+        totalTime: {
+          value: 5,
+          breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
+        },
+      },
+      rootTime: 5,
+    });
   });
 });

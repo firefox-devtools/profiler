@@ -191,8 +191,8 @@ function _createUnsymbolicatedProfile() {
     // "0x000a" and "0x0000" are both in the first symbol, and should be merged.
     // See "exampleSymbolTable" for the actual function boundary ranges.
     `
-      0x000a 0x0000 0x1a0f 0x0f0f
-      0x2000 0x2000
+      0x000a  0x0000  0x1a0f  0x0f0f
+      0x2000  0x2000
     `
   );
   const thread = profile.threads[0];

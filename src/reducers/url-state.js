@@ -6,12 +6,12 @@
 import { combineReducers } from 'redux';
 import escapeStringRegexp from 'escape-string-regexp';
 import { createSelector } from 'reselect';
+import { ensureExists } from '../utils/flow';
+import { urlFromState } from '../app-logic/url-handling';
+import * as CommittedRanges from '../profile-logic/committed-ranges';
 
-import { defaultThreadOrder } from '../profile-logic/profile-data';
-import { urlFromState } from '../url-handling';
-import * as RangeFilters from '../profile-logic/range-filters';
-
-import type { ThreadIndex } from '../types/profile';
+import type { ThreadIndex, Pid } from '../types/profile';
+import type { TrackIndex } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type {
   TransformStacksPerThread,
@@ -21,9 +21,9 @@ import type {
   Action,
   DataSource,
   ImplementationFilter,
-  TabSlug,
 } from '../types/actions';
 import type { State, UrlState, Reducer } from '../types/reducers';
+import type { TabSlug } from '../app-logic/tabs-handling';
 
 // Pre-allocate an array to help with strict equality tests in the selectors.
 const EMPTY_TRANSFORM_STACK = [];
@@ -64,14 +64,14 @@ function selectedTab(state: TabSlug = 'calltree', action: Action) {
   }
 }
 
-function rangeFilters(state: StartEndRange[] = [], action: Action) {
+function committedRanges(state: StartEndRange[] = [], action: Action) {
   switch (action.type) {
-    case 'ADD_RANGE_FILTER': {
+    case 'COMMIT_RANGE': {
       const { start, end } = action;
       return [...state, { start, end }];
     }
-    case 'POP_RANGE_FILTERS':
-      return state.slice(0, action.firstRemovedFilterIndex);
+    case 'POP_COMMITTED_RANGES':
+      return state.slice(0, action.firstPoppedFilterIndex);
     default:
       return state;
   }
@@ -83,25 +83,13 @@ function selectedThread(
 ): ThreadIndex | null {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
-      return action.selectedThread;
     case 'VIEW_PROFILE':
+    case 'ISOLATE_PROCESS':
+    case 'ISOLATE_PROCESS_MAIN_THREAD':
+    case 'HIDE_GLOBAL_TRACK':
+    case 'HIDE_LOCAL_TRACK':
+    case 'ISOLATE_LOCAL_TRACK':
       return action.selectedThreadIndex;
-    case 'ISOLATE_THREAD':
-      return action.isolatedThreadIndex;
-    case 'HIDE_THREAD': {
-      const { threadIndex, hiddenThreads, threadOrder } = action;
-      // If the currently selected thread is being hidden, then re-select a new one.
-      if (state === threadIndex) {
-        const index = threadOrder.find(index => {
-          return index !== threadIndex && !hiddenThreads.includes(index);
-        });
-        if (index === undefined) {
-          throw new Error('A new thread index must be found');
-        }
-        return index;
-      }
-      return state;
-    }
     default:
       return state;
   }
@@ -135,10 +123,10 @@ function transforms(state: TransformStacksPerThread = {}, action: Action) {
       });
     }
     case 'POP_TRANSFORMS_FROM_STACK': {
-      const { threadIndex, firstRemovedFilterIndex } = action;
+      const { threadIndex, firstPoppedFilterIndex } = action;
       const transforms = state[threadIndex] || [];
       return Object.assign({}, state, {
-        [threadIndex]: transforms.slice(0, firstRemovedFilterIndex),
+        [threadIndex]: transforms.slice(0, firstPoppedFilterIndex),
       });
     }
     default:
@@ -171,36 +159,84 @@ function invertCallstack(state: boolean = false, action: Action) {
   }
 }
 
-function threadOrder(state: ThreadIndex[] = [], action: Action) {
+function globalTrackOrder(state: TrackIndex[] = [], action: Action) {
   switch (action.type) {
-    case 'VIEW_PROFILE': {
-      // When receiving a new profile, try to use the thread order specified in the URL,
-      // but ensure that the IDs are correct.
-      const threads = defaultThreadOrder(action.profile.threads);
-      const validUrlThreads = state.filter(index => threads.includes(index));
-      const missingThreads = threads.filter(index => !state.includes(index));
-      return validUrlThreads.concat(missingThreads);
-    }
-    case 'CHANGE_THREAD_ORDER':
-      return action.threadOrder;
+    case 'VIEW_PROFILE':
+    case 'CHANGE_GLOBAL_TRACK_ORDER':
+      return action.globalTrackOrder;
     default:
       return state;
   }
 }
 
-function hiddenThreads(state: ThreadIndex[] = [], action: Action) {
+function hiddenGlobalTracks(
+  state: Set<TrackIndex> = new Set(),
+  action: Action
+) {
   switch (action.type) {
-    case 'VIEW_PROFILE': {
-      return action.hiddenThreadIndexes;
+    case 'VIEW_PROFILE':
+    case 'ISOLATE_LOCAL_TRACK':
+    case 'ISOLATE_PROCESS':
+    case 'ISOLATE_PROCESS_MAIN_THREAD':
+      return action.hiddenGlobalTracks;
+    case 'HIDE_GLOBAL_TRACK': {
+      const hiddenGlobalTracks = new Set(state);
+      hiddenGlobalTracks.add(action.trackIndex);
+      return hiddenGlobalTracks;
     }
-    case 'HIDE_THREAD':
-      return [...state, action.threadIndex];
-    case 'SHOW_THREAD': {
-      const { threadIndex } = action;
-      return state.filter(index => index !== threadIndex);
+    case 'SHOW_GLOBAL_TRACK': {
+      const hiddenGlobalTracks = new Set(state);
+      hiddenGlobalTracks.delete(action.trackIndex);
+      return hiddenGlobalTracks;
     }
-    case 'ISOLATE_THREAD': {
-      return action.hiddenThreadIndexes;
+    default:
+      return state;
+  }
+}
+
+function hiddenLocalTracksByPid(
+  state: Map<Pid, Set<TrackIndex>> = new Map(),
+  action: Action
+) {
+  switch (action.type) {
+    case 'VIEW_PROFILE':
+      return action.hiddenLocalTracksByPid;
+    case 'HIDE_LOCAL_TRACK': {
+      const hiddenLocalTracksByPid = new Map(state);
+      const hiddenLocalTracks = new Set(hiddenLocalTracksByPid.get(action.pid));
+      hiddenLocalTracks.add(action.trackIndex);
+      hiddenLocalTracksByPid.set(action.pid, hiddenLocalTracks);
+      return hiddenLocalTracksByPid;
+    }
+    case 'SHOW_LOCAL_TRACK': {
+      const hiddenLocalTracksByPid = new Map(state);
+      const hiddenLocalTracks = new Set(hiddenLocalTracksByPid.get(action.pid));
+      hiddenLocalTracks.delete(action.trackIndex);
+      hiddenLocalTracksByPid.set(action.pid, hiddenLocalTracks);
+      return hiddenLocalTracksByPid;
+    }
+    case 'ISOLATE_PROCESS_MAIN_THREAD':
+    case 'ISOLATE_LOCAL_TRACK': {
+      const hiddenLocalTracksByPid = new Map(state);
+      hiddenLocalTracksByPid.set(action.pid, action.hiddenLocalTracks);
+      return hiddenLocalTracksByPid;
+    }
+    default:
+      return state;
+  }
+}
+
+function localTrackOrderByPid(
+  state: Map<Pid, TrackIndex[]> = new Map(),
+  action: Action
+) {
+  switch (action.type) {
+    case 'VIEW_PROFILE':
+      return action.localTrackOrderByPid;
+    case 'CHANGE_LOCAL_TRACK_ORDER': {
+      const localTrackOrderByPid = new Map(state);
+      localTrackOrderByPid.set(action.pid, action.localTrackOrder);
+      return localTrackOrderByPid;
     }
     default:
       return state;
@@ -227,15 +263,23 @@ function pathInZipFile(
  * These values are specific to an individual profile.
  */
 const profileSpecific = combineReducers({
+  selectedThread,
+  globalTrackOrder,
+  hiddenGlobalTracks,
+  hiddenLocalTracksByPid,
+  localTrackOrderByPid,
   implementation,
   invertCallstack,
-  rangeFilters,
-  selectedThread,
+  committedRanges,
   callTreeSearchString,
-  threadOrder,
-  hiddenThreads,
   markersSearchString,
   transforms,
+  // The timeline tracks used to be hidden and sorted by thread indexes, rather than
+  // track indexes. The only way to migrate this information to tracks-based data is to
+  // first retrieve the profile, so they can't be upgraded by the normal url upgrading
+  // process. These value are only set by the locationToState function.
+  legacyThreadOrder: (state: ThreadIndex[] | null = null) => state,
+  legacyHiddenThreads: (state: ThreadIndex[] | null = null) => state,
 });
 
 /**
@@ -284,8 +328,8 @@ export const getProfileSpecificState = (state: State) =>
 export const getDataSource = (state: State) => getUrlState(state).dataSource;
 export const getHash = (state: State) => getUrlState(state).hash;
 export const getProfileUrl = (state: State) => getUrlState(state).profileUrl;
-export const getRangeFilters = (state: State) =>
-  getProfileSpecificState(state).rangeFilters;
+export const getAllCommittedRanges = (state: State) =>
+  getProfileSpecificState(state).committedRanges;
 export const getImplementationFilter = (state: State) =>
   getProfileSpecificState(state).implementation;
 export const getInvertCallstack = (state: State) =>
@@ -343,10 +387,30 @@ export const getTransformStack = (
     EMPTY_TRANSFORM_STACK
   );
 };
-export const getThreadOrder = (state: State) =>
-  getProfileSpecificState(state).threadOrder;
-export const getHiddenThreads = (state: State) =>
-  getProfileSpecificState(state).hiddenThreads;
+
+export const getLegacyThreadOrder = (state: State) =>
+  getProfileSpecificState(state).legacyThreadOrder;
+export const getLegacyHiddenThreads = (state: State) =>
+  getProfileSpecificState(state).legacyHiddenThreads;
+export const getGlobalTrackOrder = (state: State) =>
+  getProfileSpecificState(state).globalTrackOrder;
+export const getHiddenGlobalTracks = (state: State) =>
+  getProfileSpecificState(state).hiddenGlobalTracks;
+export const getHiddenLocalTracksByPid = (state: State) =>
+  getProfileSpecificState(state).hiddenLocalTracksByPid;
+export const getHiddenLocalTracks = (state: State, pid: Pid) =>
+  ensureExists(
+    getHiddenLocalTracksByPid(state).get(pid),
+    'Unable to get the hidden tracks from the given pid'
+  );
+export const getLocalTrackOrderByPid = (state: State) =>
+  getProfileSpecificState(state).localTrackOrderByPid;
+export const getLocalTrackOrder = (state: State, pid: Pid) =>
+  ensureExists(
+    getLocalTrackOrderByPid(state).get(pid),
+    'Unable to get the track order from the given pid'
+  );
+
 export const getUrlPredictor = createSelector(
   getUrlState,
   (oldUrlState: UrlState) => (actionOrActionList: Action | Action[]) => {
@@ -375,7 +439,7 @@ export const getProfileName: State => null | string = createSelector(
   }
 );
 
-export const getRangeFilterLabels = createSelector(
-  getRangeFilters,
-  RangeFilters.getRangeFilterLabels
+export const getCommittedRangeLabels = createSelector(
+  getAllCommittedRanges,
+  CommittedRanges.getCommittedRangeLabels
 );

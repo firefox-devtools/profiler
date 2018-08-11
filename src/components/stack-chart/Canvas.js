@@ -11,7 +11,7 @@ import {
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatNumber } from '../../utils/format-numbers';
-import { updateProfileSelection } from '../../actions/profile-view';
+import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { Thread } from '../../types/profile';
 import type {
@@ -37,7 +37,7 @@ type OwnProps = {|
   +stackFrameHeight: CssPixels,
   +getCategory: GetCategory,
   +getLabel: GetLabel,
-  +updateProfileSelection: typeof updateProfileSelection,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
 type Props = $ReadOnly<{|
@@ -267,8 +267,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
       return;
     }
     const { depth, stackTableIndex } = hoveredItem;
-    const { stackTimingByDepth, updateProfileSelection } = this.props;
-    updateProfileSelection({
+    const { stackTimingByDepth, updatePreviewSelection } = this.props;
+    updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart: stackTimingByDepth[depth].start[stackTableIndex],

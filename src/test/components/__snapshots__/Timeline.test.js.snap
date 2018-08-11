@@ -1,0 +1,589 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Timeline renders the header 1`] = `
+<div
+  className="timelineSelection"
+  onMouseDown={[Function]}
+  onMouseMove={[Function]}
+>
+  <div
+    className="timelineRuler"
+  >
+    <ol
+      className="timelineRulerContainer"
+    >
+      <li
+        className="timelineRulerNotch"
+        style={
+          Object {
+            "left": "0px",
+          }
+        }
+      >
+        <span
+          className="timelineRulerNotchText"
+        >
+          0.000s
+        </span>
+      </li>
+      <li
+        className="timelineRulerNotch"
+        style={
+          Object {
+            "left": "66.66666666666667px",
+          }
+        }
+      >
+        <span
+          className="timelineRulerNotchText"
+        >
+          0.002s
+        </span>
+      </li>
+      <li
+        className="timelineRulerNotch"
+        style={
+          Object {
+            "left": "133.33333333333334px",
+          }
+        }
+      >
+        <span
+          className="timelineRulerNotchText"
+        >
+          0.004s
+        </span>
+      </li>
+      <li
+        className="timelineRulerNotch"
+        style={
+          Object {
+            "left": "200px",
+          }
+        }
+      >
+        <span
+          className="timelineRulerNotchText"
+        >
+          0.006s
+        </span>
+      </li>
+      <li
+        className="timelineRulerNotch"
+        style={
+          Object {
+            "left": "266.6666666666667px",
+          }
+        }
+      >
+        <span
+          className="timelineRulerNotchText"
+        >
+          0.008s
+        </span>
+      </li>
+    </ol>
+  </div>
+  <div
+    className="overflowEdgeIndicator timelineOverflowEdgeIndicator"
+  >
+    <div
+      className="overflowEdgeIndicatorEdge topEdge"
+    />
+    <div
+      className="overflowEdgeIndicatorEdge rightEdge"
+    />
+    <div
+      className="overflowEdgeIndicatorEdge bottomEdge"
+    />
+    <div
+      className="overflowEdgeIndicatorEdge leftEdge"
+    />
+    <div
+      className="overflowEdgeIndicatorScrollbox timelineOverflowEdgeIndicatorScrollbox"
+      onScroll={[Function]}
+    >
+      <div
+        className="overflowEdgeIndicatorContentsWrapper"
+      >
+        <ol
+          className="timelineThreadList"
+          onMouseDown={[Function]}
+        >
+          <li
+            className="timelineTrack"
+            style={undefined}
+          >
+            <div
+              className="timelineTrackRow timelineTrackGlobalRow"
+              onClick={[Function]}
+            >
+              <div
+                className="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
+                onContextMenu={[Function]}
+                onMouseDown={[Function]}
+                onMouseOut={[Function]}
+                onMouseUp={[Function]}
+                onTouchEnd={[Function]}
+                onTouchStart={[Function]}
+                title={null}
+              >
+                <h1
+                  className="timelineTrackName"
+                >
+                  Process 0
+                </h1>
+              </div>
+              <div
+                className="timelineTrackTrack"
+              >
+                <div
+                  className="timelineTrackThreadBlank"
+                />
+              </div>
+            </div>
+            <ol
+              className="timelineTrackLocalTracks"
+              onMouseDown={[Function]}
+            >
+              <li
+                className="timelineTrack timelineTrackLocal"
+                style={undefined}
+              >
+                <div
+                  className="timelineTrackRow timelineTrackLocalRow selected"
+                  onClick={[Function]}
+                >
+                  <div
+                    className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+                    onContextMenu={[Function]}
+                    onMouseDown={[Function]}
+                    onMouseOut={[Function]}
+                    onMouseUp={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
+                    title="thread: \\"Main Thread\\" (0)
+process: \\"default\\" (0)"
+                  >
+                    <h1
+                      className="timelineTrackName"
+                    >
+                      Main Thread
+                    </h1>
+                  </div>
+                  <div
+                    className="timelineTrackTrack"
+                  >
+                    <div
+                      className="timelineTrackThread"
+                    >
+                      <div
+                        className="timelineTrackThreadIntervalMarkerOverview selected"
+                      >
+                        <canvas
+                          className="timelineTracingMarkersCanvas"
+                          onMouseDown={[Function]}
+                          onMouseMove={[Function]}
+                          onMouseOut={[Function]}
+                          onMouseUp={[Function]}
+                        />
+                      </div>
+                      <div
+                        className="timelineStackGraph"
+                      >
+                        <canvas
+                          className="timelineStackGraphCanvas"
+                          onMouseUp={[Function]}
+                        />
+                      </div>
+                      <div
+                        className="timelineEmptyThreadIndicator"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </li>
+              <li
+                className="timelineTrack timelineTrackLocal"
+                style={undefined}
+              >
+                <div
+                  className="timelineTrackRow timelineTrackLocalRow"
+                  onClick={[Function]}
+                >
+                  <div
+                    className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+                    onContextMenu={[Function]}
+                    onMouseDown={[Function]}
+                    onMouseOut={[Function]}
+                    onMouseUp={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
+                    title="thread: \\"Thread with dropped samples\\" (0)
+process: \\"default\\" (0)"
+                  >
+                    <h1
+                      className="timelineTrackName"
+                    >
+                      Thread with dropped samples
+                    </h1>
+                  </div>
+                  <div
+                    className="timelineTrackTrack"
+                  >
+                    <div
+                      className="timelineTrackThread"
+                    >
+                      <div
+                        className="timelineTrackThreadIntervalMarkerOverview"
+                      >
+                        <canvas
+                          className="timelineTracingMarkersCanvas"
+                          onMouseDown={[Function]}
+                          onMouseMove={[Function]}
+                          onMouseOut={[Function]}
+                          onMouseUp={[Function]}
+                        />
+                      </div>
+                      <div
+                        className="timelineStackGraph"
+                      >
+                        <canvas
+                          className="timelineStackGraphCanvas"
+                          onMouseUp={[Function]}
+                        />
+                      </div>
+                      <div
+                        className="timelineEmptyThreadIndicator"
+                      >
+                        <div
+                          className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
+                          onMouseEnter={[Function]}
+                          onMouseLeave={[Function]}
+                          style={
+                            Object {
+                              "left": 0,
+                              "width": 66.66666666666667,
+                            }
+                          }
+                        />
+                        <div
+                          className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
+                          onMouseEnter={[Function]}
+                          onMouseLeave={[Function]}
+                          style={
+                            Object {
+                              "right": 0,
+                              "width": 66.66666666666667,
+                            }
+                          }
+                        />
+                        <div
+                          className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
+                          onMouseEnter={[Function]}
+                          onMouseLeave={[Function]}
+                          style={
+                            Object {
+                              "left": 66.66666666666667,
+                              "width": 66.66666666666667,
+                            }
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </li>
+              <li
+                className="timelineTrack timelineTrackLocal"
+                style={undefined}
+              >
+                <div
+                  className="timelineTrackRow timelineTrackLocalRow"
+                  onClick={[Function]}
+                >
+                  <div
+                    className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+                    onContextMenu={[Function]}
+                    onMouseDown={[Function]}
+                    onMouseOut={[Function]}
+                    onMouseUp={[Function]}
+                    onTouchEnd={[Function]}
+                    onTouchStart={[Function]}
+                    title="thread: \\"Thread with dropped samples\\" (0)
+process: \\"default\\" (0)"
+                  >
+                    <h1
+                      className="timelineTrackName"
+                    >
+                      Thread with dropped samples
+                    </h1>
+                  </div>
+                  <div
+                    className="timelineTrackTrack"
+                  >
+                    <div
+                      className="timelineTrackThread"
+                    >
+                      <div
+                        className="timelineTrackThreadIntervalMarkerOverview"
+                      >
+                        <canvas
+                          className="timelineTracingMarkersCanvas"
+                          onMouseDown={[Function]}
+                          onMouseMove={[Function]}
+                          onMouseOut={[Function]}
+                          onMouseUp={[Function]}
+                        />
+                      </div>
+                      <div
+                        className="timelineStackGraph"
+                      >
+                        <canvas
+                          className="timelineStackGraphCanvas"
+                          onMouseUp={[Function]}
+                        />
+                      </div>
+                      <div
+                        className="timelineEmptyThreadIndicator"
+                      >
+                        <div
+                          className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
+                          onMouseEnter={[Function]}
+                          onMouseLeave={[Function]}
+                          style={
+                            Object {
+                              "left": 0,
+                              "width": 66.66666666666667,
+                            }
+                          }
+                        />
+                        <div
+                          className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
+                          onMouseEnter={[Function]}
+                          onMouseLeave={[Function]}
+                          style={
+                            Object {
+                              "right": 0,
+                              "width": 66.66666666666667,
+                            }
+                          }
+                        />
+                        <div
+                          className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
+                          onMouseEnter={[Function]}
+                          onMouseLeave={[Function]}
+                          style={
+                            Object {
+                              "left": 66.66666666666667,
+                              "width": 66.66666666666667,
+                            }
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ol>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div
+    className="timelineSelectionHoverLine"
+    style={
+      Object {
+        "left": "0",
+        "visibility": "hidden",
+      }
+    }
+  />
+</div>
+`;
+
+exports[`Timeline renders the header 2`] = `
+Array [
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "fillRect",
+    22.22222222222222,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "fillRect",
+    44.44444444444444,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "fillRect",
+    66.66666666666666,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "fillRect",
+    88.88888888888889,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "fillRect",
+    111.11111111111111,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "fillRect",
+    133.33333333333331,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "fillRect",
+    155.55555555555554,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "fillRect",
+    177.77777777777777,
+    NaN,
+    22.22222222222222,
+    NaN,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    88.88888888888889,
+    0,
+    22.22222222222222,
+    300,
+  ],
+  Array [
+    "fillRect",
+    111.11111111111111,
+    0,
+    22.22222222222222,
+    300,
+  ],
+  Array [
+    "fillRect",
+    133.33333333333331,
+    75,
+    22.22222222222222,
+    225,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    88.88888888888889,
+    0,
+    22.22222222222222,
+    300,
+  ],
+  Array [
+    "fillRect",
+    111.11111111111111,
+    0,
+    22.22222222222222,
+    300,
+  ],
+  Array [
+    "fillRect",
+    133.33333333333331,
+    75,
+    22.22222222222222,
+    225,
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    300,
+    300,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    300,
+    300,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    300,
+    300,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+]
+`;

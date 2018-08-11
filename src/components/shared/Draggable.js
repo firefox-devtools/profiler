@@ -8,14 +8,14 @@ import * as React from 'react';
 import type { Milliseconds } from '../../types/units';
 
 export type OnMove = (
-  originalValue: { selectionEnd: Milliseconds, selectionStart: Milliseconds },
+  originalValue: { +selectionEnd: Milliseconds, +selectionStart: Milliseconds },
   dx: number,
   dy: number,
   isModifying: boolean
 ) => *;
 
 type Props = {
-  value: { selectionStart: Milliseconds, selectionEnd: Milliseconds },
+  value: { +selectionStart: Milliseconds, +selectionEnd: Milliseconds },
   onMove: OnMove,
   className: string,
   children?: React.Node,

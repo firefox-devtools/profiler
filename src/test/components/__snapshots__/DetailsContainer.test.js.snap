@@ -1,0 +1,123 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app/DetailsContainer renders an initial view with or without a sidebar 1`] = `
+<t
+  customClassName="DetailsContainer"
+  onDragEnd={[Function]}
+  onDragStart={null}
+  onSecondaryPaneSizeChange={null}
+  percentage={true}
+  primaryIndex={0}
+  primaryMinSize={0}
+  secondaryInitialSize={20}
+  secondaryMinSize={0}
+  vertical={false}
+>
+  <Connect(ProfileViewer) />
+  <Connect(CallTreeSidebar) />
+</t>
+`;
+
+exports[`app/DetailsContainer renders an initial view with or without a sidebar for tab calltree 1`] = `
+<t
+  customClassName="DetailsContainer"
+  onDragEnd={[Function]}
+  onDragStart={null}
+  onSecondaryPaneSizeChange={null}
+  percentage={true}
+  primaryIndex={0}
+  primaryMinSize={0}
+  secondaryInitialSize={20}
+  secondaryMinSize={0}
+  vertical={false}
+>
+  <Connect(ProfileViewer) />
+  <Connect(CallTreeSidebar) />
+</t>
+`;
+
+exports[`app/DetailsContainer renders an initial view with or without a sidebar for tab flame-graph 1`] = `
+<t
+  customClassName="DetailsContainer"
+  onDragEnd={[Function]}
+  onDragStart={null}
+  onSecondaryPaneSizeChange={null}
+  percentage={true}
+  primaryIndex={0}
+  primaryMinSize={0}
+  secondaryInitialSize={20}
+  secondaryMinSize={0}
+  vertical={false}
+>
+  <Connect(ProfileViewer) />
+  <Connect(CallTreeSidebar) />
+</t>
+`;
+
+exports[`app/DetailsContainer renders an initial view with or without a sidebar for tab marker-chart 1`] = `
+<t
+  customClassName="DetailsContainer"
+  onDragEnd={[Function]}
+  onDragStart={null}
+  onSecondaryPaneSizeChange={null}
+  percentage={true}
+  primaryIndex={0}
+  primaryMinSize={0}
+  secondaryInitialSize={20}
+  secondaryMinSize={0}
+  vertical={false}
+>
+  <Connect(ProfileViewer) />
+</t>
+`;
+
+exports[`app/DetailsContainer renders an initial view with or without a sidebar for tab marker-table 1`] = `
+<t
+  customClassName="DetailsContainer"
+  onDragEnd={[Function]}
+  onDragStart={null}
+  onSecondaryPaneSizeChange={null}
+  percentage={true}
+  primaryIndex={0}
+  primaryMinSize={0}
+  secondaryInitialSize={20}
+  secondaryMinSize={0}
+  vertical={false}
+>
+  <Connect(ProfileViewer) />
+</t>
+`;
+
+exports[`app/DetailsContainer renders an initial view with or without a sidebar for tab network-chart 1`] = `
+<t
+  customClassName="DetailsContainer"
+  onDragEnd={[Function]}
+  onDragStart={null}
+  onSecondaryPaneSizeChange={null}
+  percentage={true}
+  primaryIndex={0}
+  primaryMinSize={0}
+  secondaryInitialSize={20}
+  secondaryMinSize={0}
+  vertical={false}
+>
+  <Connect(ProfileViewer) />
+</t>
+`;
+
+exports[`app/DetailsContainer renders an initial view with or without a sidebar for tab stack-chart 1`] = `
+<t
+  customClassName="DetailsContainer"
+  onDragEnd={[Function]}
+  onDragStart={null}
+  onSecondaryPaneSizeChange={null}
+  percentage={true}
+  primaryIndex={0}
+  primaryMinSize={0}
+  secondaryInitialSize={20}
+  secondaryMinSize={0}
+  vertical={false}
+>
+  <Connect(ProfileViewer) />
+</t>
+`;

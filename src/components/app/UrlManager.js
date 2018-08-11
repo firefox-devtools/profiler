@@ -8,7 +8,7 @@ import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import { getIsUrlSetupDone } from '../../reducers/app';
 import { updateUrlState, urlSetupDone, show404 } from '../../actions/app';
-import { urlFromState, stateFromLocation } from '../../url-handling';
+import { urlFromState, stateFromLocation } from '../../app-logic/url-handling';
 
 import type {
   ExplicitConnectOptions,

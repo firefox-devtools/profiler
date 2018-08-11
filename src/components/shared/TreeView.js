@@ -13,6 +13,16 @@ import ContextMenuTrigger from './ContextMenuTrigger';
 import type { IconWithClassName } from '../../types/reducers';
 import type { CssPixels } from '../../types/units';
 
+/**
+ * This number is used to decide how many lines the selection moves when the
+ * user presses PageUp or PageDown.
+ * It's big enough to be useful, but small enough to always be less than one
+ * window. Of course the correct number should depend on the height of the
+ * viewport, but this is more complex, and an hardcoded number is good enough in
+ * this case.
+ */
+const PAGE_KEYS_DELTA = 15;
+
 // This is used for the result of RegExp.prototype.exec because Flow doesn't do it.
 // See https://github.com/facebook/flow/issues/4099
 type RegExpResult = null | ({ index: number, input: string } & string[]);
@@ -245,6 +255,14 @@ class TreeViewRowScrolledColumns<
             mainColumn.propName
           }`}
         >
+          {displayData.categoryColor && displayData.categoryName ? (
+            <span
+              className={`treeViewCategoryKnob category-color-${
+                displayData.categoryColor
+              }`}
+              title={displayData.categoryName}
+            />
+          ) : null}
           {RenderComponent ? (
             <RenderComponent displayData={displayData} />
           ) : (
@@ -488,12 +506,16 @@ class TreeView<
   }
 
   _onKeyDown(event: KeyboardEvent) {
-    const hasModifier = event.ctrlKey || event.altKey || event.metaKey;
-    const isArrowKey = event.key.startsWith('Arrow');
+    const hasModifier = event.ctrlKey || event.altKey;
+    const isNavigationKey =
+      event.key.startsWith('Arrow') ||
+      event.key.startsWith('Page') ||
+      event.key === 'Home' ||
+      event.key === 'End';
     const isAsteriskKey = event.key === '*';
     const isEnterKey = event.key === 'Enter';
 
-    if (hasModifier || (!isArrowKey && !isAsteriskKey && !isEnterKey)) {
+    if (hasModifier || (!isNavigationKey && !isAsteriskKey && !isEnterKey)) {
       // No key events that we care about were found, so don't try and handle them.
       return;
     }
@@ -512,50 +534,83 @@ class TreeView<
       return;
     }
 
-    if (isArrowKey) {
-      switch (event.keyCode) {
-        case 37: // KEY_LEFT
-          {
-            const isCollapsed = this._isCollapsed(selected);
-            if (!isCollapsed) {
-              this._toggle(selected);
-            } else {
-              const parent = this.props.tree.getParent(selected);
-              if (parent !== -1) {
-                this._select(parent);
-              }
+    if (isNavigationKey) {
+      switch (event.key) {
+        case 'ArrowUp': {
+          if (event.metaKey) {
+            // On MacOS this is a common shortcut for the Home gesture
+            this._select(visibleRows[0]);
+            break;
+          }
+
+          if (selectedRowIndex > 0) {
+            this._select(visibleRows[selectedRowIndex - 1]);
+          }
+          break;
+        }
+        case 'ArrowDown': {
+          if (event.metaKey) {
+            // On MacOS this is a common shortcut for the End gesture
+            this._select(visibleRows[visibleRows.length - 1]);
+            break;
+          }
+
+          if (selectedRowIndex < visibleRows.length - 1) {
+            this._select(visibleRows[selectedRowIndex + 1]);
+          }
+          break;
+        }
+        case 'PageUp': {
+          if (selectedRowIndex > 0) {
+            const nextRow = Math.max(0, selectedRowIndex - PAGE_KEYS_DELTA);
+            this._select(visibleRows[nextRow]);
+          }
+          break;
+        }
+        case 'PageDown': {
+          if (selectedRowIndex < visibleRows.length - 1) {
+            const nextRow = Math.min(
+              visibleRows.length - 1,
+              selectedRowIndex + PAGE_KEYS_DELTA
+            );
+            this._select(visibleRows[nextRow]);
+          }
+          break;
+        }
+        case 'Home': {
+          this._select(visibleRows[0]);
+          break;
+        }
+        case 'End': {
+          this._select(visibleRows[visibleRows.length - 1]);
+          break;
+        }
+        case 'ArrowLeft': {
+          const isCollapsed = this._isCollapsed(selected);
+          if (!isCollapsed) {
+            this._toggle(selected);
+          } else {
+            const parent = this.props.tree.getParent(selected);
+            if (parent !== -1) {
+              this._select(parent);
             }
           }
           break;
-        case 38: // KEY_UP
-          {
-            if (selectedRowIndex > 0) {
-              this._select(visibleRows[selectedRowIndex - 1]);
+        }
+        case 'ArrowRight': {
+          const isCollapsed = this._isCollapsed(selected);
+          if (isCollapsed) {
+            this._toggle(selected);
+          } else {
+            // Do KEY_DOWN only if the next element is a child
+            if (this.props.tree.hasChildren(selected)) {
+              this._select(this.props.tree.getChildren(selected)[0]);
             }
           }
           break;
-        case 39: // KEY_RIGHT
-          {
-            const isCollapsed = this._isCollapsed(selected);
-            if (isCollapsed) {
-              this._toggle(selected);
-            } else {
-              // Do KEY_DOWN only if the next element is a child
-              if (this.props.tree.hasChildren(selected)) {
-                this._select(this.props.tree.getChildren(selected)[0]);
-              }
-            }
-          }
-          break;
-        case 40: // KEY_DOWN
-          {
-            if (selectedRowIndex < visibleRows.length - 1) {
-              this._select(visibleRows[selectedRowIndex + 1]);
-            }
-          }
-          break;
+        }
         default:
-          throw new Error('Unhandled arrow key.');
+          throw new Error('Unhandled navigation key.');
       }
     }
 
