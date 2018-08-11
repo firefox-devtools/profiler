@@ -17,7 +17,7 @@ export function isPerfScriptFormat(profile: string): boolean {
  * Convert the output from `perf script` into the gecko profile format.
  */
 export function convertPerfScriptProfile(profile: string): Object {
-  function _createThread(name, tid) {
+  function _createThread(name, pid, tid) {
     const markers = {
       schema: {
         name: 0,
@@ -94,6 +94,7 @@ export function convertPerfScriptProfile(profile: string): Object {
       finish: () => {
         return {
           tid,
+          pid,
           name,
           markers,
           samples,
@@ -107,10 +108,12 @@ export function convertPerfScriptProfile(profile: string): Object {
 
   const threadMap = new Map();
 
-  function _addThreadSample(tid, threadName, timeStamp, stack) {
+  function _addThreadSample(pid, tid, threadName, timeStamp, stack) {
+    // Right now this assumes that you can't have two identical tids in
+    // different pids, which is true in linux at least.
     let thread = threadMap.get(tid);
     if (thread === undefined) {
-      thread = _createThread(threadName, tid);
+      thread = _createThread(threadName, pid, tid);
       threadMap.set(tid, thread);
     }
     thread.addSample(stack, timeStamp);
@@ -121,6 +124,7 @@ export function convertPerfScriptProfile(profile: string): Object {
   const lines = profile.split('\n');
 
   let lineIndex = 0;
+  let startTime = 0;
   while (lineIndex < lines.length) {
     const sampleStartLine = lines[lineIndex++];
     // default "perf script" output has TID but not PID
@@ -131,14 +135,22 @@ export function convertPerfScriptProfile(profile: string): Object {
     // eg, "java 12688/12764 6544038.708352: cpu-clock:"
     // eg, "V8 WorkerThread 24636/25607 [000] 94564.109216: cycles:"
     // other combinations possible
-    const sampleStartMatch = /^(\S.+?)\s+(\d+)\/*(\d+)*\s+([\d.]+)/.exec(
+    // pattern: thread-name-with-optional-spaces tid time: NNN cycles:XXXX:
+    // alternate pattern: thread-name-with-optional-spaces pid/tid time: NNN cycles:XXXX:
+    // eg, "java 25607/25608 4794564.109216: 33 cycles:uppp"
+    //   (generate with "perf script -F +pid")
+    const sampleStartMatch = /^(\S.*?)(?=(?:\s+(?:(?:\d+)\/*(?:\d+)*\s)))\s+(\d+)\/*(\d+)*\s+([\d.]+)/.exec(
       sampleStartLine
     );
     if (sampleStartMatch) {
       const threadName = sampleStartMatch[1];
       const tid = sampleStartMatch[3] || sampleStartMatch[2];
+      const pid = sampleStartMatch[3] ? sampleStartMatch[2] : 0;
       const timeStamp = parseFloat(sampleStartMatch[4]) * 1000;
-
+      // Assume start time is the time of the first sample
+      if (startTime === 0) {
+        startTime = timeStamp;
+      }
       // Parse the stack frames of the current sample in a nested loop.
       const stack = [];
       while (lineIndex < lines.length) {
@@ -172,7 +184,7 @@ export function convertPerfScriptProfile(profile: string): Object {
 
       if (stack.length !== 0) {
         stack.reverse();
-        _addThreadSample(tid, threadName, timeStamp, stack);
+        _addThreadSample(pid, tid, threadName, timeStamp, stack);
       }
     }
   }
@@ -186,13 +198,13 @@ export function convertPerfScriptProfile(profile: string): Object {
       abi: 'x86_64-gcc3',
       interval: 1,
       misc: 'rv:48.0',
-      oscpu: 'Intel Mac OS X 10.11',
-      platform: 'Macintosh',
+      oscpu: 'Intel Fedora 28',
+      platform: 'Linux Fedora',
       processType: 0,
       product: 'Firefox',
       stackwalk: 1,
-      startTime: 1460221352723.438,
-      toolkit: 'cocoa',
+      startTime: startTime,
+      toolkit: 'gtk',
       version: 4,
     },
     libs: [],
