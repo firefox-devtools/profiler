@@ -179,7 +179,6 @@ class Reorderable extends React.PureComponent<Props, State> {
           ];
 
     this.setState({
-      phase: 'MANIPULATING',
       manipulatingIndex: elementIndex,
       manipulationDelta: 0,
       destinationIndex: elementIndex,
@@ -188,6 +187,10 @@ class Reorderable extends React.PureComponent<Props, State> {
     });
 
     const mouseMoveListener = (event: EventWithPageProperties) => {
+      if (this.state.phase === 'RESTING') {
+        // Only start manipulating on the mouse move.
+        this.setState({ phase: 'MANIPULATING' });
+      }
       const delta = clamp(
         event[xy.pageXY] - mouseDownPos,
         -spaceBefore,
@@ -199,14 +202,19 @@ class Reorderable extends React.PureComponent<Props, State> {
       });
     };
     const mouseUpListener = (event: EventWithPageProperties) => {
+      window.removeEventListener('mousemove', mouseMoveListener, true);
+      window.removeEventListener('mouseup', mouseUpListener, true);
+      if (this.state.phase === 'RESTING') {
+        // A mousemove never transitioned to the MANIPULATING state, so
+        // exit out now.
+        return;
+      }
       mouseMoveListener(event);
       const destinationIndex = this.state.destinationIndex;
       this.setState({
         phase: 'FINISHING',
         finalOffset: offsets[destinationIndex],
       });
-      window.removeEventListener('mousemove', mouseMoveListener, true);
-      window.removeEventListener('mouseup', mouseUpListener, true);
       setTimeout(() => {
         this.setState({
           phase: 'RESTING',
