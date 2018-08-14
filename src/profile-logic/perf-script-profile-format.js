@@ -145,6 +145,12 @@ export function convertPerfScriptProfile(profile: string): Object {
     // alternate pattern: thread-name-with-optional-spaces pid/tid time: NNN cycles:XXXX:
     // eg, "java 25607/25608 4794564.109216: 33 cycles:uppp"
     //   (generate with "perf script -F +pid")
+    //
+    // Regexes are evil, and need descriptions (and if really in a string, would need lots of extra escapes).
+    // Match a threadname, with optional spaces, by requiring it to be followed by either a numeric tid or tid/pid
+    // '/^' + '(S.*?)(?=(?:s+(?:(?:d+)/*(?:d+)*s)))s+' +
+    // Match a numeric tid, or a numeric tid/pid
+    // '(d+)/*(d+)*s+([d.]+)' + '/';
     const sampleStartMatch = /^(\S.*?)(?=(?:\s+(?:(?:\d+)\/*(?:\d+)*\s)))\s+(\d+)\/*(\d+)*\s+([\d.]+)/.exec(
       sampleStartLine
     );
