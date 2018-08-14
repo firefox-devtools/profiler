@@ -41,11 +41,11 @@ it('renders FlameGraph correctly', () => {
   }
 
   const { profile } = getProfileFromTextSamples(`
-    A A A
-    B B B
-    C C H
-    D F I
-    E G
+    A  A  A
+    B  B  B
+    C  C  H
+    D  F  I
+    E  G
   `);
 
   const store = storeWithProfile(profile);
@@ -69,7 +69,7 @@ it('renders FlameGraph correctly', () => {
 
 it('renders a message instead of FlameGraph when call stack is inverted', () => {
   const { profile } = getProfileFromTextSamples(`
-    A B
+    A  B
   `);
 
   const store = storeWithProfile(profile);

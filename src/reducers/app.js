@@ -5,8 +5,17 @@
 // @flow
 import { combineReducers } from 'redux';
 
+import { getSelectedTab } from './url-state';
+import { tabSlugs } from '../app-logic/tabs-handling';
+
 import type { Action } from '../types/store';
-import type { State, AppState, AppViewState, Reducer } from '../types/reducers';
+import type {
+  State,
+  AppState,
+  AppViewState,
+  IsSidebarOpenPerPanelState,
+  Reducer,
+} from '../types/reducers';
 
 function view(
   state: AppViewState = { phase: 'INITIALIZING' },
@@ -63,10 +72,37 @@ function hasZoomedViaMousewheel(state: boolean = false, action: Action) {
       return state;
   }
 }
+
+function isSidebarOpenPerPanel(
+  state: IsSidebarOpenPerPanelState,
+  action: Action
+): IsSidebarOpenPerPanelState {
+  if (state === undefined) {
+    state = {};
+    tabSlugs.forEach(tabSlug => (state[tabSlug] = false));
+  }
+
+  switch (action.type) {
+    case 'CHANGE_SIDEBAR_OPEN_STATE': {
+      const { tab, isOpen } = action;
+      // Due to how this action will be dispatched we'll always have the value
+      // changed so we don't need the performance optimization of checking the
+      // stored value against the new value.
+      return {
+        ...state,
+        [tab]: isOpen,
+      };
+    }
+    default:
+      return state;
+  }
+}
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   isUrlSetupDone,
   hasZoomedViaMousewheel,
+  isSidebarOpenPerPanel,
 });
 
 export default appStateReducer;
@@ -75,6 +111,8 @@ export const getApp = (state: State): AppState => state.app;
 export const getView = (state: State): AppViewState => getApp(state).view;
 export const getIsUrlSetupDone = (state: State): boolean =>
   getApp(state).isUrlSetupDone;
-export const getHasZoomedViaMousewheel = (state: Object): boolean => {
+export const getHasZoomedViaMousewheel = (state: State): boolean => {
   return getApp(state).hasZoomedViaMousewheel;
 };
+export const getIsSidebarOpen = (state: State): boolean =>
+  getApp(state).isSidebarOpenPerPanel[getSelectedTab(state)];

@@ -19,6 +19,28 @@ export function getBoundingBox(width: number, height: number) {
   };
 }
 
+export function getMouseEvent(values: Object = {}): $Shape<MouseEvent> {
+  return {
+    altKey: false,
+    button: 0,
+    buttons: 1,
+    clientX: 0,
+    clientY: 0,
+    ctrlKey: false,
+    metaKey: false,
+    movementX: 0,
+    movementY: 0,
+    offsetX: 0,
+    offsetY: 0,
+    pageX: 0,
+    pageY: 0,
+    screenX: 0,
+    screenY: 0,
+    shiftKey: false,
+    ...values,
+  };
+}
+
 /**
  * This function formats a call tree into a human readable form, to make it easy
  * to assert certain relationships about the data structure in a really terse
@@ -41,6 +63,7 @@ export function getBoundingBox(width: number, height: number) {
  */
 export function formatTree(
   callTree: CallTree,
+  includeCategories: boolean = false,
   children: IndexIntoCallNodeTable[] = callTree.getRoots(),
   depth: number = 0,
   lines: string[] = []
@@ -48,16 +71,40 @@ export function formatTree(
   const whitespace = Array(depth * 2 + 1).join(' ');
 
   children.forEach(callNodeIndex => {
-    const { name, totalTime, selfTime } = callTree.getDisplayData(
+    const { name, totalTime, selfTime, categoryName } = callTree.getDisplayData(
       callNodeIndex
     );
+    const displayName = includeCategories ? `${name} [${categoryName}]` : name;
     lines.push(
-      `${whitespace}- ${name} (total: ${totalTime}, self: ${selfTime})`
+      `${whitespace}- ${displayName} (total: ${totalTime}, self: ${selfTime})`
     );
-    formatTree(callTree, callTree.getChildren(callNodeIndex), depth + 1, lines);
+    formatTree(
+      callTree,
+      includeCategories,
+      callTree.getChildren(callNodeIndex),
+      depth + 1,
+      lines
+    );
   });
 
   return lines;
+}
+
+/**
+ * Convenience wrapper around formatTree, with includeCategories == true.
+ * This produces output like the following:
+ *
+ * [
+ *   '- A [Other] (total: 4, self: —)',
+ *   '  - B [Graphics] (total: 3, self: —)',
+ *   '    - C [Graphics] (total: 1, self: 1)',
+ *   '    - D [Graphics] (total: 1, self: 1)',
+ *   '    - E [DOM] (total: 1, self: 1)',
+ *   '  - F [Other] (total: 1, self: 1)',
+ * ]
+ */
+export function formatTreeIncludeCategories(callTree: CallTree): string[] {
+  return formatTree(callTree, true);
 }
 
 /**

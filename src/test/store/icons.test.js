@@ -1,11 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
 
 import { createImageMock } from '../fixtures/mocks/image';
 import { blankStore } from '../fixtures/stores';
 import * as iconsAccessors from '../../reducers/icons';
 import * as iconsActions from '../../actions/icons';
+import type { CallNodeDisplayData } from '../../types/profile-derived';
 
 describe('actions/icons', function() {
   const validIcons = [
@@ -18,85 +20,86 @@ describe('actions/icons', function() {
   ];
   const invalidIcon = 'https://invalid.icon.example.org/favicon.ico';
 
-  let instances;
+  let imageInstances: Image[] = [];
 
   beforeEach(() => {
     const mock = createImageMock();
-    instances = mock.instances;
-    window.Image = mock.Image;
+    imageInstances = mock.instances;
+    (window: Object).Image = mock.Image;
   });
 
   afterEach(() => {
-    delete window.Image;
-    instances = null;
+    delete (window: Object).Image;
+    imageInstances = [];
   });
 
-  let store;
-
-  beforeEach(function() {
-    store = blankStore();
-  });
-
-  afterEach(function() {
-    store = null;
-  });
+  function _createCallNodeWithIcon(icon: string): CallNodeDisplayData {
+    return {
+      totalTime: '0',
+      totalTimePercent: '0',
+      selfTime: '0',
+      name: 'icon',
+      lib: 'icon',
+      dim: false,
+      categoryName: 'Other',
+      categoryColor: 'grey',
+      icon,
+    };
+  }
 
   describe('With the initial state', function() {
-    let state;
-    beforeEach(function() {
-      state = store.getState();
-    });
-
-    afterEach(function() {
-      state = null;
-    });
-
+    function getInitialState() {
+      return blankStore().getState();
+    }
     it('getIcons return an empty set', function() {
-      const initialState = iconsAccessors.getIcons(state);
+      const initialState = iconsAccessors.getIcons(getInitialState());
       expect(initialState).toBeInstanceOf(Set);
       expect(initialState.size).toEqual(0);
     });
 
     it('getIconForCallNode returns null for any icon', function() {
-      const subject = iconsAccessors.getIconForCallNode(state, {
-        icon: validIcons[0],
-      });
+      const subject = iconsAccessors.getIconForCallNode(
+        getInitialState(),
+        _createCallNodeWithIcon(validIcons[0])
+      );
       expect(subject).toBeNull();
     });
 
     it('getIconClassNameForCallNode returns an empty string for any icon', function() {
-      const subject = iconsAccessors.getIconClassNameForCallNode(state, {
-        icon: validIcons[0],
-      });
+      const subject = iconsAccessors.getIconClassNameForCallNode(
+        getInitialState(),
+        _createCallNodeWithIcon(validIcons[0])
+      );
       expect(subject).toBe('');
     });
 
     it('getIconsWithClassNames returns an empty array', function() {
-      const subject = iconsAccessors.getIconsWithClassNames(state);
+      const subject = iconsAccessors.getIconsWithClassNames(getInitialState());
       expect(subject).toEqual([]);
     });
   });
 
   describe('Requesting an existing icon', function() {
     it('will populate the local cache', async function() {
+      const { dispatch, getState } = blankStore();
       const promises = [
-        store.dispatch(iconsActions.iconStartLoading(validIcons[0])),
+        dispatch(iconsActions.iconStartLoading(validIcons[0])),
         // Second request for the same icon shouldn't dspatch anything
-        store.dispatch(iconsActions.iconStartLoading(validIcons[0])),
+        dispatch(iconsActions.iconStartLoading(validIcons[0])),
         // 3rd request for another icon should dispatch the loaded action
-        store.dispatch(iconsActions.iconStartLoading(validIcons[1])),
+        dispatch(iconsActions.iconStartLoading(validIcons[1])),
       ];
 
       // Only 2 requests because only 2 different icons
-      expect(instances.length).toBe(2);
-      instances.forEach((instance, i) => {
+      expect(imageInstances.length).toBe(2);
+      imageInstances.forEach((instance, i) => {
         expect(instance.src).toEqual(validIcons[i]);
         expect(instance.referrerPolicy).toEqual('no-referrer');
       });
-      instances.forEach(instance => instance.onload());
+      imageInstances.forEach(instance => (instance: Object).onload());
       await Promise.all(promises);
 
-      const state = store.getState();
+      const state = getState();
       let subject = iconsAccessors.getIcons(state);
       expect([...subject]).toEqual(validIcons);
 
@@ -106,10 +109,16 @@ describe('actions/icons', function() {
       );
 
       validIcons.forEach((icon, i) => {
-        subject = iconsAccessors.getIconForCallNode(state, { icon });
+        subject = iconsAccessors.getIconForCallNode(
+          state,
+          _createCallNodeWithIcon(icon)
+        );
         expect(subject).toEqual(icon);
 
-        subject = iconsAccessors.getIconClassNameForCallNode(state, { icon });
+        subject = iconsAccessors.getIconClassNameForCallNode(
+          state,
+          _createCallNodeWithIcon(icon)
+        );
         expect(subject).toEqual(expectedClasses[i]);
       });
     });
@@ -117,24 +126,29 @@ describe('actions/icons', function() {
 
   describe('Requesting a non-existing image', function() {
     it('will not populate the local cache', async function() {
-      const actionPromise = store.dispatch(
+      const { dispatch, getState } = blankStore();
+      const actionPromise = dispatch(
         iconsActions.iconStartLoading(invalidIcon)
       );
-      expect(instances.length).toBe(1);
-      instances[0].onerror();
+      expect(imageInstances.length).toBe(1);
+      (imageInstances[0]: Object).onerror();
 
       await actionPromise;
 
-      const state = store.getState();
+      const state = getState();
       let subject = iconsAccessors.getIcons(state);
       expect([...subject]).toEqual([]);
 
-      subject = iconsAccessors.getIconForCallNode(state, { icon: invalidIcon });
+      subject = iconsAccessors.getIconForCallNode(
+        state,
+        _createCallNodeWithIcon(invalidIcon)
+      );
       expect(subject).toBeNull();
 
-      subject = iconsAccessors.getIconClassNameForCallNode(state, {
-        icon: invalidIcon,
-      });
+      subject = iconsAccessors.getIconClassNameForCallNode(
+        state,
+        _createCallNodeWithIcon(invalidIcon)
+      );
       expect(subject).toBe('');
 
       subject = iconsAccessors.getIconsWithClassNames(state);

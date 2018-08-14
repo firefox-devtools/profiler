@@ -7,7 +7,7 @@ import { storeWithSimpleProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
 import * as AppSelectors from '../../reducers/app';
-import createStore from '../../create-store';
+import createStore from '../../app-logic/create-store';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 
 import * as AppActions from '../../actions/app';
@@ -66,13 +66,15 @@ describe('app actions', function() {
         2,
         3,
         4,
+        5,
       ]);
-      dispatch(AppActions.changeTabOrder([2, 3, 1, 4, 0]));
+      dispatch(AppActions.changeTabOrder([2, 3, 1, 4, 5, 0]));
       expect(ProfileViewSelectors.getTabOrder(getState())).toEqual([
         2,
         3,
         1,
         4,
+        5,
         0,
       ]);
     });
@@ -121,6 +123,21 @@ describe('app actions', function() {
       expect(AppSelectors.getView(getState())).toEqual({
         phase: 'ROUTE_NOT_FOUND',
       });
+    });
+  });
+
+  describe('isSidebarOpen', function() {
+    it('can change the state of the sidebar', function() {
+      const { dispatch, getState } = storeWithSimpleProfile();
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(false);
+      dispatch(AppActions.changeSidebarOpenState('calltree', true));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(true);
+      dispatch(AppActions.changeSelectedTab('flame-graph'));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(false);
+      dispatch(AppActions.changeSidebarOpenState('flame-graph', true));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(true);
+      dispatch(AppActions.changeSidebarOpenState('calltree', false));
+      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(true);
     });
   });
 

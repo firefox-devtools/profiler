@@ -14,6 +14,7 @@ html, body {
 body, #root, .profileViewer {
   display: flex;
   flex: 1;
+  min-width: 0; /* This allows Flexible Layout to shrink this further than its min-content */
 }
 
 .profileViewer {
@@ -193,6 +194,42 @@ body, #root, .profileViewer {
   color: highlighttext;
 }
 
+.treeViewCategoryKnob {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 9px;
+  height: 9px;
+  border: 0.5px solid rgba(0, 0, 0, 0.1);
+  margin-right: 3px;
+}
+.treeViewCategoryKnob.category-color-transparent {
+  background-color: transparent;
+}
+.treeViewCategoryKnob.category-color-purple {
+  background-color: var(--purple-70);
+}
+.treeViewCategoryKnob.category-color-green {
+  background-color: var(--green-60);
+}
+.treeViewCategoryKnob.category-color-orange {
+  background-color: var(--orange-50);
+}
+.treeViewCategoryKnob.category-color-yellow {
+  background-color: var(--yellow-50);
+}
+.treeViewCategoryKnob.category-color-lightblue {
+  background-color: var(--blue-40);
+}
+.treeViewCategoryKnob.category-color-grey {
+  background-color: var(--grey-30);
+}
+.treeViewCategoryKnob.category-color-blue {
+  background-color: var(--blue-60);
+}
+.treeViewCategoryKnob.category-color-brown {
+  background-color: var(--magenta-60);
+}
+
 .treeViewHighlighting {
   /* This negative margin enlarges the background to the top, so that it fully
    * covers the underlying background. There's an underlying background when the
@@ -240,7 +277,7 @@ body, #root, .profileViewer {
     height: 0;
     width: 0;
     color: #888;
-    border-top: 5px solid transparent;   
+    border-top: 5px solid transparent;
     border-right: 4px solid transparent;
     border-bottom: 5px solid transparent;
     border-left: 8px solid;
@@ -292,316 +329,11 @@ body, #root, .profileViewer {
   flex: 1;
 }
 
-.profileViewerHeader {
-  position: relative;
-  margin-left: 149px;
-  border-left: 1px solid var(--grey-30);
-  -moz-user-focus: ignore;
-}
-
-.profileViewerHeaderTimeRuler {
-  height: 20px;
-  overflow: hidden;
-}
-
-.profileViewerHeaderTimeRuler::after {
-  content: '';
-  position: absolute;
-  top: 20px;
-  left: -150px;
-  right: 0;
-  height: 1px;
-  background: var(--grey-30);
-  z-index: 3;
-}
-
-.timeRulerContainer {
-  overflow: hidden;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  -moz-user-select: none;
-  user-select: none;
-  line-height: 20px;
-  font-size: 9px;
-  color: #888;
-  cursor: default;
-  z-index: 1; /* between .profileThreadHeaderBar background and .profileThreadHeaderBarThreadDetails */
-}
-
-.timeRulerNotch {
-  display: block;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  margin-left: -1px;
-  white-space: nowrap;
-  text-align: right;
-  background: linear-gradient(transparent, var(--grey-30) 19px, var(--grey-30) 20px, #d7d7db66 0);
-}
-
-.timeRulerNotchText {
-  position: absolute;
-  right: 0;
-  padding-right: 5px;
-}
-
-.profileViewerHeaderOverflowEdgeIndicatorScrollbox {
-  margin: 0 0 0 -150px;
-  padding-left: 150px;
-  max-height: 250px;
-  overflow: auto;
-}
-
-.profileThreadHeaderBarIntervalMarkerOverviewContainerJank {
-  border-bottom: 1px solid var(--grey-30);
-}
-
-.profileThreadHeaderBarIntervalMarkerOverview {
-  list-style: none;
-  display: block;
-  margin: 0;
-  height: 6px;
-  position: relative;
-  overflow: hidden;
-  opacity: 0.75;
-}
-
-.profileThreadHeaderBarIntervalMarkerOverview.selected {
-  opacity: 1;
-}
-
-.profileThreadHeaderBarIntervalMarkerOverviewThreadGeckoMain {
-  height: 18px;
-  /*border-bottom: 1px solid var(--grey-30);*/
-}
-
-.intervalMarkerTimelineCanvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.profileViewerHeaderThreadList {
-  list-style: none;
-  margin: 0 0 0 -150px;
-  padding: 0;
-  box-shadow: inset 0 1px var(--grey-30);
-}
-
-.profileThreadHeaderBarHidden {
-  height: 0;
-  pointer-events: none;
-}
-
-.profileThreadHeaderBar {
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-flow: row nowrap;
-  border-top: 1px solid var(--grey-30);
-  box-shadow: 0 1px var(--grey-30);
-}
-
-.profileThreadHeaderBar.selected {
-  background-color: #edf6ff;
-}
-
-.profileThreadHeaderBarThreadLabel {
-  box-sizing: border-box;
-  width: 150px;
-  border-right: 1px solid var(--grey-30);
-  padding-left: 14px;
-  cursor: default;
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-}
-
-.profileThreadHeaderBarThreadName {
-  font-weight: normal;
-  font: message-box;
-  font-size: 100%;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-}
-
-.profileThreadHeaderBarThreadDetails {
-  flex: 1;
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-flow: column nowrap;
-}
-
-.threadStackGraph {
-  height: 25px;
-}
-
-.threadStackGraphCanvas {
-  display: block;
-  height: 25px;
-  width: 100%;
-}
-
-.timeSelectionScrubberHoverIndicator {
-  position: absolute;
-  pointer-events: none;
-  visibility: hidden;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: rgba(0,0,0,0.4);
-  z-index: 1;
-}
-
-.profileViewerHeader:hover > .timeSelectionScrubberHoverIndicator {
-  visibility: visible;
-}
-
-.overlay {
-  position: absolute;
-  z-index: 2;
-  display: flex;
-  flex-flow: row nowrap;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  margin-left: -5px;
-  padding-left: 5px;
-  overflow: hidden;
-}
-
-.dimmerBefore,
-.dimmerAfter {
-  background: rgba(12, 12, 13, .1);
-  flex-shrink: 0;
-}
-
-.dimmerAfter {
-  flex: 1;
-}
-
-.selectionScrubberGrippy {
-  height: 20px;
-  pointer-events: auto;
-  display: flex;
-  flex-flow: row nowrap;
-}
-
-.grippyRangeStart,
-.grippyRangeEnd {
-  width: 0px;
-  padding: 3px;
-  background: #AAA;
-  border: 1px solid white;
-  margin: 0 -4px;
-  cursor: ew-resize;
-  border-radius: 5px;
-  position: relative;
-  z-index: 3;
-}
-
-.grippyRangeStart:hover,
-.grippyRangeStart.dragging,
-.grippyRangeEnd:hover,
-.grippyRangeEnd.dragging {
-  background: #888;
-}
-
-.grippyMoveRange {
-  flex: 1;
-  cursor: -webkit-grab;
-  cursor: grab;
-}
-
-.grippyMoveRange.dragging {
-  cursor: -webkit-grabbing;
-  cursor: grabbing;
-}
-
-.selectionScrubberWrapper {
-  display: flex;
-  flex-flow: column nowrap;
-}
-
-.selectionScrubberInner {
-  flex: 1;
-  justify-content: center;
-  align-items: center;
-  display: flex;
-  min-width: 0;
-  min-height: 0;
-}
-
-.selectionScrubberRange {
-  top: 20px;
-  position: absolute;
-  padding: 4px 8px;
-  color: #fff;
-  background-color: var(--blue-50);
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-  pointer-events: none;
-  opacity: 1;
-  transition: opacity 200ms;
-}
-
-.selectionScrubberRange.hidden {
-  opacity: 0;
-}
-
-.selectionScrubberZoomButton {
-  width: 30px;
-  height: 30px;
-  pointer-events: auto;
-  box-sizing: border-box;
-  border-radius: 100%;
-  margin: -15px;
-  position: relative;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  background: url(../img/svg/zoom-icon.svg) center center no-repeat rgba(255, 255, 255, 0.6);
-  transition: opacity 200ms ease-in-out;
-  will-change: opacity;
-  opacity: 0.5;
-}
-
-.selectionScrubberZoomButton.hidden {
-  opacity: 0.0 !important;
-  pointer-events: none;
-  transition: unset;
-}
-
-.profileViewerHeader:hover .selectionScrubberZoomButton,
-.selectionScrubberZoomButton:active {
-  opacity: 1.0;
-}
-
-.selectionScrubberZoomButton:hover {
-  background-color: rgba(255, 255, 255, 0.9);
-}
-
-.selectionScrubberZoomButton:active:hover {
-  background-color: rgba(160, 160, 160, 0.6);
-}
-
 .tabBarContainer {
   display: flex;
   flex-flow: row nowrap;
+  justify-content: space-between; /* This pushes the sidebar button to the right */
+  align-items: center;
   background: var(--grey-10);
   position: relative;
   border: solid var(--grey-30);
@@ -609,13 +341,12 @@ body, #root, .profileViewer {
 }
 
 .tabBarTabWrapper {
-  margin: 0;
   padding: 0 0.5px;
   list-style: none;
   display: flex;
   flex-flow: row nowrap;
   margin: 0 -1px;
-  max-width: 100%;
+  min-width: 0; /* This makes the tab container actually shrinkable below min-content */
 }
 
 .tabBarTab {
@@ -633,6 +364,8 @@ body, #root, .profileViewer {
   position: relative;
   border: solid transparent;
   border-width: 0 1px 0 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .tabBarTab.selected {
   background: #fff;
@@ -840,15 +573,19 @@ body, #root, .profileViewer {
 
 
 .react-contextmenu-item.checkable {
-  padding-left: 21px;
+  padding-right: 21px;
   position: relative;
 }
 
-.react-contextmenu-item.checked::before {
+.react-contextmenu-item.indented {
+  padding-left: 35px;
+}
+
+.react-contextmenu-item.checked:not(.react-contextmenu-item--disabled)::before {
   content: '';
   display: block;
   position: absolute;
-  left: 8px;
+  right: 8px;
   top: 6px;
   width: 3px;
   height: 6px;

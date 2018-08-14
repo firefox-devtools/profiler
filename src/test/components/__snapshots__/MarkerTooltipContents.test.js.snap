@@ -217,6 +217,13 @@ Array [
       <div
         className="tooltipLabel"
       >
+        Status
+        :
+      </div>
+      STATUS_START
+      <div
+        className="tooltipLabel"
+      >
         URL
         :
       </div>
@@ -224,17 +231,10 @@ Array [
       <div
         className="tooltipLabel"
       >
-        pri
+        Priority
         :
       </div>
       8
-      <div
-        className="tooltipLabel"
-      >
-        Status
-        :
-      </div>
-      STATUS_START
     </div>
   </div>,
   <div
@@ -352,28 +352,84 @@ Array [
         Reason
         :
       </div>
-      CC_WAITING
+      FULL_CELL_PTR_BUFFER
       <div
         className="tooltipLabel"
       >
-        Bytes tenured
+        Bytes evicted
         :
       </div>
-      4.0MB / 8.0MB (50%)
+      1.30MB / 1.97MB (66%)
       <div
         className="tooltipLabel"
       >
-        New nursery size
+        Cells evicted
         :
       </div>
-      16MB
+      15.9K / 26.6K (60%)
       <div
         className="tooltipLabel"
       >
-        Lazy-allocated size
+        Bytes used
         :
       </div>
-      12MB
+      1.97MB / 16.0MB (12%)
+      <div
+        className="tooltipLabel"
+      >
+        Nursery allocations since last minor GC
+        :
+      </div>
+      26.6K / 38.8K (69%)
+      <div
+        className="tooltipLabel"
+      >
+        Tenuring allocation rate
+        :
+      </div>
+      190MB/s
+      <div
+        className="tooltipLabel"
+      >
+        Tenuring allocation rate
+        :
+      </div>
+      23.1M/s
+      <div
+        className="tooltipLabel"
+      >
+        Phase ClearNursery
+        :
+      </div>
+      1.3ms
+      <div
+        className="tooltipLabel"
+      >
+        Phase CollectToFP
+        :
+      </div>
+      3.0ms
+      <div
+        className="tooltipLabel"
+      >
+        Phase TraceCells
+        :
+      </div>
+      1.9ms
+      <div
+        className="tooltipLabel"
+      >
+        Phase TraceGenericEntries
+        :
+      </div>
+      0.39ms
+      <div
+        className="tooltipLabel"
+      >
+        Phase TraceSlots
+        :
+      </div>
+      1.5ms
     </div>
   </div>,
   <div
@@ -416,35 +472,35 @@ Array [
         Reason
         :
       </div>
-      CC_WAITING
+      ALLOC_TRIGGER
       <div
         className="tooltipLabel"
       >
         Non-incremental reason
         :
       </div>
-      Non incremental reason
+      GCBytesTrigger
       <div
         className="tooltipLabel"
       >
         Total slice times
         :
       </div>
-      157ms
+      85.6ms
       <div
         className="tooltipLabel"
       >
         Max Pause
         :
       </div>
-      104ms
+      74.0ms
       <div
         className="tooltipLabel"
       >
         Heap usage
         :
       </div>
-      16MB
+      46.1MB
       <div
         className="tooltipLabel"
       >
@@ -465,28 +521,70 @@ Array [
         Minor GCs
         :
       </div>
-      9
+      8
       <div
         className="tooltipLabel"
       >
         Slices
         :
       </div>
-      13
+      2
       <div
         className="tooltipLabel"
       >
         Zones
         :
       </div>
-      3 / 5 (60%)
+      1 / 4 (25%)
       <div
         className="tooltipLabel"
       >
         Compartments
         :
       </div>
-      79
+      19
+      <div
+        className="tooltipLabel"
+      >
+        Phase minor_gc.mark_roots.mark_stack
+        :
+      </div>
+      1.5ms
+      <div
+        className="tooltipLabel"
+      >
+        Phase prepare.purge
+        :
+      </div>
+      6.4ms
+      <div
+        className="tooltipLabel"
+      >
+        Phase sweep.sweep_compartments.sweep_jit_data
+        :
+      </div>
+      1.2ms
+      <div
+        className="tooltipLabel"
+      >
+        Phase sweep.sweep_mark.sweep_mark_gray
+        :
+      </div>
+      12ms
+      <div
+        className="tooltipLabel"
+      >
+        Phase sweep.sweep_mark.sweep_mark_weak
+        :
+      </div>
+      4.1ms
+      <div
+        className="tooltipLabel"
+      >
+        Phase wait_background_thread
+        :
+      </div>
+      14ms
     </div>
   </div>,
   <div
@@ -544,6 +642,13 @@ Array [
         :
       </div>
       Initial – Final
+      <div
+        className="tooltipLabel"
+      >
+        Trigger (amt/trig)
+        :
+      </div>
+      266MB / 245MB
       <div
         className="tooltipLabel"
       >
@@ -1203,17 +1308,60 @@ Array [
       <div
         className="tooltipLabel"
       >
-        pri
-        :
-      </div>
-      8
-      <div
-        className="tooltipLabel"
-      >
         Status
         :
       </div>
       STATUS_READING
+      <div
+        className="tooltipLabel"
+      >
+        Priority
+        :
+      </div>
+      8
+    </div>
+  </div>,
+  <div
+    className="tooltipMarker propClass"
+  >
+    <div
+      className="tooltipHeader"
+    >
+      <div
+        className="tooltipOneLine"
+      >
+        <div
+          className="tooltipTiming"
+        >
+          0.80ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          ConstructRootFrame
+        </div>
+      </div>
+      <div
+        className="tooltipDetails"
+      >
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
+      </div>
+    </div>
+    <div
+      className="tooltipDetails"
+    >
+      <div
+        className="tooltipLabel"
+      >
+        Category
+        :
+      </div>
+      Frame Construction
     </div>
   </div>,
   <div
@@ -1267,31 +1415,24 @@ Array [
       <div
         className="tooltipLabel"
       >
-        pri
+        Priority
         :
       </div>
       8
       <div
         className="tooltipLabel"
       >
-        count
+        Requested bytes
         :
       </div>
-      47027
+      45.9KB
       <div
         className="tooltipLabel"
       >
-        requestStart @
+        Response time
         :
       </div>
-      -2239.159199062502
-      <div
-        className="tooltipLabel"
-      >
-        response
-        :
-      </div>
-      3.514498000000458
+      3.5ms
     </div>
   </div>,
   <div
@@ -1352,17 +1493,17 @@ Array [
       <div
         className="tooltipLabel"
       >
-        pri
+        Priority
         :
       </div>
       -20
       <div
         className="tooltipLabel"
       >
-        count
+        Requested bytes
         :
       </div>
-      0
+      0.000B
     </div>
   </div>,
 ]

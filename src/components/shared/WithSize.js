@@ -36,14 +36,11 @@ export function withSize<
   $ReadOnly<$Diff<Props, SizeProps>>
 > {
   return class WithSizeWrapper extends React.PureComponent<*, State> {
-    _resizeListener: Event => void;
+    _resizeListener: () => void;
     state = { width: 0, height: 0 };
 
-    _observeSize = (wrappedComponent: React.Component<any> | null) => {
-      if (!wrappedComponent) {
-        return;
-      }
-      const container = findDOMNode(wrappedComponent); // eslint-disable-line react/no-find-dom-node
+    componentDidMount() {
+      const container = findDOMNode(this); // eslint-disable-line react/no-find-dom-node
       if (!container) {
         throw new Error('Unable to find the DOMNode');
       }
@@ -51,8 +48,11 @@ export function withSize<
         this._updateWidth(container);
       };
       window.addEventListener('resize', this._resizeListener);
-      this._updateWidth(container);
-    };
+
+      // Wrapping the first update in a requestAnimationFrame to defer the
+      // calculation until the full render is done.
+      requestAnimationFrame(() => this._updateWidth(container));
+    }
 
     componentWillUnmount() {
       window.removeEventListener('resize', this._resizeListener);
@@ -67,9 +67,7 @@ export function withSize<
     }
 
     render() {
-      return (
-        <Wrapped ref={this._observeSize} {...this.props} {...this.state} />
-      );
+      return <Wrapped {...this.props} {...this.state} />;
     }
   };
 }

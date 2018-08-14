@@ -11,7 +11,7 @@ import {
 } from '../../reducers/profile-view';
 import explicitConnect from '../../utils/connect';
 
-import type { RequestedLib } from '../../types/reducers';
+import type { RequestedLib } from '../../types/actions';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,

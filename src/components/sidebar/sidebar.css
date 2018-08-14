@@ -1,22 +1,44 @@
 .sidebar {
   padding: 1em;
-  overflow-x: hidden;
+  overflow: auto;
 
   font-size: 11px;
   background: var(--grey-10);
+  border-top: 1px solid var(--grey-30);
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 2px 5px;
+  align-content: start; /* the grid isn't vertically stretched */
+
+  line-height: 1.5;
+}
+
+.sidebar-titlegroup, .sidebar-title2, .sidebar-title3 {
+  grid-column-start: span 2;
+  min-width: 0; /* With this, the cell's minimum size is 0 instead of min-content */
 }
 
 .sidebar-titlegroup {
   margin: 0 0 1em 0;
-  line-height: 1.2;
+  line-height: unset;
 }
 
 .sidebar-title, .sidebar-subtitle {
   margin: 0;
   padding: 0;
   font-weight: normal;
+}
 
-  overflow-wrap: break-word;
+/* This will be used on both the title and the subtitle */
+.can-select-content-input {
+  all: unset;
+  width: 100%;
+  text-overflow: ellipsis;
+}
+
+.can-select-content-input:focus {
+  text-overflow: unset;
 }
 
 .sidebar-title {
@@ -29,17 +51,29 @@
   color: var(--grey-50);
 }
 
-.sidebar-details {
-  display: grid;
-  grid-template-columns: min-content min-content;
-  grid-gap: 2px 5px;
-  justify-content: center;
+.sidebar-title2, .sidebar-title3 {
+  font-weight: normal;
+  white-space: nowrap;
 
-  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-title2 {
+  margin: 0.9em 0 0.4em;
+}
+
+.sidebar-title3 {
+  margin: 0.7em 0 0.3em;
 }
 
 .sidebar-label {
   color: var(--grey-50);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.sidebar-value {
   white-space: nowrap;
   text-align: right;
 }

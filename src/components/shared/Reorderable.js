@@ -11,14 +11,16 @@ import arrayMove from 'array-move';
 import { getContentRect, getMarginRect } from '../../utils/css-geometry-tools';
 
 import type { DOMRectLiteral } from '../../utils/dom-rect';
-import type { Action } from '../../types/actions';
 
 type Props = {|
   orient: 'horizontal' | 'vertical',
   tagName: string,
   className: string,
   order: number[],
-  onChangeOrder: (number[]) => Action,
+  onChangeOrder: (number[]) => mixed,
+  // Reorderable elements should set a class name to match against. This allows
+  // nested reorderable elements to set different matching class names.
+  grippyClassName: string,
   // This forces the children to be an array of React Elements.
   // See https://flow.org/en/docs/react/children/ for more information.
   // Be careful: children need to handle a `style` property.
@@ -93,8 +95,10 @@ class Reorderable extends React.PureComponent<Props, State> {
     // Flow: Coerce the event target into an HTMLElement in combination with the above
     // `instanceof` statement.
     let element = (event.target: HTMLElement);
-    if (!element.matches('.grippy, .grippy *')) {
-      // Don't handle this event. Only clicking inside a grippy should start the dragging process.
+    const { grippyClassName } = this.props;
+    if (!element.matches(`.${grippyClassName}, .${grippyClassName} *`)) {
+      // Don't handle this event. Only clicking inside a matching grippy class
+      // name should start the dragging process.
       return;
     }
 

@@ -15,10 +15,25 @@ import { decompress } from '../utils/gz';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
 import {
-  getHiddenThreads,
+  getDataSource,
   getSelectedThreadIndexOrNull,
+  getGlobalTrackOrder,
+  getHiddenGlobalTracks,
+  getHiddenLocalTracksByPid,
+  getLocalTrackOrderByPid,
+  getLegacyThreadOrder,
+  getLegacyHiddenThreads,
 } from '../reducers/url-state';
-import { defaultThreadOrder } from '../profile-logic/profile-data';
+import {
+  initializeLocalTrackOrderByPid,
+  initializeHiddenLocalTracksByPid,
+  computeLocalTracksByPid,
+  computeGlobalTracks,
+  initializeGlobalTrackOrder,
+  initializeSelectedThreadIndex,
+  initializeHiddenGlobalTracks,
+  getVisibleThreads,
+} from '../profile-logic/tracks';
 
 import type {
   FunctionsUpdatePerThread,
@@ -28,7 +43,6 @@ import type {
 import type { Action, ThunkAction, Dispatch } from '../types/store';
 import type {
   Profile,
-  Thread,
   ThreadIndex,
   IndexIntoFuncTable,
 } from '../types/profile';
@@ -44,114 +58,93 @@ export function waitingForProfileFromAddon(): Action {
   };
 }
 
+/**
+ * Call this function once the profile has been fetched and pre-processed from whatever
+ * source (url, addon, file, etc). This function will take the view information from the
+ * URL, such as hiding and sorting information, and it will validate it against the
+ * profile. If there is no pre-existing view information, this function will compute the
+ * defaults. There is a decent amount of complexity to making all of these decisions,
+ * which has been collected in a bunch of functions in the src/profile-logic/tracks.js
+ * file.
+ */
 export function viewProfile(
   profile: Profile,
   pathInZipFile: ?string
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const threadIndexes = profile.threads.map((_, threadIndex) => threadIndex);
-    let hiddenThreadIndexes;
+    // The selectedThreadIndex is only null for new profiles that haven't
+    // been seen before. If it's non-null, then there is profile view information
+    // encoded into the URL.
     let selectedThreadIndex = getSelectedThreadIndexOrNull(getState());
+    const hasUrlInfo = selectedThreadIndex !== null;
 
-    if (selectedThreadIndex === null) {
-      // This is a new profile, it has no selected thread index.
-      hiddenThreadIndexes = _hideIdleThreads(profile);
-    } else {
-      // Pull the existing data that was URL encoded.
-      hiddenThreadIndexes = getHiddenThreads(getState())
-        // Try to use the hidden threads specified in the URL, but ensure that the indexes
-        // are correct by filtering out invalid ones.
-        .filter(index => threadIndexes.includes(index));
-    }
+    const globalTracks = computeGlobalTracks(profile);
+    const globalTrackOrder = initializeGlobalTrackOrder(
+      globalTracks,
+      hasUrlInfo ? getGlobalTrackOrder(getState()) : null,
+      getLegacyThreadOrder(getState())
+    );
+    let hiddenGlobalTracks = initializeHiddenGlobalTracks(
+      globalTracks,
+      profile.threads,
+      globalTrackOrder,
+      hasUrlInfo ? getHiddenGlobalTracks(getState()) : null,
+      getLegacyHiddenThreads(getState())
+    );
+    const localTracksByPid = computeLocalTracksByPid(profile);
+    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
+      hasUrlInfo ? getLocalTrackOrderByPid(getState()) : null,
+      localTracksByPid,
+      getLegacyThreadOrder(getState())
+    );
+    let hiddenLocalTracksByPid = initializeHiddenLocalTracksByPid(
+      hasUrlInfo ? getHiddenLocalTracksByPid(getState()) : null,
+      localTracksByPid,
+      profile.threads,
+      getLegacyHiddenThreads(getState())
+    );
+    let visibleThreadIndexes = getVisibleThreads(
+      globalTracks,
+      hiddenGlobalTracks,
+      localTracksByPid,
+      hiddenLocalTracksByPid
+    );
 
-    // Don't trust the selectedThreadIndex value to make sense or exists here. If it's not in the
-    // thread indexes, or is listed in the hidden threads, then compute a new
-    // selectedThreadIndex.
-    if (
-      selectedThreadIndex === null ||
-      !threadIndexes.includes(selectedThreadIndex) ||
-      hiddenThreadIndexes.includes(selectedThreadIndex)
-    ) {
-      const visibleThreads = threadIndexes
-        .filter(threadIndex => !hiddenThreadIndexes.includes(threadIndex))
-        .map(threadIndex => profile.threads[threadIndex]);
-
-      // Select either the GeckoMain [tab] thread, or the first thread in the thread
-      // order.
-      selectedThreadIndex = profile.threads.indexOf(
-        _findDefaultThread(visibleThreads)
+    // This validity check can't be extracted into a separate function, as it needs
+    // to update a lot of the local variables in this function.
+    if (visibleThreadIndexes.length === 0) {
+      // All threads are hidden, since this can't happen normally, revert them all.
+      visibleThreadIndexes = profile.threads.map(
+        (_, threadIndex) => threadIndex
       );
-
-      if (selectedThreadIndex === -1) {
-        selectedThreadIndex = null;
+      hiddenGlobalTracks = new Set();
+      const newHiddenTracksByPid = new Map();
+      for (const [pid] of hiddenLocalTracksByPid) {
+        newHiddenTracksByPid.set(pid, new Set());
       }
+      hiddenLocalTracksByPid = newHiddenTracksByPid;
     }
+
+    selectedThreadIndex = initializeSelectedThreadIndex(
+      selectedThreadIndex,
+      visibleThreadIndexes,
+      profile
+    );
 
     dispatch({
       type: 'VIEW_PROFILE',
       profile,
-      hiddenThreadIndexes,
       selectedThreadIndex,
+      globalTracks,
+      globalTrackOrder,
+      hiddenGlobalTracks,
+      localTracksByPid,
+      hiddenLocalTracksByPid,
+      localTrackOrderByPid,
       pathInZipFile,
+      dataSource: getDataSource(getState()),
     });
   };
-}
-
-/**
- * Find idle threads to hide. It is really annoying for an end user to load a profile
- * full of empty threads. It can be helpful to hide certain threads that appear to
- * be idle. This function attempts to find and hide idle threads.
- */
-function _hideIdleThreads(profile: Profile): ThreadIndex[] {
-  const hiddenThreadIndexes = [];
-  // Go through each thread.
-  for (
-    let threadIndex = 0;
-    threadIndex < profile.threads.length;
-    threadIndex++
-  ) {
-    // Hide content threads with no RefreshDriverTick. This indicates they were
-    // not painted to, and most likely idle. This is just a heuristic to help users.
-    const thread = profile.threads[threadIndex];
-    if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
-      let isPaintMarkerFound = false;
-      if (thread.stringTable.hasString('RefreshDriverTick')) {
-        const paintStringIndex = thread.stringTable.indexForString(
-          'RefreshDriverTick'
-        );
-
-        for (
-          let markerIndex = 0;
-          markerIndex < thread.markers.length;
-          markerIndex++
-        ) {
-          if (paintStringIndex === thread.markers.name[markerIndex]) {
-            isPaintMarkerFound = true;
-            break;
-          }
-        }
-      }
-      if (!isPaintMarkerFound) {
-        hiddenThreadIndexes.push(threadIndex);
-      }
-    }
-  }
-
-  return hiddenThreadIndexes;
-}
-
-function _findDefaultThread(threads: Thread[]): Thread | null {
-  if (threads.length === 0) {
-    // Tests may have no threads.
-    return null;
-  }
-  const contentThreadId = threads.findIndex(
-    thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
-  );
-  const defaultThreadIndex =
-    contentThreadId !== -1 ? contentThreadId : defaultThreadOrder(threads)[0];
-
-  return threads[defaultThreadIndex];
 }
 
 export function requestingSymbolTable(requestedLib: RequestedLib): Action {

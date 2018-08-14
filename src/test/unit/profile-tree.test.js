@@ -8,6 +8,7 @@ import {
   computeCallTreeCountsAndTimings,
   CallTree,
 } from '../../profile-logic/call-tree';
+import { getRootsAndChildren } from '../../profile-logic/flame-graph';
 import {
   getCallNodeInfo,
   invertCallstack,
@@ -15,7 +16,7 @@ import {
   getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
 } from '../../profile-logic/profile-data';
-import { formatTree } from '../fixtures/utils';
+import { formatTree, formatTreeIncludeCategories } from '../fixtures/utils';
 
 import type { Profile } from '../../types/profile';
 
@@ -35,23 +36,32 @@ describe('unfiltered call tree', function() {
 
   function getProfile() {
     return getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E G
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  G
     `).profile;
   }
 
   function callTreeFromProfile(profile: Profile): CallTree {
     const [thread] = profile.threads;
-    const { interval } = profile.meta;
+    const { interval, categories } = profile.meta;
+    const defaultCategory = categories.findIndex(c => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable
+      thread.funcTable,
+      defaultCategory
     );
-    return getCallTree(thread, interval, callNodeInfo, 'combined', false);
+    return getCallTree(
+      thread,
+      interval,
+      callNodeInfo,
+      categories,
+      'combined',
+      false
+    );
   }
 
   /**
@@ -61,10 +71,14 @@ describe('unfiltered call tree', function() {
   describe('computed counts and timings', function() {
     const profile = getProfile();
     const [thread] = profile.threads;
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable
+      thread.funcTable,
+      defaultCategory
     );
 
     it('does', function() {
@@ -82,6 +96,37 @@ describe('unfiltered call tree', function() {
         callNodeTimes: {
           selfTime: new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
           totalTime: new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
+        },
+      });
+    });
+  });
+
+  describe('roots and children for flame graph', function() {
+    const profile = getProfile();
+    const [thread] = profile.threads;
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
+    const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+
+    it('returns roots and children', function() {
+      expect(
+        getRootsAndChildren(
+          thread,
+          callNodeInfo.callNodeTable,
+          new Uint32Array([1, 2, 2, 1, 0, 1, 0, 1, 0]),
+          new Float32Array([3, 3, 2, 1, 1, 1, 1, 1, 1])
+        )
+      ).toEqual({
+        roots: [0],
+        children: {
+          array: new Uint32Array([1, 7, 2, 5, 3, 4, 6, 8, 0]),
+          offsets: new Uint32Array([0, 1, 3, 5, 6, 6, 7, 7, 8, 8]),
         },
       });
     });
@@ -125,11 +170,11 @@ describe('unfiltered call tree', function() {
      *  E:1,1       G:1,1
      */
     const { profile } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E G
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  G
     `);
     const callTree = callTreeFromProfile(profile);
     it('computes an unfiltered call tree', function() {
@@ -148,17 +193,48 @@ describe('unfiltered call tree', function() {
   });
 
   /**
+   * The same as the previous test, but with categories
+   */
+  describe('computed structure with categories', function() {
+    /**
+     * Test that the category of a frame gets inherited down into its subtree
+     * of the call tree, until reaching a frame that has an explicit category.
+     */
+    const { profile } = getProfileFromTextSamples(`
+      A           A                A
+      B[cat:DOM]  B[cat:DOM]       B[cat:DOM]
+      C           C                H
+      D           F[cat:Graphics]  I[cat:Other]
+      E           G
+    `);
+    const callTree = callTreeFromProfile(profile);
+    it('computes an unfiltered call tree', function() {
+      expect(formatTreeIncludeCategories(callTree)).toEqual([
+        '- A [Other] (total: 3, self: —)',
+        '  - B [DOM] (total: 3, self: —)',
+        '    - C [DOM] (total: 2, self: —)',
+        '      - D [DOM] (total: 1, self: —)',
+        '        - E [DOM] (total: 1, self: 1)',
+        '      - F [Graphics] (total: 1, self: —)',
+        '        - G [Graphics] (total: 1, self: 1)',
+        '    - H [DOM] (total: 1, self: —)',
+        '      - I [Other] (total: 1, self: 1)',
+      ]);
+    });
+  });
+
+  /**
    * These tests provides coverage for every method of the CallTree. It's less about
    * correct tree structure, and more of simple assertions about how the interface
    * is supposed to behave. There is probably duplication of coverage with other tests.
    */
   describe('CallTree methods', function() {
     const { profile } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E G
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  G
     `);
     const callTree = callTreeFromProfile(profile);
 
@@ -170,15 +246,6 @@ describe('unfiltered call tree', function() {
 
     describe('getChildren()', function() {
       it('returns an array with the children indexes', function() {
-        expect(callTree.getChildren(C)).toEqual([D, F]);
-        expect(callTree.getChildren(E)).toEqual([]);
-      });
-    });
-
-    describe('getChildren() after preloading cache', function() {
-      it('returns an array with the children indexes', function() {
-        const callTree = callTreeFromProfile(profile);
-        callTree.preloadChildrenCache();
         expect(callTree.getChildren(C)).toEqual([D, F]);
         expect(callTree.getChildren(E)).toEqual([]);
       });
@@ -245,7 +312,9 @@ describe('unfiltered call tree', function() {
           name: 'A',
           selfTime: '—',
           totalTime: '3',
-          totalTimePercent: '100%',
+          totalTimePercent: '100.0%',
+          categoryColor: 'grey',
+          categoryName: 'Other',
         });
       });
     });
@@ -278,10 +347,14 @@ describe('unfiltered call tree', function() {
   describe('getCallNodeIndexFromPath', function() {
     const profile = getProfile();
     const [thread] = profile.threads;
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
     const { callNodeTable } = getCallNodeInfo(
       thread.stackTable,
       thread.frameTable,
-      thread.funcTable
+      thread.funcTable,
+      defaultCategory
     );
 
     // Helper to make the assertions a little less verbose.
@@ -319,25 +392,61 @@ describe('inverted call tree', function() {
    */
   describe('computed structure', function() {
     const profile = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C X C
-      D Y X
-      E Z Y
-          Z
+      A                A           A
+      B[cat:DOM]       B[cat:DOM]  B[cat:DOM]
+      C[cat:Graphics]  X           C[cat:Graphics]
+      D[cat:Other]     Y           X
+      E                Z           Y
+                                   Z
     `).profile;
-    const invertedThread = invertCallstack(profile.threads[0]);
-    const { interval } = profile.meta;
-    const callNodeInfo = getCallNodeInfo(
-      invertedThread.stackTable,
-      invertedThread.frameTable,
-      invertedThread.funcTable
-    );
+    const { interval, categories } = profile.meta;
+    const defaultCategory = categories.findIndex(c => c.color === 'grey');
 
+    // Check the non-inverted tree first.
+    const thread = profile.threads[0];
+    const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
     const callTree = getCallTree(
-      invertedThread,
+      thread,
       interval,
       callNodeInfo,
+      categories,
+      'combined',
+      true
+    );
+    it('computes an non-inverted call tree', function() {
+      expect(formatTreeIncludeCategories(callTree)).toEqual([
+        '- A [Other] (total: 3, self: 3)',
+        '  - B [DOM] (total: 3, self: —)',
+        '    - C [Graphics] (total: 2, self: —)',
+        '      - D [Other] (total: 1, self: —)',
+        '        - E [Other] (total: 1, self: —)',
+        '      - X [Graphics] (total: 1, self: —)',
+        '        - Y [Graphics] (total: 1, self: —)',
+        '          - Z [Graphics] (total: 1, self: —)',
+        '    - X [DOM] (total: 1, self: —)',
+        '      - Y [DOM] (total: 1, self: —)',
+        '        - Z [DOM] (total: 1, self: —)',
+      ]);
+    });
+
+    // Now compute the inverted tree and check it.
+    const invertedThread = invertCallstack(thread, defaultCategory);
+    const invertedCallNodeInfo = getCallNodeInfo(
+      invertedThread.stackTable,
+      invertedThread.frameTable,
+      invertedThread.funcTable,
+      defaultCategory
+    );
+    const invertedCallTree = getCallTree(
+      invertedThread,
+      interval,
+      invertedCallNodeInfo,
+      categories,
       'combined',
       true
     );
@@ -365,22 +474,30 @@ describe('inverted call tree', function() {
      *      ^         ^         ^
      *      |         |         |
      *      L         M         R   <- Label the branches. (left, middle, right)
+     *
+     * This test also checks that stacks of conflicting categories end up with
+     * the "Other" category. In this test, in the non-inverted tree, the nodes
+     * for the functions X, Y, and Z have different categories depending on
+     * which subtree they are in: They have category "Graphics" in the subtree
+     * under C, and the category "DOM" in the subtree that's directly attached
+     * to B. In the inverted tree, those nodes collapse into each other, and
+     * their category should be set to "Other".
      */
     it('computes an inverted call tree', function() {
-      expect(formatTree(callTree)).toEqual([
-        '- Z (total: 2, self: 2)',
-        '  - Y (total: 2, self: —)',
-        '    - X (total: 2, self: —)',
-        '      - B (total: 1, self: —)',
-        '        - A (total: 1, self: —)',
-        '      - C (total: 1, self: —)',
-        '        - B (total: 1, self: —)',
-        '          - A (total: 1, self: —)',
-        '- E (total: 1, self: 1)',
-        '  - D (total: 1, self: —)',
-        '    - C (total: 1, self: —)',
-        '      - B (total: 1, self: —)',
-        '        - A (total: 1, self: —)',
+      expect(formatTreeIncludeCategories(invertedCallTree)).toEqual([
+        '- Z [Other] (total: 2, self: 2)',
+        '  - Y [Other] (total: 2, self: —)',
+        '    - X [Other] (total: 2, self: —)',
+        '      - B [DOM] (total: 1, self: —)',
+        '        - A [Other] (total: 1, self: —)',
+        '      - C [Graphics] (total: 1, self: —)',
+        '        - B [DOM] (total: 1, self: —)',
+        '          - A [Other] (total: 1, self: —)',
+        '- E [Other] (total: 1, self: 1)',
+        '  - D [Other] (total: 1, self: —)',
+        '    - C [Graphics] (total: 1, self: —)',
+        '      - B [DOM] (total: 1, self: —)',
+        '        - A [Other] (total: 1, self: —)',
       ]);
     });
   });

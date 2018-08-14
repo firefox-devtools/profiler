@@ -6,7 +6,7 @@
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
-import EmptyReasons from './EmptyReasons';
+import CallTreeEmptyReasons from './CallTreeEmptyReasons';
 import NodeIcon from '../shared/NodeIcon';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
@@ -19,7 +19,7 @@ import {
   selectedThreadSelectors,
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
-  getProfileViewOptions,
+  getPreviewSelection,
 } from '../../reducers/profile-view';
 import { getIconsWithClassNames } from '../../reducers/icons';
 import {
@@ -95,7 +95,11 @@ class CallTreeComponent extends PureComponent<Props> {
 
   componentDidMount() {
     this.focus();
-    this.procureInterestingInitialSelection();
+    if (this.props.selectedCallNodeIndex === null) {
+      this.procureInterestingInitialSelection();
+    } else if (this._treeView) {
+      this._treeView.scrollSelectionIntoView();
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -175,7 +179,7 @@ class CallTreeComponent extends PureComponent<Props> {
       callNodeMaxDepth,
     } = this.props;
     if (tree.getRoots().length === 0) {
-      return <EmptyReasons />;
+      return <CallTreeEmptyReasons />;
     }
     return (
       <TreeView
@@ -190,7 +194,7 @@ class CallTreeComponent extends PureComponent<Props> {
         highlightRegExp={searchStringsRegExp}
         disableOverscan={disableOverscan}
         ref={this._takeTreeViewRef}
-        contextMenuId={'CallNodeContextMenu'}
+        contextMenuId="CallNodeContextMenu"
         maxNodeDepth={callNodeMaxDepth}
         icons={this.props.icons}
         rowHeight={16}
@@ -214,7 +218,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       state
     ),
     searchStringsRegExp: getSearchStringsAsRegExp(state),
-    disableOverscan: getProfileViewOptions(state).selection.isModifying,
+    disableOverscan: getPreviewSelection(state).isModifying,
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
     icons: getIconsWithClassNames(state),

@@ -15,7 +15,7 @@ import * as ProfileView from '../../actions/profile-view';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
 
-const { selectedThreadSelectors } = ProfileViewSelectors;
+const { selectedThreadSelectors, selectedNodeSelectors } = ProfileViewSelectors;
 
 describe('call node paths on implementation filter change', function() {
   const {
@@ -182,98 +182,21 @@ describe('actions/ProfileView', function() {
     });
   });
 
-  describe('changeRightClickedThread', function() {
+  describe('changeRightClickedTrack', function() {
     it('changes the right clicked thread index', function() {
       const { profile } = getProfileFromTextSamples('A', 'B');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(
-        ProfileViewSelectors.getRightClickedThreadIndex(getState())
-      ).toEqual(0);
-      dispatch(ProfileView.changeRightClickedThread(1));
-      expect(
-        ProfileViewSelectors.getRightClickedThreadIndex(getState())
-      ).toEqual(1);
-    });
-  });
-
-  describe('changeThreadOrder', function() {
-    it('changes the thread order', function() {
-      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-      const { dispatch, getState } = storeWithProfile(profile);
-
-      expect(UrlStateSelectors.getThreadOrder(getState())).toEqual([0, 1, 2]);
-      withAnalyticsMock(() => {
-        dispatch(ProfileView.changeThreadOrder([2, 1, 0]));
-        expect(self.ga).toBeCalledWith('send', {
-          eventAction: 'change thread order',
-          eventCategory: 'profile',
-          hitType: 'event',
-        });
+      expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual({
+        trackIndex: 0,
+        type: 'global',
       });
-      expect(UrlStateSelectors.getThreadOrder(getState())).toEqual([2, 1, 0]);
-    });
-  });
-
-  describe('hideThread', function() {
-    it('hides threads', function() {
-      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-      const { dispatch, getState } = storeWithProfile(profile);
-
-      expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([]);
-      withAnalyticsMock(() => {
-        dispatch(ProfileView.hideThread(1));
-        expect(self.ga).toBeCalledWith('send', {
-          eventAction: 'hide',
-          eventCategory: 'threads',
-          eventLabel: 'Empty',
-          hitType: 'event',
-        });
-      });
-      expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([1]);
-    });
-  });
-
-  describe('showThread', function() {
-    it('shows threads', function() {
-      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-      const { dispatch, getState } = storeWithProfile(profile);
-
-      dispatch(ProfileView.hideThread(0));
-      dispatch(ProfileView.hideThread(1));
-
-      expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([0, 1]);
-
-      withAnalyticsMock(() => {
-        dispatch(ProfileView.showThread(0));
-        expect(self.ga).toBeCalledWith('send', {
-          eventAction: 'show',
-          eventCategory: 'threads',
-          eventLabel: 'Empty',
-          hitType: 'event',
-        });
-      });
-      expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([1]);
-    });
-  });
-
-  describe('isolateThread', function() {
-    it('isolates a thread', function() {
-      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
-      const { dispatch, getState } = storeWithProfile(profile);
-
-      expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([]);
-
-      withAnalyticsMock(() => {
-        dispatch(ProfileView.isolateThread(1));
-
-        expect(UrlStateSelectors.getHiddenThreads(getState())).toEqual([0, 2]);
-        expect(self.ga).toBeCalledWith('send', {
-          eventAction: 'isolate',
-          eventCategory: 'threads',
-          eventLabel: 'Empty',
-          hitType: 'event',
-        });
+      dispatch(
+        ProfileView.changeRightClickedTrack({ trackIndex: 1, type: 'global' })
+      );
+      expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual({
+        trackIndex: 1,
+        type: 'global',
       });
     });
   });
@@ -311,9 +234,9 @@ describe('actions/ProfileView', function() {
         profile,
         funcNamesPerThread: [funcNames],
       } = getProfileFromTextSamples(`
-        A A A
-        B B E
-        C D
+        A  A  A
+        B  B  E
+        C  D
       `);
       const threadIndex = 0;
       const A = funcNames.indexOf('A');
@@ -481,25 +404,24 @@ describe('actions/ProfileView', function() {
     });
   });
 
-  describe('updateProfileSelection', function() {
+  describe('updatePreviewSelection', function() {
     it('updates the profile selection', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({ hasSelection: false, isModifying: false });
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+        hasSelection: false,
+        isModifying: false,
+      });
       dispatch(
-        ProfileView.updateProfileSelection({
+        ProfileView.updatePreviewSelection({
           hasSelection: true,
           isModifying: false,
           selectionStart: 0,
           selectionEnd: 1,
         })
       );
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionStart: 0,
@@ -508,124 +430,116 @@ describe('actions/ProfileView', function() {
     });
   });
 
-  describe('addRangeFilter', function() {
-    it('adds a range filter', function() {
+  describe('commitRange', function() {
+    it('commits a range', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([]);
-      dispatch(ProfileView.addRangeFilter(0, 10));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([]);
+      dispatch(ProfileView.commitRange(0, 10));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
       ]);
 
-      dispatch(ProfileView.addRangeFilter(1, 9));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      dispatch(ProfileView.commitRange(1, 9));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
     });
   });
 
-  describe('addRangeFilterAndUnsetSelection', function() {
-    it('adds a range filter and unsets a selection', function() {
+  describe('commitRangeAndUnsetSelection', function() {
+    it('commits a range and unsets a selection', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      dispatch(ProfileView.addRangeFilter(0, 10));
+      dispatch(ProfileView.commitRange(0, 10));
       dispatch(
-        ProfileView.updateProfileSelection({
+        ProfileView.updatePreviewSelection({
           hasSelection: true,
           isModifying: false,
           selectionStart: 1,
           selectionEnd: 9,
         })
       );
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
       ]);
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionEnd: 9,
         selectionStart: 1,
       });
 
-      dispatch(ProfileView.addRangeFilterAndUnsetSelection(2, 8));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      dispatch(ProfileView.commitRange(2, 8));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 2, end: 8 },
       ]);
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: false,
         isModifying: false,
       });
     });
   });
 
-  describe('popRangeFilters', function() {
+  describe('popCommittedRanges', function() {
     function setupStore() {
       const { profile } = getProfileFromTextSamples('A');
       const store = storeWithProfile(profile);
-      store.dispatch(ProfileView.addRangeFilter(0, 10));
-      store.dispatch(ProfileView.addRangeFilter(1, 9));
-      store.dispatch(ProfileView.addRangeFilter(2, 8));
-      store.dispatch(ProfileView.addRangeFilter(3, 7));
+      store.dispatch(ProfileView.commitRange(0, 10));
+      store.dispatch(ProfileView.commitRange(1, 9));
+      store.dispatch(ProfileView.commitRange(2, 8));
+      store.dispatch(ProfileView.commitRange(3, 7));
       return store;
     }
 
-    it('pops a range filter', function() {
+    it('pops a committed range', function() {
       const { getState, dispatch } = setupStore();
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
         { start: 2, end: 8 },
         { start: 3, end: 7 },
       ]);
-      dispatch(ProfileView.popRangeFilters(2));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      dispatch(ProfileView.popCommittedRanges(2));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
     });
 
-    it('pops a range filter and unsets the selection', function() {
+    it('pops a committed range and unsets the selection', function() {
       const { getState, dispatch } = setupStore();
       dispatch(
-        ProfileView.updateProfileSelection({
+        ProfileView.updatePreviewSelection({
           hasSelection: true,
           isModifying: false,
           selectionStart: 1,
           selectionEnd: 9,
         })
       );
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionEnd: 9,
         selectionStart: 1,
       });
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
         { start: 2, end: 8 },
         { start: 3, end: 7 },
       ]);
 
-      dispatch(ProfileView.popRangeFiltersAndUnsetSelection(2));
-      expect(UrlStateSelectors.getRangeFilters(getState())).toEqual([
+      dispatch(ProfileView.popCommittedRanges(2));
+      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
-      expect(
-        ProfileViewSelectors.getProfileViewOptions(getState()).selection
-      ).toEqual({
+      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: false,
         isModifying: false,
       });
@@ -719,11 +633,11 @@ describe('snapshots of selectors/profile-view', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A A A A A A A A A
-      B B B B B B B B B
-      C C C C C C H H H
-      D D D F F F I I I
-      E E E G G G
+      A  A  A  A  A  A  A  A  A
+      B  B  B  B  B  B  B  B  B
+      C  C  C  C  C  C  H  H  H
+      D  D  D  F  F  F  I  I  I
+      E  E  E  G  G  G
     `);
     const A = funcNames.indexOf('A');
     const B = funcNames.indexOf('B');
@@ -754,7 +668,15 @@ describe('snapshots of selectors/profile-view', function() {
     dispatch(ProfileView.changeExpandedCallNodes(0, [[A], [A, B]]));
     dispatch(ProfileView.changeSelectedCallNode(0, [A, B]));
     dispatch(ProfileView.changeSelectedMarker(0, 1));
-    dispatch(ProfileView.addRangeFilter(3, 7));
+    dispatch(ProfileView.commitRange(3, 7)); // Reminder: upper bound "7" is exclusive.
+    dispatch(
+      ProfileView.updatePreviewSelection({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 4,
+        selectionEnd: 6,
+      })
+    );
     return { getState, dispatch, samplesThread, mergeFunction, A, B, C };
   }
   it('matches the last stored run of getProfile', function() {
@@ -776,11 +698,12 @@ describe('snapshots of selectors/profile-view', function() {
       'Thread with markers',
     ]);
   });
-  it('matches the last stored run of getRightClickedThreadIndex', function() {
+  it('matches the last stored run of getRightClickedTrack', function() {
     const { getState } = setupStore();
-    expect(ProfileViewSelectors.getRightClickedThreadIndex(getState())).toEqual(
-      0
-    );
+    expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual({
+      trackIndex: 0,
+      type: 'global',
+    });
   });
   it('matches the last stored run of selectedThreadSelector.getThread', function() {
     const { getState, samplesThread } = setupStore();
@@ -843,18 +766,18 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getMarkerTiming(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getRangeSelectionFilteredTracingMarkers', function() {
+  it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkers', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getRangeSelectionFilteredTracingMarkers(
+      selectedThreadSelectors.getCommittedRangeFilteredTracingMarkers(
         getState()
       )
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getRangeSelectionFilteredTracingMarkersForHeader', function() {
+  it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkersForHeader', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getRangeSelectionFilteredTracingMarkersForHeader(
+      selectedThreadSelectors.getCommittedRangeFilteredTracingMarkersForHeader(
         getState()
       )
     ).toMatchSnapshot();
@@ -865,10 +788,10 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getFilteredThread(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getRangeSelectionFilteredThread', function() {
+  it('matches the last stored run of selectedThreadSelector.getPreviewFilteredThread', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getRangeSelectionFilteredThread(getState())
+      selectedThreadSelectors.getPreviewFilteredThread(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getCallNodeInfo', function() {
@@ -940,5 +863,27 @@ describe('snapshots of selectors/profile-view', function() {
       end: 9,
       start: 0,
     });
+  });
+
+  it('matches the last stored run of selectedNodeSelectors.getName', () => {
+    const { getState } = setupStore();
+    expect(selectedNodeSelectors.getName(getState())).toEqual('B');
+  });
+
+  it('matches the last stored run of selectedNodeSelectors.getIsJS', () => {
+    const { getState } = setupStore();
+    expect(selectedNodeSelectors.getIsJS(getState())).toEqual(false);
+  });
+
+  it('matches the last stored run of selectedNodeSelectors.getLib', () => {
+    const { getState } = setupStore();
+    expect(selectedNodeSelectors.getLib(getState())).toEqual('');
+  });
+
+  it('matches the last stored run of selectedNodeSelectors.getTimingsForSidebar', () => {
+    const { getState } = setupStore();
+    expect(
+      selectedNodeSelectors.getTimingsForSidebar(getState())
+    ).toMatchSnapshot();
   });
 });

@@ -11,6 +11,7 @@ import {
 } from './profile-data';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import type {
+  CategoryList,
   Thread,
   FuncTable,
   ResourceTable,
@@ -48,6 +49,7 @@ function extractFaviconFromLibname(libname: string): string | null {
 }
 
 export class CallTree {
+  _categories: CategoryList;
   _callNodeTable: CallNodeTable;
   _callNodeTimes: CallNodeTimes;
   _callNodeChildCount: Uint32Array; // A table column matching the callNodeTable
@@ -57,13 +59,15 @@ export class CallTree {
   _rootTotalTime: number;
   _rootCount: number;
   _displayDataByIndex: Map<IndexIntoCallNodeTable, CallNodeDisplayData>;
-  _children: Map<IndexIntoCallNodeTable, CallNodeChildren>;
-  _isChildrenCachePreloaded: boolean;
+  // _children is indexed by IndexIntoCallNodeTable. Since they are
+  // integers, using an array directly is faster than going through a Map.
+  _children: Array<CallNodeChildren>;
   _jsOnly: boolean;
   _isIntegerInterval: boolean;
 
   constructor(
     { funcTable, resourceTable, stringTable }: Thread,
+    categories: CategoryList,
     callNodeTable: CallNodeTable,
     callNodeTimes: CallNodeTimes,
     callNodeChildCount: Uint32Array,
@@ -72,6 +76,7 @@ export class CallTree {
     jsOnly: boolean,
     isIntegerInterval: boolean
   ) {
+    this._categories = categories;
     this._callNodeTable = callNodeTable;
     this._callNodeTimes = callNodeTimes;
     this._callNodeChildCount = callNodeChildCount;
@@ -81,8 +86,7 @@ export class CallTree {
     this._rootTotalTime = rootTotalTime;
     this._rootCount = rootCount;
     this._displayDataByIndex = new Map();
-    this._children = new Map();
-    this._isChildrenCachePreloaded = false;
+    this._children = [];
     this._jsOnly = jsOnly;
     this._isIntegerInterval = isIntegerInterval;
   }
@@ -91,62 +95,9 @@ export class CallTree {
     return this.getChildren(-1);
   }
 
-  /**
-   * Preload the internal cache of children so that subsequent calls
-   * to getChildren() return in constant time.
-   *
-   * This is an essential optimization for the flame graph since it
-   * needs to traverse all children of the call tree in one pass.
-   */
-  preloadChildrenCache() {
-    if (!this._isChildrenCachePreloaded) {
-      this._children.clear();
-      this._children.set(-1, []); // -1 is the parent of the roots
-      for (
-        let callNodeIndex = 0;
-        callNodeIndex < this._callNodeTable.length;
-        callNodeIndex++
-      ) {
-        // This loop assumes parents always come before their children
-        // in the call node table. For every call node index, we set
-        // its children to be an empty array. Then we always have an
-        // array to append to when any call node acts as a parent
-        // through the prefix.
-        this._children.set(callNodeIndex, []);
-
-        if (this._callNodeTimes.totalTime[callNodeIndex] === 0) {
-          continue;
-        }
-
-        const siblings = this._children.get(
-          this._callNodeTable.prefix[callNodeIndex]
-        );
-        if (siblings === undefined) {
-          // We should definitely have created a children array for
-          // the parent in an earlier iteration of this loop. Add this
-          // condition to satisfy flow.
-          throw new Error(
-            "Failed to retrieve array of children. This shouldn't happen."
-          );
-        }
-        siblings.push(callNodeIndex);
-        siblings.sort(
-          (a, b) =>
-            this._callNodeTimes.totalTime[b] - this._callNodeTimes.totalTime[a]
-        );
-      }
-      this._isChildrenCachePreloaded = true;
-    }
-  }
-
   getChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
-    let children = this._children.get(callNodeIndex);
+    let children = this._children[callNodeIndex];
     if (children === undefined) {
-      if (this._isChildrenCachePreloaded) {
-        console.error(
-          `Children for callNodeIndex ${callNodeIndex} not found in cache despite having a preloaded cache.`
-        );
-      }
       const childCount =
         callNodeIndex === -1
           ? this._rootCount
@@ -169,7 +120,7 @@ export class CallTree {
         (a, b) =>
           this._callNodeTimes.totalTime[b] - this._callNodeTimes.totalTime[a]
       );
-      this._children.set(callNodeIndex, children);
+      this._children[callNodeIndex] = children;
     }
     return children;
   }
@@ -239,11 +190,11 @@ export class CallTree {
         selfTime,
       } = this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeTable.func[callNodeIndex];
+      const categoryIndex = this._callNodeTable.category[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
       const libName = this._getOriginAnnotation(funcIndex);
-      const precision = this._isIntegerInterval ? 0 : 1;
 
       let icon = null;
       if (resourceType === resourceTypes.webhost) {
@@ -259,11 +210,13 @@ export class CallTree {
       displayData = {
         totalTime: formatNumber(totalTime),
         selfTime: selfTime === 0 ? '—' : formatNumber(selfTime),
-        totalTimePercent: `${(100 * totalTimeRelative).toFixed(precision)}%`,
+        totalTimePercent: `${(100 * totalTimeRelative).toFixed(1)}%`,
         name: funcName,
         lib: libName,
         // Dim platform pseudo-stacks.
         dim: !isJS && this._jsOnly,
+        categoryName: this._categories[categoryIndex].name,
+        categoryColor: this._categories[categoryIndex].color,
         icon,
       };
       this._displayDataByIndex.set(callNodeIndex, displayData);
@@ -287,7 +240,12 @@ function _getInvertedStackSelfTimes(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   interval: Milliseconds
 ): {
+  // In an inverted profile, all the self time is accounted to the root nodes.
+  // So `callNodeSelfTime` will be 0 for all non-root nodes.
   callNodeSelfTime: Float32Array,
+  // This property stores the time spent in the stacks' leaf nodes.
+  // Later these values will make it possible to compute the running times for
+  // all nodes by summing up the values up the tree.
   callNodeLeafTime: Float32Array,
 } {
   // Compute an array that maps the callNodeIndex to its root.
@@ -298,10 +256,18 @@ function _getInvertedStackSelfTimes(
     callNodeIndex++
   ) {
     const prefixCallNode = callNodeTable.prefix[callNodeIndex];
-    if (prefixCallNode !== -1) {
-      callNodeToRoot[callNodeIndex] = callNodeToRoot[prefixCallNode];
-    } else {
+    if (prefixCallNode === -1) {
+      // callNodeIndex is a root node
       callNodeToRoot[callNodeIndex] = callNodeIndex;
+    } else {
+      // The callNodeTable guarantees that a callNode's prefix always comes
+      // before the callNode; prefix references are always to lower callNode
+      // indexes and never to higher indexes.
+      // We are iterating the callNodeTable in forwards direction (starting at
+      // index 0) so we know that we have already visited the current call
+      // node's prefix call node and can reuse its stored root node, which
+      // recursively is the value we're looking for.
+      callNodeToRoot[callNodeIndex] = callNodeToRoot[prefixCallNode];
     }
   }
 
@@ -382,6 +348,8 @@ export function computeCallTreeCountsAndTimings(
   let rootTotalTime = 0;
   let rootCount = 0;
 
+  // We loop the call node table in reverse, so that we find the children
+  // before their parents.
   for (
     let callNodeIndex = callNodeTable.length - 1;
     callNodeIndex >= 0;
@@ -421,6 +389,7 @@ export function getCallTree(
   thread: Thread,
   interval: Milliseconds,
   callNodeInfo: CallNodeInfo,
+  categories: CategoryList,
   implementationFilter: string,
   invertCallstack: boolean
 ): CallTree {
@@ -442,6 +411,7 @@ export function getCallTree(
 
     return new CallTree(
       thread,
+      categories,
       callNodeInfo.callNodeTable,
       callNodeTimes,
       callNodeChildCount,
