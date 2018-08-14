@@ -81,7 +81,13 @@ export function convertPerfScriptProfile(profile: string): Object {
       return frame;
     }
 
-    function addSample(stackArray, time) {
+    function addSample(threadName, stackArray, time) {
+      // often we create a thread which inherits the name of the parent, and
+      // set the thread's name slightly later.  Avoid having the first
+      // sample's name stick.
+      if (name !== threadName) {
+        name = threadName;
+      }
       const stack = stackArray.reduce((prefix, stackFrame) => {
         const frame = getOrCreateFrame(stackFrame);
         return getOrCreateStack(frame, prefix);
@@ -116,7 +122,7 @@ export function convertPerfScriptProfile(profile: string): Object {
       thread = _createThread(threadName, pid, tid);
       threadMap.set(tid, thread);
     }
-    thread.addSample(stack, timeStamp);
+    thread.addSample(threadName, stack, timeStamp);
   }
 
   // Parse the format. The two regular expressions and some of the comments
@@ -145,7 +151,7 @@ export function convertPerfScriptProfile(profile: string): Object {
     if (sampleStartMatch) {
       const threadName = sampleStartMatch[1];
       const tid = sampleStartMatch[3] || sampleStartMatch[2];
-      const pid = sampleStartMatch[3] ? sampleStartMatch[2] : 0;
+      const pid = sampleStartMatch[3] ? Number(sampleStartMatch[2]) : 0;
       const timeStamp = parseFloat(sampleStartMatch[4]) * 1000;
       // Assume start time is the time of the first sample
       if (startTime === 0) {
