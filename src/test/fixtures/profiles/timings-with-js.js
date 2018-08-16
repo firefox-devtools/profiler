@@ -64,7 +64,8 @@ function _createGeckoThread(name: string): GeckoThread {
         implementation: 1,
         optimizations: 2,
         line: 3,
-        category: 4,
+        column: 4,
+        category: 5,
       },
       data: [
         [0, null, null, null, null], // 0: (root)

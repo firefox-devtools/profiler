@@ -118,6 +118,7 @@ export function getEmptyThread(overrides: ?Object): Thread {
         func: [],
         implementation: [],
         line: [],
+        column: [],
         optimizations: [],
         length: 0,
       },
@@ -447,6 +448,7 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.category.push(category);
         frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(null);
+        frameTable.column.push(null);
         frameTable.optimizations.push(null);
         frameIndex = frameTable.length++;
       }
