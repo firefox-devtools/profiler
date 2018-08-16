@@ -128,6 +128,7 @@ export type FrameTable = {
   func: IndexIntoFuncTable[],
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
+  column: (number | null)[],
   optimizations: ({} | null)[],
   length: number,
 };

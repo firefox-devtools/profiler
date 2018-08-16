@@ -11,41 +11,18 @@
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
     "version": 4,
-    "preprocessedProfileVersion": 14,
+    "preprocessedProfileVersion": 15,
     "categories": [
-      {
-        "name": "Idle",
-        "color": "transparent"
-      },
-      {
-        "name": "Other",
-        "color": "grey"
-      },
-      {
-        "name": "JavaScript",
-        "color": "yellow"
-      },
-      {
-        "name": "Layout",
-        "color": "purple"
-      },
-      {
-        "name": "Graphics",
-        "color": "green"
-      },
-      {
-        "name": "DOM",
-        "color": "blue"
-      },
-      {
-        "name": "GC / CC",
-        "color": "orange"
-      },
-      {
-        "name": "Network",
-        "color": "lightblue"
-      }
-    ]
+      { "name": "Idle", "color": "transparent" },
+      { "name": "Other", "color": "grey" },
+      { "name": "JavaScript", "color": "yellow" },
+      { "name": "Layout", "color": "purple" },
+      { "name": "Graphics", "color": "green" },
+      { "name": "DOM", "color": "blue" },
+      { "name": "GC / CC", "color": "orange" },
+      { "name": "Network", "color": "lightblue" }
+    ],
+    "networkURLsRemoved": false
   },
   "threads": [
     {
@@ -96,7 +73,8 @@
         "line": [null, null, null, 4391, 34],
         "category": [null, null, null, 1, null],
         "func": [0, 1, 2, 3, 4],
-        "address": [-1, 3972, 6725, -1, -1]
+        "address": [-1, 3972, 6725, -1, -1],
+        "column": [null, null, null, null, null]
       },
       "funcTable": {
         "length": 5,
@@ -127,34 +105,16 @@
         "name": [4, 5, 10, 10, 5, 8, 8, 9],
         "time": [0, 2, 4, 5, 8, 9, 10, 11],
         "data": [
-          {
-            "category": "VsyncTimestamp",
-            "vsync": 0
-          },
+          { "category": "VsyncTimestamp", "vsync": 0 },
           {
             "category": "Paint",
             "interval": "start",
             "type": "tracing",
-            "cause": {
-              "time": 1,
-              "stack": 2
-            }
+            "cause": { "time": 1, "stack": 2 }
           },
-          {
-            "category": "Paint",
-            "interval": "start",
-            "type": "tracing"
-          },
-          {
-            "category": "Paint",
-            "interval": "end",
-            "type": "tracing"
-          },
-          {
-            "category": "Paint",
-            "interval": "end",
-            "type": "tracing"
-          },
+          { "category": "Paint", "interval": "start", "type": "tracing" },
+          { "category": "Paint", "interval": "end", "type": "tracing" },
+          { "category": "Paint", "interval": "end", "type": "tracing" },
           {
             "type": "tracing",
             "category": "DOMEvent",
@@ -169,10 +129,7 @@
             "eventType": "mouseout",
             "phase": 3
           },
-          {
-            "startTime": 11,
-            "endTime": 12
-          }
+          { "startTime": 11, "endTime": 12 }
         ]
       },
       "samples": {
@@ -248,7 +205,8 @@
         "line": [null, null, null, 4391, 34],
         "category": [null, null, null, 1, null],
         "func": [0, 1, 2, 3, 4],
-        "address": [-1, 3972, 6725, -1, -1]
+        "address": [-1, 3972, 6725, -1, -1],
+        "column": [null, null, null, null, null]
       },
       "funcTable": {
         "length": 5,
@@ -279,34 +237,16 @@
         "name": [4, 5, 10, 10, 5, 8, 8, 9],
         "time": [0, 2, 4, 5, 8, 9, 10, 11],
         "data": [
-          {
-            "category": "VsyncTimestamp",
-            "vsync": 0
-          },
+          { "category": "VsyncTimestamp", "vsync": 0 },
           {
             "category": "Paint",
             "interval": "start",
             "type": "tracing",
-            "cause": {
-              "time": 1,
-              "stack": 2
-            }
+            "cause": { "time": 1, "stack": 2 }
           },
-          {
-            "category": "Paint",
-            "interval": "start",
-            "type": "tracing"
-          },
-          {
-            "category": "Paint",
-            "interval": "end",
-            "type": "tracing"
-          },
-          {
-            "category": "Paint",
-            "interval": "end",
-            "type": "tracing"
-          },
+          { "category": "Paint", "interval": "start", "type": "tracing" },
+          { "category": "Paint", "interval": "end", "type": "tracing" },
+          { "category": "Paint", "interval": "end", "type": "tracing" },
           {
             "type": "tracing",
             "category": "DOMEvent",
@@ -321,10 +261,7 @@
             "eventType": "mouseout",
             "phase": 3
           },
-          {
-            "startTime": 11,
-            "endTime": 12
-          }
+          { "startTime": 11, "endTime": 12 }
         ]
       },
       "samples": {
@@ -401,7 +338,8 @@
         "line": [null, null, null, 4391, 34],
         "category": [null, null, null, 1, null],
         "func": [0, 1, 2, 3, 4],
-        "address": [-1, 3972, 6725, -1, -1]
+        "address": [-1, 3972, 6725, -1, -1],
+        "column": [null, null, null, null, null]
       },
       "funcTable": {
         "length": 5,
@@ -432,34 +370,16 @@
         "name": [4, 5, 10, 10, 5, 8, 8, 9],
         "time": [1000, 1002, 1004, 1005, 1008, 1009, 1010, 1011],
         "data": [
-          {
-            "category": "VsyncTimestamp",
-            "vsync": 0
-          },
+          { "category": "VsyncTimestamp", "vsync": 0 },
           {
             "category": "Paint",
             "interval": "start",
             "type": "tracing",
-            "cause": {
-              "time": 1,
-              "stack": 2
-            }
+            "cause": { "time": 1, "stack": 2 }
           },
-          {
-            "category": "Paint",
-            "interval": "start",
-            "type": "tracing"
-          },
-          {
-            "category": "Paint",
-            "interval": "end",
-            "type": "tracing"
-          },
-          {
-            "category": "Paint",
-            "interval": "end",
-            "type": "tracing"
-          },
+          { "category": "Paint", "interval": "start", "type": "tracing" },
+          { "category": "Paint", "interval": "end", "type": "tracing" },
+          { "category": "Paint", "interval": "end", "type": "tracing" },
           {
             "type": "tracing",
             "category": "DOMEvent",
@@ -474,10 +394,7 @@
             "eventType": "mouseout",
             "phase": 3
           },
-          {
-            "startTime": 1011,
-            "endTime": 1012
-          }
+          { "startTime": 1011, "endTime": 1012 }
         ]
       },
       "samples": {
@@ -522,19 +439,9 @@
       "address": []
     },
     "tasksIdToTaskIndexMap": [],
-    "addressTable": {
-      "length": 0,
-      "address": [],
-      "className": [],
-      "lib": []
-    },
+    "addressTable": { "length": 0, "address": [], "className": [], "lib": [] },
     "addressIndicesByLib": [],
-    "threadTable": {
-      "length": 0,
-      "tid": [],
-      "name": [],
-      "start": []
-    },
+    "threadTable": { "length": 0, "tid": [], "name": [], "start": [] },
     "tidToThreadIndexMap": [],
     "stringArray": []
   }
