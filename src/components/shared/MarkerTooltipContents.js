@@ -122,7 +122,7 @@ function _makePhaseTimesArray(
   return array;
 }
 
-function _dataPrioReplace(str: string) {
+function _dataPrioReplace(str: number) {
   if (str === -20) {
     return 'Priority: Highest (-20)';
   } else if (str === -10) {
