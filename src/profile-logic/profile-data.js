@@ -21,6 +21,8 @@ import type {
   IndexIntoMarkersTable,
   IndexIntoStackTable,
   ThreadIndex,
+  UnprocessedOptimization,
+  ProcessedOptimization,
 } from '../types/profile';
 import type {
   CallNodeInfo,
@@ -1635,4 +1637,118 @@ export function getOriginAnnotationForFunc(
   }
 
   return '';
+}
+
+function _applySchema({ data, schema }) {
+  return data.map(tuple => {
+    const obj = {};
+    for (const key in schema) {
+      if (schema.hasOwnProperty(key)) {
+        obj[key] = tuple[schema[key]];
+      }
+    }
+    return obj;
+  });
+}
+
+// TODO - This function is making it convenient to work with this data, perhaps we should
+// only process out the schema information, and leave the string indexes. This stuff
+// should go in the processing step anyway.
+export function getProcessedOptimizations(
+  stringTable: UniqueStringArray,
+  optimization: UnprocessedOptimization | null
+): ProcessedOptimization | null {
+  if (optimization === null) {
+    return null;
+  }
+  const { types, attempts, line, column } = optimization;
+  const typesProcessed = types.map(entry => {
+    return {
+      mirType: stringTable.getString(entry.mirType),
+      site: stringTable.getString(entry.site),
+      typeset: entry.typeset
+        ? entry.typeset.map(typeset => ({
+            keyedBy: stringTable.getString(typeset.keyedBy),
+            location: typeset.location
+              ? stringTable.getString(typeset.location)
+              : '',
+            name: typeset.name ? stringTable.getString(typeset.name) : '',
+            line: typeset.line,
+          }))
+        : [],
+    };
+  });
+  return {
+    types: typesProcessed,
+    attempts: _applySchema(attempts).map(entry => ({
+      strategy: stringTable.getString(entry.strategy),
+      outcome: stringTable.getString(entry.outcome),
+    })),
+    line,
+    column,
+  };
+}
+
+export function getJitOptimizationsAtCallNode(
+  thread: Thread,
+  callNodeIndex: IndexIntoCallNodeTable | null,
+  interval: Milliseconds,
+  { stackIndexToCallNodeIndex }: CallNodeInfo
+): Array<{
+  selfTime: number,
+  runningTime: number,
+  optimizations: ProcessedOptimization,
+}> {
+  if (callNodeIndex === null) {
+    return [];
+  }
+  const stacks = [];
+  for (
+    let stackIndex = 0;
+    stackIndex < stackIndexToCallNodeIndex.length;
+    stackIndex++
+  ) {
+    if (stackIndexToCallNodeIndex[stackIndex] === callNodeIndex) {
+      stacks.push(stackIndex);
+    }
+  }
+  const results = [];
+  for (const stackIndex of stacks) {
+    const frameIndex = thread.stackTable.frame[stackIndex];
+    const optimizations = getProcessedOptimizations(
+      thread.stringTable,
+      // TODO Make this any, since it's not properly typed.
+      (thread.frameTable.optimizations[frameIndex]: any)
+    );
+    if (optimizations === null) {
+      continue;
+    }
+    let selfTime = 0;
+    let runningTime = 0;
+    const isChildOfStack = new Set([stackIndex]);
+    for (let i = stackIndex + 1; i < thread.stackTable.length; i++) {
+      if (isChildOfStack.has(thread.stackTable.prefix[i])) {
+        isChildOfStack.add(i);
+      }
+    }
+    for (
+      let sampleIndex = 0;
+      sampleIndex < thread.samples.length;
+      sampleIndex++
+    ) {
+      // TODO - This feels like a O(n^2) problem.
+      if (thread.samples.stack[sampleIndex] === stackIndex) {
+        selfTime += interval;
+      }
+      if (isChildOfStack.has(thread.samples.stack[sampleIndex])) {
+        runningTime += interval;
+      }
+    }
+    results.push({
+      selfTime,
+      runningTime,
+      optimizations,
+    });
+  }
+  return results;
 }

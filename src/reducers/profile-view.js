@@ -32,6 +32,7 @@ import type {
   SamplesTable,
   MarkersTable,
   Pid,
+  ProcessedOptimization,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -1113,6 +1114,11 @@ export type SelectorsForNode = {
   getIsJS: State => boolean,
   getLib: State => string,
   getTimingsForSidebar: State => TimingsForPath,
+  getJitOptimizationsForSidebar: State => Array<{
+    selfTime: number,
+    runningTime: number,
+    optimizations: ProcessedOptimization,
+  }>,
 };
 
 export const selectedNodeSelectors: SelectorsForNode = (() => {
@@ -1182,10 +1188,19 @@ export const selectedNodeSelectors: SelectorsForNode = (() => {
     }
   );
 
+  const getJitOptimizationsForSidebar = createSelector(
+    selectedThreadSelectors.getPreviewFilteredThread,
+    selectedThreadSelectors.getSelectedCallNodeIndex,
+    getProfileInterval,
+    selectedThreadSelectors.getCallNodeInfo,
+    ProfileData.getJitOptimizationsAtCallNode
+  );
+
   return {
     getName,
     getIsJS,
     getLib,
     getTimingsForSidebar,
+    getJitOptimizationsForSidebar,
   };
 })();

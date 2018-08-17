@@ -118,18 +118,63 @@ export type MarkersTable = {
   length: number,
 };
 
+// TODO - Put in processing step
+export type UnprocessedOptimization = {
+  types: Array<{
+    site: IndexIntoStringTable,
+    mirType: IndexIntoStringTable,
+    typeset?: [
+      {
+        keyedBy: IndexIntoStringTable,
+        name?: IndexIntoStringTable,
+        location?: IndexIntoStringTable,
+        line?: IndexIntoStringTable,
+      },
+    ],
+  }>,
+  attempts: {
+    schema: {
+      strategy: 0,
+      outcome: 1,
+    },
+    data: [[IndexIntoStringTable, IndexIntoStringTable]],
+  },
+  line: number,
+  column: number,
+};
+
+// TODO - Put in processing step
+export type ProcessedOptimization = {
+  types: Array<{
+    site: string,
+    mirType: string,
+    typeset: Array<{
+      keyedBy: string,
+      name: string,
+      location: string,
+      line: number | void,
+    }>,
+  }>,
+  attempts: Array<{
+    strategy: string,
+    outcome: string,
+  }>,
+  line: number,
+  column: number,
+};
+
 /**
  * Frames contain the context information about the function execution at the moment in
  * time. The relationship between frames is defined by the StackTable.
  */
 export type FrameTable = {
   address: IndexIntoStringTable[],
-  category: (IndexIntoCategoryList | null)[],
+  category: Array<IndexIntoCategoryList | null>,
   func: IndexIntoFuncTable[],
-  implementation: (IndexIntoStringTable | null)[],
-  line: (number | null)[],
-  column: (number | null)[],
-  optimizations: ({} | null)[],
+  implementation: Array<IndexIntoStringTable | null>,
+  line: Array<number | null>,
+  optimizations: Array<{} | null>,
+  column: Array<number | null>,
   length: number,
 };
 

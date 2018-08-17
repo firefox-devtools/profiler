@@ -70,10 +70,57 @@
 .sidebar-label {
   color: var(--grey-50);
   white-space: nowrap;
-  text-align: right;
 }
 
 .sidebar-value {
   white-space: nowrap;
-  text-align: right;
+}
+
+.sidebarOptimizations {
+  border: 1px solid #aaf;
+  padding: 10px;
+}
+
+.sidebarOptimizationsTitle {
+  grid-column-start: span 2;
+}
+
+.sidebarOptimizations {
+  padding: 1em;
+  margin-bottom: 1em;
+
+  font-size: 11px;
+  background: #fff;
+  border: 1px solid var(--grey-30);
+
+  display: grid;
+  grid-column-start: span 2;
+  grid-template-columns: 75px 1fr;
+  grid-gap: 2px 5px;
+  align-content: start; /* the grid isn't vertically stretched */
+
+  line-height: 1.5;
+}
+
+.sidebarOptimizations h1,
+.sidebarOptimizations h2,
+.sidebarOptimizations h3,
+.sidebarOptimizations h4,
+.sidebarOptimizations h5 {
+  grid-column-start: span 2;
+}
+
+.sidebarOptimizationsTitle:first-child {
+  margin-top: 0;
+}
+
+.sidebarOptimizations h3 {
+  margin-bottom: 0;
+  margin-top: 0.3em;
+}
+
+.sidebarOptimizations .sidebar-label,
+.sidebarOptimizations .sidebar-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

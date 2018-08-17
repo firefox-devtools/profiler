@@ -79,7 +79,7 @@ function isSidebarOpenPerPanel(
 ): IsSidebarOpenPerPanelState {
   if (state === undefined) {
     state = {};
-    tabSlugs.forEach(tabSlug => (state[tabSlug] = false));
+    tabSlugs.forEach(tabSlug => (state[tabSlug] = true));
   }
 
   switch (action.type) {

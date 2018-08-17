@@ -20,7 +20,7 @@ import type {
   ConnectedProps,
   ExplicitConnectOptions,
 } from '../../utils/connect';
-import type { ThreadIndex } from '../../types/profile';
+import type { ThreadIndex, ProcessedOptimization } from '../../types/profile';
 import type {
   CallNodeTable,
   IndexIntoCallNodeTable,
@@ -79,7 +79,12 @@ function SidebarDetail({ label, children }: SidebarDetailProps) {
   return (
     <React.Fragment>
       <div className="sidebar-label">{label}:</div>
-      <div className="sidebar-value">{children}</div>
+      <div
+        className="sidebar-value"
+        title={typeof children === 'string' ? children : null}
+      >
+        {children}
+      </div>
     </React.Fragment>
   );
 }
@@ -164,11 +169,62 @@ type StateProps = {|
   +name: string,
   +lib: string,
   +timings: TimingsForPath,
+  +optimizationsList: Array<{
+    runningTime: number,
+    selfTime: number,
+    optimizations: ProcessedOptimization,
+  }>,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
 class CallTreeSidebar extends React.PureComponent<Props> {
+  renderOptimizations() {
+    const { optimizationsList } = this.props;
+    if (optimizationsList.length === 0) {
+      return (
+        <div className="sidebarOptimizations">
+          <h3 className="sidebarOptimizationsTitle">JIT Optimizations</h3>
+          <div>No optimizations</div>
+        </div>
+      );
+    }
+    return optimizationsList.map(
+      ({ selfTime, runningTime, optimizations }, index) => (
+        <div className="sidebarOptimizations" key={index}>
+          <h3 className="sidebarOptimizationsTitle">
+            JIT Optimizations Frame {index + 1}
+          </h3>
+          <SidebarDetail label="Self time">{selfTime}ms</SidebarDetail>
+          <SidebarDetail label="Running time">{runningTime}ms</SidebarDetail>
+          {optimizations.types.length === 0 ? null : <h3>Types</h3>}
+          {optimizations.types.map(({ site, mirType, typeset }, index) => (
+            <React.Fragment key={index}>
+              <SidebarDetail label="Site">{site}</SidebarDetail>
+              <SidebarDetail label="MIRType">{mirType}</SidebarDetail>
+              {typeset.map(({ keyedBy, name, location, line }, index) => (
+                <React.Fragment key={index}>
+                  <h3>Typeset</h3>
+                  <SidebarDetail label="Keyed">{keyedBy}</SidebarDetail>
+                  <SidebarDetail label="Name">{name}</SidebarDetail>
+                  <SidebarDetail label="Location">{location}</SidebarDetail>
+                  <SidebarDetail label="Line">{line}</SidebarDetail>
+                </React.Fragment>
+              ))}
+            </React.Fragment>
+          ))}
+          {optimizations.attempts.length === 0 ? null : <h3>Attempts</h3>}
+          {optimizations.attempts.map(({ strategy, outcome }, index) => (
+            <React.Fragment key={index}>
+              <SidebarDetail label="Strategy">{strategy}</SidebarDetail>
+              <SidebarDetail label="Outcome">{outcome}</SidebarDetail>
+            </React.Fragment>
+          ))}
+        </div>
+      )
+    );
+  }
+
   render() {
     const { selectedNodeIndex, name, lib, timings } = this.props;
     const {
@@ -210,6 +266,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
             />
           ) : null}
         </header>
+        {this.renderOptimizations()}
         <h3 className="sidebar-title2">This selected call node</h3>
         <SidebarDetail label="Running Time">
           {totalTime.value}ms ({totalTimePercent}%)
@@ -271,6 +328,9 @@ const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
     name: getFunctionName(selectedNodeSelectors.getName(state)),
     lib: selectedNodeSelectors.getLib(state),
     timings: selectedNodeSelectors.getTimingsForSidebar(state),
+    optimizationsList: selectedNodeSelectors.getJitOptimizationsForSidebar(
+      state
+    ),
   }),
   component: CallTreeSidebar,
 };
