@@ -7,6 +7,8 @@ import SymbolStoreDB from './symbol-store-db';
 import { SymbolsNotFoundError } from './errors';
 import bisection from 'bisection';
 
+const demangleModulePromise = import('gecko-profiler-demangle');
+
 import type { RequestedLib } from '../types/actions';
 import type { SymbolTableAsTuple } from './symbol-store-db';
 
@@ -117,7 +119,8 @@ export class SymbolStore {
   // This format is documented at the SymbolTableAsTuple flow type definition.
   _readSymbolsFromSymbolTable(
     addresses: Set<number>,
-    symbolTable: SymbolTableAsTuple
+    symbolTable: SymbolTableAsTuple,
+    demangleCallback: string => string
   ): Map<number, AddressResult> {
     const [symbolTableAddrs, symbolTableIndex, symbolTableBuffer] = symbolTable;
     const addressArray = Uint32Array.from(addresses);
@@ -154,7 +157,9 @@ export class SymbolStore {
           const startOffset = symbolTableIndex[symbolIndex];
           const endOffset = symbolTableIndex[symbolIndex + 1];
           const subarray = symbolTableBuffer.subarray(startOffset, endOffset);
-          currentSymbol = decoder.decode(subarray);
+          // C++ or rust symbols in the symbol table may have mangled names.
+          // Demangle them here.
+          currentSymbol = demangleCallback(decoder.decode(subarray));
           currentSymbolIndex = symbolIndex;
         }
         results.set(address, {
@@ -272,10 +277,16 @@ export class SymbolStore {
     // symbolication for the libraries for which we found symbol tables in the
     // database. This is delayed until after the request has been kicked off
     // because it can take some time.
+    // We also need a demangling function for this, which is in an async module.
+    const demangleCallback = (await demangleModulePromise).demangle_any;
     for (const { request, symbolTable } of requestsForCachedLibs) {
       successCb(
         request,
-        this._readSymbolsFromSymbolTable(request.addresses, symbolTable)
+        this._readSymbolsFromSymbolTable(
+          request.addresses,
+          symbolTable,
+          demangleCallback
+        )
       );
     }
 
@@ -316,7 +327,11 @@ export class SymbolStore {
             // Did not throw, option 3 was successful!
             successCb(
               request,
-              this._readSymbolsFromSymbolTable(addresses, symbolTable)
+              this._readSymbolsFromSymbolTable(
+                addresses,
+                symbolTable,
+                demangleCallback
+              )
             );
 
             // Store the symbol table in the database.
