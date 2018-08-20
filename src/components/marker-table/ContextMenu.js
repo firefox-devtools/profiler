@@ -41,11 +41,6 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkersContextMenu extends PureComponent<Props> {
-  constructor(props: Props) {
-    super(props);
-    (this: any).handleClick = this.handleClick.bind(this);
-  }
-
   setStartRange() {
     const {
       selectedMarker,
@@ -102,10 +97,10 @@ class MarkersContextMenu extends PureComponent<Props> {
     );
   }
 
-  handleClick(
+  handleClick = (
     event: SyntheticEvent<>,
     data: { type: 'setStartRange' | 'setEndRange' | 'copyMarkerJSON' }
-  ): void {
+  ): void => {
     switch (data.type) {
       case 'setStartRange':
         this.setStartRange();
@@ -119,7 +114,7 @@ class MarkersContextMenu extends PureComponent<Props> {
       default:
         throw new Error(`Unknown type ${data.type}`);
     }
-  }
+  };
 
   render() {
     return (

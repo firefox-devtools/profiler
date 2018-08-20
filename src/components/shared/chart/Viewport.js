@@ -156,28 +156,17 @@ export const withChartViewport: WithChartViewport<*, *> =
     >;
 
     class ChartViewport extends React.PureComponent<ViewportProps, State> {
-      shiftScrollId: number;
-      zoomRangeSelectionScheduled: boolean;
-      zoomRangeSelectionScrollDelta: number;
-      _container: HTMLElement | null;
-      _takeContainerRef = container => (this._container = container);
+      shiftScrollId: number = 0;
+      zoomRangeSelectionScheduled: boolean = false;
+      zoomRangeSelectionScrollDelta: number = 0;
+      _container: HTMLElement | null = null;
+
+      _takeContainerRef = container => {
+        this._container = container;
+      };
 
       constructor(props: ViewportProps) {
         super(props);
-        (this: any).moveViewport = this.moveViewport.bind(this);
-        (this: any)._mouseWheelListener = this._mouseWheelListener.bind(this);
-        (this: any)._mouseDownListener = this._mouseDownListener.bind(this);
-        (this: any)._mouseMoveListener = this._mouseMoveListener.bind(this);
-        (this: any)._mouseUpListener = this._mouseUpListener.bind(this);
-
-        (this: any)._setSize = this._setSize.bind(this);
-        (this: any)._setSizeNextFrame = this._setSizeNextFrame.bind(this);
-
-        this.shiftScrollId = 0;
-        this.zoomRangeSelectionScheduled = false;
-        this.zoomRangeSelectionScrollDelta = 0;
-        this._container = null;
-
         this.state = this.getDefaultState(props);
       }
 
@@ -257,7 +246,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         }
       }
 
-      _setSize() {
+      _setSize = () => {
         if (this._container) {
           const rect = this._container.getBoundingClientRect();
           const { startsAtBottom } = this.props.viewportProps;
@@ -279,13 +268,13 @@ export const withChartViewport: WithChartViewport<*, *> =
             }));
           }
         }
-      }
+      };
 
-      _setSizeNextFrame() {
+      _setSizeNextFrame = () => {
         requestAnimationFrame(this._setSize);
-      }
+      };
 
-      _mouseWheelListener(event: SyntheticWheelEvent<>) {
+      _mouseWheelListener = (event: SyntheticWheelEvent<>) => {
         // We handle the wheel event, so disable the browser's handling, such
         // as back/forward swiping or scrolling.
         event.preventDefault();
@@ -309,7 +298,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           -getNormalizedScrollDelta(event, containerHeight, 'deltaX'),
           -getNormalizedScrollDelta(event, containerHeight, 'deltaY')
         );
-      }
+      };
 
       zoomRangeSelection(event: SyntheticWheelEvent<>) {
         const {
@@ -400,15 +389,15 @@ export const withChartViewport: WithChartViewport<*, *> =
         }
       }
 
-      _mouseDownListener(event: SyntheticMouseEvent<>) {
+      _mouseDownListener = (event: SyntheticMouseEvent<>) => {
         event.stopPropagation();
         event.preventDefault();
 
         window.addEventListener('mousemove', this._mouseMoveListener, true);
         window.addEventListener('mouseup', this._mouseUpListener, true);
-      }
+      };
 
-      _mouseMoveListener(event: MouseEvent) {
+      _mouseMoveListener = (event: MouseEvent) => {
         event.stopPropagation();
         event.preventDefault();
 
@@ -428,9 +417,9 @@ export const withChartViewport: WithChartViewport<*, *> =
         });
 
         this.moveViewport(offsetX, offsetY);
-      }
+      };
 
-      moveViewport(offsetX: CssPixels, offsetY: CssPixels): boolean {
+      moveViewport = (offsetX: CssPixels, offsetY: CssPixels): boolean => {
         const {
           updatePreviewSelection,
           viewportProps: {
@@ -507,9 +496,9 @@ export const withChartViewport: WithChartViewport<*, *> =
         }
 
         return viewportVerticalChanged || viewportHorizontalChanged;
-      }
+      };
 
-      _mouseUpListener(event: MouseEvent) {
+      _mouseUpListener = (event: MouseEvent) => {
         event.stopPropagation();
         event.preventDefault();
         window.removeEventListener('mousemove', this._mouseMoveListener, true);
@@ -517,7 +506,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         this.setState({
           isDragging: false,
         });
-      }
+      };
 
       componentDidMount() {
         window.addEventListener('resize', this._setSizeNextFrame, false);
