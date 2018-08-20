@@ -499,7 +499,7 @@ function getNetworkMarker(startTime: number, id) {
     type: 'Network',
     id,
     pri: 0,
-    status: 'DONE',
+    status: 'STOP',
     startTime,
     endTime: startTime + 1,
   };

@@ -7,7 +7,7 @@ Array [
     0,
     0,
     0,
-    20,
+    25,
   ],
   Array [
     "set strokeStyle",
@@ -26,7 +26,7 @@ Array [
     0,
     0,
     400,
-    20,
+    25,
   ],
   Array [
     "set strokeStyle",
@@ -48,7 +48,7 @@ exports[`timeline/TrackNetwork matches the component snapshot 1`] = `
   className="timelineTrackNetwork"
   style={
     Object {
-      "height": 20,
+      "height": 25,
     }
   }
 >

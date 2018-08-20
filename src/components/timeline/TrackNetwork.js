@@ -42,7 +42,7 @@ type State = void;
 
 export const ROW_HEIGHT = 5;
 export const ROW_REPEAT = 7;
-export const MIN_ROW_REPEAT = 4;
+export const MIN_ROW_REPEAT = 5;
 
 class Network extends PureComponent<Props, State> {
   _canvas: null | HTMLCanvasElement = null;
