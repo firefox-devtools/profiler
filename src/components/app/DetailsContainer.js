@@ -9,26 +9,35 @@ import SplitterLayout from 'react-splitter-layout';
 import Details from './Details';
 import selectSidebar from '../sidebar';
 
+import { invalidatePanelLayout } from '../../actions/app';
 import { getSelectedTab } from '../../reducers/url-state';
 import { getIsSidebarOpen } from '../../reducers/app';
 import explicitConnect from '../../utils/connect';
 
 import type { TabSlug } from '../../app-logic/tabs-handling';
-import type { ExplicitConnectOptions } from '../../utils/connect';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
 import './DetailsContainer.css';
-
-function dispatchResizeEvent() {
-  const event = new UIEvent('resize', { view: window });
-  window.dispatchEvent(event);
-}
 
 type StateProps = {|
   +selectedTab: TabSlug,
   +isSidebarOpen: boolean,
 |};
 
-function DetailsContainer({ selectedTab, isSidebarOpen }: StateProps) {
+type DispatchProps = {|
+  +invalidatePanelLayout: typeof invalidatePanelLayout,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+
+function DetailsContainer({
+  selectedTab,
+  isSidebarOpen,
+  invalidatePanelLayout,
+}: Props) {
   const Sidebar = isSidebarOpen && selectSidebar(selectedTab);
 
   return (
@@ -36,7 +45,7 @@ function DetailsContainer({ selectedTab, isSidebarOpen }: StateProps) {
       customClassName="DetailsContainer"
       percentage
       secondaryInitialSize={20}
-      onDragEnd={dispatchResizeEvent}
+      onDragEnd={invalidatePanelLayout}
     >
       <Details />
       {Sidebar && <Sidebar />}
@@ -44,11 +53,14 @@ function DetailsContainer({ selectedTab, isSidebarOpen }: StateProps) {
   );
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
   }),
+  mapDispatchToProps: {
+    invalidatePanelLayout,
+  },
   component: DetailsContainer,
 };
 
