@@ -17,10 +17,37 @@ import type { Milliseconds } from '../../../types/units';
 // Array<[MarkerName, Milliseconds, Data]>
 type MarkerName = string;
 type MarkerTime = Milliseconds;
-type DataPayload =
-  | MarkerPayload
-  | {| startTime: Milliseconds, endTime: Milliseconds |};
-type TestDefinedMarkers = Array<[MarkerName, MarkerTime, DataPayload]>;
+type MockPayload = {| startTime: Milliseconds, endTime: Milliseconds |};
+type TestDefinedMarkers = Array<
+  [MarkerName, MarkerTime, MarkerPayload | MockPayload]
+>;
+
+/**
+ * This function ensures that the mock payloads are converted correctly to real payloads
+ * that match the MarkerPayload typing. Specifically it adds the 'DummyForTests' type
+ * to { startTime, endTime } payloads.
+ */
+function _refineMockPayload(
+  payload: MarkerPayload | MockPayload
+): MarkerPayload {
+  if (
+    // Check for a MockPayload.
+    payload !== null &&
+    Object.keys(payload).length === 2 &&
+    typeof payload.startTime === 'number' &&
+    typeof payload.endTime === 'number'
+  ) {
+    return {
+      type: 'DummyForTests',
+      endTime: payload.endTime,
+      startTime: payload.startTime,
+    };
+  }
+  // There is no way to refine the payload type to just the { startTime, endTime }
+  // mock marker. So check for those conditions above, and coerce the final result
+  // into a MarkerPayload using the function signature.
+  return (payload: any);
+}
 
 export { getEmptyProfile } from '../../../profile-logic/profile-data';
 
@@ -33,22 +60,9 @@ export function addMarkersToThreadWithCorrespondingSamples(
   const samples = thread.samples;
 
   markers.forEach(([name, time, data]) => {
-    if (data && !data.type) {
-      if (
-        typeof data.startTime !== 'number' ||
-        typeof data.endTime !== 'number'
-      ) {
-        throw new Error('Expected a startTime and endTime for the marker.');
-      }
-      data = {
-        type: 'DummyForTests',
-        startTime: data.startTime,
-        endTime: data.endTime,
-      };
-    }
     markersTable.name.push(stringTable.indexForString(name));
     markersTable.time.push(time);
-    markersTable.data.push(data);
+    markersTable.data.push(_refineMockPayload(data));
     markersTable.length++;
 
     // Try to get a consistent profile with a sample for each marker.
@@ -517,5 +531,23 @@ export function getNetworkTrackProfile() {
     Array(10)
       .fill()
       .map((_, i) => getNetworkMarker(3 + 0.1 * i, i))
+  );
+}
+
+export function getScreenshotTrackProfile() {
+  return getProfileWithMarkers(
+    Array(10)
+      .fill()
+      .map((_, i) => [
+        'CompositorScreenshot',
+        i,
+        {
+          type: undefined,
+          url: 0, // Some arbitrary string.
+          windowID: '0',
+          windowWidth: 300,
+          windowHeight: 150,
+        },
+      ])
   );
 }

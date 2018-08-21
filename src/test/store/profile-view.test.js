@@ -9,6 +9,7 @@ import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
   getNetworkTrackProfile,
+  getScreenshotTrackProfile,
 } from '../fixtures/profiles/make-profile';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
@@ -740,6 +741,16 @@ describe('actions/ProfileView', function() {
           funcIndex: 1,
         },
       ]);
+    });
+  });
+
+  describe('getNetworkMarkers', function() {
+    it('can extract some network markers and match the snapshot', function() {
+      const { getState } = storeWithProfile(getScreenshotTrackProfile());
+      const screenshotMarkers = selectedThreadSelectors.getScreenshotMarkersById(
+        getState()
+      );
+      expect(screenshotMarkers).toMatchSnapshot();
     });
   });
 });
