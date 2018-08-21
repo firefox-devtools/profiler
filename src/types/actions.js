@@ -164,6 +164,9 @@ type ProfileAction =
   | {|
       +type: 'SET_PROFILE_SHARING_STATUS',
       +profileSharingStatus: ProfileSharingStatus,
+    |}
+  | {|
+      +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
     |};
 
 type ReceiveProfileAction =

@@ -22,17 +22,12 @@ type Props = {|
 |};
 
 class TabBar extends React.PureComponent<Props> {
-  constructor(props: Props) {
-    super(props);
-    (this: any)._mouseDownListener = this._mouseDownListener.bind(this);
-  }
-
-  _mouseDownListener(e: SyntheticMouseEvent<HTMLElement>) {
+  _mouseDownListener = (e: SyntheticMouseEvent<HTMLElement>) => {
     this.props.onSelectTab(e.currentTarget.dataset.name);
     // Prevent focusing the tab so that actual content like the
     // calltree can perform its own focusing.
     e.preventDefault();
-  }
+  };
 
   render() {
     const {

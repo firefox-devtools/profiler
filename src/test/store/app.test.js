@@ -3,12 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { storeWithSimpleProfile } from '../fixtures/stores';
+import { storeWithSimpleProfile, storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
 import * as AppSelectors from '../../reducers/app';
 import createStore from '../../app-logic/create-store';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
+import { isolateProcess } from '../../actions/profile-view';
+import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 
 import * as AppActions from '../../actions/app';
 
@@ -162,6 +164,33 @@ describe('app actions', function() {
       dispatch(AppActions.updateUrlState(originalUrlState));
       expect(UrlStateSelectors.getUrlState(getState())).toBe(originalUrlState);
       expect(UrlStateSelectors.getSelectedTab(getState())).toEqual('calltree');
+    });
+  });
+
+  describe('panelLayoutGeneration', function() {
+    it('can be manually updated using an action', function() {
+      const { dispatch, getState } = storeWithSimpleProfile();
+      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(0);
+      dispatch(AppActions.invalidatePanelLayout());
+      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(1);
+      dispatch(AppActions.invalidatePanelLayout());
+      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(2);
+    });
+
+    it('will be updated when working with the sidebar', function() {
+      const { dispatch, getState } = storeWithSimpleProfile();
+      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(0);
+      dispatch(AppActions.changeSidebarOpenState('flame-graph', false));
+      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(1);
+    });
+
+    it('will be updated when working with the timeline', function() {
+      const { dispatch, getState } = storeWithProfile(
+        getProfileWithNiceTracks()
+      );
+      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(0);
+      dispatch(isolateProcess(0));
+      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(1);
     });
   });
 });

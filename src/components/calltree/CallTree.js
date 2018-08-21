@@ -68,30 +68,16 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class CallTreeComponent extends PureComponent<Props> {
-  _fixedColumns: Column[];
-  _mainColumn: Column;
-  _appendageColumn: Column;
-  _treeView: TreeView<IndexIntoCallNodeTable, CallNodeDisplayData> | null;
+  _fixedColumns: Column[] = [
+    { propName: 'totalTimePercent', title: '' },
+    { propName: 'totalTime', title: 'Running Time (ms)' },
+    { propName: 'selfTime', title: 'Self (ms)' },
+    { propName: 'icon', title: '', component: NodeIcon },
+  ];
+  _mainColumn: Column = { propName: 'name', title: '' };
+  _appendageColumn: Column = { propName: 'lib', title: '' };
+  _treeView: TreeView<CallNodeDisplayData> | null = null;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
-
-  constructor(props: Props) {
-    super(props);
-    this._fixedColumns = [
-      { propName: 'totalTimePercent', title: '' },
-      { propName: 'totalTime', title: 'Running Time (ms)' },
-      { propName: 'selfTime', title: 'Self (ms)' },
-      { propName: 'icon', title: '', component: NodeIcon },
-    ];
-    this._mainColumn = { propName: 'name', title: '' };
-    this._appendageColumn = { propName: 'lib', title: '' };
-    this._treeView = null;
-    (this: any)._onSelectedCallNodeChange = this._onSelectedCallNodeChange.bind(
-      this
-    );
-    (this: any)._onExpandedCallNodesChange = this._onExpandedCallNodesChange.bind(
-      this
-    );
-  }
 
   componentDidMount() {
     this.focus();
@@ -125,17 +111,17 @@ class CallTreeComponent extends PureComponent<Props> {
     }
   }
 
-  _onSelectedCallNodeChange(newSelectedCallNode: IndexIntoCallNodeTable) {
+  _onSelectedCallNodeChange = (newSelectedCallNode: IndexIntoCallNodeTable) => {
     const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadIndex,
       getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
-  }
+  };
 
-  _onExpandedCallNodesChange(
+  _onExpandedCallNodesChange = (
     newExpandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>
-  ) {
+  ) => {
     const { callNodeInfo, threadIndex, changeExpandedCallNodes } = this.props;
     changeExpandedCallNodes(
       threadIndex,
@@ -143,7 +129,7 @@ class CallTreeComponent extends PureComponent<Props> {
         getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
       )
     );
-  }
+  };
 
   procureInterestingInitialSelection() {
     // Expand the heaviest callstack up to a certain depth and select the frame

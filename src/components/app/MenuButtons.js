@@ -154,10 +154,16 @@ class ProfileSharingCompositeButton extends PureComponent<
   _permalinkButton: ButtonWithPanel | null;
   _uploadErrorButton: ButtonWithPanel | null;
   _permalinkTextField: HTMLInputElement | null;
-  _permalinkButtonCreated: (ButtonWithPanel | null) => void;
-  _uploadErrorButtonCreated: (ButtonWithPanel | null) => void;
-  _permalinkTextFieldCreated: (HTMLInputElement | null) => void;
-  _attemptToSecondaryShare: () => void;
+  _takePermalinkButtonRef = elem => {
+    this._permalinkButton = elem;
+  };
+  _takeUploadErrorButtonRef = elem => {
+    this._uploadErrorButton = elem;
+  };
+  _takePermalinkTextFieldRef = elem => {
+    this._permalinkTextField = elem;
+  };
+  _attemptToSecondaryShare = () => this._attemptToShare(true);
 
   constructor(props: ProfileSharingCompositeButtonProps) {
     super(props);
@@ -169,29 +175,6 @@ class ProfileSharingCompositeButton extends PureComponent<
       fullUrl: window.location.href,
       shortUrl: window.location.href,
       shareNetworkUrls: false,
-    };
-
-    (this: any)._attemptToShare = this._attemptToShare.bind(this);
-    (this: any)._attemptToSecondaryShare = this._attemptToShare.bind(
-      this,
-      true
-    );
-    (this: any)._onChangeShareNetworkUrls = this._onChangeShareNetworkUrls.bind(
-      this
-    );
-    (this: any)._onPermalinkPanelOpen = this._onPermalinkPanelOpen.bind(this);
-    (this: any)._onPermalinkPanelClose = this._onPermalinkPanelClose.bind(this);
-    (this: any)._onSecondarySharePanelOpen = this._onSecondarySharePanelOpen.bind(
-      this
-    );
-    this._permalinkButtonCreated = (elem: ButtonWithPanel | null) => {
-      this._permalinkButton = elem;
-    };
-    this._uploadErrorButtonCreated = (elem: ButtonWithPanel | null) => {
-      this._uploadErrorButton = elem;
-    };
-    this._permalinkTextFieldCreated = (elem: HTMLInputElement | null) => {
-      this._permalinkTextField = elem;
     };
   }
 
@@ -209,9 +192,9 @@ class ProfileSharingCompositeButton extends PureComponent<
     }
   }
 
-  _onPermalinkPanelOpen() {
+  _onPermalinkPanelOpen = () => {
     this._shortenUrlAndFocusTextFieldOnCompletion();
-  }
+  };
 
   _shortenUrlAndFocusTextFieldOnCompletion(): Promise<void> {
     return shortenUrl(this.state.fullUrl)
@@ -226,11 +209,11 @@ class ProfileSharingCompositeButton extends PureComponent<
       .catch(() => {});
   }
 
-  _onPermalinkPanelClose() {
+  _onPermalinkPanelClose = () => {
     if (this._permalinkTextField) {
       this._permalinkTextField.blur();
     }
-  }
+  };
 
   _notifyAnalytics() {
     sendAnalytics({
@@ -251,7 +234,7 @@ class ProfileSharingCompositeButton extends PureComponent<
    * them. We check the current state before attempting to share depending
    * on that flag.
    */
-  _attemptToShare(isSecondaryShare: boolean = false) {
+  _attemptToShare = (isSecondaryShare: boolean = false) => {
     if (
       ((!isSecondaryShare && this.state.state !== 'local') ||
         (isSecondaryShare && this.state.state !== 'public')) &&
@@ -346,15 +329,15 @@ class ProfileSharingCompositeButton extends PureComponent<
           eventAction: 'failed',
         });
       });
-  }
+  };
 
-  _onChangeShareNetworkUrls(event: SyntheticEvent<HTMLInputElement>) {
+  _onChangeShareNetworkUrls = (event: SyntheticEvent<HTMLInputElement>) => {
     this.setState({
       shareNetworkUrls: event.currentTarget.checked,
     });
-  }
+  };
 
-  _onSecondarySharePanelOpen() {
+  _onSecondarySharePanelOpen = () => {
     const { profileSharingStatus } = this.props;
     // In the secondary sharing panel, we disable the URL sharing checkbox and
     // force it to the value we haven't used yet.
@@ -363,7 +346,7 @@ class ProfileSharingCompositeButton extends PureComponent<
     this.setState({
       shareNetworkUrls: !profileSharingStatus.sharedWithUrls,
     });
-  }
+  };
 
   render() {
     const { state, uploadProgress, error, shortUrl } = this.state;
@@ -415,7 +398,7 @@ class ProfileSharingCompositeButton extends PureComponent<
         <UploadingStatus progress={uploadProgress} />
         <ButtonWithPanel
           className="menuButtonsPermalinkButton"
-          ref={this._permalinkButtonCreated}
+          ref={this._takePermalinkButtonRef}
           label="Permalink"
           panel={
             <ArrowPanel
@@ -428,14 +411,14 @@ class ProfileSharingCompositeButton extends PureComponent<
                 className="menuButtonsPermalinkTextField"
                 value={shortUrl}
                 readOnly="readOnly"
-                ref={this._permalinkTextFieldCreated}
+                ref={this._takePermalinkTextFieldRef}
               />
             </ArrowPanel>
           }
         />
         <ButtonWithPanel
           className="menuButtonsUploadErrorButton"
-          ref={this._uploadErrorButtonCreated}
+          ref={this._takeUploadErrorButtonRef}
           label="Upload Error"
           panel={
             <ArrowPanel
@@ -488,19 +471,15 @@ class ProfileDownloadButton extends PureComponent<
   ProfileDownloadButtonProps,
   ProfileDownloadButtonState
 > {
-  constructor(props: ProfileDownloadButtonProps) {
-    super(props);
-    this.state = {
-      uncompressedBlobUrl: '',
-      compressedBlobUrl: '',
-      uncompressedSize: 0,
-      compressedSize: 0,
-      filename: '',
-    };
-    (this: any)._onPanelOpen = this._onPanelOpen.bind(this);
-  }
+  state = {
+    uncompressedBlobUrl: '',
+    compressedBlobUrl: '',
+    uncompressedSize: 0,
+    compressedSize: 0,
+    filename: '',
+  };
 
-  _onPanelOpen() {
+  _onPanelOpen = () => {
     const { profile, rootRange } = this.props;
     const profileDate = new Date(profile.meta.startTime + rootRange.start);
     const serializedProfile = serializeProfile(profile);
@@ -528,7 +507,7 @@ class ProfileDownloadButton extends PureComponent<
       eventCategory: 'profile save locally',
       eventAction: 'save',
     });
-  }
+  };
 
   render() {
     const {
