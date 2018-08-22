@@ -6,7 +6,10 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from '../../../utils/connect';
-import { getHasZoomedViaMousewheel } from '../../../reducers/app';
+import {
+  getHasZoomedViaMousewheel,
+  getPanelLayoutGeneration,
+} from '../../../reducers/app';
 import { setHasZoomedViaMousewheel } from '../../../actions/stack-chart';
 import { updatePreviewSelection } from '../../../actions/profile-view';
 
@@ -69,6 +72,7 @@ export type Viewport = {|
 |};
 
 type ViewportStateProps = {|
+  +panelLayoutGeneration: number,
   +hasZoomedViaMousewheel?: boolean,
 |};
 
@@ -523,6 +527,14 @@ export const withChartViewport: WithChartViewport<*, *> =
         window.removeEventListener('mouseup', this._mouseUpListener, true);
       }
 
+      componentDidUpdate(prevProps: ViewportProps) {
+        if (
+          prevProps.panelLayoutGeneration !== this.props.panelLayoutGeneration
+        ) {
+          this._setSize();
+        }
+      }
+
       render() {
         const { chartProps, hasZoomedViaMousewheel } = this.props;
 
@@ -586,6 +598,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       ViewportDispatchProps
     > = {
       mapStateToProps: state => ({
+        panelLayoutGeneration: getPanelLayoutGeneration(state),
         hasZoomedViaMousewheel: getHasZoomedViaMousewheel(state),
       }),
       mapDispatchToProps: { setHasZoomedViaMousewheel, updatePreviewSelection },
