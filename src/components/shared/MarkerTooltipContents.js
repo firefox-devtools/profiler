@@ -122,6 +122,20 @@ function _makePhaseTimesArray(
   return array;
 }
 
+function _dataPrioReplace(str: number) {
+  if (str === -20) {
+    return 'Priority: Highest (-20)';
+  } else if (str === -10) {
+    return 'Priority: High (-10)';
+  } else if (str === 10) {
+    return 'Priority: Low (10)';
+  } else if (str === 20) {
+    return 'Priority: Lowest (-20)';
+  } else {
+    return 'Priority: Normal (0)';
+  }
+}
+
 /*
  * Return true if the phase 'phaseName' is a leaf phase among the whole
  * array of phases.
@@ -621,7 +635,7 @@ function getMarkerDetails(
             <div className="tooltipDetails">
               {_markerDetail('status', 'Status', data.status)}
               {_markerDetailNullable('url', 'URL', data.URI)}
-              {_markerDetail('pri', 'Priority', data.pri)}
+              {_markerDetail('pri', 'Priority', _dataPrioReplace(data.pri))}
               {_markerDetailBytesNullable(
                 'count',
                 'Requested bytes',
@@ -639,7 +653,7 @@ function getMarkerDetails(
                 'Redirect URL',
                 data.RedirectURI
               )}
-              {_markerDetail('pri', 'Priority', data.pri)}
+              {_markerDetail('pri', 'Priority', _dataPrioReplace(data.pri))}
               {_markerDetailBytesNullable(
                 'count',
                 'Requested bytes',
