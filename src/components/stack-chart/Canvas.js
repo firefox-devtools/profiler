@@ -15,6 +15,10 @@ import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { Thread } from '../../types/profile';
 import type {
+  CallNodeInfo,
+  IndexIntoCallNodeTable,
+} from '../../types/profile-derived';
+import type {
   Milliseconds,
   CssPixels,
   UnitIntervalOfProfileRange,
@@ -38,6 +42,9 @@ type OwnProps = {|
   +getCategory: GetCategory,
   +getLabel: GetLabel,
   +updatePreviewSelection: typeof updatePreviewSelection,
+  +callNodeInfo: CallNodeInfo,
+  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
 |};
 
 type Props = $ReadOnly<{|
@@ -80,6 +87,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
       stackTimingByDepth,
       stackFrameHeight,
       getCategory,
+      selectedCallNodeIndex,
+      callNodeInfo: { stackIndexToCallNodeIndex },
       viewport: {
         containerWidth,
         containerHeight,
@@ -154,6 +163,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
           }
 
           const stackIndex = stackTiming.stack[i];
+          const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
           const frameIndex = thread.stackTable.frame[stackIndex];
           const text = getLabel(thread, stackIndex);
           const category = getCategory(thread, frameIndex);
@@ -161,8 +171,10 @@ class StackChartCanvas extends React.PureComponent<Props> {
             hoveredItem &&
             depth === hoveredItem.depth &&
             i === hoveredItem.stackTableIndex;
+          const isSelected = selectedCallNodeIndex === callNodeIndex;
 
-          ctx.fillStyle = isHovered ? 'Highlight' : category.color;
+          ctx.fillStyle =
+            isHovered || isSelected ? 'Highlight' : category.color;
           ctx.fillRect(x, y, w, h);
 
           // Ensure spacing between blocks.
@@ -177,7 +189,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
           if (w2 > textMeasurement.minWidth) {
             const fittedText = textMeasurement.getFittedText(text, w2);
             if (fittedText) {
-              ctx.fillStyle = isHovered ? 'HighlightText' : '#000000';
+              ctx.fillStyle =
+                isHovered || isSelected ? 'HighlightText' : '#000000';
               ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
             }
           }
@@ -268,6 +281,20 @@ class StackChartCanvas extends React.PureComponent<Props> {
     });
   };
 
+  _onMouseDown = (hoveredItem: HoveredStackTiming | null) => {
+    // Change our selection to the hovered item, or deselect (with
+    // null) if there's nothing hovered.
+    let callNodeIndex = null;
+    if (hoveredItem !== null) {
+      const { depth, stackTableIndex } = hoveredItem;
+      const { stackTimingByDepth } = this.props;
+      const stackIndex = stackTimingByDepth[depth].stack[stackTableIndex];
+      const { stackIndexToCallNodeIndex } = this.props.callNodeInfo;
+      callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+    }
+    this.props.onSelectionChange(callNodeIndex);
+  };
+
   _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
     const {
       rangeStart,
@@ -313,6 +340,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
+        onMouseDown={this._onMouseDown}
       />
     );
   }
