@@ -112,7 +112,6 @@ exports[`Timeline renders the header 1`] = `
         >
           <li
             className="timelineTrack"
-            style={undefined}
           >
             <div
               className="timelineTrackRow timelineTrackGlobalRow"
@@ -148,7 +147,6 @@ exports[`Timeline renders the header 1`] = `
             >
               <li
                 className="timelineTrack timelineTrackLocal"
-                style={undefined}
               >
                 <div
                   className="timelineTrackRow timelineTrackLocalRow selected"
@@ -205,7 +203,6 @@ process: \\"default\\" (0)"
               </li>
               <li
                 className="timelineTrack timelineTrackLocal"
-                style={undefined}
               >
                 <div
                   className="timelineTrackRow timelineTrackLocalRow"
@@ -296,7 +293,6 @@ process: \\"default\\" (0)"
               </li>
               <li
                 className="timelineTrack timelineTrackLocal"
-                style={undefined}
               >
                 <div
                   className="timelineTrackRow timelineTrackLocalRow"

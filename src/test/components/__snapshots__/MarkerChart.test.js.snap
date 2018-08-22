@@ -369,6 +369,16 @@ Array [
             "rgba(255, 255, 255, 0.0)",
           ],
         ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
       },
     },
   ],
@@ -575,6 +585,16 @@ Array [
             1,
             "rgba(255, 255, 255, 0.0)",
           ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
         ],
       },
     },
@@ -879,6 +899,16 @@ Array [
             1,
             "rgba(255, 255, 255, 0.0)",
           ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
         ],
       },
     },
