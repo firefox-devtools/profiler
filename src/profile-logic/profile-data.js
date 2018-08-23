@@ -1575,7 +1575,7 @@ export function getEmptyProfile(): Profile {
       platform: '',
       processType: 0,
       extensions: emptyExtensions,
-      categories: defaultCategories,
+      categories: [...defaultCategories],
       product: 'Firefox',
       stackwalk: 0,
       toolkit: '',

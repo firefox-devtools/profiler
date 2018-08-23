@@ -51,12 +51,13 @@ export function addMarkersToThreadWithCorrespondingSamples(
     markersTable.data.push(data);
     markersTable.length++;
 
-    // trying to get a consistent profile with a sample for each marker
+    // Try to get a consistent profile with a sample for each marker.
     const startTime = time;
-    // If we have no data, endTime is the same as startTime
+    // If we have no data, endTime is the same as startTime.
     const endTime =
       data && typeof data.endTime === 'number' ? data.endTime : time;
     samples.time.push(startTime, endTime);
+    samples.stack.push(null);
     samples.length++;
   });
 
