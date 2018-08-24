@@ -11,6 +11,7 @@ import {
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
+  getScrollToSelectionGeneration,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
@@ -58,6 +59,7 @@ type StateProps = {|
   +threadIndex: number,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +scrollToSelectionGeneration: number,
 |};
 
 type DispatchProps = {|
@@ -99,6 +101,7 @@ class StackChartGraph extends React.PureComponent<Props> {
       updatePreviewSelection,
       callNodeInfo,
       selectedCallNodeIndex,
+      scrollToSelectionGeneration,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -128,6 +131,7 @@ class StackChartGraph extends React.PureComponent<Props> {
               callNodeInfo,
               selectedCallNodeIndex,
               onSelectionChange: this._onSelectedCallNodeChange,
+              scrollToSelectionGeneration,
             }}
           />
         </div>
@@ -156,6 +160,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
+      scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     };
   },
   mapDispatchToProps: {
