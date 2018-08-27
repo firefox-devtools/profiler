@@ -100,6 +100,7 @@ module.exports = {
     'prefer-promise-reject-errors': 'error',
     'prefer-rest-params': 'error',
     'prefer-spread': 'error',
+    'no-else-return': 'error',
   },
   settings: {
     react: {
