@@ -12,6 +12,7 @@ import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import Reorderable from '../shared/Reorderable';
 import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
+import { getPanelLayoutGeneration } from '../../reducers/app';
 import {
   getCommittedRange,
   getZeroAt,
@@ -44,6 +45,7 @@ type StateProps = {|
   +globalTracks: GlobalTrack[],
   +globalTrackOrder: TrackIndex[],
   +globalTrackReferences: TrackReference[],
+  +panelLayoutGeneration: number,
   +zeroAt: Milliseconds,
 |};
 
@@ -65,6 +67,7 @@ class Timeline extends PureComponent<Props> {
       zeroAt,
       width,
       globalTrackReferences,
+      panelLayoutGeneration,
     } = this.props;
 
     return (
@@ -75,7 +78,10 @@ class Timeline extends PureComponent<Props> {
           rangeEnd={committedRange.end}
           width={width}
         />
-        <OverflowEdgeIndicator className="timelineOverflowEdgeIndicator">
+        <OverflowEdgeIndicator
+          className="timelineOverflowEdgeIndicator"
+          panelLayoutGeneration={panelLayoutGeneration}
+        >
           {
             <Reorderable
               tagName="ol"
@@ -107,6 +113,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     globalTrackReferences: getGlobalTrackReferences(state),
     committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),
+    panelLayoutGeneration: getPanelLayoutGeneration(state),
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
