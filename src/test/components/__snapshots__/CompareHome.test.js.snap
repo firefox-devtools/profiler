@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app/CompareHome renders properly 1`] = `
+<form
+  class="compareHome"
+>
+  <h1>
+    Enter the 2 profile URLs that you’d like to compare
+  </h1>
+  <p>
+    The tool will extract the data from the selected track and range for each profile, and put them both on the same view to make them easy to compare.
+  </p>
+  <label
+    for="compareHomeProfile1"
+  >
+    Profile 1:
+  </label>
+  <input
+    class="compareHome-input"
+    id="compareHomeProfile1"
+    name="profile1"
+    value=""
+  />
+  <label
+    for="compareHomeProfile2"
+  >
+    Profile 2:
+  </label>
+  <input
+    class="compareHome-input"
+    id="compareHomeProfile2"
+    name="profile2"
+    value=""
+  />
+  <input
+    class="compareHome-submit-button"
+    type="submit"
+    value="Retrieve profiles"
+  />
+</form>
+`;

@@ -44,6 +44,17 @@ const profileUrl: Reducer<string> = (state = '', action) => {
     case 'TRIGGER_LOADING_FROM_URL':
       return action.profileUrl;
     default:
+      // This will be set by UPDATE_URL_STATE
+      return state;
+  }
+};
+
+const profiles: Reducer<[string, string] | null> = (state = null, action) => {
+  switch (action.type) {
+    case 'CHANGE_PROFILES':
+      return action.profiles;
+    default:
+      // This will also be set by UPDATE_URL_STATE
       return state;
   }
 };
@@ -330,6 +341,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     dataSource,
     hash,
     profileUrl,
+    profiles,
     selectedTab,
     pathInZipFile,
     profileSpecific,

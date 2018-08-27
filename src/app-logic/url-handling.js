@@ -21,7 +21,9 @@ import type { TrackIndex } from '../types/profile-derived';
 
 export const CURRENT_URL_VERSION = 3;
 
-function dataSourceDirs(urlState: UrlState) {
+function getDataSourceDirs(
+  urlState: UrlState
+): [] | [DataSource] | [DataSource, string] {
   const { dataSource } = urlState;
   switch (dataSource) {
     case 'from-addon':
@@ -34,8 +36,21 @@ function dataSourceDirs(urlState: UrlState) {
       return ['public', urlState.hash];
     case 'from-url':
       return ['from-url', encodeURIComponent(urlState.profileUrl)];
-    default:
+    case 'compare':
+      if (urlState.profiles) {
+        const { profiles } = urlState;
+        if (profiles.length >= 2) {
+          return [
+            'compare',
+            encodeURIComponent(`${profiles[0]}...${profiles[1]}`),
+          ];
+        }
+      }
+      return ['compare'];
+    case 'none':
       return [];
+    default:
+      throw assertExhaustiveCheck(dataSource);
   }
 }
 
@@ -110,7 +125,15 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       query: {},
     };
   }
-  const pathParts = [...dataSourceDirs(urlState), urlState.selectedTab];
+  const dataSourceDirs = getDataSourceDirs(urlState);
+  if (dataSource === 'compare' && dataSourceDirs.length < 2) {
+    return {
+      pathParts: [...dataSourceDirs],
+      query: {},
+    };
+  }
+
+  const pathParts = [...dataSourceDirs, urlState.selectedTab];
   const { selectedThread } = urlState.profileSpecific;
 
   // Start with the query parameters that are shown regardless of the active tab.
@@ -224,6 +247,7 @@ function getDataSourceFromPathParts(pathParts: string[]): DataSource {
     case 'local':
     case 'public':
     case 'from-url':
+    case 'compare':
       return str;
     default:
       throw new Error(`Unexpected data source ${str}`);
@@ -257,8 +281,11 @@ export function stateFromLocation(location: Location): UrlState {
   // https://perf-html.io/from-url/{url}/calltree/
   const hasProfileUrl = ['from-url'].includes(dataSource);
 
+  const hasProfilesToCompare = dataSource === 'compare';
+
   // The selected tab is the last path part in the URL.
-  const selectedTabPathPart = hasProfileHash || hasProfileUrl ? 2 : 1;
+  const selectedTabPathPart =
+    hasProfileHash || hasProfileUrl || hasProfilesToCompare ? 2 : 1;
 
   let implementation = 'combined';
   // Don't trust the implementation values from the user. Make sure it conforms
@@ -274,10 +301,21 @@ export function stateFromLocation(location: Location): UrlState {
       : [];
   }
 
+  let profilesToCompare = null;
+  if (hasProfilesToCompare && pathParts[1]) {
+    profilesToCompare = decodeURIComponent(pathParts[1]).split('...');
+    if (profilesToCompare.length >= 2) {
+      profilesToCompare = [profilesToCompare[0], profilesToCompare[1]];
+    } else {
+      profilesToCompare = null;
+    }
+  }
+
   return {
     dataSource,
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
+    profiles: profilesToCompare,
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
     pathInZipFile: query.file || null,
     profileSpecific: {

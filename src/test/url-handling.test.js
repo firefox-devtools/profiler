@@ -11,7 +11,7 @@ import {
   changeCallTreeSearchString,
   changeMarkersSearchString,
 } from '../actions/profile-view';
-import { changeSelectedTab } from '../actions/app';
+import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
   stateFromLocation,
   urlStateToUrlObject,
@@ -39,7 +39,7 @@ function _getStoreWithURL(
     hash?: string,
     v?: number | false, // If v is false, do not add a v parameter to the search string.
   } = {},
-  profile: Profile = getProfile()
+  profile: Profile | null = getProfile()
 ) {
   const { pathname, hash, search, v } = Object.assign(
     {
@@ -73,7 +73,10 @@ function _getStoreWithURL(
     type: 'UPDATE_URL_STATE',
     newUrlState,
   });
-  store.dispatch(viewProfile(profile));
+
+  if (profile) {
+    store.dispatch(viewProfile(profile));
+  }
   return store;
 }
 
@@ -486,6 +489,41 @@ describe('urlFromState', function() {
     });
     expect(urlFromState(newUrlState)).toEqual(
       `${pathname}/?v=${CURRENT_URL_VERSION}`
+    );
+  });
+});
+
+describe('compare', function() {
+  const url1 = 'http://fake-url.com/hash/1';
+  const url2 = 'http://fake-url.com/hash/2';
+
+  it('unserializes profiles URL properly', function() {
+    const store = _getStoreWithURL(
+      {
+        pathname: `/compare/${encodeURIComponent(url1)}...${encodeURIComponent(
+          url2
+        )}`,
+      },
+      /* no profile */ null
+    );
+
+    expect(urlStateReducers.getProfiles(store.getState())).toEqual([
+      url1,
+      url2,
+    ]);
+  });
+
+  it('serializes profiles URL properly', function() {
+    const store = _getStoreWithURL(
+      { pathname: '/compare/' },
+      /* no profile */ null
+    );
+    store.dispatch(changeProfilesToCompare(url1, url2));
+
+    expect(
+      urlFromState(urlStateReducers.getUrlState(store.getState()))
+    ).toMatch(
+      `/compare/${encodeURIComponent(url1)}...${encodeURIComponent(url2)}/`
     );
   });
 });

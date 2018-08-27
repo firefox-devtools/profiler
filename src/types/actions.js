@@ -32,7 +32,8 @@ export type DataSource =
   | 'from-addon'
   | 'local'
   | 'public'
-  | 'from-url';
+  | 'from-url'
+  | 'compare';
 export type TimelineType = 'stack' | 'category';
 export type PreviewSelection =
   | {| +hasSelection: false, +isModifying: false |}
@@ -274,7 +275,8 @@ type UrlStateAction =
       +type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
       +showSummary: boolean,
     |}
-  | {| +type: 'CHANGE_MARKER_SEARCH_STRING', +searchString: string |};
+  | {| +type: 'CHANGE_MARKER_SEARCH_STRING', +searchString: string |}
+  | {| +type: 'CHANGE_PROFILES', +profiles: [string, string] |};
 
 type IconsAction =
   | {| +type: 'ICON_HAS_LOADED', +icon: string |}
