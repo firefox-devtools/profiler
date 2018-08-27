@@ -49,9 +49,17 @@ function hash(state: string = '', action: Action) {
   }
 }
 
-function profileUrl(state: string = '', action: Action) {
+function profileUrl(state: string = '') {
+  // This will be set by UPDATE_URL_STATE
+  return state;
+}
+
+function profiles(state: [string, string] | null = null, action: Action) {
   switch (action.type) {
+    case 'CHANGE_PROFILES':
+      return action.profiles;
     default:
+      // This will also be set by UPDATE_URL_STATE
       return state;
   }
 }
@@ -333,6 +341,7 @@ const urlStateReducer = wrapReducerInResetter(
     dataSource,
     hash,
     profileUrl,
+    profiles,
     selectedTab,
     pathInZipFile,
     profileSpecific,
@@ -348,6 +357,7 @@ export const getProfileSpecificState = (state: State) =>
 export const getDataSource = (state: State) => getUrlState(state).dataSource;
 export const getHash = (state: State) => getUrlState(state).hash;
 export const getProfileUrl = (state: State) => getUrlState(state).profileUrl;
+export const getProfiles = (state: State) => getUrlState(state).profiles;
 export const getAllCommittedRanges = (state: State) =>
   getProfileSpecificState(state).committedRanges;
 export const getImplementationFilter = (state: State) =>

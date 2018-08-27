@@ -138,8 +138,12 @@ export type ZippedProfilesState = {
 
 export type UrlState = {|
   +dataSource: DataSource,
+  // This is used for the "public" dataSource".
   +hash: string,
+  // This is used for the "from-url" dataSource.
   +profileUrl: string,
+  // This is used for the "compare" dataSource, to compare 2 profiles.
+  +profiles: [string, string] | null,
   +selectedTab: TabSlug,
   +pathInZipFile: string | null,
   +profileSpecific: {|

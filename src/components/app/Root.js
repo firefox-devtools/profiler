@@ -15,12 +15,14 @@ import {
 import ProfileViewer from './ProfileViewer';
 import ZipFileViewer from './ZipFileViewer';
 import Home from './Home';
+import CompareHome from './CompareHome';
 import { getView } from '../../reducers/app';
 import { getHasZipFile } from '../../reducers/zipped-profiles';
 import {
   getDataSource,
   getHash,
   getProfileUrl,
+  getProfiles,
 } from '../../reducers/url-state';
 import UrlManager from './UrlManager';
 import ServiceWorkerManager from './ServiceWorkerManager';
@@ -42,6 +44,7 @@ const LOADING_MESSAGES: { [string]: string } = Object.freeze({
   local: 'Not implemented yet.',
   public: 'Downloading and processing the profile...',
   'from-url': 'Downloading and processing the profile...',
+  compare: 'Reading and processing profiles...',
 });
 
 const ERROR_MESSAGES: { [string]: string } = Object.freeze({
@@ -50,6 +53,7 @@ const ERROR_MESSAGES: { [string]: string } = Object.freeze({
   local: 'Not implemented yet.',
   public: 'Could not download the profile.',
   'from-url': 'Could not download the profile.',
+  compare: 'Could not retrieve the profile',
 });
 
 // TODO Switch to a proper i18n library
@@ -74,6 +78,7 @@ type ProfileViewStateProps = {|
   +dataSource: DataSource,
   +hash: string,
   +profileUrl: string,
+  +profiles: [string, string] | null,
   +hasZipFile: boolean,
 |};
 
@@ -95,6 +100,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       dataSource,
       hash,
       profileUrl,
+      profiles,
       retrieveProfileFromAddon,
       retrieveProfileFromStore,
       retrieveProfileOrZipFromUrl,
@@ -113,6 +119,11 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
         break;
       case 'from-url':
         retrieveProfileOrZipFromUrl(profileUrl).catch(e => console.error(e));
+        break;
+      case 'compare':
+        if (profiles) {
+          retrieveProfilesToCompare(profiles);
+        }
         break;
       case 'none':
         // nothing to do
@@ -158,10 +169,14 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
   }
 
   renderAppropriateComponents() {
-    const { view, dataSource, hasZipFile } = this.props;
+    const { view, dataSource, profiles, hasZipFile } = this.props;
     const phase = view.phase;
     if (dataSource === 'none') {
       return <Home />;
+    }
+
+    if (dataSource === 'compare' && profiles === null) {
+      return <CompareHome />;
     }
     switch (phase) {
       case 'INITIALIZING': {
@@ -234,6 +249,7 @@ const options: ExplicitConnectOptions<
     dataSource: getDataSource(state),
     hash: getHash(state),
     profileUrl: getProfileUrl(state),
+    profiles: getProfiles(state),
     hasZipFile: getHasZipFile(state),
   }),
   mapDispatchToProps: {
