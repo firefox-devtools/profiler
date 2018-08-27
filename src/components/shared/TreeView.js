@@ -26,6 +26,7 @@ const PAGE_KEYS_DELTA = 15;
 // This is used for the result of RegExp.prototype.exec because Flow doesn't do it.
 // See https://github.com/facebook/flow/issues/4099
 type RegExpResult = null | ({ index: number, input: string } & string[]);
+type NodeIndex = number;
 
 export type Column = {
   propName: string,
@@ -96,7 +97,7 @@ function reactStringWithHighlightedSubstrings(
   return highlighted;
 }
 
-type TreeViewRowFixedColumnsProps<NodeIndex: number, DisplayData: Object> = {|
+type TreeViewRowFixedColumnsProps<DisplayData: Object> = {|
   +displayData: DisplayData,
   +nodeId: NodeIndex,
   +columns: Column[],
@@ -107,21 +108,13 @@ type TreeViewRowFixedColumnsProps<NodeIndex: number, DisplayData: Object> = {|
   +rowHeightStyle: { height: CssPixels, lineHeight: string },
 |};
 
-class TreeViewRowFixedColumns<
-  NodeIndex: number,
-  DisplayData: Object
-> extends React.PureComponent<
-  TreeViewRowFixedColumnsProps<NodeIndex, DisplayData>
+class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
+  TreeViewRowFixedColumnsProps<DisplayData>
 > {
-  constructor(props: TreeViewRowFixedColumnsProps<NodeIndex, DisplayData>) {
-    super(props);
-    (this: any)._onClick = this._onClick.bind(this);
-  }
-
-  _onClick(event: SyntheticMouseEvent<>) {
+  _onClick = (event: SyntheticMouseEvent<>) => {
     const { nodeId, onClick } = this.props;
     onClick(nodeId, event);
-  }
+  };
 
   render() {
     const {
@@ -170,10 +163,7 @@ class TreeViewRowFixedColumns<
   }
 }
 
-type TreeViewRowScrolledColumnsProps<
-  NodeIndex: number,
-  DisplayData: Object
-> = {|
+type TreeViewRowScrolledColumnsProps<DisplayData: Object> = {|
   +displayData: DisplayData,
   +nodeId: NodeIndex,
   +depth: number,
@@ -193,28 +183,20 @@ type TreeViewRowScrolledColumnsProps<
 |};
 
 class TreeViewRowScrolledColumns<
-  NodeIndex: number,
   DisplayData: Object
-> extends React.PureComponent<
-  TreeViewRowScrolledColumnsProps<NodeIndex, DisplayData>
-> {
-  constructor(props: TreeViewRowScrolledColumnsProps<NodeIndex, DisplayData>) {
-    super(props);
-    (this: any)._onClick = this._onClick.bind(this);
-  }
-
+> extends React.PureComponent<TreeViewRowScrolledColumnsProps<DisplayData>> {
   /**
    * In this mousedown handler, we use event delegation so we have to use
    * `target` instead of `currentTarget`.
    */
-  _onClick(event: { target: Element } & SyntheticMouseEvent<Element>) {
+  _onClick = (event: { target: Element } & SyntheticMouseEvent<Element>) => {
     const { nodeId, isExpanded, onToggle, onClick } = this.props;
     if (event.target.classList.contains('treeRowToggleButton')) {
       onToggle(nodeId, !isExpanded, event.altKey === true);
     } else {
       onClick(nodeId, event);
     }
-  }
+  };
 
   render() {
     const {
@@ -291,7 +273,7 @@ class TreeViewRowScrolledColumns<
   }
 }
 
-interface Tree<NodeIndex: number, DisplayData: Object> {
+interface Tree<DisplayData: Object> {
   getDepth(NodeIndex): number;
   getRoots(): NodeIndex[];
   getDisplayData(NodeIndex): DisplayData;
@@ -301,10 +283,10 @@ interface Tree<NodeIndex: number, DisplayData: Object> {
   getAllDescendants(NodeIndex): Set<NodeIndex>;
 }
 
-type TreeViewProps<NodeIndex, DisplayData> = {|
+type TreeViewProps<DisplayData> = {|
   +fixedColumns: Column[],
   +mainColumn: Column,
-  +tree: Tree<NodeIndex, DisplayData>,
+  +tree: Tree<DisplayData>,
   +expandedNodeIds: Array<NodeIndex | null>,
   +selectedNodeId: NodeIndex | null,
   +onExpandedNodesChange: (Array<NodeIndex | null>) => mixed,
@@ -321,27 +303,20 @@ type TreeViewProps<NodeIndex, DisplayData> = {|
   +indentWidth: CssPixels,
 |};
 
-class TreeView<
-  NodeIndex: number,
-  DisplayData: Object
-> extends React.PureComponent<TreeViewProps<NodeIndex, DisplayData>> {
+class TreeView<DisplayData: Object> extends React.PureComponent<
+  TreeViewProps<DisplayData>
+> {
   _specialItems: (NodeIndex | null)[];
   _visibleRows: NodeIndex[];
   _expandedNodes: Set<NodeIndex | null>;
-  _list: VirtualList | null;
+  _list: VirtualList | null = null;
   _takeListRef = (list: VirtualList | null) => (this._list = list);
 
-  constructor(props: TreeViewProps<NodeIndex, DisplayData>) {
+  constructor(props: TreeViewProps<DisplayData>) {
     super(props);
-    (this: any)._renderRow = this._renderRow.bind(this);
-    (this: any)._toggle = this._toggle.bind(this);
-    (this: any)._onKeyDown = this._onKeyDown.bind(this);
-    (this: any)._onCopy = this._onCopy.bind(this);
-    (this: any)._onRowClicked = this._onRowClicked.bind(this);
     this._specialItems = [props.selectedNodeId];
     this._expandedNodes = new Set(props.expandedNodeIds);
     this._visibleRows = this._getAllVisibleRows(props);
-    this._list = null;
   }
 
   scrollSelectionIntoView() {
@@ -354,7 +329,7 @@ class TreeView<
     }
   }
 
-  componentWillReceiveProps(nextProps: TreeViewProps<NodeIndex, DisplayData>) {
+  componentWillReceiveProps(nextProps: TreeViewProps<DisplayData>) {
     if (nextProps.selectedNodeId !== this.props.selectedNodeId) {
       this._specialItems = [nextProps.selectedNodeId];
     }
@@ -367,7 +342,7 @@ class TreeView<
     }
   }
 
-  _renderRow(nodeId: NodeIndex, index: number, columnIndex: number) {
+  _renderRow = (nodeId: NodeIndex, index: number, columnIndex: number) => {
     const {
       tree,
       fixedColumns,
@@ -417,10 +392,10 @@ class TreeView<
         indentWidth={indentWidth}
       />
     );
-  }
+  };
 
   _addVisibleRowsFromNode(
-    props: TreeViewProps<NodeIndex, DisplayData>,
+    props: TreeViewProps<DisplayData>,
     arr: NodeIndex[],
     nodeId: NodeIndex,
     depth: number
@@ -435,9 +410,7 @@ class TreeView<
     }
   }
 
-  _getAllVisibleRows(
-    props: TreeViewProps<NodeIndex, DisplayData>
-  ): NodeIndex[] {
+  _getAllVisibleRows(props: TreeViewProps<DisplayData>): NodeIndex[] {
     const roots = props.tree.getRoots();
     const allRows = [];
     for (let i = 0; i < roots.length; i++) {
@@ -450,11 +423,11 @@ class TreeView<
     return !this._expandedNodes.has(nodeId);
   }
 
-  _toggle(
+  _toggle = (
     nodeId: NodeIndex,
     newExpanded: boolean = this._isCollapsed(nodeId),
     toggleAll: * = false
-  ) {
+  ) => {
     const newSet = new Set(this._expandedNodes);
     if (newExpanded) {
       newSet.add(nodeId);
@@ -467,7 +440,7 @@ class TreeView<
       newSet.delete(nodeId);
     }
     this.props.onExpandedNodesChange(Array.from(newSet.values()));
-  }
+  };
 
   _toggleAll(
     nodeId: NodeIndex,
@@ -480,32 +453,30 @@ class TreeView<
     this.props.onSelectionChange(nodeId);
   }
 
-  _onRowClicked(nodeId: NodeIndex, event: SyntheticMouseEvent<>) {
+  _onRowClicked = (nodeId: NodeIndex, event: SyntheticMouseEvent<>) => {
     this._select(nodeId);
     if (event.detail === 2 && event.button === 0) {
       // double click
       this._toggle(nodeId);
     }
-  }
+  };
 
   /**
    * Flow doesn't yet know about Clipboard events, so infer what's going on with the
    * event.
    * See: https://github.com/facebook/flow/issues/1856
    */
-  _onCopy(event: *) {
+  _onCopy = (event: *) => {
     event.preventDefault();
     const { tree, selectedNodeId, mainColumn } = this.props;
     if (selectedNodeId) {
       const displayData = tree.getDisplayData(selectedNodeId);
-      event.clipboardData.setData(
-        'text/plain',
-        displayData[mainColumn.propName]
-      );
+      const clipboardData: DataTransfer = (event: Object).clipboardData;
+      clipboardData.setData('text/plain', displayData[mainColumn.propName]);
     }
-  }
+  };
 
-  _onKeyDown(event: KeyboardEvent) {
+  _onKeyDown = (event: KeyboardEvent) => {
     const hasModifier = event.ctrlKey || event.altKey;
     const isNavigationKey =
       event.key.startsWith('Arrow') ||
@@ -624,7 +595,7 @@ class TreeView<
         onEnterKey(selectedNodeId);
       }
     }
-  }
+  };
 
   focus() {
     if (this._list) {

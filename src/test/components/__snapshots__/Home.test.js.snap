@@ -334,7 +334,6 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
             To start recording a performance profile in Firefox, first install the
              
             <a
-              className={undefined}
               href="https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi"
               onClick={[Function]}
             >

@@ -47,40 +47,34 @@ type XY = {|
 type EventWithPageProperties = { pageX: number, pageY: number };
 
 class Reorderable extends React.PureComponent<Props, State> {
-  _xy: {| horizontal: XY, vertical: XY |};
+  _xy: {| horizontal: XY, vertical: XY |} = {
+    horizontal: {
+      pageXY: 'pageX',
+      translateXY: 'translateX',
+      lefttop: 'left',
+      rightbottom: 'right',
+    },
+    vertical: {
+      pageXY: 'pageY',
+      translateXY: 'translateY',
+      lefttop: 'top',
+      rightbottom: 'bottom',
+    },
+  };
 
-  constructor(props: Props) {
-    super(props);
-    (this: any)._onMouseDown = this._onMouseDown.bind(this);
-    this.state = {
-      phase: 'RESTING',
-      manipulatingIndex: -1,
-      destinationIndex: -1,
-      manipulationDelta: 0,
-      adjustPrecedingBy: 0,
-      adjustSucceedingBy: 0,
-      finalOffset: 0,
-    };
+  state = {
+    phase: 'RESTING',
+    manipulatingIndex: -1,
+    destinationIndex: -1,
+    manipulationDelta: 0,
+    adjustPrecedingBy: 0,
+    adjustSucceedingBy: 0,
+    finalOffset: 0,
+  };
 
-    this._xy = {
-      horizontal: {
-        pageXY: 'pageX',
-        translateXY: 'translateX',
-        lefttop: 'left',
-        rightbottom: 'right',
-      },
-      vertical: {
-        pageXY: 'pageY',
-        translateXY: 'translateY',
-        lefttop: 'top',
-        rightbottom: 'bottom',
-      },
-    };
-  }
-
-  _onMouseDown(
+  _onMouseDown = (
     event: { target: EventTarget } & SyntheticMouseEvent<HTMLElement>
-  ) {
+  ) => {
     const container = event.currentTarget;
 
     if (
@@ -111,7 +105,7 @@ class Reorderable extends React.PureComponent<Props, State> {
     }
 
     this._startDraggingElement(container, element, event);
-  }
+  };
 
   _getXY(): XY {
     return this._xy[this.props.orient];

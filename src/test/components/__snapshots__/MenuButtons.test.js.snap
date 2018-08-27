@@ -145,7 +145,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
               className="menuButtonsPermalinkTextField"
               readOnly="readOnly"
               type="text"
-              value="about:blank"
+              value="http://localhost/"
             />
           </div>
         </div>
@@ -271,7 +271,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                   checked={false}
                   className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={true}
-                  onChange={undefined}
                   type="checkbox"
                 />
                 Share the URLs of all network requests
@@ -490,7 +489,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
               className="menuButtonsPermalinkTextField"
               readOnly="readOnly"
               type="text"
-              value="about:blank"
+              value="http://localhost/"
             />
           </div>
         </div>
@@ -616,7 +615,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                   checked={false}
                   className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={true}
-                  onChange={undefined}
                   type="checkbox"
                 />
                 Share the URLs of all network requests
@@ -835,7 +833,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               className="menuButtonsPermalinkTextField"
               readOnly="readOnly"
               type="text"
-              value="about:blank"
+              value="http://localhost/"
             />
           </div>
         </div>
@@ -961,7 +959,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                   checked={false}
                   className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={true}
-                  onChange={undefined}
                   type="checkbox"
                 />
                 Share the URLs of all network requests
@@ -1180,7 +1177,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               className="menuButtonsPermalinkTextField"
               readOnly="readOnly"
               type="text"
-              value="about:blank"
+              value="http://localhost/"
             />
           </div>
         </div>
@@ -1306,7 +1303,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                   checked={false}
                   className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={true}
-                  onChange={undefined}
                   type="checkbox"
                 />
                 Share the URLs of all network requests
@@ -1525,7 +1521,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               className="menuButtonsPermalinkTextField"
               readOnly="readOnly"
               type="text"
-              value="about:blank"
+              value="http://localhost/"
             />
           </div>
         </div>
@@ -1651,7 +1647,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                   checked={false}
                   className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={true}
-                  onChange={undefined}
                   type="checkbox"
                 />
                 Share the URLs of all network requests
@@ -1870,7 +1865,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               className="menuButtonsPermalinkTextField"
               readOnly="readOnly"
               type="text"
-              value="about:blank"
+              value="http://localhost/"
             />
           </div>
         </div>
@@ -1996,7 +1991,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                   checked={false}
                   className="menuButtonsShareNetworkUrlsCheckbox"
                   disabled={true}
-                  onChange={undefined}
                   type="checkbox"
                 />
                 Share the URLs of all network requests

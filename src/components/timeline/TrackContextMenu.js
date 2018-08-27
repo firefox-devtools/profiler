@@ -213,14 +213,13 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
     if (rightClickedTrack.type === 'global') {
       return globalTrackNames[rightClickedTrack.trackIndex];
-    } else {
-      const localTrackNames = localTrackNamesByPid.get(rightClickedTrack.pid);
-      if (localTrackNames === undefined) {
-        console.error('Expected to find a local track name for the given pid.');
-        return 'Unknown Track';
-      }
-      return localTrackNames[rightClickedTrack.trackIndex];
     }
+    const localTrackNames = localTrackNamesByPid.get(rightClickedTrack.pid);
+    if (localTrackNames === undefined) {
+      console.error('Expected to find a local track name for the given pid.');
+      return 'Unknown Track';
+    }
+    return localTrackNames[rightClickedTrack.trackIndex];
   }
 
   renderIsolateProcess() {

@@ -661,16 +661,15 @@ export const getRightClickedThreadIndex = createSelector(
     if (rightClickedTrack.type === 'global') {
       const track = globalTracks[rightClickedTrack.trackIndex];
       return track.type === 'process' ? track.mainThreadIndex : null;
-    } else {
-      const { pid, trackIndex } = rightClickedTrack;
-      const localTracks = ensureExists(
-        localTracksByPid.get(pid),
-        'No local tracks found at that pid.'
-      );
-      const track = localTracks[trackIndex];
-
-      return track.type === 'thread' ? track.threadIndex : null;
     }
+    const { pid, trackIndex } = rightClickedTrack;
+    const localTracks = ensureExists(
+      localTracksByPid.get(pid),
+      'No local tracks found at that pid.'
+    );
+    const track = localTracks[trackIndex];
+
+    return track.type === 'thread' ? track.threadIndex : null;
   }
 );
 export const getGlobalTrackNames = createSelector(

@@ -98,11 +98,42 @@ function isSidebarOpenPerPanel(
   }
 }
 
+/**
+ * The panels that make up the timeline, details view, and sidebar can all change
+ * their sizes depending on the state that is fed to them. In order to control
+ * the invalidations of this sizing information, provide a "generation" value that
+ * increases monotonically for any change that potentially changes the sizing of
+ * any of the panels. This provides a mechanism for subscribing components to
+ * deterministically update their sizing correctly.
+ */
+function panelLayoutGeneration(state: number = 0, action: Action): number {
+  switch (action.type) {
+    case 'INCREMENT_PANEL_LAYOUT_GENERATION':
+    // Sidebar: (fallthrough)
+    case 'CHANGE_SIDEBAR_OPEN_STATE':
+    // Timeline: (fallthrough)
+    case 'HIDE_GLOBAL_TRACK':
+    case 'SHOW_GLOBAL_TRACK':
+    case 'ISOLATE_PROCESS':
+    case 'ISOLATE_PROCESS_MAIN_THREAD':
+    case 'HIDE_LOCAL_TRACK':
+    case 'SHOW_LOCAL_TRACK':
+    case 'ISOLATE_LOCAL_TRACK':
+    // Committed range changes: (fallthrough)
+    case 'COMMIT_RANGE':
+    case 'POP_COMMITTED_RANGES':
+      return state + 1;
+    default:
+      return state;
+  }
+}
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   isUrlSetupDone,
   hasZoomedViaMousewheel,
   isSidebarOpenPerPanel,
+  panelLayoutGeneration,
 });
 
 export default appStateReducer;
@@ -116,3 +147,5 @@ export const getHasZoomedViaMousewheel = (state: State): boolean => {
 };
 export const getIsSidebarOpen = (state: State): boolean =>
   getApp(state).isSidebarOpenPerPanel[getSelectedTab(state)];
+export const getPanelLayoutGeneration = (state: State) =>
+  getApp(state).panelLayoutGeneration;
