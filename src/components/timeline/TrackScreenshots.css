@@ -8,12 +8,8 @@
   overflow: hidden;
 }
 
-.timelineTrackScreenshot > * {
-  /* Do not allow mouseout events to fire for children events. */
-  pointer-events: none;
-}
-
 .timelineTrackScreenshotImgContainer {
+  /* This positioning is defined through JavaScript */
   position: absolute;
   overflow: hidden;
   display: flex;
@@ -30,10 +26,9 @@
   background: var(--grey-30);
   right: 0;
 }
-.timelineTrackScreenshotImg {
-}
 
 .timelineTrackScreenshotHover {
+  /* This positioning is defined through JavaScript */
   position: absolute;
   pointer-events: none;
   z-index: 4; /* Ensure this is higher than any other timeline element. */

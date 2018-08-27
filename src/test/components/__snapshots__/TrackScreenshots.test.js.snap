@@ -3,8 +3,8 @@
 exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
 <div
   className="timelineTrackScreenshot"
+  onMouseLeave={[Function]}
   onMouseMove={[Function]}
-  onMouseOut={[Function]}
   style={
     Object {
       "height": 50,

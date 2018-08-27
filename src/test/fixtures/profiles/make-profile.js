@@ -25,7 +25,8 @@ type TestDefinedMarkers = Array<
 /**
  * This function ensures that the mock payloads are converted correctly to real payloads
  * that match the MarkerPayload typing. Specifically it adds the 'DummyForTests' type
- * to { startTime, endTime } payloads.
+ * to { startTime, endTime } payloads. Doing this means that it's cleaner to create
+ * dummy test-defined markers, since we don't have to add a `type` to the payload.
  */
 function _refineMockPayload(
   payload: MarkerPayload | MockPayload

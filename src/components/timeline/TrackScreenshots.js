@@ -32,7 +32,6 @@ import './TrackScreenshots.css';
 type OwnProps = {|
   +threadIndex: ThreadIndex,
   +screenshotId: string,
-  +overlayElement?: HTMLElement,
   ...SizeProps,
 |};
 type StateProps = {|
@@ -42,7 +41,6 @@ type StateProps = {|
   +screenshots: MarkersTableWithPayload<ScreenshotPayload>,
   +threadName: string,
   +isMakingPreviewSelection: boolean,
-  +overlayElement: HTMLElement,
 |};
 type DispatchProps = {||};
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -52,6 +50,7 @@ type State = {|
   containerTop: null | number,
 |};
 
+// Export the value for tests.
 export const TRACK_HEIGHT = 50;
 const HOVER_HEIGHT = 100;
 const HOVER_MAX_WIDTH_RATIO = 1.75;
@@ -63,24 +62,26 @@ class Screenshots extends PureComponent<Props, State> {
     containerTop: null,
   };
 
+  _overlayElement = ensureExists(
+    document.querySelector('#root-overlay'),
+    'Expected to find a root overlay element.'
+  );
+
   findScreenshotAtMouse(offsetX: number): number | null {
     const { width, rangeStart, rangeEnd, screenshots } = this.props;
     const rangeLength = rangeEnd - rangeStart;
     const mouseTime = offsetX / width * rangeLength + rangeStart;
-    if (screenshots.length === 0) {
-      return null;
-    }
-    if (mouseTime < screenshots.time[0]) {
-      // Only show a screenshot for the first time we know of.
-      return null;
-    }
-    for (let i = 0; i < screenshots.length; i++) {
-      const time = screenshots.time[i];
-      if (time >= mouseTime) {
+
+    // Loop backwards to find the latest screenshot that has a time less
+    // than the current time at the mouse position.
+    for (let i = screenshots.length - 1; i >= 0; i--) {
+      const screenshotTime = screenshots.time[i];
+      if (mouseTime >= screenshotTime) {
         return i;
       }
     }
-    return screenshots.length - 1;
+
+    return null;
   }
 
   /**
@@ -95,9 +96,11 @@ class Screenshots extends PureComponent<Props, State> {
       rangeEnd,
       screenshots,
     } = this.props;
+
     if (screenshots.length === 0) {
       return null;
     }
+
     const images = [];
     const rangeLength = rangeEnd - rangeStart;
     const imageContainerWidth = TRACK_HEIGHT * 0.75;
@@ -118,9 +121,11 @@ class Screenshots extends PureComponent<Props, State> {
           break;
         }
       }
-      const { url, windowWidth, windowHeight } = screenshots.data[
-        screenshotIndex
-      ];
+      const {
+        url: urlStringIndex,
+        windowWidth,
+        windowHeight,
+      } = screenshots.data[screenshotIndex];
       const scaledImageWidth = TRACK_HEIGHT * windowWidth / windowHeight;
       images.push(
         <div
@@ -131,7 +136,7 @@ class Screenshots extends PureComponent<Props, State> {
           {/* The following image is centered and cropped by the outer container. */}
           <img
             className="timelineTrackScreenshotImg"
-            src={thread.stringTable.getString(url)}
+            src={thread.stringTable.getString(urlStringIndex)}
             style={{
               width: scaledImageWidth,
               height: TRACK_HEIGHT,
@@ -146,13 +151,7 @@ class Screenshots extends PureComponent<Props, State> {
 
   renderHoverPreview() {
     const { pageX, offsetX, containerTop } = this.state;
-    const {
-      screenshots,
-      thread,
-      isMakingPreviewSelection,
-      width,
-      overlayElement,
-    } = this.props;
+    const { screenshots, thread, isMakingPreviewSelection, width } = this.props;
     if (isMakingPreviewSelection || offsetX === null || pageX === null) {
       return null;
     }
@@ -173,6 +172,7 @@ class Screenshots extends PureComponent<Props, State> {
       hoverWidth = HOVER_HEIGHT * HOVER_MAX_WIDTH_RATIO;
       hoverHeight = hoverWidth / windowWidth * windowHeight;
     }
+
     // Set the top so it centers around the track.
     const top = containerTop + (TRACK_HEIGHT - hoverHeight) * 0.5;
     const left =
@@ -193,11 +193,11 @@ class Screenshots extends PureComponent<Props, State> {
           }}
         />
       </div>,
-      overlayElement
+      this._overlayElement
     );
   }
 
-  _handleMouseOut = () => {
+  _handleMouseLeave = () => {
     this.setState({
       offsetX: null,
       pageX: null,
@@ -219,7 +219,7 @@ class Screenshots extends PureComponent<Props, State> {
       <div
         className="timelineTrackScreenshot"
         style={{ height: TRACK_HEIGHT }}
-        onMouseOut={this._handleMouseOut}
+        onMouseLeave={this._handleMouseLeave}
         onMouseMove={this._handleMouseMove}
       >
         {this.renderScreenshotStrip()}
@@ -246,13 +246,6 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       rangeEnd: end,
       isMakingPreviewSelection:
         previewSelection.hasSelection && previewSelection.isModifying,
-      overlayElement:
-        // Allow tests to inject their own overlayElement
-        ownProps.overlayElement ||
-        ensureExists(
-          document.querySelector('#root-overlay'),
-          'Expected to find a root overlay element.'
-        ),
     };
   },
   component: Screenshots,

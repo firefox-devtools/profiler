@@ -346,7 +346,7 @@ type VsyncTimestampPayload = {|
   vsync: 0,
 |};
 
-export type ScreenshotPayload = {
+export type ScreenshotPayload = {|
   // The "type" property doesn't exist, but is required to make Flow typing work.
   type: void,
   // This field represents the data url of the image. It is saved in the string table.
@@ -358,7 +358,7 @@ export type ScreenshotPayload = {
   // stored in the string table will be scaled down from the original size.
   windowWidth: number,
   windowHeight: number,
-};
+|};
 
 /**
  * The payload for Styles.

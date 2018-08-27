@@ -10,6 +10,7 @@ import { mount } from 'enzyme';
 import TrackScreenshots, {
   TRACK_HEIGHT,
 } from '../../components/timeline/TrackScreenshots';
+import { ensureExists } from '../../utils/flow';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
@@ -22,6 +23,26 @@ const LEFT = 5;
 const TOP = 7;
 
 describe('timeline/TrackScreenshots', function() {
+  beforeEach(function() {
+    const div = document.createElement('div');
+    div.id = 'root-overlay';
+    ensureExists(
+      document.body,
+      'Expected the document.body to exist.'
+    ).appendChild(div);
+  });
+  afterEach(function() {
+    ensureExists(
+      document.body,
+      'Expected the document.body to exist.'
+    ).removeChild(
+      ensureExists(
+        document.querySelector('#root-overlay'),
+        'Expected to find a root overlay element to clean up.'
+      )
+    );
+  });
+
   it('matches the component snapshot', () => {
     const { view } = setup();
     expect(view).toMatchSnapshot();
@@ -47,7 +68,7 @@ describe('timeline/TrackScreenshots', function() {
     view.update();
     expect(view.find('.timelineTrackScreenshotHover').length).toBe(1);
 
-    view.simulate('mouseout');
+    view.simulate('mouseleave');
     view.update();
     expect(view.find('.timelineTrackScreenshotHover').length).toBe(0);
   });
@@ -87,11 +108,7 @@ function setup() {
 
   const view = mount(
     <Provider store={store}>
-      <TrackScreenshots
-        threadIndex={0}
-        screenshotId="0"
-        overlayElement={document.createElement('div')}
-      />
+      <TrackScreenshots threadIndex={0} screenshotId="0" />
     </Provider>
   );
 
@@ -102,7 +119,7 @@ function setup() {
   function moveMouseAndGetLeft(pageX: number): number {
     view.simulate('mousemove', { pageX });
     view.update();
-    return view.find('.timelineTrackScreenshotHover').get(0).props.style.left;
+    return view.find('.timelineTrackScreenshotHover').prop('style').left;
   }
 
   return {
