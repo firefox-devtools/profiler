@@ -10,7 +10,7 @@ import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
 describe('getTracingMarkers', function() {
   const profile = processProfile(getGeckoProfile());
   const thread = profile.threads[0];
-  const tracingMarkers = getTracingMarkers(thread);
+  const tracingMarkers = getTracingMarkers(thread.markers, thread.stringTable);
 
   it('creates 10 tracing markers given the test data', function() {
     expect(tracingMarkers.length).toEqual(10);
