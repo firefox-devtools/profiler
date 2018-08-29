@@ -281,14 +281,25 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
       const startTime = getNumberPropertyOrNull(data, 'startTime');
       const endTime = getNumberPropertyOrNull(data, 'endTime');
 
-      // Now construct a tracing marker if these properties existed.
       if (startTime !== null && endTime !== null) {
+        // Construct a tracing marker with a duration if these properties exist.
         const name = stringTable.getString(markers.name[i]);
         const duration = endTime - startTime;
         tracingMarkers.push({
           start: startTime,
           dur: duration,
           name,
+          data,
+          title: null,
+        });
+      } else {
+        // Ensure all markers are converted to tracing markers, even if they have no
+        // more timing information. This ensures that markers can be filtered by time
+        // in a consistent manner.
+        tracingMarkers.push({
+          start: markers.time[i],
+          dur: 0,
+          name: stringTable.getString(markers.name[i]),
           data,
           title: null,
         });
