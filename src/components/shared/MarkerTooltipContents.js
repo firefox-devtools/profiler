@@ -122,17 +122,21 @@ function _makePhaseTimesArray(
   return array;
 }
 
-function _dataPrioReplace(str: number) {
-  if (str === -20) {
-    return 'Priority: Highest (-20)';
-  } else if (str === -10) {
-    return 'Priority: High (-10)';
-  } else if (str === 10) {
-    return 'Priority: Low (10)';
-  } else if (str === 20) {
-    return 'Priority: Lowest (-20)';
-  } else {
-    return 'Priority: Normal (0)';
+function _dataPriorityReplace(priority: number) {
+  // https://searchfox.org/mozilla-central/source/xpcom/threads/nsISupportsPriority.idl#24-28
+  switch (priority) {
+    case -20:
+      return 'Highest (-20)';
+    case -10:
+      return 'High (-10)';
+    case 0:
+      return 'Normal (0)';
+    case 10:
+      return 'Low (10)';
+    case 20:
+      return 'Lowest (20)';
+    default:
+      return priority;
   }
 }
 
@@ -635,7 +639,7 @@ function getMarkerDetails(
             <div className="tooltipDetails">
               {_markerDetail('status', 'Status', data.status)}
               {_markerDetailNullable('url', 'URL', data.URI)}
-              {_markerDetail('pri', 'Priority', _dataPrioReplace(data.pri))}
+              {_markerDetail('pri', 'Priority', _dataPriorityReplace(data.pri))}
               {_markerDetailBytesNullable(
                 'count',
                 'Requested bytes',
@@ -653,7 +657,7 @@ function getMarkerDetails(
                 'Redirect URL',
                 data.RedirectURI
               )}
-              {_markerDetail('pri', 'Priority', _dataPrioReplace(data.pri))}
+              {_markerDetail('pri', 'Priority', _dataPriorityReplace(data.pri))}
               {_markerDetailBytesNullable(
                 'count',
                 'Requested bytes',
