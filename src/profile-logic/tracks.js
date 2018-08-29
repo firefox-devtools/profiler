@@ -138,12 +138,15 @@ export function computeLocalTracksByPid(
       localTracksByPid.set(pid, tracks);
     }
 
-    if (_isMainThread(thread)) {
-      // This thread was already added as a GlobalTrack.
-      continue;
+    if (!_isMainThread(thread)) {
+      // This thread has not been added as a GlobalTrack, so add it as a local track.
+      tracks.push({ type: 'thread', threadIndex });
     }
 
-    tracks.push({ type: 'thread', threadIndex });
+    if (thread.markers.data.some(datum => datum && datum.type === 'Network')) {
+      // This thread has network markers.
+      tracks.push({ type: 'network', threadIndex });
+    }
   }
 
   return localTracksByPid;

@@ -8,6 +8,7 @@ import { combineReducers } from 'redux';
 import { getSelectedTab } from './url-state';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
+import type { TabSlug } from '../app-logic/tabs-handling';
 import type { Action } from '../types/store';
 import type {
   State,
@@ -128,12 +129,36 @@ function panelLayoutGeneration(state: number = 0, action: Action): number {
   }
 }
 
+/**
+ * Clicking on tracks can switch between different tabs. This piece of state holds
+ * on to the last relevant thread-based tab that was viewed. This makes the UX nicer
+ * for when a user clicks on a Network track, and gets taken to the Network
+ * panel, then clicks on a thread or process track. With this state we can smoothly
+ * transition them back to the panel they were using.
+ */
+function lastVisibleThreadTabSlug(
+  state: TabSlug = 'calltree',
+  action: Action
+): TabSlug {
+  switch (action.type) {
+    case 'SELECT_TRACK':
+    case 'CHANGE_SELECTED_TAB':
+      if (action.selectedTab !== 'network-chart') {
+        return action.selectedTab;
+      }
+      return state;
+    default:
+      return state;
+  }
+}
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   isUrlSetupDone,
   hasZoomedViaMousewheel,
   isSidebarOpenPerPanel,
   panelLayoutGeneration,
+  lastVisibleThreadTabSlug,
 });
 
 export default appStateReducer;
@@ -149,3 +174,5 @@ export const getIsSidebarOpen = (state: State): boolean =>
   getApp(state).isSidebarOpenPerPanel[getSelectedTab(state)];
 export const getPanelLayoutGeneration = (state: State) =>
   getApp(state).panelLayoutGeneration;
+export const getLastVisibleThreadTabSlug = (state: State) =>
+  getApp(state).lastVisibleThreadTabSlug;

@@ -11,7 +11,7 @@ import type {
   IndexIntoCategoryList,
   CategoryList,
 } from '../../../types/profile';
-import type { MarkerPayload } from '../../../types/markers';
+import type { MarkerPayload, NetworkPayload } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
 
 // Array<[MarkerName, Milliseconds, Data]>
@@ -492,4 +492,30 @@ function _buildThreadFromTextOnlyStacks(
     samples.time.push(columnIndex);
   });
   return thread;
+}
+
+function getNetworkMarker(startTime: number, id) {
+  const payload: NetworkPayload = {
+    type: 'Network',
+    id,
+    pri: 0,
+    status: 'STOP',
+    startTime,
+    endTime: startTime + 1,
+  };
+  return ['Network', startTime, payload];
+}
+
+/**
+ * This function computes a profile with network markers, which will in turn generate
+ * a profile that contains a main thread track, and a network track.
+ *
+ * This generates 10 network markers ranged 3-4 ms on their start times.
+ */
+export function getNetworkTrackProfile() {
+  return getProfileWithMarkers(
+    Array(10)
+      .fill()
+      .map((_, i) => getNetworkMarker(3 + 0.1 * i, i))
+  );
 }

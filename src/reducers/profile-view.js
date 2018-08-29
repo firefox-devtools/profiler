@@ -402,6 +402,7 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
     case 'CHANGE_INVERT_CALLSTACK':
     case 'CHANGE_SELECTED_CALL_NODE':
     case 'CHANGE_SELECTED_THREAD':
+    case 'SELECT_TRACK':
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
       return state + 1;
@@ -629,6 +630,16 @@ export const getGlobalTrackReferences = createSelector(
       trackIndex,
     }))
 );
+export const getGlobalTrackFromReference = (
+  state: State,
+  trackReference: TrackReference
+) => {
+  if (trackReference.type !== 'global') {
+    throw new Error('Expected a global track reference.');
+  }
+  const globalTracks = getGlobalTracks(state);
+  return globalTracks[trackReference.trackIndex];
+};
 
 // Warning: this selector returns a new object on every call, and will not properly
 // work with a PureComponent.
@@ -653,6 +664,16 @@ export const getLocalTracks = (state: State, pid: Pid) =>
     getProfileView(state).localTracksByPid.get(pid),
     'Unable to get the tracks for the given pid.'
   );
+export const getLocalTrackFromReference = (
+  state: State,
+  trackReference: TrackReference
+): LocalTrack => {
+  if (trackReference.type !== 'local') {
+    throw new Error('Expected a local track reference.');
+  }
+  const { pid, trackIndex } = trackReference;
+  return getLocalTracks(state, pid)[trackIndex];
+};
 export const getRightClickedThreadIndex = createSelector(
   getRightClickedTrack,
   getGlobalTracks,
@@ -729,6 +750,8 @@ export type SelectorsForThread = {
   getMarkerTiming: State => MarkerTimingRows,
   getCommittedRangeFilteredTracingMarkers: State => TracingMarker[],
   getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
+  getNetworkTracingMarkers: State => TracingMarker[],
+  getNetworkTiming: State => MarkerTimingRows,
   getFilteredThread: State => Thread,
   getPreviewFilteredThread: State => Thread,
   getCallNodeInfo: State => CallNodeInfo,
@@ -961,6 +984,17 @@ export const selectorsForThread = (
             !ProfileData.isNetworkMarker(tm)
         )
     );
+    const getNetworkTracingMarkers = createSelector(
+      getCommittedRangeFilteredTracingMarkers,
+      tracingMarkers =>
+        tracingMarkers.filter(
+          marker => marker.data && marker.data.type === 'Network'
+        )
+    );
+    const getNetworkTiming = createSelector(
+      getNetworkTracingMarkers,
+      MarkerTiming.getMarkerTiming
+    );
     const getCallNodeInfo = createSelector(
       getFilteredThread,
       getDefaultCategory,
@@ -1075,6 +1109,8 @@ export const selectorsForThread = (
       getMarkerTiming,
       getCommittedRangeFilteredTracingMarkers,
       getCommittedRangeFilteredTracingMarkersForHeader,
+      getNetworkTracingMarkers,
+      getNetworkTiming,
       getFilteredThread,
       getPreviewFilteredThread,
       getCallNodeInfo,
