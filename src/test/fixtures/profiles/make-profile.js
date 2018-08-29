@@ -71,9 +71,11 @@ export function addMarkersToThreadWithCorrespondingSamples(
     // If we have no data, endTime is the same as startTime.
     const endTime =
       data && typeof data.endTime === 'number' ? data.endTime : time;
+
+    // Push on the start and end time.
     samples.time.push(startTime, endTime);
-    samples.stack.push(null);
-    samples.length++;
+    samples.stack.push(null, null);
+    samples.length += 2;
   });
 
   samples.time.sort();
