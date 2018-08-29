@@ -49,9 +49,14 @@ exports[`MarkerTable renders some basic markers 1`] = `
       className="treeViewHeader"
     >
       <span
-        className="treeViewHeaderColumn treeViewFixedColumn timestamp"
+        className="treeViewHeaderColumn treeViewFixedColumn start"
       >
-        Time Stamp
+        Start
+      </span>
+      <span
+        className="treeViewHeaderColumn treeViewFixedColumn duration"
+      >
+        Duration
       </span>
       <span
         className="treeViewHeaderColumn treeViewFixedColumn category"
@@ -112,16 +117,22 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn timestamp"
+                  className="treeViewRowColumn treeViewFixedColumn start"
                   title="0.000s"
                 >
                   0.000s
                 </span>
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn category"
-                  title="unknown"
+                  className="treeViewRowColumn treeViewFixedColumn duration"
+                  title="—"
                 >
-                  unknown
+                  —
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn category"
+                  title="UserTiming"
+                >
+                  UserTiming
                 </span>
               </div>
               <div
@@ -193,7 +204,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
-                  UserTiming [foobar]
+                  foobar
                 </span>
               </div>
               <div

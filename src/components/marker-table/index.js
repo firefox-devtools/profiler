@@ -29,7 +29,8 @@ import type {
 } from '../../utils/connect';
 
 type MarkerDisplayData = {|
-  timestamp: string,
+  start: string,
+  duration: string,
   name: string,
   category: string,
 |};
@@ -81,11 +82,11 @@ class MarkerTree {
   getDisplayData(markerIndex: IndexIntoTracingMarkers): MarkerDisplayData {
     let displayData = this._displayDataByIndex.get(markerIndex);
     if (displayData === undefined) {
-      const markers = this._markers;
+      const marker = this._markers[markerIndex];
       let category = 'unknown';
-      let name = markers[markerIndex].name;
-      if (markers[markerIndex].data) {
-        const data = markers[markerIndex].data;
+      let name = marker.name;
+      if (marker.data) {
+        const data = marker.data;
 
         if (typeof data.category === 'string') {
           category = data.category;
@@ -98,23 +99,25 @@ class MarkerTree {
               if (name.length > 100) {
                 name = name.substring(0, 100) + '...';
               }
-            } else {
-              name = `[${data.interval}] ${name}`;
+            } else if (data.category === 'DOMEvent') {
+              name = data.eventType;
             }
             break;
 
           case 'UserTiming':
-            name = `${name} [${data.name}]`;
+            category = name;
+            name = data.name;
+            break;
+          case 'Bailout':
+            category = 'Bailout';
             break;
           default:
         }
       }
 
       displayData = {
-        timestamp: `${(
-          (markers[markerIndex].start - this._zeroAt) /
-          1000
-        ).toFixed(3)}s`,
+        start: `${((marker.start - this._zeroAt) / 1000).toFixed(3)}s`,
+        duration: _formatDuration(marker.dur),
         name,
         category,
       };
@@ -122,6 +125,23 @@ class MarkerTree {
     }
     return displayData;
   }
+}
+function _formatDuration(duration: number): string {
+  if (duration === 0) {
+    return '—';
+  }
+  let maximumFractionDigits = 1;
+  if (duration < 0.01) {
+    maximumFractionDigits = 3;
+  } else if (duration < 1) {
+    maximumFractionDigits = 2;
+  }
+  return (
+    duration.toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits,
+    }) + 'ms'
+  );
 }
 
 type StateProps = {|
@@ -139,7 +159,8 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkerTable extends PureComponent<Props> {
   _fixedColumns = [
-    { propName: 'timestamp', title: 'Time Stamp' },
+    { propName: 'start', title: 'Start' },
+    { propName: 'duration', title: 'Duration' },
     { propName: 'category', title: 'Category' },
   ];
   _mainColumn = { propName: 'name', title: '' };
@@ -192,7 +213,7 @@ class MarkerTable extends PureComponent<Props> {
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     threadIndex: getSelectedThreadIndex(state),
-    markers: selectedThreadSelectors.getSearchFilteredTracingMarkers(state),
+    markers: selectedThreadSelectors.getPreviewFilteredTracingMarkers(state),
     selectedMarker: selectedThreadSelectors.getViewOptions(state)
       .selectedMarker,
     zeroAt: getZeroAt(state),

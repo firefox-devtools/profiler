@@ -11,3 +11,23 @@
   user-select: none;
   cursor: default;
 }
+
+.treeViewFixedColumn.start {
+  left: 0px;
+  width: 80px;
+  text-align: right;
+  padding-right: 5px;
+}
+
+.treeViewFixedColumn.duration {
+  left: 80px;
+  width: 80px;
+  border-right: none;
+  text-align: right;
+  padding-right: 5px;
+}
+
+.treeViewFixedColumn.category {
+  left: 160px;
+  width: 80px;
+}
