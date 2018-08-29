@@ -3,10 +3,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import type {
+  Profile,
+  Thread,
+  IndexIntoMarkersTable,
+} from '../../types/profile';
+
 import * as React from 'react';
 import { Provider } from 'react-redux';
 import { mount } from 'enzyme';
 
+import { commitRange } from '../../actions/profile-view';
 import TrackScreenshots, {
   TRACK_HEIGHT,
 } from '../../components/timeline/TrackScreenshots';
@@ -85,10 +92,48 @@ describe('timeline/TrackScreenshots', function() {
     const pageX = LEFT + TRACK_WIDTH - 1;
     expect(pageX > moveMouseAndGetLeft(pageX)).toBe(true);
   });
+
+  it('renders a screenshot images when zooming into a range without a screenshot start time actually in the range', () => {
+    const profile = getScreenshotTrackProfile();
+    const [thread] = profile.threads;
+    const markerIndexA = thread.markers.length - 2;
+    const markerIndexB = thread.markers.length - 1;
+
+    _setScreenshotMarkersToUnknown(thread, markerIndexA, markerIndexB);
+
+    const { dispatch, view } = setup(profile);
+    dispatch(
+      commitRange(
+        thread.markers.time[markerIndexA],
+        thread.markers.time[markerIndexB]
+      )
+    );
+    view.update();
+    expect(view.find('.timelineTrackScreenshotImg').length).toBeGreaterThan(0);
+  });
+
+  it('renders a no images when zooming into a range before screenshots', () => {
+    const profile = getScreenshotTrackProfile();
+    const [thread] = profile.threads;
+
+    const markerIndexA = 0;
+    const markerIndexB = 1;
+
+    _setScreenshotMarkersToUnknown(thread, markerIndexA, markerIndexB);
+
+    const { dispatch, view } = setup(profile);
+    dispatch(
+      commitRange(
+        thread.markers.time[markerIndexA],
+        thread.markers.time[markerIndexB]
+      )
+    );
+    view.update();
+    expect(view.find('.timelineTrackScreenshotImg').length).toBe(0);
+  });
 });
 
-function setup() {
-  const profile = getScreenshotTrackProfile();
+function setup(profile: Profile = getScreenshotTrackProfile()) {
   const store = storeWithProfile(profile);
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
@@ -130,4 +175,23 @@ function setup() {
     view,
     moveMouseAndGetLeft,
   };
+}
+
+function _setScreenshotMarkersToUnknown(
+  thread: Thread,
+  ...markerIndexes: IndexIntoMarkersTable[]
+) {
+  // Remove off the last few screenshot markers
+  const unknownStringIndex = thread.stringTable.indexForString('Unknown');
+  const screenshotStringIndex = thread.stringTable.indexForString(
+    'CompositorScreenshot'
+  );
+  for (const markerIndex of markerIndexes) {
+    // Double check that we've actually got screenshot markers:
+    if (thread.markers.name[markerIndex] !== screenshotStringIndex) {
+      throw new Error('This is not a screenshot marker.');
+    }
+    thread.markers.name[markerIndex] = unknownStringIndex;
+    thread.markers.data[markerIndex] = null;
+  }
 }

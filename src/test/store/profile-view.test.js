@@ -744,13 +744,50 @@ describe('actions/ProfileView', function() {
     });
   });
 
-  describe('getNetworkMarkers', function() {
+  describe('getRangeFilteredScreenshotsById', function() {
     it('can extract some network markers and match the snapshot', function() {
-      const { getState } = storeWithProfile(getScreenshotTrackProfile());
-      const screenshotMarkers = selectedThreadSelectors.getScreenshotMarkersById(
+      const profile = getScreenshotTrackProfile();
+      const { getState } = storeWithProfile(profile);
+      const screenshotMarkersById = selectedThreadSelectors.getRangeFilteredScreenshotsById(
         getState()
       );
-      expect(screenshotMarkers).toMatchSnapshot();
+      const keys = [...screenshotMarkersById.keys()];
+      expect(keys.length).toEqual(1);
+
+      const [key] = keys;
+      const screenshots = screenshotMarkersById.get(key);
+      if (!screenshots) {
+        throw new Error('No screenshots found.');
+      }
+      expect(screenshots.length).toEqual(profile.threads[0].markers.length);
+      for (const screenshot of screenshots) {
+        expect(screenshot.name).toEqual('CompositorScreenshot');
+      }
+    });
+
+    it('can extract some network markers and match the snapshot', function() {
+      const profile = getScreenshotTrackProfile();
+      const [{ markers }] = profile.threads;
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      // Assume there are 10 markers, and commit a subsection of that range.
+      expect(markers.length).toBe(10);
+      const startIndex = 3;
+      const endIndex = 8;
+      const startTime = markers.time[startIndex];
+      const endTime = markers.time[endIndex];
+      dispatch(ProfileView.commitRange(startTime, endTime));
+
+      // Get out the tracing markers.
+      const screenshotMarkersById = selectedThreadSelectors.getRangeFilteredScreenshotsById(
+        getState()
+      );
+      const [key] = [...screenshotMarkersById.keys()];
+      const screenshots = screenshotMarkersById.get(key);
+      if (!screenshots) {
+        throw new Error('No screenshots found.');
+      }
+      expect(screenshots.length).toEqual(endIndex - startIndex + 1);
     });
   });
 });

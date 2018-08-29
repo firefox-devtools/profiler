@@ -111,14 +111,12 @@ export type ProfilerMarkerPayload = {
  * Engineers can easily add arbitrary markers to their code without coordinating with
  * perf.html to instrument their code.
  */
-export type MarkersTableWithPayload<Payload> = {
-  data: Payload[],
+export type MarkersTable = {
+  data: MarkerPayload[],
   name: IndexIntoStringTable[],
   time: number[],
   length: number,
 };
-
-export type MarkersTable = MarkersTableWithPayload<MarkerPayload>;
 
 /**
  * Frames contain the context information about the function execution at the moment in

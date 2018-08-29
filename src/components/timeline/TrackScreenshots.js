@@ -14,12 +14,9 @@ import {
 } from '../../reducers/profile-view';
 import { withSize, type SizeProps } from '../shared/WithSize';
 
-import type {
-  ThreadIndex,
-  Thread,
-  MarkersTableWithPayload,
-} from '../../types/profile';
+import type { ThreadIndex, Thread } from '../../types/profile';
 import type { ScreenshotPayload } from '../../types/markers';
+import type { TracingMarker } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
 import type {
   ExplicitConnectOptions,
@@ -38,7 +35,7 @@ type StateProps = {|
   +thread: Thread,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +screenshots: MarkersTableWithPayload<ScreenshotPayload>,
+  +screenshots: TracingMarker[],
   +threadName: string,
   +isMakingPreviewSelection: boolean,
 |};
@@ -75,7 +72,7 @@ class Screenshots extends PureComponent<Props, State> {
     // Loop backwards to find the latest screenshot that has a time less
     // than the current time at the mouse position.
     for (let i = screenshots.length - 1; i >= 0; i--) {
-      const screenshotTime = screenshots.time[i];
+      const screenshotTime = screenshots[i].start;
       if (mouseTime >= screenshotTime) {
         return i;
       }
@@ -109,23 +106,22 @@ class Screenshots extends PureComponent<Props, State> {
 
     let screenshotIndex = 0;
     for (
-      let left = timeToPixel(screenshots.time[0]);
+      let left = timeToPixel(screenshots[0].start);
       left < outerContainerWidth;
       left += imageContainerWidth
     ) {
       // Try to find the next screenshot to fit in, or re-use the existing one.
       for (let i = screenshotIndex; i < screenshots.length; i++) {
-        if (timeToPixel(screenshots.time[i]) <= left) {
+        if (timeToPixel(screenshots[i].start) <= left) {
           screenshotIndex = i;
         } else {
           break;
         }
       }
-      const {
-        url: urlStringIndex,
-        windowWidth,
-        windowHeight,
-      } = screenshots.data[screenshotIndex];
+      // Coerce the payload into a screenshot one.
+      const payload: ScreenshotPayload = (screenshots[screenshotIndex]
+        .data: any);
+      const { url: urlStringIndex, windowWidth, windowHeight } = payload;
       const scaledImageWidth = TRACK_HEIGHT * windowWidth / windowHeight;
       images.push(
         <div
@@ -159,9 +155,9 @@ class Screenshots extends PureComponent<Props, State> {
     if (screenshotIndex === null) {
       return null;
     }
-    const { url, windowWidth, windowHeight } = screenshots.data[
-      screenshotIndex
-    ];
+    // Coerce the payload into a screenshot one.
+    const payload: ScreenshotPayload = (screenshots[screenshotIndex].data: any);
+    const { url, windowWidth, windowHeight } = payload;
 
     // Compute the hover image's thumbnail size.
     let hoverHeight = HOVER_HEIGHT;
@@ -238,7 +234,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     return {
       thread: selectors.getRangeFilteredThread(state),
       screenshots: ensureExists(
-        selectors.getScreenshotMarkersById(state).get(screenshotId),
+        selectors.getRangeFilteredScreenshotsById(state).get(screenshotId),
         'Expected to find screenshots for the given pid'
       ),
       threadName: selectors.getFriendlyThreadName(state),

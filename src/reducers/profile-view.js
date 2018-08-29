@@ -32,7 +32,6 @@ import type {
   ThreadIndex,
   SamplesTable,
   MarkersTable,
-  MarkersTableWithPayload,
   Pid,
 } from '../types/profile';
 import type {
@@ -755,10 +754,7 @@ export type SelectorsForThread = {
   getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
   getNetworkTracingMarkers: State => TracingMarker[],
   getNetworkTiming: State => MarkerTimingRows,
-  getScreenshotMarkersById: State => Map<
-    string,
-    MarkersTableWithPayload<ScreenshotPayload>
-  >,
+  getRangeFilteredScreenshotsById: State => Map<string, TracingMarker[]>,
   getFilteredThread: State => Thread,
   getPreviewFilteredThread: State => Thread,
   getCallNodeInfo: State => CallNodeInfo,
@@ -783,19 +779,22 @@ export const selectorsForThread = (
   threadIndex: ThreadIndex
 ): SelectorsForThread => {
   if (!(threadIndex in selectorsForThreads)) {
+    const getThread = (state: State): Thread =>
+      getProfile(state).threads[threadIndex];
+    const _getMarkersTable = (state: State) => getThread(state).markers;
+    const _getStringTable = (state: State) => getThread(state).stringTable;
+
     /**
      * The first per-thread selectors filter out and transform a thread based on user's
      * interactions. The transforms are order dependendent.
      *
-     * 1. Unfiltered - The first selector gets the unmodified original thread.
+     * 1. Unfiltered getThread - The first selector gets the unmodified original thread.
      * 2. Range - New samples table with only samples in the committed range.
      * 3. Transform - Apply the transform stack that modifies the stacks and samples.
      * 4. Implementation - Modify stacks and samples to only show a single implementation.
      * 5. Search - Exclude samples that don't include some text in the stack.
      * 6. Preview - Only include samples that are within a user's preview range selection.
      */
-    const getThread = (state: State): Thread =>
-      getProfile(state).threads[threadIndex];
     const getRangeFilteredThread = createSelector(
       getThread,
       getCommittedRange,
@@ -1002,38 +1001,65 @@ export const selectorsForThread = (
       getNetworkTracingMarkers,
       MarkerTiming.getMarkerTiming
     );
-    const getScreenshotMarkersById = createSelector(
-      getRangeFilteredThread,
-      thread => {
-        const { markers, stringTable } = thread;
+    const getScreenshotsById = createSelector(
+      _getMarkersTable,
+      _getStringTable,
+      getProfileRootRange,
+      (markers, stringTable, rootRange) => {
         const idToScreenshotMarkers = new Map();
-        const nameIndex = stringTable.indexForString('CompositorScreenshot');
+        const name = 'CompositorScreenshot';
+        const nameIndex = stringTable.indexForString(name);
         for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
           if (markers.name[markerIndex] === nameIndex) {
             // Coerce the payload to a screenshot one. Don't do a runtime check that
             // this is correct.
             const data: ScreenshotPayload = (markers.data[markerIndex]: any);
-            let screenshotMarkerTable = idToScreenshotMarkers.get(
-              data.windowID
-            );
-            if (screenshotMarkerTable === undefined) {
-              screenshotMarkerTable = {
-                time: [],
-                data: [],
-                name: [],
-                length: 0,
-              };
-              idToScreenshotMarkers.set(data.windowID, screenshotMarkerTable);
+
+            let tracingMarkers = idToScreenshotMarkers.get(data.windowID);
+            if (tracingMarkers === undefined) {
+              tracingMarkers = [];
+              idToScreenshotMarkers.set(data.windowID, tracingMarkers);
             }
-            screenshotMarkerTable.time.push(markers.time[markerIndex]);
-            screenshotMarkerTable.data.push(data);
-            screenshotMarkerTable.name.push(nameIndex);
-            screenshotMarkerTable.length++;
+
+            tracingMarkers.push({
+              start: markers.time[markerIndex],
+              dur: 0,
+              title: null,
+              name,
+              data,
+            });
+
+            if (tracingMarkers.length > 1) {
+              // Set the duration
+              const prevMarker = tracingMarkers[tracingMarkers.length - 2];
+              const nextMarker = tracingMarkers[tracingMarkers.length - 1];
+              prevMarker.dur = nextMarker.start - prevMarker.start;
+            }
           }
+        }
+        for (const [, tracingMarkers] of idToScreenshotMarkers) {
+          // This last marker must exist.
+          const lastMarker = tracingMarkers[tracingMarkers.length - 1];
+          lastMarker.dur = rootRange.end - lastMarker.start;
         }
         return idToScreenshotMarkers;
       }
     );
+    const getRangeFilteredScreenshotsById = createSelector(
+      getScreenshotsById,
+      getCommittedRange,
+      (screenshotsById, { start, end }) => {
+        const newMap = new Map();
+        for (const [id, screenshots] of screenshotsById) {
+          newMap.set(
+            id,
+            ProfileData.filterTracingMarkersToRange(screenshots, start, end)
+          );
+        }
+        return newMap;
+      }
+    );
+
     const getCallNodeInfo = createSelector(
       getFilteredThread,
       getDefaultCategory,
@@ -1150,7 +1176,7 @@ export const selectorsForThread = (
       getCommittedRangeFilteredTracingMarkersForHeader,
       getNetworkTracingMarkers,
       getNetworkTiming,
-      getScreenshotMarkersById,
+      getRangeFilteredScreenshotsById,
       getFilteredThread,
       getPreviewFilteredThread,
       getCallNodeInfo,
