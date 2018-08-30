@@ -308,6 +308,7 @@ describe('importing perf profile', function() {
       }
       //console.log(profile);
       version = profile.meta.version;
+      expect(profile).toMatchSnapshot();
     } catch (e) {
       //console.log(e)
       // probably file not found
