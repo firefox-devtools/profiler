@@ -55,12 +55,16 @@ type UploadButtonProps = {
 
 class UploadButton extends React.PureComponent<UploadButtonProps> {
   _input: HTMLInputElement | null;
-  _takeInputRef = input => (this._input = input);
 
-  constructor(props: UploadButtonProps) {
-    super(props);
-    (this: any)._upload = this._upload.bind(this);
-  }
+  _takeInputRef = input => {
+    this._input = input;
+  };
+
+  _upload = () => {
+    if (this._input) {
+      this.props.retrieveProfileFromFile(this._input.files[0]);
+    }
+  };
 
   render() {
     return (
@@ -68,12 +72,6 @@ class UploadButton extends React.PureComponent<UploadButtonProps> {
         <input type="file" ref={this._takeInputRef} onChange={this._upload} />
       </div>
     );
-  }
-
-  _upload() {
-    if (this._input) {
-      this.props.retrieveProfileFromFile(this._input.files[0]);
-    }
   }
 }
 
@@ -124,22 +122,12 @@ type HomeState = {
 };
 
 class Home extends React.PureComponent<HomeProps, HomeState> {
-  _supportsWebExtensionAPI: boolean;
-  _isFirefox: boolean;
-
-  constructor(props: HomeProps) {
-    super(props);
-    (this: any)._startDragging = this._startDragging.bind(this);
-    (this: any)._stopDragging = this._stopDragging.bind(this);
-    (this: any)._handleProfileDrop = this._handleProfileDrop.bind(this);
-    this.state = {
-      isDragging: false,
-      isAddonInstalled: Boolean(window.isGeckoProfilerAddonInstalled),
-    };
-
-    this._supportsWebExtensionAPI = _supportsWebExtensionAPI();
-    this._isFirefox = _isFirefox();
-  }
+  _supportsWebExtensionAPI: boolean = _supportsWebExtensionAPI();
+  _isFirefox: boolean = _isFirefox();
+  state = {
+    isDragging: false,
+    isAddonInstalled: Boolean(window.isGeckoProfilerAddonInstalled),
+  };
 
   addonInstalled() {
     this.setState({ isAddonInstalled: true });
@@ -161,17 +149,17 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
     document.removeEventListener(('drop': string), _preventDefault, false);
   }
 
-  _startDragging(event: Event) {
+  _startDragging = (event: Event) => {
     event.preventDefault();
     this.setState({ isDragging: true });
-  }
+  };
 
-  _stopDragging(event: Event) {
+  _stopDragging = (event: Event) => {
     event.preventDefault();
     this.setState({ isDragging: false });
-  }
+  };
 
-  _handleProfileDrop(event: DragEvent) {
+  _handleProfileDrop = (event: DragEvent) => {
     event.preventDefault();
     if (!event.dataTransfer) {
       return;
@@ -181,7 +169,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
     if (files.length > 0) {
       this.props.retrieveProfileFromFile(files[0]);
     }
-  }
+  };
 
   _renderInstructions() {
     const { isAddonInstalled } = this.state;

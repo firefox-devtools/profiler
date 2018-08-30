@@ -15,6 +15,7 @@ import * as Tracks from '../profile-logic/tracks';
 import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
+import * as MarkerData from '../profile-logic/marker-data';
 import * as StackTiming from '../profile-logic/stack-timing';
 import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
@@ -402,6 +403,7 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
     case 'CHANGE_INVERT_CALLSTACK':
     case 'CHANGE_SELECTED_CALL_NODE':
     case 'CHANGE_SELECTED_THREAD':
+    case 'SELECT_TRACK':
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
       return state + 1;
@@ -629,6 +631,16 @@ export const getGlobalTrackReferences = createSelector(
       trackIndex,
     }))
 );
+export const getGlobalTrackFromReference = (
+  state: State,
+  trackReference: TrackReference
+) => {
+  if (trackReference.type !== 'global') {
+    throw new Error('Expected a global track reference.');
+  }
+  const globalTracks = getGlobalTracks(state);
+  return globalTracks[trackReference.trackIndex];
+};
 
 // Warning: this selector returns a new object on every call, and will not properly
 // work with a PureComponent.
@@ -653,6 +665,16 @@ export const getLocalTracks = (state: State, pid: Pid) =>
     getProfileView(state).localTracksByPid.get(pid),
     'Unable to get the tracks for the given pid.'
   );
+export const getLocalTrackFromReference = (
+  state: State,
+  trackReference: TrackReference
+): LocalTrack => {
+  if (trackReference.type !== 'local') {
+    throw new Error('Expected a local track reference.');
+  }
+  const { pid, trackIndex } = trackReference;
+  return getLocalTracks(state, pid)[trackIndex];
+};
 export const getRightClickedThreadIndex = createSelector(
   getRightClickedTrack,
   getGlobalTracks,
@@ -661,16 +683,15 @@ export const getRightClickedThreadIndex = createSelector(
     if (rightClickedTrack.type === 'global') {
       const track = globalTracks[rightClickedTrack.trackIndex];
       return track.type === 'process' ? track.mainThreadIndex : null;
-    } else {
-      const { pid, trackIndex } = rightClickedTrack;
-      const localTracks = ensureExists(
-        localTracksByPid.get(pid),
-        'No local tracks found at that pid.'
-      );
-      const track = localTracks[trackIndex];
-
-      return track.type === 'thread' ? track.threadIndex : null;
     }
+    const { pid, trackIndex } = rightClickedTrack;
+    const localTracks = ensureExists(
+      localTracksByPid.get(pid),
+      'No local tracks found at that pid.'
+    );
+    const track = localTracks[trackIndex];
+
+    return track.type === 'thread' ? track.threadIndex : null;
   }
 );
 export const getGlobalTrackNames = createSelector(
@@ -730,6 +751,9 @@ export type SelectorsForThread = {
   getMarkerTiming: State => MarkerTimingRows,
   getCommittedRangeFilteredTracingMarkers: State => TracingMarker[],
   getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
+  getNetworkTracingMarkers: State => TracingMarker[],
+  getNetworkTiming: State => MarkerTimingRows,
+  getRangeFilteredScreenshotsById: State => Map<string, TracingMarker[]>,
   getFilteredThread: State => Thread,
   getPreviewFilteredThread: State => Thread,
   getCallNodeInfo: State => CallNodeInfo,
@@ -754,19 +778,22 @@ export const selectorsForThread = (
   threadIndex: ThreadIndex
 ): SelectorsForThread => {
   if (!(threadIndex in selectorsForThreads)) {
+    const getThread = (state: State): Thread =>
+      getProfile(state).threads[threadIndex];
+    const _getMarkersTable = (state: State) => getThread(state).markers;
+    const _getStringTable = (state: State) => getThread(state).stringTable;
+
     /**
      * The first per-thread selectors filter out and transform a thread based on user's
      * interactions. The transforms are order dependendent.
      *
-     * 1. Unfiltered - The first selector gets the unmodified original thread.
+     * 1. Unfiltered getThread - The first selector gets the unmodified original thread.
      * 2. Range - New samples table with only samples in the committed range.
      * 3. Transform - Apply the transform stack that modifies the stacks and samples.
      * 4. Implementation - Modify stacks and samples to only show a single implementation.
      * 5. Search - Exclude samples that don't include some text in the stack.
      * 6. Preview - Only include samples that are within a user's preview range selection.
      */
-    const getThread = (state: State): Thread =>
-      getProfile(state).threads[threadIndex];
     const getRangeFilteredThread = createSelector(
       getThread,
       getCommittedRange,
@@ -911,23 +938,23 @@ export const selectorsForThread = (
     );
     const getJankInstances = createSelector(
       _getRangeFilteredThreadSamples,
-      (samples): TracingMarker[] => ProfileData.getJankInstances(samples, 50)
+      (samples): TracingMarker[] => MarkerData.getJankInstances(samples, 50)
     );
     const getProcessedMarkersThread = createSelector(
       getThread,
-      ProfileData.extractMarkerDataFromName
+      MarkerData.extractMarkerDataFromName
     );
     const getTracingMarkers = createSelector(
       getProcessedMarkersThread,
-      ProfileData.getTracingMarkers
+      MarkerData.getTracingMarkers
     );
     const getTracingMarkersForNetworkChart = createSelector(
       getTracingMarkers,
-      markers => markers.filter(ProfileData.isNetworkMarker)
+      markers => markers.filter(MarkerData.isNetworkMarker)
     );
     const getTracingMarkersForMarkerChart = createSelector(
       getTracingMarkers,
-      markers => markers.filter(marker => !ProfileData.isNetworkMarker(marker))
+      markers => markers.filter(marker => !MarkerData.isNetworkMarker(marker))
     );
     const getTracingMarkersForView = state => {
       const selectedTab = UrlState.getSelectedTab(state);
@@ -949,7 +976,7 @@ export const selectorsForThread = (
       getCommittedRange,
       (markers, range): TracingMarker[] => {
         const { start, end } = range;
-        return ProfileData.filterTracingMarkersToRange(markers, start, end);
+        return MarkerData.filterTracingMarkersToRange(markers, start, end);
       }
     );
     const getCommittedRangeFilteredTracingMarkersForHeader = createSelector(
@@ -959,9 +986,41 @@ export const selectorsForThread = (
           tm =>
             tm.name !== 'GCMajor' &&
             tm.name !== 'BHR-detected hang' &&
-            !ProfileData.isNetworkMarker(tm)
+            !MarkerData.isNetworkMarker(tm)
         )
     );
+    const getNetworkTracingMarkers = createSelector(
+      getCommittedRangeFilteredTracingMarkers,
+      tracingMarkers =>
+        tracingMarkers.filter(
+          marker => marker.data && marker.data.type === 'Network'
+        )
+    );
+    const getNetworkTiming = createSelector(
+      getNetworkTracingMarkers,
+      MarkerTiming.getMarkerTiming
+    );
+    const getScreenshotsById = createSelector(
+      _getMarkersTable,
+      _getStringTable,
+      getProfileRootRange,
+      MarkerData.extractScreenshotsById
+    );
+    const getRangeFilteredScreenshotsById = createSelector(
+      getScreenshotsById,
+      getCommittedRange,
+      (screenshotsById, { start, end }) => {
+        const newMap = new Map();
+        for (const [id, screenshots] of screenshotsById) {
+          newMap.set(
+            id,
+            MarkerData.filterTracingMarkersToRange(screenshots, start, end)
+          );
+        }
+        return newMap;
+      }
+    );
+
     const getCallNodeInfo = createSelector(
       getFilteredThread,
       getDefaultCategory,
@@ -1044,7 +1103,7 @@ export const selectorsForThread = (
     const getSearchFilteredMarkers = createSelector(
       getPreviewFilteredThread,
       UrlState.getMarkersSearchString,
-      ProfileData.getSearchFilteredMarkers
+      MarkerData.getSearchFilteredMarkers
     );
     /**
      * The buffers of the samples can be cleared out. This function lets us know the
@@ -1076,6 +1135,9 @@ export const selectorsForThread = (
       getMarkerTiming,
       getCommittedRangeFilteredTracingMarkers,
       getCommittedRangeFilteredTracingMarkersForHeader,
+      getNetworkTracingMarkers,
+      getNetworkTiming,
+      getRangeFilteredScreenshotsById,
       getFilteredThread,
       getPreviewFilteredThread,
       getCallNodeInfo,

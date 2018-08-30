@@ -5,7 +5,7 @@
 
 import type { Milliseconds, Microseconds, Seconds } from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
-import type { IndexIntoStackTable } from './profile';
+import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
 
 /**
  * Measurement for how long draw calls take for the compositor.
@@ -346,6 +346,20 @@ type VsyncTimestampPayload = {|
   vsync: 0,
 |};
 
+export type ScreenshotPayload = {|
+  // The "type" property doesn't exist, but is required to make Flow typing work.
+  type: void,
+  // This field represents the data url of the image. It is saved in the string table.
+  url: IndexIntoStringTable,
+  // A memory address that can uniquely identify a window. It has no meaning other than
+  // a way to identify a window.
+  windowID: string,
+  // The original dimensions of the window that was captured. The actual image that is
+  // stored in the string table will be scaled down from the original size.
+  windowWidth: number,
+  windowHeight: number,
+|};
+
 /**
  * The payload for Styles.
  */
@@ -397,6 +411,7 @@ export type MarkerPayload =
   | StyleMarkerPayload
   | BHRMarkerPayload
   | VsyncTimestampPayload
+  | ScreenshotPayload
   | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | null;

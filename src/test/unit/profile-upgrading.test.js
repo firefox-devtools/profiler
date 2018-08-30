@@ -224,17 +224,24 @@ describe('upgrading processed profiles', function() {
     );
     compareProcessedProfiles(upgradedProfile13, afterUpgradeReference);
   });
-  it('should still process a profile of the current version with no issues', function() {
+  it('should upgrade version 14', function() {
     const serializedOldProcessedProfile14 = require('../fixtures/upgrades/processed-14.json');
     const upgradedProfile14 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile14
     );
     compareProcessedProfiles(upgradedProfile14, afterUpgradeReference);
   });
+  it('should still process a profile of the current version with no issues', function() {
+    const serializedOldProcessedProfile15 = require('../fixtures/upgrades/processed-15.json');
+    const upgradedProfile15 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile15
+    );
+    compareProcessedProfiles(upgradedProfile15, afterUpgradeReference);
+  });
 });
 
 describe('upgrading gecko profiles', function() {
-  const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-11.json');
+  const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-12.json');
   // Uncomment this to output your next ./upgrades/gecko-X.json
   // upgradeGeckoProfileToCurrentVersion(afterUpgradeGeckoReference);
   // console.log(JSON.stringify(afterUpgradeGeckoReference));
@@ -285,11 +292,16 @@ describe('upgrading gecko profiles', function() {
     expect(geckoProfile10).toEqual(afterUpgradeGeckoReference);
   });
   it('should upgrade version 11', function() {
-    // This last test is to make sure we properly upgrade the json
-    // file to same version
     const geckoProfile11 = require('../fixtures/upgrades/gecko-11.json');
     upgradeGeckoProfileToCurrentVersion(geckoProfile11);
     expect(geckoProfile11).toEqual(afterUpgradeGeckoReference);
+  });
+  it('should upgrade version 12', function() {
+    // This last test is to make sure we properly upgrade the json
+    // file to same version
+    const geckoProfile12 = require('../fixtures/upgrades/gecko-12.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile12);
+    expect(geckoProfile12).toEqual(afterUpgradeGeckoReference);
   });
 });
 

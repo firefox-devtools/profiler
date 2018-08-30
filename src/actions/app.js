@@ -75,6 +75,10 @@ export function changeSidebarOpenState(tab: TabSlug, isOpen: boolean): Action {
   return { type: 'CHANGE_SIDEBAR_OPEN_STATE', tab, isOpen };
 }
 
+export function invalidatePanelLayout(): Action {
+  return { type: 'INCREMENT_PANEL_LAYOUT_GENERATION' };
+}
+
 /**
  * This function is called when a browser navigation event happens. A new UrlState
  * is generated when the window.location is serialized, or the state is pulled out of

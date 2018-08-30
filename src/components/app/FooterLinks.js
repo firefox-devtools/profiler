@@ -13,12 +13,9 @@ class FooterLinks extends PureComponent<{||}, State> {
     this.setState({ hide: true });
   };
 
-  constructor() {
-    super();
-    this.state = {
-      hide: false,
-    };
-  }
+  state = {
+    hide: false,
+  };
 
   render() {
     if (this.state.hide) {

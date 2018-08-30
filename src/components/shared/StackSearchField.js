@@ -38,28 +38,18 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 type State = {| searchFieldFocused: boolean |};
 
 class StackSearchField extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(
-      this
-    );
-    (this: any)._onSearchFieldFocus = this._onSearchFieldFocus.bind(this);
-    (this: any)._onSearchFieldBlur = this._onSearchFieldBlur.bind(this);
-
-    this.state = { searchFieldFocused: false };
-  }
-
-  _onSearchFieldIdleAfterChange(value: string) {
+  state = { searchFieldFocused: false };
+  _onSearchFieldIdleAfterChange = (value: string) => {
     this.props.changeCallTreeSearchString(value);
-  }
+  };
 
-  _onSearchFieldFocus() {
+  _onSearchFieldFocus = () => {
     this.setState({ searchFieldFocused: true });
-  }
+  };
 
-  _onSearchFieldBlur() {
+  _onSearchFieldBlur = () => {
     this.setState(() => ({ searchFieldFocused: false }));
-  }
+  };
 
   render() {
     const { currentSearchString, searchStrings, className } = this.props;

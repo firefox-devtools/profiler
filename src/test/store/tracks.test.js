@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
+import { getScreenshotTrackProfile } from '../fixtures/profiles/make-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
@@ -292,6 +293,15 @@ describe('ordering and hiding', function() {
         'show [process]',
         '  - show [thread DOM Worker] SELECTED',
         '  - show [thread Style]',
+      ]);
+    });
+
+    it('can extract a screenshots track', function() {
+      const { getState } = storeWithProfile(getScreenshotTrackProfile());
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [screenshots]',
+        'show [process]',
+        '  - show [thread Empty] SELECTED',
       ]);
     });
   });

@@ -222,7 +222,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     className="treeViewRowColumn treeViewMainColumn name"
                   >
                     <a
-                      href="null/from-url//calltree/?file=foo%2Fbar%2Fprofile1.json"
+                      href="http://localhost/from-url//calltree/?file=foo%2Fbar%2Fprofile1.json"
                       onClick={[Function]}
                     >
                       profile1.json
@@ -254,7 +254,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     className="treeViewRowColumn treeViewMainColumn name"
                   >
                     <a
-                      href="null/from-url//calltree/?file=foo%2Fprofile2.json"
+                      href="http://localhost/from-url//calltree/?file=foo%2Fprofile2.json"
                       onClick={[Function]}
                     >
                       profile2.json
@@ -313,7 +313,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     className="treeViewRowColumn treeViewMainColumn name"
                   >
                     <a
-                      href="null/from-url//calltree/?file=baz%2Fprofile3.json"
+                      href="http://localhost/from-url//calltree/?file=baz%2Fprofile3.json"
                       onClick={[Function]}
                     >
                       profile3.json

@@ -16,7 +16,6 @@ import type {
   ResourceTable,
   IndexIntoCategoryList,
   IndexIntoFuncTable,
-  IndexIntoStringTable,
   IndexIntoSamplesTable,
   IndexIntoMarkersTable,
   IndexIntoStackTable,
@@ -27,12 +26,9 @@ import type {
   CallNodeTable,
   CallNodePath,
   IndexIntoCallNodeTable,
-  TracingMarker,
 } from '../types/profile-derived';
-import type { BailoutPayload } from '../types/markers';
 import { CURRENT_VERSION as GECKO_PROFILE_VERSION } from './gecko-profile-versioning';
 import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profile-versioning';
-import { getNumberPropertyOrNull } from '../utils/flow';
 
 import type { Milliseconds, StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
@@ -617,6 +613,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
       implementation: frameTable.implementation.slice(),
       optimizations: frameTable.optimizations.slice(),
       line: frameTable.line.slice(),
+      column: frameTable.column.slice(),
       category: frameTable.category.slice(),
       func: frameTable.func.slice(),
       address: frameTable.address.slice(),
@@ -692,6 +689,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
               newFrameTable.implementation.push(null);
               newFrameTable.optimizations.push(null);
               newFrameTable.line.push(null);
+              newFrameTable.column.push(null);
               newFrameTable.category.push(null);
               newFrameTable.func.push(newFuncIndex);
               newFrameTable.address.push(-1);
@@ -1201,312 +1199,6 @@ export function getSampleIndexClosestToTime(
   return distanceToThis < distanceToLast ? index : index - 1;
 }
 
-export function getJankInstances(
-  samples: SamplesTable,
-  thresholdInMs: number
-): TracingMarker[] {
-  const addTracingMarker = () =>
-    jankInstances.push({
-      start: lastTimestamp - lastResponsiveness,
-      dur: lastResponsiveness,
-      title: `${lastResponsiveness.toFixed(2)}ms event processing delay`,
-      name: 'Jank',
-      data: null,
-    });
-
-  let lastResponsiveness = 0;
-  let lastTimestamp = 0;
-  const jankInstances = [];
-  for (let i = 0; i < samples.length; i++) {
-    const currentResponsiveness = samples.responsiveness[i];
-    if (currentResponsiveness < lastResponsiveness) {
-      if (lastResponsiveness >= thresholdInMs) {
-        addTracingMarker();
-      }
-    }
-    lastResponsiveness = currentResponsiveness;
-    lastTimestamp = samples.time[i];
-  }
-  if (lastResponsiveness >= thresholdInMs) {
-    addTracingMarker();
-  }
-  return jankInstances;
-}
-
-export function getSearchFilteredMarkers(
-  thread: Thread,
-  searchString: string
-): MarkersTable {
-  if (!searchString) {
-    return thread.markers;
-  }
-  const lowerCaseSearchString = searchString.toLowerCase();
-  const { stringTable, markers } = thread;
-  const newMarkersTable: MarkersTable = {
-    data: [],
-    name: [],
-    time: [],
-    length: 0,
-  };
-  function addMarker(markerIndex: IndexIntoMarkersTable) {
-    newMarkersTable.data.push(markers.data[markerIndex]);
-    newMarkersTable.time.push(markers.time[markerIndex]);
-    newMarkersTable.name.push(markers.name[markerIndex]);
-    newMarkersTable.length++;
-  }
-  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-    const stringIndex = markers.name[markerIndex];
-    const name = stringTable.getString(stringIndex);
-    const lowerCaseName = name.toLowerCase();
-    if (lowerCaseName.includes(lowerCaseSearchString)) {
-      addMarker(markerIndex);
-      continue;
-    }
-    const data = markers.data[markerIndex];
-    if (data && typeof data === 'object') {
-      if (
-        typeof data.eventType === 'string' &&
-        data.eventType.toLowerCase().includes(lowerCaseSearchString)
-      ) {
-        // Match DOMevents data.eventType
-        addMarker(markerIndex);
-        continue;
-      }
-      if (
-        typeof data.name === 'string' &&
-        data.name.toLowerCase().includes(lowerCaseSearchString)
-      ) {
-        // Match UserTiming's name.
-        addMarker(markerIndex);
-        continue;
-      }
-      if (
-        typeof data.category === 'string' &&
-        data.category.toLowerCase().includes(lowerCaseSearchString)
-      ) {
-        // Match UserTiming's name.
-        addMarker(markerIndex);
-        continue;
-      }
-    }
-  }
-  return newMarkersTable;
-}
-
-/**
- * This function takes a marker that packs in a marker payload into the string of the
- * name. This extracts that and turns it into a payload.
- */
-export function extractMarkerDataFromName(thread: Thread): Thread {
-  const { stringTable, markers } = thread;
-  const newMarkers: MarkersTable = {
-    data: markers.data.slice(),
-    name: markers.name.slice(),
-    time: markers.time.slice(),
-    length: markers.length,
-  };
-
-  // Match: "Bailout_MonitorTypes after add on line 1013 of self-hosted:1008"
-  // Match: "Bailout_TypeBarrierO at jumptarget on line 1490 of resource://devtools/shared/base-loader.js -> resource://devtools/client/shared/vendor/immutable.js:1484"
-  const bailoutRegex =
-    // Capture groups:
-    //       type   afterAt    where        bailoutLine  script functionLine
-    //        ↓     ↓          ↓                  ↓        ↓    ↓
-    /^Bailout_(\w+) (after|at) ([\w _-]+) on line (\d+) of (.*):(\d+)$/;
-
-  // Match: "Invalidate resource://devtools/shared/base-loader.js -> resource://devtools/client/shared/vendor/immutable.js:3662"
-  // Match: "Invalidate self-hosted:4032"
-  const invalidateRegex =
-    // Capture groups:
-    //         url    line
-    //           ↓    ↓
-    /^Invalidate (.*):(\d+)$/;
-
-  const bailoutStringIndex = stringTable.indexForString('Bailout');
-  const invalidationStringIndex = stringTable.indexForString('Invalidate');
-  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-    const nameIndex = markers.name[markerIndex];
-    const time = markers.time[markerIndex];
-    const name = stringTable.getString(nameIndex);
-    let matchFound = false;
-    if (name.startsWith('Bailout_')) {
-      matchFound = true;
-      const match = name.match(bailoutRegex);
-      if (!match) {
-        console.error(`Could not match regex for bailout: "${name}"`);
-      } else {
-        const [
-          ,
-          type,
-          afterAt,
-          where,
-          bailoutLine,
-          script,
-          functionLine,
-        ] = match;
-        newMarkers.name[markerIndex] = bailoutStringIndex;
-        newMarkers.data[markerIndex] = ({
-          type: 'Bailout',
-          bailoutType: type,
-          where: afterAt + ' ' + where,
-          script: script,
-          bailoutLine: +bailoutLine,
-          functionLine: +functionLine,
-          startTime: time,
-          endTime: time,
-        }: BailoutPayload);
-      }
-    } else if (name.startsWith('Invalidate ')) {
-      matchFound = true;
-      const match = name.match(invalidateRegex);
-      if (!match) {
-        console.error(`Could not match regex for bailout: "${name}"`);
-      } else {
-        const [, url, line] = match;
-        newMarkers.name[markerIndex] = invalidationStringIndex;
-        newMarkers.data[markerIndex] = {
-          type: 'Invalidation',
-          url,
-          line,
-          startTime: time,
-          endTime: time,
-        };
-      }
-    }
-    if (matchFound && markers.data[markerIndex]) {
-      console.error(
-        "A marker's payload was rewritten based off the text content of the marker. " +
-          "perf.html assumed that the payload was empty, but it turns out it wasn't. " +
-          'This is most likely an error and should be fixed. The marker name is:',
-        name
-      );
-    }
-  }
-
-  return Object.assign({}, thread, { markers: newMarkers });
-}
-
-export function getTracingMarkers(thread: Thread): TracingMarker[] {
-  const { stringTable, markers } = thread;
-  const tracingMarkers: TracingMarker[] = [];
-  // This map is used to track start and end markers for tracing markers.
-  const openMarkers: Map<IndexIntoStringTable, TracingMarker[]> = new Map();
-  for (let i = 0; i < markers.length; i++) {
-    const data = markers.data[i];
-    if (!data) {
-      // Add a marker with a zero duration
-      const marker = {
-        start: markers.time[i],
-        dur: 0,
-        name: stringTable.getString(markers.name[i]),
-        title: null,
-        data: null,
-      };
-      tracingMarkers.push(marker);
-    } else if (data.type === 'tracing') {
-      // Tracing markers are created from two distinct markers that are created at
-      // the start and end of whatever code that is running that we care about.
-      // This is implemented by AutoProfilerTracing in Gecko.
-      //
-      // In this function we convert both of these raw markers into a single
-      // tracing marker with a non-null duration.
-      //
-      // We also handle nested markers by assuming markers of the same type are
-      // never interwoven: given input markers startA, startB, endC, endD, we'll
-      // get 2 markers A-D and B-C.
-
-      const time = markers.time[i];
-      const nameStringIndex = markers.name[i];
-      if (data.interval === 'start') {
-        let markerBucket = openMarkers.get(nameStringIndex);
-        if (markerBucket === undefined) {
-          markerBucket = [];
-          openMarkers.set(nameStringIndex, markerBucket);
-        }
-
-        markerBucket.push({
-          start: time,
-          name: stringTable.getString(nameStringIndex),
-          dur: 0,
-          title: null,
-          data,
-        });
-      } else if (data.interval === 'end') {
-        const markerBucket = openMarkers.get(nameStringIndex);
-        let marker;
-        if (markerBucket && markerBucket.length) {
-          // We already encountered a matching "start" marker for this "end".
-          marker = markerBucket.pop();
-        } else {
-          // No matching "start" marker has been encountered before this "end",
-          // this means it was issued before the capture started. Here we create
-          // a fake "start" marker to create the final tracing marker.
-          // Note we won't have additional data (eg the cause stack) for this
-          // marker because that data is contained in the "start" marker.
-
-          const nameStringIndex = markers.name[i];
-
-          marker = {
-            start: -1, // Something negative so that we can distinguish it later
-            name: stringTable.getString(nameStringIndex),
-            dur: 0,
-            title: null,
-            data,
-          };
-        }
-        if (marker.start !== undefined) {
-          marker.dur = time - marker.start;
-        }
-        tracingMarkers.push(marker);
-      }
-    } else {
-      // `data` here is a union of different shaped objects, that may or not have
-      // certain properties. Flow doesn't like us arbitrarily accessing properties
-      // that may not exist, so use a utility function to generically get the data out.
-      const startTime = getNumberPropertyOrNull(data, 'startTime');
-      const endTime = getNumberPropertyOrNull(data, 'endTime');
-
-      // Now construct a tracing marker if these properties existed.
-      if (startTime !== null && endTime !== null) {
-        const name = stringTable.getString(markers.name[i]);
-        const duration = endTime - startTime;
-        tracingMarkers.push({
-          start: startTime,
-          dur: duration,
-          name,
-          data,
-          title: null,
-        });
-      }
-    }
-  }
-
-  // Loop over tracing "start" markers without any "end" markers
-  for (const markerBucket of openMarkers.values()) {
-    for (const marker of markerBucket) {
-      marker.dur = Infinity;
-      tracingMarkers.push(marker);
-    }
-  }
-
-  tracingMarkers.sort((a, b) => a.start - b.start);
-  return tracingMarkers;
-}
-
-export function filterTracingMarkersToRange(
-  tracingMarkers: TracingMarker[],
-  rangeStart: number,
-  rangeEnd: number
-): TracingMarker[] {
-  return tracingMarkers.filter(
-    tm => tm.start < rangeEnd && tm.start + tm.dur >= rangeStart
-  );
-}
-
-export function isNetworkMarker(marker: TracingMarker): boolean {
-  return !!(marker.data && marker.data.type === 'Network');
-}
-
 export function getFriendlyThreadName(
   threads: Thread[],
   thread: Thread
@@ -1573,7 +1265,7 @@ export function getEmptyProfile(): Profile {
       platform: '',
       processType: 0,
       extensions: emptyExtensions,
-      categories: defaultCategories,
+      categories: [...defaultCategories],
       product: 'Firefox',
       stackwalk: 0,
       toolkit: '',
