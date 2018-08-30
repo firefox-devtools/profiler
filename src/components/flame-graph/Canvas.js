@@ -214,13 +214,6 @@ export function getHoverBackgroundColor(stackType: StackType): string {
 class FlameGraphCanvas extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement;
 
-  constructor(props: Props) {
-    super(props);
-    (this: any)._getHoveredStackInfo = this._getHoveredStackInfo.bind(this);
-    (this: any)._drawCanvas = this._drawCanvas.bind(this);
-    (this: any)._hitTest = this._hitTest.bind(this);
-  }
-
   componentDidUpdate(prevProps) {
     // If the stack depth changes (say, when changing the time range
     // selection or applying a transform), move the viewport
@@ -274,10 +267,10 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     }
   };
 
-  _drawCanvas(
+  _drawCanvas = (
     ctx: CanvasRenderingContext2D,
     hoveredItem: HoveredStackTiming | null
-  ) {
+  ) => {
     const {
       thread,
       flameGraphTiming,
@@ -380,12 +373,12 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         }
       }
     }
-  }
+  };
 
-  _getHoveredStackInfo({
+  _getHoveredStackInfo = ({
     depth,
     flameGraphTimingIndex,
-  }: HoveredStackTiming): React.Node {
+  }: HoveredStackTiming): React.Node => {
     const {
       thread,
       flameGraphTiming,
@@ -459,7 +452,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         </div>
       </div>
     );
-  }
+  };
 
   _onMouseDown = (hoveredItem: HoveredStackTiming | null) => {
     // Change our selection to the hovered item, or deselect (with
@@ -474,7 +467,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     this.props.onSelectionChange(callNodeIndex);
   };
 
-  _hitTest(x: CssPixels, y: CssPixels): HoveredStackTiming | null {
+  _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
     const {
       flameGraphTiming,
       maxStackDepth,
@@ -497,7 +490,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     }
 
     return null;
-  }
+  };
 
   _noOp = () => {};
 

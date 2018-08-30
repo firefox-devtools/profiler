@@ -208,7 +208,7 @@ function _createUnsymbolicatedProfile() {
     path: '',
     debugName: 'firefox.pdb',
     debugPath: '',
-    breakpadId: '',
+    breakpadId: '000000000000000000000000000000000',
   };
 
   thread.resourceTable = {

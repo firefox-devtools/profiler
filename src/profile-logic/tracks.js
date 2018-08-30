@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import type { ScreenshotPayload } from '../types/markers';
 import type { Profile, Thread, ThreadIndex, Pid } from '../types/profile';
 import type {
   GlobalTrack,
@@ -17,7 +18,6 @@ import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
  * It also selects the default view options for things like track hiding, ordering,
  * and selection.
  */
-
 export function initializeLocalTrackOrderByPid(
   urlTrackOrderByPid: Map<Pid, TrackIndex[]> | null,
   localTracksByPid: Map<Pid, LocalTrack[]>,
@@ -73,7 +73,7 @@ export function initializeLocalTrackOrderByPid(
 export function initializeHiddenLocalTracksByPid(
   urlHiddenTracksByPid: Map<Pid, Set<TrackIndex>> | null,
   localTracksByPid: Map<Pid, LocalTrack[]>,
-  threads: Thread[],
+  profile: Profile,
   legacyHiddenThreads: ThreadIndex[] | null
 ): Map<Pid, Set<TrackIndex>> {
   const hiddenTracksByPid = new Map();
@@ -96,7 +96,7 @@ export function initializeHiddenLocalTracksByPid(
         const track = tracks[trackIndex];
         if (
           track.type === 'thread' &&
-          _isThreadIdle(threads[track.threadIndex])
+          _isThreadIdle(profile, profile.threads[track.threadIndex])
         ) {
           hiddenTracks.add(trackIndex);
         }
@@ -139,12 +139,15 @@ export function computeLocalTracksByPid(
       localTracksByPid.set(pid, tracks);
     }
 
-    if (_isMainThread(thread)) {
-      // This thread was already added as a GlobalTrack.
-      continue;
+    if (!_isMainThread(thread)) {
+      // This thread has not been added as a GlobalTrack, so add it as a local track.
+      tracks.push({ type: 'thread', threadIndex });
     }
 
-    tracks.push({ type: 'thread', threadIndex });
+    if (thread.markers.data.some(datum => datum && datum.type === 'Network')) {
+      // This thread has network markers.
+      tracks.push({ type: 'network', threadIndex });
+    }
   }
 
   return localTracksByPid;
@@ -169,7 +172,7 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { pid } = thread;
+    const { pid, markers, stringTable } = thread;
     if (_isMainThread(thread)) {
       // This is a main thread, a global track needs to be created or updated with
       // the main thread info.
@@ -199,6 +202,25 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
         };
         globalTracks.push(globalTrack);
         globalTracksByPid.set(pid, globalTrack);
+      }
+    }
+
+    // Check for screenshots.
+    const ids: Set<string> = new Set();
+    if (stringTable.hasString('CompositorScreenshot')) {
+      const screenshotNameIndex = stringTable.indexForString(
+        'CompositorScreenshot'
+      );
+      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+        if (markers.name[markerIndex] === screenshotNameIndex) {
+          // Coerce the payload to a screenshot one. Don't do a runtime check that
+          // this is correct.
+          const data: ScreenshotPayload = (markers.data[markerIndex]: any);
+          ids.add(data.windowID);
+        }
+      }
+      for (const id of ids) {
+        globalTracks.unshift({ type: 'screenshots', id, threadIndex });
       }
     }
   }
@@ -268,7 +290,7 @@ export function initializeSelectedThreadIndex(
 
 export function initializeHiddenGlobalTracks(
   globalTracks: GlobalTrack[],
-  threads: Thread[],
+  profile: Profile,
   validTrackIndexes: TrackIndex[],
   urlHiddenGlobalTracks: Set<TrackIndex> | null,
   legacyHiddenThreads: ThreadIndex[] | null
@@ -293,8 +315,8 @@ export function initializeHiddenGlobalTracks(
       const track = globalTracks[trackIndex];
       if (track.type === 'process' && track.mainThreadIndex !== null) {
         const { mainThreadIndex } = track;
-        const thread = threads[mainThreadIndex];
-        if (_isThreadIdle(thread)) {
+        const thread = profile.threads[mainThreadIndex];
+        if (_isThreadIdle(profile, thread)) {
           hiddenGlobalTracks.add(trackIndex);
         }
       }
@@ -394,36 +416,57 @@ export function getLocalTrackName(
   }
 }
 
+// Any thread with less than 1% non-idle time will be hidden.
+const PERCENTAGE_ACTIVE_SAMPLES = 0.01;
+
 /**
  * Determine if a thread is idle, so that it can be hidden. It is really annoying for an
- * end user to load a profile full of empty and idle threads.
+ * end user to load a profile full of empty and idle threads. This function goes through
+ * all of the samples in the thread, and sees if some large percentage of them are idle.
  */
-function _isThreadIdle(thread: Thread): boolean {
-  // Hide content threads with no RefreshDriverTick. This indicates they were
-  // not painted to, and most likely idle. This is just a heuristic to help users.
-  if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
-    let isPaintMarkerFound = false;
-    if (thread.stringTable.hasString('RefreshDriverTick')) {
-      const paintStringIndex = thread.stringTable.indexForString(
-        'RefreshDriverTick'
-      );
+function _isThreadIdle(profile: Profile, thread: Thread): boolean {
+  if (
+    // Don't hide the compositor.
+    thread.name === 'Compositor' ||
+    // Don't hide the main thread.
+    (thread.name === 'GeckoMain' && thread.processType === 'default')
+  ) {
+    return false;
+  }
 
-      for (
-        let markerIndex = 0;
-        markerIndex < thread.markers.length;
-        markerIndex++
-      ) {
-        if (paintStringIndex === thread.markers.name[markerIndex]) {
-          isPaintMarkerFound = true;
-          break;
+  let maxActiveStackCount = PERCENTAGE_ACTIVE_SAMPLES * thread.samples.length;
+  let activeStackCount = 0;
+  let filteredStackCount = 0;
+
+  for (
+    let sampleIndex = 0;
+    sampleIndex < thread.samples.length;
+    sampleIndex++
+  ) {
+    const stackIndex = thread.samples.stack[sampleIndex];
+    if (stackIndex === null) {
+      // This stack was filtered out. Most likely this will never actually happen
+      // on a new profile, but keep this check here since the stacks are possibly
+      // null in the Flow type definitions.
+      filteredStackCount++;
+      // Adjust the maximum necessary active stacks to find based on null stacks.
+      maxActiveStackCount =
+        PERCENTAGE_ACTIVE_SAMPLES *
+        (thread.samples.length - filteredStackCount);
+    } else {
+      const categoryIndex = thread.stackTable.category[stackIndex];
+      const category = profile.meta.categories[categoryIndex];
+      if (category.name !== 'Idle') {
+        activeStackCount++;
+        if (activeStackCount > maxActiveStackCount) {
+          return false;
         }
       }
     }
-    if (!isPaintMarkerFound) {
-      return true;
-    }
   }
-  return false;
+
+  // Do one final check to see if we have enough active samples.
+  return activeStackCount <= maxActiveStackCount;
 }
 
 function _findDefaultThread(threads: Thread[]): Thread | null {

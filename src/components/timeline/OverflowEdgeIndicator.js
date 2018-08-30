@@ -12,6 +12,7 @@ import './OverflowEdgeIndicator.css';
 type Props = {
   className: string,
   children: React.Node,
+  panelLayoutGeneration: number,
 };
 
 type State = {

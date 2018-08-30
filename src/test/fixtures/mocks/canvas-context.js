@@ -33,6 +33,9 @@ export default function mockCanvasContext() {
       clearRect: spyLog('clearRect'),
       beginPath: spyLog('beginPath'),
       closePath: spyLog('closePath'),
+      moveTo: spyLog('moveTo'),
+      lineTo: spyLog('lineTo'),
+      stroke: spyLog('stroke'),
       arc: spyLog('arc'),
       measureText: spyLog('measureText', text => ({ width: text.length * 5 })),
       createLinearGradient: spyLog('createLinearGradient', () => ({

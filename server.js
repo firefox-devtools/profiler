@@ -32,7 +32,7 @@ const serverConfig = {
         'sha256-AdiT28wTL5FNaRVHWQVFC0ic3E20Gu4/PiC9xukS9+E='
         https://www.google-analytics.com;
       style-src 'self' 'unsafe-inline';
-      img-src *;
+      img-src http: https: data:;
       object-src 'none';
       connect-src *;
       frame-ancestors 'self';

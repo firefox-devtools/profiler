@@ -37,6 +37,9 @@ module.exports = {
     'react/no-redundant-should-component-update': 'error',
     'react/no-this-in-sfc': 'error',
     'react/no-typos': 'error',
+    // Flow provides enough coverage over the prop types, and there can be errors
+    // with some of the more complicated Flow types.
+    'react/prop-types': 'off',
     "react/jsx-curly-brace-presence": ['error', { "props": 'never', "children": 'never' }],
     // `no-unused-prop-types` is buggy when we use destructuring parameters in
     // functions as it misunderstands them as functional components.
@@ -97,6 +100,7 @@ module.exports = {
     'prefer-promise-reject-errors': 'error',
     'prefer-rest-params': 'error',
     'prefer-spread': 'error',
+    'no-else-return': 'error',
   },
   settings: {
     react: {

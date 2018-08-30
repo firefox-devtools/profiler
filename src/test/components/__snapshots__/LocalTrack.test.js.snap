@@ -1,6 +1,50 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`timeline/LocalTrack matches the snapshot of a local track 1`] = `
+exports[`timeline/LocalTrack with a network track matches the snapshot of the network track 1`] = `
+<li
+  className="timelineTrack timelineTrackLocal"
+>
+  <div
+    className="timelineTrackRow timelineTrackLocalRow"
+    onClick={[Function]}
+  >
+    <div
+      className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+      onContextMenu={[Function]}
+      onMouseDown={[Function]}
+      onMouseOut={[Function]}
+      onMouseUp={[Function]}
+      onTouchEnd={[Function]}
+      onTouchStart={[Function]}
+      title={null}
+    >
+      <h1
+        className="timelineTrackName"
+      >
+        Network
+      </h1>
+    </div>
+    <div
+      className="timelineTrackTrack"
+    >
+      <div
+        className="timelineTrackNetwork"
+        style={
+          Object {
+            "height": 35,
+          }
+        }
+      >
+        <canvas
+          className="timelineTrackNetworkCanvas"
+        />
+      </div>
+    </div>
+  </div>
+</li>
+`;
+
+exports[`timeline/LocalTrack with a thread track matches the snapshot of a local track 1`] = `
 <li
   className="timelineTrack timelineTrackLocal"
 >

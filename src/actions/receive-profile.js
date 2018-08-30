@@ -86,7 +86,7 @@ export function viewProfile(
     );
     let hiddenGlobalTracks = initializeHiddenGlobalTracks(
       globalTracks,
-      profile.threads,
+      profile,
       globalTrackOrder,
       hasUrlInfo ? getHiddenGlobalTracks(getState()) : null,
       getLegacyHiddenThreads(getState())
@@ -100,7 +100,7 @@ export function viewProfile(
     let hiddenLocalTracksByPid = initializeHiddenLocalTracksByPid(
       hasUrlInfo ? getHiddenLocalTracksByPid(getState()) : null,
       localTracksByPid,
-      profile.threads,
+      profile,
       getLegacyHiddenThreads(getState())
     );
     let visibleThreadIndexes = getVisibleThreads(

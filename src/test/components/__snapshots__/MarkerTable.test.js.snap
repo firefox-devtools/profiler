@@ -85,7 +85,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
             className="treeViewBodyInner treeViewBodyInner0"
             style={
               Object {
-                "height": "16px",
+                "height": "32px",
                 "width": undefined,
               }
             }
@@ -124,13 +124,36 @@ exports[`MarkerTable renders some basic markers 1`] = `
                   unknown
                 </span>
               </div>
+              <div
+                className="treeViewRow treeViewRowFixedColumns odd "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": 16,
+                    "lineHeight": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn timestamp"
+                  title="0.002s"
+                >
+                  0.002s
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn category"
+                  title="Paint"
+                >
+                  Paint
+                </span>
+              </div>
             </div>
           </div>
           <div
             className="treeViewBodyInner treeViewBodyInner1"
             style={
               Object {
-                "height": "16px",
+                "height": "32px",
                 "width": 3000,
               }
             }
@@ -171,6 +194,33 @@ exports[`MarkerTable renders some basic markers 1`] = `
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
                   UserTiming [foobar]
+                </span>
+              </div>
+              <div
+                className="treeViewRow treeViewRowScrolledColumns odd  "
+                onMouseDown={[Function]}
+                style={
+                  Object {
+                    "height": 16,
+                    "lineHeight": "16px",
+                  }
+                }
+              >
+                <span
+                  className="treeRowIndentSpacer"
+                  style={
+                    Object {
+                      "width": "0px",
+                    }
+                  }
+                />
+                <span
+                  className="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  className="treeViewRowColumn treeViewMainColumn name"
+                >
+                  [start] NotifyDidPaint
                 </span>
               </div>
             </div>

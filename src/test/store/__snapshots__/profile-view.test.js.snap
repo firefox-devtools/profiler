@@ -1,8 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of getProfile 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of getProfile 1`] = `
 Object {
   "meta": Object {
     "abi": "",
@@ -33,14 +31,14 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 14,
+    "preprocessedProfileVersion": 15,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
     "stackwalk": 0,
     "startTime": 0,
     "toolkit": "",
-    "version": 11,
+    "version": 12,
   },
   "threads": Array [
     Object {
@@ -57,6 +55,17 @@ Object {
           0,
         ],
         "category": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
+        "column": Array [
           null,
           null,
           null,
@@ -346,6 +355,7 @@ Object {
       "frameTable": Object {
         "address": Array [],
         "category": Array [],
+        "column": Array [],
         "func": Array [],
         "implementation": Array [],
         "length": 0,
@@ -402,10 +412,23 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "length": 6,
+        "length": 12,
         "responsiveness": Array [],
         "rss": Array [],
-        "stack": Array [],
+        "stack": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
         "time": Array [
           0,
           0,
@@ -452,9 +475,7 @@ Object {
 }
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of getThreads 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of getThreads 1`] = `
 Array [
   Object {
     "frameTable": Object {
@@ -470,6 +491,17 @@ Array [
         0,
       ],
       "category": Array [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+      "column": Array [
         null,
         null,
         null,
@@ -759,6 +791,7 @@ Array [
     "frameTable": Object {
       "address": Array [],
       "category": Array [],
+      "column": Array [],
       "func": Array [],
       "implementation": Array [],
       "length": 0,
@@ -815,10 +848,23 @@ Array [
       "type": Array [],
     },
     "samples": Object {
-      "length": 6,
+      "length": 12,
       "responsiveness": Array [],
       "rss": Array [],
-      "stack": Array [],
+      "stack": Array [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
       "time": Array [
         0,
         0,
@@ -864,9 +910,7 @@ Array [
 ]
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedNodeSelectors.getTimingsForSidebar 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedNodeSelectors.getTimingsForSidebar 1`] = `
 Object {
   "forFunc": Object {
     "selfTime": Object {
@@ -896,9 +940,7 @@ Object {
 }
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getCallNodeInfo 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getCallNodeInfo 1`] = `
 Object {
   "callNodeTable": Object {
     "category": Int32Array [
@@ -956,9 +998,7 @@ Object {
 }
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getCallTree 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getCallTree 1`] = `
 CallTree {
   "_callNodeChildCount": Uint32Array [
     1,
@@ -1160,9 +1200,59 @@ CallTree {
 }
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getFilteredThread 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkers 1`] = `
+Array [
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "D",
+    "start": 3,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "E",
+    "start": 4,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "F",
+    "start": 5,
+    "title": null,
+  },
+]
+`;
+
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkersForHeader 1`] = `
+Array [
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "D",
+    "start": 3,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "E",
+    "start": 4,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "F",
+    "start": 5,
+    "title": null,
+  },
+]
+`;
+
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getFilteredThread 1`] = `
 Object {
   "frameTable": Object {
     "address": Array [
@@ -1177,6 +1267,17 @@ Object {
       0,
     ],
     "category": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    "column": Array [
       null,
       null,
       null,
@@ -1427,9 +1528,7 @@ Object {
 }
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getFlameGraphTiming 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getFlameGraphTiming 1`] = `
 Array [
   Object {
     "callNode": Array [
@@ -1494,9 +1593,7 @@ Array [
 ]
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getJankInstances 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getJankInstances 1`] = `
 Array [
   Object {
     "data": null,
@@ -1508,9 +1605,7 @@ Array [
 ]
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getMarkerTiming 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getMarkerTiming 1`] = `
 Array [
   Object {
     "end": Array [
@@ -1611,9 +1706,7 @@ Array [
 ]
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getProcessedMarkersThread 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getPreviewFilteredThread 1`] = `
 Object {
   "frameTable": Object {
     "address": Array [
@@ -1628,6 +1721,280 @@ Object {
       0,
     ],
     "category": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    "column": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    "func": Array [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+    ],
+    "implementation": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    "length": 9,
+    "line": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    "optimizations": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+  },
+  "funcTable": Object {
+    "address": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
+    "fileName": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    "isJS": Array [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+    ],
+    "length": 9,
+    "lineNumber": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    "name": Array [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+    ],
+    "resource": Array [
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+    ],
+  },
+  "libs": Array [],
+  "markers": Object {
+    "data": Array [
+      null,
+      null,
+    ],
+    "length": 2,
+    "name": Array [
+      4,
+      5,
+    ],
+    "time": Array [
+      4,
+      5,
+    ],
+  },
+  "name": "Thread with samples",
+  "pid": 0,
+  "processType": "default",
+  "resourceTable": Object {
+    "addonId": Array [],
+    "host": Array [],
+    "icon": Array [],
+    "length": 0,
+    "lib": Array [],
+    "name": Array [],
+    "type": Array [],
+  },
+  "samples": Object {
+    "length": 2,
+    "responsiveness": Array [
+      100,
+      0,
+    ],
+    "rss": Array [
+      null,
+      null,
+    ],
+    "stack": Array [
+      5,
+      5,
+    ],
+    "time": Array [
+      4,
+      5,
+    ],
+    "uss": Array [
+      null,
+      null,
+    ],
+  },
+  "stackTable": Object {
+    "category": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
+    "frame": Array [
+      0,
+      1,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+    ],
+    "length": 8,
+    "prefix": Array [
+      null,
+      0,
+      1,
+      2,
+      1,
+      4,
+      1,
+      6,
+    ],
+  },
+  "stringTable": UniqueStringArray {
+    "_array": Array [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+    ],
+    "_stringToIndex": Map {
+      "A" => 0,
+      "B" => 1,
+      "C" => 2,
+      "D" => 3,
+      "E" => 4,
+      "F" => 5,
+      "G" => 6,
+      "H" => 7,
+      "I" => 8,
+    },
+  },
+  "tid": 0,
+}
+`;
+
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getProcessedMarkersThread 1`] = `
+Object {
+  "frameTable": Object {
+    "address": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
+    "category": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    "column": Array [
       null,
       null,
       null,
@@ -1919,9 +2286,7 @@ Object {
 }
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getRangeAndTransformFilteredThread 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getRangeAndTransformFilteredThread 1`] = `
 Object {
   "frameTable": Object {
     "address": Array [
@@ -1936,6 +2301,17 @@ Object {
       0,
     ],
     "category": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    "column": Array [
       null,
       null,
       null,
@@ -2186,9 +2562,7 @@ Object {
 }
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getRangeFilteredThread 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getRangeFilteredThread 1`] = `
 Object {
   "frameTable": Object {
     "address": Array [
@@ -2203,6 +2577,17 @@ Object {
       0,
     ],
     "category": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    "column": Array [
       null,
       null,
       null,
@@ -2456,319 +2841,7 @@ Object {
 }
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getPreviewFilteredThread 1`
-] = `
-Object {
-  "frameTable": Object {
-    "address": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-    ],
-    "category": Array [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-    "func": Array [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-    ],
-    "implementation": Array [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-    "length": 9,
-    "line": Array [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-    "optimizations": Array [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-  },
-  "funcTable": Object {
-    "address": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-    ],
-    "fileName": Array [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-    "isJS": Array [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-    ],
-    "length": 9,
-    "lineNumber": Array [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-    ],
-    "name": Array [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-    ],
-    "resource": Array [
-      -1,
-      -1,
-      -1,
-      -1,
-      -1,
-      -1,
-      -1,
-      -1,
-      -1,
-    ],
-  },
-  "libs": Array [],
-  "markers": Object {
-    "data": Array [
-      null,
-      null,
-    ],
-    "length": 2,
-    "name": Array [
-      4,
-      5,
-    ],
-    "time": Array [
-      4,
-      5,
-    ],
-  },
-  "name": "Thread with samples",
-  "pid": 0,
-  "processType": "default",
-  "resourceTable": Object {
-    "addonId": Array [],
-    "host": Array [],
-    "icon": Array [],
-    "length": 0,
-    "lib": Array [],
-    "name": Array [],
-    "type": Array [],
-  },
-  "samples": Object {
-    "length": 2,
-    "responsiveness": Array [
-      100,
-      0,
-    ],
-    "rss": Array [
-      null,
-      null,
-    ],
-    "stack": Array [
-      5,
-      5,
-    ],
-    "time": Array [
-      4,
-      5,
-    ],
-    "uss": Array [
-      null,
-      null,
-    ],
-  },
-  "stackTable": Object {
-    "category": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-    ],
-    "frame": Array [
-      0,
-      1,
-      3,
-      4,
-      5,
-      6,
-      7,
-      8,
-    ],
-    "length": 8,
-    "prefix": Array [
-      null,
-      0,
-      1,
-      2,
-      1,
-      4,
-      1,
-      6,
-    ],
-  },
-  "stringTable": UniqueStringArray {
-    "_array": Array [
-      "A",
-      "B",
-      "C",
-      "D",
-      "E",
-      "F",
-      "G",
-      "H",
-      "I",
-    ],
-    "_stringToIndex": Map {
-      "A" => 0,
-      "B" => 1,
-      "C" => 2,
-      "D" => 3,
-      "E" => 4,
-      "F" => 5,
-      "G" => 6,
-      "H" => 7,
-      "I" => 8,
-    },
-  },
-  "tid": 0,
-}
-`;
-
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkers 1`
-] = `
-Array [
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "D",
-    "start": 3,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "E",
-    "start": 4,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "F",
-    "start": 5,
-    "title": null,
-  },
-]
-`;
-
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkersForHeader 1`
-] = `
-Array [
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "D",
-    "start": 3,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "E",
-    "start": 4,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "F",
-    "start": 5,
-    "title": null,
-  },
-]
-`;
-
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getSearchFilteredMarkers 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getSearchFilteredMarkers 1`] = `
 Object {
   "data": Array [
     null,
@@ -2786,16 +2859,12 @@ Object {
 }
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getThreadProcessDetails 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getThreadProcessDetails 1`] = `
 "thread: \\"Thread with samples\\" (0)
 process: \\"default\\" (0)"
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getTracingMarkers 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getTracingMarkers 1`] = `
 Array [
   Object {
     "data": null,
@@ -2842,9 +2911,7 @@ Array [
 ]
 `;
 
-exports[
-  `snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getViewOptions 1`
-] = `
+exports[`snapshots of selectors/profile-view matches the last stored run of selectedThreadSelector.getViewOptions 1`] = `
 Object {
   "expandedCallNodePaths": PathSet {
     "_table": Map {

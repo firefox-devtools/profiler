@@ -123,7 +123,7 @@ const ZipFileRow = explicitConnect(zipFileRowConnectOptions);
 class ZipFileViewer extends React.PureComponent<Props> {
   _fixedColumns = [];
   _mainColumn = { propName: 'name', title: '', component: ZipFileRow };
-  _treeView: ?TreeView<IndexIntoZipFileTable, ZipDisplayData>;
+  _treeView: ?TreeView<ZipDisplayData>;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
   componentWillMount() {

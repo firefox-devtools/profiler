@@ -504,6 +504,7 @@ function _processFrameTable(
     func: frameFuncs,
     implementation: geckoFrameStruct.implementation,
     line: geckoFrameStruct.line,
+    column: geckoFrameStruct.column,
     optimizations: geckoFrameStruct.optimizations,
     length: geckoFrameStruct.length,
   };
