@@ -332,10 +332,10 @@ describe('importing perf profile', function() {
       if (profile === undefined) {
         throw new Error('Unable to parse the profile.');
       }
-      //console.log(profile);
       version = profile.meta.version;
+      expect(profile).toMatchSnapshot();
     } catch (e) {
-      //console.log(e)
+      console.log(e)
       // probably file not found
     }
     expect(version).toEqual(CURRENT_GECKO_VERSION);
