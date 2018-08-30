@@ -104,10 +104,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
       case 'screenshots': {
         const { threadIndex, id } = globalTrack;
         return (
-          <TimelineTrackScreenshots
-            threadIndex={threadIndex}
-            screenshotId={id}
-          />
+          <TimelineTrackScreenshots threadIndex={threadIndex} windowId={id} />
         );
       }
       default:

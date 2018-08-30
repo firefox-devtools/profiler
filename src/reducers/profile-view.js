@@ -44,7 +44,6 @@ import type {
   GlobalTrack,
   TrackIndex,
 } from '../types/profile-derived';
-import type { ScreenshotPayload } from '../types/markers';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
   Action,
@@ -1005,45 +1004,7 @@ export const selectorsForThread = (
       _getMarkersTable,
       _getStringTable,
       getProfileRootRange,
-      (markers, stringTable, rootRange) => {
-        const idToScreenshotMarkers = new Map();
-        const name = 'CompositorScreenshot';
-        const nameIndex = stringTable.indexForString(name);
-        for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-          if (markers.name[markerIndex] === nameIndex) {
-            // Coerce the payload to a screenshot one. Don't do a runtime check that
-            // this is correct.
-            const data: ScreenshotPayload = (markers.data[markerIndex]: any);
-
-            let tracingMarkers = idToScreenshotMarkers.get(data.windowID);
-            if (tracingMarkers === undefined) {
-              tracingMarkers = [];
-              idToScreenshotMarkers.set(data.windowID, tracingMarkers);
-            }
-
-            tracingMarkers.push({
-              start: markers.time[markerIndex],
-              dur: 0,
-              title: null,
-              name,
-              data,
-            });
-
-            if (tracingMarkers.length > 1) {
-              // Set the duration
-              const prevMarker = tracingMarkers[tracingMarkers.length - 2];
-              const nextMarker = tracingMarkers[tracingMarkers.length - 1];
-              prevMarker.dur = nextMarker.start - prevMarker.start;
-            }
-          }
-        }
-        for (const [, tracingMarkers] of idToScreenshotMarkers) {
-          // This last marker must exist.
-          const lastMarker = tracingMarkers[tracingMarkers.length - 1];
-          lastMarker.dur = rootRange.end - lastMarker.start;
-        }
-        return idToScreenshotMarkers;
-      }
+      MarkerData.extractScreenshotsById
     );
     const getRangeFilteredScreenshotsById = createSelector(
       getScreenshotsById,
@@ -1053,7 +1014,7 @@ export const selectorsForThread = (
         for (const [id, screenshots] of screenshotsById) {
           newMap.set(
             id,
-            ProfileData.filterTracingMarkersToRange(screenshots, start, end)
+            MarkerData.filterTracingMarkersToRange(screenshots, start, end)
           );
         }
         return newMap;

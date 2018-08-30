@@ -754,8 +754,7 @@ describe('actions/ProfileView', function() {
       const keys = [...screenshotMarkersById.keys()];
       expect(keys.length).toEqual(1);
 
-      const [key] = keys;
-      const screenshots = screenshotMarkersById.get(key);
+      const [screenshots] = [...screenshotMarkersById.values()];
       if (!screenshots) {
         throw new Error('No screenshots found.');
       }
@@ -770,7 +769,8 @@ describe('actions/ProfileView', function() {
       const [{ markers }] = profile.threads;
       const { dispatch, getState } = storeWithProfile(profile);
 
-      // Assume there are 10 markers, and commit a subsection of that range.
+      // Double check that there are 10 markers in the test data, and commit a
+      // subsection of that range.
       expect(markers.length).toBe(10);
       const startIndex = 3;
       const endIndex = 8;

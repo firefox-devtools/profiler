@@ -28,7 +28,7 @@ import './TrackScreenshots.css';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
-  +screenshotId: string,
+  +windowId: string,
   ...SizeProps,
 |};
 type StateProps = {|
@@ -148,13 +148,16 @@ class Screenshots extends PureComponent<Props, State> {
   renderHoverPreview() {
     const { pageX, offsetX, containerTop } = this.state;
     const { screenshots, thread, isMakingPreviewSelection, width } = this.props;
+
     if (isMakingPreviewSelection || offsetX === null || pageX === null) {
       return null;
     }
+
     const screenshotIndex = this.findScreenshotAtMouse(offsetX);
     if (screenshotIndex === null) {
       return null;
     }
+
     // Coerce the payload into a screenshot one.
     const payload: ScreenshotPayload = (screenshots[screenshotIndex].data: any);
     const { url, windowWidth, windowHeight } = payload;
@@ -227,14 +230,14 @@ class Screenshots extends PureComponent<Props, State> {
 
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: (state, ownProps) => {
-    const { threadIndex, screenshotId } = ownProps;
+    const { threadIndex, windowId } = ownProps;
     const selectors = selectorsForThread(threadIndex);
     const { start, end } = getCommittedRange(state);
     const previewSelection = getPreviewSelection(state);
     return {
       thread: selectors.getRangeFilteredThread(state),
       screenshots: ensureExists(
-        selectors.getRangeFilteredScreenshotsById(state).get(screenshotId),
+        selectors.getRangeFilteredScreenshotsById(state).get(windowId),
         'Expected to find screenshots for the given pid'
       ),
       threadName: selectors.getFriendlyThreadName(state),

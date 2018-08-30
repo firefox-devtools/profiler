@@ -17,12 +17,14 @@ import { commitRange } from '../../actions/profile-view';
 import TrackScreenshots, {
   TRACK_HEIGHT,
 } from '../../components/timeline/TrackScreenshots';
+import Timeline from '../../components/timeline';
 import { ensureExists } from '../../utils/flow';
+import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
-
 import { getScreenshotTrackProfile } from '../fixtures/profiles/make-profile';
+import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 
 // Mock out the getBoundingBox to have a 400 pixel width.
 const TRACK_WIDTH = 400;
@@ -131,12 +133,29 @@ describe('timeline/TrackScreenshots', function() {
     view.update();
     expect(view.find('.timelineTrackScreenshotImg').length).toBe(0);
   });
+
+  it('is created in the <Timeline /> with a profile with screenshots', function() {
+    const { view } = setup(getScreenshotTrackProfile(), <Timeline />);
+    expect(view.find(TrackScreenshots).length).toBe(1);
+  });
+
+  it('is not created in the <Timeline /> with a profile with no screenshots', function() {
+    const { view } = setup(getProfileWithNiceTracks(), <Timeline />);
+    expect(view.find(TrackScreenshots).length).toBe(0);
+  });
 });
 
-function setup(profile: Profile = getScreenshotTrackProfile()) {
+function setup(
+  profile: Profile = getScreenshotTrackProfile(),
+  component = <TrackScreenshots threadIndex={0} windowId="0" />
+) {
   const store = storeWithProfile(profile);
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
+  const ctx = mockCanvasContext();
+  jest
+    .spyOn(HTMLCanvasElement.prototype, 'getContext')
+    .mockImplementation(() => ctx);
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => {
@@ -151,11 +170,7 @@ function setup(profile: Profile = getScreenshotTrackProfile()) {
       return rect;
     });
 
-  const view = mount(
-    <Provider store={store}>
-      <TrackScreenshots threadIndex={0} screenshotId="0" />
-    </Provider>
-  );
+  const view = mount(<Provider store={store}>{component}</Provider>);
 
   // WithSize uses requestAnimationFrame
   flushRafCalls();
@@ -177,6 +192,10 @@ function setup(profile: Profile = getScreenshotTrackProfile()) {
   };
 }
 
+/**
+ * Take a thread full screenshot markers, and set some to "Unknown" in order to
+ * create gaps in a screenshot track.
+ */
 function _setScreenshotMarkersToUnknown(
   thread: Thread,
   ...markerIndexes: IndexIntoMarkersTable[]
