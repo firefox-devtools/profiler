@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import type { ScreenshotPayload } from '../types/markers';
 import type { Profile, Thread, ThreadIndex, Pid } from '../types/profile';
 import type {
   GlobalTrack,
@@ -171,7 +172,7 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
     threadIndex++
   ) {
     const thread = profile.threads[threadIndex];
-    const { pid } = thread;
+    const { pid, markers, stringTable } = thread;
     if (_isMainThread(thread)) {
       // This is a main thread, a global track needs to be created or updated with
       // the main thread info.
@@ -201,6 +202,25 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
         };
         globalTracks.push(globalTrack);
         globalTracksByPid.set(pid, globalTrack);
+      }
+    }
+
+    // Check for screenshots.
+    const ids: Set<string> = new Set();
+    if (stringTable.hasString('CompositorScreenshot')) {
+      const screenshotNameIndex = stringTable.indexForString(
+        'CompositorScreenshot'
+      );
+      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+        if (markers.name[markerIndex] === screenshotNameIndex) {
+          // Coerce the payload to a screenshot one. Don't do a runtime check that
+          // this is correct.
+          const data: ScreenshotPayload = (markers.data[markerIndex]: any);
+          ids.add(data.windowID);
+        }
+      }
+      for (const id of ids) {
+        globalTracks.unshift({ type: 'screenshots', id, threadIndex });
       }
     }
   }

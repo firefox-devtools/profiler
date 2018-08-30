@@ -28,6 +28,7 @@ import {
 } from '../../reducers/profile-view';
 import './Track.css';
 import TimelineTrackThread from './TrackThread';
+import TimelineTrackScreenshots from './TrackScreenshots';
 import TimelineLocalTrack from './LocalTrack';
 import Reorderable from '../shared/Reorderable';
 import type { TabSlug } from '../../app-logic/tabs-handling';
@@ -100,9 +101,12 @@ class GlobalTrackComponent extends PureComponent<Props> {
         }
         return <TimelineTrackThread threadIndex={mainThreadIndex} />;
       }
-      case 'screenshots':
-        // TODO: Add support for screenshots.
-        return <div />;
+      case 'screenshots': {
+        const { threadIndex, id } = globalTrack;
+        return (
+          <TimelineTrackScreenshots threadIndex={threadIndex} windowId={id} />
+        );
+      }
       default:
         console.error('Unhandled globalTrack type', (globalTrack: empty));
         return null;
