@@ -118,9 +118,9 @@ exports[`MarkerTable renders some basic markers 1`] = `
               >
                 <span
                   className="treeViewRowColumn treeViewFixedColumn start"
-                  title="0.000s"
+                  title="0s"
                 >
-                  0.000s
+                  0s
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn duration"
@@ -146,10 +146,16 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 }
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn timestamp"
+                  className="treeViewRowColumn treeViewFixedColumn start"
                   title="0.002s"
                 >
                   0.002s
+                </span>
+                <span
+                  className="treeViewRowColumn treeViewFixedColumn duration"
+                  title="∞ms"
+                >
+                  ∞ms
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn category"
@@ -231,7 +237,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
                 >
-                  [start] NotifyDidPaint
+                  NotifyDidPaint
                 </span>
               </div>
             </div>

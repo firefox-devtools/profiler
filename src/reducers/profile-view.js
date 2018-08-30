@@ -956,7 +956,7 @@ export const selectorsForThread = (
      *                               still.
      * 3. getTracingMarkers - Match up start/end markers, and start returning
      *                        TracingMarkers.
-     * 4. getCommittedRangeFilteredTracingMarkers - Match up start/end markers, and remove duplicates.
+     * 4. getCommittedRangeFilteredTracingMarkers - Apply the commited range.
      * 5. getSearchFilteredTracingMarkers - Apply the search string
      * 6. getPreviewFilteredTracingMarkers - Apply the preview range
      */

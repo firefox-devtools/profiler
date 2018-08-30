@@ -123,6 +123,8 @@ export function extractMarkerDataFromName(
     //           ↓    ↓
     /^Invalidate (.*):(\d+)$/;
 
+  const bailoutStringIndex = stringTable.indexForString('Bailout');
+  const invalidationStringIndex = stringTable.indexForString('Invalidate');
   for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
     const nameIndex = markers.name[markerIndex];
     const time = markers.time[markerIndex];
@@ -143,7 +145,7 @@ export function extractMarkerDataFromName(
           script,
           functionLine,
         ] = match;
-        newMarkers.name[markerIndex] = nameIndex;
+        newMarkers.name[markerIndex] = bailoutStringIndex;
         newMarkers.data[markerIndex] = ({
           type: 'Bailout',
           bailoutType: type,
@@ -162,6 +164,7 @@ export function extractMarkerDataFromName(
         console.error(`Could not match regex for bailout: "${name}"`);
       } else {
         const [, url, line] = match;
+        newMarkers.name[markerIndex] = invalidationStringIndex;
         newMarkers.data[markerIndex] = {
           type: 'Invalidation',
           url,

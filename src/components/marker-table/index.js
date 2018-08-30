@@ -116,7 +116,7 @@ class MarkerTree {
       }
 
       displayData = {
-        start: `${((marker.start - this._zeroAt) / 1000).toFixed(3)}s`,
+        start: _formatStart(marker.start, this._zeroAt),
         duration: _formatDuration(marker.dur),
         name,
         category,
@@ -126,6 +126,16 @@ class MarkerTree {
     return displayData;
   }
 }
+
+function _formatStart(start: number, zeroAt) {
+  return (
+    ((start - zeroAt) / 1000).toLocaleString(undefined, {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 3,
+    }) + 's'
+  );
+}
+
 function _formatDuration(duration: number): string {
   if (duration === 0) {
     return '—';
