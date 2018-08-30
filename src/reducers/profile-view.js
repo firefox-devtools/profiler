@@ -15,6 +15,7 @@ import * as Tracks from '../profile-logic/tracks';
 import * as Transforms from '../profile-logic/transforms';
 import * as UrlState from './url-state';
 import * as ProfileData from '../profile-logic/profile-data';
+import * as MarkerData from '../profile-logic/marker-data';
 import * as StackTiming from '../profile-logic/stack-timing';
 import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
@@ -933,23 +934,23 @@ export const selectorsForThread = (
     );
     const getJankInstances = createSelector(
       _getRangeFilteredThreadSamples,
-      (samples): TracingMarker[] => ProfileData.getJankInstances(samples, 50)
+      (samples): TracingMarker[] => MarkerData.getJankInstances(samples, 50)
     );
     const getProcessedMarkersThread = createSelector(
       getThread,
-      ProfileData.extractMarkerDataFromName
+      MarkerData.extractMarkerDataFromName
     );
     const getTracingMarkers = createSelector(
       getProcessedMarkersThread,
-      ProfileData.getTracingMarkers
+      MarkerData.getTracingMarkers
     );
     const getTracingMarkersForNetworkChart = createSelector(
       getTracingMarkers,
-      markers => markers.filter(ProfileData.isNetworkMarker)
+      markers => markers.filter(MarkerData.isNetworkMarker)
     );
     const getTracingMarkersForMarkerChart = createSelector(
       getTracingMarkers,
-      markers => markers.filter(marker => !ProfileData.isNetworkMarker(marker))
+      markers => markers.filter(marker => !MarkerData.isNetworkMarker(marker))
     );
     const getTracingMarkersForView = state => {
       const selectedTab = UrlState.getSelectedTab(state);
@@ -971,7 +972,7 @@ export const selectorsForThread = (
       getCommittedRange,
       (markers, range): TracingMarker[] => {
         const { start, end } = range;
-        return ProfileData.filterTracingMarkersToRange(markers, start, end);
+        return MarkerData.filterTracingMarkersToRange(markers, start, end);
       }
     );
     const getCommittedRangeFilteredTracingMarkersForHeader = createSelector(
@@ -981,7 +982,7 @@ export const selectorsForThread = (
           tm =>
             tm.name !== 'GCMajor' &&
             tm.name !== 'BHR-detected hang' &&
-            !ProfileData.isNetworkMarker(tm)
+            !MarkerData.isNetworkMarker(tm)
         )
     );
     const getNetworkTracingMarkers = createSelector(
@@ -1077,7 +1078,7 @@ export const selectorsForThread = (
     const getSearchFilteredMarkers = createSelector(
       getPreviewFilteredThread,
       UrlState.getMarkersSearchString,
-      ProfileData.getSearchFilteredMarkers
+      MarkerData.getSearchFilteredMarkers
     );
     /**
      * The buffers of the samples can be cleared out. This function lets us know the
