@@ -753,6 +753,7 @@ export type SelectorsForThread = {
   getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
   getNetworkTracingMarkers: State => TracingMarker[],
   getNetworkTiming: State => MarkerTimingRows,
+  getRangeFilteredScreenshotsById: State => Map<string, TracingMarker[]>,
   getFilteredThread: State => Thread,
   getPreviewFilteredThread: State => Thread,
   getCallNodeInfo: State => CallNodeInfo,
@@ -777,19 +778,22 @@ export const selectorsForThread = (
   threadIndex: ThreadIndex
 ): SelectorsForThread => {
   if (!(threadIndex in selectorsForThreads)) {
+    const getThread = (state: State): Thread =>
+      getProfile(state).threads[threadIndex];
+    const _getMarkersTable = (state: State) => getThread(state).markers;
+    const _getStringTable = (state: State) => getThread(state).stringTable;
+
     /**
      * The first per-thread selectors filter out and transform a thread based on user's
      * interactions. The transforms are order dependendent.
      *
-     * 1. Unfiltered - The first selector gets the unmodified original thread.
+     * 1. Unfiltered getThread - The first selector gets the unmodified original thread.
      * 2. Range - New samples table with only samples in the committed range.
      * 3. Transform - Apply the transform stack that modifies the stacks and samples.
      * 4. Implementation - Modify stacks and samples to only show a single implementation.
      * 5. Search - Exclude samples that don't include some text in the stack.
      * 6. Preview - Only include samples that are within a user's preview range selection.
      */
-    const getThread = (state: State): Thread =>
-      getProfile(state).threads[threadIndex];
     const getRangeFilteredThread = createSelector(
       getThread,
       getCommittedRange,
@@ -996,6 +1000,27 @@ export const selectorsForThread = (
       getNetworkTracingMarkers,
       MarkerTiming.getMarkerTiming
     );
+    const getScreenshotsById = createSelector(
+      _getMarkersTable,
+      _getStringTable,
+      getProfileRootRange,
+      MarkerData.extractScreenshotsById
+    );
+    const getRangeFilteredScreenshotsById = createSelector(
+      getScreenshotsById,
+      getCommittedRange,
+      (screenshotsById, { start, end }) => {
+        const newMap = new Map();
+        for (const [id, screenshots] of screenshotsById) {
+          newMap.set(
+            id,
+            MarkerData.filterTracingMarkersToRange(screenshots, start, end)
+          );
+        }
+        return newMap;
+      }
+    );
+
     const getCallNodeInfo = createSelector(
       getFilteredThread,
       getDefaultCategory,
@@ -1112,6 +1137,7 @@ export const selectorsForThread = (
       getCommittedRangeFilteredTracingMarkersForHeader,
       getNetworkTracingMarkers,
       getNetworkTiming,
+      getRangeFilteredScreenshotsById,
       getFilteredThread,
       getPreviewFilteredThread,
       getCallNodeInfo,
