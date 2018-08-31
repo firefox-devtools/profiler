@@ -4,6 +4,7 @@
 
 // @flow
 import type { TrackReference } from '../../types/actions';
+import type { TabSlug } from '../../app-logic/tabs-handling';
 
 import {
   getProfileFromTextSamples,
@@ -13,13 +14,15 @@ import {
 } from '../fixtures/profiles/make-profile';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
-import { storeWithProfile } from '../fixtures/stores';
+import { blankStore, storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
 import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
+import { viewProfile } from '../../actions/receive-profile';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
+import { stateFromLocation } from '../../app-logic/url-handling';
 
 const { selectedThreadSelectors, selectedNodeSelectors } = ProfileViewSelectors;
 
@@ -174,50 +177,67 @@ describe('actions/ProfileView', function() {
   });
 
   describe('selectTrack', function() {
-    describe('with a thread tracks', function() {
-      /**
-       * Using the following tracks:
-       *  [
-       *    'show [thread GeckoMain process]',
-       *    'show [thread GeckoMain tab]',
-       *    '  - show [thread DOM Worker]',
-       *    '  - show [thread Style]',
-       *  ]
-       */
-      const parentTrackReference = { type: 'global', trackIndex: 0 };
-      const tabTrackReference = { type: 'global', trackIndex: 1 };
-      const workerTrackReference = { type: 'local', trackIndex: 0, pid: 222 };
-      function setup() {
-        const profile = getProfileWithNiceTracks();
-        const { getState, dispatch } = storeWithProfile(profile);
-        const parentTrack = ProfileViewSelectors.getGlobalTrackFromReference(
-          getState(),
-          parentTrackReference
-        );
-        const tabTrack = ProfileViewSelectors.getGlobalTrackFromReference(
-          getState(),
-          tabTrackReference
-        );
-        const workerTrack = ProfileViewSelectors.getLocalTrackFromReference(
-          getState(),
-          workerTrackReference
-        );
-        if (tabTrack.type !== 'process' || parentTrack.type !== 'process') {
-          throw new Error('Expected to get process tracks.');
-        }
-        if (workerTrack.type !== 'thread') {
-          throw new Error('Expected to get a thread tracks.');
-        }
-        return {
-          profile,
-          getState,
-          dispatch,
-          parentTrack,
-          tabTrack,
-          workerTrack,
-        };
-      }
+    /**
+     * Using the following tracks:
+     *  [
+     *    'show [thread GeckoMain process]',
+     *    'show [thread GeckoMain tab]',
+     *    '  - show [thread DOM Worker]',
+     *    '  - show [thread Style]',
+     *  ]
+     */
+    const parentTrackReference = { type: 'global', trackIndex: 0 };
+    const tabTrackReference = { type: 'global', trackIndex: 1 };
+    const workerTrackReference = { type: 'local', trackIndex: 0, pid: 222 };
 
+    function storeWithTab(tabSlug: TabSlug) {
+      const profile = getProfileWithNiceTracks();
+      const { dispatch, getState } = blankStore();
+      const newUrlState = stateFromLocation({
+        pathname: `/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/${tabSlug}/`,
+        search: '',
+        hash: '',
+      });
+      dispatch({
+        type: 'UPDATE_URL_STATE',
+        newUrlState,
+      });
+      dispatch(viewProfile(profile));
+
+      return { profile, dispatch, getState };
+    }
+
+    function setup(tabSlug: TabSlug = 'calltree') {
+      const { profile, dispatch, getState } = storeWithTab(tabSlug);
+      const parentTrack = ProfileViewSelectors.getGlobalTrackFromReference(
+        getState(),
+        parentTrackReference
+      );
+      const tabTrack = ProfileViewSelectors.getGlobalTrackFromReference(
+        getState(),
+        tabTrackReference
+      );
+      const workerTrack = ProfileViewSelectors.getLocalTrackFromReference(
+        getState(),
+        workerTrackReference
+      );
+      if (tabTrack.type !== 'process' || parentTrack.type !== 'process') {
+        throw new Error('Expected to get process tracks.');
+      }
+      if (workerTrack.type !== 'thread') {
+        throw new Error('Expected to get a thread tracks.');
+      }
+      return {
+        profile,
+        getState,
+        dispatch,
+        parentTrack,
+        tabTrack,
+        workerTrack,
+      };
+    }
+
+    describe('with a thread tracks', function() {
       it('starts out with the tab thread selected', function() {
         const { getState, tabTrack } = setup();
         expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
@@ -286,6 +306,36 @@ describe('actions/ProfileView', function() {
         expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
           'flame-graph'
+        );
+      });
+    });
+
+    describe('when the loaded panel is not the call tree', function() {
+      it('stays in the same panel when selecting another track', function() {
+        const { getState, dispatch, parentTrack } = setup('marker-chart');
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'marker-chart'
+        );
+        dispatch(ProfileView.selectTrack(parentTrackReference));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+          parentTrack.mainThreadIndex
+        );
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'marker-chart'
+        );
+      });
+
+      it('moves to the call tree when then initial tab is the network chart', function() {
+        const { getState, dispatch, parentTrack } = setup('network-chart');
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'network-chart'
+        );
+        dispatch(ProfileView.selectTrack(parentTrackReference));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+          parentTrack.mainThreadIndex
+        );
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'calltree'
         );
       });
     });

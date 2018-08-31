@@ -89,7 +89,9 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
           }
           selectedThreadIndex = globalTrack.mainThreadIndex;
           // Ensure a relevant thread-based tab is used.
-          selectedTab = getLastVisibleThreadTabSlug(getState());
+          if (selectedTab === 'network-chart') {
+            selectedTab = getLastVisibleThreadTabSlug(getState());
+          }
           break;
         }
         case 'screenshots':
@@ -110,7 +112,9 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
         case 'thread': {
           // Ensure a relevant thread-based tab is used.
           selectedThreadIndex = localTrack.threadIndex;
-          selectedTab = getLastVisibleThreadTabSlug(getState());
+          if (selectedTab === 'network-chart') {
+            selectedTab = getLastVisibleThreadTabSlug(getState());
+          }
           break;
         }
         case 'network':
@@ -126,8 +130,8 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
     }
 
     if (
-      currentlySelectedTab === selectedThreadIndex &&
-      currentlySelectedThreadIndex === selectedTab
+      currentlySelectedTab === selectedTab &&
+      currentlySelectedThreadIndex === selectedThreadIndex
     ) {
       return;
     }
