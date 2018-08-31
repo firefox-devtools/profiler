@@ -72,8 +72,12 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     const canvas = this._canvas;
     const { containerWidth, containerHeight } = this.props;
     const { devicePixelRatio } = window;
-    const pixelWidth: DevicePixels = containerWidth * devicePixelRatio;
-    const pixelHeight: DevicePixels = containerHeight * devicePixelRatio;
+    const pixelWidth: DevicePixels = Math.round(
+      containerWidth * devicePixelRatio
+    );
+    const pixelHeight: DevicePixels = Math.round(
+      containerHeight * devicePixelRatio
+    );
     if (!canvas) {
       return;
     }

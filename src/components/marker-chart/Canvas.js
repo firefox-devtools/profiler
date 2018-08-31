@@ -61,6 +61,8 @@ const MARKER_LABEL_MAX_LENGTH = 150;
 
 class MarkerChartCanvas extends React.PureComponent<Props, State> {
   _textMeasurement: null | TextMeasurement;
+  _previousRowWithHoveredItem: number | null = null;
+  _drawOnce: boolean = false;
 
   drawCanvas = (
     ctx: CanvasRenderingContext2D,
@@ -83,14 +85,34 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       markerTimingRows.length
     );
 
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, containerWidth, containerHeight);
+    if (this._drawOnce) {
+      if (this._previousRowWithHoveredItem !== null) {
+        this.drawMarkers(
+          ctx,
+          this._previousRowWithHoveredItem,
+          this._previousRowWithHoveredItem + 1
+        );
+      }
+      if (hoveredItem) {
+        this.drawMarkers(ctx, hoveredItem.rowIndex, hoveredItem.rowIndex + 1);
+        this.drawHoveredItem(ctx, hoveredItem);
+        this._previousRowWithHoveredItem = hoveredItem.rowIndex;
+      } else {
+        this._previousRowWithHoveredItem = null;
+      }
+      this.drawSeparatorsAndLabels(ctx, startRow, endRow);
+    } else {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, containerWidth, containerHeight);
 
-    this.drawMarkers(ctx, startRow, endRow);
-    if (hoveredItem) {
-      this.drawHoveredItem(ctx, hoveredItem);
+      this.drawMarkers(ctx, startRow, endRow);
+      if (hoveredItem) {
+        this.drawHoveredItem(ctx, hoveredItem);
+        this._previousRowWithHoveredItem = hoveredItem.rowIndex;
+      }
+      this.drawSeparatorsAndLabels(ctx, startRow, endRow);
+      this._drawOnce = true;
     }
-    this.drawSeparatorsAndLabels(ctx, startRow, endRow);
   };
 
   // Note: we used a long argument list instead of an object parameter on
@@ -375,6 +397,11 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       />
     );
   };
+
+  componentDidUpdate() {
+    this._drawOnce = false;
+    this._previousRowWithHoveredItem = null;
+  }
 
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
