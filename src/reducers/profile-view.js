@@ -748,8 +748,12 @@ export type SelectorsForThread = {
   getJankInstances: State => TracingMarker[],
   getProcessedMarkersTable: State => MarkersTable,
   getTracingMarkers: State => TracingMarker[],
-  getTracingMarkersForView: State => TracingMarker[],
-  getMarkerTiming: State => MarkerTimingRows,
+  getIsNetworkChartEmptyInFullRange: State => boolean,
+  getNetworkChartTracingMarkers: State => TracingMarker[],
+  getMarkerChartTracingMarkers: State => TracingMarker[],
+  getIsMarkerChartEmptyInFullRange: State => boolean,
+  getMarkerChartTiming: State => MarkerTimingRows,
+  getNetworkChartTiming: State => MarkerTimingRows,
   getCommittedRangeFilteredTracingMarkers: State => TracingMarker[],
   getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
   getNetworkTracingMarkers: State => TracingMarker[],
@@ -1009,27 +1013,28 @@ export const selectorsForThread = (
         );
       }
     );
-    const getTracingMarkersForNetworkChart = createSelector(
+    const getIsNetworkChartEmptyInFullRange = createSelector(
       getTracingMarkers,
+      markers => markers.filter(MarkerData.isNetworkMarker).length === 0
+    );
+    const getNetworkChartTracingMarkers = createSelector(
+      getSearchFilteredTracingMarkers,
       markers => markers.filter(MarkerData.isNetworkMarker)
     );
-    const getTracingMarkersForMarkerChart = createSelector(
+    const getIsMarkerChartEmptyInFullRange = createSelector(
       getTracingMarkers,
+      markers => MarkerData.filterForMarkerChart(markers).length === 0
+    );
+    const getMarkerChartTracingMarkers = createSelector(
+      getSearchFilteredTracingMarkers,
       markers => markers.filter(marker => !MarkerData.isNetworkMarker(marker))
     );
-    const getTracingMarkersForView = state => {
-      const selectedTab = UrlState.getSelectedTab(state);
-      switch (selectedTab) {
-        case 'marker-chart':
-          return getTracingMarkersForMarkerChart(state);
-        case 'network-chart':
-          return getTracingMarkersForNetworkChart(state);
-        default:
-          return getTracingMarkers(state);
-      }
-    };
-    const getMarkerTiming = createSelector(
-      getTracingMarkersForView,
+    const getMarkerChartTiming = createSelector(
+      getMarkerChartTracingMarkers,
+      MarkerTiming.getMarkerTiming
+    );
+    const getNetworkChartTiming = createSelector(
+      getNetworkChartTracingMarkers,
       MarkerTiming.getMarkerTiming
     );
     const getNetworkTracingMarkers = createSelector(
@@ -1169,8 +1174,12 @@ export const selectorsForThread = (
       getJankInstances,
       getProcessedMarkersTable,
       getTracingMarkers,
-      getTracingMarkersForView,
-      getMarkerTiming,
+      getIsNetworkChartEmptyInFullRange,
+      getNetworkChartTracingMarkers,
+      getIsMarkerChartEmptyInFullRange,
+      getMarkerChartTracingMarkers,
+      getMarkerChartTiming,
+      getNetworkChartTiming,
       getCommittedRangeFilteredTracingMarkers,
       getCommittedRangeFilteredTracingMarkersForHeader,
       getNetworkTracingMarkers,
