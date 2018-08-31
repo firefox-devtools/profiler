@@ -124,19 +124,14 @@ describe('getProcessedMarkersThread', function() {
   function getProcessedMarkers(testMarkers) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
-    return selectedThreadSelectors.getProcessedMarkersThread(getState());
+    return selectedThreadSelectors.getProcessedMarkersTable(getState());
   }
 
   it('can process Invalidation markers', function() {
-    const { markers, stringTable } = getProcessedMarkers([
+    const markers = getProcessedMarkers([
       ['Invalidate http://mozilla.com/script.js:1234', 10, null],
       ['Invalidate self-hosted:2345', 20, null],
       ['Invalidate resource://foo -> resource://bar:3456', 30, null],
-    ]);
-    expect(markers.name.map(index => stringTable.getString(index))).toEqual([
-      'Invalidate',
-      'Invalidate',
-      'Invalidate',
     ]);
     expect(markers.time).toEqual([10, 20, 30]);
     expect(markers.data).toEqual([
@@ -165,7 +160,7 @@ describe('getProcessedMarkersThread', function() {
   });
 
   it('can process Bailout markers', function() {
-    const { markers, stringTable } = getProcessedMarkers([
+    const markers = getProcessedMarkers([
       [
         'Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662',
         10,
@@ -176,10 +171,6 @@ describe('getProcessedMarkersThread', function() {
         20,
         null,
       ],
-    ]);
-    expect(markers.name.map(index => stringTable.getString(index))).toEqual([
-      'Bailout',
-      'Bailout',
     ]);
     expect(markers.time).toEqual([10, 20]);
     expect(markers.data).toEqual([

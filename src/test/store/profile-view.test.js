@@ -969,10 +969,10 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getJankInstances(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getProcessedMarkersThread', function() {
+  it('matches the last stored run of selectedThreadSelector.getProcessedMarkersTable', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getProcessedMarkersThread(getState())
+      selectedThreadSelectors.getProcessedMarkersTable(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getTracingMarkers', function() {
@@ -1072,10 +1072,10 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getThreadProcessDetails(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getSearchFilteredMarkers', function() {
+  it('matches the last stored run of selectedThreadSelector.getSearchFilteredTracingMarkers', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getSearchFilteredMarkers(getState())
+      selectedThreadSelectors.getSearchFilteredTracingMarkers(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.unfilteredSamplesRange', function() {
