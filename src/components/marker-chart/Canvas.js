@@ -23,17 +23,15 @@ import type { ThreadIndex } from '../../types/profile';
 import type {
   TracingMarker,
   MarkerTimingRows,
-  IndexIntoMarkerTiming,
+  IndexIntoTracingMarkers,
 } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
 
-type MarkerDrawingInformation = {
-  x: CssPixels,
-  y: CssPixels,
-  w: CssPixels,
-  h: CssPixels,
-  text: string,
-};
+type HoveredItem = {|
+  +markerIndex: IndexIntoTracingMarkers,
+  +rowIndex: number,
+  +indexInRow: number,
+|};
 
 type OwnProps = {|
   +rangeStart: Milliseconds,
@@ -63,10 +61,12 @@ const MARKER_LABEL_MAX_LENGTH = 150;
 
 class MarkerChartCanvas extends React.PureComponent<Props, State> {
   _textMeasurement: null | TextMeasurement;
+  _previousRowWithHoveredItem: number | null = null;
+  _drawOnce: boolean = false;
 
   drawCanvas = (
     ctx: CanvasRenderingContext2D,
-    hoveredItem: IndexIntoMarkerTiming | null
+    hoveredItem: HoveredItem | null
   ) => {
     const {
       rowHeight,
@@ -85,11 +85,34 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       markerTimingRows.length
     );
 
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, containerWidth, containerHeight);
+    if (this._drawOnce) {
+      if (this._previousRowWithHoveredItem !== null) {
+        this.drawMarkers(
+          ctx,
+          this._previousRowWithHoveredItem,
+          this._previousRowWithHoveredItem + 1
+        );
+      }
+      if (hoveredItem) {
+        this.drawMarkers(ctx, hoveredItem.rowIndex, hoveredItem.rowIndex + 1);
+        this.drawHoveredItem(ctx, hoveredItem);
+        this._previousRowWithHoveredItem = hoveredItem.rowIndex;
+      } else {
+        this._previousRowWithHoveredItem = null;
+      }
+      this.drawSeparatorsAndLabels(ctx, startRow, endRow);
+    } else {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, containerWidth, containerHeight);
 
-    this.drawMarkers(ctx, hoveredItem, startRow, endRow);
-    this.drawSeparatorsAndLabels(ctx, startRow, endRow);
+      this.drawMarkers(ctx, startRow, endRow);
+      if (hoveredItem) {
+        this.drawHoveredItem(ctx, hoveredItem);
+        this._previousRowWithHoveredItem = hoveredItem.rowIndex;
+      }
+      this.drawSeparatorsAndLabels(ctx, startRow, endRow);
+      this._drawOnce = true;
+    }
   };
 
   // Note: we used a long argument list instead of an object parameter on
@@ -144,12 +167,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     }
   }
 
-  drawMarkers(
-    ctx: CanvasRenderingContext2D,
-    hoveredItem: IndexIntoMarkerTiming | null,
-    startRow: number,
-    endRow: number
-  ) {
+  drawMarkers(ctx: CanvasRenderingContext2D, startRow: number, endRow: number) {
     const {
       rangeStart,
       rangeEnd,
@@ -179,7 +197,6 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       const timeAtViewportRight: Milliseconds =
         rangeStart + rangeLength * viewportRight;
 
-      let hoveredElement: MarkerDrawingInformation | null = null;
       for (let i = 0; i < markerTiming.length; i++) {
         // Only draw samples that are in bounds.
         if (
@@ -199,30 +216,56 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
             (endTime - startTime) * containerWidth / viewportLength
           );
           const h: CssPixels = rowHeight - 1;
-
-          const tracingMarkerIndex = markerTiming.index[i];
-          const isHovered = hoveredItem === tracingMarkerIndex;
           const text = markerTiming.label[i];
-          if (isHovered) {
-            hoveredElement = { x, y, w, h, text };
-          } else {
-            this.drawOneMarker(ctx, x, y, w, h, text);
-          }
+
+          this.drawOneMarker(ctx, x, y, w, h, text);
         }
       }
-      if (hoveredElement) {
-        this.drawOneMarker(
-          ctx,
-          hoveredElement.x,
-          hoveredElement.y,
-          hoveredElement.w,
-          hoveredElement.h,
-          hoveredElement.text,
-          'Highlight', //    background color
-          'HighlightText' // foreground color
-        );
-      }
     }
+  }
+
+  drawHoveredItem(
+    ctx: CanvasRenderingContext2D,
+    { rowIndex, indexInRow }: HoveredItem
+  ): void {
+    const {
+      rangeStart,
+      rangeEnd,
+      markerTimingRows,
+      rowHeight,
+      viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
+    } = this.props;
+
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+
+    const markerTiming = markerTimingRows[rowIndex];
+    const startTime: UnitIntervalOfProfileRange =
+      (markerTiming.start[indexInRow] - rangeStart) / rangeLength;
+    const endTime: UnitIntervalOfProfileRange =
+      (markerTiming.end[indexInRow] - rangeStart) / rangeLength;
+
+    const x: CssPixels =
+      (startTime - viewportLeft) * containerWidth / viewportLength;
+    const y: CssPixels = rowIndex * rowHeight - viewportTop;
+    const w: CssPixels = Math.max(
+      10,
+      (endTime - startTime) * containerWidth / viewportLength
+    );
+    const h: CssPixels = rowHeight - 1;
+    const text = markerTiming.label[indexInRow];
+
+    this.drawOneMarker(
+      ctx,
+      x,
+      y,
+      w,
+      h,
+      text,
+      'Highlight', //    background color
+      'HighlightText' // foreground color
+    );
   }
 
   drawSeparatorsAndLabels(
@@ -274,7 +317,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     }
   }
 
-  hitTest = (x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null => {
+  hitTest = (x: CssPixels, y: CssPixels): HoveredItem | null => {
     const {
       rangeStart,
       rangeEnd,
@@ -305,18 +348,22 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       // Ensure that really small markers are hoverable with a minDuration.
       const end = Math.max(start + minDuration, markerTiming.end[i]);
       if (start < time && end > time) {
-        return markerTiming.index[i];
+        return {
+          markerIndex: markerTiming.index[i],
+          rowIndex,
+          indexInRow: i,
+        };
       }
     }
     return null;
   };
 
-  onDoubleClickMarker = (markerIndex: IndexIntoMarkerTiming | null) => {
-    if (markerIndex === null) {
+  onDoubleClickMarker = (hoveredItem: HoveredItem | null) => {
+    if (hoveredItem === null) {
       return;
     }
     const { markers, updatePreviewSelection } = this.props;
-    const marker = markers[markerIndex];
+    const marker = markers[hoveredItem.markerIndex];
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
@@ -341,8 +388,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  getHoveredMarkerInfo = (hoveredItem: IndexIntoMarkerTiming): React.Node => {
-    const marker = this.props.markers[hoveredItem];
+  getHoveredMarkerInfo = ({ markerIndex }: HoveredItem): React.Node => {
+    const marker = this.props.markers[markerIndex];
     return (
       <MarkerTooltipContents
         marker={marker}
@@ -350,6 +397,11 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       />
     );
   };
+
+  componentDidUpdate() {
+    this._drawOnce = false;
+    this._previousRowWithHoveredItem = null;
+  }
 
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
