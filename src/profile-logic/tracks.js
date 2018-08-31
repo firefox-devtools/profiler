@@ -429,7 +429,9 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
     // Don't hide the compositor.
     thread.name === 'Compositor' ||
     // Don't hide the main thread.
-    (thread.name === 'GeckoMain' && thread.processType === 'default')
+    (thread.name === 'GeckoMain' && thread.processType === 'default') ||
+    // Don't hide the GPU thread on Windows.
+    (thread.name === 'GeckoMain' && thread.processType === 'gpu')
   ) {
     return false;
   }
