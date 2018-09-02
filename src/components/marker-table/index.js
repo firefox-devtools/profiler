@@ -10,6 +10,7 @@ import TreeView from '../shared/TreeView';
 import {
   getZeroAt,
   selectedThreadSelectors,
+  getScrollToSelectionGeneration,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { changeSelectedMarker } from '../../actions/profile-view';
@@ -159,6 +160,7 @@ type StateProps = {|
   +markers: TracingMarker[],
   +selectedMarker: IndexIntoTracingMarkers,
   +zeroAt: Milliseconds,
+  +scrollToSelectionGeneration: number,
 |};
 
 type DispatchProps = {|
@@ -181,6 +183,17 @@ class MarkerTable extends PureComponent<Props> {
 
   componentDidMount() {
     this.focus();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+      this.props.scrollToSelectionGeneration >
+      prevProps.scrollToSelectionGeneration
+    ) {
+      if (this._treeView) {
+        this._treeView.scrollSelectionIntoView();
+      }
+    }
   }
 
   focus() {
@@ -223,6 +236,7 @@ class MarkerTable extends PureComponent<Props> {
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     threadIndex: getSelectedThreadIndex(state),
+    scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     markers: selectedThreadSelectors.getPreviewFilteredTracingMarkers(state),
     selectedMarker: selectedThreadSelectors.getViewOptions(state)
       .selectedMarker,
