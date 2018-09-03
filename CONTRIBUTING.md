@@ -12,7 +12,7 @@ This project is made up of a cross section of different parts of Mozilla, includ
 | <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
 | ![][gregtatum] | Greg Tatum | [@gregtatum](https://github.com/gregtatum) | Firefox DevTools Engineer |
 | ![][julienw] | Julien Wajsberg | [@julienw](https://github.com/julienw) | Firefox DevTools Engineer |
-| ![][brisad] | Michael Hoffmann | [@brisad](https://github.com/brisad) | Firefox DevTools Engineer |
+| ![][brisad] | Michael Hoffmann | [@brisad](https://github.com/brisad) | Engineer and Contributor |
 | ![][zoepage] | Ola Gasidlo | [@zoepage](https://github.com/zoepage) | Firefox DevTools Engineer |
 | ![][violasong] | Victoria Wang | [@violasong](https://github.com/violasong) | Firefox DevTools UX Designer |
 
