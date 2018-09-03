@@ -7,6 +7,7 @@
 import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { createLogger } from 'redux-logger';
+import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import reducers from '../reducers';
 import type { Store } from '../types/store';
 
@@ -30,7 +31,10 @@ export default function initializeStore(): Store {
     );
   }
 
-  const store = createStore(reducers, applyMiddleware(...middlewares));
+  const store = createStore(
+    reducers,
+    composeWithDevTools(applyMiddleware(...middlewares))
+  );
 
   return store;
 }
