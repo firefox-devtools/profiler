@@ -406,6 +406,7 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
     case 'SELECT_TRACK':
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
+    case 'CHANGE_SELECTED_MARKER':
       return state + 1;
     default:
       return state;
