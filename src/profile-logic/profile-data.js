@@ -1210,6 +1210,9 @@ export function getFriendlyThreadName(
         case 'default':
           label = 'Main Thread';
           break;
+        case 'gpu':
+          label = 'GPU Process';
+          break;
         case 'tab': {
           const contentThreads = threads.filter(thread => {
             return thread.name === 'GeckoMain' && thread.processType === 'tab';
