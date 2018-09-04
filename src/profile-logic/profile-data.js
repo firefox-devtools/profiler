@@ -67,6 +67,7 @@ export const defaultCategories: CategoryList = Object.freeze([
   { name: 'Network', color: 'lightblue' },
   { name: 'Graphics', color: 'green' },
   { name: 'DOM', color: 'blue' },
+  { name: 'Idle', color: 'transparent' },
 ]);
 
 /**

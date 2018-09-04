@@ -54,7 +54,10 @@ function profileUrl(state: string = '') {
   return state;
 }
 
-function profiles(state: [string, string] | null = null, action: Action) {
+function profiles(
+  state: [string, string] | null = null,
+  action: Action
+): [string, string] | null {
   switch (action.type) {
     case 'CHANGE_PROFILES':
       return action.profiles;

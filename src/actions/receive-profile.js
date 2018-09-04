@@ -656,12 +656,14 @@ async function _extractJsonFromResponse(
   }
 }
 
+function getProfileUrlForHash(hash: string): string {
+  return `https://profile-store.commondatastorage.googleapis.com/${hash}`;
+}
+
 export function retrieveProfileFromStore(
   hash: string
 ): ThunkAction<Promise<void>> {
-  return retrieveProfileOrZipFromUrl(
-    `https://profile-store.commondatastorage.googleapis.com/${hash}`
-  );
+  return retrieveProfileOrZipFromUrl(getProfileUrlForHash(hash));
 }
 
 /**
@@ -805,11 +807,20 @@ export function retrieveProfilesToCompare(
     dispatch(waitingForProfileFromUrl());
 
     try {
-      const profileUrls = profileViewUrls.map(url => {
-        const hash = stateFromLocation(new URL(url)).hash;
-        return `https://profile-store.commondatastorage.googleapis.com/${hash}`;
-      });
-      const promises = profileUrls.map(async profileUrl => {
+      const profileStates = profileViewUrls.map(url =>
+        stateFromLocation(new URL(url))
+      );
+      const hasSupportedDatasources = profileStates.every(
+        state => state.dataSource === 'public'
+      );
+      if (!hasSupportedDatasources) {
+        throw new Error(
+          'Only public uploaded profiles are supported by the comparison function.'
+        );
+      }
+
+      const promises = profileStates.map(async ({ hash }) => {
+        const profileUrl = getProfileUrlForHash(hash);
         const response = await _fetchProfile({
           url: profileUrl,
           onTemporaryError: (e: TemporaryError) => {
@@ -822,18 +833,21 @@ export function retrieveProfilesToCompare(
         }
 
         const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
-        if (profile === undefined) {
-          throw new Error('Unable to parse the profile.');
-        }
-
         return profile;
       });
 
       const profiles = await Promise.all(promises);
-      const resultProfile = profiles.reduce((resultProfile, profile) => {
-        resultProfile.threads.push(...profile.threads);
-        return resultProfile;
-      });
+      const resultProfile = getEmptyProfile();
+      resultProfile.meta.categories = profiles[0].meta.categories;
+      for (let i = 0; i < profileStates.length; i++) {
+        const { profileSpecific: { selectedThread } } = profileStates[i];
+        if (selectedThread === null) {
+          continue;
+        }
+        const thread = profiles[i].threads[selectedThread];
+        thread.name = `Profile ${i}: ${thread.name}`;
+        resultProfile.threads.push(thread);
+      }
 
       dispatch(viewProfile(resultProfile));
     } catch (error) {
