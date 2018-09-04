@@ -14,6 +14,56 @@ import { defaultThreadOrder, getFriendlyThreadName } from './profile-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 
 /**
+ * In order for track indexes to be backwards compatible, the indexes need to be
+ * stable across time. Therefore the tracks must be consistently sorted. When new
+ * track types are added, they must be added to the END of the track list, so that
+ * URL-encoded information remains stable.
+ *
+ * However, this sorting may not be the one we want to display to the end user, so provide
+ * a secondary sorting order for how the tracks will actually be displayed.
+ */
+const LOCAL_TRACK_INDEX_ORDER = {
+  thread: 0,
+  network: 1,
+  memory: 2,
+};
+const LOCAL_TRACK_SORT_ORDER = {
+  network: 0,
+  memory: 1,
+  thread: 2,
+};
+const GLOBAL_TRACK_INDEX_ORDER = {
+  process: 0,
+  screenshots: 1,
+};
+const GLOBAL_TRACK_SORT_ORDER = {
+  screenshots: 0,
+  process: 1,
+};
+
+function _getDefaultLocalTrackOrder(tracks: LocalTrack[]) {
+  const trackOrder = tracks.map((_, index) => index);
+  // In place sort!
+  trackOrder.sort(
+    (a, b) =>
+      LOCAL_TRACK_SORT_ORDER[tracks[a].type] -
+      LOCAL_TRACK_SORT_ORDER[tracks[b].type]
+  );
+  return trackOrder;
+}
+
+function _getDefaultGlobalTrackOrder(tracks: GlobalTrack[]) {
+  const trackOrder = tracks.map((_, index) => index);
+  // In place sort!
+  trackOrder.sort(
+    (a, b) =>
+      GLOBAL_TRACK_SORT_ORDER[tracks[a].type] -
+      GLOBAL_TRACK_SORT_ORDER[tracks[b].type]
+  );
+  return trackOrder;
+}
+
+/**
  * This file collects all the logic that goes into validating URL-encoded view options.
  * It also selects the default view options for things like track hiding, ordering,
  * and selection.
@@ -29,7 +79,7 @@ export function initializeLocalTrackOrderByPid(
     // Go through each set of tracks, determine the sort order.
     for (const [pid, tracks] of localTracksByPid) {
       // Create the default trackOrder.
-      let trackOrder = tracks.map((_, index) => index);
+      let trackOrder = _getDefaultLocalTrackOrder(tracks);
 
       if (urlTrackOrderByPid !== null) {
         // Sanitize the track information provided by the URL, and ensure it is valid.
@@ -120,6 +170,9 @@ export function initializeHiddenLocalTracksByPid(
   return hiddenTracksByPid;
 }
 
+/**
+ * Take a profile and figure out all of the local tracks, and organize them by PID.
+ */
 export function computeLocalTracksByPid(
   profile: Profile
 ): Map<Pid, LocalTrack[]> {
@@ -150,9 +203,22 @@ export function computeLocalTracksByPid(
     }
   }
 
+  // When adding a new track type, ensure that the newer tracks are added at the end
+  // so that the global track indexes are stable and backwards compatible.
+  for (const localTracks of localTracksByPid.values()) {
+    // In place sort!
+    localTracks.sort(
+      (a, b) =>
+        LOCAL_TRACK_INDEX_ORDER[a.type] - LOCAL_TRACK_INDEX_ORDER[b.type]
+    );
+  }
+
   return localTracksByPid;
 }
 
+/**
+ * Take a profile and figure out what GlobalTracks it contains.
+ */
 export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
   // Defining this ProcessTrack type here helps flow understand the intent of
   // the internals of this function, otherwise each GlobalTrack usage would need
@@ -220,10 +286,19 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
         }
       }
       for (const id of ids) {
-        globalTracks.unshift({ type: 'screenshots', id, threadIndex });
+        globalTracks.push({ type: 'screenshots', id, threadIndex });
       }
     }
   }
+
+  // When adding a new track type, ensure that the newer tracks are added at the end
+  // so that the global track indexes are stable and backwards compatible.
+  globalTracks.sort(
+    // In place sort!
+    (a, b) =>
+      GLOBAL_TRACK_INDEX_ORDER[a.type] - GLOBAL_TRACK_INDEX_ORDER[b.type]
+  );
+
   return globalTracks;
 }
 
@@ -261,7 +336,7 @@ export function initializeGlobalTrackOrder(
   return urlGlobalTrackOrder !== null &&
     _indexesAreValid(globalTracks.length, urlGlobalTrackOrder)
     ? urlGlobalTrackOrder
-    : globalTracks.map((_, index) => index);
+    : _getDefaultGlobalTrackOrder(globalTracks);
 }
 
 export function initializeSelectedThreadIndex(
