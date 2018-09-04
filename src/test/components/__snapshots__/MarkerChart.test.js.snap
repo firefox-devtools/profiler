@@ -1,23 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Empty Reasons shows a reason when a profil has no network markers 1`] = `
-<div
-  className="EmptyReasons"
->
-  <h3>
-    The 
-    network chart
-     is empty for “
-    Empty
-    ”
-  </h3>
-  <p>
-    This thread has no network markers.
-  </p>
-</div>
-`;
-
-exports[`Empty Reasons shows a reason when a profile has no marker 1`] = `
+exports[`MarkerChart EmptyReasons shows a reason when a profile has no markers 1`] = `
 <div
   className="EmptyReasons"
 >
@@ -29,55 +12,64 @@ exports[`Empty Reasons shows a reason when a profile has no marker 1`] = `
     ”
   </h3>
   <p>
-    This thread contains no markers.
+    This thread contains no markers for this chart.
   </p>
 </div>
 `;
 
-exports[`renders MarkerChart correctly 1`] = `
+exports[`MarkerChart EmptyReasons shows a reason when a profile has no network markers 1`] = `
 <div
-  className="markerChart"
+  className="EmptyReasons"
 >
-  <div
-    className="chartViewport"
-    onMouseDown={[Function]}
-    onWheel={[Function]}
-  >
-    <div>
-      <canvas
-        className="chartCanvas markerChartCanvas"
-        onDoubleClick={[Function]}
-        onMouseDown={[Function]}
-        onMouseMove={[Function]}
-        onMouseOut={[Function]}
-      />
-    </div>
-    <div
-      className="chartViewportShiftScroll hidden"
-    >
-      Zoom Chart:
-      <kbd
-        className="chartViewportShiftScrollKbd"
-      >
-        Shift
-      </kbd>
-      <kbd
-        className="chartViewportShiftScrollKbd"
-      >
-        Scroll
-      </kbd>
-    </div>
-  </div>
+  <h3>
+    The 
+    network chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    This thread has no network information.
+  </p>
 </div>
 `;
 
-exports[`renders MarkerChart correctly 2`] = `
+exports[`MarkerChart EmptyReasons shows a reason when a profile's markers have been filtered out 1`] = `
+<div
+  className="EmptyReasons"
+>
+  <h3>
+    The 
+    marker chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    All markers were filtered out by the current selection or search term.
+  </p>
+</div>
+`;
+
+exports[`MarkerChart EmptyReasons shows a reason when a profile's network markers have been filtered out 1`] = `
+<div
+  className="EmptyReasons"
+>
+  <h3>
+    The 
+    network chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    All network requests were filtered out by the current selection or search term.
+  </p>
+</div>
+`;
+
+exports[`MarkerChart renders the hoveredItem markers properly 1`] = `
 Array [
-  Array [
-    "scale",
-    1,
-    1,
-  ],
   Array [
     "set fillStyle",
     "#ffffff",
@@ -95,15 +87,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
-    "measureText",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
-  ],
-  Array [
-    "measureText",
-    "…",
+    "Highlight",
   ],
   Array [
     "fillRect",
@@ -230,10 +214,6 @@ Array [
     77,
     123,
     1,
-  ],
-  Array [
-    "measureText",
-    "click",
   ],
   Array [
     "set fillStyle",
@@ -432,10 +412,48 @@ Array [
 ]
 `;
 
-exports[`renders MarkerChart correctly 3`] = `
+exports[`MarkerChart renders the network marker chart and matches the snapshot 1`] = `
 <div
   className="markerChart"
 >
+  <div
+    className="markerSettings"
+  >
+    <div
+      className="markerSettingsSpacer"
+    />
+    <div
+      className="markerSettingsSearchbar"
+    >
+      <label
+        className="markerSettingsSearchbarLabel"
+      >
+        Filter Markers: 
+        <form
+          className="idleSearchField markerSettingsSearchField"
+          onSubmit={[Function]}
+        >
+          <input
+            className="idleSearchFieldInput"
+            name="search"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            required="required"
+            title="Only display markers that match a certain name"
+            type="search"
+            value=""
+          />
+          <input
+            className="idleSearchFieldButton"
+            onClick={[Function]}
+            onFocus={[Function]}
+            type="reset"
+          />
+        </form>
+      </label>
+    </div>
+  </div>
   <div
     className="chartViewport"
     onMouseDown={[Function]}
@@ -469,8 +487,13 @@ exports[`renders MarkerChart correctly 3`] = `
 </div>
 `;
 
-exports[`renders MarkerChart correctly 4`] = `
+exports[`MarkerChart renders the network marker chart and matches the snapshot 2`] = `
 Array [
+  Array [
+    "scale",
+    1,
+    1,
+  ],
   Array [
     "set fillStyle",
     "#ffffff",
@@ -488,12 +511,373 @@ Array [
   ],
   Array [
     "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
+    "fillRect",
+    76,
+    1,
+    23,
+    1,
+  ],
+  Array [
+    "fillRect",
+    75,
+    2,
+    25,
+    11,
+  ],
+  Array [
+    "fillRect",
+    76,
+    13,
+    23,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    78.5,
+    17,
+    22.99999999999999,
+    1,
+  ],
+  Array [
+    "fillRect",
+    77.5,
+    18,
+    24.99999999999999,
+    11,
+  ],
+  Array [
+    "fillRect",
+    78.5,
+    29,
+    22.99999999999999,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    81,
+    33,
+    23,
+    1,
+  ],
+  Array [
+    "fillRect",
+    80,
+    34,
+    25,
+    11,
+  ],
+  Array [
+    "fillRect",
+    81,
+    45,
+    23,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    83.5,
+    49,
+    23,
+    1,
+  ],
+  Array [
+    "fillRect",
+    82.5,
+    50,
+    25,
+    11,
+  ],
+  Array [
+    "fillRect",
+    83.5,
+    61,
+    23,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    86,
+    65,
+    23.00000000000001,
+    1,
+  ],
+  Array [
+    "fillRect",
+    85,
+    66,
+    25.00000000000001,
+    11,
+  ],
+  Array [
+    "fillRect",
+    86,
+    77,
+    23.00000000000001,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    88.5,
+    81,
+    23,
+    1,
+  ],
+  Array [
+    "fillRect",
+    87.5,
+    82,
+    25,
+    11,
+  ],
+  Array [
+    "fillRect",
+    88.5,
+    93,
+    23,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    91,
+    97,
+    22.99999999999999,
+    1,
+  ],
+  Array [
+    "fillRect",
+    90,
+    98,
+    24.99999999999999,
+    11,
+  ],
+  Array [
+    "fillRect",
+    91,
+    109,
+    22.99999999999999,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    93.5,
+    113,
+    23,
+    1,
+  ],
+  Array [
+    "fillRect",
+    92.5,
+    114,
+    25,
+    11,
+  ],
+  Array [
+    "fillRect",
+    93.5,
+    125,
+    23,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    96,
+    129,
+    23,
+    1,
+  ],
+  Array [
+    "fillRect",
+    95,
+    130,
+    25,
+    11,
+  ],
+  Array [
+    "fillRect",
+    96,
+    141,
+    23,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    98.5,
+    145,
+    23.00000000000001,
+    1,
+  ],
+  Array [
+    "fillRect",
+    97.5,
+    146,
+    25.00000000000001,
+    11,
+  ],
+  Array [
+    "fillRect",
+    98.5,
+    157,
+    23.00000000000001,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
     "#eee",
   ],
   Array [
     "fillRect",
     0,
     15,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    31,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    47,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    63,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    79,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    95,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    111,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    127,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    143,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    159,
     200,
     1,
   ],
@@ -549,20 +933,163 @@ Array [
     15,
   ],
   Array [
+    "fillRect",
+    0,
+    16,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    32,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    48,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    64,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    80,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    96,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    112,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    128,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    144,
+    150,
+    15,
+  ],
+  Array [
     "set fillStyle",
     "#000000",
   ],
   Array [
     "fillText",
-    "Load event",
+    "Network",
     5,
     11,
   ],
 ]
 `;
 
-exports[`renders the hoveredItem markers properly 1`] = `
+exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`] = `
+<div
+  className="markerChart"
+>
+  <div
+    className="markerSettings"
+  >
+    <div
+      className="markerSettingsSpacer"
+    />
+    <div
+      className="markerSettingsSearchbar"
+    >
+      <label
+        className="markerSettingsSearchbarLabel"
+      >
+        Filter Markers: 
+        <form
+          className="idleSearchField markerSettingsSearchField"
+          onSubmit={[Function]}
+        >
+          <input
+            className="idleSearchFieldInput"
+            name="search"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            required="required"
+            title="Only display markers that match a certain name"
+            type="search"
+            value=""
+          />
+          <input
+            className="idleSearchFieldButton"
+            onClick={[Function]}
+            onFocus={[Function]}
+            type="reset"
+          />
+        </form>
+      </label>
+    </div>
+  </div>
+  <div
+    className="chartViewport"
+    onMouseDown={[Function]}
+    onWheel={[Function]}
+  >
+    <div>
+      <canvas
+        className="chartCanvas markerChartCanvas"
+        onDoubleClick={[Function]}
+        onMouseDown={[Function]}
+        onMouseMove={[Function]}
+        onMouseOut={[Function]}
+      />
+    </div>
+    <div
+      className="chartViewportShiftScroll hidden"
+    >
+      Zoom Chart:
+      <kbd
+        className="chartViewportShiftScrollKbd"
+      >
+        Shift
+      </kbd>
+      <kbd
+        className="chartViewportShiftScrollKbd"
+      >
+        Scroll
+      </kbd>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`MarkerChart renders the normal marker chart and matches the snapshot 2`] = `
 Array [
+  Array [
+    "scale",
+    1,
+    1,
+  ],
   Array [
     "set fillStyle",
     "#ffffff",
@@ -580,7 +1107,15 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "Highlight",
+    "#45a1ff",
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
   ],
   Array [
     "fillRect",
@@ -707,6 +1242,10 @@ Array [
     77,
     123,
     1,
+  ],
+  Array [
+    "measureText",
+    "click",
   ],
   Array [
     "set fillStyle",
