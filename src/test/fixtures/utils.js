@@ -30,8 +30,10 @@ export function getMouseEvent(values: Object = {}): $Shape<MouseEvent> {
     metaKey: false,
     movementX: 0,
     movementY: 0,
-    offsetX: 0,
-    offsetY: 0,
+    nativeEvent: {
+      offsetX: 0,
+      offsetY: 0,
+    },
     pageX: 0,
     pageY: 0,
     screenX: 0,
