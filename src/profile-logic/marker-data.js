@@ -366,3 +366,7 @@ export function extractScreenshotsById(
 
   return idToScreenshotMarkers;
 }
+
+export function filterForMarkerChart(markers: TracingMarker[]) {
+  return markers.filter(marker => !isNetworkMarker(marker));
+}
