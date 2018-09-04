@@ -1027,7 +1027,7 @@ export const selectorsForThread = (
     );
     const getMarkerChartTracingMarkers = createSelector(
       getSearchFilteredTracingMarkers,
-      markers => markers.filter(marker => !MarkerData.isNetworkMarker(marker))
+      MarkerData.filterForMarkerChart
     );
     const getMarkerChartTiming = createSelector(
       getMarkerChartTracingMarkers,
