@@ -73,8 +73,10 @@ class StackChartCanvas extends React.PureComponent<Props> {
     // viewport will not have completed setting its size by
     // then. Instead, look for when the viewport's isSizeSet prop
     // changes to true.
-    const viewportDidMount =
-      !prevProps.viewport.isSizeSet && this.props.viewport.isSizeSet;
+    if (!this.props.viewport.isSizeSet) {
+      return;
+    }
+    const viewportDidMount = !prevProps.viewport.isSizeSet;
 
     if (
       viewportDidMount ||
