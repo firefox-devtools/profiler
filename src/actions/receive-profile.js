@@ -9,6 +9,7 @@ import {
   unserializeProfileOfArbitraryFormat,
 } from '../profile-logic/process-profile';
 import { SymbolStore } from '../profile-logic/symbol-store';
+import { getEmptyProfile } from '../profile-logic/profile-data';
 import { symbolicateProfile } from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { decompress } from '../utils/gz';
@@ -24,6 +25,7 @@ import {
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
 } from '../reducers/url-state';
+import { stateFromLocation } from '../app-logic/url-handling';
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,
@@ -792,6 +794,50 @@ export function retrieveProfileFromFile(
       }
     } catch (error) {
       dispatch(fatalError(error));
+    }
+  };
+}
+
+export function retrieveProfilesToCompare(
+  profileViewUrls: [string, string]
+): ThunkAction<Promise<void>> {
+  return async dispatch => {
+    dispatch(waitingForProfileFromUrl());
+
+    try {
+      const profileUrls = profileViewUrls.map(url => {
+        const hash = stateFromLocation(new URL(url)).hash;
+        return `https://profile-store.commondatastorage.googleapis.com/${hash}`;
+      });
+      const promises = profileUrls.map(async profileUrl => {
+        const response = await _fetchProfile({
+          url: profileUrl,
+          onTemporaryError: (e: TemporaryError) => {
+            dispatch(temporaryErrorReceivingProfileFromUrl(e));
+          },
+        });
+        const serializedProfile = response.profile;
+        if (!serializedProfile) {
+          throw new Error('Expected to receive a profile from _fetchProfile');
+        }
+
+        const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
+        if (profile === undefined) {
+          throw new Error('Unable to parse the profile.');
+        }
+
+        return profile;
+      });
+
+      const profiles = await Promise.all(promises);
+      const resultProfile = profiles.reduce((resultProfile, profile) => {
+        resultProfile.threads.push(...profile.threads);
+        return resultProfile;
+      });
+
+      dispatch(viewProfile(resultProfile));
+    } catch (error) {
+      dispatch(fatalErrorReceivingProfileFromUrl(error));
     }
   };
 }

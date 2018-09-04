@@ -11,6 +11,7 @@ import {
   retrieveProfileFromAddon,
   retrieveProfileFromStore,
   retrieveProfileOrZipFromUrl,
+  retrieveProfilesToCompare,
 } from '../../actions/receive-profile';
 import ProfileViewer from './ProfileViewer';
 import ZipFileViewer from './ZipFileViewer';
@@ -86,6 +87,7 @@ type ProfileViewDispatchProps = {|
   +retrieveProfileFromAddon: typeof retrieveProfileFromAddon,
   +retrieveProfileFromStore: typeof retrieveProfileFromStore,
   +retrieveProfileOrZipFromUrl: typeof retrieveProfileOrZipFromUrl,
+  +retrieveProfilesToCompare: typeof retrieveProfilesToCompare,
 |};
 
 type ProfileViewProps = ConnectedProps<
@@ -104,6 +106,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       retrieveProfileFromAddon,
       retrieveProfileFromStore,
       retrieveProfileOrZipFromUrl,
+      retrieveProfilesToCompare,
     } = this.props;
     switch (dataSource) {
       case 'from-addon':
@@ -256,6 +259,7 @@ const options: ExplicitConnectOptions<
     retrieveProfileFromStore,
     retrieveProfileOrZipFromUrl,
     retrieveProfileFromAddon,
+    retrieveProfilesToCompare,
   },
   component: ProfileViewWhenReadyImpl,
 };
