@@ -234,7 +234,7 @@ Array [
         Priority
         :
       </div>
-      8
+      Low(8)
     </div>
   </div>,
   <div
@@ -1318,7 +1318,7 @@ Array [
         Priority
         :
       </div>
-      8
+      Low(8)
     </div>
   </div>,
   <div
@@ -1418,7 +1418,7 @@ Array [
         Priority
         :
       </div>
-      8
+      Low(8)
       <div
         className="tooltipLabel"
       >
@@ -1496,7 +1496,7 @@ Array [
         Priority
         :
       </div>
-      -20
+      Highest(-20)
       <div
         className="tooltipLabel"
       >
