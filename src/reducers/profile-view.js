@@ -31,8 +31,8 @@ import type {
   Thread,
   ThreadIndex,
   SamplesTable,
-  MarkersTable,
   Pid,
+  MarkersTable,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -406,6 +406,7 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
     case 'SELECT_TRACK':
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
+    case 'CHANGE_SELECTED_MARKER':
       return state + 1;
     default:
       return state;
@@ -745,10 +746,14 @@ export type SelectorsForThread = {
   getRangeFilteredThread: State => Thread,
   getRangeAndTransformFilteredThread: State => Thread,
   getJankInstances: State => TracingMarker[],
-  getProcessedMarkersThread: State => Thread,
+  getProcessedMarkersTable: State => MarkersTable,
   getTracingMarkers: State => TracingMarker[],
-  getTracingMarkersForView: State => TracingMarker[],
-  getMarkerTiming: State => MarkerTimingRows,
+  getIsNetworkChartEmptyInFullRange: State => boolean,
+  getNetworkChartTracingMarkers: State => TracingMarker[],
+  getMarkerChartTracingMarkers: State => TracingMarker[],
+  getIsMarkerChartEmptyInFullRange: State => boolean,
+  getMarkerChartTiming: State => MarkerTimingRows,
+  getNetworkChartTiming: State => MarkerTimingRows,
   getCommittedRangeFilteredTracingMarkers: State => TracingMarker[],
   getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
   getNetworkTracingMarkers: State => TracingMarker[],
@@ -768,7 +773,8 @@ export type SelectorsForThread = {
   getFlameGraphTiming: State => FlameGraph.FlameGraphTiming,
   getFriendlyThreadName: State => string,
   getThreadProcessDetails: State => string,
-  getSearchFilteredMarkers: State => MarkersTable,
+  getSearchFilteredTracingMarkers: State => TracingMarker[],
+  getPreviewFilteredTracingMarkers: State => TracingMarker[],
   unfilteredSamplesRange: State => StartEndRange | null,
 };
 
@@ -940,36 +946,34 @@ export const selectorsForThread = (
       _getRangeFilteredThreadSamples,
       (samples): TracingMarker[] => MarkerData.getJankInstances(samples, 50)
     );
-    const getProcessedMarkersThread = createSelector(
-      getThread,
+
+    /**
+     * Similar to thread filtering, the markers can be filtered as well, and it's
+     * important to use the right type of filtering for the view. The steps for filtering
+     * markers are a bit different, since markers can be valid over ranges, and need a
+     * bit more processing in order to get into a correct state. There are a few
+     * variants of the selectors that are created for specific views that have been
+     * omitted, but the ordered steps below give the general picture.
+     *
+     * 1. _getMarkersTable - Get the MarkersTable from the current thread.
+     * 2. getProcessedMarkersTable - Process marker payloads out of raw strings, and other
+     *                               future processing needs. This returns a MarkersTable
+     *                               still.
+     * 3. getTracingMarkers - Match up start/end markers, and start returning
+     *                        TracingMarkers.
+     * 4. getCommittedRangeFilteredTracingMarkers - Apply the commited range.
+     * 5. getSearchFilteredTracingMarkers - Apply the search string
+     * 6. getPreviewFilteredTracingMarkers - Apply the preview range
+     */
+    const getProcessedMarkersTable = createSelector(
+      _getMarkersTable,
+      _getStringTable,
       MarkerData.extractMarkerDataFromName
     );
     const getTracingMarkers = createSelector(
-      getProcessedMarkersThread,
+      getProcessedMarkersTable,
+      _getStringTable,
       MarkerData.getTracingMarkers
-    );
-    const getTracingMarkersForNetworkChart = createSelector(
-      getTracingMarkers,
-      markers => markers.filter(MarkerData.isNetworkMarker)
-    );
-    const getTracingMarkersForMarkerChart = createSelector(
-      getTracingMarkers,
-      markers => markers.filter(marker => !MarkerData.isNetworkMarker(marker))
-    );
-    const getTracingMarkersForView = state => {
-      const selectedTab = UrlState.getSelectedTab(state);
-      switch (selectedTab) {
-        case 'marker-chart':
-          return getTracingMarkersForMarkerChart(state);
-        case 'network-chart':
-          return getTracingMarkersForNetworkChart(state);
-        default:
-          return getTracingMarkers(state);
-      }
-    };
-    const getMarkerTiming = createSelector(
-      getTracingMarkersForView,
-      MarkerTiming.getMarkerTiming
     );
     const getCommittedRangeFilteredTracingMarkers = createSelector(
       getTracingMarkers,
@@ -988,6 +992,50 @@ export const selectorsForThread = (
             tm.name !== 'BHR-detected hang' &&
             !MarkerData.isNetworkMarker(tm)
         )
+    );
+    const getSearchFilteredTracingMarkers = createSelector(
+      getCommittedRangeFilteredTracingMarkers,
+      UrlState.getMarkersSearchString,
+      MarkerData.getSearchFilteredTracingMarkers
+    );
+    const getPreviewFilteredTracingMarkers = createSelector(
+      getSearchFilteredTracingMarkers,
+      getPreviewSelection,
+      (markers, previewSelection) => {
+        if (!previewSelection.hasSelection) {
+          return markers;
+        }
+        const { selectionStart, selectionEnd } = previewSelection;
+        return MarkerData.filterTracingMarkersToRange(
+          markers,
+          selectionStart,
+          selectionEnd
+        );
+      }
+    );
+    const getIsNetworkChartEmptyInFullRange = createSelector(
+      getTracingMarkers,
+      markers => markers.filter(MarkerData.isNetworkMarker).length === 0
+    );
+    const getNetworkChartTracingMarkers = createSelector(
+      getSearchFilteredTracingMarkers,
+      markers => markers.filter(MarkerData.isNetworkMarker)
+    );
+    const getIsMarkerChartEmptyInFullRange = createSelector(
+      getTracingMarkers,
+      markers => MarkerData.filterForMarkerChart(markers).length === 0
+    );
+    const getMarkerChartTracingMarkers = createSelector(
+      getSearchFilteredTracingMarkers,
+      MarkerData.filterForMarkerChart
+    );
+    const getMarkerChartTiming = createSelector(
+      getMarkerChartTracingMarkers,
+      MarkerTiming.getMarkerTiming
+    );
+    const getNetworkChartTiming = createSelector(
+      getNetworkChartTracingMarkers,
+      MarkerTiming.getMarkerTiming
     );
     const getNetworkTracingMarkers = createSelector(
       getCommittedRangeFilteredTracingMarkers,
@@ -1100,11 +1148,6 @@ export const selectorsForThread = (
       UrlState.getInvertCallstack,
       FlameGraph.getFlameGraphTiming
     );
-    const getSearchFilteredMarkers = createSelector(
-      getPreviewFilteredThread,
-      UrlState.getMarkersSearchString,
-      MarkerData.getSearchFilteredMarkers
-    );
     /**
      * The buffers of the samples can be cleared out. This function lets us know the
      * absolute range of samples that we have collected.
@@ -1129,10 +1172,14 @@ export const selectorsForThread = (
       getRangeFilteredThread,
       getRangeAndTransformFilteredThread,
       getJankInstances,
-      getProcessedMarkersThread,
+      getProcessedMarkersTable,
       getTracingMarkers,
-      getTracingMarkersForView,
-      getMarkerTiming,
+      getIsNetworkChartEmptyInFullRange,
+      getNetworkChartTracingMarkers,
+      getIsMarkerChartEmptyInFullRange,
+      getMarkerChartTracingMarkers,
+      getMarkerChartTiming,
+      getNetworkChartTiming,
       getCommittedRangeFilteredTracingMarkers,
       getCommittedRangeFilteredTracingMarkersForHeader,
       getNetworkTracingMarkers,
@@ -1152,7 +1199,8 @@ export const selectorsForThread = (
       getFlameGraphTiming,
       getFriendlyThreadName,
       getThreadProcessDetails,
-      getSearchFilteredMarkers,
+      getSearchFilteredTracingMarkers,
+      getPreviewFilteredTracingMarkers,
       unfilteredSamplesRange,
     };
   }

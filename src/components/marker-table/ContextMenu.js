@@ -14,12 +14,11 @@ import {
 } from '../../reducers/profile-view';
 import copy from 'copy-to-clipboard';
 
-import type { StartEndRange } from '../../types/units';
 import type {
-  Thread,
-  IndexIntoMarkersTable,
-  MarkersTable,
-} from '../../types/profile';
+  TracingMarker,
+  IndexIntoTracingMarkers,
+} from '../../types/profile-derived';
+import type { StartEndRange } from '../../types/units';
 import type { PreviewSelection } from '../../types/actions';
 import type {
   ExplicitConnectOptions,
@@ -27,11 +26,10 @@ import type {
 } from '../../utils/connect';
 
 type StateProps = {|
-  +thread: Thread,
-  +markers: MarkersTable,
+  +markers: TracingMarker[],
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
-  +selectedMarker: IndexIntoMarkersTable,
+  +selectedMarker: IndexIntoTracingMarkers,
 |};
 
 type DispatchProps = {|
@@ -57,7 +55,7 @@ class MarkersContextMenu extends PureComponent<Props> {
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: markers.time[selectedMarker],
+      selectionStart: markers[selectedMarker].start,
       selectionEnd,
     });
   }
@@ -81,20 +79,13 @@ class MarkersContextMenu extends PureComponent<Props> {
       selectionStart,
       // Add an arbitrarily small bit of time at the end to make sure the selected marker
       // doesn't disappear from view.
-      selectionEnd: markers.time[selectedMarker] + 0.0001,
+      selectionEnd: markers[selectedMarker].start + 0.0001,
     });
   }
 
   copyMarkerJSON() {
-    const { thread, selectedMarker, markers } = this.props;
-
-    copy(
-      JSON.stringify({
-        name: thread.stringTable.getString(markers.name[selectedMarker]),
-        time: markers.time[selectedMarker],
-        data: markers.data[selectedMarker],
-      })
-    );
+    const { selectedMarker, markers } = this.props;
+    copy(JSON.stringify(markers[selectedMarker]));
   }
 
   handleClick = (
@@ -135,8 +126,7 @@ class MarkersContextMenu extends PureComponent<Props> {
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
-    thread: selectedThreadSelectors.getThread(state),
-    markers: selectedThreadSelectors.getSearchFilteredMarkers(state),
+    markers: selectedThreadSelectors.getPreviewFilteredTracingMarkers(state),
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
     selectedMarker: selectedThreadSelectors.getViewOptions(state)

@@ -4,11 +4,9 @@
 // @flow
 
 import type {
-  Thread,
   SamplesTable,
   MarkersTable,
   IndexIntoStringTable,
-  IndexIntoMarkersTable,
 } from '../types/profile';
 import type { TracingMarker } from '../types/profile-derived';
 import type { BailoutPayload, ScreenshotPayload } from '../types/markers';
@@ -48,43 +46,29 @@ export function getJankInstances(
   return jankInstances;
 }
 
-export function getSearchFilteredMarkers(
-  thread: Thread,
+export function getSearchFilteredTracingMarkers(
+  markers: TracingMarker[],
   searchString: string
-): MarkersTable {
+): TracingMarker[] {
   if (!searchString) {
-    return thread.markers;
+    return markers;
   }
   const lowerCaseSearchString = searchString.toLowerCase();
-  const { stringTable, markers } = thread;
-  const newMarkersTable: MarkersTable = {
-    data: [],
-    name: [],
-    time: [],
-    length: 0,
-  };
-  function addMarker(markerIndex: IndexIntoMarkersTable) {
-    newMarkersTable.data.push(markers.data[markerIndex]);
-    newMarkersTable.time.push(markers.time[markerIndex]);
-    newMarkersTable.name.push(markers.name[markerIndex]);
-    newMarkersTable.length++;
-  }
-  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-    const stringIndex = markers.name[markerIndex];
-    const name = stringTable.getString(stringIndex);
+  const newMarkers: TracingMarker[] = [];
+  for (const marker of markers) {
+    const { data, name } = marker;
     const lowerCaseName = name.toLowerCase();
     if (lowerCaseName.includes(lowerCaseSearchString)) {
-      addMarker(markerIndex);
+      newMarkers.push(marker);
       continue;
     }
-    const data = markers.data[markerIndex];
     if (data && typeof data === 'object') {
       if (
         typeof data.eventType === 'string' &&
         data.eventType.toLowerCase().includes(lowerCaseSearchString)
       ) {
         // Match DOMevents data.eventType
-        addMarker(markerIndex);
+        newMarkers.push(marker);
         continue;
       }
       if (
@@ -92,7 +76,7 @@ export function getSearchFilteredMarkers(
         data.name.toLowerCase().includes(lowerCaseSearchString)
       ) {
         // Match UserTiming's name.
-        addMarker(markerIndex);
+        newMarkers.push(marker);
         continue;
       }
       if (
@@ -100,20 +84,22 @@ export function getSearchFilteredMarkers(
         data.category.toLowerCase().includes(lowerCaseSearchString)
       ) {
         // Match UserTiming's name.
-        addMarker(markerIndex);
+        newMarkers.push(marker);
         continue;
       }
     }
   }
-  return newMarkersTable;
+  return newMarkers;
 }
 
 /**
  * This function takes a marker that packs in a marker payload into the string of the
  * name. This extracts that and turns it into a payload.
  */
-export function extractMarkerDataFromName(thread: Thread): Thread {
-  const { stringTable, markers } = thread;
+export function extractMarkerDataFromName(
+  markers: MarkersTable,
+  stringTable: UniqueStringArray
+): MarkersTable {
   const newMarkers: MarkersTable = {
     data: markers.data.slice(),
     name: markers.name.slice(),
@@ -198,11 +184,13 @@ export function extractMarkerDataFromName(thread: Thread): Thread {
     }
   }
 
-  return Object.assign({}, thread, { markers: newMarkers });
+  return newMarkers;
 }
 
-export function getTracingMarkers(thread: Thread): TracingMarker[] {
-  const { stringTable, markers } = thread;
+export function getTracingMarkers(
+  markers: MarkersTable,
+  stringTable: UniqueStringArray
+): TracingMarker[] {
   const tracingMarkers: TracingMarker[] = [];
   // This map is used to track start and end markers for tracing markers.
   const openMarkers: Map<IndexIntoStringTable, TracingMarker[]> = new Map();
@@ -281,14 +269,25 @@ export function getTracingMarkers(thread: Thread): TracingMarker[] {
       const startTime = getNumberPropertyOrNull(data, 'startTime');
       const endTime = getNumberPropertyOrNull(data, 'endTime');
 
-      // Now construct a tracing marker if these properties existed.
       if (startTime !== null && endTime !== null) {
+        // Construct a tracing marker with a duration if these properties exist.
         const name = stringTable.getString(markers.name[i]);
         const duration = endTime - startTime;
         tracingMarkers.push({
           start: startTime,
           dur: duration,
           name,
+          data,
+          title: null,
+        });
+      } else {
+        // Ensure all markers are converted to tracing markers, even if they have no
+        // more timing information. This ensures that markers can be filtered by time
+        // in a consistent manner.
+        tracingMarkers.push({
+          start: markers.time[i],
+          dur: 0,
+          name: stringTable.getString(markers.name[i]),
           data,
           title: null,
         });
@@ -366,4 +365,8 @@ export function extractScreenshotsById(
   }
 
   return idToScreenshotMarkers;
+}
+
+export function filterForMarkerChart(markers: TracingMarker[]) {
+  return markers.filter(marker => !isNetworkMarker(marker));
 }

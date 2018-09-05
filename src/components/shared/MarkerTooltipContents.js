@@ -122,6 +122,38 @@ function _makePhaseTimesArray(
   return array;
 }
 
+function _makePriorityHumanReadable(
+  key: string,
+  label: string,
+  priority: number
+): React.Node {
+  if (typeof priority !== 'number') {
+    return null;
+  }
+
+  let prioLabel: string = '';
+
+  // https://searchfox.org/mozilla-central/source/xpcom/threads/nsISupportsPriority.idl#24-28
+  if (priority < -10) {
+    prioLabel = 'Highest';
+  } else if (priority >= -10 && priority < 0) {
+    prioLabel = 'High';
+  } else if (priority === 0) {
+    prioLabel = 'Normal';
+  } else if (priority <= 10 && priority > 0) {
+    prioLabel = 'Low';
+  } else if (priority > 10) {
+    prioLabel = 'Lowest';
+  }
+
+  if (!prioLabel) {
+    return null;
+  }
+
+  prioLabel = prioLabel + '(' + priority + ')';
+  return _markerDetail(key, label, prioLabel);
+}
+
 /*
  * Return true if the phase 'phaseName' is a leaf phase among the whole
  * array of phases.
@@ -621,7 +653,7 @@ function getMarkerDetails(
             <div className="tooltipDetails">
               {_markerDetail('status', 'Status', data.status)}
               {_markerDetailNullable('url', 'URL', data.URI)}
-              {_markerDetail('pri', 'Priority', data.pri)}
+              {_makePriorityHumanReadable('pri', 'Priority', data.pri)}
               {_markerDetailBytesNullable(
                 'count',
                 'Requested bytes',
@@ -639,7 +671,7 @@ function getMarkerDetails(
               'Redirect URL',
               data.RedirectURI
             )}
-            {_markerDetail('pri', 'Priority', data.pri)}
+            {_makePriorityHumanReadable('pri', 'Priority', data.pri)}
             {_markerDetailBytesNullable('count', 'Requested bytes', data.count)}
             {_markerDetailDeltaTimeNullable(
               'domainLookup',

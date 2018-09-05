@@ -511,7 +511,7 @@ function _buildThreadFromTextOnlyStacks(
   return thread;
 }
 
-function getNetworkMarker(startTime: number, id) {
+export function getNetworkMarker(startTime: number, id: number) {
   const payload: NetworkPayload = {
     type: 'Network',
     id,
