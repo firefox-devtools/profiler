@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders StackChartGraph correctly 1`] = `
+exports[`StackChart matches the snapshot 1`] = `
 <div
   className="stackChart"
 >
@@ -130,7 +130,7 @@ exports[`renders StackChartGraph correctly 1`] = `
 </div>
 `;
 
-exports[`renders StackChartGraph correctly 2`] = `
+exports[`StackChart matches the snapshot 2`] = `
 Array [
   Array [
     "scale",
