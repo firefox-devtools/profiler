@@ -282,6 +282,7 @@ export type InvalidationPayload = {
  * be included depending on what states happen during the load.  Also note
  * that redirects are logged as well.
  */
+
 export type NetworkPayload = {
   type: 'Network',
   URI?: string,

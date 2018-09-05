@@ -154,6 +154,26 @@ function _makePriorityHumanReadable(
   return _markerDetail(key, label, prioLabel);
 }
 
+function _dataStatusReplace(str: string): string {
+  switch (str) {
+    case 'STATUS_START': {
+      return 'Start of request';
+    }
+    case 'STATUS_READ': {
+      return 'Reading request';
+    }
+    case 'STATUS_STOP': {
+      return 'End of request';
+    }
+    case 'STATUS_REDIRECT': {
+      return 'Redirecting request';
+    }
+    default: {
+      return 'other';
+    }
+  }
+}
+
 /*
  * Return true if the phase 'phaseName' is a leaf phase among the whole
  * array of phases.
@@ -651,7 +671,11 @@ function getMarkerDetails(
         ) {
           return (
             <div className="tooltipDetails">
-              {_markerDetail('status', 'Status', data.status)}
+              {_markerDetail(
+                'status',
+                'Status',
+                _dataStatusReplace(data.status)
+              )}
               {_markerDetailNullable('url', 'URL', data.URI)}
               {_makePriorityHumanReadable('pri', 'Priority', data.pri)}
               {_markerDetailBytesNullable(
@@ -664,7 +688,7 @@ function getMarkerDetails(
         }
         return (
           <div className="tooltipDetails">
-            {_markerDetail('status', 'Status', data.status)}
+            {_markerDetail('status', 'Status', _dataStatusReplace(data.status))}
             {_markerDetailNullable('url', 'URL', data.URI)}
             {_markerDetailNullable(
               'redirect_url',
