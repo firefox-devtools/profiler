@@ -7,12 +7,17 @@ import * as React from 'react';
 import { mount } from 'enzyme';
 import { Provider } from 'react-redux';
 
+import { changeMarkersSearchString } from '../../actions/profile-view';
 import MarkerChart from '../../components/marker-chart';
 import { changeSelectedTab } from '../../actions/app';
 
+import EmptyReasons from '../../components/shared/EmptyReasons';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
+import {
+  getProfileWithMarkers,
+  getNetworkMarker,
+} from '../fixtures/profiles/make-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
@@ -51,21 +56,9 @@ const MARKERS = [
   ],
 ];
 
-const NETWORK_MARKERS = [
-  [
-    'Load event',
-    11,
-    {
-      type: 'Network',
-      startTime: 11,
-      endTime: 12,
-      id: 31666793873480,
-      status: 'STATUS_START',
-      pri: 0,
-      URI: 'https://tiles.services.mozilla.com/v3/links/ping-centre',
-    },
-  ],
-];
+const NETWORK_MARKERS = Array(10)
+  .fill()
+  .map((_, i) => getNetworkMarker(3 + 0.1 * i, i));
 
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
@@ -97,87 +90,166 @@ function setupWithProfile(profile) {
   };
 }
 
-it('renders MarkerChart correctly', () => {
-  window.devicePixelRatio = 1;
+describe('MarkerChart', function() {
+  it('renders the normal marker chart and matches the snapshot', () => {
+    window.devicePixelRatio = 1;
 
-  const profile = getProfileWithMarkers([...MARKERS, ...NETWORK_MARKERS]);
-  const {
-    flushRafCalls,
-    dispatch,
-    markerChart,
-    flushDrawLog,
-  } = setupWithProfile(profile);
-
-  dispatch(changeSelectedTab('marker-chart'));
-  markerChart.update();
-  flushRafCalls();
-
-  let drawCalls = flushDrawLog();
-  expect(markerChart).toMatchSnapshot();
-  expect(drawCalls).toMatchSnapshot();
-
-  dispatch(changeSelectedTab('network-chart'));
-  markerChart.update();
-  flushRafCalls();
-
-  drawCalls = flushDrawLog();
-  expect(markerChart).toMatchSnapshot();
-  expect(drawCalls).toMatchSnapshot();
-
-  delete window.devicePixelRatio;
-});
-
-it('renders the hoveredItem markers properly', () => {
-  window.devicePixelRatio = 1;
-
-  const profile = getProfileWithMarkers(MARKERS);
-  const {
-    flushRafCalls,
-    dispatch,
-    markerChart,
-    flushDrawLog,
-  } = setupWithProfile(profile);
-
-  dispatch(changeSelectedTab('marker-chart'));
-  markerChart.update();
-  flushRafCalls();
-  flushDrawLog();
-
-  // No tooltip displayed yet
-  expect(markerChart.find('Tooltip').exists()).toEqual(false);
-
-  // Move the mouse on top of an item.
-  markerChart.find('canvas').simulate('mousemove', {
-    nativeEvent: { offsetX: 50, offsetY: 5 },
-    pageX: 50,
-    pageY: 5,
-  });
-  markerChart.update();
-  flushRafCalls();
-
-  const drawCalls = flushDrawLog();
-  expect(drawCalls).toMatchSnapshot();
-
-  // The tooltip should be displayed
-  expect(markerChart.find('Tooltip').exists()).toEqual(true);
-});
-
-describe('Empty Reasons', () => {
-  it('shows a reason when a profile has no marker', () => {
-    const profile = getProfileWithMarkers([]);
-    const { dispatch, markerChart } = setupWithProfile(profile);
+    const profile = getProfileWithMarkers([...MARKERS, ...NETWORK_MARKERS]);
+    const {
+      flushRafCalls,
+      dispatch,
+      markerChart,
+      flushDrawLog,
+    } = setupWithProfile(profile);
 
     dispatch(changeSelectedTab('marker-chart'));
     markerChart.update();
+    flushRafCalls();
+
+    const drawCalls = flushDrawLog();
     expect(markerChart).toMatchSnapshot();
+    expect(drawCalls).toMatchSnapshot();
+
+    delete window.devicePixelRatio;
   });
 
-  it('shows a reason when a profil has no network markers', () => {
-    const profile = getProfileWithMarkers(MARKERS);
-    const { dispatch, markerChart } = setupWithProfile(profile);
+  it('renders the network marker chart and matches the snapshot', () => {
+    window.devicePixelRatio = 1;
+
+    const profile = getProfileWithMarkers([...MARKERS, ...NETWORK_MARKERS]);
+    const {
+      flushRafCalls,
+      dispatch,
+      markerChart,
+      flushDrawLog,
+    } = setupWithProfile(profile);
 
     dispatch(changeSelectedTab('network-chart'));
     markerChart.update();
+    flushRafCalls();
+
     expect(markerChart).toMatchSnapshot();
+    expect(flushDrawLog()).toMatchSnapshot();
+
+    delete window.devicePixelRatio;
+  });
+
+  it('renders the hoveredItem markers properly', () => {
+    window.devicePixelRatio = 1;
+
+    const profile = getProfileWithMarkers(MARKERS);
+    const {
+      flushRafCalls,
+      dispatch,
+      markerChart,
+      flushDrawLog,
+    } = setupWithProfile(profile);
+
+    dispatch(changeSelectedTab('marker-chart'));
+    markerChart.update();
+    flushRafCalls();
+    flushDrawLog();
+
+    // No tooltip displayed yet
+    expect(markerChart.find('Tooltip').exists()).toEqual(false);
+
+    // Move the mouse on top of an item.
+    markerChart.find('canvas').simulate('mousemove', {
+      nativeEvent: { offsetX: 50, offsetY: 5 },
+      pageX: 50,
+      pageY: 5,
+    });
+    markerChart.update();
+    flushRafCalls();
+
+    const drawCalls = flushDrawLog();
+    expect(drawCalls).toMatchSnapshot();
+
+    // The tooltip should be displayed
+    expect(markerChart.find('Tooltip').exists()).toEqual(true);
+  });
+
+  describe('with search strings', function() {
+    function getFillTextCalls(drawCalls) {
+      return drawCalls
+        .filter(([methodName]) => methodName === 'fillText')
+        .map(([_, text]) => text);
+    }
+
+    const searchString = 'Dot marker E';
+
+    it('renders lots of markers initially', function() {
+      const profile = getProfileWithMarkers(MARKERS);
+      const { flushRafCalls, flushDrawLog } = setupWithProfile(profile);
+
+      flushRafCalls();
+      const text = getFillTextCalls(flushDrawLog());
+      expect(text.length).toBeGreaterThan(1);
+      // Check that our test search string is in here:
+      expect(text.filter(t => t === searchString).length).toBe(1);
+    });
+
+    it('renders only the marker that was searched for', function() {
+      const profile = getProfileWithMarkers(MARKERS);
+      const {
+        flushRafCalls,
+        dispatch,
+        flushDrawLog,
+        markerChart,
+      } = setupWithProfile(profile);
+
+      // Flush out any existing draw calls.
+      flushRafCalls();
+      flushDrawLog();
+
+      // Update the chart with a search string.
+      dispatch(changeMarkersSearchString(searchString));
+      markerChart.update();
+      flushRafCalls();
+
+      const text = getFillTextCalls(flushDrawLog());
+      expect(text.length).toBe(1);
+      expect(text[0]).toBe(searchString);
+    });
+  });
+
+  describe('EmptyReasons', () => {
+    it('shows a reason when a profile has no markers', () => {
+      const profile = getProfileWithMarkers([]);
+      const { dispatch, markerChart } = setupWithProfile(profile);
+
+      dispatch(changeSelectedTab('marker-chart'));
+      markerChart.update();
+      expect(markerChart.find(EmptyReasons)).toMatchSnapshot();
+    });
+
+    it("shows a reason when a profile's markers have been filtered out", () => {
+      const profile = getProfileWithMarkers(MARKERS);
+      const { dispatch, markerChart } = setupWithProfile(profile);
+
+      dispatch(changeSelectedTab('marker-chart'));
+      dispatch(changeMarkersSearchString('MATCH_NOTHING'));
+      markerChart.update();
+      expect(markerChart.find(EmptyReasons)).toMatchSnapshot();
+    });
+
+    it('shows a reason when a profile has no network markers', () => {
+      const profile = getProfileWithMarkers(MARKERS);
+      const { dispatch, markerChart } = setupWithProfile(profile);
+
+      dispatch(changeSelectedTab('network-chart'));
+      markerChart.update();
+      expect(markerChart.find(EmptyReasons)).toMatchSnapshot();
+    });
+
+    it("shows a reason when a profile's network markers have been filtered out", () => {
+      const profile = getProfileWithMarkers(NETWORK_MARKERS);
+      const { dispatch, markerChart } = setupWithProfile(profile);
+
+      dispatch(changeSelectedTab('network-chart'));
+      dispatch(changeMarkersSearchString('MATCH_NOTHING'));
+      markerChart.update();
+      expect(markerChart.find(EmptyReasons)).toMatchSnapshot();
+    });
   });
 });

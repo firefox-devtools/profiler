@@ -7,6 +7,7 @@ import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import MarkerChartCanvas from './Canvas';
 import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
+import MarkerSettings from '../shared/MarkerSettings';
 
 import {
   selectedThreadSelectors,
@@ -14,7 +15,10 @@ import {
   getProfileInterval,
   getPreviewSelection,
 } from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+import {
+  getSelectedThreadIndex,
+  getSelectedTab,
+} from '../../reducers/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type {
@@ -71,35 +75,36 @@ class MarkerChart extends React.PureComponent<Props> {
       updatePreviewSelection,
     } = this.props;
 
-    if (!markers.length) {
-      return <MarkerChartEmptyReasons />;
-    }
-
     // The viewport needs to know about the height of what it's drawing, calculate
     // that here at the top level component.
     const maxViewportHeight = maxMarkerRows * ROW_HEIGHT;
 
     return (
       <div className="markerChart">
-        <MarkerChartCanvas
-          key={threadIndex}
-          viewportProps={{
-            timeRange,
-            previewSelection,
-            maxViewportHeight,
-            viewportNeedsUpdate,
-            maximumZoom: this.getMaximumZoom(),
-          }}
-          chartProps={{
-            markerTimingRows,
-            markers,
-            updatePreviewSelection,
-            rangeStart: timeRange.start,
-            rangeEnd: timeRange.end,
-            rowHeight: ROW_HEIGHT,
-            threadIndex,
-          }}
-        />
+        <MarkerSettings />
+        {markers.length === 0 ? (
+          <MarkerChartEmptyReasons />
+        ) : (
+          <MarkerChartCanvas
+            key={threadIndex}
+            viewportProps={{
+              timeRange,
+              previewSelection,
+              maxViewportHeight,
+              viewportNeedsUpdate,
+              maximumZoom: this.getMaximumZoom(),
+            }}
+            chartProps={{
+              markerTimingRows,
+              markers,
+              updatePreviewSelection,
+              rangeStart: timeRange.start,
+              rangeEnd: timeRange.end,
+              rowHeight: ROW_HEIGHT,
+              threadIndex,
+            }}
+          />
+        )}
       </div>
     );
   }
@@ -115,8 +120,13 @@ function viewportNeedsUpdate(
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
-    const markers = selectedThreadSelectors.getTracingMarkersForView(state);
-    const markerTimingRows = selectedThreadSelectors.getMarkerTiming(state);
+    const isNetworkChart = getSelectedTab(state) === 'network-chart';
+    const markers = isNetworkChart
+      ? selectedThreadSelectors.getNetworkChartTracingMarkers(state)
+      : selectedThreadSelectors.getMarkerChartTracingMarkers(state);
+    const markerTimingRows = isNetworkChart
+      ? selectedThreadSelectors.getNetworkChartTiming(state)
+      : selectedThreadSelectors.getMarkerChartTiming(state);
 
     return {
       markers,

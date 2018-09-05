@@ -5,20 +5,20 @@ exports[`MarkerTable renders some basic markers 1`] = `
   className="markerTable"
 >
   <div
-    className="markerTableSettings"
+    className="markerSettings"
   >
     <div
-      className="markerTableSettingsSpacer"
+      className="markerSettingsSpacer"
     />
     <div
-      className="markerTableSettingsSearchbar"
+      className="markerSettingsSearchbar"
     >
       <label
-        className="markerTableSettingsSearchbarLabel"
+        className="markerSettingsSearchbarLabel"
       >
         Filter Markers: 
         <form
-          className="idleSearchField markerTableSettingsSearchField"
+          className="idleSearchField markerSettingsSearchField"
           onSubmit={[Function]}
         >
           <input

@@ -11,6 +11,7 @@ import {
   getProfileWithMarkers,
   getNetworkTrackProfile,
   getScreenshotTrackProfile,
+  getNetworkMarker,
 } from '../fixtures/profiles/make-profile';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
@@ -873,6 +874,8 @@ describe('snapshots of selectors/profile-view', function() {
       ['D', 3, null],
       ['E', 4, null],
       ['F', 5, null],
+      getNetworkMarker(6, 6),
+      getNetworkMarker(7, 7),
     ]);
     profile.threads.push(markersThread);
     const { getState, dispatch } = storeWithProfile(profile);
@@ -981,10 +984,16 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getTracingMarkers(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getMarkerTiming', function() {
+  it('matches the last stored run of selectedThreadSelector.getMarkerChartTiming', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getMarkerTiming(getState())
+      selectedThreadSelectors.getMarkerChartTiming(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getNetworkChartTiming', function() {
+    const { getState } = setupStore();
+    expect(
+      selectedThreadSelectors.getNetworkChartTiming(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkers', function() {
