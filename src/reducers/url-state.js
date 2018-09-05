@@ -55,9 +55,10 @@ function profileUrl(state: string = '', action: Action) {
   }
 }
 
-function selectedTab(state: TabSlug = 'calltree', action: Action) {
+function selectedTab(state: TabSlug = 'calltree', action: Action): TabSlug {
   switch (action.type) {
     case 'CHANGE_SELECTED_TAB':
+    case 'SELECT_TRACK':
       return action.selectedTab;
     default:
       return state;
@@ -83,6 +84,7 @@ function selectedThread(
 ): ThreadIndex | null {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
+    case 'SELECT_TRACK':
     case 'VIEW_PROFILE':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':

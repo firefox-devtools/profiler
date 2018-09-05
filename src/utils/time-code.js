@@ -7,6 +7,7 @@ import { sendAnalytics } from './analytics';
 
 const MAX_TIMINGS_PER_LABEL = 3;
 const _timingsPerLabel = {};
+let _performanceMeasureGeneration = 0;
 
 /**
  * We care about timing information. This function helps log and collect information
@@ -14,12 +15,24 @@ const _timingsPerLabel = {};
  */
 export function timeCode<T>(label: string, codeAsACallback: () => T): T {
   if (typeof performance !== 'undefined') {
+    let markName;
+    if (process.env.NODE_ENV === 'development') {
+      if (performance.mark) {
+        markName = `time-code-${_performanceMeasureGeneration++}`;
+        performance.mark(markName);
+      }
+    }
+
     const start = performance.now();
     const result = codeAsACallback();
     const elapsed = Math.round(performance.now() - start);
 
     // Only log timing information in development mode.
     if (process.env.NODE_ENV === 'development') {
+      // Record a UserTiming for this timeCode call.
+      if (performance.measure) {
+        performance.measure(`TimeCode: ${label}`, markName);
+      }
       const style = 'font-weight: bold; color: #f0a';
       console.log(
         `[timing]    %c"${label}"`,

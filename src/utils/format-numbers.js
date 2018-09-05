@@ -60,9 +60,8 @@ export function formatBytes(bytes: number): string {
     return formatNumber(bytes / 1024, 3, 2) + 'KB';
   } else if (bytes < 1024 * 1024 * 1024) {
     return formatNumber(bytes / (1024 * 1024), 3, 2) + 'MB';
-  } else {
-    return formatNumber(bytes / (1024 * 1024 * 1024), 3, 2) + 'GB';
   }
+  return formatNumber(bytes / (1024 * 1024 * 1024), 3, 2) + 'GB';
 }
 
 export function formatSI(num: number): string {
@@ -73,9 +72,8 @@ export function formatSI(num: number): string {
     return formatNumber(num / 1000, 3, 2) + 'K';
   } else if (num < 1000 * 1000 * 1000) {
     return formatNumber(num / (1000 * 1000), 3, 2) + 'M';
-  } else {
-    return formatNumber(num / (1000 * 1000 * 1000), 3, 2) + 'G';
   }
+  return formatNumber(num / (1000 * 1000 * 1000), 3, 2) + 'G';
 }
 
 export function formatMicroseconds(

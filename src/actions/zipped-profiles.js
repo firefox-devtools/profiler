@@ -91,9 +91,8 @@ export function viewProfileFromPathInZipFile(
     if (zipFileIndex === -1) {
       dispatch(showErrorForNoFileInZip(pathInZipFile));
       return Promise.resolve();
-    } else {
-      return dispatch(viewProfileFromZip(zipFileIndex));
     }
+    return dispatch(viewProfileFromZip(zipFileIndex));
   };
 }
 

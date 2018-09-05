@@ -115,7 +115,7 @@ export type StackType = 'js' | 'native' | 'unsymbolicated';
 
 export type GlobalTrack =
   | {| +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null |}
-  | {| +type: 'screenshots' |};
+  | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |};
 
 export type LocalTrack =
   | {| +type: 'thread', +threadIndex: ThreadIndex |}

@@ -22,7 +22,7 @@ import getGeckoProfile from '../fixtures/profiles/gecko-profile';
 import { getEmptyProfile } from '../../profile-logic/profile-data';
 import JSZip from 'jszip';
 import { serializeProfile } from '../../profile-logic/process-profile';
-import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 
 // Mocking SymbolStoreDB
@@ -73,40 +73,93 @@ describe('actions/receive-profile', function() {
       );
     });
 
-    it('will hide content threads with no RefreshDriverTick markers', function() {
+    function getProfileWithIdleAndWorkThread() {
+      const { profile } = getProfileFromTextSamples(
+        'idle idle idle idle idle idle idle',
+        'work work work work work work work'
+      );
+
+      const [idleThread, workThread] = profile.threads;
+      const idleCategoryIndex = profile.meta.categories.length;
+      profile.meta.categories.push({ name: 'Idle', color: '#fff' });
+      workThread.name = 'Work Thread';
+      idleThread.name = 'Idle Thread';
+      idleThread.stackTable.category = idleThread.stackTable.category.map(
+        () => idleCategoryIndex
+      );
+      return { profile, idleThread, workThread };
+    }
+
+    it('will hide threads with idle samples', function() {
       const store = blankStore();
-
-      expect(() => {
-        ProfileViewSelectors.getProfile(store.getState());
-      }).toThrow();
-
-      const initialProfile = ProfileViewSelectors.getProfileOrNull(
-        store.getState()
-      );
-      expect(initialProfile).toBeNull();
-      const profile = getProfileWithMarkers(
-        [],
-        [
-          [
-            'RefreshDriverTick',
-            0,
-            { type: 'tracing', category: 'Paint', interval: 'start' },
-          ],
-        ],
-        []
-      );
-
-      profile.threads.forEach((thread, threadIndex) => {
-        thread.name = 'GeckoMain';
-        thread.processType = 'tab';
-        thread.pid = threadIndex;
-      });
+      const { profile } = getProfileWithIdleAndWorkThread();
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
-        'hide [thread GeckoMain tab]',
-        'show [thread GeckoMain tab] SELECTED',
-        'hide [thread GeckoMain tab]',
+        'show [process]',
+        '  - hide [thread Idle Thread]',
+        '  - show [thread Work Thread] SELECTED',
+      ]);
+    });
+
+    it('will not hide the Windows GPU thread', function() {
+      const store = blankStore();
+      const {
+        profile,
+        idleThread,
+        workThread,
+      } = getProfileWithIdleAndWorkThread();
+      idleThread.name = 'GeckoMain';
+      idleThread.processType = 'default';
+      idleThread.pid = 0;
+      workThread.name = 'GeckoMain';
+      workThread.processType = 'default';
+      idleThread.pid = 1;
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread GeckoMain default] SELECTED',
+        'show [thread GeckoMain default]',
+      ]);
+    });
+
+    it('will not hide the Compositor thread', function() {
+      const store = blankStore();
+      const {
+        profile,
+        idleThread,
+        workThread,
+      } = getProfileWithIdleAndWorkThread();
+      idleThread.name = 'Compositor';
+      idleThread.processType = 'default';
+      workThread.name = 'GeckoMain';
+      workThread.processType = 'default';
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread GeckoMain default] SELECTED',
+        '  - show [thread Compositor]',
+      ]);
+    });
+
+    it('will not hide a main thread', function() {
+      const store = blankStore();
+      const {
+        profile,
+        idleThread,
+        workThread,
+      } = getProfileWithIdleAndWorkThread();
+      idleThread.name = 'GeckoMain';
+      idleThread.processType = 'default';
+      idleThread.pid = 0;
+      workThread.name = 'GeckoMain';
+      workThread.processType = 'default';
+      workThread.pid = 1;
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread GeckoMain default] SELECTED',
+        'show [thread GeckoMain default]',
       ]);
     });
   });

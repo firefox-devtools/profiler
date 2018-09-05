@@ -1,0 +1,44 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.timelineTrackScreenshot {
+  position: relative;
+  background: var(--grey-20);
+  overflow: hidden;
+}
+
+.timelineTrackScreenshotImgContainer {
+  /* This positioning is defined through JavaScript */
+  position: absolute;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+
+.timelineTrackScreenshotImgContainer::after {
+  /* Create a border on the right of the container */
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: var(--grey-30);
+  right: 0;
+}
+
+.timelineTrackScreenshotHover {
+  /* This positioning is defined through JavaScript */
+  position: absolute;
+  pointer-events: none;
+  z-index: 4; /* Ensure this is higher than any other timeline element. */
+}
+
+.timelineTrackScreenshotHoverImg {
+  position: relative;
+  left: -50%;
+  border-radius: 5px;
+  padding: 0.5px;
+  border: 0.5px solid rgba(0,0,0,.2);
+  box-shadow:0 2px 4px rgba(0,0,0,.2);
+}
