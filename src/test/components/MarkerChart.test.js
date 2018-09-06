@@ -14,10 +14,7 @@ import { changeSelectedTab } from '../../actions/app';
 import EmptyReasons from '../../components/shared/EmptyReasons';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import {
-  getProfileWithMarkers,
-  getNetworkMarker,
-} from '../fixtures/profiles/make-profile';
+import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
@@ -56,10 +53,6 @@ const MARKERS = [
   ],
 ];
 
-const NETWORK_MARKERS = Array(10)
-  .fill()
-  .map((_, i) => getNetworkMarker(3 + 0.1 * i, i));
-
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
   const ctx = mockCanvasContext();
@@ -94,7 +87,7 @@ describe('MarkerChart', function() {
   it('renders the normal marker chart and matches the snapshot', () => {
     window.devicePixelRatio = 1;
 
-    const profile = getProfileWithMarkers([...MARKERS, ...NETWORK_MARKERS]);
+    const profile = getProfileWithMarkers([...MARKERS]);
     const {
       flushRafCalls,
       dispatch,
@@ -109,27 +102,6 @@ describe('MarkerChart', function() {
     const drawCalls = flushDrawLog();
     expect(markerChart).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
-
-    delete window.devicePixelRatio;
-  });
-
-  it('renders the network marker chart and matches the snapshot', () => {
-    window.devicePixelRatio = 1;
-
-    const profile = getProfileWithMarkers([...MARKERS, ...NETWORK_MARKERS]);
-    const {
-      flushRafCalls,
-      dispatch,
-      markerChart,
-      flushDrawLog,
-    } = setupWithProfile(profile);
-
-    dispatch(changeSelectedTab('network-chart'));
-    markerChart.update();
-    flushRafCalls();
-
-    expect(markerChart).toMatchSnapshot();
-    expect(flushDrawLog()).toMatchSnapshot();
 
     delete window.devicePixelRatio;
   });
@@ -228,25 +200,6 @@ describe('MarkerChart', function() {
       const { dispatch, markerChart } = setupWithProfile(profile);
 
       dispatch(changeSelectedTab('marker-chart'));
-      dispatch(changeMarkersSearchString('MATCH_NOTHING'));
-      markerChart.update();
-      expect(markerChart.find(EmptyReasons)).toMatchSnapshot();
-    });
-
-    it('shows a reason when a profile has no network markers', () => {
-      const profile = getProfileWithMarkers(MARKERS);
-      const { dispatch, markerChart } = setupWithProfile(profile);
-
-      dispatch(changeSelectedTab('network-chart'));
-      markerChart.update();
-      expect(markerChart.find(EmptyReasons)).toMatchSnapshot();
-    });
-
-    it("shows a reason when a profile's network markers have been filtered out", () => {
-      const profile = getProfileWithMarkers(NETWORK_MARKERS);
-      const { dispatch, markerChart } = setupWithProfile(profile);
-
-      dispatch(changeSelectedTab('network-chart'));
       dispatch(changeMarkersSearchString('MATCH_NOTHING'));
       markerChart.update();
       expect(markerChart.find(EmptyReasons)).toMatchSnapshot();
