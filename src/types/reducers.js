@@ -59,7 +59,6 @@ export type ProfileViewState = {|
     scrollToSelectionGeneration: number,
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
-    zeroAt: Milliseconds,
     rightClickedTrack: TrackReference,
     isCallNodeContextMenuVisible: boolean,
     profileSharingStatus: ProfileSharingStatus,
