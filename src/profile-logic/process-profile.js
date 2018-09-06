@@ -773,7 +773,7 @@ function _processThread(
  * has its own timebase, and we don't want to keep converting timestamps when
  * we deal with the integrated profile.
  */
-function _adjustSampleTimestamps(
+export function _adjustSampleTimestamps(
   samples: SamplesTable,
   delta: Milliseconds
 ): SamplesTable {
@@ -788,7 +788,7 @@ function _adjustSampleTimestamps(
  * profile's process has its own timebase, and we don't want to keep
  * converting timestamps when we deal with the integrated profile.
  */
-function _adjustMarkerTimestamps(
+export function _adjustMarkerTimestamps(
   markers: MarkersTable,
   delta: Milliseconds
 ): MarkersTable {

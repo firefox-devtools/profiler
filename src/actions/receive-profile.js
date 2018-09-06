@@ -7,9 +7,15 @@ import { oneLine } from 'common-tags';
 import {
   processProfile,
   unserializeProfileOfArbitraryFormat,
+  _adjustSampleTimestamps,
+  _adjustMarkerTimestamps,
 } from '../profile-logic/process-profile';
 import { SymbolStore } from '../profile-logic/symbol-store';
-import { getEmptyProfile } from '../profile-logic/profile-data';
+import {
+  getEmptyProfile,
+  filterThreadToRange,
+  getTimeRangeIncludingAllThreads,
+} from '../profile-logic/profile-data';
 import { symbolicateProfile } from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { decompress } from '../utils/gz';
@@ -840,13 +846,44 @@ export function retrieveProfilesToCompare(
       const resultProfile = getEmptyProfile();
       resultProfile.meta.categories = profiles[0].meta.categories;
       for (let i = 0; i < profileStates.length; i++) {
-        const { profileSpecific: { selectedThread } } = profileStates[i];
-        if (selectedThread === null) {
+        const { profileSpecific } = profileStates[i];
+        const selectedThreadIndex = profileSpecific.selectedThread;
+        if (selectedThreadIndex === null) {
           continue;
         }
-        const thread = profiles[i].threads[selectedThread];
-        thread.name = `Profile ${i}: ${thread.name}`;
-        resultProfile.threads.push(thread);
+        const profile = profiles[i];
+        const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
+        const committedRange =
+          profileSpecific.committedRanges &&
+          profileSpecific.committedRanges.pop();
+        const thread = profile.threads[selectedThreadIndex];
+        const filteredThread = committedRange
+          ? filterThreadToRange(
+              thread,
+              committedRange.start + zeroAt,
+              committedRange.end + zeroAt
+            )
+          : thread;
+        filteredThread.name = `Profile ${i}: ${thread.name}`;
+
+        const startTimeDelta = filteredThread.samples.time[0];
+        filteredThread.samples = _adjustSampleTimestamps(
+          filteredThread.samples,
+          -startTimeDelta
+        );
+        filteredThread.markers = _adjustMarkerTimestamps(
+          filteredThread.markers,
+          -startTimeDelta
+        );
+        filteredThread.registerTime -= startTimeDelta;
+        filteredThread.processStartupTime -= startTimeDelta;
+        if (filteredThread.processShutdownTime !== null) {
+          filteredThread.processShutdownTime -= startTimeDelta;
+        }
+        if (filteredThread.unregisterTime !== null) {
+          filteredThread.unregisterTime -= startTimeDelta;
+        }
+        resultProfile.threads.push(filteredThread);
       }
 
       dispatch(viewProfile(resultProfile));
