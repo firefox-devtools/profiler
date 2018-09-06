@@ -685,13 +685,17 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
 /**
  * Explicitly recreate the markers here to help enforce our assumptions about types.
  */
-function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
+function _processSamples(
+  geckoSamples: GeckoSampleStruct,
+  interval: number
+): SamplesTable {
   return {
     responsiveness: geckoSamples.responsiveness,
     stack: geckoSamples.stack,
     time: geckoSamples.time,
     rss: geckoSamples.rss,
     uss: geckoSamples.uss,
+    interval: Array(geckoSamples.length).fill(interval),
     length: geckoSamples.length,
   };
 }
@@ -742,7 +746,7 @@ function _processThread(
     categories
   );
   const markers = _processMarkers(geckoMarkers);
-  const samples = _processSamples(geckoSamples);
+  const samples = _processSamples(geckoSamples, processProfile.meta.interval);
 
   return {
     name: thread.name,
@@ -911,8 +915,8 @@ export function processProfile(
   }
 
   const meta = {
-    interval: geckoProfile.meta.interval,
     startTime: geckoProfile.meta.startTime,
+    interval: geckoProfile.meta.interval,
     abi: geckoProfile.meta.abi,
     extensions: extensions,
     misc: geckoProfile.meta.misc,

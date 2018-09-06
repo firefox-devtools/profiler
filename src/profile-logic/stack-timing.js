@@ -68,14 +68,12 @@ type LastSeen = {
  * @param {object} thread - The profile thread.
  * @param {object} callNodeInfo - from the callNodeInfo selector.
  * @param {integer} maxDepth - The max depth of the all the stacks.
- * @param {number} interval - The sampling interval that the profile was recorded with.
  * @return {array} stackTimingByDepth
  */
 export function getStackTimingByDepth(
   thread: Thread,
   callNodeInfo: CallNodeInfo,
-  maxDepth: number,
-  interval: number
+  maxDepth: number
 ): StackTimingByDepth {
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
   const stackTimingByDepth = Array.from({ length: maxDepth }, () => ({
@@ -126,8 +124,9 @@ export function getStackTimingByDepth(
   }
 
   // Pop the remaining stacks
+  const lastIndex = thread.samples.length - 1;
   const endingTime =
-    thread.samples.time[thread.samples.time.length - 1] + interval;
+    thread.samples.time[lastIndex] + thread.samples.interval[lastIndex];
   _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, endingTime);
 
   return stackTimingByDepth;
@@ -200,7 +199,6 @@ type GetRelevantFrame = (Thread, IndexIntoStackTable) => IndexIntoFrameTable;
 
 export function getLeafCategoryStackTiming(
   thread: Thread,
-  interval: number,
   getCategory: GetCategory,
   getRelevantLeafStack: GetRelevantFrame = getNearestJSFrame
 ) {
@@ -241,8 +239,9 @@ export function getLeafCategoryStackTiming(
 
   if (stackTiming.end.length !== stackTiming.start.length) {
     // Calculate the final end time.
+    const lastIndex = thread.samples.length - 1;
     stackTiming.end.push(
-      thread.samples.time[thread.samples.length - 1] + interval
+      thread.samples.time[lastIndex] + thread.samples.interval[lastIndex]
     );
   }
 

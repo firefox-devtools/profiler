@@ -1181,7 +1181,6 @@ export const selectorsForThread = (
     );
     const getCallTree = createSelector(
       getPreviewFilteredThread,
-      getProfileInterval,
       getCallNodeInfo,
       getCategories,
       UrlState.getImplementationFilter,
@@ -1192,7 +1191,6 @@ export const selectorsForThread = (
       getFilteredThread,
       getCallNodeInfo,
       getCallNodeMaxDepth,
-      getProfileInterval,
       StackTiming.getStackTimingByDepth
     );
     const getCallNodeMaxDepthForFlameGraph = createSelector(
@@ -1202,7 +1200,6 @@ export const selectorsForThread = (
     );
     const getFlameGraphTiming = createSelector(
       getPreviewFilteredThread,
-      getProfileInterval,
       getCallNodeInfo,
       UrlState.getInvertCallstack,
       FlameGraph.getFlameGraphTiming
@@ -1211,17 +1208,14 @@ export const selectorsForThread = (
      * The buffers of the samples can be cleared out. This function lets us know the
      * absolute range of samples that we have collected.
      */
-    const unfilteredSamplesRange = createSelector(
-      getThread,
-      getProfileInterval,
-      (thread, interval) => {
-        const { time } = thread.samples;
-        if (time.length === 0) {
-          return null;
-        }
-        return { start: time[0], end: time[time.length - 1] + interval };
+    const unfilteredSamplesRange = createSelector(getThread, thread => {
+      const { time, interval } = thread.samples;
+      if (time.length === 0) {
+        return null;
       }
-    );
+      const lastIndex = time.length - 1;
+      return { start: time[0], end: time[lastIndex] + interval[lastIndex] };
+    });
     const getSelectedMarkerIndex = (state: State) =>
       getViewOptions(state).selectedMarker;
 
@@ -1337,24 +1331,9 @@ export const selectedNodeSelectors: SelectorsForNode = (() => {
   const getTimingsForSidebar = createSelector(
     selectedThreadSelectors.getSelectedCallNodePath,
     selectedThreadSelectors.getCallNodeInfo,
-    getProfileInterval,
     UrlState.getInvertCallstack,
     selectedThreadSelectors.getPreviewFilteredThread,
-    (
-      selectedPath,
-      callNodeInfo,
-      interval,
-      isInvertedTree,
-      thread
-    ): TimingsForPath => {
-      return ProfileData.getTimingsForPath(
-        selectedPath,
-        callNodeInfo,
-        interval,
-        isInvertedTree,
-        thread
-      );
-    }
+    ProfileData.getTimingsForPath
   );
 
   return {

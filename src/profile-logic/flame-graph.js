@@ -171,7 +171,6 @@ export function getRootsAndChildren(
  */
 export function getFlameGraphTiming(
   thread: Thread,
-  interval: Milliseconds,
   callNodeInfo: CallNodeInfo,
   invertCallstack: boolean
 ): FlameGraphTiming {
@@ -179,12 +178,7 @@ export function getFlameGraphTiming(
     callNodeChildCount,
     callNodeTimes,
     rootTotalTime,
-  } = computeCallTreeCountsAndTimings(
-    thread,
-    callNodeInfo,
-    interval,
-    invertCallstack
-  );
+  } = computeCallTreeCountsAndTimings(thread, callNodeInfo, invertCallstack);
   const { roots, children } = getRootsAndChildren(
     thread,
     callNodeInfo.callNodeTable,

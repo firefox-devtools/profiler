@@ -357,7 +357,6 @@ export function getJsImplementationForStack(
 export function getTimingsForPath(
   needlePath: CallNodePath,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
-  interval: number,
   isInvertedTree: boolean,
   thread: Thread
 ): TimingsForPath {
@@ -403,7 +402,8 @@ export function getTimingsForPath(
       value: number,
     },
     stackIndex: IndexIntoStackTable,
-    funcIndex: IndexIntoFuncTable
+    funcIndex: IndexIntoFuncTable,
+    interval: Milliseconds
   ): void {
     // Step 1: increment the total value
     timings.value += interval;
@@ -425,10 +425,12 @@ export function getTimingsForPath(
 
   // Loop over each sample and accumulate the self time, running time, and
   // the implementation breakdown.
-  for (const thisStackIndex of samples.stack) {
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const thisStackIndex = samples.stack[sampleIndex];
     if (thisStackIndex === null) {
       continue;
     }
+    const interval = samples.interval[sampleIndex];
 
     rootTime += interval;
 
@@ -438,11 +440,21 @@ export function getTimingsForPath(
     if (!isInvertedTree) {
       // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
       if (thisNodeIndex === needleNodeIndex) {
-        accumulateDataToTimings(pathTimings.selfTime, thisStackIndex, thisFunc);
+        accumulateDataToTimings(
+          pathTimings.selfTime,
+          thisStackIndex,
+          thisFunc,
+          interval
+        );
       }
 
       if (thisFunc === needleFuncIndex) {
-        accumulateDataToTimings(funcTimings.selfTime, thisStackIndex, thisFunc);
+        accumulateDataToTimings(
+          funcTimings.selfTime,
+          thisStackIndex,
+          thisFunc,
+          interval
+        );
       }
     }
 
@@ -473,7 +485,8 @@ export function getTimingsForPath(
           accumulateDataToTimings(
             pathTimings.totalTime,
             thisStackIndex,
-            thisFunc
+            thisFunc,
+            interval
           );
         }
 
@@ -490,7 +503,8 @@ export function getTimingsForPath(
           accumulateDataToTimings(
             funcTimings.totalTime,
             thisStackIndex,
-            thisFunc
+            thisFunc,
+            interval
           );
         }
         funcFound = true;
@@ -522,7 +536,8 @@ export function getTimingsForPath(
           accumulateDataToTimings(
             funcTimings.selfTime,
             currentStackIndex,
-            currentFuncIndex
+            currentFuncIndex,
+            interval
           );
         }
 
@@ -532,7 +547,8 @@ export function getTimingsForPath(
           accumulateDataToTimings(
             pathTimings.totalTime,
             currentStackIndex,
-            currentFuncIndex
+            currentFuncIndex,
+            interval
           );
         }
 
@@ -542,7 +558,8 @@ export function getTimingsForPath(
           accumulateDataToTimings(
             funcTimings.totalTime,
             currentStackIndex,
-            currentFuncIndex
+            currentFuncIndex,
+            interval
           );
         }
       }
@@ -552,16 +569,17 @@ export function getTimingsForPath(
   return { forPath: pathTimings, forFunc: funcTimings, rootTime };
 }
 
-function _getTimeRangeForThread(
-  thread: Thread,
-  interval: number
-): StartEndRange {
+function _getTimeRangeForThread(thread: Thread): StartEndRange {
   if (thread.samples.length === 0) {
     return { start: Infinity, end: -Infinity };
   }
+
+  const lastSampleIndex = thread.samples.length - 1;
   return {
     start: thread.samples.time[0],
-    end: thread.samples.time[thread.samples.length - 1] + interval,
+    end:
+      thread.samples.time[lastSampleIndex] +
+      thread.samples.interval[lastSampleIndex],
   };
 }
 
@@ -570,7 +588,7 @@ export function getTimeRangeIncludingAllThreads(
 ): StartEndRange {
   const completeRange = { start: Infinity, end: -Infinity };
   profile.threads.forEach(thread => {
-    const threadRange = _getTimeRangeForThread(thread, profile.meta.interval);
+    const threadRange = _getTimeRangeForThread(thread);
     completeRange.start = Math.min(completeRange.start, threadRange.start);
     completeRange.end = Math.max(completeRange.end, threadRange.end);
   });
@@ -1001,6 +1019,7 @@ export function filterThreadToRange(
   const newSamples = {
     length: sEnd - sBegin,
     time: samples.time.slice(sBegin, sEnd),
+    interval: samples.interval.slice(sBegin, sEnd),
     stack: samples.stack.slice(sBegin, sEnd),
     responsiveness: samples.responsiveness.slice(sBegin, sEnd),
     rss: samples.rss.slice(sBegin, sEnd),
@@ -1409,8 +1428,8 @@ export function getThreadProcessDetails(thread: Thread): string {
 export function getEmptyProfile(): Profile {
   return {
     meta: {
-      interval: 1,
       startTime: 0,
+      interval: 1,
       abi: '',
       misc: '',
       oscpu: '',

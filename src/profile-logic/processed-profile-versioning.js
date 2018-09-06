@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 19; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 20; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -898,6 +898,14 @@ const _upgraders = {
           }
         }
       }
+    }
+  },
+  [20]: profile => {
+    // The interval is now define in samples
+    for (const thread of profile.threads) {
+      thread.samples.interval = Array(thread.samples.length).fill(
+        profile.meta.interval
+      );
     }
   },
 };
