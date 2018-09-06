@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 15; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 16; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -736,6 +736,49 @@ const _upgraders = {
       for (let i = 0; i < thread.frameTable.length; i++) {
         thread.frameTable.column[i] = null;
       }
+    }
+  },
+  [16]: profile => {
+    // The type field on some markers were missing. Renamed category field of
+    // VsyncTimestamp and LayerTranslation marker payloads to type and added
+    // a type field to Screenshot marker payload.
+    for (const thread of profile.threads) {
+      const { stringArray, markers } = thread;
+      const stringTable = new UniqueStringArray(stringArray);
+      const newDataArray = [];
+      for (let i = 0; i < markers.length; i++) {
+        const name = stringTable.getString(markers.name[i]);
+        const data = markers.data[i];
+        switch (name) {
+          case 'VsyncTimestamp':
+            newDataArray[i] = {
+              type: 'VsyncTimestamp',
+              vsync: data.vsync,
+            };
+            break;
+          case 'LayerTranslation':
+            newDataArray[i] = {
+              type: 'LayerTranslation',
+              layer: data.layer,
+              x: data.x,
+              y: data.y,
+            };
+            break;
+          case 'CompositorScreenshot':
+            newDataArray[i] = {
+              type: 'CompositorScreenshot',
+              url: data.url,
+              windowID: data.windowID,
+              windowWidth: data.windowWidth,
+              windowHeight: data.windowHeight,
+            };
+            break;
+          default:
+            newDataArray[i] = data;
+            break;
+        }
+      }
+      thread.markers.data = newDataArray;
     }
   },
 };
