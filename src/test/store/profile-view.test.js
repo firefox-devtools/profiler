@@ -3,17 +3,27 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import type { TrackReference } from '../../types/actions';
+import type { TabSlug } from '../../app-logic/tabs-handling';
+
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
+  getNetworkTrackProfile,
+  getScreenshotTrackProfile,
+  getNetworkMarker,
 } from '../fixtures/profiles/make-profile';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
-import { storeWithProfile } from '../fixtures/stores';
+import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
+import { blankStore, storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 
+import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
+import { viewProfile } from '../../actions/receive-profile';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
+import { stateFromLocation } from '../../app-logic/url-handling';
 
 const { selectedThreadSelectors, selectedNodeSelectors } = ProfileViewSelectors;
 
@@ -164,6 +174,171 @@ describe('actions/ProfileView', function() {
       expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
       dispatch(ProfileView.changeSelectedThread(1));
       expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(1);
+    });
+  });
+
+  describe('selectTrack', function() {
+    /**
+     * Using the following tracks:
+     *  [
+     *    'show [thread GeckoMain process]',
+     *    'show [thread GeckoMain tab]',
+     *    '  - show [thread DOM Worker]',
+     *    '  - show [thread Style]',
+     *  ]
+     */
+    const parentTrackReference = { type: 'global', trackIndex: 0 };
+    const tabTrackReference = { type: 'global', trackIndex: 1 };
+    const workerTrackReference = { type: 'local', trackIndex: 0, pid: 222 };
+
+    function storeWithTab(tabSlug: TabSlug) {
+      const profile = getProfileWithNiceTracks();
+      const { dispatch, getState } = blankStore();
+      const newUrlState = stateFromLocation({
+        pathname: `/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/${tabSlug}/`,
+        search: '',
+        hash: '',
+      });
+      dispatch({
+        type: 'UPDATE_URL_STATE',
+        newUrlState,
+      });
+      dispatch(viewProfile(profile));
+
+      return { profile, dispatch, getState };
+    }
+
+    function setup(tabSlug: TabSlug = 'calltree') {
+      const { profile, dispatch, getState } = storeWithTab(tabSlug);
+      const parentTrack = ProfileViewSelectors.getGlobalTrackFromReference(
+        getState(),
+        parentTrackReference
+      );
+      const tabTrack = ProfileViewSelectors.getGlobalTrackFromReference(
+        getState(),
+        tabTrackReference
+      );
+      const workerTrack = ProfileViewSelectors.getLocalTrackFromReference(
+        getState(),
+        workerTrackReference
+      );
+      if (tabTrack.type !== 'process' || parentTrack.type !== 'process') {
+        throw new Error('Expected to get process tracks.');
+      }
+      if (workerTrack.type !== 'thread') {
+        throw new Error('Expected to get a thread tracks.');
+      }
+      return {
+        profile,
+        getState,
+        dispatch,
+        parentTrack,
+        tabTrack,
+        workerTrack,
+      };
+    }
+
+    describe('with a thread tracks', function() {
+      it('starts out with the tab thread selected', function() {
+        const { getState, tabTrack } = setup();
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+          tabTrack.mainThreadIndex
+        );
+      });
+
+      it('can switch to another global track', function() {
+        const { getState, dispatch, parentTrack } = setup();
+        dispatch(ProfileView.selectTrack(parentTrackReference));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+          parentTrack.mainThreadIndex
+        );
+      });
+
+      it('can switch to a local track', function() {
+        const { getState, dispatch, workerTrack } = setup();
+        dispatch(ProfileView.selectTrack(workerTrackReference));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+          workerTrack.threadIndex
+        );
+      });
+    });
+    describe('with a network track', function() {
+      const threadTrack: TrackReference = {
+        type: 'local',
+        trackIndex: 0,
+        pid: 0,
+      };
+      const networkTrack: TrackReference = {
+        type: 'local',
+        trackIndex: 1,
+        pid: 0,
+      };
+      it('it starts out with the thread track and call tree selected', function() {
+        const profile = getNetworkTrackProfile();
+        const { getState } = storeWithProfile(profile);
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'calltree'
+        );
+      });
+      it('it can switch to the network track, which selects the network chart tab', function() {
+        const profile = getNetworkTrackProfile();
+        const { dispatch, getState } = storeWithProfile(profile);
+        dispatch(ProfileView.selectTrack(networkTrack));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'network-chart'
+        );
+      });
+      it('it can switch back to the thread, which remembers the last viewed panel', function() {
+        const profile = getNetworkTrackProfile();
+        const { dispatch, getState } = storeWithProfile(profile);
+        dispatch(App.changeSelectedTab('flame-graph'));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'flame-graph'
+        );
+        dispatch(ProfileView.selectTrack(networkTrack));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'network-chart'
+        );
+        dispatch(ProfileView.selectTrack(threadTrack));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'flame-graph'
+        );
+      });
+    });
+
+    describe('when the loaded panel is not the call tree', function() {
+      it('stays in the same panel when selecting another track', function() {
+        const { getState, dispatch, parentTrack } = setup('marker-chart');
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'marker-chart'
+        );
+        dispatch(ProfileView.selectTrack(parentTrackReference));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+          parentTrack.mainThreadIndex
+        );
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'marker-chart'
+        );
+      });
+
+      it('moves to the call tree when then initial tab is the network chart', function() {
+        const { getState, dispatch, parentTrack } = setup('network-chart');
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'network-chart'
+        );
+        dispatch(ProfileView.selectTrack(parentTrackReference));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+          parentTrack.mainThreadIndex
+        );
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'calltree'
+        );
+      });
     });
   });
 
@@ -619,6 +794,53 @@ describe('actions/ProfileView', function() {
       ]);
     });
   });
+
+  describe('getRangeFilteredScreenshotsById', function() {
+    it('can extract some network markers and match the snapshot', function() {
+      const profile = getScreenshotTrackProfile();
+      const { getState } = storeWithProfile(profile);
+      const screenshotMarkersById = selectedThreadSelectors.getRangeFilteredScreenshotsById(
+        getState()
+      );
+      const keys = [...screenshotMarkersById.keys()];
+      expect(keys.length).toEqual(1);
+
+      const [screenshots] = [...screenshotMarkersById.values()];
+      if (!screenshots) {
+        throw new Error('No screenshots found.');
+      }
+      expect(screenshots.length).toEqual(profile.threads[0].markers.length);
+      for (const screenshot of screenshots) {
+        expect(screenshot.name).toEqual('CompositorScreenshot');
+      }
+    });
+
+    it('can extract some network markers and match the snapshot', function() {
+      const profile = getScreenshotTrackProfile();
+      const [{ markers }] = profile.threads;
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      // Double check that there are 10 markers in the test data, and commit a
+      // subsection of that range.
+      expect(markers.length).toBe(10);
+      const startIndex = 3;
+      const endIndex = 8;
+      const startTime = markers.time[startIndex];
+      const endTime = markers.time[endIndex];
+      dispatch(ProfileView.commitRange(startTime, endTime));
+
+      // Get out the tracing markers.
+      const screenshotMarkersById = selectedThreadSelectors.getRangeFilteredScreenshotsById(
+        getState()
+      );
+      const [key] = [...screenshotMarkersById.keys()];
+      const screenshots = screenshotMarkersById.get(key);
+      if (!screenshots) {
+        throw new Error('No screenshots found.');
+      }
+      expect(screenshots.length).toEqual(endIndex - startIndex + 1);
+    });
+  });
 });
 
 /**
@@ -652,6 +874,8 @@ describe('snapshots of selectors/profile-view', function() {
       ['D', 3, null],
       ['E', 4, null],
       ['F', 5, null],
+      getNetworkMarker(6, 6),
+      getNetworkMarker(7, 7),
     ]);
     profile.threads.push(markersThread);
     const { getState, dispatch } = storeWithProfile(profile);
@@ -748,10 +972,10 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getJankInstances(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getProcessedMarkersThread', function() {
+  it('matches the last stored run of selectedThreadSelector.getProcessedMarkersTable', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getProcessedMarkersThread(getState())
+      selectedThreadSelectors.getProcessedMarkersTable(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getTracingMarkers', function() {
@@ -760,10 +984,16 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getTracingMarkers(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getMarkerTiming', function() {
+  it('matches the last stored run of selectedThreadSelector.getMarkerChartTiming', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getMarkerTiming(getState())
+      selectedThreadSelectors.getMarkerChartTiming(getState())
+    ).toMatchSnapshot();
+  });
+  it('matches the last stored run of selectedThreadSelector.getNetworkChartTiming', function() {
+    const { getState } = setupStore();
+    expect(
+      selectedThreadSelectors.getNetworkChartTiming(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkers', function() {
@@ -851,10 +1081,10 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getThreadProcessDetails(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getSearchFilteredMarkers', function() {
+  it('matches the last stored run of selectedThreadSelector.getSearchFilteredTracingMarkers', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getSearchFilteredMarkers(getState())
+      selectedThreadSelectors.getSearchFilteredTracingMarkers(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.unfilteredSamplesRange', function() {

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.markerTableSettings {
+.markerSettings {
   height: 25px;
   padding: 0;
   line-height: 25px;
@@ -10,11 +10,11 @@
   flex-flow: row nowrap;
 }
 
-.markerTableSettingsSpacer {
+.markerSettingsSpacer {
   flex: 1;
 }
 
-.markerTableSettingsLabel {
+.markerSettingsLabel {
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
@@ -24,10 +24,10 @@
   height: 25px;
 }
 
-.markerTableSettingsSearchbar {
+.markerSettingsSearchbar {
   padding: 0 5px;
 }
 
-.markerTableSettingsSearchField {
+.markerSettingsSearchField {
   width: 250px;
 }

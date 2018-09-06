@@ -13,7 +13,6 @@ import { processProfile } from '../../profile-logic/process-profile';
 import {
   resourceTypes,
   getCallNodeInfo,
-  getTracingMarkers,
   filterThreadByImplementation,
   getCallNodePathFromIndex,
   getSampleIndexClosestToTime,
@@ -464,83 +463,6 @@ describe('profile-data', function() {
       expect(mergedFuncListA).toEqual([0, 1, 2, 3, 4]);
       expect(mergedFuncListB).toEqual([0, 1, 2, 3, 5]);
       expect(callNodeTable.length).toEqual(6);
-    });
-  });
-  describe('getTracingMarkers', function() {
-    const profile = processProfile(getGeckoProfile());
-    const thread = profile.threads[0];
-    const tracingMarkers = getTracingMarkers(thread);
-
-    it('should fold the two reflow markers into one tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(9);
-      expect(tracingMarkers[1]).toMatchObject({
-        start: 3,
-        dur: 5,
-        name: 'Reflow',
-        title: null,
-      });
-    });
-    it('should fold the two Rasterize markers into one tracing marker, after the reflow tracing marker', function() {
-      expect(tracingMarkers[2]).toMatchObject({
-        start: 4,
-        dur: 1,
-        name: 'Rasterize',
-        title: null,
-      });
-    });
-    it('should create a tracing marker for the MinorGC startTime/endTime marker', function() {
-      expect(tracingMarkers[4]).toMatchObject({
-        start: 11,
-        dur: 1,
-        name: 'MinorGC',
-        title: null,
-      });
-    });
-    it('should create a tracing marker for the DOMEvent marker', function() {
-      expect(tracingMarkers[3]).toMatchObject({
-        dur: 1,
-        name: 'DOMEvent',
-        start: 9,
-        title: null,
-      });
-    });
-    it('should create a tracing marker for the marker UserTiming', function() {
-      expect(tracingMarkers[5]).toMatchObject({
-        dur: 1,
-        name: 'UserTiming',
-        start: 12,
-        title: null,
-      });
-    });
-    it('should handle tracing markers without a start', function() {
-      expect(tracingMarkers[0]).toMatchObject({
-        start: -1,
-        dur: 2, // This duration doesn't represent much and won't be displayed anyway
-        name: 'Rasterize',
-        title: null,
-      });
-    });
-    it('should handle tracing markers without an end', function() {
-      expect(tracingMarkers[8]).toMatchObject({
-        start: 20,
-        dur: Infinity,
-        name: 'Rasterize',
-        title: null,
-      });
-    });
-    it('should handle nested tracing markers correctly', function() {
-      expect(tracingMarkers[6]).toMatchObject({
-        start: 13,
-        dur: 5,
-        name: 'Reflow',
-        title: null,
-      });
-      expect(tracingMarkers[7]).toMatchObject({
-        start: 14,
-        dur: 1,
-        name: 'Reflow',
-        title: null,
-      });
     });
   });
 });

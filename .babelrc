@@ -1,35 +1,27 @@
 {
   presets: [
-    [
-      "env",
-      {
-        targets: {
-          node: "current",
-          browsers: "last 2 chrome versions, last 2 firefox versions"
-        },
-        modules: false
-      }
-    ],
-    "react",
-    "flow"
+    "@babel/preset-env",
+    "@babel/preset-react",
+    "@babel/preset-flow"
   ],
   plugins: [
-    "transform-class-properties",
-    [ "transform-object-rest-spread", { "useBuiltIns": true }]
+    // Without `loose`, the transformation uses `Object.defineProperty` which
+    // obeys the spec more, but we get a bundle that's 8kB larger. That was the
+    // default in babel v6.
+    ["@babel/plugin-proposal-class-properties", { loose: true }],
+    ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }]
   ],
   env: {
-    // Needed for tests, as node doesn't support ES2015 modules yet.
-    // The version of node we use doesn't need the generator polyfill so we're not including it
     test: {
       presets: [
-        [ "env", { target: { node: "current" }} ],
-        "react",
-        "flow"
+        "@babel/preset-env",
+        "@babel/preset-react",
+        "@babel/preset-flow"
       ],
       plugins: [
-        "transform-class-properties",
-        [ "transform-object-rest-spread", { "useBuiltIns": true }]
-      ],
+        ["@babel/plugin-proposal-class-properties", { loose: true }],
+        ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }]
+      ]
     }
   }
 }

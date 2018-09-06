@@ -344,7 +344,7 @@ exports[`app/Details renders an initial view with the right panel for tab networ
       ]
     }
   />
-  <Connect(MarkerChart) />
+  <Connect(NetworkChart) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
   <Connect(TimelineTrackContextMenu) />

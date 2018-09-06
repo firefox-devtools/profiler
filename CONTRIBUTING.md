@@ -8,17 +8,21 @@ This project is made up of a cross section of different parts of Mozilla, includ
 
 | - | Name | Github Handle | Position |
 | - | ---- | ------------- | -------- |
-| ![][clarkbw] | Bryan Clark | [@clarkbw](https://github.com/clarkbw) | Firefox DevTools Product Manager |
+| ![][digitarald] | Harald Kirschner | [@digitarald](https://github.com/digitarald) | Firefox DevTools Product Manager |
 | <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
 | ![][gregtatum] | Greg Tatum | [@gregtatum](https://github.com/gregtatum) | Firefox DevTools Engineer |
 | ![][julienw] | Julien Wajsberg | [@julienw](https://github.com/julienw) | Firefox DevTools Engineer |
+| ![][brisad] | Michael Hoffmann | [@brisad](https://github.com/brisad) | Engineer and Contributor |
+| ![][zoepage] | Ola Gasidlo | [@zoepage](https://github.com/zoepage) | Firefox DevTools Engineer |
 | ![][violasong] | Victoria Wang | [@violasong](https://github.com/violasong) | Firefox DevTools UX Designer |
 
-[clarkbw]:https://avatars.githubusercontent.com/clarkbw?size=56
+[digitarald]:https://avatars.githubusercontent.com/digitarald?size=56
 [mstange]:https://avatars.githubusercontent.com/mstange?size=56
 [gregtatum]:https://avatars.githubusercontent.com/gregtatum?size=56
 [julienw]:https://avatars.githubusercontent.com/julienw?size=56
 [violasong]:https://avatars.githubusercontent.com/violasong?size=56
+[brisad]:https://avatars.githubusercontent.com/brisad?size=56
+[zoepage]:https://avatars.githubusercontent.com/zoepage?size=56
 
 We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-slack.herokuapp.com/) in the #perf channel. Come chat with us if you have any questions about the project.
 
