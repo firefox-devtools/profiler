@@ -537,6 +537,13 @@ const _upgraders = {
     // https://searchfox.org/mozilla-central/rev/5a744713370ec47969595e369fd5125f123e6d24/js/public/ProfilingStack.h#193-201
     // New category list:
     // https://searchfox.org/mozilla-central/rev/04b9cbbc2be2137a37e158a5ebaf9c7bef2364f9/js/public/ProfilingStack.h#193-200
+    //
+    // In addition to adding the meta category values, this upgrader attempts to deduce
+    // a frame's category from a set of known function names. This helps the UI visualize
+    // category-only views when that information is completely lacking. This is a
+    // "best guess" approach, that may not get the information completely correct.
+    // This list can safely be updated in the future, if needed, to help better refine
+    // the categories.
     profile.meta.categories = [
       {
         name: 'Idle',
@@ -590,6 +597,7 @@ const _upgraders = {
       [1 << 11 /* STORAGE */]: OTHER,
       [1 << 12 /* EVENTS */]: OTHER,
     };
+    // This is the list of function names that are used to map to categories.
     const exactMatches = new Map([
       [
         '-[GeckoNSApplication nextEventMatchingMask:untilDate:inMode:dequeue:]',
@@ -626,15 +634,18 @@ const _upgraders = {
       ['g_main_context_dispatch', OTHER],
       ['nsContentSink::StartLayout(bool)', LAYOUT],
     ]);
+
     const upToFirstSpaceMatches = new Map([
       ['PresShell::DoFlushPendingNotifications', LAYOUT],
       ['PresShell::DoReflow', LAYOUT],
     ]);
-    function truncateAtFirstSpace(s) {
+
+    function truncateAtFirstSpace(s: string): string {
       const spacePos = s.indexOf(' ');
       return spacePos === -1 ? s : s.substr(0, spacePos);
     }
-    function getCategoryForFuncName(funcName) {
+
+    function getCategoryForFuncName(funcName: string): number | void {
       const exactMatch = exactMatches.get(funcName);
       if (exactMatch !== undefined) {
         return exactMatch;
@@ -645,7 +656,11 @@ const _upgraders = {
       );
       return truncatedMatch;
     }
+
     const domCallRegex = /^(get |set )?\w+(\.\w+| constructor)$/;
+
+    // Go through all of the threads and their frames and attempt to deduce
+    // the categories by looking at the function names.
     for (const thread of profile.threads) {
       const { frameTable, funcTable, stringArray } = thread;
       const stringTable = new UniqueStringArray(stringArray);
