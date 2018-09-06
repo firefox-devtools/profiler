@@ -757,7 +757,7 @@ export type SelectorsForThread = {
   getCommittedRangeFilteredTracingMarkers: State => TracingMarker[],
   getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
   getNetworkTracingMarkers: State => TracingMarker[],
-  getNetworkTiming: State => MarkerTimingRows,
+  getNetworkTrackTiming: State => MarkerTimingRows,
   getRangeFilteredScreenshotsById: State => Map<string, TracingMarker[]>,
   getFilteredThread: State => Thread,
   getPreviewFilteredThread: State => Thread,
@@ -1044,7 +1044,7 @@ export const selectorsForThread = (
           marker => marker.data && marker.data.type === 'Network'
         )
     );
-    const getNetworkTiming = createSelector(
+    const getNetworkTrackTiming = createSelector(
       getNetworkTracingMarkers,
       MarkerTiming.getMarkerTiming
     );
@@ -1183,7 +1183,7 @@ export const selectorsForThread = (
       getCommittedRangeFilteredTracingMarkers,
       getCommittedRangeFilteredTracingMarkersForHeader,
       getNetworkTracingMarkers,
-      getNetworkTiming,
+      getNetworkTrackTiming,
       getRangeFilteredScreenshotsById,
       getFilteredThread,
       getPreviewFilteredThread,
