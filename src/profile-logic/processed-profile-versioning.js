@@ -962,5 +962,13 @@ const _upgraders = {
       );
     }
   },
+  [24]: profile => {
+    // The interval/duration is now defined in samples.
+    for (const thread of profile.threads) {
+      thread.samples.duration = Array(thread.samples.length).fill(
+        profile.meta.interval
+      );
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

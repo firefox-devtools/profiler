@@ -279,7 +279,6 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         timings={this._getTimingsForCallNodeIndex(
           callNodeIndex,
           callNodeInfo,
-          interval,
           isInverted,
           thread,
           categories

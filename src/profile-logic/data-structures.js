@@ -50,6 +50,7 @@ export function getEmptySamplesTable(): SamplesTable {
     responsiveness: [],
     stack: [],
     time: [],
+    duration: [],
     length: 0,
   };
 }

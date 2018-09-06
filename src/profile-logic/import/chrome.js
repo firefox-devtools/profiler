@@ -268,7 +268,8 @@ async function processTracingEvents(
     // Choose 500us as a somewhat reasonable sampling interval. When converting
     // the chrome profile, this function samples the chrome profile, and generates
     // new samples on our target interval of 500us.
-    profile.meta.interval = 0.5;
+    const interval = 0.5;
+    profile.meta.interval = interval;
 
     for (let i = 0; i < samples.length; i++) {
       const nodeIndex = samples[i];
@@ -286,6 +287,7 @@ async function processTracingEvents(
         samplesTable.responsiveness.push(null);
         samplesTable.stack.push(stackIndex);
         samplesTable.time.push(threadInfo.lastSampledTime);
+        samplesTable.duration.push(interval);
         samplesTable.length++;
       }
     }

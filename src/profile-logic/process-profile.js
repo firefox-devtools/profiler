@@ -677,11 +677,15 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): RawMarkerTable {
 /**
  * Explicitly recreate the markers here to help enforce our assumptions about types.
  */
-function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
+function _processSamples(
+  geckoSamples: GeckoSampleStruct,
+  interval: number
+): SamplesTable {
   return {
     responsiveness: geckoSamples.responsiveness,
     stack: geckoSamples.stack,
     time: geckoSamples.time,
+    duration: Array(geckoSamples.length).fill(interval),
     length: geckoSamples.length,
   };
 }
@@ -748,7 +752,8 @@ function _processCounters(
 function _processThread(
   thread: GeckoThread,
   processProfile: GeckoProfile | GeckoSubprocessProfile,
-  extensions: ExtensionTable
+  extensions: ExtensionTable,
+  interval: Milliseconds
 ): Thread {
   const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
     thread.frameTable
@@ -787,7 +792,7 @@ function _processThread(
     categories
   );
   const markers = _processMarkers(geckoMarkers);
-  const samples = _processSamples(geckoSamples);
+  const samples = _processSamples(geckoSamples, interval);
 
   const newThread: Thread = {
     name: thread.name,
@@ -982,9 +987,10 @@ export function processProfile(
   const extensions: ExtensionTable = geckoProfile.meta.extensions
     ? _toStructOfArrays(geckoProfile.meta.extensions)
     : getEmptyExtensions();
+  const interval = geckoProfile.meta.interval;
 
   for (const thread of geckoProfile.threads) {
-    threads.push(_processThread(thread, geckoProfile, extensions));
+    threads.push(_processThread(thread, geckoProfile, extensions, interval));
   }
   const counters: Counter[] = _processCounters(geckoProfile, threads, 0);
 
@@ -993,7 +999,12 @@ export function processProfile(
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
     threads = threads.concat(
       subprocessProfile.threads.map(thread => {
-        const newThread = _processThread(thread, subprocessProfile, extensions);
+        const newThread = _processThread(
+          thread,
+          subprocessProfile,
+          extensions,
+          interval
+        );
         newThread.samples = adjustSampleTimestamps(
           newThread.samples,
           adjustTimestampsBy

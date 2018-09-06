@@ -199,17 +199,13 @@ class StackGraph extends PureComponent<Props> {
   _onMouseUp = (e: SyntheticMouseEvent<>) => {
     const canvas = this._canvas;
     if (canvas) {
-      const { rangeStart, rangeEnd, thread, interval } = this.props;
+      const { rangeStart, rangeEnd, thread } = this.props;
       const r = canvas.getBoundingClientRect();
 
       const x = e.pageX - r.left;
       const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
 
-      const sampleIndex = getSampleIndexClosestToTime(
-        thread.samples,
-        time,
-        interval
-      );
+      const sampleIndex = getSampleIndexClosestToTime(thread.samples, time);
 
       this.props.onSampleClick(sampleIndex);
     }
