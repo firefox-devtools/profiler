@@ -107,19 +107,21 @@ describe('upgrading processed profiles', function() {
 
     expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
   }
+
+  const latestProcessedProfile = require('../fixtures/upgrades/processed-15.json');
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-14.json')
+    latestProcessedProfile
   );
 
   // Uncomment this to output your next ./upgrades/processed-X.json
   // console.log(serializeProfile(afterUpgradeReference));
   // Then run prettier on it with the following command:
   //   yarn run prettier --write <file name>
-  it('should upgrade version 0', function() {
-    expect(afterUpgradeReference.meta.preprocessedProfileVersion).toEqual(
-      CURRENT_PROCESSED_VERSION
-    );
+  expect(latestProcessedProfile.meta.preprocessedProfileVersion).toEqual(
+    CURRENT_PROCESSED_VERSION
+  );
 
+  it('should upgrade version 0', function() {
     const serializedOldProcessedProfile0 = require('../fixtures/upgrades/processed-0.json');
     const upgradedProfile0 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile0
