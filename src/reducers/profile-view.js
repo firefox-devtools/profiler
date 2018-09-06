@@ -454,15 +454,6 @@ function rootRange(
   }
 }
 
-function zeroAt(state: Milliseconds = 0, action: Action) {
-  switch (action.type) {
-    case 'VIEW_PROFILE':
-      return ProfileData.getTimeRangeIncludingAllThreads(action.profile).start;
-    default:
-      return state;
-  }
-}
-
 function rightClickedTrack(
   // Make the initial value the first global track, which is assumed to exists.
   // This makes the track reference always exist, which in turn makes it so that
@@ -545,7 +536,6 @@ export default wrapReducerInResetter(
       scrollToSelectionGeneration,
       focusCallTreeGeneration,
       rootRange,
-      zeroAt,
       rightClickedTrack,
       isCallNodeContextMenuVisible,
       profileSharingStatus,
@@ -570,24 +560,15 @@ export const getSymbolicationStatus = (state: State) =>
   getProfileViewOptions(state).symbolicationStatus;
 export const getProfileSharingStatus = (state: State) =>
   getProfileViewOptions(state).profileSharingStatus;
-export const getScrollToSelectionGeneration = createSelector(
-  getProfileViewOptions,
-  viewOptions => viewOptions.scrollToSelectionGeneration
-);
-
-export const getFocusCallTreeGeneration = createSelector(
-  getProfileViewOptions,
-  viewOptions => viewOptions.focusCallTreeGeneration
-);
-
-export const getZeroAt = createSelector(
-  getProfileViewOptions,
-  viewOptions => viewOptions.zeroAt
-);
+export const getScrollToSelectionGeneration = (state: State) =>
+  getProfileViewOptions(state).scrollToSelectionGeneration;
+export const getFocusCallTreeGeneration = (state: State) =>
+  getProfileViewOptions(state).focusCallTreeGeneration;
+export const getZeroAt = (state: State) => getProfileRootRange(state).start;
 
 export const getCommittedRange = createSelector(
-  (state: State) => getProfileViewOptions(state).rootRange,
-  (state: State) => getProfileViewOptions(state).zeroAt,
+  getProfileRootRange,
+  getZeroAt,
   UrlState.getAllCommittedRanges,
   (rootRange, zeroAt, committedRanges): StartEndRange => {
     if (committedRanges.length > 0) {

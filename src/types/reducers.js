@@ -14,7 +14,7 @@ import type {
   TimelineType,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { Milliseconds, StartEndRange } from './units';
+import type { StartEndRange } from './units';
 import type {
   IndexIntoMarkersTable,
   Profile,
@@ -59,7 +59,6 @@ export type ProfileViewState = {|
     scrollToSelectionGeneration: number,
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
-    zeroAt: Milliseconds,
     rightClickedTrack: TrackReference,
     isCallNodeContextMenuVisible: boolean,
     profileSharingStatus: ProfileSharingStatus,
