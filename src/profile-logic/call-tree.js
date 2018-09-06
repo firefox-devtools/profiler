@@ -307,8 +307,11 @@ function _getInvertedStackSelfTimes(
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       const rootIndex = callNodeToRoot[callNodeIndex];
-      callNodeSelfTime[rootIndex] += interval;
-      callNodeLeafTime[callNodeIndex] += interval;
+      const duration = thread.samples.duration
+        ? thread.samples.duration[sampleIndex]
+        : interval;
+      callNodeSelfTime[rootIndex] += duration;
+      callNodeLeafTime[callNodeIndex] += duration;
     }
   }
 
@@ -336,7 +339,10 @@ function _getStackSelfTimes(
   ) {
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
-      callNodeSelfTime[callNodeIndex] += interval;
+      const duration = thread.samples.duration
+        ? thread.samples.duration[sampleIndex]
+        : interval;
+      callNodeSelfTime[callNodeIndex] += duration;
     }
   }
 
@@ -427,7 +433,7 @@ export function getCallTree(
     } = callTreeCountsAndTimings;
 
     const jsOnly = implementationFilter === 'js';
-    const isIntegerInterval = Math.floor(interval) === interval;
+    const isIntegerInterval = Number.isInteger(interval);
 
     return new CallTree(
       thread,
