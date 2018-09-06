@@ -856,7 +856,7 @@ function _processThread(
  * has its own timebase, and we don't want to keep converting timestamps when
  * we deal with the integrated profile.
  */
-function _adjustSampleTimestamps(
+export function adjustSampleTimestamps(
   samples: SamplesTable,
   delta: Milliseconds
 ): SamplesTable {
@@ -887,7 +887,7 @@ function _adjustJsTracerTimestamps(
  * profile's process has its own timebase, and we don't want to keep
  * converting timestamps when we deal with the integrated profile.
  */
-function _adjustMarkerTimestamps(
+export function adjustMarkerTimestamps(
   markers: RawMarkerTable,
   delta: Milliseconds
 ): RawMarkerTable {
@@ -993,11 +993,11 @@ export function processProfile(
     threads = threads.concat(
       subprocessProfile.threads.map(thread => {
         const newThread = _processThread(thread, subprocessProfile, extensions);
-        newThread.samples = _adjustSampleTimestamps(
+        newThread.samples = adjustSampleTimestamps(
           newThread.samples,
           adjustTimestampsBy
         );
-        newThread.markers = _adjustMarkerTimestamps(
+        newThread.markers = adjustMarkerTimestamps(
           newThread.markers,
           adjustTimestampsBy
         );

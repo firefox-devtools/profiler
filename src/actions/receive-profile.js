@@ -7,9 +7,15 @@ import { oneLine } from 'common-tags';
 import {
   processProfile,
   unserializeProfileOfArbitraryFormat,
+  adjustSampleTimestamps,
+  adjustMarkerTimestamps,
 } from '../profile-logic/process-profile';
 import { SymbolStore } from '../profile-logic/symbol-store';
 import { getEmptyProfile } from '../profile-logic/data-structures';
+import {
+  filterThreadSamplesToRange,
+  getTimeRangeIncludingAllThreads,
+} from '../profile-logic/profile-data';
 import { symbolicateProfile } from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { decompress } from '../utils/gz';
@@ -856,15 +862,52 @@ export function retrieveProfilesToCompare(
       // only the 2 selected threads from the 2 profiles.
       const profiles = await Promise.all(promises);
       const resultProfile = getEmptyProfile();
-      resultProfile.meta.categories = profiles[0].meta.categories;
+
+      // Then we loop over all profiles and do the necessary changes according
+      // to the states we computed earlier.
       for (let i = 0; i < profileStates.length; i++) {
-        const { profileSpecific: { selectedThread } } = profileStates[i];
-        if (selectedThread === null) {
+        const { profileSpecific } = profileStates[i];
+        const selectedThreadIndex = profileSpecific.selectedThread;
+        if (selectedThreadIndex === null) {
           continue;
         }
-        const thread = profiles[i].threads[selectedThread];
+        const profile = profiles[i];
+        let thread = profile.threads[selectedThreadIndex];
+
+        // We filter the profile using the range from the state for this profile.
+        const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
+        const committedRange =
+          profileSpecific.committedRanges &&
+          profileSpecific.committedRanges.pop();
+        thread = committedRange
+          ? filterThreadSamplesToRange(
+              thread,
+              committedRange.start + zeroAt,
+              committedRange.end + zeroAt
+            )
+          : thread;
         thread.processName = `Profile ${i}: ${thread.processName ||
           thread.name}`;
+
+        // We adjust the various times so that the 2 profiles are aligned and
+        // the data is consistent.
+        const startTimeDelta = thread.samples.time[0];
+        thread.samples = adjustSampleTimestamps(
+          thread.samples,
+          -startTimeDelta
+        );
+        thread.markers = adjustMarkerTimestamps(
+          thread.markers,
+          -startTimeDelta
+        );
+        thread.registerTime -= startTimeDelta;
+        thread.processStartupTime -= startTimeDelta;
+        if (thread.processShutdownTime !== null) {
+          thread.processShutdownTime -= startTimeDelta;
+        }
+        if (thread.unregisterTime !== null) {
+          thread.unregisterTime -= startTimeDelta;
+        }
         resultProfile.threads.push(thread);
       }
 
