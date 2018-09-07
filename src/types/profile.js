@@ -250,8 +250,6 @@ export type Thread = {
   pausedRanges: PausedRange[],
   name: string,
   processName?: string,
-  // An undefined pid is a valid value. An undefined value will key
-  // properly on Map<pid, T>.
   pid: Pid,
   tid: number | void,
   samples: SamplesTable,

@@ -42,6 +42,10 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
+import {
+  getComparisonThread,
+  mergeCategories,
+} from '../profile-logic/comparison';
 
 import type {
   FunctionsUpdatePerThread,
@@ -844,19 +848,28 @@ export function retrieveProfilesToCompare(
 
       const profiles = await Promise.all(promises);
       const resultProfile = getEmptyProfile();
-      resultProfile.meta.categories = profiles[0].meta.categories;
+      const {
+        categories: newCategories,
+        translationMaps: translationMapsForCategories,
+      } = mergeCategories(
+        profiles[0].meta.categories,
+        profiles[1].meta.categories
+      );
+      resultProfile.meta.categories = newCategories;
+
       for (let i = 0; i < profileStates.length; i++) {
         const { profileSpecific } = profileStates[i];
         const selectedThreadIndex = profileSpecific.selectedThread;
         if (selectedThreadIndex === null) {
-          continue;
+          throw new Error(`No thread has been selected in profile ${i}`);
         }
         const profile = profiles[i];
+        const thread = profile.threads[selectedThreadIndex];
+
         const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
         const committedRange =
           profileSpecific.committedRanges &&
           profileSpecific.committedRanges.pop();
-        const thread = profile.threads[selectedThreadIndex];
         const filteredThread = committedRange
           ? filterThreadToRange(
               thread,
@@ -885,6 +898,13 @@ export function retrieveProfilesToCompare(
         }
         resultProfile.threads.push(filteredThread);
       }
+
+      resultProfile.threads.push(
+        getComparisonThread(
+          translationMapsForCategories,
+          ...resultProfile.threads
+        )
+      );
 
       dispatch(viewProfile(resultProfile));
     } catch (error) {
