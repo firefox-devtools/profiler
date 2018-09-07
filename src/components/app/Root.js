@@ -136,6 +136,12 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
     }
   }
 
+  componentDidUpdate(prevProps) {
+    if (!prevProps.profiles && this.props.profiles) {
+      this.props.retrieveProfilesToCompare(this.props.profiles);
+    }
+  }
+
   renderMessage(
     message: string,
     additionalMessage: string | null,
