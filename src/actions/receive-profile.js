@@ -899,12 +899,14 @@ export function retrieveProfilesToCompare(
         resultProfile.threads.push(filteredThread);
       }
 
+      /*
       resultProfile.threads.push(
         getComparisonThread(
           translationMapsForCategories,
           ...resultProfile.threads
         )
       );
+      */
 
       dispatch(viewProfile(resultProfile));
     } catch (error) {
