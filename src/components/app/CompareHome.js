@@ -36,8 +36,14 @@ class CompareHome extends PureComponent<Props, State> {
 
   handleFormSubmit = (e: SyntheticEvent<>) => {
     e.preventDefault();
-    const { profile1, profile2 } = this.state;
+    let { profile1, profile2 } = this.state;
     const { changeProfilesToCompare } = this.props;
+    if (!profile1.startsWith('http')) {
+      profile1 = 'http://' + profile1;
+    }
+    if (!profile2.startsWith('http')) {
+      profile2 = 'http://' + profile2;
+    }
     changeProfilesToCompare(profile1, profile2);
   };
 
