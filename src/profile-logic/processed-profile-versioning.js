@@ -536,7 +536,14 @@ const _upgraders = {
     // Old category list:
     // https://searchfox.org/mozilla-central/rev/5a744713370ec47969595e369fd5125f123e6d24/js/public/ProfilingStack.h#193-201
     // New category list:
-    // [To be inserted once the Gecko change lands in mozilla-central]
+    // https://searchfox.org/mozilla-central/rev/04b9cbbc2be2137a37e158a5ebaf9c7bef2364f9/js/public/ProfilingStack.h#193-200
+    //
+    // In addition to adding the meta category values, this upgrader attempts to deduce
+    // a frame's category from a set of known function names. This helps the UI visualize
+    // category-only views when that information is completely lacking. This is a
+    // "best guess" approach, that may not get the information completely correct.
+    // This list can safely be updated in the future, if needed, to help better refine
+    // the categories.
     profile.meta.categories = [
       {
         name: 'Idle',
@@ -571,26 +578,111 @@ const _upgraders = {
         color: 'lightblue',
       },
     ];
+    const IDLE = 0;
+    const OTHER = 1;
+    const JS = 2;
+    const LAYOUT = 3;
+    const GRAPHICS = 4;
+    const DOM = 5;
+    const GCCC = 6;
+    const NETWORK = 7;
     const oldCategoryToNewCategory = {
-      [1 << 4 /* OTHER */]: 1 /* Other */,
-      [1 << 5 /* CSS */]: 3 /* Layout */,
-      [1 << 6 /* JS */]: 2 /* JavaScript */,
-      [1 << 7 /* GC */]: 6 /* GC / CC */,
-      [1 << 8 /* CC */]: 6 /* GC / CC */,
-      [1 << 9 /* NETWORK */]: 7 /* Network */,
-      [1 << 10 /* GRAPHICS */]: 4 /* Graphics */,
-      [1 << 11 /* STORAGE */]: 1 /* Other */,
-      [1 << 12 /* EVENTS */]: 1 /* Other */,
+      [1 << 4 /* OTHER */]: OTHER,
+      [1 << 5 /* CSS */]: LAYOUT,
+      [1 << 6 /* JS */]: JS,
+      [1 << 7 /* GC */]: GCCC,
+      [1 << 8 /* CC */]: GCCC,
+      [1 << 9 /* NETWORK */]: NETWORK,
+      [1 << 10 /* GRAPHICS */]: GRAPHICS,
+      [1 << 11 /* STORAGE */]: OTHER,
+      [1 << 12 /* EVENTS */]: OTHER,
     };
+    // This is the list of function names that are used to map to categories.
+    const exactMatches = new Map([
+      [
+        '-[GeckoNSApplication nextEventMatchingMask:untilDate:inMode:dequeue:]',
+        IDLE,
+      ],
+      ['base::MessagePumpDefault::Run(base::MessagePump::Delegate*)', IDLE],
+      ['mozilla::widget::WinUtils::WaitForMessage(unsigned long)', IDLE],
+      [
+        'mozilla::ThreadEventQueue<mozilla::PrioritizedEventQueue<mozilla::LabeledEventQueue> >::GetEvent(bool,mozilla::EventPriority *)',
+        IDLE,
+      ],
+      [
+        'mozilla::ThreadEventQueue<mozilla::PrioritizedEventQueue<mozilla::EventQueue> >::GetEvent(bool,mozilla::EventPriority *)',
+        IDLE,
+      ],
+      [
+        'mozilla::ThreadEventQueue<mozilla::EventQueue>::GetEvent(bool,mozilla::EventPriority *)',
+        IDLE,
+      ],
+      [
+        'mozilla::layers::PaintThread::AsyncPaintContents(mozilla::layers::CompositorBridgeChild *,mozilla::layers::CapturedPaintState *,bool (*)(mozilla::layers::CapturedPaintState *))',
+        GRAPHICS,
+      ],
+      ['PresShell::DoFlushPendingNotifications InterruptibleLayout', LAYOUT],
+      ['nsRefreshDriver::Tick', LAYOUT],
+      ['nsLayoutUtils::GetFrameForPoint', LAYOUT],
+      ['nsAppShell::ProcessGeckoEvents', OTHER],
+      ['PollWrapper(_GPollFD*, unsigned int, int)', IDLE],
+      ['mozilla::image::DecodePoolImpl::PopWorkLocked(bool)', IDLE],
+      [
+        'nsCCUncollectableMarker::Observe(nsISupports*, char const*, char16_t const*)',
+        GCCC,
+      ],
+      ['g_main_context_dispatch', OTHER],
+      ['nsContentSink::StartLayout(bool)', LAYOUT],
+    ]);
+
+    const upToFirstSpaceMatches = new Map([
+      ['PresShell::DoFlushPendingNotifications', LAYOUT],
+      ['PresShell::DoReflow', LAYOUT],
+    ]);
+
+    function truncateAtFirstSpace(s: string): string {
+      const spacePos = s.indexOf(' ');
+      return spacePos === -1 ? s : s.substr(0, spacePos);
+    }
+
+    function getCategoryForFuncName(funcName: string): number | void {
+      const exactMatch = exactMatches.get(funcName);
+      if (exactMatch !== undefined) {
+        return exactMatch;
+      }
+
+      const truncatedMatch = upToFirstSpaceMatches.get(
+        truncateAtFirstSpace(funcName)
+      );
+      return truncatedMatch;
+    }
+
+    const domCallRegex = /^(get |set )?\w+(\.\w+| constructor)$/;
+
+    // Go through all of the threads and their frames and attempt to deduce
+    // the categories by looking at the function names.
     for (const thread of profile.threads) {
-      for (let i = 0; i < thread.frameTable.length; i++) {
-        const oldCategory = thread.frameTable.category[i];
-        if (oldCategory !== null) {
-          const newCategory =
-            oldCategory in oldCategoryToNewCategory
-              ? oldCategoryToNewCategory[oldCategory]
-              : 1 /* Other */;
-          thread.frameTable.category[i] = newCategory;
+      const { frameTable, funcTable, stringArray } = thread;
+      const stringTable = new UniqueStringArray(stringArray);
+      for (let i = 0; i < frameTable.length; i++) {
+        const funcIndex = frameTable.func[i];
+        const funcName = stringTable.getString(funcTable.name[funcIndex]);
+        const categoryBasedOnFuncName = getCategoryForFuncName(funcName);
+        if (categoryBasedOnFuncName !== undefined) {
+          frameTable.category[i] = categoryBasedOnFuncName;
+        } else {
+          const oldCategory = frameTable.category[i];
+          if (oldCategory !== null) {
+            if (!funcTable.isJS[funcIndex] && domCallRegex.test(funcName)) {
+              frameTable.category[i] = DOM;
+            } else {
+              const newCategory =
+                oldCategory in oldCategoryToNewCategory
+                  ? oldCategoryToNewCategory[oldCategory]
+                  : 1 /* Other */;
+              frameTable.category[i] = newCategory;
+            }
+          }
         }
       }
     }
