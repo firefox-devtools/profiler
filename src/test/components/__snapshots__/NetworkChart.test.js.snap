@@ -1,0 +1,631 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyReasons shows a reason when a profile has no network markers 1`] = `
+<div
+  className="EmptyReasons"
+>
+  <h3>
+    The 
+    network chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    This thread has no network information.
+  </p>
+</div>
+`;
+
+exports[`EmptyReasons shows a reason when a profile's network markers have been filtered out 1`] = `
+<div
+  className="EmptyReasons"
+>
+  <h3>
+    The 
+    network chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    All network requests were filtered out by the current selection or search term.
+  </p>
+</div>
+`;
+
+exports[`renders NetworkChart correctly 1`] = `
+<div
+  className="networkChart"
+>
+  <div
+    className="markerSettings"
+  >
+    <div
+      className="markerSettingsSpacer"
+    />
+    <div
+      className="markerSettingsSearchbar"
+    >
+      <label
+        className="markerSettingsSearchbarLabel"
+      >
+        Filter Markers: 
+        <form
+          className="idleSearchField markerSettingsSearchField"
+          onSubmit={[Function]}
+        >
+          <input
+            className="idleSearchFieldInput"
+            name="search"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            required="required"
+            title="Only display markers that match a certain name"
+            type="search"
+            value=""
+          />
+          <input
+            className="idleSearchFieldButton"
+            onClick={[Function]}
+            onFocus={[Function]}
+            type="reset"
+          />
+        </form>
+      </label>
+    </div>
+  </div>
+  <div
+    className="chartViewport"
+    onMouseDown={[Function]}
+    onWheel={[Function]}
+  >
+    <div>
+      <canvas
+        className="chartCanvas networkChartCanvas"
+        onDoubleClick={[Function]}
+        onMouseDown={[Function]}
+        onMouseMove={[Function]}
+        onMouseOut={[Function]}
+      />
+    </div>
+    <div
+      className="chartViewportShiftScroll hidden"
+    >
+      Zoom Chart:
+      <kbd
+        className="chartViewportShiftScrollKbd"
+      >
+        Shift
+      </kbd>
+      <kbd
+        className="chartViewportShiftScrollKbd"
+      >
+        Scroll
+      </kbd>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`renders NetworkChart correctly 2`] = `
+Array [
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    200,
+    300,
+  ],
+  Array [
+    "set lineWidth",
+    1,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
+    "fillRect",
+    1,
+    1,
+    66.9655172413793,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    2,
+    68.9655172413793,
+    11,
+  ],
+  Array [
+    "fillRect",
+    1,
+    13,
+    66.9655172413793,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    7.896551724137937,
+    17,
+    66.96551724137927,
+    1,
+  ],
+  Array [
+    "fillRect",
+    6.896551724137937,
+    18,
+    68.96551724137927,
+    11,
+  ],
+  Array [
+    "fillRect",
+    7.896551724137937,
+    29,
+    66.96551724137927,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    14.793103448275874,
+    33,
+    66.96551724137929,
+    1,
+  ],
+  Array [
+    "fillRect",
+    13.793103448275874,
+    34,
+    68.96551724137929,
+    11,
+  ],
+  Array [
+    "fillRect",
+    14.793103448275874,
+    45,
+    66.96551724137929,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    21.68965517241378,
+    49,
+    66.9655172413793,
+    1,
+  ],
+  Array [
+    "fillRect",
+    20.68965517241378,
+    50,
+    68.9655172413793,
+    11,
+  ],
+  Array [
+    "fillRect",
+    21.68965517241378,
+    61,
+    66.9655172413793,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    28.58620689655171,
+    65,
+    66.96551724137933,
+    1,
+  ],
+  Array [
+    "fillRect",
+    27.58620689655171,
+    66,
+    68.96551724137933,
+    11,
+  ],
+  Array [
+    "fillRect",
+    28.58620689655171,
+    77,
+    66.96551724137933,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    35.48275862068965,
+    81,
+    66.96551724137929,
+    1,
+  ],
+  Array [
+    "fillRect",
+    34.48275862068965,
+    82,
+    68.96551724137929,
+    11,
+  ],
+  Array [
+    "fillRect",
+    35.48275862068965,
+    93,
+    66.96551724137929,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    42.37931034482759,
+    97,
+    66.96551724137927,
+    1,
+  ],
+  Array [
+    "fillRect",
+    41.37931034482759,
+    98,
+    68.96551724137927,
+    11,
+  ],
+  Array [
+    "fillRect",
+    42.37931034482759,
+    109,
+    66.96551724137927,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    49.27586206896552,
+    113,
+    66.96551724137929,
+    1,
+  ],
+  Array [
+    "fillRect",
+    48.27586206896552,
+    114,
+    68.96551724137929,
+    11,
+  ],
+  Array [
+    "fillRect",
+    49.27586206896552,
+    125,
+    66.96551724137929,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    56.17241379310342,
+    129,
+    66.96551724137932,
+    1,
+  ],
+  Array [
+    "fillRect",
+    55.17241379310342,
+    130,
+    68.96551724137932,
+    11,
+  ],
+  Array [
+    "fillRect",
+    56.17241379310342,
+    141,
+    66.96551724137932,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    63.06896551724137,
+    145,
+    66.96551724137933,
+    1,
+  ],
+  Array [
+    "fillRect",
+    62.06896551724137,
+    146,
+    68.96551724137933,
+    11,
+  ],
+  Array [
+    "fillRect",
+    63.06896551724137,
+    157,
+    66.96551724137933,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#eee",
+  ],
+  Array [
+    "fillRect",
+    0,
+    15,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    31,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    47,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    63,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    79,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    95,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    111,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    127,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    143,
+    200,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    159,
+    200,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    150,
+    0,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "rgba(255, 255, 255, 0.8)",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "rgba(255, 255, 255, 0.0)",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "rgba(255, 255, 255, 0.8)",
+          ],
+          Array [
+            1,
+            "rgba(255, 255, 255, 0.0)",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    16,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    32,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    48,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    64,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    80,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    96,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    112,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    128,
+    150,
+    15,
+  ],
+  Array [
+    "fillRect",
+    0,
+    144,
+    150,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Network",
+    5,
+    11,
+  ],
+]
+`;

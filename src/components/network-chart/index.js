@@ -6,8 +6,8 @@
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import MarkerChartCanvas from './Canvas';
-import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
 import MarkerSettings from '../shared/MarkerSettings';
+import NetworkChartEmptyReasons from './NetworkChartEmptyReasons';
 
 import {
   selectedThreadSelectors,
@@ -42,8 +42,8 @@ type DispatchProps = {|
 
 type StateProps = {|
   +markers: TracingMarker[],
-  +markerTimingRows: MarkerTimingRows,
-  +maxMarkerRows: number,
+  +networkTimingRows: MarkerTimingRows,
+  +maxNetworkRows: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +interval: Milliseconds,
   +threadIndex: number,
@@ -52,7 +52,7 @@ type StateProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class MarkerChart extends React.PureComponent<Props> {
+class NetworkChart extends React.PureComponent<Props> {
   /**
    * Determine the maximum zoom of the viewport.
    */
@@ -63,10 +63,10 @@ class MarkerChart extends React.PureComponent<Props> {
 
   render() {
     const {
-      maxMarkerRows,
+      maxNetworkRows,
       timeRange,
       threadIndex,
-      markerTimingRows,
+      networkTimingRows,
       markers,
       previewSelection,
       updatePreviewSelection,
@@ -74,13 +74,13 @@ class MarkerChart extends React.PureComponent<Props> {
 
     // The viewport needs to know about the height of what it's drawing, calculate
     // that here at the top level component.
-    const maxViewportHeight = maxMarkerRows * ROW_HEIGHT;
+    const maxViewportHeight = maxNetworkRows * ROW_HEIGHT;
 
     return (
-      <div className="markerChart">
+      <div className="networkChart">
         <MarkerSettings />
         {markers.length === 0 ? (
-          <MarkerChartEmptyReasons />
+          <NetworkChartEmptyReasons />
         ) : (
           <MarkerChartCanvas
             key={threadIndex}
@@ -92,7 +92,7 @@ class MarkerChart extends React.PureComponent<Props> {
               maximumZoom: this.getMaximumZoom(),
             }}
             chartProps={{
-              markerTimingRows,
+              networkTimingRows,
               markers,
               updatePreviewSelection,
               rangeStart: timeRange.start,
@@ -107,23 +107,27 @@ class MarkerChart extends React.PureComponent<Props> {
   }
 }
 
-// This function is given the MarkerChartCanvas's chartProps.
+// This function is given the NetworkChartCanvas's chartProps.
 function viewportNeedsUpdate(
-  prevProps: { +markerTimingRows: MarkerTimingRows },
-  newProps: { +markerTimingRows: MarkerTimingRows }
+  prevProps: { +networkTimingRows: MarkerTimingRows },
+  newProps: { +networkTimingRows: MarkerTimingRows }
 ) {
-  return prevProps.markerTimingRows !== newProps.markerTimingRows;
+  return prevProps.networkTimingRows !== newProps.networkTimingRows;
 }
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
-    const markerTimingRows = selectedThreadSelectors.getMarkerChartTiming(
+    const markers = selectedThreadSelectors.getNetworkChartTracingMarkers(
       state
     );
+    const networkTimingRows = selectedThreadSelectors.getNetworkChartTiming(
+      state
+    );
+
     return {
-      markers: selectedThreadSelectors.getMarkerChartTracingMarkers(state),
-      markerTimingRows,
-      maxMarkerRows: markerTimingRows.length,
+      markers,
+      networkTimingRows,
+      maxNetworkRows: networkTimingRows.length,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
@@ -131,6 +135,6 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     };
   },
   mapDispatchToProps: { updatePreviewSelection },
-  component: MarkerChart,
+  component: NetworkChart,
 };
 export default explicitConnect(options);

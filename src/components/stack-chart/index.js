@@ -11,15 +11,25 @@ import {
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
+  getScrollToSelectionGeneration,
 } from '../../reducers/profile-view';
+import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
   getCategoryColorStrategy,
   getLabelingStrategy,
 } from '../../reducers/stack-chart';
 import StackSettings from '../shared/StackSettings';
-import { updatePreviewSelection } from '../../actions/profile-view';
+import {
+  updatePreviewSelection,
+  changeSelectedCallNode,
+} from '../../actions/profile-view';
 
+import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import type { Thread } from '../../types/profile';
+import type {
+  CallNodeInfo,
+  IndexIntoCallNodeTable,
+} from '../../types/profile-derived';
 import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
@@ -46,9 +56,14 @@ type StateProps = {|
   +getCategory: GetCategory,
   +getLabel: GetLabel,
   +previewSelection: PreviewSelection,
+  +threadIndex: number,
+  +callNodeInfo: CallNodeInfo,
+  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +scrollToSelectionGeneration: number,
 |};
 
 type DispatchProps = {|
+  +changeSelectedCallNode: typeof changeSelectedCallNode,
   +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
@@ -63,6 +78,16 @@ class StackChartGraph extends React.PureComponent<Props> {
     return interval / (end - start);
   }
 
+  _onSelectedCallNodeChange = (
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => {
+    const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
+    changeSelectedCallNode(
+      threadIndex,
+      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+    );
+  };
+
   render() {
     const {
       thread,
@@ -74,6 +99,9 @@ class StackChartGraph extends React.PureComponent<Props> {
       getLabel,
       previewSelection,
       updatePreviewSelection,
+      callNodeInfo,
+      selectedCallNodeIndex,
+      scrollToSelectionGeneration,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -100,6 +128,10 @@ class StackChartGraph extends React.PureComponent<Props> {
               rangeStart: timeRange.start,
               rangeEnd: timeRange.end,
               stackFrameHeight: STACK_FRAME_HEIGHT,
+              callNodeInfo,
+              selectedCallNodeIndex,
+              onSelectionChange: this._onSelectedCallNodeChange,
+              scrollToSelectionGeneration,
             }}
           />
         </div>
@@ -123,9 +155,18 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       getCategory: getCategoryColorStrategy(state),
       getLabel: getLabelingStrategy(state),
       previewSelection: getPreviewSelection(state),
+      threadIndex: getSelectedThreadIndex(state),
+      callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+      selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
+        state
+      ),
+      scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     };
   },
-  mapDispatchToProps: { updatePreviewSelection },
+  mapDispatchToProps: {
+    changeSelectedCallNode,
+    updatePreviewSelection,
+  },
   component: StackChartGraph,
 };
 export default explicitConnect(options);

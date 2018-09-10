@@ -140,7 +140,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     const { threadIndex } = ownProps;
     const selectors = selectorsForThread(threadIndex);
     const { start, end } = getCommittedRange(state);
-    const networkTiming = selectors.getNetworkTiming(state);
+    const networkTiming = selectors.getNetworkTrackTiming(state);
     return {
       networkMarkers: selectors.getNetworkTracingMarkers(state),
       networkTiming: networkTiming,
