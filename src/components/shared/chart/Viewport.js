@@ -318,18 +318,30 @@ export const withChartViewport: WithChartViewport<*, *> =
         );
       };
 
-      _updatePreviewSelectionFromHorizontalViewportAsync(
+      /**
+       * Add a batched update to the preview selection.
+       *
+       * This method works asynchronously in order to avoid spamming the redux store
+       * with updates (which cause synchronous react renders) in response to mouse events.
+       * The actual redux update happens in _flushPendingPreviewSelectionUpdates(), which
+       * processes all queued updates from a requestAnimationFrame callback.
+       */
+      _addBatchedPreviewSelectionUpdate(
         callback: HorizontalViewport => PreviewSelection
       ) {
         if (this._pendingPreviewSelectionUpdates.length === 0) {
           requestAnimationFrame(() =>
-            this._flushPendingProfileSelectionUpdates()
+            this._flushPendingPreviewSelectionUpdates()
           );
         }
         this._pendingPreviewSelectionUpdates.push(callback);
       }
 
-      _flushPendingProfileSelectionUpdates() {
+      /**
+       * Flush all batched preview selection updates at once, with only a single
+       * call to update the Redux store.
+       */
+      _flushPendingPreviewSelectionUpdates() {
         if (this._pendingPreviewSelectionUpdates.length !== 0) {
           const pendingUpdates = this._pendingPreviewSelectionUpdates;
           this._pendingPreviewSelectionUpdates = [];
@@ -358,16 +370,12 @@ export const withChartViewport: WithChartViewport<*, *> =
           setHasZoomedViaMousewheel();
         }
 
-        // Shift is a modifier that will change some mice to scroll horizontally, check
-        // for that here.
-        const deltaKey = event.deltaY === 0 ? 'deltaX' : 'deltaY';
-
-        // Accumulate the scroll delta here. Only apply it once per frame to avoid
-        // spamming the Redux store with updates.
         const deltaY = getNormalizedScrollDelta(
           event,
           this.state.containerHeight,
-          deltaKey
+          // Shift is a modifier that will change some mice to scroll horizontally, check
+          // for that here.
+          event.deltaY === 0 ? 'deltaX' : 'deltaY'
         );
 
         const mouseX = event.clientX;
@@ -375,7 +383,7 @@ export const withChartViewport: WithChartViewport<*, *> =
 
         const { maximumZoom } = this.props.viewportProps;
 
-        this._updatePreviewSelectionFromHorizontalViewportAsync(
+        this._addBatchedPreviewSelectionUpdate(
           ({ viewportLeft, viewportRight }) => {
             const mouseCenter = (mouseX - containerLeft) / containerWidth;
 
@@ -488,7 +496,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         }
 
         if (!disableHorizontalMovement) {
-          this._updatePreviewSelectionFromHorizontalViewportAsync(
+          this._addBatchedPreviewSelectionUpdate(
             ({ viewportLeft, viewportRight }) => {
               // Calculate left and right in terms of the unit interval of the profile range.
               const viewportLength = viewportRight - viewportLeft;
@@ -566,11 +574,13 @@ export const withChartViewport: WithChartViewport<*, *> =
           isSizeSet,
         } = this.state;
 
-        const viewportClassName = classNames({
-          chartViewport: true,
-          dragging: isDragging,
-          ...(className ? { [className]: true } : {}),
-        });
+        const viewportClassName = classNames(
+          {
+            chartViewport: true,
+            dragging: isDragging,
+          },
+          className
+        );
 
         const shiftScrollClassName = classNames({
           chartViewportShiftScroll: true,
