@@ -5,12 +5,13 @@
 
 import React, { PureComponent } from 'react';
 import bisection from 'bisection';
+import { ensureExists } from '../../utils/flow';
 import { timeCode } from '../../utils/time-code';
 import { getSampleCallNodes } from '../../profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 import './StackGraph.css';
 
-import type { Thread } from '../../types/profile';
+import type { Thread, CategoryList } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type {
   CallNodeInfo,
@@ -24,6 +25,7 @@ type Props = {|
   +rangeEnd: Milliseconds,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +categories: CategoryList,
   +onStackClick: (time: Milliseconds) => void,
 |};
 
@@ -67,6 +69,7 @@ class StackGraph extends PureComponent<Props> {
       rangeEnd,
       callNodeInfo,
       selectedCallNodeIndex,
+      categories,
     } = this.props;
 
     const devicePixelRatio = canvas.ownerDocument
@@ -134,6 +137,10 @@ class StackGraph extends PureComponent<Props> {
       height: [],
       xPos: [],
     };
+    const idleSamples = {
+      height: [],
+      xPos: [],
+    };
     const highlightedSamples = {
       height: [],
       xPos: [],
@@ -153,33 +160,47 @@ class StackGraph extends PureComponent<Props> {
       }
       const height = callNodeTable.depth[callNodeIndex] * yPixelsPerDepth;
       const xPos = (sampleTime - range[0]) * xPixelsPerMs;
+      let samplesBucket;
       if (hasSelectedCallNodePrefix(callNodeIndex)) {
-        highlightedSamples.height.push(height);
-        highlightedSamples.xPos.push(xPos);
+        samplesBucket = highlightedSamples;
       } else {
-        regularSamples.height.push(height);
-        regularSamples.xPos.push(xPos);
+        const stackIndex = ensureExists(
+          thread.samples.stack[i],
+          'A stack must exist for this sample, since a callNodeIndex exists.'
+        );
+        const categoryIndex = thread.stackTable.category[stackIndex];
+        const category = categories[categoryIndex];
+        if (category.name === 'Idle') {
+          samplesBucket = idleSamples;
+        } else {
+          samplesBucket = regularSamples;
+        }
       }
+      samplesBucket.height.push(height);
+      samplesBucket.xPos.push(xPos);
       nextMinTime = sampleTime + minGapMs;
     }
 
-    // Draw the regular samples first, and then the highlighted samples.
-    // This means that we only set ctx.fillStyle twice, which saves on time
-    // that's spent parsing color strings.
-    ctx.fillStyle = BLUE_40;
-    for (let i = 0; i < regularSamples.height.length; i++) {
-      const height = regularSamples.height[i];
-      const startY = canvas.height - height;
-      const xPos = regularSamples.xPos[i];
-      ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
+    type SamplesBucket = {
+      height: number[],
+      xPos: number[],
+    };
+    function drawSamples(samplesBucket: SamplesBucket, color: string) {
+      ctx.fillStyle = color;
+      for (let i = 0; i < samplesBucket.height.length; i++) {
+        const height = samplesBucket.height[i];
+        const startY = canvas.height - height;
+        const xPos = samplesBucket.xPos[i];
+        ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
+      }
     }
-    ctx.fillStyle = BLUE_70;
-    for (let i = 0; i < highlightedSamples.height.length; i++) {
-      const height = highlightedSamples.height[i];
-      const startY = canvas.height - height;
-      const xPos = highlightedSamples.xPos[i];
-      ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
-    }
+
+    // Draw the samples in multiple passes, separated by color. This reduces the calls
+    // to ctx.fillStyle, which saves on time that's spent parsing color strings.
+    const lighterBlue = '#c5e1fe';
+    drawSamples(regularSamples, BLUE_40);
+    drawSamples(highlightedSamples, BLUE_70);
+    drawSamples(idleSamples, lighterBlue);
   }
 
   _onMouseUp = (e: SyntheticMouseEvent<>) => {

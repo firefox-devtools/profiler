@@ -11,6 +11,7 @@ import {
   selectorsForThread,
   getProfileInterval,
   getCommittedRange,
+  getCategories,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
@@ -31,7 +32,7 @@ import {
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 import './TrackThread.css';
 
-import type { Thread, ThreadIndex } from '../../types/profile';
+import type { Thread, ThreadIndex, CategoryList } from '../../types/profile';
 import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
   CallNodeInfo,
@@ -55,6 +56,7 @@ type StateProps = {|
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
+  +categories: CategoryList,
 |};
 
 type DispatchProps = {|
@@ -123,6 +125,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       callNodeInfo,
       selectedCallNodeIndex,
       unfilteredSamplesRange,
+      categories,
     } = this.props;
 
     const processType = thread.processType;
@@ -167,6 +170,7 @@ class TimelineTrackThread extends PureComponent<Props> {
           rangeEnd={rangeEnd}
           callNodeInfo={callNodeInfo}
           selectedCallNodeIndex={selectedCallNodeIndex}
+          categories={categories}
           onStackClick={this._onStackClick}
         />
         <EmptyThreadIndicator
@@ -198,6 +202,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       interval: getProfileInterval(state),
       rangeStart: committedRange.start,
       rangeEnd: committedRange.end,
+      categories: getCategories(state),
     };
   },
   mapDispatchToProps: {
