@@ -181,9 +181,6 @@ class StackGraph extends PureComponent<Props> {
       nextMinTime = sampleTime + minGapMs;
     }
 
-    // Draw the regular samples first, and then the highlighted samples.
-    // This means that we only set ctx.fillStyle twice, which saves on time
-    // that's spent parsing color strings.
     type SamplesBucket = {
       height: number[],
       xPos: number[],
@@ -198,6 +195,8 @@ class StackGraph extends PureComponent<Props> {
       }
     }
 
+    // Draw the samples in multiple passes, separated by color. This reduces the calls
+    // to ctx.fillStyle, which saves on time that's spent parsing color strings.
     const lighterBlue = '#c5e1fe';
     drawSamples(regularSamples, BLUE_40);
     drawSamples(highlightedSamples, BLUE_70);
