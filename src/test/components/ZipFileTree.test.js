@@ -21,6 +21,12 @@ describe('calltree/ZipFileTree', function() {
       'foo/profile2.json',
       'baz/profile3.json',
     ]);
+
+    // Some child components render to canvas.
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => mockCanvasContext());
+
     const component = mount(
       <Provider store={store}>
         <ZipFileViewer />
