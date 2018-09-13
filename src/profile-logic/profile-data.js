@@ -150,6 +150,10 @@ export function getCallNodeInfo(
   });
 }
 
+/**
+ * Take a samples table, and return an array that contain indexes that point to the
+ * leaf most call node, or null.
+ */
 export function getSampleCallNodes(
   samples: SamplesTable,
   stackIndexToCallNodeIndex: {
@@ -159,6 +163,117 @@ export function getSampleCallNodes(
   return samples.stack.map(stack => {
     return stack === null ? null : stackIndexToCallNodeIndex[stack];
   });
+}
+
+export type SelectedState =
+  // Samples can be filtered through various operations, like searching, or
+  // call tree transforms.
+  | 'FILTERED_OUT'
+  // This sample is selected because either the tip or an ancestor call node matches
+  // the currently selected call node.
+  | 'SELECTED'
+  // This call node is not selected, and the stacks are ordered before the selected
+  // call node as sorted by the getTreeOrderComparator.
+  | 'UNSELECTED_ORDERED_BEFORE_SELECTED'
+  // This call node is not selected, and the stacks are ordered after the selected
+  // call node as sorted by the getTreeOrderComparator.
+  | 'UNSELECTED_ORDERED_AFTER_SELECTED';
+
+/**
+ * Go through the samples, and determine their current state.
+ *
+ * For samples that are neither 'FILTERED_OUT' nor 'SELECTED', this function compares
+ * the sample's call node to the selected call node, in tree order. It uses the same
+ * ordering as the function compareCallNodes in getTreeOrderComparator. But it does not
+ * call compareCallNodes with the selected node for each sample's call node, because doing
+ * so would recompute information about the selected call node on every call. Instead, it
+ * has an equivalent implementation that is faster because it only computes information
+ * about the selected call node's ancestors once.
+ */
+export function getSamplesSelectedStates(
+  callNodeTable: CallNodeTable,
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  selectedCallNodeIndex: IndexIntoCallNodeTable | null
+): SelectedState[] {
+  const result = new Array(sampleCallNodes.length);
+
+  const selectedCallNodeDepth =
+    selectedCallNodeIndex === -1 || selectedCallNodeIndex === null
+      ? 0
+      : callNodeTable.depth[selectedCallNodeIndex];
+
+  // Find all of the call nodes from the current depth to the root.
+  const selectedCallNodeAtDepth: IndexIntoCallNodeTable[] = new Array(
+    selectedCallNodeDepth
+  );
+  for (
+    let callNodeIndex = selectedCallNodeIndex, depth = selectedCallNodeDepth;
+    depth >= 0 && callNodeIndex !== null;
+    depth--, callNodeIndex = callNodeTable.prefix[callNodeIndex]
+  ) {
+    selectedCallNodeAtDepth[depth] = callNodeIndex;
+  }
+
+  /**
+   * Take a call node, and compute its selected state.
+   */
+  function getSelectedStateFromCallNode(
+    callNode: IndexIntoCallNodeTable | null
+  ): SelectedState {
+    let callNodeIndex = callNode;
+    if (callNodeIndex === null) {
+      return 'FILTERED_OUT';
+    }
+
+    // Walk the call nodes toward the root, and get the call node at the the depth
+    // of the selected call node.
+    let depth = callNodeTable.depth[callNodeIndex];
+    while (depth > selectedCallNodeDepth) {
+      callNodeIndex = callNodeTable.prefix[callNodeIndex];
+      depth--;
+    }
+
+    if (callNodeIndex === selectedCallNodeIndex) {
+      // This sample's call node at the depth matches the selected call node.
+      return 'SELECTED';
+    }
+
+    const prevCallNodeIndex = callNodeIndex;
+    while (true) {
+      // Walk the call nodes towards the root.
+      callNodeIndex = callNodeTable.prefix[callNodeIndex];
+      depth--;
+      if (
+        callNodeIndex === -1 ||
+        callNodeIndex === selectedCallNodeAtDepth[depth]
+      ) {
+        // This stack is not currently selected, determine if it's before or after
+        // the selected call node in order to provide a stable ordering when rendering
+        // visualizations.
+        return prevCallNodeIndex <= selectedCallNodeAtDepth[depth + 1]
+          ? 'UNSELECTED_ORDERED_BEFORE_SELECTED'
+          : 'UNSELECTED_ORDERED_AFTER_SELECTED';
+      }
+    }
+
+    // This code is unreachable, but Flow doesn't know that and thinks this
+    // function could return undefined. So throw an error.
+    /* eslint-disable no-unreachable */
+    throw new Error('unreachable');
+    /* eslint-enable no-unreachable */
+  }
+
+  // Go through each sample, and label its state.
+  for (
+    let sampleIndex = 0;
+    sampleIndex < sampleCallNodes.length;
+    sampleIndex++
+  ) {
+    result[sampleIndex] = getSelectedStateFromCallNode(
+      sampleCallNodes[sampleIndex]
+    );
+  }
+  return result;
 }
 
 /**
@@ -1328,4 +1443,82 @@ export function getOriginAnnotationForFunc(
   }
 
   return '';
+}
+
+/**
+ * Return a function that can compare two samples' call nodes, and determine a sort order.
+ *
+ * The order is determined as follows:
+ *  - Ancestor call nodes are ordered before their descendants.
+ *  - Sibling call nodes are ordered by their call node index.
+ * This order can be different than the order of the rows that are displayed in the
+ * call tree, because it does not take any sample information into account. This
+ * makes it independent of any range selection and cheaper to compute.
+ */
+export function getTreeOrderComparator(
+  callNodeTable: CallNodeTable,
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>
+): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
+  /**
+   * Determine the ordering of two non-null call nodes.
+   */
+  function compareCallNodes(
+    callNodeA: IndexIntoCallNodeTable,
+    callNodeB: IndexIntoCallNodeTable
+  ): number {
+    const initialDepthA = callNodeTable.depth[callNodeA];
+    const initialDepthB = callNodeTable.depth[callNodeB];
+    let depthA = initialDepthA;
+    let depthB = initialDepthB;
+
+    // Walk call tree towards the roots until the call nodes are at the same depth.
+    while (depthA > depthB) {
+      callNodeA = callNodeTable.prefix[callNodeA];
+      depthA--;
+    }
+    while (depthB > depthA) {
+      callNodeB = callNodeTable.prefix[callNodeB];
+      depthB--;
+    }
+
+    // Sort the call nodes by the initial depth.
+    if (callNodeA === callNodeB) {
+      return initialDepthA - initialDepthB;
+    }
+
+    // The call nodes are at the same depth, walk towards the roots until a match is
+    // is found, then sort them based on stack order.
+    while (true) {
+      const parentNodeA = callNodeTable.prefix[callNodeA];
+      const parentNodeB = callNodeTable.prefix[callNodeB];
+      if (parentNodeA === parentNodeB) {
+        break;
+      }
+      callNodeA = parentNodeA;
+      callNodeB = parentNodeB;
+    }
+
+    return callNodeA - callNodeB;
+  }
+
+  /**
+   * Determine the ordering of (possibly null) call nodes for two given samples.
+   */
+  return function treeOrderComparator(
+    sampleA: IndexIntoSamplesTable,
+    sampleB: IndexIntoSamplesTable
+  ): number {
+    const callNodeA = sampleCallNodes[sampleA];
+    const callNodeB = sampleCallNodes[sampleB];
+    if (callNodeA === null) {
+      if (callNodeB === null) {
+        return 0;
+      }
+      return -1;
+    }
+    if (callNodeB === null) {
+      return 1;
+    }
+    return compareCallNodes(callNodeA, callNodeB);
+  };
 }

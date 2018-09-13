@@ -7,11 +7,19 @@ import React, { PureComponent } from 'react';
 import bisection from 'bisection';
 import { ensureExists } from '../../utils/flow';
 import { timeCode } from '../../utils/time-code';
-import { getSampleCallNodes } from '../../profile-logic/profile-data';
+import {
+  getSampleCallNodes,
+  getSamplesSelectedStates,
+  getSampleIndexClosestToTime,
+} from '../../profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 import './StackGraph.css';
 
-import type { Thread, CategoryList } from '../../types/profile';
+import type {
+  Thread,
+  CategoryList,
+  IndexIntoSamplesTable,
+} from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type {
   CallNodeInfo,
@@ -26,28 +34,21 @@ type Props = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
-  +onStackClick: (time: Milliseconds) => void,
+  +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
 |};
 
 class StackGraph extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement = null;
-  _requestedAnimationFrame: boolean = false;
   _resizeListener: () => void;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
     (this._canvas = canvas);
   _resizeListener = () => this.forceUpdate();
 
-  _scheduleDraw() {
-    if (!this._requestedAnimationFrame) {
-      this._requestedAnimationFrame = true;
-      window.requestAnimationFrame(() => {
-        this._requestedAnimationFrame = false;
-        const canvas = this._canvas;
-        if (canvas) {
-          timeCode('StackGraph render', () => {
-            this.drawCanvas(canvas);
-          });
-        }
+  _renderCanvas() {
+    const canvas = this._canvas;
+    if (canvas !== null) {
+      timeCode('ThreadStackGraph render', () => {
+        this.drawCanvas(canvas);
       });
     }
   }
@@ -85,6 +86,11 @@ class StackGraph extends PureComponent<Props> {
       thread.samples,
       stackIndexToCallNodeIndex
     );
+    const samplesSelectedStates = getSamplesSelectedStates(
+      callNodeTable,
+      sampleCallNodes,
+      selectedCallNodeIndex
+    );
     for (let i = 0; i < callNodeTable.depth.length; i++) {
       if (callNodeTable.depth[i] > maxDepth) {
         maxDepth = callNodeTable.depth[i];
@@ -100,24 +106,6 @@ class StackGraph extends PureComponent<Props> {
       0.8,
       trueIntervalPixelWidth * multiplier
     );
-    let selectedCallNodeDepth = 0;
-    if (selectedCallNodeIndex !== -1 && selectedCallNodeIndex !== null) {
-      selectedCallNodeDepth = callNodeTable.depth[selectedCallNodeIndex];
-    }
-    function hasSelectedCallNodePrefix(callNodePrefix) {
-      let callNodeIndex = callNodePrefix;
-      if (callNodeIndex === null) {
-        return false;
-      }
-      for (
-        let depth = callNodeTable.depth[callNodeIndex];
-        depth > selectedCallNodeDepth;
-        depth--
-      ) {
-        callNodeIndex = callNodeTable.prefix[callNodeIndex];
-      }
-      return callNodeIndex === selectedCallNodeIndex;
-    }
 
     const firstDrawnSampleTime = range[0] - drawnIntervalWidth / xPixelsPerMs;
     const lastDrawnSampleTime = range[1];
@@ -161,7 +149,7 @@ class StackGraph extends PureComponent<Props> {
       const height = callNodeTable.depth[callNodeIndex] * yPixelsPerDepth;
       const xPos = (sampleTime - range[0]) * xPixelsPerMs;
       let samplesBucket;
-      if (hasSelectedCallNodePrefix(callNodeIndex)) {
+      if (samplesSelectedStates[i] === 'SELECTED') {
         samplesBucket = highlightedSamples;
       } else {
         const stackIndex = ensureExists(
@@ -206,17 +194,24 @@ class StackGraph extends PureComponent<Props> {
   _onMouseUp = (e: SyntheticMouseEvent<>) => {
     const canvas = this._canvas;
     if (canvas) {
-      const { rangeStart, rangeEnd } = this.props;
+      const { rangeStart, rangeEnd, thread, interval } = this.props;
       const r = canvas.getBoundingClientRect();
 
       const x = e.pageX - r.left;
       const time = rangeStart + x / r.width * (rangeEnd - rangeStart);
-      this.props.onStackClick(time);
+
+      const sampleIndex = getSampleIndexClosestToTime(
+        thread.samples,
+        time,
+        interval
+      );
+
+      this.props.onSampleClick(sampleIndex);
     }
   };
 
   render() {
-    this._scheduleDraw();
+    this._renderCanvas();
     return (
       <div className="timelineStackGraph">
         <canvas
