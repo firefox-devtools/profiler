@@ -7,6 +7,7 @@ import * as React from 'react';
 import StackChartGraph from '../../components/stack-chart';
 import { mount } from 'enzyme';
 import { Provider } from 'react-redux';
+import { MARGIN_LEFT, MARGIN_RIGHT } from '../../components/stack-chart/Canvas';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -16,7 +17,8 @@ import { changeSelectedCallNode } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 jest.useFakeTimers();
 
-const GRAPH_WIDTH = 200;
+const GRAPH_BASE_WIDTH = 200;
+const GRAPH_WIDTH = GRAPH_BASE_WIDTH + MARGIN_LEFT + MARGIN_RIGHT;
 const GRAPH_HEIGHT = 300;
 
 describe('StackChart', function() {
@@ -88,7 +90,12 @@ describe('StackChart', function() {
     // Click the first frame
     stackChartCanvas.simulate(
       'mousemove',
-      getMouseEvent({ nativeEvent: { offsetX: GRAPH_WIDTH / 2, offsetY: 10 } })
+      getMouseEvent({
+        nativeEvent: {
+          offsetX: GRAPH_BASE_WIDTH / 2 + MARGIN_LEFT,
+          offsetY: 10,
+        },
+      })
     );
     stackChartCanvas.simulate('mousedown');
 
@@ -99,7 +106,12 @@ describe('StackChart', function() {
     // Click on a region without any drawn box to deselect
     stackChartCanvas.simulate(
       'mousemove',
-      getMouseEvent({ nativeEvent: { offsetX: GRAPH_WIDTH / 2, offsetY: 100 } })
+      getMouseEvent({
+        nativeEvent: {
+          offsetX: GRAPH_BASE_WIDTH / 2 + MARGIN_LEFT,
+          offsetY: 100,
+        },
+      })
     );
     stackChartCanvas.simulate('mousedown');
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
