@@ -234,7 +234,9 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               />
             </React.Fragment>
           ) : null}
-          <h3 className="sidebar-title2">This function across the entire tree</h3>
+          <h3 className="sidebar-title2">
+            This function across the entire tree
+          </h3>
           <SidebarDetail label="Running Time">
             {totalTimeForFunc.value}ms ({totalTimeForFuncPercent}%)
           </SidebarDetail>
