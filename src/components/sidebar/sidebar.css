@@ -14,6 +14,10 @@
   line-height: 1.5;
 }
 
+.sidebar-contents-wrapper {
+  display: grid;
+}
+
 .sidebar-titlegroup, .sidebar-title2, .sidebar-title3 {
   grid-column-start: span 2;
   min-width: 0; /* With this, the cell's minimum size is 0 instead of min-content */
