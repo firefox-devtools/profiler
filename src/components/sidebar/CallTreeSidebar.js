@@ -196,7 +196,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
 
     return (
       <aside className="sidebar sidebar-calltree">
-        <div class="sidebar-contents-wrapper">
+        <div className="sidebar-contents-wrapper">
           <header className="sidebar-titlegroup">
             <CanSelectContent
               tagName="h2"
