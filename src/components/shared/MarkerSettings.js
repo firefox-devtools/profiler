@@ -15,7 +15,7 @@ import type {
   ConnectedProps,
 } from '../../utils/connect';
 
-import './Settings.css';
+import './MarkerSettings.css';
 
 type StateProps = {|
   +searchString: string,
@@ -28,26 +28,20 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class Settings extends PureComponent<Props> {
-  constructor(props: Props) {
-    super(props);
-    (this: any)._onSearchFieldIdleAfterChange = this._onSearchFieldIdleAfterChange.bind(
-      this
-    );
-  }
-  _onSearchFieldIdleAfterChange(value: string) {
+  _onSearchFieldIdleAfterChange = (value: string) => {
     this.props.changeMarkersSearchString(value);
-  }
+  };
 
   render() {
     const { searchString } = this.props;
     return (
-      <div className="markerTableSettings">
-        <div className="markerTableSettingsSpacer" />
-        <div className="markerTableSettingsSearchbar">
-          <label className="markerTableSettingsSearchbarLabel">
+      <div className="markerSettings">
+        <div className="markerSettingsSpacer" />
+        <div className="markerSettingsSearchbar">
+          <label className="markerSettingsSearchbarLabel">
             {'Filter Markers: '}
             <IdleSearchField
-              className="markerTableSettingsSearchField"
+              className="markerSettingsSearchField"
               title="Only display markers that match a certain name"
               idlePeriod={200}
               defaultValue={searchString}

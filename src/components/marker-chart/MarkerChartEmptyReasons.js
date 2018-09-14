@@ -7,7 +7,6 @@ import React, { PureComponent } from 'react';
 
 import EmptyReasons from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
-import { getSelectedTab } from '../../reducers/url-state';
 
 import explicitConnect, {
   type ExplicitConnectOptions,
@@ -15,38 +14,26 @@ import explicitConnect, {
 } from '../../utils/connect';
 
 import type { State } from '../../types/store';
-import type { TabSlug } from '../../app-logic/tabs-handling';
-import type { Thread } from '../../types/profile';
 
 type StateProps = {|
-  +thread: Thread,
   +threadName: string,
-  +selectedTab: TabSlug,
+  +isMarkerChartEmptyInFullRange: boolean,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 class MarkerChartEmptyReasons extends PureComponent<Props> {
   render() {
-    const { selectedTab, thread, threadName } = this.props;
-
-    let reason;
-    let viewName = 'marker chart';
-    if (thread.markers.length === 0) {
-      reason = 'This thread contains no markers.';
-    } else if (selectedTab === 'network-chart') {
-      viewName = 'network chart';
-      reason = 'This thread has no network markers.';
-    } else {
-      // I can't think of a possible reason coming here at the moment as we
-      // don't have any search yet.
-      reason = 'No markers have been found in this thread.';
-    }
+    const { isMarkerChartEmptyInFullRange, threadName } = this.props;
 
     return (
       <EmptyReasons
         threadName={threadName}
-        reason={reason}
-        viewName={viewName}
+        reason={
+          isMarkerChartEmptyInFullRange
+            ? 'This thread contains no markers for this chart.'
+            : 'All markers were filtered out by the current selection or search term.'
+        }
+        viewName="marker chart"
       />
     );
   }
@@ -54,9 +41,10 @@ class MarkerChartEmptyReasons extends PureComponent<Props> {
 
 const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
   mapStateToProps: (state: State) => ({
-    thread: selectedThreadSelectors.getThread(state),
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
-    selectedTab: getSelectedTab(state),
+    isMarkerChartEmptyInFullRange: selectedThreadSelectors.getIsMarkerChartEmptyInFullRange(
+      state
+    ),
   }),
   component: MarkerChartEmptyReasons,
 };

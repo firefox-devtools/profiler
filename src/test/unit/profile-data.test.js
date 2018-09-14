@@ -13,13 +13,16 @@ import { processProfile } from '../../profile-logic/process-profile';
 import {
   resourceTypes,
   getCallNodeInfo,
-  getTracingMarkers,
   filterThreadByImplementation,
   getCallNodePathFromIndex,
   getSampleIndexClosestToTime,
   convertStackToCallNodePath,
   invertCallstack,
   getTimingsForPath,
+  getSampleCallNodes,
+  getCallNodeIndexFromPath,
+  getTreeOrderComparator,
+  getSamplesSelectedStates,
 } from '../../profile-logic/profile-data';
 import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
 import profileWithJS from '.././fixtures/profiles/timings-with-js';
@@ -464,83 +467,6 @@ describe('profile-data', function() {
       expect(mergedFuncListA).toEqual([0, 1, 2, 3, 4]);
       expect(mergedFuncListB).toEqual([0, 1, 2, 3, 5]);
       expect(callNodeTable.length).toEqual(6);
-    });
-  });
-  describe('getTracingMarkers', function() {
-    const profile = processProfile(getGeckoProfile());
-    const thread = profile.threads[0];
-    const tracingMarkers = getTracingMarkers(thread);
-
-    it('should fold the two reflow markers into one tracing marker', function() {
-      expect(tracingMarkers.length).toEqual(9);
-      expect(tracingMarkers[1]).toMatchObject({
-        start: 3,
-        dur: 5,
-        name: 'Reflow',
-        title: null,
-      });
-    });
-    it('should fold the two Rasterize markers into one tracing marker, after the reflow tracing marker', function() {
-      expect(tracingMarkers[2]).toMatchObject({
-        start: 4,
-        dur: 1,
-        name: 'Rasterize',
-        title: null,
-      });
-    });
-    it('should create a tracing marker for the MinorGC startTime/endTime marker', function() {
-      expect(tracingMarkers[4]).toMatchObject({
-        start: 11,
-        dur: 1,
-        name: 'MinorGC',
-        title: null,
-      });
-    });
-    it('should create a tracing marker for the DOMEvent marker', function() {
-      expect(tracingMarkers[3]).toMatchObject({
-        dur: 1,
-        name: 'DOMEvent',
-        start: 9,
-        title: null,
-      });
-    });
-    it('should create a tracing marker for the marker UserTiming', function() {
-      expect(tracingMarkers[5]).toMatchObject({
-        dur: 1,
-        name: 'UserTiming',
-        start: 12,
-        title: null,
-      });
-    });
-    it('should handle tracing markers without a start', function() {
-      expect(tracingMarkers[0]).toMatchObject({
-        start: -1,
-        dur: 2, // This duration doesn't represent much and won't be displayed anyway
-        name: 'Rasterize',
-        title: null,
-      });
-    });
-    it('should handle tracing markers without an end', function() {
-      expect(tracingMarkers[8]).toMatchObject({
-        start: 20,
-        dur: Infinity,
-        name: 'Rasterize',
-        title: null,
-      });
-    });
-    it('should handle nested tracing markers correctly', function() {
-      expect(tracingMarkers[6]).toMatchObject({
-        start: 13,
-        dur: 5,
-        name: 'Reflow',
-        title: null,
-      });
-      expect(tracingMarkers[7]).toMatchObject({
-        start: 14,
-        dur: 1,
-        name: 'Reflow',
-        title: null,
-      });
     });
   });
 });
@@ -1080,5 +1006,79 @@ describe('getTimingsForPath for an inverted tree', function() {
       },
       rootTime: 5,
     });
+  });
+});
+
+describe('getSamplesSelectedStates', function() {
+  const {
+    profile,
+    funcNamesDictPerThread: [{ A, B, C, D, E, F, G }],
+  } = getProfileFromTextSamples(`
+     A  A  A  A  A
+     B  B  E  E  E
+     C  D  F  G
+  `);
+  const thread = profile.threads[0];
+  const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
+    thread.stackTable,
+    thread.frameTable,
+    thread.funcTable,
+    0
+  );
+  const sampleCallNodes = getSampleCallNodes(
+    thread.samples,
+    stackIndexToCallNodeIndex
+  );
+  it('has test data where function indexes that match the call node indexes', function() {
+    // Assert that the function indexes match the call node indexes. This is true only
+    // because of the way the fixture data was constructed, but it is useful to have
+    // the call node indexes match the func indexes.
+    expect(getCallNodeIndexFromPath([A], callNodeTable)).toBe(A);
+    expect(getCallNodeIndexFromPath([A, B], callNodeTable)).toBe(B);
+    expect(getCallNodeIndexFromPath([A, B, C], callNodeTable)).toBe(C);
+    expect(getCallNodeIndexFromPath([A, E], callNodeTable)).toBe(E);
+    expect(getCallNodeIndexFromPath([A, E, F], callNodeTable)).toBe(F);
+    expect(getCallNodeIndexFromPath([A, E, G], callNodeTable)).toBe(G);
+  });
+
+  it('determines the selection status of all the samples', function() {
+    expect(getSamplesSelectedStates(callNodeTable, sampleCallNodes, B)).toEqual(
+      [
+        'SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+      ]
+    );
+    expect(getSamplesSelectedStates(callNodeTable, sampleCallNodes, E)).toEqual(
+      [
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'SELECTED',
+        'SELECTED',
+      ]
+    );
+    expect(getSamplesSelectedStates(callNodeTable, sampleCallNodes, D)).toEqual(
+      [
+        'UNSELECTED_ORDERED_BEFORE_SELECTED',
+        'SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+        'UNSELECTED_ORDERED_AFTER_SELECTED',
+      ]
+    );
+  });
+  it('can sort the samples based on their selection status', function() {
+    const comparator = getTreeOrderComparator(callNodeTable, sampleCallNodes);
+    const samples = [4, 2, 3, 0, 1]; // some random order
+    samples.sort(comparator);
+    expect(samples).toEqual([0, 1, 4, 2, 3]);
+    expect(comparator(0, 0)).toBe(0);
+    expect(comparator(2, 2)).toBe(0);
+    expect(comparator(4, 4)).toBe(0);
+    expect(comparator(0, 1)).toBe(-1);
+    expect(comparator(1, 0)).toBe(1);
   });
 });

@@ -1,23 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Empty Reasons shows a reason when a profil has no network markers 1`] = `
-<div
-  className="EmptyReasons"
->
-  <h3>
-    The 
-    network chart
-     is empty for “
-    Empty
-    ”
-  </h3>
-  <p>
-    This thread has no network markers.
-  </p>
-</div>
-`;
-
-exports[`Empty Reasons shows a reason when a profile has no marker 1`] = `
+exports[`MarkerChart EmptyReasons shows a reason when a profile has no markers 1`] = `
 <div
   className="EmptyReasons"
 >
@@ -29,55 +12,30 @@ exports[`Empty Reasons shows a reason when a profile has no marker 1`] = `
     ”
   </h3>
   <p>
-    This thread contains no markers.
+    This thread contains no markers for this chart.
   </p>
 </div>
 `;
 
-exports[`renders MarkerChart correctly 1`] = `
+exports[`MarkerChart EmptyReasons shows a reason when a profile's markers have been filtered out 1`] = `
 <div
-  className="markerChart"
+  className="EmptyReasons"
 >
-  <div
-    className="chartViewport"
-    onMouseDown={[Function]}
-    onWheel={[Function]}
-  >
-    <div>
-      <canvas
-        className="chartCanvas markerChartCanvas"
-        onDoubleClick={[Function]}
-        onMouseDown={[Function]}
-        onMouseMove={[Function]}
-        onMouseOut={[Function]}
-      />
-    </div>
-    <div
-      className="chartViewportShiftScroll hidden"
-    >
-      Zoom Chart:
-      <kbd
-        className="chartViewportShiftScrollKbd"
-      >
-        Shift
-      </kbd>
-      <kbd
-        className="chartViewportShiftScrollKbd"
-      >
-        Scroll
-      </kbd>
-    </div>
-  </div>
+  <h3>
+    The 
+    marker chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    All markers were filtered out by the current selection or search term.
+  </p>
 </div>
 `;
 
-exports[`renders MarkerChart correctly 2`] = `
+exports[`MarkerChart renders the hoveredItem markers properly 1`] = `
 Array [
-  Array [
-    "scale",
-    1,
-    1,
-  ],
   Array [
     "set fillStyle",
     "#ffffff",
@@ -95,64 +53,27 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
-    "measureText",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
-  ],
-  Array [
-    "measureText",
-    "…",
+    "Highlight",
   ],
   Array [
     "fillRect",
     1,
     1,
-    151.84615384615387,
+    248,
     1,
   ],
   Array [
     "fillRect",
     0,
     2,
-    153.84615384615387,
+    250,
     11,
   ],
   Array [
     "fillRect",
     1,
     13,
-    151.84615384615387,
-    1,
-  ],
-  Array [
-    "measureText",
-    "",
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
-    "fillRect",
-    170.23076923076923,
-    1,
-    59.53846153846152,
-    1,
-  ],
-  Array [
-    "fillRect",
-    169.23076923076923,
-    2,
-    61.53846153846152,
-    11,
-  ],
-  Array [
-    "fillRect",
-    170.23076923076923,
-    13,
-    59.53846153846152,
+    248,
     1,
   ],
   Array [
@@ -167,21 +88,21 @@ Array [
     "fillRect",
     1,
     17,
-    151.84615384615387,
+    248,
     1,
   ],
   Array [
     "fillRect",
     0,
     18,
-    153.84615384615387,
+    250,
     11,
   ],
   Array [
     "fillRect",
     1,
     29,
-    151.84615384615387,
+    248,
     1,
   ],
   Array [
@@ -197,7 +118,7 @@ Array [
   ],
   Array [
     "arc",
-    66.53846153846155,
+    105,
     39.5,
     3.75,
     0,
@@ -212,23 +133,23 @@ Array [
   ],
   Array [
     "fillRect",
-    77.92307692307693,
+    126,
     49,
-    151.84615384615384,
+    248,
     1,
   ],
   Array [
     "fillRect",
-    76.92307692307693,
+    125,
     50,
-    153.84615384615384,
+    250,
     11,
   ],
   Array [
     "fillRect",
-    77.92307692307693,
+    126,
     61,
-    151.84615384615384,
+    248,
     1,
   ],
   Array [
@@ -241,28 +162,24 @@ Array [
   ],
   Array [
     "fillRect",
-    77.92307692307693,
+    126,
     65,
-    74.92307692307693,
+    123,
     1,
   ],
   Array [
     "fillRect",
-    76.92307692307693,
+    125,
     66,
-    76.92307692307693,
+    125,
     11,
   ],
   Array [
     "fillRect",
-    77.92307692307693,
+    126,
     77,
-    74.92307692307693,
+    123,
     1,
-  ],
-  Array [
-    "measureText",
-    "click",
   ],
   Array [
     "set fillStyle",
@@ -271,7 +188,7 @@ Array [
   Array [
     "fillText",
     "click",
-    79.92307692307693,
+    128,
     75,
   ],
   Array [
@@ -283,7 +200,7 @@ Array [
   ],
   Array [
     "arc",
-    112.6923076923077,
+    180,
     87.5,
     3.75,
     0,
@@ -368,6 +285,16 @@ Array [
             1,
             "rgba(255, 255, 255, 0.0)",
           ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
         ],
       },
     },
@@ -451,10 +378,48 @@ Array [
 ]
 `;
 
-exports[`renders MarkerChart correctly 3`] = `
+exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`] = `
 <div
   className="markerChart"
 >
+  <div
+    className="markerSettings"
+  >
+    <div
+      className="markerSettingsSpacer"
+    />
+    <div
+      className="markerSettingsSearchbar"
+    >
+      <label
+        className="markerSettingsSearchbarLabel"
+      >
+        Filter Markers: 
+        <form
+          className="idleSearchField markerSettingsSearchField"
+          onSubmit={[Function]}
+        >
+          <input
+            className="idleSearchFieldInput"
+            name="search"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            required="required"
+            title="Only display markers that match a certain name"
+            type="search"
+            value=""
+          />
+          <input
+            className="idleSearchFieldButton"
+            onClick={[Function]}
+            onFocus={[Function]}
+            type="reset"
+          />
+        </form>
+      </label>
+    </div>
+  </div>
   <div
     className="chartViewport"
     onMouseDown={[Function]}
@@ -488,8 +453,13 @@ exports[`renders MarkerChart correctly 3`] = `
 </div>
 `;
 
-exports[`renders MarkerChart correctly 4`] = `
+exports[`MarkerChart renders the normal marker chart and matches the snapshot 2`] = `
 Array [
+  Array [
+    "scale",
+    1,
+    1,
+  ],
   Array [
     "set fillStyle",
     "#ffffff",
@@ -510,164 +480,32 @@ Array [
     "#45a1ff",
   ],
   Array [
-    "fillRect",
-    170.23076923076923,
-    1,
-    13.384615384615397,
-    1,
-  ],
-  Array [
-    "fillRect",
-    169.23076923076923,
-    2,
-    15.384615384615397,
-    11,
-  ],
-  Array [
-    "fillRect",
-    170.23076923076923,
-    13,
-    13.384615384615397,
-    1,
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
   ],
   Array [
     "measureText",
-    "",
-  ],
-  Array [
-    "set fillStyle",
-    "#eee",
-  ],
-  Array [
-    "fillRect",
-    0,
-    15,
-    200,
-    1,
-  ],
-  Array [
-    "createLinearGradient",
-    0,
-    0,
-    150,
-    0,
-  ],
-  Array [
-    "addColorStop",
-    0,
-    "rgba(255, 255, 255, 0.8)",
-  ],
-  Array [
-    "addColorStop",
-    1,
-    "rgba(255, 255, 255, 0.0)",
-  ],
-  Array [
-    "set fillStyle",
-    Object {
-      "addColorStop": [MockFunction] {
-        "calls": Array [
-          Array [
-            0,
-            "rgba(255, 255, 255, 0.8)",
-          ],
-          Array [
-            1,
-            "rgba(255, 255, 255, 0.0)",
-          ],
-        ],
-      },
-    },
-  ],
-  Array [
-    "fillRect",
-    0,
-    0,
-    150,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
-    "Load event",
-    5,
-    11,
-  ],
-]
-`;
-
-exports[`renders the hoveredItem markers properly 1`] = `
-Array [
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    0,
-    200,
-    300,
-  ],
-  Array [
-    "set lineWidth",
-    1,
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
-    "fillRect",
-    138.5,
-    1,
-    48,
-    1,
-  ],
-  Array [
-    "fillRect",
-    137.5,
-    2,
-    50,
-    11,
-  ],
-  Array [
-    "fillRect",
-    138.5,
-    13,
-    48,
-    1,
-  ],
-  Array [
-    "measureText",
-    "",
-  ],
-  Array [
-    "set fillStyle",
-    "Highlight",
+    "…",
   ],
   Array [
     "fillRect",
     1,
     1,
-    123,
+    248,
     1,
   ],
   Array [
     "fillRect",
     0,
     2,
-    125,
+    250,
     11,
   ],
   Array [
     "fillRect",
     1,
     13,
-    123,
+    248,
     1,
   ],
   Array [
@@ -682,21 +520,21 @@ Array [
     "fillRect",
     1,
     17,
-    123,
+    248,
     1,
   ],
   Array [
     "fillRect",
     0,
     18,
-    125,
+    250,
     11,
   ],
   Array [
     "fillRect",
     1,
     29,
-    123,
+    248,
     1,
   ],
   Array [
@@ -712,7 +550,7 @@ Array [
   ],
   Array [
     "arc",
-    55,
+    105,
     39.5,
     3.75,
     0,
@@ -727,23 +565,23 @@ Array [
   ],
   Array [
     "fillRect",
-    63.5,
+    126,
     49,
-    123,
+    248,
     1,
   ],
   Array [
     "fillRect",
-    62.5,
-    50,
     125,
+    50,
+    250,
     11,
   ],
   Array [
     "fillRect",
-    63.5,
+    126,
     61,
-    123,
+    248,
     1,
   ],
   Array [
@@ -756,24 +594,28 @@ Array [
   ],
   Array [
     "fillRect",
-    63.5,
+    126,
     65,
-    60.5,
+    123,
     1,
   ],
   Array [
     "fillRect",
-    62.5,
+    125,
     66,
-    62.5,
+    125,
     11,
   ],
   Array [
     "fillRect",
-    63.5,
+    126,
     77,
-    60.5,
+    123,
     1,
+  ],
+  Array [
+    "measureText",
+    "click",
   ],
   Array [
     "set fillStyle",
@@ -782,7 +624,7 @@ Array [
   Array [
     "fillText",
     "click",
-    65.5,
+    128,
     75,
   ],
   Array [
@@ -794,7 +636,7 @@ Array [
   ],
   Array [
     "arc",
-    92.5,
+    180,
     87.5,
     3.75,
     0,
@@ -879,6 +721,16 @@ Array [
             1,
             "rgba(255, 255, 255, 0.0)",
           ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
         ],
       },
     },

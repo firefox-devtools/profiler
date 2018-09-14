@@ -38,32 +38,18 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
   Props<HoveredItem>,
   State<HoveredItem>
 > {
-  _devicePixelRatio: number;
-  _offsetX: CssPixels;
-  _offsetY: CssPixels;
+  _devicePixelRatio: number = 1;
+  _offsetX: CssPixels = 0;
+  _offsetY: CssPixels = 0;
   _ctx: CanvasRenderingContext2D;
-  _canvas: HTMLCanvasElement | null;
-  _isDrawScheduled: boolean;
+  _canvas: HTMLCanvasElement | null = null;
+  _isDrawScheduled: boolean = false;
 
-  constructor(props: Props<HoveredItem>) {
-    super(props);
-    this._devicePixelRatio = 1;
-    this._offsetX = 0;
-    this._offsetY = 0;
-    this._isDrawScheduled = false;
-    this.state = {
-      hoveredItem: null,
-      pageX: 0,
-      pageY: 0,
-    };
-
-    (this: any)._setCanvasRef = this._setCanvasRef.bind(this);
-    (this: any)._onMouseDown = this._onMouseDown.bind(this);
-    (this: any)._onMouseMove = this._onMouseMove.bind(this);
-    (this: any)._onMouseOut = this._onMouseOut.bind(this);
-    (this: any)._onDoubleClick = this._onDoubleClick.bind(this);
-    (this: any)._getHoveredItemInfo = this._getHoveredItemInfo.bind(this);
-  }
+  state: State<HoveredItem> = {
+    hoveredItem: null,
+    pageX: 0,
+    pageY: 0,
+  };
 
   _scheduleDraw() {
     const { className, drawCanvas } = this.props;
@@ -112,13 +98,15 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     }
   }
 
-  _onMouseDown() {
+  _onMouseDown = () => {
     if (this.props.onMouseDown) {
       this.props.onMouseDown(this.state.hoveredItem);
     }
-  }
+  };
 
-  _onMouseMove(event: { nativeEvent: MouseEvent } & SyntheticMouseEvent<>) {
+  _onMouseMove = (
+    event: { nativeEvent: MouseEvent } & SyntheticMouseEvent<>
+  ) => {
     if (!this._canvas) {
       return;
     }
@@ -138,29 +126,29 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
         hoveredItem: null,
       });
     }
-  }
+  };
 
-  _onMouseOut() {
+  _onMouseOut = () => {
     if (this.state.hoveredItem !== null) {
       this.setState({ hoveredItem: null });
     }
-  }
+  };
 
-  _onDoubleClick() {
+  _onDoubleClick = () => {
     this.props.onDoubleClickItem(this.state.hoveredItem);
-  }
+  };
 
-  _getHoveredItemInfo(): React.Node {
+  _getHoveredItemInfo = (): React.Node => {
     const { hoveredItem } = this.state;
     if (hoveredItem === null) {
       return null;
     }
     return this.props.getHoveredItemInfo(hoveredItem);
-  }
+  };
 
-  _setCanvasRef(canvas: HTMLCanvasElement | null) {
+  _takeCanvasRef = (canvas: HTMLCanvasElement | null) => {
     this._canvas = canvas;
-  }
+  };
 
   componentWillReceiveProps() {
     // It is possible that the data backing the chart has been
@@ -206,7 +194,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       <div>
         <canvas
           className={className}
-          ref={this._setCanvasRef}
+          ref={this._takeCanvasRef}
           onMouseDown={this._onMouseDown}
           onMouseMove={this._onMouseMove}
           onMouseOut={this._onMouseOut}

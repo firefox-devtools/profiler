@@ -59,7 +59,7 @@ function _markerDetailNullable<T: NotVoidOrNull>(
   value: T | void | null,
   fn: T => string = String
 ): React.Node {
-  if (value === undefined || value === null) {
+  if (value === undefined || value === null || fn(value).length === 0) {
     return null;
   }
   return _markerDetail(key, label, value, fn);
@@ -120,6 +120,58 @@ function _makePhaseTimesArray(
     }
   }
   return array;
+}
+
+function _makePriorityHumanReadable(
+  key: string,
+  label: string,
+  priority: number
+): React.Node {
+  if (typeof priority !== 'number') {
+    return null;
+  }
+
+  let prioLabel: string = '';
+
+  // https://searchfox.org/mozilla-central/source/xpcom/threads/nsISupportsPriority.idl#24-28
+  if (priority < -10) {
+    prioLabel = 'Highest';
+  } else if (priority >= -10 && priority < 0) {
+    prioLabel = 'High';
+  } else if (priority === 0) {
+    prioLabel = 'Normal';
+  } else if (priority <= 10 && priority > 0) {
+    prioLabel = 'Low';
+  } else if (priority > 10) {
+    prioLabel = 'Lowest';
+  }
+
+  if (!prioLabel) {
+    return null;
+  }
+
+  prioLabel = prioLabel + '(' + priority + ')';
+  return _markerDetail(key, label, prioLabel);
+}
+
+function _dataStatusReplace(str: string): string {
+  switch (str) {
+    case 'STATUS_START': {
+      return 'Start of request';
+    }
+    case 'STATUS_READ': {
+      return 'Reading request';
+    }
+    case 'STATUS_STOP': {
+      return 'End of request';
+    }
+    case 'STATUS_REDIRECT': {
+      return 'Redirecting request';
+    }
+    default: {
+      return 'other';
+    }
+  }
 }
 
 /*
@@ -607,7 +659,7 @@ function getMarkerDetails(
       case 'Invalidation': {
         return (
           <div className="tooltipDetails">
-            {_markerDetail('url', 'URL', data.url)}
+            {_markerDetailNullable('url', 'URL', data.url)}
             {_markerDetail('line', 'Line', data.line)}
           </div>
         );
@@ -619,71 +671,70 @@ function getMarkerDetails(
         ) {
           return (
             <div className="tooltipDetails">
-              {_markerDetail('status', 'Status', data.status)}
+              {_markerDetail(
+                'status',
+                'Status',
+                _dataStatusReplace(data.status)
+              )}
               {_markerDetailNullable('url', 'URL', data.URI)}
-              {_markerDetail('pri', 'Priority', data.pri)}
+              {_makePriorityHumanReadable('pri', 'Priority', data.pri)}
               {_markerDetailBytesNullable(
                 'count',
                 'Requested bytes',
                 data.count
-              )}
-            </div>
-          );
-        } else {
-          return (
-            <div className="tooltipDetails">
-              {_markerDetail('status', 'Status', data.status)}
-              {_markerDetailNullable('url', 'URL', data.URI)}
-              {_markerDetailNullable(
-                'redirect_url',
-                'Redirect URL',
-                data.RedirectURI
-              )}
-              {_markerDetail('pri', 'Priority', data.pri)}
-              {_markerDetailBytesNullable(
-                'count',
-                'Requested bytes',
-                data.count
-              )}
-              {_markerDetailDeltaTimeNullable(
-                'domainLookup',
-                'Domain lookup in total',
-                data.domainLookupEnd,
-                data.domainLookupStart
-              )}
-              {_markerDetailDeltaTimeNullable(
-                'connect',
-                'Connection in total',
-                data.connectEnd,
-                data.connectStart
-              )}
-              {_markerDetailDeltaTimeNullable(
-                'tcpConnect',
-                'TCP connection in total',
-                data.tcpConnectEnd,
-                data.connectStart
-              )}
-              {_markerDetailDeltaTimeNullable(
-                'secureConnectionStart',
-                'Start of secure connection at',
-                data.secureConnectionStart,
-                data.tcpConnectEnd
-              )}
-              {_markerDetailDeltaTimeNullable(
-                'requestStart',
-                'Start of request at',
-                data.requestStart,
-                data.connectStart
-              )}
-              {_markerDetailDeltaTimeNullable(
-                'response',
-                'Response time',
-                data.responseEnd,
-                data.responseStart
               )}
             </div>
           );
         }
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('status', 'Status', _dataStatusReplace(data.status))}
+            {_markerDetailNullable('url', 'URL', data.URI)}
+            {_markerDetailNullable(
+              'redirect_url',
+              'Redirect URL',
+              data.RedirectURI
+            )}
+            {_makePriorityHumanReadable('pri', 'Priority', data.pri)}
+            {_markerDetailBytesNullable('count', 'Requested bytes', data.count)}
+            {_markerDetailDeltaTimeNullable(
+              'domainLookup',
+              'Domain lookup in total',
+              data.domainLookupEnd,
+              data.domainLookupStart
+            )}
+            {_markerDetailDeltaTimeNullable(
+              'connect',
+              'Connection in total',
+              data.connectEnd,
+              data.connectStart
+            )}
+            {_markerDetailDeltaTimeNullable(
+              'tcpConnect',
+              'TCP connection in total',
+              data.tcpConnectEnd,
+              data.connectStart
+            )}
+            {_markerDetailDeltaTimeNullable(
+              'secureConnectionStart',
+              'Start of secure connection at',
+              data.secureConnectionStart,
+              data.tcpConnectEnd
+            )}
+            {_markerDetailDeltaTimeNullable(
+              'requestStart',
+              'Start of request at',
+              data.requestStart,
+              data.connectStart
+            )}
+            {_markerDetailDeltaTimeNullable(
+              'response',
+              'Response time',
+              data.responseEnd,
+              data.responseStart
+            )}
+          </div>
+        );
       }
       case 'Styles': {
         return [

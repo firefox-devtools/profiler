@@ -6,15 +6,15 @@ import { storeWithProfile } from '../fixtures/stores';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 
-describe('selectors/getMarkerTiming', function() {
-  function getMarkerTiming(testMarkers) {
+describe('selectors/getMarkerChartTiming', function() {
+  function getMarkerChartTiming(testMarkers) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
-    return selectedThreadSelectors.getMarkerTiming(getState());
+    return selectedThreadSelectors.getMarkerChartTiming(getState());
   }
 
   it('has no marker timing if no markers are present', function() {
-    expect(getMarkerTiming([])).toEqual([]);
+    expect(getMarkerChartTiming([])).toEqual([]);
   });
 
   describe('markers of the same name', function() {
@@ -22,7 +22,7 @@ describe('selectors/getMarkerTiming', function() {
       // The timing should look like this:
       // 'Marker Name': *------*
       //              : *------*
-      const markerTiming = getMarkerTiming([
+      const markerTiming = getMarkerChartTiming([
         ['Marker Name', 0, { startTime: 0, endTime: 10 }],
         ['Marker Name', 0, { startTime: 0, endTime: 10 }],
       ]);
@@ -32,7 +32,7 @@ describe('selectors/getMarkerTiming', function() {
     it('puts markers of disjoint times in one row', function() {
       // The timing should look like this:
       // 'Marker Name': *------*  *------*
-      const markerTiming = getMarkerTiming([
+      const markerTiming = getMarkerChartTiming([
         ['Marker Name', 0, { startTime: 0, endTime: 10 }],
         ['Marker Name', 0, { startTime: 15, endTime: 25 }],
       ]);
@@ -43,7 +43,7 @@ describe('selectors/getMarkerTiming', function() {
       // The timing should look like this:
       // 'Marker Name': *------*
       //              :     *------*
-      const markerTiming = getMarkerTiming([
+      const markerTiming = getMarkerChartTiming([
         ['Marker Name', 0, { startTime: 0, endTime: 10 }],
         ['Marker Name', 0, { startTime: 5, endTime: 15 }],
       ]);
@@ -54,7 +54,7 @@ describe('selectors/getMarkerTiming', function() {
       // The timing should look like this:
       // 'Marker Name': *--------*
       //              :   *---*
-      const markerTiming = getMarkerTiming([
+      const markerTiming = getMarkerChartTiming([
         ['Marker Name', 0, { startTime: 0, endTime: 20 }],
         ['Marker Name', 0, { startTime: 5, endTime: 15 }],
       ]);
@@ -67,7 +67,7 @@ describe('selectors/getMarkerTiming', function() {
       // The timing should look like this:
       // 'Marker Name A': *------*
       // 'Marker Name B':           *------*
-      const markerTiming = getMarkerTiming([
+      const markerTiming = getMarkerChartTiming([
         ['Marker Name A', 0, { startTime: 0, endTime: 10 }],
         ['Marker Name B', 0, { startTime: 20, endTime: 30 }],
       ]);
@@ -79,7 +79,7 @@ describe('selectors/getMarkerTiming', function() {
 
   describe('markers that are crossing the profile start or end', function() {
     it('renders properly markers starting before profile start', function() {
-      const markerTiming = getMarkerTiming([
+      const markerTiming = getMarkerChartTiming([
         [
           'Rasterize',
           1,
@@ -99,7 +99,7 @@ describe('selectors/getMarkerTiming', function() {
     });
 
     it('renders properly markers ending after profile end', function() {
-      const markerTiming = getMarkerTiming([
+      const markerTiming = getMarkerChartTiming([
         [
           'Rasterize',
           20,
@@ -124,19 +124,14 @@ describe('getProcessedMarkersThread', function() {
   function getProcessedMarkers(testMarkers) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
-    return selectedThreadSelectors.getProcessedMarkersThread(getState());
+    return selectedThreadSelectors.getProcessedMarkersTable(getState());
   }
 
   it('can process Invalidation markers', function() {
-    const { markers, stringTable } = getProcessedMarkers([
+    const markers = getProcessedMarkers([
       ['Invalidate http://mozilla.com/script.js:1234', 10, null],
       ['Invalidate self-hosted:2345', 20, null],
       ['Invalidate resource://foo -> resource://bar:3456', 30, null],
-    ]);
-    expect(markers.name.map(index => stringTable.getString(index))).toEqual([
-      'Invalidate',
-      'Invalidate',
-      'Invalidate',
     ]);
     expect(markers.time).toEqual([10, 20, 30]);
     expect(markers.data).toEqual([
@@ -165,7 +160,7 @@ describe('getProcessedMarkersThread', function() {
   });
 
   it('can process Bailout markers', function() {
-    const { markers, stringTable } = getProcessedMarkers([
+    const markers = getProcessedMarkers([
       [
         'Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662',
         10,
@@ -176,10 +171,6 @@ describe('getProcessedMarkersThread', function() {
         20,
         null,
       ],
-    ]);
-    expect(markers.name.map(index => stringTable.getString(index))).toEqual([
-      'Bailout',
-      'Bailout',
     ]);
     expect(markers.time).toEqual([10, 20]);
     expect(markers.data).toEqual([

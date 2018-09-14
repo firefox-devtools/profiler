@@ -344,7 +344,7 @@ exports[`app/Details renders an initial view with the right panel for tab networ
       ]
     }
   />
-  <Connect(MarkerChart) />
+  <Connect(NetworkChart) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
   <Connect(TimelineTrackContextMenu) />
@@ -475,9 +475,9 @@ exports[`app/Details show the correct state for the sidebar open button 2`] = `
   <TabBar
     extraElements={
       <button
-        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isopen"
         onClick={[Function]}
-        title="Open the sidebar"
+        title="Close the sidebar"
         type="button"
       />
     }
@@ -545,7 +545,7 @@ exports[`app/Details show the correct state for the sidebar open button 3`] = `
     }
     onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
-    selectedTabName="calltree"
+    selectedTabName="flame-graph"
     tabOrder={
       Array [
         0,
@@ -585,7 +585,7 @@ exports[`app/Details show the correct state for the sidebar open button 3`] = `
       ]
     }
   />
-  <ProfileCallTreeView />
+  <FlameGraphView />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
   <Connect(TimelineTrackContextMenu) />

@@ -107,19 +107,21 @@ describe('upgrading processed profiles', function() {
 
     expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
   }
+
+  const latestProcessedProfile = require('../fixtures/upgrades/processed-16.json');
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
-    require('../fixtures/upgrades/processed-14.json')
+    latestProcessedProfile
   );
 
   // Uncomment this to output your next ./upgrades/processed-X.json
   // console.log(serializeProfile(afterUpgradeReference));
   // Then run prettier on it with the following command:
   //   yarn run prettier --write <file name>
-  it('should upgrade version 0', function() {
-    expect(afterUpgradeReference.meta.preprocessedProfileVersion).toEqual(
-      CURRENT_PROCESSED_VERSION
-    );
+  expect(latestProcessedProfile.meta.preprocessedProfileVersion).toEqual(
+    CURRENT_PROCESSED_VERSION
+  );
 
+  it('should upgrade version 0', function() {
     const serializedOldProcessedProfile0 = require('../fixtures/upgrades/processed-0.json');
     const upgradedProfile0 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile0
@@ -224,17 +226,31 @@ describe('upgrading processed profiles', function() {
     );
     compareProcessedProfiles(upgradedProfile13, afterUpgradeReference);
   });
-  it('should still process a profile of the current version with no issues', function() {
+  it('should upgrade version 14', function() {
     const serializedOldProcessedProfile14 = require('../fixtures/upgrades/processed-14.json');
     const upgradedProfile14 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile14
     );
     compareProcessedProfiles(upgradedProfile14, afterUpgradeReference);
   });
+  it('should upgrade version 15', function() {
+    const serializedOldProcessedProfile15 = require('../fixtures/upgrades/processed-15.json');
+    const upgradedProfile15 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile15
+    );
+    compareProcessedProfiles(upgradedProfile15, afterUpgradeReference);
+  });
+  it('should still process a profile of the current version with no issues', function() {
+    const serializedOldProcessedProfile16 = require('../fixtures/upgrades/processed-16.json');
+    const upgradedProfile16 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile16
+    );
+    compareProcessedProfiles(upgradedProfile16, afterUpgradeReference);
+  });
 });
 
 describe('upgrading gecko profiles', function() {
-  const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-11.json');
+  const afterUpgradeGeckoReference = require('../fixtures/upgrades/gecko-13.json');
   // Uncomment this to output your next ./upgrades/gecko-X.json
   // upgradeGeckoProfileToCurrentVersion(afterUpgradeGeckoReference);
   // console.log(JSON.stringify(afterUpgradeGeckoReference));
@@ -285,10 +301,20 @@ describe('upgrading gecko profiles', function() {
     expect(geckoProfile10).toEqual(afterUpgradeGeckoReference);
   });
   it('should upgrade version 11', function() {
-    // This last test is to make sure we properly upgrade the json
-    // file to same version
     const geckoProfile11 = require('../fixtures/upgrades/gecko-11.json');
     upgradeGeckoProfileToCurrentVersion(geckoProfile11);
     expect(geckoProfile11).toEqual(afterUpgradeGeckoReference);
+  });
+  it('should upgrade version 12', function() {
+    const geckoProfile12 = require('../fixtures/upgrades/gecko-12.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile12);
+    expect(geckoProfile12).toEqual(afterUpgradeGeckoReference);
+  });
+  it('should upgrade version 13', function() {
+    // This last test is to make sure we properly upgrade the json
+    // file to same version
+    const geckoProfile13 = require('../fixtures/upgrades/gecko-13.json');
+    upgradeGeckoProfileToCurrentVersion(geckoProfile13);
+    expect(geckoProfile13).toEqual(afterUpgradeGeckoReference);
   });
 });

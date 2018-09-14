@@ -401,16 +401,6 @@ body, #root, .profileViewer {
   background-color: var(--grey-40);
 }
 
-.treeViewFixedColumn.timestamp {
-  left: 0px;
-  width: 80px;
-  border-right: none;
-}
-.treeViewFixedColumn.category {
-  left: 80px;
-  width: 70px;
-}
-
 .treeAndSidebarWrapper {
   flex: 1;
   display: flex;

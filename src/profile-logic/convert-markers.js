@@ -19,8 +19,8 @@ export function upgradeGCMinorMarker(marker8: Object): GCMinorMarkerPayload {
         marker8.nursery.status = 'nursery empty';
       }
       return Object.assign(marker8);
-    } else {
-      /*
+    }
+    /*
        * This is the old format for GCMinor, rename some
        * properties to the more sensible names in the newer
        * format and set the status.
@@ -29,23 +29,21 @@ export function upgradeGCMinorMarker(marker8: Object): GCMinorMarkerPayload {
        * promotion_rate, leave them so that anyone opening the
        * raw json data can still see them in converted profiles.
        */
-      const marker = Object.assign(marker8, {
-        nursery: Object.assign(marker8.nursery, {
-          status: 'complete',
-          bytes_used: marker8.nursery.nursery_bytes,
-          // cur_capacity cannot be filled in.
-          new_capacity: marker8.nursery.new_nursery_bytes,
-          phase_times: marker8.nursery.timings,
-        }),
-      });
-      delete marker.nursery.nursery_bytes;
-      delete marker.nursery.new_nursery_bytes;
-      delete marker.nursery.timings;
-      return marker;
-    }
-  } else {
-    return marker8;
+    const marker = Object.assign(marker8, {
+      nursery: Object.assign(marker8.nursery, {
+        status: 'complete',
+        bytes_used: marker8.nursery.nursery_bytes,
+        // cur_capacity cannot be filled in.
+        new_capacity: marker8.nursery.new_nursery_bytes,
+        phase_times: marker8.nursery.timings,
+      }),
+    });
+    delete marker.nursery.nursery_bytes;
+    delete marker.nursery.new_nursery_bytes;
+    delete marker.nursery.timings;
+    return marker;
   }
+  return marker8;
 }
 
 /*

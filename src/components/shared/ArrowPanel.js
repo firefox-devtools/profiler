@@ -26,21 +26,12 @@ type State = {
 };
 
 class ArrowPanel extends React.PureComponent<Props, State> {
-  _panelElementCreated: (HTMLElement | null) => void;
-  _panelElement: HTMLElement | null;
+  _panelElement: HTMLElement | null = null;
+  state = { open: false };
 
-  constructor(props: Props) {
-    super(props);
-    this.state = { open: false };
-    (this: any)._windowMouseDownListener = this._windowMouseDownListener.bind(
-      this
-    );
-    this._panelElementCreated = (elem: HTMLElement | null) => {
-      this._panelElement = elem;
-    };
-    (this: any)._onOkButtonClick = this._onOkButtonClick.bind(this);
-    (this: any)._onCancelButtonClick = this._onCancelButtonClick.bind(this);
-  }
+  _takePanelElementRef = (elem: HTMLElement | null) => {
+    this._panelElement = elem;
+  };
 
   open() {
     if (this.state.open) {
@@ -78,7 +69,7 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     );
   }
 
-  _windowMouseDownListener(e: MouseEvent) {
+  _windowMouseDownListener = (e: MouseEvent) => {
     const target: Node = (e.target: any); // make flow happy
     if (
       this.state.open &&
@@ -87,21 +78,21 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     ) {
       this.close();
     }
-  }
+  };
 
-  _onOkButtonClick() {
+  _onOkButtonClick = () => {
     this.close();
     if (this.props.onOkButtonClick) {
       this.props.onOkButtonClick();
     }
-  }
+  };
 
-  _onCancelButtonClick() {
+  _onCancelButtonClick = () => {
     this.close();
     if (this.props.onCancelButtonClick) {
       this.props.onCancelButtonClick();
     }
-  }
+  };
 
   render() {
     const {
@@ -122,7 +113,7 @@ class ArrowPanel extends React.PureComponent<Props, State> {
             { open, hasTitle, hasButtons },
             className
           )}
-          ref={this._panelElementCreated}
+          ref={this._takePanelElementRef}
         >
           <div className="arrowPanelArrow" />
           {hasTitle ? <h1 className="arrowPanelTitle">{title}</h1> : null}

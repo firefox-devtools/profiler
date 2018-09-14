@@ -3,12 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { getLastVisibleThreadTabSlug } from '../reducers/app';
 import {
   selectorsForThread,
   selectedThreadSelectors,
   getGlobalTracks,
   getGlobalTrackAndIndexByPid,
   getLocalTracks,
+  getLocalTrackFromReference,
+  getGlobalTrackFromReference,
 } from '../reducers/profile-view';
 import {
   getImplementationFilter,
@@ -17,9 +20,10 @@ import {
   getGlobalTrackOrder,
   getLocalTrackOrder,
   getHiddenLocalTracks,
+  getSelectedTab,
 } from '../reducers/url-state';
 import { getCallNodePathFromIndex } from '../profile-logic/profile-data';
-import { ensureExists } from '../utils/flow';
+import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import { sendAnalytics } from '../utils/analytics';
 
 import type {
@@ -58,6 +62,85 @@ export function changeSelectedThread(selectedThreadIndex: ThreadIndex): Action {
   return {
     type: 'CHANGE_SELECTED_THREAD',
     selectedThreadIndex,
+  };
+}
+
+export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const currentlySelectedTab = getSelectedTab(getState());
+    const currentlySelectedThreadIndex = getSelectedThreadIndex(getState());
+    // These get assigned based on the track type.
+    let selectedThreadIndex = null;
+    let selectedTab = currentlySelectedTab;
+
+    if (trackReference.type === 'global') {
+      // Handle the case of global tracks.
+      const globalTrack = getGlobalTrackFromReference(
+        getState(),
+        trackReference
+      );
+
+      // Go through each type, and determine the selected slug and thread index.
+      switch (globalTrack.type) {
+        case 'process': {
+          if (globalTrack.mainThreadIndex === null) {
+            // Do not allow selecting process tracks without a thread index.
+            return;
+          }
+          selectedThreadIndex = globalTrack.mainThreadIndex;
+          // Ensure a relevant thread-based tab is used.
+          if (selectedTab === 'network-chart') {
+            selectedTab = getLastVisibleThreadTabSlug(getState());
+          }
+          break;
+        }
+        case 'screenshots':
+          // Do not allow selecting screenshots.
+          return;
+        default:
+          throw assertExhaustiveCheck(
+            globalTrack,
+            `Unhandled GlobalTrack type.`
+          );
+      }
+    } else {
+      // Handle the case of local tracks.
+      const localTrack = getLocalTrackFromReference(getState(), trackReference);
+
+      // Go through each type, and determine the tab slug and thread index.
+      switch (localTrack.type) {
+        case 'thread': {
+          // Ensure a relevant thread-based tab is used.
+          selectedThreadIndex = localTrack.threadIndex;
+          if (selectedTab === 'network-chart') {
+            selectedTab = getLastVisibleThreadTabSlug(getState());
+          }
+          break;
+        }
+        case 'network':
+          selectedThreadIndex = localTrack.threadIndex;
+          selectedTab = 'network-chart';
+          break;
+        case 'memory':
+          // TODO - Currently disable selecting memory.
+          return;
+        default:
+          throw assertExhaustiveCheck(localTrack, `Unhandled LocalTrack type.`);
+      }
+    }
+
+    if (
+      currentlySelectedTab === selectedTab &&
+      currentlySelectedThreadIndex === selectedThreadIndex
+    ) {
+      return;
+    }
+
+    dispatch({
+      type: 'SELECT_TRACK',
+      selectedThreadIndex,
+      selectedTab,
+    });
   };
 }
 
@@ -654,6 +737,10 @@ export function updatePreviewSelection(
 }
 
 export function commitRange(start: number, end: number): Action {
+  if (end === start) {
+    // Ensure that the duration of the range is non-zero.
+    end = end + 0.0001;
+  }
   return {
     type: 'COMMIT_RANGE',
     start,

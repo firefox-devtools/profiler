@@ -23,15 +23,11 @@ type State = {|
  * a div.
  */
 export default class DivWithTooltip extends React.PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
-
-    this.state = {
-      isMouseOver: false,
-      mouseX: 0,
-      mouseY: 0,
-    };
-  }
+  state = {
+    isMouseOver: false,
+    mouseX: 0,
+    mouseY: 0,
+  };
 
   componentWillUnmount() {
     document.removeEventListener('mousemove', this._onMouseMove, false);

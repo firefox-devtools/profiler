@@ -17,7 +17,7 @@ import {
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 
-export const CURRENT_VERSION = 11; // The current version of the Gecko profile format.
+export const CURRENT_VERSION = 13; // The current version of the Gecko profile format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -429,6 +429,61 @@ const _upgraders = {
       }
     }
     convertToVersionElevenRecursive(profile);
+  },
+  [12]: profile => {
+    // This version will add column numbers to the JS functions and scripts.
+    // There is also a new property in the frameTable called "column" which
+    // swaps positions with the "category" property.  The new value for
+    // "category" in the frameTable schema will be 5.
+    const oldSchemaCategoryIndex = 4;
+    const newSchemaCategoryIndex = 5;
+    function convertToVersionTwelveRecursive(p) {
+      for (const thread of p.threads) {
+        const schemaIndexCategory = thread.frameTable.schema.category;
+        for (const frame of thread.frameTable.data) {
+          if (frame.hasOwnProperty(schemaIndexCategory)) {
+            frame[newSchemaCategoryIndex] = frame[oldSchemaCategoryIndex];
+            frame[oldSchemaCategoryIndex] = null;
+          }
+        }
+        thread.frameTable.schema.category = newSchemaCategoryIndex;
+        thread.frameTable.schema.column = oldSchemaCategoryIndex;
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersionTwelveRecursive(subprocessProfile);
+      }
+    }
+    convertToVersionTwelveRecursive(profile);
+  },
+  [13]: profile => {
+    // The type field on some markers were missing. Renamed category field of
+    // VsyncTimestamp and LayerTranslation marker payloads to type and added
+    // a type field to Screenshot marker payload.
+    function convertToVersionThirteenRecursive(p) {
+      for (const thread of p.threads) {
+        const stringTable = new UniqueStringArray(thread.stringTable);
+        const nameIndex = thread.markers.schema.name;
+        const dataIndex = thread.markers.schema.data;
+        for (let i = 0; i < thread.markers.data.length; i++) {
+          const name = stringTable.getString(thread.markers.data[i][nameIndex]);
+          const data = thread.markers.data[i][dataIndex];
+          switch (name) {
+            case 'VsyncTimestamp':
+            case 'LayerTranslation':
+            case 'CompositorScreenshot':
+              data.type = name;
+              delete data.category;
+              break;
+            default:
+              break;
+          }
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersionThirteenRecursive(subprocessProfile);
+      }
+    }
+    convertToVersionThirteenRecursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */

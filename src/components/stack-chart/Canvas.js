@@ -15,6 +15,10 @@ import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { Thread } from '../../types/profile';
 import type {
+  CallNodeInfo,
+  IndexIntoCallNodeTable,
+} from '../../types/profile-derived';
+import type {
   Milliseconds,
   CssPixels,
   UnitIntervalOfProfileRange,
@@ -38,6 +42,10 @@ type OwnProps = {|
   +getCategory: GetCategory,
   +getLabel: GetLabel,
   +updatePreviewSelection: typeof updatePreviewSelection,
+  +callNodeInfo: CallNodeInfo,
+  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
+  +scrollToSelectionGeneration: number,
 |};
 
 type Props = $ReadOnly<{|
@@ -57,15 +65,50 @@ const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
 
 class StackChartCanvas extends React.PureComponent<Props> {
-  _textMeasurement: null | TextMeasurement;
+  _textMeasurement: null | TextMeasurement = null;
 
-  constructor(props: Props) {
-    super(props);
-    (this: any)._onDoubleClickStack = this._onDoubleClickStack.bind(this);
-    (this: any)._getHoveredStackInfo = this._getHoveredStackInfo.bind(this);
-    (this: any)._drawCanvas = this._drawCanvas.bind(this);
-    (this: any)._hitTest = this._hitTest.bind(this);
+  componentDidUpdate(prevProps) {
+    // We want to scroll the selection into view when this component
+    // is mounted, but using componentDidMount won't work here as the
+    // viewport will not have completed setting its size by
+    // then. Instead, look for when the viewport's isSizeSet prop
+    // changes to true.
+    if (!this.props.viewport.isSizeSet) {
+      return;
+    }
+    const viewportDidMount = !prevProps.viewport.isSizeSet;
+
+    if (
+      viewportDidMount ||
+      this.props.scrollToSelectionGeneration >
+        prevProps.scrollToSelectionGeneration
+    ) {
+      this._scrollSelectionIntoView();
+    }
   }
+
+  _scrollSelectionIntoView = () => {
+    const {
+      selectedCallNodeIndex,
+      callNodeInfo: { callNodeTable },
+    } = this.props;
+
+    if (selectedCallNodeIndex === null) {
+      return;
+    }
+
+    const depth = callNodeTable.depth[selectedCallNodeIndex];
+    const y = depth * ROW_HEIGHT;
+
+    if (y < this.props.viewport.viewportTop) {
+      this.props.viewport.moveViewport(0, this.props.viewport.viewportTop - y);
+    } else if (y + ROW_HEIGHT > this.props.viewport.viewportBottom) {
+      this.props.viewport.moveViewport(
+        0,
+        this.props.viewport.viewportBottom - (y + ROW_HEIGHT)
+      );
+    }
+  };
 
   /**
    * Draw the canvas.
@@ -76,10 +119,10 @@ class StackChartCanvas extends React.PureComponent<Props> {
    * src/components/shared/chart/Viewport.js for a diagram detailing the various
    * components of this set-up.
    */
-  _drawCanvas(
+  _drawCanvas = (
     ctx: CanvasRenderingContext2D,
     hoveredItem: HoveredStackTiming | null
-  ) {
+  ) => {
     const {
       thread,
       rangeStart,
@@ -88,6 +131,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
       stackTimingByDepth,
       stackFrameHeight,
       getCategory,
+      selectedCallNodeIndex,
+      callNodeInfo: { stackIndexToCallNodeIndex },
       viewport: {
         containerWidth,
         containerHeight,
@@ -162,6 +207,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
           }
 
           const stackIndex = stackTiming.stack[i];
+          const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
           const frameIndex = thread.stackTable.frame[stackIndex];
           const text = getLabel(thread, stackIndex);
           const category = getCategory(thread, frameIndex);
@@ -169,8 +215,10 @@ class StackChartCanvas extends React.PureComponent<Props> {
             hoveredItem &&
             depth === hoveredItem.depth &&
             i === hoveredItem.stackTableIndex;
+          const isSelected = selectedCallNodeIndex === callNodeIndex;
 
-          ctx.fillStyle = isHovered ? 'Highlight' : category.color;
+          ctx.fillStyle =
+            isHovered || isSelected ? 'Highlight' : category.color;
           ctx.fillRect(x, y, w, h);
 
           // Ensure spacing between blocks.
@@ -185,19 +233,20 @@ class StackChartCanvas extends React.PureComponent<Props> {
           if (w2 > textMeasurement.minWidth) {
             const fittedText = textMeasurement.getFittedText(text, w2);
             if (fittedText) {
-              ctx.fillStyle = isHovered ? 'HighlightText' : '#000000';
+              ctx.fillStyle =
+                isHovered || isSelected ? 'HighlightText' : '#000000';
               ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
             }
           }
         }
       }
     }
-  }
+  };
 
-  _getHoveredStackInfo({
+  _getHoveredStackInfo = ({
     depth,
     stackTableIndex,
-  }: HoveredStackTiming): React.Node {
+  }: HoveredStackTiming): React.Node => {
     const { thread, getLabel, getCategory, stackTimingByDepth } = this.props;
     const stackTiming = stackTimingByDepth[depth];
 
@@ -260,9 +309,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
         </div>
       </div>
     );
-  }
+  };
 
-  _onDoubleClickStack(hoveredItem: HoveredStackTiming | null) {
+  _onDoubleClickStack = (hoveredItem: HoveredStackTiming | null) => {
     if (hoveredItem === null) {
       return;
     }
@@ -274,9 +323,23 @@ class StackChartCanvas extends React.PureComponent<Props> {
       selectionStart: stackTimingByDepth[depth].start[stackTableIndex],
       selectionEnd: stackTimingByDepth[depth].end[stackTableIndex],
     });
-  }
+  };
 
-  _hitTest(x: CssPixels, y: CssPixels): HoveredStackTiming | null {
+  _onMouseDown = (hoveredItem: HoveredStackTiming | null) => {
+    // Change our selection to the hovered item, or deselect (with
+    // null) if there's nothing hovered.
+    let callNodeIndex = null;
+    if (hoveredItem !== null) {
+      const { depth, stackTableIndex } = hoveredItem;
+      const { stackTimingByDepth } = this.props;
+      const stackIndex = stackTimingByDepth[depth].stack[stackTableIndex];
+      const { stackIndexToCallNodeIndex } = this.props.callNodeInfo;
+      callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+    }
+    this.props.onSelectionChange(callNodeIndex);
+  };
+
+  _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
     const {
       rangeStart,
       rangeEnd,
@@ -306,7 +369,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
 
     return null;
-  }
+  };
 
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
@@ -321,6 +384,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
+        onMouseDown={this._onMouseDown}
       />
     );
   }

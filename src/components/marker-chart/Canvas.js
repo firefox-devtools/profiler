@@ -64,18 +64,10 @@ const MARKER_LABEL_MAX_LENGTH = 150;
 class MarkerChartCanvas extends React.PureComponent<Props, State> {
   _textMeasurement: null | TextMeasurement;
 
-  constructor(props: Props) {
-    super(props);
-    (this: any).onDoubleClickMarker = this.onDoubleClickMarker.bind(this);
-    (this: any).getHoveredMarkerInfo = this.getHoveredMarkerInfo.bind(this);
-    (this: any).drawCanvas = this.drawCanvas.bind(this);
-    (this: any).hitTest = this.hitTest.bind(this);
-  }
-
-  drawCanvas(
+  drawCanvas = (
     ctx: CanvasRenderingContext2D,
     hoveredItem: IndexIntoMarkerTiming | null
-  ) {
+  ) => {
     const {
       rowHeight,
       markerTimingRows,
@@ -98,7 +90,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
     this.drawMarkers(ctx, hoveredItem, startRow, endRow);
     this.drawSeparatorsAndLabels(ctx, startRow, endRow);
-  }
+  };
 
   // Note: we used a long argument list instead of an object parameter on
   // purpose, to reduce GC pressure while drawing.
@@ -282,7 +274,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     }
   }
 
-  hitTest(x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null {
+  hitTest = (x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null => {
     const {
       rangeStart,
       rangeEnd,
@@ -317,9 +309,9 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       }
     }
     return null;
-  }
+  };
 
-  onDoubleClickMarker(markerIndex: IndexIntoMarkerTiming | null) {
+  onDoubleClickMarker = (markerIndex: IndexIntoMarkerTiming | null) => {
     if (markerIndex === null) {
       return;
     }
@@ -331,7 +323,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       selectionStart: marker.start,
       selectionEnd: marker.start + marker.dur,
     });
-  }
+  };
 
   drawRoundedRect(
     ctx: CanvasRenderingContext2D,
@@ -349,7 +341,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  getHoveredMarkerInfo(hoveredItem: IndexIntoMarkerTiming): React.Node {
+  getHoveredMarkerInfo = (hoveredItem: IndexIntoMarkerTiming): React.Node => {
     const marker = this.props.markers[hoveredItem];
     return (
       <MarkerTooltipContents
@@ -357,7 +349,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
         threadIndex={this.props.threadIndex}
       />
     );
-  }
+  };
 
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;

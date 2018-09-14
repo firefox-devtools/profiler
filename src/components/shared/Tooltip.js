@@ -25,26 +25,22 @@ type State = {
 };
 
 export default class Tooltip extends React.PureComponent<Props, State> {
-  _isMounted: boolean;
+  _isMounted: boolean = false;
   _mountElement: ?HTMLElement;
+
+  state = {
+    interiorElement: null,
+    isNewContentLaidOut: false,
+  };
 
   // This allows to get the store so that we can pass it along to the tooltip
   // children with a react-redux Provider. We can safely remove it once we use
   // React 16's portals.
   static contextTypes = { store: PropTypes.object.isRequired };
 
-  constructor(props: Props) {
-    super(props);
-    (this: any)._setMountElement = this._setMountElement.bind(this);
-    this.state = {
-      interiorElement: null,
-      isNewContentLaidOut: false,
-    };
-  }
-
-  _setMountElement(el: HTMLElement | null) {
+  _takeInteriorElementRef = (el: HTMLElement | null) => {
     this.setState({ interiorElement: el });
-  }
+  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -138,7 +134,11 @@ export default class Tooltip extends React.PureComponent<Props, State> {
 
     ReactDOM.render(
       <Provider store={this.context.store}>
-        <div className="tooltip" style={style} ref={this._setMountElement}>
+        <div
+          className="tooltip"
+          style={style}
+          ref={this._takeInteriorElementRef}
+        >
           {children}
         </div>
       </Provider>,
