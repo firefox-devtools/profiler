@@ -18,6 +18,7 @@ import {
   getRightClickedTrack,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
+import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
 import { getMouseEvent } from '../fixtures/utils';
@@ -49,6 +50,11 @@ describe('timeline/GlobalTrack', function() {
     if (threadIndex === null) {
       throw new Error('Expected the track to have a thread index.');
     }
+
+    // Some child components render to canvas.
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => mockCanvasContext());
 
     // The assertions are simpler if this thread is not already selected.
     dispatch(changeSelectedThread(threadIndex + 1));

@@ -197,7 +197,7 @@ function _createGeckoThread(): GeckoThread {
           },
         ],
         // This marker is filtered out
-        [4, 2, { type: undefined, category: 'VsyncTimestamp', vsync: 0 }],
+        [4, 2, { type: 'VsyncTimestamp', vsync: 0 }],
         [
           5, // Reflow
           3,

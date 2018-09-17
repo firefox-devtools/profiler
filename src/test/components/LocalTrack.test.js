@@ -23,6 +23,7 @@ import {
   getProfile,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
+import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getNetworkTrackProfile } from '../fixtures/profiles/make-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
@@ -123,6 +124,11 @@ function setup(
   const { threadIndex } = localTrack;
   // The assertions are simpler if this thread is not already selected.
   dispatch(changeSelectedThread(threadIndex + 1));
+
+  // Some child components render to canvas.
+  jest
+    .spyOn(HTMLCanvasElement.prototype, 'getContext')
+    .mockImplementation(() => mockCanvasContext());
 
   const view = mount(
     <Provider store={store}>
