@@ -72,6 +72,18 @@ class Timeline extends PureComponent<Props> {
 
     return (
       <TimelineSelection width={width}>
+        <div className="timelineToggle">
+          <form>
+            <label>
+              <input type="radio" name="timelineToggle" checked />
+              Stacks
+            </label>
+            <label>
+              <input type="radio" name="timelineToggle" />
+              Categories
+            </label>
+          </form>
+        </div>
         <TimelineRuler
           zeroAt={zeroAt}
           rangeStart={committedRange.start}

@@ -6,7 +6,8 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
-import StackGraph from './StackGraph';
+// import ThreadStackGraph from '../shared/thread/StackGraph';
+import ThreadActivityGraph from '../shared/thread/ActivityGraph';
 import {
   selectorsForThread,
   getProfileInterval,
@@ -50,7 +51,8 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +thread: Thread,
+  +fullThread: Thread,
+  +filteredThread: Thread,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +unfilteredSamplesRange: StartEndRange | null,
@@ -72,14 +74,14 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 class TimelineTrackThread extends PureComponent<Props> {
   _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
     const {
-      thread,
+      filteredThread,
       threadIndex,
       callNodeInfo,
       changeSelectedCallNode,
       focusCallTree,
     } = this.props;
 
-    const newSelectedStack = thread.samples.stack[sampleIndex];
+    const newSelectedStack = filteredThread.samples.stack[sampleIndex];
     const newSelectedCallNode =
       newSelectedStack === null
         ? -1
@@ -107,23 +109,24 @@ class TimelineTrackThread extends PureComponent<Props> {
 
   render() {
     const {
-      thread,
+      filteredThread,
+      fullThread,
       threadIndex,
       interval,
       rangeStart,
       rangeEnd,
-      callNodeInfo,
-      selectedCallNodeIndex,
+      // callNodeInfo,
+      // selectedCallNodeIndex,
       unfilteredSamplesRange,
       categories,
     } = this.props;
 
-    const processType = thread.processType;
+    const processType = filteredThread.processType;
     const displayJank = processType !== 'plugin';
     const displayTracingMarkers =
-      (thread.name === 'GeckoMain' ||
-        thread.name === 'Compositor' ||
-        thread.name === 'Renderer') &&
+      (filteredThread.name === 'GeckoMain' ||
+        filteredThread.name === 'Compositor' ||
+        filteredThread.name === 'Renderer') &&
       processType !== 'plugin';
 
     return (
@@ -145,7 +148,9 @@ class TimelineTrackThread extends PureComponent<Props> {
             // JavaScript and props instead.
             className={`
               timelineTrackThreadIntervalMarkerOverview
-              timelineTrackThreadIntervalMarkerOverviewThread${thread.name}
+              timelineTrackThreadIntervalMarkerOverviewThread${
+                filteredThread.name
+              }
             `}
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
@@ -153,7 +158,16 @@ class TimelineTrackThread extends PureComponent<Props> {
             onSelect={this._onIntervalMarkerSelect}
           />
         ) : null}
-        <StackGraph
+        <ThreadActivityGraph
+          className="threadActivityGraph"
+          interval={interval}
+          fullThread={fullThread}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          onSampleClick={this._onSampleClick}
+          categories={categories}
+        />
+        {/* <ThreadStackGraph
           interval={interval}
           thread={thread}
           rangeStart={rangeStart}
@@ -162,9 +176,9 @@ class TimelineTrackThread extends PureComponent<Props> {
           selectedCallNodeIndex={selectedCallNodeIndex}
           categories={categories}
           onSampleClick={this._onSampleClick}
-        />
+        /> */}
         <EmptyThreadIndicator
-          thread={thread}
+          thread={filteredThread}
           interval={interval}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
@@ -182,7 +196,8 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     const selectedThread = getSelectedThreadIndex(state);
     const committedRange = getCommittedRange(state);
     return {
-      thread: selectors.getFilteredThread(state),
+      filteredThread: selectors.getFilteredThread(state),
+      fullThread: selectors.getRangeFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
       selectedCallNodeIndex:
         threadIndex === selectedThread

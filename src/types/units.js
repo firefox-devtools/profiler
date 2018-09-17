@@ -16,7 +16,8 @@ export type CssPixels = number;
 
 /**
  * The size of the pixels actually present on the device, particularly used on canvas
- * sizing.
+ * sizing. For instance on a device with a devicePixelRatio of 2, the DevicePixels
+ * will be  twice as large as CssPixels.
  */
 export type DevicePixels = number;
 

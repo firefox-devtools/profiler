@@ -2,12 +2,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.timelineStackGraph {
-  height: 25px;
+.threadActivityGraph {
+  height: 20px;
 }
 
-.timelineStackGraphCanvas {
+.threadActivityGraphCanvas {
   display: block;
-  height: 25px;
+  height: 100%;
   width: 100%;
+}
+
+.chartViewport.selectedThreadActivityGraphViewport {
+  flex: auto 0 0;
+}
+
+.selectedThreadActivityGraph {
+  height: 30px;
+  -moz-user-focus: ignore;
 }

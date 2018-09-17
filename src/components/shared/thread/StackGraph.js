@@ -5,13 +5,14 @@
 
 import React, { PureComponent } from 'react';
 import bisection from 'bisection';
-import { ensureExists } from '../../utils/flow';
-import { timeCode } from '../../utils/time-code';
+import classNames from 'classnames';
+import { ensureExists } from '../../../utils/flow';
+import { timeCode } from '../../../utils/time-code';
 import {
   getSampleCallNodes,
   getSamplesSelectedStates,
   getSampleIndexClosestToTime,
-} from '../../profile-logic/profile-data';
+} from '../../../profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 import './StackGraph.css';
 
@@ -19,14 +20,15 @@ import type {
   Thread,
   CategoryList,
   IndexIntoSamplesTable,
-} from '../../types/profile';
-import type { Milliseconds } from '../../types/units';
+} from '../../../types/profile';
+import type { Milliseconds } from '../../../types/units';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
-} from '../../types/profile-derived';
+} from '../../../types/profile-derived';
 
 type Props = {|
+  +className: string,
   +thread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
@@ -35,6 +37,7 @@ type Props = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
   +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
+  +upsideDown?: boolean,
 |};
 
 class StackGraph extends PureComponent<Props> {
@@ -71,6 +74,7 @@ class StackGraph extends PureComponent<Props> {
       callNodeInfo,
       selectedCallNodeIndex,
       categories,
+      upsideDown,
     } = this.props;
 
     const devicePixelRatio = canvas.ownerDocument
@@ -177,7 +181,7 @@ class StackGraph extends PureComponent<Props> {
       ctx.fillStyle = color;
       for (let i = 0; i < samplesBucket.height.length; i++) {
         const height = samplesBucket.height[i];
-        const startY = canvas.height - height;
+        const startY = upsideDown ? 0 : canvas.height - height;
         const xPos = samplesBucket.xPos[i];
         ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
       }
@@ -213,9 +217,12 @@ class StackGraph extends PureComponent<Props> {
   render() {
     this._renderCanvas();
     return (
-      <div className="timelineStackGraph">
+      <div className={this.props.className}>
         <canvas
-          className="timelineStackGraphCanvas"
+          className={classNames(
+            `${this.props.className}Canvas`,
+            'threadStackGraphCanvas'
+          )}
           ref={this._takeCanvasRef}
           onMouseUp={this._onMouseUp}
         />

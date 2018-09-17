@@ -33,6 +33,7 @@ import type {
   SamplesTable,
   Pid,
   MarkersTable,
+  IndexIntoSamplesTable,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -60,7 +61,10 @@ import type {
   ThreadViewOptions,
 } from '../types/reducers';
 import type { Transform, TransformStack } from '../types/transforms';
-import type { TimingsForPath } from '../profile-logic/profile-data';
+import type {
+  TimingsForPath,
+  SelectedState,
+} from '../profile-logic/profile-data';
 
 function profile(state: Profile | null = null, action: Action): Profile | null {
   switch (action.type) {
@@ -794,6 +798,11 @@ export type SelectorsForThread = {
   getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
   getExpandedCallNodePaths: State => PathSet,
   getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
+  getSamplesSelectedStatesInFilteredThread: State => SelectedState[],
+  getTreeOrderComparatorInFilteredThread: State => (
+    IndexIntoSamplesTable,
+    IndexIntoSamplesTable
+  ) => number,
   getCallTree: State => CallTree.CallTree,
   getStackTimingByDepth: State => StackTiming.StackTimingByDepth,
   getCallNodeMaxDepthForFlameGraph: State => number,
@@ -1147,6 +1156,40 @@ export const selectorsForThread = (
           callNodeTable
         )
     );
+    const getSamplesSelectedStatesInFilteredThread = createSelector(
+      getFilteredThread,
+      getCallNodeInfo,
+      getSelectedCallNodeIndex,
+      (
+        thread,
+        { callNodeTable, stackIndexToCallNodeIndex },
+        selectedCallNode
+      ) => {
+        const sampleCallNodes = ProfileData.getSampleCallNodes(
+          thread.samples,
+          stackIndexToCallNodeIndex
+        );
+        return ProfileData.getSamplesSelectedStates(
+          callNodeTable,
+          sampleCallNodes,
+          selectedCallNode
+        );
+      }
+    );
+    const getTreeOrderComparatorInFilteredThread = createSelector(
+      getFilteredThread,
+      getCallNodeInfo,
+      (thread, { callNodeTable, stackIndexToCallNodeIndex }) => {
+        const sampleCallNodes = ProfileData.getSampleCallNodes(
+          thread.samples,
+          stackIndexToCallNodeIndex
+        );
+        return ProfileData.getTreeOrderComparator(
+          callNodeTable,
+          sampleCallNodes
+        );
+      }
+    );
     const getCallTree = createSelector(
       getPreviewFilteredThread,
       getProfileInterval,
@@ -1220,6 +1263,8 @@ export const selectorsForThread = (
       getSelectedCallNodeIndex,
       getExpandedCallNodePaths,
       getExpandedCallNodeIndexes,
+      getSamplesSelectedStatesInFilteredThread,
+      getTreeOrderComparatorInFilteredThread,
       getCallTree,
       getStackTimingByDepth,
       getCallNodeMaxDepthForFlameGraph,

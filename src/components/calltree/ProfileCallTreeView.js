@@ -8,11 +8,13 @@ import React from 'react';
 import CallTree from './CallTree';
 import StackSettings from '../shared/StackSettings';
 import TransformNavigator from '../shared/TransformNavigator';
+import SelectedThreadActivityGraph from '../shared/thread/SelectedActivityGraph';
 
 const ProfileCallTreeView = () => (
   <div className="treeAndSidebarWrapper">
     <StackSettings />
     <TransformNavigator />
+    <SelectedThreadActivityGraph />
     <CallTree />
   </div>
 );
