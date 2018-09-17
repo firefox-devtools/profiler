@@ -36,11 +36,15 @@
   height: 25px;
 }
 
-.stackSettingsSelect {
-  margin: 0 5px;
-  font-size: 11px;
-}
-
 .stackSettingsCheckbox {
   margin: 0 5px;
+}
+
+.stackSettingsFilter {
+  border-right: 1px solid var(--grey-20);
+  padding-right: 10px;
+}
+
+.stackSettingsFilterLabel {
+  padding-right: 5px;
 }

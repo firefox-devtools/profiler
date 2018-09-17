@@ -30,7 +30,7 @@ type Props = {|
 |};
 
 class StackSettings extends PureComponent<Props> {
-  _onImplementationFilterChange = (e: SyntheticEvent<HTMLSelectElement>) => {
+  _onImplementationFilterChange = (e: SyntheticEvent<HTMLInputElement>) => {
     this.props.changeImplementationFilter(
       // This function is here to satisfy Flow that we are getting a valid
       // implementation filter.
@@ -42,29 +42,37 @@ class StackSettings extends PureComponent<Props> {
     this.props.changeInvertCallstack(e.currentTarget.checked);
   };
 
+  _renderRadioButton(
+    label: string,
+    implementationFilter: ImplementationFilter
+  ) {
+    return (
+      <label className="stackSettingsFilterLabel">
+        <input
+          type="radio"
+          value={implementationFilter}
+          name="stack-settings-filter"
+          title="Filter stack frames to a type."
+          onChange={this._onImplementationFilterChange}
+          checked={this.props.implementationFilter === implementationFilter}
+        />
+        {label}
+      </label>
+    );
+  }
+
   render() {
-    const {
-      implementationFilter,
-      invertCallstack,
-      hideInvertCallstack,
-    } = this.props;
+    const { invertCallstack, hideInvertCallstack } = this.props;
 
     return (
       <div className="stackSettings">
         <ul className="stackSettingsList">
           <li className="stackSettingsListItem">
-            <label className="stackSettingsLabel">
-              Filter:
-              <select
-                className="stackSettingsSelect"
-                onChange={this._onImplementationFilterChange}
-                value={implementationFilter}
-              >
-                <option value="combined">Combined stacks</option>
-                <option value="js">JS only</option>
-                <option value="cpp">C++ only</option>
-              </select>
-            </label>
+            <div className="stackSettingsFilter">
+              {this._renderRadioButton('All stacks', 'combined')}
+              {this._renderRadioButton('JavaScript', 'js')}
+              {this._renderRadioButton('Native', 'cpp')}
+            </div>
           </li>
           {hideInvertCallstack ? null : (
             <li className="stackSettingsListItem">
