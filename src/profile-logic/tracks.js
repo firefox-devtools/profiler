@@ -462,12 +462,17 @@ export function getVisibleThreads(
   hiddenTracksByPid: Map<Pid, Set<TrackIndex>>
 ): ThreadIndex[] {
   const visibleThreads = [];
-  for (const globalTrack of globalTracks) {
+  for (
+    let globalTrackIndex = 0;
+    globalTrackIndex < globalTracks.length;
+    globalTrackIndex++
+  ) {
+    const globalTrack = globalTracks[globalTrackIndex];
     if (globalTrack.type === 'process') {
       const { mainThreadIndex, pid } = globalTrack;
       if (
         mainThreadIndex !== null &&
-        !hiddenGlobalTracks.has(mainThreadIndex)
+        !hiddenGlobalTracks.has(globalTrackIndex)
       ) {
         visibleThreads.push(mainThreadIndex);
       }
