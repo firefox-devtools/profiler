@@ -7,7 +7,6 @@
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import {
-  changeSelectedThread,
   changeRightClickedTrack,
   changeLocalTrackOrder,
   selectTrack,
@@ -63,7 +62,6 @@ type StateProps = {|
 |};
 
 type DispatchProps = {|
-  +changeSelectedThread: typeof changeSelectedThread,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
   +changeLocalTrackOrder: typeof changeLocalTrackOrder,
   +selectTrack: typeof selectTrack,
@@ -245,7 +243,6 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     };
   },
   mapDispatchToProps: {
-    changeSelectedThread,
     changeRightClickedTrack,
     changeLocalTrackOrder,
     selectTrack,
