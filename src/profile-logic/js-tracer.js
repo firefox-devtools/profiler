@@ -6,6 +6,8 @@
 import type { JsTracerTable } from '../types/profile';
 import type { JsTracerTiming } from '../types/profile-derived';
 
+import { ensureExists } from '../utils/flow';
+
 // Arbitrarily set an upper limit for adding marker depths, avoiding an infinite loop.
 const MAX_STACKING_DEPTH = 300;
 
@@ -46,7 +48,7 @@ export function getJsTracerTiming({
         markerTimingsByName.push(markerTimingsRow);
       }
 
-      const start = tracerEvents.timestamps[tracerEventIndex];
+      const start = tracerEvents.timestamps[tracerEventIndex] / 1000;
       const duration = 0;
 
       // Since the markers are sorted, look at the last added marker in this row. If
@@ -63,6 +65,20 @@ export function getJsTracerTiming({
     }
   }
 
-  // Flatten out the map into a single array.
-  return [].concat(...jsTracerTimingMap.values());
+  const isUrl = /:\/\//;
+  // Sort the URLs last.
+  const keys = [...jsTracerTimingMap.keys()].sort((a, b) => {
+    const isUrlA = isUrl.test(a);
+    const isUrlB = isUrl.test(b);
+    if (isUrlA === isUrlB) {
+      return a > b ? 1 : -1;
+    }
+    return isUrlA ? 1 : -1;
+  });
+
+  const jsTracerTiming = [];
+  for (const key of keys) {
+    jsTracerTiming.push(...ensureExists(jsTracerTimingMap.get(key)));
+  }
+  return jsTracerTiming;
 }

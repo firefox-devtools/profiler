@@ -117,7 +117,8 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     return {
       jsTracerTable: selectedThreadSelectors.getJsTracerTable(state),
       jsTracerTimingRows,
-      maxMarkerRows: jsTracerTimingRows.length,
+      maxMarkerRows:
+        jsTracerTimingRows === null ? 0 : jsTracerTimingRows.length,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
