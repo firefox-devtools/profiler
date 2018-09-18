@@ -185,22 +185,21 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
         return this.renderMessage(message, additionalMessage, showLoader);
       }
       case 'FATAL_ERROR': {
+        const message =
+          ERROR_MESSAGES[dataSource] || "Couldn't retrieve the profile.";
+        let additionalMessage = null;
 
-        if(dataSource == 'none') {
-          return <Home />
+        if (view.error) {
+          console.error(view.error);
+          additionalMessage =
+            `${view.error.toString()}\n` +
+            'The full stack has been written to the Web Console.';
         }
 
-        else {
-          const message = ERROR_MESSAGES[dataSource] || "Couldn't retrieve the profile.";
-          let additionalMessage = null;
-          if (view.error) {
-            console.error(view.error);
-            additionalMessage =
-              `${view.error.toString()}\n` +
-              'The full stack has been written to the Web Console.';
-          }
-            return this.renderMessage(message, additionalMessage, false);
+        if (dataSource === 'none') {
+          return <Home />;
         }
+        return this.renderMessage(message, additionalMessage, false);
       }
       case 'DATA_LOADED':
         // The data is now loaded. This could be either a single profile, or a zip file
