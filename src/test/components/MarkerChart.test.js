@@ -9,6 +9,10 @@ import { Provider } from 'react-redux';
 
 import { changeMarkersSearchString } from '../../actions/profile-view';
 import MarkerChart from '../../components/marker-chart';
+import {
+  MARGIN_LEFT,
+  MARGIN_RIGHT,
+} from '../../components/marker-chart/Canvas';
 import { changeSelectedTab } from '../../actions/app';
 
 import EmptyReasons from '../../components/shared/EmptyReasons';
@@ -64,7 +68,9 @@ function setupWithProfile(profile) {
   // a lot easier to mock this everywhere.
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(200, 300));
+    .mockImplementation(() =>
+      getBoundingBox(200 + MARGIN_LEFT + MARGIN_RIGHT, 300)
+    );
 
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('marker-chart'));
@@ -127,7 +133,7 @@ describe('MarkerChart', function() {
 
     // Move the mouse on top of an item.
     markerChart.find('canvas').simulate('mousemove', {
-      nativeEvent: { offsetX: 50, offsetY: 5 },
+      nativeEvent: { offsetX: 50 + MARGIN_LEFT, offsetY: 5 },
       pageX: 50,
       pageY: 5,
     });

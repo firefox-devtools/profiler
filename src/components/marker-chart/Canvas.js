@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { GREY_20 } from 'photon-colors';
 import * as React from 'react';
 import {
   withChartViewport,
@@ -59,7 +60,10 @@ const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
-const MARKER_LABEL_MAX_LENGTH = 150;
+
+// Export for tests.
+export const MARGIN_RIGHT = 15;
+export const MARGIN_LEFT = 150;
 
 class MarkerChartCanvas extends React.PureComponent<Props, State> {
   _textMeasurement: null | TextMeasurement;
@@ -106,12 +110,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
   ) {
     ctx.fillStyle = backgroundColor;
 
-    // Ensure the text measurement tool is created, since this is the first time
-    // this class has access to a ctx.
-    if (!this._textMeasurement) {
-      this._textMeasurement = new TextMeasurement(ctx);
-    }
-    const textMeasurement = this._textMeasurement;
+    const textMeasurement = this._getTextMeasurement(ctx);
 
     if (w >= h) {
       // We want the rectangle to have a clear margin, that's why we increment y
@@ -121,7 +120,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       // Draw the text label
       // TODO - L10N RTL.
       // Constrain the x coordinate to the leftmost area.
-      const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
+      const x2: CssPixels = Math.max(x, MARGIN_LEFT) + TEXT_OFFSET_START;
       const w2: CssPixels = Math.max(0, w - (x2 - x));
 
       if (w2 > textMeasurement.minWidth) {
@@ -158,6 +157,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
     } = this.props;
 
+    const markerContainerWidth = containerWidth - MARGIN_LEFT - MARGIN_RIGHT;
+
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
@@ -191,14 +192,19 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
           const endTime: UnitIntervalOfProfileRange =
             (markerTiming.end[i] - rangeStart) / rangeLength;
 
-          const x: CssPixels =
-            (startTime - viewportLeft) * containerWidth / viewportLength;
+          let x: CssPixels =
+            (startTime - viewportLeft) * markerContainerWidth / viewportLength +
+            MARGIN_LEFT;
           const y: CssPixels = rowIndex * rowHeight - viewportTop;
-          const w: CssPixels = Math.max(
+          let w: CssPixels = Math.max(
             10,
-            (endTime - startTime) * containerWidth / viewportLength
+            (endTime - startTime) * markerContainerWidth / viewportLength
           );
           const h: CssPixels = rowHeight - 1;
+          if (x < MARGIN_LEFT) {
+            w = w - MARGIN_LEFT + x;
+            x = MARGIN_LEFT;
+          }
 
           const tracingMarkerIndex = markerTiming.index[i];
           const isHovered = hoveredItem === tracingMarkerIndex;
@@ -225,6 +231,17 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     }
   }
 
+  /**
+   * Lazily create the text measurement tool, as a valid 2d rendering context must
+   * exist before it is created.
+   */
+  _getTextMeasurement(ctx: CanvasRenderingContext2D): TextMeasurement {
+    if (!this._textMeasurement) {
+      this._textMeasurement = new TextMeasurement(ctx);
+    }
+    return this._textMeasurement;
+  }
+
   drawSeparatorsAndLabels(
     ctx: CanvasRenderingContext2D,
     startRow: number,
@@ -233,11 +250,12 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const {
       markerTimingRows,
       rowHeight,
-      viewport: { viewportTop, containerWidth },
+      viewport: { viewportTop, containerWidth, containerHeight },
     } = this.props;
 
     // Draw separators
-    ctx.fillStyle = '#eee';
+    ctx.fillStyle = GREY_20;
+    ctx.fillRect(MARGIN_LEFT, 0, 1, containerHeight);
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       // `- 1` at the end, because the top separator is not drawn in the canvas,
       // it's drawn using CSS' border property. And canvas positioning is 0-based.
@@ -245,17 +263,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       ctx.fillRect(0, y, containerWidth, 1);
     }
 
-    // Fill in behind text
-    const gradient = ctx.createLinearGradient(0, 0, 150, 0);
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
-    gradient.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
-    ctx.fillStyle = gradient;
-    for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-      // Get the timing information for a row of stack frames.
-      const y = rowIndex * rowHeight - viewportTop;
-      // `-1` because we only want to cover the row's inner surface.
-      ctx.fillRect(0, y, 150, rowHeight - 1);
-    }
+    const textMeasurement = this._getTextMeasurement(ctx);
 
     // Draw the text
     ctx.fillStyle = '#000000';
@@ -265,16 +273,16 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       if (rowIndex > 0 && name === markerTimingRows[rowIndex - 1].name) {
         continue;
       }
-      const displayedName =
-        name.length < MARKER_LABEL_MAX_LENGTH
-          ? name
-          : name.slice(0, MARKER_LABEL_MAX_LENGTH) + '…';
+      const fittedText = textMeasurement.getFittedText(name, MARGIN_LEFT);
       const y = rowIndex * rowHeight - viewportTop;
-      ctx.fillText(displayedName, 5, y + TEXT_OFFSET_TOP);
+      ctx.fillText(fittedText, 5, y + TEXT_OFFSET_TOP);
     }
   }
 
   hitTest = (x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null => {
+    if (x < MARGIN_LEFT) {
+      return null;
+    }
     const {
       rangeStart,
       rangeEnd,
@@ -282,18 +290,20 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       rowHeight,
       viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
+    const markerContainerWidth = containerWidth - MARGIN_LEFT - MARGIN_RIGHT;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
     const unitIntervalTime: UnitIntervalOfProfileRange =
-      viewportLeft + viewportLength * (x / containerWidth);
+      viewportLeft +
+      viewportLength * ((x - MARGIN_LEFT) / markerContainerWidth);
     const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
     const rowIndex = Math.floor((y + viewportTop) / rowHeight);
     const minDuration =
       rangeLength *
       viewportLength *
-      (rowHeight * 2 * MARKER_DOT_RADIUS / containerWidth);
+      (rowHeight * 2 * MARKER_DOT_RADIUS / markerContainerWidth);
     const markerTiming = markerTimingRows[rowIndex];
 
     if (!markerTiming) {
