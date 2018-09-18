@@ -30,6 +30,7 @@ import type {
   PreviewSelection,
   ImplementationFilter,
   TrackReference,
+  TimelineType,
 } from '../types/actions';
 import type { State } from '../types/reducers';
 import type { Action, ThunkAction } from '../types/store';
@@ -832,5 +833,12 @@ export function popTransformsFromStack(
       threadIndex,
       firstPoppedFilterIndex,
     });
+  };
+}
+
+export function changeTimelineType(timelineType: TimelineType): Action {
+  return {
+    type: 'CHANGE_TIMELINE_TYPE',
+    timelineType,
   };
 }
