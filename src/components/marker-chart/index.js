@@ -18,10 +18,7 @@ import {
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
-import type {
-  TracingMarker,
-  MarkerTimingRows,
-} from '../../types/profile-derived';
+import type { TracingMarker, MarkerTiming } from '../../types/profile-derived';
 import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
@@ -42,7 +39,7 @@ type DispatchProps = {|
 
 type StateProps = {|
   +markers: TracingMarker[],
-  +markerTimingRows: MarkerTimingRows,
+  +markerTimingAndBuckets: Array<string | MarkerTiming>,
   +maxMarkerRows: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +interval: Milliseconds,
@@ -66,7 +63,7 @@ class MarkerChart extends React.PureComponent<Props> {
       maxMarkerRows,
       timeRange,
       threadIndex,
-      markerTimingRows,
+      markerTimingAndBuckets,
       markers,
       previewSelection,
       updatePreviewSelection,
@@ -92,7 +89,7 @@ class MarkerChart extends React.PureComponent<Props> {
               maximumZoom: this.getMaximumZoom(),
             }}
             chartProps={{
-              markerTimingRows,
+              markerTimingAndBuckets,
               markers,
               updatePreviewSelection,
               rangeStart: timeRange.start,
@@ -109,21 +106,21 @@ class MarkerChart extends React.PureComponent<Props> {
 
 // This function is given the MarkerChartCanvas's chartProps.
 function viewportNeedsUpdate(
-  prevProps: { +markerTimingRows: MarkerTimingRows },
-  newProps: { +markerTimingRows: MarkerTimingRows }
+  prevProps: { +markerTimingAndBuckets: Array<string | MarkerTiming> },
+  newProps: { +markerTimingAndBuckets: Array<string | MarkerTiming> }
 ) {
-  return prevProps.markerTimingRows !== newProps.markerTimingRows;
+  return prevProps.markerTimingAndBuckets !== newProps.markerTimingAndBuckets;
 }
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
-    const markerTimingRows = selectedThreadSelectors.getMarkerChartTiming(
+    const markerTimingAndBuckets = selectedThreadSelectors.getMarkerChartTimingAndBuckets(
       state
     );
     return {
       markers: selectedThreadSelectors.getMarkerChartTracingMarkers(state),
-      markerTimingRows,
-      maxMarkerRows: markerTimingRows.length,
+      markerTimingAndBuckets,
+      maxMarkerRows: markerTimingAndBuckets.length,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),

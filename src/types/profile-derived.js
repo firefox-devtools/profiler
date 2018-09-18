@@ -107,8 +107,13 @@ export type MarkerTiming = {
   index: IndexIntoTracingMarkers[],
   label: string[],
   name: string,
+  bucket: string,
   length: number,
 };
+export type MarkerTimingBuckets = Array<{
+  bucket: string,
+  markerTimings: MarkerTiming[],
+}>;
 export type MarkerTimingRows = Array<MarkerTiming>;
 
 export type StackType = 'js' | 'native' | 'unsymbolicated';

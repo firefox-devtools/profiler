@@ -6,15 +6,15 @@ import { storeWithProfile } from '../fixtures/stores';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 
-describe('selectors/getMarkerChartTiming', function() {
-  function getMarkerChartTiming(testMarkers) {
+describe('selectors/getMarkerChartTimingAndBuckets', function() {
+  function getMarkerChartTimingAndBuckets(testMarkers) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
-    return selectedThreadSelectors.getMarkerChartTiming(getState());
+    return selectedThreadSelectors.getMarkerChartTimingAndBuckets(getState());
   }
 
   it('has no marker timing if no markers are present', function() {
-    expect(getMarkerChartTiming([])).toEqual([]);
+    expect(getMarkerChartTimingAndBuckets([])).toEqual([]);
   });
 
   describe('markers of the same name', function() {
@@ -22,7 +22,7 @@ describe('selectors/getMarkerChartTiming', function() {
       // The timing should look like this:
       // 'Marker Name': *------*
       //              : *------*
-      const markerTiming = getMarkerChartTiming([
+      const markerTiming = getMarkerChartTimingAndBuckets([
         ['Marker Name', 0, { startTime: 0, endTime: 10 }],
         ['Marker Name', 0, { startTime: 0, endTime: 10 }],
       ]);
@@ -32,7 +32,7 @@ describe('selectors/getMarkerChartTiming', function() {
     it('puts markers of disjoint times in one row', function() {
       // The timing should look like this:
       // 'Marker Name': *------*  *------*
-      const markerTiming = getMarkerChartTiming([
+      const markerTiming = getMarkerChartTimingAndBuckets([
         ['Marker Name', 0, { startTime: 0, endTime: 10 }],
         ['Marker Name', 0, { startTime: 15, endTime: 25 }],
       ]);
@@ -43,7 +43,7 @@ describe('selectors/getMarkerChartTiming', function() {
       // The timing should look like this:
       // 'Marker Name': *------*
       //              :     *------*
-      const markerTiming = getMarkerChartTiming([
+      const markerTiming = getMarkerChartTimingAndBuckets([
         ['Marker Name', 0, { startTime: 0, endTime: 10 }],
         ['Marker Name', 0, { startTime: 5, endTime: 15 }],
       ]);
@@ -54,7 +54,7 @@ describe('selectors/getMarkerChartTiming', function() {
       // The timing should look like this:
       // 'Marker Name': *--------*
       //              :   *---*
-      const markerTiming = getMarkerChartTiming([
+      const markerTiming = getMarkerChartTimingAndBuckets([
         ['Marker Name', 0, { startTime: 0, endTime: 20 }],
         ['Marker Name', 0, { startTime: 5, endTime: 15 }],
       ]);
@@ -67,19 +67,26 @@ describe('selectors/getMarkerChartTiming', function() {
       // The timing should look like this:
       // 'Marker Name A': *------*
       // 'Marker Name B':           *------*
-      const markerTiming = getMarkerChartTiming([
+      const markerTiming = getMarkerChartTimingAndBuckets([
         ['Marker Name A', 0, { startTime: 0, endTime: 10 }],
         ['Marker Name B', 0, { startTime: 20, endTime: 30 }],
       ]);
       expect(markerTiming).toHaveLength(2);
-      expect(markerTiming[0].name).toBe('Marker Name A');
-      expect(markerTiming[1].name).toBe('Marker Name B');
+      const [markerTimingA, markerTimingB] = markerTiming;
+      if (
+        typeof markerTimingA === 'string' ||
+        typeof markerTimingB === 'string'
+      ) {
+        throw new Error('Expected to find marker timing, but found a string');
+      }
+      expect(markerTimingA.name).toBe('Marker Name A');
+      expect(markerTimingB.name).toBe('Marker Name B');
     });
   });
 
   describe('markers that are crossing the profile start or end', function() {
     it('renders properly markers starting before profile start', function() {
-      const markerTiming = getMarkerChartTiming([
+      const markerTiming = getMarkerChartTimingAndBuckets([
         [
           'Rasterize',
           1,
@@ -99,7 +106,7 @@ describe('selectors/getMarkerChartTiming', function() {
     });
 
     it('renders properly markers ending after profile end', function() {
-      const markerTiming = getMarkerChartTiming([
+      const markerTiming = getMarkerChartTimingAndBuckets([
         [
           'Rasterize',
           20,

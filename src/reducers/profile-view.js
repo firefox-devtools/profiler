@@ -18,7 +18,7 @@ import * as ProfileData from '../profile-logic/profile-data';
 import * as MarkerData from '../profile-logic/marker-data';
 import * as StackTiming from '../profile-logic/stack-timing';
 import * as FlameGraph from '../profile-logic/flame-graph';
-import * as MarkerTiming from '../profile-logic/marker-timing';
+import * as MarkerTimingLogic from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import { arePathsEqual, PathSet } from '../utils/path';
@@ -43,6 +43,7 @@ import type {
   LocalTrack,
   GlobalTrack,
   TrackIndex,
+  MarkerTiming,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
@@ -752,7 +753,7 @@ export type SelectorsForThread = {
   getNetworkChartTracingMarkers: State => TracingMarker[],
   getMarkerChartTracingMarkers: State => TracingMarker[],
   getIsMarkerChartEmptyInFullRange: State => boolean,
-  getMarkerChartTiming: State => MarkerTimingRows,
+  getMarkerChartTimingAndBuckets: State => Array<string | MarkerTiming>,
   getNetworkChartTiming: State => MarkerTimingRows,
   getCommittedRangeFilteredTracingMarkers: State => TracingMarker[],
   getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
@@ -1029,13 +1030,13 @@ export const selectorsForThread = (
       getSearchFilteredTracingMarkers,
       MarkerData.filterForMarkerChart
     );
-    const getMarkerChartTiming = createSelector(
+    const getMarkerChartTimingAndBuckets = createSelector(
       getMarkerChartTracingMarkers,
-      MarkerTiming.getMarkerTiming
+      MarkerTimingLogic.getMarkerTimingAndBuckets
     );
     const getNetworkChartTiming = createSelector(
       getNetworkChartTracingMarkers,
-      MarkerTiming.getMarkerTiming
+      MarkerTimingLogic.getMarkerTiming
     );
     const getNetworkTracingMarkers = createSelector(
       getCommittedRangeFilteredTracingMarkers,
@@ -1046,7 +1047,7 @@ export const selectorsForThread = (
     );
     const getNetworkTrackTiming = createSelector(
       getNetworkTracingMarkers,
-      MarkerTiming.getMarkerTiming
+      MarkerTimingLogic.getMarkerTiming
     );
     const getScreenshotsById = createSelector(
       _getMarkersTable,
@@ -1178,7 +1179,7 @@ export const selectorsForThread = (
       getNetworkChartTracingMarkers,
       getIsMarkerChartEmptyInFullRange,
       getMarkerChartTracingMarkers,
-      getMarkerChartTiming,
+      getMarkerChartTimingAndBuckets,
       getNetworkChartTiming,
       getCommittedRangeFilteredTracingMarkers,
       getCommittedRangeFilteredTracingMarkersForHeader,

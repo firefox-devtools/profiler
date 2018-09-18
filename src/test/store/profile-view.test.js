@@ -984,10 +984,10 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getTracingMarkers(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getMarkerChartTiming', function() {
+  it('matches the last stored run of selectedThreadSelector.getMarkerChartTimingAndBuckets', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getMarkerChartTiming(getState())
+      selectedThreadSelectors.getMarkerChartTimingAndBuckets(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getNetworkChartTiming', function() {
