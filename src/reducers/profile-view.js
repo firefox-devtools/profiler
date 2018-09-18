@@ -19,6 +19,7 @@ import * as MarkerData from '../profile-logic/marker-data';
 import * as StackTiming from '../profile-logic/stack-timing';
 import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
+import * as JsTracer from '../profile-logic/js-tracer';
 import * as CallTree from '../profile-logic/call-tree';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import { arePathsEqual, PathSet } from '../utils/path';
@@ -33,6 +34,8 @@ import type {
   SamplesTable,
   Pid,
   MarkersTable,
+  JsTracerEvents,
+  JsTracerTable,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -43,6 +46,7 @@ import type {
   LocalTrack,
   GlobalTrack,
   TrackIndex,
+  JsTracerTiming,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
@@ -61,6 +65,7 @@ import type {
 } from '../types/reducers';
 import type { Transform, TransformStack } from '../types/transforms';
 import type { TimingsForPath } from '../profile-logic/profile-data';
+import type { UniqueStringArray } from '../utils/unique-string-array';
 
 function profile(state: Profile | null = null, action: Action): Profile | null {
   switch (action.type) {
@@ -803,6 +808,10 @@ export type SelectorsForThread = {
   getSearchFilteredTracingMarkers: State => TracingMarker[],
   getPreviewFilteredTracingMarkers: State => TracingMarker[],
   unfilteredSamplesRange: State => StartEndRange | null,
+  getJsTracerTable: State => JsTracerTable | null,
+  getJsTracerEvents: State => JsTracerEvents | null,
+  getJsTracerStringTable: State => UniqueStringArray | null,
+  getJsTracerTiming: State => JsTracerTiming[],
 };
 
 const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
@@ -1191,6 +1200,20 @@ export const selectorsForThread = (
       }
     );
 
+    const getJsTracerTable = (state: State) =>
+      getThread(state).jsTracer || null;
+    const getJsTracerEvents = (state: State) => {
+      const tracerTable = getJsTracerTable(state);
+      return tracerTable === null ? null : tracerTable.events;
+    };
+    const getJsTracerStringTable = (state: State) => {
+      const tracerTable = getJsTracerTable(state);
+      return tracerTable === null ? null : tracerTable.stringTable;
+    };
+    const getJsTracerTiming = createSelector(getJsTracerTable, jsTracerTable =>
+      JsTracer.getJsTracerTiming(ensureExists(jsTracerTable))
+    );
+
     selectorsForThreads[threadIndex] = {
       getThread,
       getViewOptions,
@@ -1229,6 +1252,10 @@ export const selectorsForThread = (
       getSearchFilteredTracingMarkers,
       getPreviewFilteredTracingMarkers,
       unfilteredSamplesRange,
+      getJsTracerTable,
+      getJsTracerEvents,
+      getJsTracerStringTable,
+      getJsTracerTiming,
     };
   }
   return selectorsForThreads[threadIndex];

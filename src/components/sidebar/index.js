@@ -21,5 +21,6 @@ export default function selectSidebar(
     'marker-chart': null,
     'marker-table': null,
     'network-chart': null,
+    'js-tracer': null,
   }[selectedTab];
 }

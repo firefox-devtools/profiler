@@ -33,6 +33,7 @@ import type {
   IndexIntoFuncTable,
   IndexIntoStringTable,
   IndexIntoResourceTable,
+  JsTracerTable,
 } from '../types/profile';
 import type { Milliseconds } from '../types/units';
 import type {
@@ -717,6 +718,17 @@ function _processThread(
   const markers = _processMarkers(geckoMarkers);
   const samples = _processSamples(geckoSamples);
 
+  // Optionally extract the JS Tracer information, if they exist.
+  let jsTracer;
+  const { jsTracerEvents } = thread;
+  const { jsTracerDictionary } = processProfile;
+  if (jsTracerEvents && jsTracerDictionary) {
+    jsTracer = ({
+      events: jsTracerEvents,
+      stringTable: new UniqueStringArray(jsTracerDictionary),
+    }: JsTracerTable);
+  }
+
   return {
     name: thread.name,
     processType: thread.processType,
@@ -735,6 +747,7 @@ function _processThread(
     markers,
     stringTable,
     samples,
+    jsTracer,
   };
 }
 

@@ -8,13 +8,13 @@ import type {
   IndexIntoStringTable,
   PausedRange,
   CategoryList,
+  JsTracerEvents,
 } from './profile';
 import type { MarkerPayload_Gecko } from './markers';
-import type { Milliseconds, Microseconds } from './units';
+import type { Milliseconds } from './units';
 
 export type IndexIntoGeckoFrameTable = number;
 export type IndexIntoGeckoStackTable = number;
-export type IndexIntoTraceLoggerDictionary = number;
 
 export type GeckoMarkers = {
   schema: { name: 0, time: 1, data: 2 },
@@ -148,14 +148,7 @@ export type GeckoThread = {
   frameTable: GeckoFrameTable,
   stackTable: GeckoStackTable,
   stringTable: string[],
-  traceLoggerEvents?: Array<
-    [
-      IndexIntoTraceLoggerDictionary,
-      Microseconds,
-      number | void, // Line number.
-      number | void, // Column number.
-    ]
-  >,
+  jsTracerEvents?: JsTracerEvents,
 };
 
 export type GeckoExtensionMeta = {|
@@ -200,5 +193,5 @@ export type GeckoProfile = {|
   pausedRanges: PausedRange[],
   tasktracer?: Object,
   processes: GeckoProfile[],
-  traceLoggerDictionary?: string[],
+  jsTracerDictionary?: string[],
 |};
