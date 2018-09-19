@@ -8,11 +8,11 @@ import { mount } from 'enzyme';
 import { Provider } from 'react-redux';
 
 import { changeMarkersSearchString } from '../../actions/profile-view';
-import MarkerChart from '../../components/marker-chart';
 import {
-  MARGIN_LEFT,
-  MARGIN_RIGHT,
-} from '../../components/marker-chart/Canvas';
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
+import MarkerChart from '../../components/marker-chart';
 import { changeSelectedTab } from '../../actions/app';
 
 import EmptyReasons from '../../components/shared/EmptyReasons';
@@ -69,7 +69,7 @@ function setupWithProfile(profile) {
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() =>
-      getBoundingBox(200 + MARGIN_LEFT + MARGIN_RIGHT, 300)
+      getBoundingBox(200 + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT, 300)
     );
 
   const store = storeWithProfile(profile);
@@ -133,7 +133,7 @@ describe('MarkerChart', function() {
 
     // Move the mouse on top of an item.
     markerChart.find('canvas').simulate('mousemove', {
-      nativeEvent: { offsetX: 50 + MARGIN_LEFT, offsetY: 5 },
+      nativeEvent: { offsetX: 50 + TIMELINE_MARGIN_LEFT, offsetY: 5 },
       pageX: 50,
       pageY: 5,
     });
