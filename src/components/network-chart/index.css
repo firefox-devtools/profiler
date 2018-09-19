@@ -1,0 +1,73 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.networkChart {
+  display: flex;
+  flex-flow: column nowrap;
+  flex: 1;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  cursor: default;
+  padding: 0 5px;
+}
+
+.networkChart .treeViewBody .treeViewBodyInnerWrapper {
+  flex-flow: column nowrap;
+  width: 100%;
+  border-top: 1px solid var(--grey-30);
+}
+
+
+.item {
+  width: 100%;
+  height: 1.5em;
+  display: block;
+}
+
+.item:nth-child(even){
+  background-color:var(--grey-20);
+}
+
+.item:hover {
+  background-color: #bbe0f6;
+}
+
+.item:hover .itemBar{
+  opacity: 1;
+}
+
+.itemLabel {
+  width: 100%;
+  display: inline-block;
+  margin-left: 4px;
+  z-index: 2;
+  flex-basis: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.itemBar {
+  background-color: var(--blue-50);
+  display: inline-block;
+  z-index: 3;
+  border-radius: 2px;
+  height: 1.2em;
+  flex-grow: 1;
+  margin-left: 4px;
+  position: absolute;
+  margin-top: 0.15em;
+  opacity: 0.6;
+}
+
+.status_start .itemBar {
+  background-color: var(--magenta-50);
+  opacity: 0.2;
+}
+
+.status_redirect .itemBar {
+  background-color: var(--teal-70);
+  opacity: 0.4;
+}

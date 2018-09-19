@@ -1,0 +1,334 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmptyReasons shows a reason when a profile has no network markers 1`] = `
+<div
+  className="EmptyReasons"
+>
+  <h3>
+    The 
+    network chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    This thread has no network information.
+  </p>
+</div>
+`;
+
+exports[`EmptyReasons shows a reason when a profile's network markers have been filtered out 1`] = `
+<div
+  className="EmptyReasons"
+>
+  <h3>
+    The 
+    network chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    This thread has no network information.
+  </p>
+</div>
+`;
+
+exports[`NetworkChart renders NetworkChart correctly 1`] = `
+<div
+  className="networkChart"
+>
+  <div
+    className="markerSettings"
+  >
+    <div
+      className="markerSettingsSpacer"
+    />
+    <div
+      className="markerSettingsSearchbar"
+    >
+      <label
+        className="markerSettingsSearchbarLabel"
+      >
+        Filter Markers: 
+        <form
+          className="idleSearchField markerSettingsSearchField"
+          onSubmit={[Function]}
+        >
+          <input
+            className="idleSearchFieldInput"
+            name="search"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            required="required"
+            title="Only display markers that match a certain name"
+            type="search"
+            value=""
+          />
+          <input
+            className="idleSearchFieldButton"
+            onClick={[Function]}
+            onFocus={[Function]}
+            type="reset"
+          />
+        </form>
+      </label>
+    </div>
+  </div>
+  <div
+    className="treeViewBody"
+    tabIndex={0}
+  >
+    <div
+      className="treeViewBodyInnerWrapper"
+    >
+      <div
+        className="treeViewBodyInner treeViewBodyInner0"
+        style={
+          Object {
+            "height": "175px",
+            "width": undefined,
+          }
+        }
+      >
+        <div
+          className="treeViewBodyInner treeViewBodyInner0TopSpacer"
+          key="-1"
+          style={
+            Object {
+              "height": "0px",
+            }
+          }
+        />
+        <div
+          className="treeViewBodyInner treeViewBodyInner0InnerChunk"
+        >
+          <section
+            className="item stop"
+          >
+            <div
+              className="itemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="itemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": "NaN%",
+                  "width": "0.1%",
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="item stop"
+          >
+            <div
+              className="itemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="itemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": "Infinity%",
+                  "width": "0.1%",
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="item stop"
+          >
+            <div
+              className="itemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="itemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": "Infinity%",
+                  "width": "0.1%",
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="item stop"
+          >
+            <div
+              className="itemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="itemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": "Infinity%",
+                  "width": "0.1%",
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="item stop"
+          >
+            <div
+              className="itemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="itemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": "Infinity%",
+                  "width": "0.1%",
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="item stop"
+          >
+            <div
+              className="itemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="itemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": "Infinity%",
+                  "width": "0.1%",
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="item stop"
+          >
+            <div
+              className="itemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="itemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": "Infinity%",
+                  "width": "0.1%",
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="item stop"
+          >
+            <div
+              className="itemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="itemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": "Infinity%",
+                  "width": "0.1%",
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="item stop"
+          >
+            <div
+              className="itemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="itemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": "Infinity%",
+                  "width": "0.1%",
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="item stop"
+          >
+            <div
+              className="itemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="itemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": "Infinity%",
+                  "width": "0.1%",
+                }
+              }
+            >
+               
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NetworkChart renders NetworkChart correctly 2`] = `Array []`;

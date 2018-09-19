@@ -15,10 +15,7 @@ import {
   getProfileInterval,
   getPreviewSelection,
 } from '../../reducers/profile-view';
-import {
-  getSelectedThreadIndex,
-  getSelectedTab,
-} from '../../reducers/url-state';
+import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type {
@@ -120,16 +117,11 @@ function viewportNeedsUpdate(
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
-    const isNetworkChart = getSelectedTab(state) === 'network-chart';
-    const markers = isNetworkChart
-      ? selectedThreadSelectors.getNetworkChartTracingMarkers(state)
-      : selectedThreadSelectors.getMarkerChartTracingMarkers(state);
-    const markerTimingRows = isNetworkChart
-      ? selectedThreadSelectors.getNetworkChartTiming(state)
-      : selectedThreadSelectors.getMarkerChartTiming(state);
-
+    const markerTimingRows = selectedThreadSelectors.getMarkerChartTiming(
+      state
+    );
     return {
-      markers,
+      markers: selectedThreadSelectors.getMarkerChartTracingMarkers(state),
       markerTimingRows,
       maxMarkerRows: markerTimingRows.length,
       timeRange: getCommittedRange(state),
