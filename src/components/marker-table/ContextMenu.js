@@ -73,13 +73,14 @@ class MarkersContextMenu extends PureComponent<Props> {
       ? previewSelection.selectionStart
       : committedRange.start;
 
+    const marker = markers[selectedMarker];
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart,
-      // Add an arbitrarily small bit of time at the end to make sure the selected marker
-      // doesn't disappear from view.
-      selectionEnd: markers[selectedMarker].start + 0.0001,
+      // For markers without a duration, add an arbitrarily small bit of time at
+      // the end to make sure the selected marker doesn't disappear from view.
+      selectionEnd: marker.start + (marker.dur || 0.0001),
     });
   }
 
