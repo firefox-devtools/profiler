@@ -33,6 +33,7 @@ type MarkerDrawingInformation = {
   y: CssPixels,
   w: CssPixels,
   h: CssPixels,
+  uncutWidth: CssPixels,
   text: string,
 };
 
@@ -62,6 +63,7 @@ const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
 
 // Export for tests.
+// TODO - Cross-link these values if other components start using them.
 export const MARGIN_RIGHT = 15;
 export const MARGIN_LEFT = 150;
 
@@ -104,6 +106,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     y: CssPixels,
     w: CssPixels,
     h: CssPixels,
+    uncutWidth: CssPixels,
     text: string,
     backgroundColor: string = BLUE_40,
     foregroundColor: string = 'white'
@@ -112,7 +115,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
     const textMeasurement = this._getTextMeasurement(ctx);
 
-    if (w >= h) {
+    if (uncutWidth >= h) {
       // We want the rectangle to have a clear margin, that's why we increment y
       // and decrement h (twice, for both margins).
       this.drawRoundedRect(ctx, x, y + 1, w, h - 2, 1);
@@ -120,7 +123,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       // Draw the text label
       // TODO - L10N RTL.
       // Constrain the x coordinate to the leftmost area.
-      const x2: CssPixels = Math.max(x, MARGIN_LEFT) + TEXT_OFFSET_START;
+      const x2: CssPixels = x + TEXT_OFFSET_START;
       const w2: CssPixels = Math.max(0, w - (x2 - x));
 
       if (w2 > textMeasurement.minWidth) {
@@ -177,15 +180,18 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       // Decide which samples to actually draw
       const timeAtViewportLeft: Milliseconds =
         rangeStart + rangeLength * viewportLeft;
-      const timeAtViewportRight: Milliseconds =
-        rangeStart + rangeLength * viewportRight;
+      const timeAtViewportRightPlusMargin: Milliseconds =
+        rangeStart +
+        rangeLength * viewportRight +
+        // This represents the amount of seconds in the right margin:
+        MARGIN_RIGHT * (viewportLength * rangeLength / markerContainerWidth);
 
       let hoveredElement: MarkerDrawingInformation | null = null;
       for (let i = 0; i < markerTiming.length; i++) {
         // Only draw samples that are in bounds.
         if (
           markerTiming.end[i] > timeAtViewportLeft &&
-          markerTiming.start[i] < timeAtViewportRight
+          markerTiming.start[i] < timeAtViewportRightPlusMargin
         ) {
           const startTime: UnitIntervalOfProfileRange =
             (markerTiming.start[i] - rangeStart) / rangeLength;
@@ -196,23 +202,29 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
             (startTime - viewportLeft) * markerContainerWidth / viewportLength +
             MARGIN_LEFT;
           const y: CssPixels = rowIndex * rowHeight - viewportTop;
-          let w: CssPixels = Math.max(
-            10,
-            (endTime - startTime) * markerContainerWidth / viewportLength
-          );
+          const uncutWidth: CssPixels =
+            (endTime - startTime) * markerContainerWidth / viewportLength;
           const h: CssPixels = rowHeight - 1;
+
+          let w = uncutWidth;
           if (x < MARGIN_LEFT) {
+            // Adjust markers that are before the left margin.
             w = w - MARGIN_LEFT + x;
             x = MARGIN_LEFT;
+          }
+          if (uncutWidth < 10) {
+            // Ensure that small durations render as a dot, but markers cut by the margins
+            // are rendered as squares.
+            w = 10;
           }
 
           const tracingMarkerIndex = markerTiming.index[i];
           const isHovered = hoveredItem === tracingMarkerIndex;
           const text = markerTiming.label[i];
           if (isHovered) {
-            hoveredElement = { x, y, w, h, text };
+            hoveredElement = { x, y, w, h, uncutWidth, text };
           } else {
-            this.drawOneMarker(ctx, x, y, w, h, text);
+            this.drawOneMarker(ctx, x, y, w, h, uncutWidth, text);
           }
         }
       }
@@ -223,6 +235,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
           hoveredElement.y,
           hoveredElement.w,
           hoveredElement.h,
+          hoveredElement.uncutWidth,
           hoveredElement.text,
           'Highlight', //    background color
           'HighlightText' // foreground color
@@ -255,7 +268,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
     // Draw separators
     ctx.fillStyle = GREY_20;
-    ctx.fillRect(MARGIN_LEFT, 0, 1, containerHeight);
+    ctx.fillRect(MARGIN_LEFT - 1, 0, 1, containerHeight);
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       // `- 1` at the end, because the top separator is not drawn in the canvas,
       // it's drawn using CSS' border property. And canvas positioning is 0-based.
@@ -280,7 +293,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
   }
 
   hitTest = (x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null => {
-    if (x < MARGIN_LEFT) {
+    if (x < MARGIN_LEFT - MARKER_DOT_RADIUS) {
       return null;
     }
     const {
