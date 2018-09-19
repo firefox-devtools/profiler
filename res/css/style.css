@@ -190,7 +190,8 @@ body, #root, .profileViewer {
   opacity: 0.7
 }
 .treeViewBody:focus .treeViewRow.selected {
-  background-color: var(--grey-30);
+  background-color: highlight;
+  color: highlighttext;
 }
 
 .treeViewCategoryKnob {
