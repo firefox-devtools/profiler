@@ -14,7 +14,7 @@ type Props<HoveredItem> = {
   containerWidth: CssPixels,
   containerHeight: CssPixels,
   className: string,
-  onMouseDown?: (HoveredItem | null) => void,
+  onSelectItem?: (HoveredItem | null) => void,
   onDoubleClickItem: (HoveredItem | null) => void,
   getHoveredItemInfo: HoveredItem => React.Node,
   drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
@@ -41,6 +41,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
   _devicePixelRatio: number = 1;
   _offsetX: CssPixels = 0;
   _offsetY: CssPixels = 0;
+  _mouseMoved: boolean = false;
   _ctx: CanvasRenderingContext2D;
   _canvas: HTMLCanvasElement | null = null;
   _isDrawScheduled: boolean = false;
@@ -99,8 +100,12 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
   }
 
   _onMouseDown = () => {
-    if (this.props.onMouseDown) {
-      this.props.onMouseDown(this.state.hoveredItem);
+    this._mouseMoved = false;
+  };
+
+  _onMouseUp = () => {
+    if (!this._mouseMoved && this.props.onSelectItem) {
+      this.props.onSelectItem(this.state.hoveredItem);
     }
   };
 
@@ -111,6 +116,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       return;
     }
 
+    this._mouseMoved = true;
     this._offsetX = event.nativeEvent.offsetX;
     this._offsetY = event.nativeEvent.offsetY;
     const maybeHoveredItem = this.props.hitTest(this._offsetX, this._offsetY);
@@ -196,6 +202,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
           className={className}
           ref={this._takeCanvasRef}
           onMouseDown={this._onMouseDown}
+          onMouseUp={this._onMouseUp}
           onMouseMove={this._onMouseMove}
           onMouseOut={this._onMouseOut}
           onDoubleClick={this._onDoubleClick}
