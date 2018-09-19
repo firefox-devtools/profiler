@@ -344,15 +344,12 @@ type StyleMarkerPayload_Shared = {
 };
 
 type VsyncTimestampPayload = {|
-  // The "type" property doesn't exist, but is required to make Flow typing work.
-  type: void,
-  category: 'VsyncTimestamp',
+  type: 'VsyncTimestamp',
   vsync: 0,
 |};
 
 export type ScreenshotPayload = {|
-  // The "type" property doesn't exist, but is required to make Flow typing work.
-  type: void,
+  type: 'CompositorScreenshot',
   // This field represents the data url of the image. It is saved in the string table.
   url: IndexIntoStringTable,
   // A memory address that can uniquely identify a window. It has no meaning other than

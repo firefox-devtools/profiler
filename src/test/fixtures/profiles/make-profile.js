@@ -550,7 +550,7 @@ export function getScreenshotTrackProfile() {
         'CompositorScreenshot',
         i,
         {
-          type: undefined,
+          type: 'CompositorScreenshot',
           url: 0, // Some arbitrary string.
           windowID: '0',
           windowWidth: 300,

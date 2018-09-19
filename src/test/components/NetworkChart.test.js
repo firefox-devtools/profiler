@@ -32,6 +32,8 @@ function setupWithProfile(profile) {
     .spyOn(HTMLCanvasElement.prototype, 'getContext')
     .mockImplementation(() => ctx);
 
+  // Ideally we'd want this only on the Canvas and on ChartViewport, but this is
+  // a lot easier to mock this everywhere.
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => getBoundingBox(200, 300));

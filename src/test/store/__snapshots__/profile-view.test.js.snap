@@ -31,14 +31,14 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 15,
+    "preprocessedProfileVersion": 16,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
     "stackwalk": 0,
     "startTime": 0,
     "toolkit": "",
-    "version": 12,
+    "version": 13,
   },
   "threads": Array [
     Object {
