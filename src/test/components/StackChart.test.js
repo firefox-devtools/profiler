@@ -4,10 +4,13 @@
 
 // @flow
 import * as React from 'react';
+import {
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
 import StackChartGraph from '../../components/stack-chart';
 import { mount } from 'enzyme';
 import { Provider } from 'react-redux';
-import { MARGIN_LEFT, MARGIN_RIGHT } from '../../components/stack-chart/Canvas';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -18,7 +21,8 @@ import { selectedThreadSelectors } from '../../reducers/profile-view';
 jest.useFakeTimers();
 
 const GRAPH_BASE_WIDTH = 200;
-const GRAPH_WIDTH = GRAPH_BASE_WIDTH + MARGIN_LEFT + MARGIN_RIGHT;
+const GRAPH_WIDTH =
+  GRAPH_BASE_WIDTH + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT;
 const GRAPH_HEIGHT = 300;
 
 describe('StackChart', function() {
@@ -92,7 +96,7 @@ describe('StackChart', function() {
       'mousemove',
       getMouseEvent({
         nativeEvent: {
-          offsetX: GRAPH_BASE_WIDTH / 2 + MARGIN_LEFT,
+          offsetX: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
           offsetY: 10,
         },
       })
@@ -108,7 +112,7 @@ describe('StackChart', function() {
       'mousemove',
       getMouseEvent({
         nativeEvent: {
-          offsetX: GRAPH_BASE_WIDTH / 2 + MARGIN_LEFT,
+          offsetX: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
           offsetY: 100,
         },
       })

@@ -6,6 +6,10 @@
 import { GREY_30 } from 'photon-colors';
 import * as React from 'react';
 import {
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
+import {
   withChartViewport,
   type WithChartViewport,
 } from '../shared/chart/Viewport';
@@ -32,10 +36,6 @@ import type {
 import type { GetCategory } from '../../profile-logic/color-categories';
 import type { GetLabel } from '../../profile-logic/labeling-strategies';
 import type { Viewport } from '../shared/chart/Viewport';
-
-// Export these values for tests.
-export const MARGIN_LEFT = 150;
-export const MARGIN_RIGHT = 15;
 
 type OwnProps = {|
   +thread: Thread,
@@ -168,12 +168,13 @@ class StackChartCanvas extends React.PureComponent<Props> {
     const startDepth = Math.floor(viewportTop / stackFrameHeight);
     const endDepth = Math.ceil(viewportBottom / stackFrameHeight);
 
-    const innerContainerWidth = containerWidth - MARGIN_LEFT - MARGIN_RIGHT;
+    const innerContainerWidth =
+      containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
 
     const pixelAtViewportPosition = (
       viewportPosition: UnitIntervalOfProfileRange
     ): CssPixels =>
-      MARGIN_LEFT +
+      TIMELINE_MARGIN_LEFT +
       (viewportPosition - viewportLeft) * innerContainerWidth / viewportLength;
 
     // Only draw the stack frames that are vertically within view.
@@ -197,7 +198,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
       // Decide which samples to actually draw
       const timeAtStart: Milliseconds =
-        rangeStart + rangeLength * viewportLeft - timePerPixel * MARGIN_LEFT;
+        rangeStart +
+        rangeLength * viewportLeft -
+        timePerPixel * TIMELINE_MARGIN_LEFT;
       const timeAtEnd: Milliseconds = rangeStart + rangeLength * viewportRight;
 
       for (let i = 0; i < stackTiming.length; i++) {
@@ -370,12 +373,14 @@ class StackChartCanvas extends React.PureComponent<Props> {
       viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
 
-    const innerContainerWidth = containerWidth - MARGIN_LEFT - MARGIN_RIGHT;
+    const innerContainerWidth =
+      containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
     const unitIntervalTime: UnitIntervalOfProfileRange =
-      viewportLeft + viewportLength * ((x - MARGIN_LEFT) / innerContainerWidth);
+      viewportLeft +
+      viewportLength * ((x - TIMELINE_MARGIN_LEFT) / innerContainerWidth);
     const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
     const depth = Math.floor((y + viewportTop) / ROW_HEIGHT);
     const stackTiming = stackTimingByDepth[depth];
