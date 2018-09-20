@@ -211,8 +211,9 @@ export type JsTracerTable = {
 export type JsTracerEvents = {
   events: Array<IndexIntoJsTracerStringTable>,
   timestamps: Array<Microseconds>,
-  lines: Array<number | void>, // Line number.
-  columns: Array<number | void>, // Column number.
+  durations: Array<Microseconds | -1>,
+  lines: Array<number | -1>, // Line number.
+  columns: Array<number | -1>, // Column number.
   length: number,
 };
 

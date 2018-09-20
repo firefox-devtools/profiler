@@ -18,18 +18,21 @@ export function getJsTracerTiming({
   // Each marker type will have it's own timing information, later collapse these into
   // a single array.
   const jsTracerTimingMap: Map<string, JsTracerTiming[]> = new Map();
-
+  const isUrl = stringTable._array.map(string => /:\/\//.test(string));
   // Go through all of the markers.
   for (
     let tracerEventIndex = 0;
     tracerEventIndex < tracerEvents.length;
     tracerEventIndex++
   ) {
-    const name = stringTable.getString(tracerEvents.events[tracerEventIndex]);
-    let markerTimingsByName = jsTracerTimingMap.get(name);
+    const stringIndex = tracerEvents.events[tracerEventIndex];
+    const displayName = stringTable.getString(stringIndex);
+    // const rowName = isUrl[stringIndex] ? 'Script' : displayName;
+    const rowName = 'Tracer';
+    let markerTimingsByName = jsTracerTimingMap.get(rowName);
     if (markerTimingsByName === undefined) {
       markerTimingsByName = [];
-      jsTracerTimingMap.set(name, markerTimingsByName);
+      jsTracerTimingMap.set(rowName, markerTimingsByName);
     }
 
     // Place the marker in the closest row that is empty.
@@ -42,14 +45,16 @@ export function getJsTracerTiming({
           end: [],
           index: [],
           label: [],
-          name: name,
+          name: rowName,
           length: 0,
         };
         markerTimingsByName.push(markerTimingsRow);
       }
 
-      const start = tracerEvents.timestamps[tracerEventIndex] / 1000;
-      const duration = 0;
+      const division = 1000000;
+      const start = tracerEvents.timestamps[tracerEventIndex] / division;
+      const durationRaw = tracerEvents.durations[tracerEventIndex];
+      const duration = durationRaw === -1 ? 0 : durationRaw / division;
 
       // Since the markers are sorted, look at the last added marker in this row. If
       // the new marker fits, go ahead and insert it.
@@ -57,7 +62,7 @@ export function getJsTracerTiming({
       if (otherEnd === undefined || otherEnd <= start) {
         markerTimingsRow.start.push(start);
         markerTimingsRow.end.push(start + duration);
-        markerTimingsRow.label.push(name);
+        markerTimingsRow.label.push(displayName);
         markerTimingsRow.index.push(tracerEventIndex);
         markerTimingsRow.length++;
         break;
@@ -65,11 +70,13 @@ export function getJsTracerTiming({
     }
   }
 
-  const isUrl = /:\/\//;
   // Sort the URLs last.
   const keys = [...jsTracerTimingMap.keys()].sort((a, b) => {
-    const isUrlA = isUrl.test(a);
-    const isUrlB = isUrl.test(b);
+    const isUrlA = a === 'Script';
+    const isUrlB = b === 'Script';
+    // const isUrl = /:\/\//;
+    // const isUrlA = isUrl.test(a);
+    // const isUrlB = isUrl.test(b);
     if (isUrlA === isUrlB) {
       return a > b ? 1 : -1;
     }
