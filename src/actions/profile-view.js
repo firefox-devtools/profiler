@@ -58,6 +58,10 @@ export function changeSelectedCallNode(
   };
 }
 
+/**
+ * This selects a thread from its thread index.
+ * Please use it in tests only.
+ */
 export function changeSelectedThread(selectedThreadIndex: ThreadIndex): Action {
   return {
     type: 'CHANGE_SELECTED_THREAD',
@@ -65,6 +69,12 @@ export function changeSelectedThread(selectedThreadIndex: ThreadIndex): Action {
   };
 }
 
+/**
+ * This selects a track from its reference.
+ * This will ultimately select the thread that this track belongs to, using its
+ * thread index, and may also change the selected tab if it makes sense for this
+ * track.
+ */
 export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
   return (dispatch, getState) => {
     const currentlySelectedTab = getSelectedTab(getState());
@@ -150,6 +160,10 @@ export function focusCallTree(): Action {
   };
 }
 
+/**
+ * This action is used when the user right clicks a track, and is especially
+ * used to display its context menu.
+ */
 export function changeRightClickedTrack(
   trackReference: TrackReference
 ): Action {
@@ -166,6 +180,9 @@ export function setCallNodeContextMenuVisibility(isVisible: boolean): Action {
   };
 }
 
+/**
+ * This action is used to change the displayed order of the global tracks.
+ */
 export function changeGlobalTrackOrder(globalTrackOrder: TrackIndex[]): Action {
   sendAnalytics({
     hitType: 'event',
@@ -178,6 +195,12 @@ export function changeGlobalTrackOrder(globalTrackOrder: TrackIndex[]): Action {
   };
 }
 
+/**
+ * This action is used to hide a global track.
+ * During this process we select a different thread if the hidden track is the
+ * currently selected thread. We also prevent from hiding the last displayed
+ * thread.
+ */
 export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   return (dispatch, getState) => {
     const hiddenGlobalTracks = getHiddenGlobalTracks(getState());
@@ -189,7 +212,8 @@ export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
     const globalTrackToHide = getGlobalTracks(getState())[trackIndex];
     let selectedThreadIndex = getSelectedThreadIndex(getState());
 
-    // Re-select the selectedThreadIndex if it is hidden with this operation.
+    // Find another selectedThreadIndex if the current selected thread is hidden
+    // with this operation.
     if (globalTrackToHide.type === 'process') {
       // This is a process global track, this operation could potentially hide
       // the selectedThreadIndex.
@@ -236,6 +260,9 @@ export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   };
 }
 
+/**
+ * This action shows a specific global track.
+ */
 export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   return dispatch => {
     sendAnalytics({
@@ -357,6 +384,9 @@ export function isolateProcessMainThread(
   };
 }
 
+/**
+ * This action changes the track order among local tracks only.
+ */
 export function changeLocalTrackOrder(
   pid: Pid,
   localTrackOrder: TrackIndex[]
@@ -429,6 +459,13 @@ function _findOtherVisibleThread(
   return null;
 }
 
+/**
+ * This action hides a local track.
+ * This handles the case where the user hides the last local track in a thread:
+ * in that case we hide the global track for this thread. In the case where this
+ * is the selected thread we also take care to select another thread.  We also
+ * prevent from hiding the last thread.
+ */
 export function hideLocalTrack(
   pid: Pid,
   trackIndexToHide: TrackIndex
@@ -530,6 +567,9 @@ export function hideLocalTrack(
   };
 }
 
+/**
+ * This action simply displays a local track from its track index and its Pid.
+ */
 export function showLocalTrack(
   pid: Pid,
   trackIndex: TrackIndex
@@ -549,6 +589,9 @@ export function showLocalTrack(
   };
 }
 
+/**
+ * This action isolates a local track. This means we will hide all other tracks.
+ */
 export function isolateLocalTrack(
   pid: Pid,
   isolatedTrackIndex: TrackIndex

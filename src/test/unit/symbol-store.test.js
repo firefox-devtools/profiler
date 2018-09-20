@@ -40,6 +40,9 @@ describe('SymbolStore', function() {
   });
 
   afterEach(async function() {
+    if (symbolStore) {
+      await symbolStore.closeDb().catch(() => {});
+    }
     await deleteDatabase();
   });
 
@@ -137,12 +140,10 @@ describe('SymbolStore', function() {
     // Using another symbol store simulates a page reload
     // Due to https://github.com/dumbmatter/fakeIndexedDB/issues/22 we need to
     // take care to sequence the DB open requests.
-    const symbolStore2 = new SymbolStore(
-      'perf-html-async-storage',
-      symbolProvider
-    );
+    await symbolStore.closeDb().catch(() => {});
+    symbolStore = new SymbolStore('perf-html-async-storage', symbolProvider);
 
-    await symbolStore2.getSymbols(
+    await symbolStore.getSymbols(
       [{ lib: lib, addresses: new Set([0x1]) }],
       (_request, _results) => {},
       (_request, _error) => {}

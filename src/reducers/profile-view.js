@@ -621,9 +621,16 @@ export const getPreviewSelection = (state: State) =>
 
 /**
  * Tracks
+ *
+ * Tracks come in two flavors: global tracks and local tracks.
+ * They're uniquely referenced by a TrackReference.
  */
 export const getGlobalTracks = (state: State) =>
   getProfileView(state).globalTracks;
+
+/**
+ * This returns all TrackReferences for global tracks.
+ */
 export const getGlobalTrackReferences = createSelector(
   getGlobalTracks,
   (globalTracks): TrackReference[] =>
@@ -632,6 +639,10 @@ export const getGlobalTrackReferences = createSelector(
       trackIndex,
     }))
 );
+
+/**
+ * This finds a GlobalTrack from its TrackReference.
+ */
 export const getGlobalTrackFromReference = (
   state: State,
   trackReference: TrackReference
@@ -643,8 +654,12 @@ export const getGlobalTrackFromReference = (
   return globalTracks[trackReference.trackIndex];
 };
 
-// Warning: this selector returns a new object on every call, and will not properly
-// work with a PureComponent.
+/**
+ * This finds a GlobalTrack and its index for a specific Pid.
+ *
+ * Warning: this selector returns a new object on every call, and will not
+ * properly work with a PureComponent.
+ */
 export const getGlobalTrackAndIndexByPid = (state: State, pid: Pid) => {
   const globalTracks = getGlobalTracks(state);
   const globalTrackIndex = globalTracks.findIndex(
@@ -659,13 +674,25 @@ export const getGlobalTrackAndIndexByPid = (state: State, pid: Pid) => {
   }
   return { globalTrackIndex, globalTrack };
 };
+
+/**
+ * This returns a map of local tracks from a pid.
+ */
 export const getLocalTracksByPid = (state: State) =>
   getProfileView(state).localTracksByPid;
+
+/**
+ * This returns the local tracks for a specific Pid.
+ */
 export const getLocalTracks = (state: State, pid: Pid) =>
   ensureExists(
     getProfileView(state).localTracksByPid.get(pid),
     'Unable to get the tracks for the given pid.'
   );
+
+/**
+ * This returns a local track from its TrackReference.
+ */
 export const getLocalTrackFromReference = (
   state: State,
   trackReference: TrackReference
