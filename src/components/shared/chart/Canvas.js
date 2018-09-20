@@ -32,6 +32,17 @@ type State<HoveredItem> = {
 
 require('./Canvas.css');
 
+/**
+ * The maximum amount of movement in either direction between the
+ * mouse down and mouse up event for it to be interpreted as a
+ * item-selecting click. We cannot use a real click event as a trigger
+ * for selecting items because then a long dragging movement of the
+ * viewport would still select items when the mouse button is
+ * released. On the other hand, for accessibility reasons we want a
+ * small amount of movement between mouse down and up to be okay.
+ */
+const MOUSE_CLICK_MAX_MOVEMENT_DELTA = 5;
+
 // This isn't a PureComponent on purpose: we always want to update if the parent updates
 // But we still conditionally update the canvas itself, see componentDidUpdate.
 export default class ChartCanvas<HoveredItem> extends React.Component<
@@ -41,6 +52,8 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
   _devicePixelRatio: number = 1;
   _offsetX: CssPixels = 0;
   _offsetY: CssPixels = 0;
+  _mouseDownOffsetX: CssPixels = 0;
+  _mouseDownOffsetY: CssPixels = 0;
   _mouseMoved: boolean = false;
   _ctx: CanvasRenderingContext2D;
   _canvas: HTMLCanvasElement | null = null;
@@ -99,7 +112,11 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     }
   }
 
-  _onMouseDown = () => {
+  _onMouseDown = (
+    event: { nativeEvent: MouseEvent } & SyntheticMouseEvent<>
+  ) => {
+    this._mouseDownOffsetX = event.nativeEvent.offsetX;
+    this._mouseDownOffsetY = event.nativeEvent.offsetY;
     this._mouseMoved = false;
   };
 
@@ -116,10 +133,18 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       return;
     }
 
-    this._mouseMoved = true;
     this._offsetX = event.nativeEvent.offsetX;
     this._offsetY = event.nativeEvent.offsetY;
     const maybeHoveredItem = this.props.hitTest(this._offsetX, this._offsetY);
+
+    if (
+      Math.abs(this._offsetX - this._mouseDownOffsetX) >
+        MOUSE_CLICK_MAX_MOVEMENT_DELTA ||
+      Math.abs(this._offsetY - this._mouseDownOffsetY) >
+        MOUSE_CLICK_MAX_MOVEMENT_DELTA
+    ) {
+      this._mouseMoved = true;
+    }
 
     if (maybeHoveredItem !== null) {
       this.setState({
