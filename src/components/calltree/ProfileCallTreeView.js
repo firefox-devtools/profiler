@@ -10,11 +10,18 @@ import StackSettings from '../shared/StackSettings';
 import TransformNavigator from '../shared/TransformNavigator';
 import SelectedThreadActivityGraph from '../shared/thread/SelectedActivityGraph';
 
-const ProfileCallTreeView = () => (
+type Props = {|
+  // Allow tests to not render the thread activity graph.
+  +hideThreadActivityGraph?: boolean,
+|};
+
+const ProfileCallTreeView = (props: Props) => (
   <div className="treeAndSidebarWrapper">
     <StackSettings />
     <TransformNavigator />
-    <SelectedThreadActivityGraph />
+    {props && props.hideThreadActivityGraph ? null : (
+      <SelectedThreadActivityGraph />
+    )}
     <CallTree />
   </div>
 );

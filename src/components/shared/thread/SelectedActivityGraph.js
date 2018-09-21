@@ -44,8 +44,14 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../../utils/connect';
+import type { Viewport } from '../chart/Viewport';
 
-type OwnProps = {||};
+type OwnProps = {|
+  // The viewport property is injected by the withViewport component, but is not
+  // actually used or needed in this case. However, withViewport has side effects
+  // of enabling event listeners for adjusting the view.
+  +viewport: Viewport,
+|};
 
 type StateProps = {|
   +selectedThreadIndex: ThreadIndex,
@@ -148,12 +154,7 @@ function getSampleCategories(
 }
 
 class SelectedThreadActivityGraphCanvas extends PureComponent<Props> {
-  constructor(props) {
-    super(props);
-    (this: any)._onSampleClick = this._onSampleClick.bind(this);
-  }
-
-  _onSampleClick(sampleIndex: IndexIntoSamplesTable) {
+  _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
     const {
       fullThread,
       filteredThread,
@@ -201,7 +202,7 @@ class SelectedThreadActivityGraphCanvas extends PureComponent<Props> {
       getCallNodePathFromIndex(chosenCallNode, callNodeTable)
     );
     focusCallTree();
-  }
+  };
   render() {
     const {
       fullThread,
