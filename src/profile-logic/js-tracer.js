@@ -51,7 +51,7 @@ export function getJsTracerTiming({
         markerTimingsByName.push(markerTimingsRow);
       }
 
-      const division = 1000000;
+      const division = 1000;
       const start = tracerEvents.timestamps[tracerEventIndex] / division;
       const durationRaw = tracerEvents.durations[tracerEventIndex];
       const duration = durationRaw === -1 ? 0 : durationRaw / division;
