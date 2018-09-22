@@ -5,8 +5,6 @@
 // @flow
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import PropTypes from 'prop-types';
 import type { CssPixels } from '../../types/units';
 
 require('./Tooltip.css');
@@ -26,44 +24,38 @@ type State = {
 
 export default class Tooltip extends React.PureComponent<Props, State> {
   _isMounted: boolean = false;
-  _mountElement: ?HTMLElement;
+  _mountElement: HTMLElement;
+  _tooltipRoot: ?HTMLElement;
 
   state = {
     interiorElement: null,
     isNewContentLaidOut: false,
   };
 
-  // This allows to get the store so that we can pass it along to the tooltip
-  // children with a react-redux Provider. We can safely remove it once we use
-  // React 16's portals.
-  static contextTypes = { store: PropTypes.object.isRequired };
-
   _takeInteriorElementRef = (el: HTMLElement | null) => {
     this.setState({ interiorElement: el });
   };
 
-  componentDidMount() {
-    this._isMounted = true;
-    // Create a DOM node outside of the normal heirarchy.
+  constructor(props: Props) {
+    super(props);
     const el = document.createElement('div');
     el.className = 'tooltipMount';
-
-    // Satisfy flow null checks.
-    if (!document.body) {
-      throw new Error('No document body was found to append to.');
-    }
-    document.body.appendChild(el);
     this._mountElement = el;
-    this._renderTooltipContents();
+    this._tooltipRoot = document.getElementById('root-tooltip');
+  }
+
+  componentDidMount() {
+    this._isMounted = true;
+    if (this._tooltipRoot) {
+      this._tooltipRoot.appendChild(this._mountElement);
+    }
   }
 
   componentWillUnmount() {
-    ReactDOM.unmountComponentAtNode(this._mountElement);
-    // Satisfy flow null checks.
-    if (this._mountElement) {
-      this._mountElement.remove();
-    }
     this._isMounted = false;
+    if (this._tooltipRoot) {
+      this._tooltipRoot.removeChild(this._mountElement);
+    }
   }
 
   componentWillReceiveProps(nextProps: Props) {
@@ -82,8 +74,6 @@ export default class Tooltip extends React.PureComponent<Props, State> {
     if (interiorElement && !isNewContentLaidOut) {
       this._forceUpdateAfterRAF();
     }
-
-    this._renderTooltipContents();
   }
 
   /**
@@ -98,11 +88,7 @@ export default class Tooltip extends React.PureComponent<Props, State> {
     });
   }
 
-  /**
-   * This is really ugly, but the tooltip needs to be outside of the normal
-   * DOM heirarchy so it isn't clipped by some arbitrary stacking context.
-   */
-  _renderTooltipContents() {
+  render() {
     const { children, mouseX, mouseY } = this.props;
     const { interiorElement } = this.state;
 
@@ -127,26 +113,11 @@ export default class Tooltip extends React.PureComponent<Props, State> {
       top: mouseY - offsetY,
     };
 
-    const mountElement = this._mountElement;
-    if (!mountElement) {
-      throw new Error('There should have been a mount element.');
-    }
-
-    ReactDOM.render(
-      <Provider store={this.context.store}>
-        <div
-          className="tooltip"
-          style={style}
-          ref={this._takeInteriorElementRef}
-        >
-          {children}
-        </div>
-      </Provider>,
-      mountElement
+    return ReactDOM.createPortal(
+      <div className="tooltip" style={style} ref={this._takeInteriorElementRef}>
+        {children}
+      </div>,
+      this._mountElement
     );
-  }
-
-  render() {
-    return null;
   }
 }
