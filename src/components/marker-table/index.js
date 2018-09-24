@@ -112,6 +112,9 @@ class MarkerTree {
           case 'Bailout':
             category = 'Bailout';
             break;
+          case 'Network':
+            category = 'Network';
+            break;
           default:
         }
       }
