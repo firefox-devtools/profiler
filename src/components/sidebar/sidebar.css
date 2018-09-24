@@ -44,8 +44,9 @@
 }
 
 .sidebar-title {
-  font-size: 12px;
+  font-size: 1.2em;
   margin-bottom: .3em;
+  font-weight: 600;
 }
 
 .sidebar-subtitle {
