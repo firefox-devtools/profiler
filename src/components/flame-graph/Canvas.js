@@ -300,6 +300,81 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       maxStackDepth - viewportBottom / stackFrameHeight
     );
     const endDepth = Math.ceil(maxStackDepth - viewportTop / stackFrameHeight);
+    const overlayedDrawCalls = [];
+
+    function draw(
+      stackTiming: *,
+      i: number,
+      depth: number,
+      callNodeIndex: IndexIntoCallNodeTable,
+      colorType: 'hovered' | 'selected' | 'normal',
+      alwaysDraw: boolean
+    ) {
+      const startTime = stackTiming.start[i];
+      const endTime = stackTiming.end[i];
+
+      const x: CssPixels = startTime * containerWidth;
+      const y: CssPixels =
+        (maxStackDepth - depth - 1) * ROW_HEIGHT - viewportTop;
+      let w: CssPixels = (endTime - startTime) * containerWidth;
+      const h: CssPixels = ROW_HEIGHT - 1;
+
+      const funcIndex = callNodeTable.func[callNodeIndex];
+      const funcName = thread.stringTable.getString(
+        thread.funcTable.name[funcIndex]
+      );
+
+      if (w < 2 && !alwaysDraw) {
+        // Skip sending draw calls for sufficiently small boxes.
+        return;
+      }
+      // Enforce a minimum draw width for hovered items.
+      w = Math.max(w, 2);
+
+      const stackType = getStackType(thread, funcIndex);
+      let background, foreground;
+
+      switch (colorType) {
+        case 'hovered':
+          background = getHoverBackgroundColor(stackType);
+          foreground = '#ffffff';
+          break;
+        case 'selected':
+          background = 'Highlight';
+          foreground = 'HighlightText';
+          break;
+        default:
+          background = getBackgroundColor(
+            stackType,
+            stackTiming.selfTimeRelative[i]
+          );
+          foreground = getForegroundColor(
+            stackType,
+            stackTiming.selfTimeRelative[i]
+          );
+
+          break;
+      }
+
+      ctx.fillStyle = background;
+      ctx.fillRect(x, y, w, h);
+      // Ensure spacing between blocks.
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(x, y, 1, h);
+
+      // TODO - L10N RTL.
+      // Constrain the x coordinate to the leftmost area.
+      const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
+      const w2: CssPixels = Math.max(0, w - (x2 - x));
+
+      if (w2 > textMeasurement.minWidth) {
+        const fittedText = textMeasurement.getFittedText(funcName, w2);
+        if (fittedText) {
+          ctx.fillStyle = foreground;
+          ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
+        }
+      }
+    }
 
     // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {
@@ -311,68 +386,30 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       }
 
       for (let i = 0; i < stackTiming.length; i++) {
-        const startTime = stackTiming.start[i];
-        const endTime = stackTiming.end[i];
-
-        const x: CssPixels = startTime * containerWidth;
-        const y: CssPixels =
-          (maxStackDepth - depth - 1) * ROW_HEIGHT - viewportTop;
-        const w: CssPixels = (endTime - startTime) * containerWidth;
-        const h: CssPixels = ROW_HEIGHT - 1;
-
-        if (w < 2) {
-          // Skip sending draw calls for sufficiently small boxes.
+        const callNodeIndex = stackTiming.callNode[i];
+        if (selectedCallNodeIndex === callNodeIndex) {
+          overlayedDrawCalls.push(() =>
+            draw(stackTiming, i, depth, callNodeIndex, 'selected', true)
+          );
+          continue;
+        }
+        if (
+          hoveredItem &&
+          depth === hoveredItem.depth &&
+          i === hoveredItem.flameGraphTimingIndex
+        ) {
+          overlayedDrawCalls.push(() =>
+            draw(stackTiming, i, depth, callNodeIndex, 'hovered', true)
+          );
           continue;
         }
 
-        const callNodeIndex = stackTiming.callNode[i];
-        const funcIndex = callNodeTable.func[callNodeIndex];
-        const funcName = thread.stringTable.getString(
-          thread.funcTable.name[funcIndex]
-        );
-
-        const stackType = getStackType(thread, funcIndex);
-        const isHovered =
-          hoveredItem &&
-          depth === hoveredItem.depth &&
-          i === hoveredItem.flameGraphTimingIndex;
-        let background, foreground;
-
-        if (isHovered) {
-          background = getHoverBackgroundColor(stackType);
-          foreground = '#ffffff';
-        } else {
-          background = getBackgroundColor(
-            stackType,
-            stackTiming.selfTimeRelative[i]
-          );
-          foreground = getForegroundColor(
-            stackType,
-            stackTiming.selfTimeRelative[i]
-          );
-        }
-
-        const isSelected = selectedCallNodeIndex === callNodeIndex;
-        ctx.fillStyle = isSelected ? 'Highlight' : background;
-        ctx.fillRect(x, y, w, h);
-        // Ensure spacing between blocks.
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(x, y, 1, h);
-
-        // TODO - L10N RTL.
-        // Constrain the x coordinate to the leftmost area.
-        const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
-        const w2: CssPixels = Math.max(0, w - (x2 - x));
-
-        if (w2 > textMeasurement.minWidth) {
-          const fittedText = textMeasurement.getFittedText(funcName, w2);
-          if (fittedText) {
-            ctx.fillStyle = isSelected ? 'HighlightText' : foreground;
-            ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
-          }
-        }
+        draw(stackTiming, i, depth, callNodeIndex, 'normal', false);
       }
     }
+
+    // Draw the hovered and selected calls.
+    overlayedDrawCalls.forEach(draw => draw());
   };
 
   _getHoveredStackInfo = ({
