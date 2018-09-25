@@ -60,6 +60,8 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class FlameGraph extends React.PureComponent<Props> {
+  _container: HTMLDivElement | null = null;
+
   _onSelectedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
@@ -69,6 +71,76 @@ class FlameGraph extends React.PureComponent<Props> {
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
   };
+
+  _takeContainerRef = (container: HTMLDivElement | null) => {
+    this._container = container;
+  };
+
+  _focus = () => {
+    if (this._container) {
+      this._container.focus();
+    }
+  };
+
+  _handleKeyDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
+    const {
+      callNodeInfo: { callNodeTable },
+      threadIndex,
+      changeSelectedCallNode,
+      selectedCallNodeIndex,
+      callTree,
+      flameGraphTiming,
+    } = this.props;
+
+    if (selectedCallNodeIndex === null) {
+      return;
+    }
+
+    console.log('!!! event.key', event.key);
+    switch (event.key) {
+      case 'ArrowDown': {
+        const prefix = callNodeTable.prefix[selectedCallNodeIndex];
+        if (prefix !== -1) {
+          changeSelectedCallNode(
+            threadIndex,
+            getCallNodePathFromIndex(prefix, callNodeTable)
+          );
+        }
+        break;
+      }
+      case 'ArrowUp': {
+        const [callNodeIndex] = callTree.getChildren(selectedCallNodeIndex);
+        if (callNodeIndex !== undefined) {
+          changeSelectedCallNode(
+            threadIndex,
+            getCallNodePathFromIndex(callNodeIndex, callNodeTable)
+          );
+        }
+        break;
+      }
+      case 'ArrowLeft':
+      case 'ArrowRight': {
+        const direction = event.key === 'ArrowLeft' ? -1 : 1;
+        const depth = callNodeTable.depth[selectedCallNodeIndex];
+        const row = flameGraphTiming[depth];
+        const rowIndex = row.callNode.indexOf(selectedCallNodeIndex);
+        const callNodeIndex = row.callNode[rowIndex + direction];
+        if (callNodeIndex !== undefined) {
+          changeSelectedCallNode(
+            threadIndex,
+            getCallNodePathFromIndex(callNodeIndex, callNodeTable)
+          );
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  };
+
+  componentDidMount() {
+    this._focus();
+  }
 
   render() {
     const {
@@ -89,7 +161,13 @@ class FlameGraph extends React.PureComponent<Props> {
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
-      <div className="flameGraphContent">
+      <div
+        className="flameGraphContent"
+        ref={this._takeContainerRef}
+        onMouseDown={this._focus}
+        onKeyDown={this._handleKeyDown}
+        tabIndex={0}
+      >
         {icons.map(({ className, icon }) => (
           <BackgroundImageStyleDef
             className={className}
