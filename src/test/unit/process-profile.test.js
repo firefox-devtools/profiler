@@ -11,6 +11,7 @@ describe('extract functions and resource from location strings', function() {
   const locations = [
     // Extract unsymbolicated memory and match them to libraries.
     '0xc0ff33',
+    '0xe0ff33',
 
     // Extract C++ function names and resources
     'cppFunction1 (in c++ resource name1) + 123',
@@ -36,6 +37,18 @@ describe('extract functions and resource from location strings', function() {
       start: 0xc00000,
       end: 0xd00000,
       offset: 0,
+      arch: '',
+      name: 'No symbols library',
+      path: '',
+      debugName: '',
+      debugPath: '',
+      breakpadId: '',
+    },
+    // This library will match the '0xe0ff33' location, and it has an offset.
+    {
+      start: 0xe01000,
+      end: 0xf00000,
+      offset: 0x1000,
       arch: '',
       name: 'No symbols library',
       path: '',

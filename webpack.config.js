@@ -2,7 +2,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const OfflinePlugin = require('offline-plugin');
+const OfflinePlugin = require('@mstange/offline-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
 
@@ -18,7 +18,7 @@ const config = {
       'redux-devtools': path.join(__dirname, '..', '..', 'src'),
       react: path.join(__dirname, 'node_modules', 'react'),
     },
-    extensions: ['.js'],
+    extensions: ['.js', '.wasm'],
   },
   devtool: 'source-map',
   module: {
@@ -78,6 +78,10 @@ const config = {
     filename: '[hash].bundle.js',
     chunkFilename: '[id].[hash].bundle.js',
     publicPath: '/',
+  },
+  optimization: {
+    // Workaround for https://github.com/webpack/webpack/issues/7760
+    usedExports: false,
   },
 };
 
