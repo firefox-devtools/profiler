@@ -19,14 +19,22 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 
-// Define some magic sizing values to assert various properties of the viewport.
-const COMPONENT_WIDTH = 300;
-const COMPONENT_HEIGHT = 100;
-const LEFT = 5;
-const TOP = 7;
+// The following define the magic values used for the mocked bounding box of the
+// the rendered component.
+const BOUNDING_BOX_WIDTH = 300;
+const BOUNDING_BOX_HEIGHT = 100;
+const BOUNDING_BOX_LEFT = 5;
+const BOUDNING_BOX_TOP = 7;
+
+// The maximum zoom is required by the viewportProps, and is defined as 0.1 to be
+// a reasonable (but arbitrary) limit to zoom in.
 const MAXIMUM_ZOOM = 0.1;
-const MAX_VIEWPORT_HEIGHT = COMPONENT_HEIGHT * 3;
-const SMALL_MAX_VIEWPORT_HEIGHT = COMPONENT_HEIGHT * 0.2;
+
+// Various tests assert the behavior of the viewport depending on whether it's larger
+// or smaller than the bounding box. Provide a larger viewport height, and a smaller
+// one.
+const MAX_VIEWPORT_HEIGHT = BOUNDING_BOX_HEIGHT * 3;
+const SMALL_MAX_VIEWPORT_HEIGHT = BOUNDING_BOX_HEIGHT * 0.2;
 
 describe('Viewport', function() {
   it('matches the component snapshot', () => {
@@ -43,15 +51,15 @@ describe('Viewport', function() {
   });
 
   it('provides a viewport', () => {
-    const { getChartProps } = setup();
-    const { viewport } = getChartProps();
+    const { getChartViewport } = setup();
+    const viewport = getChartViewport();
     expect(viewport).toEqual({
-      containerWidth: COMPONENT_WIDTH,
-      containerHeight: COMPONENT_HEIGHT,
+      containerWidth: BOUNDING_BOX_WIDTH,
+      containerHeight: BOUNDING_BOX_HEIGHT,
       viewportLeft: 0,
       viewportRight: 1,
       viewportTop: 0,
-      viewportBottom: COMPONENT_HEIGHT,
+      viewportBottom: BOUNDING_BOX_HEIGHT,
       isDragging: false,
       isSizeSet: true,
       // Just pass the function through.
@@ -99,46 +107,39 @@ describe('Viewport', function() {
 
   describe('scrolling up and down', function() {
     it('scrolls the viewport down using the mousewheel', () => {
-      const { view, getChartProps } = setup();
-      expect(getChartProps().viewport).toMatchObject({
+      const { scrollAndGetViewport, getChartViewport } = setup();
+      expect(getChartViewport()).toMatchObject({
         viewportLeft: 0,
         viewportRight: 1,
         viewportTop: 0,
-        viewportBottom: COMPONENT_HEIGHT,
+        viewportBottom: BOUNDING_BOX_HEIGHT,
       });
       const deltaY = 10;
-      view.find('.chartViewport').simulate('wheel', getMouseEvent({ deltaY }));
-      expect(getChartProps().viewport).toMatchObject({
+      expect(scrollAndGetViewport({ deltaY: 10 })).toMatchObject({
         viewportLeft: 0,
         viewportRight: 1,
         viewportTop: deltaY,
-        viewportBottom: COMPONENT_HEIGHT + deltaY,
+        viewportBottom: BOUNDING_BOX_HEIGHT + deltaY,
       });
     });
 
     it('cannot scroll past the bottom of the viewport', () => {
-      const { view, getChartProps } = setup();
-      const deltaY = 1000;
-      view.find('.chartViewport').simulate('wheel', getMouseEvent({ deltaY }));
-      view.update();
-      expect(getChartProps().viewport).toMatchObject({
+      const { scrollAndGetViewport } = setup();
+      expect(scrollAndGetViewport({ deltaY: 1000 })).toMatchObject({
         viewportLeft: 0,
         viewportRight: 1,
-        viewportTop: MAX_VIEWPORT_HEIGHT - COMPONENT_HEIGHT,
+        viewportTop: MAX_VIEWPORT_HEIGHT - BOUNDING_BOX_HEIGHT,
         viewportBottom: MAX_VIEWPORT_HEIGHT,
       });
     });
 
     it('cannot scroll past the top of the viewport', () => {
-      const { view, getChartProps } = setup();
-      const deltaY = -100;
-      view.find('.chartViewport').simulate('wheel', getMouseEvent({ deltaY }));
-      view.update();
-      expect(getChartProps().viewport).toMatchObject({
+      const { scrollAndGetViewport } = setup();
+      expect(scrollAndGetViewport({ deltaY: -100 })).toMatchObject({
         viewportLeft: 0,
         viewportRight: 1,
         viewportTop: 0,
-        viewportBottom: COMPONENT_HEIGHT,
+        viewportBottom: BOUNDING_BOX_HEIGHT,
       });
     });
   });
@@ -159,7 +160,8 @@ describe('Viewport', function() {
         // Take into account the margins and the component width to find the inner
         // component width, which is the active viewport area. All mouse events should
         // be relative to this space.
-        const innerComponentWidth = COMPONENT_WIDTH - marginLeft - marginRight;
+        const innerComponentWidth =
+          BOUNDING_BOX_WIDTH - marginLeft - marginRight;
 
         // |        Viewport        |
         // |-----------*------------|
@@ -173,7 +175,7 @@ describe('Viewport', function() {
           const viewport = scrollAndGetViewport({
             deltaY: -100,
             shiftKey: true,
-            clientX: LEFT + innerComponentWidth * 0.5 + marginLeft,
+            clientX: BOUNDING_BOX_LEFT + innerComponentWidth * 0.5 + marginLeft,
           });
 
           // Assert that this zooms in equally.
@@ -187,7 +189,7 @@ describe('Viewport', function() {
           // Only do an additional viewport top/bottom check here.
           expect(viewport).toMatchObject({
             viewportTop: 0,
-            viewportBottom: COMPONENT_HEIGHT + 0,
+            viewportBottom: BOUNDING_BOX_HEIGHT,
           });
         });
 
@@ -203,7 +205,8 @@ describe('Viewport', function() {
           const viewport = scrollAndGetViewport({
             deltaY: -10,
             shiftKey: true,
-            clientX: LEFT + innerComponentWidth * 0.75 + marginLeft,
+            clientX:
+              BOUNDING_BOX_LEFT + innerComponentWidth * 0.75 + marginLeft,
           });
 
           // Assert that the left hand side zooms in more.
@@ -226,7 +229,8 @@ describe('Viewport', function() {
           const viewport = scrollAndGetViewport({
             deltaY: -10,
             shiftKey: true,
-            clientX: LEFT + innerComponentWidth * 0.25 + marginLeft,
+            clientX:
+              BOUNDING_BOX_LEFT + innerComponentWidth * 0.25 + marginLeft,
           });
 
           // Assert that the left hand side zooms in more.
@@ -249,7 +253,7 @@ describe('Viewport', function() {
           const viewport = scrollAndGetViewport({
             deltaY: -10,
             shiftKey: true,
-            clientX: LEFT + marginLeft,
+            clientX: BOUNDING_BOX_LEFT + marginLeft,
           });
           expect(viewport.viewportLeft).toBe(0);
           expect(viewport.viewportRight).toBeLessThan(1);
@@ -267,7 +271,7 @@ describe('Viewport', function() {
           const viewport = scrollAndGetViewport({
             deltaY: -10,
             shiftKey: true,
-            clientX: LEFT + innerComponentWidth + marginLeft,
+            clientX: BOUNDING_BOX_LEFT + innerComponentWidth + marginLeft,
           });
           expect(viewport.viewportLeft).toBeGreaterThan(0);
           expect(viewport.viewportRight).toBe(1);
@@ -281,7 +285,7 @@ describe('Viewport', function() {
           const viewport = scrollAndGetViewport({
             deltaY: 100,
             shiftKey: true,
-            clientX: LEFT + innerComponentWidth * 0.5 + marginLeft,
+            clientX: BOUNDING_BOX_LEFT + innerComponentWidth * 0.5 + marginLeft,
           });
           expect(viewport).toMatchObject({
             viewportLeft: 0,
@@ -293,66 +297,66 @@ describe('Viewport', function() {
   });
 
   describe('dragging around', function() {
-    const middleX = COMPONENT_WIDTH * 0.5;
-    const middleY = COMPONENT_HEIGHT * 0.5;
+    const middleX = BOUNDING_BOX_WIDTH * 0.5;
+    const middleY = BOUNDING_BOX_HEIGHT * 0.5;
 
     it('can click and drag down', function() {
-      const { getChartProps, clickAndDrag } = setup();
+      const { getChartViewport, clickAndDrag } = setup();
 
-      expect(getChartProps().viewport).toMatchObject({
+      expect(getChartViewport()).toMatchObject({
         viewportLeft: 0,
         viewportRight: 1,
         viewportTop: 0,
-        viewportBottom: COMPONENT_HEIGHT,
+        viewportBottom: BOUNDING_BOX_HEIGHT,
       });
       clickAndDrag(middleX, middleY, middleX, middleY - 50);
-      expect(getChartProps().viewport).toMatchObject({
+      expect(getChartViewport()).toMatchObject({
         viewportLeft: 0,
         viewportRight: 1,
         viewportTop: 50,
-        viewportBottom: COMPONENT_HEIGHT + 50,
+        viewportBottom: BOUNDING_BOX_HEIGHT + 50,
       });
     });
 
     it('can click and drag up', function() {
-      const { getChartProps, clickAndDrag } = setup();
-      const middleX = COMPONENT_WIDTH * 0.5;
-      const middleY = COMPONENT_HEIGHT * 0.5;
+      const { getChartViewport, clickAndDrag } = setup();
+      const middleX = BOUNDING_BOX_WIDTH * 0.5;
+      const middleY = BOUNDING_BOX_HEIGHT * 0.5;
 
       clickAndDrag(middleX, middleY, middleX, middleY - 100);
-      expect(getChartProps().viewport).toMatchObject({
+      expect(getChartViewport()).toMatchObject({
         viewportLeft: 0,
         viewportRight: 1,
         viewportTop: 100,
-        viewportBottom: COMPONENT_HEIGHT + 100,
+        viewportBottom: BOUNDING_BOX_HEIGHT + 100,
       });
       clickAndDrag(middleX, middleY, middleX, middleY + 50);
-      expect(getChartProps().viewport).toMatchObject({
+      expect(getChartViewport()).toMatchObject({
         viewportLeft: 0,
         viewportRight: 1,
         viewportTop: 50,
-        viewportBottom: COMPONENT_HEIGHT + 50,
+        viewportBottom: BOUNDING_BOX_HEIGHT + 50,
       });
     });
 
     it('will not drag beyond the top of the window', function() {
-      const { getChartProps, clickAndDrag } = setup();
-      const middleX = COMPONENT_WIDTH * 0.5;
-      const middleY = COMPONENT_HEIGHT * 0.5;
+      const { getChartViewport, clickAndDrag } = setup();
+      const middleX = BOUNDING_BOX_WIDTH * 0.5;
+      const middleY = BOUNDING_BOX_HEIGHT * 0.5;
 
       clickAndDrag(middleX, middleY, middleX, middleY + 50);
-      expect(getChartProps().viewport).toMatchObject({
+      expect(getChartViewport()).toMatchObject({
         viewportLeft: 0,
         viewportRight: 1,
         viewportTop: 0,
-        viewportBottom: COMPONENT_HEIGHT,
+        viewportBottom: BOUNDING_BOX_HEIGHT,
       });
     });
 
     it('will not drag beyond the bottom of the window', function() {
-      const { getChartProps, clickAndDrag } = setup();
-      const middleX = COMPONENT_WIDTH * 0.5;
-      const middleY = COMPONENT_HEIGHT * 0.5;
+      const { getChartViewport, clickAndDrag } = setup();
+      const middleX = BOUNDING_BOX_WIDTH * 0.5;
+      const middleY = BOUNDING_BOX_HEIGHT * 0.5;
 
       clickAndDrag(
         middleX,
@@ -360,16 +364,16 @@ describe('Viewport', function() {
         middleX,
         middleY - MAX_VIEWPORT_HEIGHT * 2
       );
-      expect(getChartProps().viewport).toMatchObject({
+      expect(getChartViewport()).toMatchObject({
         viewportLeft: 0,
         viewportRight: 1,
-        viewportTop: MAX_VIEWPORT_HEIGHT - COMPONENT_HEIGHT,
+        viewportTop: MAX_VIEWPORT_HEIGHT - BOUNDING_BOX_HEIGHT,
         viewportBottom: MAX_VIEWPORT_HEIGHT,
       });
     });
 
-    it('will anchor small content at the top', function() {
-      const { getChartProps, clickAndDrag } = setup({
+    it('will place the contents of a small viewport at the top of the bounding box', function() {
+      const { getChartViewport, clickAndDrag } = setup({
         maxViewportHeight: SMALL_MAX_VIEWPORT_HEIGHT,
         startsAtBottom: false,
       });
@@ -377,46 +381,46 @@ describe('Viewport', function() {
         viewportLeft: 0,
         viewportRight: 1,
         viewportTop: 0,
-        viewportBottom: COMPONENT_HEIGHT,
+        viewportBottom: BOUNDING_BOX_HEIGHT,
       };
-      expect(getChartProps().viewport).toMatchObject(anchoredViewport);
+      expect(getChartViewport()).toMatchObject(anchoredViewport);
 
       // It will not move the viewport.
       clickAndDrag(middleX, middleY, middleX, middleY - 10);
-      expect(getChartProps().viewport).toMatchObject(anchoredViewport);
+      expect(getChartViewport()).toMatchObject(anchoredViewport);
       clickAndDrag(middleX, middleY, middleX, middleY + 10);
-      expect(getChartProps().viewport).toMatchObject(anchoredViewport);
+      expect(getChartViewport()).toMatchObject(anchoredViewport);
     });
 
-    it('will anchor small content at the bottom', function() {
-      const { getChartProps, clickAndDrag } = setup({
+    it('will place the contents of a small viewport at the bottom of the bounding box', function() {
+      const { getChartViewport, clickAndDrag } = setup({
         maxViewportHeight: SMALL_MAX_VIEWPORT_HEIGHT,
         startsAtBottom: true,
       });
       const anchoredViewport = {
         viewportLeft: 0,
         viewportRight: 1,
-        viewportTop: SMALL_MAX_VIEWPORT_HEIGHT - COMPONENT_HEIGHT,
+        viewportTop: SMALL_MAX_VIEWPORT_HEIGHT - BOUNDING_BOX_HEIGHT,
         viewportBottom: SMALL_MAX_VIEWPORT_HEIGHT,
       };
-      expect(getChartProps().viewport).toMatchObject(anchoredViewport);
+      expect(getChartViewport()).toMatchObject(anchoredViewport);
 
       // It will not move the viewport.
       clickAndDrag(middleX, middleY, middleX, middleY - 10);
-      expect(getChartProps().viewport).toMatchObject(anchoredViewport);
+      expect(getChartViewport()).toMatchObject(anchoredViewport);
       clickAndDrag(middleX, middleY, middleX, middleY + 10);
-      expect(getChartProps().viewport).toMatchObject(anchoredViewport);
+      expect(getChartViewport()).toMatchObject(anchoredViewport);
     });
 
     it('can click and drag left/right', function() {
-      const { scrollAndGetViewport, getChartProps, clickAndDrag } = setup();
+      const { scrollAndGetViewport, getChartViewport, clickAndDrag } = setup();
 
       // Assert the initial values.
       const { viewportLeft, viewportRight } = scrollAndGetViewport({
         // Zoom in some large arbitrary amount:
         deltaY: -5000,
         shiftKey: true,
-        clientX: LEFT + COMPONENT_WIDTH * 0.5,
+        clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
       });
 
       // These values are arbitrary, but show that the viewport was zoomed in.
@@ -425,50 +429,44 @@ describe('Viewport', function() {
 
       // Perform the dragging action.
       clickAndDrag(middleX, middleY, middleX + 500, middleY);
-      expect(getChartProps().viewport.viewportLeft).toBeLessThan(viewportLeft);
-      expect(getChartProps().viewport.viewportRight).toBeLessThan(
-        viewportRight
-      );
+      expect(getChartViewport().viewportLeft).toBeLessThan(viewportLeft);
+      expect(getChartViewport().viewportRight).toBeLessThan(viewportRight);
 
       // Drag back the other way.
       clickAndDrag(middleX, middleY, middleX - 1000, middleY);
-      expect(getChartProps().viewport.viewportLeft).toBeGreaterThan(
-        viewportLeft
-      );
-      expect(getChartProps().viewport.viewportRight).toBeGreaterThan(
-        viewportRight
-      );
+      expect(getChartViewport().viewportLeft).toBeGreaterThan(viewportLeft);
+      expect(getChartViewport().viewportRight).toBeGreaterThan(viewportRight);
     });
 
     it('will not scroll off to the left of the viewport bounds', function() {
-      const { scrollAndGetViewport, getChartProps, clickAndDrag } = setup();
-      scrollAndGetViewport({
+      const { scroll, getChartViewport, clickAndDrag } = setup();
+      scroll({
         // Zoom in some large arbitrary amount:
         deltaY: -5000,
         shiftKey: true,
-        clientX: LEFT + COMPONENT_WIDTH * 0.5,
+        clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
       });
 
       // Perform the dragging action some arbitrarily large distance..
       clickAndDrag(middleX, middleY, middleX + 10000, middleY);
-      expect(getChartProps().viewport.viewportLeft).toBe(0);
-      expect(getChartProps().viewport.viewportRight).toBeLessThan(0.4);
+      expect(getChartViewport().viewportLeft).toBe(0);
+      expect(getChartViewport().viewportRight).toBeLessThan(0.4);
     });
 
     it('will not scroll off to the right of the viewport bounds', function() {
-      const { scrollAndGetViewport, getChartProps, clickAndDrag } = setup();
+      const { scroll, getChartViewport, clickAndDrag } = setup();
 
-      scrollAndGetViewport({
+      scroll({
         // Zoom in some large arbitrary amount:
         deltaY: -5000,
         shiftKey: true,
-        clientX: LEFT + COMPONENT_WIDTH * 0.5,
+        clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
       });
 
       // Perform the dragging action some arbitrarily large distance.
       clickAndDrag(middleX, middleY, middleX - 10000, middleY);
-      expect(getChartProps().viewport.viewportLeft).toBeGreaterThan(0.6);
-      expect(getChartProps().viewport.viewportRight).toBe(1);
+      expect(getChartViewport().viewportLeft).toBeGreaterThan(0.6);
+      expect(getChartViewport().viewportRight).toBe(1);
     });
   });
 });
@@ -484,14 +482,15 @@ function setup(profileOverrides: Object = {}) {
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => {
-      const rect = getBoundingBox(COMPONENT_WIDTH, COMPONENT_HEIGHT);
-      // Add some arbitrary X offset.
-      rect.left += LEFT;
-      rect.right += LEFT;
-      rect.x += LEFT;
-      rect.y += TOP;
-      rect.top += TOP;
-      rect.bottom += TOP;
+      const rect = getBoundingBox(BOUNDING_BOX_WIDTH, BOUNDING_BOX_HEIGHT);
+      // Add some arbitrary offset to the bounding box to ensure that we
+      // are doing the correct thing when doing sizing calculations.
+      rect.left += BOUNDING_BOX_LEFT;
+      rect.right += BOUNDING_BOX_LEFT;
+      rect.x += BOUNDING_BOX_LEFT;
+      rect.y += BOUDNING_BOX_TOP;
+      rect.top += BOUDNING_BOX_TOP;
+      rect.bottom += BOUDNING_BOX_TOP;
       return rect;
     });
 
@@ -499,8 +498,11 @@ function setup(profileOverrides: Object = {}) {
   const DummyChart = () => <div id="dummy-chart" />;
   const ChartWithViewport = withChartViewport(DummyChart);
 
-  // This component assumes that it is inside of a connected component, so go
-  // ahead and mock that out here.
+  // The viewport component started out as an unconnected component, but then it
+  // started subscribing to the store an dispatching its own actions. This migration
+  // wasn't completely done, so it still has a few pieces of state passed in through
+  // its OwnProps. In order to ensure that the component is consistent, make it
+  // a connected component.
   const ConnectedChartWithViewport = explicitConnect({
     mapStateToProps: state => ({
       timeRange: getCommittedRange(state),
@@ -549,8 +551,8 @@ function setup(profileOverrides: Object = {}) {
     return view.find('.timelineTrackScreenshotHover').prop('style').left;
   }
 
-  function getChartProps() {
-    return view.find(DummyChart).props();
+  function getChartViewport() {
+    return view.find(DummyChart).props().viewport;
   }
 
   function scroll(eventOverrides) {
@@ -563,7 +565,7 @@ function setup(profileOverrides: Object = {}) {
 
   function scrollAndGetViewport(eventOverrides) {
     scroll(eventOverrides);
-    return getChartProps().viewport;
+    return getChartViewport();
   }
 
   // Dispatch events to the window, which isn't available through the enzyme
@@ -593,7 +595,7 @@ function setup(profileOverrides: Object = {}) {
     view,
     moveMouseAndGetLeft,
     flushRafCalls,
-    getChartProps,
+    getChartViewport,
     scrollAndGetViewport,
     scroll,
     clickAndDrag,

@@ -105,6 +105,8 @@ class MarkerChart extends React.PureComponent<Props> {
               rangeEnd: timeRange.end,
               rowHeight: ROW_HEIGHT,
               threadIndex,
+              marginLeft: TIMELINE_MARGIN_LEFT,
+              marginRight: TIMELINE_MARGIN_RIGHT,
             }}
           />
         )}
