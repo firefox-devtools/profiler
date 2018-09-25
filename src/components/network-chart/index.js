@@ -89,6 +89,8 @@ class NetworkChart extends React.PureComponent<Props> {
               previewSelection,
               maxViewportHeight,
               viewportNeedsUpdate,
+              marginLeft: 0,
+              marginRight: 0,
               maximumZoom: this.getMaximumZoom(),
             }}
             chartProps={{

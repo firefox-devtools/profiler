@@ -6,10 +6,6 @@
 import { GREY_20 } from 'photon-colors';
 import * as React from 'react';
 import {
-  TIMELINE_MARGIN_LEFT,
-  TIMELINE_MARGIN_RIGHT,
-} from '../../app-logic/constants';
-import {
   withChartViewport,
   type WithChartViewport,
 } from '../shared/chart/Viewport';
@@ -49,6 +45,8 @@ type OwnProps = {|
   +markers: TracingMarker[],
   +threadIndex: ThreadIndex,
   +updatePreviewSelection: typeof updatePreviewSelection,
+  +marginLeft: CssPixels,
+  +marginRight: CssPixels,
 |};
 
 type Props = {|
@@ -156,11 +154,12 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       rangeEnd,
       markerTimingRows,
       rowHeight,
+      marginLeft,
+      marginRight,
       viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
     } = this.props;
 
-    const markerContainerWidth =
-      containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+    const markerContainerWidth = containerWidth - marginLeft - marginRight;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
@@ -184,8 +183,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
         rangeStart +
         rangeLength * viewportRight +
         // This represents the amount of seconds in the right margin:
-        TIMELINE_MARGIN_RIGHT *
-          (viewportLength * rangeLength / markerContainerWidth);
+        marginRight * (viewportLength * rangeLength / markerContainerWidth);
 
       let hoveredElement: MarkerDrawingInformation | null = null;
       for (let i = 0; i < markerTiming.length; i++) {
@@ -201,17 +199,17 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
           let x: CssPixels =
             (startTime - viewportLeft) * markerContainerWidth / viewportLength +
-            TIMELINE_MARGIN_LEFT;
+            marginLeft;
           const y: CssPixels = rowIndex * rowHeight - viewportTop;
           const uncutWidth: CssPixels =
             (endTime - startTime) * markerContainerWidth / viewportLength;
           const h: CssPixels = rowHeight - 1;
 
           let w = uncutWidth;
-          if (x < TIMELINE_MARGIN_LEFT) {
+          if (x < marginLeft) {
             // Adjust markers that are before the left margin.
-            w = w - TIMELINE_MARGIN_LEFT + x;
-            x = TIMELINE_MARGIN_LEFT;
+            w = w - marginLeft + x;
+            x = marginLeft;
           }
           if (uncutWidth < 10) {
             // Ensure that small durations render as a dot, but markers cut by the margins
@@ -264,12 +262,13 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const {
       markerTimingRows,
       rowHeight,
+      marginLeft,
       viewport: { viewportTop, containerWidth, containerHeight },
     } = this.props;
 
     // Draw separators
     ctx.fillStyle = GREY_20;
-    ctx.fillRect(TIMELINE_MARGIN_LEFT - 1, 0, 1, containerHeight);
+    ctx.fillRect(marginLeft - 1, 0, 1, containerHeight);
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       // `- 1` at the end, because the top separator is not drawn in the canvas,
       // it's drawn using CSS' border property. And canvas positioning is 0-based.
@@ -287,35 +286,32 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       if (rowIndex > 0 && name === markerTimingRows[rowIndex - 1].name) {
         continue;
       }
-      const fittedText = textMeasurement.getFittedText(
-        name,
-        TIMELINE_MARGIN_LEFT
-      );
+      const fittedText = textMeasurement.getFittedText(name, marginLeft);
       const y = rowIndex * rowHeight - viewportTop;
       ctx.fillText(fittedText, 5, y + TEXT_OFFSET_TOP);
     }
   }
 
   hitTest = (x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null => {
-    if (x < TIMELINE_MARGIN_LEFT - MARKER_DOT_RADIUS) {
-      return null;
-    }
     const {
       rangeStart,
       rangeEnd,
       markerTimingRows,
       rowHeight,
+      marginLeft,
+      marginRight,
       viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
-    const markerContainerWidth =
-      containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+    if (x < marginLeft - MARKER_DOT_RADIUS) {
+      return null;
+    }
+    const markerContainerWidth = containerWidth - marginLeft - marginRight;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
     const unitIntervalTime: UnitIntervalOfProfileRange =
-      viewportLeft +
-      viewportLength * ((x - TIMELINE_MARGIN_LEFT) / markerContainerWidth);
+      viewportLeft + viewportLength * ((x - marginLeft) / markerContainerWidth);
     const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
     const rowIndex = Math.floor((y + viewportTop) / rowHeight);
     const minDuration =
