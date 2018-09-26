@@ -24,7 +24,7 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 const BOUNDING_BOX_WIDTH = 300;
 const BOUNDING_BOX_HEIGHT = 100;
 const BOUNDING_BOX_LEFT = 5;
-const BOUDNING_BOX_TOP = 7;
+const BOUNDING_BOX_TOP = 7;
 
 // The maximum zoom is required by the viewportProps, and is defined as 0.1 to be
 // a reasonable (but arbitrary) limit to zoom in.
@@ -488,9 +488,9 @@ function setup(profileOverrides: Object = {}) {
       rect.left += BOUNDING_BOX_LEFT;
       rect.right += BOUNDING_BOX_LEFT;
       rect.x += BOUNDING_BOX_LEFT;
-      rect.y += BOUDNING_BOX_TOP;
-      rect.top += BOUDNING_BOX_TOP;
-      rect.bottom += BOUDNING_BOX_TOP;
+      rect.y += BOUNDING_BOX_TOP;
+      rect.top += BOUNDING_BOX_TOP;
+      rect.bottom += BOUNDING_BOX_TOP;
       return rect;
     });
 
