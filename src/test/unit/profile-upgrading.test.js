@@ -341,3 +341,27 @@ describe('importing perf profile', function() {
     expect(version).toEqual(CURRENT_GECKO_VERSION);
   });
 });
+
+describe('importing perf profile', function() {
+  it('should import a perf profile', function() {
+    let version = -1;
+    try {
+      const fs = require('fs');
+      const zlib = require('zlib');
+      const buffer = fs.readFileSync('src/test/fixtures/upgrades/test.perf.gz');
+      const decompressedArrayBuffer = zlib.gunzipSync(buffer);
+      const text = decompressedArrayBuffer.toString('utf8');
+      const profile = unserializeProfileOfArbitraryFormat(text);
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+      //console.log(profile);
+      version = profile.meta.version;
+      expect(profile).toMatchSnapshot();
+    } catch (e) {
+      //console.log(e)
+      // probably file not found
+    }
+    expect(version).toEqual(CURRENT_GECKO_VERSION);
+  });
+});
