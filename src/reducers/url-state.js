@@ -91,7 +91,8 @@ function selectedThread(
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
     case 'ISOLATE_LOCAL_TRACK':
-      return action.selectedThreadIndex;
+      // Only switch to non-null selected threads.
+      return (action.selectedThreadIndex: ThreadIndex);
     default:
       return state;
   }

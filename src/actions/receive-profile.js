@@ -72,6 +72,18 @@ export function viewProfile(
   pathInZipFile: ?string
 ): ThunkAction<void> {
   return (dispatch, getState) => {
+    if (profile.threads.length === 0) {
+      console.error('This profile has no threads.', profile);
+      dispatch(
+        fatalError(
+          new Error(
+            'No threads were captured in this profile, there is nothing to display.'
+          )
+        )
+      );
+      return;
+    }
+
     // The selectedThreadIndex is only null for new profiles that haven't
     // been seen before. If it's non-null, then there is profile view information
     // encoded into the URL.

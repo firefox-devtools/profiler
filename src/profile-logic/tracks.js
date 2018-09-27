@@ -390,7 +390,7 @@ export function initializeSelectedThreadIndex(
   selectedThreadIndex: ThreadIndex | null,
   visibleThreadIndexes: ThreadIndex[],
   profile: Profile
-): ThreadIndex | null {
+): ThreadIndex {
   if (
     selectedThreadIndex !== null &&
     visibleThreadIndexes.includes(selectedThreadIndex)
@@ -405,9 +405,10 @@ export function initializeSelectedThreadIndex(
       visibleThreadIndexes.map(threadIndex => profile.threads[threadIndex])
     )
   );
-  // The threadIndex being null should only happen in tests where profiles
-  // have no threads.
-  return threadIndex === -1 ? null : threadIndex;
+  if (threadIndex === -1) {
+    throw new Error('Expected to find a thread index to select.');
+  }
+  return threadIndex;
 }
 
 export function initializeHiddenGlobalTracks(

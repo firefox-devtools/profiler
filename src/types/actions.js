@@ -193,7 +193,7 @@ type ReceiveProfileAction =
   | {|
       +type: 'VIEW_PROFILE',
       +profile: Profile,
-      +selectedThreadIndex: ThreadIndex | null,
+      +selectedThreadIndex: ThreadIndex,
       +globalTracks: GlobalTrack[],
       +globalTrackOrder: TrackIndex[],
       +hiddenGlobalTracks: Set<TrackIndex>,
