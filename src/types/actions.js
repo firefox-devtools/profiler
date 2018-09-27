@@ -183,31 +183,11 @@ type ReceiveProfileAction =
       +type: 'DONE_SYMBOLICATING',
     |}
   | {|
-      +type: 'ERROR_RECEIVING_PROFILE_FROM_FILE',
-      +error: Error,
-    |}
-  | {|
-      +type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_ADDON',
+      +type: 'TEMPORARY_ERROR',
       +error: TemporaryError,
     |}
   | {|
-      +type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_ADDON',
-      +error: Error,
-    |}
-  | {|
-      +type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_STORE',
-      +error: TemporaryError,
-    |}
-  | {|
-      +type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_URL',
-      +error: TemporaryError,
-    |}
-  | {|
-      +type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_STORE',
-      +error: Error,
-    |}
-  | {|
-      +type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_URL',
+      +type: 'FATAL_ERROR',
       +error: Error,
     |}
   | {|

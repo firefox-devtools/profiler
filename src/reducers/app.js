@@ -28,9 +28,7 @@ function view(
   }
 
   switch (action.type) {
-    case 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_STORE':
-    case 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_URL':
-    case 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_ADDON':
+    case 'TEMPORARY_ERROR':
       return {
         phase: 'INITIALIZING',
         additionalData: {
@@ -38,10 +36,7 @@ function view(
           attempt: action.error.attempt,
         },
       };
-    case 'ERROR_RECEIVING_PROFILE_FROM_FILE':
-    case 'FATAL_ERROR_RECEIVING_PROFILE_FROM_ADDON':
-    case 'FATAL_ERROR_RECEIVING_PROFILE_FROM_STORE':
-    case 'FATAL_ERROR_RECEIVING_PROFILE_FROM_URL':
+    case 'FATAL_ERROR':
       return { phase: 'FATAL_ERROR', error: action.error };
     case 'WAITING_FOR_PROFILE_FROM_ADDON':
       return { phase: 'INITIALIZING' };
