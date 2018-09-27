@@ -7,6 +7,7 @@ import * as React from 'react';
 import ReactDOM from 'react-dom';
 import type { CssPixels } from '../../types/units';
 
+import { ensureExists } from '../../utils/flow';
 require('./Tooltip.css');
 
 const MOUSE_OFFSET = 21;
@@ -24,38 +25,27 @@ type State = {
 
 export default class Tooltip extends React.PureComponent<Props, State> {
   _isMounted: boolean = false;
-  _mountElement: HTMLElement;
-  _tooltipRoot: ?HTMLElement;
 
   state = {
     interiorElement: null,
     isNewContentLaidOut: false,
   };
 
+  _overlayElement = ensureExists(
+    document.querySelector('#root-overlay'),
+    'Expected to find a root overlay element.'
+  );
+
   _takeInteriorElementRef = (el: HTMLElement | null) => {
     this.setState({ interiorElement: el });
   };
 
-  constructor(props: Props) {
-    super(props);
-    const el = document.createElement('div');
-    el.className = 'tooltipMount';
-    this._mountElement = el;
-    this._tooltipRoot = document.getElementById('root-tooltip');
-  }
-
   componentDidMount() {
     this._isMounted = true;
-    if (this._tooltipRoot) {
-      this._tooltipRoot.appendChild(this._mountElement);
-    }
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-    if (this._tooltipRoot) {
-      this._tooltipRoot.removeChild(this._mountElement);
-    }
   }
 
   componentWillReceiveProps(nextProps: Props) {
@@ -117,7 +107,7 @@ export default class Tooltip extends React.PureComponent<Props, State> {
       <div className="tooltip" style={style} ref={this._takeInteriorElementRef}>
         {children}
       </div>,
-      this._mountElement
+      this._overlayElement
     );
   }
 }
