@@ -207,16 +207,11 @@ export function convertPerfScriptProfile(profile: string): Object {
 
   return {
     meta: {
-      abi: 'x86_64-gcc3',
       interval: 1,
-      misc: 'rv:48.0',
-      oscpu: 'Intel Fedora 28',
-      platform: 'Linux Fedora',
       processType: 0,
       product: 'Firefox',
       stackwalk: 1,
       startTime: startTime,
-      toolkit: 'gtk',
       version: 4,
     },
     libs: [],

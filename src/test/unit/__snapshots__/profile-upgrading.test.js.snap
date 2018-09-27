@@ -3,7 +3,7 @@
 exports[`importing perf profile should import a perf profile 1`] = `
 Object {
   "meta": Object {
-    "abi": "x86_64-gcc3",
+    "abi": undefined,
     "appBuildID": undefined,
     "categories": Array [
       Object {
@@ -47,18 +47,18 @@ Object {
     },
     "interval": 1,
     "logicalCPUs": undefined,
-    "misc": "rv:48.0",
+    "misc": undefined,
     "networkURLsRemoved": false,
-    "oscpu": "Intel Fedora 28",
+    "oscpu": undefined,
     "physicalCPUs": undefined,
-    "platform": "Linux Fedora",
+    "platform": undefined,
     "preprocessedProfileVersion": 16,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": undefined,
     "stackwalk": 1,
     "startTime": 2574592839.818,
-    "toolkit": "gtk",
+    "toolkit": undefined,
     "version": 13,
   },
   "threads": Array [
