@@ -9,7 +9,8 @@
     // obeys the spec more, but we get a bundle that's 8kB larger. That was the
     // default in babel v6.
     ["@babel/plugin-proposal-class-properties", { loose: true }],
-    ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }]
+    ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }],
+    "syntax-dynamic-import"
   ],
   env: {
     test: {
@@ -20,8 +21,9 @@
       ],
       plugins: [
         ["@babel/plugin-proposal-class-properties", { loose: true }],
-        ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }]
-      ]
+        ["@babel/plugin-proposal-object-rest-spread", { useBuiltIns: true }],
+        "dynamic-import-node"
+      ],
     }
   }
 }

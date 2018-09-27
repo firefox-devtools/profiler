@@ -31,3 +31,7 @@
   # 7. `form-action`prevents forms, we don't need this.`
   # 8. `frame-src` allows the embedding of YouTube videos in the docs.
   Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw=' 'sha256-AdiT28wTL5FNaRVHWQVFC0ic3E20Gu4/PiC9xukS9+E=' https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src http: https: data:; object-src 'none'; connect-src *; frame-ancestors 'self'; form-action 'none'; frame-src www.youtube-nocookie.com
+
+# Set the correct MIME type for WebAssembly modules.
+/*.wasm
+  Content-Type: application/wasm

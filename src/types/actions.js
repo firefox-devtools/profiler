@@ -51,7 +51,12 @@ export type FunctionsUpdatePerThread = {
     funcNames: string[],
   |},
 };
-// Provide a type that can reference any track, whether local or global.
+
+/**
+ * A TrackReference uniquely identifies a track.
+ * Note that TrackIndexes aren't globally unique: they're unique among global
+ * tracks, and they're unique among local tracks for a specific Pid.
+ */
 export type TrackReference =
   | {| +type: 'global', +trackIndex: TrackIndex |}
   | {| +type: 'local', +trackIndex: TrackIndex, +pid: Pid |};
