@@ -118,6 +118,7 @@ exports[`renders FlameGraph correctly 1`] = `
             onMouseDown={[Function]}
             onMouseMove={[Function]}
             onMouseOut={[Function]}
+            onMouseUp={[Function]}
           />
         </div>
         <div

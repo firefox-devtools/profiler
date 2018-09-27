@@ -255,7 +255,8 @@ function _extractUnsymbolicatedFunction(
   const lib = getContainingLibrary(libs, address);
   if (lib) {
     // This is a known library.
-    addressRelativeToLib = address - lib.start;
+    const baseAddress = lib.start - lib.offset;
+    addressRelativeToLib = address - baseAddress;
     resourceIndex = libToResourceIndex.get(lib);
     if (resourceIndex === undefined) {
       // This library doesn't exist in the libs array, insert it. This resou
