@@ -95,8 +95,6 @@ class MarkerSidebar extends React.PureComponent<Props> {
 
     const selectedMarker = markers[selectedNodeIndex];
 
-    console.log('🤖🤖🤖🤖', selectedMarker);
-
     return (
       <aside className="sidebar sidebar-calltree">
         <div className="sidebar-contents-wrapper">
@@ -121,20 +119,6 @@ class MarkerSidebar extends React.PureComponent<Props> {
               <h3 className="sidebar-title2">Details:</h3>
               {selectedMarker.data.type ? (
                 <SidebarDetail label="Type" value={selectedMarker.data.type} />
-              ) : null}
-
-              {selectedMarker.data.category ? (
-                <SidebarDetail
-                  label="Category"
-                  value={selectedMarker.data.category}
-                />
-              ) : null}
-
-              {selectedMarker.data.interval ? (
-                <SidebarDetail
-                  label="Interval"
-                  value={selectedMarker.data.interval}
-                />
               ) : null}
             </React.Fragment>
           ) : null}

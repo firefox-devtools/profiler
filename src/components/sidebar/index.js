@@ -20,7 +20,7 @@ export default function selectSidebar(
     'flame-graph': CallTreeSidebar,
     'stack-chart': null,
     'marker-chart': null,
-    'marker-table': MarkerSidebar,
+    'marker-table': null, // MarkerSidebar
     'network-chart': null,
   }[selectedTab];
 }
