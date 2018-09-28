@@ -5,12 +5,12 @@
 // @flow
 
 import * as React from 'react';
-import classNames from 'classnames';
 
 import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { formatMilliseconds } from '../../utils/format-numbers';
+import { CanSelectContent } from './index';
 
 import type {
   ConnectedProps,
@@ -22,43 +22,6 @@ import type {
   TracingMarker,
 } from '../../types/profile-derived';
 
-type CanCopyContentProps = {|
-  +tagName?: string,
-  +content: string,
-  +className?: string,
-|};
-
-class CanSelectContent extends React.PureComponent<CanCopyContentProps> {
-  _selectContent(e: SyntheticMouseEvent<HTMLInputElement>) {
-    const input = e.currentTarget;
-    input.focus();
-    input.select();
-  }
-
-  _unselectContent(e: SyntheticMouseEvent<HTMLInputElement>) {
-    e.currentTarget.setSelectionRange(0, 0);
-  }
-
-  render() {
-    const { tagName, content, className } = this.props;
-    const TagName = tagName || 'div';
-
-    return (
-      <TagName
-        className={classNames(className, 'can-select-content')}
-        title={`${content}\n(click to select)`}
-      >
-        <input
-          value={content}
-          className="can-select-content-input"
-          onFocus={this._selectContent}
-          onBlur={this._unselectContent}
-          readOnly={true}
-        />
-      </TagName>
-    );
-  }
-}
 type SidebarDetailProps = {|
   +label: string,
   +value: React.Node,
