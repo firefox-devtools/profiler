@@ -445,10 +445,10 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
             />
             {stackTypeLabel}
           </div>
-          <div className="tooltipLabel">Running Time (ms):</div>
-          <div>{displayData.totalTime}</div>
-          <div className="tooltipLabel">Self (ms):</div>
-          <div>{displayData.selfTime}</div>
+          <div className="tooltipLabel">Running Time:</div>
+          <div>{displayData.totalTimeWithUnit}</div>
+          <div className="tooltipLabel">Self Time:</div>
+          <div>{displayData.selfTimeWithUnit}</div>
         </div>
       </div>
     );
