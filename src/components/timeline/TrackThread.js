@@ -11,18 +11,15 @@ import {
   selectorsForThread,
   getProfileInterval,
   getCommittedRange,
+  getCategories,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
-import {
-  getSampleIndexClosestToTime,
-  getCallNodePathFromIndex,
-} from '../../profile-logic/profile-data';
+import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   TimelineTracingMarkersJank,
   TimelineTracingMarkersOverview,
 } from './TracingMarkers';
 import {
-  changeSelectedThread,
   updatePreviewSelection,
   changeRightClickedTrack,
   changeSelectedCallNode,
@@ -31,7 +28,12 @@ import {
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 import './TrackThread.css';
 
-import type { Thread, ThreadIndex } from '../../types/profile';
+import type {
+  Thread,
+  ThreadIndex,
+  CategoryList,
+  IndexIntoSamplesTable,
+} from '../../types/profile';
 import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
   CallNodeInfo,
@@ -55,10 +57,10 @@ type StateProps = {|
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
+  +categories: CategoryList,
 |};
 
 type DispatchProps = {|
-  +changeSelectedThread: typeof changeSelectedThread,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -68,19 +70,15 @@ type DispatchProps = {|
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class TimelineTrackThread extends PureComponent<Props> {
-  _onStackClick = (time: number) => {
-    const { threadIndex, interval } = this.props;
+  _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
     const {
       thread,
+      threadIndex,
       callNodeInfo,
       changeSelectedCallNode,
       focusCallTree,
     } = this.props;
-    const sampleIndex = getSampleIndexClosestToTime(
-      thread.samples,
-      time,
-      interval
-    );
+
     const newSelectedStack = thread.samples.stack[sampleIndex];
     const newSelectedCallNode =
       newSelectedStack === null
@@ -98,19 +96,13 @@ class TimelineTrackThread extends PureComponent<Props> {
     start: Milliseconds,
     end: Milliseconds
   ) => {
-    const {
-      rangeStart,
-      rangeEnd,
-      updatePreviewSelection,
-      changeSelectedThread,
-    } = this.props;
+    const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart: Math.max(rangeStart, start),
       selectionEnd: Math.min(rangeEnd, end),
     });
-    changeSelectedThread(threadIndex);
   };
 
   render() {
@@ -123,6 +115,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       callNodeInfo,
       selectedCallNodeIndex,
       unfilteredSamplesRange,
+      categories,
     } = this.props;
 
     const processType = thread.processType;
@@ -167,7 +160,8 @@ class TimelineTrackThread extends PureComponent<Props> {
           rangeEnd={rangeEnd}
           callNodeInfo={callNodeInfo}
           selectedCallNodeIndex={selectedCallNodeIndex}
-          onStackClick={this._onStackClick}
+          categories={categories}
+          onSampleClick={this._onSampleClick}
         />
         <EmptyThreadIndicator
           thread={thread}
@@ -198,10 +192,10 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       interval: getProfileInterval(state),
       rangeStart: committedRange.start,
       rangeEnd: committedRange.end,
+      categories: getCategories(state),
     };
   },
   mapDispatchToProps: {
-    changeSelectedThread,
     updatePreviewSelection,
     changeRightClickedTrack,
     changeSelectedCallNode,

@@ -10,13 +10,11 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { mount } from 'enzyme';
 
-import { changeSelectedThread } from '../../actions/profile-view';
 import TrackThread from '../../components/timeline/TrackThread';
 import {
   selectedThreadSelectors,
   getPreviewSelection,
 } from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -25,7 +23,6 @@ import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
-  getEmptyThread,
 } from '../fixtures/profiles/make-profile';
 
 // The graph is 400 pixels wide based on the getBoundingBox mock. Each stack is 100
@@ -176,26 +173,5 @@ describe('timeline/TrackThread', function() {
       selectionStart: 1,
       selectionEnd: 2,
     });
-  });
-
-  it('changes the selected thread when clicking a marker', function() {
-    const profile = getMarkersProfile();
-    profile.threads.push(getEmptyThread());
-    const { getState, dispatch, tracingMarkersCanvas } = setup(profile);
-    const thisThread = 0;
-    const otherThread = 1;
-
-    dispatch(changeSelectedThread(otherThread));
-    expect(getSelectedThreadIndex(getState())).toBe(otherThread);
-
-    tracingMarkersCanvas.simulate(
-      'mousedown',
-      getMouseEvent({ pageX: STACK_1_X_POSITION })
-    );
-    tracingMarkersCanvas.simulate(
-      'mouseup',
-      getMouseEvent({ pageX: STACK_1_X_POSITION })
-    );
-    expect(getSelectedThreadIndex(getState())).toBe(thisThread);
   });
 });

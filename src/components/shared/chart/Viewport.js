@@ -67,7 +67,7 @@ export type Viewport = {|
   +viewportTop: CssPixels,
   +viewportBottom: CssPixels,
   +isDragging: boolean,
-  +moveViewport: (CssPixels, CssPixels) => boolean,
+  +moveViewport: (CssPixels, CssPixels) => void,
   +isSizeSet: boolean,
 |};
 
@@ -91,6 +91,9 @@ type ViewportOwnProps<ChartProps> = {|
     +maximumZoom: UnitIntervalOfProfileRange,
     +previewSelection: PreviewSelection,
     +disableHorizontalMovement?: boolean,
+    +className?: string,
+    +marginLeft: CssPixels,
+    +marginRight: CssPixels,
     // These props are defined by the generic variables passed into to the type
     // WithChartViewport when calling withChartViewport. This is how the relationship
     // is guaranteed. e.g. here with OwnProps:
@@ -106,14 +109,18 @@ type ViewportOwnProps<ChartProps> = {|
   +chartProps: ChartProps,
 |};
 
+type HorizontalViewport = {|
+  viewportLeft: UnitIntervalOfProfileRange,
+  viewportRight: UnitIntervalOfProfileRange,
+|};
+
 type State = {|
   containerWidth: CssPixels,
   containerHeight: CssPixels,
   containerLeft: CssPixels,
   viewportTop: CssPixels,
   viewportBottom: CssPixels,
-  viewportLeft: UnitIntervalOfProfileRange,
-  viewportRight: UnitIntervalOfProfileRange,
+  horizontalViewport: HorizontalViewport,
   dragX: CssPixels,
   dragY: CssPixels,
   isDragging: boolean,
@@ -136,12 +143,11 @@ export type WithChartViewport<
     viewport: Viewport,
   |}>
 > = (
-  // Take as input the component class that supports the the ViewportProps. The ChartProps
-  // also contain other things.
+  // Take as input a React component whose props accept the { +viewport: Viewport }.
   ChartComponent: React.ComponentType<ChartProps>
 ) => React.ComponentType<
   // Finally the returned component takes as input the InternalViewportProps, and
-  // the ChartProps, but NOT the ViewportProps.
+  // the ChartProps, but NOT { +viewport: Viewport }.
   ViewportOwnProps<ChartOwnProps>
 >;
 
@@ -161,10 +167,10 @@ export const withChartViewport: WithChartViewport<*, *> =
 
     class ChartViewport extends React.PureComponent<ViewportProps, State> {
       shiftScrollId: number = 0;
-      zoomRangeSelectionScheduled: boolean = false;
-      zoomRangeSelectionScrollDelta: number = 0;
+      _pendingPreviewSelectionUpdates: Array<
+        (HorizontalViewport) => PreviewSelection
+      > = [];
       _container: HTMLElement | null = null;
-
       _takeContainerRef = container => {
         this._container = container;
       };
@@ -174,8 +180,10 @@ export const withChartViewport: WithChartViewport<*, *> =
         this.state = this.getDefaultState(props);
       }
 
-      getHorizontalViewport(props: ViewportProps) {
-        const { previewSelection, timeRange } = props.viewportProps;
+      getHorizontalViewport(
+        previewSelection: PreviewSelection,
+        timeRange: StartEndRange
+      ) {
         if (previewSelection.hasSelection) {
           const { selectionStart, selectionEnd } = previewSelection;
           const timeRangeLength = timeRange.end - timeRange.start;
@@ -191,8 +199,10 @@ export const withChartViewport: WithChartViewport<*, *> =
       }
 
       getDefaultState(props: ViewportProps) {
-        const { viewportLeft, viewportRight } = this.getHorizontalViewport(
-          props
+        const { previewSelection, timeRange } = props.viewportProps;
+        const horizontalViewport = this.getHorizontalViewport(
+          previewSelection,
+          timeRange
         );
         const { startsAtBottom, maxViewportHeight } = props.viewportProps;
         return {
@@ -201,8 +211,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           containerLeft: 0,
           viewportTop: 0,
           viewportBottom: startsAtBottom ? maxViewportHeight : 0,
-          viewportLeft,
-          viewportRight,
+          horizontalViewport,
           dragX: 0,
           dragY: 0,
           isDragging: false,
@@ -246,7 +255,14 @@ export const withChartViewport: WithChartViewport<*, *> =
           this.props.viewportProps.timeRange !==
             newProps.viewportProps.timeRange
         ) {
-          this.setState(this.getHorizontalViewport(newProps));
+          const { previewSelection, timeRange } = newProps.viewportProps;
+          const horizontalViewport = this.getHorizontalViewport(
+            previewSelection,
+            timeRange
+          );
+          this.setState({
+            horizontalViewport,
+          });
         }
       }
 
@@ -304,97 +320,118 @@ export const withChartViewport: WithChartViewport<*, *> =
         );
       };
 
+      /**
+       * Add a batched update to the preview selection.
+       *
+       * This method works asynchronously in order to avoid spamming the redux store
+       * with updates (which cause synchronous react renders) in response to mouse events.
+       * The actual redux update happens in _flushPendingPreviewSelectionUpdates(), which
+       * processes all queued updates from a requestAnimationFrame callback.
+       */
+      _addBatchedPreviewSelectionUpdate(
+        callback: HorizontalViewport => PreviewSelection
+      ) {
+        if (this._pendingPreviewSelectionUpdates.length === 0) {
+          requestAnimationFrame(() =>
+            this._flushPendingPreviewSelectionUpdates()
+          );
+        }
+        this._pendingPreviewSelectionUpdates.push(callback);
+      }
+
+      /**
+       * Flush all batched preview selection updates at once, with only a single
+       * call to update the Redux store.
+       */
+      _flushPendingPreviewSelectionUpdates() {
+        if (this._pendingPreviewSelectionUpdates.length !== 0) {
+          const pendingUpdates = this._pendingPreviewSelectionUpdates;
+          this._pendingPreviewSelectionUpdates = [];
+          const {
+            updatePreviewSelection,
+            viewportProps: { previewSelection, timeRange },
+          } = this.props;
+          let nextSelection = previewSelection;
+          for (const callback of pendingUpdates) {
+            const horizontalViewport = this.getHorizontalViewport(
+              nextSelection,
+              timeRange
+            );
+            nextSelection = callback(horizontalViewport);
+          }
+          updatePreviewSelection(nextSelection);
+        }
+      }
+
       zoomRangeSelection(event: SyntheticWheelEvent<>) {
         const {
           hasZoomedViaMousewheel,
           setHasZoomedViaMousewheel,
+          viewportProps: { marginLeft, marginRight },
         } = this.props;
         if (!hasZoomedViaMousewheel && setHasZoomedViaMousewheel) {
           setHasZoomedViaMousewheel();
         }
 
-        // Shift is a modifier that will change some mice to scroll horizontally, check
-        // for that here.
-        const deltaKey = event.deltaY === 0 ? 'deltaX' : 'deltaY';
-
-        // Accumulate the scroll delta here. Only apply it once per frame to avoid
-        // spamming the Redux store with updates.
-        this.zoomRangeSelectionScrollDelta += getNormalizedScrollDelta(
+        const deltaY = getNormalizedScrollDelta(
           event,
           this.state.containerHeight,
-          deltaKey
+          // Shift is a modifier that will change some mice to scroll horizontally, check
+          // for that here.
+          event.deltaY === 0 ? 'deltaX' : 'deltaY'
         );
 
-        // See if an update needs to be scheduled.
-        if (!this.zoomRangeSelectionScheduled) {
-          const mouseX = event.clientX;
-          this.zoomRangeSelectionScheduled = true;
-          requestAnimationFrame(() => {
-            // Grab and reset the scroll delta accumulated up until this frame.
-            // Let another frame be scheduled.
-            const deltaY = this.zoomRangeSelectionScrollDelta;
-            this.zoomRangeSelectionScrollDelta = 0;
-            this.zoomRangeSelectionScheduled = false;
+        const mouseX = event.clientX;
+        const { containerLeft, containerWidth } = this.state;
+        const innerContainerWidth = containerWidth - marginLeft - marginRight;
 
-            const { maximumZoom } = this.props.viewportProps;
-            const {
-              containerLeft,
-              containerWidth,
-              viewportLeft,
-              viewportRight,
-            } = this.state;
-            const mouseCenter = (mouseX - containerLeft) / containerWidth;
+        const { maximumZoom } = this.props.viewportProps;
 
-            const viewportLength: CssPixels = viewportRight - viewportLeft;
-            const scale =
-              viewportLength - viewportLength / (1 + deltaY * 0.001);
-            let newViewportLeft: UnitIntervalOfProfileRange = clamp(
-              0,
+        this._addBatchedPreviewSelectionUpdate(
+          ({ viewportLeft, viewportRight }) => {
+            const mouseCenter =
+              (mouseX - containerLeft - marginLeft) / innerContainerWidth;
+
+            const viewportLength = viewportRight - viewportLeft;
+            const zoomFactor = Math.pow(1.0009, deltaY);
+            const newViewportLength = clamp(
+              maximumZoom,
               1,
-              viewportLeft - scale * mouseCenter
+              viewportLength * zoomFactor
             );
-            let newViewportRight: UnitIntervalOfProfileRange = clamp(
+            const deltaViewportLength = newViewportLength - viewportLength;
+            const newViewportLeft = clamp(
               0,
+              1 - newViewportLength,
+              viewportLeft - deltaViewportLength * mouseCenter
+            );
+            const newViewportRight = clamp(
+              newViewportLength,
               1,
-              viewportRight + scale * (1 - mouseCenter)
+              viewportRight + deltaViewportLength * (1 - mouseCenter)
             );
 
-            if (newViewportRight - newViewportLeft < maximumZoom) {
-              const newViewportMiddle = (viewportLeft + viewportRight) * 0.5;
-              newViewportLeft = newViewportMiddle - maximumZoom * 0.5;
-              newViewportRight = newViewportMiddle + maximumZoom * 0.5;
-            }
-
-            const {
-              updatePreviewSelection,
-              viewportProps: { timeRange },
-            } = this.props;
+            const { viewportProps: { timeRange } } = this.props;
             if (newViewportLeft === 0 && newViewportRight === 1) {
-              if (viewportLeft === 0 && viewportRight === 1) {
-                // Do not update if at the maximum bounds.
-                return;
-              }
-              updatePreviewSelection({
+              return {
                 hasSelection: false,
                 isModifying: false,
-              });
-            } else {
-              const timeRangeLength = timeRange.end - timeRange.start;
-              updatePreviewSelection({
-                hasSelection: true,
-                isModifying: false,
-                selectionStart:
-                  timeRange.start + timeRangeLength * newViewportLeft,
-                selectionEnd:
-                  timeRange.start + timeRangeLength * newViewportRight,
-              });
+              };
             }
-          });
-        }
+            const timeRangeLength = timeRange.end - timeRange.start;
+            return {
+              hasSelection: true,
+              isModifying: false,
+              selectionStart:
+                timeRange.start + timeRangeLength * newViewportLeft,
+              selectionEnd:
+                timeRange.start + timeRangeLength * newViewportRight,
+            };
+          }
+        );
       }
 
       _mouseDownListener = (event: SyntheticMouseEvent<>) => {
-        event.stopPropagation();
         event.preventDefault();
 
         window.addEventListener('mousemove', this._mouseMoveListener, true);
@@ -402,7 +439,6 @@ export const withChartViewport: WithChartViewport<*, *> =
       };
 
       _mouseMoveListener = (event: MouseEvent) => {
-        event.stopPropagation();
         event.preventDefault();
 
         let { dragX, dragY } = this.state;
@@ -423,9 +459,8 @@ export const withChartViewport: WithChartViewport<*, *> =
         this.moveViewport(offsetX, offsetY);
       };
 
-      moveViewport = (offsetX: CssPixels, offsetY: CssPixels): boolean => {
+      moveViewport = (offsetX: CssPixels, offsetY: CssPixels): void => {
         const {
-          updatePreviewSelection,
           viewportProps: {
             maxViewportHeight,
             timeRange,
@@ -433,28 +468,7 @@ export const withChartViewport: WithChartViewport<*, *> =
             disableHorizontalMovement,
           },
         } = this.props;
-        const {
-          containerWidth,
-          containerHeight,
-          viewportTop,
-          viewportLeft,
-          viewportRight,
-        } = this.state;
-
-        // Calculate left and right in terms of the unit interval of the profile range.
-        const viewportLength: CssPixels = viewportRight - viewportLeft;
-        const unitOffsetX: UnitIntervalOfProfileRange =
-          viewportLength * offsetX / containerWidth;
-        let newViewportLeft: CssPixels = viewportLeft - unitOffsetX;
-        let newViewportRight: CssPixels = viewportRight - unitOffsetX;
-        if (newViewportLeft < 0) {
-          newViewportLeft = 0;
-          newViewportRight = viewportLength;
-        }
-        if (newViewportRight > 1) {
-          newViewportLeft = 1 - viewportLength;
-          newViewportRight = 1;
-        }
+        const { containerWidth, containerHeight, viewportTop } = this.state;
 
         // Calculate top and bottom in terms of pixels.
         let newViewportTop: CssPixels = viewportTop - offsetY;
@@ -479,31 +493,51 @@ export const withChartViewport: WithChartViewport<*, *> =
           newViewportBottom = containerHeight;
         }
 
-        const timeRangeLength = timeRange.end - timeRange.start;
-        const viewportHorizontalChanged = newViewportLeft !== viewportLeft;
-        const viewportVerticalChanged = newViewportTop !== viewportTop;
-
-        if (viewportHorizontalChanged && !disableHorizontalMovement) {
-          updatePreviewSelection({
-            hasSelection: true,
-            isModifying: false,
-            selectionStart: timeRange.start + timeRangeLength * newViewportLeft,
-            selectionEnd: timeRange.start + timeRangeLength * newViewportRight,
-          });
-        }
-
-        if (viewportVerticalChanged) {
+        if (newViewportTop !== viewportTop) {
           this.setState({
             viewportTop: newViewportTop,
             viewportBottom: newViewportBottom,
           });
         }
 
-        return viewportVerticalChanged || viewportHorizontalChanged;
+        if (!disableHorizontalMovement) {
+          this._addBatchedPreviewSelectionUpdate(
+            ({ viewportLeft, viewportRight }) => {
+              // Calculate left and right in terms of the unit interval of the profile range.
+              const viewportLength = viewportRight - viewportLeft;
+              if (viewportLength >= 1) {
+                return {
+                  hasSelection: false,
+                  isModifying: false,
+                };
+              }
+              const unitOffsetX = viewportLength * offsetX / containerWidth;
+              let newViewportLeft = viewportLeft - unitOffsetX;
+              let newViewportRight = viewportRight - unitOffsetX;
+              if (newViewportLeft < 0) {
+                newViewportLeft = 0;
+                newViewportRight = viewportLength;
+              }
+              if (newViewportRight > 1) {
+                newViewportLeft = 1 - viewportLength;
+                newViewportRight = 1;
+              }
+
+              const timeRangeLength = timeRange.end - timeRange.start;
+              return {
+                hasSelection: true,
+                isModifying: false,
+                selectionStart:
+                  timeRange.start + timeRangeLength * newViewportLeft,
+                selectionEnd:
+                  timeRange.start + timeRangeLength * newViewportRight,
+              };
+            }
+          );
+        }
       };
 
       _mouseUpListener = (event: MouseEvent) => {
-        event.stopPropagation();
         event.preventDefault();
         window.removeEventListener('mousemove', this._mouseMoveListener, true);
         window.removeEventListener('mouseup', this._mouseUpListener, true);
@@ -527,33 +561,31 @@ export const withChartViewport: WithChartViewport<*, *> =
         window.removeEventListener('mouseup', this._mouseUpListener, true);
       }
 
-      componentDidUpdate(prevProps: ViewportProps) {
-        if (
-          prevProps.panelLayoutGeneration !== this.props.panelLayoutGeneration
-        ) {
-          this._setSize();
-        }
-      }
-
       render() {
-        const { chartProps, hasZoomedViaMousewheel } = this.props;
+        const {
+          chartProps,
+          hasZoomedViaMousewheel,
+          viewportProps: { className },
+        } = this.props;
 
         const {
           containerWidth,
           containerHeight,
           viewportTop,
           viewportBottom,
-          viewportLeft,
-          viewportRight,
+          horizontalViewport: { viewportLeft, viewportRight },
           isDragging,
           isShiftScrollHintVisible,
           isSizeSet,
         } = this.state;
 
-        const viewportClassName = classNames({
-          chartViewport: true,
-          dragging: isDragging,
-        });
+        const viewportClassName = classNames(
+          {
+            chartViewport: true,
+            dragging: isDragging,
+          },
+          className
+        );
 
         const shiftScrollClassName = classNames({
           chartViewportShiftScroll: true,

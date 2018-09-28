@@ -27,7 +27,10 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 if (process.env.NODE_ENV === 'production') {
-  const runtime = require('offline-plugin/runtime');
+  // We use '@mstange/offline-plugin/runtime' here instead of
+  // 'offline-plugin/runtime' because the fork contains the fix from
+  // https://github.com/NekR/offline-plugin/pull/410
+  const runtime = require('@mstange/offline-plugin/runtime');
   runtime.install({
     onUpdateReady: () => {
       runtime.applyUpdate();

@@ -220,7 +220,7 @@ Array [
         Status
         :
       </div>
-      STATUS_START
+      Start of request
       <div
         className="tooltipLabel"
       >
@@ -1311,7 +1311,7 @@ Array [
         Status
         :
       </div>
-      STATUS_READING
+      other
       <div
         className="tooltipLabel"
       >
@@ -1404,7 +1404,7 @@ Array [
         Status
         :
       </div>
-      STATUS_STOP
+      End of request
       <div
         className="tooltipLabel"
       >
@@ -1475,7 +1475,7 @@ Array [
         Status
         :
       </div>
-      STATUS_REDIRECT
+      Redirecting request
       <div
         className="tooltipLabel"
       >

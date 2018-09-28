@@ -196,68 +196,72 @@ class CallTreeSidebar extends React.PureComponent<Props> {
 
     return (
       <aside className="sidebar sidebar-calltree">
-        <header className="sidebar-titlegroup">
-          <CanSelectContent
-            tagName="h2"
-            className="sidebar-title"
-            content={name}
-          />
-          {lib ? (
+        <div className="sidebar-contents-wrapper">
+          <header className="sidebar-titlegroup">
             <CanSelectContent
-              tagName="p"
-              className="sidebar-subtitle"
-              content={lib}
+              tagName="h2"
+              className="sidebar-title"
+              content={name}
             />
+            {lib ? (
+              <CanSelectContent
+                tagName="p"
+                className="sidebar-subtitle"
+                content={lib}
+              />
+            ) : null}
+          </header>
+          <h3 className="sidebar-title2">This selected call node</h3>
+          <SidebarDetail label="Running Time">
+            {totalTime.value}ms ({totalTimePercent}%)
+          </SidebarDetail>
+          <SidebarDetail label="Self Time">
+            {selfTime.value ? `${selfTime.value}ms (${selfTimePercent}%)` : '—'}
+          </SidebarDetail>
+          {totalTime.breakdownByImplementation ? (
+            <React.Fragment>
+              <h4 className="sidebar-title3">Implementation – running time</h4>
+              <ImplementationBreakdown
+                breakdown={totalTime.breakdownByImplementation}
+              />
+            </React.Fragment>
           ) : null}
-        </header>
-        <h3 className="sidebar-title2">This selected call node</h3>
-        <SidebarDetail label="Running Time">
-          {totalTime.value}ms ({totalTimePercent}%)
-        </SidebarDetail>
-        <SidebarDetail label="Self Time">
-          {selfTime.value ? `${selfTime.value}ms (${selfTimePercent}%)` : '—'}
-        </SidebarDetail>
-        {totalTime.breakdownByImplementation ? (
-          <React.Fragment>
-            <h4 className="sidebar-title3">Implementation – running time</h4>
-            <ImplementationBreakdown
-              breakdown={totalTime.breakdownByImplementation}
-            />
-          </React.Fragment>
-        ) : null}
-        {selfTime.breakdownByImplementation ? (
-          <React.Fragment>
-            <h4 className="sidebar-title3">Implementation – self time</h4>
-            <ImplementationBreakdown
-              breakdown={selfTime.breakdownByImplementation}
-            />
-          </React.Fragment>
-        ) : null}
-        <h3 className="sidebar-title2">This function across the entire tree</h3>
-        <SidebarDetail label="Running Time">
-          {totalTimeForFunc.value}ms ({totalTimeForFuncPercent}%)
-        </SidebarDetail>
-        <SidebarDetail label="Self Time">
-          {selfTimeForFunc.value
-            ? `${selfTimeForFunc.value}ms (${selfTimeForFuncPercent}%)`
-            : '—'}
-        </SidebarDetail>
-        {totalTimeForFunc.breakdownByImplementation ? (
-          <React.Fragment>
-            <h4 className="sidebar-title3">Implementation – running time</h4>
-            <ImplementationBreakdown
-              breakdown={totalTimeForFunc.breakdownByImplementation}
-            />
-          </React.Fragment>
-        ) : null}
-        {selfTimeForFunc.breakdownByImplementation ? (
-          <React.Fragment>
-            <h4 className="sidebar-title3">Implementation – self time</h4>
-            <ImplementationBreakdown
-              breakdown={selfTimeForFunc.breakdownByImplementation}
-            />
-          </React.Fragment>
-        ) : null}
+          {selfTime.breakdownByImplementation ? (
+            <React.Fragment>
+              <h4 className="sidebar-title3">Implementation – self time</h4>
+              <ImplementationBreakdown
+                breakdown={selfTime.breakdownByImplementation}
+              />
+            </React.Fragment>
+          ) : null}
+          <h3 className="sidebar-title2">
+            This function across the entire tree
+          </h3>
+          <SidebarDetail label="Running Time">
+            {totalTimeForFunc.value}ms ({totalTimeForFuncPercent}%)
+          </SidebarDetail>
+          <SidebarDetail label="Self Time">
+            {selfTimeForFunc.value
+              ? `${selfTimeForFunc.value}ms (${selfTimeForFuncPercent}%)`
+              : '—'}
+          </SidebarDetail>
+          {totalTimeForFunc.breakdownByImplementation ? (
+            <React.Fragment>
+              <h4 className="sidebar-title3">Implementation – running time</h4>
+              <ImplementationBreakdown
+                breakdown={totalTimeForFunc.breakdownByImplementation}
+              />
+            </React.Fragment>
+          ) : null}
+          {selfTimeForFunc.breakdownByImplementation ? (
+            <React.Fragment>
+              <h4 className="sidebar-title3">Implementation – self time</h4>
+              <ImplementationBreakdown
+                breakdown={selfTimeForFunc.breakdownByImplementation}
+              />
+            </React.Fragment>
+          ) : null}
+        </div>
       </aside>
     );
   }
