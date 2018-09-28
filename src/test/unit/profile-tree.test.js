@@ -313,7 +313,7 @@ describe('unfiltered call tree', function() {
           selfTime: '—',
           selfTimeWithUnit: '—',
           totalTime: '3',
-          totalTimeWithUnit: '3 ms',
+          totalTimeWithUnit: '3ms',
           totalTimePercent: '100.0%',
           categoryColor: 'grey',
           categoryName: 'Other',

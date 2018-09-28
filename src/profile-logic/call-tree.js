@@ -211,9 +211,9 @@ export class CallTree {
       const formattedSelfTime = formatNumber(selfTime);
       displayData = {
         totalTime: formattedTotalTime,
-        totalTimeWithUnit: formattedTotalTime + ' ms',
+        totalTimeWithUnit: formattedTotalTime + 'ms',
         selfTime: selfTime === 0 ? '—' : formattedSelfTime,
-        selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + ' ms',
+        selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + 'ms',
         totalTimePercent: `${(100 * totalTimeRelative).toFixed(1)}%`,
         name: funcName,
         lib: libName,
