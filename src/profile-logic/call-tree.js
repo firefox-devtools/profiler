@@ -207,9 +207,13 @@ export class CallTree {
         ? _formatIntegerNumber
         : _formatDecimalNumber;
 
+      const formattedTotalTime = formatNumber(totalTime);
+      const formattedSelfTime = formatNumber(selfTime);
       displayData = {
-        totalTime: formatNumber(totalTime),
-        selfTime: selfTime === 0 ? '—' : formatNumber(selfTime),
+        totalTime: formattedTotalTime,
+        totalTimeWithUnit: formattedTotalTime + 'ms',
+        selfTime: selfTime === 0 ? '—' : formattedSelfTime,
+        selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + 'ms',
         totalTimePercent: `${(100 * totalTimeRelative).toFixed(1)}%`,
         name: funcName,
         lib: libName,
