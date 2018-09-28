@@ -543,19 +543,16 @@ export function getLocalTrackName(
   }
 }
 
-// Any thread with less than 1% non-idle time will be hidden.
-const PERCENTAGE_ACTIVE_SAMPLES = 0.01;
-
 /**
  * Determine if a thread is idle, so that it can be hidden. It is really annoying for an
- * end user to load a profile full of empty and idle threads. This function goes through
- * all of the samples in the thread, and sees if some large percentage of them are idle.
+ * end user to load a profile full of empty and idle threads. This function uses
+ * various rules to determine if a thread is idle.
  */
 function _isThreadIdle(profile: Profile, thread: Thread): boolean {
   if (
     // Don't hide the compositor.
     thread.name === 'Compositor' ||
-    // Don't hide the main thread.
+    // Don't hide the main thread of the parent process.
     (thread.name === 'GeckoMain' && thread.processType === 'default') ||
     // Don't hide the GPU thread on Windows.
     (thread.name === 'GeckoMain' && thread.processType === 'gpu')
@@ -563,6 +560,52 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
     return false;
   }
 
+  if (_isContentThreadWithNoPaint(thread)) {
+    return true;
+  }
+
+  return _isThreadMostlyFullOfIdleSamples(profile, thread);
+}
+
+function _isContentThreadWithNoPaint(thread: Thread): boolean {
+  // Hide content threads with no RefreshDriverTick. This indicates they were
+  // not painted to, and most likely idle. This is just a heuristic to help users.
+  if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
+    let isPaintMarkerFound = false;
+    if (thread.stringTable.hasString('RefreshDriverTick')) {
+      const paintStringIndex = thread.stringTable.indexForString(
+        'RefreshDriverTick'
+      );
+
+      for (
+        let markerIndex = 0;
+        markerIndex < thread.markers.length;
+        markerIndex++
+      ) {
+        if (paintStringIndex === thread.markers.name[markerIndex]) {
+          isPaintMarkerFound = true;
+          break;
+        }
+      }
+    }
+    if (!isPaintMarkerFound) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Any thread with less than 5% non-idle time will be hidden.
+const PERCENTAGE_ACTIVE_SAMPLES = 0.05;
+
+/**
+ * This function goes through all of the samples in the thread, and sees if some large
+ * percentage of them are idle. If the thread is mostly idle, then it should be hidden.
+ */
+function _isThreadMostlyFullOfIdleSamples(
+  profile: Profile,
+  thread: Thread
+): boolean {
   let maxActiveStackCount = PERCENTAGE_ACTIVE_SAMPLES * thread.samples.length;
   let activeStackCount = 0;
   let filteredStackCount = 0;

@@ -17,6 +17,10 @@ import {
   isOldCleopatraFormat,
   convertOldCleopatraProfile,
 } from './old-cleopatra-profile-format';
+import {
+  isPerfScriptFormat,
+  convertPerfScriptProfile,
+} from './perf-script-profile-format';
 import { convertPhaseTimes } from './convert-markers';
 import type {
   Profile,
@@ -938,13 +942,25 @@ function _unserializeProfile(profile: Object): Profile {
  * the processed profile format.
  */
 export function unserializeProfileOfArbitraryFormat(
-  jsonStringOrObject: string | Object
+  stringOrObject: string | Object
 ): Profile {
   try {
-    let profile =
-      typeof jsonStringOrObject === 'string'
-        ? JSON.parse(jsonStringOrObject)
-        : jsonStringOrObject;
+    let profile = null;
+    if (typeof stringOrObject === 'string') {
+      try {
+        profile = JSON.parse(stringOrObject);
+      } catch (e) {
+        // The string is not json. It might be the output from `perf script`.
+        if (isPerfScriptFormat(stringOrObject)) {
+          profile = convertPerfScriptProfile(stringOrObject);
+        } else {
+          throw e;
+        }
+      }
+    } else {
+      profile = stringOrObject;
+    }
+
     if (isOldCleopatraFormat(profile)) {
       profile = convertOldCleopatraProfile(profile); // outputs preprocessed profile
     }

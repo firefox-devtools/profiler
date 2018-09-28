@@ -114,6 +114,8 @@ class FlameGraph extends React.PureComponent<Props> {
               startsAtBottom: true,
               disableHorizontalMovement: true,
               viewportNeedsUpdate,
+              marginLeft: 0,
+              marginRight: 0,
             }}
             // FlameGraphCanvas props
             chartProps={{
