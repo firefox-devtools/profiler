@@ -86,8 +86,10 @@ export type CallNodeData = {
 export type CallNodeDisplayData = $Exact<
   $ReadOnly<{
     totalTime: string,
+    totalTimeWithUnit: string,
     totalTimePercent: string,
     selfTime: string,
+    selfTimeWithUnit: string,
     name: string,
     lib: string,
     dim: boolean,

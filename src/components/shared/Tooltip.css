@@ -1,10 +1,5 @@
-.tooltipMount {
-  pointer-events: none;
-  /* Stack the tooltip mounting point above the #root element. */
-  z-index: 1;
-}
-
 .tooltip {
+  pointer-events: none;
   position: fixed;
   max-width: 100%;
   box-sizing: border-box;

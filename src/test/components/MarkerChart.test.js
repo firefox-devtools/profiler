@@ -19,7 +19,11 @@ import EmptyReasons from '../../components/shared/EmptyReasons';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
-import { getBoundingBox } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+} from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
 const MARKERS = [
@@ -90,6 +94,9 @@ function setupWithProfile(profile) {
 }
 
 describe('MarkerChart', function() {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
   it('renders the normal marker chart and matches the snapshot', () => {
     window.devicePixelRatio = 1;
 
