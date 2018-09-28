@@ -117,7 +117,7 @@
   opacity: 1;
   animation: scale-pump 300ms ease-in-out 50ms 1 forwards;
   color: var(--internal-selected-color);
-  transition: opacity 400ms ease-out, transform 400ms ease-out;
+  transition: opacity 300ms ease-out;
 }
 
 @keyframes scale-pump {
