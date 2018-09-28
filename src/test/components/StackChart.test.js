@@ -110,6 +110,7 @@ describe('StackChart', function() {
       })
     );
     stackChartCanvas.simulate('mousedown');
+    stackChartCanvas.simulate('mouseup');
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       0
@@ -126,6 +127,8 @@ describe('StackChart', function() {
       })
     );
     stackChartCanvas.simulate('mousedown');
+    stackChartCanvas.simulate('mouseup');
+
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       null
     );

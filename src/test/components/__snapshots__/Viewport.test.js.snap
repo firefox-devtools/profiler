@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Viewport matches the component snapshot 1`] = `
+<div
+  className="chartViewport"
+  onMouseDown={[Function]}
+  onWheel={[Function]}
+>
+  <div
+    id="dummy-chart"
+  />
+  <div
+    className="chartViewportShiftScroll hidden"
+  >
+    Zoom Chart:
+    <kbd
+      className="chartViewportShiftScrollKbd"
+    >
+      Shift
+    </kbd>
+    <kbd
+      className="chartViewportShiftScrollKbd"
+    >
+      Scroll
+    </kbd>
+  </div>
+</div>
+`;

@@ -353,6 +353,7 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
         onMouseDown={[Function]}
         onMouseMove={[Function]}
         onMouseOut={[Function]}
+        onMouseUp={[Function]}
       />
     </div>
     <div

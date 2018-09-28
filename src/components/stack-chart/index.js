@@ -4,6 +4,10 @@
 
 // @flow
 import * as React from 'react';
+import {
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
 import StackChartCanvas from './Canvas';
 import {
@@ -116,6 +120,8 @@ class StackChartGraph extends React.PureComponent<Props> {
               timeRange,
               maxViewportHeight,
               viewportNeedsUpdate,
+              marginLeft: TIMELINE_MARGIN_LEFT,
+              marginRight: TIMELINE_MARGIN_RIGHT,
               maximumZoom: this.getMaximumZoom(),
             }}
             chartProps={{
