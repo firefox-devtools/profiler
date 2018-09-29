@@ -57,6 +57,37 @@ const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
     ? new WheelEvent('mouse')
     : { DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2 };
 
+/**
+ * How fast the viewport should move when navigating with the keyboard
+ * in pixels per second.
+ */
+const KEYBOARD_NAVIGATION_SPEED = 1500;
+
+type NavigationKey = 'zoomIn' | 'zoomOut' | 'up' | 'down' | 'left' | 'right';
+
+const BARE_KEYMAP: { [string]: NavigationKey } = {
+  KeyQ: 'zoomIn',
+  KeyY: 'zoomIn',
+  KeyE: 'zoomOut',
+  KeyU: 'zoomOut',
+  KeyW: 'up',
+  KeyK: 'up',
+  ArrowUp: 'up',
+  KeyS: 'down',
+  KeyJ: 'down',
+  ArrowDown: 'down',
+  KeyA: 'left',
+  KeyH: 'left',
+  ArrowLeft: 'left',
+  KeyD: 'right',
+  KeyL: 'right',
+  ArrowRight: 'right',
+};
+const CTRL_KEYMAP: { [string]: NavigationKey } = {
+  ArrowUp: 'zoomIn',
+  ArrowDown: 'zoomOut',
+};
+
 // These viewport values (most of which are computed dynamically by
 // the HOC) are passed into the props of the wrapped component.
 export type Viewport = {|
@@ -94,6 +125,7 @@ type ViewportOwnProps<ChartProps> = {|
     +className?: string,
     +marginLeft: CssPixels,
     +marginRight: CssPixels,
+    +containerRef?: (HTMLDivElement | null) => void,
     // These props are defined by the generic variables passed into to the type
     // WithChartViewport when calling withChartViewport. This is how the relationship
     // is guaranteed. e.g. here with OwnProps:
@@ -172,8 +204,13 @@ export const withChartViewport: WithChartViewport<*, *> =
       > = [];
       _container: HTMLElement | null = null;
       _takeContainerRef = container => {
+        if (this.props.viewportProps.containerRef) {
+          this.props.viewportProps.containerRef(container);
+        }
         this._container = container;
       };
+      _lastKeyboardNavigationFrame: number | null = null;
+      _keysDown: Set<NavigationKey> = new Set();
 
       constructor(props: ViewportProps) {
         super(props);
@@ -306,7 +343,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         const { disableHorizontalMovement } = this.props.viewportProps;
         if (event.shiftKey) {
           if (!disableHorizontalMovement) {
-            this.zoomRangeSelection(event);
+            this.zoomWithMouseWheel(event);
           }
           return;
         }
@@ -367,7 +404,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         }
       }
 
-      zoomRangeSelection(event: SyntheticWheelEvent<>) {
+      zoomWithMouseWheel(event: SyntheticWheelEvent<>) {
         const {
           hasZoomedViaMousewheel,
           setHasZoomedViaMousewheel,
@@ -388,14 +425,22 @@ export const withChartViewport: WithChartViewport<*, *> =
         const mouseX = event.clientX;
         const { containerLeft, containerWidth } = this.state;
         const innerContainerWidth = containerWidth - marginLeft - marginRight;
+        const mouseCenter =
+          (mouseX - containerLeft - marginLeft) / innerContainerWidth;
+        this.zoomRangeSelection(mouseCenter, deltaY);
+      }
 
-        const { maximumZoom } = this.props.viewportProps;
+      zoomRangeSelection = (center, deltaY) => {
+        const {
+          disableHorizontalMovement,
+          maximumZoom,
+        } = this.props.viewportProps;
+        if (disableHorizontalMovement) {
+          return;
+        }
 
         this._addBatchedPreviewSelectionUpdate(
           ({ viewportLeft, viewportRight }) => {
-            const mouseCenter =
-              (mouseX - containerLeft - marginLeft) / innerContainerWidth;
-
             const viewportLength = viewportRight - viewportLeft;
             const zoomFactor = Math.pow(1.0009, deltaY);
             const newViewportLength = clamp(
@@ -407,12 +452,12 @@ export const withChartViewport: WithChartViewport<*, *> =
             const newViewportLeft = clamp(
               0,
               1 - newViewportLength,
-              viewportLeft - deltaViewportLength * mouseCenter
+              viewportLeft - deltaViewportLength * center
             );
             const newViewportRight = clamp(
               newViewportLength,
               1,
-              viewportRight + deltaViewportLength * (1 - mouseCenter)
+              viewportRight + deltaViewportLength * (1 - center)
             );
 
             const { viewportProps: { timeRange } } = this.props;
@@ -433,10 +478,13 @@ export const withChartViewport: WithChartViewport<*, *> =
             };
           }
         );
-      }
+      };
 
       _mouseDownListener = (event: SyntheticMouseEvent<>) => {
         event.preventDefault();
+        if (this._container) {
+          this._container.focus();
+        }
 
         window.addEventListener('mousemove', this._mouseMoveListener, true);
         window.addEventListener('mouseup', this._mouseUpListener, true);
@@ -463,6 +511,94 @@ export const withChartViewport: WithChartViewport<*, *> =
         this.moveViewport(offsetX, offsetY);
       };
 
+      _keyDownListener = (
+        event: { nativeEvent: KeyboardEvent } & SyntheticKeyboardEvent<>
+      ) => {
+        let navigationKey;
+        if (
+          !event.ctrlKey &&
+          !event.shiftKey &&
+          !event.altKey &&
+          !event.metaKey
+        ) {
+          navigationKey = BARE_KEYMAP[event.nativeEvent.code];
+        } else if (event.ctrlKey) {
+          navigationKey = CTRL_KEYMAP[event.nativeEvent.code];
+        }
+
+        if (navigationKey !== undefined) {
+          // Start requesting frames if there were no keys down before
+          // this event triggered.
+          if (this._keysDown.size === 0) {
+            requestAnimationFrame(this._keyboardNavigation);
+            this._lastKeyboardNavigationFrame = performance.now();
+          }
+
+          this._keysDown.add(navigationKey);
+          event.preventDefault();
+        }
+      };
+
+      _keyUpListener = (
+        event: { nativeEvent: KeyboardEvent } & SyntheticKeyboardEvent<>
+      ) => {
+        if (!event.ctrlKey) {
+          // The ctrl modifier might have been released here. Try to
+          // delete all keys associated with the modifier. Since the
+          // navigation is aliased with non-ctrl-modified keys also,
+          // this will affect (stop) the operation even if it was
+          // introduced without a ctrl-modified key.
+          for (const code of Object.keys(CTRL_KEYMAP)) {
+            this._keysDown.delete(CTRL_KEYMAP[code]);
+          }
+        }
+        this._keysDown.delete(CTRL_KEYMAP[event.nativeEvent.code]);
+        this._keysDown.delete(BARE_KEYMAP[event.nativeEvent.code]);
+      };
+
+      _keyboardNavigation = timestamp => {
+        if (this._keysDown.size === 0) {
+          // No keys are down, nothing to do.  Don't request a new
+          // animation frame.
+          this._lastKeyboardNavigationFrame = null;
+          return;
+        }
+        requestAnimationFrame(this._keyboardNavigation);
+
+        const dt =
+          this._lastKeyboardNavigationFrame === null
+            ? 0
+            : timestamp - this._lastKeyboardNavigationFrame;
+        const delta = KEYBOARD_NAVIGATION_SPEED * dt * 0.001;
+        this._lastKeyboardNavigationFrame = timestamp;
+
+        for (const k of this._keysDown.values()) {
+          const navigationKey: NavigationKey = k;
+          switch (navigationKey) {
+            case 'zoomIn':
+              this.zoomRangeSelection(0.5, -delta);
+              break;
+            case 'zoomOut':
+              this.zoomRangeSelection(0.5, delta);
+              break;
+            case 'up':
+              this.moveViewport(0, delta);
+              break;
+            case 'down':
+              this.moveViewport(0, -delta);
+              break;
+            case 'left':
+              this.moveViewport(delta, 0);
+              break;
+            case 'right':
+              this.moveViewport(-delta, 0);
+              break;
+            default:
+              break;
+          }
+        }
+      };
+
       moveViewport = (offsetX: CssPixels, offsetY: CssPixels): void => {
         const {
           viewportProps: {
@@ -472,7 +608,19 @@ export const withChartViewport: WithChartViewport<*, *> =
             disableHorizontalMovement,
           },
         } = this.props;
-        const { containerWidth, containerHeight, viewportTop } = this.state;
+        const {
+          containerWidth,
+          containerHeight,
+          viewportTop,
+          isSizeSet,
+        } = this.state;
+
+        if (!isSizeSet) {
+          // Moving the viewport and calculating its dimensions
+          // assumes its size is actually set. Just ignore the move
+          // request if it's not.
+          return;
+        }
 
         // Calculate top and bottom in terms of pixels.
         let newViewportTop: CssPixels = viewportTop - offsetY;
@@ -613,7 +761,10 @@ export const withChartViewport: WithChartViewport<*, *> =
             className={viewportClassName}
             onWheel={this._mouseWheelListener}
             onMouseDown={this._mouseDownListener}
+            onKeyDown={this._keyDownListener}
+            onKeyUp={this._keyUpListener}
             ref={this._takeContainerRef}
+            tabIndex={0}
           >
             <ChartComponent {...chartProps} viewport={viewport} />
             <div className={shiftScrollClassName}>
