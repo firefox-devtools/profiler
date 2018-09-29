@@ -57,6 +57,9 @@ const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
     ? new WheelEvent('mouse')
     : { DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2 };
 
+const KEYBOARD_ZOOM_AMOUNT = 75;
+const KEYBOARD_MOVE_AMOUNT = 100;
+
 // These viewport values (most of which are computed dynamically by
 // the HOC) are passed into the props of the wrapped component.
 export type Viewport = {|
@@ -306,7 +309,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         const { disableHorizontalMovement } = this.props.viewportProps;
         if (event.shiftKey) {
           if (!disableHorizontalMovement) {
-            this.zoomRangeSelection(event);
+            this.zoomWithMouseWheel(event);
           }
           return;
         }
@@ -367,7 +370,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         }
       }
 
-      zoomRangeSelection(event: SyntheticWheelEvent<>) {
+      zoomWithMouseWheel(event: SyntheticWheelEvent<>) {
         const {
           hasZoomedViaMousewheel,
           setHasZoomedViaMousewheel,
@@ -388,14 +391,22 @@ export const withChartViewport: WithChartViewport<*, *> =
         const mouseX = event.clientX;
         const { containerLeft, containerWidth } = this.state;
         const innerContainerWidth = containerWidth - marginLeft - marginRight;
+        const mouseCenter =
+          (mouseX - containerLeft - marginLeft) / innerContainerWidth;
+        this.zoomRangeSelection(mouseCenter, deltaY);
+      }
 
-        const { maximumZoom } = this.props.viewportProps;
+      zoomRangeSelection = (center, deltaY) => {
+        const {
+          disableHorizontalMovement,
+          maximumZoom,
+        } = this.props.viewportProps;
+        if (disableHorizontalMovement) {
+          return;
+        }
 
         this._addBatchedPreviewSelectionUpdate(
           ({ viewportLeft, viewportRight }) => {
-            const mouseCenter =
-              (mouseX - containerLeft - marginLeft) / innerContainerWidth;
-
             const viewportLength = viewportRight - viewportLeft;
             const zoomFactor = Math.pow(1.0009, deltaY);
             const newViewportLength = clamp(
@@ -407,12 +418,12 @@ export const withChartViewport: WithChartViewport<*, *> =
             const newViewportLeft = clamp(
               0,
               1 - newViewportLength,
-              viewportLeft - deltaViewportLength * mouseCenter
+              viewportLeft - deltaViewportLength * center
             );
             const newViewportRight = clamp(
               newViewportLength,
               1,
-              viewportRight + deltaViewportLength * (1 - mouseCenter)
+              viewportRight + deltaViewportLength * (1 - center)
             );
 
             const { viewportProps: { timeRange } } = this.props;
@@ -433,7 +444,7 @@ export const withChartViewport: WithChartViewport<*, *> =
             };
           }
         );
-      }
+      };
 
       _mouseDownListener = (event: SyntheticMouseEvent<>) => {
         event.preventDefault();
@@ -461,6 +472,43 @@ export const withChartViewport: WithChartViewport<*, *> =
         });
 
         this.moveViewport(offsetX, offsetY);
+      };
+
+      _keyListener = (event: KeyboardEvent) => {
+        const modifier = event.getModifierState();
+        if (
+          (event.shiftKey && event.key === 'ArrowUp') ||
+          (!modifier && (event.key === 'q' || event.key === 'y'))
+        ) {
+          this.zoomRangeSelection(0.5, -KEYBOARD_ZOOM_AMOUNT);
+        } else if (
+          (event.shiftKey && event.key === 'ArrowDown') ||
+          (!modifier && (event.key === 'e' || event.key === 'u'))
+        ) {
+          // Add a small amount to zoom out so that we don't need an
+          // extra keypress to leave the preview selection state.
+          this.zoomRangeSelection(0.5, KEYBOARD_ZOOM_AMOUNT + 0.001);
+        } else if (
+          (event.ctrlKey && event.key === 'ArrowUp') ||
+          (!modifier && (event.key === 'w' || event.key === 'k'))
+        ) {
+          this.moveViewport(0, KEYBOARD_MOVE_AMOUNT);
+        } else if (
+          (event.ctrlKey && event.key === 'ArrowDown') ||
+          (!modifier && (event.key === 's' || event.key === 'j'))
+        ) {
+          this.moveViewport(0, -KEYBOARD_MOVE_AMOUNT);
+        } else if (
+          (event.ctrlKey && event.key === 'ArrowLeft') ||
+          (!modifier && (event.key === 'a' || event.key === 'h'))
+        ) {
+          this.moveViewport(KEYBOARD_MOVE_AMOUNT, 0);
+        } else if (
+          (event.ctrlKey && event.key === 'ArrowRight') ||
+          (!modifier && (event.key === 'd' || event.key === 'l'))
+        ) {
+          this.moveViewport(-KEYBOARD_MOVE_AMOUNT, 0);
+        }
       };
 
       moveViewport = (offsetX: CssPixels, offsetY: CssPixels): void => {
@@ -555,6 +603,9 @@ export const withChartViewport: WithChartViewport<*, *> =
         // The first _setSize ensures that the screen does not blip when mounting
         // the component, while the second ensures that it lays out correctly if the DOM
         // is not fully layed out correctly yet.
+        if (this._container !== null && this._container.focus !== undefined) {
+          this._container.focus();
+        }
         this._setSize();
         this._setSizeNextFrame();
       }
@@ -613,7 +664,9 @@ export const withChartViewport: WithChartViewport<*, *> =
             className={viewportClassName}
             onWheel={this._mouseWheelListener}
             onMouseDown={this._mouseDownListener}
+            onKeyDown={this._keyListener}
             ref={this._takeContainerRef}
+            tabIndex={0}
           >
             <ChartComponent {...chartProps} viewport={viewport} />
             <div className={shiftScrollClassName}>
