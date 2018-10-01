@@ -477,35 +477,47 @@ export const withChartViewport: WithChartViewport<*, *> =
       _keyListener = (event: KeyboardEvent) => {
         const modifier = event.getModifierState();
         if (
-          (event.shiftKey && event.key === 'ArrowUp') ||
-          (!modifier && (event.key === 'q' || event.key === 'y'))
+          (event.shiftKey && event.nativeEvent.code === 'ArrowUp') ||
+          (!modifier &&
+            (event.nativeEvent.code === 'KeyQ' ||
+              event.nativeEvent.code === 'KeyY'))
         ) {
           this.zoomRangeSelection(0.5, -KEYBOARD_ZOOM_AMOUNT);
         } else if (
-          (event.shiftKey && event.key === 'ArrowDown') ||
-          (!modifier && (event.key === 'e' || event.key === 'u'))
+          (event.shiftKey && event.nativeEvent.code === 'ArrowDown') ||
+          (!modifier &&
+            (event.nativeEvent.code === 'KeyE' ||
+              event.nativeEvent.code === 'KeyU'))
         ) {
           // Add a small amount to zoom out so that we don't need an
           // extra keypress to leave the preview selection state.
           this.zoomRangeSelection(0.5, KEYBOARD_ZOOM_AMOUNT + 0.001);
         } else if (
-          (event.ctrlKey && event.key === 'ArrowUp') ||
-          (!modifier && (event.key === 'w' || event.key === 'k'))
+          (event.ctrlKey && event.nativeEvent.code === 'ArrowUp') ||
+          (!modifier &&
+            (event.nativeEvent.code === 'KeyW' ||
+              event.nativeEvent.code === 'KeyK'))
         ) {
           this.moveViewport(0, KEYBOARD_MOVE_AMOUNT);
         } else if (
-          (event.ctrlKey && event.key === 'ArrowDown') ||
-          (!modifier && (event.key === 's' || event.key === 'j'))
+          (event.ctrlKey && event.nativeEvent.code === 'ArrowDown') ||
+          (!modifier &&
+            (event.nativeEvent.code === 'KeyS' ||
+              event.nativeEvent.code === 'KeyJ'))
         ) {
           this.moveViewport(0, -KEYBOARD_MOVE_AMOUNT);
         } else if (
-          (event.ctrlKey && event.key === 'ArrowLeft') ||
-          (!modifier && (event.key === 'a' || event.key === 'h'))
+          (event.ctrlKey && event.nativeEvent.code === 'ArrowLeft') ||
+          (!modifier &&
+            (event.nativeEvent.code === 'KeyA' ||
+              event.nativeEvent.code === 'KeyH'))
         ) {
           this.moveViewport(KEYBOARD_MOVE_AMOUNT, 0);
         } else if (
-          (event.ctrlKey && event.key === 'ArrowRight') ||
-          (!modifier && (event.key === 'd' || event.key === 'l'))
+          (event.ctrlKey && event.nativeEvent.code === 'ArrowRight') ||
+          (!modifier &&
+            (event.nativeEvent.code === 'KeyD' ||
+              event.nativeEvent.code === 'KeyL'))
         ) {
           this.moveViewport(-KEYBOARD_MOVE_AMOUNT, 0);
         }
