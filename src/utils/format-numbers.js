@@ -94,7 +94,7 @@ export function formatMilliseconds(
 
 export function formatSeconds(
   time: Milliseconds,
-  significantDigits: number = 2,
+  significantDigits: number = 5,
   maxFractionalDigits: number = 3
 ) {
   return (
