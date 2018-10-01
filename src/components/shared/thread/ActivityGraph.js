@@ -110,18 +110,25 @@ class ThreadActivityGraph extends PureComponent<ActivityGraphProps> {
       this._getCategoryDrawStyles(ctx)
     );
 
-    const fillResult = this._activityGraphFills.computeFills();
-    let { lastCumulativeArray } = fillResult;
-    const { categoryFills } = fillResult;
+    const categoryFills = this._activityGraphFills.computeFills();
 
     // Draw adjacent filled paths using Operator ADD and disjoint paths.
     // This avoids any bleeding and seams.
     // lighter === OP_ADD
     ctx.globalCompositeOperation = 'lighter';
-    lastCumulativeArray = new Float32Array(canvasPixelWidth);
+
+    // The lastCumulativeArray keeps track of where the "mountain ridge" is after the
+    // previous fill.
+    let lastCumulativeArray = new Float32Array(canvasPixelWidth);
     for (const { fillStyle, perPixelContribution } of categoryFills) {
       const cumulativeArray = perPixelContribution;
       ctx.fillStyle = fillStyle;
+
+      // Some fills might not span the full width of the graph - they have parts where
+      // their contribution stays zero for some time. So instead of having one fill call
+      // with a path that is mostly empty, we split the shape of the fill so that we have
+      // potentially multiple fill calls, one fill call for each range during which the
+      // fill has an uninterrupted sequence of non-zero-contribution pixels.
       let lastNonZeroRangeEnd = 0;
       while (lastNonZeroRangeEnd < canvasPixelWidth) {
         const currentNonZeroRangeStart = _findNextDifferentIndex(
@@ -252,6 +259,8 @@ function _mapColorNameToStyles(colorName: string) {
     case 'purple':
       return {
         selectedFillStyle: photonColors.PURPLE_70,
+        // Colors are assumed to have the form #RRGGBB, so concatenating 2 more digits to
+        // the end defines the transparency #RRGGBBAA.
         unselectedFillStyle: photonColors.PURPLE_70 + '60',
         gravity: 5,
       };
@@ -310,7 +319,7 @@ function _mapColorNameToStyles(colorName: string) {
 }
 
 /**
- * Search an array from a starting index to find where two arrays are not sharing.
+ * Search an array from a starting index to find where two arrays diverge.
  */
 function _findNextDifferentIndex(arr1, arr2, startIndex) {
   for (let i = startIndex; i < arr1.length; i++) {

@@ -37,7 +37,8 @@ type Props = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
   +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
-  +upsideDown?: boolean,
+  // Decide which way the stacks grow up from the floor, or down from the ceiling.
+  +stacksGrowFromCeiling?: boolean,
 |};
 
 class StackGraph extends PureComponent<Props> {
@@ -74,7 +75,7 @@ class StackGraph extends PureComponent<Props> {
       callNodeInfo,
       selectedCallNodeIndex,
       categories,
-      upsideDown,
+      stacksGrowFromCeiling,
     } = this.props;
 
     const devicePixelRatio = canvas.ownerDocument
@@ -181,7 +182,7 @@ class StackGraph extends PureComponent<Props> {
       ctx.fillStyle = color;
       for (let i = 0; i < samplesBucket.height.length; i++) {
         const height = samplesBucket.height[i];
-        const startY = upsideDown ? 0 : canvas.height - height;
+        const startY = stacksGrowFromCeiling ? 0 : canvas.height - height;
         const xPos = samplesBucket.xPos[i];
         ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
       }

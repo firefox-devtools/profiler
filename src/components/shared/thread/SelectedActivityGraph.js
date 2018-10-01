@@ -240,7 +240,7 @@ class SelectedThreadActivityGraphCanvas extends PureComponent<Props> {
           selectedCallNodeIndex={selectedCallNodeIndex}
           onSampleClick={this._onSampleClick}
           categories={categories}
-          upsideDown={true}
+          stacksGrowFromCeiling={true}
         />
       </div>
     );
@@ -251,11 +251,11 @@ const SelectedThreadActivityGraphCanvasWithViewport = withChartViewport(
   SelectedThreadActivityGraphCanvas
 );
 
+/**
+ * The viewport contents never change size from this component, so it never needs
+ * explicit updating, outside of how the viewport manages its own size and positioning.
+ */
 function viewportNeedsUpdate() {
-  // By always returning false we prevent the viewport from being
-  // reset and scrolled all the way to the bottom when doing
-  // operations like changing the time selection or applying a
-  // transform.
   return false;
 }
 

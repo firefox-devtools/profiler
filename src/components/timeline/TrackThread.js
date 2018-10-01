@@ -178,7 +178,7 @@ class TimelineTrackThread extends PureComponent<Props> {
           <ThreadStackGraph
             className="threadStackGraph"
             interval={interval}
-            thread={fullThread}
+            thread={filteredThread}
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}

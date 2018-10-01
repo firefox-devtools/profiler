@@ -96,6 +96,7 @@ export class ActivityGraphFills {
       categories,
       interval,
       samplesSelectedStates,
+      treeOrderSampleComparator,
       fullThread: { samples, stackTable },
     }: ActivityGraphProps,
     categoryDrawStyles: CategoryDrawStyle[]
@@ -114,6 +115,7 @@ export class ActivityGraphFills {
     this.samplesSelectedStates = samplesSelectedStates;
     this.greyCategoryIndex = categories.findIndex(c => c.color === 'grey') || 0;
     this.devicePixelRatio = window.devicePixelRatio;
+    this.treeOrderSampleComparator = treeOrderSampleComparator;
     this.percentageBuffers = _createSelectedPercentageAtPixelBuffers(
       categoryDrawStyles,
       this.canvasPixelWidth
@@ -448,10 +450,7 @@ export class ActivityGraphFills {
   /**
    * Compute a list of the fills that need to be drawn for the ThreadActivityGraph.
    */
-  computeFills(): {
-    categoryFills: CategoryFill[],
-    lastCumulativeArray: Float32Array,
-  } {
+  computeFills(): CategoryFill[] {
     const { categoryFills, canvasPixelWidth } = this;
 
     // First go through each sample, and set the buffers that contain the percentage
@@ -473,7 +472,7 @@ export class ActivityGraphFills {
       lastCumulativeArray = perPixelContribution;
     }
 
-    return { categoryFills, lastCumulativeArray };
+    return categoryFills;
   }
 
   /**
