@@ -343,8 +343,10 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
   </div>
   <div
     className="chartViewport"
+    onKeyDown={[Function]}
     onMouseDown={[Function]}
     onWheel={[Function]}
+    tabIndex={0}
   >
     <div>
       <canvas

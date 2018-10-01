@@ -108,8 +108,10 @@ exports[`renders FlameGraph correctly 1`] = `
     >
       <div
         className="chartViewport"
+        onKeyDown={[Function]}
         onMouseDown={[Function]}
         onWheel={[Function]}
+        tabIndex={0}
       >
         <div>
           <canvas

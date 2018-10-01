@@ -98,8 +98,10 @@ exports[`StackChart matches the snapshot 1`] = `
   >
     <div
       className="chartViewport"
+      onKeyDown={[Function]}
       onMouseDown={[Function]}
       onWheel={[Function]}
+      tabIndex={0}
     >
       <div>
         <canvas
