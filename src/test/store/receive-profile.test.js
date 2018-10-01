@@ -22,7 +22,10 @@ import getGeckoProfile from '../fixtures/profiles/gecko-profile';
 import { getEmptyProfile } from '../../profile-logic/profile-data';
 import JSZip from 'jszip';
 import { serializeProfile } from '../../profile-logic/process-profile';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import {
+  getProfileFromTextSamples,
+  addMarkersToThreadWithCorrespondingSamples,
+} from '../fixtures/profiles/make-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 
 // Mocking SymbolStoreDB
@@ -160,6 +163,36 @@ describe('actions/receive-profile', function() {
       expect(getHumanReadableTracks(store.getState())).toEqual([
         'show [thread GeckoMain default] SELECTED',
         'show [thread GeckoMain default]',
+      ]);
+    });
+
+    it('will hide content threads with no RefreshDriverTick markers', function() {
+      const store = blankStore();
+      const { profile } = getProfileFromTextSamples(
+        'work work work work work work work',
+        'work work work work work work work',
+        'work work work work work gswork work'
+      );
+
+      profile.threads.forEach((thread, threadIndex) => {
+        thread.name = 'GeckoMain';
+        thread.processType = 'tab';
+        thread.pid = threadIndex;
+      });
+
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
+        [
+          'RefreshDriverTick',
+          0,
+          { type: 'tracing', category: 'Paint', interval: 'start' },
+        ],
+      ]);
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'hide [thread GeckoMain tab]',
+        'show [thread GeckoMain tab] SELECTED',
+        'hide [thread GeckoMain tab]',
       ]);
     });
   });

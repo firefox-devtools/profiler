@@ -277,8 +277,19 @@ export class SymbolStore {
     // symbolication for the libraries for which we found symbol tables in the
     // database. This is delayed until after the request has been kicked off
     // because it can take some time.
+
     // We also need a demangling function for this, which is in an async module.
-    const demangleCallback = (await demangleModulePromise).demangle_any;
+    const demangleCallback = await demangleModulePromise.then(
+      demangleModule => demangleModule.demangle_any,
+      error => {
+        // Module loading can fail (for example in browsers without WebAssembly
+        // support, or due to bad server configuration), so we will fall back
+        // to a pass-through function if that happens.
+        console.error('Demangling module could not be imported.', error);
+        return mangledString => mangledString;
+      }
+    );
+
     for (const { request, symbolTable } of requestsForCachedLibs) {
       successCb(
         request,

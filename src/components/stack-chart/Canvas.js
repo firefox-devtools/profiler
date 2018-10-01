@@ -351,7 +351,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     });
   };
 
-  _onMouseDown = (hoveredItem: HoveredStackTiming | null) => {
+  _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
     let callNodeIndex = null;
@@ -413,7 +413,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
-        onMouseDown={this._onMouseDown}
+        onSelectItem={this._onSelectItem}
       />
     );
   }

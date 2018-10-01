@@ -92,6 +92,8 @@ type ViewportOwnProps<ChartProps> = {|
     +previewSelection: PreviewSelection,
     +disableHorizontalMovement?: boolean,
     +className?: string,
+    +marginLeft: CssPixels,
+    +marginRight: CssPixels,
     // These props are defined by the generic variables passed into to the type
     // WithChartViewport when calling withChartViewport. This is how the relationship
     // is guaranteed. e.g. here with OwnProps:
@@ -365,6 +367,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         const {
           hasZoomedViaMousewheel,
           setHasZoomedViaMousewheel,
+          viewportProps: { marginLeft, marginRight },
         } = this.props;
         if (!hasZoomedViaMousewheel && setHasZoomedViaMousewheel) {
           setHasZoomedViaMousewheel();
@@ -380,12 +383,14 @@ export const withChartViewport: WithChartViewport<*, *> =
 
         const mouseX = event.clientX;
         const { containerLeft, containerWidth } = this.state;
+        const innerContainerWidth = containerWidth - marginLeft - marginRight;
 
         const { maximumZoom } = this.props.viewportProps;
 
         this._addBatchedPreviewSelectionUpdate(
           ({ viewportLeft, viewportRight }) => {
-            const mouseCenter = (mouseX - containerLeft) / containerWidth;
+            const mouseCenter =
+              (mouseX - containerLeft - marginLeft) / innerContainerWidth;
 
             const viewportLength = viewportRight - viewportLeft;
             const zoomFactor = Math.pow(1.0009, deltaY);
