@@ -18,7 +18,12 @@ import {
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  getMouseEvent,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+} from '../fixtures/utils';
 
 import {
   getProfileFromTextSamples,
@@ -36,6 +41,9 @@ const STACK_3_X_POSITION = 250;
 const STACK_4_X_POSITION = 350;
 
 describe('timeline/TrackThread', function() {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
       a  d  g  j

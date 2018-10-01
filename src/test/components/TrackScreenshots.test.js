@@ -18,11 +18,14 @@ import TrackScreenshots, {
   TRACK_HEIGHT,
 } from '../../components/timeline/TrackScreenshots';
 import Timeline from '../../components/timeline';
-import { ensureExists } from '../../utils/flow';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+} from '../fixtures/utils';
 import { getScreenshotTrackProfile } from '../fixtures/profiles/make-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 
@@ -32,25 +35,8 @@ const LEFT = 5;
 const TOP = 7;
 
 describe('timeline/TrackScreenshots', function() {
-  beforeEach(function() {
-    const div = document.createElement('div');
-    div.id = 'root-overlay';
-    ensureExists(
-      document.body,
-      'Expected the document.body to exist.'
-    ).appendChild(div);
-  });
-  afterEach(function() {
-    ensureExists(
-      document.body,
-      'Expected the document.body to exist.'
-    ).removeChild(
-      ensureExists(
-        document.querySelector('#root-overlay'),
-        'Expected to find a root overlay element to clean up.'
-      )
-    );
-  });
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
 
   it('matches the component snapshot', () => {
     const { view } = setup();

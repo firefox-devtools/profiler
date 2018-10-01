@@ -127,6 +127,7 @@ export type AppState = {|
 
 export type ZippedProfilesState = {
   zipFile: ZipFileState,
+  error: Error | null,
   selectedZipFileIndex: IndexIntoZipFileTable | null,
   // In practice this should never contain null, but needs to support the
   // TreeView interface.

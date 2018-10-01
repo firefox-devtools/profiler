@@ -8,6 +8,10 @@ import { mount } from 'enzyme';
 import { Provider } from 'react-redux';
 
 import { changeMarkersSearchString } from '../../actions/profile-view';
+import {
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
 import MarkerChart from '../../components/marker-chart';
 import { changeSelectedTab } from '../../actions/app';
 
@@ -15,7 +19,11 @@ import EmptyReasons from '../../components/shared/EmptyReasons';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
-import { getBoundingBox } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+} from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
 const MARKERS = [
@@ -64,7 +72,9 @@ function setupWithProfile(profile) {
   // a lot easier to mock this everywhere.
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(200, 300));
+    .mockImplementation(() =>
+      getBoundingBox(200 + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT, 300)
+    );
 
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('marker-chart'));
@@ -84,6 +94,9 @@ function setupWithProfile(profile) {
 }
 
 describe('MarkerChart', function() {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
   it('renders the normal marker chart and matches the snapshot', () => {
     window.devicePixelRatio = 1;
 
@@ -127,7 +140,7 @@ describe('MarkerChart', function() {
 
     // Move the mouse on top of an item.
     markerChart.find('canvas').simulate('mousemove', {
-      nativeEvent: { offsetX: 50, offsetY: 5 },
+      nativeEvent: { offsetX: 50 + TIMELINE_MARGIN_LEFT, offsetY: 5 },
       pageX: 50,
       pageY: 5,
     });
