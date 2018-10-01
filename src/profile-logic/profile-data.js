@@ -1522,3 +1522,111 @@ export function getTreeOrderComparator(
     return compareCallNodes(callNodeA, callNodeB);
   };
 }
+
+/**
+ * This function walks up the from a clicked call node, and tries to find the best
+ * call node to select. This is the root-most call node that is drawn on the same
+ * category path as the clicked call node.
+ */
+export function findBestAncestorCallNode(
+  callNodeInfo: CallNodeInfo,
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  sampleCategories: Array<IndexIntoCategoryList | null>,
+  clickedCallNode: IndexIntoCallNodeTable,
+  clickedCategory: IndexIntoCategoryList
+): IndexIntoCallNodeTable {
+  const { callNodeTable } = callNodeInfo;
+  if (callNodeTable.category[clickedCallNode] !== clickedCategory) {
+    return clickedCallNode;
+  }
+
+  // Compute the callNodesOnSameCategoryPath.
+  // Given a call node path with some arbitrary categories, e.g. A, B, C
+  //
+  // A -> A -> B -> B -> C -> C -> C
+  //
+  // This loop will select the leaf-most call nodes that match the leaf call-node's
+  // category. Running the above path through this loop would produce the list:
+  //
+  // "C -> C -> C".
+  const callNodesOnSameCategoryPath = [clickedCallNode];
+  let callNode = clickedCallNode;
+  while (true) {
+    const parentCallNode = callNodeTable.prefix[callNode];
+    if (parentCallNode === -1) {
+      // The entire call path is just clickedCategory.
+      return clickedCallNode; // TODO: is this a useful behavior?
+    }
+    if (callNodeTable.category[parentCallNode] !== clickedCategory) {
+      break;
+    }
+    callNodesOnSameCategoryPath.push(parentCallNode);
+    callNode = parentCallNode;
+  }
+
+  // Now find the callNode in callNodesOnSameCategoryPath with the lowest depth
+  // such that selecting it will not highlight any samples whose unfiltered
+  // category is different from clickedCategory. If no such callNode exists,
+  // return clickedCallNode.
+
+  const clickedDepth = callNodeTable.depth[clickedCallNode];
+  const handledCallNodes = new Uint8Array(callNodeTable.length);
+  function limitSameCategoryPathToCommonAncestor(callNode) {
+    const walkUpToDepth =
+      clickedDepth - (callNodesOnSameCategoryPath.length - 1);
+    let depth = callNodeTable.depth[callNode];
+
+    // Go from leaf to root in the call nodes.
+    while (depth >= walkUpToDepth) {
+      if (handledCallNodes[callNode]) {
+        // This call node was already handled. Stop checking.
+        return;
+      }
+      handledCallNodes[callNode] = 1;
+      if (depth <= clickedDepth) {
+        // This call node's depth is less than the clicked depth, it needs to be
+        // checked to see if the call node is in the callNodesOnSameCategoryPath.
+        if (callNode === callNodesOnSameCategoryPath[clickedDepth - depth]) {
+          // Remove some of the call nodes, as they are not on the same path.
+          // This is done by shortening the array length. Keep in mind that this
+          // array is in the opposite order of a CallNodePath, with the leaf-most
+          // nodes first, and the root-most last.
+          callNodesOnSameCategoryPath.length = clickedDepth - depth;
+          return;
+        }
+      }
+      callNode = callNodeTable.prefix[callNode];
+      depth--;
+    }
+  }
+
+  // Go through every sample in the call noes.
+  for (let sample = 0; sample < sampleCallNodes.length; sample++) {
+    if (
+      sampleCategories[sample] !== clickedCategory &&
+      sampleCallNodes[sample] !== null
+    ) {
+      // This sample's category is a different one than the one clicked. Make
+      // sure to limit the callNodesOnSameCategoryPath to just the call nodes
+      // that share the same common ancestor.
+      limitSameCategoryPathToCommonAncestor(sampleCallNodes[sample]);
+    }
+  }
+
+  if (callNodesOnSameCategoryPath.length > 0) {
+    // The last call node in this list will be the root-most call node that has
+    // the same category on the path as the clicked call node.
+    return callNodesOnSameCategoryPath[callNodesOnSameCategoryPath.length - 1];
+  }
+  return clickedCallNode;
+}
+
+/**
+ * Look at the leaf-most stack for every sample, and take its category.
+ */
+export function getSampleCategories(
+  samples: SamplesTable,
+  stackTable: StackTable
+): Array<IndexIntoSamplesTable | null> {
+  return samples.stack.map(s => (s !== null ? stackTable.category[s] : null));
+}

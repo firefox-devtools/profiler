@@ -81,6 +81,7 @@ type ProfileAction =
       +type: 'CHANGE_SELECTED_CALL_NODE',
       +threadIndex: ThreadIndex,
       +selectedCallNodePath: CallNodePath,
+      +optionalExpandedToCallNodePath: ?CallNodePath,
     |}
   | {|
       +type: 'FOCUS_CALL_TREE',

@@ -18,7 +18,6 @@ import {
   getSelectedThreadIndex,
   getTimelineType,
 } from '../../reducers/url-state';
-import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   TimelineTracingMarkersJank,
   TimelineTracingMarkersOverview,
@@ -28,6 +27,7 @@ import {
   changeRightClickedTrack,
   changeSelectedCallNode,
   focusCallTree,
+  selectLeafCallNode,
 } from '../../actions/profile-view';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 import './TrackThread.css';
@@ -72,29 +72,19 @@ type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
+  +selectLeafCallNode: typeof selectLeafCallNode,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class TimelineTrackThread extends PureComponent<Props> {
+  /**
+   * Handle when a sample is clicked in the ThreadStackGraph. This will select
+   * the leaf-most stack.
+   */
   _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
-    const {
-      filteredThread,
-      threadIndex,
-      callNodeInfo,
-      changeSelectedCallNode,
-      focusCallTree,
-    } = this.props;
-
-    const newSelectedStack = filteredThread.samples.stack[sampleIndex];
-    const newSelectedCallNode =
-      newSelectedStack === null
-        ? -1
-        : callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
-    changeSelectedCallNode(
-      threadIndex,
-      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
-    );
+    const { threadIndex, selectLeafCallNode, focusCallTree } = this.props;
+    selectLeafCallNode(threadIndex, sampleIndex);
     focusCallTree();
   };
 
@@ -226,6 +216,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     changeRightClickedTrack,
     changeSelectedCallNode,
     focusCallTree,
+    selectLeafCallNode,
   },
   component: TimelineTrackThread,
 };
