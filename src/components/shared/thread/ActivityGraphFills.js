@@ -11,37 +11,64 @@ import './ActivityGraph.css';
 import type {
   IndexIntoSamplesTable,
   IndexIntoCategoryList,
-  SamplesTable,
-  StackTable,
+  Thread,
 } from '../../../types/profile';
 import type {
   Milliseconds,
   DevicePixels,
   CssPixels,
 } from '../../../types/units';
-import type { ActivityGraphProps } from './ActivityGraph';
+
+/**
+ * Computing the ActivityGraph's fills requires a set of immutable properties that
+ * are used to compute the fills, but are never changed. In order to separate out
+ * the mutable values, collect all of these immutable settings in one object that
+ * can easily be shared between classes and functions.
+ */
+type LastRenderedGraphSettings = {|
+  +canvasPixelWidth: DevicePixels,
+  +canvasPixelHeight: DevicePixels,
+  +fullThread: Thread,
+  +interval: Milliseconds,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +xPixelsPerMs: number,
+  +treeOrderSampleComparator: ?(
+    IndexIntoSamplesTable,
+    IndexIntoSamplesTable
+  ) => number,
+  +greyCategoryIndex: IndexIntoCategoryList,
+  +samplesSelectedStates: ?Array<boolean>,
+  +categoryDrawStyles: CategoryDrawStyles,
+|};
 
 type SampleContributionToPixel = {|
-  sample: IndexIntoSamplesTable,
-  contribution: number,
+  +sample: IndexIntoSamplesTable,
+  +contribution: number,
 |};
 
+/**
+ * The category fills are the computation that is ultimately returned for drawing
+ * the categories to the canvas. During the computation step, this value is mutated
+ * in place, but should be consumed immutably.
+ */
 type CategoryFill = {|
-  category: IndexIntoCategoryList,
-  perPixelContribution: Float32Array,
-  fillStyle: string | CanvasPattern,
+  +category: IndexIntoCategoryList,
+  +fillStyle: string | CanvasPattern,
+  // The Float32Array is mutated in place during the computation step.
+  +perPixelContribution: Float32Array,
 |};
 
-export type CategoryDrawStyle = {|
+export type CategoryDrawStyles = $ReadOnlyArray<{|
   +category: number,
   +gravity: number,
   +selectedFillStyle: string,
   +unselectedFillStyle: string,
   +filteredOutFillStyle: CanvasPattern,
-|};
+|}>;
 
 type SelectedPercentageAtPixelBuffers = {|
-  // The following arrays get recreated when the canvas gets resized.
+  // These Float32Arrays are mutated in place during the computation step.
   +beforeSelectedPercentageAtPixel: Float32Array,
   +selectedPercentageAtPixel: Float32Array,
   +afterSelectedPercentageAtPixel: Float32Array,
@@ -55,75 +82,83 @@ const SMOOTHING_KERNEL: Float32Array = _getSmoothingKernel(
   BOX_BLUR_RADII
 );
 
+export function computeActivityGraphFills(
+  lastRenderedGraphSettings: LastRenderedGraphSettings
+) {
+  const mutablePercentageBuffers = _createSelectedPercentageAtPixelBuffers(
+    lastRenderedGraphSettings
+  );
+  const mutableFills = _getCategoryFills(
+    lastRenderedGraphSettings.categoryDrawStyles,
+    mutablePercentageBuffers
+  );
+  const activityGraphFills = new ActivityGraphFillComputer(
+    lastRenderedGraphSettings,
+    mutablePercentageBuffers,
+    mutableFills
+  );
+
+  activityGraphFills.run();
+  // We're done mutating the fills' Float32Array buffers.
+  const fills = mutableFills;
+
+  return {
+    fills,
+    fillsQuerier: new ActivityFillGraphQuerier(
+      lastRenderedGraphSettings,
+      fills
+    ),
+  };
+}
+
 /**
- * A lot of logic and mutation goes into computing the fills in the ThreadActivityGraph.
- * This class breaks out the fill computations separately from the component logic. This
- * makes it easier to to have lots of shared mutable state between the various
- * calculations.
- *
- * Note that this class should be recreated for every new computation of the fills.
- * It computes the category percentages inside a set of Float32Array buffers. These
- * should be discarded after use. This class has lots of mutation, so there shouldn't
- * be any assumptions made about the validity of strict equalities.
+ * This class takes the immutable graph settings, and then computes the ActivityGraph's
+ * fills by mutating the selected pecentage buffers and the category fill values.
  */
-export class ActivityGraphFills {
-  rangeStart: Milliseconds;
-  rangeEnd: Milliseconds;
-  rangeLength: Milliseconds;
-  canvasPixelWidth: DevicePixels;
-  canvasPixelHeight: DevicePixels;
-  devicePixelRatio: number;
-  xPixelsPerMs: number;
-  categoryDrawStyles: CategoryDrawStyle[];
-  percentageBuffers: SelectedPercentageAtPixelBuffers[];
-  samples: SamplesTable;
-  stackTable: StackTable;
-  interval: Milliseconds;
-  greyCategoryIndex: IndexIntoCategoryList;
-  samplesSelectedStates: ?Array<boolean>;
-  categoryFills: CategoryFill[];
-  treeOrderSampleComparator: ?(
-    IndexIntoSamplesTable,
-    IndexIntoSamplesTable
-  ) => number;
+export class ActivityGraphFillComputer {
+  +lastRenderedGraphSettings: LastRenderedGraphSettings;
+  // The fills and percentages are mutated in place.
+  +mutablePercentageBuffers: SelectedPercentageAtPixelBuffers[];
+  +mutableFills: CategoryFill[];
 
   constructor(
-    canvasPixelWidth: DevicePixels,
-    canvasPixelHeight: DevicePixels,
-    {
-      rangeEnd,
-      rangeStart,
-      categories,
-      interval,
-      samplesSelectedStates,
-      treeOrderSampleComparator,
-      fullThread: { samples, stackTable },
-    }: ActivityGraphProps,
-    categoryDrawStyles: CategoryDrawStyle[]
+    lastRenderedGraphSettings: LastRenderedGraphSettings,
+    mutablePercentageBuffers: SelectedPercentageAtPixelBuffers[],
+    mutableFills: CategoryFill[]
   ) {
-    // Collect the common variables used on the various methods.
-    this.canvasPixelWidth = canvasPixelWidth;
-    this.canvasPixelHeight = canvasPixelHeight;
-    this.rangeEnd = rangeEnd;
-    this.rangeStart = rangeStart;
-    this.rangeLength = rangeEnd - rangeStart;
-    this.categoryDrawStyles = categoryDrawStyles;
-    this.interval = interval;
-    this.xPixelsPerMs = this.canvasPixelWidth / this.rangeLength;
-    this.samples = samples;
-    this.stackTable = stackTable;
-    this.samplesSelectedStates = samplesSelectedStates;
-    this.greyCategoryIndex = categories.findIndex(c => c.color === 'grey') || 0;
-    this.devicePixelRatio = window.devicePixelRatio;
-    this.treeOrderSampleComparator = treeOrderSampleComparator;
-    this.percentageBuffers = _createSelectedPercentageAtPixelBuffers(
-      categoryDrawStyles,
-      this.canvasPixelWidth
-    );
-    this.categoryFills = _getCategoryFills(
-      categoryDrawStyles,
-      this.percentageBuffers
-    );
+    this.lastRenderedGraphSettings = lastRenderedGraphSettings;
+    this.mutablePercentageBuffers = mutablePercentageBuffers;
+    this.mutableFills = mutableFills;
+  }
+
+  /**
+   * Run the computation to compute a list of the fills that need to be drawn for the
+   * ThreadActivityGraph.
+   */
+  run(): void {
+    const {
+      mutableFills,
+      lastRenderedGraphSettings: { canvasPixelWidth },
+    } = this;
+
+    // First go through each sample, and set the buffers that contain the percentage
+    // that a category contributes to a given place in the X axis of the chart.
+    this._accumulateSampleCategories();
+
+    // Smooth the graphs by applying a 1D gaussian blur to the per-pixel
+    // contribution of each fill.
+    for (const fill of mutableFills) {
+      _applyGaussianBlur1D(fill.perPixelContribution, BOX_BLUR_RADII);
+    }
+
+    // Finally compute the last cumulative array.
+    let lastCumulativeArray = mutableFills[0].perPixelContribution;
+    for (const { perPixelContribution } of mutableFills.slice(1)) {
+      for (let i = 0; i < canvasPixelWidth; i++) {
+        perPixelContribution[i] += lastCumulativeArray[i];
+      }
+      lastCumulativeArray = perPixelContribution;
+    }
   }
 
   /**
@@ -132,8 +167,12 @@ export class ActivityGraphFills {
    * that a category contributes to a single pixel. These buffers are mutated in place
    * with these methods.
    */
-  accumulateSampleCategories() {
-    const { samples, interval, stackTable, greyCategoryIndex } = this;
+  _accumulateSampleCategories() {
+    const {
+      fullThread: { samples, stackTable },
+      interval,
+      greyCategoryIndex,
+    } = this.lastRenderedGraphSettings;
 
     let prevSampleTime = samples.time[0] - interval;
     let sampleTime = samples.time[0];
@@ -193,13 +232,13 @@ export class ActivityGraphFills {
       categoryDrawStyles,
       xPixelsPerMs,
       canvasPixelWidth,
-    } = this;
+    } = this.lastRenderedGraphSettings;
     if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
       return;
     }
 
     const categoryDrawStyle = categoryDrawStyles[category];
-    const percentageBuffers = this.percentageBuffers[category];
+    const percentageBuffers = this.mutablePercentageBuffers[category];
 
     if (categoryDrawStyle.selectedFillStyle === 'transparent') {
       return;
@@ -254,7 +293,7 @@ export class ActivityGraphFills {
     percentageBuffers: SelectedPercentageAtPixelBuffers,
     sampleIndex: IndexIntoSamplesTable
   ): Float32Array {
-    const { samplesSelectedStates } = this;
+    const { samplesSelectedStates } = this.lastRenderedGraphSettings;
     if (!samplesSelectedStates) {
       return percentageBuffers.selectedPercentageAtPixel;
     }
@@ -271,35 +310,90 @@ export class ActivityGraphFills {
         throw new Error('Unexpected samplesSelectedStates value');
     }
   }
+}
+
+/**
+ * This class contains the logic to pick a sample based on where the ThreaActivityGraph
+ * was clicked. In this way, the fills can be computed one time, and the previously
+ * computed settings can be re-used until the graph is drawn again.
+ */
+export class ActivityFillGraphQuerier {
+  lastRenderedGraphSettings: LastRenderedGraphSettings;
+  fills: CategoryFill[];
+
+  constructor(
+    lastRenderedGraphSettings: LastRenderedGraphSettings,
+    fills: CategoryFill[]
+  ) {
+    this.lastRenderedGraphSettings = lastRenderedGraphSettings;
+    this.fills = fills;
+  }
+
+  /**
+   * Given a click in CssPixels coordinates, look up the sample in the graph.
+   */
+  getSampleAtClick(
+    cssX: CssPixels,
+    cssY: CssPixels,
+    time: Milliseconds,
+    canvasBoundingRect: ClientRect
+  ): IndexIntoSamplesTable | null {
+    const { canvasPixelWidth } = this.lastRenderedGraphSettings;
+    const devicePixelRatio = canvasPixelWidth / canvasBoundingRect.width;
+    const categoryUnderMouse = this._categoryAtDevicePixel(
+      Math.round(cssX * devicePixelRatio),
+      Math.round(cssY * devicePixelRatio)
+    );
+    if (categoryUnderMouse === null) {
+      return null;
+    }
+
+    let { offsetToCategoryStart } = categoryUnderMouse;
+    const candidateSamples = this._getCategoriesSamplesAtTime(
+      time,
+      categoryUnderMouse.category
+    );
+
+    for (let i = 0; i < candidateSamples.length; i++) {
+      const { sample, contribution } = candidateSamples[i];
+      if (offsetToCategoryStart <= contribution) {
+        return sample;
+      }
+      offsetToCategoryStart -= contribution;
+    }
+
+    return null;
+  }
 
   /**
    * Find a specific category at a pixel location.
    */
-  categoryAtPixel(
-    x: number,
-    y: number
+  _categoryAtDevicePixel(
+    deviceX: DevicePixels,
+    deviceY: DevicePixels
   ): null | {
     category: IndexIntoCategoryList,
     offsetToCategoryStart: DevicePixels,
   } {
-    const deviceX = Math.round(x * this.devicePixelRatio);
-    const deviceY = Math.round(y * this.devicePixelRatio);
+    const {
+      canvasPixelWidth,
+      canvasPixelHeight,
+    } = this.lastRenderedGraphSettings;
 
     if (
-      !this.categoryFills ||
       deviceX < 0 ||
-      deviceX >= this.canvasPixelWidth ||
+      deviceX >= canvasPixelWidth ||
       deviceY < 0 ||
-      deviceY >= this.canvasPixelHeight
+      deviceY >= canvasPixelHeight
     ) {
       return null;
     }
 
-    const valueToFind = 1 - deviceY / this.canvasPixelHeight;
+    const valueToFind = 1 - deviceY / canvasPixelHeight;
     let currentCategory = null;
     let currentCategoryStart = 0.0;
     let previousFillEnd = 0.0;
-    for (const { category, perPixelContribution } of this.categoryFills) {
+    for (const { category, perPixelContribution } of this.fills) {
       const fillEnd = perPixelContribution[deviceX];
 
       if (category !== currentCategory) {
@@ -327,16 +421,15 @@ export class ActivityGraphFills {
   _getCategoriesSamplesAtTime(
     time: number,
     category: IndexIntoCategoryList
-  ): Array<SampleContributionToPixel> {
+  ): $ReadOnlyArray<SampleContributionToPixel> {
     const {
       rangeStart,
       rangeEnd,
       treeOrderSampleComparator,
       greyCategoryIndex,
-      samples,
-      stackTable,
+      fullThread: { samples, stackTable },
       canvasPixelWidth,
-    } = this;
+    } = this.lastRenderedGraphSettings;
 
     const rangeLength = rangeEnd - rangeStart;
     const xPixelsPerMs = canvasPixelWidth / rangeLength;
@@ -381,7 +474,11 @@ export class ActivityGraphFills {
   _getSampleRangeContributingToPixelWhenSmoothed(
     xPixel: number
   ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-    const { samples, rangeStart, xPixelsPerMs } = this;
+    const {
+      fullThread: { samples },
+      rangeStart,
+      xPixelsPerMs,
+    } = this.lastRenderedGraphSettings;
     const contributionTimeRangeStart =
       rangeStart + (xPixel - SMOOTHING_RADIUS) / xPixelsPerMs;
     const contributionTimeRangeEnd =
@@ -413,7 +510,10 @@ export class ActivityGraphFills {
     xPixelsPerMs: number,
     sample: IndexIntoSamplesTable
   ): number {
-    const { samples, rangeStart } = this;
+    const {
+      fullThread: { samples },
+      rangeStart,
+    } = this.lastRenderedGraphSettings;
     const kernelPos = xPixel - SMOOTHING_RADIUS;
     const pixelsAroundX = new Float32Array(SMOOTHING_KERNEL.length);
     const sampleTime = samples.time[sample];
@@ -446,64 +546,6 @@ export class ActivityGraphFills {
 
     return sum;
   }
-
-  /**
-   * Compute a list of the fills that need to be drawn for the ThreadActivityGraph.
-   */
-  computeFills(): CategoryFill[] {
-    const { categoryFills, canvasPixelWidth } = this;
-
-    // First go through each sample, and set the buffers that contain the percentage
-    // that a category contributes to a given place in the X axis of the chart.
-    this.accumulateSampleCategories();
-
-    // Smooth the graphs by applying a 1D gaussian blur to the per-pixel
-    // contribution of each fill.
-    for (const fill of categoryFills) {
-      _applyGaussianBlur1D(fill.perPixelContribution, BOX_BLUR_RADII);
-    }
-
-    // Finally compute the last cumulative array.
-    let lastCumulativeArray = categoryFills[0].perPixelContribution;
-    for (const { perPixelContribution } of categoryFills.slice(1)) {
-      for (let i = 0; i < canvasPixelWidth; i++) {
-        perPixelContribution[i] += lastCumulativeArray[i];
-      }
-      lastCumulativeArray = perPixelContribution;
-    }
-
-    return categoryFills;
-  }
-
-  /**
-   * Given a click in CssPixels coordinates, look up the sample in the graph.
-   */
-  getSampleAtClick(
-    x: CssPixels,
-    y: CssPixels,
-    time: Milliseconds
-  ): IndexIntoSamplesTable | null {
-    const categoryUnderMouse = this.categoryAtPixel(x, y);
-    if (categoryUnderMouse === null) {
-      return null;
-    }
-
-    let { offsetToCategoryStart } = categoryUnderMouse;
-    const candidateSamples = this._getCategoriesSamplesAtTime(
-      time,
-      categoryUnderMouse.category
-    );
-
-    for (let i = 0; i < candidateSamples.length; i++) {
-      const { sample, contribution } = candidateSamples[i];
-      if (offsetToCategoryStart <= contribution) {
-        return sample;
-      }
-      offsetToCategoryStart -= contribution;
-    }
-
-    return null;
-  }
 }
 
 /**
@@ -526,10 +568,10 @@ function _getSmoothingKernel(
  * These buffers can only be used once per fill computation. The buffer values are
  * updated across various method calls.
  */
-function _createSelectedPercentageAtPixelBuffers(
-  categoryDrawStyles: CategoryDrawStyle[],
-  canvasPixelWidth: DevicePixels
-): SelectedPercentageAtPixelBuffers[] {
+function _createSelectedPercentageAtPixelBuffers({
+  categoryDrawStyles,
+  canvasPixelWidth,
+}): SelectedPercentageAtPixelBuffers[] {
   return categoryDrawStyles.map(() => ({
     beforeSelectedPercentageAtPixel: new Float32Array(canvasPixelWidth),
     selectedPercentageAtPixel: new Float32Array(canvasPixelWidth),
@@ -548,7 +590,7 @@ function _createSelectedPercentageAtPixelBuffers(
  * 'FILTERED_OUT'
  */
 function _getCategoryFills(
-  categoryDrawStyles: CategoryDrawStyle[],
+  categoryDrawStyles: CategoryDrawStyles,
   percentageBuffers: SelectedPercentageAtPixelBuffers[]
 ): CategoryFill[] {
   // Sort all of the categories by their gravity.

@@ -4,7 +4,7 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { ActivityGraphFills } from './ActivityGraphFills';
+import { computeActivityGraphFills } from './ActivityGraphFills';
 import { timeCode } from '../../../utils/time-code';
 import classNames from 'classnames';
 import photonColors from 'photon-colors';
@@ -17,10 +17,12 @@ import type {
   IndexIntoSamplesTable,
 } from '../../../types/profile';
 import type { Milliseconds } from '../../../types/units';
-import type { CategoryDrawStyle } from './ActivityGraphFills';
+import type {
+  CategoryDrawStyles,
+  ActivityFillGraphQuerier,
+} from './ActivityGraphFills';
 
-// Export these for the ActivityGraphFills.
-export type ActivityGraphProps = {|
+export type Props = {|
   +className: string,
   +fullThread: Thread,
   +interval: Milliseconds,
@@ -35,11 +37,11 @@ export type ActivityGraphProps = {|
   ) => number,
 |};
 
-class ThreadActivityGraph extends PureComponent<ActivityGraphProps> {
+class ThreadActivityGraph extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement = null;
   _resizeListener = () => this.forceUpdate();
-  _categoryDrawStyles: null | CategoryDrawStyle[] = null;
-  _activityGraphFills: null | ActivityGraphFills = null;
+  _categoryDrawStyles: null | CategoryDrawStyles = null;
+  _fillsQuerier: null | ActivityFillGraphQuerier = null;
 
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) => {
     this._canvas = canvas;
@@ -67,7 +69,7 @@ class ThreadActivityGraph extends PureComponent<ActivityGraphProps> {
    * Get or lazily create the category info. It requires the 2d ctx to exist in order
    * to create the fill patterns.
    */
-  _getCategoryDrawStyles(ctx: CanvasRenderingContext2D): CategoryDrawStyle[] {
+  _getCategoryDrawStyles(ctx: CanvasRenderingContext2D): CategoryDrawStyles {
     if (this._categoryDrawStyles === null) {
       // Lazily initialize this list.
       this._categoryDrawStyles = this.props.categories.map(
@@ -89,7 +91,15 @@ class ThreadActivityGraph extends PureComponent<ActivityGraphProps> {
   }
 
   drawCanvas(canvas: HTMLCanvasElement) {
-    const { fullThread } = this.props;
+    const {
+      fullThread,
+      interval,
+      rangeStart,
+      rangeEnd,
+      samplesSelectedStates,
+      treeOrderSampleComparator,
+      categories,
+    } = this.props;
     const { samples } = fullThread;
 
     if (samples.length === 0) {
@@ -103,14 +113,21 @@ class ThreadActivityGraph extends PureComponent<ActivityGraphProps> {
     canvas.width = canvasPixelWidth;
     canvas.height = canvasPixelHeight;
 
-    this._activityGraphFills = new ActivityGraphFills(
+    const { fills, fillsQuerier } = computeActivityGraphFills({
       canvasPixelWidth,
       canvasPixelHeight,
-      this.props,
-      this._getCategoryDrawStyles(ctx)
-    );
+      fullThread,
+      interval,
+      rangeStart,
+      rangeEnd,
+      samplesSelectedStates,
+      xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
+      treeOrderSampleComparator: treeOrderSampleComparator,
+      greyCategoryIndex: categories.findIndex(c => c.color === 'grey') || 0,
+      categoryDrawStyles: this._getCategoryDrawStyles(ctx),
+    });
 
-    const categoryFills = this._activityGraphFills.computeFills();
+    this._fillsQuerier = fillsQuerier;
 
     // Draw adjacent filled paths using Operator ADD and disjoint paths.
     // This avoids any bleeding and seams.
@@ -120,7 +137,7 @@ class ThreadActivityGraph extends PureComponent<ActivityGraphProps> {
     // The lastCumulativeArray keeps track of where the "mountain ridge" is after the
     // previous fill.
     let lastCumulativeArray = new Float32Array(canvasPixelWidth);
-    for (const { fillStyle, perPixelContribution } of categoryFills) {
+    for (const { fillStyle, perPixelContribution } of fills) {
       const cumulativeArray = perPixelContribution;
       ctx.fillStyle = fillStyle;
 
@@ -172,7 +189,7 @@ class ThreadActivityGraph extends PureComponent<ActivityGraphProps> {
   }
 
   _onMouseUp = (e: SyntheticMouseEvent<>) => {
-    const activityGraphFills = this._activityGraphFills;
+    const activityGraphFills = this._fillsQuerier;
     const canvas = this._canvas;
     if (!canvas || !activityGraphFills) {
       return;
@@ -184,7 +201,7 @@ class ThreadActivityGraph extends PureComponent<ActivityGraphProps> {
     const y = e.pageY - rect.top;
     const time = rangeStart + x / rect.width * (rangeEnd - rangeStart);
 
-    const sample = activityGraphFills.getSampleAtClick(x, y, time);
+    const sample = activityGraphFills.getSampleAtClick(x, y, time, rect);
     if (sample !== null) {
       this.props.onSampleClick(sample);
     }
