@@ -89,12 +89,14 @@ export default class Tooltip extends React.PureComponent<Props, State> {
     let offsetY = 0;
     if (interiorElement) {
       if (
-        mouseY + interiorElement.offsetHeight + MOUSE_OFFSET >
-        window.innerHeight
+        interiorElement.offsetHeight + MOUSE_OFFSET <
+        window.innerHeight - mouseY
       ) {
+        offsetY = 0;
+      } else if (interiorElement.offsetHeight + MOUSE_OFFSET < mouseY) {
         offsetY = interiorElement.offsetHeight + MOUSE_OFFSET;
       } else {
-        offsetY = -MOUSE_OFFSET;
+        offsetY = mouseY;
       }
     }
 
