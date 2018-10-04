@@ -214,13 +214,20 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
     const startPosition = _timeToCssPixels(props, networkPayload.startTime);
     const endPosition = _timeToCssPixels(props, networkPayload.endTime);
 
+    // Set min-width for marker bar.
+    let markerWidth = endPosition - startPosition;
+
+    if (markerWidth < 1) {
+      markerWidth = 2;
+    }
+
     return {
       marker,
       networkPayload,
       threadIndex,
       markerStyle: {
         left: startPosition,
-        width: endPosition - startPosition,
+        width: markerWidth,
       },
     };
   });

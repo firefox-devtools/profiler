@@ -37,6 +37,10 @@
   opacity: 1;
 }
 
+.item:hover .itemLabel{
+  opacity: .2;
+}
+
 .itemLabel {
   width: 100%;
   display: inline-block;
