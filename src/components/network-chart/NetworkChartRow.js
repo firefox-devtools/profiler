@@ -67,7 +67,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
 
     return (
       <section className={itemClassName}>
-        <div className="itemLabel">{marker.name}</div>
+        <div className="networkChartRowItemLabel">{marker.name}</div>
         <div
           className="networkChartRowItemBar"
           style={markerStyle}

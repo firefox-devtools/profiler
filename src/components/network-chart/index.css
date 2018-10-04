@@ -50,6 +50,7 @@
   flex-shrink: 0;
   overflow: hidden;
   white-space: nowrap;
+  max-height: 1.5em;
 }
 
 .networkChartRowItemBar {

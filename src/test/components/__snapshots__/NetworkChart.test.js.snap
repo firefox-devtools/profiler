@@ -109,7 +109,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             className="even networkChartRowItem STOP"
           >
             <div
-              className="itemLabel"
+              className="networkChartRowItemLabel"
             >
               Network
             </div>
@@ -131,7 +131,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             className="odd networkChartRowItem STOP"
           >
             <div
-              className="itemLabel"
+              className="networkChartRowItemLabel"
             >
               Network
             </div>
@@ -153,7 +153,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             className="even networkChartRowItem STOP"
           >
             <div
-              className="itemLabel"
+              className="networkChartRowItemLabel"
             >
               Network
             </div>
@@ -175,7 +175,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             className="odd networkChartRowItem STOP"
           >
             <div
-              className="itemLabel"
+              className="networkChartRowItemLabel"
             >
               Network
             </div>
@@ -197,7 +197,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             className="even networkChartRowItem STOP"
           >
             <div
-              className="itemLabel"
+              className="networkChartRowItemLabel"
             >
               Network
             </div>
@@ -219,7 +219,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             className="odd networkChartRowItem STOP"
           >
             <div
-              className="itemLabel"
+              className="networkChartRowItemLabel"
             >
               Network
             </div>
@@ -241,7 +241,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             className="even networkChartRowItem STOP"
           >
             <div
-              className="itemLabel"
+              className="networkChartRowItemLabel"
             >
               Network
             </div>
@@ -263,7 +263,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             className="odd networkChartRowItem STOP"
           >
             <div
-              className="itemLabel"
+              className="networkChartRowItemLabel"
             >
               Network
             </div>
@@ -285,7 +285,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             className="even networkChartRowItem STOP"
           >
             <div
-              className="itemLabel"
+              className="networkChartRowItemLabel"
             >
               Network
             </div>
@@ -307,7 +307,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             className="odd networkChartRowItem STOP"
           >
             <div
-              className="itemLabel"
+              className="networkChartRowItemLabel"
             >
               Network
             </div>
