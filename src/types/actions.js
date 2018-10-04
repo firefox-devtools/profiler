@@ -35,6 +35,7 @@ export type DataSource =
   | 'local'
   | 'public'
   | 'from-url';
+export type TimelineType = 'stack' | 'category';
 export type PreviewSelection =
   | {| +hasSelection: false, +isModifying: false |}
   | {|
@@ -80,6 +81,7 @@ type ProfileAction =
       +type: 'CHANGE_SELECTED_CALL_NODE',
       +threadIndex: ThreadIndex,
       +selectedCallNodePath: CallNodePath,
+      +optionalExpandedToCallNodePath: ?CallNodePath,
     |}
   | {|
       +type: 'FOCUS_CALL_TREE',
@@ -249,6 +251,10 @@ type UrlStateAction =
       +type: 'POP_TRANSFORMS_FROM_STACK',
       +threadIndex: ThreadIndex,
       +firstPoppedFilterIndex: number,
+    |}
+  | {|
+      +type: 'CHANGE_TIMELINE_TYPE',
+      +timelineType: TimelineType,
     |}
   | {|
       +type: 'CHANGE_IMPLEMENTATION_FILTER',

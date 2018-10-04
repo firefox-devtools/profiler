@@ -16,10 +16,10 @@ exports[`timeline/TrackThread matches the snapshot 1`] = `
     />
   </div>
   <div
-    className="timelineStackGraph"
+    className="threadStackGraph"
   >
     <canvas
-      className="timelineStackGraphCanvas"
+      className="threadStackGraphCanvas threadStackGraphCanvas"
       onMouseUp={[Function]}
     />
   </div>
