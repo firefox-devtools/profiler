@@ -78,6 +78,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
   </div>
   <div
     className="treeViewBody"
+    onKeyDown={[Function]}
     tabIndex={0}
   >
     <div
@@ -118,8 +119,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               onMouseLeave={[Function]}
               style={
                 Object {
-                  "left": "NaN%",
-                  "width": "0.1%",
+                  "left": 0,
+                  "width": 0,
                 }
               }
             >
@@ -140,8 +141,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               onMouseLeave={[Function]}
               style={
                 Object {
-                  "left": "Infinity%",
-                  "width": "0.1%",
+                  "left": 0,
+                  "width": 0,
                 }
               }
             >
@@ -162,8 +163,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               onMouseLeave={[Function]}
               style={
                 Object {
-                  "left": "Infinity%",
-                  "width": "0.1%",
+                  "left": 0,
+                  "width": 0,
                 }
               }
             >
@@ -184,8 +185,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               onMouseLeave={[Function]}
               style={
                 Object {
-                  "left": "Infinity%",
-                  "width": "0.1%",
+                  "left": 0,
+                  "width": 0,
                 }
               }
             >
@@ -206,8 +207,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               onMouseLeave={[Function]}
               style={
                 Object {
-                  "left": "Infinity%",
-                  "width": "0.1%",
+                  "left": 0,
+                  "width": 0,
                 }
               }
             >
@@ -228,8 +229,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               onMouseLeave={[Function]}
               style={
                 Object {
-                  "left": "Infinity%",
-                  "width": "0.1%",
+                  "left": 0,
+                  "width": 0,
                 }
               }
             >
@@ -250,8 +251,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               onMouseLeave={[Function]}
               style={
                 Object {
-                  "left": "Infinity%",
-                  "width": "0.1%",
+                  "left": 0,
+                  "width": 0,
                 }
               }
             >
@@ -272,8 +273,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               onMouseLeave={[Function]}
               style={
                 Object {
-                  "left": "Infinity%",
-                  "width": "0.1%",
+                  "left": 0,
+                  "width": 0,
                 }
               }
             >
@@ -294,8 +295,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               onMouseLeave={[Function]}
               style={
                 Object {
-                  "left": "Infinity%",
-                  "width": "0.1%",
+                  "left": 0,
+                  "width": 0,
                 }
               }
             >
@@ -316,8 +317,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               onMouseLeave={[Function]}
               style={
                 Object {
-                  "left": "Infinity%",
-                  "width": "0.1%",
+                  "left": 0,
+                  "width": 0,
                 }
               }
             >

@@ -10,7 +10,6 @@
   -moz-user-select: none;
   user-select: none;
   cursor: default;
-  padding: 0 5px;
 }
 
 .networkChart .treeViewBody .treeViewBodyInnerWrapper {
@@ -56,7 +55,6 @@
   border-radius: 2px;
   height: 1.2em;
   flex-grow: 1;
-  margin-left: 4px;
   position: absolute;
   margin-top: 0.15em;
   opacity: 0.6;
