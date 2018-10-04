@@ -445,16 +445,16 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
             />
             {stackTypeLabel}
           </div>
-          <div className="tooltipLabel">Running Time (ms):</div>
-          <div>{displayData.totalTime}</div>
-          <div className="tooltipLabel">Self (ms):</div>
-          <div>{displayData.selfTime}</div>
+          <div className="tooltipLabel">Running Time:</div>
+          <div>{displayData.totalTimeWithUnit}</div>
+          <div className="tooltipLabel">Self Time:</div>
+          <div>{displayData.selfTimeWithUnit}</div>
         </div>
       </div>
     );
   };
 
-  _onMouseDown = (hoveredItem: HoveredStackTiming | null) => {
+  _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
     let callNodeIndex = null;
@@ -507,7 +507,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
-        onMouseDown={this._onMouseDown}
+        onSelectItem={this._onSelectItem}
       />
     );
   }

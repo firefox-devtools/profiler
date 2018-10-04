@@ -4,6 +4,10 @@
 
 // @flow
 import * as React from 'react';
+import {
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
 import MarkerChartCanvas from './Canvas';
 import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
@@ -90,6 +94,8 @@ class MarkerChart extends React.PureComponent<Props> {
               maxViewportHeight,
               viewportNeedsUpdate,
               maximumZoom: this.getMaximumZoom(),
+              marginLeft: TIMELINE_MARGIN_LEFT,
+              marginRight: TIMELINE_MARGIN_RIGHT,
             }}
             chartProps={{
               markerTimingRows,
@@ -99,6 +105,8 @@ class MarkerChart extends React.PureComponent<Props> {
               rangeEnd: timeRange.end,
               rowHeight: ROW_HEIGHT,
               threadIndex,
+              marginLeft: TIMELINE_MARGIN_LEFT,
+              marginRight: TIMELINE_MARGIN_RIGHT,
             }}
           />
         )}

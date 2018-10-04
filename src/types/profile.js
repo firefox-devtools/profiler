@@ -206,7 +206,21 @@ export type PausedRange = {
  * thread has a unique set of tables for its data.
  */
 export type Thread = {
-  processType: string,
+  // This list of process types is defined here:
+  // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#383
+  processType:
+    | 'default'
+    | 'plugin'
+    | 'tab'
+    | 'ipdlunittest'
+    | 'geckomediaplugin'
+    | 'gpu'
+    | 'pdfium'
+    | 'vr'
+    // Unknown process type:
+    // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/toolkit/xre/nsEmbedFunctions.cpp#232
+    | 'invalid'
+    | string,
   processStartupTime: Milliseconds,
   processShutdownTime: Milliseconds | null,
   registerTime: Milliseconds,
@@ -240,29 +254,69 @@ export type ExtensionTable = {|
  * Meta information associated for the entire profile.
  */
 export type ProfileMeta = {|
-  interval: number,
+  // The interval at which the threads are sampled.
+  interval: Milliseconds,
+  // The number of milliseconds since midnight January 1, 1970 GMT.
   startTime: Milliseconds,
-  abi: string,
-  misc: string,
-  oscpu: string,
-  platform: string,
-  processType: number, // TODO find the possible values
+  // The process type where the Gecko profiler was started. This is the raw enum
+  // numeric value as defined here:
+  // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#365
+  processType: number,
   // The extensions property landed in Firefox 60, and is only optional because older
   // processed profile versions may not have it. No upgrader was written for this change.
   extensions?: ExtensionTable,
+  // The list of categories as provided by the platform.
   categories: CategoryList,
-  product: string,
-  stackwalk: number,
-  toolkit: string,
+  // The name of the product, most likely "Firefox".
+  product: 'Firefox' | string,
+  // This value represents a boolean, but for some reason is written out as an int value.
+  // It's 0 for the stack walking feature being turned off, and 1 for stackwalking being
+  // turned on.
+  stackwalk: 0 | 1,
+  // This is the Gecko profile format version (the unprocessed version received directly
+  // from the browser.)
   version: number,
+  // This is the processed profile format version.
   preprocessedProfileVersion: number,
+
+  // The following fields are most likely included in Gecko profiles, but are marked
+  // optional for imported or converted profiles.
+
+  // The XPCOM ABI (Application Binary Interface) name, taking the form:
+  // {CPU_ARCH}-{TARGET_COMPILER_ABI} e.g. "x86_64-gcc3"
+  // See https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/XPCOM_ABI
+  abi?: string,
+  // The "misc" value of the browser's user agent, typically the revision of the browser.
+  // e.g. "rv:63.0", which would be Firefox 63.0
+  // See https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/netwerk/protocol/http/nsHttpHandler.h#543
+  misc?: string,
+  // The OS and CPU. e.g. "Intel Mac OS X"
+  oscpu?: string,
+  // The current platform, as taken from the user agent string.
+  // See https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/netwerk/protocol/http/nsHttpHandler.cpp#992
+  platform?:
+    | 'Android'
+    | 'Windows'
+    | 'Macintosh'
+    // X11 is used for historic reasons, but this value means that it is a Unix platform.
+    | 'X11'
+    | string,
+  // The widget toolkit used for GUI rendering.
+  toolkit?: 'gtk' | 'windows' | 'cocoa' | 'android' | string,
+
   // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed
-  // in Firefox 62, and are only optional because older processed profile
+  // in Firefox 62, and are optional because older processed profile
   // versions may not have them. No upgrader was written for this change.
+
+  // The build ID/date of the application.
   appBuildID?: string,
+  // The URL to the source revision for this build of the application.
   sourceURL?: string,
+  // The physical number of CPU cores for the machine.
   physicalCPUs?: number,
+  // The amount of logically available CPU cores for the program.
   logicalCPUs?: number,
+  // A boolean flag for whether or not the network URLs were stripped from the profile.
   networkURLsRemoved?: boolean,
 |};
 

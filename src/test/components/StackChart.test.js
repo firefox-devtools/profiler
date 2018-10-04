@@ -14,7 +14,12 @@ import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  getMouseEvent,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+} from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { changeSelectedCallNode } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
@@ -26,6 +31,9 @@ const GRAPH_WIDTH =
 const GRAPH_HEIGHT = 300;
 
 describe('StackChart', function() {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
   function setup(samples) {
     const flushRafCalls = mockRaf();
     const ctx = mockCanvasContext();
@@ -102,6 +110,7 @@ describe('StackChart', function() {
       })
     );
     stackChartCanvas.simulate('mousedown');
+    stackChartCanvas.simulate('mouseup');
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       0
@@ -118,6 +127,8 @@ describe('StackChart', function() {
       })
     );
     stackChartCanvas.simulate('mousedown');
+    stackChartCanvas.simulate('mouseup');
+
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       null
     );
