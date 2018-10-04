@@ -13,6 +13,7 @@ import type { TracingMarker } from '../../types/profile-derived';
 import type { NetworkPayload } from '../../types/markers';
 
 export type NetworkChartRowProps = {
+  +index: number,
   +marker: TracingMarker,
   // Pass the payload in as well, since our types can't express a TracingMarker with
   // a specific payload.
@@ -54,12 +55,15 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   };
 
   render() {
-    const { marker, markerStyle, networkPayload } = this.props;
+    const { index, marker, markerStyle, networkPayload } = this.props;
+
+    const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
 
     if (networkPayload === null) {
       return null;
     }
-    const itemClassName = 'networkChartRowItem ' + networkPayload.status;
+    const itemClassName =
+      evenOddClassName + ' networkChartRowItem ' + networkPayload.status;
 
     return (
       <section className={itemClassName}>

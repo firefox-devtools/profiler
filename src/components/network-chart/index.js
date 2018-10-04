@@ -191,7 +191,7 @@ function _timeToCssPixels(props: Props, time: Milliseconds): CssPixels {
  */
 function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
   const { markers, threadIndex } = props;
-  return markers.map(marker => {
+  return markers.map((marker, markerIndex) => {
     // Since our type definition for TracingMarker can't refine to just Network
     // markers, extract the payload.
     const networkPayload = _getNetworkPayloadOrNull(marker);
@@ -203,6 +203,7 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
         `
       );
       return {
+        index: markerIndex,
         marker,
         threadIndex,
         networkPayload: null,
@@ -220,6 +221,7 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
     }
 
     return {
+      index: markerIndex,
       marker,
       networkPayload,
       threadIndex,
