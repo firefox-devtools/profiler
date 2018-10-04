@@ -80,7 +80,7 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 class TimelineTrackThread extends PureComponent<Props> {
   /**
    * Handle when a sample is clicked in the ThreadStackGraph. This will select
-   * the leaf-most stack.
+   * the leaf-most stack frame or call node.
    */
   _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
     const { threadIndex, selectLeafCallNode, focusCallTree } = this.props;

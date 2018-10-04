@@ -63,6 +63,9 @@ import type { Transform } from '../types/transforms';
 /**
  * Select a call node for a given thread. An optional call node path can be provided
  * to expand child nodes beyond the selected call node path.
+ *
+ * Note that optionalExpandedToCallNodePath, if specified, must be a descendant call node
+ * of selectedCallNodePath.
  */
 export function changeSelectedCallNode(
   threadIndex: ThreadIndex,
@@ -72,7 +75,7 @@ export function changeSelectedCallNode(
   if (optionalExpandedToCallNodePath) {
     for (let i = 0; i < selectedCallNodePath.length; i++) {
       if (selectedCallNodePath[i] !== optionalExpandedToCallNodePath[i]) {
-        // This assertions ensures that the selectedCallNode will be correctly expanded.
+        // This assertion ensures that the selectedCallNode will be correctly expanded.
         throw new Error(
           oneLine`
             The optional expanded call node path provided to the changeSelectedCallNode
@@ -91,7 +94,8 @@ export function changeSelectedCallNode(
 }
 
 /**
- * Given a sample index, select the leaf most call node for a thread.
+ * Given a threadIndex and a sampleIndex, select the call node at the top ("leaf")
+ * of that sample's stack.
  */
 export function selectLeafCallNode(
   threadIndex: ThreadIndex,

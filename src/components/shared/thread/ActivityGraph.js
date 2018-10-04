@@ -122,7 +122,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
       rangeEnd,
       samplesSelectedStates,
       xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
-      treeOrderSampleComparator: treeOrderSampleComparator,
+      treeOrderSampleComparator,
       greyCategoryIndex: categories.findIndex(c => c.color === 'grey') || 0,
       categoryDrawStyles: this._getCategoryDrawStyles(ctx),
     });
@@ -134,11 +134,10 @@ class ThreadActivityGraph extends PureComponent<Props> {
     // lighter === OP_ADD
     ctx.globalCompositeOperation = 'lighter';
 
-    // The lastCumulativeArray keeps track of where the "mountain ridge" is after the
+    // The previousUpperEdge keeps track of where the "mountain ridge" is after the
     // previous fill.
-    let lastCumulativeArray = new Float32Array(canvasPixelWidth);
-    for (const { fillStyle, perPixelContribution } of fills) {
-      const cumulativeArray = perPixelContribution;
+    let previousUpperEdge = new Float32Array(canvasPixelWidth);
+    for (const { fillStyle, accumulatedUpperEdge } of fills) {
       ctx.fillStyle = fillStyle;
 
       // Some fills might not span the full width of the graph - they have parts where
@@ -149,8 +148,8 @@ class ThreadActivityGraph extends PureComponent<Props> {
       let lastNonZeroRangeEnd = 0;
       while (lastNonZeroRangeEnd < canvasPixelWidth) {
         const currentNonZeroRangeStart = _findNextDifferentIndex(
-          cumulativeArray,
-          lastCumulativeArray,
+          accumulatedUpperEdge,
+          previousUpperEdge,
           lastNonZeroRangeEnd
         );
         if (currentNonZeroRangeStart >= canvasPixelWidth) {
@@ -160,12 +159,11 @@ class ThreadActivityGraph extends PureComponent<Props> {
         ctx.beginPath();
         ctx.moveTo(
           currentNonZeroRangeStart,
-          (1 - lastCumulativeArray[currentNonZeroRangeStart]) *
-            canvasPixelHeight
+          (1 - previousUpperEdge[currentNonZeroRangeStart]) * canvasPixelHeight
         );
         for (let i = currentNonZeroRangeStart + 1; i < canvasPixelWidth; i++) {
-          const lastVal = lastCumulativeArray[i];
-          const thisVal = cumulativeArray[i];
+          const lastVal = previousUpperEdge[i];
+          const thisVal = accumulatedUpperEdge[i];
           ctx.lineTo(i, (1 - lastVal) * canvasPixelHeight);
           if (lastVal === thisVal) {
             currentNonZeroRangeEnd = i;
@@ -177,21 +175,22 @@ class ThreadActivityGraph extends PureComponent<Props> {
           i >= currentNonZeroRangeStart;
           i--
         ) {
-          ctx.lineTo(i, (1 - cumulativeArray[i]) * canvasPixelHeight);
+          ctx.lineTo(i, (1 - accumulatedUpperEdge[i]) * canvasPixelHeight);
         }
         ctx.closePath();
         ctx.fill();
 
         lastNonZeroRangeEnd = currentNonZeroRangeEnd;
       }
-      lastCumulativeArray = cumulativeArray;
+      previousUpperEdge = accumulatedUpperEdge;
     }
   }
 
   _onMouseUp = (e: SyntheticMouseEvent<>) => {
-    const activityGraphFills = this._fillsQuerier;
+    // Create local variables so that Flow can refine the following to be non-null.
+    const fillsQuerier = this._fillsQuerier;
     const canvas = this._canvas;
-    if (!canvas || !activityGraphFills) {
+    if (!canvas || !fillsQuerier) {
       return;
     }
     // Re-measure the canvas and get the coordinates and time for the click.
@@ -201,7 +200,7 @@ class ThreadActivityGraph extends PureComponent<Props> {
     const y = e.pageY - rect.top;
     const time = rangeStart + x / rect.width * (rangeEnd - rangeStart);
 
-    const sample = activityGraphFills.getSampleAtClick(x, y, time, rect);
+    const sample = fillsQuerier.getSampleAtClick(x, y, time, rect);
     if (sample !== null) {
       this.props.onSampleClick(sample);
     }

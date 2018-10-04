@@ -1524,9 +1524,9 @@ export function getTreeOrderComparator(
 }
 
 /**
- * This function walks up the from a clicked call node, and tries to find the best
- * call node to select. This is the root-most call node that is drawn on the same
- * category path as the clicked call node.
+ * This is the root-most call node for which, if selected, only the clicked category
+ * is highlighted in the thread activity graph. In other words, it's the root-most call
+ * node which only 'contains' samples whose sample category is the clicked category.
  */
 export function findBestAncestorCallNode(
   callNodeInfo: CallNodeInfo,
@@ -1543,12 +1543,14 @@ export function findBestAncestorCallNode(
   // Compute the callNodesOnSameCategoryPath.
   // Given a call node path with some arbitrary categories, e.g. A, B, C
   //
-  // A -> A -> B -> B -> C -> C -> C
-  //
+  //     Categories: A -> A -> B -> B -> C -> C -> C
+  //   Node Indexes: 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6
+
   // This loop will select the leaf-most call nodes that match the leaf call-node's
   // category. Running the above path through this loop would produce the list:
   //
-  // "C -> C -> C".
+  //     Categories: [C, C, C]
+  //   Node Indexes: [6, 5, 4]  (note the reverse order)
   const callNodesOnSameCategoryPath = [clickedCallNode];
   let callNode = clickedCallNode;
   while (true) {
@@ -1570,8 +1572,16 @@ export function findBestAncestorCallNode(
   // return clickedCallNode.
 
   const clickedDepth = callNodeTable.depth[clickedCallNode];
+  // The handledCallNodes is used as a Map<CallNodeIndex, bool>.
   const handledCallNodes = new Uint8Array(callNodeTable.length);
+
   function limitSameCategoryPathToCommonAncestor(callNode) {
+    // The callNode argument is the leaf call node of a sample whose sample category is a
+    // different category than clickedCategory. If callNode's ancestor path crosses
+    // callNodesOnSameCategoryPath, that implies that callNode would be highlighted
+    // if we were to select the root-most node in callNodesOnSameCategoryPath.
+    // If that is the case, we need to truncate callNodesOnSameCategoryPath in such
+    // a way that the root-most node in that list is no longer an ancestor of callNode.
     const walkUpToDepth =
       clickedDepth - (callNodesOnSameCategoryPath.length - 1);
     let depth = callNodeTable.depth[callNode];
@@ -1600,7 +1610,7 @@ export function findBestAncestorCallNode(
     }
   }
 
-  // Go through every sample in the call noes.
+  // Go through every sample and look at each sample's call node.
   for (let sample = 0; sample < sampleCallNodes.length; sample++) {
     if (
       sampleCategories[sample] !== clickedCategory &&

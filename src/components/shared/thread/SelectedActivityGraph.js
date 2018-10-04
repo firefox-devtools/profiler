@@ -85,13 +85,11 @@ class SelectedThreadActivityGraphCanvas extends PureComponent<Props> {
       selectBestAncestorCallNodeAndExpandCallTree,
       focusCallTree,
     } = this.props;
-    const isBestCallNodeFound = selectBestAncestorCallNodeAndExpandCallTree(
+    selectBestAncestorCallNodeAndExpandCallTree(
       selectedThreadIndex,
       sampleIndex
     );
-    if (isBestCallNodeFound) {
-      focusCallTree();
-    }
+    focusCallTree();
   };
 
   _onStackSampleClick = (sampleIndex: IndexIntoSamplesTable) => {

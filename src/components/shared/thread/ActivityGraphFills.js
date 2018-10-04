@@ -20,12 +20,16 @@ import type {
 } from '../../../types/units';
 
 /**
- * Computing the ActivityGraph's fills requires a set of immutable properties that
- * are used to compute the fills, but are never changed. In order to separate out
- * the mutable values, collect all of these immutable settings in one object that
- * can easily be shared between classes and functions.
+ * This type contains the values that were used to render the ThreadActivityGraph's React
+ * component, plus the sizing of the DOM element. These values are computed BEFORE drawing
+ * to the 2d canvas, and are needed to compute the 2d canvas' fills.
+ *
+ * Computing these fills requires a large set of mutable and immutable values. This type
+ * helps organize and delineate these two types of values by only containing the
+ * immutable values. This object makes it easy to share these values between different
+ * classes and functions.
  */
-type LastRenderedGraphSettings = {|
+type RenderedComponentSettings = {|
   +canvasPixelWidth: DevicePixels,
   +canvasPixelHeight: DevicePixels,
   +fullThread: Thread,
@@ -55,8 +59,9 @@ type SampleContributionToPixel = {|
 type CategoryFill = {|
   +category: IndexIntoCategoryList,
   +fillStyle: string | CanvasPattern,
-  // The Float32Array is mutated in place during the computation step.
+  // The Float32Arrays are mutated in place during the computation step.
   +perPixelContribution: Float32Array,
+  +accumulatedUpperEdge: Float32Array,
 |};
 
 export type CategoryDrawStyles = $ReadOnlyArray<{|
@@ -83,17 +88,17 @@ const SMOOTHING_KERNEL: Float32Array = _getSmoothingKernel(
 );
 
 export function computeActivityGraphFills(
-  lastRenderedGraphSettings: LastRenderedGraphSettings
+  renderedComponentSettings: RenderedComponentSettings
 ) {
   const mutablePercentageBuffers = _createSelectedPercentageAtPixelBuffers(
-    lastRenderedGraphSettings
+    renderedComponentSettings
   );
   const mutableFills = _getCategoryFills(
-    lastRenderedGraphSettings.categoryDrawStyles,
+    renderedComponentSettings.categoryDrawStyles,
     mutablePercentageBuffers
   );
   const activityGraphFills = new ActivityGraphFillComputer(
-    lastRenderedGraphSettings,
+    renderedComponentSettings,
     mutablePercentageBuffers,
     mutableFills
   );
@@ -105,7 +110,7 @@ export function computeActivityGraphFills(
   return {
     fills,
     fillsQuerier: new ActivityFillGraphQuerier(
-      lastRenderedGraphSettings,
+      renderedComponentSettings,
       fills
     ),
   };
@@ -116,17 +121,17 @@ export function computeActivityGraphFills(
  * fills by mutating the selected pecentage buffers and the category fill values.
  */
 export class ActivityGraphFillComputer {
-  +lastRenderedGraphSettings: LastRenderedGraphSettings;
+  +renderedComponentSettings: RenderedComponentSettings;
   // The fills and percentages are mutated in place.
   +mutablePercentageBuffers: SelectedPercentageAtPixelBuffers[];
   +mutableFills: CategoryFill[];
 
   constructor(
-    lastRenderedGraphSettings: LastRenderedGraphSettings,
+    renderedComponentSettings: RenderedComponentSettings,
     mutablePercentageBuffers: SelectedPercentageAtPixelBuffers[],
     mutableFills: CategoryFill[]
   ) {
-    this.lastRenderedGraphSettings = lastRenderedGraphSettings;
+    this.renderedComponentSettings = renderedComponentSettings;
     this.mutablePercentageBuffers = mutablePercentageBuffers;
     this.mutableFills = mutableFills;
   }
@@ -136,28 +141,45 @@ export class ActivityGraphFillComputer {
    * ThreadActivityGraph.
    */
   run(): void {
-    const {
-      mutableFills,
-      lastRenderedGraphSettings: { canvasPixelWidth },
-    } = this;
-
     // First go through each sample, and set the buffers that contain the percentage
     // that a category contributes to a given place in the X axis of the chart.
     this._accumulateSampleCategories();
 
     // Smooth the graphs by applying a 1D gaussian blur to the per-pixel
     // contribution of each fill.
-    for (const fill of mutableFills) {
+    for (const fill of this.mutableFills) {
       _applyGaussianBlur1D(fill.perPixelContribution, BOX_BLUR_RADII);
     }
 
-    // Finally compute the last cumulative array.
-    let lastCumulativeArray = mutableFills[0].perPixelContribution;
-    for (const { perPixelContribution } of mutableFills.slice(1)) {
-      for (let i = 0; i < canvasPixelWidth; i++) {
-        perPixelContribution[i] += lastCumulativeArray[i];
+    this._accumulateUpperEdge();
+  }
+
+  /**
+   * Accumulate the per pixel contribution of each fill, so that each fill's
+   * accumulatedUpperEdge array describes the shape of the "upper edge" after this fill.
+   * Fills are stacked on top of each other.
+   */
+  _accumulateUpperEdge(): void {
+    const { mutableFills } = this;
+    {
+      // Only copy the first array, as there is no accumulation.
+      const { accumulatedUpperEdge, perPixelContribution } = mutableFills[0];
+      for (let i = 0; i < perPixelContribution.length; i++) {
+        accumulatedUpperEdge[i] = perPixelContribution[i];
       }
-      lastCumulativeArray = perPixelContribution;
+    }
+
+    // Now accumulate the upper edges.
+    let previousUpperEdge = mutableFills[0].accumulatedUpperEdge;
+    for (const {
+      perPixelContribution,
+      accumulatedUpperEdge,
+    } of mutableFills.slice(1)) {
+      for (let i = 0; i < perPixelContribution.length; i++) {
+        accumulatedUpperEdge[i] =
+          previousUpperEdge[i] + perPixelContribution[i];
+      }
+      previousUpperEdge = accumulatedUpperEdge;
     }
   }
 
@@ -172,7 +194,7 @@ export class ActivityGraphFillComputer {
       fullThread: { samples, stackTable },
       interval,
       greyCategoryIndex,
-    } = this.lastRenderedGraphSettings;
+    } = this.renderedComponentSettings;
 
     let prevSampleTime = samples.time[0] - interval;
     let sampleTime = samples.time[0];
@@ -232,7 +254,7 @@ export class ActivityGraphFillComputer {
       categoryDrawStyles,
       xPixelsPerMs,
       canvasPixelWidth,
-    } = this.lastRenderedGraphSettings;
+    } = this.renderedComponentSettings;
     if (sampleTime < rangeStart || sampleTime >= rangeEnd) {
       return;
     }
@@ -293,7 +315,7 @@ export class ActivityGraphFillComputer {
     percentageBuffers: SelectedPercentageAtPixelBuffers,
     sampleIndex: IndexIntoSamplesTable
   ): Float32Array {
-    const { samplesSelectedStates } = this.lastRenderedGraphSettings;
+    const { samplesSelectedStates } = this.renderedComponentSettings;
     if (!samplesSelectedStates) {
       return percentageBuffers.selectedPercentageAtPixel;
     }
@@ -318,14 +340,14 @@ export class ActivityGraphFillComputer {
  * computed settings can be re-used until the graph is drawn again.
  */
 export class ActivityFillGraphQuerier {
-  lastRenderedGraphSettings: LastRenderedGraphSettings;
+  renderedComponentSettings: RenderedComponentSettings;
   fills: CategoryFill[];
 
   constructor(
-    lastRenderedGraphSettings: LastRenderedGraphSettings,
+    renderedComponentSettings: RenderedComponentSettings,
     fills: CategoryFill[]
   ) {
-    this.lastRenderedGraphSettings = lastRenderedGraphSettings;
+    this.renderedComponentSettings = renderedComponentSettings;
     this.fills = fills;
   }
 
@@ -338,7 +360,7 @@ export class ActivityFillGraphQuerier {
     time: Milliseconds,
     canvasBoundingRect: ClientRect
   ): IndexIntoSamplesTable | null {
-    const { canvasPixelWidth } = this.lastRenderedGraphSettings;
+    const { canvasPixelWidth } = this.renderedComponentSettings;
     const devicePixelRatio = canvasPixelWidth / canvasBoundingRect.width;
     const categoryUnderMouse = this._categoryAtDevicePixel(
       Math.round(cssX * devicePixelRatio),
@@ -378,7 +400,7 @@ export class ActivityFillGraphQuerier {
     const {
       canvasPixelWidth,
       canvasPixelHeight,
-    } = this.lastRenderedGraphSettings;
+    } = this.renderedComponentSettings;
 
     if (
       deviceX < 0 ||
@@ -393,8 +415,8 @@ export class ActivityFillGraphQuerier {
     let currentCategory = null;
     let currentCategoryStart = 0.0;
     let previousFillEnd = 0.0;
-    for (const { category, perPixelContribution } of this.fills) {
-      const fillEnd = perPixelContribution[deviceX];
+    for (const { category, accumulatedUpperEdge } of this.fills) {
+      const fillEnd = accumulatedUpperEdge[deviceX];
 
       if (category !== currentCategory) {
         currentCategory = category;
@@ -429,7 +451,7 @@ export class ActivityFillGraphQuerier {
       greyCategoryIndex,
       fullThread: { samples, stackTable },
       canvasPixelWidth,
-    } = this.lastRenderedGraphSettings;
+    } = this.renderedComponentSettings;
 
     const rangeLength = rangeEnd - rangeStart;
     const xPixelsPerMs = canvasPixelWidth / rangeLength;
@@ -478,7 +500,7 @@ export class ActivityFillGraphQuerier {
       fullThread: { samples },
       rangeStart,
       xPixelsPerMs,
-    } = this.lastRenderedGraphSettings;
+    } = this.renderedComponentSettings;
     const contributionTimeRangeStart =
       rangeStart + (xPixel - SMOOTHING_RADIUS) / xPixelsPerMs;
     const contributionTimeRangeEnd =
@@ -513,7 +535,7 @@ export class ActivityFillGraphQuerier {
     const {
       fullThread: { samples },
       rangeStart,
-    } = this.lastRenderedGraphSettings;
+    } = this.renderedComponentSettings;
     const kernelPos = xPixel - SMOOTHING_RADIUS;
     const pixelsAroundX = new Float32Array(SMOOTHING_KERNEL.length);
     const sampleTime = samples.time[sample];
@@ -610,21 +632,33 @@ function _getCategoryFills(
           category: categoryDrawStyle.category,
           fillStyle: categoryDrawStyle.unselectedFillStyle,
           perPixelContribution: buffer.beforeSelectedPercentageAtPixel,
+          accumulatedUpperEdge: new Float32Array(
+            buffer.beforeSelectedPercentageAtPixel.length
+          ),
         },
         {
           category: categoryDrawStyle.category,
           fillStyle: categoryDrawStyle.selectedFillStyle,
           perPixelContribution: buffer.selectedPercentageAtPixel,
+          accumulatedUpperEdge: new Float32Array(
+            buffer.beforeSelectedPercentageAtPixel.length
+          ),
         },
         {
           category: categoryDrawStyle.category,
           fillStyle: categoryDrawStyle.unselectedFillStyle,
           perPixelContribution: buffer.afterSelectedPercentageAtPixel,
+          accumulatedUpperEdge: new Float32Array(
+            buffer.beforeSelectedPercentageAtPixel.length
+          ),
         },
         {
           category: categoryDrawStyle.category,
           fillStyle: categoryDrawStyle.filteredOutFillStyle,
           perPixelContribution: buffer.filteredOutPercentageAtPixel,
+          accumulatedUpperEdge: new Float32Array(
+            buffer.beforeSelectedPercentageAtPixel.length
+          ),
         },
       ];
     }
