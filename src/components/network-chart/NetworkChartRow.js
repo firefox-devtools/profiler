@@ -59,13 +59,13 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     if (networkPayload === null) {
       return null;
     }
-    const itemClassName = ('item ' + networkPayload.status).toLowerCase();
+    const itemClassName = ('networkChartRowItem ' + networkPayload.status);
 
     return (
       <section className={itemClassName}>
         <div className="itemLabel">{marker.name}</div>
         <div
-          className="itemBar"
+          className="networkChartRowItemBar"
           style={markerStyle}
           onMouseEnter={this._hoverIn}
           onMouseLeave={this._hoverOut}
