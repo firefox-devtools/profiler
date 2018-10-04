@@ -59,7 +59,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     if (networkPayload === null) {
       return null;
     }
-    const itemClassName = ('networkChartRowItem ' + networkPayload.status);
+    const itemClassName = 'networkChartRowItem ' + networkPayload.status;
 
     return (
       <section className={itemClassName}>
