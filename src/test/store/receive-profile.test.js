@@ -3,8 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import type { Profile } from '../../types/profile';
+
 import sinon from 'sinon';
 
+import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as ZippedProfilesSelectors from '../../reducers/zipped-profiles';
@@ -22,7 +25,10 @@ import getGeckoProfile from '../fixtures/profiles/gecko-profile';
 import { getEmptyProfile } from '../../profile-logic/profile-data';
 import JSZip from 'jszip';
 import { serializeProfile } from '../../profile-logic/process-profile';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import {
+  getProfileFromTextSamples,
+  addMarkersToThreadWithCorrespondingSamples,
+} from '../fixtures/profiles/make-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 
 // Mocking SymbolStoreDB
@@ -66,11 +72,22 @@ describe('actions/receive-profile', function() {
         store.getState()
       );
       expect(initialProfile).toBeNull();
+      const profile = _getSimpleProfile();
+      store.dispatch(viewProfile(profile));
+      expect(ProfileViewSelectors.getProfile(store.getState())).toBe(profile);
+    });
+
+    it('will be a fatal error if a profile has no threads', function() {
+      const store = blankStore();
+      expect(getView(store.getState()).phase).toBe('INITIALIZING');
       const emptyProfile = getEmptyProfile();
+
+      // Stop console.error from spitting out an error message:
+      const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
       store.dispatch(viewProfile(emptyProfile));
-      expect(ProfileViewSelectors.getProfile(store.getState())).toBe(
-        emptyProfile
-      );
+      expect(getView(store.getState()).phase).toBe('FATAL_ERROR');
+      expect(spy).toHaveBeenCalled();
     });
 
     function getProfileWithIdleAndWorkThread() {
@@ -160,6 +177,36 @@ describe('actions/receive-profile', function() {
       expect(getHumanReadableTracks(store.getState())).toEqual([
         'show [thread GeckoMain default] SELECTED',
         'show [thread GeckoMain default]',
+      ]);
+    });
+
+    it('will hide content threads with no RefreshDriverTick markers', function() {
+      const store = blankStore();
+      const { profile } = getProfileFromTextSamples(
+        'work work work work work work work',
+        'work work work work work work work',
+        'work work work work work gswork work'
+      );
+
+      profile.threads.forEach((thread, threadIndex) => {
+        thread.name = 'GeckoMain';
+        thread.processType = 'tab';
+        thread.pid = threadIndex;
+      });
+
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
+        [
+          'RefreshDriverTick',
+          0,
+          { type: 'tracing', category: 'Paint', interval: 'start' },
+        ],
+      ]);
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'hide [thread GeckoMain tab]',
+        'show [thread GeckoMain tab] SELECTED',
+        'hide [thread GeckoMain tab]',
       ]);
     });
   });
@@ -504,7 +551,7 @@ describe('actions/receive-profile', function() {
       json?: () => Promise<mixed>,
     }) {
       const { url, contentType, isZipped, isJSON } = obj;
-      const profile = getEmptyProfile();
+      const profile = _getSimpleProfile();
       let arrayBuffer = obj.arrayBuffer;
       let json = obj.json;
 
@@ -710,7 +757,7 @@ describe('actions/receive-profile', function() {
     }
 
     it('can load json with a good mime type', async function() {
-      const profile = getEmptyProfile();
+      const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
 
       const { getState, view } = await setupTestWithFile({
@@ -724,7 +771,7 @@ describe('actions/receive-profile', function() {
     });
 
     it('can load json with an empty mime type', async function() {
-      const profile = getEmptyProfile();
+      const profile = _getSimpleProfile();
       profile.meta.product = 'JSON Test';
 
       const { getState, view } = await setupTestWithFile({
@@ -760,9 +807,12 @@ describe('actions/receive-profile', function() {
       // the profile.
     });
 
-    it('can load a zipped profile', async function() {
+    async function setupZipTestWithProfile(
+      fileName: string,
+      serializedProfile: string
+    ) {
       const zip = new JSZip();
-      zip.file('profile.json', serializeProfile(getEmptyProfile()));
+      zip.file(fileName, serializedProfile);
       const array = await zip.generateAsync({ type: 'uint8array' });
 
       // Create a new ArrayBuffer instance and copy the data into it, in order
@@ -770,16 +820,73 @@ describe('actions/receive-profile', function() {
       const bufferCopy = new ArrayBuffer(array.buffer.byteLength);
       new Uint8Array(bufferCopy).set(new Uint8Array(array.buffer));
 
-      const { getState, view } = await setupTestWithFile({
+      return setupTestWithFile({
         type: 'application/zip',
         payload: bufferCopy,
       });
+    }
+
+    it('can load a zipped profile', async function() {
+      const { getState, view } = await setupZipTestWithProfile(
+        'profile.json',
+        serializeProfile(_getSimpleProfile())
+      );
       expect(view.phase).toBe('DATA_LOADED');
       const zipInStore = ZippedProfilesSelectors.getZipFile(getState());
       if (zipInStore === null) {
         throw new Error('Expected zipInStore to exist.');
       }
       expect(zipInStore.files['profile.json']).toBeTruthy();
+    });
+
+    it('will load and view a simple profile with no errors', async function() {
+      const { getState, dispatch } = await setupZipTestWithProfile(
+        'profile.json',
+        serializeProfile(_getSimpleProfile())
+      );
+
+      expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
+        'LIST_FILES_IN_ZIP_FILE'
+      );
+      await dispatch(viewProfileFromPathInZipFile('profile.json'));
+      expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
+        'VIEW_PROFILE_IN_ZIP_FILE'
+      );
+      const errorMessage = ZippedProfilesSelectors.getZipFileErrorMessage(
+        getState()
+      );
+      expect(errorMessage).toEqual(null);
+    });
+
+    it('will be an error to view a profile with no threads', async function() {
+      const { getState, dispatch } = await setupZipTestWithProfile(
+        'profile.json',
+        serializeProfile(getEmptyProfile())
+      );
+
+      expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
+        'LIST_FILES_IN_ZIP_FILE'
+      );
+      expect(
+        ZippedProfilesSelectors.getZipFileErrorMessage(getState())
+      ).toEqual(null);
+
+      // Stop console.error from spitting out an error message:
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      await dispatch(viewProfileFromPathInZipFile('profile.json'));
+
+      expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
+        'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE'
+      );
+      expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
+        'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE'
+      );
+      const errorMessage = ZippedProfilesSelectors.getZipFileErrorMessage(
+        getState()
+      );
+      expect(typeof errorMessage).toEqual('string');
+      expect(errorMessage).toMatchSnapshot();
     });
 
     it('will give an error when unable to decompress a zipped profile', async function() {
@@ -795,3 +902,10 @@ describe('actions/receive-profile', function() {
     });
   });
 });
+
+/**
+ * This profile will have a single sample, and a single thread.
+ */
+function _getSimpleProfile(): Profile {
+  return getProfileFromTextSamples('A').profile;
+}

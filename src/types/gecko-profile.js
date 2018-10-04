@@ -172,7 +172,7 @@ export type GeckoProfileMeta = {|
   platform: string,
   processType: number,
   product: string,
-  stackwalk: number,
+  stackwalk: 0 | 1,
   toolkit: string,
   version: number,
   // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed

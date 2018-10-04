@@ -81,6 +81,15 @@ function zipFile(
         zip: ensureExists(state.zip),
         pathInZipFile: ensureExists(state.pathInZipFile),
       });
+    case 'FATAL_ERROR':
+      return state.phase === 'NO_ZIP_FILE' ||
+        state.phase === 'LIST_FILES_IN_ZIP_FILE'
+        ? state
+        : _validateStateTransition(state, {
+            phase: 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE',
+            zip: ensureExists(state.zip),
+            pathInZipFile: ensureExists(state.pathInZipFile),
+          });
     case 'VIEW_PROFILE':
       // Only process this as a change if a zip file is actually loaded.
       return state.phase === 'NO_ZIP_FILE'
@@ -90,6 +99,16 @@ function zipFile(
             zip: ensureExists(state.zip),
             pathInZipFile: ensureExists(state.pathInZipFile),
           });
+    default:
+      return state;
+  }
+}
+
+function error(state: null | Error = null, action: Action): null | Error {
+  switch (action.type) {
+    case 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE':
+    case 'FATAL_ERROR':
+      return action.error;
     default:
       return state;
   }
@@ -187,6 +206,7 @@ function expandedZipFileIndexes(
 
 const zipFileReducer: Reducer<ZippedProfilesState> = combineReducers({
   zipFile,
+  error,
   selectedZipFileIndex,
   expandedZipFileIndexes,
 });
@@ -199,6 +219,10 @@ export const getSelectedZipFileIndex = (state: State) =>
   getZippedProfilesState(state).selectedZipFileIndex;
 export const getExpandedZipFileIndexes = (state: State) =>
   getZippedProfilesState(state).expandedZipFileIndexes;
+export const getZipFileErrorMessage = (state: State): string | null => {
+  const { error } = getZippedProfilesState(state);
+  return error === null ? null : error.message;
+};
 
 export const getZipFileState = (state: State): ZipFileState =>
   getZippedProfilesState(state).zipFile;

@@ -72,6 +72,18 @@ export function viewProfile(
   pathInZipFile: ?string
 ): ThunkAction<void> {
   return (dispatch, getState) => {
+    if (profile.threads.length === 0) {
+      console.error('This profile has no threads.', profile);
+      dispatch(
+        fatalError(
+          new Error(
+            'No threads were captured in this profile, there is nothing to display.'
+          )
+        )
+      );
+      return;
+    }
+
     // The selectedThreadIndex is only null for new profiles that haven't
     // been seen before. If it's non-null, then there is profile view information
     // encoded into the URL.
@@ -392,16 +404,9 @@ export async function doSymbolicateProfile(
   dispatch(doneSymbolicating());
 }
 
-export function temporaryErrorReceivingProfileFromAddon(error: TemporaryError) {
+export function fatalError(error: Error) {
   return {
-    type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_ADDON',
-    error,
-  };
-}
-
-export function fatalErrorReceivingProfileFromAddon(error: Error) {
-  return {
-    type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_ADDON',
+    type: 'FATAL_ERROR',
     error,
   };
 }
@@ -411,7 +416,7 @@ export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
     try {
       const timeoutId = setTimeout(() => {
         dispatch(
-          temporaryErrorReceivingProfileFromAddon(
+          temporaryError(
             new TemporaryError(oneLine`
             We were unable to connect to the Gecko profiler add-on within thirty seconds.
             This might be because the profile is big or your machine is slower than usual.
@@ -430,7 +435,7 @@ export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
 
       await doSymbolicateProfile(dispatch, profile, symbolStore);
     } catch (error) {
-      dispatch(fatalErrorReceivingProfileFromAddon(error));
+      dispatch(fatalError(error));
       throw error;
     }
   };
@@ -455,34 +460,9 @@ export function receiveZipFile(zip: JSZip): Action {
   };
 }
 
-export function temporaryErrorReceivingProfileFromStore(
-  error: TemporaryError
-): Action {
+export function temporaryError(error: TemporaryError): Action {
   return {
-    type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_STORE',
-    error,
-  };
-}
-
-export function fatalErrorReceivingProfileFromStore(error: Error): Action {
-  return {
-    type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_STORE',
-    error,
-  };
-}
-
-export function temporaryErrorReceivingProfileFromUrl(
-  error: TemporaryError
-): Action {
-  return {
-    type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_URL',
-    error,
-  };
-}
-
-export function fatalErrorReceivingProfileFromUrl(error: Error): Action {
-  return {
-    type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_URL',
+    type: 'TEMPORARY_ERROR',
     error,
   };
 }
@@ -697,7 +677,7 @@ export function retrieveProfileOrZipFromUrl(
       const response = await _fetchProfile({
         url: profileUrl,
         onTemporaryError: (e: TemporaryError) => {
-          dispatch(temporaryErrorReceivingProfileFromUrl(e));
+          dispatch(temporaryError(e));
         },
       });
 
@@ -718,7 +698,7 @@ export function retrieveProfileOrZipFromUrl(
         );
       }
     } catch (error) {
-      dispatch(fatalErrorReceivingProfileFromUrl(error));
+      dispatch(fatalError(error));
     }
   };
 }
@@ -726,13 +706,6 @@ export function retrieveProfileOrZipFromUrl(
 export function waitingForProfileFromFile(): Action {
   return {
     type: 'WAITING_FOR_PROFILE_FROM_FILE',
-  };
-}
-
-export function errorReceivingProfileFromFile(error: Error): Action {
-  return {
-    type: 'ERROR_RECEIVING_PROFILE_FROM_FILE',
-    error,
   };
 }
 
@@ -816,7 +789,7 @@ export function retrieveProfileFromFile(
         }
       }
     } catch (error) {
-      dispatch(errorReceivingProfileFromFile(error));
+      dispatch(fatalError(error));
     }
   };
 }

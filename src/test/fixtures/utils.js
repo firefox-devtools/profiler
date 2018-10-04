@@ -5,6 +5,7 @@
 import { CallTree } from '../../profile-logic/call-tree';
 import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
 import type { Store, State } from '../../types/store';
+import { ensureExists } from '../../utils/flow';
 
 export function getBoundingBox(width: number, height: number) {
   return {
@@ -128,4 +129,29 @@ export function waitUntilState(
       }
     });
   });
+}
+
+/**
+ * Tests with components using React portals (tooltips for instance)
+ * need to have a mountpoint in the DOM.
+ */
+export function addRootOverlayElement() {
+  const div = document.createElement('div');
+  div.id = 'root-overlay';
+  ensureExists(
+    document.body,
+    'Expected the document.body to exist.'
+  ).appendChild(div);
+}
+
+export function removeRootOverlayElement() {
+  ensureExists(
+    document.body,
+    'Expected the document.body to exist.'
+  ).removeChild(
+    ensureExists(
+      document.querySelector('#root-overlay'),
+      'Expected to find a root overlay element to clean up.'
+    )
+  );
 }

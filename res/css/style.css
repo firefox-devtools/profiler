@@ -183,7 +183,7 @@ body, #root, .profileViewer {
   background-color: #F5F5F5;
 }
 .treeViewRow.selected {
-  background-color: -moz-dialog;
+  background-color: var(--grey-30);
   color: black;
 }
 .treeViewRow.dim > .treeViewMainColumn {
