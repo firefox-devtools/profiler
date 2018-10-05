@@ -70,6 +70,10 @@ const config = {
       { from: 'res/_headers' },
       { from: 'res/_redirects' },
       { from: 'docs-user', to: 'docs' },
+      { from: 'res/.htaccess' },
+      { from: 'res/zee-worker.js' },
+      { from: 'res/analytics.js' },
+
     ]),
   ],
   entry: ['./src/index'],
