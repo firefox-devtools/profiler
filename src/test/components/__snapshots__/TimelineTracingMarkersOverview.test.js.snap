@@ -30,7 +30,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "black",
+    "#ff9400",
   ],
   Array [
     "fillRect",
@@ -55,7 +55,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "black",
+    "#ff9400",
   ],
   Array [
     "fillRect",
@@ -80,7 +80,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "black",
+    "#ff9400",
   ],
   Array [
     "fillRect",
