@@ -57,8 +57,9 @@ const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
     ? new WheelEvent('mouse')
     : { DOM_DELTA_LINE: 1, DOM_DELTA_PAGE: 2 };
 
-const KEYBOARD_ZOOM_AMOUNT = 75;
-const KEYBOARD_MOVE_AMOUNT = 100;
+const KEYBOARD_ZOOM_DELTA = 75;
+const KEYBOARD_X_DELTA = 100;
+const KEYBOARD_Y_DELTA = 50;
 
 // These viewport values (most of which are computed dynamically by
 // the HOC) are passed into the props of the wrapped component.
@@ -177,6 +178,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       _takeContainerRef = container => {
         this._container = container;
       };
+      _keysDown = new Set();
 
       constructor(props: ViewportProps) {
         super(props);
@@ -474,52 +476,121 @@ export const withChartViewport: WithChartViewport<*, *> =
         this.moveViewport(offsetX, offsetY);
       };
 
-      _keyListener = (event: KeyboardEvent) => {
-        const modifier = event.getModifierState();
+      _keyDownListener = (
+        event: { nativeEvent: KeyboardEvent } & SyntheticKeyboardEvent<>
+      ) => {
+        const bareKeys = [
+          'KeyQ',
+          'KeyE',
+          'KeyW',
+          'KeyS',
+          'KeyA',
+          'KeyD',
+          'KeyY',
+          'KeyU',
+          'KeyK',
+          'KeyJ',
+          'KeyH',
+          'KeyL',
+        ];
+        const shiftModifiedKeys = ['ArrowUp', 'ArrowDown'];
+        const ctrlModifiedKeys = [
+          'ArrowUp',
+          'ArrowDown',
+          'ArrowLeft',
+          'ArrowRight',
+        ];
+
+        if (this._keysDown.size === 0) {
+          requestAnimationFrame(this._navigateWithKeyboard);
+        }
+
+        this._keysDown.add(event.nativeEvent.code);
+
         if (
-          (event.shiftKey && event.nativeEvent.code === 'ArrowUp') ||
-          (!modifier &&
-            (event.nativeEvent.code === 'KeyQ' ||
-              event.nativeEvent.code === 'KeyY'))
+          (!event.ctrlKey &&
+            !event.shiftKey &&
+            !event.altKey &&
+            bareKeys.includes(event.nativeEvent.code)) ||
+          (event.shiftKey &&
+            shiftModifiedKeys.includes(event.nativeEvent.code)) ||
+          (event.ctrlKey && ctrlModifiedKeys.includes(event.nativeEvent.code))
         ) {
-          this.zoomRangeSelection(0.5, -KEYBOARD_ZOOM_AMOUNT);
-        } else if (
-          (event.shiftKey && event.nativeEvent.code === 'ArrowDown') ||
-          (!modifier &&
-            (event.nativeEvent.code === 'KeyE' ||
-              event.nativeEvent.code === 'KeyU'))
+          event.preventDefault();
+        }
+      };
+
+      _keyUpListener = (
+        event: { nativeEvent: KeyboardEvent } & SyntheticKeyboardEvent<>
+      ) => {
+        this._keysDown.delete(event.nativeEvent.code);
+      };
+
+      _navigateWithKeyboard = () => {
+        if (this._keysDown.size === 0) {
+          // No keys are down, nothing to do.  Don't request a new
+          // animation frame.
+          return;
+        }
+        requestAnimationFrame(this._navigateWithKeyboard);
+
+        const ctrlDown =
+          this._keysDown.has('ControlLeft') ||
+          this._keysDown.has('ControlRight');
+        const shiftDown =
+          this._keysDown.has('ShiftLeft') || this._keysDown.has('ShiftRight');
+        const altDown =
+          this._keysDown.has('AltLeft') || this._keysDown.has('AltRight');
+        const noModifiersDown = !ctrlDown && !shiftDown && !altDown;
+
+        if (
+          (shiftDown && this._keysDown.has('ArrowUp')) ||
+          (noModifiersDown &&
+            (this._keysDown.has('KeyQ') || this._keysDown.has('KeyY')))
+        ) {
+          this.zoomRangeSelection(0.5, -KEYBOARD_ZOOM_DELTA);
+        }
+
+        if (
+          (shiftDown && this._keysDown.has('ArrowDown')) ||
+          (noModifiersDown &&
+            (this._keysDown.has('KeyE') || this._keysDown.has('KeyU')))
         ) {
           // Add a small amount to zoom out so that we don't need an
           // extra keypress to leave the preview selection state.
-          this.zoomRangeSelection(0.5, KEYBOARD_ZOOM_AMOUNT + 0.001);
-        } else if (
-          (event.ctrlKey && event.nativeEvent.code === 'ArrowUp') ||
-          (!modifier &&
-            (event.nativeEvent.code === 'KeyW' ||
-              event.nativeEvent.code === 'KeyK'))
+          this.zoomRangeSelection(0.5, KEYBOARD_ZOOM_DELTA + 0.001);
+        }
+
+        if (
+          (ctrlDown && this._keysDown.has('ArrowUp')) ||
+          (noModifiersDown &&
+            (this._keysDown.has('KeyW') || this._keysDown.has('KeyK')))
         ) {
-          this.moveViewport(0, KEYBOARD_MOVE_AMOUNT);
-        } else if (
-          (event.ctrlKey && event.nativeEvent.code === 'ArrowDown') ||
-          (!modifier &&
-            (event.nativeEvent.code === 'KeyS' ||
-              event.nativeEvent.code === 'KeyJ'))
+          this.moveViewport(0, KEYBOARD_Y_DELTA);
+        }
+
+        if (
+          (ctrlDown && this._keysDown.has('ArrowDown')) ||
+          (noModifiersDown &&
+            (this._keysDown.has('KeyS') || this._keysDown.has('KeyJ')))
         ) {
-          this.moveViewport(0, -KEYBOARD_MOVE_AMOUNT);
-        } else if (
-          (event.ctrlKey && event.nativeEvent.code === 'ArrowLeft') ||
-          (!modifier &&
-            (event.nativeEvent.code === 'KeyA' ||
-              event.nativeEvent.code === 'KeyH'))
+          this.moveViewport(0, -KEYBOARD_Y_DELTA);
+        }
+
+        if (
+          (ctrlDown && this._keysDown.has('ArrowLeft')) ||
+          (noModifiersDown &&
+            (this._keysDown.has('KeyA') || this._keysDown.has('KeyH')))
         ) {
-          this.moveViewport(KEYBOARD_MOVE_AMOUNT, 0);
-        } else if (
-          (event.ctrlKey && event.nativeEvent.code === 'ArrowRight') ||
-          (!modifier &&
-            (event.nativeEvent.code === 'KeyD' ||
-              event.nativeEvent.code === 'KeyL'))
+          this.moveViewport(KEYBOARD_X_DELTA, 0);
+        }
+
+        if (
+          (ctrlDown && this._keysDown.has('ArrowRight')) ||
+          (noModifiersDown &&
+            (this._keysDown.has('KeyD') || this._keysDown.has('KeyL')))
         ) {
-          this.moveViewport(-KEYBOARD_MOVE_AMOUNT, 0);
+          this.moveViewport(-KEYBOARD_X_DELTA, 0);
         }
       };
 
@@ -676,7 +747,8 @@ export const withChartViewport: WithChartViewport<*, *> =
             className={viewportClassName}
             onWheel={this._mouseWheelListener}
             onMouseDown={this._mouseDownListener}
-            onKeyDown={this._keyListener}
+            onKeyDown={this._keyDownListener}
+            onKeyUp={this._keyUpListener}
             ref={this._takeContainerRef}
             tabIndex={0}
           >
