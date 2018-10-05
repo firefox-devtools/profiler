@@ -8,7 +8,7 @@ export const styles = {
   default: {
     top: 0,
     height: 6,
-    background: 'black',
+    background: colors.ORANGE_50,
     squareCorners: false,
     borderLeft: null,
     borderRight: null,
