@@ -8,7 +8,7 @@ export const styles = {
   default: {
     top: 0,
     height: 6,
-    background: colors.ORANGE_50,
+    background: 'black',
     squareCorners: false,
     borderLeft: null,
     borderRight: null,
@@ -86,6 +86,9 @@ export const styles = {
     borderLeft: colors.RED_50,
     borderRight: colors.RED_50,
     squareCorners: true,
+  },
+  GCSlice: {
+    background: colors.ORANGE_50,
   },
 };
 
