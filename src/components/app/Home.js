@@ -69,7 +69,10 @@ class UploadButton extends React.PureComponent<UploadButtonProps> {
   render() {
     return (
       <div>
-        <input type="file" ref={this._takeInputRef} onChange={this._upload} />
+        <label className="homeSectionUploadFiles">
+            <input type="file" ref={this._takeInputRef} onChange={this._upload} />
+            <p>Choose file</p>
+        </label>
       </div>
     );
   }

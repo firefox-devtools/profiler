@@ -188,6 +188,29 @@
   transition: opacity 300ms ease-out, transform 300ms ease-out;
 }
 
+.homeSectionUploadFiles {
+    margin: 15px 0;
+    display: block;
+    border: 2px solid var(--blue-50);
+    color: #fff;
+    background-color: var(--blue-50);
+    transition: background-color 300ms;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: .8;
+    text-align: center;
+    cursor: pointer;
+}
+
+.homeSectionUploadFiles:hover {
+    color: var(--blue-50);
+    background-color: #fff;
+}
+
+input[type="file"] {
+    display: none;
+}
+
 @media (max-width: 1300px) {
   .homeSection {
     padding: 5em;
