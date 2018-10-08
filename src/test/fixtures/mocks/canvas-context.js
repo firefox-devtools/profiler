@@ -41,6 +41,7 @@ export default function mockCanvasContext() {
       createLinearGradient: spyLog('createLinearGradient', () => ({
         addColorStop: spyLog('addColorStop'),
       })),
+      createPattern: spyLog('createPattern', () => ({})),
       __flushDrawLog: (): Array<any> => {
         const oldLog = log.slice();
         log.splice(0, log.length);

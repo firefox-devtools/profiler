@@ -8,6 +8,7 @@ import { mount } from 'enzyme';
 
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
 import { Provider } from 'react-redux';
+import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 import {
@@ -31,10 +32,17 @@ describe('calltree/ProfileCallTreeView', function() {
     E  E
   `);
 
+  beforeEach(() => {
+    // Mock out the 2d canvas for the loupe view.
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => mockCanvasContext());
+  });
+
   it('renders an unfiltered call tree', () => {
     const calltree = mount(
       <Provider store={storeWithProfile(profile)}>
-        <ProfileCallTreeView />
+        <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
 
@@ -55,7 +63,7 @@ describe('calltree/ProfileCallTreeView', function() {
 
     const calltree = mount(
       <Provider store={store}>
-        <ProfileCallTreeView />
+        <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
 
@@ -66,7 +74,7 @@ describe('calltree/ProfileCallTreeView', function() {
     const store = storeWithProfile(profile);
     const calltree = mount(
       <Provider store={store}>
-        <ProfileCallTreeView />
+        <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
 
@@ -97,7 +105,7 @@ describe('calltree/ProfileCallTreeView', function() {
     const store = storeWithProfile(profile);
     const calltree = mount(
       <Provider store={store}>
-        <ProfileCallTreeView />
+        <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
 
@@ -106,6 +114,13 @@ describe('calltree/ProfileCallTreeView', function() {
 });
 
 describe('calltree/ProfileCallTreeView EmptyReasons', function() {
+  beforeEach(() => {
+    // Mock out the 2d canvas for the loupe view.
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => mockCanvasContext());
+  });
+
   const { profile } = getProfileFromTextSamples(`
     A  A  A
     B  B  B
@@ -118,7 +133,7 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
   function renderWithStore(store) {
     return mount(
       <Provider store={store}>
-        <ProfileCallTreeView />
+        <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
   }
@@ -147,6 +162,13 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
 });
 
 describe('calltree/ProfileCallTreeView navigation keys', () => {
+  beforeEach(() => {
+    // Mock out the 2d canvas for the loupe view.
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => mockCanvasContext());
+  });
+
   function setup(profileString: string) {
     // This makes the bounding box large enough so that we don't trigger
     // VirtualList's virtualization. We assert this above.
@@ -158,7 +180,7 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     const store = storeWithProfile(profile);
     const callTree = mount(
       <Provider store={store}>
-        <ProfileCallTreeView />
+        <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
 
