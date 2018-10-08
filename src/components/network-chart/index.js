@@ -33,11 +33,7 @@ import type {
   TracingMarker,
   MarkerTimingRows,
 } from '../../types/profile-derived';
-import type {
-  Milliseconds,
-  UnitIntervalOfProfileRange,
-  CssPixels,
-} from '../../types/units';
+import type { Milliseconds, CssPixels } from '../../types/units';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
@@ -46,7 +42,7 @@ import type { NetworkChartRowProps } from './NetworkChartRow';
 
 require('./index.css');
 
-const ROW_HEIGHT = 17.5;
+const ROW_HEIGHT = 16;
 
 // The SizeProps are injected by the WithSize higher order component.
 type OwnProps = SizeProps;
@@ -77,14 +73,6 @@ const _getVirtualListItemsMemoized = memoize(_getVirtualListItems, {
 });
 
 class NetworkChart extends React.PureComponent<Props> {
-  /**
-   * Determine the maximum zoom of the viewport.
-   */
-  getMaximumZoom(): UnitIntervalOfProfileRange {
-    const { timeRange: { start, end }, interval } = this.props;
-    return interval / (end - start);
-  }
-
   _onCopy = (_event: Event) => {
     // No implemented.
   };
@@ -110,7 +98,7 @@ class NetworkChart extends React.PureComponent<Props> {
             focusable={true}
             specialItems={[]}
             containerWidth={3000}
-            disableOverscan={true}
+            disableOverscan={false}
             onCopy={this._onCopy}
             onKeyDown={this._onKeyDown}
           />

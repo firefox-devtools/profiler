@@ -21,7 +21,7 @@
 
 .networkChartRowItem {
   width: 100%;
-  height: 1.5em;
+  height: 16px;
   display: block;
 }
 
@@ -50,7 +50,7 @@
   flex-shrink: 0;
   overflow: hidden;
   white-space: nowrap;
-  max-height: 1.5em;
+  max-height: 16px;
 }
 
 .networkChartRowItemBar {
@@ -58,10 +58,10 @@
   display: inline-block;
   z-index: 3;
   border-radius: 2px;
-  height: 1.2em;
+  height: 12px;
   flex-grow: 1;
   position: absolute;
-  margin-top: 0.15em;
+  margin-top: 2px;
   opacity: 0.6;
 }
 
