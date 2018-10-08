@@ -4,10 +4,73 @@
 
 .networkChart {
   display: flex;
-  flex: 1;
   flex-flow: column nowrap;
+  flex: 1;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  cursor: default;
 }
 
-.networkChartCanvas {
+.networkChart .treeViewBody .treeViewBodyInnerWrapper {
+  flex-flow: column nowrap;
+  width: 100%;
   border-top: 1px solid var(--grey-30);
+}
+
+
+.networkChartRowItem {
+  width: 100%;
+  height: 16px;
+  display: block;
+}
+
+.networkChartRowItem.odd{
+  background-color: #f5f5f5;
+}
+
+.networkChartRowItem:hover {
+  background-color: #bbe0f6;
+}
+
+.networkChartRowItem:hover .networkChartRowItemBar{
+  opacity: 1;
+}
+
+.networkChartRowItem:hover .networkChartRowItemLabel{
+  opacity: .2;
+}
+
+.networkChartRowItemLabel {
+  width: 100%;
+  display: inline-block;
+  margin-left: 4px;
+  z-index: 2;
+  flex-basis: 0;
+  flex-shrink: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  max-height: 16px;
+}
+
+.networkChartRowItemBar {
+  background-color: var(--blue-50);
+  display: inline-block;
+  z-index: 3;
+  border-radius: 2px;
+  height: 12px;
+  flex-grow: 1;
+  position: absolute;
+  margin-top: 2px;
+  opacity: 0.6;
+}
+
+.STATUS_START .networkChartRowItemBar {
+  background-color: var(--magenta-50);
+  opacity: 0.2;
+}
+
+.STATUS_REDIRECT .networkChartRowItemBar {
+  background-color: var(--teal-70);
+  opacity: 0.4;
 }
