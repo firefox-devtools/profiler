@@ -189,6 +189,7 @@
 }
 
 .homeSectionUploadFiles {
+    padding: 0.5em;
     margin: 15px 0;
     display: block;
     border: 2px solid var(--blue-50);
@@ -197,7 +198,6 @@
     transition: background-color 300ms;
     font-weight: bold;
     font-size: 16px;
-    line-height: .8;
     text-align: center;
     cursor: pointer;
 }
