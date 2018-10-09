@@ -11,6 +11,7 @@ import type {
   ImplementationFilter,
   RequestedLib,
   TrackReference,
+  TimelineType,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { Milliseconds, StartEndRange } from './units';
@@ -152,6 +153,7 @@ export type UrlState = {|
     callTreeSearchString: string,
     markersSearchString: string,
     transforms: TransformStacksPerThread,
+    timelineType: TimelineType,
     legacyThreadOrder: ThreadIndex[] | null,
     legacyHiddenThreads: ThreadIndex[] | null,
   |},
