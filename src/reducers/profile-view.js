@@ -1060,7 +1060,7 @@ export const selectorsForThread = (
       }
     );
     const getIsNetworkChartEmptyInFullRange = createSelector(
-      getTracingMarkers,
+      getSearchFilteredTracingMarkers,
       markers => markers.filter(MarkerData.isNetworkMarker).length === 0
     );
     const getNetworkChartTracingMarkers = createSelector(
