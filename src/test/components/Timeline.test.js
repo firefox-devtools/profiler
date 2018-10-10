@@ -73,6 +73,11 @@ describe('Timeline', function() {
       }: any);
       return mockEl;
     });
+
+    // Mock out the 2d canvas for the loupe view.
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => mockCanvasContext());
   });
   it('renders the header', () => {
     const flushRafCalls = mockRaf();

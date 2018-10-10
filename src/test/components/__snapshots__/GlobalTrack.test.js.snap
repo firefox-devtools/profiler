@@ -57,10 +57,10 @@ process: \\"tab\\" (222)"
           />
         </div>
         <div
-          className="timelineStackGraph"
+          className="threadActivityGraph"
         >
           <canvas
-            className="timelineStackGraphCanvas"
+            className="threadActivityGraphCanvas threadActivityGraphCanvas"
             onMouseUp={[Function]}
           />
         </div>
@@ -116,10 +116,10 @@ process: \\"tab\\" (222)"
               />
             </div>
             <div
-              className="timelineStackGraph"
+              className="threadActivityGraph"
             >
               <canvas
-                className="timelineStackGraphCanvas"
+                className="threadActivityGraphCanvas threadActivityGraphCanvas"
                 onMouseUp={[Function]}
               />
             </div>
@@ -172,10 +172,10 @@ process: \\"tab\\" (222)"
               />
             </div>
             <div
-              className="timelineStackGraph"
+              className="threadActivityGraph"
             >
               <canvas
-                className="timelineStackGraphCanvas"
+                className="threadActivityGraphCanvas threadActivityGraphCanvas"
                 onMouseUp={[Function]}
               />
             </div>

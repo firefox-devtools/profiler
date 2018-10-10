@@ -10,6 +10,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { mount } from 'enzyme';
 
+import { changeTimelineType } from '../../actions/profile-view';
 import TrackThread from '../../components/timeline/TrackThread';
 import {
   selectedThreadSelectors,
@@ -40,6 +41,11 @@ const STACK_2_X_POSITION = 150;
 const STACK_3_X_POSITION = 250;
 const STACK_4_X_POSITION = 350;
 
+/**
+ * This test is asserting behavior more for the ThreadStackGraph component. The
+ * ThreadActivityGraph component was added as a new default. Currently this test
+ * only checks the older behavior.
+ */
 describe('timeline/TrackThread', function() {
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
@@ -79,6 +85,11 @@ describe('timeline/TrackThread', function() {
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
+    // Note: These tests were first written with the timeline using the ThreadStackGraph.
+    // This is not the default view, so dispatch an action to change to the older default
+    // view.
+    store.dispatch(changeTimelineType('stack'));
+
     const view = mount(
       <Provider store={store}>
         <TrackThread threadIndex={threadIndex} />
@@ -89,7 +100,7 @@ describe('timeline/TrackThread', function() {
     flushRafCalls();
     view.update();
 
-    const stackGraphCanvas = view.find('.timelineStackGraphCanvas').first();
+    const stackGraphCanvas = view.find('.threadStackGraphCanvas').first();
     const tracingMarkersCanvas = view
       .find(
         [
