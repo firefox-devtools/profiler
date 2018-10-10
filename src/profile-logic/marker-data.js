@@ -329,8 +329,25 @@ export function filterForMarkerChart(markers: TracingMarker[]) {
   return markers.filter(marker => !isNetworkMarker(marker));
 }
 
-export function mergeStartAndEndNetworkMarker(markers: TracingMarker[]) {
-  return markers.filter(marker => isNetworkMarker(marker));
+export function mergeStartAndEndNetworkMarker(
+  markers: TracingMarker[]
+): TracingMarker[] {
+  const filteredMarkers: TracingMarker[] = [];
+  markers.sort((a, b) => a.name < b.name);
+
+  for (let i = 0; i < markers.length; i++) {
+    const marker = markers[i];
+    const markerNext = markers[i + 1];
+
+    if (markerNext !== undefined && marker.name === markerNext.name) {
+      continue;
+    }
+    // add marker.data.startTime to marker stop
+    filteredMarkers.push(marker);
+  }
+  filteredMarkers.sort((a, b) => a.start > b.start);
+
+  return filteredMarkers;
 }
 
 export function extractScreenshotsById(
