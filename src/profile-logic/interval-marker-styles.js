@@ -87,6 +87,24 @@ export const styles = {
     borderRight: colors.RED_50,
     squareCorners: true,
   },
+  GCSlice: {
+    background: colors.ORANGE_50,
+  },
+  GCMinor: {
+    background: colors.ORANGE_50,
+  },
+  ForgetSkippable: {
+    background: colors.ORANGE_50,
+  },
+  IdleForgetSkippable: {
+    background: colors.ORANGE_50,
+  },
+  CCSlice: {
+    background: colors.ORANGE_50,
+  },
+  IdleCCSlice: {
+    background: colors.ORANGE_50,
+  },
 };
 
 for (const name in styles) {
