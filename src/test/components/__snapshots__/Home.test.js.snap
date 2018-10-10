@@ -14,15 +14,19 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
       className="homeTitle"
     >
       <span
-        className="homeTitleText"
+        className="homeTitleSlogan"
       >
-        perf.html
-      </span>
-      <span
-        className="homeTitleSubtext"
-      >
-         
-        — Web app for Firefox performance analysis
+        <span
+          className="homeTitleText"
+        >
+          perf.html
+        </span>
+        <span
+          className="homeTitleSubtext"
+        >
+           
+          — Web app for Firefox performance analysis
+        </span>
       </span>
       <a
         className="homeTitleGithubIcon"
@@ -134,15 +138,19 @@ exports[`app/Home renders the install screen for the extension 1`] = `
       className="homeTitle"
     >
       <span
-        className="homeTitleText"
+        className="homeTitleSlogan"
       >
-        perf.html
-      </span>
-      <span
-        className="homeTitleSubtext"
-      >
-         
-        — Web app for Firefox performance analysis
+        <span
+          className="homeTitleText"
+        >
+          perf.html
+        </span>
+        <span
+          className="homeTitleSubtext"
+        >
+           
+          — Web app for Firefox performance analysis
+        </span>
       </span>
       <a
         className="homeTitleGithubIcon"
@@ -259,15 +267,19 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
       className="homeTitle"
     >
       <span
-        className="homeTitleText"
+        className="homeTitleSlogan"
       >
-        perf.html
-      </span>
-      <span
-        className="homeTitleSubtext"
-      >
-         
-        — Web app for Firefox performance analysis
+        <span
+          className="homeTitleText"
+        >
+          perf.html
+        </span>
+        <span
+          className="homeTitleSubtext"
+        >
+           
+          — Web app for Firefox performance analysis
+        </span>
       </span>
       <a
         className="homeTitleGithubIcon"
@@ -417,15 +429,19 @@ exports[`app/Home renders the usage instructions for pages with the extension in
       className="homeTitle"
     >
       <span
-        className="homeTitleText"
+        className="homeTitleSlogan"
       >
-        perf.html
-      </span>
-      <span
-        className="homeTitleSubtext"
-      >
-         
-        — Web app for Firefox performance analysis
+        <span
+          className="homeTitleText"
+        >
+          perf.html
+        </span>
+        <span
+          className="homeTitleSubtext"
+        >
+           
+          — Web app for Firefox performance analysis
+        </span>
       </span>
       <a
         className="homeTitleGithubIcon"
