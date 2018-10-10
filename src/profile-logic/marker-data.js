@@ -329,7 +329,9 @@ export function filterForMarkerChart(markers: TracingMarker[]) {
   return markers.filter(marker => !isNetworkMarker(marker));
 }
 
-// TODO: add function to merge start and end markers
+export function mergeStartAndEndNetworkMarker(markers: TracingMarker[]) {
+  return markers.filter(marker => isNetworkMarker(marker));
+}
 
 export function extractScreenshotsById(
   markers: MarkersTable,
