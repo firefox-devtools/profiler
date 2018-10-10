@@ -12,8 +12,8 @@ describe('getTracingMarkers', function() {
   const thread = profile.threads[0];
   const tracingMarkers = getTracingMarkers(thread.markers, thread.stringTable);
 
-  it('creates 10 tracing markers given the test data', function() {
-    expect(tracingMarkers.length).toEqual(10);
+  it('creates 11 tracing markers given the test data', function() {
+    expect(tracingMarkers.length).toEqual(11);
   });
   it('creates a tracing marker even if there is no start or end time', function() {
     expect(tracingMarkers[1]).toMatchObject({
@@ -32,7 +32,7 @@ describe('getTracingMarkers', function() {
     });
   });
   it('should fold the two reflow markers into one tracing marker', function() {
-    expect(tracingMarkers.length).toEqual(10);
+    expect(tracingMarkers.length).toEqual(11);
     expect(tracingMarkers[2]).toMatchObject({
       start: 3,
       dur: 5,
@@ -100,6 +100,15 @@ describe('getTracingMarkers', function() {
       dur: 1,
       name: 'Reflow',
       title: null,
+    });
+  });
+  it('should handle arbitrary event tracing markers correctly', function() {
+    expect(tracingMarkers[10]).toMatchObject({
+      start: 21,
+      dur: 0,
+      name: 'ArbitraryName',
+      title: null,
+      data: { category: 'ArbitraryCategory', type: 'tracing' },
     });
   });
 });
