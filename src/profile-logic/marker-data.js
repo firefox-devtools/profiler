@@ -333,7 +333,13 @@ export function mergeStartAndEndNetworkMarker(
   markers: TracingMarker[]
 ): TracingMarker[] {
   const filteredMarkers: TracingMarker[] = [];
-  markers.sort((a, b) => a.name < b.name);
+
+  // Flow expects a number instead of a boolead
+  markers.sort((a, b) => {
+    if (a.name < b.name) return -1;
+    if (a.name > b.name) return 1;
+    return 0;
+  });
 
   for (let i = 0; i < markers.length; i++) {
     const marker = markers[i];
@@ -345,8 +351,7 @@ export function mergeStartAndEndNetworkMarker(
     // add marker.data.startTime to marker stop
     filteredMarkers.push(marker);
   }
-  filteredMarkers.sort((a, b) => a.start > b.start);
-
+  filteredMarkers.sort((a, b) => a.start - b.start);
   return filteredMarkers;
 }
 
