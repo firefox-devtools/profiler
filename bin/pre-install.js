@@ -79,7 +79,7 @@ function checkYarn(agents /*: AgentsVersion */) {
 
   if (agents.yarn) {
     const version = agents.yarn;
-    if (versionCompare(version, '1.0') < 0) {
+    if (versionCompare(version, '1.10') < 0) {
       displayYarnVersionExplanation();
       displayInstallationInformation();
       return false;
@@ -107,7 +107,7 @@ function parseExpectedNodeVersion() {
 }
 
 function displayYarnVersionExplanation() {
-  console.error(`This project supports only Yarn version 1.0 or newer.`);
+  console.error(`This project supports only Yarn version 1.10 or newer.`);
 }
 
 function displayInstallationInformation() {
