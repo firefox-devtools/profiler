@@ -265,7 +265,7 @@ function _extractUnsymbolicatedFunction(
       resourceIndex = resourceTable.length++;
       resourceTable.lib[resourceIndex] = libs.indexOf(lib);
       resourceTable.name[resourceIndex] = stringTable.indexForString(
-        lib.debugName
+        lib.name
       );
       resourceTable.host[resourceIndex] = undefined;
       resourceTable.type[resourceIndex] = resourceTypes.library;
