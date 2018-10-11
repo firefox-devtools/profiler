@@ -46,8 +46,9 @@ For more detailed information on getting started contributing. We have plenty of
 |[Code of Conduct](./CODE_OF_CONDUCT.md)| We want to create an open and inclusive community, we have a few guidelines to help us out. |
 |[Developer Documentation](./docs-developer)| Want to know how this whole thing works? Get started here. |
 |[Roadmap](./ROADMAP.md)| Get more information about why we are building this tool, and what we have planned. |
-|[Source Files](./src)| Dive into the inner workings of the code. Most folders have a `README.md` providing more information.
-|[Gecko Profiler Addon][Gecko Profiler]| perf.html can record profiles directly in the browser using an add-on, development takes place in another repo. |
+|[Source Files](./src)| Dive into the inner workings of the code. Most folders have a `README.md` providing more information. |
+|[Gecko Profiler Addon][Gecko Profiler]| perf.html can record profiles directly in the browser using an add-on, development takes place in another repo. | 
+|[Deploying](./docs-developer/deploying.md)| Want to know how deploying works? Get Started here. | 
 
 ### Discussion
 
