@@ -189,14 +189,21 @@
   transition: opacity 300ms ease-out, transform 300ms ease-out;
 }
 
-input[type="file"] {
-  width: .1px;
-  height: .1px;
+/* This code comes from https://tympanus.net/codrops/2015/09/15/styling-customizing-file-inputs-smart-way/ */
+
+.homeSectionUploadInput {
+  width: 0.1px;
+  height: 0.1px;
   opacity: 0;
   overflow: hidden;
   position: absolute;
   z-index: -1;
-  cursor: pointer;
+}
+
+label.homeSectionButton:focus-within {
+  outline: 1px dotted black;
+  /* This is a trick to display the default outline in webkit- and blink-based browsers */
+  outline: -webkit-focus-ring-color auto 5px;
 }
 
 @media (max-width: 1300px) {

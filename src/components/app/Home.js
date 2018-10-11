@@ -4,30 +4,30 @@
 
 // @flow
 
-import * as React from 'react';
-import explicitConnect from '../../utils/connect';
-import classNames from 'classnames';
-import AddonScreenshot from '../../../res/img/png/gecko-profiler-screenshot-2018-01-18.png';
-import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2017-09-08.jpg';
-import { retrieveProfileFromFile } from '../../actions/receive-profile';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import * as React from "react";
+import explicitConnect from "../../utils/connect";
+import classNames from "classnames";
+import AddonScreenshot from "../../../res/img/png/gecko-profiler-screenshot-2018-01-18.png";
+import PerfScreenshot from "../../../res/img/jpg/perf-screenshot-2017-09-08.jpg";
+import { retrieveProfileFromFile } from "../../actions/receive-profile";
+import { CSSTransition, TransitionGroup } from "react-transition-group";
 import type {
   ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+  ConnectedProps
+} from "../../utils/connect";
 
-require('./Home.css');
+require("./Home.css");
 
 const ADDON_URL =
-  'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
+  "https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi";
 const LEGACY_ADDON_URL =
-  'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
+  "https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi";
 
 type InstallButtonProps = {
   name: string,
   xpiUrl: string,
   children?: React.Node,
-  className?: string,
+  className?: string
 };
 
 class InstallButton extends React.PureComponent<InstallButtonProps> {
@@ -50,7 +50,7 @@ class InstallButton extends React.PureComponent<InstallButtonProps> {
 }
 
 type UploadButtonProps = {
-  retrieveProfileFromFile: typeof retrieveProfileFromFile,
+  retrieveProfileFromFile: typeof retrieveProfileFromFile
 };
 
 class UploadButton extends React.PureComponent<UploadButtonProps> {
@@ -70,7 +70,12 @@ class UploadButton extends React.PureComponent<UploadButtonProps> {
     return (
       <div>
         <label className="homeSectionButton">
-          <input type="file" ref={this._takeInputRef} onChange={this._upload} />
+          <input
+            className="homeSectionUploadInput"
+            type="file"
+            ref={this._takeInputRef}
+            onChange={this._upload}
+          />
           Select a profile to open
         </label>
       </div>
@@ -110,18 +115,18 @@ window.geckoProfilerAddonInstalled = function() {
 };
 
 type OwnHomeProps = {|
-  +specialMessage?: string,
+  +specialMessage?: string
 |};
 
 type DispatchHomeProps = {|
-  +retrieveProfileFromFile: typeof retrieveProfileFromFile,
+  +retrieveProfileFromFile: typeof retrieveProfileFromFile
 |};
 
 type HomeProps = ConnectedProps<OwnHomeProps, {||}, DispatchHomeProps>;
 
 type HomeState = {
   isDragging: boolean,
-  isAddonInstalled: boolean,
+  isAddonInstalled: boolean
 };
 
 class Home extends React.PureComponent<HomeProps, HomeState> {
@@ -129,7 +134,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
   _isFirefox: boolean = _isFirefox();
   state = {
     isDragging: false,
-    isAddonInstalled: Boolean(window.isGeckoProfilerAddonInstalled),
+    isAddonInstalled: Boolean(window.isGeckoProfilerAddonInstalled)
   };
 
   addonInstalled() {
@@ -139,17 +144,17 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
   componentDidMount() {
     // Prevent dropping files on the document.
     // Help Flow infer the correct type signature for document.addEventListener.
-    document.addEventListener(('drag': string), _preventDefault, false);
-    document.addEventListener(('dragover': string), _preventDefault, false);
-    document.addEventListener(('drop': string), _preventDefault, false);
+    document.addEventListener(("drag": string), _preventDefault, false);
+    document.addEventListener(("dragover": string), _preventDefault, false);
+    document.addEventListener(("drop": string), _preventDefault, false);
     // Let the Gecko Profiler Add-on let the home-page know when it's been installed.
     homeInstance = this;
   }
 
   componentWillUnmount() {
-    document.removeEventListener(('drag': string), _preventDefault, false);
-    document.removeEventListener(('dragover': string), _preventDefault, false);
-    document.removeEventListener(('drop': string), _preventDefault, false);
+    document.removeEventListener(("drag": string), _preventDefault, false);
+    document.removeEventListener(("dragover": string), _preventDefault, false);
+    document.removeEventListener(("drop": string), _preventDefault, false);
   }
 
   _startDragging = (event: Event) => {
@@ -193,7 +198,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
       <InstructionTransition key={0}>
         <div className="homeInstructions">
           <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: "center" }}>
               <img className="homeSectionScreenshot" src={PerfScreenshot} />
             </div>
           </div>
@@ -256,7 +261,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
       <InstructionTransition key={2}>
         <div className="homeInstructions">
           <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: "center" }}>
               <img className="homeSectionScreenshot" src={PerfScreenshot} />
             </div>
           </div>
@@ -264,12 +269,12 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             <DocsButton />
             <p>
               To start recording a performance profile in Firefox, first install
-              the{' '}
+              the{" "}
               <InstallButton name="Gecko Profiler" xpiUrl={LEGACY_ADDON_URL}>
                 Gecko Profiler Add-on
               </InstallButton>. Then use the button added to the browser, or use
               the following shortcuts to record a profile. The button’s icon is
-              blue when a profile is recording. Hit <kbd>Capture Profile</kbd>{' '}
+              blue when a profile is recording. Hit <kbd>Capture Profile</kbd>{" "}
               to load the data into perf.html.
             </p>
             {this._renderShortcuts()}
@@ -289,7 +294,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
       <InstructionTransition key={0}>
         <div className="homeInstructions" key={0}>
           <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: "center" }}>
               <img className="homeSectionScreenshot" src={PerfScreenshot} />
             </div>
           </div>
@@ -297,7 +302,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             <DocsButton />
             <h2>How to view and record profiles</h2>
             <p>
-              Recording performance profiles requires{' '}
+              Recording performance profiles requires{" "}
               <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>.
               However, existing profiles can be viewed in any modern browser. To
               view a profile, either follow a link to a public profile, drag a
@@ -342,7 +347,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           <h1 className="homeTitle">
             <span className="homeTitleText">perf.html</span>
             <span className="homeTitleSubtext">
-              {' '}
+              {" "}
               &mdash; Web app for Firefox performance analysis
             </span>
             <a
@@ -375,7 +380,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             {this._renderInstructions()}
           </TransitionGroup>
           <div
-            className={classNames('homeDrop', isDragging ? 'dragging' : false)}
+            className={classNames("homeDrop", isDragging ? "dragging" : false)}
           >
             <div className="homeDropMessage">Drop a saved profile here</div>
           </div>
@@ -401,6 +406,6 @@ function _isFirefox(): boolean {
 
 const options: ExplicitConnectOptions<OwnHomeProps, {||}, DispatchHomeProps> = {
   mapDispatchToProps: { retrieveProfileFromFile },
-  component: Home,
+  component: Home
 };
 export default explicitConnect(options);
