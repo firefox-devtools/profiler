@@ -519,6 +519,11 @@ export function getNetworkMarker(startTime: number, id: number) {
     status: 'STOP',
     startTime,
     endTime: startTime + 1,
+    URI: 'https://mozilla.org',
+    RedirectURI: 'https://mozilla.org',
+    dur: 0.2345,
+    name: 'load 123: https://mozilla.org',
+    title: '',
   };
   return ['Network', startTime, payload];
 }

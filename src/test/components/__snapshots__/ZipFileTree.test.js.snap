@@ -163,6 +163,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   />
                   <span
                     className="treeRowToggleButton expanded canBeExpanded"
+                    onClick={[Function]}
                   />
                   <span
                     className="treeViewRowColumn treeViewMainColumn name"
@@ -190,6 +191,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   />
                   <span
                     className="treeRowToggleButton expanded canBeExpanded"
+                    onClick={[Function]}
                   />
                   <span
                     className="treeViewRowColumn treeViewMainColumn name"
@@ -217,6 +219,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   />
                   <span
                     className="treeRowToggleButton collapsed leaf"
+                    onClick={[Function]}
                   />
                   <span
                     className="treeViewRowColumn treeViewMainColumn name"
@@ -249,6 +252,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   />
                   <span
                     className="treeRowToggleButton collapsed leaf"
+                    onClick={[Function]}
                   />
                   <span
                     className="treeViewRowColumn treeViewMainColumn name"
@@ -281,6 +285,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   />
                   <span
                     className="treeRowToggleButton expanded canBeExpanded"
+                    onClick={[Function]}
                   />
                   <span
                     className="treeViewRowColumn treeViewMainColumn name"
@@ -308,6 +313,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   />
                   <span
                     className="treeRowToggleButton collapsed leaf"
+                    onClick={[Function]}
                   />
                   <span
                     className="treeViewRowColumn treeViewMainColumn name"

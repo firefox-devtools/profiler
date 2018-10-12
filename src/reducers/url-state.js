@@ -21,6 +21,7 @@ import type {
   Action,
   DataSource,
   ImplementationFilter,
+  TimelineType,
 } from '../types/actions';
 import type { State, UrlState, Reducer } from '../types/reducers';
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -132,6 +133,18 @@ function transforms(state: TransformStacksPerThread = {}, action: Action) {
         [threadIndex]: transforms.slice(0, firstPoppedFilterIndex),
       });
     }
+    default:
+      return state;
+  }
+}
+
+function timelineType(
+  state: TimelineType = 'category',
+  action: Action
+): TimelineType {
+  switch (action.type) {
+    case 'CHANGE_TIMELINE_TYPE':
+      return action.timelineType;
     default:
       return state;
   }
@@ -277,6 +290,7 @@ const profileSpecific = combineReducers({
   callTreeSearchString,
   markersSearchString,
   transforms,
+  timelineType,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading
@@ -390,6 +404,9 @@ export const getTransformStack = (
     EMPTY_TRANSFORM_STACK
   );
 };
+
+export const getTimelineType = (state: State): TimelineType =>
+  getProfileSpecificState(state).timelineType;
 
 export const getLegacyThreadOrder = (state: State) =>
   getProfileSpecificState(state).legacyThreadOrder;

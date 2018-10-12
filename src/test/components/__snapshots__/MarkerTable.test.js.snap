@@ -206,6 +206,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 />
                 <span
                   className="treeRowToggleButton collapsed leaf"
+                  onClick={[Function]}
                 />
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"
@@ -233,6 +234,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 />
                 <span
                   className="treeRowToggleButton collapsed leaf"
+                  onClick={[Function]}
                 />
                 <span
                   className="treeViewRowColumn treeViewMainColumn name"

@@ -2,7 +2,7 @@
 
 exports[`timeline/TrackContextMenu selected global track matches the snapshot of a global track 1`] = `
 <nav
-  className="react-contextmenu"
+  className="react-contextmenu timeline-context-menu"
   onContextMenu={[Function]}
   onMouseLeave={[Function]}
   role="menu"
@@ -115,7 +115,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
 
 exports[`timeline/TrackContextMenu selected local track matches the snapshot of a local track 1`] = `
 <nav
-  className="react-contextmenu"
+  className="react-contextmenu timeline-context-menu"
   onContextMenu={[Function]}
   onMouseLeave={[Function]}
   role="menu"
