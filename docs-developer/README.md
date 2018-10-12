@@ -24,4 +24,4 @@ This project is a client for reading profiles from the Gecko Profiler and potent
  * [Potential performance data sources in Gecko](./data-sources.md)
  * [Call tree](./call-tree.md)
  * [Frames, funcs, stacks and CallNodes in C++](./call-nodes-in-cpp.md)
- * [Deploy](./deploying.md)
+ * [Deploying perf.html](./deploying.md)

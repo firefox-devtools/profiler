@@ -47,7 +47,7 @@ For more detailed information on getting started contributing. We have plenty of
 |[Developer Documentation](./docs-developer)| Want to know how this whole thing works? Get started here. |
 |[Roadmap](./ROADMAP.md)| Get more information about why we are building this tool, and what we have planned. |
 |[Source Files](./src)| Dive into the inner workings of the code. Most folders have a `README.md` providing more information. |
-|[Gecko Profiler Addon][Gecko Profiler]| perf.html can record profiles directly in the browser using an add-on, development takes place in another repo. | 
+|[Gecko Profiler Addon][Gecko Profiler]| perf.html can record profiles directly in the browser using an add-on, development takes place in another repo. |
 
 ### Discussion
 
