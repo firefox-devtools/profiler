@@ -114,6 +114,7 @@ exports[`renders FlameGraph correctly 1`] = `
         <div>
           <canvas
             className="chartCanvas flameGraphCanvas"
+            drawingGeneration={0}
             onDoubleClick={[Function]}
             onMouseDown={[Function]}
             onMouseMove={[Function]}

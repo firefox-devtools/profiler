@@ -21,6 +21,7 @@ import {
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
+import { getPanelLayoutGeneration } from '../../reducers/app';
 
 import type {
   TracingMarker,
@@ -52,6 +53,7 @@ type StateProps = {|
   +interval: Milliseconds,
   +threadIndex: number,
   +previewSelection: PreviewSelection,
+  +drawingGeneration: number,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -74,6 +76,7 @@ class MarkerChart extends React.PureComponent<Props> {
       markers,
       previewSelection,
       updatePreviewSelection,
+      drawingGeneration,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -107,6 +110,7 @@ class MarkerChart extends React.PureComponent<Props> {
               threadIndex,
               marginLeft: TIMELINE_MARGIN_LEFT,
               marginRight: TIMELINE_MARGIN_RIGHT,
+              drawingGeneration,
             }}
           />
         )}
@@ -136,6 +140,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
       previewSelection: getPreviewSelection(state),
+      drawingGeneration: getPanelLayoutGeneration(state),
     };
   },
   mapDispatchToProps: { updatePreviewSelection },

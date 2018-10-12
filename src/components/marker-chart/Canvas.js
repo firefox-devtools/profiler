@@ -47,6 +47,7 @@ type OwnProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +marginLeft: CssPixels,
   +marginRight: CssPixels,
+  +drawingGeneration: number,
 |};
 
 type Props = {|
@@ -388,6 +389,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
         getHoveredItemInfo={this.getHoveredMarkerInfo}
         drawCanvas={this.drawCanvas}
         hitTest={this.hitTest}
+        drawingGeneration={this.props.drawingGeneration}
       />
     );
   }

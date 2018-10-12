@@ -84,6 +84,7 @@ exports[`renders NetworkChart correctly 1`] = `
     <div>
       <canvas
         className="chartCanvas networkChartCanvas"
+        drawingGeneration={0}
         onDoubleClick={[Function]}
         onMouseDown={[Function]}
         onMouseMove={[Function]}

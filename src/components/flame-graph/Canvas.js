@@ -41,6 +41,7 @@ export type OwnProps = {|
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
   +disableTooltips: boolean,
   +scrollToSelectionGeneration: number,
+  +drawingGeneration: number,
 |};
 
 type Props = {|
@@ -508,6 +509,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
         onSelectItem={this._onSelectItem}
+        drawingGeneration={this.props.drawingGeneration}
       />
     );
   }

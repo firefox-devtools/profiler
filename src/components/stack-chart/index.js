@@ -28,6 +28,8 @@ import {
   changeSelectedCallNode,
 } from '../../actions/profile-view';
 
+import { getPanelLayoutGeneration } from '../../reducers/app';
+
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import type { Thread } from '../../types/profile';
 import type {
@@ -64,6 +66,7 @@ type StateProps = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
+  +drawingGeneration: number,
 |};
 
 type DispatchProps = {|
@@ -106,6 +109,7 @@ class StackChartGraph extends React.PureComponent<Props> {
       callNodeInfo,
       selectedCallNodeIndex,
       scrollToSelectionGeneration,
+      drawingGeneration,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -138,6 +142,7 @@ class StackChartGraph extends React.PureComponent<Props> {
               selectedCallNodeIndex,
               onSelectionChange: this._onSelectedCallNodeChange,
               scrollToSelectionGeneration,
+              drawingGeneration,
             }}
           />
         </div>
@@ -167,6 +172,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
         state
       ),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
+      drawingGeneration: getPanelLayoutGeneration(state),
     };
   },
   mapDispatchToProps: {

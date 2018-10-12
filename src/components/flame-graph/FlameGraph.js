@@ -19,6 +19,7 @@ import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import { changeSelectedCallNode } from '../../actions/profile-view';
 import { getIconsWithClassNames } from '../../reducers/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
+import { getPanelLayoutGeneration } from '../../reducers/app';
 
 import type { Thread } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
@@ -53,6 +54,7 @@ type StateProps = {|
   +isCallNodeContextMenuVisible: boolean,
   +scrollToSelectionGeneration: number,
   +icons: IconWithClassName[],
+  +drawingGeneration: number,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -84,6 +86,7 @@ class FlameGraph extends React.PureComponent<Props> {
       isCallNodeContextMenuVisible,
       scrollToSelectionGeneration,
       icons,
+      drawingGeneration,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -129,6 +132,7 @@ class FlameGraph extends React.PureComponent<Props> {
               stackFrameHeight: STACK_FRAME_HEIGHT,
               onSelectionChange: this._onSelectedCallNodeChange,
               disableTooltips: isCallNodeContextMenuVisible,
+              drawingGeneration,
             }}
           />
         </ContextMenuTrigger>
@@ -165,6 +169,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
         .isCallNodeContextMenuVisible,
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       icons: getIconsWithClassNames(state),
+      drawingGeneration: getPanelLayoutGeneration(state),
     };
   },
   mapDispatchToProps: {

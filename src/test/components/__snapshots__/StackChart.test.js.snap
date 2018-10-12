@@ -104,6 +104,7 @@ exports[`StackChart matches the snapshot 1`] = `
       <div>
         <canvas
           className="chartCanvas stackChartCanvas"
+          drawingGeneration={0}
           onDoubleClick={[Function]}
           onMouseDown={[Function]}
           onMouseMove={[Function]}

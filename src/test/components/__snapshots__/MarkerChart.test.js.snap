@@ -349,6 +349,7 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
     <div>
       <canvas
         className="chartCanvas markerChartCanvas"
+        drawingGeneration={0}
         onDoubleClick={[Function]}
         onMouseDown={[Function]}
         onMouseMove={[Function]}

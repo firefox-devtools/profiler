@@ -51,6 +51,7 @@ type OwnProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
   +scrollToSelectionGeneration: number,
+  +drawingGeneration: number,
 |};
 
 type Props = $ReadOnly<{|
@@ -414,6 +415,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
         onSelectItem={this._onSelectItem}
+        drawingGeneration={this.props.drawingGeneration}
       />
     );
   }

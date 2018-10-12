@@ -43,6 +43,7 @@ type OwnProps = {|
   +markers: TracingMarker[],
   +threadIndex: ThreadIndex,
   +updatePreviewSelection: typeof updatePreviewSelection,
+  +drawingGeneration: number,
 |};
 
 type Props = {|
@@ -365,6 +366,7 @@ class NetworkChartCanvas extends React.PureComponent<Props, State> {
         getHoveredItemInfo={this.getHoveredMarkerInfo}
         drawCanvas={this.drawCanvas}
         hitTest={this.hitTest}
+        drawingGeneration={this.props.drawingGeneration}
       />
     );
   }

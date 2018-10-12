@@ -20,6 +20,7 @@ type Props<HoveredItem> = {
   drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
   isDragging: boolean,
   hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
+  drawingGeneration: number,
 };
 
 // The naming of the X and Y coordinates here correspond to the ones
@@ -245,6 +246,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
           onMouseMove={this._onMouseMove}
           onMouseOut={this._onMouseOut}
           onDoubleClick={this._onDoubleClick}
+          drawingGeneration={this.props.drawingGeneration}
         />
         {!isDragging && tooltipContents ? (
           <Tooltip mouseX={pageX} mouseY={pageY}>
