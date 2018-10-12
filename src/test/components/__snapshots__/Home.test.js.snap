@@ -100,13 +100,14 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
           </p>
           <div>
             <label
-              className="homeSectionUploadFiles"
+              className="homeSectionButton"
             >
               <input
+                className="homeSectionUploadInput"
                 onChange={[Function]}
                 type="file"
               />
-              Select profile
+              Select a profile to open
             </label>
           </div>
         </div>
@@ -230,13 +231,14 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           </p>
           <div>
             <label
-              className="homeSectionUploadFiles"
+              className="homeSectionButton"
             >
               <input
+                className="homeSectionUploadInput"
                 onChange={[Function]}
                 type="file"
               />
-              Select profile
+              Select a profile to open
             </label>
           </div>
         </div>
@@ -393,13 +395,14 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
           </p>
           <div>
             <label
-              className="homeSectionUploadFiles"
+              className="homeSectionButton"
             >
               <input
+                className="homeSectionUploadInput"
                 onChange={[Function]}
                 type="file"
               />
-              Select profile
+              Select a profile to open
             </label>
           </div>
         </div>
@@ -541,13 +544,14 @@ exports[`app/Home renders the usage instructions for pages with the extension in
           </p>
           <div>
             <label
-              className="homeSectionUploadFiles"
+              className="homeSectionButton"
             >
               <input
+                className="homeSectionUploadInput"
                 onChange={[Function]}
                 type="file"
               />
-              Select profile
+              Select a profile to open
             </label>
           </div>
         </div>
