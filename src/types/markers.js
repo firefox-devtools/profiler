@@ -350,7 +350,6 @@ type StyleMarkerPayload_Shared = {
 
 type VsyncTimestampPayload = {|
   type: 'VsyncTimestamp',
-  vsync: 0,
 |};
 
 export type ScreenshotPayload = {|
