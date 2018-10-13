@@ -158,8 +158,8 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
   render() {
     const { view, dataSource, hasZipFile } = this.props;
     const phase = view.phase;
-    if(dataSource === 'none') {
-      return <Home />
+    if (dataSource === 'none') {
+      return <Home />;
     }
     switch (phase) {
       case 'INITIALIZING': {
