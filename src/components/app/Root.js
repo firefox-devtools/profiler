@@ -188,6 +188,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
         const message =
           ERROR_MESSAGES[dataSource] || "Couldn't retrieve the profile.";
         let additionalMessage = null;
+
         if (view.error) {
           console.error(view.error);
           additionalMessage =
@@ -195,6 +196,9 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
             'The full stack has been written to the Web Console.';
         }
 
+        if (dataSource === 'none') {
+          return <Home />;
+        }
         return this.renderMessage(message, additionalMessage, false);
       }
       case 'DATA_LOADED':

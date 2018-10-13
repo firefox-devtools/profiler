@@ -110,14 +110,28 @@
 
 .filterNavigatorBarTransition-enter {
   opacity: 0.1;
-  transform: translateX(-100%);
   z-index:0;
 }
 
 .filterNavigatorBarTransition-enter.filterNavigatorBarTransition-enter-active {
   opacity: 1;
-  transform: translateX(0);
-  transition: opacity 300ms ease-out, transform 300ms ease-out;
+  animation: scale-pump 300ms ease-in-out 50ms 1 forwards;
+  color: var(--internal-selected-color);
+  transition: opacity 400ms ease-out, transform 400ms ease-out;
+}
+
+@keyframes scale-pump {
+  0% {
+    transform: scale(1);
+  }
+
+  80% {
+    transform: scale(1.12);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .filterNavigatorBarTransition-exit {
