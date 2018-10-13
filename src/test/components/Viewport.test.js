@@ -496,15 +496,20 @@ describe('Viewport', function() {
       viewportBottom: BOUNDING_BOX_HEIGHT,
     });
 
-    setBoundingBoxMock({ width: BOUNDING_BOX_WIDTH - 15 });
-    dispatch(changeSidebarOpenState('calltree', true));
+    const boundingWidthDiff = 15;
+    setBoundingBoxMock({ width: BOUNDING_BOX_WIDTH - boundingWidthDiff });
+    dispatch(changeSidebarOpenState('flamegraph', true));
     flushRafCalls();
     view.update();
 
-    const { containerWidth, containerHeight } = getChartViewport();
-
-    expect(containerWidth).toBe(initialContainerWidth - 15);
-    expect(containerHeight).toBe(initialContainerHeight);
+    expect(getChartViewport()).toMatchObject({
+      containerWidth: initialContainerWidth - boundingWidthDiff,
+      containerHeight: initialContainerHeight,
+      viewportLeft: 0,
+      viewportRight: 1,
+      viewportTop: 0,
+      viewportBottom: BOUNDING_BOX_HEIGHT,
+    });
   });
 });
 
