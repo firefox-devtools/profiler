@@ -487,8 +487,14 @@ describe('Viewport', function() {
       containerHeight: initialContainerHeight,
     } = getChartViewport();
 
-    // add something here :-)
-    expect(true).toBe(false);
+    expect(getChartViewport()).toMatchObject({
+      containerWidth: initialContainerWidth,
+      containerHeight: initialContainerHeight,
+      viewportLeft: 0,
+      viewportRight: 1,
+      viewportTop: 0,
+      viewportBottom: BOUNDING_BOX_HEIGHT,
+    });
 
     setBoundingBoxMock({ width: BOUNDING_BOX_WIDTH - 15 });
     dispatch(changeSidebarOpenState('calltree', true));
@@ -497,8 +503,8 @@ describe('Viewport', function() {
 
     const { containerWidth, containerHeight } = getChartViewport();
 
-    // add something here :-)
-    expect(true).toBe(false);
+    expect(containerWidth).toBe(initialContainerWidth - 15);
+    expect(containerHeight).toBe(initialContainerHeight);
   });
 });
 
