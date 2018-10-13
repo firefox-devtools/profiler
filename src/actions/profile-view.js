@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { oneLine } from 'common-tags';
 import { getLastVisibleThreadTabSlug } from '../reducers/app';
 import {
   selectorsForThread,
@@ -22,7 +23,12 @@ import {
   getHiddenLocalTracks,
   getSelectedTab,
 } from '../reducers/url-state';
-import { getCallNodePathFromIndex } from '../profile-logic/profile-data';
+import {
+  getCallNodePathFromIndex,
+  getSampleCallNodes,
+  getSampleCategories,
+  findBestAncestorCallNode,
+} from '../profile-logic/profile-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import { sendAnalytics } from '../utils/analytics';
 
@@ -30,10 +36,16 @@ import type {
   PreviewSelection,
   ImplementationFilter,
   TrackReference,
+  TimelineType,
 } from '../types/actions';
 import type { State } from '../types/reducers';
 import type { Action, ThunkAction } from '../types/store';
-import type { ThreadIndex, IndexIntoMarkersTable, Pid } from '../types/profile';
+import type {
+  ThreadIndex,
+  IndexIntoMarkersTable,
+  Pid,
+  IndexIntoSamplesTable,
+} from '../types/profile';
 import type {
   CallNodePath,
   CallNodeInfo,
@@ -43,21 +55,139 @@ import type {
 import type { Transform } from '../types/transforms';
 
 /**
- * The actions that pertain to changing the view on the profile, including searching
- * and filtering. Currently the call tree's actions are in this file, but should be
- * split apart. These actions should most likely affect every panel.
+ * This file contains actions that pertain to changing the view on the profile, including
+ * searching and filtering. Currently the call tree's actions are in this file, but
+ * should be split apart. These actions should most likely affect every panel.
+ */
+
+/**
+ * Select a call node for a given thread. An optional call node path can be provided
+ * to expand child nodes beyond the selected call node path.
+ *
+ * Note that optionalExpandedToCallNodePath, if specified, must be a descendant call node
+ * of selectedCallNodePath.
  */
 export function changeSelectedCallNode(
   threadIndex: ThreadIndex,
-  selectedCallNodePath: CallNodePath
+  selectedCallNodePath: CallNodePath,
+  optionalExpandedToCallNodePath?: CallNodePath
 ): Action {
+  if (optionalExpandedToCallNodePath) {
+    for (let i = 0; i < selectedCallNodePath.length; i++) {
+      if (selectedCallNodePath[i] !== optionalExpandedToCallNodePath[i]) {
+        // This assertion ensures that the selectedCallNode will be correctly expanded.
+        throw new Error(
+          oneLine`
+            The optional expanded call node path provided to the changeSelectedCallNode
+            must contain the selected call node path.
+          `
+        );
+      }
+    }
+  }
   return {
     type: 'CHANGE_SELECTED_CALL_NODE',
     selectedCallNodePath,
+    optionalExpandedToCallNodePath,
     threadIndex,
   };
 }
 
+/**
+ * Given a threadIndex and a sampleIndex, select the call node at the top ("leaf")
+ * of that sample's stack.
+ */
+export function selectLeafCallNode(
+  threadIndex: ThreadIndex,
+  sampleIndex: IndexIntoSamplesTable
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const threadSelectors = selectorsForThread(threadIndex);
+    const filteredThread = threadSelectors.getFilteredThread(getState());
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+
+    const newSelectedStack = filteredThread.samples.stack[sampleIndex];
+    const newSelectedCallNode =
+      newSelectedStack === null
+        ? -1
+        : callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
+    dispatch(
+      changeSelectedCallNode(
+        threadIndex,
+        getCallNodePathFromIndex(
+          newSelectedCallNode,
+          callNodeInfo.callNodeTable
+        )
+      )
+    );
+  };
+}
+
+/**
+ * This function provides a different strategy for selecting call nodes. It selects
+ * a "best" ancestor call node, but also expands out its children nodes to the
+ * actual call node that was clicked. See findBestAncestorCallNode for more
+ * on the "best" call node.
+ */
+export function selectBestAncestorCallNodeAndExpandCallTree(
+  threadIndex: ThreadIndex,
+  sampleIndex: IndexIntoSamplesTable
+): ThunkAction<boolean> {
+  return (dispatch, getState) => {
+    const threadSelectors = selectorsForThread(threadIndex);
+    const fullThread = threadSelectors.getRangeFilteredThread(getState());
+    const filteredThread = threadSelectors.getFilteredThread(getState());
+    const unfilteredStack = fullThread.samples.stack[sampleIndex];
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+
+    if (unfilteredStack === null) {
+      return false;
+    }
+
+    const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
+    const sampleCallNodes = getSampleCallNodes(
+      filteredThread.samples,
+      stackIndexToCallNodeIndex
+    );
+    const clickedCallNode = sampleCallNodes[sampleIndex];
+    const clickedCategory = fullThread.stackTable.category[unfilteredStack];
+
+    if (clickedCallNode === null) {
+      return false;
+    }
+
+    const sampleCategories = getSampleCategories(
+      fullThread.samples,
+      fullThread.stackTable
+    );
+    const bestAncestorCallNode = findBestAncestorCallNode(
+      callNodeInfo,
+      sampleCallNodes,
+      sampleCategories,
+      clickedCallNode,
+      clickedCategory
+    );
+
+    // In one dispatch, change the selected call node to the best ancestor call node, but
+    // also expand out to the clicked call node.
+    dispatch(
+      changeSelectedCallNode(
+        threadIndex,
+        // Select the best ancestor call node.
+        getCallNodePathFromIndex(bestAncestorCallNode, callNodeTable),
+        // Also expand the children nodes out further below it to what was actually
+        // clicked.
+        getCallNodePathFromIndex(clickedCallNode, callNodeTable)
+      )
+    );
+    return true;
+  };
+}
+
+/**
+ * This selects a thread from its thread index.
+ * Please use it in tests only.
+ */
 export function changeSelectedThread(selectedThreadIndex: ThreadIndex): Action {
   return {
     type: 'CHANGE_SELECTED_THREAD',
@@ -65,6 +195,12 @@ export function changeSelectedThread(selectedThreadIndex: ThreadIndex): Action {
   };
 }
 
+/**
+ * This selects a track from its reference.
+ * This will ultimately select the thread that this track belongs to, using its
+ * thread index, and may also change the selected tab if it makes sense for this
+ * track.
+ */
 export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
   return (dispatch, getState) => {
     const currentlySelectedTab = getSelectedTab(getState());
@@ -150,6 +286,10 @@ export function focusCallTree(): Action {
   };
 }
 
+/**
+ * This action is used when the user right clicks a track, and is especially
+ * used to display its context menu.
+ */
 export function changeRightClickedTrack(
   trackReference: TrackReference
 ): Action {
@@ -166,6 +306,9 @@ export function setCallNodeContextMenuVisibility(isVisible: boolean): Action {
   };
 }
 
+/**
+ * This action is used to change the displayed order of the global tracks.
+ */
 export function changeGlobalTrackOrder(globalTrackOrder: TrackIndex[]): Action {
   sendAnalytics({
     hitType: 'event',
@@ -178,6 +321,12 @@ export function changeGlobalTrackOrder(globalTrackOrder: TrackIndex[]): Action {
   };
 }
 
+/**
+ * This action is used to hide a global track.
+ * During this process we select a different thread if the hidden track is the
+ * currently selected thread. We also prevent from hiding the last displayed
+ * thread.
+ */
 export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   return (dispatch, getState) => {
     const hiddenGlobalTracks = getHiddenGlobalTracks(getState());
@@ -189,7 +338,8 @@ export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
     const globalTrackToHide = getGlobalTracks(getState())[trackIndex];
     let selectedThreadIndex = getSelectedThreadIndex(getState());
 
-    // Re-select the selectedThreadIndex if it is hidden with this operation.
+    // Find another selectedThreadIndex if the current selected thread is hidden
+    // with this operation.
     if (globalTrackToHide.type === 'process') {
       // This is a process global track, this operation could potentially hide
       // the selectedThreadIndex.
@@ -236,6 +386,9 @@ export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   };
 }
 
+/**
+ * This action shows a specific global track.
+ */
 export function showGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   return dispatch => {
     sendAnalytics({
@@ -357,6 +510,9 @@ export function isolateProcessMainThread(
   };
 }
 
+/**
+ * This action changes the track order among local tracks only.
+ */
 export function changeLocalTrackOrder(
   pid: Pid,
   localTrackOrder: TrackIndex[]
@@ -429,6 +585,13 @@ function _findOtherVisibleThread(
   return null;
 }
 
+/**
+ * This action hides a local track.
+ * This handles the case where the user hides the last local track in a thread:
+ * in that case we hide the global track for this thread. In the case where this
+ * is the selected thread we also take care to select another thread.  We also
+ * prevent from hiding the last thread.
+ */
 export function hideLocalTrack(
   pid: Pid,
   trackIndexToHide: TrackIndex
@@ -530,6 +693,9 @@ export function hideLocalTrack(
   };
 }
 
+/**
+ * This action simply displays a local track from its track index and its Pid.
+ */
 export function showLocalTrack(
   pid: Pid,
   trackIndex: TrackIndex
@@ -549,6 +715,9 @@ export function showLocalTrack(
   };
 }
 
+/**
+ * This action isolates a local track. This means we will hide all other tracks.
+ */
 export function isolateLocalTrack(
   pid: Pid,
   isolatedTrackIndex: TrackIndex
@@ -789,5 +958,12 @@ export function popTransformsFromStack(
       threadIndex,
       firstPoppedFilterIndex,
     });
+  };
+}
+
+export function changeTimelineType(timelineType: TimelineType): Action {
+  return {
+    type: 'CHANGE_TIMELINE_TYPE',
+    timelineType,
   };
 }

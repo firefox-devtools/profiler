@@ -7,7 +7,6 @@ import React, { PureComponent } from 'react';
 
 import EmptyReasons from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
-import { getSelectedTab } from '../../reducers/url-state';
 
 import explicitConnect, {
   type ExplicitConnectOptions,
@@ -15,49 +14,26 @@ import explicitConnect, {
 } from '../../utils/connect';
 
 import type { State } from '../../types/store';
-import type { TabSlug } from '../../app-logic/tabs-handling';
 
 type StateProps = {|
   +threadName: string,
-  +selectedTab: TabSlug,
   +isMarkerChartEmptyInFullRange: boolean,
-  +isNetworkChartEmptyInFullRange: boolean,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 class MarkerChartEmptyReasons extends PureComponent<Props> {
   render() {
-    const {
-      selectedTab,
-      isNetworkChartEmptyInFullRange,
-      isMarkerChartEmptyInFullRange,
-      threadName,
-    } = this.props;
-
-    let reason, viewName;
-    if (selectedTab === 'network-chart') {
-      viewName = 'network chart';
-      if (isNetworkChartEmptyInFullRange) {
-        reason = 'This thread has no network information.';
-      } else {
-        reason =
-          'All network requests were filtered out by the current selection or search term.';
-      }
-    } else {
-      viewName = 'marker chart';
-      if (isMarkerChartEmptyInFullRange) {
-        reason = 'This thread contains no markers for this chart.';
-      } else {
-        reason =
-          'All markers were filtered out by the current selection or search term.';
-      }
-    }
+    const { isMarkerChartEmptyInFullRange, threadName } = this.props;
 
     return (
       <EmptyReasons
         threadName={threadName}
-        reason={reason}
-        viewName={viewName}
+        reason={
+          isMarkerChartEmptyInFullRange
+            ? 'This thread contains no markers for this chart.'
+            : 'All markers were filtered out by the current selection or search term.'
+        }
+        viewName="marker chart"
       />
     );
   }
@@ -69,10 +45,6 @@ const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
     isMarkerChartEmptyInFullRange: selectedThreadSelectors.getIsMarkerChartEmptyInFullRange(
       state
     ),
-    isNetworkChartEmptyInFullRange: selectedThreadSelectors.getIsNetworkChartEmptyInFullRange(
-      state
-    ),
-    selectedTab: getSelectedTab(state),
   }),
   component: MarkerChartEmptyReasons,
 };

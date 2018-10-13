@@ -197,7 +197,7 @@ function _createGeckoThread(): GeckoThread {
           },
         ],
         // This marker is filtered out
-        [4, 2, { type: undefined, category: 'VsyncTimestamp', vsync: 0 }],
+        [4, 2, { type: 'VsyncTimestamp', vsync: 0 }],
         [
           5, // Reflow
           3,
@@ -380,6 +380,14 @@ function _createGeckoThread(): GeckoThread {
             type: 'tracing',
           },
         ],
+        [
+          12, // ArbitraryName
+          21,
+          {
+            category: 'ArbitraryCategory',
+            type: 'tracing',
+          },
+        ],
       ],
     },
     stringTable: [
@@ -395,6 +403,7 @@ function _createGeckoThread(): GeckoThread {
       'MinorGC',
       'Rasterize',
       'UserTiming',
+      'ArbitraryName',
     ],
   };
 }

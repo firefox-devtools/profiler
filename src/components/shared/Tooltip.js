@@ -5,10 +5,9 @@
 // @flow
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import PropTypes from 'prop-types';
 import type { CssPixels } from '../../types/units';
 
+import { ensureExists } from '../../utils/flow';
 require('./Tooltip.css');
 
 const MOUSE_OFFSET = 21;
@@ -26,17 +25,16 @@ type State = {
 
 export default class Tooltip extends React.PureComponent<Props, State> {
   _isMounted: boolean = false;
-  _mountElement: ?HTMLElement;
 
   state = {
     interiorElement: null,
     isNewContentLaidOut: false,
   };
 
-  // This allows to get the store so that we can pass it along to the tooltip
-  // children with a react-redux Provider. We can safely remove it once we use
-  // React 16's portals.
-  static contextTypes = { store: PropTypes.object.isRequired };
+  _overlayElement = ensureExists(
+    document.querySelector('#root-overlay'),
+    'Expected to find a root overlay element.'
+  );
 
   _takeInteriorElementRef = (el: HTMLElement | null) => {
     this.setState({ interiorElement: el });
@@ -44,25 +42,9 @@ export default class Tooltip extends React.PureComponent<Props, State> {
 
   componentDidMount() {
     this._isMounted = true;
-    // Create a DOM node outside of the normal heirarchy.
-    const el = document.createElement('div');
-    el.className = 'tooltipMount';
-
-    // Satisfy flow null checks.
-    if (!document.body) {
-      throw new Error('No document body was found to append to.');
-    }
-    document.body.appendChild(el);
-    this._mountElement = el;
-    this._renderTooltipContents();
   }
 
   componentWillUnmount() {
-    ReactDOM.unmountComponentAtNode(this._mountElement);
-    // Satisfy flow null checks.
-    if (this._mountElement) {
-      this._mountElement.remove();
-    }
     this._isMounted = false;
   }
 
@@ -82,8 +64,6 @@ export default class Tooltip extends React.PureComponent<Props, State> {
     if (interiorElement && !isNewContentLaidOut) {
       this._forceUpdateAfterRAF();
     }
-
-    this._renderTooltipContents();
   }
 
   /**
@@ -98,11 +78,7 @@ export default class Tooltip extends React.PureComponent<Props, State> {
     });
   }
 
-  /**
-   * This is really ugly, but the tooltip needs to be outside of the normal
-   * DOM heirarchy so it isn't clipped by some arbitrary stacking context.
-   */
-  _renderTooltipContents() {
+  render() {
     const { children, mouseX, mouseY } = this.props;
     const { interiorElement } = this.state;
 
@@ -127,26 +103,11 @@ export default class Tooltip extends React.PureComponent<Props, State> {
       top: mouseY - offsetY,
     };
 
-    const mountElement = this._mountElement;
-    if (!mountElement) {
-      throw new Error('There should have been a mount element.');
-    }
-
-    ReactDOM.render(
-      <Provider store={this.context.store}>
-        <div
-          className="tooltip"
-          style={style}
-          ref={this._takeInteriorElementRef}
-        >
-          {children}
-        </div>
-      </Provider>,
-      mountElement
+    return ReactDOM.createPortal(
+      <div className="tooltip" style={style} ref={this._takeInteriorElementRef}>
+        {children}
+      </div>,
+      this._overlayElement
     );
-  }
-
-  render() {
-    return null;
   }
 }

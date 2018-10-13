@@ -11,6 +11,7 @@ import type {
   ImplementationFilter,
   RequestedLib,
   TrackReference,
+  TimelineType,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { Milliseconds, StartEndRange } from './units';
@@ -127,6 +128,7 @@ export type AppState = {|
 
 export type ZippedProfilesState = {
   zipFile: ZipFileState,
+  error: Error | null,
   selectedZipFileIndex: IndexIntoZipFileTable | null,
   // In practice this should never contain null, but needs to support the
   // TreeView interface.
@@ -151,6 +153,7 @@ export type UrlState = {|
     callTreeSearchString: string,
     markersSearchString: string,
     transforms: TransformStacksPerThread,
+    timelineType: TimelineType,
     legacyThreadOrder: ThreadIndex[] | null,
     legacyHiddenThreads: ThreadIndex[] | null,
   |},

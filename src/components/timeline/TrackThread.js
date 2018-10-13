@@ -6,32 +6,39 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
-import StackGraph from './StackGraph';
+import ThreadStackGraph from '../shared/thread/StackGraph';
+import ThreadActivityGraph from '../shared/thread/ActivityGraph';
 import {
   selectorsForThread,
   getProfileInterval,
   getCommittedRange,
+  getCategories,
 } from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
 import {
-  getSampleIndexClosestToTime,
-  getCallNodePathFromIndex,
-} from '../../profile-logic/profile-data';
+  getSelectedThreadIndex,
+  getTimelineType,
+} from '../../reducers/url-state';
 import {
   TimelineTracingMarkersJank,
   TimelineTracingMarkersOverview,
 } from './TracingMarkers';
 import {
-  changeSelectedThread,
   updatePreviewSelection,
   changeRightClickedTrack,
   changeSelectedCallNode,
   focusCallTree,
+  selectLeafCallNode,
 } from '../../actions/profile-view';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 import './TrackThread.css';
 
-import type { Thread, ThreadIndex } from '../../types/profile';
+import type { TimelineType } from '../../types/actions';
+import type {
+  Thread,
+  ThreadIndex,
+  CategoryList,
+  IndexIntoSamplesTable,
+} from '../../types/profile';
 import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
   CallNodeInfo,
@@ -48,48 +55,36 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +thread: Thread,
+  +fullThread: Thread,
+  +filteredThread: Thread,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +unfilteredSamplesRange: StartEndRange | null,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
+  +categories: CategoryList,
+  +timelineType: TimelineType,
 |};
 
 type DispatchProps = {|
-  +changeSelectedThread: typeof changeSelectedThread,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
+  +selectLeafCallNode: typeof selectLeafCallNode,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class TimelineTrackThread extends PureComponent<Props> {
-  _onStackClick = (time: number) => {
-    const { threadIndex, interval } = this.props;
-    const {
-      thread,
-      callNodeInfo,
-      changeSelectedCallNode,
-      focusCallTree,
-    } = this.props;
-    const sampleIndex = getSampleIndexClosestToTime(
-      thread.samples,
-      time,
-      interval
-    );
-    const newSelectedStack = thread.samples.stack[sampleIndex];
-    const newSelectedCallNode =
-      newSelectedStack === null
-        ? -1
-        : callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
-    changeSelectedCallNode(
-      threadIndex,
-      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
-    );
+  /**
+   * Handle when a sample is clicked in the ThreadStackGraph. This will select
+   * the leaf-most stack frame or call node.
+   */
+  _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
+    const { threadIndex, selectLeafCallNode, focusCallTree } = this.props;
+    selectLeafCallNode(threadIndex, sampleIndex);
     focusCallTree();
   };
 
@@ -98,24 +93,19 @@ class TimelineTrackThread extends PureComponent<Props> {
     start: Milliseconds,
     end: Milliseconds
   ) => {
-    const {
-      rangeStart,
-      rangeEnd,
-      updatePreviewSelection,
-      changeSelectedThread,
-    } = this.props;
+    const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart: Math.max(rangeStart, start),
       selectionEnd: Math.min(rangeEnd, end),
     });
-    changeSelectedThread(threadIndex);
   };
 
   render() {
     const {
-      thread,
+      filteredThread,
+      fullThread,
       threadIndex,
       interval,
       rangeStart,
@@ -123,14 +113,16 @@ class TimelineTrackThread extends PureComponent<Props> {
       callNodeInfo,
       selectedCallNodeIndex,
       unfilteredSamplesRange,
+      categories,
+      timelineType,
     } = this.props;
 
-    const processType = thread.processType;
+    const processType = filteredThread.processType;
     const displayJank = processType !== 'plugin';
     const displayTracingMarkers =
-      (thread.name === 'GeckoMain' ||
-        thread.name === 'Compositor' ||
-        thread.name === 'Renderer') &&
+      (filteredThread.name === 'GeckoMain' ||
+        filteredThread.name === 'Compositor' ||
+        filteredThread.name === 'Renderer') &&
       processType !== 'plugin';
 
     return (
@@ -152,7 +144,9 @@ class TimelineTrackThread extends PureComponent<Props> {
             // JavaScript and props instead.
             className={`
               timelineTrackThreadIntervalMarkerOverview
-              timelineTrackThreadIntervalMarkerOverviewThread${thread.name}
+              timelineTrackThreadIntervalMarkerOverviewThread${
+                filteredThread.name
+              }
             `}
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
@@ -160,17 +154,31 @@ class TimelineTrackThread extends PureComponent<Props> {
             onSelect={this._onIntervalMarkerSelect}
           />
         ) : null}
-        <StackGraph
-          interval={interval}
-          thread={thread}
-          rangeStart={rangeStart}
-          rangeEnd={rangeEnd}
-          callNodeInfo={callNodeInfo}
-          selectedCallNodeIndex={selectedCallNodeIndex}
-          onStackClick={this._onStackClick}
-        />
+        {timelineType === 'category' ? (
+          <ThreadActivityGraph
+            className="threadActivityGraph"
+            interval={interval}
+            fullThread={fullThread}
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            onSampleClick={this._onSampleClick}
+            categories={categories}
+          />
+        ) : (
+          <ThreadStackGraph
+            className="threadStackGraph"
+            interval={interval}
+            thread={filteredThread}
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            callNodeInfo={callNodeInfo}
+            selectedCallNodeIndex={selectedCallNodeIndex}
+            categories={categories}
+            onSampleClick={this._onSampleClick}
+          />
+        )}
         <EmptyThreadIndicator
-          thread={thread}
+          thread={filteredThread}
           interval={interval}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
@@ -188,7 +196,8 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     const selectedThread = getSelectedThreadIndex(state);
     const committedRange = getCommittedRange(state);
     return {
-      thread: selectors.getFilteredThread(state),
+      filteredThread: selectors.getFilteredThread(state),
+      fullThread: selectors.getRangeFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
       selectedCallNodeIndex:
         threadIndex === selectedThread
@@ -198,14 +207,16 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       interval: getProfileInterval(state),
       rangeStart: committedRange.start,
       rangeEnd: committedRange.end,
+      categories: getCategories(state),
+      timelineType: getTimelineType(state),
     };
   },
   mapDispatchToProps: {
-    changeSelectedThread,
     updatePreviewSelection,
     changeRightClickedTrack,
     changeSelectedCallNode,
     focusCallTree,
+    selectLeafCallNode,
   },
   component: TimelineTrackThread,
 };

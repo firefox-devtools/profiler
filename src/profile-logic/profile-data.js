@@ -150,6 +150,10 @@ export function getCallNodeInfo(
   });
 }
 
+/**
+ * Take a samples table, and return an array that contain indexes that point to the
+ * leaf most call node, or null.
+ */
 export function getSampleCallNodes(
   samples: SamplesTable,
   stackIndexToCallNodeIndex: {
@@ -159,6 +163,117 @@ export function getSampleCallNodes(
   return samples.stack.map(stack => {
     return stack === null ? null : stackIndexToCallNodeIndex[stack];
   });
+}
+
+export type SelectedState =
+  // Samples can be filtered through various operations, like searching, or
+  // call tree transforms.
+  | 'FILTERED_OUT'
+  // This sample is selected because either the tip or an ancestor call node matches
+  // the currently selected call node.
+  | 'SELECTED'
+  // This call node is not selected, and the stacks are ordered before the selected
+  // call node as sorted by the getTreeOrderComparator.
+  | 'UNSELECTED_ORDERED_BEFORE_SELECTED'
+  // This call node is not selected, and the stacks are ordered after the selected
+  // call node as sorted by the getTreeOrderComparator.
+  | 'UNSELECTED_ORDERED_AFTER_SELECTED';
+
+/**
+ * Go through the samples, and determine their current state.
+ *
+ * For samples that are neither 'FILTERED_OUT' nor 'SELECTED', this function compares
+ * the sample's call node to the selected call node, in tree order. It uses the same
+ * ordering as the function compareCallNodes in getTreeOrderComparator. But it does not
+ * call compareCallNodes with the selected node for each sample's call node, because doing
+ * so would recompute information about the selected call node on every call. Instead, it
+ * has an equivalent implementation that is faster because it only computes information
+ * about the selected call node's ancestors once.
+ */
+export function getSamplesSelectedStates(
+  callNodeTable: CallNodeTable,
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  selectedCallNodeIndex: IndexIntoCallNodeTable | null
+): SelectedState[] {
+  const result = new Array(sampleCallNodes.length);
+
+  const selectedCallNodeDepth =
+    selectedCallNodeIndex === -1 || selectedCallNodeIndex === null
+      ? 0
+      : callNodeTable.depth[selectedCallNodeIndex];
+
+  // Find all of the call nodes from the current depth to the root.
+  const selectedCallNodeAtDepth: IndexIntoCallNodeTable[] = new Array(
+    selectedCallNodeDepth
+  );
+  for (
+    let callNodeIndex = selectedCallNodeIndex, depth = selectedCallNodeDepth;
+    depth >= 0 && callNodeIndex !== null;
+    depth--, callNodeIndex = callNodeTable.prefix[callNodeIndex]
+  ) {
+    selectedCallNodeAtDepth[depth] = callNodeIndex;
+  }
+
+  /**
+   * Take a call node, and compute its selected state.
+   */
+  function getSelectedStateFromCallNode(
+    callNode: IndexIntoCallNodeTable | null
+  ): SelectedState {
+    let callNodeIndex = callNode;
+    if (callNodeIndex === null) {
+      return 'FILTERED_OUT';
+    }
+
+    // Walk the call nodes toward the root, and get the call node at the the depth
+    // of the selected call node.
+    let depth = callNodeTable.depth[callNodeIndex];
+    while (depth > selectedCallNodeDepth) {
+      callNodeIndex = callNodeTable.prefix[callNodeIndex];
+      depth--;
+    }
+
+    if (callNodeIndex === selectedCallNodeIndex) {
+      // This sample's call node at the depth matches the selected call node.
+      return 'SELECTED';
+    }
+
+    const prevCallNodeIndex = callNodeIndex;
+    while (true) {
+      // Walk the call nodes towards the root.
+      callNodeIndex = callNodeTable.prefix[callNodeIndex];
+      depth--;
+      if (
+        callNodeIndex === -1 ||
+        callNodeIndex === selectedCallNodeAtDepth[depth]
+      ) {
+        // This stack is not currently selected, determine if it's before or after
+        // the selected call node in order to provide a stable ordering when rendering
+        // visualizations.
+        return prevCallNodeIndex <= selectedCallNodeAtDepth[depth + 1]
+          ? 'UNSELECTED_ORDERED_BEFORE_SELECTED'
+          : 'UNSELECTED_ORDERED_AFTER_SELECTED';
+      }
+    }
+
+    // This code is unreachable, but Flow doesn't know that and thinks this
+    // function could return undefined. So throw an error.
+    /* eslint-disable no-unreachable */
+    throw new Error('unreachable');
+    /* eslint-enable no-unreachable */
+  }
+
+  // Go through each sample, and label its state.
+  for (
+    let sampleIndex = 0;
+    sampleIndex < sampleCallNodes.length;
+    sampleIndex++
+  ) {
+    result[sampleIndex] = getSelectedStateFromCallNode(
+      sampleCallNodes[sampleIndex]
+    );
+  }
+  return result;
 }
 
 /**
@@ -1328,4 +1443,200 @@ export function getOriginAnnotationForFunc(
   }
 
   return '';
+}
+
+/**
+ * Return a function that can compare two samples' call nodes, and determine a sort order.
+ *
+ * The order is determined as follows:
+ *  - Ancestor call nodes are ordered before their descendants.
+ *  - Sibling call nodes are ordered by their call node index.
+ * This order can be different than the order of the rows that are displayed in the
+ * call tree, because it does not take any sample information into account. This
+ * makes it independent of any range selection and cheaper to compute.
+ */
+export function getTreeOrderComparator(
+  callNodeTable: CallNodeTable,
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>
+): (IndexIntoSamplesTable, IndexIntoSamplesTable) => number {
+  /**
+   * Determine the ordering of two non-null call nodes.
+   */
+  function compareCallNodes(
+    callNodeA: IndexIntoCallNodeTable,
+    callNodeB: IndexIntoCallNodeTable
+  ): number {
+    const initialDepthA = callNodeTable.depth[callNodeA];
+    const initialDepthB = callNodeTable.depth[callNodeB];
+    let depthA = initialDepthA;
+    let depthB = initialDepthB;
+
+    // Walk call tree towards the roots until the call nodes are at the same depth.
+    while (depthA > depthB) {
+      callNodeA = callNodeTable.prefix[callNodeA];
+      depthA--;
+    }
+    while (depthB > depthA) {
+      callNodeB = callNodeTable.prefix[callNodeB];
+      depthB--;
+    }
+
+    // Sort the call nodes by the initial depth.
+    if (callNodeA === callNodeB) {
+      return initialDepthA - initialDepthB;
+    }
+
+    // The call nodes are at the same depth, walk towards the roots until a match is
+    // is found, then sort them based on stack order.
+    while (true) {
+      const parentNodeA = callNodeTable.prefix[callNodeA];
+      const parentNodeB = callNodeTable.prefix[callNodeB];
+      if (parentNodeA === parentNodeB) {
+        break;
+      }
+      callNodeA = parentNodeA;
+      callNodeB = parentNodeB;
+    }
+
+    return callNodeA - callNodeB;
+  }
+
+  /**
+   * Determine the ordering of (possibly null) call nodes for two given samples.
+   */
+  return function treeOrderComparator(
+    sampleA: IndexIntoSamplesTable,
+    sampleB: IndexIntoSamplesTable
+  ): number {
+    const callNodeA = sampleCallNodes[sampleA];
+    const callNodeB = sampleCallNodes[sampleB];
+    if (callNodeA === null) {
+      if (callNodeB === null) {
+        return 0;
+      }
+      return -1;
+    }
+    if (callNodeB === null) {
+      return 1;
+    }
+    return compareCallNodes(callNodeA, callNodeB);
+  };
+}
+
+/**
+ * This is the root-most call node for which, if selected, only the clicked category
+ * is highlighted in the thread activity graph. In other words, it's the root-most call
+ * node which only 'contains' samples whose sample category is the clicked category.
+ */
+export function findBestAncestorCallNode(
+  callNodeInfo: CallNodeInfo,
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  sampleCategories: Array<IndexIntoCategoryList | null>,
+  clickedCallNode: IndexIntoCallNodeTable,
+  clickedCategory: IndexIntoCategoryList
+): IndexIntoCallNodeTable {
+  const { callNodeTable } = callNodeInfo;
+  if (callNodeTable.category[clickedCallNode] !== clickedCategory) {
+    return clickedCallNode;
+  }
+
+  // Compute the callNodesOnSameCategoryPath.
+  // Given a call node path with some arbitrary categories, e.g. A, B, C
+  //
+  //     Categories: A -> A -> B -> B -> C -> C -> C
+  //   Node Indexes: 0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 6
+
+  // This loop will select the leaf-most call nodes that match the leaf call-node's
+  // category. Running the above path through this loop would produce the list:
+  //
+  //     Categories: [C, C, C]
+  //   Node Indexes: [6, 5, 4]  (note the reverse order)
+  const callNodesOnSameCategoryPath = [clickedCallNode];
+  let callNode = clickedCallNode;
+  while (true) {
+    const parentCallNode = callNodeTable.prefix[callNode];
+    if (parentCallNode === -1) {
+      // The entire call path is just clickedCategory.
+      return clickedCallNode; // TODO: is this a useful behavior?
+    }
+    if (callNodeTable.category[parentCallNode] !== clickedCategory) {
+      break;
+    }
+    callNodesOnSameCategoryPath.push(parentCallNode);
+    callNode = parentCallNode;
+  }
+
+  // Now find the callNode in callNodesOnSameCategoryPath with the lowest depth
+  // such that selecting it will not highlight any samples whose unfiltered
+  // category is different from clickedCategory. If no such callNode exists,
+  // return clickedCallNode.
+
+  const clickedDepth = callNodeTable.depth[clickedCallNode];
+  // The handledCallNodes is used as a Map<CallNodeIndex, bool>.
+  const handledCallNodes = new Uint8Array(callNodeTable.length);
+
+  function limitSameCategoryPathToCommonAncestor(callNode) {
+    // The callNode argument is the leaf call node of a sample whose sample category is a
+    // different category than clickedCategory. If callNode's ancestor path crosses
+    // callNodesOnSameCategoryPath, that implies that callNode would be highlighted
+    // if we were to select the root-most node in callNodesOnSameCategoryPath.
+    // If that is the case, we need to truncate callNodesOnSameCategoryPath in such
+    // a way that the root-most node in that list is no longer an ancestor of callNode.
+    const walkUpToDepth =
+      clickedDepth - (callNodesOnSameCategoryPath.length - 1);
+    let depth = callNodeTable.depth[callNode];
+
+    // Go from leaf to root in the call nodes.
+    while (depth >= walkUpToDepth) {
+      if (handledCallNodes[callNode]) {
+        // This call node was already handled. Stop checking.
+        return;
+      }
+      handledCallNodes[callNode] = 1;
+      if (depth <= clickedDepth) {
+        // This call node's depth is less than the clicked depth, it needs to be
+        // checked to see if the call node is in the callNodesOnSameCategoryPath.
+        if (callNode === callNodesOnSameCategoryPath[clickedDepth - depth]) {
+          // Remove some of the call nodes, as they are not on the same path.
+          // This is done by shortening the array length. Keep in mind that this
+          // array is in the opposite order of a CallNodePath, with the leaf-most
+          // nodes first, and the root-most last.
+          callNodesOnSameCategoryPath.length = clickedDepth - depth;
+          return;
+        }
+      }
+      callNode = callNodeTable.prefix[callNode];
+      depth--;
+    }
+  }
+
+  // Go through every sample and look at each sample's call node.
+  for (let sample = 0; sample < sampleCallNodes.length; sample++) {
+    if (
+      sampleCategories[sample] !== clickedCategory &&
+      sampleCallNodes[sample] !== null
+    ) {
+      // This sample's category is a different one than the one clicked. Make
+      // sure to limit the callNodesOnSameCategoryPath to just the call nodes
+      // that share the same common ancestor.
+      limitSameCategoryPathToCommonAncestor(sampleCallNodes[sample]);
+    }
+  }
+
+  if (callNodesOnSameCategoryPath.length > 0) {
+    // The last call node in this list will be the root-most call node that has
+    // the same category on the path as the clicked call node.
+    return callNodesOnSameCategoryPath[callNodesOnSameCategoryPath.length - 1];
+  }
+  return clickedCallNode;
+}
+
+/**
+ * Look at the leaf-most stack for every sample, and take its category.
+ */
+export function getSampleCategories(
+  samples: SamplesTable,
+  stackTable: StackTable
+): Array<IndexIntoSamplesTable | null> {
+  return samples.stack.map(s => (s !== null ? stackTable.category[s] : null));
 }

@@ -2,7 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import { getScreenshotTrackProfile } from '../fixtures/profiles/make-profile';
+import {
+  getScreenshotTrackProfile,
+  getEmptyThread,
+  getNetworkTrackProfile,
+} from '../fixtures/profiles/make-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
@@ -304,6 +308,50 @@ describe('ordering and hiding', function() {
         '  - show [thread Empty] SELECTED',
       ]);
     });
+
+    describe('sorting of track types to ensure proper URL backwards compatibility', function() {
+      const stableIndexOrder = [
+        'process',
+        'process',
+        // Screenshots are last.
+        'screenshots',
+      ];
+      const userFacingSortOrder = [
+        // Screenshots are first.
+        'screenshots',
+        'process',
+        'process',
+      ];
+
+      function setup() {
+        const profile = getScreenshotTrackProfile();
+        profile.threads.push(getEmptyThread());
+        const [threadA, threadB] = profile.threads;
+        threadA.name = 'GeckoMain';
+        threadB.name = 'GeckoMain';
+        threadA.processType = 'tab';
+        threadB.processType = 'process';
+        threadA.pid = 1;
+        threadA.pid = 2;
+        const { getState } = storeWithProfile(profile);
+        return {
+          globalTracks: ProfileViewSelectors.getGlobalTracks(getState()),
+          globalTrackOrder: UrlStateSelectors.getGlobalTrackOrder(getState()),
+        };
+      }
+
+      it('creates stable track indexes over time', function() {
+        const { globalTracks } = setup();
+        expect(globalTracks.map(track => track.type)).toEqual(stableIndexOrder);
+      });
+
+      it('creates a separate user-facing ordering that is different from the internal sortiong', function() {
+        const { globalTracks, globalTrackOrder } = setup();
+        expect(
+          globalTrackOrder.map(trackIndex => globalTracks[trackIndex].type)
+        ).toEqual(userFacingSortOrder);
+      });
+    });
   });
 
   describe('local tracks', function() {
@@ -531,6 +579,45 @@ describe('ordering and hiding', function() {
         '  - show [thread DOM Worker] SELECTED',
         '  - hide [thread Style]',
       ]);
+    });
+
+    describe('sorting of track types to ensure proper URL backwards compatibility', function() {
+      const stableIndexOrder = [
+        'thread',
+        // Network is last.
+        'network',
+      ];
+      const userFacingSortOrder = [
+        // Network is first.
+        'network',
+        'thread',
+      ];
+
+      function setup() {
+        const profile = getNetworkTrackProfile();
+        const pid = 1;
+        profile.threads[0].pid = pid;
+        const { getState } = storeWithProfile(profile);
+        return {
+          localTracks: ProfileViewSelectors.getLocalTracks(getState(), pid),
+          localTrackOrder: UrlStateSelectors.getLocalTrackOrder(
+            getState(),
+            pid
+          ),
+        };
+      }
+
+      it('creates stable track indexes over time', function() {
+        const { localTracks } = setup();
+        expect(localTracks.map(track => track.type)).toEqual(stableIndexOrder);
+      });
+
+      it('creates a separate user-facing ordering that is different from the internal sortiong', function() {
+        const { localTracks, localTrackOrder } = setup();
+        expect(
+          localTrackOrder.map(trackIndex => localTracks[trackIndex].type)
+        ).toEqual(userFacingSortOrder);
+      });
     });
   });
 });

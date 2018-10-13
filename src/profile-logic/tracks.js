@@ -18,9 +18,69 @@ import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
  * It also selects the default view options for things like track hiding, ordering,
  * and selection.
  */
+
+/**
+ * In order for track indexes to be backwards compatible, the indexes need to be
+ * stable across time. Therefore the tracks must be consistently sorted. When new
+ * track types are added, they must be added to the END of the track list, so that
+ * URL-encoded information remains stable.
+ *
+ * However, this sorting may not be the one we want to display to the end user, so provide
+ * a secondary sorting order for how the tracks will actually be displayed.
+ */
+const LOCAL_TRACK_INDEX_ORDER = {
+  thread: 0,
+  network: 1,
+  memory: 2,
+};
+const LOCAL_TRACK_DISPLAY_ORDER = {
+  network: 0,
+  memory: 1,
+  thread: 2,
+};
+const GLOBAL_TRACK_INDEX_ORDER = {
+  process: 0,
+  screenshots: 1,
+};
+const GLOBAL_TRACK_DISPLAY_ORDER = {
+  screenshots: 0,
+  process: 1,
+};
+
+function _getDefaultLocalTrackOrder(tracks: LocalTrack[]) {
+  const trackOrder = tracks.map((_, index) => index);
+  // In place sort!
+  trackOrder.sort(
+    (a, b) =>
+      LOCAL_TRACK_DISPLAY_ORDER[tracks[a].type] -
+      LOCAL_TRACK_DISPLAY_ORDER[tracks[b].type]
+  );
+  return trackOrder;
+}
+
+function _getDefaultGlobalTrackOrder(tracks: GlobalTrack[]) {
+  const trackOrder = tracks.map((_, index) => index);
+  // In place sort!
+  trackOrder.sort(
+    (a, b) =>
+      GLOBAL_TRACK_DISPLAY_ORDER[tracks[a].type] -
+      GLOBAL_TRACK_DISPLAY_ORDER[tracks[b].type]
+  );
+  return trackOrder;
+}
+
+/**
+ * Determine the display order of the local tracks. This will be a different order than
+ * how the local tracks are stored, as the initial ordering must be stable when new
+ * track types are added.
+ */
 export function initializeLocalTrackOrderByPid(
+  // If viewing an existing profile, take the track ordering from the URL and sanitize it.
   urlTrackOrderByPid: Map<Pid, TrackIndex[]> | null,
+  // This is the list of the tracks.
   localTracksByPid: Map<Pid, LocalTrack[]>,
+  // If viewing an old profile URL, there were not tracks, only thread indexes. Turn
+  // the legacy ordering into track ordering.
   legacyThreadOrder: ThreadIndex[] | null
 ): Map<Pid, TrackIndex[]> {
   const trackOrderByPid = new Map();
@@ -29,16 +89,29 @@ export function initializeLocalTrackOrderByPid(
     // Go through each set of tracks, determine the sort order.
     for (const [pid, tracks] of localTracksByPid) {
       // Create the default trackOrder.
-      let trackOrder = tracks.map((_, index) => index);
+      let trackOrder = _getDefaultLocalTrackOrder(tracks);
 
       if (urlTrackOrderByPid !== null) {
         // Sanitize the track information provided by the URL, and ensure it is valid.
-        const urlTrackOrder = urlTrackOrderByPid.get(pid);
-        if (
-          urlTrackOrder !== undefined &&
-          _indexesAreValid(tracks.length, urlTrackOrder)
-        ) {
-          trackOrder = urlTrackOrder;
+        let urlTrackOrder = urlTrackOrderByPid.get(pid);
+        if (urlTrackOrder !== undefined) {
+          // A URL track order was found, sanitize it.
+
+          if (urlTrackOrder.length !== trackOrder.length) {
+            // The URL track order length doesn't match the tracks we've generated. Most
+            // likely this means that we have generated new tracks that the URL does not
+            // know about. Add indexes at the end for the new tracks. These new indexes
+            // will still be checked by the _indexesAreValid function below.
+            const newOrder = urlTrackOrder.slice();
+            for (let i = urlTrackOrder.length; i < trackOrder.length; i++) {
+              newOrder.push(i);
+            }
+            urlTrackOrder = newOrder;
+          }
+
+          if (_indexesAreValid(tracks.length, urlTrackOrder)) {
+            trackOrder = urlTrackOrder;
+          }
         }
       }
 
@@ -120,6 +193,9 @@ export function initializeHiddenLocalTracksByPid(
   return hiddenTracksByPid;
 }
 
+/**
+ * Take a profile and figure out all of the local tracks, and organize them by PID.
+ */
 export function computeLocalTracksByPid(
   profile: Profile
 ): Map<Pid, LocalTrack[]> {
@@ -150,9 +226,22 @@ export function computeLocalTracksByPid(
     }
   }
 
+  // When adding a new track type, this for loop ensures that the newer tracks are
+  // added at the end so that the local track indexes are stable and backwards compatible.
+  for (const localTracks of localTracksByPid.values()) {
+    // In place sort!
+    localTracks.sort(
+      (a, b) =>
+        LOCAL_TRACK_INDEX_ORDER[a.type] - LOCAL_TRACK_INDEX_ORDER[b.type]
+    );
+  }
+
   return localTracksByPid;
 }
 
+/**
+ * Take a profile and figure out what GlobalTracks it contains.
+ */
 export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
   // Defining this ProcessTrack type here helps flow understand the intent of
   // the internals of this function, otherwise each GlobalTrack usage would need
@@ -220,16 +309,34 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
         }
       }
       for (const id of ids) {
-        globalTracks.unshift({ type: 'screenshots', id, threadIndex });
+        globalTracks.push({ type: 'screenshots', id, threadIndex });
       }
     }
   }
+
+  // When adding a new track type, this sort ensures that the newer tracks are added
+  // at the end so that the global track indexes are stable and backwards compatible.
+  globalTracks.sort(
+    // In place sort!
+    (a, b) =>
+      GLOBAL_TRACK_INDEX_ORDER[a.type] - GLOBAL_TRACK_INDEX_ORDER[b.type]
+  );
+
   return globalTracks;
 }
 
+/**
+ * Determine the display order for the global tracks, which will be different the
+ * initial ordering of the tracks, as the initial ordering must remain stable as
+ * new tracks are added.
+ */
 export function initializeGlobalTrackOrder(
+  // This is the list of the tracks.
   globalTracks: GlobalTrack[],
+  // If viewing an existing profile, take the track ordering from the URL and sanitize it.
   urlGlobalTrackOrder: TrackIndex[] | null,
+  // If viewing an old profile URL, there were not tracks, only thread indexes. Turn
+  // the legacy ordering into track ordering.
   legacyThreadOrder: ThreadIndex[] | null
 ): TrackIndex[] {
   if (legacyThreadOrder !== null) {
@@ -258,17 +365,32 @@ export function initializeGlobalTrackOrder(
     return trackOrder;
   }
 
+  if (
+    urlGlobalTrackOrder !== null &&
+    urlGlobalTrackOrder.length !== globalTracks.length
+  ) {
+    // The URL track order length doesn't match the tracks we've generated. Most likely
+    // this means that we have generated new tracks that the URL does not know about.
+    // Add on indexes at the end for the new tracks. These new indexes will still be
+    // checked by the _indexesAreValid function below.s
+    const newOrder = urlGlobalTrackOrder.slice();
+    for (let i = urlGlobalTrackOrder.length; i < globalTracks.length; i++) {
+      newOrder.push(i);
+    }
+    urlGlobalTrackOrder = newOrder;
+  }
+
   return urlGlobalTrackOrder !== null &&
     _indexesAreValid(globalTracks.length, urlGlobalTrackOrder)
     ? urlGlobalTrackOrder
-    : globalTracks.map((_, index) => index);
+    : _getDefaultGlobalTrackOrder(globalTracks);
 }
 
 export function initializeSelectedThreadIndex(
   selectedThreadIndex: ThreadIndex | null,
   visibleThreadIndexes: ThreadIndex[],
   profile: Profile
-): ThreadIndex | null {
+): ThreadIndex {
   if (
     selectedThreadIndex !== null &&
     visibleThreadIndexes.includes(selectedThreadIndex)
@@ -283,9 +405,10 @@ export function initializeSelectedThreadIndex(
       visibleThreadIndexes.map(threadIndex => profile.threads[threadIndex])
     )
   );
-  // The threadIndex being null should only happen in tests where profiles
-  // have no threads.
-  return threadIndex === -1 ? null : threadIndex;
+  if (threadIndex === -1) {
+    throw new Error('Expected to find a thread index to select.');
+  }
+  return threadIndex;
 }
 
 export function initializeHiddenGlobalTracks(
@@ -340,12 +463,17 @@ export function getVisibleThreads(
   hiddenTracksByPid: Map<Pid, Set<TrackIndex>>
 ): ThreadIndex[] {
   const visibleThreads = [];
-  for (const globalTrack of globalTracks) {
+  for (
+    let globalTrackIndex = 0;
+    globalTrackIndex < globalTracks.length;
+    globalTrackIndex++
+  ) {
+    const globalTrack = globalTracks[globalTrackIndex];
     if (globalTrack.type === 'process') {
       const { mainThreadIndex, pid } = globalTrack;
       if (
         mainThreadIndex !== null &&
-        !hiddenGlobalTracks.has(mainThreadIndex)
+        !hiddenGlobalTracks.has(globalTrackIndex)
       ) {
         visibleThreads.push(mainThreadIndex);
       }
@@ -416,19 +544,16 @@ export function getLocalTrackName(
   }
 }
 
-// Any thread with less than 1% non-idle time will be hidden.
-const PERCENTAGE_ACTIVE_SAMPLES = 0.01;
-
 /**
  * Determine if a thread is idle, so that it can be hidden. It is really annoying for an
- * end user to load a profile full of empty and idle threads. This function goes through
- * all of the samples in the thread, and sees if some large percentage of them are idle.
+ * end user to load a profile full of empty and idle threads. This function uses
+ * various rules to determine if a thread is idle.
  */
 function _isThreadIdle(profile: Profile, thread: Thread): boolean {
   if (
     // Don't hide the compositor.
     thread.name === 'Compositor' ||
-    // Don't hide the main thread.
+    // Don't hide the main thread of the parent process.
     (thread.name === 'GeckoMain' && thread.processType === 'default') ||
     // Don't hide the GPU thread on Windows.
     (thread.name === 'GeckoMain' && thread.processType === 'gpu')
@@ -436,6 +561,52 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
     return false;
   }
 
+  if (_isContentThreadWithNoPaint(thread)) {
+    return true;
+  }
+
+  return _isThreadMostlyFullOfIdleSamples(profile, thread);
+}
+
+function _isContentThreadWithNoPaint(thread: Thread): boolean {
+  // Hide content threads with no RefreshDriverTick. This indicates they were
+  // not painted to, and most likely idle. This is just a heuristic to help users.
+  if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
+    let isPaintMarkerFound = false;
+    if (thread.stringTable.hasString('RefreshDriverTick')) {
+      const paintStringIndex = thread.stringTable.indexForString(
+        'RefreshDriverTick'
+      );
+
+      for (
+        let markerIndex = 0;
+        markerIndex < thread.markers.length;
+        markerIndex++
+      ) {
+        if (paintStringIndex === thread.markers.name[markerIndex]) {
+          isPaintMarkerFound = true;
+          break;
+        }
+      }
+    }
+    if (!isPaintMarkerFound) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// Any thread with less than 5% non-idle time will be hidden.
+const PERCENTAGE_ACTIVE_SAMPLES = 0.05;
+
+/**
+ * This function goes through all of the samples in the thread, and sees if some large
+ * percentage of them are idle. If the thread is mostly idle, then it should be hidden.
+ */
+function _isThreadMostlyFullOfIdleSamples(
+  profile: Profile,
+  thread: Thread
+): boolean {
   let maxActiveStackCount = PERCENTAGE_ACTIVE_SAMPLES * thread.samples.length;
   let activeStackCount = 0;
   let filteredStackCount = 0;

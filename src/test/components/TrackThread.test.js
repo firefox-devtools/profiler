@@ -10,22 +10,25 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { mount } from 'enzyme';
 
-import { changeSelectedThread } from '../../actions/profile-view';
+import { changeTimelineType } from '../../actions/profile-view';
 import TrackThread from '../../components/timeline/TrackThread';
 import {
   selectedThreadSelectors,
   getPreviewSelection,
 } from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  getMouseEvent,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+} from '../fixtures/utils';
 
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
-  getEmptyThread,
 } from '../fixtures/profiles/make-profile';
 
 // The graph is 400 pixels wide based on the getBoundingBox mock. Each stack is 100
@@ -38,7 +41,15 @@ const STACK_2_X_POSITION = 150;
 const STACK_3_X_POSITION = 250;
 const STACK_4_X_POSITION = 350;
 
+/**
+ * This test is asserting behavior more for the ThreadStackGraph component. The
+ * ThreadActivityGraph component was added as a new default. Currently this test
+ * only checks the older behavior.
+ */
 describe('timeline/TrackThread', function() {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
       a  d  g  j
@@ -74,6 +85,11 @@ describe('timeline/TrackThread', function() {
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
+    // Note: These tests were first written with the timeline using the ThreadStackGraph.
+    // This is not the default view, so dispatch an action to change to the older default
+    // view.
+    store.dispatch(changeTimelineType('stack'));
+
     const view = mount(
       <Provider store={store}>
         <TrackThread threadIndex={threadIndex} />
@@ -84,7 +100,7 @@ describe('timeline/TrackThread', function() {
     flushRafCalls();
     view.update();
 
-    const stackGraphCanvas = view.find('.timelineStackGraphCanvas').first();
+    const stackGraphCanvas = view.find('.threadStackGraphCanvas').first();
     const tracingMarkersCanvas = view
       .find(
         [
@@ -176,26 +192,5 @@ describe('timeline/TrackThread', function() {
       selectionStart: 1,
       selectionEnd: 2,
     });
-  });
-
-  it('changes the selected thread when clicking a marker', function() {
-    const profile = getMarkersProfile();
-    profile.threads.push(getEmptyThread());
-    const { getState, dispatch, tracingMarkersCanvas } = setup(profile);
-    const thisThread = 0;
-    const otherThread = 1;
-
-    dispatch(changeSelectedThread(otherThread));
-    expect(getSelectedThreadIndex(getState())).toBe(otherThread);
-
-    tracingMarkersCanvas.simulate(
-      'mousedown',
-      getMouseEvent({ pageX: STACK_1_X_POSITION })
-    );
-    tracingMarkersCanvas.simulate(
-      'mouseup',
-      getMouseEvent({ pageX: STACK_1_X_POSITION })
-    );
-    expect(getSelectedThreadIndex(getState())).toBe(thisThread);
   });
 });

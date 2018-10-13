@@ -20,6 +20,7 @@ import {
   getZipFileMaxDepth,
   getSelectedZipFileIndex,
   getExpandedZipFileIndexes,
+  getZipFileErrorMessage,
 } from '../../reducers/zipped-profiles';
 import { getPathInZipFileFromUrl } from '../../reducers/url-state';
 import TreeView from '../shared/TreeView';
@@ -49,6 +50,7 @@ type StateProps = {|
   // In practice this should never contain null, but needs to support the
   // TreeView interface.
   +expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
+  +zipFileErrorMessage: null | string,
 |};
 
 type DispatchProps = {|
@@ -248,6 +250,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
       changeSelectedZipFile,
       changeExpandedZipFile,
       pathInZipFile,
+      zipFileErrorMessage,
     } = this.props;
 
     if (!zipFileTree) {
@@ -294,10 +297,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
         );
       case 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE':
         return this._renderMessage([
-          <span key="message">
-            Are you sure this is a profile? Failed to process the file in the
-            zip file at the following path:
-          </span>,
+          <p key="message">Unable to load the profile at this path:</p>,
           <span className="zipFileViewerUntrustedFilePath" key="path">
             /{
               // This is text that comes from the URL, make sure it looks visually
@@ -306,6 +306,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
               pathInZipFile
             }
           </span>,
+          <p key="error">{zipFileErrorMessage}</p>,
           this._renderBackButton(),
         ]);
       case 'FILE_NOT_FOUND_IN_ZIP_FILE':
@@ -354,6 +355,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       zipFileMaxDepth: getZipFileMaxDepth(state),
       selectedZipFileIndex: getSelectedZipFileIndex(state),
       expandedZipFileIndexes: getExpandedZipFileIndexes(state),
+      zipFileErrorMessage: getZipFileErrorMessage(state),
     };
   },
   mapDispatchToProps: {

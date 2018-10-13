@@ -8,17 +8,22 @@ import { mount } from 'enzyme';
 import { Provider } from 'react-redux';
 
 import { changeMarkersSearchString } from '../../actions/profile-view';
+import {
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
 import MarkerChart from '../../components/marker-chart';
 import { changeSelectedTab } from '../../actions/app';
 
 import EmptyReasons from '../../components/shared/EmptyReasons';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
+import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 import {
-  getProfileWithMarkers,
-  getNetworkMarker,
-} from '../fixtures/profiles/make-profile';
-import { getBoundingBox } from '../fixtures/utils';
+  getBoundingBox,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+} from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
 const MARKERS = [
@@ -56,10 +61,6 @@ const MARKERS = [
   ],
 ];
 
-const NETWORK_MARKERS = Array(10)
-  .fill()
-  .map((_, i) => getNetworkMarker(3 + 0.1 * i, i));
-
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
   const ctx = mockCanvasContext();
@@ -71,7 +72,9 @@ function setupWithProfile(profile) {
   // a lot easier to mock this everywhere.
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(200, 300));
+    .mockImplementation(() =>
+      getBoundingBox(200 + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT, 300)
+    );
 
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('marker-chart'));
@@ -91,10 +94,13 @@ function setupWithProfile(profile) {
 }
 
 describe('MarkerChart', function() {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
   it('renders the normal marker chart and matches the snapshot', () => {
     window.devicePixelRatio = 1;
 
-    const profile = getProfileWithMarkers([...MARKERS, ...NETWORK_MARKERS]);
+    const profile = getProfileWithMarkers([...MARKERS]);
     const {
       flushRafCalls,
       dispatch,
@@ -109,27 +115,6 @@ describe('MarkerChart', function() {
     const drawCalls = flushDrawLog();
     expect(markerChart).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
-
-    delete window.devicePixelRatio;
-  });
-
-  it('renders the network marker chart and matches the snapshot', () => {
-    window.devicePixelRatio = 1;
-
-    const profile = getProfileWithMarkers([...MARKERS, ...NETWORK_MARKERS]);
-    const {
-      flushRafCalls,
-      dispatch,
-      markerChart,
-      flushDrawLog,
-    } = setupWithProfile(profile);
-
-    dispatch(changeSelectedTab('network-chart'));
-    markerChart.update();
-    flushRafCalls();
-
-    expect(markerChart).toMatchSnapshot();
-    expect(flushDrawLog()).toMatchSnapshot();
 
     delete window.devicePixelRatio;
   });
@@ -155,7 +140,7 @@ describe('MarkerChart', function() {
 
     // Move the mouse on top of an item.
     markerChart.find('canvas').simulate('mousemove', {
-      nativeEvent: { offsetX: 50, offsetY: 5 },
+      nativeEvent: { offsetX: 50 + TIMELINE_MARGIN_LEFT, offsetY: 5 },
       pageX: 50,
       pageY: 5,
     });
@@ -228,25 +213,6 @@ describe('MarkerChart', function() {
       const { dispatch, markerChart } = setupWithProfile(profile);
 
       dispatch(changeSelectedTab('marker-chart'));
-      dispatch(changeMarkersSearchString('MATCH_NOTHING'));
-      markerChart.update();
-      expect(markerChart.find(EmptyReasons)).toMatchSnapshot();
-    });
-
-    it('shows a reason when a profile has no network markers', () => {
-      const profile = getProfileWithMarkers(MARKERS);
-      const { dispatch, markerChart } = setupWithProfile(profile);
-
-      dispatch(changeSelectedTab('network-chart'));
-      markerChart.update();
-      expect(markerChart.find(EmptyReasons)).toMatchSnapshot();
-    });
-
-    it("shows a reason when a profile's network markers have been filtered out", () => {
-      const profile = getProfileWithMarkers(NETWORK_MARKERS);
-      const { dispatch, markerChart } = setupWithProfile(profile);
-
-      dispatch(changeSelectedTab('network-chart'));
       dispatch(changeMarkersSearchString('MATCH_NOTHING'));
       markerChart.update();
       expect(markerChart.find(EmptyReasons)).toMatchSnapshot();

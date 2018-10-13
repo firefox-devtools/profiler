@@ -2,7 +2,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const OfflinePlugin = require('offline-plugin');
+const OfflinePlugin = require('@mstange/offline-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
 
@@ -18,7 +18,7 @@ const config = {
       'redux-devtools': path.join(__dirname, '..', '..', 'src'),
       react: path.join(__dirname, 'node_modules', 'react'),
     },
-    extensions: ['.js'],
+    extensions: ['.js', '.wasm'],
   },
   devtool: 'source-map',
   module: {
@@ -70,6 +70,9 @@ const config = {
       { from: 'res/_headers' },
       { from: 'res/_redirects' },
       { from: 'docs-user', to: 'docs' },
+      { from: 'res/.htaccess' },
+      { from: 'res/zee-worker.js' },
+      { from: 'res/analytics.js' },
     ]),
   ],
   entry: ['./src/index'],
@@ -78,6 +81,10 @@ const config = {
     filename: '[hash].bundle.js',
     chunkFilename: '[id].[hash].bundle.js',
     publicPath: '/',
+  },
+  optimization: {
+    // Workaround for https://github.com/webpack/webpack/issues/7760
+    usedExports: false,
   },
 };
 
@@ -100,10 +107,9 @@ if (process.env.NODE_ENV === 'production') {
         scope: '/',
         events: true,
       },
-      externals: ['/zee-worker.js', '/analytics.js'],
       /* Exclude the files used but not served by netlify. When trying to fetch
        * them we get a 404, and so the SW registration fails. */
-      excludes: ['_headers', '_redirects'],
+      excludes: ['_headers', '_redirects', '.htaccess'],
       cacheMaps: [
         {
           requestTypes: ['navigate'],

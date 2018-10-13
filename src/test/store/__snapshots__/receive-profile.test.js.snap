@@ -104,6 +104,8 @@ Array [
 ]
 `;
 
+exports[`actions/receive-profile retrieveProfileFromFile will be an error to view a profile with no threads 1`] = `"No threads were captured in this profile, there is nothing to display."`;
+
 exports[`actions/receive-profile retrieveProfileFromFile will give an error when unable to decompress a zipped profile 1`] = `[Error: Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html]`;
 
 exports[`actions/receive-profile retrieveProfileFromFile will give an error when unable to parse json 1`] = `[Error: Unserializing the profile failed: TypeError: Cannot read property 'version' of undefined]`;

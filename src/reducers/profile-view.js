@@ -33,6 +33,7 @@ import type {
   SamplesTable,
   Pid,
   MarkersTable,
+  IndexIntoSamplesTable,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -60,7 +61,10 @@ import type {
   ThreadViewOptions,
 } from '../types/reducers';
 import type { Transform, TransformStack } from '../types/transforms';
-import type { TimingsForPath } from '../profile-logic/profile-data';
+import type {
+  TimingsForPath,
+  SelectedState,
+} from '../profile-logic/profile-data';
 
 function profile(state: Profile | null = null, action: Action): Profile | null {
   switch (action.type) {
@@ -180,34 +184,44 @@ function viewOptionsPerThread(
       });
     }
     case 'CHANGE_SELECTED_CALL_NODE': {
-      const { selectedCallNodePath, threadIndex } = action;
+      const {
+        selectedCallNodePath,
+        threadIndex,
+        optionalExpandedToCallNodePath,
+      } = action;
 
       const threadState = state[threadIndex];
       const previousSelectedCallNodePath = threadState.selectedCallNodePath;
 
       // If the selected node doesn't actually change, let's return the previous
       // state to avoid rerenders.
-      if (arePathsEqual(selectedCallNodePath, previousSelectedCallNodePath)) {
+      if (
+        arePathsEqual(selectedCallNodePath, previousSelectedCallNodePath) &&
+        !optionalExpandedToCallNodePath
+      ) {
         return state;
       }
 
       let { expandedCallNodePaths } = threadState;
+      const expandToNode = optionalExpandedToCallNodePath
+        ? optionalExpandedToCallNodePath
+        : selectedCallNodePath;
 
       /* Looking into the current state to know whether we want to generate a
        * new one. It can be expensive to clone when we have a lot of expanded
        * lines, but it's very infrequent that we actually want to expand new
        * lines as a result of a selection. */
-      const selectedNodeParentPaths = [];
-      for (let i = 1; i < selectedCallNodePath.length; i++) {
-        selectedNodeParentPaths.push(selectedCallNodePath.slice(0, i));
+      const expandToNodeParentPaths = [];
+      for (let i = 1; i < expandToNode.length; i++) {
+        expandToNodeParentPaths.push(expandToNode.slice(0, i));
       }
-      const hasNewExpandedPaths = selectedNodeParentPaths.some(
+      const hasNewExpandedPaths = expandToNodeParentPaths.some(
         path => !expandedCallNodePaths.has(path)
       );
 
       if (hasNewExpandedPaths) {
         expandedCallNodePaths = new PathSet(expandedCallNodePaths);
-        selectedNodeParentPaths.forEach(path =>
+        expandToNodeParentPaths.forEach(path =>
           expandedCallNodePaths.add(path)
         );
       }
@@ -621,9 +635,16 @@ export const getPreviewSelection = (state: State) =>
 
 /**
  * Tracks
+ *
+ * Tracks come in two flavors: global tracks and local tracks.
+ * They're uniquely referenced by a TrackReference.
  */
 export const getGlobalTracks = (state: State) =>
   getProfileView(state).globalTracks;
+
+/**
+ * This returns all TrackReferences for global tracks.
+ */
 export const getGlobalTrackReferences = createSelector(
   getGlobalTracks,
   (globalTracks): TrackReference[] =>
@@ -632,6 +653,10 @@ export const getGlobalTrackReferences = createSelector(
       trackIndex,
     }))
 );
+
+/**
+ * This finds a GlobalTrack from its TrackReference.
+ */
 export const getGlobalTrackFromReference = (
   state: State,
   trackReference: TrackReference
@@ -643,8 +668,12 @@ export const getGlobalTrackFromReference = (
   return globalTracks[trackReference.trackIndex];
 };
 
-// Warning: this selector returns a new object on every call, and will not properly
-// work with a PureComponent.
+/**
+ * This finds a GlobalTrack and its index for a specific Pid.
+ *
+ * Warning: this selector returns a new object on every call, and will not
+ * properly work with a PureComponent.
+ */
 export const getGlobalTrackAndIndexByPid = (state: State, pid: Pid) => {
   const globalTracks = getGlobalTracks(state);
   const globalTrackIndex = globalTracks.findIndex(
@@ -659,13 +688,25 @@ export const getGlobalTrackAndIndexByPid = (state: State, pid: Pid) => {
   }
   return { globalTrackIndex, globalTrack };
 };
+
+/**
+ * This returns a map of local tracks from a pid.
+ */
 export const getLocalTracksByPid = (state: State) =>
   getProfileView(state).localTracksByPid;
+
+/**
+ * This returns the local tracks for a specific Pid.
+ */
 export const getLocalTracks = (state: State, pid: Pid) =>
   ensureExists(
     getProfileView(state).localTracksByPid.get(pid),
     'Unable to get the tracks for the given pid.'
   );
+
+/**
+ * This returns a local track from its TrackReference.
+ */
 export const getLocalTrackFromReference = (
   state: State,
   trackReference: TrackReference
@@ -757,7 +798,7 @@ export type SelectorsForThread = {
   getCommittedRangeFilteredTracingMarkers: State => TracingMarker[],
   getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
   getNetworkTracingMarkers: State => TracingMarker[],
-  getNetworkTiming: State => MarkerTimingRows,
+  getNetworkTrackTiming: State => MarkerTimingRows,
   getRangeFilteredScreenshotsById: State => Map<string, TracingMarker[]>,
   getFilteredThread: State => Thread,
   getPreviewFilteredThread: State => Thread,
@@ -767,6 +808,11 @@ export type SelectorsForThread = {
   getSelectedCallNodeIndex: State => IndexIntoCallNodeTable | null,
   getExpandedCallNodePaths: State => PathSet,
   getExpandedCallNodeIndexes: State => Array<IndexIntoCallNodeTable | null>,
+  getSamplesSelectedStatesInFilteredThread: State => SelectedState[],
+  getTreeOrderComparatorInFilteredThread: State => (
+    IndexIntoSamplesTable,
+    IndexIntoSamplesTable
+  ) => number,
   getCallTree: State => CallTree.CallTree,
   getStackTimingByDepth: State => StackTiming.StackTimingByDepth,
   getCallNodeMaxDepthForFlameGraph: State => number,
@@ -1014,7 +1060,7 @@ export const selectorsForThread = (
       }
     );
     const getIsNetworkChartEmptyInFullRange = createSelector(
-      getTracingMarkers,
+      getSearchFilteredTracingMarkers,
       markers => markers.filter(MarkerData.isNetworkMarker).length === 0
     );
     const getNetworkChartTracingMarkers = createSelector(
@@ -1044,7 +1090,7 @@ export const selectorsForThread = (
           marker => marker.data && marker.data.type === 'Network'
         )
     );
-    const getNetworkTiming = createSelector(
+    const getNetworkTrackTiming = createSelector(
       getNetworkTracingMarkers,
       MarkerTiming.getMarkerTiming
     );
@@ -1120,6 +1166,40 @@ export const selectorsForThread = (
           callNodeTable
         )
     );
+    const getSamplesSelectedStatesInFilteredThread = createSelector(
+      getFilteredThread,
+      getCallNodeInfo,
+      getSelectedCallNodeIndex,
+      (
+        thread,
+        { callNodeTable, stackIndexToCallNodeIndex },
+        selectedCallNode
+      ) => {
+        const sampleCallNodes = ProfileData.getSampleCallNodes(
+          thread.samples,
+          stackIndexToCallNodeIndex
+        );
+        return ProfileData.getSamplesSelectedStates(
+          callNodeTable,
+          sampleCallNodes,
+          selectedCallNode
+        );
+      }
+    );
+    const getTreeOrderComparatorInFilteredThread = createSelector(
+      getFilteredThread,
+      getCallNodeInfo,
+      (thread, { callNodeTable, stackIndexToCallNodeIndex }) => {
+        const sampleCallNodes = ProfileData.getSampleCallNodes(
+          thread.samples,
+          stackIndexToCallNodeIndex
+        );
+        return ProfileData.getTreeOrderComparator(
+          callNodeTable,
+          sampleCallNodes
+        );
+      }
+    );
     const getCallTree = createSelector(
       getPreviewFilteredThread,
       getProfileInterval,
@@ -1183,7 +1263,7 @@ export const selectorsForThread = (
       getCommittedRangeFilteredTracingMarkers,
       getCommittedRangeFilteredTracingMarkersForHeader,
       getNetworkTracingMarkers,
-      getNetworkTiming,
+      getNetworkTrackTiming,
       getRangeFilteredScreenshotsById,
       getFilteredThread,
       getPreviewFilteredThread,
@@ -1193,6 +1273,8 @@ export const selectorsForThread = (
       getSelectedCallNodeIndex,
       getExpandedCallNodePaths,
       getExpandedCallNodeIndexes,
+      getSamplesSelectedStatesInFilteredThread,
+      getTreeOrderComparatorInFilteredThread,
       getCallTree,
       getStackTimingByDepth,
       getCallNodeMaxDepthForFlameGraph,

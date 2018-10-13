@@ -9,6 +9,11 @@
 import * as urlStateReducers from '../reducers/url-state';
 import * as profileViewSelectors from '../reducers/profile-view';
 import {
+  changeCallTreeSearchString,
+  changeMarkersSearchString,
+} from '../actions/profile-view';
+import { changeSelectedTab } from '../actions/app';
+import {
   stateFromLocation,
   urlStateToUrlObject,
   urlFromState,
@@ -34,7 +39,7 @@ function _getStoreWithURL(
     search?: string,
     hash?: string,
     v?: number | false, // If v is false, do not add a v parameter to the search string.
-  },
+  } = {},
   profile: Profile = getProfile()
 ) {
   const { pathname, hash, search, v } = Object.assign(
@@ -212,13 +217,13 @@ describe('url handling tracks', function() {
 });
 
 describe('search strings', function() {
-  it('properly handles the search string stacks with 1 item', function() {
+  it('properly handles the call tree search string stacks with 1 item', function() {
     const { getState } = _getStoreWithURL({ search: '?search=string' });
     expect(urlStateReducers.getCurrentSearchString(getState())).toBe('string');
     expect(urlStateReducers.getSearchStrings(getState())).toEqual(['string']);
   });
 
-  it('properly handles the search string stacks with several items', function() {
+  it('properly handles the call tree search string stacks with several items', function() {
     const { getState } = _getStoreWithURL({
       search: '?search=string,foo,%20bar',
     });
@@ -230,6 +235,45 @@ describe('search strings', function() {
       'foo',
       'bar',
     ]);
+  });
+
+  it('properly handles marker search strings', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?markerSearch=otherString',
+    });
+    expect(urlStateReducers.getMarkersSearchString(getState())).toBe(
+      'otherString'
+    );
+  });
+
+  it('serializes the call tree search strings in the URL', function() {
+    const { getState, dispatch } = _getStoreWithURL();
+
+    const callTreeSearchString = 'some, search, string';
+
+    dispatch(changeCallTreeSearchString(callTreeSearchString));
+
+    ['calltree', 'stack-chart', 'flame-graph'].forEach(tabSlug => {
+      dispatch(changeSelectedTab(tabSlug));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const { query } = urlStateToUrlObject(urlState);
+      expect(query.search).toBe(callTreeSearchString);
+    });
+  });
+
+  it('serializes the marker search string in the URL', function() {
+    const { getState, dispatch } = _getStoreWithURL();
+
+    const markerSearchString = 'abc';
+
+    dispatch(changeMarkersSearchString(markerSearchString));
+
+    ['marker-chart', 'marker-table'].forEach(tabSlug => {
+      dispatch(changeSelectedTab(tabSlug));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const { query } = urlStateToUrlObject(urlState);
+      expect(query.markerSearch).toBe(markerSearchString);
+    });
   });
 });
 

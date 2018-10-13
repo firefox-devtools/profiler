@@ -206,7 +206,7 @@ export function getTracingMarkers(
         data: null,
       };
       tracingMarkers.push(marker);
-    } else if (data.type === 'tracing') {
+    } else if (data.type === 'tracing' && data.interval) {
       // Tracing markers are created from two distinct markers that are created at
       // the start and end of whatever code that is running that we care about.
       // This is implemented by AutoProfilerTracing in Gecko.
@@ -321,6 +321,16 @@ export function isNetworkMarker(marker: TracingMarker): boolean {
   return !!(marker.data && marker.data.type === 'Network');
 }
 
+export function filterForNetworkChart(markers: TracingMarker[]) {
+  return markers.filter(marker => isNetworkMarker(marker));
+}
+
+export function filterForMarkerChart(markers: TracingMarker[]) {
+  return markers.filter(marker => !isNetworkMarker(marker));
+}
+
+// TODO: add function to merge start and end markers
+
 export function extractScreenshotsById(
   markers: MarkersTable,
   stringTable: UniqueStringArray,
@@ -365,8 +375,4 @@ export function extractScreenshotsById(
   }
 
   return idToScreenshotMarkers;
-}
-
-export function filterForMarkerChart(markers: TracingMarker[]) {
-  return markers.filter(marker => !isNetworkMarker(marker));
 }

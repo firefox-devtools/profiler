@@ -5,47 +5,54 @@
 
 import React, { PureComponent } from 'react';
 import bisection from 'bisection';
-import { timeCode } from '../../utils/time-code';
-import { getSampleCallNodes } from '../../profile-logic/profile-data';
+import classNames from 'classnames';
+import { ensureExists } from '../../../utils/flow';
+import { timeCode } from '../../../utils/time-code';
+import {
+  getSampleCallNodes,
+  getSamplesSelectedStates,
+  getSampleIndexClosestToTime,
+} from '../../../profile-logic/profile-data';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 import './StackGraph.css';
 
-import type { Thread } from '../../types/profile';
-import type { Milliseconds } from '../../types/units';
+import type {
+  Thread,
+  CategoryList,
+  IndexIntoSamplesTable,
+} from '../../../types/profile';
+import type { Milliseconds } from '../../../types/units';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
-} from '../../types/profile-derived';
+} from '../../../types/profile-derived';
 
 type Props = {|
+  +className: string,
   +thread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +onStackClick: (time: Milliseconds) => void,
+  +categories: CategoryList,
+  +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
+  // Decide which way the stacks grow up from the floor, or down from the ceiling.
+  +stacksGrowFromCeiling?: boolean,
 |};
 
 class StackGraph extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement = null;
-  _requestedAnimationFrame: boolean = false;
   _resizeListener: () => void;
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
     (this._canvas = canvas);
   _resizeListener = () => this.forceUpdate();
 
-  _scheduleDraw() {
-    if (!this._requestedAnimationFrame) {
-      this._requestedAnimationFrame = true;
-      window.requestAnimationFrame(() => {
-        this._requestedAnimationFrame = false;
-        const canvas = this._canvas;
-        if (canvas) {
-          timeCode('StackGraph render', () => {
-            this.drawCanvas(canvas);
-          });
-        }
+  _renderCanvas() {
+    const canvas = this._canvas;
+    if (canvas !== null) {
+      timeCode('ThreadStackGraph render', () => {
+        this.drawCanvas(canvas);
       });
     }
   }
@@ -67,6 +74,8 @@ class StackGraph extends PureComponent<Props> {
       rangeEnd,
       callNodeInfo,
       selectedCallNodeIndex,
+      categories,
+      stacksGrowFromCeiling,
     } = this.props;
 
     const devicePixelRatio = canvas.ownerDocument
@@ -81,6 +90,11 @@ class StackGraph extends PureComponent<Props> {
     const sampleCallNodes = getSampleCallNodes(
       thread.samples,
       stackIndexToCallNodeIndex
+    );
+    const samplesSelectedStates = getSamplesSelectedStates(
+      callNodeTable,
+      sampleCallNodes,
+      selectedCallNodeIndex
     );
     for (let i = 0; i < callNodeTable.depth.length; i++) {
       if (callNodeTable.depth[i] > maxDepth) {
@@ -97,24 +111,6 @@ class StackGraph extends PureComponent<Props> {
       0.8,
       trueIntervalPixelWidth * multiplier
     );
-    let selectedCallNodeDepth = 0;
-    if (selectedCallNodeIndex !== -1 && selectedCallNodeIndex !== null) {
-      selectedCallNodeDepth = callNodeTable.depth[selectedCallNodeIndex];
-    }
-    function hasSelectedCallNodePrefix(callNodePrefix) {
-      let callNodeIndex = callNodePrefix;
-      if (callNodeIndex === null) {
-        return false;
-      }
-      for (
-        let depth = callNodeTable.depth[callNodeIndex];
-        depth > selectedCallNodeDepth;
-        depth--
-      ) {
-        callNodeIndex = callNodeTable.prefix[callNodeIndex];
-      }
-      return callNodeIndex === selectedCallNodeIndex;
-    }
 
     const firstDrawnSampleTime = range[0] - drawnIntervalWidth / xPixelsPerMs;
     const lastDrawnSampleTime = range[1];
@@ -131,6 +127,10 @@ class StackGraph extends PureComponent<Props> {
 
     // Do one pass over the samples array to gather the samples we want to draw.
     const regularSamples = {
+      height: [],
+      xPos: [],
+    };
+    const idleSamples = {
       height: [],
       xPos: [],
     };
@@ -153,53 +153,77 @@ class StackGraph extends PureComponent<Props> {
       }
       const height = callNodeTable.depth[callNodeIndex] * yPixelsPerDepth;
       const xPos = (sampleTime - range[0]) * xPixelsPerMs;
-      if (hasSelectedCallNodePrefix(callNodeIndex)) {
-        highlightedSamples.height.push(height);
-        highlightedSamples.xPos.push(xPos);
+      let samplesBucket;
+      if (samplesSelectedStates[i] === 'SELECTED') {
+        samplesBucket = highlightedSamples;
       } else {
-        regularSamples.height.push(height);
-        regularSamples.xPos.push(xPos);
+        const stackIndex = ensureExists(
+          thread.samples.stack[i],
+          'A stack must exist for this sample, since a callNodeIndex exists.'
+        );
+        const categoryIndex = thread.stackTable.category[stackIndex];
+        const category = categories[categoryIndex];
+        if (category.name === 'Idle') {
+          samplesBucket = idleSamples;
+        } else {
+          samplesBucket = regularSamples;
+        }
       }
+      samplesBucket.height.push(height);
+      samplesBucket.xPos.push(xPos);
       nextMinTime = sampleTime + minGapMs;
     }
 
-    // Draw the regular samples first, and then the highlighted samples.
-    // This means that we only set ctx.fillStyle twice, which saves on time
-    // that's spent parsing color strings.
-    ctx.fillStyle = BLUE_40;
-    for (let i = 0; i < regularSamples.height.length; i++) {
-      const height = regularSamples.height[i];
-      const startY = canvas.height - height;
-      const xPos = regularSamples.xPos[i];
-      ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
+    type SamplesBucket = {
+      height: number[],
+      xPos: number[],
+    };
+    function drawSamples(samplesBucket: SamplesBucket, color: string) {
+      ctx.fillStyle = color;
+      for (let i = 0; i < samplesBucket.height.length; i++) {
+        const height = samplesBucket.height[i];
+        const startY = stacksGrowFromCeiling ? 0 : canvas.height - height;
+        const xPos = samplesBucket.xPos[i];
+        ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
+      }
     }
-    ctx.fillStyle = BLUE_70;
-    for (let i = 0; i < highlightedSamples.height.length; i++) {
-      const height = highlightedSamples.height[i];
-      const startY = canvas.height - height;
-      const xPos = highlightedSamples.xPos[i];
-      ctx.fillRect(xPos, startY, drawnIntervalWidth, height);
-    }
+
+    // Draw the samples in multiple passes, separated by color. This reduces the calls
+    // to ctx.fillStyle, which saves on time that's spent parsing color strings.
+    const lighterBlue = '#c5e1fe';
+    drawSamples(regularSamples, BLUE_40);
+    drawSamples(highlightedSamples, BLUE_70);
+    drawSamples(idleSamples, lighterBlue);
   }
 
   _onMouseUp = (e: SyntheticMouseEvent<>) => {
     const canvas = this._canvas;
     if (canvas) {
-      const { rangeStart, rangeEnd } = this.props;
+      const { rangeStart, rangeEnd, thread, interval } = this.props;
       const r = canvas.getBoundingClientRect();
 
       const x = e.pageX - r.left;
       const time = rangeStart + x / r.width * (rangeEnd - rangeStart);
-      this.props.onStackClick(time);
+
+      const sampleIndex = getSampleIndexClosestToTime(
+        thread.samples,
+        time,
+        interval
+      );
+
+      this.props.onSampleClick(sampleIndex);
     }
   };
 
   render() {
-    this._scheduleDraw();
+    this._renderCanvas();
     return (
-      <div className="timelineStackGraph">
+      <div className={this.props.className}>
         <canvas
-          className="timelineStackGraphCanvas"
+          className={classNames(
+            `${this.props.className}Canvas`,
+            'threadStackGraphCanvas'
+          )}
           ref={this._takeCanvasRef}
           onMouseUp={this._onMouseUp}
         />

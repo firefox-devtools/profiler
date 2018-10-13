@@ -5,7 +5,9 @@
   font-size: 11px;
   background: var(--grey-10);
   border-top: 1px solid var(--grey-30);
+}
 
+.sidebar-contents-wrapper {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 2px 5px;
