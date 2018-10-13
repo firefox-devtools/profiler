@@ -498,7 +498,7 @@ describe('Viewport', function() {
 
     const boundingWidthDiff = 15;
     setBoundingBoxMock({ width: BOUNDING_BOX_WIDTH - boundingWidthDiff });
-    dispatch(changeSidebarOpenState('flamegraph', true));
+    dispatch(changeSidebarOpenState('calltree', true));
     flushRafCalls();
     view.update();
 
