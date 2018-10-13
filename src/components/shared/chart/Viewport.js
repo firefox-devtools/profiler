@@ -263,6 +263,10 @@ export const withChartViewport: WithChartViewport<*, *> =
           this.setState({
             horizontalViewport,
           });
+        } else if (
+          this.props.panelLayoutGeneration !== newProps.panelLayoutGeneration
+        ) {
+          this._setSizeNextFrame()
         }
       }
 
