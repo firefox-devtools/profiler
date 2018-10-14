@@ -134,6 +134,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
           {additionalMessage ? (
             <div className="rootMessageAdditional">
               {toParagraphs(additionalMessage)}
+              <a href="/">Back to home</a>
             </div>
           ) : null}
           {showLoader ? (
