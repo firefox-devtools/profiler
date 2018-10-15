@@ -482,14 +482,9 @@ describe('Viewport', function() {
       view,
     } = setup();
 
-    const {
-      containerWidth: initialContainerWidth,
-      containerHeight: initialContainerHeight,
-    } = getChartViewport();
-
     expect(getChartViewport()).toMatchObject({
-      containerWidth: initialContainerWidth,
-      containerHeight: initialContainerHeight,
+      containerWidth: BOUNDING_BOX_WIDTH,
+      containerHeight: BOUNDING_BOX_HEIGHT,
       viewportLeft: 0,
       viewportRight: 1,
       viewportTop: 0,
@@ -503,8 +498,8 @@ describe('Viewport', function() {
     view.update();
 
     expect(getChartViewport()).toMatchObject({
-      containerWidth: initialContainerWidth - boundingWidthDiff,
-      containerHeight: initialContainerHeight,
+      containerWidth: BOUNDING_BOX_WIDTH - boundingWidthDiff,
+      containerHeight: BOUNDING_BOX_HEIGHT,
       viewportLeft: 0,
       viewportRight: 1,
       viewportTop: 0,
