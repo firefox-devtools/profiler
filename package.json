@@ -37,6 +37,7 @@
     "url": "https://github.com/devtools-html/perf.html"
   },
   "dependencies": {
+    "@mstange/offline-plugin": "^5.0.6",
     "array-move": "^1.0.0",
     "array-range": "^1.0.1",
     "babel-plugin-dynamic-import-node": "^2.0.0",
@@ -52,7 +53,6 @@
     "jszip": "^3.1.5",
     "memoize-immutable": "^3.0.0",
     "mixedtuplemap": "^1.0.0",
-    "@mstange/offline-plugin": "^5.0.6",
     "photon-colors": "2.0.1",
     "prop-types": "^15.6.0",
     "query-string": "^5.1.0",
@@ -67,7 +67,8 @@
     "redux-thunk": "^2.2.0",
     "reselect": "^3.0.1",
     "url": "^0.11.0",
-    "weaktuplemap": "^1.0.0"
+    "weaktuplemap": "^1.0.0",
+    "yarn": "^1.10.1"
   },
   "devDependencies": {
     "@babel/cli": "7.0.0",

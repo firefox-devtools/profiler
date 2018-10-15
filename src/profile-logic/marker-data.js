@@ -328,29 +328,57 @@ export function filterForNetworkChart(markers: TracingMarker[]) {
 export function filterForMarkerChart(markers: TracingMarker[]) {
   return markers.filter(marker => !isNetworkMarker(marker));
 }
-
+// Firefox emits separate start and end markers for each load. It does this so that,
+// if a profile is collected while a request is in progress, the profile will still contain
+// a start marker for that request. So by looking at start markers we can get
+// information about requests that were in progress at profile collection time.
+// For requests that have finished, we want to merge the request's start and end
+// markers into one marker.
 export function mergeStartAndEndNetworkMarker(
   markers: TracingMarker[]
 ): TracingMarker[] {
+  const sortedMarkers: TracingMarker[] = markers.slice(0);
   const filteredMarkers: TracingMarker[] = [];
 
-  // Flow expects a number instead of a boolead
-  markers.sort((a, b) => {
+  // Sort markers, alphabetized by name to filter for markers with the same name
+  sortedMarkers.sort((a, b) => {
     if (a.name < b.name) return -1;
     if (a.name > b.name) return 1;
     return 0;
   });
+  for (let i = 0; i < sortedMarkers.length; i++) {
+    const marker = sortedMarkers[i];
+    const markerNext = sortedMarkers[i + 1];
 
-  for (let i = 0; i < markers.length; i++) {
-    const marker = markers[i];
-    const markerNext = markers[i + 1];
-
-    if (markerNext !== undefined && marker.name === markerNext.name) {
+    if (!marker.data || marker.data.type !== 'Network') {
       continue;
     }
-    // add marker.data.startTime to marker stop
+    // The timestamps on the start and end markers describe two non-overlapping parts
+    // of the same load. The start marker has a duration from channel-creation until Start
+    // (i.e. AsyncOpen()). The End marker has a duration from AsyncOpen time until
+    // OnStopRequest.
+    // In the merged marker, we want to represent the entire duration, from channel-creation
+    // until OnStopRequest.
+    if (markerNext !== undefined && marker.name === markerNext.name) {
+      // Skipping start marker in the new array
+      if (marker.data && marker.data.status === 'STATUS_START') {
+        // As we discard the start marker, but want the whole duration we override the
+        // start of the end marker with the start time of the start marker
+        markerNext.start = marker.start;
+        continue;
+      }
+      // Cheking of order of matching markers might be reversed as the sort might not be stable 
+      if (markerNext.data && markerNext.data.status === 'STATUS_START') {
+        // As we discard the start marker, but want the whole duration we override the
+        // start of the end marker with the start time of the start marker
+        marker.start = markerNext.start;
+        filteredMarkers.push(marker);
+        continue;
+      }
+    }
     filteredMarkers.push(marker);
   }
+  // Sort markers by startTime to display in the right order in the network panel waterfall
   filteredMarkers.sort((a, b) => a.start - b.start);
   return filteredMarkers;
 }
