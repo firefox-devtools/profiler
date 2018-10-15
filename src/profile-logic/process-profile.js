@@ -264,9 +264,7 @@ function _extractUnsymbolicatedFunction(
       // "AppKit", or "CoreFoundation".
       resourceIndex = resourceTable.length++;
       resourceTable.lib[resourceIndex] = libs.indexOf(lib);
-      resourceTable.name[resourceIndex] = stringTable.indexForString(
-        lib.debugName
-      );
+      resourceTable.name[resourceIndex] = stringTable.indexForString(lib.name);
       resourceTable.host[resourceIndex] = undefined;
       resourceTable.type[resourceIndex] = resourceTypes.library;
       libToResourceIndex.set(lib, resourceIndex);
