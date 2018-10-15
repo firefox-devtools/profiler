@@ -99,10 +99,16 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             . However, existing profiles can be viewed in any modern browser. To view a profile, either follow a link to a public profile, drag a saved local profile onto this screen or select it using the button below.
           </p>
           <div>
-            <input
-              onChange={[Function]}
-              type="file"
-            />
+            <label
+              className="homeSectionButton"
+            >
+              <input
+                className="homeSectionUploadInput"
+                onChange={[Function]}
+                type="file"
+              />
+              Select a profile to open
+            </label>
           </div>
         </div>
       </div>
@@ -224,10 +230,16 @@ exports[`app/Home renders the install screen for the extension 1`] = `
             You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
           </p>
           <div>
-            <input
-              onChange={[Function]}
-              type="file"
-            />
+            <label
+              className="homeSectionButton"
+            >
+              <input
+                className="homeSectionUploadInput"
+                onChange={[Function]}
+                type="file"
+              />
+              Select a profile to open
+            </label>
           </div>
         </div>
       </div>
@@ -382,10 +394,16 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
             You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
           </p>
           <div>
-            <input
-              onChange={[Function]}
-              type="file"
-            />
+            <label
+              className="homeSectionButton"
+            >
+              <input
+                className="homeSectionUploadInput"
+                onChange={[Function]}
+                type="file"
+              />
+              Select a profile to open
+            </label>
           </div>
         </div>
       </div>
@@ -525,10 +543,16 @@ exports[`app/Home renders the usage instructions for pages with the extension in
             You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
           </p>
           <div>
-            <input
-              onChange={[Function]}
-              type="file"
-            />
+            <label
+              className="homeSectionButton"
+            >
+              <input
+                className="homeSectionUploadInput"
+                onChange={[Function]}
+                type="file"
+              />
+              Select a profile to open
+            </label>
           </div>
         </div>
       </div>

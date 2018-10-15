@@ -238,18 +238,25 @@ export function getSamplesSelectedStates(
       return 'SELECTED';
     }
 
-    const prevCallNodeIndex = callNodeIndex;
+    // If we're here, it means that callNode is not selected, because it's not
+    // an ancestor of selectedCallNodeIndex.
+    // Determine if it's ordered "before" or "after" the selected call node,
+    // in order to provide a stable ordering when rendering visualizations.
+    // Walk the call nodes towards the root, until we find the common ancestor.
+    // Once we've found the common ancestor, compare the order of the two
+    // child nodes that we passed through, which are siblings.
     while (true) {
-      // Walk the call nodes towards the root.
+      const prevCallNodeIndex = callNodeIndex;
       callNodeIndex = callNodeTable.prefix[callNodeIndex];
       depth--;
       if (
         callNodeIndex === -1 ||
         callNodeIndex === selectedCallNodeAtDepth[depth]
       ) {
-        // This stack is not currently selected, determine if it's before or after
-        // the selected call node in order to provide a stable ordering when rendering
-        // visualizations.
+        // callNodeIndex is the lowest common ancestor of selectedCallNodeIndex
+        // and callNode. Compare the order of the two children that we passed
+        // through on the way up to the ancestor. These nodes are siblings, so
+        // their order is defined by the numerical order of call node indexes.
         return prevCallNodeIndex <= selectedCallNodeAtDepth[depth + 1]
           ? 'UNSELECTED_ORDERED_BEFORE_SELECTED'
           : 'UNSELECTED_ORDERED_AFTER_SELECTED';
