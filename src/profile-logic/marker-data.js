@@ -206,7 +206,7 @@ export function getTracingMarkers(
         data: null,
       };
       tracingMarkers.push(marker);
-    } else if (data.type === 'tracing') {
+    } else if (data.type === 'tracing' && data.interval) {
       // Tracing markers are created from two distinct markers that are created at
       // the start and end of whatever code that is running that we care about.
       // This is implemented by AutoProfilerTracing in Gecko.
