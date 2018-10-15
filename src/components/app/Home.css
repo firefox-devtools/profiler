@@ -6,9 +6,9 @@
   width: 100%;
   min-height: 100vh;
   display: flex;
+  align-self: flex-start;
   align-items: center;
   justify-content: center;
-  margin: auto;
   line-height: 1.5;
 }
 
@@ -80,15 +80,15 @@
 
 .homeTitle {
   display: flex;
-  flex-wrap: wrap;
   justify-content: space-between;
-  margin: 0 -0.5em 0.5em;
+  /* Negative margin is here to compensate for the children's margins */
+  margin: 0 -0.2em 0.5em;
   padding-bottom: 0.5em;
   border-bottom: 1px solid #DDD;
 }
 
 .homeTitleSlogan {
-  margin: 0 0.5em;
+  margin: 0 0.2em;
 }
 
 .homeTitleSubtext {
@@ -96,11 +96,7 @@
 }
 
 .homeTitleGithubIcon {
-  margin: 0 0.5em;
-}
-
-.homeTitleGithubIcon {
-  float: right;
+  margin: 0 0.2em;
 }
 
 .homeTitleGithubIcon svg {
