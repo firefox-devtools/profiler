@@ -164,10 +164,6 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
     }
     switch (phase) {
       case 'INITIALIZING': {
-        if (dataSource === 'none') {
-          return <Home />;
-        }
-
         const loadingMessage = LOADING_MESSAGES[dataSource];
         const message = loadingMessage ? loadingMessage : 'View not found';
         const showLoader = Boolean(loadingMessage);
