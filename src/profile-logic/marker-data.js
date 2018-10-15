@@ -360,19 +360,24 @@ export function mergeStartAndEndNetworkMarker(
     // In the merged marker, we want to represent the entire duration, from channel-creation
     // until OnStopRequest.
     if (markerNext !== undefined && marker.name === markerNext.name) {
-      // Skipping start marker in the new array
-      if (marker.data && marker.data.status === 'STATUS_START') {
-        // As we discard the start marker, but want the whole duration we override the
-        // start of the end marker with the start time of the start marker
-        markerNext.start = marker.start;
-        continue;
-      }
-      // Cheking of order of matching markers might be reversed as the sort might not be stable 
-      if (markerNext.data && markerNext.data.status === 'STATUS_START') {
-        // As we discard the start marker, but want the whole duration we override the
-        // start of the end marker with the start time of the start marker
-        marker.start = markerNext.start;
-        filteredMarkers.push(marker);
+      if (
+        marker.data &&
+        marker.data.type === 'Network' &&
+        markerNext.data &&
+        markerNext.data.type === 'Network'
+      ) {
+        if (marker.data.status === 'STATUS_START') {
+          // As we discard the start marker, but want the whole duration we override the
+          // start of the end marker with the start time of the start marker
+          markerNext.start = marker.start;
+        }
+        // Cheking of order of matching markers might be reversed as the sort might not be stable
+        if (markerNext.data.status === 'STATUS_START') {
+          // As we discard the start marker, but want the whole duration we override the
+          // start of the end marker with the start time of the start marker
+          marker.start = markerNext.start;
+          filteredMarkers.push(marker);
+        }
         continue;
       }
     }
