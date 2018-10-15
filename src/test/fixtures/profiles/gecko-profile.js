@@ -380,6 +380,14 @@ function _createGeckoThread(): GeckoThread {
             type: 'tracing',
           },
         ],
+        [
+          12, // ArbitraryName
+          21,
+          {
+            category: 'ArbitraryCategory',
+            type: 'tracing',
+          },
+        ],
       ],
     },
     stringTable: [
@@ -395,6 +403,7 @@ function _createGeckoThread(): GeckoThread {
       'MinorGC',
       'Rasterize',
       'UserTiming',
+      'ArbitraryName',
     ],
   };
 }

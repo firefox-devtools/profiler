@@ -44,6 +44,11 @@ export type PaintProfilerMarkerTracing = {
   interval: 'start' | 'end',
 };
 
+export type ArbitraryEventTracing = {|
+  +type: 'tracing',
+  +category: string,
+|};
+
 export type PhaseTimes<Unit> = { [phase: string]: Unit };
 
 type GCSliceData_Shared = {
@@ -430,4 +435,5 @@ export type MarkerPayload_Gecko =
   | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | VsyncTimestampPayload
+  | ArbitraryEventTracing
   | null;
