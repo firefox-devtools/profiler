@@ -27,6 +27,8 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
       <a
         className="homeTitleGithubIcon"
         href="https://github.com/devtools-html/perf.html"
+        rel="noopener noreferrer"
+        target="_blank"
       >
         <svg
           aria-hidden="true"
@@ -153,6 +155,8 @@ exports[`app/Home renders the install screen for the extension 1`] = `
       <a
         className="homeTitleGithubIcon"
         href="https://github.com/devtools-html/perf.html"
+        rel="noopener noreferrer"
+        target="_blank"
       >
         <svg
           aria-hidden="true"
@@ -284,6 +288,8 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
       <a
         className="homeTitleGithubIcon"
         href="https://github.com/devtools-html/perf.html"
+        rel="noopener noreferrer"
+        target="_blank"
       >
         <svg
           aria-hidden="true"
@@ -448,6 +454,8 @@ exports[`app/Home renders the usage instructions for pages with the extension in
       <a
         className="homeTitleGithubIcon"
         href="https://github.com/devtools-html/perf.html"
+        rel="noopener noreferrer"
+        target="_blank"
       >
         <svg
           aria-hidden="true"
