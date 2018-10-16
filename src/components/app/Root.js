@@ -233,7 +233,7 @@ const options: ExplicitConnectOptions<
   },
   component: ProfileViewWhenReadyImpl,
 };
-const ProfileViewWhenReady = explicitConnect(options);
+export const ProfileViewWhenReady = explicitConnect(options);
 
 type RootProps = {
   store: Store,
