@@ -353,6 +353,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             <a
               className="homeTitleGithubIcon"
               href="https://github.com/devtools-html/perf.html"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <svg
                 width="22"
