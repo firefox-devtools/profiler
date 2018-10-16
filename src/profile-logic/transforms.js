@@ -14,6 +14,7 @@ import {
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
 import { CallTree } from '../profile-logic/call-tree';
+import { getFunctionName } from './function-info';
 
 import type {
   Thread,
@@ -36,6 +37,8 @@ import type {
   TransformType,
   TransformStack,
 } from '../types/transforms';
+
+
 
 /**
  * This file contains the functions and logic for working with and applying transforms
@@ -327,7 +330,7 @@ export function getTransformLabels(
         throw assertExhaustiveCheck(transform);
     }
     const nameIndex = funcTable.name[funcIndex];
-    const funcName = stringTable.getString(nameIndex);
+    const funcName = getFunctionName(stringTable.getString(nameIndex));
 
     switch (transform.type) {
       case 'focus-subtree':
@@ -1423,3 +1426,4 @@ export function funcHasRecursiveCall(
   }
   return false;
 }
+
